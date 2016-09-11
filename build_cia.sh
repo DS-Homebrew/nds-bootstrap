@@ -1,5 +1,5 @@
 GAME_TITLE="NDS BOOTSTRAP"
-GAME_SUBTITLE1="Runs an .ds file"
+GAME_SUBTITLE1="Runs an .nds file"
 GAME_SUBTITLE2="made by devkitpro"
 GAME_INFO="KBSE 01 NTRBOOSTRAP"
 
