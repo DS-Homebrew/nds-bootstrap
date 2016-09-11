@@ -26,6 +26,9 @@
 // #include <nds/fifocommon.h>
 
 #include "nds_loader_arm9.h"
+#include "inifile.h"
+
+using namespace std;
 
 // Disabled by default
 /*
@@ -69,7 +72,11 @@ int main( int argc, char **argv) {
 	// WaitForSlot();
 	
 	if (fatInitDefault()) {
-		runNdsFile("/Boot.nds", 0, NULL);
+		CIniFile bootstrapini( "sd:/nds-bootstrap.ini" );
+
+		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
+	
+		runNdsFile(ndsPath.c_str(), 0, NULL);
 	} else {
 		printf("SD init failed!\nLauncher not patched!");
 	}
