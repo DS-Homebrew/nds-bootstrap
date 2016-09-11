@@ -23,45 +23,44 @@
 #include <limits.h>
 
 #include <stdio.h>
+#include <stdarg.h>
 
-// #include <nds/fifocommon.h>
+#include <nds/fifocommon.h>
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
 
 using namespace std;
 
-// Disabled by default
-/*
-void WaitForCart() {
-
-	unsigned int * SCFG_MC=(unsigned int*)0x4004010;
+static bool debug = false;
+static inline int dbg_printf( const char* format, ... )
+{
+	if(!debug) return 0;
 	
-	// Hold in loop until cartridge detected. (this is skipped if there's one already inserted at boot)
-	printf("No cartridge detected!\nPlease insert a cartridge to\ncontinue.");
-	do {
-		swiWaitForVBlank();
-	} while (*SCFG_MC == 0x11);
+	va_list args;
+    va_start( args, format );
+    int ret = printf( format, args );
+	va_end(args);
+    return ret;
 }
 
-// Waits for a preset amount of time then waits for arm7 to send fifo for FIFO_USER_01
-// This means it has powered off slot and has continued the card reset.
-// This ensures arm9 doesn't attempt to init card too soon when it's not ready.
-void WaitForSlot() {
-	
-	// Tell Arm7 it's ready to start card reset.
-	fifoSendValue32(FIFO_USER_02, 1);
-	
-	// Waits for arm7 to power off slot before continuing
-	fifoWaitValue32(FIFO_USER_01);		
-	// Wait for half a second to make sure Power On sequence on arm7 is complete.
-	for (int i = 0; i < 30; i++) {
+//---------------------------------------------------------------------------------
+void dopause() {
+//---------------------------------------------------------------------------------
+	iprintf("Press start...\n");
+	while(1) {
+		scanKeys();
+		if(keysDown() & KEY_START)
+			break;
 		swiWaitForVBlank();
 	}
+	scanKeys();
 }
-*/
+
 void runFile(string filename) {
 	vector<char*> argarray;
+	
+	if(debug) dopause();
 	
 	if ( strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
 		FILE *argfile = fopen(filename.c_str(),"rb");
@@ -88,17 +87,49 @@ void runFile(string filename) {
 	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
-		iprintf("no nds file specified\n");
+		dbg_printf("no nds file specified\n");
 	} else {
-		iprintf ("Running %s with %d parameters\n", argarray[0], argarray.size());
+		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
 		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0]);
-		iprintf ("Start failed. Error %i\n", err);
+		dbg_printf("Start failed. Error %i\n", err);
 
 	}
 }
 
+void getSFCG_ARM9() {
+	dbg_printf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
+	dbg_printf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
+	dbg_printf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+}
+
+void getSFCG_ARM7() {
+	
+	dbg_printf( "SCFG_ROM ARM7\n" );
+
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_ROM);	
+		  
+	dbg_printf( "SCFG_CLK ARM7\n" );
+	
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");	
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_CLK);
+	
+	dbg_printf( "SCFG_EXT ARM7\n" );
+	
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");	
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_EXT);
+
+}
+
+static void myFIFOValue32Handler(u32 value,void* data)
+{
+	dbg_printf( "ARM7 data %x\n", value );
+}
+
 int main( int argc, char **argv) {
 	bool ntrMode = false;
+
+	
 	if (argc >= 2) {
 		if ( strcasecmp (argv[1], "NTR") == 0 ) {
 			ntrMode = true;
@@ -110,20 +141,16 @@ int main( int argc, char **argv) {
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	}
 	
-	//unsigned int * SCFG_MC=(unsigned int*)0x4004010;
-	
 	consoleDemoInit();
 	
-	// Cart Init Stuff. Enable if cart reset needed.
-	// if(*SCFG_MC == 0x11) { WaitForCart(); }
-	
-	// WaitForSlot();
 	
 	if (0 != argc ) {
+		printf("arguments passed\n");
 		int i;
 		for (i=0; i<argc; i++ ) {
 			if (argv[i]) printf("[%d] %s\n", i, argv[i]);
 		}
+		printf("\n");
 	} else {
 		printf("No arguments passed!\n");
 	}
@@ -132,13 +159,23 @@ int main( int argc, char **argv) {
 		printf("NTR mode enabled\n");
 	}
 	
+	fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+	
 	if (fatInitDefault()) {
 		CIniFile bootstrapini( "sd:/nds-bootstrap.ini" );
+		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
+			debug=true;
+			REG_SCFG_CLK |= 1;
+			
+			getSFCG_ARM9();
+			getSFCG_ARM7();
+		}	
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
-			printf("CPU boosted\n");
+			dbg_printf("CPU boosted\n");
 			REG_SCFG_CLK |= 1;
 		}		
 		
@@ -147,46 +184,27 @@ int main( int argc, char **argv) {
 			
 			// run an argv file
 			
-			printf("NTR MODE SWITCH\n");		
+			dbg_printf("NTR MODE SWITCH\n");		
 			
 			if(!ntrMode) {
-				printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
-				printf("Running %s\n", bootstrapPath.c_str());
+				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
+				dbg_printf("Running %s\n", bootstrapPath.c_str());
 				
-				for (int i = 0; i < 120; i++) { swiWaitForVBlank(); }
 				runFile(bootstrapPath.c_str());
 			} else {				
-				printf("Running %s\n", ndsPath.c_str());
+				dbg_printf("Running %s\n", ndsPath.c_str());
 				
-				for (int i = 0; i < 120; i++) { swiWaitForVBlank(); }
 				runFile(ndsPath.c_str());
 			}
 		} else {
 			printf("TWL MODE enabled\n");			
-			printf("Running %s\n", ndsPath.c_str());
-			
-			for (int i = 0; i < 120; i++) { swiWaitForVBlank(); }			
+			dbg_printf("Running %s\n", ndsPath.c_str());
+					
 			runFile(ndsPath.c_str());
 		}		
 	} else {
-		printf("SD init failed!\nLauncher not patched!");
+		printf("SD init failed!\n");
 	}
 	while(1) swiWaitForVBlank();
-	
-	// Alternate exit loop. Stops program if no cart inserted. Enable if making a Stage3 BootStrap for a flashcart.
-	// Can also be used for other purposes requiring cart reset. Disable original exit loop before using this.
-	/*
-	if (*SCFG_MC == 0x11) {
-		printf("Cartridge Not Inserted!\nReboot and try again!");
-		} else {
-			if (fatInitDefault()) {
-				runNdsFile("Boot.nds", 0, NULL);
-				} else {
-					printf("SD init failed!\nLauncher not patched!");
-				}
-			}
-	
-	while(1) swiWaitForVBlank();
-	*/
 }
 
