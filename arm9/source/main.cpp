@@ -29,6 +29,7 @@
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
+#include "bootsplash.h"
 
 using namespace std;
 
@@ -39,7 +40,7 @@ static inline int dbg_printf( const char* format, ... )
 	
 	va_list args;
     va_start( args, format );
-    int ret = vprintf( format, args );
+    int ret = printf( format, args );
 	va_end(args);
     return ret;
 }
@@ -141,6 +142,9 @@ int main( int argc, char **argv) {
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	}
 	
+	// Start BootSplash. No button triggers for now since ini/conf system will be used to configure that in the future.
+	BootSplashInit();
+
 	consoleDemoInit();
 	
 	
