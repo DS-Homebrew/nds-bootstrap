@@ -108,17 +108,17 @@ void getSFCG_ARM7() {
 	dbg_printf( "SCFG_ROM ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_ROM);	
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);	
 		  
 	dbg_printf( "SCFG_CLK ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");	
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_CLK);
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_CLK);
 	
 	dbg_printf( "SCFG_EXT ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");	
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)REG_SCFG_EXT);
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_EXT);
 
 }
 
