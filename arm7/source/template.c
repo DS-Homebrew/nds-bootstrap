@@ -28,6 +28,8 @@ redistribute it freely, subject to the following restrictions:
 
 ---------------------------------------------------------------------------------*/
 #include <nds.h>
+
+#include <maxmod7.h>
 // #include <nds/fifocommon.h>
 
 //---------------------------------------------------------------------------------
@@ -73,8 +75,11 @@ int main() {
 
 	fifoInit();
 
+	mmInstall(FIFO_MAXMOD);
+
 	SetYtrigger(80);
 
+	installSoundFIFO();
 	installSystemFIFO();
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
