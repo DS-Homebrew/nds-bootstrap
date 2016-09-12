@@ -142,35 +142,40 @@ int main( int argc, char **argv) {
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	}
 	
-	// Start BootSplash. No button triggers for now since ini/conf system will be used to configure that in the future.
-	BootSplashInit();
-
-	consoleDemoInit();
-	
-	
-	if (0 != argc ) {
-		printf("arguments passed\n");
-		int i;
-		for (i=0; i<argc; i++ ) {
-			if (argv[i]) printf("[%d] %s\n", i, argv[i]);
-		}
-		printf("\n");
-	} else {
-		printf("No arguments passed!\n");
-	}
-	
-	if(ntrMode) {
-		printf("NTR mode enabled\n");
-	}
-	
-	fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-	
 	if (fatInitDefault()) {
-		CIniFile bootstrapini( "sd:/nds-bootstrap.ini" );
+		CIniFile bootstrapini( "sd:/_bootstrap/nds-bootstrap.ini" );
+		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
+			REG_SCFG_CLK |= 1;
+		}	
+		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
+			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
+			BootSplashInit();
+		}
+
+		consoleDemoInit();
+		
+		
+		if (0 != argc ) {
+			printf("arguments passed\n");
+			int i;
+			for (i=0; i<argc; i++ ) {
+				if (argv[i]) printf("[%d] %s\n", i, argv[i]);
+			}
+			printf("\n");
+		} else {
+			printf("No arguments passed!\n");
+		}
+		
+		if(ntrMode) {
+			printf("NTR mode enabled\n");
+		}
+	
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;
-			REG_SCFG_CLK |= 1;
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();
 			getSFCG_ARM7();
@@ -180,8 +185,7 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
-			REG_SCFG_CLK |= 1;
-		}		
+		}	
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
 			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
@@ -207,6 +211,7 @@ int main( int argc, char **argv) {
 			runFile(ndsPath.c_str());
 		}		
 	} else {
+		consoleDemoInit();
 		printf("SD init failed!\n");
 	}
 	while(1) swiWaitForVBlank();
