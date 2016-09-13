@@ -52,20 +52,6 @@ static void myFIFOValue32Handler(u32 value,void* data)
 //---------------------------------------------------------------------------------
 int main() {
 //---------------------------------------------------------------------------------
-	bool ntrMode = false;
-	
-	if (__system_argv->argc >= 2) {
-		if ( strcasecmp (__system_argv->argv[1], "NTR") == 0 ) {
-			ntrMode = true;
-		}		
-	}
-	
-	if(ntrMode) {
-		// REG_SCFG_ROM = 0x703;	
-		// REG_SCFG_EXT = 0x93AF0100; // NAND/SD Access
-		// REG_SCFG_CLK = 0x0181;
-	}
-
 	irqInit();
 
 	// read User Settings from firmware

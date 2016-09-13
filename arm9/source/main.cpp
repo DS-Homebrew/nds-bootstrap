@@ -150,7 +150,7 @@ int main( int argc, char **argv) {
 			REG_SCFG_CLK |= 1;
 		}	
 		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
+		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
 			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
 			BootSplashInit();
 		}
