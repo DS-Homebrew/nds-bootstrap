@@ -152,11 +152,13 @@ arm9/$(TARGET).elf:
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).arm9 data
+	@rm -fr nds-bootstrap.arm7.elf
+	@rm -fr nds-bootstrap.arm9.elf
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootstub clean
 	$(MAKE) -C arm9 clean
 	$(MAKE) -C arm7 clean
-
+		
 data:
 	@mkdir -p data
 

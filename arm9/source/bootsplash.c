@@ -202,7 +202,6 @@ void CartridgePrompt() {
 }
 */
 
-// Button triggers disabled for now. Ahezard using ini files for this project. Will use that instead to configure everything.
 void BootSplashDSi() {
 
 	swiDecompressLZSSVram ((void*)DSi18Tiles, (void*)CHAR_BASE_BLOCK(2), 0, &decompressBiosCallback);
@@ -327,8 +326,6 @@ void BootSplashDSi() {
 
 void BootSplashDS(){
 
-	// int pressed = keysDown();
-
 	// offsetting palletes by one frame during the fade in seems to fix black flicker at start.	
 	// only did this for about 5 frames. (time it takes for bottom screen to fade in)
 	swiDecompressLZSSVram ((void*)Top00Tiles, (void*)CHAR_BASE_BLOCK(2), 0, &decompressBiosCallback);
@@ -388,7 +385,6 @@ void BootSplashDS(){
 	for (int i = 0; i < 2; i++) { swiWaitForVBlank(); }
 
 	// Once frame 8 is reached boot jingle sound effect plays
-	// if (REG_SCFG_ROM == 0x03 or REG_SCFG_ROM == 0x00) { BootJingle(); } else { BootJingleDSi(); }
 	// if ( pressed & KEY_A ) { BootJingleDSi(); } else { BootJingle(); }
 	BootJingleDSi();
 	
@@ -593,7 +589,8 @@ void BootSplashInit() {
 	
 	// Set TWL Clock speeds to ensure bootsplash plays smoothly. SCFG_CLK will be set back to what it was before when it's done.
 	int backup = REG_SCFG_CLK;
-	REG_SCFG_CLK = 0x85;
+	// REG_SCFG_CLK = 0x85;
+	REG_SCFG_CLK |= 1;
 	
 	swiWaitForVBlank();
 
@@ -612,10 +609,6 @@ void BootSplashInit() {
 		bgMapSub[i] = (u16)i;
 	}
 	
-	// For refrence incase button triggers brought back. However this may be removed permanently once ini files configure boot splash options instead.
-	// scanKeys();
-	// int pressed = keysDown();
-
 	BootSplashDS();
 	
 	REG_SCFG_CLK = backup;

@@ -140,6 +140,7 @@ int main( int argc, char **argv) {
 	if(ntrMode) {
 		REG_SCFG_CLK = 0x80;
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+		fifoSendValue32(FIFO_USER_03, 1);
 	}
 	
 	if (fatInitDefault()) {

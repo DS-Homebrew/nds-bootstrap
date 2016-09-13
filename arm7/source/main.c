@@ -30,7 +30,8 @@ redistribute it freely, subject to the following restrictions:
 #include <nds.h>
 
 #include <maxmod7.h>
-// #include <nds/fifocommon.h>
+
+#include "ntrcheck.h"
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
@@ -60,9 +61,9 @@ int main() {
 	}
 	
 	if(ntrMode) {
-		REG_SCFG_ROM = 0x703;	
-		REG_SCFG_EXT = 0x93AF0100; // NAND/SD Access
-		REG_SCFG_CLK = 0x0181;
+		// REG_SCFG_ROM = 0x703;	
+		// REG_SCFG_EXT = 0x93AF0100; // NAND/SD Access
+		// REG_SCFG_CLK = 0x0181;
 	}
 
 	irqInit();
@@ -92,6 +93,10 @@ int main() {
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 
 	// Keep the ARM7 mostly idle
-	while (1) swiWaitForVBlank();
+	while (1) {
+	swiWaitForVBlank();
+	// Function checks FIFO value to see if arm9 wants NTR mode set. Refer to ntrcheck.c for how it currently works
+	ntrcheck();
+	}
 }
 
