@@ -126,7 +126,7 @@ dist:	all
 	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
 	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 	
-$(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9
+$(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9 dldi/dsisd.dldi
 	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b icon.bmp "NDS BOOTSTRAP;Runs an .ds file;made by devkitpro"
 
 $(TARGET).arm7: arm7/$(TARGET).elf
@@ -143,6 +143,10 @@ arm7/$(TARGET).elf:
 arm9/$(TARGET).elf:
 	@$(MAKE) -C arm9
 
+#---------------------------------------------------------------------------------	
+dldi/dsisd.dldi:
+	@$(MAKE) -C dldi
+
 #---------------------------------------------------------------------------------
 #$(BUILD):
 	#@[ -d $@ ] || mkdir -p $@
@@ -156,8 +160,9 @@ clean:
 	@rm -fr nds-bootstrap.arm9.elf
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootstub clean
-	$(MAKE) -C arm9 clean
-	$(MAKE) -C arm7 clean
+	@$(MAKE) -C arm9 clean
+	@$(MAKE) -C arm7 clean
+	@$(MAKE) -C dldi clean
 		
 data:
 	@mkdir -p data

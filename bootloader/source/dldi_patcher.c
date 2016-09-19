@@ -21,7 +21,7 @@
 ------------------------------------------------------------------*/
 
 #include <string.h>
-#include <nds.h>
+#include <nds/ndstypes.h>
 #include "dldi_patcher.h"
 
 #define FIX_ALL	0x01
