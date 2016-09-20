@@ -108,12 +108,14 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	oldReturn = *hookLocation;
 	oldSync = hookLocation[16];
 	
-	*hookLocation = (u32)sdEngineLocation;
-	hookLocation[16] = (u32)sdEngineLocation;
+	*hookLocation = (u32)sdEngineLocation+0xC;
+	hookLocation[16] = (u32)sdEngineLocation+0xC;
 	
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
 	
-	sdmmc_intr_orig_return_offset = 
+	u32 sdmmc_intr_orig_return_offset = *((u32*)sdEngineLocation+0x4);
+	u32 sdmmc_intr_sync_orig_return_offset = *((u32*)sdEngineLocation+0x8);
+	
 	
 	sdEngineLocation [sdmmc_intr_orig_return_offset/sizeof(u32)] = oldReturn;
 	sdEngineLocation [sdmmc_intr_sync_orig_return_offset/sizeof(u32)] = oldSync;
