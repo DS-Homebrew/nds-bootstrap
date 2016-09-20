@@ -99,6 +99,10 @@ void sdmmcCustomMsgHandler(int bytes) {
 
 void runSdMmcEngineCheck (void)
 {
+	// boost performance via IRQ_IPC_SYNC
+	irqEnable(IRQ_IPC_SYNC);
+	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE;	
+
 	//nocashMessage("runSdMmcEngineCheck");
 	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
 	{

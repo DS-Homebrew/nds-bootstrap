@@ -16,6 +16,7 @@ TARGET		:=	load
 BUILD		:=	build
 SOURCES		:=	source source/patches 
 INCLUDES	:=	build
+DATA		:=	../data
 SPECS		:=  specs
  
 #---------------------------------------------------------------------------------
@@ -64,8 +65,9 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
  
-export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
@@ -108,10 +110,22 @@ $(LOADBIN)	:	$(LOADELF)
 $(LOADELF)	:	$(OFILES)
 	@echo linking $(notdir $@)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
- 
+	
+	
+sdengine.bin.o : sdengine.bin
 
+sdengine.bin:
+	cp $(CURDIR)/../../data/sdengine.bin sdengine.bin
 
 -include $(DEPENDS)
+
+
+#---------------------------------------------------------------------------------
+%.bin.o	:	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+	
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

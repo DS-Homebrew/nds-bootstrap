@@ -51,6 +51,7 @@ Helpful information:
 #include "dldi_patcher.h"
 #include "card.h"
 #include "boot.h"
+#include "hook.h"
 
 void arm7clearRAM();
 int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
@@ -63,6 +64,9 @@ void sdmmc_controller_init();
 #define NDS_HEAD 0x02FFFE00
 #define TEMP_ARM9_START_ADDRESS (*(vu32*)0x02FFFFF4)
 
+#define CHEAT_ENGINE_LOCATION	0x027FE000
+#define CHEAT_DATA_LOCATION  	0x06010000
+#define SD_ENGINE_LOCATION  	0x023FF000
 
 const char* bootName = "BOOT.NDS";
 
@@ -303,6 +307,8 @@ int main (void) {
 	if (wantToPatchDLDI) {
 		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	}
+	
+	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();

@@ -4,7 +4,7 @@ ENTRY(sdmmc_engine_start)
 
 MEMORY {
 
-	vram	: ORIGIN = 0x06000000, LENGTH = 128K
+	vram	: ORIGIN = 0x023FF000, LENGTH = 4K
 }
 
 __vram_start	=	ORIGIN(vram);

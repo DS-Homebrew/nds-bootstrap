@@ -16,16 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cheat.h"
+#include "hook.h"
 #include "common.h"
+#include "sdengine_bin.h"
 
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
-extern const u8 cheat_engine_start[]; 
-#define CHEAT_CODE_END	0xCF000000
-#define CHEAT_ENGINE_RELOCATE	0xCF000001
-#define CHEAT_ENGINE_HOOK	0xCF000002
+extern const u8 cheat_engine_start[]; 
 
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
@@ -94,27 +92,10 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 	return actualTableAddr;
 }
 
-int arm7_hookGame (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation) {
+int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation) {
 	u32 oldReturn;
-	u32 cheatWord1, cheatWord2;
-	u32* cheatDest;
+	u32 oldSync;
 	u32* hookLocation = NULL;
-
-	if (cheatData[0] == CHEAT_CODE_END) {
-		return ERR_NOCHEAT;
-	}
-
-	if (cheatData[0] == CHEAT_ENGINE_RELOCATE) {
-		cheatWord1 = *cheatData++;
-		cheatWord2 = *cheatData++;
-		cheatEngineLocation = (u32*)cheatWord2;
-	}
-	
-	if (cheatData[0] == CHEAT_ENGINE_HOOK) {
-		cheatWord1 = *cheatData++;
-		cheatWord2 = *cheatData++;
-		hookLocation = (u32*)cheatWord2;
-	}
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandler ((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
@@ -125,22 +106,17 @@ int arm7_hookGame (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheat
 	}
 	
 	oldReturn = *hookLocation;
+	oldSync = hookLocation[16];
 	
-	*hookLocation = (u32)cheatEngineLocation;
+	*hookLocation = (u32)sdEngineLocation;
+	hookLocation[16] = (u32)sdEngineLocation;
 	
-	copyLoop (cheatEngineLocation, (u32*)cheat_engine_start, cheat_engine_size);
+	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
 	
-	cheatEngineLocation [intr_orig_return_offset/sizeof(u32)] = oldReturn;
+	sdmmc_intr_orig_return_offset = 
 	
-	cheatDest = cheatEngineLocation + (cheat_engine_size/sizeof(u32));
-	
-	// Copy cheat data across
-	do {
-		cheatWord1 = *cheatData++;
-		cheatWord2 = *cheatData++;
-		*cheatDest++ = cheatWord1;
-		*cheatDest++ = cheatWord2;
-	} while (cheatWord1 != CHEAT_CODE_END);
+	sdEngineLocation [sdmmc_intr_orig_return_offset/sizeof(u32)] = oldReturn;
+	sdEngineLocation [sdmmc_intr_sync_orig_return_offset/sizeof(u32)] = oldSync;
 	
 	return ERR_NONE;
 }

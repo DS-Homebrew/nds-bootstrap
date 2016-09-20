@@ -17,16 +17,21 @@
 .arm
 
 .global sdmmc_engine_start
+.global sdmmc_engine_start_sync
 .global sdmmc_engine_end
-.global intr_orig_return_offset
+.global sdmmc_intr_orig_return_offset
+.global sdmmc_intr_sync_orig_return_offset
 .global sdmmc_engine_size
 
 
 sdmmc_engine_size:
 	.word	sdmmc_engine_end - sdmmc_engine_start
 
-intr_orig_return_offset:
+sdmmc_intr_orig_return_offset:
 	.word	intr_orig_return - sdmmc_engine_start
+	
+sdmmc_intr_sync_orig_return_offset:
+	.word	intr_sync_orig_return - sdmmc_engine_start
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -44,6 +49,13 @@ code_handler_start:
   @ exit after return
 	b	exit
   
+sdmmc_engine_start_sync:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start
+	ldr 	r0,	intr_sync_orig_return
+	bx  	r0
+	
 @---------------------------------------------------------------------------------
 _blx_r3_stub:
 @---------------------------------------------------------------------------------
@@ -57,6 +69,9 @@ exit:
 	bx		lr
 
 intr_orig_return:
+	.word	0x00000000
+
+intr_sync_orig_return:
 	.word	0x00000000
 
 .pool
