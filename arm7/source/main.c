@@ -32,6 +32,7 @@ redistribute it freely, subject to the following restrictions:
 #include <maxmod7.h>
 
 #include "ntrcheck.h"
+#include "sdmmcEngine.h"
 
 //---------------------------------------------------------------------------------
 void SyncHandler(void) {
@@ -42,8 +43,8 @@ void SyncHandler(void) {
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
+	runSdMmcEngineCheck();
 	inputGetAndSend();
-  runSdMmcEngineCheck();
 }
 
 static void myFIFOValue32Handler(u32 value,void* data)
@@ -77,11 +78,11 @@ int main() {
 	installSystemFIFO();
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
-  irqSet(IRQ_IPC_SYNC, SyncHandler);
+	irqSet(IRQ_IPC_SYNC, SyncHandler);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK | IRQ_IPC_SYNC);
   
-  REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
+	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
 
 	//Card Reset. Enable if needed.
 	//ResetSlot();

@@ -144,7 +144,7 @@ int main( int argc, char **argv) {
 	}
 	
 	if (fatInitDefault()) {
-		CIniFile bootstrapini( "sd:/_bootstrap/nds-bootstrap.ini" );
+		CIniFile bootstrapini( "fat:/_bootstrap/nds-bootstrap.ini" );
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			REG_SCFG_CLK |= 1;
