@@ -20,7 +20,7 @@ readBios:
     .thumb
 
 bios_dump:
-    push {r4-r7,lr} @Even though we don't use R7, the code we are jumping to is going
+    push {r4-r7,lr} @Even though we dont use R7, the code we are jumping to is going
                     @trash R7, therefore, we must save it.
 	mov r5, r1		@ src
 	sub r1, r2, #1	@ size
@@ -39,7 +39,7 @@ loop:
 ret:
     strb r3,[r2,r1] @Store the read byte contained in r3, to SRAM.
     sub r1,#1       @Subtract 1
-    bpl loop        @And branch as long as R1 doesn't roll into -1 (0xFFFFFFFF).
+    bpl loop        @And branch as long as R1 doesnt roll into -1 (0xFFFFFFFF).
 
     pop {r4-r7}     @Restore the saved registers
     pop {r3}        @and return.

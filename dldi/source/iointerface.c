@@ -36,6 +36,8 @@
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
 #include <nds/ipc.h>
+#include "sdmmc.h"
+
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
@@ -161,6 +163,10 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	return false;
 }
 
+bool isArm7() {
+	return REG_SCFG_EXT & 0x90000000 == 0x90000000;
+}
+
 
 //---------------------------------------------------------------------------------
 bool sd_ClearStatus() {
@@ -184,7 +190,11 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
 	nocashMessage("startup");
-	return sd_Startup();
+	if(isArm7()) {
+		return sdmmc_sdcard_init()==0;
+	} else {	
+		return sd_Startup();
+	}
 }
 
 /*-----------------------------------------------------------------
@@ -218,7 +228,11 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	nocashMessage("readSectors");
-	return sd_ReadSectors(sector,numSectors,buffer);
+	if(isArm7()) {
+		return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
+	} else {	
+		return sd_ReadSectors(sector,numSectors,buffer);
+	}
 }
 
 
@@ -232,7 +246,11 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	nocashMessage("writeSectors");
-	return sd_WriteSectors(sector,numSectors,buffer);
+	if(isArm7()) {
+		return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
+	} else {	
+		return sd_WriteSectors(sector,numSectors,buffer);
+	}
 }
 
 /*-----------------------------------------------------------------

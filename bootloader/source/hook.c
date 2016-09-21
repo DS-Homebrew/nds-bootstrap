@@ -96,6 +96,8 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	u32 oldReturn;
 	u32 oldSync;
 	u32* hookLocation = NULL;
+	
+	nocashMessage("hookNds");
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandler ((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);

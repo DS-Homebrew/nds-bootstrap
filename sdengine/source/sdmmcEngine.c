@@ -99,6 +99,7 @@ void sdmmcCustomMsgHandler(int bytes) {
 
 void runSdMmcEngineCheck (void)
 {
+	nocashMessage("runSdMmcEngineCheck");
 	// boost performance via IRQ_IPC_SYNC
 	irqEnable(IRQ_IPC_SYNC);
 	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE;	

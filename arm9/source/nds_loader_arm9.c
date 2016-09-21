@@ -170,6 +170,8 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 	size_t dldiFileSize = 0;
 	
+	nocashMessage("dldiPatchLoader");
+	
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
 
@@ -184,11 +186,13 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
 		// No DLDI patch
+		nocashMessage("No DLDI patch");
 		return false;
 	}
 
 	if (pDH[DO_driverSize] > pAH[DO_allocatedSpace]) {
-		// Not enough space for patch
+		// Not enough space for patch	
+		nocashMessage("Not enough space for patch");
 		return false;
 	}
 	
@@ -269,6 +273,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	u16 argTempVal = 0;
 	int argSize;
 	const char* argChar;
+	
+	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
 
@@ -327,22 +333,34 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 		
 	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
+		nocashMessage("dldiPatchNds");
 		if (!dldiPatchLoader ((data_t*)LCDC_BANK_C, loaderSize, initDisc)) {
+			nocashMessage("return 3");
 			return 3;
 		}
 	}
+	
+	nocashMessage("irqDisable(IRQ_ALL);");
 
 	irqDisable(IRQ_ALL);
 
+	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
+	
+	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
+	
 	*((vu32*)0x02FFFFFC) = 0;
 	*((vu32*)0x02FFFE04) = (u32)0xE59FF018;
 	*((vu32*)0x02FFFE24) = (u32)0x02FFFE04;
+	
+	nocashMessage("resetARM7");
 
 	resetARM7(0x06000000);
+	
+	nocashMessage("swiSoftReset");
 
 	swiSoftReset(); 
 	return true;
@@ -400,6 +418,7 @@ dsiSD:
 */
 bool installBootStub(bool havedsiSD) {
 #ifndef _NO_BOOTSTUB_
+	nocashMessage("installBootStub");
 	extern char *fake_heap_end;
 	struct __bootstub *bootcode = (struct __bootstub *)fake_heap_end;
 

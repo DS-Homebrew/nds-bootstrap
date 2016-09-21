@@ -205,6 +205,8 @@ void resetMemory_ARM7 (void)
 void loadBinary_ARM7 (u32 fileCluster)
 {
 	u32 ndsHeader[0x170>>2];
+	
+	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
 	fileRead ((char*)ndsHeader, fileCluster, 0, 0x170);
@@ -264,6 +266,7 @@ bool sdmmc_readsectors(u32 sector_no, u32 numsectors, void *out) {
 }
 
 int main (void) {
+	nocashMessage("bootloader");
 	if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
 		_io_dldi.fn_isInserted = sdmmc_inserted;
