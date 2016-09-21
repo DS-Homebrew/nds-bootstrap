@@ -72,7 +72,7 @@ bool sd_Startup() {
 	nocashMessage("sdio_Startup");
 	//if (!isSDAcessible()) return false;
 	
-	REG_SCFG_EXT &= 0xC000;
+	//REG_SCFG_EXT &= 0xC000;
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -164,7 +164,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 }
 
 bool isArm7() {
-	return REG_SCFG_EXT & 0x90000000 == 0x90000000;
+	return sdmmc_read16(REG_SDSTATUS0)!=0;
 }
 
 
