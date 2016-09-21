@@ -277,6 +277,7 @@ int main (void) {
 	// Init card
 	if(!FAT_InitFiles(initDisc))
 	{
+		nocashMessage("!FAT_InitFiles");
 		return -1;
 	}
 	if ((fileCluster < CLUSTER_FIRST) || (fileCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
@@ -285,6 +286,7 @@ int main (void) {
 	}
 	if (fileCluster == CLUSTER_FREE)
 	{
+		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
 	
@@ -293,9 +295,11 @@ int main (void) {
 	copyLoop((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
 	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 	// Wait until the ARM9 has completed its task
+	nocashMessage("Wait until the ARM9 has completed its task");
 	while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
 
 	// Get ARM7 to clear RAM
+	nocashMessage("Get ARM7 to clear RAM");
 	resetMemory_ARM7();	
 	
 	// ARM9 enters a wait loop
@@ -304,10 +308,12 @@ int main (void) {
 	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 
 	// Load the NDS file
+	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(fileCluster);
 	
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
+		nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	}
 	
