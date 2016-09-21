@@ -40,6 +40,15 @@ static const u32 handlerEndSig[4] = {
 	0xe12fff10		// bx   r0
 };
 
+static const u32 homebrewStartSig[1] = {
+	0x04000208, 	// DCD 0x4000208
+};
+
+static const u32 homebrewEndSig[2] = {
+	0x04000004,		// DCD 0x4000004
+	0x04000180		// DCD 0x4000180
+};
+
 static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandler (u32* addr, size_t size) {
@@ -92,6 +101,30 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 	return actualTableAddr;
 }
 
+static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+	int i;
+	
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewStartSig[0]) && 
+			(addr[1] != 0) && // actual irqTable address
+			(addr[2] == homebrewEndSig[1]) && 
+			(addr[3] == homebrewEndSig[2])) 
+		{
+			break;
+		}
+		addr++;
+	}
+	
+	if (addr >= end) {
+		return NULL;
+	}
+	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr[1];
+}
+
 int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation) {
 	u32 oldReturn;
 	u32 oldSync;
@@ -100,10 +133,11 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	nocashMessage("hookNds");
 
 	if (!hookLocation) {
-		hookLocation = hookInterruptHandler ((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		hookLocation = hookInterruptHandlerHomebrew ((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
 	
 	if (!hookLocation) {
+		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
 	}
 	
@@ -122,6 +156,7 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	sdEngineLocation [sdmmc_intr_orig_return_offset/sizeof(u32)] = oldReturn;
 	sdEngineLocation [sdmmc_intr_sync_orig_return_offset/sizeof(u32)] = oldSync;
 	
+	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
 
