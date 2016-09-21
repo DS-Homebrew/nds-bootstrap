@@ -109,8 +109,8 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	while (addr < end) {
 		if ((addr[0] == homebrewStartSig[0]) && 
 			(addr[1] != 0) && // actual irqTable address
-			(addr[2] == homebrewEndSig[1]) && 
-			(addr[3] == homebrewEndSig[2])) 
+			(addr[2] == homebrewEndSig[0]) && 
+			(addr[3] == homebrewEndSig[1])) 
 		{
 			break;
 		}
