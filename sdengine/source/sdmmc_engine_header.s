@@ -8,16 +8,17 @@
 .global sdmmc_engine_start
 .global sdmmc_engine_start_sync
 .global sdmmc_engine_end
-.global irqTable
-.global irq
+.global irqCode
+.global irqHandler
+.global irqSig
 .global sdmmc_engine_size
 
 
 sdmmc_engine_size:
 	.word	sdmmc_engine_end - sdmmc_engine_start
-irqTable:
+irqHandler:
 	.word	0x00000000
-irq:
+irqSig:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -39,8 +40,8 @@ _blx_r3_stub:
 @---------------------------------------------------------------------------------
 myPatch:
 	ldr    r1, =sdmmc_engine_start        @ my custom handler
-	str    r2, [r1, #-8]		@ irqtable
-	str    r0, [r1, #-4]		@ irq
+	str    r2, [r1, #-8]		@ irqhandler
+	str    pc, [r1, #-4]		@ irqsig
 	b      got_handler
 .pool	
 got_handler:

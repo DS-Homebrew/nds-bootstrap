@@ -98,8 +98,8 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 static bool initialized = false;
-extern IntFn* irqTable; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-//extern u32 irq; // always NULL
+extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern u32* irqSig; // always NULL
 
 void runSdMmcEngineCheck (void) {
 	nocashMessage("runSdMmcEngineCheck");
@@ -115,28 +115,90 @@ void runSdMmcEngineCheck (void) {
 	}
 }
 
+// interruptDispatcher.s jump_intr:
+static const u32 homebrewSig[5] = {
+	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
+	0xE3510000, // cmp    r1, #0
+	0x1A000001, // bne    got_handler
+	0xE1A01000, // mov    r1, r0
+	0xEAFFFFF6  // b    no_handler
+};	
+
+// interruptDispatcher.s jump_intr:
+//patch
+static const u32 homebrewSigPatched[5] = {
+	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
+	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
+	0xE501F004, // str    pc, [r1,#-4]     @ irqsig 
+	0xEA000001, // b      got_handler
+	0x023FF00C  // DCD 	  0x23FF00C       
+};
+
+static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
+	nocashMessage("restoreInterruptHandlerHomebrew");	
+	u32* end = addr + size/sizeof(u32);
+	
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewSigPatched[0]) && 
+			(addr[1] == homebrewSigPatched[1]) && 
+			(addr[2] == homebrewSigPatched[2]) && 
+			(addr[3] == homebrewSigPatched[3]) && 
+			(addr[4] == homebrewSigPatched[4])) 
+		{
+			break;
+		}
+		addr++;
+	}
+	
+	if (addr >= end) {
+		nocashMessage("addr >= end");	
+		return 0;
+	}
+	
+	// patch the program
+	addr -= 5;
+	addr[0] = homebrewSig[0];
+	addr[1] = homebrewSig[1];
+	addr[2] = homebrewSig[2];
+	addr[3] = homebrewSig[3];
+	addr[4] = homebrewSig[4];
+	
+	nocashMessage("restoreSuccessfull");	
+	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}
+
 void myIrqHandler(void) {
 	nocashMessage("myIrqHandler");	
 	
-	u32 irq = *((u32*)irqTable-4);
-	
-	if(irq == IRQ_IPC_SYNC) {
-		nocashMessage("IPC SYNC");
-		runSdMmcEngineCheck();
-	}
+	u32 irq = *((u32*)irqHandler-4);
 		
 	nocashMessage("interrupt handler found");
-	IntFn handler = *irqTable;
+	IntFn handler = *irqHandler;
 	if(handler>0) handler();
 
 	if(!initialized) {	
+		u32* current=irqHandler+4;
+		
+		while(*current!=IRQ_IPC_SYNC || !*current) {
+			current+=8;
+		}
+		
+		*((IntFn*)current-4)	= handler;
+		*current				= IRQ_IPC_SYNC;
+	
 		nocashMessage("IRQ_IPC_SYNC setted");
 		
 		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;	
 		REG_IE       |= IRQ_IPC_SYNC;
 		
 		nocashMessage("IRQ_IPC_SYNC enabled");	
-	}
+		// restore the irq Handler for better compatibility
+		restoreInterruptHandlerHomebrew(irqSig-8,24);
+	}	
+	runSdMmcEngineCheck();
 }
 
 
