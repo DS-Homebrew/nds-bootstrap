@@ -98,8 +98,8 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 static bool initialized = false;
-extern struct IntTable irqTable[];
-extern u32 irq;
+extern IntFn* irqTable; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+//extern u32 irq; // always NULL
 
 void runSdMmcEngineCheck (void) {
 	nocashMessage("runSdMmcEngineCheck");
@@ -116,22 +116,19 @@ void runSdMmcEngineCheck (void) {
 }
 
 void myIrqHandler(void) {
-	nocashMessage("myIrqHandler");
-
-	int i;
+	nocashMessage("myIrqHandler");	
 	
-	for	(i=0;i<MAX_INTERRUPTS;i++)
-		if	(!irqTable[i].mask || irqTable[i].mask == irq) break;
-		
-	if ( i == MAX_INTERRUPTS ) return;
-		
-	IntFn handler = irqTable[i].handler;
+	u32 irq = *((u32*)irqTable-4);
+	
 	if(irq == IRQ_IPC_SYNC) {
+		nocashMessage("IPC SYNC");
 		runSdMmcEngineCheck();
-		if(handler>0) handler();
-	} else {
-		if(handler>0) handler();
 	}
+		
+	nocashMessage("interrupt handler found");
+	IntFn handler = *irqTable;
+	if(handler>0) handler();
+
 	if(!initialized) {	
 		nocashMessage("IRQ_IPC_SYNC setted");
 		
@@ -140,7 +137,6 @@ void myIrqHandler(void) {
 		
 		nocashMessage("IRQ_IPC_SYNC enabled");	
 	}
-
 }
 
 
