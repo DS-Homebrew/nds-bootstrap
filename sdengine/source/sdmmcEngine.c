@@ -97,13 +97,12 @@ void sdmmcCustomMsgHandler(int bytes) {
     sendValue32(retval);
 }
 
-void runSdMmcEngineCheck (void)
-{
-	nocashMessage("runSdMmcEngineCheck");
-	// boost performance via IRQ_IPC_SYNC
-	irqEnable(IRQ_IPC_SYNC);
-	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE;	
+static bool initialized = false;
+extern struct IntTable irqTable[];
+extern u32 irq;
 
+void runSdMmcEngineCheck (void) {
+	nocashMessage("runSdMmcEngineCheck");
 	//nocashMessage("runSdMmcEngineCheck");
 	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
 	{
@@ -115,3 +114,33 @@ void runSdMmcEngineCheck (void)
 		sdmmcCustomMsgHandler(*((vu32*)0x027FEE28));
 	}
 }
+
+void myIrqHandler(void) {
+	nocashMessage("myIrqHandler");
+
+	int i;
+	
+	for	(i=0;i<MAX_INTERRUPTS;i++)
+		if	(!irqTable[i].mask || irqTable[i].mask == irq) break;
+		
+	if ( i == MAX_INTERRUPTS ) return;
+		
+	IntFn handler = irqTable[i].handler;
+	if(irq == IRQ_IPC_SYNC) {
+		runSdMmcEngineCheck();
+		if(handler>0) handler();
+	} else {
+		if(handler>0) handler();
+	}
+	if(!initialized) {	
+		nocashMessage("IRQ_IPC_SYNC setted");
+		
+		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;	
+		REG_IE       |= IRQ_IPC_SYNC;
+		
+		nocashMessage("IRQ_IPC_SYNC enabled");	
+	}
+
+}
+
+

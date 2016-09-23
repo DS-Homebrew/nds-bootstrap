@@ -40,13 +40,43 @@ static const u32 handlerEndSig[4] = {
 	0xe12fff10		// bx   r0
 };
 
-static const u32 homebrewStartSig[1] = {
+// libnds v1.5.12 2016
+static const u32 homebrewStartSig_2016[1] = {
 	0x04000208, 	// DCD 0x4000208
 };
 
-static const u32 homebrewEndSig[2] = {
+static const u32 homebrewEndSig_2016[2] = {
 	0x04000004,		// DCD 0x4000004
 	0x04000180		// DCD 0x4000180
+};
+
+// libnds v_._._ 2007 irqset
+static const u32 homebrewStartSig_2007[1] = {
+	0x04000208, 	// DCD 0x4000208
+};
+
+static const u32 homebrewEndSig2007[2] = {
+	0x04000004,		// DCD 0x4000004
+	0x04000180		// DCD 0x4000180
+};
+
+// interruptDispatcher.s jump_intr:
+static const u32 homebrewSig[5] = {
+	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
+	0xE3510000, // cmp    r1, #0
+	0x1A000001, // bne    got_handler
+	0xE1A01000, // mov    r1, r0
+	0xEAFFFFF6  // b    no_handler
+};	
+
+// interruptDispatcher.s jump_intr:
+//patch
+static const u32 homebrewSigPatched[5] = {
+	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
+	0xE5012008, // str    r2, [r1,#-8]     @ irqtable
+	0xE5010004, // str    r0, [r1,#-4]     @ irq
+	0xEA000001, // b      got_handler
+	0x023FF00C  // DCD 	  0x23FF00C       
 };
 
 static const int MAX_HANDLER_SIZE = 50;
@@ -107,10 +137,11 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewStartSig[0]) && 
-			(addr[1] != 0) && // actual irqTable address
-			(addr[2] == homebrewEndSig[0]) && 
-			(addr[3] == homebrewEndSig[1])) 
+		if ((addr[0] == homebrewSig[0]) && 
+			(addr[1] == homebrewSig[1]) && 
+			(addr[2] == homebrewSig[2]) && 
+			(addr[3] == homebrewSig[3]) && 
+			(addr[4] == homebrewSig[4])) 
 		{
 			break;
 		}
@@ -121,19 +152,33 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 		return NULL;
 	}
 	
+	// patch the program
+	addr -= 5;
+	addr[0] = homebrewSigPatched[0];
+	addr[1] = homebrewSigPatched[1];
+	addr[2] = homebrewSigPatched[2];
+	addr[3] = homebrewSigPatched[3];
+	addr[4] = homebrewSigPatched[4];
+	
 	// The first entry in the table is for the Vblank handler, which is what we want
-	return addr[1];
+	return addr;
 }
 
+
+static u32* hookInterruptHandlerTest (u32* addr, size_t size) {	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return 0x3801138;
+}
+
+
+
 int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation) {
-	u32 oldReturn;
-	u32 oldSync;
 	u32* hookLocation = NULL;
 	
 	nocashMessage("hookNds");
 
 	if (!hookLocation) {
-		hookLocation = hookInterruptHandlerHomebrew ((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
 	
 	if (!hookLocation) {
@@ -141,20 +186,7 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 		return ERR_HOOK;
 	}
 	
-	oldReturn = *hookLocation;
-	oldSync = hookLocation[16];
-	
-	*hookLocation = (u32)sdEngineLocation+0xC;
-	hookLocation[16] = (u32)sdEngineLocation+0xC;
-	
-	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
-	
-	u32 sdmmc_intr_orig_return_offset = *((u32*)sdEngineLocation+0x4);
-	u32 sdmmc_intr_sync_orig_return_offset = *((u32*)sdEngineLocation+0x8);
-	
-	
-	sdEngineLocation [sdmmc_intr_orig_return_offset/sizeof(u32)] = oldReturn;
-	sdEngineLocation [sdmmc_intr_sync_orig_return_offset/sizeof(u32)] = oldSync;
+	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

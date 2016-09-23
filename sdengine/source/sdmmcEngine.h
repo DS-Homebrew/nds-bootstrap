@@ -23,6 +23,7 @@
 extern "C" {
 #endif
 
+void myIrqHandler(void);
 
 void runSdMmcEngineCheck (void);
 
