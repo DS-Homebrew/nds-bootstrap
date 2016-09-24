@@ -33,14 +33,14 @@ sdmmc_engine_start:
 	bx	r3
 
 call_handler:
-	stmdb	sp!, {lr}
+	push    {lr}
 	adr 	lr, code_handler_start
 	ldr		r2, [r1]
 	ldr		r0, [r2]
 	bx  	r0
 	
 code_handler_start:
-	stmdb	sp!,	{r0-r12} 
+	push	{r0-r12} 
 	ldr	r3, =myIrqHandler
 	bl	_blx_r3_stub		@ jump to user code
   
@@ -68,9 +68,11 @@ got_handler:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 exit:	
+	pop   	{r0-r12} 
+	pop  	{lr}
 	ldr	r4, =irqSig
 	ldr	r3, [r4]
-	add	r3, r3, #44  	@ IntrRet
+	add	r3, r3, #40  	@ IntrRet
 	bx	r3
 
 .pool

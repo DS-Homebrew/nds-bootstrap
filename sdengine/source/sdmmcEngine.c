@@ -130,7 +130,7 @@ static const u32 homebrewSigPatched[5] = {
 	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    pc, [r1,#-4]     @ irqsig 
-	0xEA000001, // b      got_handler
+	0xEA000000, // b      got_handler
 	0x023FF00C  // DCD 	  0x23FF00C       
 };
 
