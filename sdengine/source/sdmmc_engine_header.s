@@ -29,7 +29,7 @@ sdmmc_engine_start:
 	mov	r1, r0
 	ldr	r4, =irqSig
 	ldr	r3, [r4]
-	add	r3, r3, #-24  	@ no_handler
+	add	r3, r3, #-36  	@ no_handler
 	bx	r3
 
 call_handler:
