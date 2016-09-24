@@ -28,7 +28,8 @@ sdmmc_engine_start:
 	bne	call_handler
 	mov	r1, r0
 	ldr	r4, =irqSig
-	ldr	r3, [r4, #-24]  	@ no_handler
+	ldr	r3, [r4]
+	add	r3, r3, #-24  	@ no_handler
 	bx	r3
 
 call_handler:
@@ -67,9 +68,10 @@ got_handler:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 exit:	
-	ldmia	sp!,	{r0-r12} 
-	ldmia	sp!,	{lr}
-	bx		lr
+	ldr	r4, =irqSig
+	ldr	r3, [r4]
+	add	r3, r3, #44  	@ IntrRet
+	bx	r3
 
 .pool
 

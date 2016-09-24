@@ -152,7 +152,6 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	}
 	
 	// patch the program
-	addr -= 5;
 	addr[0] = homebrewSigPatched[0];
 	addr[1] = homebrewSigPatched[1];
 	addr[2] = homebrewSigPatched[2];
