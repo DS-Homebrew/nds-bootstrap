@@ -8,7 +8,6 @@
 .global sdmmc_engine_start
 .global sdmmc_engine_start_sync
 .global sdmmc_engine_end
-.global irqCode
 .global irqHandler
 .global irqSig
 .global sdmmc_engine_size
@@ -24,6 +23,23 @@ irqSig:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 sdmmc_engine_start:
+	ldr	r1, =irqHandler			@ user IRQ handler address
+	cmp	r1, #0
+	bne	call_handler
+	mov	r1, r0
+	ldr	r4, =irqSig
+	ldr	r3, [r4, #-24]  	@ no_handler
+	bx	r3
+
+call_handler:
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start
+	ldr		r2, [r1]
+	ldr		r0, [r2]
+	bx  	r0
+	
+code_handler_start:
+	stmdb	sp!,	{r0-r12} 
 	ldr	r3, =myIrqHandler
 	bl	_blx_r3_stub		@ jump to user code
   

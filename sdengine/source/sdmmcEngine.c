@@ -172,21 +172,19 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 
 void myIrqHandler(void) {
 	nocashMessage("myIrqHandler");	
-	
-	u32 irq = *((u32*)irqHandler-4);
-		
-	nocashMessage("interrupt handler found");
-	IntFn handler = *irqHandler;
-	if(handler>0) handler();
+	REG_IE       |= IRQ_IPC_SYNC;
 
 	if(!initialized) {	
+		nocashMessage("!initialized");	
 		u32* current=irqHandler+4;
 		
-		while(*current!=IRQ_IPC_SYNC || !*current) {
+		while(*current!=IRQ_IPC_SYNC && *current) {
 			current+=8;
 		}
 		
-		*((IntFn*)current-4)	= handler;
+		nocashMessage("empty irqtable slot found");	
+		
+		*((IntFn*)current-4)	= runSdMmcEngineCheck;
 		*current				= IRQ_IPC_SYNC;
 	
 		nocashMessage("IRQ_IPC_SYNC setted");
@@ -196,7 +194,8 @@ void myIrqHandler(void) {
 		
 		nocashMessage("IRQ_IPC_SYNC enabled");	
 		// restore the irq Handler for better compatibility
-		restoreInterruptHandlerHomebrew(irqSig-8,24);
+		// restoreInterruptHandlerHomebrew(irqSig-8,24);
+		initialized = true;
 	}	
 	runSdMmcEngineCheck();
 }
