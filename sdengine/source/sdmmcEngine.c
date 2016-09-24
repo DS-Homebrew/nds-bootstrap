@@ -37,8 +37,6 @@ void sdmmcCustomValueHandler(u32 value) {
 //---------------------------------------------------------------------------------
     int result = 0;
 
-    int oldIME = enterCriticalSection();
-
     switch(value) {
 
     case SDMMC_HAVE_SD:
@@ -61,7 +59,6 @@ void sdmmcCustomValueHandler(u32 value) {
     case SDMMC_SD_STOP:
         break;
 	}
-    leaveCriticalSection(oldIME);
 
     sendValue32(result);
 }
@@ -74,8 +71,7 @@ void sdmmcCustomMsgHandler(int bytes) {
 	//char buf[64];
 
     getDatamsg(bytes, (u8*)&msg);
-
-    int oldIME = enterCriticalSection();
+    
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
@@ -90,20 +86,21 @@ void sdmmcCustomMsgHandler(int bytes) {
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
-    }
-
-    leaveCriticalSection(oldIME);
+    }    
 
     sendValue32(retval);
 }
 
 static bool initialized = false;
+static bool inTreament = false;
 extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern u32* irqSig; // always NULL
 
 void runSdMmcEngineCheck (void) {
 	nocashMessage("runSdMmcEngineCheck");
-	//nocashMessage("runSdMmcEngineCheck");
+	int oldIME = enterCriticalSection();
+
+
 	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
@@ -113,6 +110,8 @@ void runSdMmcEngineCheck (void) {
 		nocashMessage("sdmmc msg received");
 		sdmmcCustomMsgHandler(*((vu32*)0x027FEE28));
 	}
+
+	leaveCriticalSection(oldIME);
 }
 
 // interruptDispatcher.s jump_intr:
@@ -174,7 +173,7 @@ void myIrqHandler(void) {
 	nocashMessage("myIrqHandler");	
 	REG_IE       |= IRQ_IPC_SYNC;
 
-	if(!initialized) {	
+	/*if(!initialized) {	
 		nocashMessage("!initialized");	
 		u32* current=irqHandler+4;
 		
@@ -196,7 +195,7 @@ void myIrqHandler(void) {
 		// restore the irq Handler for better compatibility
 		// restoreInterruptHandlerHomebrew(irqSig-8,24);
 		initialized = true;
-	}	
+	}*/	
 	runSdMmcEngineCheck();
 }
 

@@ -66,6 +66,12 @@ u32 getValue32() {
 	return *((vu32*)0x027FEE28);
 }
 
+void goodOldCopy32(u32* src, u32* dst, int size) {
+	for(int i = 0 ; i<size/4; i++) {
+		dst[i]=src[i];
+	}
+}
+
 //---------------------------------------------------------------------------------
 bool sd_Startup() {
 //---------------------------------------------------------------------------------
@@ -127,7 +133,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 	int result = getValue32();
 	
-	swiFastCopy(mybuffer, buffer, numSectors*512);
+	goodOldCopy32(mybuffer, buffer, numSectors*512);
 	
 	return result == 0;
 	
@@ -145,7 +151,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 
 	DC_FlushRange(buffer,numSectors * 512);		
 	
-	swiFastCopy(buffer, mybuffer, numSectors*512);
+	goodOldCopy32(buffer, mybuffer, numSectors*512);
 
 	msg.type = SDMMC_SD_WRITE_SECTORS;
 	msg.sdParams.startsector = sector;
