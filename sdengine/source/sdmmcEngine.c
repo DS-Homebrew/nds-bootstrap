@@ -92,7 +92,6 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 static bool initialized = false;
-static bool inTreament = false;
 extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern u32* irqSig; // always NULL
 
