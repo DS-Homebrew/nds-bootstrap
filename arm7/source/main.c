@@ -60,6 +60,7 @@ static void myFIFOValue32Handler(u32 value,void* data)
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
+	
 	irqInit();
 	fifoInit();
 
@@ -83,9 +84,9 @@ int main(void) {
   
 	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
 
-	fifoWaitValue32(FIFO_USER_06);
-	if(fifoCheckValue32(FIFO_USER_07)) { dsi_resetSlot1(); }
-	fifoSendValue32(FIFO_USER_08, 1);
+	fifoWaitValue32(FIFO_USER_03);
+	if(fifoCheckValue32(FIFO_USER_04)) { dsi_resetSlot1(); }
+	fifoSendValue32(FIFO_USER_05, 1);
 
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 

@@ -128,9 +128,11 @@ static void myFIFOValue32Handler(u32 value,void* data)
 }
 
 int main( int argc, char **argv) {
+
 	bool ntrMode = false;
 
-	
+	REG_SCFG_CLK = 0x85;
+
 	if (argc >= 2) {
 		if ( strcasecmp (argv[1], "NTR") == 0 ) {
 			ntrMode = true;
@@ -138,17 +140,13 @@ int main( int argc, char **argv) {
 	}
 	
 	if(ntrMode) {
-		REG_SCFG_CLK = 0x80;
+		// REG_SCFG_CLK = 0x80;
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-		fifoSendValue32(FIFO_USER_03, 1);
+		fifoSendValue32(FIFO_USER_06, 1);
 	}
 	
 	if (fatInitDefault()) {
 		CIniFile bootstrapini( "fat:/_bootstrap/nds-bootstrap.ini" );
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
-			REG_SCFG_CLK = 0x85;
-		}
 		
 		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
 			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
@@ -163,11 +161,11 @@ int main( int argc, char **argv) {
 				do { swiWaitForVBlank(); } 
 				while (REG_SCFG_MC == 0x11);
 			}
-			fifoSendValue32(FIFO_USER_07, 1);
+			fifoSendValue32(FIFO_USER_04, 1);
 		}
 
-		fifoSendValue32(FIFO_USER_06, 1);
-		fifoWaitValue32(FIFO_USER_08);
+		fifoSendValue32(FIFO_USER_03, 1);
+		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
 		
 		if (0 != argc ) {
@@ -198,7 +196,10 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
-		}	
+		} else {
+			REG_SCFG_CLK = 0x80;
+			fifoSendValue32(FIFO_USER_07, 1);
+		}
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
 			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
@@ -227,6 +228,7 @@ int main( int argc, char **argv) {
 		consoleDemoInit();
 		printf("SD init failed!\n");
 	}
-	while(1) swiWaitForVBlank();
+
+	while(1) { swiWaitForVBlank(); }
 }
 

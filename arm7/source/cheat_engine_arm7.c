@@ -23,10 +23,10 @@ void runCheatEngineCheck (void)
 	if(*((vu32*)0x027FFE24) == (u32)0x027FFE04)
 	{
 
-		REG_SCFG_ROM = 0x703;
-		if(fifoCheckValue32(FIFO_USER_04)) { REG_SCFG_CLK=0x0181; }
+		// REG_SCFG_ROM = 0x703;
+		// if(fifoCheckValue32(FIFO_USER_04)) { REG_SCFG_CLK=0x0181; }
 		// REG_SCFG_EXT = 0x12A00000;
-		REG_SCFG_EXT = 0x93A40000;
+		// REG_SCFG_EXT = 0x93A40000;
 
 		irqDisable (IRQ_ALL);
 		*((vu32*)0x027FFE34) = (u32)0x06000000;
