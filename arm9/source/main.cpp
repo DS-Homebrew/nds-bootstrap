@@ -147,8 +147,8 @@ int main( int argc, char **argv) {
 		CIniFile bootstrapini( "fat:/_bootstrap/nds-bootstrap.ini" );
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
-			REG_SCFG_CLK |= 1;
-		}	
+			REG_SCFG_CLK = 0x85;
+		}
 		
 		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
 			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
@@ -157,6 +157,18 @@ int main( int argc, char **argv) {
 
 		consoleDemoInit();
 		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
+			if(REG_SCFG_MC == 0x11) { 
+				printf("Please insert a cartridge...\n");
+				do { swiWaitForVBlank(); } 
+				while (REG_SCFG_MC == 0x11);
+			}
+			fifoSendValue32(FIFO_USER_07, 1);
+		}
+
+		fifoSendValue32(FIFO_USER_06, 1);
+		fifoWaitValue32(FIFO_USER_08);
+		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
 		
 		if (0 != argc ) {
 			printf("arguments passed\n");

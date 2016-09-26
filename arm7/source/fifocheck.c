@@ -1,6 +1,6 @@
 #include <nds.h>
 
-void ntrcheck (void)
+void fifocheck (void)
 {
 		if(fifoCheckValue32(FIFO_USER_03)) { 
 			if(REG_SCFG_ROM == 0x501) {

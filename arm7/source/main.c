@@ -31,7 +31,7 @@ redistribute it freely, subject to the following restrictions:
 
 #include <maxmod7.h>
 
-#include "ntrcheck.h"
+#include "fifocheck.h"
 #include "sdmmcEngine.h"
 
 //---------------------------------------------------------------------------------
@@ -58,17 +58,16 @@ static void myFIFOValue32Handler(u32 value,void* data)
 }
 
 //---------------------------------------------------------------------------------
-int main() {
+int main(void) {
 //---------------------------------------------------------------------------------
 	irqInit();
+	fifoInit();
 
 	// read User Settings from firmware
 	readUserSettings();
 
 	// Start the RTC tracking IRQ
 	initClockIRQ();
-
-	fifoInit();
 
 	mmInstall(FIFO_MAXMOD);
 
@@ -84,16 +83,13 @@ int main() {
   
 	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
 
-	//Card Reset. Enable if needed.
-	//ResetSlot();
-	
+	fifoWaitValue32(FIFO_USER_06);
+	if(fifoCheckValue32(FIFO_USER_07)) { dsi_resetSlot1(); }
+	fifoSendValue32(FIFO_USER_08, 1);
+
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 
 	// Keep the ARM7 mostly idle
-	while (1) {
-	swiWaitForVBlank();
-	// Function checks FIFO value to see if arm9 wants NTR mode set. Refer to ntrcheck.c for how it currently works
-	ntrcheck();
-	}
+	while (1) { swiWaitForVBlank(); fifocheck(); }
 }
 

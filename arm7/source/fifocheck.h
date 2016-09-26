@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void ntrcheck (void);
+void fifocheck (void);
 
 #ifdef __cplusplus
 }
