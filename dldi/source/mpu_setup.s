@@ -47,19 +47,19 @@
 @---------------------------------------------------------------------------------
 __custom_mpu_setup:
 
-	ldr	r1, =0x00002078			@ disable TCM and protection unit
-	mcr	p15, 0, r1, c1, c0
+	@ldr	r1, =0x00002078			@ disable TCM and protection unit
+	@mcr	p15, 0, r1, c1, c0
 
 @---------------------------------------------------------------------------------
 @ Protection Unit Setup added by Sasq
 @---------------------------------------------------------------------------------
 	@ Flush cache
-	mov	r0, #0
-	mcr	p15, 0, r0, c7, c5, 0		@ Instruction cache
-	mcr	p15, 0, r0, c7, c6, 0		@ Data cache
+	@mov	r0, #0
+	@mcr	p15, 0, r0, c7, c5, 0		@ Instruction cache
+	@mcr	p15, 0, r0, c7, c6, 0		@ Data cache
 
 	@ Wait for write buffer to empty 
-	mcr	p15, 0, r0, c7, c10, 4
+	@mcr	p15, 0, r0, c7, c10, 4
 
 @---------------------------------------------------------------------------------
 @ Modify memory regions
@@ -70,14 +70,14 @@ dsi_mode: @access to New WRAM with region 3
 	
 	mcr	p15, 0, r1, c6, c3, 0
 
-setregions:
+@setregions:
 
 	@-------------------------------------------------------------------------
 	@ Enable ICache, DCache, ITCM & DTCM
 	@-------------------------------------------------------------------------
-	mrc	p15, 0, r0, c1, c0, 0
-	ldr	r1,= ITCM_ENABLE | DTCM_ENABLE | ICACHE_ENABLE | DCACHE_ENABLE | PROTECT_ENABLE
-	orr	r0,r0,r1
-	mcr	p15, 0, r0, c1, c0, 0
+	@mrc	p15, 0, r0, c1, c0, 0
+	@ldr	r1,= ITCM_ENABLE | DTCM_ENABLE | ICACHE_ENABLE | DCACHE_ENABLE | PROTECT_ENABLE
+	@orr	r0,r0,r1
+	@mcr	p15, 0, r0, c1, c0, 0
 
 	bx	lr
