@@ -68,6 +68,10 @@ __custom_mpu_setup:
 dsi_mode: @access to New WRAM with region 3
 	ldr	r1,=( PAGE_16M | 0x03000000 | 1)
 	
+	mrc	p15, 0, r9, c6, c3, 0
+	adr	r0,region3
+	str	r9,[r0]
+	
 	mcr	p15, 0, r1, c6, c3, 0
 
 @setregions:
@@ -80,4 +84,16 @@ dsi_mode: @access to New WRAM with region 3
 	@orr	r0,r0,r1
 	@mcr	p15, 0, r0, c1, c0, 0
 
+	bx	lr
+	
+region3:	.word	0
+
+	.global	__custom_mpu_restore
+	.type	__custom_mpu_restore STT_FUNC
+	
+@---------------------------------------------------------------------------------
+__custom_mpu_restore:
+	ldr	r1,=region3
+	mcr	p15, 0, r1, c6, c3, 0
+	
 	bx	lr

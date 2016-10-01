@@ -73,6 +73,7 @@ void goodOldCopy32(u32* src, u32* dst, int size) {
 }
 
 void __custom_mpu_setup();
+void __custom_mpu_restore();
 
 //---------------------------------------------------------------------------------
 bool sd_Startup() {
@@ -82,7 +83,7 @@ bool sd_Startup() {
 	
 	//REG_SCFG_EXT &= 0xC000;
   
-  __custom_mpu_setup();
+	__custom_mpu_setup();
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -97,6 +98,8 @@ bool sd_Startup() {
 	waitValue32();
 
 	result = getValue32();
+	
+	__custom_mpu_restore();
 	
 	return result == 0;
 }
