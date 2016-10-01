@@ -131,7 +131,8 @@ int main( int argc, char **argv) {
 
 	bool ntrMode = false;
 
-	REG_SCFG_CLK = 0x85;
+	// No! broke no$gba compatibility
+	//REG_SCFG_CLK = 0x85;
 
 	if (argc >= 2) {
 		if ( strcasecmp (argv[1], "NTR") == 0 ) {
