@@ -26,9 +26,9 @@ void sendValue32(vu32* commandAddr, u32 value32) {
 	commandAddr[1] = value32;
 }
 
-void getDatamsg(int size, u8* msg) {
+void getDatamsg(vu32* commandAddr, int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
-		msg[i]=*((u8*)0x027FEE2C+i);
+		msg[i]=*((u8*)commandAddr+8+i);
 	}	
 }
 
@@ -85,7 +85,7 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 	
 	struct mmcdevice deviceSD =*getMMCDevice(1);
 
-    getDatamsg(bytes, (u8*)&msg);
+    getDatamsg(commandAddr, bytes, (u8*)&msg);
 
     int oldIME = enterCriticalSection();
     switch (msg.type) {

@@ -40,6 +40,7 @@
 
 extern vu32 word_command;
 extern vu32 word_params;
+extern vu32 words_msg;
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
@@ -53,7 +54,7 @@ void sendMsg(int size, u8* msg) {
 	word_command = (u32)0x027FEE05;
 	word_params = size;
 	for(int i=0;i<size;i++)  {
-		*((u8*)0x027FEE2C+i) = msg[i];
+		*((u8*)&words_msg+i) = msg[i];
 	}	
 	IPC_SendSync(0xEE24);
 }

@@ -4,6 +4,7 @@
 	.global _start
 	.global word_command
 	.global word_params
+	.global words_msg
 	.align	4
 	.arm
 
@@ -59,6 +60,11 @@
 	word_command:
 	.word	0x00000000
 	word_params:
+	.word	0x00000000
+	words_msg:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
 	.word	0x00000000
 	
 @---------------------------------------------------------------------------------
