@@ -38,18 +38,20 @@
 #include <nds/ipc.h>
 #include "sdmmc.h"
 
+extern vu32 word_command;
+extern vu32 word_params;
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
-	*((vu32*)0x027FEE24) = (u32)0x027FEE04;
-	*((vu32*)0x027FEE28) = value32;
+	word_command = (u32)0x027FEE04;
+	word_params = value32;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
 	nocashMessage("sendMsg");
-	*((vu32*)0x027FEE24) = (u32)0x027FEE05;
-	*((vu32*)0x027FEE28) = size;
+	word_command = (u32)0x027FEE05;
+	word_params = size;
 	for(int i=0;i<size;i++)  {
 		*((u8*)0x027FEE2C+i) = msg[i];
 	}	
@@ -58,12 +60,12 @@ void sendMsg(int size, u8* msg) {
 
 void waitValue32() {
 	nocashMessage("waitValue32");
-	while(*((vu32*)0x027FEE24) != (u32)0x027FEE08);
+	while(word_command != (u32)0x027FEE08);
 }
 
 u32 getValue32() {
 	nocashMessage("getValue32");
-	return *((vu32*)0x027FEE28);
+	return word_params;
 }
 
 void goodOldCopy32(u32* src, u32* dst, int size) {
@@ -83,7 +85,7 @@ bool sd_Startup() {
 	
 	//REG_SCFG_EXT &= 0xC000;
   
-	__custom_mpu_setup();
+	//__custom_mpu_setup();
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -99,7 +101,7 @@ bool sd_Startup() {
 
 	result = getValue32();
 	
-	__custom_mpu_restore();
+	//__custom_mpu_restore();
 	
 	return result == 0;
 }

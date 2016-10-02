@@ -2,6 +2,8 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global word_command
+	.global word_params
 	.align	4
 	.arm
 
@@ -53,6 +55,11 @@
 	.word	writeSectors	@ 
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
+	
+	word_command:
+	.word	0x00000000
+	word_params:
+	.word	0x00000000
 	
 @---------------------------------------------------------------------------------
 _start:

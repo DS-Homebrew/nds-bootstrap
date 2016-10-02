@@ -30,20 +30,23 @@ redistribute it freely, subject to the following restrictions:
 #include <nds.h>
 
 #include <maxmod7.h>
+#include <nds/ndstypes.h>
 
 #include "fifocheck.h"
 #include "sdmmcEngine.h"
 
+static u32 * wordCommandAddr;
+
 //---------------------------------------------------------------------------------
 void SyncHandler(void) {
 //---------------------------------------------------------------------------------
-	runSdMmcEngineCheck();
+	runSdMmcEngineCheck(wordCommandAddr);
 }
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-	runSdMmcEngineCheck();
+	runSdMmcEngineCheck(wordCommandAddr);
 	inputGetAndSend();
 }
 
@@ -57,37 +60,35 @@ static void myFIFOValue32Handler(u32 value,void* data)
 
 }
 
-//---------------------------------------------------------------------------------
-void initMBK() {
-//---------------------------------------------------------------------------------
-	// DS browser setting
-	/*REG_MBK_1=0x8185838D;
-	REG_MBK_2=0x8185838D;
-	REG_MBK_3=0x9195999D;
-	REG_MBK_4=0x0105098D;
-	REG_MBK_5=0x9195999D;
-	REG_MBK_6=0x080037C0;
-	REG_MBK_7=0x07C03780;
-	REG_MBK_8=0x07803700;
-	REG_MBK_9=0xFCF8FF0F;*/
+static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+	const int* dataChunk = (const int*) data;
+	int searchChunk = ((const int*)search)[0];
+	u32 i;
+	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
 
-	// DS compat setting
-	/*REG_MBK_1=0x8185898D;
-	REG_MBK_2=0x81858991;
-	REG_MBK_3=0x91959991;
-	REG_MBK_4=0x81858991;
-	REG_MBK_5=0x91959991;
-	REG_MBK_6=0x09403900;
-	REG_MBK_7=0x09803940;
-	REG_MBK_8=0x09C03980;
-	REG_MBK_9=0xFCFFFF0F;*/
+	for ( i = 0; i < dataChunkEnd; i++) {
+		if (dataChunk[i] == searchChunk) {
+			if ((i*sizeof(int) + searchLen) > dataLen) {
+				return -1;
+			}
+			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+				return i*sizeof(int);
+			}
+		}
+	}
+
+	return -1;
 }
+
+static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
 	
-	initMBK();
+	// Find the DLDI reserved space in the file
+	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
+	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
 	
 	irqInit();
 	fifoInit();

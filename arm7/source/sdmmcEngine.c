@@ -20,10 +20,10 @@
 #include <nds/arm7/sdmmc.h>
 #include <nds/fifomessages.h>
 
-void sendValue32(u32 value32) {
+void sendValue32(vu32* commandAddr, u32 value32) {
 	nocashMessage("sendValue32");
-	*((vu32*)0x027FEE24) = (u32)0x027FEE08;
-	*((vu32*)0x027FEE28) = value32;
+	commandAddr[0] = (u32)0x027FEE08;
+	commandAddr[1] = value32;
 }
 
 void getDatamsg(int size, u8* msg) {
@@ -33,7 +33,7 @@ void getDatamsg(int size, u8* msg) {
 }
 
 //---------------------------------------------------------------------------------
-void sdmmcCustomValueHandler(u32 value) {
+void sdmmcCustomValueHandler(vu32* commandAddr, u32 value) {
 //---------------------------------------------------------------------------------
     int result = 0;
 
@@ -73,11 +73,11 @@ void sdmmcCustomValueHandler(u32 value) {
 	}
     leaveCriticalSection(oldIME);
 
-    sendValue32(result);
+    sendValue32(commandAddr, result);
 }
 
 //---------------------------------------------------------------------------------
-void sdmmcCustomMsgHandler(int bytes) {
+void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 //---------------------------------------------------------------------------------
     FifoMessage msg;
     int retval = 0;
@@ -106,19 +106,19 @@ void sdmmcCustomMsgHandler(int bytes) {
 
     leaveCriticalSection(oldIME);
 
-    sendValue32(retval);
+    sendValue32(commandAddr, retval);
 }
 
-void runSdMmcEngineCheck (void)
+void runSdMmcEngineCheck (vu32* commandAddr)
 {
 	//nocashMessage("runSdMmcEngineCheck");
-	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
+	if(*commandAddr == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
-		sdmmcCustomValueHandler(*((vu32*)0x027FEE28));
-	} else if(*((vu32*)0x027FEE24) == (u32)0x027FEE05)
+		sdmmcCustomValueHandler(commandAddr, commandAddr[1]);
+	} else if(*commandAddr == (u32)0x027FEE05)
 	{
 		nocashMessage("sdmmc msg received");
-		sdmmcCustomMsgHandler(*((vu32*)0x027FEE28));
+		sdmmcCustomMsgHandler(commandAddr, commandAddr[1]);
 	}
 }

@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 
-void runSdMmcEngineCheck (void);
+void runSdMmcEngineCheck (vu32* commandAddr);
 
 
 #ifdef __cplusplus
