@@ -72,11 +72,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 //patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x3900010   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig 
 	0xEA000000, // b      got_handler
-	0x0390000C  // DCD 	  0x0390000C       
+	0x03900010  // DCD 	  0x03900010       
 };
 
 static const int MAX_HANDLER_SIZE = 50;
@@ -162,15 +162,7 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	return addr;
 }
 
-
-static u32* hookInterruptHandlerTest (u32* addr, size_t size) {	
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return 0x3801138;
-}
-
-
-
-int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation) {
+int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	
 	nocashMessage("hookNds");
@@ -185,6 +177,8 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	}
 	
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
+	
+	sdEngineLocation[1] = wordCommandAddr;
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

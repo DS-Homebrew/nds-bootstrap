@@ -265,6 +265,28 @@ bool sdmmc_readsectors(u32 sector_no, u32 numsectors, void *out) {
 	return sdmmc_sdcard_readsectors(sector_no, numsectors, out) == 0;
 }
 
+static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+	const int* dataChunk = (const int*) data;
+	int searchChunk = ((const int*)search)[0];
+	u32 i;
+	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
+
+	for ( i = 0; i < dataChunkEnd; i++) {
+		if (dataChunk[i] == searchChunk) {
+			if ((i*sizeof(int) + searchLen) > dataLen) {
+				return -1;
+			}
+			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+				return i*sizeof(int);
+			}
+		}
+	}
+
+	return -1;
+}
+
+static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+
 int main (void) {
 	nocashMessage("bootloader");
 	if (dsiSD) {
@@ -317,7 +339,11 @@ int main (void) {
 		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	}
 	
-	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
+	// Find the DLDI reserved space in the file
+	u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+	u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+	
+	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();

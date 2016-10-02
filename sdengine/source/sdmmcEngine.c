@@ -20,15 +20,21 @@
 #include <nds/fifomessages.h>
 #include "sdmmc.h"
 
+static bool initialized = false;
+extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern u32* irqSig; // always NULL
+extern u32* irqSig; // always NULL
+extern u32* commandAddr;
+
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
-	*((vu32*)0x027FEE24) = (u32)0x027FEE08;
-	*((vu32*)0x027FEE28) = value32;
+	commandAddr[0] = (u32)0x027FEE08;
+	commandAddr[1] = value32;
 }
 
 void getDatamsg(int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
-		msg[i]=*((u8*)0x027FEE2C+i);
+		msg[i]=*((u8*)commandAddr+8+i);
 	}	
 }
 
@@ -91,23 +97,19 @@ void sdmmcCustomMsgHandler(int bytes) {
     sendValue32(retval);
 }
 
-static bool initialized = false;
-extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-extern u32* irqSig; // always NULL
-
 void runSdMmcEngineCheck (void) {
 	nocashMessage("runSdMmcEngineCheck");
 	int oldIME = enterCriticalSection();
 
 
-	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
+	if(*commandAddr == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
-		sdmmcCustomValueHandler(*((vu32*)0x027FEE28));
-	} else if(*((vu32*)0x027FEE24) == (u32)0x027FEE05)
+		sdmmcCustomValueHandler(commandAddr[1]);
+	} else if(*commandAddr == (u32)0x027FEE05)
 	{
 		nocashMessage("sdmmc msg received");
-		sdmmcCustomMsgHandler(*((vu32*)0x027FEE28));
+		sdmmcCustomMsgHandler(commandAddr[1]);
 	}
 
 	leaveCriticalSection(oldIME);

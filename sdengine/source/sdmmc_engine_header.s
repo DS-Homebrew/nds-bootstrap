@@ -11,19 +11,16 @@
 .global irqHandler
 .global irqSig
 .global sdmmc_engine_size
-.global word_command_addr
-.global word_params_addr
+.global commandAddr
 
 
 sdmmc_engine_size:
 	.word	sdmmc_engine_end - sdmmc_engine_start
+commandAddr:
+	.word	0x00000000
 irqHandler:
 	.word	0x00000000
 irqSig:
-	.word	0x00000000
-word_command_addr:
-	.word	0x00000000
-word_params_addr:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
