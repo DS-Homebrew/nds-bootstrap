@@ -47,19 +47,19 @@
 @---------------------------------------------------------------------------------
 __custom_mpu_setup:
 
-	@ldr	r1, =0x00002078			@ disable TCM and protection unit
-	@mcr	p15, 0, r1, c1, c0
+	ldr	r1, =0x00002078			@ disable TCM and protection unit
+	mcr	p15, 0, r1, c1, c0
 
 @---------------------------------------------------------------------------------
 @ Protection Unit Setup added by Sasq
 @---------------------------------------------------------------------------------
 	@ Flush cache
-	@mov	r0, #0
-	@mcr	p15, 0, r0, c7, c5, 0		@ Instruction cache
-	@mcr	p15, 0, r0, c7, c6, 0		@ Data cache
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c5, 0		@ Instruction cache
+	mcr	p15, 0, r0, c7, c6, 0		@ Data cache
 
 	@ Wait for write buffer to empty 
-	@mcr	p15, 0, r0, c7, c10, 4
+	mcr	p15, 0, r0, c7, c10, 4
 
 @---------------------------------------------------------------------------------
 @ Modify memory regions
@@ -86,21 +86,33 @@ dsi_mode: @access to New WRAM with region 3
 	@ Region 6 - non cacheable main ram
 	@-------------------------------------------------------------------------
 	mcr	p15, 0, r2, c6, c6, 0
+	
+	ldr	r3,=( PAGE_4M | 0x02000000 | 1)
+	
+	mrc	p15, 0, r9, c6, c7, 0
+	adr	r0,region7
+	str	r9,[r0]	
+	
+	@-------------------------------------------------------------------------
+	@ Region 7 - cacheable main ram
+	@-------------------------------------------------------------------------
+	mcr	p15, 0, r3, c6, c7, 0
 
 @setregions:
 
 	@-------------------------------------------------------------------------
 	@ Enable ICache, DCache, ITCM & DTCM
 	@-------------------------------------------------------------------------
-	@mrc	p15, 0, r0, c1, c0, 0
-	@ldr	r1,= ITCM_ENABLE | DTCM_ENABLE | ICACHE_ENABLE | DCACHE_ENABLE | PROTECT_ENABLE
-	@orr	r0,r0,r1
-	@mcr	p15, 0, r0, c1, c0, 0
+	mrc	p15, 0, r0, c1, c0, 0
+	ldr	r1,= ITCM_ENABLE | DTCM_ENABLE | ICACHE_ENABLE | DCACHE_ENABLE | PROTECT_ENABLE
+	orr	r0,r0,r1
+	mcr	p15, 0, r0, c1, c0, 0
 
 	bx	lr
 	
 region3:	.word	0
 region6:	.word	0
+region7:	.word	0
 
 	.global	__custom_mpu_restore
 	.type	__custom_mpu_restore STT_FUNC
@@ -113,6 +125,9 @@ __custom_mpu_restore:
 	ldr	r1,=region6
 	ldr	r2,[r1]
 	mcr	p15, 0, r2, c6, c6, 0
+	ldr	r1,=region7
+	ldr	r2,[r1]
+	mcr	p15, 0, r2, c6, c7, 0
 	
 	bx	lr
 	
