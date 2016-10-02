@@ -22,8 +22,8 @@
 
 void sendValue32(vu32* commandAddr, u32 value32) {
 	nocashMessage("sendValue32");
-	commandAddr[0] = (u32)0x027FEE08;
 	commandAddr[1] = value32;
+	commandAddr[0] = (u32)0x027FEE08;
 }
 
 void getDatamsg(vu32* commandAddr, int size, u8* msg) {

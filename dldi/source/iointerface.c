@@ -134,9 +134,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
-	vu32* mybuffer = tmp_buf_addr;
-
-	DC_FlushRange(buffer,numSectors * 512);	
+	vu32* mybuffer = tmp_buf_addr;	
 
 	msg.type = SDMMC_SD_READ_SECTORS;
 	msg.sdParams.startsector = sector;
@@ -148,6 +146,8 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	waitValue32();
 
 	int result = getValue32();
+	
+	DC_FlushRange(buffer,numSectors * 512);	
 	
 	goodOldCopy32(mybuffer, buffer, numSectors*512);
 	
