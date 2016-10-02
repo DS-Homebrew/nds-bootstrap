@@ -5,6 +5,7 @@
 	.global word_command
 	.global word_params
 	.global words_msg
+	.global tmp_buf_addr
 	.align	4
 	.arm
 
@@ -44,6 +45,7 @@
 	.word   __got_start		@ GOT start					-- Needs address fixing
 	.word   __got_end		@ GOT end
 	.word   __bss_start		@ bss start					-- Needs setting to zero
+	tmp_buf_addr:
 	.word   __bss_end		@ bss end
 
 @---------------------------------------------------------------------------------

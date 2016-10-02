@@ -42,6 +42,9 @@ extern vu32 word_command;
 extern vu32 word_params;
 extern vu32 words_msg;
 
+ // Use the dldi remaining space as temporary buffer : 28k usually available
+extern vu32* tmp_buf_addr;
+
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
 	word_command = (u32)0x027FEE04;
@@ -128,7 +131,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
-	vu32* mybuffer = (vu32*)0x027F0E24;
+	vu32* mybuffer = tmp_buf_addr;
 
 	DC_FlushRange(buffer,numSectors * 512);	
 
@@ -157,7 +160,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
-	vu32* mybuffer = (vu32*)0x027F0E24;
+	vu32* mybuffer = tmp_buf_addr;
 
 	DC_FlushRange(buffer,numSectors * 512);		
 	
