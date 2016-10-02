@@ -40,13 +40,13 @@ static u32 * wordCommandAddr;
 //---------------------------------------------------------------------------------
 void SyncHandler(void) {
 //---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(wordCommandAddr);
+	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
 }
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(wordCommandAddr);
+	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
 	inputGetAndSend();
 }
 

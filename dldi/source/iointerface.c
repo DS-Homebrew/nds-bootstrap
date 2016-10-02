@@ -47,32 +47,29 @@ extern vu32* tmp_buf_addr;
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
-	word_command = (u32)0x027FEE04;
-	word_params = value32;
+	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE04;
+	*((vu32*)myMemUncached(&word_params)) = value32;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
 	nocashMessage("sendMsg");
-	word_command = (u32)0x027FEE05;
-	word_params = size;
+	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE05;
+	*((vu32*)myMemUncached(&word_params)) = size;
 	for(int i=0;i<size;i++)  {
-		*((u8*)&words_msg+i) = msg[i];
+		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
 	}	
 	IPC_SendSync(0xEE24);
 }
 
 void waitValue32() {
 	nocashMessage("waitValue32");
-	DC_FlushRange(&word_command, 6);	
-	while(word_command != (u32)0x027FEE08) {
-		DC_FlushRange(&word_command, 6);	
-	}
+	while(*((vu32*)myMemUncached(&word_command)) != (u32)0x027FEE08);
 }
 
 u32 getValue32() {
 	nocashMessage("getValue32");
-	return word_params;
+	return *((vu32*)myMemUncached(&word_params));
 }
 
 void goodOldCopy32(u32* src, u32* dst, int size) {
@@ -92,7 +89,7 @@ bool sd_Startup() {
 	
 	//REG_SCFG_EXT &= 0xC000;
   
-	//__custom_mpu_setup();
+	__custom_mpu_setup();
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -108,7 +105,7 @@ bool sd_Startup() {
 
 	result = getValue32();
 	
-	//__custom_mpu_restore();
+	__custom_mpu_restore();
 	
 	return result == 0;
 }
@@ -134,6 +131,8 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
+	__custom_mpu_setup();
+	
 	vu32* mybuffer = tmp_buf_addr;	
 
 	msg.type = SDMMC_SD_READ_SECTORS;
@@ -151,9 +150,9 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	
 	goodOldCopy32(mybuffer, buffer, numSectors*512);
 	
-	return result == 0;
+	__custom_mpu_restore();
 	
-	return false;
+	return result == 0;
 }
 
 //---------------------------------------------------------------------------------
@@ -162,6 +161,8 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
+	
+	__custom_mpu_setup();
 	
 	vu32* mybuffer = tmp_buf_addr;
 
@@ -180,9 +181,9 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 
 	int result = getValue32();	
 	
-	return result == 0;
+	__custom_mpu_restore();
 	
-	return false;
+	return result == 0;
 }
 
 bool isArm7() {

@@ -178,7 +178,7 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
 	
-	sdEngineLocation[1] = wordCommandAddr;
+	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
