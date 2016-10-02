@@ -133,7 +133,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	
 	__custom_mpu_setup();
 	
-	vu32* mybuffer = tmp_buf_addr;	
+	vu32* mybuffer = myMemUncached(tmp_buf_addr);	
 
 	msg.type = SDMMC_SD_READ_SECTORS;
 	msg.sdParams.startsector = sector;
@@ -145,8 +145,6 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	waitValue32();
 
 	int result = getValue32();
-	
-	DC_FlushRange(buffer,numSectors * 512);	
 	
 	goodOldCopy32(mybuffer, buffer, numSectors*512);
 	
@@ -164,9 +162,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	
 	__custom_mpu_setup();
 	
-	vu32* mybuffer = tmp_buf_addr;
-
-	DC_FlushRange(buffer,numSectors * 512);		
+	vu32* mybuffer = myMemUncached(tmp_buf_addr);		
 	
 	goodOldCopy32(buffer, mybuffer, numSectors*512);
 
