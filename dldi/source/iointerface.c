@@ -64,7 +64,10 @@ void sendMsg(int size, u8* msg) {
 
 void waitValue32() {
 	nocashMessage("waitValue32");
-	while(word_command != (u32)0x027FEE08);
+	DC_FlushRange(&word_command, 6);	
+	while(word_command != (u32)0x027FEE08) {
+		DC_FlushRange(&word_command, 6);	
+	}
 }
 
 u32 getValue32() {
