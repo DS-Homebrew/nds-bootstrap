@@ -23,6 +23,7 @@
 */
 
 #define BYTES_PER_READ 512
+#define MAX_READ 55
 
 #ifndef NULL
  #define NULL 0
@@ -47,18 +48,18 @@ extern vu32* tmp_buf_addr;
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
-	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE04;
 	*((vu32*)myMemUncached(&word_params)) = value32;
+	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
 	nocashMessage("sendMsg");
-	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE05;
 	*((vu32*)myMemUncached(&word_params)) = size;
 	for(int i=0;i<size;i++)  {
 		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
 	}	
+	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
 
@@ -89,7 +90,7 @@ bool sd_Startup() {
 	
 	//REG_SCFG_EXT &= 0xC000;
   
-	__custom_mpu_setup();
+	//__custom_mpu_setup();
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -105,7 +106,7 @@ bool sd_Startup() {
 
 	result = getValue32();
 	
-	__custom_mpu_restore();
+	//__custom_mpu_restore();
 	
 	return result == 0;
 }
@@ -129,26 +130,34 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
 	nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
-	FifoMessage msg;
+	FifoMessage msg;	
+	int result = 0;
+	sec_t startsector, readsectors;
 	
-	__custom_mpu_setup();
+	//__custom_mpu_setup();
 	
-	vu32* mybuffer = myMemUncached(tmp_buf_addr);	
+	for(int numreads =0; numreads<numSectors; numreads+=MAX_READ) {
+		startsector = sector+numreads;
+		if(numSectors - numreads < MAX_READ) readsectors = numSectors - numreads ;
+		else readsectors = MAX_READ; 
+	
+		vu32* mybuffer = myMemUncached(tmp_buf_addr);	
 
-	msg.type = SDMMC_SD_READ_SECTORS;
-	msg.sdParams.startsector = sector;
-	msg.sdParams.numsectors = numSectors;
-	msg.sdParams.buffer = mybuffer;
-	
-	sendMsg(sizeof(msg), (u8*)&msg);
+		msg.type = SDMMC_SD_READ_SECTORS;
+		msg.sdParams.startsector = startsector;
+		msg.sdParams.numsectors = readsectors;
+		msg.sdParams.buffer = mybuffer;
+		
+		sendMsg(sizeof(msg), (u8*)&msg);
 
-	waitValue32();
+		waitValue32();
 
-	int result = getValue32();
+		result = getValue32();
+		
+		goodOldCopy32(mybuffer, buffer+numreads*512, readsectors*512);
+	}
 	
-	goodOldCopy32(mybuffer, buffer, numSectors*512);
-	
-	__custom_mpu_restore();
+	//__custom_mpu_restore();
 	
 	return result == 0;
 }
@@ -158,26 +167,34 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 //---------------------------------------------------------------------------------
 	nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
-	FifoMessage msg;
+	FifoMessage msg;	
+	int result = 0;	
+	sec_t startsector, readsectors;
 	
-	__custom_mpu_setup();
+	//__custom_mpu_setup();
 	
-	vu32* mybuffer = myMemUncached(tmp_buf_addr);		
+	for(int numreads =0; numreads<numSectors; numreads+=MAX_READ) {
+		startsector = sector+numreads;
+		if(numSectors - numreads < MAX_READ) readsectors = numSectors - numreads ;
+		else readsectors = MAX_READ; 
 	
-	goodOldCopy32(buffer, mybuffer, numSectors*512);
+		vu32* mybuffer = myMemUncached(tmp_buf_addr);		
+		
+		goodOldCopy32(buffer+numreads*512, mybuffer, readsectors*512);
 
-	msg.type = SDMMC_SD_WRITE_SECTORS;
-	msg.sdParams.startsector = sector;
-	msg.sdParams.numsectors = numSectors;
-	msg.sdParams.buffer = mybuffer;
-	
-	sendMsg(sizeof(msg), (u8*)&msg);
+		msg.type = SDMMC_SD_WRITE_SECTORS;
+		msg.sdParams.startsector = startsector;
+		msg.sdParams.numsectors = readsectors;
+		msg.sdParams.buffer = mybuffer;
+		
+		sendMsg(sizeof(msg), (u8*)&msg);
 
-	waitValue32();
+		waitValue32();
 
-	int result = getValue32();	
+		result = getValue32();	
+	}
 	
-	__custom_mpu_restore();
+	//__custom_mpu_restore();
 	
 	return result == 0;
 }

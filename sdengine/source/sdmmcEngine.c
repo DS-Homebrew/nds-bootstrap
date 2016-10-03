@@ -172,7 +172,7 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 
 void myIrqHandler(void) {
 	nocashMessage("myIrqHandler");	
-	REG_IE       |= IRQ_IPC_SYNC;
+	//REG_IE       |= IRQ_IPC_SYNC;
 
 	/*if(!initialized) {	
 		nocashMessage("!initialized");	
