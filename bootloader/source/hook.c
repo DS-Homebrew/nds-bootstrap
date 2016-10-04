@@ -76,7 +76,7 @@ static const u32 homebrewSigPatched[5] = {
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig 
 	0xEA000000, // b      got_handler
-	0x03900010  // DCD 	  0x03900010       
+	0x037C0010  // DCD 	  0x037C0010       
 };
 
 static const int MAX_HANDLER_SIZE = 50;

@@ -66,7 +66,7 @@ void sdmmc_controller_init();
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
-#define SD_ENGINE_LOCATION  	0x03900000
+#define SD_ENGINE_LOCATION  	0x037C0000
 
 const char* bootName = "BOOT.NDS";
 
