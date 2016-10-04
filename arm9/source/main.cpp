@@ -147,7 +147,7 @@ int main( int argc, char **argv) {
 	}
 	
 	if (fatInitDefault()) {
-		CIniFile bootstrapini( "fat:/_bootstrap/nds-bootstrap.ini" );
+		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 		
 		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
 			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
