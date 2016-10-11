@@ -103,6 +103,8 @@
 #define TMIO_MASK_READOP  (TMIO_STAT1_RXRDY | TMIO_STAT1_DATAEND)
 #define TMIO_MASK_WRITEOP (TMIO_STAT1_TXRQ | TMIO_STAT1_DATAEND)
 
+#define DEVICE_TYPE_DSI_SD ('i') | ('_' << 8) | ('S' << 16) | ('D' << 24)
+
 typedef struct mmcdevice {
     u8* data;
     u32 size;

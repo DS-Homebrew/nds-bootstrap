@@ -33,12 +33,12 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC
+CFLAGS	+=	$(INCLUDE) -DARM7
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-nostartfiles -nostdlib -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+LDFLAGS	=	-nostartfiles -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:= 
 

@@ -49,7 +49,7 @@ extern vu32* tmp_buf_addr;
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
 	*((vu32*)myMemUncached(&word_params)) = value32;
-	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE04;
+	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
@@ -59,13 +59,13 @@ void sendMsg(int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
 		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
 	}	
-	*((vu32*)myMemUncached(&word_command)) = (u32)0x027FEE05;
+	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
 
 void waitValue32() {
 	nocashMessage("waitValue32");
-	while(*((vu32*)myMemUncached(&word_command)) != (u32)0x027FEE08);
+	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
 }
 
 u32 getValue32() {

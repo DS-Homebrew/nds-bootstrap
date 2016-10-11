@@ -21,20 +21,19 @@
 #include "sdmmc.h"
 
 static bool initialized = false;
-extern IntFn* irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-extern u32* irqSig; // always NULL
-extern u32* irqSig; // always NULL
-extern u32* commandAddr;
+extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern vu32* volatile irqSig; // always NULL
+extern vu32* volatile commandAddr;
 
-void sendValue32(u32 value32) {
+void sendValue32(vu32 value32) {
 	nocashMessage("sendValue32");
 	commandAddr[0] = (u32)0x027FEE08;
 	commandAddr[1] = value32;
 }
 
-void getDatamsg(int size, u8* msg) {
+void getDatamsg(int size, vu8* msg) {
 	for(int i=0;i<size;i++)  {
-		msg[i]=*((u8*)commandAddr+8+i);
+		msg[i]=*((vu8*)commandAddr+8+i);
 	}	
 }
 
@@ -102,11 +101,11 @@ void runSdMmcEngineCheck (void) {
 	int oldIME = enterCriticalSection();
 
 
-	if(*commandAddr == (u32)0x027FEE04)
+	if(*commandAddr == (vu32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
 		sdmmcCustomValueHandler(commandAddr[1]);
-	} else if(*commandAddr == (u32)0x027FEE05)
+	} else if(*commandAddr == (vu32)0x027FEE05)
 	{
 		nocashMessage("sdmmc msg received");
 		sdmmcCustomMsgHandler(commandAddr[1]);

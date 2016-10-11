@@ -1,6 +1,6 @@
 #include <nds.h>
 #include "sdmmc.h"
-
+#include "disc_io.h"
 
 static struct mmcdevice deviceSD;
 
@@ -331,3 +331,87 @@ int __attribute__((noinline)) sdmmc_sdcard_writesectors(u32 sector_no, u32 numse
     sdmmc_send_command(&deviceSD,0x52C19,sector_no);
     return geterror(&deviceSD);
 }
+
+/*-----------------------------------------------------------------
+startUp
+Initialize the interface, geting it into an idle, ready state
+returns true if successful, otherwise returns false
+-----------------------------------------------------------------*/
+bool startup(void) {	
+	nocashMessage("startup internal");
+	return true;	
+}
+
+/*-----------------------------------------------------------------
+isInserted
+Is a card inserted?
+return true if a card is inserted and usable
+-----------------------------------------------------------------*/
+bool isInserted (void) {
+	nocashMessage("isInserted internal");
+	return true;
+}
+
+
+/*-----------------------------------------------------------------
+clearStatus
+Reset the card, clearing any status errors
+return true if the card is idle and ready
+-----------------------------------------------------------------*/
+bool clearStatus (void) {
+	nocashMessage("clearStatus internal");
+	return true;
+}
+
+
+/*-----------------------------------------------------------------
+readSectors
+Read "numSectors" 512-byte sized sectors from the card into "buffer", 
+starting at "sector". 
+The buffer may be unaligned, and the driver must deal with this correctly.
+return true if it was successful, false if it failed for any reason
+-----------------------------------------------------------------*/
+bool readSectors (u32 sector, u32 numSectors, void* buffer) {
+	nocashMessage("readSectors internal");
+	//dbg_printf("readSectors internal");
+	return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
+}
+
+
+
+/*-----------------------------------------------------------------
+writeSectors
+Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
+starting at "sector".
+The buffer may be unaligned, and the driver must deal with this correctly.
+return true if it was successful, false if it failed for any reason
+-----------------------------------------------------------------*/
+bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
+	nocashMessage("writeSectors internal");
+	//dbg_printf("writeSectors internal");
+	return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
+}
+
+
+/*-----------------------------------------------------------------
+shutdown
+shutdown the card, performing any needed cleanup operations
+Don't expect this function to be called before power off, 
+it is merely for disabling the card.
+return true if the card is no longer active
+-----------------------------------------------------------------*/
+bool shutdown(void) {
+	nocashMessage("shutdown internal");
+	return true;
+}
+
+const IO_INTERFACE __myio_dsisd = {
+	DEVICE_TYPE_DSI_SD,
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	(FN_MEDIUM_STARTUP)&startup,
+	(FN_MEDIUM_ISINSERTED)&isInserted,
+	(FN_MEDIUM_READSECTORS)&readSectors,
+	(FN_MEDIUM_WRITESECTORS)&writeSectors,
+	(FN_MEDIUM_CLEARSTATUS)&clearStatus,
+	(FN_MEDIUM_SHUTDOWN)&shutdown
+};
