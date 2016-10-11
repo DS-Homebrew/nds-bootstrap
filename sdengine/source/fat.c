@@ -614,7 +614,7 @@ u32 fileWrite (char* buffer, u32 cluster, u32 startOffset, u32 length)
 
 	// Load sector buffer for new position in file
 	CARD_ReadSector( curSect + FAT_ClustToSect(cluster), globalBuffer);
-	curSect++;
+
 
 	// Number of bytes needed to read to align with a sector
 	beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
@@ -622,13 +622,17 @@ u32 fileWrite (char* buffer, u32 cluster, u32 startOffset, u32 length)
 	// Read first part from buffer, to align with sector boundary
 	for (dataPos = 0 ; dataPos < beginBytes; dataPos++)
 	{
-		buffer[dataPos] = globalBuffer[curByte++];
+		globalBuffer[curByte++] = buffer[dataPos];
 	}
+	
+	CARD_WriteSector( curSect + FAT_ClustToSect(cluster), globalBuffer);
+	
+	curSect++;
 
 	// Read in all the 512 byte chunks of the file directly, saving time
 	for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
 	{
-		int sectorsToRead;
+		int sectorsToWrite;
 
 		// Move to the next cluster if necessary
 		if (curSect >= discSecPerClus)
@@ -638,15 +642,15 @@ u32 fileWrite (char* buffer, u32 cluster, u32 startOffset, u32 length)
 		}
 
 		// Calculate how many sectors to read (read a maximum of discSecPerClus at a time)
-		sectorsToRead = discSecPerClus - curSect;
-		if(chunks < sectorsToRead)
-			sectorsToRead = chunks;
+		sectorsToWrite = discSecPerClus - curSect;
+		if(chunks < sectorsToWrite)
+			sectorsToWrite = chunks;
 
 		// Read the sectors
-		CARD_ReadSectors(curSect + FAT_ClustToSect(cluster), sectorsToRead, buffer + dataPos);
-		chunks  -= sectorsToRead;
-		curSect += sectorsToRead;
-		dataPos += BYTES_PER_SECTOR * sectorsToRead;
+		CARD_WriteSectors(curSect + FAT_ClustToSect(cluster), sectorsToWrite, buffer + dataPos);
+		chunks  -= sectorsToWrite;
+		curSect += sectorsToWrite;
+		dataPos += BYTES_PER_SECTOR * sectorsToWrite;
 	}
 
 	// Take care of any bytes left over before end of read
@@ -665,9 +669,11 @@ u32 fileWrite (char* buffer, u32 cluster, u32 startOffset, u32 length)
 		// Read in last partial chunk
 		for (; dataPos < length; dataPos++)
 		{
-			buffer[dataPos] = globalBuffer[curByte];
+			globalBuffer[curByte] = buffer[dataPos];
 			curByte++;
 		}
+		
+		CARD_WriteSector( curSect + FAT_ClustToSect(cluster), globalBuffer);
 	}
 	
 	return dataPos;
