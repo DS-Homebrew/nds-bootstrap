@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-u32 dbg_printf( char * message, u32 messageLenght );
+u32 dbg_printf( char * message);
 void enableDebug(u32 debugFileCluster);	
 
 #ifdef __cplusplus

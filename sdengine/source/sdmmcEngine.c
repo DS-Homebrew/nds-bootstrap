@@ -19,6 +19,8 @@
 #include <nds.h> 
 #include <nds/fifomessages.h>
 #include "sdmmc.h"
+#include "debugToFile.h"
+#include "fat.h"
 
 static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
@@ -55,6 +57,8 @@ void sdmmcCustomValueHandler(u32 value) {
             sdmmc_controller_init();
             result = sdmmc_sdcard_init();
         }
+		u32 myDebugFile = getBootFileCluster ("_nds_boostrap_debug.log");
+		enableDebug(myDebugFile);
         break;
 
     case SDMMC_SD_IS_INSERTED:
@@ -81,12 +85,14 @@ void sdmmcCustomMsgHandler(int bytes) {
 
     case SDMMC_SD_READ_SECTORS:
 		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
+		dbg_printf("msg SDMMC_SD_READ_SECTORS received");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
 		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
+		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);

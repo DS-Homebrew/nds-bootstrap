@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <string.h>
 #include "fat.h"
 
 static bool _debug = false;
@@ -28,13 +29,15 @@ void enableDebug(u32 debugFileCluster) {
 	_debugFileCluster = debugFileCluster;
 }
 
-u32 dbg_printf( char * message, u32 messageLenght )
+u32 dbg_printf( char * message)
 {
 	if(!_debug) return 0;	
 	
-	u32 ret = fileWrite (message, _debugFileCluster, _currentPos, messageLenght);
+	nocashMessage(message);
 	
-	_currentPos+=messageLenght;
+	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message));
+	
+	_currentPos+=strlen(message);
 	
 	return ret;
 }

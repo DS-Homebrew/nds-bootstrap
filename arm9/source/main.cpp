@@ -34,14 +34,22 @@
 using namespace std;
 
 static bool debug = false;
+
 static inline int dbg_printf( const char* format, ... )
 {
 	if(!debug) return 0;
 	
+	static FILE * debugFile;
+	debugFile = fopen ("fat:/_nds_boostrap_debug.log","w");
+	
 	va_list args;
     va_start( args, format );
     int ret = vprintf( format, args );
+	ret = vfprintf(debugFile, format, args );
 	va_end(args);
+	
+	fclose (debugFile);
+	
     return ret;
 }
 
