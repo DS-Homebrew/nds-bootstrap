@@ -306,12 +306,14 @@ bool FAT_InitFiles (bool initCard)
 	
 	if (initCard && !CARD_StartUp())
 	{
+		nocashMessage("!CARD_StartUp()");
 		return (false);
 	}
 	
 	// Read first sector of card
 	if (!CARD_ReadSector (0, globalBuffer)) 
 	{
+		nocashMessage("!CARD_ReadSector (0, globalBuffer)");
 		return false;
 	}
 	// Check if there is a FAT string, which indicates this is a boot sector
@@ -400,6 +402,8 @@ bool FAT_InitFiles (bool initCard)
 			discFAT = discFAT + ( discSecPerFAT * (bootSec->extBlock.fat32.extFlags & 0x0F));
 		}
 	}
+	
+	nocashMessage("FAT_InitFiles OK");
 
 	return (true);
 }
@@ -427,6 +431,7 @@ u32 getBootFileCluster (const char* bootName)
 	// Check if fat has been initialised
 	if (discBytePerSec == 0)
 	{
+		nocashMessage("getBootFileCluster  fat not initialised");
 		return (CLUSTER_FREE);
 	}
 	
@@ -489,8 +494,11 @@ u32 getBootFileCluster (const char* bootName)
 	// If no file is found, return CLUSTER_FREE
 	if (notFound)
 	{
+		nocashMessage("getBootFileCluster  notFound");
 		return CLUSTER_FREE;
 	}
+	
+	nocashMessage("getBootFileCluster  found");
 
 	return (dir.startCluster | (dir.startClusterHigh << 16));
 }
@@ -500,6 +508,7 @@ fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileRead (char* buffer, u32 cluster, u32 startOffset, u32 length)
 {
+	nocashMessage("fileRead");
 	int curByte;
 	int curSect;
 	
@@ -589,6 +598,7 @@ fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileWrite (char* buffer, u32 cluster, u32 startOffset, u32 length)
 {
+	nocashMessage("fileWrite");
 	int curByte;
 	int curSect;
 	

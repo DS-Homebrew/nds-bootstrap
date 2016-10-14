@@ -40,7 +40,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/_nds_boostrap_debug.log","w");
+	debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 	
 	va_list args;
     va_start( args, format );

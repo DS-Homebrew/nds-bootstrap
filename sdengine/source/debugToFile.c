@@ -25,15 +25,14 @@ static u32 _currentPos = 0;
 
 void enableDebug(u32 debugFileCluster) {	
 	_debug = true;
-	FAT_InitFiles(true);
 	_debugFileCluster = debugFileCluster;
 }
 
 u32 dbg_printf( char * message)
 {
-	if(!_debug) return 0;	
-	
 	nocashMessage(message);
+	
+	if(!_debug) return 0;	
 	
 	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message));
 	

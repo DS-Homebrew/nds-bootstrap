@@ -57,7 +57,8 @@ void sdmmcCustomValueHandler(u32 value) {
             sdmmc_controller_init();
             result = sdmmc_sdcard_init();
         }
-		u32 myDebugFile = getBootFileCluster ("_nds_boostrap_debug.log");
+		FAT_InitFiles(false);
+		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
         break;
 
@@ -84,14 +85,12 @@ void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
-		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
 		dbg_printf("msg SDMMC_SD_READ_SECTORS received");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
-		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
 		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
@@ -103,17 +102,16 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 void runSdMmcEngineCheck (void) {
-	nocashMessage("runSdMmcEngineCheck");
+	dbg_printf("runSdMmcEngineCheck");
 	int oldIME = enterCriticalSection();
-
 
 	if(*commandAddr == (vu32)0x027FEE04)
 	{
-		nocashMessage("sdmmc value received");
+		dbg_printf("sdmmc value received");
 		sdmmcCustomValueHandler(commandAddr[1]);
 	} else if(*commandAddr == (vu32)0x027FEE05)
 	{
-		nocashMessage("sdmmc msg received");
+		dbg_printf("sdmmc msg received");
 		sdmmcCustomMsgHandler(commandAddr[1]);
 	}
 
@@ -140,7 +138,7 @@ static const u32 homebrewSigPatched[5] = {
 };
 
 static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	nocashMessage("restoreInterruptHandlerHomebrew");	
+	dbg_printf("restoreInterruptHandlerHomebrew");	
 	u32* end = addr + size/sizeof(u32);
 	
 	// Find the start of the handler
@@ -157,7 +155,7 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	}
 	
 	if (addr >= end) {
-		nocashMessage("addr >= end");	
+		dbg_printf("addr >= end");	
 		return 0;
 	}
 	
@@ -169,14 +167,14 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	addr[3] = homebrewSig[3];
 	addr[4] = homebrewSig[4];
 	
-	nocashMessage("restoreSuccessfull");	
+	dbg_printf("restoreSuccessfull");	
 	
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
 
 void myIrqHandler(void) {
-	nocashMessage("myIrqHandler");	
+	dbg_printf("myIrqHandler");	
 	//REG_IE       |= IRQ_IPC_SYNC;
 
 	/*if(!initialized) {	
