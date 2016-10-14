@@ -200,7 +200,7 @@ void myIrqHandler(void) {
 		// restoreInterruptHandlerHomebrew(irqSig-8,24);
 		initialized = true;
 	}*/	
-	//runSdMmcEngineCheck();
+	runSdMmcEngineCheck();
 }
 
 
