@@ -40,7 +40,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
+	debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -195,6 +195,12 @@ int main( int argc, char **argv) {
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;
+			
+			static FILE * debugFile;
+			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
+			fprintf(debugFile, "DEBUG MODE\n");			
+			fclose (debugFile);
+			
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();

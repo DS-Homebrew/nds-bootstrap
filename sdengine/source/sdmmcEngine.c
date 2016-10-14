@@ -85,13 +85,13 @@ void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
-		dbg_printf("msg SDMMC_SD_READ_SECTORS received");
+		dbg_printf("msg SDMMC_SD_READ_SECTORS received\n");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
-		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received");
+		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received\n");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
         retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
@@ -102,16 +102,16 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 void runSdMmcEngineCheck (void) {
-	dbg_printf("runSdMmcEngineCheck");
+	dbg_printf("runSdMmcEngineCheck\n");
 	int oldIME = enterCriticalSection();
 
 	if(*commandAddr == (vu32)0x027FEE04)
 	{
-		dbg_printf("sdmmc value received");
+		dbg_printf("sdmmc value received\n");
 		sdmmcCustomValueHandler(commandAddr[1]);
 	} else if(*commandAddr == (vu32)0x027FEE05)
 	{
-		dbg_printf("sdmmc msg received");
+		dbg_printf("sdmmc msg received\n");
 		sdmmcCustomMsgHandler(commandAddr[1]);
 	}
 
@@ -138,7 +138,7 @@ static const u32 homebrewSigPatched[5] = {
 };
 
 static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	dbg_printf("restoreInterruptHandlerHomebrew");	
+	dbg_printf("restoreInterruptHandlerHomebrew\n");	
 	u32* end = addr + size/sizeof(u32);
 	
 	// Find the start of the handler
@@ -167,14 +167,14 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	addr[3] = homebrewSig[3];
 	addr[4] = homebrewSig[4];
 	
-	dbg_printf("restoreSuccessfull");	
+	dbg_printf("restoreSuccessfull\n");	
 	
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
 
 void myIrqHandler(void) {
-	dbg_printf("myIrqHandler");	
+	dbg_printf("myIrqHandler\n");	
 	//REG_IE       |= IRQ_IPC_SYNC;
 
 	/*if(!initialized) {	
