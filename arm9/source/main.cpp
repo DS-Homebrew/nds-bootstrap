@@ -201,6 +201,15 @@ int main( int argc, char **argv) {
 			fprintf(debugFile, "DEBUG MODE\n");			
 			fclose (debugFile);
 			
+			// create a big file (minimal sdengine libfat cannot append to a file)
+			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+			for (int i=0; i<50000; i++) {
+				fprintf(debugFile, "                                                                                                                                          \n");			
+			}
+			
+			fprintf(debugFile, "ARM9 BOOTSTRAP DEBUG\n");	
+			fclose (debugFile);	
+			
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();

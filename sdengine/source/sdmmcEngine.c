@@ -102,7 +102,7 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 void runSdMmcEngineCheck (void) {
-	dbg_printf("runSdMmcEngineCheck\n");
+	//dbg_printf("runSdMmcEngineCheck\n");
 	int oldIME = enterCriticalSection();
 
 	if(*commandAddr == (vu32)0x027FEE04)
@@ -200,7 +200,7 @@ void myIrqHandler(void) {
 		// restoreInterruptHandlerHomebrew(irqSig-8,24);
 		initialized = true;
 	}*/	
-	runSdMmcEngineCheck();
+	//runSdMmcEngineCheck();
 }
 
 
