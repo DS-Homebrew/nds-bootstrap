@@ -23,7 +23,6 @@
 */
 
 #define BYTES_PER_READ 512
-#define MAX_READ 53
 
 #ifndef NULL
  #define NULL 0
@@ -37,6 +36,7 @@
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
 #include <nds/ipc.h>
+#include <nds/arm9/dldi.h>
 #include "sdmmc.h"
 
 extern vu32 word_command;
@@ -136,10 +136,12 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	for(int numreads =0; numreads<numSectors; numreads+=MAX_READ) {
+	int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	
+	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;
-		if(numSectors - numreads < MAX_READ) readsectors = numSectors - numreads ;
-		else readsectors = MAX_READ; 
+		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+		else readsectors = max_reads; 
 	
 		vu32* mybuffer = myMemUncached(tmp_buf_addr);	
 
@@ -173,10 +175,12 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	for(int numreads =0; numreads<numSectors; numreads+=MAX_READ) {
+	int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	
+	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;
-		if(numSectors - numreads < MAX_READ) readsectors = numSectors - numreads ;
-		else readsectors = MAX_READ; 
+		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+		else readsectors = max_reads; 
 	
 		vu32* mybuffer = myMemUncached(tmp_buf_addr);		
 		

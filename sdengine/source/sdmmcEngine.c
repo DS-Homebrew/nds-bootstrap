@@ -57,9 +57,9 @@ void sdmmcCustomValueHandler(u32 value) {
             sdmmc_controller_init();
             result = sdmmc_sdcard_init();
         }
-		FAT_InitFiles(false);
-		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
-		enableDebug(myDebugFile);
+		//FAT_InitFiles(false);
+		//u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
+		//enableDebug(myDebugFile);
         break;
 
     case SDMMC_SD_IS_INSERTED:
@@ -174,7 +174,7 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 }
 
 void myIrqHandler(void) {
-	dbg_printf("myIrqHandler\n");	
+	//dbg_printf("myIrqHandler\n");	
 	//REG_IE       |= IRQ_IPC_SYNC;
 
 	/*if(!initialized) {	
