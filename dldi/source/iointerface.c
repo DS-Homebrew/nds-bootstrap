@@ -23,7 +23,7 @@
 */
 
 #define BYTES_PER_READ 512
-#define MAX_READ 23
+#define MAX_READ 53
 
 #ifndef NULL
  #define NULL 0

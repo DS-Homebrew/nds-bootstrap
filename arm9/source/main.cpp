@@ -191,11 +191,20 @@ int main( int argc, char **argv) {
 		if(ntrMode) {
 			printf("NTR mode enabled\n");
 		}
-	
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;
+			debug=true;			
 			
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			
+			getSFCG_ARM9();
+			getSFCG_ARM7();
+		} else {
+		
+		}
+	
+		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -207,14 +216,9 @@ int main( int argc, char **argv) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
 			
-			fprintf(debugFile, "ARM9 BOOTSTRAP DEBUG\n");	
-			fclose (debugFile);	
-			
-			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-			
-			getSFCG_ARM9();
-			getSFCG_ARM7();
-		}	
+		} else {
+			remove ("fat:/NDSBTSRP.LOG");
+		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 
