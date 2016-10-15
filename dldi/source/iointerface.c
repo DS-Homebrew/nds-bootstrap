@@ -22,6 +22,7 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#define MAX_READ 53
 #define BYTES_PER_READ 512
 
 #ifndef NULL
@@ -136,7 +137,8 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	//int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	int max_reads = MAX_READ;
 	
 	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;
@@ -175,7 +177,8 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	//int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
+	int max_reads = MAX_READ;
 	
 	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;

@@ -29,11 +29,7 @@ sdmmc_engine_start:
 	ldr	r1, =irqHandler			@ user IRQ handler address
 	cmp	r1, #0
 	bne	call_handler
-	mov	r1, r0
-	ldr	r4, =irqSig
-	ldr	r3, [r4]
-	add	r3, r3, #40  	@ IntrRet
-	bx	r3
+	bx  lr
 
 call_handler:
 	push    {lr}
@@ -73,10 +69,7 @@ got_handler:
 exit:	
 	pop   	{r0-r12} 
 	pop  	{lr}
-	ldr	r4, =irqSig
-	ldr	r3, [r4]
-	add	r3, r3, #40  	@ IntrRet
-	bx	r3
+	bx  lr
 
 .pool
 
