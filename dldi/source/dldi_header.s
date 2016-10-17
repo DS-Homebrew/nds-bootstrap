@@ -6,6 +6,7 @@
 	.global word_params
 	.global words_msg
 	.global tmp_buf_addr
+	.global allocated_space
 	.align	4
 	.arm
 
@@ -28,6 +29,7 @@
 	.byte	0x01			@ Version number
 	.byte	0x0d		@ 8KiB	@ Log [base-2] of the size of this driver in bytes.
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE | FIX_ALL	@ Sections to fix
+	allocated_space:
 	.byte 	0x00			@ Space allocated in the application, not important here.
 	
 @---------------------------------------------------------------------------------

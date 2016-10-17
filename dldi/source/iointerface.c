@@ -46,6 +46,7 @@ extern vu32 words_msg;
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
 extern vu32* tmp_buf_addr;
+extern vu8 allocated_space;
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
@@ -137,8 +138,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	//int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
-	int max_reads = MAX_READ;
+	int max_reads = ((1 << allocated_space) / 512) - 11;
 	
 	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;
@@ -177,8 +177,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	
 	//__custom_mpu_setup();
 	
-	//int max_reads = ((2 ^ io_dldi_data->allocatedSize) / 512) - 11;
-	int max_reads = MAX_READ;
+	int max_reads = ((1 << allocated_space) / 512) - 11;
 	
 	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
 		startsector = sector+numreads;
