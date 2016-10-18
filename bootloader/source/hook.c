@@ -79,6 +79,25 @@ static const u32 homebrewSigPatched[5] = {
 	0x037C0010  // DCD 	  0x037C0010       
 };
 
+// accelerator patch for IPC_SYNC
+static const u32 homebrewAccelSig[4] = {
+	0xD5060743, // LSLS    R3, R0, #0x1D
+				// BPL     loc_37FA6DE
+	0x881A4B07, // LDR     R3, =0x4000004
+				// LDRH    R2, [R3]
+	0x430A2120, // ...
+	0x0C120412, // ...
+};	
+
+static const u32 homebrewAccelSigPatched[4] = {
+	0x4318231D, // MOVS    R3, #0x1D
+				// ORRS    R0, R3
+	0x881A4B07, // LDR     R3, =0x4000004
+				// LDRH    R2, [R3]
+	0x430A2120, // ...
+	0x0C120412, // ...
+};	
+
 static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandler (u32* addr, size_t size) {
@@ -162,8 +181,38 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	return addr;
 }
 
+static u32* hookAccelIPCHomebrew (u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+	
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig[0]) && 
+			(addr[1] == homebrewAccelSig[1]) && 
+			(addr[2] == homebrewAccelSig[2]) && 
+			(addr[3] == homebrewAccelSig[3])) 
+		{
+			break;
+		}
+		addr++;
+	}
+	
+	if (addr >= end) {
+		return NULL;
+	}
+	
+	// patch the program
+	addr[0] = homebrewAccelSigPatched[0];
+	addr[1] = homebrewAccelSigPatched[1];
+	addr[2] = homebrewAccelSigPatched[2];
+	addr[3] = homebrewAccelSigPatched[3];
+	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}
+
 int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
+	u32* hookAccel = NULL;
 	
 	nocashMessage("hookNds");
 
@@ -174,6 +223,14 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	if (!hookLocation) {
 		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
+	}
+	
+	hookAccel = hookAccelIPCHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_OK");
 	}
 	
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
