@@ -78,10 +78,10 @@ static const u32 homebrewSigPatched[5] = {
 	0xEA000000, // b      got_handler
 	0x037C0010  // DCD 	  0x037C0010       
 };
-
+ 
 // accelerator patch for IPC_SYNC
 static const u32 homebrewAccelSig[4] = {
-	0x2201B510   , // .
+	0x2401B510   , // .
 	               // MOVS    R4, #1
 	0xD0064220   , // .
 				// .
@@ -89,16 +89,23 @@ static const u32 homebrewAccelSig[4] = {
 	0x430A2108   , // ...
 };	
 
-
-
-static const u32 homebrewAccelSigPatched[4] = {
+/*static const u32 homebrewAccelSigPatched[4] = {
 	0x2201B510   , // .
 	               // MOVS    R4, #1
 	0x43180423   , // LSLS    R3, R4, #0x10 // IRQ IPC SYNC
 				   // ORRS    R0, R3        // ENABLE THE BIT
 	0x881A4B10   , // ...
 	0x430A2108   , // ...
-};	
+};	*/
+
+static const u32 homebrewAccelSigPatched[4] = {
+	0x47104A00   , // LDR     R2, =0x037C0014
+	               // BX      R2
+	0x037C0020   , // 
+				   // 
+	0x881A4B10   , // ...
+	0x430A2108   , // ...
+};
 
 static const int MAX_HANDLER_SIZE = 50;
 

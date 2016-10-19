@@ -26,9 +26,19 @@ irqSig:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 sdmmc_engine_start:
+sdmmc_engine_irqHandler:
 	ldr	r1, =irqHandler			@ user IRQ handler address
 	cmp	r1, #0
 	bne	call_handler
+	bx  lr
+
+sdmmc_engine_irqEnable:
+    push    {lr}
+	push	{r1-r12}
+	ldr	r3, =myIrqEnable
+	bl	_blx_r3_stub		@ jump to myIrqEnable	
+	pop   	{r1-r12} 
+	pop  	{lr}
 	bx  lr
 
 call_handler:
@@ -41,7 +51,7 @@ call_handler:
 code_handler_start:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandler
-	bl	_blx_r3_stub		@ jump to user code
+	bl	_blx_r3_stub		@ jump to myIrqHandler
   
   @ exit after return
 	b	exit

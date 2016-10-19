@@ -173,34 +173,62 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	return addr;
 }
 
-void myIrqHandler(void) {
-	//dbg_printf("myIrqHandler\n");	
-	//REG_IE       |= IRQ_IPC_SYNC;
+//---------------------------------------------------------------------------------
+void SyncHandler(void) {
+//---------------------------------------------------------------------------------
+	nocashMessage("SyncHandler");
+	runSdMmcEngineCheck();
+}
 
-	/*if(!initialized) {	
+//---------------------------------------------------------------------------------
+void checkIRQ_IPC_SYNC() {
+//---------------------------------------------------------------------------------
+	if(!initialized) {	
 		nocashMessage("!initialized");	
-		u32* current=irqHandler+4;
+		u32* current=irqHandler+1;
 		
-		while(*current!=IRQ_IPC_SYNC && *current) {
-			current+=8;
+		while(*current!=IRQ_IPC_SYNC && *current!=0) {
+			current+=2;
 		}
+		if(current==IRQ_IPC_SYNC) {
+			nocashMessage("IRQ_IPC_SYNC slot found");	
+		} else {
+			nocashMessage("empty irqtable slot found");	
+		}		
 		
-		nocashMessage("empty irqtable slot found");	
-		
-		*((IntFn*)current-4)	= runSdMmcEngineCheck;
+		*((IntFn*)current-1)	= SyncHandler;
 		*current				= IRQ_IPC_SYNC;
 	
 		nocashMessage("IRQ_IPC_SYNC setted");
-		
-		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;	
-		REG_IE       |= IRQ_IPC_SYNC;
-		
-		nocashMessage("IRQ_IPC_SYNC enabled");	
-		// restore the irq Handler for better compatibility
-		// restoreInterruptHandlerHomebrew(irqSig-8,24);
+	
 		initialized = true;
-	}*/	
+	}	
+}
+
+
+void myIrqHandler(void) {
+	//dbg_printf("myIrqHandler\n");	
+	
+	checkIRQ_IPC_SYNC();
 	runSdMmcEngineCheck();
+}
+
+void myIrqEnable(u32 irq) {	
+	dbg_printf("myIrqEnable\n");
+	int oldIME = enterCriticalSection();	
+	if (irq & IRQ_VBLANK)
+		REG_DISPSTAT |= DISP_VBLANK_IRQ ;
+	if (irq & IRQ_HBLANK)
+		REG_DISPSTAT |= DISP_HBLANK_IRQ ;
+	if (irq & IRQ_VCOUNT)
+		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
+		
+	irq |= IRQ_IPC_SYNC;
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+	nocashMessage("IRQ_IPC_SYNC enabled");
+
+	REG_IE |= irq;
+	leaveCriticalSection(oldIME);
 }
 
 

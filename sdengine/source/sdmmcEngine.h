@@ -25,6 +25,8 @@ extern "C" {
 
 void myIrqHandler(void);
 
+void myIrqEnable(u32 irq);
+
 void runSdMmcEngineCheck (void);
 
 
