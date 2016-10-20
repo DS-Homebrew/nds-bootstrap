@@ -79,8 +79,8 @@ static const u32 homebrewSigPatched[5] = {
 	0x037C0010  // DCD 	  0x037C0010       
 };
  
-// accelerator patch for IPC_SYNC
-static const u32 homebrewAccelSig[4] = {
+// accelerator patch for IPC_SYNC v2007
+static const u32 homebrewAccelSig2007[4] = {
 	0x2401B510   , // .
 	               // MOVS    R4, #1
 	0xD0064220   , // .
@@ -89,22 +89,32 @@ static const u32 homebrewAccelSig[4] = {
 	0x430A2108   , // ...
 };	
 
-/*static const u32 homebrewAccelSigPatched[4] = {
-	0x2201B510   , // .
-	               // MOVS    R4, #1
-	0x43180423   , // LSLS    R3, R4, #0x10 // IRQ IPC SYNC
-				   // ORRS    R0, R3        // ENABLE THE BIT
-	0x881A4B10   , // ...
-	0x430A2108   , // ...
-};	*/
-
-static const u32 homebrewAccelSigPatched[4] = {
+static const u32 homebrewAccelSig2007Patched[4] = {
 	0x47104A00   , // LDR     R2, =0x037C0014
 	               // BX      R2
 	0x037C0020   , // 
 				   // 
 	0x881A4B10   , // ...
 	0x430A2108   , // ...
+};
+
+// accelerator patch for IPC_SYNC v2010 (libnds 1.4.8)
+static const u32 homebrewAccelSig2010[4] = {
+	0x07C3B500   , // .
+	               // MOVS    R4, #1
+	0x4B13D506   , // .
+				// .
+	0x22088819   , // ...
+	0x0412430A   , // ...
+};	
+
+static const u32 homebrewAccelSig2010Patched[4] = {
+	0x47104A00   , // LDR     R2, =0x037C0014
+	               // BX      R2
+	0x037C0020   , // 
+				   // 
+	0x22088819   , // ...
+	0x0412430A   , // ...
 };
 
 static const int MAX_HANDLER_SIZE = 50;
@@ -190,15 +200,15 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	return addr;
 }
 
-static u32* hookAccelIPCHomebrew (u32* addr, size_t size) {
+static u32* hookAccelIPCHomebrew2007 (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 	
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewAccelSig[0]) && 
-			(addr[1] == homebrewAccelSig[1]) && 
-			(addr[2] == homebrewAccelSig[2]) && 
-			(addr[3] == homebrewAccelSig[3])) 
+		if ((addr[0] == homebrewAccelSig2007[0]) && 
+			(addr[1] == homebrewAccelSig2007[1]) && 
+			(addr[2] == homebrewAccelSig2007[2]) && 
+			(addr[3] == homebrewAccelSig2007[3])) 
 		{
 			break;
 		}
@@ -210,10 +220,40 @@ static u32* hookAccelIPCHomebrew (u32* addr, size_t size) {
 	}
 	
 	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
-	addr[2] = homebrewAccelSigPatched[2];
-	addr[3] = homebrewAccelSigPatched[3];
+	addr[0] = homebrewAccelSig2007Patched[0];
+	addr[1] = homebrewAccelSig2007Patched[1];
+	addr[2] = homebrewAccelSig2007Patched[2];
+	addr[3] = homebrewAccelSig2007Patched[3];
+	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}
+
+
+static u32* hookAccelIPCHomebrew2010 (u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+	
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig2010[0]) && 
+			(addr[1] == homebrewAccelSig2010[1]) && 
+			(addr[2] == homebrewAccelSig2010[2]) && 
+			(addr[3] == homebrewAccelSig2010[3])) 
+		{
+			break;
+		}
+		addr++;
+	}
+	
+	if (addr >= end) {
+		return NULL;
+	}
+	
+	// patch the program
+	addr[0] = homebrewAccelSig2010Patched[0];
+	addr[1] = homebrewAccelSig2010Patched[1];
+	addr[2] = homebrewAccelSig2010Patched[2];
+	addr[3] = homebrewAccelSig2010Patched[3];
 	
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
@@ -234,12 +274,20 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 		return ERR_HOOK;
 	}
 	
-	hookAccel = hookAccelIPCHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	
 	if (!hookAccel) {
-		nocashMessage("ACCEL_IPC_ERR");
+		nocashMessage("ACCEL_IPC_2007_ERR");
 	} else {
-		nocashMessage("ACCEL_IPC_OK");
+		nocashMessage("ACCEL_IPC_2007_OK");
+	}
+	
+	hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_2010_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_2010_OK");
 	}
 	
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	

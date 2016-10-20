@@ -193,13 +193,11 @@ void checkIRQ_IPC_SYNC() {
 		if(current==IRQ_IPC_SYNC) {
 			nocashMessage("IRQ_IPC_SYNC slot found");	
 		} else {
-			nocashMessage("empty irqtable slot found");	
-		}		
+			*((IntFn*)current-1)	= SyncHandler;
+			*current				= IRQ_IPC_SYNC;
 		
-		*((IntFn*)current-1)	= SyncHandler;
-		*current				= IRQ_IPC_SYNC;
-	
-		nocashMessage("IRQ_IPC_SYNC setted");
+			nocashMessage("IRQ_IPC_SYNC setted");
+		}				
 	
 		initialized = true;
 	}	

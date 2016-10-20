@@ -83,3 +83,5 @@ $RECYCLE.BIN/
 *.nds
 *.cia
 *.d
+release/nds-bootstrap.zip
+release/_nds/nds-bootstrap.ini
