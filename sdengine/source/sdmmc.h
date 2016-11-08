@@ -3,8 +3,9 @@
 
 #include <nds/ndstypes.h>
 
-#define SDMMC_BASE	0x04004800
+#define DATA32_SUPPORT
 
+#define SDMMC_BASE	0x04004800
 
 #define REG_SDCMD       0x00
 #define REG_SDPORTSEL   0x02
