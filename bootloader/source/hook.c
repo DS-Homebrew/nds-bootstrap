@@ -255,6 +255,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 		return ERR_HOOK;
 	}
 	
+	u32* vblankHandler = hookLocation;
 	u32* vcountHandler = hookLocation+4;
 	u32* syncHandler = hookLocation+32;
 	
@@ -276,12 +277,12 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	
 	copyLoop (cardEngineLocation, (u32*)cardengine_bin, cardengine_bin_size);	
 	
-	cardEngineLocation[1] = *vcountHandler;
-	cardEngineLocation[2] = *syncHandler;
+	cardEngineLocation[1] = *vblankHandler;
+	cardEngineLocation[2] = hookLocation;
 	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
 	cardEngineLocation[4] = fileCluster;
 	
-	*vcountHandler = cardEngineLocation+0x1C;
+	*vblankHandler = 0x37C001C;
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

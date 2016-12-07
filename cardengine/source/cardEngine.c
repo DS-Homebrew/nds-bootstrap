@@ -182,7 +182,7 @@ void SyncHandler(void) {
 
 
 void myIrqHandler(void) {
-	//dbg_printf("myIrqHandler\n");	
+	nocashMessage("myIrqHandler");
 	
 	runCardEngineCheck();
 }
