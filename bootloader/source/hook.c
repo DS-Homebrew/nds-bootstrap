@@ -281,7 +281,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
 	cardEngineLocation[4] = fileCluster;
 	
-	*vcountHandler = cardEngineLocation+7;
+	*vcountHandler = cardEngineLocation+0x1C;
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

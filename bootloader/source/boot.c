@@ -346,7 +346,7 @@ int main (void) {
 	hookNds(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	// Pass command line arguments to loaded program
-	passArgs_ARM7();
+	//passArgs_ARM7();
 	
 	nocashMessage("Start the NDS file");
 	startBinary_ARM7();
