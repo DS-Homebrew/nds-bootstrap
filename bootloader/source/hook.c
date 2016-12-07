@@ -18,7 +18,7 @@
 
 #include "hook.h"
 #include "common.h"
-#include "sdengine_bin.h"
+#include "cardengine_bin.h"
 
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
@@ -38,26 +38,6 @@ static const u32 handlerEndSig[4] = {
 	0xe7910100,		// ldr  r0, [r1, r0, lsl #2]
 	0xe59fe004,		// ldr  lr, [pc, #4]	(IRQ return address)
 	0xe12fff10		// bx   r0
-};
-
-// libnds v1.5.12 2016
-static const u32 homebrewStartSig_2016[1] = {
-	0x04000208, 	// DCD 0x4000208
-};
-
-static const u32 homebrewEndSig_2016[2] = {
-	0x04000004,		// DCD 0x4000004
-	0x04000180		// DCD 0x4000180
-};
-
-// libnds v_._._ 2007 irqset
-static const u32 homebrewStartSig_2007[1] = {
-	0x04000208, 	// DCD 0x4000208
-};
-
-static const u32 homebrewEndSig2007[2] = {
-	0x04000004,		// DCD 0x4000004
-	0x04000180		// DCD 0x4000180
 };
 
 // interruptDispatcher.s jump_intr:
@@ -118,56 +98,6 @@ static const u32 homebrewAccelSig2010Patched[4] = {
 };
 
 static const int MAX_HANDLER_SIZE = 50;
-
-static u32* hookInterruptHandler (u32* addr, size_t size) {
-	u32* end = addr + size/sizeof(u32);
-	int i;
-	
-	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == handlerStartSig[0]) && 
-			(addr[1] == handlerStartSig[1]) && 
-			(addr[2] == handlerStartSig[2]) && 
-			(addr[3] == handlerStartSig[3]) && 
-			(addr[4] == handlerStartSig[4])) 
-		{
-			break;
-		}
-		addr++;
-	}
-	
-	if (addr >= end) {
-		return NULL;
-	}
-	
-	// Find the end of the handler
-	for (i = 0; i < MAX_HANDLER_SIZE; i++) {
-		if ((addr[i+0] == handlerEndSig[0]) && 
-			(addr[i+1] == handlerEndSig[1]) && 
-			(addr[i+2] == handlerEndSig[2]) && 
-			(addr[i+3] == handlerEndSig[3])) 
-		{
-			break;
-		}
-	}
-	
-	if (i >= MAX_HANDLER_SIZE) {
-		return NULL;
-	}
-	
-	// Now find the IRQ vector table
-	// Make addr point to the vector table address pointer within the IRQ handler
-	addr = addr + i + sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
-	
-	// Use relative and absolute addresses to find the location of the table in RAM
-	u32 tableAddr = addr[0];
-	u32 returnAddr = addr[1];
-	u32* actualReturnAddr = addr + 2;
-	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-	
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return actualTableAddr;
-}
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
@@ -259,14 +189,65 @@ static u32* hookAccelIPCHomebrew2010 (u32* addr, size_t size) {
 	return addr;
 }
 
-int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
+static u32* hookInterruptHandler (u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+	int i;
+	
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == handlerStartSig[0]) && 
+			(addr[1] == handlerStartSig[1]) && 
+			(addr[2] == handlerStartSig[2]) && 
+			(addr[3] == handlerStartSig[3]) && 
+			(addr[4] == handlerStartSig[4])) 
+		{
+			break;
+		}
+		addr++;
+	}
+	
+	if (addr >= end) {
+		return NULL;
+	}
+	
+	// Find the end of the handler
+	for (i = 0; i < MAX_HANDLER_SIZE; i++) {
+		if ((addr[i+0] == handlerEndSig[0]) && 
+			(addr[i+1] == handlerEndSig[1]) && 
+			(addr[i+2] == handlerEndSig[2]) && 
+			(addr[i+3] == handlerEndSig[3])) 
+		{
+			break;
+		}
+	}
+	
+	if (i >= MAX_HANDLER_SIZE) {
+		return NULL;
+	}
+	
+	// Now find the IRQ vector table
+	// Make addr point to the vector table address pointer within the IRQ handler
+	addr = addr + i + sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
+	
+	// Use relative and absolute addresses to find the location of the table in RAM
+	u32 tableAddr = addr[0];
+	u32 returnAddr = addr[1];
+	u32* actualReturnAddr = addr + 2;
+	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
+	
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return actualTableAddr;
+	// 2     LCD V-Counter Match
+}
+
+int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	
 	nocashMessage("hookNds");
 
 	if (!hookLocation) {
-		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
 	
 	if (!hookLocation) {
@@ -274,7 +255,10 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 		return ERR_HOOK;
 	}
 	
-	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	u32* vcountHandler = hookLocation+4;
+	u32* syncHandler = hookLocation+32;
+	
+	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	
 	if (!hookAccel) {
 		nocashMessage("ACCEL_IPC_2007_ERR");
@@ -288,11 +272,16 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 		nocashMessage("ACCEL_IPC_2010_ERR");
 	} else {
 		nocashMessage("ACCEL_IPC_2010_OK");
-	}
+	}*/
 	
-	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
+	copyLoop (cardEngineLocation, (u32*)cardengine_bin, cardengine_bin_size);	
 	
-	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
+	cardEngineLocation[1] = *vcountHandler;
+	cardEngineLocation[2] = *syncHandler;
+	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
+	cardEngineLocation[4] = fileCluster;
+	
+	*vcountHandler = cardEngineLocation+7;
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

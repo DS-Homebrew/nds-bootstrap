@@ -16,11 +16,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds/memory.h>
-#include <nds/ndstypes.h>
+#include <string.h>
+#include "fat.h"
 
-/*-------------------------------------------------------------------------
-arm7_hookGame
-Adds a hook in the game's ARM7 binary to our own code
--------------------------------------------------------------------------*/
-int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr);
+static bool _debug = false;
+static u32 _debugFileCluster = 0;
+static u32 _currentPos = 0;
+
+void enableDebug(u32 debugFileCluster) {	
+	_debug = true;
+	_debugFileCluster = debugFileCluster;
+}
+
+u32 dbg_printf( char * message)
+{
+	nocashMessage(message);
+	
+	if(!_debug) return 0;	
+	
+	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message));
+	
+	_currentPos+=strlen(message);
+	
+	return ret;
+}
