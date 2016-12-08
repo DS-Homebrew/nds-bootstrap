@@ -50,6 +50,7 @@ Helpful information:
 #include "fat.h"
 #include "dldi_patcher.h"
 #include "card.h"
+#include "card_patcher.h"
 #include "boot.h"
 #include "hook.h"
 
@@ -338,6 +339,8 @@ int main (void) {
 	//	nocashMessage("wantToPatchDLDI");
 	//	dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	//}
+	
+	patchCardNds(NDS_HEAD);
 	
 	// Find the DLDI reserved space in the file
 	//u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
