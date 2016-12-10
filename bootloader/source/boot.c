@@ -51,6 +51,7 @@ Helpful information:
 #include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
+#include "cardengine_bin.h"
 #include "boot.h"
 #include "hook.h"
 
@@ -339,6 +340,8 @@ int main (void) {
 	//	nocashMessage("wantToPatchDLDI");
 	//	dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	//}
+	
+	copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
 	
 	patchCardNds(NDS_HEAD);
 	

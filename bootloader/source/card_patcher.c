@@ -91,7 +91,6 @@ u32 patchCardNds (const tNDSHeader* ndsHeader) {
 	debug[0] = cardReadStartOffset;
     nocashMessage("Card read found\n");	
 
-
 	debug[2] = cardengine_bin;
 	
 	u32* myCardEngine = (u32*)cardengine_bin;
@@ -100,7 +99,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader) {
 	
 	debug[5] = patches;
 	
-	copyLoop ((u32*)cardReadStartOffset, patches, 30);	
+	copyLoop ((u32*)cardReadStartOffset, patches, 0xF0);	
 	
 	nocashMessage("ERR_NONE");
 	return cardReadStartOffset;

@@ -275,8 +275,6 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
 	
-	copyLoop (cardEngineLocation, (u32*)cardengine_bin, cardengine_bin_size);	
-	
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = hookLocation;
 	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
