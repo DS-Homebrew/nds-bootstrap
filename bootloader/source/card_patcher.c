@@ -28,9 +28,8 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 // Subroutine function signatures arm9
 u32 compressionSignature[2]   = {0xDEC00621, 0x2106C0DE};
-u32 a9cardReadSignature[2]    = {0x10001004, 0xA4010004};
-u32 a9cardReadSignatureHE[2]    = {0x04100010, 0x040001A4};
-u16 cardReadStartSignature[1] = {0xE92D};
+u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
+u32 cardReadStartSignature[1] = {0xE92D4FF0};
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u16 cardIdStartSignature[1]   = {0xE92D};
 u32 a9instructionBHI[1]       = {0x8A000001};
@@ -38,68 +37,73 @@ u32 a9instructionBHI[1]       = {0x8A000001};
 //
 // Look in @data for @find and return the position of it.
 //
-u32 getOffsetA9(u8* data, int size, void* find, u32 sizeofFind, int specifier)
+u32 getOffsetA9(u32* addr, size_t size, u32* find, size_t sizeofFind, int direction)
 {
-    s32 result = 0;
-
-    // Go backwards
-    if (specifier == -1) {
-        // Simply scan through @data
-        u8* comparison = (data-sizeofFind);
-        result = -sizeofFind;
-        s32 offset = 0;
-        // @result, @offset, exist due to a reasoning in the original patcher
-        // I can't entirely explain; this is required for proper offsets
-        for (result = -sizeofFind; result >= -size; result--)
-        {
-            // If @find is found, break and return the decremented offset
-            if (!memcmp(comparison + offset, find, sizeofFind))
-                return result;
-            offset--;
-        }
-    }
-
-    // Go forwards
-    if (specifier == 1) {
-        // Simply scan through @data
-        for (result = 0; result < size - sizeofFind; result++)
-        {
-            // If @find is found, break and return the incremented offset
-            if (!memcmp((void*)(data + result), find, sizeofFind))
-                return result;
-        }
-    }
-
-    // If scanning is finished and end was not reached, return no offset.
-    return 0;
+	u32* end = addr + size/sizeof(u32);
+	u32* debug = (u32*)0x037D0000;
+	debug[3] = end;
+	
+    u32 result = 0;
+	bool found = false;
+	
+	do {
+		for(int i=0;i<sizeofFind;i++) {
+			if (addr[i] != find[i]) 
+			{
+				break;
+			} else if(i==sizeofFind-1) {
+				found = true;				
+			}
+		}	
+		if(!found) addr+=direction;
+	} while (addr != end && !found);
+	
+	if (addr == end) {
+		return NULL;
+	}
+	
+	return addr;
 }
 
 
 u32 patchCardNds (const tNDSHeader* ndsHeader) {	
 	nocashMessage("patchCardNds");
+	
+	u32* debug = (u32*)0x037D0000;
+	debug[4] = ndsHeader->arm9destination;
 
 	// Find the card read
-    u32 cardReadEndOffset =  // should result in 5AA64
+    u32 cardReadEndOffset =  
         getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (void*)a9cardReadSignature, 8, 1);
+              (u32*)a9cardReadSignature, 2, 1);
     if (!cardReadEndOffset) {
         nocashMessage("Card read end not found\n");
-        return 0;;
-    }
-    u8 *vAddrCardReadEnd = ((u32*)ndsHeader->arm9destination)[cardReadEndOffset];
-    u32 cardReadStartOffset =   // should result in FFFFFF0A (-F6?)
-        getOffsetA9((void*)(vAddrCardReadEnd - 0x2000000), 0x200,
-              (void*)cardReadStartSignature, 2, -1);
+        return 0;
+    }	
+	debug[1] = cardReadEndOffset;	
+    u32 cardReadStartOffset =   
+        getOffsetA9((u32*)cardReadEndOffset, -0xF9,
+              (u32*)cardReadStartSignature, 1, -1);
     if (!cardReadStartOffset) {
         nocashMessage("Card read start not found\n");
-        return 0;;
+        return 0;
     }
-    u32 vAddrOfCardRead = cardReadEndOffset + cardReadStartOffset +
-        (u32*)ndsHeader->arm9destination - 2;
-    nocashMessage("Card read found\n");
+	debug[0] = cardReadStartOffset;
+    nocashMessage("Card read found\n");	
+
+
+	debug[2] = cardengine_bin;
+	
+	u32* myCardEngine = (u32*)cardengine_bin;
+	
+	u32* patches =  (u32*)*myCardEngine;
+	
+	debug[5] = patches;
+	
+	copyLoop ((u32*)cardReadStartOffset, patches, 30);	
 	
 	nocashMessage("ERR_NONE");
-	return vAddrOfCardRead;
+	return cardReadStartOffset;
 }
 
 

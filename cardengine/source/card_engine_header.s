@@ -10,13 +10,13 @@
 .global card_engine_end
 .global staticCommand
 .global staticCache
-.global sdmmc_engine_size
+.global patches_offset
 .global commandAddr
 .global fileCluster
 
 
-card_engine_size:
-	.word	card_engine_end - card_engine_start
+patches_offset:
+	.word	patches
 intr_vcount_orig_return:
 	.word	0x00000000
 intr_synch_orig_return:
@@ -29,7 +29,6 @@ staticCommand:
 	.word	0x00000000
 staticCache:
 	.word	0x00000000
-
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -66,4 +65,16 @@ exit:
 
 card_engine_end:
 
+patches:
+card_read_arm9:
+	stmfd   sp!, {r4-r11,lr}
+	sub     sp, sp, #4
+	mov		r10, r0	
+	ldr		r5, =0x027FEE04
+	str     r5, [r10,#9] @ wordcommand area
+	add     sp, sp, #4
+	ldmfd   sp!, {r4-r11,lr}
+	bx      lr
+	
+.pool
 
