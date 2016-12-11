@@ -69,9 +69,13 @@ patches:
 card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
 	sub     sp, sp, #4
-	mov		r10, r0	
+	ldr		r10, =0x24
+	add		r10, r10, r0	
 	ldr		r5, =0x027FEE04
-	str     r5, [r10,#9] @ wordcommand area
+	ldr		r6, =0x02096320 @ debug area,
+	str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+	str     r5, [r6] 
+	str     r10, [r6,#4]
 	add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
