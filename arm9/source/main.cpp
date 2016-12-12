@@ -40,7 +40,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+	debugFile = fopen ("fat:/NDSBTSRPCARD.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -204,7 +204,7 @@ int main( int argc, char **argv) {
 		}
 	
 		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",1) == 1) {			
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -212,9 +212,10 @@ int main( int argc, char **argv) {
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
-			for (int i=0; i<50000; i++) {
+			for (int i=0; i<1000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
+			fclose (debugFile);
 			
 		} else {
 			remove ("fat:/NDSBTSRP.LOG");

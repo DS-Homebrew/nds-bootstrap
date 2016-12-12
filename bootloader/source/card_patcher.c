@@ -33,6 +33,7 @@ u32 cardReadStartSignature[1] = {0xE92D4FF0};
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u16 cardIdStartSignature[1]   = {0xE92D};
 u32 a9instructionBHI[1]       = {0x8A000001};
+u32 cardPullOutSignature[4]       = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 
 //
 // Look in @data for @find and return the position of it.
@@ -90,16 +91,32 @@ u32 patchCardNds (const tNDSHeader* ndsHeader) {
     }
 	debug[0] = cardReadStartOffset;
     nocashMessage("Card read found\n");	
+	
+	u32 cardPullOutOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+              (u32*)cardPullOutSignature, 4, 1);
+    if (!cardReadStartOffset) {
+        nocashMessage("Card pull out not found\n");
+        return 0;
+    }
+	debug[0] = cardPullOutOffset;
+    nocashMessage("Card pull out found\n");	
 
 	debug[2] = cardengine_bin;
 	
-	u32* myCardEngine = (u32*)cardengine_bin;
+	u32* myCardEngine = (u32*) cardengine_bin;
 	
-	u32* patches =  (u32*)*myCardEngine;
+	u32* patches =  (u32*) myCardEngine[0];
+	
+	u32* cardReadPatch = (u32*) patches[0];
+	
+	u32* cardPullOutPatch = (u32*) patches[1];
 	
 	debug[5] = patches;
 	
-	copyLoop ((u32*)cardReadStartOffset, patches, 0xF0);	
+	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
+	
+	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
 	
 	nocashMessage("ERR_NONE");
 	return cardReadStartOffset;

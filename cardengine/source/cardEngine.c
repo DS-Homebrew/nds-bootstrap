@@ -26,6 +26,7 @@ static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern vu32* volatile irqSig; // always NULL
 extern vu32* volatile commandAddr;
+vu32* volatile debugAddr = (vu32*)0x02096320;
 
 void sendValue32(vu32 value32) {
 	nocashMessage("sendValue32");
@@ -57,9 +58,9 @@ void sdmmcCustomValueHandler(u32 value) {
             sdmmc_controller_init();
             result = sdmmc_sdcard_init();
         }
-		//FAT_InitFiles(false);
-		//u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
-		//enableDebug(myDebugFile);
+		FAT_InitFiles(false);
+		u32 myDebugFile = getBootFileCluster ("NDSBTSRPCARD.LOG");
+		enableDebug(myDebugFile);
         break;
 
     case SDMMC_SD_IS_INSERTED:
@@ -104,7 +105,23 @@ void sdmmcCustomMsgHandler(int bytes) {
 void runCardEngineCheck (void) {
 	//dbg_printf("runSdMmcEngineCheck\n");
 	int oldIME = enterCriticalSection();
+	
+	if(!initialized) {
+		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+			sdmmc_controller_init();
+			sdmmc_sdcard_init();
+		}
+		FAT_InitFiles(false);
+		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
+		enableDebug(myDebugFile);
+		dbg_printf("logging initialized\n");
+		initialized=true;
+	}
 
+	if(*debugAddr == (vu32)0x027FEE04)
+	{
+		dbg_printf("card read executed\n");
+	}
 	if(*commandAddr == (vu32)0x027FEE04)
 	{
 		dbg_printf("sdmmc value received\n");
