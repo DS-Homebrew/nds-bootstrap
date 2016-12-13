@@ -256,8 +256,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	}
 	
 	u32* vblankHandler = hookLocation;
-	u32* vcountHandler = hookLocation+4;
-	u32* syncHandler = hookLocation+32;
+	u32* fifoHandler = hookLocation+18;
 	
 	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	
@@ -276,11 +275,14 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	}*/
 	
 	cardEngineLocation[1] = *vblankHandler;
-	cardEngineLocation[2] = hookLocation;
+	cardEngineLocation[2] = *fifoHandler;
 	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
 	cardEngineLocation[4] = fileCluster;
 	
-	*vblankHandler = 0x37C001C;
+	u32* patches =  (u32*) cardEngineLocation[0];
+	
+	*vblankHandler = patches[2];
+	*fifoHandler = patches[2];
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
