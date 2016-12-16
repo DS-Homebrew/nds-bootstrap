@@ -136,6 +136,8 @@ void runCardEngineCheck (void) {
 		dbg_hexa(dst);
 		dbg_printf("len : \n");
 		dbg_hexa(len);
+		
+		fileRead(dst,fileCluster,src,len);
 	}
 	/*
 	if(*debugAddr == (vu32)0x027FEE04)
