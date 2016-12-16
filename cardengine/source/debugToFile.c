@@ -22,6 +22,7 @@
 static bool _debug = false;
 static u32 _debugFileCluster = 0;
 static u32 _currentPos = 0;
+static char hexbuffer [8];
 
 void enableDebug(u32 debugFileCluster) {	
 	_debug = true;
@@ -39,4 +40,28 @@ u32 dbg_printf( char * message)
 	_currentPos+=strlen(message);
 	
 	return ret;
+}
+
+char* tohex(u32 n)
+{
+    unsigned size = 8;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
+
+u32 dbg_hexa(u32 n) {
+	return dbg_printf(tohex(n));
 }

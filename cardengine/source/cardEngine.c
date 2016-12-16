@@ -118,9 +118,15 @@ void runCardEngineCheck (void) {
 		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");
+		dbg_hexa(0x02100000);
 		initialized=true;
 	}
 
+	if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
+    {
+        dbg_printf("card read received\n");
+	}
+	/*
 	if(*debugAddr == (vu32)0x027FEE04)
 	{
 		dbg_printf("card read executed\n");
@@ -133,7 +139,7 @@ void runCardEngineCheck (void) {
 	{
 		dbg_printf("sdmmc msg received\n");
 		sdmmcCustomMsgHandler(commandAddr[1]);
-	}
+	}*/
 
 	leaveCriticalSection(oldIME);
 }
@@ -142,7 +148,6 @@ void runCardEngineCheck (void) {
 void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
 	nocashMessage("myIrqHandlerFIFO");
-	dbg_printf("myIrqHandlerFIFO\n");
 	
 	runCardEngineCheck();
 }

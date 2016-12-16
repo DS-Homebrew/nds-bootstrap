@@ -94,14 +94,14 @@ card_read_arm9:
 	ldr		r10, =0x24
 	add		r10, r10, r0	
 	ldr 	r5, =0x027FEE04
-	str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
-	str     r5, [r6] 
+	@ str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+	@ str     r5, [r6] 
 	
 	@ send the command via the debug area (may cause conflict)
 	ldr     r5, =0x027FEE04
     ldr     r6, =0x02100000
     str     r5, [r6]	
-	str     r10, [r6,#4]
+	@ str     r10, [r6,#4]
 
 	@ turn the screen blue
     ldr     r5, =0x027FEE04
@@ -109,10 +109,10 @@ card_read_arm9:
     str     r5, [r6] 
 	
 	@ call card send for fifo activation	
-	ldr     r6, card_send_arm9
-	ldr     r0, card_send_arm9
-	ldr     r1, =0x0002
-	bx  	r6
+	@ ldr     r6, card_send_arm9
+	@ ldr     r0, card_send_arm9
+	@ ldr     r1, =0x0002
+	@ bx  	r6
 	
 	add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
