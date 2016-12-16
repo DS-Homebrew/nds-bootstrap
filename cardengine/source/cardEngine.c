@@ -125,6 +125,17 @@ void runCardEngineCheck (void) {
 	if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
     {
         dbg_printf("card read received\n");
+
+		u32 src = cardStruct[6];
+		u32 dst = cardStruct[7];
+		u32 len = cardStruct[8];
+		
+		dbg_printf("src : \n");
+		dbg_hexa(dst);
+		dbg_printf("dst : \n");
+		dbg_hexa(dst);
+		dbg_printf("len : \n");
+		dbg_hexa(len);
 	}
 	/*
 	if(*debugAddr == (vu32)0x027FEE04)
