@@ -53,13 +53,16 @@ code_handler_start_vblank:
 	ldr	r3, =myIrqHandlerVBlank
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
+	@ exit after return
+	b	exit
+	
 code_handler_start_fifo:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerFIFO
 	bl	_blx_r3_stub		@ jump to myIrqHandler
   
   
-  @ exit after return
+    @ exit after return
 	b	exit
 	
 @---------------------------------------------------------------------------------
@@ -99,14 +102,59 @@ card_read_arm9:
 	
 	@ send the command via the debug area (may cause conflict)
 	ldr     r5, =0x027FEE04
-    ldr     r6, =0x02100000
+    ldr     r6, =0x02500000
     str     r5, [r6]	
 	@ str     r10, [r6,#4]
 
 	@ turn the screen blue
-    ldr     r5, =0x027FEE04
     ldr     r6, =0x05000400
     str     r5, [r6] 
+	
+	ldr     r5, =0x027FEE04
+    ldr     r6, =0x05000400 @ debug area,
+	str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+	str     r5, [r6] 
+	str     r10, [r6,#4]
+
+    ldr     r6, =0x05000404 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x05000408 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x0500040C @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x05000410 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x05000414 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x05000418 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x0500041C @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
+
+    ldr     r6, =0x05000420 @ debug area,
+    str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
+    str     r5, [r6] 
+    str     r10, [r6,#4]
 	
 	@ call card send for fifo activation	
 	@ ldr     r6, card_send_arm9

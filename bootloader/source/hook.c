@@ -282,7 +282,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	u32* patches =  (u32*) cardEngineLocation[0];
 	
 	*vblankHandler = patches[2];
-	*fifoHandler = patches[2];
+	//*fifoHandler = patches[3];
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
