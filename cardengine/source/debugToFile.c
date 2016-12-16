@@ -22,7 +22,7 @@
 static bool _debug = false;
 static u32 _debugFileCluster = 0;
 static u32 _currentPos = 0;
-static char hexbuffer [8];
+static char hexbuffer [9];
 
 void enableDebug(u32 debugFileCluster) {	
 	_debug = true;
