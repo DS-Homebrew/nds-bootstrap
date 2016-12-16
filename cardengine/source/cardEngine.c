@@ -26,9 +26,10 @@ static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern vu32* volatile irqSig; // always NULL
 extern vu32* volatile commandAddr;
-extern vu32* volatile staticCommand;
+extern vu32* volatile cardStruct;
+extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
-vu32* volatile debugAddr = (vu32*)0x02496320;
+vu32* volatile debugAddr = (vu32*)0x02100000;
 
 void sendValue32(vu32 value32) {
 	nocashMessage("sendValue32");
@@ -137,91 +138,20 @@ void runCardEngineCheck (void) {
 	leaveCriticalSection(oldIME);
 }
 
-// interruptDispatcher.s jump_intr:
-static const u32 homebrewSig[5] = {
-	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
-	0xE3510000, // cmp    r1, #0
-	0x1A000001, // bne    got_handler
-	0xE1A01000, // mov    r1, r0
-	0xEAFFFFF6  // b    no_handler
-};	
-
-// interruptDispatcher.s jump_intr:
-//patch
-static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
-	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
-	0xE501F004, // str    pc, [r1,#-4]     @ irqsig 
-	0xEA000000, // b      got_handler
-	0x0390000C  // DCD 	  0x0390000C       
-};
-
-static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	dbg_printf("restoreInterruptHandlerHomebrew\n");	
-	u32* end = addr + size/sizeof(u32);
-	
-	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == homebrewSigPatched[0]) && 
-			(addr[1] == homebrewSigPatched[1]) && 
-			(addr[2] == homebrewSigPatched[2]) && 
-			(addr[3] == homebrewSigPatched[3]) && 
-			(addr[4] == homebrewSigPatched[4])) 
-		{
-			break;
-		}
-		addr++;
-	}
-	
-	if (addr >= end) {
-		dbg_printf("addr >= end");	
-		return 0;
-	}
-	
-	// patch the program
-	addr -= 5;
-	addr[0] = homebrewSig[0];
-	addr[1] = homebrewSig[1];
-	addr[2] = homebrewSig[2];
-	addr[3] = homebrewSig[3];
-	addr[4] = homebrewSig[4];
-	
-	dbg_printf("restoreSuccessfull\n");	
-	
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return addr;
-}
-
 //---------------------------------------------------------------------------------
-void SyncHandler(void) {
+void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
-	nocashMessage("SyncHandler");
+	nocashMessage("myIrqHandlerFIFO");
+	dbg_printf("myIrqHandlerFIFO\n");
+	
 	runCardEngineCheck();
 }
 
 
-void myIrqHandler(void) {
-	nocashMessage("myIrqHandler");
+void myIrqHandlerVBlank(void) {
+	nocashMessage("myIrqHandlerVBlank");
 	
 	runCardEngineCheck();
-}
-
-void myIrqEnable(u32 irq) {	
-	dbg_printf("myIrqEnable\n");
-	int oldIME = enterCriticalSection();	
-	if (irq & IRQ_VBLANK)
-		REG_DISPSTAT |= DISP_VBLANK_IRQ ;
-	if (irq & IRQ_HBLANK)
-		REG_DISPSTAT |= DISP_HBLANK_IRQ ;
-	if (irq & IRQ_VCOUNT)
-		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-		
-	irq |= IRQ_IPC_SYNC;
-	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-	nocashMessage("IRQ_IPC_SYNC enabled");
-
-	REG_IE |= irq;
-	leaveCriticalSection(oldIME);
 }
 
 

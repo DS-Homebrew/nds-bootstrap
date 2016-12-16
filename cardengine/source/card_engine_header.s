@@ -8,8 +8,8 @@
 .global card_engine_start
 .global card_engine_start_sync
 .global card_engine_end
-.global staticCommand
-.global staticCache
+.global cardStruct
+.global cacheStruct
 .global patches_offset
 .global commandAddr
 .global fileCluster
@@ -25,9 +25,9 @@ commandAddr:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
-staticCommand:
+cardStruct:
 	.word	0x00000000
-staticCache:
+cacheStruct:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -37,21 +37,27 @@ card_engine_start:
 vblankHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start
+	adr 	lr, code_handler_start_vblank
 	ldr 	r0,	intr_vblank_orig_return
 	bx  	r0
 
 fifoHandler:	
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start
+	adr 	lr, code_handler_start_fifo
 	ldr 	r0,	intr_fifo_orig_return
 	bx  	r0
 	
-code_handler_start:
+code_handler_start_vblank:
 	push	{r0-r12} 
-	ldr	r3, =myIrqHandler
+	ldr	r3, =myIrqHandlerVBlank
 	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+code_handler_start_fifo:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerFIFO
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+  
   
   @ exit after return
 	b	exit
@@ -79,37 +85,40 @@ patches:
 .word	card_pull_out_arm9
 .word	vblankHandler
 .word	fifoHandler
+.word	card_send_arm9
 card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
 	sub     sp, sp, #4
+	
+	@ send the command via the wordcommand area. not yet working
 	ldr		r10, =0x24
 	add		r10, r10, r0	
 	ldr 	r5, =0x027FEE04
-	ldr		r6, =0x02496320 @ debug area,
 	str     r5, [r10] @ wordcommand area, 2096200 + 24 = 2096224
 	str     r5, [r6] 
+	
+	@ send the command via the debug area (may cause conflict)
+	ldr     r5, =0x027FEE04
+    ldr     r6, =0x02100000
+    str     r5, [r6]	
 	str     r10, [r6,#4]
+
+	@ turn the screen blue
+    ldr     r5, =0x027FEE04
+    ldr     r6, =0x05000400
+    str     r5, [r6] 
 	
-	@REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;
-	ldr     r4, =0x04000000
-	ldr     r6, =0x10100
-	str     r6, [r4]
-	
-	@VRAM_A_CR = VRAM_ENABLE | VRAM_A_MAIN_BG;
-	ldr     r4, =0x04000240
-	mov     r6, #0x81
-	str     r6, [r4]
-	
-	@BG_PALETTE[0] = RGB15(31, 0, 0)
-	ldr     r4, =0x05000000
-	mov     r6, #31
-	str     r6, [r4]
-	
-	0x0002
+	@ call card send for fifo activation	
+	ldr     r6, card_send_arm9
+	ldr     r0, card_send_arm9
+	ldr     r1, =0x0002
+	bx  	r6
 	
 	add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
-	bx      lr	
+	bx      lr
+card_send_arm9:
+.word	0x00000000	
 .pool
 card_pull_out_arm9:
 	bx      lr

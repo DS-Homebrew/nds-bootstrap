@@ -33,8 +33,9 @@ u32 cardReadStartSignature[1] = {0xE92D4FF0};
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u16 cardIdStartSignature[1]   = {0xE92D};
 u32 a9instructionBHI[1]       = {0x8A000001};
-u32 cardPullOutSignature[4]       = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
-
+u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
+u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
+   
 //
 // Look in @data for @find and return the position of it.
 //
@@ -101,6 +102,16 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
     }
 	debug[0] = cardPullOutOffset;
     nocashMessage("Card pull out found\n");	
+	
+	u32 cardSendOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+              (u32*)a9cardSendSignature, 4, 1);
+    if (!cardReadStartOffset) {
+        nocashMessage("Card send not found\n");
+        return 0;
+    }
+	debug[0] = cardPullOutOffset;
+    nocashMessage("Card send found\n");	
 
 	debug[2] = cardEngineLocation;
 	
@@ -113,10 +124,14 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	debug[5] = patches;
 	
 	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
+	u32* cache_struct = ((u32*)cardReadStartOffset) - 1;
 	
 	debug[6] = *card_struct;
 	
 	cardEngineLocation[5] = *card_struct;
+	cardEngineLocation[6] = *cache_struct;
+	
+	*((u32*)patches[4]) = cardSendOffset;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
