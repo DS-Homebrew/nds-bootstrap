@@ -44,9 +44,14 @@ u32 dbg_printf( char * message)
 
 char* tohex(u32 n)
 {
-    unsigned size = 8;
+    unsigned size = 9;
     char *buffer = hexbuffer;
     unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+	
     while (n > 0)
     {
         unsigned mod = n % 16;
