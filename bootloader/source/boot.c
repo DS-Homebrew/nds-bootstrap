@@ -343,7 +343,7 @@ int main (void) {
 	
 	copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
 	
-	patchCardNds(NDS_HEAD);
+	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION);
 	
 	// Find the DLDI reserved space in the file
 	//u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));

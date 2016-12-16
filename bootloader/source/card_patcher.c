@@ -67,7 +67,7 @@ u32 getOffsetA9(u32* addr, size_t size, u32* find, size_t sizeofFind, int direct
 }
 
 
-u32 patchCardNds (const tNDSHeader* ndsHeader) {	
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {	
 	nocashMessage("patchCardNds");
 	
 	u32* debug = (u32*)0x037D0000;
@@ -102,11 +102,9 @@ u32 patchCardNds (const tNDSHeader* ndsHeader) {
 	debug[0] = cardPullOutOffset;
     nocashMessage("Card pull out found\n");	
 
-	debug[2] = cardengine_bin;
+	debug[2] = cardEngineLocation;
 	
-	u32* myCardEngine = (u32*) cardengine_bin;
-	
-	u32* patches =  (u32*) myCardEngine[0];
+	u32* patches =  (u32*) cardEngineLocation[0];
 	
 	u32* cardReadPatch = (u32*) patches[0];
 	
@@ -114,9 +112,15 @@ u32 patchCardNds (const tNDSHeader* ndsHeader) {
 	
 	debug[5] = patches;
 	
+	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
+	
+	debug[6] = *card_struct;
+	
+	cardEngineLocation[5] = *card_struct;
+	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
+	//copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
 	
 	nocashMessage("ERR_NONE");
 	return cardReadStartOffset;

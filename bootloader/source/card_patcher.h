@@ -26,6 +26,6 @@
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-u32 patchCardNds (const tNDSHeader* ndsHeader);
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation);
 
 #endif // CARD_PATCHER_H

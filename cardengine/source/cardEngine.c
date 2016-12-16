@@ -26,6 +26,8 @@ static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern vu32* volatile irqSig; // always NULL
 extern vu32* volatile commandAddr;
+extern vu32* volatile staticCommand;
+extern u32 fileCluster;
 vu32* volatile debugAddr = (vu32*)0x02496320;
 
 void sendValue32(vu32 value32) {
