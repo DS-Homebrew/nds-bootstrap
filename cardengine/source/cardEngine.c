@@ -48,21 +48,32 @@ void runCardEngineCheck (void) {
 
 	if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
     {
-        dbg_printf("card read received\n");
+		//dbg_printf("card read received\n");
 
-		u32 src = cardStruct[6];
-		u32 dst = cardStruct[7];
-		u32 len = cardStruct[8];
-		
-		dbg_printf("src : \n");
-		dbg_hexa(dst);
-		dbg_printf("dst : \n");
-		dbg_hexa(dst);
-		dbg_printf("len : \n");
-		dbg_hexa(len);
-		
-		fileRead(dst,fileCluster,src,len);
-	}
+        u32 src = *(vu32*)(cardStruct+6);
+        u32 dst = *(vu32*)(cardStruct+7);
+        u32 len = *(vu32*)(cardStruct+8);
+        
+        
+        
+        /*dbg_printf("src : \n");
+        dbg_hexa(src);
+        
+        dbg_printf("str : \n");
+        dbg_hexa(cardStruct);
+        
+        dbg_printf("dst : \n");
+        dbg_hexa(dst);*/
+        dbg_printf("len : \n");
+        dbg_hexa(len);
+        
+        fileRead(0x02140000,fileCluster,src,len);
+        
+        //dbg_printf("read \n");
+        
+        *(vu32*)(0x2100000) = 0;
+        
+    }
 
 	leaveCriticalSection(oldIME);
 }

@@ -276,7 +276,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *fifoHandler;
-	cardEngineLocation[3] = myMemUncached(wordCommandAddr);
+	cardEngineLocation[3] = wordCommandAddr;
 	cardEngineLocation[4] = fileCluster;
 	
 	u32* patches =  (u32*) cardEngineLocation[0];
