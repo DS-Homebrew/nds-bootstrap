@@ -50,20 +50,16 @@ void runCardEngineCheck (void) {
     {
 		//dbg_printf("card read received\n");
 
-        u32 src = *(vu32*)(cardStruct+6);
-        u32 dst = *(vu32*)(cardStruct+7);
-        u32 len = *(vu32*)(cardStruct+8);
+        u32 src = *(vu32*)(cardStruct+7);
+        u32 dst = *(vu32*)(cardStruct+8);
+        u32 len = *(vu32*)(cardStruct+9);
         
         
         
-        /*dbg_printf("src : \n");
-        dbg_hexa(src);
-        
-        dbg_printf("str : \n");
-        dbg_hexa(cardStruct);
-        
+        dbg_printf("src : \n");
+        dbg_hexa(src);   
         dbg_printf("dst : \n");
-        dbg_hexa(dst);*/
+        dbg_hexa(dst);
         dbg_printf("len : \n");
         dbg_hexa(len);
         
