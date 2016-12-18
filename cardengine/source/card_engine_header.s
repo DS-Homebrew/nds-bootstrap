@@ -96,7 +96,7 @@ card_read_arm9:
 	add		r10, r10, r0	
 	
 	@ new sdk version
-	ldr 	r4, =cardStructArm9
+	ldr 	r4, cardStructArm9
 	ldr 	r5, [R4,#0x1C]
 	ldr 	r6, [R4,#0x20]
 	ldr 	r7, [R4,#0x24]
