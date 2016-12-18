@@ -158,7 +158,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	cardEngineLocation[5] = *card_struct;
 	//cardEngineLocation[6] = *cache_struct;
 	
-	*((u32*)patches[4]) = card_struct;
+	*((u32*)patches[4]) = *card_struct;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
