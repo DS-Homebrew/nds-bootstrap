@@ -99,11 +99,8 @@ int main(void) {
 	// Start the RTC tracking IRQ
 	initClockIRQ();
 
-	mmInstall(FIFO_MAXMOD);
-
 	SetYtrigger(80);
 
-	installSoundFIFO();
 	installSystemFIFO();
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
