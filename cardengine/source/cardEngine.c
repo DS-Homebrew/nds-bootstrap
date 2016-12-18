@@ -46,22 +46,28 @@ void runCardEngineCheck (void) {
 		initialized=true;
 	}
 
-	if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
+   if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
     {
-		//dbg_printf("card read received\n");
+        //dbg_printf("card read received\n");
 
-        u32 src = *(vu32*)(cardStruct+7);
-        u32 dst = *(vu32*)(cardStruct+8);
-        u32 len = *(vu32*)(cardStruct+9);
+        u32 src = *(vu32*)(cardStruct+6);
+        u32 dst = *(vu32*)(cardStruct+7);
+        u32 len = *(vu32*)(cardStruct+8);
         
+        *(vu32*)(0x02100004) = *(vu32*)(cardStruct+7);
         
+        *(vu32*)(0x02100008) = len;
         
-        dbg_printf("src : \n");
-        dbg_hexa(src);   
-        dbg_printf("dst : \n");
-        dbg_hexa(dst);
-        dbg_printf("len : \n");
-        dbg_hexa(len);
+        //dbg_printf("src : \n");
+        //dbg_hexa(src);
+        
+        //dbg_printf("str : \n");
+        //dbg_hexa(cardStruct);
+        
+        //dbg_printf("dst : \n");
+        //dbg_hexa(dst);
+        //dbg_printf("len : \n");
+        //dbg_hexa(len);
         
         fileRead(0x02140000,fileCluster,src,len);
         
