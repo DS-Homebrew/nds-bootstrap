@@ -50,9 +50,15 @@ void runCardEngineCheck (void) {
     {
         //dbg_printf("card read received\n");
 
-		u32 src = *(vu32*)(cardStruct+6);
-		u32 dst = *(vu32*)(cardStruct+7);
-		u32 len = *(vu32*)(cardStruct+8);
+		// old sdk version
+		// u32 src = *(vu32*)(cardStruct+6);
+		// u32 dst = *(vu32*)(cardStruct+7);
+		// u32 len = *(vu32*)(cardStruct+8);
+		
+		// new sdk version
+		u32 src = *(vu32*)(cardStruct+7);
+		u32 dst = *(vu32*)(cardStruct+8);
+		u32 len = *(vu32*)(cardStruct+9);
 		
 		*(vu32*)(0x02100004) = dst;
 		

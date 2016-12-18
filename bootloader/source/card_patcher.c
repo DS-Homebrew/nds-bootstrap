@@ -28,8 +28,15 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 // Subroutine function signatures arm9
 u32 compressionSignature[2]   = {0xDEC00621, 0x2106C0DE};
-u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
-u32 cardReadStartSignature[1] = {0xE92D4FF0};
+
+// old sdk version
+//u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
+//u32 cardReadStartSignature[1] = {0xE92D4FF0};
+
+// new sdk version
+u32 a9cardReadSignature[2]    = {0x040001A4, 0x04100010};
+u32 cardReadStartSignature[1] = {0xE92D4070};
+
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
 u32 a9instructionBHI[1]       = {0x8A000001};
@@ -151,7 +158,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	cardEngineLocation[5] = *card_struct;
 	//cardEngineLocation[6] = *cache_struct;
 	
-	//*((u32*)patches[4]) = cardSendOffset;
+	*((u32*)patches[4]) = card_struct;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
