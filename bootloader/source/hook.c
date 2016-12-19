@@ -243,6 +243,7 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
+	u32* debug = (u32*)0x037D0000;
 	
 	nocashMessage("hookNds");
 
@@ -256,7 +257,9 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	}
 	
 	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation+16;
+	u32* ipcSyncHandler = hookLocation+17;
+	
+	debug[9] = hookLocation;
 	
 	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	

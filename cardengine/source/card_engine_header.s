@@ -44,8 +44,7 @@ vblankHandler:
 fifoHandler:	
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_fifo
-	ldr 	r0,	intr_fifo_orig_return
+	ldr 	r0, code_handler_start_fifo
 	bx  	r0
 	
 code_handler_start_vblank:
@@ -220,7 +219,16 @@ cardStructArm9:
 card_pull_out_arm9:
 	bx      lr
 card_init_pull_arm7:
-	ldr	r3, =ipcSyncEnable
-	bx	r3	
+    push    {lr}
+	push	{r0-r12}
+	ldr	r3, =irqIPCSYNCEnable
+	bl	_blx_r3_stub2
+	pop   	{r0-r12} 
+	pop  	{lr}
+	mov     r0, #0
 	bx  lr
+@---------------------------------------------------------------------------------
+_blx_r3_stub2:
+@---------------------------------------------------------------------------------
+	bx	r3		
 .pool

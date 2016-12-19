@@ -43,7 +43,12 @@ u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
-u32 cardInitPullOutStartSignature[1] = {0xE92D4008};
+
+// infinite loop
+u32 cardInitPullOutStartSignature[3] = {0xE92D4000,0xE24DD004,0xE59D3000,0xE3C3301F};
+
+//u32 cardInitPullOutStartSignature[3] = {0xE92D4000,0xE3A0C301,0xE28CCE21,0xE51C1008};
+
     
 //
 // Look in @data for @find and return the position of it.
@@ -173,12 +178,22 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	u32 cardPullOutOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
-    if (!cardReadStartOffset) {
+    if (!cardPullOutOffset) {
         nocashMessage("Card pull out not found\n");
-        return 0;
+        //return 0;
     }
 	debug[0] = cardPullOutOffset;
     nocashMessage("Card pull out found\n");
+	
+	u32 cardInitPullOutOffset =   
+        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)cardInitPullOutStartSignature, 3, 1);
+    if (!cardInitPullOutOffset) {
+        nocashMessage("Card init pull out not found\n");
+        return 0;
+    }
+	debug[0] = cardInitPullOutOffset;
+    nocashMessage("Card init pull out found\n");
 	
 	/*u32 cardSendOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
@@ -221,6 +236,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32* cardPullOutPatch = (u32*) patches[1];
 	
+	u32* cardInitPullOutPatch = (u32*) patches[2];
+	
 	debug[5] = patches;
 	
 	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
@@ -239,7 +256,10 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
+	if(cardPullOutOffset>0)
+		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
+		
+	copyLoop ((u32*)cardInitPullOutOffset, cardInitPullOutPatch, 0x40);	
 	
 	nocashMessage("ERR_NONE");
 	return 0;

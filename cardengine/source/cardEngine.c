@@ -118,11 +118,31 @@ void myIrqHandlerVBlank(void) {
 	runCardEngineCheck();
 }
 
-void ipcSyncEnable() {	
-	dbg_printf("ipcSyncEnable\n");
+u32 myIrqEnable(u32 irq) {	
+	int oldIME = enterCriticalSection();	
+	
+	nocashMessage("myIrqEnable\n");
+	
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 	nocashMessage("IRQ_IPC_SYNC enabled");
-	REG_IE |= IRQ_IPC_SYNC;
+
+	REG_IE |= irq;
+	leaveCriticalSection(oldIME);
+	return irq_before;
+}
+
+void irqIPCSYNCEnable() {	
+	if(!initializedIRQ) {
+		int oldIME = enterCriticalSection();		
+		nocashMessage("irqIPCSYNCEnable\n");	
+		REG_IE |= IRQ_IPC_SYNC;
+		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+		nocashMessage("IRQ_IPC_SYNC enabled");
+		leaveCriticalSection(oldIME);
+		initializedIRQ = true;
+	}
 }
 
 
