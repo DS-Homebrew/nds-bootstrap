@@ -95,23 +95,23 @@ card_read_arm9:
 	ldr		r10, =0x24
 	add		r10, r10, r0	
 	
-	@ old sdk version
-	@ ldr 	r4, cardStructArm9
-	@ ldr 	r5, [R4,#0x18]
-	@ ldr 	r6, [R4,#0x1C]
-	@ ldr 	r7, [R4,#0x20]
+	ldr r8,=0x00000fff
+	
+	loop2:
+    subs r8, #1
+    bgt loop2
 	
 	@ new sdk version
 	ldr 	r4, cardStructArm9
-	ldr 	r5, [R4,#0x1C]
-	ldr 	r6, [R4,#0x20]
-	ldr 	r7, [R4,#0x24]
+	ldr 	r5, [R4,#0x18] @Depends on the SDK version
+	ldr 	r6, [R4,#0x1C] @Depends on the SDK version
+	ldr 	r7, [R4,#0x20] @Depends on the SDK version
 	
 	@ mrc p15, 0, r0, c1, c0, 0
 	@ bic r0, #1
 	@ mcr p15, 0, r0, c1, c0, 0
 	
-
+	@ new sdk version
 	ldr     r8, =0x027FFB08
 	str 	r5, [R8,#0x4]
 	str 	r6, [R8,#0x8]
@@ -122,9 +122,36 @@ card_read_arm9:
 	@mov r1, #0
 	@str r1, [r0]
 	
+	ldr r8, =0x02700000
+	
+	cmp r6, r8
+	
+	bgt cmd1
+	
+	b cmd2
+	
+	cmd1:
+	
 	ldr 	r5, =0x027FEE04
 	ldr		r6, =0x027FFB08
 	str     r5, [r6]
+
+	b end
+	
+	cmd2:
+	ldr 	r5, =0x027FEE05
+	ldr		r6, =0x027FFB08
+	str     r5, [r6]
+
+	top2:
+	ldr		r6,=0x027FFB08 @sharedAddr
+	ldr     r5, [r6]
+	cmp		r5,#0
+	bne top2
+	
+	b endfunc
+	
+	end:
 	
 	@REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;
 	@ldr     r4, =0x04000000
@@ -165,12 +192,19 @@ card_read_arm9:
     ldr r7,=0x027FFB08
     ldr r8, [r7, #0xC] //len
     ldr r9, [r7, #0x8] //dst
-    ldr r7,=0x027ff800 
+	@sub r8, #1
+    ldr r7,= 0x027ff800 
 	loop:
     ldrb r10, [r7], #1
     strb r10, [r9], #1
     subs r8, #1
     bgt loop
+	
+	endfunc:
+	
+	ldr 	r7, cardStructArm9
+	
+	str 	r9, [R7,#0x1C]
 	
 	@BG_PALETTE[0] = RGB15(31, 0, 0)
 	@ldr     r4, =0x05000000
