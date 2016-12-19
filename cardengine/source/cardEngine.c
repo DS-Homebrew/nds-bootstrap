@@ -57,7 +57,7 @@ void runCardEngineCheck (void) {
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
 		
-		if(sdk_version > 0x4000000) {
+		if(sdk_version > 0x3000000) {
 			// new sdk version
 			src = *(vu32*)(sharedAddr+2);
 			dst = *(vu32*)(sharedAddr+3);
@@ -92,7 +92,7 @@ void runCardEngineCheck (void) {
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
 		
-		if(sdk_version > 0x4000000) {
+		if(sdk_version > 0x3000000) {
 			// new sdk version
 			src = *(vu32*)(sharedAddr+2);
 			dst = *(vu32*)(sharedAddr+3);
