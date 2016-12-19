@@ -146,28 +146,25 @@ card_read_arm9:
 	@ldr		r6, =0xffffffff
 	@str     r6, [r4]
 	
-	ldr		r6,=0x02140000
-	ldr		r8,=0x02140000
+	ldr		r6,=0x027FFB14
+	ldr		r8,=0x027FFB14
 	ldr		r9,=0x027FFB0C
 	LDR     R9, [R9]
 
-	ldr		r7,=0x027FFB10
-	ldr R7, [R7]
-	add r7, r6, r7
-	@add r7,r7,#1
-
-	@BG_PALETTE[0] = RGB15(31, 0, 0)
+	@BG_PALETTE[0] = RGB150x027FFB140x027FFB14(31, 0, 0)
 	@ldr     r4, =0x05000000
 	@ldr		r6, =10 
 	@str     r6, [r4]
 
-	top2:
-	ldrb r10, [r8]
-	strb r10, [r9]
-	add r8,#1
-	add r9,#1
-	cmp r7,r8
-	bne top2
+    ldr r7,=0x027FFB08
+    ldr r8, [r7, #0xC] //len
+    ldr r9, [r7, #0x8] //dst
+    ldr r7,= 0x02140000
+	loop:
+    ldrb r10, [r7], #1
+    strb r10, [r9], #1
+    subs r8, #1
+    bgt loop
 	
 	@BG_PALETTE[0] = RGB15(31, 0, 0)
 	@ldr     r4, =0x05000000
