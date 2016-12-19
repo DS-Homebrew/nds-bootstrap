@@ -65,7 +65,7 @@ void runCardEngineCheck (void) {
 		dbg_printf("len : \n");
 		dbg_hexa(len);
 		
-		fileRead(0x02140000,fileCluster,src,len);
+		fileRead(0x027ff800,fileCluster,src,len);
 		
 		//dbg_printf("read \n");
 		

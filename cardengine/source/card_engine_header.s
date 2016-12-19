@@ -96,20 +96,20 @@ card_read_arm9:
 	add		r10, r10, r0	
 	
 	@ old sdk version
-	ldr 	r4, cardStructArm9
-	ldr 	r5, [R4,#0x18]
-	ldr 	r6, [R4,#0x1C]
-	ldr 	r7, [R4,#0x20]
+	@ ldr 	r4, cardStructArm9
+	@ ldr 	r5, [R4,#0x18]
+	@ ldr 	r6, [R4,#0x1C]
+	@ ldr 	r7, [R4,#0x20]
 	
 	@ new sdk version
-	@ ldr 	r4, cardStructArm9
-	@ ldr 	r5, [R4,#0x1C]
-	@ ldr 	r6, [R4,#0x20]
-	@ ldr 	r7, [R4,#0x24]
+	ldr 	r4, cardStructArm9
+	ldr 	r5, [R4,#0x1C]
+	ldr 	r6, [R4,#0x20]
+	ldr 	r7, [R4,#0x24]
 	
-	mrc p15, 0, r0, c1, c0, 0
-	bic r0, #1
-	mcr p15, 0, r0, c1, c0, 0
+	@ mrc p15, 0, r0, c1, c0, 0
+	@ bic r0, #1
+	@ mcr p15, 0, r0, c1, c0, 0
 	
 
 	ldr     r8, =0x027FFB08
@@ -165,7 +165,7 @@ card_read_arm9:
     ldr r7,=0x027FFB08
     ldr r8, [r7, #0xC] //len
     ldr r9, [r7, #0x8] //dst
-    ldr r7,= 0x02140000
+    ldr r7,=0x027ff800 
 	loop:
     ldrb r10, [r7], #1
     strb r10, [r9], #1
