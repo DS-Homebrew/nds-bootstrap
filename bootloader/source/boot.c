@@ -349,7 +349,7 @@ int main (void) {
 		ensureArm9Decompressed(NDS_HEAD, params);
 	}
 	
-	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION);
+	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
 	
 	// Find the DLDI reserved space in the file
 	//u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));

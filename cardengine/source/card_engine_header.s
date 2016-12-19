@@ -11,7 +11,7 @@
 .global cardStruct
 .global cacheStruct
 .global patches_offset
-.global commandAddr
+.global sdk_version
 .global fileCluster
 
 
@@ -21,7 +21,7 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-commandAddr:
+sdk_version:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
@@ -86,6 +86,7 @@ card_engine_end:
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
+.word	card_init_pull_arm7
 .word	vblankHandler
 .word	fifoHandler
 .word	cardStructArm9
@@ -106,6 +107,7 @@ card_read_arm9:
 	ldr 	r5, [R4,#0x18] @Depends on the SDK version
 	ldr 	r6, [R4,#0x1C] @Depends on the SDK version
 	ldr 	r7, [R4,#0x20] @Depends on the SDK version
+	ldr 	r9, [R4,#0x24] @Depends on the SDK version
 	
 	@ mrc p15, 0, r0, c1, c0, 0
 	@ bic r0, #1
@@ -116,6 +118,7 @@ card_read_arm9:
 	str 	r5, [R8,#0x4]
 	str 	r6, [R8,#0x8]
 	str 	r7, [R8,#0xC]
+	str 	r9, [R8,#0x10]
 	
 	@ldr r0,= 0x4000208
 	@ldr r11,[r0]
@@ -226,3 +229,8 @@ cardStructArm9:
 .pool
 card_pull_out_arm9:
 	bx      lr
+card_init_pull_arm7:
+	ldr	r3, =ipcSyncEnable
+	bx	r3	
+	bx  lr
+.pool

@@ -29,13 +29,13 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
-// old sdk version
-u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
-u32 cardReadStartSignature[1] = {0xE92D4FF0};
+// sdk < 4 version
+u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
+u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 
-// new sdk version
-//u32 a9cardReadSignature[2]    = {0x040001A4, 0x04100010};
-//u32 cardReadStartSignature[1] = {0xE92D4070};
+// sdk > 4 version
+u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
+u32 cardReadStartSignature4[1] = {0xE92D4070};
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
@@ -43,6 +43,7 @@ u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
+u32 cardInitPullOutStartSignature[1] = {0xE92D4008};
     
 //
 // Look in @data for @find and return the position of it.
@@ -136,11 +137,19 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 }
 
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {	
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
 	nocashMessage("patchCardNds");
 	
 	u32* debug = (u32*)0x037D0000;
 	debug[4] = ndsHeader->arm9destination;
+	debug[8] = moduleParams->sdk_version;
+	
+	u32* a9cardReadSignature = a9cardReadSignature1;
+	u32* cardReadStartSignature = cardReadStartSignature1;
+	if(moduleParams->sdk_version > 0x4000000) {
+		a9cardReadSignature = a9cardReadSignature4;
+		cardReadStartSignature = cardReadStartSignature4;
+	} 
 
 	// Find the card read
     u32 cardReadEndOffset =  
@@ -199,10 +208,14 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
     }
 	debug[0] = cardIdStartOffset;
     nocashMessage("Card id found\n");	*/	
+	
+
 
 	debug[2] = cardEngineLocation;
 	
 	u32* patches =  (u32*) cardEngineLocation[0];
+	
+	cardEngineLocation[3] = moduleParams->sdk_version;
 	
 	u32* cardReadPatch = (u32*) patches[0];
 	
@@ -219,7 +232,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	cardEngineLocation[5] = *card_struct;
 	//cardEngineLocation[6] = *cache_struct;
 	
-	*((u32*)patches[4]) = *card_struct;
+	*((u32*)patches[5]) = *card_struct;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	

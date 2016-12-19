@@ -23,10 +23,11 @@
 #include "fat.h"
 
 static bool initialized = false;
-extern vu32* volatile commandAddr;
+static bool initializedIRQ = false;
 extern vu32* volatile cardStruct;
 extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
+extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 
 void runCardEngineCheck (void) {
@@ -42,38 +43,39 @@ void runCardEngineCheck (void) {
 		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");
-		dbg_hexa(0x02100000);
 		initialized=true;
 	}
 
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE04)
     {
-        dbg_printf("card read received\n");
-
+        dbg_printf("card read received\n");	
+		dbg_printf("sdk version :");
+		dbg_hexa(sdk_version);			
+			
 		// old sdk version
-		// u32 src = *(vu32*)(cardStruct+6);
-		// u32 dst = *(vu32*)(cardStruct+7);
-		// u32 len = *(vu32*)(cardStruct+8);
-		
-		// new sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
 		
-		dbg_printf("src : \n");
-		dbg_hexa(src);
+		if(sdk_version > 0x4000000) {
+			// new sdk version
+			src = *(vu32*)(sharedAddr+2);
+			dst = *(vu32*)(sharedAddr+3);
+			len = *(vu32*)(sharedAddr+4);
+		}
 		
-		dbg_printf("str : \n");
-		dbg_hexa(cardStruct);
-		
-		dbg_printf("dst : \n");
+		dbg_printf("\nstr : \n");
+		dbg_hexa(cardStruct);		
+		dbg_printf("\nsrc : \n");
+		dbg_hexa(src);		
+		dbg_printf("\ndst : \n");
 		dbg_hexa(dst);
-		dbg_printf("len : \n");
+		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
 		
 		fileRead(0x027ff800 ,fileCluster,src,len);
 		
-		dbg_printf("read \n");
+		dbg_printf("\nread \n");
 		
 		*sharedAddr = 0;
 		
@@ -82,31 +84,33 @@ void runCardEngineCheck (void) {
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE05)
     {
         dbg_printf("card read receivedv2\n");
-
-		// old sdk version
-		// u32 src = *(vu32*)(cardStruct+6);
-		// u32 dst = *(vu32*)(cardStruct+7);
-		// u32 len = *(vu32*)(cardStruct+8);
+		dbg_printf("sdk version :");
+		dbg_hexa(sdk_version);		
 		
-		// new sdk version
+		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
 		
-		dbg_printf("src : \n");
-		dbg_hexa(src);
+		if(sdk_version > 0x4000000) {
+			// new sdk version
+			src = *(vu32*)(sharedAddr+2);
+			dst = *(vu32*)(sharedAddr+3);
+			len = *(vu32*)(sharedAddr+4);
+		}
 		
-		dbg_printf("str : \n");
-		dbg_hexa(cardStruct);
-		
-		dbg_printf("dst : \n");
+		dbg_printf("\nstr : \n");
+		dbg_hexa(cardStruct);		
+		dbg_printf("\nsrc : \n");
+		dbg_hexa(src);		
+		dbg_printf("\ndst : \n");
 		dbg_hexa(dst);
-		dbg_printf("len : \n");
+		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
 		
 		fileRead(dst,fileCluster,src,len);
 		
-		dbg_printf("read \n");
+		dbg_printf("\nread \n");
 		
 		*sharedAddr = 0;
 		
@@ -128,6 +132,13 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	
 	runCardEngineCheck();
+}
+
+void ipcSyncEnable() {	
+	dbg_printf("ipcSyncEnable\n");
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+	nocashMessage("IRQ_IPC_SYNC enabled");
+	REG_IE |= IRQ_IPC_SYNC;
 }
 
 
