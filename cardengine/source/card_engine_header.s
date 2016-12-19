@@ -95,17 +95,23 @@ card_read_arm9:
 	ldr		r10, =0x24
 	add		r10, r10, r0	
 	
-	@ new sdk version
+	@ old sdk version
 	ldr 	r4, cardStructArm9
-	ldr 	r5, [R4,#0x1C]
-	ldr 	r6, [R4,#0x20]
-	ldr 	r7, [R4,#0x24]
-	
-	@ mrc p15, 0, r0, c1, c0, 0
-	@ bic r0, #1
-	@ mcr p15, 0, r0, c1, c0, 0
+	ldr 	r5, [R4,#0x18]
+	ldr 	r6, [R4,#0x1C]
+	ldr 	r7, [R4,#0x20]
 	
 	@ new sdk version
+	@ ldr 	r4, cardStructArm9
+	@ ldr 	r5, [R4,#0x1C]
+	@ ldr 	r6, [R4,#0x20]
+	@ ldr 	r7, [R4,#0x24]
+	
+	mrc p15, 0, r0, c1, c0, 0
+	bic r0, #1
+	mcr p15, 0, r0, c1, c0, 0
+	
+
 	ldr     r8, =0x027FFB08
 	str 	r5, [R8,#0x4]
 	str 	r6, [R8,#0x8]

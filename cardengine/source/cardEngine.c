@@ -50,12 +50,6 @@ void runCardEngineCheck (void) {
     {
         dbg_printf("card read received\n");
 
-		// old sdk version
-		// u32 src = *(vu32*)(cardStruct+6);
-		// u32 dst = *(vu32*)(cardStruct+7);
-		// u32 len = *(vu32*)(cardStruct+8);
-		
-		// new sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
