@@ -50,6 +50,12 @@ void runCardEngineCheck (void) {
     {
         dbg_printf("card read received\n");
 
+		// old sdk version
+		// u32 src = *(vu32*)(cardStruct+6);
+		// u32 dst = *(vu32*)(cardStruct+7);
+		// u32 len = *(vu32*)(cardStruct+8);
+		
+		// new sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
@@ -65,9 +71,42 @@ void runCardEngineCheck (void) {
 		dbg_printf("len : \n");
 		dbg_hexa(len);
 		
-		fileRead(0x027ff800,fileCluster,src,len);
+		fileRead(0x027ff800 ,fileCluster,src,len);
 		
-		//dbg_printf("read \n");
+		dbg_printf("read \n");
+		
+		*sharedAddr = 0;
+		
+	}
+	
+	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE05)
+    {
+        dbg_printf("card read receivedv2\n");
+
+		// old sdk version
+		// u32 src = *(vu32*)(cardStruct+6);
+		// u32 dst = *(vu32*)(cardStruct+7);
+		// u32 len = *(vu32*)(cardStruct+8);
+		
+		// new sdk version
+		u32 src = *(vu32*)(sharedAddr+1);
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 len = *(vu32*)(sharedAddr+3);
+		
+		dbg_printf("src : \n");
+		dbg_hexa(src);
+		
+		dbg_printf("str : \n");
+		dbg_hexa(cardStruct);
+		
+		dbg_printf("dst : \n");
+		dbg_hexa(dst);
+		dbg_printf("len : \n");
+		dbg_hexa(len);
+		
+		fileRead(dst,fileCluster,src,len);
+		
+		dbg_printf("read \n");
 		
 		*sharedAddr = 0;
 		
