@@ -342,6 +342,12 @@ int main (void) {
 	//}
 	
 	copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
+
+	module_params_t* params = findModuleParams(NDS_HEAD);
+	if(params)
+	{
+		ensureArm9Decompressed(NDS_HEAD, params);
+	}
 	
 	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION);
 	

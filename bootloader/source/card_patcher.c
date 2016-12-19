@@ -27,7 +27,7 @@ u32 a7something1Signature[2]   = {0xE350000C,0x908FF100};
 u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 // Subroutine function signatures arm9
-u32 compressionSignature[2]   = {0xDEC00621, 0x2106C0DE};
+u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
 // old sdk version
 u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
@@ -43,7 +43,6 @@ u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
-
     
 //
 // Look in @data for @find and return the position of it.
@@ -76,6 +75,66 @@ u32 getOffsetA9(u32* addr, size_t size, u32* find, size_t sizeofFind, int direct
 	return addr;
 }
 
+module_params_t* findModuleParams(const tNDSHeader* ndsHeader)
+{
+	nocashMessage("Looking for moduleparams\n");
+	uint32_t moduleparams = getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
+	if(!moduleparams)
+	{
+		nocashMessage("No moduleparams?\n");
+        return 0;
+	}
+	return (module_params_t*)(moduleparams - 0x1C);
+}
+
+void decompressLZ77Backwards(uint8_t* addr, size_t size)
+{
+	uint32_t leng = *((uint32_t*)(addr + size - 4)) + size;
+	//byte[] Result = new byte[leng];
+	//Array.Copy(Data, Result, Data.Length);
+	uint32_t end = (*((uint32_t*)(addr + size - 8))) & 0xFFFFFF;
+	uint8_t* result = addr;
+	int Offs = (int)(size - ((*((uint32_t*)(addr + size - 8))) >> 24));
+	int dstoffs = (int)leng;
+	while (true)
+	{
+		uint8_t header = result[--Offs];
+		for (int i = 0; i < 8; i++)
+		{
+			if ((header & 0x80) == 0) result[--dstoffs] = result[--Offs];
+			else
+			{
+				uint8_t a = result[--Offs];
+				uint8_t b = result[--Offs];
+				int offs = (((a & 0xF) << 8) | b) + 2;//+ 1;
+				int length = (a >> 4) + 2;
+				do
+				{
+					result[dstoffs - 1] = result[dstoffs + offs];
+					dstoffs--;
+					length--;
+				}
+				while (length >= 0);
+			}
+			if (Offs <= size - end)
+				return;
+			header <<= 1;
+		}
+	}
+}
+
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams)
+{
+	if(!moduleParams->compressed_static_end)
+	{
+		nocashMessage("This rom is not compressed\n");
+		return; //not compressed
+	}
+	nocashMessage("This rom is compressed ;)\n");
+	decompressLZ77Backwards((uint8_t*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+	moduleParams->compressed_static_end = 0;
+}
+
 
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {	
 	nocashMessage("patchCardNds");
@@ -85,7 +144,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 
 	// Find the card read
     u32 cardReadEndOffset =  
-        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//ndsHeader->arm9binarySize,
               (u32*)a9cardReadSignature, 2, 1);
     if (!cardReadEndOffset) {
         nocashMessage("Card read end not found\n");
@@ -103,7 +162,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
     nocashMessage("Card read found\n");	
 	
 	u32 cardPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
     if (!cardReadStartOffset) {
         nocashMessage("Card pull out not found\n");
