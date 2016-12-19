@@ -159,54 +159,15 @@ partial_loop_copy:
     strb r10, [r6], #1
     subs r7, #1
     bgt partial_loop_copy
-
-	b exitfunc
 	
 	@ mrc p15, 0, r0, c1, c0, 0
 	@ bic r0, #1
 	@ mcr p15, 0, r0, c1, c0, 0
 	
-	@ new sdk version
-	//ldr     r8, =0x027FFB08
-	//str 	r5, [R8,#0x4]
-	//str 	r6, [R8,#0x8]
-	//str 	r7, [R8,#0xC]
-	
 	@ldr r0,= 0x4000208
 	@ldr r11,[r0]
 	@mov r1, #0
 	@str r1, [r0]
-	
-	//ldr r8, =0x02700000
-	
-	//cmp r6, r8
-	
-	//bgt cmd1
-	
-	//b cmd2
-	
-//cmd1:
-	
-	//ldr 	r5, =0x027FEE04
-	//ldr		r6, =0x027FFB08
-	//str     r5, [r6]
-
-	//b end
-	
-//cmd2:
-	//ldr 	r5, =0x027FEE05
-	//ldr		r6, =0x027FFB08
-	//str     r5, [r6]
-
-//top2:
-//	ldr		r6,=0x027FFB08 @sharedAddr
-//	ldr     r5, [r6]
-//	cmp		r5,#0
-//	bne top2
-	
-//	b endfunc
-	
-//end:
 	
 	@REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;
 	@ldr     r4, =0x04000000
@@ -223,43 +184,15 @@ partial_loop_copy:
 	@mov     r6, #31
 	@str     r6, [r4]
 	
-//top:
-	//ldr		r6,=0x027FFB08 @sharedAddr
-	//ldr     r5, [r6]
-	//cmp		r5,#0
-	//bne top
-	
 	@BG_PALETTE[0] = RGB15(31, 0, 0)
 	@ldr     r4, =0x05000000
 	@ldr		r6, =0xffffffff
 	@str     r6, [r4]
-	
-	//ldr		r6,=0x027FFB14
-	//ldr		r8,=0x027FFB14
-	//ldr		r9,=0x027FFB0C
-	//LDR     R9, [R9]
 
 	@BG_PALETTE[0] = RGB150x027FFB140x027FFB14(31, 0, 0)
 	@ldr     r4, =0x05000000
 	@ldr		r6, =10 
 	@str     r6, [r4]
-
-   // ldr r7,=0x027FFB08
-    //ldr r8, [r7, #0xC] //len
-    //ldr r9, [r7, #0x8] //dst
-	@sub r8, #1
-   // ldr r7,= 0x027ff800 
-//loop:
-   // ldrb r10, [r7], #1
-    //strb r10, [r9], #1
-   // subs r8, #1
-    //bgt loop
-	
-//endfunc:
-	
-	//ldr 	r7, cardStructArm9
-	
-	//str 	r9, [R7,#0x1C]
 	
 	@BG_PALETTE[0] = RGB15(31, 0, 0)
 	@ldr     r4, =0x05000000
@@ -275,8 +208,8 @@ partial_loop_copy:
 
 exitfunc:
 
-	ldr 	r7, cardStructArm9
-	str 	r6, [R7,#0x1C]
+	@ldr 	r7, cardStructArm9
+	@str 	r6, [R7,#0x1C]
 	
 	add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
