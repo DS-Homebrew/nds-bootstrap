@@ -27,10 +27,10 @@ extern vu32* volatile commandAddr;
 extern vu32* volatile cardStruct;
 extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
-vu32* volatile debugAddr = (vu32*)0x02100000;
+vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 
 void runCardEngineCheck (void) {
-	dbg_printf("runCardEngineCheck\n");
+	//dbg_printf("runCardEngineCheck\n");
 	int oldIME = enterCriticalSection();
 	
 	if(!initialized) {
@@ -46,17 +46,13 @@ void runCardEngineCheck (void) {
 		initialized=true;
 	}
 
-	if(*(vu32*)(0x02100000) == (vu32)0x027FEE04)
+	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE04)
     {
-        //dbg_printf("card read received\n");
+        dbg_printf("card read received\n");
 
-		u32 src = *(vu32*)(cardStruct+6);
-		u32 dst = *(vu32*)(cardStruct+7);
-		u32 len = *(vu32*)(cardStruct+8);
-		
-		*(vu32*)(0x02100004) = dst;
-		
-		*(vu32*)(0x02100008) = len;
+		u32 src = *(vu32*)(sharedAddr+1);
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 len = *(vu32*)(sharedAddr+3);
 		
 		dbg_printf("src : \n");
 		dbg_hexa(src);
@@ -69,11 +65,11 @@ void runCardEngineCheck (void) {
 		dbg_printf("len : \n");
 		dbg_hexa(len);
 		
-		fileRead(0x02140000,fileCluster,src,len);
+		fileRead(0x027ff800,fileCluster,src,len);
 		
 		//dbg_printf("read \n");
 		
-		*(vu32*)(0x2100000) = 0;
+		*sharedAddr = 0;
 		
 	}
 
