@@ -42,27 +42,20 @@ void runCardEngineCheck (void) {
 		FAT_InitFiles(false);
 		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
-		dbg_printf("logging initialized\n");
+		dbg_printf("logging initialized\n");		
+		dbg_printf("sdk version :");
+		dbg_hexa(sdk_version);		
 		initialized=true;
 	}
 
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE04)
     {
-        dbg_printf("card read received\n");	
-		dbg_printf("sdk version :");
-		dbg_hexa(sdk_version);			
+        dbg_printf("\ncard read received\n");	
 			
 		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
-		
-		if(sdk_version > 0x3000000) {
-			// new sdk version
-			src = *(vu32*)(sharedAddr+2);
-			dst = *(vu32*)(sharedAddr+3);
-			len = *(vu32*)(sharedAddr+4);
-		}
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
@@ -83,21 +76,12 @@ void runCardEngineCheck (void) {
 	
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE05)
     {
-        dbg_printf("card read receivedv2\n");
-		dbg_printf("sdk version :");
-		dbg_hexa(sdk_version);		
+        dbg_printf("\ncard read receivedv2\n");
 		
 		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 len = *(vu32*)(sharedAddr+3);
-		
-		if(sdk_version > 0x3000000) {
-			// new sdk version
-			src = *(vu32*)(sharedAddr+2);
-			dst = *(vu32*)(sharedAddr+3);
-			len = *(vu32*)(sharedAddr+4);
-		}
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
