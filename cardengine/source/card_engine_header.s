@@ -102,15 +102,14 @@ loop2:
     subs r8, #1
     bgt loop2
 	
-	@ new sdk version
 	ldr 	r4, cardStructArm9
 	ldr 	r5, [R4]      @SRC; 
 	ldr 	r6, [R4,#0x4] @DST; 
 	ldr 	r7, [R4,#0x8] @LEN; 
 	cmp r7, #512
-	cmp r7, #512
-	blt partial
 	ldr r8, =0x027FFB08
+	blt partial
+	
 chunck_loop:
 	str r5, [R8,#0x4]
 	str r6, [R8,#0x8]
