@@ -44,7 +44,8 @@ vblankHandler:
 fifoHandler:	
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	ldr 	r0, code_handler_start_fifo
+	adr 	lr, code_handler_start_fifo
+	ldr 	r0,	intr_fifo_orig_return
 	bx  	r0
 	
 code_handler_start_vblank:
@@ -92,14 +93,11 @@ patches:
 card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
 	sub     sp, sp, #4
-	ldr		r10, =0x24
-	add		r10, r10, r0	
 	
-	ldr r8,=0x00000fff
-	
-loop2:
-    subs r8, #1
-    bgt loop2
+	@ mov r8,#0x1000	
+	@ loop2:
+    @ subs r8, #1
+    @ bgt loop2
 	
 	ldr 	r4, cardStructArm9
 	ldr 	r5, [R4]      @SRC; 
@@ -117,6 +115,13 @@ chunck_loop:
 
 	ldr r4, =0x027FEE04
 	str r4, [r8]
+	
+sendIPCSync:
+	@ LDR     R4, =0x4000100
+	@ LDRH    R11, [R4,#0x80]
+	@ BIC     R11, R11, #0xF00
+	@ ORR     R11, R11, #0x2400
+	@ STRH    R3, [R4,#0x80]
 
 chunck_loop_wait:
 	ldr r4, [r8]
@@ -213,19 +218,30 @@ exitfunc:
 	add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
+
 cardStructArm9:
 .word	0x00000000	
 .pool
 card_pull_out_arm9:
+	@sendIPCSync
+	@	stmfd   sp!, {r4-r11,lr}
+	@	LDR     R4, =0x4000100
+	@	LDRH    R11, [R4,#0x80]
+	@	BIC     R11, R11, #0xF00
+	@	ORR     R11, R11, #0x2400
+	@	STRH    R3, [R4,#0x80]
+	@	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
+	@.pool
 card_init_pull_arm7:
     push    {lr}
-	push	{r0-r12}
-	ldr	r3, =irqIPCSYNCEnable
+	push	{r1-r12}
+	@ldr	r3, =irqIPCSYNCEnable
+	ldr	r3, =myIrqEnable
 	bl	_blx_r3_stub2
-	pop   	{r0-r12} 
+	pop   	{r1-r12} 
 	pop  	{lr}
-	mov     r0, #0
+	@ldr     r0, =0xFFFFFFFE
 	bx  lr
 @---------------------------------------------------------------------------------
 _blx_r3_stub2:

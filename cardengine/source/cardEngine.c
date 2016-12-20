@@ -24,16 +24,14 @@
 
 static bool initialized = false;
 static bool initializedIRQ = false;
+static bool calledViaIPC = false;
 extern vu32* volatile cardStruct;
 extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 
-void runCardEngineCheck (void) {
-	//dbg_printf("runCardEngineCheck\n");
-	int oldIME = enterCriticalSection();
-	
+void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_controller_init();
@@ -46,6 +44,18 @@ void runCardEngineCheck (void) {
 		dbg_printf("sdk version :");
 		dbg_hexa(sdk_version);		
 		initialized=true;
+	}
+	
+}
+
+void runCardEngineCheck (void) {
+	//dbg_printf("runCardEngineCheck\n");
+	int oldIME = enterCriticalSection();
+	
+	initLogging();
+	
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
 	}
 
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE04)
@@ -108,12 +118,16 @@ void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
 	nocashMessage("myIrqHandlerFIFO");
 	
+	calledViaIPC = true;
+	
 	runCardEngineCheck();
 }
 
 
 void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
+	
+	calledViaIPC = false;
 	
 	runCardEngineCheck();
 }
@@ -126,7 +140,7 @@ u32 myIrqEnable(u32 irq) {
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-	nocashMessage("IRQ_IPC_SYNC enabled");
+	nocashMessage("IRQ_IPC_SYNC enabled\n");
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
@@ -135,11 +149,12 @@ u32 myIrqEnable(u32 irq) {
 
 void irqIPCSYNCEnable() {	
 	if(!initializedIRQ) {
-		int oldIME = enterCriticalSection();		
-		nocashMessage("irqIPCSYNCEnable\n");	
+		int oldIME = enterCriticalSection();	
+		initLogging();	
+		dbg_printf("\nirqIPCSYNCEnable\n");	
 		REG_IE |= IRQ_IPC_SYNC;
 		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-		nocashMessage("IRQ_IPC_SYNC enabled");
+		dbg_printf("IRQ_IPC_SYNC enabled\n");
 		leaveCriticalSection(oldIME);
 		initializedIRQ = true;
 	}
