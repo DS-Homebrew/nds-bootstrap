@@ -105,7 +105,6 @@ card_read_arm9:
 	ldr 	r7, [R4,#0x8] @LEN; 
 	cmp r7, #512
 	ldr r8, =0x027FFB08
-	ldr r1, =0x027FEE04
 	ldr r2, =0x4000100
 	
 	blt partial
@@ -115,7 +114,7 @@ chunck_loop:
 	str r6, [R8,#0x8]
 	mov r4, #512
 	str r4, [R8,#0xC]
-	str r1, [r8]
+	str r2, [r8]
 	
 	@sendIPCSync
 	LDRH    R11, [r2,#0x80]
@@ -148,7 +147,7 @@ partial:
 	str r5, [R8,#0x4]
 	str r6, [R8,#0x8]
 	str r7, [R8,#0xC]
-	str r1, [r8]
+	str r2, [r8]
 	
 	@sendIPCSync
 	LDRH    R11, [r2,#0x80]
