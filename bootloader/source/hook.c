@@ -257,7 +257,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData,
 	}
 	
 	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation+17;
+	u32* ipcSyncHandler = hookLocation+16;
 	
 	debug[9] = hookLocation;
 	

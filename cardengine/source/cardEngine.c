@@ -135,12 +135,12 @@ void myIrqHandlerVBlank(void) {
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();	
 	
-	nocashMessage("myIrqEnable\n");
+	//nocashMessage("myIrqEnable\n");
 	
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-	nocashMessage("IRQ_IPC_SYNC enabled\n");
+	//nocashMessage("IRQ_IPC_SYNC enabled\n");
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);

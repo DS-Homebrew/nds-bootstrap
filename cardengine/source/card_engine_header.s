@@ -92,7 +92,7 @@ patches:
 .word	cardStructArm9
 card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
-	sub     sp, sp, #4
+	@sub     sp, sp, #4
 	
 	@ mov r8,#0x1000	
 	@ loop2:
@@ -115,13 +115,6 @@ chunck_loop:
 
 	ldr r4, =0x027FEE04
 	str r4, [r8]
-	
-sendIPCSync:
-	@ LDR     R4, =0x4000100
-	@ LDRH    R11, [R4,#0x80]
-	@ BIC     R11, R11, #0xF00
-	@ ORR     R11, R11, #0x2400
-	@ STRH    R3, [R4,#0x80]
 
 chunck_loop_wait:
 	ldr r4, [r8]
@@ -151,6 +144,13 @@ partial:
 
 	ldr r4, =0x027FEE04
 	str r4, [r8]
+	
+sendIPCSync:
+	LDR     R4, =0x4000100
+	LDRH    R11, [R4,#0x80]
+	BIC     R11, R11, #0xF00
+	ORR     R11, R11, #0x2400
+	STRH    R3, [R4,#0x80]
 
 partial_loop_wait:
 	ldr r4, [r8]
@@ -215,7 +215,7 @@ exitfunc:
 	@ldr 	r7, cardStructArm9
 	@str 	r6, [R7,#0x1C]
 	
-	add     sp, sp, #4
+	@add     sp, sp, #4
 	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
 
@@ -223,25 +223,15 @@ cardStructArm9:
 .word	0x00000000	
 .pool
 card_pull_out_arm9:
-	@sendIPCSync
-	@	stmfd   sp!, {r4-r11,lr}
-	@	LDR     R4, =0x4000100
-	@	LDRH    R11, [R4,#0x80]
-	@	BIC     R11, R11, #0xF00
-	@	ORR     R11, R11, #0x2400
-	@	STRH    R3, [R4,#0x80]
-	@	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
 	@.pool
 card_init_pull_arm7:
     push    {lr}
 	push	{r1-r12}
-	@ldr	r3, =irqIPCSYNCEnable
 	ldr	r3, =myIrqEnable
 	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
 	pop  	{lr}
-	@ldr     r0, =0xFFFFFFFE
 	bx  lr
 @---------------------------------------------------------------------------------
 _blx_r3_stub2:
