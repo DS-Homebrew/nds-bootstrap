@@ -20,6 +20,7 @@
 #include <nds/fifomessages.h>
 #include "sdmmc.h"
 #include "debugToFile.h"
+#include "cardEngine.h"
 #include "fat.h"
 
 static bool initialized = false;
@@ -77,6 +78,12 @@ void runCardEngineCheck (void) {
 		dbg_hexa(dst);
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
+		
+		if(is_aligned(dst,4) || is_aligned(len,4)) {
+			dbg_printf("\n aligned read : \n");
+		} else {
+			dbg_printf("\n misaligned read : \n");
+		}
 		
 		fileRead(0x027ff800 ,fileCluster,src,len);
 		

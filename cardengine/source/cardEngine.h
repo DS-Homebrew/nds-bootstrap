@@ -23,11 +23,14 @@
 extern "C" {
 #endif
 
-void myIrqHandler(void);
+#define is_aligned(POINTER, BYTE_COUNT) \
+    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
-void myIrqEnable(u32 irq);
+void myIrqHandlerFIFO(void);
 
-void runCardEngineCheck (void);
+u32 myIrqEnable(u32 irq);
+
+/*void runCardEngineCheck (void);
 
 void eepromProtect (void);
 void eepromRead (u32 src, void *dst, u32 len);
@@ -37,7 +40,7 @@ void eepromPageVerify (void);
 void eepromPageErase (void);
 
 u32 cardId (void);
-void cardRead (u32 dma, const void *src, void *dst, u32 len);
+void cardRead (u32 dma, const void *src, void *dst, u32 len);*/
 
 #ifdef __cplusplus
 }
