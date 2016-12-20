@@ -45,7 +45,7 @@ u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 
 // infinite loop
-u32 cardInitPullOutStartSignature[3] = {0xE92D4000,0xE24DD004,0xE59D3000,0xE3C3301F};
+u32 cardInitPullOutStartSignature[4] = {0xE92D4000,0xE24DD004,0xE59D3000,0xE3C3301F};
 
 //u32 cardInitPullOutStartSignature[3] = {0xE92D4000,0xE3A0C301,0xE28CCE21,0xE51C1008};
 
@@ -187,7 +187,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32 cardInitPullOutOffset =   
         getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)cardInitPullOutStartSignature, 3, 1);
+              (u32*)cardInitPullOutStartSignature, 4, 1);
     if (!cardInitPullOutOffset) {
         nocashMessage("Card init pull out not found\n");
         return 0;
@@ -259,7 +259,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	if(cardPullOutOffset>0)
 		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
 		
-	copyLoop ((u32*)cardInitPullOutOffset, cardInitPullOutPatch, 0x40);	
+	//copyLoop ((u32*)cardInitPullOutOffset, cardInitPullOutPatch, 0x40);	
 	
 	nocashMessage("ERR_NONE");
 	return 0;
