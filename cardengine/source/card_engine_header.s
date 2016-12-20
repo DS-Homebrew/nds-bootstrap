@@ -150,7 +150,7 @@ sendIPCSync:
 	LDRH    R11, [R4,#0x80]
 	BIC     R11, R11, #0xF00
 	ORR     R11, R11, #0x2400
-	STRH    R3, [R4,#0x80]
+	STRH    R11, [R4,#0x80]
 
 partial_loop_wait:
 	ldr r4, [r8]
