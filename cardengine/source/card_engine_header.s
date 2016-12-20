@@ -91,7 +91,7 @@ patches:
 .word	fifoHandler
 .word	cardStructArm9
 card_read_arm9:
-	stmfd   sp!, {r4-r11,lr}
+	stmfd   sp!, {r0-r11,lr}
 	@sub     sp, sp, #4
 	
 	@ mov r8,#0x1000	
@@ -105,6 +105,9 @@ card_read_arm9:
 	ldr 	r7, [R4,#0x8] @LEN; 
 	cmp r7, #512
 	ldr r8, =0x027FFB08
+	ldr r1, =0x027FEE04
+	ldr r2, =0x4000100
+	
 	blt partial
 	
 chunck_loop:
@@ -112,9 +115,13 @@ chunck_loop:
 	str r6, [R8,#0x8]
 	mov r4, #512
 	str r4, [R8,#0xC]
-
-	ldr r4, =0x027FEE04
-	str r4, [r8]
+	str r1, [r8]
+	
+	@sendIPCSync
+	LDRH    R11, [r2,#0x80]
+	BIC     R11, R11, #0xF00
+	ORR     R11, R11, #0x2400
+	STRH    R11, [r2,#0x80]
 
 chunck_loop_wait:
 	ldr r4, [r8]
@@ -141,16 +148,13 @@ partial:
 	str r5, [R8,#0x4]
 	str r6, [R8,#0x8]
 	str r7, [R8,#0xC]
-
-	ldr r4, =0x027FEE04
-	str r4, [r8]
+	str r1, [r8]
 	
-sendIPCSync:
-	LDR     R4, =0x4000100
-	LDRH    R11, [R4,#0x80]
+	@sendIPCSync
+	LDRH    R11, [r2,#0x80]
 	BIC     R11, R11, #0xF00
 	ORR     R11, R11, #0x2400
-	STRH    R11, [R4,#0x80]
+	STRH    R11, [r2,#0x80]
 
 partial_loop_wait:
 	ldr r4, [r8]
@@ -216,7 +220,7 @@ exitfunc:
 	@str 	r6, [R7,#0x1C]
 	
 	@add     sp, sp, #4
-	ldmfd   sp!, {r4-r11,lr}
+	ldmfd   sp!, {r0-r11,lr}
 	bx      lr
 
 cardStructArm9:

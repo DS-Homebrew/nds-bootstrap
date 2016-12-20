@@ -53,15 +53,17 @@ void runCardEngineCheck (void) {
 	int oldIME = enterCriticalSection();
 	
 	initLogging();
-	
-	if(calledViaIPC) {
-		dbg_printf("\ntriggered via IPC\n");
-	}
+
 
 	if(*(vu32*)(0x027FFB08) == (vu32)0x027FEE04)
     {
         dbg_printf("\ncard read received\n");	
+		
 			
+		if(calledViaIPC) {
+			dbg_printf("\ntriggered via IPC\n");
+		}
+				
 		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+1);
 		u32 dst = *(vu32*)(sharedAddr+2);
