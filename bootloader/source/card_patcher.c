@@ -44,13 +44,16 @@ u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 
-// infinite loop
-//u32 cardInitPullOutStartSignature[4] = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001};
-
-//u32 cardInitPullOutStartSignature[3] = {0xE92D4000,0xE3A0C301,0xE28CCE21,0xE51C1008};
-
 // irqEnable
-u32 cardInitPullOutStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+
+// cache management
+u32 cacheMagStartSignature[4] = {0xE0811000,0xE3C0001F,0xEE070F3E,0xE2800020};
+
+   
+   
+   
+ 
     
 //
 // Look in @data for @find and return the position of it.
@@ -189,13 +192,23 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32 cardInitPullOutOffset =   
         getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)cardInitPullOutStartSignature, 4, 1);
+              (u32*)irqEnableStartSignature, 4, 1);
     if (!cardInitPullOutOffset) {
-        nocashMessage("Card init pull out not found\n");
+        nocashMessage("irq enable not found\n");
         return 0;
     }
 	debug[0] = cardInitPullOutOffset;
-    nocashMessage("Card init pull out found\n");
+    nocashMessage("irq enable found\n");
+	
+	u32 cacheMagOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)cacheMagStartSignature, 4, 1);
+    if (!cacheMagOffset) {
+        nocashMessage("cache management not found\n");
+        return 0;
+    }
+	debug[0] = cacheMagOffset;
+    nocashMessage("cache management found\n");
 	
 	/*u32 cardSendOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
@@ -255,6 +268,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	if(moduleParams->sdk_version > 0x3000000) {
 		*((u32*)patches[5]) = ((u32*)*card_struct)+7;	
 	}
+	
+	*((u32*)patches[6]) = cacheMagOffset;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	

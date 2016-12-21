@@ -56,7 +56,7 @@ void runCardEngineCheck (void) {
 	initLogging();
 
 
-	if(*(vu32*)(0x027FFB0C) == (vu32)0x4000100)
+	if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800 || *(vu32*)(0x027FFB14) == (vu32)0x027ff800)
     {
         dbg_printf("\ncard read received\n");	
 		
@@ -66,9 +66,9 @@ void runCardEngineCheck (void) {
 		}
 				
 		// old sdk version
-		u32 src = *(vu32*)(sharedAddr+3);
+		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+2);
+		u32 len = *(vu32*)(sharedAddr+1);
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
@@ -88,21 +88,22 @@ void runCardEngineCheck (void) {
 		
 		if(is_aligned(dst,4) || is_aligned(len,4)) {
 			dbg_printf("\n aligned read : \n");
-			*(vu32*)(0x027FFB0C) = (vu32)2;
+			//*(vu32*)(0x027FFB0C) = (vu32)2;
 		} else {
 			dbg_printf("\n misaligned read : \n");
-			*(vu32*)(0x027FFB0C) = (vu32)0;
-		}		
+			//*(vu32*)(0x027FFB0C) = (vu32)0;
+		}	
+		*(vu32*)(0x027FFB14) = (vu32)0;	
 	}
 	
-	if(*(vu32*)(0x027FFB0C) == (vu32)0x027FEE05)
+	if(*(vu32*)(0x027FFB14) == (vu32)0x025ff800)
     {
         dbg_printf("\ncard read receivedv2\n");
 		
 		// old sdk version
-		u32 src = *(vu32*)(sharedAddr+3);
+		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+2);
+		u32 len = *(vu32*)(sharedAddr+1);
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
@@ -117,7 +118,7 @@ void runCardEngineCheck (void) {
 		
 		dbg_printf("\nread \n");
 		
-		*(vu32*)(0x027FFB0C) = 0;
+		*(vu32*)(0x027FFB14) = 0;
 		
 	}
 
