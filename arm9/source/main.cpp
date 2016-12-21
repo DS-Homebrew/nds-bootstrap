@@ -29,7 +29,6 @@
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
-#include "bootsplash.h"
 
 using namespace std;
 
@@ -137,60 +136,25 @@ static void myFIFOValue32Handler(u32 value,void* data)
 
 int main( int argc, char **argv) {
 
-	bool ntrMode = false;
-
 	// No! broke no$gba compatibility
-	//REG_SCFG_CLK = 0x85;
+	REG_SCFG_CLK = 0x85;
 
-	if (argc >= 2) {
-		if ( strcasecmp (argv[1], "NTR") == 0 ) {
-			ntrMode = true;
-		}		
-	}
-	
-	if(ntrMode) {
+	// if(ntrMode) {
 		// REG_SCFG_CLK = 0x80;
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+		// REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 		fifoSendValue32(FIFO_USER_06, 1);
-	}
+	// }
 	
 	if (fatInitDefault()) {
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 		
-		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
-			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
-			BootSplashInit();
-		}
-
-		consoleDemoInit();
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
-			if(REG_SCFG_MC == 0x11) { 
-				printf("Please insert a cartridge...\n");
-				do { swiWaitForVBlank(); } 
-				while (REG_SCFG_MC == 0x11);
-			}
-			fifoSendValue32(FIFO_USER_04, 1);
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) != -1) {
+			consoleDemoInit();
 		}
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
-		
-		if (0 != argc ) {
-			printf("arguments passed\n");
-			int i;
-			for (i=0; i<argc; i++ ) {
-				if (argv[i]) printf("[%d] %s\n", i, argv[i]);
-			}
-			printf("\n");
-		} else {
-			printf("No arguments passed!\n");
-		}
-		
-		if(ntrMode) {
-			printf("NTR mode enabled\n");
-		}
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
@@ -236,29 +200,9 @@ int main( int argc, char **argv) {
 			REG_SCFG_EXT = 0x03000000; // NAND/SD Access
 		}
 		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
-			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
-			
-			// run an argv file
-			
-			dbg_printf("NTR MODE SWITCH\n");		
-			
-			if(!ntrMode) {
-				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
-				dbg_printf("Running %s\n", bootstrapPath.c_str());
-				
-				runFile(bootstrapPath.c_str());
-			} else {				
-				dbg_printf("Running %s\n", ndsPath.c_str());
-				
-				runFile(ndsPath.c_str());
-			}
-		} else {
-			printf("TWL MODE enabled\n");			
-			dbg_printf("Running %s\n", ndsPath.c_str());
+		dbg_printf("Running %s\n", ndsPath.c_str());
 					
-			runFile(ndsPath.c_str());
-		}		
+		runFile(ndsPath.c_str());	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
