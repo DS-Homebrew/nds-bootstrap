@@ -50,9 +50,12 @@ u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 // cache management
 u32 cacheMagStartSignature1[4] = {0xE0811000,0xE3C0001F,0xEE070F3E,0xE2800020};
 
-// sdk > 4 version
+// sdk 2 alt version
+u32 cacheMagStartSignature2[4] = {0xE0811000,0xE3C0001F,0xEE070F36,0xE2800020};
+
+// cache management sdk > 4 version
 u32 cacheMagStartSignature4[4] = {0xE3A0C000,0xE0811000,0xE3C0001F,0xEE07CF9A};
-   
+
 //
 // Look in @data for @find and return the position of it.
 //
@@ -201,14 +204,17 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     nocashMessage("irq enable found\n");
 	
 	u32 cacheMagOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)cacheMagStartSignature, 4, 1);
     if (!cacheMagOffset) {
         nocashMessage("cache management not found\n");
-        return 0;
-    }
-	debug[0] = cacheMagOffset;
-    nocashMessage("cache management found\n");
+    } else {
+		debug[0] = cacheMagOffset;
+		nocashMessage("cache management found\n");
+	}
+
+	
+
 	
 	/*u32 cardSendOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
@@ -264,18 +270,30 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	cardEngineLocation[5] = *card_struct;
 	//cardEngineLocation[6] = *cache_struct;
 	
+	// cache management alternative
 	*((u32*)patches[5]) = ((u32*)*card_struct)+6;	
 	if(moduleParams->sdk_version > 0x3000000) {
 		*((u32*)patches[5]) = ((u32*)*card_struct)+7;	
+	}	
+	if(!cacheMagOffset) {
+		cacheMagOffset =   
+			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+				  (u32*)cacheMagStartSignature2, 4, 1);
+		if (!cacheMagOffset) {
+			nocashMessage("cache management alt not found\n");
+		}
+		debug[0] = cacheMagOffset;
+		nocashMessage("cache management alt found\n");
+		copyLoop ((u32*)patches[7], (u32*)patches[8], 16);	
 	}
 	
 	*((u32*)patches[6]) = cacheMagOffset;
 	
-	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
-	
 	if(moduleParams->sdk_version > 0x4000000) {
-		copyLoop ((u32*)patches[7], patches[8], 16);	
+		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
 	}
+	
+	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
 	if(cardPullOutOffset>0)
 		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
