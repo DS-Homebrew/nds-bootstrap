@@ -82,8 +82,6 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nmarker : \n");
 		dbg_hexa(marker);
 		
-
-		
 		fileRead(0x027ff800 ,fileCluster,src,len);
 		
 		dbg_printf("\nread \n");
@@ -96,7 +94,7 @@ void runCardEngineCheck (void) {
 			dbg_printf("\n misaligned read : \n");
 			//*(vu32*)(0x027FFB0C) = (vu32)0;
 		}	
-		*(vu32*)(0x027FFB14) = (vu32)0;	
+		*(vu32*)(0x027FFB14) = 0;	
 	}
 	
 	if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)

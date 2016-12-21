@@ -91,6 +91,8 @@ patches:
 .word	fifoHandler
 .word	cardStructArm9
 .word	cachemag
+.word	card_read_arm9_cmd2_v4
+.word	cmd2_v4
 card_read_arm9:
     stmfd   sp!, {r0-r11,lr}
     
@@ -114,6 +116,7 @@ cmd2:
 	blx r9  			@ dc flush range
 	@ restore r0, r1
 	ldmia r10, {r0,r1}
+cmd2_v4:
 	add r9, r9, #0x28
  	blx r9 				@ ic invalidate range
 	@ restore r0, r1
@@ -202,3 +205,9 @@ _blx_r3_stub2:
 @---------------------------------------------------------------------------------
 	bx	r3		
 .pool
+card_read_arm9_cmd2_v4:
+	add r9, r9, #0x3C
+ 	blx r9 				@ ic invalidate range
+	@ restore r0, r1
+	ldmia r10, {r0,r1}
+	sub r9, r9, #0x14

@@ -48,13 +48,11 @@ u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B
 u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
 // cache management
-u32 cacheMagStartSignature[4] = {0xE0811000,0xE3C0001F,0xEE070F3E,0xE2800020};
+u32 cacheMagStartSignature1[4] = {0xE0811000,0xE3C0001F,0xEE070F3E,0xE2800020};
 
+// sdk > 4 version
+u32 cacheMagStartSignature4[4] = {0xE3A0C000,0xE0811000,0xE3C0001F,0xEE07CF9A};
    
-   
-   
- 
-    
 //
 // Look in @data for @find and return the position of it.
 //
@@ -156,9 +154,11 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32* a9cardReadSignature = a9cardReadSignature1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
+	u32* cacheMagStartSignature = cacheMagStartSignature1;
 	if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
+		cacheMagStartSignature = cacheMagStartSignature4;
 	} 
 
 	// Find the card read
@@ -272,6 +272,10 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	*((u32*)patches[6]) = cacheMagOffset;
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
+	
+	if(moduleParams->sdk_version > 0x4000000) {
+		copyLoop ((u32*)patches[7], patches[8], 16);	
+	}
 	
 	if(cardPullOutOffset>0)
 		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
