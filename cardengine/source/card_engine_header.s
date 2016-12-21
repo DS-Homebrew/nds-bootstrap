@@ -97,7 +97,6 @@ card_read_arm9:
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
-	@sub 	r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
     ldr     r4, cardStructArm9
     ldr     r5, [R4]      @SRC
 	ldr     r0, [R4,#0x4] @DST
@@ -166,11 +165,11 @@ partial_cmd2:
 partial_loop_wait:
     ldr r9, [r8,#12]
     cmp r9,#0
-    bne partial_loop_wait
+    bne partial_loop_wait	
 	
+	sub r8, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 	cmp r7, r8
-	blt exitfunc
-
+	bne exitfunc
 
 partial_loop_copy:
     ldrb r9, [r7], #1
