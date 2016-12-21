@@ -102,63 +102,51 @@ card_read_arm9:
     ldr     r5, [R4]      @SRC
 	ldr     r0, [R4,#0x4] @DST
     ldr     r1, [R4,#0x8] @LEN
-	@mov r2, #128          @len for swicopy
-	mov    r2, #0x2400
+	mov     r2, #0x2400
 	
-	sub r7, r3, #(0x027ff800 - 0x026ff800) @below dtcm
+	sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
 	cmp r0, r7
 	bgt check_partial
 cmd2:
-	sub r7, r3, #(0x027ff800 - 0x025ff800) @below dtcm
-	add r4,r4,#4
+	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
+	add r10,r4,#4
 	@r0 dst, r1 len
 	ldr r9, cachemag
 	blx r9  			@ dc flush range
 	@ restore r0, r1
-	ldmia r4, {r0,r1}
+	ldmia r10, {r0,r1}
 	add r9, r9, #0x28
  	blx r9 				@ ic invalidate range
 	@ restore r0, r1
-	ldmia r4, {r0,r1}
+	ldmia r10, {r0,r1}
 	sub r9, r9, #0xC
 	blx r9 			 	@ wait for empty write buffer
-	@ restore r0, r1
-	ldmia r4, {r0,r1}
-	b partial
+	@ restore r0
+	ldr     r0, [R4,#0x4] @DST
+	b partial_cmd2
 	
 check_partial:
 	cmp r1, #512    
     blt partial
     
 chunck_loop:
-    mov r1, #512
-	@dst,  len, src, marker
-    stmia r8, {r0,r1,r3,r7}
+    mov r4, #512
+	@dst, len, src, marker
+    stmia r8, {r0,r4,r5,r7}
     
     @sendIPCSync
     strh    r2, [r3,#0x80]
 
     sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 chunck_loop_wait:
-    ldr r9, [r8,#12]	
-    @cmp r9,#2
-    @beq chunck_swi_copy	
+    ldr r9, [r8,#12]		
     cmp r9,#0
     bne chunck_loop_wait
-chunck_begin_copy:
-    mov r10, #512
 chunck_loop_copy:
     ldrb r9, [r7], #1
     strb r9, [r0], #1
-    subs r10, #1
+    subs r4, #1
     bgt chunck_loop_copy
-    b chunk_end_copy
-
-@chunck_swi_copy: 
-@    stmfd   sp!, {r0-r11,lr}
-@    swi 0x0C0000
-@	ldmfd   sp!, {r0-r11,lr}
-@    add r1, #512
 
 chunk_end_copy:
     add  r5, #512
@@ -167,22 +155,22 @@ chunk_end_copy:
     b check_partial
 
 partial:
-	@dst,  len, src, marker
-    stmia r8, {r0,r1,r3,r7}
+    sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
+partial_cmd2:
+	@dst, len, src, marker
+    stmia r8, {r0,r1,r5,r7}
     
     @sendIPCSync
     strh    r2, [r3,#0x80]
 
-    sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 partial_loop_wait:
     ldr r9, [r8,#12]
-    @cmp r9,#2
-    @beq partial_loop_copy
     cmp r9,#0
     bne partial_loop_wait
 	
-	cmp r3, r8
-	beq exitfunc
+	cmp r7, r8
+	blt exitfunc
+
 
 partial_loop_copy:
     ldrb r9, [r7], #1

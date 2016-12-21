@@ -56,7 +56,7 @@ void runCardEngineCheck (void) {
 	initLogging();
 
 
-	if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800 || *(vu32*)(0x027FFB14) == (vu32)0x027ff800)
+	if(*(vu32*)(0x027FFB14) == (vu32)0x026FFB08 || *(vu32*)(0x027FFB14) == (vu32)0x027ff800)
     {
         dbg_printf("\ncard read received\n");	
 		
@@ -69,6 +69,7 @@ void runCardEngineCheck (void) {
 		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
 		u32 len = *(vu32*)(sharedAddr+1);
+		u32 marker = *(vu32*)(sharedAddr+3);
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
@@ -78,6 +79,8 @@ void runCardEngineCheck (void) {
 		dbg_hexa(dst);
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
+		dbg_printf("\nmarker : \n");
+		dbg_hexa(marker);
 		
 
 		
@@ -96,14 +99,15 @@ void runCardEngineCheck (void) {
 		*(vu32*)(0x027FFB14) = (vu32)0;	
 	}
 	
-	if(*(vu32*)(0x027FFB14) == (vu32)0x025ff800)
+	if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
     {
-        dbg_printf("\ncard read receivedv2\n");
+        dbg_printf("\ncard read received v2\n");
 		
 		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
 		u32 len = *(vu32*)(sharedAddr+1);
+		u32 marker = *(vu32*)(sharedAddr+3);
 		
 		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
@@ -113,6 +117,8 @@ void runCardEngineCheck (void) {
 		dbg_hexa(dst);
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
+		dbg_printf("\nmarker : \n");
+		dbg_hexa(marker);
 		
 		fileRead(dst,fileCluster,src,len);
 		
