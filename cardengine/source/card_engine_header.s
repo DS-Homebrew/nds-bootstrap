@@ -86,7 +86,7 @@ card_engine_end:
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
-.word	card_init_pull_arm7
+.word	card_irq_enable_arm7
 .word	vblankHandler
 .word	fifoHandler
 .word	cardStructArm9
@@ -95,6 +95,7 @@ patches:
 .word	card_read_arm9_cmd2_v2alt
 .word	card_read_arm9_cmd2_v4
 .word   card_pull
+.word   cacheFlushRef
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -116,8 +117,8 @@ card_read_arm9:
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
 	@r0 dst, r1 len
-	@ldr r9, cacheManagRef
-	@blx r9  			@ dc flush range
+	ldr r9, cacheFlushRef
+	blx r9  			@ cache flush code
 	b partial_cmd2
 	
 check_partial:
@@ -179,7 +180,7 @@ exitfunc:
 
 cardStructArm9:
 .word    0x00000000     
-cacheManagRef:
+cacheFlushRef:
 .word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------
@@ -211,7 +212,7 @@ card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	
 @---------------------------------------------------------------------------------
-card_init_pull_arm7:
+card_irq_enable_arm7:
 @---------------------------------------------------------------------------------
     push    {lr}
 	push	{r1-r12}
@@ -229,7 +230,7 @@ _blx_r3_stub2:
 card_pull:
 @---------------------------------------------------------------------------------
 	bx lr
-cacheManag:
+cacheFlush:
     stmfd   sp!, {r0-r11,lr}
 	ldr r9, cachemag
 	blx r9  			@ dc flush range

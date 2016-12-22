@@ -56,6 +56,8 @@ u32 cacheMagStartSignature2[4] = {0xE0811000,0xE3C0001F,0xEE070F36,0xE2800020};
 // cache management sdk > 4 version
 u32 cacheMagStartSignature4[4] = {0xE3A0C000,0xE0811000,0xE3C0001F,0xEE07CF9A};
 
+u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5900DA0};  
+
 //
 // Look in @data for @find and return the position of it.
 //
@@ -166,7 +168,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 
 	// Find the card read
     u32 cardReadEndOffset =  
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//ndsHeader->arm9binarySize,
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
               (u32*)a9cardReadSignature, 2, 1);
     if (!cardReadEndOffset) {
         nocashMessage("Card read end not found\n");
@@ -183,24 +185,24 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	debug[0] = cardReadStartOffset;
     nocashMessage("Card read found\n");	
 	
-	u32 cardPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
+	u32 cardCheckPullOutOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
-    if (!cardPullOutOffset) {
-        nocashMessage("Card pull out not found\n");
+    if (!cardCheckPullOutOffset) {
+        nocashMessage("Card check pull out not found\n");
         //return 0;
     }
-	debug[0] = cardPullOutOffset;
-    nocashMessage("Card pull out found\n");
+	debug[0] = cardCheckPullOutOffset;
+    nocashMessage("Card check pull out found\n");
 	
-	u32 cardInitPullOutOffset =   
+	u32 cardIrqEnableOffset =   
         getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)irqEnableStartSignature, 4, 1);
-    if (!cardInitPullOutOffset) {
+    if (!cardIrqEnableOffset) {
         nocashMessage("irq enable not found\n");
         return 0;
     }
-	debug[0] = cardInitPullOutOffset;
+	debug[0] = cardIrqEnableOffset;
     nocashMessage("irq enable found\n");
 	
 	u32 cacheMagOffset =   
@@ -212,6 +214,16 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		debug[0] = cacheMagOffset;
 		nocashMessage("cache management found\n");
 	}
+	
+	u32 cardPullOutOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+              (u32*)cardPullOutSignature, 4, 1);
+    if (!cardPullOutOffset) {
+        nocashMessage("Card pull out handler not found\n");
+        return 0;
+    }
+	debug[0] = cardPullOutOffset;
+    nocashMessage("Card pull out handler found\n");
 
 	
 
@@ -255,9 +267,11 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32* cardReadPatch = (u32*) patches[0];
 	
-	u32* cardPullOutPatch = (u32*) patches[1];
+	u32* cardCheckPullOutPatch = (u32*) patches[1];
 	
-	u32* cardInitPullOutPatch = (u32*) patches[2];
+	u32* cardIrqEnablePatch = (u32*) patches[2];
+	
+	u32* cardPullOutPatch = patches[10];
 	
 	debug[5] = patches;
 	
@@ -289,6 +303,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	*((u32*)patches[6]) = cacheMagOffset;
 	
+	*((u32*)patches[11]) = cardPullOutOffset+1;
+	
 	if(moduleParams->sdk_version > 0x4000000) {
 		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
 	}
@@ -296,9 +312,12 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
 	if(cardPullOutOffset>0)
-		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x4);	
+		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
 		
-	copyLoop ((u32*)cardInitPullOutOffset, cardInitPullOutPatch, 0x30);	
+	if(cardPullOutOffset>0)
+		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0xA0);	
+		
+	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
 	
 	nocashMessage("ERR_NONE");
 	return 0;
