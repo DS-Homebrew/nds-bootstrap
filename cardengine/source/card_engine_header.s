@@ -94,7 +94,11 @@ patches:
 .word	cmd2_alt
 .word	card_read_arm9_cmd2_v2alt
 .word	card_read_arm9_cmd2_v4
+.word   card_pull
+
+@---------------------------------------------------------------------------------
 card_read_arm9:
+@---------------------------------------------------------------------------------
     stmfd   sp!, {r0-r11,lr}
     
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
@@ -111,21 +115,9 @@ card_read_arm9:
 	bgt check_partial
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
-	add r10,r4,#4
 	@r0 dst, r1 len
-	ldr r9, cachemag
-	blx r9  			@ dc flush range
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
-cmd2_alt:
-	add r9, r9, #0x28
- 	blx r9 				@ ic invalidate range
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
-	sub r9, r9, #0xC
-	blx r9 			 	@ wait for empty write buffer
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
+	@ldr r9, cacheManagRef
+	@blx r9  			@ dc flush range
 	b partial_cmd2
 	
 check_partial:
@@ -186,14 +178,41 @@ exitfunc:
     bx      lr
 
 cardStructArm9:
-.word    0x00000000    
-cachemag:
-.word    0x00000000   
+.word    0x00000000     
+cacheManagRef:
+.word    0x00000000  
 .pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+card_read_arm9_cmd2_v2alt:
+@---------------------------------------------------------------------------------
+	add r9, r9, #0x80
+ 	blx r9 				@ ic invalidate range
+	@ restore r0, r1
+	ldmia r10, {r0,r1}
+	sub r9, r9, #0x18
+@---------------------------------------------------------------------------------
+	
+@---------------------------------------------------------------------------------
+card_read_arm9_cmd2_v4:
+@---------------------------------------------------------------------------------
+	add r9, r9, #0x3C
+ 	blx r9 				@ ic invalidate range
+	@ restore r0, r1
+	ldmia r10, {r0,r1}
+	sub r9, r9, #0x14
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 card_pull_out_arm9:
+@---------------------------------------------------------------------------------
 	bx      lr
-	@.pool
+@---------------------------------------------------------------------------------
+	
+@---------------------------------------------------------------------------------
 card_init_pull_arm7:
+@---------------------------------------------------------------------------------
     push    {lr}
 	push	{r1-r12}
 	ldr	r3, =myIrqEnable
@@ -201,20 +220,30 @@ card_init_pull_arm7:
 	pop   	{r1-r12} 
 	pop  	{lr}
 	bx  lr
-@---------------------------------------------------------------------------------
 _blx_r3_stub2:
-@---------------------------------------------------------------------------------
 	bx	r3		
 .pool
-card_read_arm9_cmd2_v2alt:
-	add r9, r9, #0x80
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+card_pull:
+@---------------------------------------------------------------------------------
+	bx lr
+cacheManag:
+    stmfd   sp!, {r0-r11,lr}
+	ldr r9, cachemag
+	blx r9  			@ dc flush range
+	@ restore r0, r1
+	ldmia r10, {r0,r1}
+	cmd2_alt:
+	add r9, r9, #0x28
  	blx r9 				@ ic invalidate range
 	@ restore r0, r1
 	ldmia r10, {r0,r1}
-	sub r9, r9, #0x18
-card_read_arm9_cmd2_v4:
-	add r9, r9, #0x3C
- 	blx r9 				@ ic invalidate range
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
-	sub r9, r9, #0x14
+	sub r9, r9, #0xC
+	blx r9 			 	@ wait for empty write buffer
+    ldmfd   sp!, {r0-r11,lr}
+    bx      lr
+cachemag:
+	.word    0x00000000  
+	.pool
