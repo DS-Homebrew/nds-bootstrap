@@ -111,9 +111,10 @@ card_read_arm9:
     ldr     r1, [R4,#0x8] @LEN
 	mov     r2, #0x2400
 	
-	sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
-	cmp r0, r7
-	bgt check_partial
+	@sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
+	@cmp r0, r7
+	@bgt check_partial
+	b check_partial @deactivate cmd2 optimization
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
 	@r0 dst, r1 len

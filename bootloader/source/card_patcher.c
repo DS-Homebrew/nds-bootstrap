@@ -49,7 +49,7 @@ u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B
 u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
 
-u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5900DA0};  
+u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
 //
 // Look in @data for @find and return the position of it.
@@ -239,7 +239,25 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     }
 	debug[0] = cardIdStartOffset;
     nocashMessage("Card id found\n");	*/		
-
+	
+	u32 arenaLoOffset =   
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+              (u32*)arenaLowSignature, 4, 1);
+    if (!arenaLoOffset) {
+        nocashMessage("Arenow low not found\n");
+        return 0;
+    }
+	debug[0] = arenaLoOffset;
+    nocashMessage("Arenow low found\n");
+	
+	arenaLoOffset += 0x88;
+	debug[10] = arenaLoOffset;
+	debug[11] = *((u32*)arenaLoOffset);
+		
+	u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
+	*((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x2000; // shrink heap by 8 kb
+	
+	debug[12] = *((u32*)arenaLoOffset);
 
 	debug[2] = cardEngineLocation;
 	
@@ -291,6 +309,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	/*if(moduleParams->sdk_version > 0x4000000) {
 		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
 	}*/
+	
+	copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
