@@ -40,21 +40,14 @@ u32 cardReadStartSignature4[1] = {0xE92D4070};
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
 u32 a9instructionBHI[1]       = {0x8A000001};
-u32 cardPullOutSignature[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
+u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
+u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 
 // irqEnable
 u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
-// cache management
-u32 cacheMagStartSignature1[4] = {0xE0811000,0xE3C0001F,0xEE070F3E,0xE2800020};
-
-// sdk 2 alt version
-u32 cacheMagStartSignature2[4] = {0xE0811000,0xE3C0001F,0xEE070F36,0xE2800020};
-
-// cache management sdk > 4 version
-u32 cacheMagStartSignature4[4] = {0xE3A0C000,0xE0811000,0xE3C0001F,0xEE07CF9A};
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5900DA0};  
 
@@ -159,12 +152,12 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	u32* a9cardReadSignature = a9cardReadSignature1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
-	u32* cacheMagStartSignature = cacheMagStartSignature1;
+	u32* cardPullOutSignature = cardPullOutSignature1;
 	if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
-		cacheMagStartSignature = cacheMagStartSignature4;
-	} 
+		cardPullOutSignature = cardPullOutSignature4;
+	} 	
 
 	// Find the card read
     u32 cardReadEndOffset =  
