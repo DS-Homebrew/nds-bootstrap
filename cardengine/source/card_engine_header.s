@@ -14,6 +14,8 @@
 .global sdk_version
 .global fileCluster
 
+#define CACHE_LINE_SIZE	32
+
 
 patches_offset:
 	.word	patches
@@ -90,10 +92,6 @@ patches:
 .word	vblankHandler
 .word	fifoHandler
 .word	cardStructArm9
-.word	cachemag
-.word	cmd2_alt
-.word	card_read_arm9_cmd2_v2alt
-.word	card_read_arm9_cmd2_v4
 .word   card_pull
 .word   cacheFlushRef
 
@@ -186,26 +184,6 @@ cacheFlushRef:
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
-card_read_arm9_cmd2_v2alt:
-@---------------------------------------------------------------------------------
-	add r9, r9, #0x80
- 	blx r9 				@ ic invalidate range
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
-	sub r9, r9, #0x18
-@---------------------------------------------------------------------------------
-	
-@---------------------------------------------------------------------------------
-card_read_arm9_cmd2_v4:
-@---------------------------------------------------------------------------------
-	add r9, r9, #0x3C
- 	blx r9 				@ ic invalidate range
-	@ restore r0, r1
-	ldmia r10, {r0,r1}
-	sub r9, r9, #0x14
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	bx      lr
@@ -241,26 +219,49 @@ cacheFlush:
 	
 	add r10, R4, #4
 		
-	ldr r9, cachemag
-	blx r9  			@ dc flush range
-	@ restore r0, r1
+//---------------------------------------------------------------------------------
+DC_FlushRange:
+/*---------------------------------------------------------------------------------
+	Clean and invalidate a range
+---------------------------------------------------------------------------------*/
+	mov r4, #0
+	add	r1, r1, r0
+	bic	r0, r0, #(CACHE_LINE_SIZE - 1)
+.flush:
+    mcr	p15, 0, r4, c7, c10, 1		@ clean and flush address
+	mcr	p15, 0, r0, c7, c14, 1		@ clean and flush address
+	add	r0, r0, #CACHE_LINE_SIZE
+	cmp	r0, r1
+	blt	.flush
+	
 	ldmia r10, {r0,r1}
 	
-	cmd2_alt:
-	add r9, r9, #0x28
- 	blx r9 				@ ic invalidate range
+//---------------------------------------------------------------------------------
+IC_InvalidateRange:
+/*---------------------------------------------------------------------------------
+	Invalidate a range
+---------------------------------------------------------------------------------*/
+	add	r1, r1, r0
+	bic	r0, r0, #CACHE_LINE_SIZE - 1
+.invalidate:
+	mcr	p15, 0, r0, c7, c5, 1
+	add	r0, r0, #CACHE_LINE_SIZE
+	cmp	r0, r1
+	blt	.invalidate
 	@ restore r0, r1
+	
 	ldmia r10, {r0,r1}
 	
-	sub r9, r9, #0xC
-	blx r9 			 	@ wait for empty write buffer
+//---------------------------------------------------------------------------------	
+DC_WaitWriteBufferEmpty:
+//---------------------------------------------------------------------------------               
+    MOV     R0, #0
+    MCR     p15, 0, R0,c7,c10, 4
+    BX      LR
 	
 	@restore interrupt
 	str r11, [r8]
 	
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
-	
-cachemag:
-	.word    0x00000000  
 	.pool

@@ -186,7 +186,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     nocashMessage("Card read found\n");	
 	
 	u32 cardCheckPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
     if (!cardCheckPullOutOffset) {
         nocashMessage("Card check pull out not found\n");
@@ -207,7 +207,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	debug[0] = cardIrqEnableOffset;
     nocashMessage("irq enable found\n");
 	
-	u32 cacheMagOffset =   
+	/*u32 cacheMagOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)cacheMagStartSignature, 4, 1);
     if (!cacheMagOffset) {
@@ -215,7 +215,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     } else {
 		debug[0] = cacheMagOffset;
 		nocashMessage("cache management found\n");
-	}
+	}*/
 	
 	u32 cardPullOutOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
@@ -278,7 +278,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	if(moduleParams->sdk_version > 0x3000000) {
 		*((u32*)patches[5]) = ((u32*)*card_struct)+7;	
 	}	
-	if(!cacheMagOffset) {
+	
+	/*if(!cacheMagOffset) {
 		cacheMagOffset =   
 			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
 				  (u32*)cacheMagStartSignature2, 4, 1);
@@ -290,20 +291,20 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		copyLoop ((u32*)patches[7], (u32*)patches[8], 16);	
 	}
 	
-	*((u32*)patches[6]) = cacheMagOffset;
+	*((u32*)patches[6]) = cacheMagOffset;*/
 	
-	*((u32*)patches[11]) = cardPullOutOffset+4;
+	*((u32*)patches[7]) = cardPullOutOffset+4;
 	
-	if(moduleParams->sdk_version > 0x4000000) {
+	/*if(moduleParams->sdk_version > 0x4000000) {
 		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
-	}
+	}*/
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
 	if(cardCheckPullOutOffset>0)
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
 		
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x50);	
+	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x74);	
 		
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
 	
