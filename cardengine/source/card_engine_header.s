@@ -215,7 +215,7 @@ cacheFlush:
 	ldr r8,= 0x4000208
 	ldr r11,[r8]
 	mov r7, #0
-	str r7, [r8]
+	str r7, [r8]	
 	
 	add r10, R4, #4
 		
@@ -224,11 +224,10 @@ DC_FlushRange:
 /*---------------------------------------------------------------------------------
 	Clean and invalidate a range
 ---------------------------------------------------------------------------------*/
-	mov r4, #0
 	add	r1, r1, r0
 	bic	r0, r0, #(CACHE_LINE_SIZE - 1)
 .flush:
-    mcr	p15, 0, r4, c7, c10, 1		@ clean and flush address
+    mcr	p15, 0, r7, c7, c10, 1		@ clean and flush address
 	mcr	p15, 0, r0, c7, c14, 1		@ clean and flush address
 	add	r0, r0, #CACHE_LINE_SIZE
 	cmp	r0, r1
@@ -250,13 +249,12 @@ IC_InvalidateRange:
 	blt	.invalidate
 	@ restore r0, r1
 	
-	ldmia r10, {r0,r1}
+	@ldmia r10, {r0,r1}
 	
 //---------------------------------------------------------------------------------	
 DC_WaitWriteBufferEmpty:
 //---------------------------------------------------------------------------------               
-    MOV     R0, #0
-    MCR     p15, 0, R0,c7,c10, 4
+    MCR     p15, 0, R7,c7,c10, 4
     BX      LR
 	
 	@restore interrupt
