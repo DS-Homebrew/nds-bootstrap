@@ -255,7 +255,6 @@ IC_InvalidateRange:
 DC_WaitWriteBufferEmpty:
 //---------------------------------------------------------------------------------               
     MCR     p15, 0, R7,c7,c10, 4
-    BX      LR
 	
 	@restore interrupt
 	str r11, [r8]
