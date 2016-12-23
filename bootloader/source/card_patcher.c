@@ -191,9 +191,11 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     if (!cardCheckPullOutOffset) {
         nocashMessage("Card check pull out not found\n");
         //return 0;
-    }
-	debug[0] = cardCheckPullOutOffset;
-    nocashMessage("Card check pull out found\n");
+    } else {
+		debug[0] = cardCheckPullOutOffset;
+		nocashMessage("Card check pull out found\n");
+	}
+
 	
 	u32 cardIrqEnableOffset =   
         getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
@@ -224,20 +226,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     }
 	debug[0] = cardPullOutOffset;
     nocashMessage("Card pull out handler found\n");
-
 	
-
-	
-	/*u32 cardSendOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u32*)a9cardSendSignature, 4, 1);
-    if (!cardSendOffset) {
-        nocashMessage("Card send not found\n");
-        return 0;
-    }
-	debug[0] = cardSendOffset;
-    nocashMessage("Card send found\n");	
-	
+	/*	
 	// Find the card id
     u32 cardIdEndOffset =  
         getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
@@ -255,8 +245,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
         return 0;
     }
 	debug[0] = cardIdStartOffset;
-    nocashMessage("Card id found\n");	*/	
-	
+    nocashMessage("Card id found\n");	*/		
 
 
 	debug[2] = cardEngineLocation;
@@ -303,7 +292,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	*((u32*)patches[6]) = cacheMagOffset;
 	
-	*((u32*)patches[11]) = cardPullOutOffset+1;
+	*((u32*)patches[11]) = cardPullOutOffset+4;
 	
 	if(moduleParams->sdk_version > 0x4000000) {
 		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
@@ -311,11 +300,10 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
-	if(cardPullOutOffset>0)
+	if(cardCheckPullOutOffset>0)
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
 		
-	if(cardPullOutOffset>0)
-		copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0xA0);	
+	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x50);	
 		
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
 	
