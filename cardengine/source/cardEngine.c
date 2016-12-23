@@ -56,7 +56,7 @@ void runCardEngineCheck (void) {
 	initLogging();
 
 
-	if(*(vu32*)(0x027FFB14) == (vu32)0x026FFB08 || *(vu32*)(0x027FFB14) == (vu32)0x027ff800)
+	if(*(vu32*)(0x027FFB14) == (vu32)0x027ff800)
     {
         dbg_printf("\ncard read received\n");			
 			

@@ -128,13 +128,13 @@ check_partial:
     
 chunck_loop:
     mov r4, #512
+	sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 	@dst, len, src, marker
     stmia r8, {r0,r4,r5,r7}
     
     @sendIPCSync
     strh    r2, [r3,#0x80]
 
-    sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 chunck_loop_wait:
     ldr r9, [r8,#12]		
     cmp r9,#0

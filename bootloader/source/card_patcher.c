@@ -245,17 +245,17 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
               (u32*)arenaLowSignature, 4, 1);
     if (!arenaLoOffset) {
         nocashMessage("Arenow low not found\n");
-        return 0;
-    }
-	debug[0] = arenaLoOffset;
-    nocashMessage("Arenow low found\n");
+    } else {
+		debug[0] = arenaLoOffset;
+		nocashMessage("Arenow low found\n");
+	}
 	
 	arenaLoOffset += 0x88;
 	debug[10] = arenaLoOffset;
 	debug[11] = *((u32*)arenaLoOffset);
 		
 	u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
-	*((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x2000; // shrink heap by 8 kb
+	//*((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x2000; // shrink heap by 8 kb
 	
 	debug[12] = *((u32*)arenaLoOffset);
 
@@ -310,7 +310,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
 	}*/
 	
-	copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
+	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
 	
