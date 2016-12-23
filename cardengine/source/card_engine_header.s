@@ -14,6 +14,8 @@
 .global sdk_version
 .global fileCluster
 
+#define ICACHE_SIZE	0x2000
+#define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
 
 
@@ -215,41 +217,33 @@ cacheFlush:
 	ldr r8,= 0x4000208
 	ldr r11,[r8]
 	mov r7, #0
-	str r7, [r8]	
+	str r7, [r8]		
 	
-	add r10, R4, #4
+//---------------------------------------------------------------------------------
+IC_InvalidateAll:
+/*---------------------------------------------------------------------------------
+	Clean and invalidate entire data cache
+---------------------------------------------------------------------------------*/
+	mcr	p15, 0, r7, c7, c5, 0
 		
 //---------------------------------------------------------------------------------
-DC_FlushRange:
+DC_FlushAll:
 /*---------------------------------------------------------------------------------
 	Clean and invalidate a range
 ---------------------------------------------------------------------------------*/
-	add	r1, r1, r0
-	bic	r0, r0, #(CACHE_LINE_SIZE - 1)
-.flush:
-    mcr	p15, 0, r7, c7, c10, 1		@ clean and flush address
-	mcr	p15, 0, r0, c7, c14, 1		@ clean and flush address
+	mov	r1, #0
+outer_loop:
+	mov	r0, #0
+inner_loop:
+	orr	r2, r1, r0			@ generate segment and line address
+	mcr p15, 0, r7, c7, c10, 4
+	mcr	p15, 0, r2, c7, c14, 2		@ clean and flush the line
 	add	r0, r0, #CACHE_LINE_SIZE
-	cmp	r0, r1
-	blt	.flush
-	
-	ldmia r10, {r0,r1}
-	
-//---------------------------------------------------------------------------------
-IC_InvalidateRange:
-/*---------------------------------------------------------------------------------
-	Invalidate a range
----------------------------------------------------------------------------------*/
-	add	r1, r1, r0
-	bic	r0, r0, #CACHE_LINE_SIZE - 1
-.invalidate:
-	mcr	p15, 0, r0, c7, c5, 1
-	add	r0, r0, #CACHE_LINE_SIZE
-	cmp	r0, r1
-	blt	.invalidate
-	@ restore r0, r1
-	
-	@ldmia r10, {r0,r1}
+	cmp	r0, #DCACHE_SIZE/4
+	bne	inner_loop
+	add	r1, r1, #0x40000000
+	cmp	r1, #0
+	bne	outer_loop
 	
 //---------------------------------------------------------------------------------	
 DC_WaitWriteBufferEmpty:
