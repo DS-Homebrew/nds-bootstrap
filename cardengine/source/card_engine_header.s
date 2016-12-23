@@ -232,19 +232,35 @@ card_pull:
 	bx lr
 cacheFlush:
     stmfd   sp!, {r0-r11,lr}
+	
+	@disable interrupt	
+	ldr r8,= 0x4000208
+	ldr r11,[r8]
+	mov r7, #0
+	str r7, [r8]
+	
+	add r10, R4, #4
+		
 	ldr r9, cachemag
 	blx r9  			@ dc flush range
 	@ restore r0, r1
 	ldmia r10, {r0,r1}
+	
 	cmd2_alt:
 	add r9, r9, #0x28
  	blx r9 				@ ic invalidate range
 	@ restore r0, r1
 	ldmia r10, {r0,r1}
+	
 	sub r9, r9, #0xC
 	blx r9 			 	@ wait for empty write buffer
+	
+	@restore interrupt
+	str r11, [r8]
+	
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
+	
 cachemag:
 	.word    0x00000000  
 	.pool
