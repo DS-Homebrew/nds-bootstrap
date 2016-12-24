@@ -248,16 +248,25 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     } else {
 		debug[0] = arenaLoOffset;
 		nocashMessage("Arenow low found\n");
-	}
-	
-	arenaLoOffset += 0x88;
-	debug[10] = arenaLoOffset;
-	debug[11] = *((u32*)arenaLoOffset);
 		
-	u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
-	//*((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x2000; // shrink heap by 8 kb
-	
-	debug[12] = *((u32*)arenaLoOffset);
+		arenaLoOffset += 0x88;
+		debug[10] = arenaLoOffset;
+		debug[11] = *((u32*)arenaLoOffset);
+			
+		u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
+		
+		//*((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x800; // shrink heap by 8 kb
+		//*(vu32*)(0x027FFDA0) = *((u32*)arenaLoOffset);	
+		debug[12] = *((u32*)arenaLoOffset);
+
+		u32 arenaLo2Offset =   
+			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00100000,//, ndsHeader->arm9binarySize,
+				  oldArenaLow, 1, 1);	
+		
+		//*((u32*)arenaLo2Offset) = *((u32*)arenaLo2Offset) + 0x800; // shrink heap by 8 kb
+			
+		debug[13] = arenaLo2Offset;
+	}
 
 	debug[2] = cardEngineLocation;
 	
