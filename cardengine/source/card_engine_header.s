@@ -96,6 +96,7 @@ patches:
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
+.word   readCachedRef
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -182,6 +183,8 @@ exitfunc:
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
+.word    0x00000000  
+readCachedRef:
 .word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------
