@@ -11,6 +11,7 @@ install:
   - unzip /tmp/libnds.zip
   - cd libnds-master
   - make && sudo make install
+  - cd ..
 
 script:
   - make
