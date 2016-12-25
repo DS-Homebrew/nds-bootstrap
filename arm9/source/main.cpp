@@ -40,7 +40,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+	debugFile = fopen ("fat:/NDSBTSRPCARD.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -162,7 +162,22 @@ int main( int argc, char **argv) {
 			BootSplashInit();
 		}
 
-		consoleDemoInit();
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
+			debug=true;			
+			
+			consoleDemoInit();
+			
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			
+			getSFCG_ARM9();
+			getSFCG_ARM7();
+			
+			
+		} else {
+		
+		}
+
+		// consoleDemoInit();
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
 			if(REG_SCFG_MC == 0x11) { 
@@ -178,33 +193,21 @@ int main( int argc, char **argv) {
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
 		
 		if (0 != argc ) {
-			printf("arguments passed\n");
+			dbg_printf("arguments passed\n");
 			int i;
 			for (i=0; i<argc; i++ ) {
-				if (argv[i]) printf("[%d] %s\n", i, argv[i]);
+				if (argv[i]) dbg_printf("[%d] %s\n", i, argv[i]);
 			}
-			printf("\n");
+			dbg_printf("\n");
 		} else {
-			printf("No arguments passed!\n");
+			dbg_printf("No arguments passed!\n");
 		}
 		
 		if(ntrMode) {
-			printf("NTR mode enabled\n");
+			dbg_printf("NTR mode enabled\n");
 		}
 		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;			
-			
-			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-			
-			getSFCG_ARM9();
-			getSFCG_ARM7();
-		} else {
-		
-		}
-	
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",1) == 1) {			
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -212,9 +215,10 @@ int main( int argc, char **argv) {
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
-			for (int i=0; i<50000; i++) {
+			for (int i=0; i<1000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
+			fclose (debugFile);
 			
 		} else {
 			remove ("fat:/NDSBTSRP.LOG");
@@ -253,7 +257,7 @@ int main( int argc, char **argv) {
 				runFile(ndsPath.c_str());
 			}
 		} else {
-			printf("TWL MODE enabled\n");			
+			dbg_printf("TWL MODE enabled\n");			
 			dbg_printf("Running %s\n", ndsPath.c_str());
 					
 			runFile(ndsPath.c_str());

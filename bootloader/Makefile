@@ -29,7 +29,7 @@ CFLAGS	:=	-g -Wall -Os\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7
+CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
@@ -116,6 +116,11 @@ sdengine.bin.o : sdengine.bin
 
 sdengine.bin:
 	cp $(CURDIR)/../../data/sdengine.bin sdengine.bin
+	
+cardengine.bin.o : cardengine.bin
+
+cardengine.bin:
+	cp $(CURDIR)/../../data/cardengine.bin cardengine.bin
 
 -include $(DEPENDS)
 

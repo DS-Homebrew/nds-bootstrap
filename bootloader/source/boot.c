@@ -50,6 +50,8 @@ Helpful information:
 #include "fat.h"
 #include "dldi_patcher.h"
 #include "card.h"
+#include "card_patcher.h"
+#include "cardengine_bin.h"
 #include "boot.h"
 #include "hook.h"
 
@@ -334,20 +336,31 @@ int main (void) {
 	loadBinary_ARM7(fileCluster);
 	
 	// Patch with DLDI if desired
-	if (wantToPatchDLDI) {
-		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+	//if (wantToPatchDLDI) {
+	//	nocashMessage("wantToPatchDLDI");
+	//	dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+	//}
+	
+	copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
+
+	module_params_t* params = findModuleParams(NDS_HEAD);
+	if(params)
+	{
+		ensureArm9Decompressed(NDS_HEAD, params);
 	}
 	
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-	u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
 	
-	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+	// Find the DLDI reserved space in the file
+	//u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+	u32* wordCommandAddr = (u32 *) 0x2051BB4;
+	
+	hookNds(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	// Pass command line arguments to loaded program
-	passArgs_ARM7();
-
+	//passArgs_ARM7();
+	
+	nocashMessage("Start the NDS file");
 	startBinary_ARM7();
 
 	return 0;

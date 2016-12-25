@@ -16,11 +16,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef CARD_PATCHER_H
+#define CARD_PATCHER_H
+
 #include <nds/memory.h>
 #include <nds/ndstypes.h>
 
+typedef struct 
+{
+	u32 auto_load_list_offset;
+	u32 auto_load_list_end;
+	u32 auto_load_start;
+	u32 static_bss_start;
+	u32 static_bss_end;
+	u32 compressed_static_end;
+	u32 sdk_version;
+	u32 nitro_code_be;
+	u32 nitro_code_le;
+} module_params_t;
+
+
+module_params_t* findModuleParams(const tNDSHeader* ndsHeader);
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr);
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams);
+
+#endif // CARD_PATCHER_H

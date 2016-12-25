@@ -16,11 +16,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds/memory.h>
-#include <nds/ndstypes.h>
+#ifndef CARD_ENGINE_ARM7_H
+#define CARD_ENGINE_ARM7_H
 
-/*-------------------------------------------------------------------------
-arm7_hookGame
-Adds a hook in the game's ARM7 binary to our own code
--------------------------------------------------------------------------*/
-int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define is_aligned(POINTER, BYTE_COUNT) \
+    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
+
+void myIrqHandlerFIFO(void);
+
+u32 myIrqEnable(u32 irq);
+
+/*void runCardEngineCheck (void);
+
+void eepromProtect (void);
+void eepromRead (u32 src, void *dst, u32 len);
+void eepromPageWrite (void);
+void eepromPageProg (void);
+void eepromPageVerify (void);
+void eepromPageErase (void);
+
+u32 cardId (void);
+void cardRead (u32 dma, const void *src, void *dst, u32 len);*/
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // CARD_ENGINE_ARM7_H
