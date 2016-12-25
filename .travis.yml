@@ -1,0 +1,12 @@
+language: c
+
+before_install:
+  - wget http://sourceforge.net/projects/devkitpro/files/Automated%20Installer/devkitARMupdate.pl
+  - export DEVKITPRO=/home/travis/devkitPro
+  - export DEVKITARM=${DEVKITPRO}/devkitARM
+
+install:
+  - sudo perl devkitARMupdate.pl
+
+script:
+  - make
