@@ -10,6 +10,10 @@ install:
   - wget --no-check-certificate https://codeload.github.com/ahezard/libnds/zip/master -O /tmp/libnds.zip
   - unzip /tmp/libnds.zip
   - cd libnds-master
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
+  - sudo apt-get install gcc-4.9
+  - sudo apt-get upgrade libstdc++6
   - make && sudo make install
 
 script:
