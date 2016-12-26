@@ -35,7 +35,7 @@ after_success:
         cp bootstrap-dldi.nds $REV_NAME_BS
         lftp -c "open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
     fi
-	if [ "$TRAVIS_BRANCH" == "card" ]; then
+    if [ "$TRAVIS_BRANCH" == "card" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
         REV_NAME="bootstrap-card-${GITDATE}-${GITREV}.nds"
