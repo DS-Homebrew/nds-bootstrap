@@ -163,11 +163,13 @@ partial_loop_copy:
 	mov     r10,r7
 	
 
-	@ copy 512 byte
+	@ copy 512 bytes
+	MOV     R12, #512
+loop_copy:
 	ldmia r10!, {r0-r7}
 	stmia r9!, {r0-r7}
-	ldmia r10!, {r0-r7}
-	stmia r9!, {r0-r7}
+	subs r12, r12, #32  @ 4*8 bytes
+	bgt loop_copy
 
 	ldr 	r0,[r8,#16]		
 	str r11, [r0, #8]	@ cache page
