@@ -108,16 +108,18 @@ begin:
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
+
 	
 	@ avoid parallel execution
 	adr     r1, mutex    @shared area command
 	mov r2, #1
 mutex_loop:
-    swp r0,r2, [r1]
-    cmp r0, #1
+    swp r4,r2, [r1]
+    cmp r4, #1
     beq mutex_loop
 	
 	str 	r0,[r8,#16]
+
     ldr     r4, cardStructArm9
     ldr     r5, [R4]      @SRC
 	ldr     r0, [R4,#0x4] @DST
@@ -166,7 +168,7 @@ partial_loop_copy:
 	MOV     R10, #0
 	str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
-	sub     r10, r8, #(0x027FFB08 - 0x027ff800) @shared area data
+	mov     r10,r7
 	
 
 	@ copy 512 bytes
@@ -188,7 +190,7 @@ loop_copy:
 	@str     r6, [r4]
 	
 	@ release mutex
-	ldr r1, mutex    
+	adr r1, mutex    @shared area command
 	mov r2, #0
     str r2, [r1]
 	
