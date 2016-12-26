@@ -32,6 +32,6 @@ after_success:
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
         REV_NAME="bootstrap-dldi-${GITDATE}-${GITREV}.nds"
-        cp bootstrap-dldi.nds $REV_NAME_BS
+        cp bootstrap-dldi.nds $REV_NAME
         lftp -c "open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
     fi
