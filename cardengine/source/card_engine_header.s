@@ -125,8 +125,6 @@ cmd2:
 	@ldr r9, cacheFlushRef
 	@blx r9  			@ cache flush code
 	@b partial_cmd2
-	
-
 
 check_partial:
 
@@ -134,18 +132,13 @@ check_partial:
 	
 	MOV     R10, #0x200
 	RSB     R10, R10, #0
-	AND     R6, R5, R10
-	mov r5, r6       @ current page
+	AND     R11, R5, R10
+	mov r5, r11       @ current page
 
 	add r6, r0, #28		
 	mov r0, r6	
 
 	MOV     R1, #0x200
-
-	@cmp r1, #512    
-    @blt partial
-
-@ldr r7,readCachedRef
 	
 partial:
     sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
@@ -160,16 +153,10 @@ partial_loop_wait:
     ldr r9, [r8,#12]
     cmp r9,#0
     bne partial_loop_wait	
-	
-	@sub r8, r8, #(0x027FFB08 - 0x027ff800) @shared area data
-	@cmp r7, r8
-	@bne exitfunc
 
 partial_loop_copy:
 
 	@ldr     r8,=0x027FFB08    @shared area command
-	
-	@stmfd   sp!, {r1-r11,lr}
 	
 	ldr 	r9,[r8,#40]	
 	add     r9,r9,#0x20	@ cache buffer
@@ -182,12 +169,10 @@ partial_loop_copy:
 	stmia r9!, {r0-r7}
 
 	ldr 	r0,[r8,#40]		
-	str r5, [r0, #8]	@ cache page
+	str r11, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
 	blx r9  		
-	
-	@ldmfd   sp!, {r1-r11,lr}
 	
 	@ldr     r4, =0x05000000
 	@mov     r6, #31
