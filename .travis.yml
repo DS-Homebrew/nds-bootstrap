@@ -25,6 +25,7 @@ addons:
     - gcc-4.9
     - g++-4.9
     - libstdc++6
+    - lftp
 
 after_success:
   - >
