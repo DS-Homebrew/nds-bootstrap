@@ -108,7 +108,7 @@ begin:
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
-	str 	r0,[r8,#40]
+	str 	r0,[r8,#16]
     ldr     r4, cardStructArm9
     ldr     r5, [R4]      @SRC
 	ldr     r0, [R4,#0x4] @DST
@@ -127,18 +127,16 @@ cmd2:
 	@b partial_cmd2
 
 check_partial:
-
-	ldr 	r0,[r8,#40]
 	
-	MOV     R10, #0x200
-	RSB     R10, R10, #0
-	AND     R11, R5, R10
-	mov r5, r11       @ current page
-
-	add r6, r0, #28		
-	mov r0, r6	
-
+	mov r0, r5
+	
 	MOV     R1, #0x200
+	RSB     R10, R1, #0
+	AND     R11, R5, R10
+	mov     r5, r11       @ current page	
+	
+
+
 	
 partial:
     sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
@@ -158,9 +156,12 @@ partial_loop_copy:
 
 	@ldr     r8,=0x027FFB08    @shared area command
 	
-	ldr 	r9,[r8,#40]	
+	ldr 	r9,[r8,#16]	
+	MOV     R10, #0
+	str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
 	mov     r10,r7
+	
 
 	@ copy 512 byte
 	ldmia r10!, {r0-r7}
@@ -168,7 +169,7 @@ partial_loop_copy:
 	ldmia r10!, {r0-r7}
 	stmia r9!, {r0-r7}
 
-	ldr 	r0,[r8,#40]		
+	ldr 	r0,[r8,#16]		
 	str r11, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
@@ -181,7 +182,7 @@ partial_loop_copy:
 	cmp r0,#0	
 	beq exitfunc
 	
-	ldr 	r0,[r8,#40]	
+	ldr 	r0,[r8,#16]	
 	b begin
 
 exitfunc:
