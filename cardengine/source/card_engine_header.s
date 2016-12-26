@@ -103,6 +103,8 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r0-r11,lr}
 	
+begin:
+	
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
@@ -167,7 +169,7 @@ partial_loop_copy:
 
 	@ldr     r8,=0x027FFB08    @shared area command
 	
-	stmfd   sp!, {r1-r11,lr}
+	@stmfd   sp!, {r1-r11,lr}
 	
 	ldr 	r9,[r8,#40]	
 	add     r9,r9,#0x20	@ cache buffer
@@ -183,31 +185,19 @@ partial_loop_copy:
 	str r5, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
-	blx r9  			
+	blx r9  		
 	
-	ldmfd   sp!, {r1-r11,lr}
+	@ldmfd   sp!, {r1-r11,lr}
 	
-	ldr     r4, =0x05000000
-	mov     r6, #31
-	str     r6, [r4]
+	@ldr     r4, =0x05000000
+	@mov     r6, #31
+	@str     r6, [r4]
 	
-	cmp r0,#0
-	
+	cmp r0,#0	
 	beq exitfunc
 	
-	ldr     r4, cardStructArm9
-    ldr     r5, [R4]      @SRC
-	@ldr     r0, [R4,#0x4] @DST
-    ldr     r1, [R4,#0x8] @LEN
-	
-	ldr 	r0,[r8,#40]
-
-	add r6, r0, #28
-	
-	mov r0, r6
-
-	
-	b partial_loop_copy
+	ldr 	r0,[r8,#40]	
+	b begin
 
 exitfunc:
     ldmfd   sp!, {r0-r11,lr}
