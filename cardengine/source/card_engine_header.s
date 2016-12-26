@@ -108,6 +108,15 @@ begin:
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
+	
+	@ avoid parallel execution
+	adr     r1, mutex    @shared area command
+	mov r2, #1
+mutex_loop:
+    swp r0,r2, [r1]
+    cmp r0, #1
+    beq mutex_loop
+	
 	str 	r0,[r8,#16]
     ldr     r4, cardStructArm9
     ldr     r5, [R4]      @SRC
@@ -135,9 +144,6 @@ check_partial:
 	AND     R11, R5, R10
 	mov     r5, r11       @ current page	
 	
-
-
-	
 partial:
     sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 partial_cmd2:
@@ -160,7 +166,7 @@ partial_loop_copy:
 	MOV     R10, #0
 	str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
-	mov     r10,r7
+	sub     r10, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 	
 
 	@ copy 512 bytes
@@ -181,6 +187,11 @@ loop_copy:
 	@mov     r6, #31
 	@str     r6, [r4]
 	
+	@ release mutex
+	ldr r1, mutex    
+	mov r2, #0
+    str r2, [r1]
+	
 	cmp r0,#0	
 	beq exitfunc
 	
@@ -196,6 +207,8 @@ cardStructArm9:
 cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
+.word    0x00000000  
+mutex:
 .word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------
