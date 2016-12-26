@@ -44,8 +44,9 @@ u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
-u32 cardReadCachedSignature[4]   = {0xE92D4030,0xE24DD004,0xE59F5090,0xE3A01C02};
-
+u32 cardReadCachedSignature1[4]   = {0xE92D4030,0xE24DD004,0xE59F5090,0xE3A01C02};
+u32 cardReadCachedSignature4[4]   = {0xE92D4038,0xE59F407C,0xE3A01C02,0xE594301C};
+   
 // irqEnable
 u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
@@ -153,10 +154,12 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	u32* a9cardReadSignature = a9cardReadSignature1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardPullOutSignature = cardPullOutSignature1;
+	u32* cardReadCachedSignature = cardReadCachedSignature;
 	if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
+		cardReadCachedSignature = cardReadCachedSignature4;
 	} 	
 
 	// Find the card read
