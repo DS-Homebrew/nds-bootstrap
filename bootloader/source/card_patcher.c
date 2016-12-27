@@ -47,6 +47,8 @@ u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B
 u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
 u32 cardReadCachedEndSignature1[4]   = {0xE5950020,0xE3500000,0x13A00001,0x03A00000};
 
+u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
+
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
@@ -159,7 +161,9 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	u32* cardPullOutSignature = cardPullOutSignature1;
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
 	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
-	if(moduleParams->sdk_version > 0x4000000) {
+	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+		cardReadCachedEndSignature = cardReadCachedEndSignature3;
+	} else if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
