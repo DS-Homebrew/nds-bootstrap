@@ -163,8 +163,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
-		u32* cardReadCachedStartSignature = cardReadCachedStartSignature4;
-		u32* cardReadCachedEndSignature = cardReadCachedEndSignature4;
+		cardReadCachedStartSignature = cardReadCachedStartSignature4;
+		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 	} 	
 
 	// Find the card read
