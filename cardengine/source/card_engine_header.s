@@ -102,56 +102,48 @@ patches:
 card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r0-r11,lr}
-	
-	@ avoid parallel execution
-	@ 	adr     r1, mutex    @shared area command
-	@ 	mov r2, #1
-mutex_loop:
- 	@    swp r4,r2, [r1]
- 	@    cmp r4, #1
- 	@    beq mutex_loop	
-	
-begin:
-	
-	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
-    ldr     r3,=0x4000100     @IPC_SYNC & command value
-    ldr     r8,=0x027FFB08    @shared area command		
 	str 	r0, cacheRef
 	
+begin:	
+	@ registers used r0,r1,r2,r3,r5,r8
+    ldr     r3,=0x4000100     @IPC_SYNC & command value
+    ldr     r8,=0x027FFB08    @shared area command			
     ldr     r4, cardStructArm9	
     ldr     r5, [R4]      @SRC
-	MOV     R1, #0x200
-	RSB     R10, R1, #0
-	AND     R11, R5, R10
-	
+	ldr     r1, [R4,#0x8] @LEN
 	ldr     r0, [R4,#0x4] @DST
-    ldr     r1, [R4,#0x8] @LEN
-	mov     r2, #0x2400
+	mov     r2, #0x2400	
 	
-	sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
-	cmp r0, r7
-	bgt cmd1
-	sub r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
-	cmp r0, r7
-	blt cmd1
-	cmp r1, #1024
-	blt cmd1
+	@page computation
+	mov     r9, #0x200
+	rsb     r10, r9, #0
+	and     r11, r5, r10
+	
+	@ check for cmd2
 	cmp     r11, r5
-	bne     cmd1
-
+	bne     cmd1	
+	cmp     r1, #1024
+	blt     cmd1	
+	sub     r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
+	cmp     r0, r7
+	bgt     cmd1
+	sub     r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
+	cmp     r0, r7
+	blt     cmd1
+	
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
 	@r0 dst, r1 len
 	ldr r9, cacheFlushRef
 	blx r9  			@ cache flush code
-	b partial_cmd2
+	b 	send_cmd
 
 cmd1:	
-	@mov r0, r5
+	mov     R1, #0x200
 	mov     r5, r11       @ current page	
-    sub r7, r8, #(0x027FFB08 - 0x027ff800) @cmd1 marker
-	
-partial_cmd2:
+    sub     r7, r8, #(0x027FFB08 - 0x027ff800) @cmd1 marker
+
+send_cmd:
 	@dst, len, src, marker
     stmia r8, {r0,r1,r5,r7}
     
@@ -164,46 +156,32 @@ loop_wait:
     bne loop_wait	
 
 	@ check for cmd2
-	cmp r1, #0x200
-	bgt exitfunc
+	cmp     r1, #0x200
+	bgt     exitfunc
 	
 	ldr 	r9, cacheRef
-	@MOV     R10, #0
-	@str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
-	mov     r10,r7
-	
+	mov     r10,r7	
 
 	@ copy 512 bytes
 	mov     r8, #512
+	
 loop_copy:
-	ldmia r10!, {r0-r7}
-	stmia r9!, {r0-r7}
-	subs  r8, r8, #32  @ 4*8 bytes
-	bgt loop_copy
+	ldmia   r10!, {r0-r7}
+	stmia   r9!,  {r0-r7}
+	subs    r8, r8, #32  @ 4*8 bytes
+	bgt     loop_copy
 
 	ldr 	r0, cacheRef	
-	str r11, [r0, #8]	@ cache page
+	str     r11, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
 	blx r9  		
 	
-	@ldr     r4, =0x05000000
-	@mov     r6, #31
-	@str     r6, [r4]
-	
 	cmp r0,#0	
-	beq exitfunc
-	
-	ldr 	r0, cacheRef
-	b begin
+	bne begin
 
-exitfunc:
-	@ release mutex
-	@ 	adr r1, mutex    @shared area command
-	@ 	mov r2, #0
-	@   str r2, [r1]
-	
+exitfunc:	
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
 
@@ -213,8 +191,6 @@ cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
 .word    0x00000000  
-@mutex:
-@.word    0x00000000  
 cacheRef:
 .word    0x00000000  
 .pool
