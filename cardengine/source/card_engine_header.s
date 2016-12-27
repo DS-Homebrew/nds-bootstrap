@@ -130,6 +130,8 @@ begin:
 	sub     r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
 	cmp     r0, r7
 	blt     cmd1
+	ands    r10, r0, #3
+	bne     cmd1
 	
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
