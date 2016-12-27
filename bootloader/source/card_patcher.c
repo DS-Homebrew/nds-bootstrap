@@ -353,7 +353,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	if(cardCheckPullOutOffset>0)
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
 		
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x58);	
+	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x5C);	
 		
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
 	

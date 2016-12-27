@@ -105,7 +105,7 @@ card_read_arm9:
 	str 	r0, cacheRef
 	
 begin:	
-	@ registers used r0,r1,r2,r3,r5,r8
+	@ registers used r0,r1,r2,r3,r5,r8,r11
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command			
     ldr     r4, cardStructArm9	
@@ -157,15 +157,14 @@ loop_wait:
 
 	@ check for cmd2
 	cmp     r1, #0x200
-	bgt     exitfunc
+	bne     exitfunc
 	
 	ldr 	r9, cacheRef
 	add     r9,r9,#0x20	@ cache buffer
 	mov     r10,r7	
 
 	@ copy 512 bytes
-	mov     r8, #512
-	
+	mov     r8, #512	
 loop_copy:
 	ldmia   r10!, {r0-r7}
 	stmia   r9!,  {r0-r7}
