@@ -25,3 +25,14 @@ addons:
     - gcc-4.9
     - g++-4.9
     - libstdc++6
+    - lftp
+
+after_success:
+  - >
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+        GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
+        GITREV="`git show -s --format='%h'`"
+        REV_NAME="bootstrap-dldi-${GITDATE}-${GITREV}.nds"
+        cp bootstrap-dldi.nds $REV_NAME
+        lftp -c "open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
+    fi
