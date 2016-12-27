@@ -29,7 +29,7 @@ addons:
 
 after_success:
   - >
-    if [ "$TRAVIS_BRANCH" == "master" || "$TRAVIS_BRANCH" == "card" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "card" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
         REV_NAME="bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
