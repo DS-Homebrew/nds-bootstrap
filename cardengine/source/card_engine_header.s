@@ -103,20 +103,19 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r0-r11,lr}
 	
+	@ avoid parallel execution
+	@ 	adr     r1, mutex    @shared area command
+	@ 	mov r2, #1
+mutex_loop:
+ 	@    swp r4,r2, [r1]
+ 	@    cmp r4, #1
+ 	@    beq mutex_loop	
+	
 begin:
 	
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
     ldr     r8,=0x027FFB08    @shared area command
-
-	
-	@ avoid parallel execution
-	adr     r1, mutex    @shared area command
-	mov r2, #1
-mutex_loop:
-    swp r4,r2, [r1]
-    cmp r4, #1
-    beq mutex_loop	
 		
 	str 	r0, cacheRef
 
@@ -188,10 +187,6 @@ loop_copy:
 	@mov     r6, #31
 	@str     r6, [r4]
 	
-	@ldr 	r9, cacheRef
-	@MOV     R10, #0
-	@str     r10, [r9, #8]	@ clear cache page
-	
 	cmp r0,#0	
 	beq exitfunc
 	
@@ -200,9 +195,9 @@ loop_copy:
 
 exitfunc:
 	@ release mutex
-	adr r1, mutex    @shared area command
-	mov r2, #0
-    str r2, [r1]
+	@ 	adr r1, mutex    @shared area command
+	@ 	mov r2, #0
+	@   str r2, [r1]
 	
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
