@@ -115,39 +115,42 @@ begin:
 	
 	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
     ldr     r3,=0x4000100     @IPC_SYNC & command value
-    ldr     r8,=0x027FFB08    @shared area command
-		
+    ldr     r8,=0x027FFB08    @shared area command		
 	str 	r0, cacheRef
-
-    ldr     r4, cardStructArm9
 	
+    ldr     r4, cardStructArm9	
     ldr     r5, [R4]      @SRC
+	MOV     R1, #0x200
+	RSB     R10, R1, #0
+	AND     R11, R5, R10
+	
 	ldr     r0, [R4,#0x4] @DST
     ldr     r1, [R4,#0x8] @LEN
 	mov     r2, #0x2400
 	
-	@sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
-	@cmp r0, r7
-	@bgt check_partial
-	@b check_partial @deactivate cmd2 optimization
-cmd2:
-	@sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
-	@r0 dst, r1 len
-	@ldr r9, cacheFlushRef
-	@blx r9  			@ cache flush code
-	@b partial_cmd2
+	sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
+	cmp r0, r7
+	bgt cmd1
+	sub r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
+	cmp r0, r7
+	blt cmd1
+	cmp r1, #1024
+	blt cmd1
+	cmp     r11, r5
+	bne     cmd1
 
-check_partial:
-	
-	mov r0, r5
-	
-	MOV     R1, #0x200
-	RSB     R10, R1, #0
-	AND     R11, R5, R10
+cmd2:
+	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
+	@r0 dst, r1 len
+	ldr r9, cacheFlushRef
+	blx r9  			@ cache flush code
+	b partial_cmd2
+
+cmd1:	
+	@mov r0, r5
 	mov     r5, r11       @ current page	
+    sub r7, r8, #(0x027FFB08 - 0x027ff800) @cmd1 marker
 	
-partial:
-    sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
 partial_cmd2:
 	@dst, len, src, marker
     stmia r8, {r0,r1,r5,r7}
@@ -155,16 +158,18 @@ partial_cmd2:
     @sendIPCSync
     strh    r2, [r3,#0x80]
 
-partial_loop_wait:
+loop_wait:
     ldr r9, [r8,#12]
     cmp r9,#0
-    bne partial_loop_wait	
+    bne loop_wait	
 
-partial_loop_copy:
+	@ check for cmd2
+	cmp r1, #0x200
+	bgt exitfunc
 	
 	ldr 	r9, cacheRef
-	MOV     R10, #0
-	str     r10, [r9, #8]	@ clear cache page
+	@MOV     R10, #0
+	@str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
 	mov     r10,r7
 	
@@ -208,8 +213,8 @@ cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
 .word    0x00000000  
-mutex:
-.word    0x00000000  
+@mutex:
+@.word    0x00000000  
 cacheRef:
 .word    0x00000000  
 .pool
