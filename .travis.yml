@@ -29,10 +29,11 @@ addons:
 
 after_success:
   - >
-    if [ "$TRAVIS_BRANCH" == "master" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "card" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
-        REV_NAME="bootstrap-dldi-${GITDATE}-${GITREV}.nds"
+        REV_NAME="bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
         cp bootstrap-dldi.nds $REV_NAME
-        lftp -c "open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
+        lftp ftp://nds-bootstrap:$BUILD_PASSWORD@joshuadoes.com  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
+        lftp sftp://twlbuild:$BUILD_PASSWORD2@labs.projectkaeru.xyz  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
     fi

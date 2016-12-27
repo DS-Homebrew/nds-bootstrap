@@ -102,81 +102,87 @@ patches:
 card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r0-r11,lr}
-    
-	@ registers used r0,r1,r2,r3,r5,r6,r7,r8
-    ldr     r3,=0x4000100     @IPC_SYNC & command value
-    ldr     r8,=0x027FFB08    @shared area command
-    ldr     r4, cardStructArm9
-    ldr     r5, [R4]      @SRC
-	ldr     r0, [R4,#0x4] @DST
-    ldr     r1, [R4,#0x8] @LEN
-	mov     r2, #0x2400
+	str 	r0, cacheRef
 	
-	@sub r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
-	@cmp r0, r7
-	@bgt check_partial
-	b check_partial @deactivate cmd2 optimization
+begin:	
+	@ registers used r0,r1,r2,r3,r5,r8,r11
+    ldr     r3,=0x4000100     @IPC_SYNC & command value
+    ldr     r8,=0x027FFB08    @shared area command			
+    ldr     r4, cardStructArm9	
+    ldr     r5, [R4]      @SRC
+	ldr     r1, [R4,#0x8] @LEN
+	ldr     r0, [R4,#0x4] @DST
+	mov     r2, #0x2400	
+	
+	@page computation
+	mov     r9, #0x200
+	rsb     r10, r9, #0
+	and     r11, r5, r10
+	
+	@ check for cmd2
+	cmp     r11, r5
+	bne     cmd1	
+	cmp     r1, #1024
+	blt     cmd1	
+	sub     r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
+	cmp     r0, r7
+	bgt     cmd1
+	sub     r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
+	cmp     r0, r7
+	blt     cmd1
+	ands    r10, r0, #3
+	bne     cmd1
+	
 cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
 	@r0 dst, r1 len
 	ldr r9, cacheFlushRef
 	blx r9  			@ cache flush code
-	b partial_cmd2
-	
-check_partial:
-	cmp r1, #512    
-    blt partial
-    
-chunck_loop:
-    mov r4, #512
-	sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
-	@dst, len, src, marker
-    stmia r8, {r0,r4,r5,r7}
-    
-    @sendIPCSync
-    strh    r2, [r3,#0x80]
+	b 	send_cmd
 
-chunck_loop_wait:
-    ldr r9, [r8,#12]		
-    cmp r9,#0
-    bne chunck_loop_wait
-chunck_loop_copy:
-    ldrb r9, [r7], #1
-    strb r9, [r0], #1
-    subs r4, #1
-    bgt chunck_loop_copy
+cmd1:	
+	mov     R1, #0x200
+	mov     r5, r11       @ current page	
+    sub     r7, r8, #(0x027FFB08 - 0x027ff800) @cmd1 marker
 
-chunk_end_copy:
-    add  r5, #512
-    subs r1, #512
-	beq exitfunc
-    b check_partial
-
-partial:
-    sub r7, r8, #(0x027FFB08 - 0x027ff800) @shared area data
-partial_cmd2:
+send_cmd:
 	@dst, len, src, marker
     stmia r8, {r0,r1,r5,r7}
     
     @sendIPCSync
     strh    r2, [r3,#0x80]
 
-partial_loop_wait:
+loop_wait:
     ldr r9, [r8,#12]
     cmp r9,#0
-    bne partial_loop_wait	
+    bne loop_wait	
+
+	@ check for cmd2
+	cmp     r1, #0x200
+	bne     exitfunc
 	
-	sub r8, r8, #(0x027FFB08 - 0x027ff800) @shared area data
-	cmp r7, r8
-	bne exitfunc
+	ldr 	r9, cacheRef
+	add     r9,r9,#0x20	@ cache buffer
+	mov     r10,r7	
 
-partial_loop_copy:
-    ldrb r9, [r7], #1
-    strb r9, [r0], #1
-    subs r1, #1
-    bgt partial_loop_copy
+	@ copy 512 bytes
+	mov     r8, #512	
+loop_copy:
+	ldmia   r10!, {r0-r7}
+	stmia   r9!,  {r0-r7}
+	subs    r8, r8, #32  @ 4*8 bytes
+	bgt     loop_copy
 
-exitfunc:
+	ldr 	r0, cacheRef	
+	str     r11, [r0, #8]	@ cache page
+	
+	ldr r9, readCachedRef
+	blx r9  		
+	
+	cmp r0,#0	
+	bne begin
+
+exitfunc:	
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
 
@@ -185,6 +191,8 @@ cardStructArm9:
 cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
+.word    0x00000000  
+cacheRef:
 .word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------
