@@ -44,9 +44,11 @@ u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
 u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
-u32 cardReadCachedSignature1[4]   = {0xE92D4030,0xE24DD004,0xE59F5090,0xE3A01C02};
-u32 cardReadCachedSignature4[4]   = {0xE92D4038,0xE59F407C,0xE3A01C02,0xE594301C};
-   
+u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
+u32 cardReadCachedEndSignature1[4]   = {0xE5950020,0xE3500000,0x13A00001,0x03A00000};
+
+u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
+u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
 // irqEnable
 u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
@@ -155,12 +157,14 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	u32* a9cardReadSignature = a9cardReadSignature1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardPullOutSignature = cardPullOutSignature1;
-	u32* cardReadCachedSignature = cardReadCachedSignature1;
+	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
+	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
-		cardReadCachedSignature = cardReadCachedSignature4;
+		u32* cardReadCachedStartSignature = cardReadCachedStartSignature4;
+		u32* cardReadCachedEndSignature = cardReadCachedEndSignature4;
 	} 	
 
 	// Find the card read
@@ -193,17 +197,6 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		nocashMessage("Card check pull out found\n");
 	}
 	
-	u32 cardReadCachedOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)cardReadCachedSignature, 4, 1);
-    if (!cardReadCachedOffset) {
-        nocashMessage("Card read cached not found\n");
-        return 0;
-    } else {
-		debug[0] = cardReadCachedOffset;
-		nocashMessage("Card read cached  found\n");
-	}
-	
 	u32 cardIrqEnableOffset =   
         getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)irqEnableStartSignature, 4, 1);
@@ -233,6 +226,25 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     }
 	debug[0] = cardPullOutOffset;
     nocashMessage("Card pull out handler found\n");
+	
+	
+    u32 cardReadCachedEndOffset =  
+        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+              (u32*)cardReadCachedEndSignature, 4, 1);
+    if (!cardReadCachedEndOffset) {
+        nocashMessage("Card read cached end not found\n");
+        return 0;
+    }	
+	debug[1] = cardReadCachedEndOffset;	
+    u32 cardReadCachedOffset =   
+        getOffsetA9((u32*)cardReadCachedEndOffset, -0xFF,
+              (u32*)cardReadCachedStartSignature, 2, -1);
+    if (!cardReadStartOffset) {
+        nocashMessage("Card read cached start not found\n");
+        return 0;
+    }
+	debug[0] = cardReadCachedOffset;
+    nocashMessage("Card read cached found\n");	
 	
 	/*	
 	// Find the card id
