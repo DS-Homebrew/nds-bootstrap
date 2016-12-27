@@ -116,11 +116,12 @@ begin:
 mutex_loop:
     swp r4,r2, [r1]
     cmp r4, #1
-    beq mutex_loop
-	
-	str 	r0,[r8,#16]
+    beq mutex_loop	
+		
+	str 	r0, cacheRef
 
     ldr     r4, cardStructArm9
+	
     ldr     r5, [R4]      @SRC
 	ldr     r0, [R4,#0x4] @DST
     ldr     r1, [R4,#0x8] @LEN
@@ -161,10 +162,8 @@ partial_loop_wait:
     bne partial_loop_wait	
 
 partial_loop_copy:
-
-	@ldr     r8,=0x027FFB08    @shared area command
 	
-	ldr 	r9,[r8,#16]	
+	ldr 	r9, cacheRef
 	MOV     R10, #0
 	str     r10, [r9, #8]	@ clear cache page
 	add     r9,r9,#0x20	@ cache buffer
@@ -172,14 +171,14 @@ partial_loop_copy:
 	
 
 	@ copy 512 bytes
-	MOV     R12, #512
+	mov     r8, #512
 loop_copy:
 	ldmia r10!, {r0-r7}
 	stmia r9!, {r0-r7}
-	subs r12, r12, #32  @ 4*8 bytes
+	subs  r8, r8, #32  @ 4*8 bytes
 	bgt loop_copy
 
-	ldr 	r0,[r8,#16]		
+	ldr 	r0, cacheRef	
 	str r11, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
@@ -189,18 +188,22 @@ loop_copy:
 	@mov     r6, #31
 	@str     r6, [r4]
 	
+	@ldr 	r9, cacheRef
+	@MOV     R10, #0
+	@str     r10, [r9, #8]	@ clear cache page
+	
+	cmp r0,#0	
+	beq exitfunc
+	
+	ldr 	r0, cacheRef
+	b begin
+
+exitfunc:
 	@ release mutex
 	adr r1, mutex    @shared area command
 	mov r2, #0
     str r2, [r1]
 	
-	cmp r0,#0	
-	beq exitfunc
-	
-	ldr 	r0,[r8,#16]	
-	b begin
-
-exitfunc:
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
 
@@ -211,6 +214,8 @@ cacheFlushRef:
 readCachedRef:
 .word    0x00000000  
 mutex:
+.word    0x00000000  
+cacheRef:
 .word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------

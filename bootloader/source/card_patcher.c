@@ -253,7 +253,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	debug[0] = cardIdStartOffset;
     nocashMessage("Card id found\n");	*/		
 	
-	u32 arenaLoOffset =   
+	/*u32 arenaLoOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)arenaLowSignature, 4, 1);
     if (!arenaLoOffset) {
@@ -279,7 +279,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 		//*((u32*)arenaLo2Offset) = *((u32*)arenaLo2Offset) + 0x800; // shrink heap by 8 kb
 			
 		debug[13] = arenaLo2Offset;
-	}
+	}*/
 
 	debug[2] = cardEngineLocation;
 	
@@ -340,7 +340,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	if(cardCheckPullOutOffset>0)
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
 		
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x6C);	
+	//copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x6C);	
 		
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
 	
