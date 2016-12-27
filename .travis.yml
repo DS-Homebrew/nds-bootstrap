@@ -34,5 +34,5 @@ after_success:
         GITREV="`git show -s --format='%h'`"
         REV_NAME="bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
         cp bootstrap-dldi.nds $REV_NAME
-        lftp -c "open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
+        lftp -c "set net:timeout 5; set net:max-retries 2; open -u nds-bootstrap,$BUILD_PASSWORD sftp://joshuadoes.com; put -O ' /home/nds-bootstrap' '${REV_NAME}'"
     fi
