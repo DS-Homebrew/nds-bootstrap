@@ -195,6 +195,11 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 // Global sector buffer to save on stack space
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 
+#define CLUSTER_CACHE      0x3700000
+#define CLUSTER_CACHE_SIZE 0x40000
+
+static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //FAT routines
@@ -502,6 +507,7 @@ aFile getBootFileCluster (const char* bootName)
 		file.firstCluster = CLUSTER_FREE;
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
+		file.fatTableCached=false;
 		return file;
 	}
 	
@@ -510,6 +516,7 @@ aFile getBootFileCluster (const char* bootName)
 	file.firstCluster = (dir.startCluster | (dir.startClusterHigh << 16));
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
+	file.fatTableCached=false;
 	return file;
 }
 
@@ -518,6 +525,7 @@ aFile getFileFromCluster (u32 cluster) {
 	file.firstCluster = cluster;
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
+	file.fatTableCached=false;
 	return file;	
 }
 
@@ -638,16 +646,23 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 		return 0;
 	}
 	
-	if(startOffset<file.currentOffset) {
-		file.currentOffset=0;
-		file.currentCluster = file.firstCluster;
-	}
+	if(file.fatTableCached) {
+		u32 clusterIndex = startOffset/discBytePerClus;
+		file.currentCluster = file.fatTableCache[clusterIndex];
+		file.currentOffset=clusterIndex*discBytePerClus;
+	} else {	
+		if(startOffset<file.currentOffset) {
+			file.currentOffset=0;
+			file.currentCluster = file.firstCluster;
+		}
+		
+		// Follow cluster list until desired one is found
+		for (chunks = (startOffset-file.currentOffset) / discBytePerClus; chunks > 0; chunks--)
+		{
+			file.currentCluster = FAT_NextCluster (file.currentCluster);
+			file.currentOffset+=discBytePerClus;
+		}
 	
-	// Follow cluster list until desired one is found
-	for (chunks = (startOffset-file.currentOffset) / discBytePerClus; chunks > 0; chunks--)
-	{
-		file.currentCluster = FAT_NextCluster (file.currentCluster);
-		file.currentOffset+=discBytePerClus;
 	}
 	
 	// Calculate the sector and byte of the current position,
@@ -668,7 +683,7 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 		globalBuffer[curByte++] = buffer[dataPos];
 	}
 	
-	CARD_WriteSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer);
+	CARD_WriteSector(curSect + FAT_ClustToSect(file.currentCluster), globalBuffer);
 	
 	curSect++;
 
@@ -722,4 +737,28 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 	}
 	
 	return dataPos;
+}
+
+void buildFatTableCache (aFile file) {
+	file.currentOffset=0;
+	file.currentCluster = file.firstCluster;
+	
+	file.fatTableCache = lastClusterCacheUsed;
+	
+	// Follow cluster list until desired one is found
+	while (file.currentCluster != CLUSTER_EOF && file.firstCluster != CLUSTER_FREE 
+		&& lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
+	{
+		*lastClusterCacheUsed = file.currentCluster;
+		file.currentOffset+=discBytePerClus;
+		file.currentCluster = FAT_NextCluster (file.currentCluster);
+		lastClusterCacheUsed++;
+	}
+	
+	if(file.currentCluster == CLUSTER_EOF) {
+		file.fatTableCached = true;
+	}
+	
+	file.currentOffset=0;
+	file.currentCluster = file.firstCluster;
 }

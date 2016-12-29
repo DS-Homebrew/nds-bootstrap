@@ -43,6 +43,9 @@ typedef	struct
 	u32	firstCluster;
 	u32	currentCluster;
 	u32 currentOffset;
+	bool fatTableCached;
+	u32* fatTableCache;
+	u32 fatTableCacheSize;
 } aFile;
 
 bool FAT_InitFiles (bool initCard);
@@ -51,6 +54,7 @@ aFile getFileFromCluster (u32 cluster);
 u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length);
 u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length);
 u32 FAT_ClustToSect (u32 cluster);
+void buildFatTableCache (aFile file);
 
 /* ROM Header Region Information Structure */
 

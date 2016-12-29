@@ -41,6 +41,7 @@ void initLogging() {
 		}
 		FAT_InitFiles(false);
 		romFile = getFileFromCluster(fileCluster);
+		buildFatTableCache(romFile);
 		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
