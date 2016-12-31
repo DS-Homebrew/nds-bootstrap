@@ -29,7 +29,6 @@
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
-#include "bootsplash.h"
 
 using namespace std;
 
@@ -156,11 +155,6 @@ int main( int argc, char **argv) {
 	
 	if (fatInitDefault()) {
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
-		
-		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
-			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
-			BootSplashInit();
-		}
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
