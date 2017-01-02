@@ -26,6 +26,8 @@ u32 a7cardReadSignature[2]     = {0x04100010,0x040001A4};
 u32 a7something1Signature[2]   = {0xE350000C,0x908FF100};
 u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
+u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000}; 
+
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
@@ -53,7 +55,8 @@ u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
 // irqEnable
-u32 irqEnableStartSignature[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature1[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature3[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
@@ -148,10 +151,8 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 	moduleParams->compressed_static_end = 0;
 }
 
+u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
-	nocashMessage("patchCardNds");
-	
 	u32* debug = (u32*)0x037D0000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
@@ -189,38 +190,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     }
 	debug[0] = cardReadStartOffset;
     nocashMessage("Card read found\n");	
-	
-	u32 cardCheckPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)cardCheckPullOutSignature, 4, 1);
-    if (!cardCheckPullOutOffset) {
-        nocashMessage("Card check pull out not found\n");
-        //return 0;
-    } else {
-		debug[0] = cardCheckPullOutOffset;
-		nocashMessage("Card check pull out found\n");
-	}
-	
-	u32 cardIrqEnableOffset =   
-        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)irqEnableStartSignature, 4, 1);
-    if (!cardIrqEnableOffset) {
-        nocashMessage("irq enable not found\n");
-        return 0;
-    }
-	debug[0] = cardIrqEnableOffset;
-    nocashMessage("irq enable found\n");
-	
-	/*u32 cacheMagOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-              (u32*)cacheMagStartSignature, 4, 1);
-    if (!cacheMagOffset) {
-        nocashMessage("cache management not found\n");
-    } else {
-		debug[0] = cacheMagOffset;
-		nocashMessage("cache management found\n");
-	}*/
-	
+
 	u32 cardPullOutOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)cardPullOutSignature, 4, 1);
@@ -249,7 +219,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
     }
 	debug[0] = cardReadCachedOffset;
     nocashMessage("Card read cached found\n");	
-	
+
 	/*	
 	// Find the card id
     u32 cardIdEndOffset =  
@@ -305,11 +275,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	cardEngineLocation[3] = moduleParams->sdk_version;
 	
 	u32* cardReadPatch = (u32*) patches[0];
-	
-	u32* cardCheckPullOutPatch = (u32*) patches[1];
-	
-	u32* cardIrqEnablePatch = (u32*) patches[2];
-	
+
 	u32* cardPullOutPatch = patches[6];
 	
 	debug[5] = patches;
@@ -327,42 +293,70 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_p
 	*((u32*)patches[5]) = ((u32*)*card_struct)+6;	
 	if(moduleParams->sdk_version > 0x3000000) {
 		*((u32*)patches[5]) = ((u32*)*card_struct)+7;	
-	}	
-	
-	/*if(!cacheMagOffset) {
-		cacheMagOffset =   
-			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				  (u32*)cacheMagStartSignature2, 4, 1);
-		if (!cacheMagOffset) {
-			nocashMessage("cache management alt not found\n");
-		}
-		debug[0] = cacheMagOffset;
-		nocashMessage("cache management alt found\n");
-		copyLoop ((u32*)patches[7], (u32*)patches[8], 16);	
 	}
 	
-	*((u32*)patches[6]) = cacheMagOffset;*/
 	
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	*((u32*)patches[8]) = cardReadCachedOffset;
 	
-	/*if(moduleParams->sdk_version > 0x4000000) {
-		copyLoop ((u32*)patches[7], (u32*)patches[9], 16);	
-	}*/
-	
 	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
 	
-	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);	
+	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);		
+
+	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x5C);	
+
+	nocashMessage("ERR_NONE");
+	return 0;
+}
+
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+	u32* debug = (u32*)0x037D0000;
+	
+	u32* irqEnableStartSignature = irqEnableStartSignature1;	
+	if(moduleParams->sdk_version > 0x3000000) {
+		irqEnableStartSignature = irqEnableStartSignature3;
+	}
+
+	u32 cardCheckPullOutOffset =   
+        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)cardCheckPullOutSignature, 4, 1);
+    if (!cardCheckPullOutOffset) {
+        nocashMessage("Card check pull out not found\n");
+        //return 0;
+    } else {
+		debug[0] = cardCheckPullOutOffset;
+		nocashMessage("Card check pull out found\n");
+	}
+
+	u32 cardIrqEnableOffset =   
+        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)irqEnableStartSignature, 4, 1);
+    if (!cardIrqEnableOffset) {
+        nocashMessage("irq enable not found\n");
+        return 0;
+    }
+	debug[0] = cardIrqEnableOffset;
+    nocashMessage("irq enable found\n");
+	
+	u32* patches =  (u32*) cardEngineLocation[0];
+	u32* cardIrqEnablePatch = (u32*) patches[2];
+	u32* cardCheckPullOutPatch = (u32*) patches[1];
 	
 	if(cardCheckPullOutOffset>0)
-		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);	
-		
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x5C);	
-		
-	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);	
+		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);		
+
+	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	
 	nocashMessage("ERR_NONE");
 	return 0;
 }
 
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
+	nocashMessage("patchCardNds");
 
+	patchCardNdsArm9(ndsHeader, cardEngineLocation, moduleParams);
+	patchCardNdsArm7(ndsHeader, cardEngineLocation, moduleParams);
+
+	nocashMessage("ERR_NONE");
+	return 0;
+}
