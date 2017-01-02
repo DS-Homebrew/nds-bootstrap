@@ -31,6 +31,7 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+static aFile romFile;
 
 void initLogging() {
 	if(!initialized) {
@@ -39,7 +40,9 @@ void initLogging() {
 			sdmmc_sdcard_init();
 		}
 		FAT_InitFiles(false);
-		u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
+		romFile = getFileFromCluster(fileCluster);
+		buildFatTableCache(romFile);
+		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
@@ -81,7 +84,7 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nmarker : \n");
 		dbg_hexa(marker);
 		
-		fileRead(0x027ff800 ,fileCluster,src,len);
+		fileRead(0x027ff800 ,romFile,src,len);
 		
 		dbg_printf("\nread \n");
 		
@@ -121,7 +124,7 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nmarker : \n");
 		dbg_hexa(marker);
 		
-		fileRead(dst,fileCluster,src,len);
+		fileRead(dst,romFile,src,len);
 		
 		dbg_printf("\nread \n");
 		

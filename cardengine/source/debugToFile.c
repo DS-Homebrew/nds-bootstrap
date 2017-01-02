@@ -20,11 +20,11 @@
 #include "fat.h"
 
 static bool _debug = false;
-static u32 _debugFileCluster = 0;
+static aFile _debugFileCluster;
 static u32 _currentPos = 0;
 static char hexbuffer [9];
 
-void enableDebug(u32 debugFileCluster) {	
+void enableDebug(aFile debugFileCluster) {	
 	_debug = true;
 	_debugFileCluster = debugFileCluster;
 }
