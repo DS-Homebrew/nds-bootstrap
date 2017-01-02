@@ -56,7 +56,7 @@ u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00
    
 // irqEnable
 u32 irqEnableStartSignature1[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
-u32 irqEnableStartSignature3[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020};
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
@@ -313,8 +313,8 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* debug = (u32*)0x037D0000;
 	
 	u32* irqEnableStartSignature = irqEnableStartSignature1;	
-	if(moduleParams->sdk_version > 0x3000000) {
-		irqEnableStartSignature = irqEnableStartSignature3;
+	if(moduleParams->sdk_version > 0x4000000) {
+		irqEnableStartSignature = irqEnableStartSignature4;
 	}
 
 	u32 cardCheckPullOutOffset =   
