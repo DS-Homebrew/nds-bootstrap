@@ -55,7 +55,7 @@ u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
 // irqEnable
-u32 irqEnableStartSignature1[4] = {0xE59FC02C,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature1[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 u32 irqEnableStartSignature3[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
