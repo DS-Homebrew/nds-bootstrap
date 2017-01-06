@@ -63,7 +63,7 @@ u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};
 //
 // Look in @data for @find and return the position of it.
 //
-u32 getOffsetA9(u32* addr, size_t size, u32* find, size_t sizeofFind, int direction)
+u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int direction)
 {
 	u32* end = addr + size/sizeof(u32);
 	u32* debug = (u32*)0x037D0000;
@@ -94,7 +94,7 @@ u32 getOffsetA9(u32* addr, size_t size, u32* find, size_t sizeofFind, int direct
 module_params_t* findModuleParams(const tNDSHeader* ndsHeader)
 {
 	nocashMessage("Looking for moduleparams\n");
-	uint32_t moduleparams = getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
+	uint32_t moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
 	if(!moduleparams)
 	{
 		nocashMessage("No moduleparams?\n");
@@ -174,7 +174,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	// Find the card read
     u32 cardReadEndOffset =  
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
               (u32*)a9cardReadSignature, 2, 1);
     if (!cardReadEndOffset) {
         nocashMessage("Card read end not found\n");
@@ -182,7 +182,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }	
 	debug[1] = cardReadEndOffset;	
     u32 cardReadStartOffset =   
-        getOffsetA9((u32*)cardReadEndOffset, -0xF9,
+        getOffset((u32*)cardReadEndOffset, -0xF9,
               (u32*)cardReadStartSignature, 1, -1);
     if (!cardReadStartOffset) {
         nocashMessage("Card read start not found\n");
@@ -192,7 +192,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     nocashMessage("Card read found\n");	
 
 	u32 cardPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)cardPullOutSignature, 4, 1);
     if (!cardPullOutOffset) {
         nocashMessage("Card pull out handler not found\n");
@@ -203,7 +203,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	
     u32 cardReadCachedEndOffset =  
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
               (u32*)cardReadCachedEndSignature, 4, 1);
     if (!cardReadCachedEndOffset) {
         nocashMessage("Card read cached end not found\n");
@@ -211,7 +211,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }	
 	debug[1] = cardReadCachedEndOffset;	
     u32 cardReadCachedOffset =   
-        getOffsetA9((u32*)cardReadCachedEndOffset, -0xFF,
+        getOffset((u32*)cardReadCachedEndOffset, -0xFF,
               (u32*)cardReadCachedStartSignature, 2, -1);
     if (!cardReadStartOffset) {
         nocashMessage("Card read cached start not found\n");
@@ -309,6 +309,56 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
+u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+
+	u32 alignedA7size = (ndsHeader->arm7binarySize + 511) & 0xFFFFFE00;
+
+	// Find the relocation signature
+    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, alignedA7size,
+        relocateStartSignature, 4, 1);
+    if (!relocationStart) {
+        nocashMessage("Relocation start not found\n");
+		return 0;
+    }
+	
+	// Validate the relocation signature
+    u32 forwardedRelocStartAddr = relocationStart + 4;
+    if (!*(u32*)forwardedRelocStartAddr)
+        forwardedRelocStartAddr += 4;
+    u32 vAddrOfRelocSrc =
+        *(u32*)(forwardedRelocStartAddr + 8);
+    // sanity checks
+    u32 relocationCheck1 =
+        *(u32*)(forwardedRelocStartAddr + 0xC);
+    u32 relocationCheck2 =
+        *(u32*)(forwardedRelocStartAddr + 0x10);
+    if ( vAddrOfRelocSrc != relocationCheck1
+      || vAddrOfRelocSrc != relocationCheck2) {
+        nocashMessage("Error in relocation checking\n");
+		return 0;
+    }
+	
+	
+    // Get the remaining details regarding relocation
+    u32 valueAtRelocStart =
+        *(u32*)forwardedRelocStartAddr;
+    u32 relocDestAtSharedMem =
+        *(u32*)valueAtRelocStart;
+    if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
+        // Try again
+        vAddrOfRelocSrc +=
+            *(u32*)valueAtRelocStart + 4;
+        relocDestAtSharedMem =
+            *(u32*)valueAtRelocStart + 0xC;
+        if (relocDestAtSharedMem != 0x37F8000) {
+            printf("Error in finding shared memory relocation area\n");
+			return 0;
+        }
+    }
+    printf("Relocation src:\t%08X\n", vAddrOfRelocSrc);
+    printf("Relocation dst:\t%08X\n", relocDestAtSharedMem);
+}
+
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
 	u32* debug = (u32*)0x037D0000;
 	
@@ -318,7 +368,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	u32 cardCheckPullOutOffset =   
-        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
     if (!cardCheckPullOutOffset) {
         nocashMessage("Card check pull out not found\n");
@@ -329,7 +379,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	u32 cardIrqEnableOffset =   
-        getOffsetA9((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)irqEnableStartSignature, 4, 1);
     if (!cardIrqEnableOffset) {
         nocashMessage("irq enable not found\n");
@@ -346,6 +396,8 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);		
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	
+	savePatchV1(ndsHeader, cardEngineLocation, moduleParams);
 	
 	nocashMessage("ERR_NONE");
 	return 0;
