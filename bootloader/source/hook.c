@@ -245,7 +245,7 @@ int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* che
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	
-	nocashMessage("hookNds");
+	nocashMessage("hookNdsHomebrew");
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
@@ -286,7 +286,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* chea
 	u32* hookAccel = NULL;
 	u32* debug = (u32*)0x037D0000;
 	
-	nocashMessage("hookNds");
+	nocashMessage("hookNdsRetail");
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
