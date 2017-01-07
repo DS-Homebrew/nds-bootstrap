@@ -346,6 +346,7 @@ int main (void) {
 			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
 			
+			hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 		}
 	} else {
 		copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
