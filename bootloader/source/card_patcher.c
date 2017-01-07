@@ -309,13 +309,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
-u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
 
-	u32 alignedA7size = (ndsHeader->arm7binarySize + 511) & 0xFFFFFE00;
+    nocashMessage("\nArm7 (patch v2.0)\n");
 
 	// Find the relocation signature
-    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, alignedA7size,
-        relocateStartSignature, 4, 1);
+    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        relocateStartSignature, 1, 1);
     if (!relocationStart) {
         nocashMessage("Relocation start not found\n");
 		return 0;
@@ -351,7 +351,58 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         relocDestAtSharedMem =
             *(u32*)valueAtRelocStart + 0xC;
         if (relocDestAtSharedMem != 0x37F8000) {
-            printf("Error in finding shared memory relocation area\n");
+            nocashMessage("Error in finding shared memory relocation area\n");
+			return 0;
+        }
+    }
+    printf("Relocation src:\t%08X\n", vAddrOfRelocSrc);
+    printf("Relocation dst:\t%08X\n", relocDestAtSharedMem);
+}
+
+
+u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+
+    nocashMessage("\nArm7 (patch v1.0)\n");
+
+	// Find the relocation signature
+    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        relocateStartSignature, 1, 1);
+    if (!relocationStart) {
+        nocashMessage("Relocation start not found\n");
+		return 0;
+    }
+	
+	// Validate the relocation signature
+    u32 forwardedRelocStartAddr = relocationStart + 4;
+    if (!*(u32*)forwardedRelocStartAddr)
+        forwardedRelocStartAddr += 4;
+    u32 vAddrOfRelocSrc =
+        *(u32*)(forwardedRelocStartAddr + 8);
+    // sanity checks
+    u32 relocationCheck1 =
+        *(u32*)(forwardedRelocStartAddr + 0xC);
+    u32 relocationCheck2 =
+        *(u32*)(forwardedRelocStartAddr + 0x10);
+    if ( vAddrOfRelocSrc != relocationCheck1
+      || vAddrOfRelocSrc != relocationCheck2) {
+        nocashMessage("Error in relocation checking\n");
+		return 0;
+    }
+	
+	
+    // Get the remaining details regarding relocation
+    u32 valueAtRelocStart =
+        *(u32*)forwardedRelocStartAddr;
+    u32 relocDestAtSharedMem =
+        *(u32*)valueAtRelocStart;
+    if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
+        // Try again
+        vAddrOfRelocSrc +=
+            *(u32*)valueAtRelocStart + 4;
+        relocDestAtSharedMem =
+            *(u32*)valueAtRelocStart + 0xC;
+        if (relocDestAtSharedMem != 0x37F8000) {
+            nocashMessage("Error in finding shared memory relocation area\n");
 			return 0;
         }
     }
@@ -397,7 +448,8 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	
-	savePatchV1(ndsHeader, cardEngineLocation, moduleParams);
+	u32 saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams);
+	if(!saveResult) saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams);
 	
 	nocashMessage("ERR_NONE");
 	return 0;

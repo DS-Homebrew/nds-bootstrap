@@ -335,27 +335,32 @@ int main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(fileCluster);
 	
-	// Patch with DLDI if desired
-	//if (wantToPatchDLDI) {
-	//	nocashMessage("wantToPatchDLDI");
-	//	dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-	//}
+	wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 	
-	copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
+	// Patch with DLDI if desired
+	if (wantToPatchDLDI) {
+		nocashMessage("wantToPatchDLDI");
+		wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+		if (wantToPatchDLDI) {		
+			// Find the DLDI reserved space in the file
+			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+			
+		}
+	} else {
+		copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
 
-	module_params_t* params = findModuleParams(NDS_HEAD);
-	if(params)
-	{
-		ensureArm9Decompressed(NDS_HEAD, params);
+		module_params_t* params = findModuleParams(NDS_HEAD);
+		if(params)
+		{
+			ensureArm9Decompressed(NDS_HEAD, params);
+		}
+		
+		patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
+		
+		hookNdsRetail(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
 	}
 	
-	patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
-	
-	// Find the DLDI reserved space in the file
-	//u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-	u32* wordCommandAddr = (u32 *) 0x2051BB4;
-	
-	hookNds(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	// Pass command line arguments to loaded program
 	//passArgs_ARM7();
