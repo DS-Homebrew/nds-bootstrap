@@ -230,7 +230,7 @@ int main( int argc, char **argv) {
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
 			dbg_printf("ARM9_SCFG_EXT locked\n");
-			REG_SCFG_EXT = 0x03000000; // NAND/SD Access
+			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
 		}
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		

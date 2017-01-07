@@ -280,6 +280,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 
 	// Direct CPU access to VRAM bank C
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;	
 	// Load the loader/patcher into the correct address
 	vramcpy (LCDC_BANK_C, loader, loaderSize);
 
@@ -347,6 +348,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;	
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
@@ -392,7 +394,7 @@ int runNdsFile (const char* filename, int argc, const char** argv)  {
 
 	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 	
-	installBootStub(havedsiSD);
+	//installBootStub(havedsiSD);
 
 	return runNds (load_bin, load_bin_size, st.st_ino, true, true, argc, argv);
 }

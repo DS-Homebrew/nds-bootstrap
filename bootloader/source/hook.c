@@ -19,6 +19,7 @@
 #include "hook.h"
 #include "common.h"
 #include "cardengine_bin.h"
+#include "sdengine_bin.h"
 
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
@@ -240,12 +241,52 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNds (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation, u32* wordCommandAddr) {
+int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
+	u32* hookLocation = NULL;
+	u32* hookAccel = NULL;
+	
+	nocashMessage("hookNdsHomebrew");
+
+	if (!hookLocation) {
+		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	}
+	
+	if (!hookLocation) {
+		nocashMessage("ERR_HOOK");
+		return ERR_HOOK;
+	}
+	
+	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_2007_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_2007_OK");
+	}
+	
+	hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_2010_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_2010_OK");
+	}
+	
+	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
+	
+	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
+	
+	nocashMessage("ERR_NONE");
+	return ERR_NONE;
+}
+
+
+int hookNdsRetail (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	u32* debug = (u32*)0x037D0000;
 	
-	nocashMessage("hookNds");
+	nocashMessage("hookNdsRetail");
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
