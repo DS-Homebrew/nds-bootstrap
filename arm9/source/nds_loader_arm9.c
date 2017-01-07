@@ -394,7 +394,7 @@ int runNdsFile (const char* filename, int argc, const char** argv)  {
 
 	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 	
-	installBootStub(havedsiSD);
+	//installBootStub(havedsiSD);
 
 	return runNds (load_bin, load_bin_size, st.st_ino, true, true, argc, argv);
 }
