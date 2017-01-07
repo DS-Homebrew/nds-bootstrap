@@ -54,6 +54,7 @@ Helpful information:
 #include "cardengine_bin.h"
 #include "boot.h"
 #include "hook.h"
+#include "common.h"
 
 void arm7clearRAM();
 int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
@@ -108,14 +109,6 @@ void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
     buffer[index] = REG_SPIDATA & 0xFF;
   }
   REG_SPICNT = 0;
-}
-
-
-static inline void copyLoop (u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3;
-	do {
-		*dest++ = *src++;
-	} while (size -= 4);
 }
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
@@ -339,15 +332,22 @@ int main (void) {
 	
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
-		nocashMessage("wantToPatchDLDI");
+		nocashMessage("try to patch dldi");
 		wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 		if (wantToPatchDLDI) {		
+			nocashMessage("dldi patch successful");
 			// Find the DLDI reserved space in the file
 			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
 			
-			hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+			int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+			if(error == ERR_NONE) {
+				nocashMessage("dldi hook Sucessfull");
+			} else {
+				nocashMessage("error during dldi hook");
+			}
 		} else {	
+			nocashMessage("dldi Patch Unsuccessful try to patch card");
 			copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
 
 			module_params_t* params = findModuleParams(NDS_HEAD);
@@ -358,7 +358,12 @@ int main (void) {
 			
 			patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
 			
-			hookNdsRetail(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
+			int error = hookNdsRetail(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
+				if(error == ERR_NONE) {
+				nocashMessage("card hook Sucessfull");
+			} else {
+				nocashMessage("error during card hook");
+			}
 		}
 	} 
 	
