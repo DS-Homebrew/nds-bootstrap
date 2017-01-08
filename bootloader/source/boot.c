@@ -197,14 +197,14 @@ void resetMemory_ARM7 (void)
 }
 
 
-void loadBinary_ARM7 (u32 fileCluster)
+void loadBinary_ARM7 (aFile file)
 {
 	u32 ndsHeader[0x170>>2];
 	
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead ((char*)ndsHeader, fileCluster, 0, 0x170);
+	fileRead ((char*)ndsHeader, file, 0, 0x170);
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
@@ -215,8 +215,8 @@ void loadBinary_ARM7 (u32 fileCluster)
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
 	
 	// Load binaries into memory
-	fileRead(ARM9_DST, fileCluster, ARM9_SRC, ARM9_LEN);
-	fileRead(ARM7_DST, fileCluster, ARM7_SRC, ARM7_LEN);
+	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
+	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
@@ -290,18 +290,18 @@ int main (void) {
 		_io_dldi.fn_startup = sdmmc_startup;
 	}
 
-	u32 fileCluster = storedFileCluster;
+	aFile file = getFileFromCluster (storedFileCluster);
 	// Init card
 	if(!FAT_InitFiles(initDisc))
 	{
 		nocashMessage("!FAT_InitFiles");
 		return -1;
 	}
-	if ((fileCluster < CLUSTER_FIRST) || (fileCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
+	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
-		fileCluster = getBootFileCluster(bootName);
+		file = getBootFileCluster(bootName);
 	}
-	if (fileCluster == CLUSTER_FREE)
+	if (file.firstCluster == CLUSTER_FREE)
 	{
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
@@ -326,7 +326,7 @@ int main (void) {
 
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
-	loadBinary_ARM7(fileCluster);
+	loadBinary_ARM7(file);
 	
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 	
@@ -358,7 +358,7 @@ int main (void) {
 			
 			patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
 			
-			int error = hookNdsRetail(NDS_HEAD, fileCluster, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
+			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
 				if(error == ERR_NONE) {
 				nocashMessage("card hook Sucessfull");
 			} else {

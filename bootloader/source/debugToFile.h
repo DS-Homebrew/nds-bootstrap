@@ -16,14 +16,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds/memory.h>
-#include <nds/ndstypes.h>
+#ifndef DEBUG_TO_FILE_H
+#define DEBUG_TO_FILE_H
+
 #include "fat.h"
 
-/*-------------------------------------------------------------------------
-arm7_hookGame
-Adds a hook in the game's ARM7 binary to our own code
--------------------------------------------------------------------------*/
-int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr);
+u32 dbg_printf( char * message);
+u32 dbg_hexa(u32 n);
+void enableDebug(aFile debugFileCluster);	
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // DEBUG_TO_FILE_H
