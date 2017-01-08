@@ -285,7 +285,7 @@ int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* che
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
-	u32* debug = (u32*)0x037D0000;
+	u32* debug = (u32*)0x037C4000;
 	
 	nocashMessage("hookNdsRetail");
 
