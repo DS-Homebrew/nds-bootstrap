@@ -555,6 +555,13 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 		file.currentCluster = file.firstCluster;
 	}
 	
+	if(file.oneClusterCached && length == 512 && ((startOffset / discBytePerClus) * discBytePerClus) == file.currentOffset) {
+		// read from cache
+		curByte = startOffset % discBytePerClus;
+		fastCopy32(ONE_CACHE+curByte,buffer,length);
+		return length;	
+	}
+	
 	if(file.fatTableCached) {
 		u32 clusterIndex = startOffset/discBytePerClus;
 		file.currentCluster = file.fatTableCache[clusterIndex];
@@ -573,15 +580,15 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 		}	
 	}
 	
-	/*if(file.oneClusterCached && length == 512) {
-		if(startOffset % discSecPerClus == currentCluster) {
-			
-		} else {			
-			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster),  discSecPerClus, ONE_CACHE);
-			currentCluster = 
-		}
+	if(file.oneClusterCached && length == 512) {		
+		// fill the cache
+		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, ONE_CACHE);		
+		// read from cache
+		curByte = startOffset % discBytePerClus;
+		fastCopy32(ONE_CACHE+curByte,buffer,length);
+		return length;	
 		
-	} else {*/
+	} else {
 		// Calculate the sector and byte of the current position,
 		// and store them
 		curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
@@ -648,11 +655,11 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 		}
 		
 		return dataPos;	
-	//}	
+	}	
 }
 
 /*-----------------------------------------------------------------
-fileRead(buffer, cluster, startOffset, length)
+fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 {
@@ -780,6 +787,7 @@ void buildFatTableCache (aFile file) {
 	
 	if(file.currentCluster == CLUSTER_EOF) {
 		file.fatTableCached = true;
+		file.oneClusterCached = true;
 	}
 	
 	file.currentOffset=0;
