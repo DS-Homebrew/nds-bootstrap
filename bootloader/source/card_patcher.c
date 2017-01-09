@@ -343,6 +343,10 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     // Get the remaining details regarding relocation
     u32 valueAtRelocStart =
         *(u32*)forwardedRelocStartAddr;
+	dbg_printf("valueAtRelocStart: ");
+	dbg_hexa(valueAtRelocStart);
+	dbg_printf("\n");
+		
     u32 relocDestAtSharedMem =
         *(u32*)valueAtRelocStart;
     if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
@@ -405,9 +409,9 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
         // Try again
         vAddrOfRelocSrc +=
-            *(u32*)valueAtRelocStart + 4;
+            *(u32*)(valueAtRelocStart + 4);
         relocDestAtSharedMem =
-            *(u32*)valueAtRelocStart + 0xC;
+            *(u32*)(valueAtRelocStart + 0xC);
         if (relocDestAtSharedMem != 0x37F8000) {
             dbg_printf("Error in finding shared memory relocation area\n");
 			return 0;
@@ -420,8 +424,91 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("Relocation dst: ");
 	dbg_hexa(relocDestAtSharedMem);
 	dbg_printf("\n");	
+
+    // Find the card read
+    u32 cardReadEndAddr =
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000, 
+		a7cardReadSignature, 2, 1);
+    if (!cardReadEndAddr) {
+        dbg_printf("[Error!] Card read addr not found\n"); return 0;
+    }
 	
+	dbg_printf("cardReadEndAddr: ");
+	dbg_hexa(cardReadEndAddr);
+	dbg_printf("\n");
 	
+	// nonsense variable names below
+    u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
+	
+	dbg_printf("cardstructAddr: ");
+	dbg_hexa(cardstructAddr);
+	dbg_printf("\n");
+	
+    u32 readCacheEnd =
+         getOffset(cardReadEndAddr,
+             0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
+			 
+	dbg_printf("readCacheEnd: ");
+	dbg_hexa(readCacheEnd);
+	dbg_printf("\n");
+
+    if (!readCacheEnd)
+    {
+        dbg_printf("[Error!] ___ addr not found\n"); return 0;
+    }
+    u32 addrOfSomething_8C1C = readCacheEnd + cardReadEndAddr + 4 - 0X2380000;
+	
+	dbg_printf("addrOfSomething_8C1C: ");
+	dbg_hexa(addrOfSomething_8C1C);
+	dbg_printf("\n");
+	
+	//
+    // Here is where the differences in the retry begin
+    //
+
+    u32 specificWramAddr = *(u32*)(addrOfSomething_8C1C + 0x10);
+    // if out of specific ram range...
+    if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
+        addrOfSomething_8C1C +=
+            getOffset(addrOfSomething_8C1C,
+              0x18000 - addrOfSomething_8C1C, &cardstructAddr, 1, 1) + 4;
+        specificWramAddr = *(u32*)(addrOfSomething_8C1C + 0x10);
+    }
+	
+	dbg_printf("specificWramAddr: ");
+	dbg_hexa(specificWramAddr);
+	dbg_printf("\n");
+
+    u32 someAddr_799C = getOffset((u32*)ndsHeader->arm7destination, 0x18000, a7something2Signature,
+        2, 1);
+    if (!someAddr_799C) {
+        dbg_printf("[Error!] ___ someOffset not found\n"); return 0;
+    }	
+	
+	dbg_printf("someAddr_799C: ");
+	dbg_hexa(someAddr_799C);
+	dbg_printf("\n");
+	
+	// begin writes
+    // TODO: if I'm going to be modifying these things in the future,
+    // best to memcpy() in the future.
+    /*u8* hardcodedArm7 = unk_4240C0;
+    u32 dword_4240FC = *(u32*)(someAddr_799C - 4);
+    u32 dword_4240F4 = someWramAddr;
+    u32 dword_4240F0 = dword_4240FC + 0x10;
+    u32 dword_4240F8 = dword_4240FC - 0x04;
+	
+    *(u32*)&hardcodedArm7[0x30] = dword_4240F0;
+    *(u32*)&hardcodedArm7[0x34] = dword_4240F4;
+    *(u32*)&hardcodedArm7[0x38] = dword_4240F8;
+    *(u32*)&hardcodedArm7[0x3C] = dword_4240FC;*/
+	
+	u32 Buffer = vAddrOfRelocSrc + specificWramAddr - relocDestAtSharedMem;
+	u32 four = 4; u8 vals[4] = {0x1C,0x04,0x00,0x00};
+	
+	dbg_printf("Arm7 patched!\n");
+
+    return 1;
 }
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
