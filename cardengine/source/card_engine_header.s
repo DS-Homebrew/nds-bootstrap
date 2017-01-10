@@ -114,6 +114,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   arm7Functions
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -285,3 +286,12 @@ DC_WaitWriteBufferEmpty:
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
 	.pool
+	
+arm7Functions :
+.word    eepromPageErase 
+.word    eepromPageVerify  
+.word    eepromPageWrite  
+.word    eepromPageProg  
+.word    eepromRead  
+.word    cardRead 
+.word    cardId 

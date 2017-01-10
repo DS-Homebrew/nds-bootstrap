@@ -456,23 +456,23 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     {
         dbg_printf("[Error!] ___ addr not found\n"); return 0;
     }
-    u32 addrOfSomething_8C1C = readCacheEnd + cardReadEndAddr + 4 - 0X2380000;
+    u32 JumpTableFunc = readCacheEnd + 4;
 	
-	dbg_printf("addrOfSomething_8C1C: ");
-	dbg_hexa(addrOfSomething_8C1C);
+	dbg_printf("JumpTableFunc: ");
+	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
 	
 	//
     // Here is where the differences in the retry begin
     //
 
-    u32 specificWramAddr = *(u32*)(addrOfSomething_8C1C + 0x10);
+    u32 specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
     // if out of specific ram range...
     if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
-        addrOfSomething_8C1C +=
-            getOffset(addrOfSomething_8C1C,
-              0x18000 - addrOfSomething_8C1C, &cardstructAddr, 1, 1) + 4;
-        specificWramAddr = *(u32*)(addrOfSomething_8C1C + 0x10);
+        JumpTableFunc +=
+            getOffset(JumpTableFunc,
+              0x18000 - JumpTableFunc, &cardstructAddr, 1, 1) + 4;
+        specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
     }
 	
 	dbg_printf("specificWramAddr: ");
@@ -487,25 +487,61 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	
 	dbg_printf("someAddr_799C: ");
 	dbg_hexa(someAddr_799C);
+	dbg_printf("\n");	
+	
+	u32* patches =  (u32*) cardEngineLocation[0];
+	u32* arm7Function =  (u32*) patches[9];
+	
+	u32* eepromPageErase = (u32*) (JumpTableFunc + 0x10);
+    dbg_printf("Eeprom page erase:\t");
+	dbg_hexa(eepromPageErase);
+	dbg_printf("\n");	
+	*eepromPageErase=arm7Function[0];
+		
+	u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x2C);
+	dbg_printf("Eeprom verify:\t");
+	dbg_hexa(eepromPageVerify);
+	dbg_printf("\n");	
+	*eepromPageVerify=arm7Function[1];
+		
+	u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x48);
+	dbg_printf("Eeprom page write:\t");
+	dbg_hexa(eepromPageWrite);
 	dbg_printf("\n");
+	*eepromPageWrite=arm7Function[2];
+		
+	u32* eepromPageProg = (u32*) (JumpTableFunc + 0x64);
+	dbg_printf("Eeprom page prog:\t");
+	dbg_hexa(eepromPageProg);
+	dbg_printf("\n");
+	*eepromPageProg=arm7Function[3];
 	
-	// begin writes
-    // TODO: if I'm going to be modifying these things in the future,
-    // best to memcpy() in the future.
-    /*u8* hardcodedArm7 = unk_4240C0;
-    u32 dword_4240FC = *(u32*)(someAddr_799C - 4);
-    u32 dword_4240F4 = someWramAddr;
-    u32 dword_4240F0 = dword_4240FC + 0x10;
-    u32 dword_4240F8 = dword_4240FC - 0x04;
-	
-    *(u32*)&hardcodedArm7[0x30] = dword_4240F0;
-    *(u32*)&hardcodedArm7[0x34] = dword_4240F4;
-    *(u32*)&hardcodedArm7[0x38] = dword_4240F8;
-    *(u32*)&hardcodedArm7[0x3C] = dword_4240FC;*/
-	
-	u32 Buffer = vAddrOfRelocSrc + specificWramAddr - relocDestAtSharedMem;
-	u32 four = 4; u8 vals[4] = {0x1C,0x04,0x00,0x00};
-	
+	u32* eepromRead = (u32*) (JumpTableFunc + 0x80);
+	dbg_printf("Eeprom read:\t");
+	dbg_hexa(eepromRead);
+	dbg_printf("\n");
+	*eepromRead=arm7Function[4];
+		
+	u32* cardRead = (u32*) (JumpTableFunc + 0xA0);
+	dbg_printf("Card  read:\t");
+	dbg_hexa(cardRead);
+	dbg_printf("\n");
+	*cardRead=arm7Function[5];
+		
+	u32* cardId = (u32*) (JumpTableFunc + 0xAC);
+	dbg_printf("Card id:\t");
+	dbg_hexa(cardId);
+	dbg_printf("\n");
+	*cardId=arm7Function[5];
+		
+	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
+    if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
+        u32 current = JumpTableFunc + 0xD0;
+        dbg_printf("???:\t\t\t");
+		dbg_hexa(current);
+		dbg_printf("\n");
+    }
+
 	dbg_printf("Arm7 patched!\n");
 
     return 1;

@@ -188,4 +188,39 @@ void irqIPCSYNCEnable() {
 	}
 }
 
+// ARM7 Redirected function
+
+void eepromProtect (void) {
+	dbg_printf("\eepromProtect\n");	
+}
+
+void eepromRead (u32 src, void *dst, u32 len) {
+	dbg_printf("\eepromRead\n");	
+}
+
+void eepromPageWrite (u32 dst, const void *src, u32 len) {
+	dbg_printf("\eepromPageWrite\n");	
+}
+
+void eepromPageProg (u32 dst, const void *src, u32 len) {
+	dbg_printf("\eepromPageProg\n");	
+}
+
+void eepromPageVerify (u32 dst, const void *src, u32 len) {
+	dbg_printf("\eepromPageVerify\n");	
+}
+
+void eepromPageErase (u32 dst) {
+	dbg_printf("\eepromPageErase\n");	
+}
+
+u32 cardId (void) {
+	dbg_printf("\cardId\n");	
+}
+
+void cardRead (u32 dma, const void *src, void *dst, u32 len) {
+	dbg_printf("\cardRead\n");	
+}
+
+
 
