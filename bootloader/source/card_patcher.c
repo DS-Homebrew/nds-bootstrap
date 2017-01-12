@@ -310,7 +310,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
-u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
 
     dbg_printf("\nArm7 (patch v2.0)\n");
 
@@ -368,10 +368,11 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_hexa(relocDestAtSharedMem);
 	dbg_printf("\n");	
 	
+	return 0;
 }
 
 
-u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
 
     dbg_printf("\nArm7 (patch v1.0)\n");
 
@@ -532,7 +533,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("Card id:\t");
 	dbg_hexa(cardId);
 	dbg_printf("\n");
-	*cardId=arm7Function[5];
+	*cardId=arm7Function[6];
 		
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
     if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
@@ -541,13 +542,15 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		dbg_hexa(current);
 		dbg_printf("\n");
     }
+	
+	arm7Function[7] = saveFileCluster;
 
 	dbg_printf("Arm7 patched!\n");
 
     return 1;
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
 	u32* debug = (u32*)0x037C4000;
 	
 	u32* irqEnableStartSignature = irqEnableStartSignature1;	
@@ -585,18 +588,18 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	
-	u32 saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams);
-	if(!saveResult) saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams);
+	u32 saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if(!saveResult) saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocation, moduleParams);
-	patchCardNdsArm7(ndsHeader, cardEngineLocation, moduleParams);
+	patchCardNdsArm7(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 
 	dbg_printf("ERR_NONE");
 	return 0;

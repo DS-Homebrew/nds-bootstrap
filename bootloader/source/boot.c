@@ -80,6 +80,7 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern unsigned long saveFileCluster;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -356,7 +357,7 @@ int main (void) {
 				ensureArm9Decompressed(NDS_HEAD, params);
 			}
 			
-			patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params);
+			patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params,saveFileCluster);
 			
 			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
 				if(error == ERR_NONE) {

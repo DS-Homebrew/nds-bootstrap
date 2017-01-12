@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename) {
+void runFile(string filename, string savPath) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -98,7 +98,7 @@ void runFile(string filename) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -219,6 +219,8 @@ int main( int argc, char **argv) {
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
+		
+		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");	
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
@@ -244,17 +246,17 @@ int main( int argc, char **argv) {
 				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
 				dbg_printf("Running %s\n", bootstrapPath.c_str());
 				
-				runFile(bootstrapPath.c_str());
+				runFile(bootstrapPath.c_str(), savPath);
 			} else {				
 				dbg_printf("Running %s\n", ndsPath.c_str());
 				
-				runFile(ndsPath.c_str());
+				runFile(ndsPath.c_str(), savPath.c_str());
 			}
 		} else {
 			dbg_printf("TWL MODE enabled\n");			
 			dbg_printf("Running %s\n", ndsPath.c_str());
 					
-			runFile(ndsPath.c_str());
+			runFile(ndsPath.c_str(), savPath.c_str());
 		}		
 	} else {
 		consoleDemoInit();

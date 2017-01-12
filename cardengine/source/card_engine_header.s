@@ -13,6 +13,7 @@
 .global patches_offset
 .global sdk_version
 .global fileCluster
+.global saveCluster
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -295,3 +296,5 @@ arm7Functions :
 .word    eepromRead  
 .word    cardRead 
 .word    cardId 
+saveCluster:
+.word    0x00000000 
