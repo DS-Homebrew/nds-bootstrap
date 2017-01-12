@@ -40,7 +40,7 @@ void eepromPageVerify (u32 dst, const void *src, u32 len);
 void eepromPageErase (u32 dst);
 
 u32 cardId (void);
-void cardRead (u32 dma, const void *src, void *dst, u32 len);
+void cardRead (u32 dma,  u32 src, void *dst, u32 len);
 
 #ifdef __cplusplus
 }

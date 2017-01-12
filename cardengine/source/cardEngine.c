@@ -216,14 +216,41 @@ void eepromRead (u32 src, void *dst, u32 len) {
 
 void eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageWrite\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+
+	fileWrite(src,romFile,dst,len);
 }
 
 void eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageProg\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+
+	fileWrite(src,romFile,dst,len);
 }
 
 void eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageVerify\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+
+	fileWrite(src,romFile,dst,len);
 }
 
 void eepromPageErase (u32 dst) {
@@ -234,8 +261,17 @@ u32 cardId (void) {
 	dbg_printf("\cardId\n");	
 }
 
-void cardRead (u32 dma, const void *src, void *dst, u32 len) {
+void cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_printf("\cardRead\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	
+	fileRead(dst,romFile,src,len);
 }
 
 
