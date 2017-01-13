@@ -343,18 +343,14 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     // Get the remaining details regarding relocation
     u32 valueAtRelocStart =
         *(u32*)forwardedRelocStartAddr;
-	dbg_printf("valueAtRelocStart: ");
-	dbg_hexa(valueAtRelocStart);
-	dbg_printf("\n");
-		
     u32 relocDestAtSharedMem =
         *(u32*)valueAtRelocStart;
     if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
         // Try again
         vAddrOfRelocSrc +=
-            *(u32*)valueAtRelocStart + 4;
+            *(u32*)(valueAtRelocStart + 4);
         relocDestAtSharedMem =
-            *(u32*)valueAtRelocStart + 0xC;
+            *(u32*)(valueAtRelocStart + 0xC);
         if (relocDestAtSharedMem != 0x37F8000) {
             dbg_printf("Error in finding shared memory relocation area\n");
 			return 0;
@@ -367,6 +363,148 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("Relocation dst: ");
 	dbg_hexa(relocDestAtSharedMem);
 	dbg_printf("\n");	
+
+    // Find the card read
+    u32 cardReadEndAddr =
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000, 
+		a7cardReadSignature, 2, 1);
+    if (!cardReadEndAddr) {
+        dbg_printf("[Error!] Card read addr not found\n"); return 0;
+    }
+	
+	dbg_printf("cardReadEndAddr: ");
+	dbg_hexa(cardReadEndAddr);
+	dbg_printf("\n");
+	
+	// nonsense variable names below
+    u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
+	
+	dbg_printf("cardstructAddr: ");
+	dbg_hexa(cardstructAddr);
+	dbg_printf("\n");
+	
+    u32 readCacheEnd =
+         getOffset(cardReadEndAddr,
+             0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
+			 
+	dbg_printf("readCacheEnd: ");
+	dbg_hexa(readCacheEnd);
+	dbg_printf("\n");
+
+    if (!readCacheEnd)
+    {
+        dbg_printf("[Error!] ___ addr not found\n"); return 0;
+    }
+    u32 JumpTableFunc = readCacheEnd + 4;
+	
+	dbg_printf("JumpTableFunc: ");
+	dbg_hexa(JumpTableFunc);
+	dbg_printf("\n");
+	
+	//
+    // Here is where the differences in the retry begin
+    //
+	
+	u32 returned_A0_with_MKDS =
+        getOffset(JumpTableFunc, 0x100,
+            (void*)a7something1Signature, 2, 1);
+    if (!returned_A0_with_MKDS) {
+        dbg_printf("[Error!]...\n");
+        return 0;
+    }
+	
+	dbg_printf("returned_A0_with_MKDS: ");
+	dbg_hexa(returned_A0_with_MKDS);
+	dbg_printf("\n");
+
+    u32 addrOfSomething_85C0 =
+        getOffset((u32*)ndsHeader->arm7destination, 0x18000,
+            (void*)a7something2Signature, 2, 1);
+    if ( !addrOfSomething_85C0 )
+    {
+        dbg_printf("[Error!] ...\n");
+        return 0;
+    }
+	
+	dbg_printf("addrOfSomething_85C0: ");
+	dbg_hexa(addrOfSomething_85C0);
+	dbg_printf("\n");
+
+    u32 anotherLocinA7WRAM = *(u32*)(addrOfSomething_85C0 - 4);
+	
+	dbg_printf("anotherLocinA7WRAM: ");
+	dbg_hexa(anotherLocinA7WRAM);
+	dbg_printf("\n");
+
+    u32 amal_8CBC = returned_A0_with_MKDS;
+	
+	dbg_printf("amal_8CBC: ");
+	dbg_hexa(amal_8CBC);
+	dbg_printf("\n");
+
+    // no, no idea what this is yet
+    // and no idea how to cleanly fix this warning yet.
+    // but it should be (in MKDS), 0x7F54
+    u8* aFinalLocation =
+        (u8*)(JumpTableFunc
+        + 4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF)
+        + 0x48
+        + 4 * (*(u32*)((
+                4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF) + 0x48
+                ) + JumpTableFunc) | 0xFF000000
+              )
+        + 8);
+		
+	dbg_printf("aFinalLocation: ");
+	dbg_hexa(aFinalLocation);
+	dbg_printf("\n");
+	
+	u32* patches =  (u32*) cardEngineLocation[0];
+	u32* arm7Function =  (u32*) patches[9];
+	
+	u32* eepromPageErase = (u32*) (JumpTableFunc + 0x10);
+    dbg_printf("Eeprom page erase:\t");
+	dbg_hexa(eepromPageErase);
+	dbg_printf("\n");	
+	//*eepromPageErase=arm7Function[0];
+		
+	u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x2C);
+	dbg_printf("Eeprom verify:\t");
+	dbg_hexa(eepromPageVerify);
+	dbg_printf("\n");	
+	//*eepromPageVerify=arm7Function[1];
+		
+	u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x48);
+	dbg_printf("Eeprom page write:\t");
+	dbg_hexa(eepromPageWrite);
+	dbg_printf("\n");
+	//*eepromPageWrite=arm7Function[2];
+		
+	u32* eepromPageProg = (u32*) (JumpTableFunc + 0x64);
+	dbg_printf("Eeprom page prog:\t");
+	dbg_hexa(eepromPageProg);
+	dbg_printf("\n");
+	//*eepromPageProg=arm7Function[3];
+	
+	u32* eepromRead = (u32*) (JumpTableFunc + 0x80);
+	dbg_printf("Eeprom read:\t");
+	dbg_hexa(eepromRead);
+	dbg_printf("\n");
+	//*eepromRead=arm7Function[4];
+		
+	u32* cardRead = (u32*) (JumpTableFunc + 0xA0);
+	dbg_printf("Card  read:\t");
+	dbg_hexa(cardRead);
+	dbg_printf("\n");
+	//*cardRead=arm7Function[5];
+		
+	u32* cardId = (u32*) (JumpTableFunc + 0xAC);
+	dbg_printf("Card id:\t");
+	dbg_hexa(cardId);
+	dbg_printf("\n");
+	//*cardId=arm7Function[6];
+		
+	arm7Function[7] = saveFileCluster;
 	
 	return 0;
 }
@@ -474,6 +612,9 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
             getOffset(JumpTableFunc,
               0x18000 - JumpTableFunc, &cardstructAddr, 1, 1) + 4;
         specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
+		if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
+			return 0;
+		}
     }
 	
 	dbg_printf("specificWramAddr: ");

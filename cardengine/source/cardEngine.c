@@ -197,11 +197,13 @@ void irqIPCSYNCEnable() {
 
 // ARM7 Redirected function
 
-void eepromProtect (void) {
+bool eepromProtect (void) {
 	dbg_printf("\eepromProtect\n");	
+	
+	return true;
 }
 
-void eepromRead (u32 src, void *dst, u32 len) {
+bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_printf("\eepromRead\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -214,7 +216,7 @@ void eepromRead (u32 src, void *dst, u32 len) {
 	fileRead(dst,savFile,src,len);
 }
 
-void eepromPageWrite (u32 dst, const void *src, u32 len) {
+bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageWrite\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -225,9 +227,11 @@ void eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 
 	fileWrite(src,romFile,dst,len);
+	
+	return true;
 }
 
-void eepromPageProg (u32 dst, const void *src, u32 len) {
+bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageProg\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -238,9 +242,11 @@ void eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 
 	fileWrite(src,romFile,dst,len);
+	
+	return true;
 }
 
-void eepromPageVerify (u32 dst, const void *src, u32 len) {
+bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_printf("\eepromPageVerify\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -250,18 +256,23 @@ void eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 
-	fileWrite(src,romFile,dst,len);
+	//fileWrite(src,romFile,dst,len);
+	return true;
 }
 
-void eepromPageErase (u32 dst) {
+bool eepromPageErase (u32 dst) {
 	dbg_printf("\eepromPageErase\n");	
+	
+	return true;
 }
 
 u32 cardId (void) {
-	dbg_printf("\cardId\n");	
+	dbg_printf("\cardId\n");
+
+	return	1;
 }
 
-void cardRead (u32 dma,  u32 src, void *dst, u32 len) {
+bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_printf("\cardRead\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -272,7 +283,10 @@ void cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	
 	fileRead(dst,romFile,src,len);
+	
+	return true;
 }
+
 
 
 
