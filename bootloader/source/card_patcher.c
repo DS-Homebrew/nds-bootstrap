@@ -644,12 +644,16 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     u32 specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
     // if out of specific ram range...
     if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
-        JumpTableFunc +=
+		dbg_printf("Retry the search\n");
+        JumpTableFunc =
             getOffset(JumpTableFunc,
               0x18000 - JumpTableFunc, &cardstructAddr, 1, 1) + 4;
+		dbg_printf("JumpTableFunc: ");
+		dbg_hexa(JumpTableFunc);
+		dbg_printf("\n");	  
         specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
 		if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
-			return 0;
+			return 0;		
 		}
     }
 	
