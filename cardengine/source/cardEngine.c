@@ -43,7 +43,10 @@ void initLogging() {
 		}
 		FAT_InitFiles(false);
 		romFile = getFileFromCluster(fileCluster);
-		savFile = getFileFromCluster(saveCluster);
+		if(saveCluster>0)
+			savFile = getFileFromCluster(saveCluster);
+		else
+			savFile.firstCluster = CLUSTER_FREE;
 		buildFatTableCache(romFile);
 		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
