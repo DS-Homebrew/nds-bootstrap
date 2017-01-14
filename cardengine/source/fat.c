@@ -511,6 +511,7 @@ aFile getBootFileCluster (const char* bootName)
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
 		file.fatTableCached=false;
+		file.oneClusterCached=false;
 		return file;
 	}
 	
@@ -520,6 +521,7 @@ aFile getBootFileCluster (const char* bootName)
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
 	file.fatTableCached=false;
+	file.oneClusterCached=false;
 	return file;
 }
 
@@ -529,6 +531,7 @@ aFile getFileFromCluster (u32 cluster) {
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
 	file.fatTableCached=false;
+	file.oneClusterCached=false;
 	return file;	
 }
 

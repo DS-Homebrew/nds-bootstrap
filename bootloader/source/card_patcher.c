@@ -92,6 +92,10 @@ u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int directio
 	return addr;
 }
 
+u32 generateA7Instr(int arg1, int arg2) {
+    return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
 module_params_t* findModuleParams(const tNDSHeader* ndsHeader)
 {
 	dbg_printf("Looking for moduleparams\n");
@@ -670,18 +674,23 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("\n");
 	*cardRead=arm7Function[5];
 		
+	// different patch for card id
 	u32* cardId = (u32*) (JumpTableFunc + 0xAC);
 	dbg_printf("Card id:\t");
 	dbg_hexa(cardId);
 	dbg_printf("\n");
-	*cardId=arm7Function[6];
+	u32 patchCardID = generateA7Instr(JumpTableFunc + 0xAC,
+        arm7Function[6]);
+	*cardId=patchCardID; 
 		
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
     if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
-        u32 current = JumpTableFunc + 0xD0;
+        u32* current = (u32*)(JumpTableFunc + 0xD0);
         dbg_printf("???:\t\t\t");
 		dbg_hexa(current);
-		dbg_printf("\n");
+		dbg_printf("\n");		
+		
+		*current=arm7Function[0];
     }
 	
 	arm7Function[7] = saveFileCluster;
