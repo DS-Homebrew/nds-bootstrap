@@ -771,8 +771,8 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	
-	u32 saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	if(!saveResult) saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	
 	dbg_printf("ERR_NONE");
 	return 0;
