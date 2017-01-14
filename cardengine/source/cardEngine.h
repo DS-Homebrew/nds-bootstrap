@@ -30,17 +30,17 @@ void myIrqHandlerFIFO(void);
 
 u32 myIrqEnable(u32 irq);
 
-/*void runCardEngineCheck (void);
+/*void runCardEngineCheck (void);*/
 
-void eepromProtect (void);
-void eepromRead (u32 src, void *dst, u32 len);
-void eepromPageWrite (void);
-void eepromPageProg (void);
-void eepromPageVerify (void);
-void eepromPageErase (void);
+bool eepromProtect (void);
+bool eepromRead (u32 src, void *dst, u32 len);
+bool eepromPageWrite (u32 dst, const void *src, u32 len);
+bool eepromPageProg (u32 dst, const void *src, u32 len);
+bool eepromPageVerify (u32 dst, const void *src, u32 len);
+bool eepromPageErase (u32 dst);
 
 u32 cardId (void);
-void cardRead (u32 dma, const void *src, void *dst, u32 len);*/
+bool cardRead (u32 dma,  u32 src, void *dst, u32 len);
 
 #ifdef __cplusplus
 }

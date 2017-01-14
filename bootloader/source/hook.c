@@ -20,6 +20,7 @@
 #include "common.h"
 #include "cardengine_bin.h"
 #include "sdengine_bin.h"
+#include "fat.h"
 
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
@@ -281,10 +282,10 @@ int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* che
 }
 
 
-int hookNdsRetail (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
+int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
-	u32* debug = (u32*)0x037D0000;
+	u32* debug = (u32*)0x037C4000;
 	
 	nocashMessage("hookNdsRetail");
 
@@ -320,7 +321,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, u32 fileCluster, const u32* chea
 	
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *ipcSyncHandler;
-	cardEngineLocation[4] = fileCluster;
+	cardEngineLocation[4] = file.firstCluster;
 	
 	u32* patches =  (u32*) cardEngineLocation[0];
 	

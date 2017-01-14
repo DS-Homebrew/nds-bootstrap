@@ -29,6 +29,7 @@
 	.global argStart
 	.global argSize
 	.global dsiSD
+	.global saveFileCluster
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -52,6 +53,8 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
+saveFileCluster:
+	.word	0x00000000		@ .sav file
 
 startUp:
 	mov	r0, #0x04000000
