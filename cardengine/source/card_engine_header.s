@@ -289,6 +289,7 @@ DC_WaitWriteBufferEmpty:
 	.pool
 	
 arm7Functions :
+.word    eepromProtect 
 .word    eepromPageErase 
 .word    eepromPageVerify  
 .word    eepromPageWrite  
