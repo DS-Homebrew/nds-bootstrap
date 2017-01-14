@@ -226,7 +226,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 
-	fileWrite(src,romFile,dst,len);
+	fileWrite(src,savFile,dst,len);
 	
 	return true;
 }
@@ -241,7 +241,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 
-	fileWrite(src,romFile,dst,len);
+	fileWrite(src,savFile,dst,len);
 	
 	return true;
 }
@@ -256,7 +256,7 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 
-	//fileWrite(src,romFile,dst,len);
+	//fileWrite(src,savFile,dst,len);
 	return true;
 }
 
