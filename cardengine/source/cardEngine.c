@@ -201,13 +201,13 @@ void irqIPCSYNCEnable() {
 // ARM7 Redirected function
 
 bool eepromProtect (void) {
-	dbg_printf("\neepromProtect\n");	
+	dbg_printf("\narm7 eepromProtect\n");	
 	
 	return true;
 }
 
 bool eepromRead (u32 src, void *dst, u32 len) {
-	dbg_printf("\neepromRead\n");	
+	dbg_printf("\narm7 eepromRead\n");	
 	
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
@@ -220,7 +220,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite (u32 dst, const void *src, u32 len) {
-	dbg_printf("\neepromPageWrite\n");	
+	dbg_printf("\narm7 eepromPageWrite\n");	
 	
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
@@ -235,7 +235,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg (u32 dst, const void *src, u32 len) {
-	dbg_printf("\neepromPageProg\n");	
+	dbg_printf("\narm7 eepromPageProg\n");	
 	
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
@@ -250,7 +250,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageVerify (u32 dst, const void *src, u32 len) {
-	dbg_printf("\neepromPageVerify\n");	
+	dbg_printf("\narm7 eepromPageVerify\n");	
 	
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
@@ -264,7 +264,7 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageErase (u32 dst) {
-	dbg_printf("\eepromPageErase\n");	
+	dbg_printf("\narm7 eepromPageErase\n");	
 	
 	return true;
 }
@@ -276,8 +276,10 @@ u32 cardId (void) {
 }
 
 bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
-	dbg_printf("\cardRead\n");	
+	dbg_printf("\narm7 cardRead\n");	
 	
+	dbg_printf("\ndma : \n");
+	dbg_hexa(dma);		
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
 	dbg_printf("\ndst : \n");
