@@ -40,8 +40,9 @@ u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
 
-u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
-u32 cardIdStartSignature[1]   = {0xE92D4000};
+u32 a9cardIdSignature[3]      = {0x027FFE60,0x040001A4,0x04100010};  
+u32 cardIdStartSignature[1]   = {0xE92D4000,0xE24DD004,0xE3A0032E};   
+  
 u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
@@ -225,25 +226,27 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[0] = cardReadCachedOffset;
     dbg_printf("Card read cached found\n");	
 
-	/*	
+		
 	// Find the card id
+	u32 cardIdStartOffset = 0;
     u32 cardIdEndOffset =  
-        getOffsetA9((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
               (u32*)a9cardIdSignature, 2, 1);
     if (!cardIdEndOffset) {
-        nocashMessage("Card id end not found\n");
-        return 0;
-    }	
-	debug[1] = cardIdEndOffset;	
-    u32 cardIdStartOffset =   
-        getOffsetA9((u32*)cardIdEndOffset, -0x100,
-              (u32*)cardIdStartSignature, 1, -1);
-    if (!cardIdStartOffset) {
-        nocashMessage("Card id start not found\n");
-        return 0;
-    }
-	debug[0] = cardIdStartOffset;
-    nocashMessage("Card id found\n");	*/		
+        dbg_printf("Card id end not found\n");
+    } else {
+		debug[1] = cardIdEndOffset;	
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignature, 1, -1);
+		if (!cardIdStartOffset) {
+			dbg_printf("Card id start not found\n");
+		} else {
+			debug[0] = cardIdStartOffset;
+			dbg_printf("Card id found\n");	
+		}
+	}	
+
 	
 	/*u32 arenaLoOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
@@ -309,6 +312,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);		
 
 	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x5C);	
+	
+	if (cardIdStartOffset) {
+		copyLoop ((u32*)cardIdStartOffset, cardPullOutPatch, 0x4);	
+	}
 
 	dbg_printf("ERR_NONE");
 	return 0;
