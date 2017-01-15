@@ -82,9 +82,25 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
+void initMBK() {
+	// default dsiware settings
+	REG_MBK_1=0x8185898D;
+	REG_MBK_2=0x8084888C;
+	REG_MBK_3=0x9094989C;
+	REG_MBK_4=0x8084888C;
+	REG_MBK_5=0x9094989C;
+	REG_MBK_6=0x07F037C0;
+	//REG_MBK_6=0x080037C0;
+	REG_MBK_7=0x07C03740;
+	REG_MBK_8=0x07403700;
+	REG_MBK_9=0x3000000F;
+}
+
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
+	
+	initMBK();
 	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));

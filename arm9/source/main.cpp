@@ -134,7 +134,22 @@ static void myFIFOValue32Handler(u32 value,void* data)
 	dbg_printf( "ARM7 data %x\n", value );
 }
 
+
+void initMBK() {
+	// default dsiware settings
+	REG_MBK_1=0x8185898D;
+	REG_MBK_2=0x8084888C;
+	REG_MBK_3=0x9094989C;
+	REG_MBK_4=0x8084888C;
+	REG_MBK_5=0x9094989C;
+	REG_MBK_6=0x00000000;
+	REG_MBK_7=0x07C03740;
+	REG_MBK_8=0x07403700; 
+}
+
 int main( int argc, char **argv) {
+
+	initMBK();
 
 	bool ntrMode = false;
 
