@@ -476,7 +476,8 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	
 	u32* eepromProtect = (u32*) (JumpTableFunc + 0xE0);
 	u32* cardRead = (u32*) (JumpTableFunc + 0x108);
-	if(*eepromProtect & 0xFF000000 == 0xEB000000 && *cardRead & 0xFF000000 == 0xEB000000) {
+	if((((*eepromProtect) & 0xFF000000) == 0xEB000000) 
+		&& (((*cardRead) & 0xFF000000) == 0xEB000000)) {
 		dbg_printf("Eeprom protect:\t");
 		dbg_hexa(eepromProtect);
 		dbg_printf("\n");	
@@ -553,7 +554,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
 		
-		if(*cardRead & 0xFF000000 == 0xEB000000) {
+		if(((*cardRead) & 0xFF000000) == 0xEB000000) {
 			dbg_printf("[Error] CardRead not found:\n");
 			return 1;
 		}
