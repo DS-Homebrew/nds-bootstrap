@@ -193,9 +193,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardReadStartOffset) {
         dbg_printf("Card read start not found\n");
         return 0;
-    }
-	debug[0] = cardReadStartOffset;
-    dbg_printf("Card read found\n");	
+    }	
+	dbg_printf("Arm9 Card read:\t");
+	dbg_hexa(cardReadStartOffset);
+	dbg_printf("\n");
 
 	u32 cardPullOutOffset =   
         getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
@@ -204,8 +205,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
         dbg_printf("Card pull out handler not found\n");
         return 0;
     }
-	debug[0] = cardPullOutOffset;
-    dbg_printf("Card pull out handler found\n");
+	dbg_printf("Card pull out handler:\t");
+	dbg_hexa(cardPullOutOffset);
+	dbg_printf("\n");
 	
 	
     u32 cardReadCachedEndOffset =  
@@ -223,9 +225,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
         dbg_printf("Card read cached start not found\n");
         return 0;
     }
-	debug[0] = cardReadCachedOffset;
-    dbg_printf("Card read cached found\n");	
-
+	dbg_printf("Card read cached :\t");
+	dbg_hexa(cardReadCachedOffset);
+	dbg_printf("\n");
 		
 	// Find the card id
 	u32 cardIdStartOffset = 0;
@@ -242,8 +244,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if (!cardIdStartOffset) {
 			dbg_printf("Card id start not found\n");
 		} else {
-			debug[0] = cardIdStartOffset;
-			dbg_printf("Card id found\n");	
+			dbg_printf("Card id :\t");
+			dbg_hexa(cardIdStartOffset);
+			dbg_printf("\n");
 		}
 	}	
 
@@ -554,8 +557,10 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
 		
-		if(((*cardRead) & 0xFF000000) == 0xEB000000) {
+		if(((*cardRead) & 0xFF000000) != 0xEB000000) {
 			dbg_printf("[Error] CardRead not found:\n");
+			dbg_hexa(cardRead);
+			dbg_printf("\n");
 			return 1;
 		}
 		
