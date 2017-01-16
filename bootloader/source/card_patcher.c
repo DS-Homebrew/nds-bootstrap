@@ -62,11 +62,11 @@ u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC02
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
-u32 mpuInitSignature[1] = {0xEE060F12};
+u32 mpuInitSignature[1] = {0xEE060F13};
 // sdk < 3 version
-u32 mpuInitData1[1] = {0x27C0023};
+u32 mpuInitData1[1] = {0x8000035};
 // sdk >= 3 version
-u32 mpuInitData3[1] = {0x27E0021};
+u32 mpuInitData3[1] = {0x8000035};
 
 //
 // Look in @data for @find and return the position of it.
@@ -278,14 +278,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		}
 	}	
 	
-	/*if(mpuDataOffset) {
-		// change the region 2 configuration
+	if(mpuDataOffset) {
+		// change the region 3 configuration
 		*mpuDataOffset = PAGE_8M  | 0x03000000 | 1;	
 		// change intruction access
-		mpuDataOffset[7] = 0x5100111;	
+		//mpuDataOffset[7] = 0x5100111;	
 		// change data access
-		mpuDataOffset[8] = 0x15111111;	
-	}*/
+		//mpuDataOffset[8] = 0x15111111;	
+	}
 		
 	// patch out all further mpu reconfiguration	
 	/*while(mpuStartOffset) {
