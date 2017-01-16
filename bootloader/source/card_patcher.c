@@ -282,7 +282,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		// change the region 3 configuration
 		*mpuDataOffset = PAGE_8M  | 0x03000000 | 1;	
 		// change intruction access
-		//mpuDataOffset[7] = 0x5100111;	
+		mpuDataOffset[5] = 0x5111111;	
 		// change data access
 		//mpuDataOffset[8] = 0x15111111;	
 	}
