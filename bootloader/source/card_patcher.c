@@ -62,6 +62,13 @@ u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC02
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
+
+u32 mpuInitRegion2Signature[1] = {0xEE060F12};
+// sdk < 3 version
+u32 mpuInitRegion2Data1[1] = {0x27C0023};
+// sdk >= 3 version
+u32 mpuInitRegion2Data3[1] = {0x27E0021};
+
 u32 mpuInitSignature[1] = {0xEE060F13};
 // sdk < 3 version
 u32 mpuInitData1[1] = {0x8000035};
@@ -175,9 +182,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
 	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	u32* mpuInitData = mpuInitData1;
+	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardReadCachedEndSignature = cardReadCachedEndSignature3;
 		mpuInitData = mpuInitData3;
+		mpuInitRegion2Data = mpuInitRegion2Data3;
 	} else if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
@@ -258,6 +267,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		}
 	}	
 	
+	
 	// Find the mpu init
 	u32* mpuDataOffset = 0;
     u32 mpuStartOffset =  
@@ -268,7 +278,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     } else {
 		mpuDataOffset =   
 			getOffset((u32*)mpuStartOffset, 0x100,
-				  (u32*)mpuInitData, 1, 1);
+				  (u32*)mpuInitRegion2Data, 1, 1);
 		if (!mpuDataOffset) {
 			dbg_printf("Mpu data not found\n");
 		} else {
@@ -282,22 +292,26 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		// change the region 3 configuration
 		*mpuDataOffset = PAGE_8M  | 0x03000000 | 1;	
 		// change intruction access
-		mpuDataOffset[5] = 0x5111111;	
+		//mpuDataOffset[5] = 0x5111111;	
+		mpuDataOffset[6] = 0x5111111;	
 		// change data access
 		//mpuDataOffset[8] = 0x15111111;	
 	}
+	
+	
+	
 		
 	// patch out all further mpu reconfiguration	
-	/*while(mpuStartOffset) {
+	while(mpuStartOffset) {
 		mpuStartOffset = getOffset(mpuStartOffset+4, ndsHeader->arm9binarySize,
-              (u32*)mpuInitSignature, 1, 1);
+              (u32*)mpuInitRegion2Signature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
 			*((u32*)mpuStartOffset) = 0xE3A00000 ;
 		}
-	}	*/
+	}	
 	
 	/*u32 arenaLoOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
