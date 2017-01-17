@@ -58,7 +58,7 @@ static const u32 homebrewSigPatched[5] = {
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig 
 	0xEA000000, // b      got_handler
-	0x037C0010  // DCD 	  0x037C0010       
+	0x03780010  // DCD 	  0x03780010       
 };
  
 // accelerator patch for IPC_SYNC v2007
@@ -72,9 +72,9 @@ static const u32 homebrewAccelSig2007[4] = {
 };	
 
 static const u32 homebrewAccelSig2007Patched[4] = {
-	0x47104A00   , // LDR     R2, =0x037C0014
+	0x47104A00   , // LDR     R2, =0x03780020
 	               // BX      R2
-	0x037C0020   , // 
+	0x03780020   , // 
 				   // 
 	0x881A4B10   , // ...
 	0x430A2108   , // ...
@@ -91,9 +91,9 @@ static const u32 homebrewAccelSig2010[4] = {
 };	
 
 static const u32 homebrewAccelSig2010Patched[4] = {
-	0x47104A00   , // LDR     R2, =0x037C0014
+	0x47104A00   , // LDR     R2, =0x03780020
 	               // BX      R2
-	0x037C0020   , // 
+	0x03780020   , // 
 				   // 
 	0x22088819   , // ...
 	0x0412430A   , // ...
@@ -285,7 +285,7 @@ int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* che
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
-	u32* debug = (u32*)0x037C4000;
+	u32* debug = (u32*)0x03784000;
 	
 	nocashMessage("hookNdsRetail");
 

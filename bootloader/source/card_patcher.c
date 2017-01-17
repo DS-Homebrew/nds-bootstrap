@@ -173,7 +173,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams) {	
 
-	u32* debug = (u32*)0x037C4000;
+	u32* debug = (u32*)0x03784000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 	
@@ -888,7 +888,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 }
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
-	u32* debug = (u32*)0x037C4000;
+	u32* debug = (u32*)0x03784000;
 	
 	u32* irqEnableStartSignature = irqEnableStartSignature1;	
 	if(moduleParams->sdk_version > 0x4000000) {
