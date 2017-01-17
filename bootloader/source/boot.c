@@ -70,7 +70,8 @@ void sdmmc_controller_init();
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
-#define SD_ENGINE_LOCATION  	0x03780000
+#define ENGINE_LOCATION_ARM7  	0x03780000
+#define ENGINE_LOCATION_ARM9  	0x03700000
 
 const char* bootName = "BOOT.NDS";
 
@@ -342,7 +343,7 @@ int main (void) {
 			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
 			
-			int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+			int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
 			if(error == ERR_NONE) {
 				nocashMessage("dldi hook Sucessfull");
 			} else {
@@ -350,7 +351,8 @@ int main (void) {
 			}
 		} else {	
 			nocashMessage("dldi Patch Unsuccessful try to patch card");
-			copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
+			copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
+			copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);	
 
 			module_params_t* params = findModuleParams(NDS_HEAD);
 			if(params)
@@ -358,9 +360,9 @@ int main (void) {
 				ensureArm9Decompressed(NDS_HEAD, params);
 			}
 			
-			patchCardNds(NDS_HEAD,SD_ENGINE_LOCATION,params,saveFileCluster);
+			patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,params,saveFileCluster);
 			
-			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION);
+			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 				if(error == ERR_NONE) {
 				nocashMessage("card hook Sucessfull");
 			} else {

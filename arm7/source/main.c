@@ -86,18 +86,18 @@ void initMBK() {
 	// give all DSI WRAM to arm7 at boot
 	
 	// arm7 is master of WRAM-A/B/C
-	REG_MBK_9=0x30FFFF0F;
+	REG_MBK_9=0x70FFFF0F;
 	
 	// WRAM-A fully mapped to arm7
 	REG_MBK_1=0x8185898D;
 	
 	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8084888C;
-	REG_MBK_3=0x9094989C;
+	REG_MBK_2=0x8185898D;
+	REG_MBK_3=0x9195999D;
 	
 	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8084888C;
-	REG_MBK_5=0x9094989C;
+	REG_MBK_4=0x8185898D;
+	REG_MBK_5=0x9195999D;
 	
 	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
 	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k

@@ -212,7 +212,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
 	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
+	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	
@@ -223,7 +223,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_printf("\narm7 eepromPageWrite\n");	
 	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
@@ -238,7 +238,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_printf("\narm7 eepromPageProg\n");	
 	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
@@ -253,7 +253,7 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_printf("\narm7 eepromPageVerify\n");	
 	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
@@ -283,7 +283,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);		
 	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
+	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	
