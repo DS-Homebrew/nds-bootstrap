@@ -295,7 +295,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		//mpuDataOffset[5] = 0x5111111;	
 		mpuDataOffset[6] = 0x5111111;	
 		// change data access
-		//mpuDataOffset[8] = 0x15111111;	
+		mpuDataOffset[7] = 0x15111111;	
 	}
 	
 	
