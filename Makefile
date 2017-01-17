@@ -115,9 +115,9 @@ endif
 
 export GAME_TITLE := $(TARGET)
 
-.PHONY: cardengine sdengine bootloader bootstub BootStrap clean
+.PHONY: cardengine_arm7 cardengine_arm9 sdengine bootloader bootstub BootStrap clean
 
-all:	cardengine sdengine bootloader bootstub $(TARGET).nds
+all:	cardengine_arm7 cardengine_arm9 sdengine bootloader bootstub $(TARGET).nds
 
 dist:	all
 	@rm	-fr	hbmenu
@@ -150,8 +150,11 @@ dldi/dsisd.dldi:
 sdengine: data
 	@$(MAKE) -C sdengine
 	
-cardengine: data
-	@$(MAKE) -C cardengine
+cardengine_arm7: data
+	@$(MAKE) -C cardengine_arm7
+	
+cardengine_arm9: data
+	@$(MAKE) -C cardengine_arm9
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
@@ -168,7 +171,8 @@ clean:
 	@$(MAKE) -C bootstub clean
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C arm7 clean
-	@$(MAKE) -C cardengine clean
+	@$(MAKE) -C cardengine_arm7 clean
+	@$(MAKE) -C cardengine_arm9 clean
 	@$(MAKE) -C sdengine clean
 	@$(MAKE) -C dldi clean
 		

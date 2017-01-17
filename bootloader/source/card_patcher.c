@@ -18,7 +18,8 @@
 
 #include "card_patcher.h"
 #include "common.h"
-#include "cardengine_bin.h"
+#include "cardengine_arm9_bin.h"
+#include "cardengine_arm7_bin.h"
 #include "debugToFile.h"
 
 // Subroutine function signatures arm7

@@ -16,7 +16,7 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET		:=	cardengine
+export TARGET		:=	cardengine_arm9
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data

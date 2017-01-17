@@ -18,7 +18,7 @@
 
 #include "hook.h"
 #include "common.h"
-#include "cardengine_bin.h"
+#include "cardengine_arm7_bin.h"
 #include "sdengine_bin.h"
 #include "fat.h"
 

@@ -51,7 +51,8 @@ Helpful information:
 #include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
-#include "cardengine_bin.h"
+#include "cardengine_arm7_bin.h"
+#include "cardengine_arm9_bin.h"
 #include "boot.h"
 #include "hook.h"
 #include "common.h"
@@ -349,7 +350,7 @@ int main (void) {
 			}
 		} else {	
 			nocashMessage("dldi Patch Unsuccessful try to patch card");
-			copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_bin, cardengine_bin_size);	
+			copyLoop (SD_ENGINE_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
 
 			module_params_t* params = findModuleParams(NDS_HEAD);
 			if(params)
