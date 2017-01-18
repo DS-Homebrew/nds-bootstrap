@@ -376,7 +376,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);		
 
-	copyLoop ((u32*)cardPullOutOffset, cardPullOutPatch, 0x5C);	
+	copyLoop ((u32*)(cardPullOutOffset-12), cardPullOutPatch, 0x5C);	
 	
 	if (cardIdStartOffset) {
 		copyLoop ((u32*)cardIdStartOffset, cardPullOutPatch, 0x4);	
@@ -932,11 +932,11 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, u32 saveFileCluster ) {
 	dbg_printf("patchCardNds");
 
-	patchCardNdsArm9(ndsHeader, cardEngineLocation, moduleParams);
-	patchCardNdsArm7(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams);
+	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster);
 
 	dbg_printf("ERR_NONE");
 	return 0;

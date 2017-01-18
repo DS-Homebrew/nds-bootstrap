@@ -360,7 +360,7 @@ int main (void) {
 				ensureArm9Decompressed(NDS_HEAD, params);
 			}
 			
-			patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,params,saveFileCluster);
+			patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster);
 			
 			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 				if(error == ERR_NONE) {

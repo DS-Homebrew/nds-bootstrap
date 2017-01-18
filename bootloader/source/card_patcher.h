@@ -64,6 +64,6 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster);
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, u32 saveFileCluster);
 
 #endif // CARD_PATCHER_H
