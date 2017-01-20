@@ -103,6 +103,7 @@ loop_fastCopy32:
 
 card_engine_end:
 
+.global readCachedRef
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
@@ -118,18 +119,24 @@ patches:
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r0-r11,lr}
+    stmfd   sp!, {r4-r11,lr}
 		
 	@ registers used r0,r1,r2,r3,r5,r8,r11
-    ldr     r0,=0x4004044     
-    ldr     r1,=0x8084888C    	
+	ldr     r4,=0x4004044     
+    ldr     r1,=0x8084888C	
 	ldr     r2,=0x4004048    
 	ldr     r3,=0x9094989C
-	str     r1,[r0]
+	str     r1,[r4]
 	str     r3,[r2]
+	ldr     r4,=0x400404C    	
+	ldr     r2,=0x4004050   
+	str     r1,[r4]
+	str     r3,[r2]
+	ldr		r3, =cardRead
+	bx		r3 @ jump to myIrqHandler
 	
     
-    ldmfd   sp!, {r0-r11,lr}
+    ldmfd   sp!, {r4-r11,lr}
     bx      lr
 
 cardStructArm9:
@@ -141,6 +148,30 @@ readCachedRef:
 cacheRef:
 .word    0x00000000  
 .pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+card_id_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r4-r11,lr}
+		
+	@ registers used r0,r1,r2,r3,r5,r8,r11
+	ldr     r4,=0x4004044     
+    ldr     r1,=0x8084888C	
+	ldr     r2,=0x4004048    
+	ldr     r3,=0x9094989C
+	str     r1,[r4]
+	str     r3,[r2]
+	ldr     r4,=0x400404C    	
+	ldr     r2,=0x4004050   
+	str     r1,[r4]
+	str     r3,[r2]
+	ldr		r3, =cardId
+	bx		r3 @ jump to myIrqHandler
+	
+    
+    ldmfd   sp!, {r4-r11,lr}
+    bx      lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -164,6 +195,8 @@ card_pull:
 	str     r3,[r2]
 	bx lr
 	.pool
+.global cacheFlush
+.type	cacheFlush STT_FUNC
 cacheFlush:
     stmfd   sp!, {r0-r11,lr}
 	

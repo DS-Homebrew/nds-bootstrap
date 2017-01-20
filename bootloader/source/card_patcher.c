@@ -376,7 +376,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);		
 
-	copyLoop ((u32*)(cardPullOutOffset-12), cardPullOutPatch, 0x5C);	
+	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x5C);	
 	
 	if (cardIdStartOffset) {
 		copyLoop ((u32*)cardIdStartOffset, cardPullOutPatch, 0x4);	
