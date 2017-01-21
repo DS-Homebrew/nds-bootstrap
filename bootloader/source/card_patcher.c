@@ -360,7 +360,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[6] = *card_struct;
 	//debug[7] = *cache_struct;
 	
-	cardEngineLocation[5] = *card_struct;
+	cardEngineLocation[5] = ((u32*)*card_struct)+6;
+	if(moduleParams->sdk_version > 0x3000000) {
+		cardEngineLocation[5] = ((u32*)*card_struct)+7;	
+	}		
 	//cardEngineLocation[6] = *cache_struct;
 	
 	// cache management alternative
