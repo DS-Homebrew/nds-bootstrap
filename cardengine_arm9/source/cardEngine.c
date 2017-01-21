@@ -39,8 +39,8 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 commandRead;
 	u32 src = cardStruct[0];
-	u32 len = cardStruct[1];
-	u32* dst = (u32*) cardStruct[2];
+	u32* dst = (u32*) cardStruct[1];
+	u32 len = cardStruct[2];
 	
 	u32 page = (src/512)*512;
 	
@@ -82,7 +82,7 @@ void cardRead (u32* cacheStruct) {
 			// read max 32k via the WRAM cache
 			if(!currentSector || sector != currentSector) {
 				// send a command to the arm7 to fill the WRAM cache
-				commandRead = 0x027ff800;
+				commandRead = 0x025FFB08;
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_2=0x8185898D;
@@ -113,7 +113,7 @@ void cardRead (u32* cacheStruct) {
 				u32 src2 = cardStruct[0];
 				while (remainToRead && (src2-sector < 0x8000) ) {
 					u32 src2 = cardStruct[0];
-					u32 len2 = cardStruct[1];
+					u32 len2 = cardStruct[2];
 					// read via the 512b ram cache
 					u32* cacheBuffer = cacheStruct + 0x20;
 					u32* cachePage = cacheStruct + 8;
