@@ -916,6 +916,9 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[0] = cardIrqEnableOffset;
     dbg_printf("irq enable found\n");
 	
+	
+	cardEngineLocation[3] = moduleParams->sdk_version;
+	
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardIrqEnablePatch = (u32*) patches[2];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];

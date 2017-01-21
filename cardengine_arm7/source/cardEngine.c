@@ -71,10 +71,10 @@ void runCardEngineCheck (void) {
 
 	if(*(vu32*)(0x027FFB14) == (vu32)0x027ff800)
     {
-        //dbg_printf("\ncard read received\n");			
+        dbg_printf("\ncard read received\n");			
 			
 		if(calledViaIPC) {
-			//dbg_printf("\ntriggered via IPC\n");
+			dbg_printf("\ntriggered via IPC\n");
 		}
 				
 		// old sdk version
@@ -83,7 +83,7 @@ void runCardEngineCheck (void) {
 		u32 len = *(vu32*)(sharedAddr+1);
 		u32 marker = *(vu32*)(sharedAddr+3);
 		
-		/*dbg_printf("\nstr : \n");
+		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
 		dbg_printf("\nsrc : \n");
 		dbg_hexa(src);		
@@ -92,18 +92,18 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
 		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);*/
+		dbg_hexa(marker);
 		
 		fileRead(0x027ff800 ,romFile,src,len);
 		
-		//dbg_printf("\nread \n");
+		dbg_printf("\nread \n");
 		
 		
 		if(is_aligned(dst,4) || is_aligned(len,4)) {
-			//dbg_printf("\n aligned read : \n");
+			dbg_printf("\n aligned read : \n");
 			//*(vu32*)(0x027FFB0C) = (vu32)2;
 		} else {
-			//dbg_printf("\n misaligned read : \n");
+			dbg_printf("\n misaligned read : \n");
 			//*(vu32*)(0x027FFB0C) = (vu32)0;
 		}	
 		*(vu32*)(0x027FFB14) = 0;	
@@ -111,10 +111,10 @@ void runCardEngineCheck (void) {
 	
 	if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
     {
-        //dbg_printf("\ncard read received v2\n");
+        dbg_printf("\ncard read received v2\n");
 		
 		if(calledViaIPC) {
-			//dbg_printf("\ntriggered via IPC\n");
+			dbg_printf("\ntriggered via IPC\n");
 		}
 		
 		// old sdk version
@@ -123,7 +123,7 @@ void runCardEngineCheck (void) {
 		u32 len = *(vu32*)(sharedAddr+1);
 		u32 marker = *(vu32*)(sharedAddr+3);
 		
-		/*dbg_printf("\nstr : \n");
+		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
 		dbg_printf("\nsrc : \n");
 		dbg_hexa(src);		
@@ -132,17 +132,17 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
 		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);*/
+		dbg_hexa(marker);
 		
 		fileRead(dst,romFile,src,len);
 		
-		//dbg_printf("\nread \n");
+		dbg_printf("\nread \n");
 		
 		if(is_aligned(dst,4) || is_aligned(len,4)) {
-			//dbg_printf("\n aligned read : \n");
+			dbg_printf("\n aligned read : \n");
 			//*(vu32*)(0x027FFB0C) = (vu32)2;
 		} else {
-			//dbg_printf("\n misaligned read : \n");
+			dbg_printf("\n misaligned read : \n");
 			//*(vu32*)(0x027FFB0C) = (vu32)0;
 		}			
 		*(vu32*)(0x027FFB14) = 0;		

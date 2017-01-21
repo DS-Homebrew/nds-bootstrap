@@ -133,12 +133,15 @@ card_read_arm9:
 	str     r1,[r4]
 	str     r3,[r2]
 	ldr		r3, =cardRead
-	bx		r3 @ jump to myIrqHandler
 	
-    
+	push    {lr}
+	bl		_blx_r3_stub_card_read	
+    pop  	{lr}
+
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
-
+_blx_r3_stub_card_read:
+	bx	r3		
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
@@ -154,24 +157,16 @@ cacheRef:
 card_id_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r11,lr}
-		
-	@ registers used r0,r1,r2,r3,r5,r8,r11
-	ldr     r4,=0x4004044     
-    ldr     r1,=0x8084888C	
-	ldr     r2,=0x4004048    
-	ldr     r3,=0x9094989C
-	str     r1,[r4]
-	str     r3,[r2]
-	ldr     r4,=0x400404C    	
-	ldr     r2,=0x4004050   
-	str     r1,[r4]
-	str     r3,[r2]
-	ldr		r3, =cardId
-	bx		r3 @ jump to myIrqHandler
-	
+
+	ldr		r3, =cardId	
+	push    {lr}
+	bl		_blx_r3_stub_card_id
+	pop  	{lr}
     
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
+_blx_r3_stub_card_id:
+	bx	r3		
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
