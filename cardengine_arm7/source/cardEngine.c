@@ -67,6 +67,35 @@ void runCardEngineCheck (void) {
 	int oldIME = enterCriticalSection();
 	
 	initLogging();
+	
+	if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+    {
+        dbg_printf("\ncard read received\n");			
+			
+		if(calledViaIPC) {
+			dbg_printf("\ntriggered via IPC\n");
+		}
+				
+		u32 src = *(vu32*)(sharedAddr+2);
+		u32 dst = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
+		u32 marker = *(vu32*)(sharedAddr+3);
+		
+		dbg_printf("\nstr : \n");
+		dbg_hexa(cardStruct);		
+		dbg_printf("\nsrc : \n");
+		dbg_hexa(src);		
+		dbg_printf("\ndst : \n");
+		dbg_hexa(dst);
+		dbg_printf("\nlen : \n");
+		dbg_hexa(len);
+		dbg_printf("\nmarker : \n");
+		dbg_hexa(marker);
+		
+		dbg_printf("\nlog only \n");
+		
+		*(vu32*)(0x027FFB14) = 0;	
+	}
 
 
 	if(*(vu32*)(0x027FFB14) == (vu32)0x027ff800)
@@ -77,7 +106,6 @@ void runCardEngineCheck (void) {
 			dbg_printf("\ntriggered via IPC\n");
 		}
 				
-		// old sdk version
 		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
 		u32 len = *(vu32*)(sharedAddr+1);

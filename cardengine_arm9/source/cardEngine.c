@@ -45,9 +45,23 @@ void cardRead (u32* cacheStruct) {
 	u32 page = (src/512)*512;
 	
 	u32 sector = (src/0x8000)*0x8000;
+	
+	// send a log command for debug purpose
+	// -------------------------------------
+	commandRead = 0x026ff800;	
+	
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
+	
+	IPC_SendSync(0xEE24);
+	
+	while(sharedAddr[3] != (vu32)0);
+	// -------------------------------------
 
 	
-	if(page = src && len > 0x8000 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+	if(page == src && len > 0x8000 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
 		

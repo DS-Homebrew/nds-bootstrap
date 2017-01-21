@@ -121,18 +121,24 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r11,lr}
 		
-	@ registers used r0,r1,r2,r3,r5,r8,r11
+	@ get back the WRAM B & C to arm9
 	ldr     r4,=0x4004044     
     ldr     r1,=0x8084888C	
-	ldr     r2,=0x4004048    
+	sub     r2, r4, #(0x4004044 - 0x4004048)
 	ldr     r3,=0x9094989C
 	str     r1,[r4]
 	str     r3,[r2]
-	ldr     r4,=0x400404C    	
-	ldr     r2,=0x4004050   
+	sub     r4, r2, #(0x4004048 - 0x400404C)
+	sub     r2, r4, #(0x400404C - 0x4004050)
 	str     r1,[r4]
 	str     r3,[r2]
+	
 	ldr		r3, =cardRead
+	ldr     r1, =0xE92D4FF0
+wait_for_wram_card_read:
+	ldr     r2, [r3]
+	cmp     r1, r2
+	bne     wait_for_wram_card_read
 	
 	push    {lr}
 	bl		_blx_r3_stub_card_read	
@@ -141,7 +147,8 @@ card_read_arm9:
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
 _blx_r3_stub_card_read:
-	bx	r3		
+	bx	r3	
+.pool	
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
@@ -150,7 +157,6 @@ readCachedRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000  
-.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -166,7 +172,8 @@ card_id_arm9:
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
 _blx_r3_stub_card_id:
-	bx	r3		
+	bx	r3	
+.pool	
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -178,18 +185,37 @@ card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 card_pull:
 @---------------------------------------------------------------------------------
-	ldr     r0,=0x4004044     
+	stmfd   sp!, {r4-r11,lr}
+		
+	@ get back the WRAM B & C to arm9
+	ldr     r4,=0x4004044     
     ldr     r1,=0x8084888C	
-	ldr     r2,=0x4004048    
+	sub     r2, r4, #(0x4004044 - 0x4004048)
 	ldr     r3,=0x9094989C
-	str     r1,[r0]
+	str     r1,[r4]
 	str     r3,[r2]
-	ldr     r0,=0x400404C    	
-	ldr     r2,=0x4004050   
-	str     r1,[r0]
+	sub     r4, r2, #(0x4004048 - 0x400404C)
+	sub     r2, r4, #(0x400404C - 0x4004050)
+	str     r1,[r4]
 	str     r3,[r2]
-	bx lr
-	.pool
+	
+	ldr		r3, =cardRead
+	ldr     r1, =0xE92D4FF0
+wait_for_wram_card_pull:
+	ldr     r2, [r3]
+	cmp     r1, r2
+	bne     wait_for_wram_card_pull
+	
+	@ push    {lr}
+	@ bl		_blx_r3_stub_card_pull	
+    @ pop  	{lr}
+
+    ldmfd   sp!, {r4-r11,lr}
+    bx      lr
+_blx_r3_stub_card_pull:
+	@bx	r3		
+.pool
+
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:
