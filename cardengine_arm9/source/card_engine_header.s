@@ -185,37 +185,7 @@ card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 card_pull:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r4-r11,lr}
-		
-	@ get back the WRAM B & C to arm9
-	ldr     r4,=0x4004044     
-    ldr     r1,=0x8084888C	
-	sub     r2, r4, #(0x4004044 - 0x4004048)
-	ldr     r3,=0x9094989C
-	str     r1,[r4]
-	str     r3,[r2]
-	sub     r4, r2, #(0x4004048 - 0x400404C)
-	sub     r2, r4, #(0x400404C - 0x4004050)
-	str     r1,[r4]
-	str     r3,[r2]
-	
-	ldr		r3, =cardRead
-	ldr     r1, =0xE92D4FF0
-wait_for_wram_card_pull:
-	ldr     r2, [r3]
-	cmp     r1, r2
-	bne     wait_for_wram_card_pull
-	
-	@ push    {lr}
-	@ bl		_blx_r3_stub_card_pull	
-    @ pop  	{lr}
-
-    ldmfd   sp!, {r4-r11,lr}
     bx      lr
-_blx_r3_stub_card_pull:
-	@bx	r3		
-.pool
-
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:

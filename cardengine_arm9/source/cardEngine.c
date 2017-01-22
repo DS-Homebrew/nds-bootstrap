@@ -46,7 +46,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/0x8000)*0x8000;
 	
-	/*// send a log command for debug purpose
+	// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -85,13 +85,13 @@ void cardRead (u32* cacheStruct) {
 				commandRead = 0x025FFB08;
 				
 				// set a synchronisation marker on the WRAM block before transfer
-				*(vu32*)(0x03740000) = (vu32)0xDEADBABE;
+				*(vu32*)(0x03748000) = (vu32)0xDEADBABE;
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_2=(vu32)0x8185898D;
 				REG_MBK_3=(vu32)0x9195999D;
 				
-				while(*(vu32*)(0x03740000) == (vu32)0xDEADBABE);	
+				while(*(vu32*)(0x03748000) == (vu32)0xDEADBABE);	
 				
 				// write the command
 				sharedAddr[0] = 0x03740000;
@@ -107,13 +107,13 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=0x8084888C;
 				REG_MBK_3=0x9094989C;
 				
-				while(*(vu32*)(0x03740000) == (vu32)0);	
+				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE);	
 				
 				currentSector = sector;
 			}			
 			
 			if(len>512 && len % 32 == 0 && ((u32)dst)%4 == 0) {
-				/*// send a log command for debug purpose
+				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -125,7 +125,7 @@ void cardRead (u32* cacheStruct) {
 				IPC_SendSync(0xEE24);
 				
 				while(sharedAddr[3] != (vu32)0);
-				// -------------------------------------*/
+				// -------------------------------------
 			
 				// copy directly
 				fastCopy32(0x03740000+src-sector,dst,len);	
@@ -160,7 +160,23 @@ void cardRead (u32* cacheStruct) {
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
 			}
-			if(len < 0x8000) len =0;
+			if(len < 0x8000) {
+				len =0;
+				// send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;	
+				
+				sharedAddr[0] = dst;
+				sharedAddr[1] = len;
+				sharedAddr[2] = src;
+				sharedAddr[3] = commandRead;
+				
+				IPC_SendSync(0xEE24);
+				
+				while(sharedAddr[3] != (vu32)0);
+				// -------------------------------------
+			
+			}
 			else {
 				// bigger than 32k unaligned command
 				len = len - 0x8000 + (src-sector) ;
