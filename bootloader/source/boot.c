@@ -353,6 +353,9 @@ int main (void) {
 			nocashMessage("dldi Patch Unsuccessful try to patch card");
 			copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
 			copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);	
+			
+			// set a synchronisation marker on the WRAM block 
+			*(vu32*)(0x03748000) = (vu32)0xDEADBABE;
 
 			module_params_t* params = findModuleParams(NDS_HEAD);
 			if(params)

@@ -84,9 +84,6 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
-				// set a synchronisation marker on the WRAM block before transfer
-				*(vu32*)(0x03748000) = (vu32)0xDEADBABE;
-				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_2=(vu32)0x8185898D;
 				REG_MBK_3=(vu32)0x9195999D;
@@ -112,7 +109,7 @@ void cardRead (u32* cacheStruct) {
 				currentSector = sector;
 			}			
 			
-			if(len>512 && len % 32 == 0 && ((u32)dst)%4 == 0) {
+			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
 				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
