@@ -790,7 +790,7 @@ void buildFatTableCache (aFile file) {
 	
 	if(file.currentCluster == CLUSTER_EOF) {
 		file.fatTableCached = true;
-		file.oneClusterCached = true;
+		file.oneClusterCached = false;
 	}
 	
 	file.currentOffset=0;
