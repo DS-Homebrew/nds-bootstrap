@@ -25,7 +25,7 @@ extern vu32* volatile cardStruct;
 extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-u32 currentSector = 0;
+static u32 currentSector = 0;
 
 
 u32 cardId (void) {
@@ -88,7 +88,9 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=(vu32)0x8185898D;
 				REG_MBK_3=(vu32)0x9195999D;
 				
-				while(*(vu32*)(0x03748000) == (vu32)0xDEADBABE);	
+				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE) {
+					cacheFlush();
+				}
 				
 				// write the command
 				sharedAddr[0] = 0x03740000;
@@ -104,7 +106,9 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=0x8084888C;
 				REG_MBK_3=0x9094989C;
 				
-				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE);	
+				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE) {
+					cacheFlush();
+				}
 				
 				currentSector = sector;
 			}			
@@ -152,7 +156,7 @@ void cardRead (u32* cacheStruct) {
 					// -------------------------------------*/
 						
 					// read via the 512b ram cache
-					fastCopy32(0x03740000+src2-sector, cacheBuffer, 512);
+					fastCopy32(0x03740000+page2-sector, cacheBuffer, 512);
 					*cachePage = page2;
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}

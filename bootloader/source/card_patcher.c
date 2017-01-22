@@ -63,6 +63,10 @@ u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC02
 
 u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
+u32 mpuInitRegion1Signature[1] = {0xEE060F11};
+u32 mpuInitRegion1Data1[1] = {0x200002D};
+// sdk >= 4 version
+u32 mpuInitRegion1Data4[1] = {0x200002D};
 
 u32 mpuInitRegion2Signature[1] = {0xEE060F12};
 // sdk < 3 version
@@ -73,6 +77,7 @@ u32 mpuInitRegion2Data3[1] = {0x27E0021};
 u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 u32 mpuInitRegion3Data[1] = {0x8000035};
 
+u32 mpuInitCache[1] = {0xE3A00042};
 
 //
 // Look in @data for @find and return the position of it.
@@ -181,6 +186,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
 	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
+	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardReadCachedEndSignature = cardReadCachedEndSignature3;
 		mpuInitRegion2Data = mpuInitRegion2Data3;
@@ -190,6 +196,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardPullOutSignature = cardPullOutSignature4;
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
+		mpuInitRegion1Data = mpuInitRegion1Data4;
 	} 	
 
 	// Find the card read
@@ -275,7 +282,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     } else {
 		mpuDataOffset =   
 			getOffset((u32*)mpuStartOffset, 0x100,
-				  (u32*)mpuInitRegion3Data, 1, 1);
+				  (u32*)mpuInitRegion1Data, 1, 1);
 		if (!mpuDataOffset) {
 			dbg_printf("Mpu data not found\n");
 		} else {
@@ -286,9 +293,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}	
 	
 	if(mpuDataOffset) {
+		// change the region 1 configuration
+		*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;	
+	
+	
 		// change the region 3 configuration
-		*mpuDataOffset = PAGE_8M  | 0x03000000 | 1;	
-		
+		//*mpuDataOffset = PAGE_8M  | 0x03000000 | 1;	
+
 		/*// Region 2 settings
 		// change intruction access
 		mpuDataOffset[6] = 0x5111111;	
@@ -297,23 +308,35 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		
 		//	Region 3 settings	
 		// change intruction access
-		mpuDataOffset[5] = 0x5111111;	
+		//mpuDataOffset[5] = 0x5103011;		
+		// change data access
+		//mpuDataOffset[6] = 0x15113011;
 	}
+	
+	// Find the mpu cache init
+    /*u32* mpuCacheOffset =  
+        getOffset((u32*)mpuStartOffset, 0x100,
+              (u32*)mpuInitCache, 1, 1);
+    if (!mpuCacheOffset) {
+        dbg_printf("Mpu init cache not found\n");
+    } else {
+		*mpuCacheOffset = 0xE3A00046;
+	}	*/
 	
 	
 	
 		
 	// patch out all further mpu reconfiguration	
-	/*while(mpuStartOffset) {
+	while(mpuStartOffset) {
 		mpuStartOffset = getOffset(mpuStartOffset+4, ndsHeader->arm9binarySize,
-              (u32*)mpuInitRegion2Signature, 1, 1);
+              (u32*)mpuInitRegion1Signature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
 			*((u32*)mpuStartOffset) = 0xE3A00000 ;
 		}
-	}*/
+	}
 	
 	/*u32 arenaLoOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,

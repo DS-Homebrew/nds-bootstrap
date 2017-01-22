@@ -140,9 +140,7 @@ wait_for_wram_card_read:
 	cmp     r1, r2
 	bne     wait_for_wram_card_read
 	
-	push    {lr}
 	bl		_blx_r3_stub_card_read	
-    pop  	{lr}
 
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
