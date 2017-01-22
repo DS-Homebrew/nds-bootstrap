@@ -88,7 +88,7 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=(vu32)0x8185898D;
 				REG_MBK_3=(vu32)0x9195999D;
 				
-				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE) {
+				while(*(vu32*)(0x03748000) == (vu32)0xDEADBABE) {
 					cacheFlush();
 				}
 				
@@ -141,13 +141,13 @@ void cardRead (u32* cacheStruct) {
 					u32* cacheBuffer = cacheStruct + 8;
 					u32* cachePage = cacheStruct + 2;
 					
-					/*// send a log command for debug purpose
+					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
 					
 					sharedAddr[0] = cacheBuffer;
 					sharedAddr[1] = len2;
-					sharedAddr[2] = 0x03740000+src2-sector;
+					sharedAddr[2] = 0x03740000+page2-sector;
 					sharedAddr[3] = commandRead;
 					
 					IPC_SendSync(0xEE24);
