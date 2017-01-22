@@ -334,7 +334,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
-			*((u32*)mpuStartOffset) = 0xE3A00000 ;
+			*((u32*)mpuStartOffset) = 0xE1A00000 ;
 		}
 	}
 	

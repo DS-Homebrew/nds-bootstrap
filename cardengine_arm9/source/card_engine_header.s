@@ -89,7 +89,7 @@ exit:
 @ r0 : src, r1 : dst, r2 : len
 fastCopy32:
     stmfd   sp!, {r3-r11,lr}
-	@ copy 512 bytes
+	@ copy r2 bytes
 	mov     r10, r0	
 	mov     r9, r1	
 	mov     r8, r2	
@@ -233,3 +233,16 @@ DC_WaitWriteBufferEmpty:
     bx      lr
 	.pool
 	
+.global DC_FlushRange
+.type	DC_FlushRange STT_FUNC
+DC_FlushRange:
+	MOV             R12, #0
+	ADD             R1, R1, R0
+	BIC             R0, R0, #0x1F
+loop_flush_range :
+	MCR             p15, 0, R12,c7,c10, 4
+	MCR             p15, 0, R0,c7,c14, 1
+	ADD             R0, R0, #0x20
+	CMP             R0, R1
+	BLT             loop_flush_range
+	BX              LR

@@ -37,6 +37,8 @@ u32 cardId (void) {
 void cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
 	
+	u32* cacheBuffer = cacheStruct + 8;
+	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
 	u32 src = cardStruct[0];
 	u32* dst = (u32*) (cardStruct[1]);
@@ -46,7 +48,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/0x8000)*0x8000;
 	
-	/*// send a log command for debug purpose
+	// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -86,10 +88,11 @@ void cardRead (u32* cacheStruct) {
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_2=(vu32)0x8185898D;
-				REG_MBK_3=(vu32)0x9195999D;
+				REG_MBK_3=(vu32)0x9195999D;				
 				
+				cacheFlush();
 				while(*(vu32*)(0x03748000) == (vu32)0xDEADBABE) {
-					cacheFlush();
+					DC_FlushRange((vu32*)0x03748000, 4);
 				}
 				
 				// write the command
@@ -106,15 +109,16 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=0x8084888C;
 				REG_MBK_3=0x9094989C;
 				
+				DC_FlushRange((vu32*)0x03748000, 4);
 				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE) {
-					cacheFlush();
+					DC_FlushRange((vu32*)0x03748000, 4);
 				}
 				
 				currentSector = sector;
 			}			
 			
-			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
-				/*// send a log command for debug purpose
+			if(0 && (len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
+				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -138,9 +142,6 @@ void cardRead (u32* cacheStruct) {
 					u32 len2 = cardStruct[2];
 					u32 page2 = (src2/512)*512;
 					
-					u32* cacheBuffer = cacheStruct + 8;
-					u32* cachePage = cacheStruct + 2;
-					
 					/*// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
@@ -163,7 +164,7 @@ void cardRead (u32* cacheStruct) {
 			}
 			if(len < 0x8000) {
 				len =0;
-				/*// send a log command for debug purpose
+				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
