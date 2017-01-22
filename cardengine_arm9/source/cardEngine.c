@@ -46,7 +46,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/0x8000)*0x8000;
 	
-	// send a log command for debug purpose
+	/*// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -114,7 +114,7 @@ void cardRead (u32* cacheStruct) {
 			}			
 			
 			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -126,7 +126,7 @@ void cardRead (u32* cacheStruct) {
 				IPC_SendSync(0xEE24);
 				
 				while(sharedAddr[3] != (vu32)0);
-				// -------------------------------------
+				// -------------------------------------*/
 			
 				// copy directly
 				fastCopy32(0x03740000+src-sector,dst,len);	
@@ -141,7 +141,7 @@ void cardRead (u32* cacheStruct) {
 					u32* cacheBuffer = cacheStruct + 8;
 					u32* cachePage = cacheStruct + 2;
 					
-					// send a log command for debug purpose
+					/*// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
 					
@@ -163,7 +163,7 @@ void cardRead (u32* cacheStruct) {
 			}
 			if(len < 0x8000) {
 				len =0;
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -175,7 +175,7 @@ void cardRead (u32* cacheStruct) {
 				IPC_SendSync(0xEE24);
 				
 				while(sharedAddr[3] != (vu32)0);
-				// -------------------------------------
+				// -------------------------------------*/
 			
 			}
 			else {
