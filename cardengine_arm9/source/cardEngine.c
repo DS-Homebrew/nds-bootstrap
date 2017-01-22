@@ -29,17 +29,17 @@ u32 currentSector = 0;
 
 
 u32 cardId (void) {
-	nocashMessage("\narm9 cardId\n");
+	//nocashMessage("\narm9 cardId\n");
 
 	return	1;
 }
 
 void cardRead (u32* cacheStruct) {
-	nocashMessage("\narm9 cardRead\n");	
+	//nocashMessage("\narm9 cardRead\n");	
 	
 	u32 commandRead;
 	u32 src = cardStruct[0];
-	u32* dst = (u32*) cardStruct[1];
+	u32* dst = (u32*) (cardStruct[1]);
 	u32 len = cardStruct[2];
 	
 	u32 page = (src/512)*512;
