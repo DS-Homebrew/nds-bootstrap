@@ -53,7 +53,10 @@ void initLogging() {
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
 		dbg_hexa(sdk_version);		
-		dbg_printf("\n");		
+		dbg_printf("\n");	
+		dbg_printf("rom file :");
+		dbg_hexa(fileCluster);	
+		dbg_printf("\n");	
 		dbg_printf("save file :");
 		dbg_hexa(saveCluster);	
 		dbg_printf("\n");			

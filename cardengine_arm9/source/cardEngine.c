@@ -84,9 +84,14 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
+				// set a synchronisation marker on the WRAM block before transfer
+				*(vu32*)(0x03740000) = (vu32)0xDEADBABE;
+				
 				// transfer the WRAM-B cache to the arm7
-				REG_MBK_2=0x8185898D;
-				REG_MBK_3=0x9195999D;
+				REG_MBK_2=(vu32)0x8185898D;
+				REG_MBK_3=(vu32)0x9195999D;
+				
+				while(*(vu32*)(0x03740000) == (vu32)0xDEADBABE);	
 				
 				// write the command
 				sharedAddr[0] = 0x03740000;
@@ -102,23 +107,56 @@ void cardRead (u32* cacheStruct) {
 				REG_MBK_2=0x8084888C;
 				REG_MBK_3=0x9094989C;
 				
+				while(*(vu32*)(0x03740000) == (vu32)0);	
+				
 				currentSector = sector;
 			}			
 			
-			if(len>512 && len % 32 == 0) {
+			if(len>512 && len % 32 == 0 && ((u32)dst)%4 == 0) {
+				// send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;	
+				
+				sharedAddr[0] = dst;
+				sharedAddr[1] = len;
+				sharedAddr[2] = 0x03740000+src-sector;
+				sharedAddr[3] = commandRead;
+				
+				IPC_SendSync(0xEE24);
+				
+				while(sharedAddr[3] != (vu32)0);
+				// -------------------------------------
+			
 				// copy directly
-				fastCopy32(0x03740000-sector+src,dst,len);
-			} else {
+				fastCopy32(0x03740000+src-sector,dst,len);	
+			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
 				while (remainToRead && (src2-sector < 0x8000) ) {
-					u32 src2 = cardStruct[0];
+					src2 = cardStruct[0];
 					u32 len2 = cardStruct[2];
-					// read via the 512b ram cache
+					u32 page2 = (src2/512)*512;
+					
 					u32* cacheBuffer = cacheStruct + 0x20;
 					u32* cachePage = cacheStruct + 8;
+					
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;	
+					
+					sharedAddr[0] = cacheBuffer;
+					sharedAddr[1] = len2;
+					sharedAddr[2] = 0x03740000+src2-sector;
+					sharedAddr[3] = commandRead;
+					
+					IPC_SendSync(0xEE24);
+					
+					while(sharedAddr[3] != (vu32)0);
+					// -------------------------------------
+						
+					// read via the 512b ram cache
 					fastCopy32(0x03740000+src2-sector, cacheBuffer, 512);
-					*cachePage = page;
+					*cachePage = page2;
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
 			}
