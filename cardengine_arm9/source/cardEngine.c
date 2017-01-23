@@ -20,8 +20,11 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x8000
-#define MARKER_ADDRESS 0x03760000
+#define READ_SIZE_ARM7 0x6000
+#define MARKER_ADDRESS_1 0x03740000
+#define MARKER_ADDRESS_2 0x03746004
+#define BUFFER_ADDRESS 0x03740004
+#define REG_MBK_B	(*(vu8*)0x4004047)
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -92,15 +95,18 @@ void cardRead (u32* cacheStruct) {
 				cacheFlush();
 				
 				// transfer the WRAM-B cache to the arm7
-				REG_MBK_2=(vu32)0x8185898D;
-				REG_MBK_3=(vu32)0x9195999D;					
+				REG_MBK_B=(vu8)0x81;					
 				
-				while(*((vu32*)MARKER_ADDRESS) == (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
+				while(*((vu32*)MARKER_ADDRESS_1) == (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
+				}
+				
+				while(*((vu32*)MARKER_ADDRESS_2) == (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
 				}
 				
 				// write the command
-				sharedAddr[0] = 0x03740000;
+				sharedAddr[0] = BUFFER_ADDRESS;
 				sharedAddr[1] = READ_SIZE_ARM7;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
@@ -110,12 +116,16 @@ void cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);	
 				
 				// transfer back the WRAM-B cache to the arm9
-				REG_MBK_2=(vu32)0x8084888C;
-				REG_MBK_3=(vu32)0x9094989C;
+				REG_MBK_B=(vu8)0x80;
 				
-				DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
-				while(*((vu32*)MARKER_ADDRESS) != (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
+				DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
+				while(*((vu32*)MARKER_ADDRESS_1) != (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
+				}
+				
+				DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
+				while(*((vu32*)MARKER_ADDRESS_2) != (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
 				}
 				
 				currentSector = sector;
@@ -128,7 +138,7 @@ void cardRead (u32* cacheStruct) {
 				
 				sharedAddr[0] = dst;
 				sharedAddr[1] = len;
-				sharedAddr[2] = 0x03740000+src-sector;
+				sharedAddr[2] = BUFFER_ADDRESS+src-sector;
 				sharedAddr[3] = commandRead;
 				
 				IPC_SendSync(0xEE24);
@@ -161,7 +171,7 @@ void cardRead (u32* cacheStruct) {
 					// -------------------------------------*/
 						
 					// read via the 512b ram cache
-					fastCopy32(0x03740000+page2-sector, cacheBuffer, 512);
+					fastCopy32(BUFFER_ADDRESS+page2-sector, cacheBuffer, 512);
 					*cachePage = page2;
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
