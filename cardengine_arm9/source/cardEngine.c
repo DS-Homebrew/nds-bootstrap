@@ -20,6 +20,9 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
+#define READ_SIZE_ARM7 0x8000
+#define MARKER_ADDRESS 0x03760000
+
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
@@ -46,7 +49,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 page = (src/512)*512;
 	
-	u32 sector = (src/0x8000)*0x8000;
+	u32 sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 	
 	// send a log command for debug purpose
 	// -------------------------------------
@@ -63,7 +66,7 @@ void cardRead (u32* cacheStruct) {
 	// -------------------------------------*/
 
 	
-	if(page == src && len > 0x8000 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+	if(page == src && len > READ_SIZE_ARM7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
 		
@@ -86,18 +89,19 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
+				cacheFlush();
+				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_2=(vu32)0x8185898D;
-				REG_MBK_3=(vu32)0x9195999D;				
+				REG_MBK_3=(vu32)0x9195999D;					
 				
-				cacheFlush();
-				while(*(vu32*)(0x03748000) == (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)0x03748000, 4);
+				while(*((vu32*)MARKER_ADDRESS) == (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
 				}
 				
 				// write the command
 				sharedAddr[0] = 0x03740000;
-				sharedAddr[1] = 0x8000;
+				sharedAddr[1] = READ_SIZE_ARM7;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 				
@@ -106,18 +110,18 @@ void cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);	
 				
 				// transfer back the WRAM-B cache to the arm9
-				REG_MBK_2=0x8084888C;
-				REG_MBK_3=0x9094989C;
+				REG_MBK_2=(vu32)0x8084888C;
+				REG_MBK_3=(vu32)0x9094989C;
 				
-				DC_FlushRange((vu32*)0x03748000, 4);
-				while(*(vu32*)(0x03748000) != (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)0x03748000, 4);
+				DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
+				while(*((vu32*)MARKER_ADDRESS) != (vu32)0xDEADBABE) {
+					DC_FlushRange((vu32*)MARKER_ADDRESS, 4);
 				}
 				
 				currentSector = sector;
 			}			
 			
-			if(0 && (len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
+			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
 				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
@@ -137,7 +141,7 @@ void cardRead (u32* cacheStruct) {
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
-				while (remainToRead && (src2-sector < 0x8000) ) {
+				while (remainToRead && (src2-sector < READ_SIZE_ARM7) ) {
 					src2 = cardStruct[0];
 					u32 len2 = cardStruct[2];
 					u32 page2 = (src2/512)*512;
@@ -162,7 +166,7 @@ void cardRead (u32* cacheStruct) {
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
 			}
-			if(len < 0x8000) {
+			if(len < READ_SIZE_ARM7) {
 				len =0;
 				// send a log command for debug purpose
 				// -------------------------------------
@@ -181,9 +185,9 @@ void cardRead (u32* cacheStruct) {
 			}
 			else {
 				// bigger than 32k unaligned command
-				len = len - 0x8000 + (src-sector) ;
-				src = sector + 0x8000;
-				dst = dst + 0x8000 - (src-sector);
+				len = len - READ_SIZE_ARM7 + (src-sector) ;
+				src = sector + READ_SIZE_ARM7;
+				dst = dst + READ_SIZE_ARM7 - (src-sector);
 				sector = page = src;
 			}			
 		}

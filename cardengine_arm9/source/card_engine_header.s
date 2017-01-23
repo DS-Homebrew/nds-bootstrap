@@ -121,14 +121,10 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r11,lr}
 		
-	@ get back the WRAM B & C to arm9
-	ldr     r4,=0x4004044     
+	@ get back the WRAM C to arm9    
     ldr     r1,=0x8084888C	
-	sub     r2, r4, #(0x4004044 - 0x4004048)
 	ldr     r3,=0x9094989C
-	str     r1,[r4]
-	str     r3,[r2]
-	sub     r4, r2, #(0x4004048 - 0x400404C)
+	ldr     r4,=0x400404C 
 	sub     r2, r4, #(0x400404C - 0x4004050)
 	str     r1,[r4]
 	str     r3,[r2]
