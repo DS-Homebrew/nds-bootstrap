@@ -54,7 +54,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 	
-	// send a log command for debug purpose
+	/*// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -132,7 +132,7 @@ void cardRead (u32* cacheStruct) {
 			}			
 			
 			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -147,7 +147,7 @@ void cardRead (u32* cacheStruct) {
 				// -------------------------------------*/
 			
 				// copy directly
-				fastCopy32(0x03740000+src-sector,dst,len);	
+				fastCopy32(BUFFER_ADDRESS+src-sector,dst,len);	
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
@@ -178,7 +178,7 @@ void cardRead (u32* cacheStruct) {
 			}
 			if(len < READ_SIZE_ARM7) {
 				len =0;
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
