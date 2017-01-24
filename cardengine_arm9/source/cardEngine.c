@@ -143,7 +143,7 @@ void cardRead (u32* cacheStruct) {
 				commandRead = 0x026ff800;	
 				
 				sharedAddr[0] = dst;
-				sharedAddr[1] = len;
+				sharedAddr[1] = len2;
 				sharedAddr[2] = BUFFER_ADDRESS+src-sector;
 				sharedAddr[3] = commandRead;
 				
@@ -157,15 +157,14 @@ void cardRead (u32* cacheStruct) {
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
-				while (remainToRead && (src2-currentSector < READ_SIZE_ARM7) ) {
-					src2 = cardStruct[0];
+				while (remainToRead && (src2-currentSector+512 <= READ_SIZE_ARM7) ) {
 					u32 page2 = (src2/512)*512;
 					
 					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
 					
-					sharedAddr[0] = cacheBuffer;
+					sharedAddr[0] = page2;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = 0x03740000+page2-sector;
 					sharedAddr[3] = commandRead;
@@ -179,6 +178,7 @@ void cardRead (u32* cacheStruct) {
 					fastCopy32(BUFFER_ADDRESS+(page2-currentSector), cacheBuffer, 512);
 					*cachePage = page2;
 					remainToRead = (*readCachedRef)(cacheStruct);
+					src2 = cardStruct[0];
 				}
 			}
 			if(len == len2) {
