@@ -68,6 +68,8 @@ u32 mpuInitRegion1Data1[1] = {0x200002D};
 // sdk >= 4 version
 u32 mpuInitRegion1Data4[1] = {0x200002D};
 
+u32 mpuInitRegion1DataAlt[1] = {0x200002B};
+
 u32 mpuInitRegion2Signature[1] = {0xEE060F12};
 // sdk < 3 version
 u32 mpuInitRegion2Data1[1] = {0x27C0023};
@@ -291,6 +293,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_printf("\n");
 		}
 	}	
+	
+	if(!mpuDataOffset) {
+		// try to found it
+		for (int i = 0; i<0x100; i++) {
+			mpuDataOffset = (u32*)(mpuStartOffset+i);
+			if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) break;
+		}
+	}
 	
 	if(mpuDataOffset) {
 		// change the region 1 configuration

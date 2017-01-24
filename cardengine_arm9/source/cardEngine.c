@@ -92,8 +92,8 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
-				//DC_FlushRange((vu32*)BUFFER_ADDRESS, READ_SIZE_ARM7);
-				cacheFlush();
+				DC_FlushRange((vu32*)BUFFER_ADDRESS, READ_SIZE_ARM7);
+				//cacheFlush();
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_B=(vu8)0x81;					
