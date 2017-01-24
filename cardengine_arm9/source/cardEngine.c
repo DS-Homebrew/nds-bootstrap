@@ -54,7 +54,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 	
-	/*// send a log command for debug purpose
+	// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -130,10 +130,15 @@ void cardRead (u32* cacheStruct) {
 				}*/
 				
 				currentSector = sector;
-			}			
+			}		
+		
+			u32 len2=len;
+			if((src - currentSector) + len2 > READ_SIZE_ARM7){
+				len2 = len2 - ((src - currentSector) + len2 - READ_SIZE_ARM7);
+			}
 			
-			if((len>512) && ((len % 32) == 0) && ((u32)dst)%4 == 0) {
-				/*// send a log command for debug purpose
+			if((len2>512) && ((len2 % 32) == 0) && ((u32)dst)%4 == 0) {
+				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -148,16 +153,15 @@ void cardRead (u32* cacheStruct) {
 				// -------------------------------------*/
 			
 				// copy directly
-				fastCopy32(BUFFER_ADDRESS+(src-currentSector),dst,len);	
+				fastCopy32(BUFFER_ADDRESS+(src-currentSector),dst,len2);	
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
 				while (remainToRead && (src2-currentSector < READ_SIZE_ARM7) ) {
 					src2 = cardStruct[0];
-					u32 len2 = cardStruct[2];
 					u32 page2 = (src2/512)*512;
 					
-					/*// send a log command for debug purpose
+					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
 					
@@ -177,9 +181,9 @@ void cardRead (u32* cacheStruct) {
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
 			}
-			if(len < READ_SIZE_ARM7) {
+			if(len == len2) {
 				len =0;
-				/*// send a log command for debug purpose
+				// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -195,10 +199,11 @@ void cardRead (u32* cacheStruct) {
 			
 			} else {
 				// bigger than 32k unaligned command
-				len = len - READ_SIZE_ARM7 + (src-sector) ;
-				src = sector + READ_SIZE_ARM7;
-				dst = dst + READ_SIZE_ARM7 - (src-sector);
-				sector = page = src;
+				len = len - len2;
+				src = src + len2;
+				dst = dst + len2;
+				page = (src/512)*512;
+				sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 			}			
 		}
 	}	

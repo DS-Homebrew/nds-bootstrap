@@ -142,7 +142,7 @@ void runCardEngineCheck (void) {
 	
 	if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
     {
-        //dbg_printf("\ncard read received v2\n");
+        dbg_printf("\ncard read received v2\n");
 		
 		if(calledViaIPC) {
 			//dbg_printf("\ntriggered via IPC\n");
@@ -154,7 +154,7 @@ void runCardEngineCheck (void) {
 		u32 len = *(vu32*)(sharedAddr+1);
 		u32 marker = *(vu32*)(sharedAddr+3);
 		
-		/*dbg_printf("\nstr : \n");
+		dbg_printf("\nstr : \n");
 		dbg_hexa(cardStruct);		
 		dbg_printf("\nsrc : \n");
 		dbg_hexa(src);		
@@ -163,7 +163,8 @@ void runCardEngineCheck (void) {
 		dbg_printf("\nlen : \n");
 		dbg_hexa(len);
 		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);*/
+		dbg_hexa(marker);
+		//*/
 		
 		fileRead(dst,romFile,src,len);
 		

@@ -128,6 +128,11 @@ card_read_arm9:
 	
 	ldr		r3, =cardRead
 	
+	mov     r1, #0x200000
+	wait_loop_card_read_arm9:
+		subs    r1, r1, #1
+		bgt     wait_loop_card_read_arm9
+	
 	@ldr     r1, =0xE92D4FF0
 @wait_for_wram_card_read:
 	@ldr     r2, [r3]
