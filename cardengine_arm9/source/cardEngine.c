@@ -54,7 +54,7 @@ void cardRead (u32* cacheStruct) {
 	
 	u32 sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 	
-	// send a log command for debug purpose
+	/*// send a log command for debug purpose
 	// -------------------------------------
 	commandRead = 0x026ff800;	
 	
@@ -138,7 +138,7 @@ void cardRead (u32* cacheStruct) {
 			}
 			
 			if((len2>512) && ((len2 % 32) == 0) && ((u32)dst)%4 == 0) {
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -156,16 +156,16 @@ void cardRead (u32* cacheStruct) {
 				fastCopy32(BUFFER_ADDRESS+(src-currentSector),dst,len2);	
 				
 				// update cardi common
-				cardStruct[0] = src+len2;
+				cardStruct[0] = src + len2;
 				cardStruct[1] = dst + len2;
 				cardStruct[2] = len - len2;
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
-				while (remainToRead && (src2-currentSector+512 <= READ_SIZE_ARM7) ) {
+				while (remainToRead && (src2-currentSector < READ_SIZE_ARM7) ) {
 					u32 page2 = (src2/512)*512;
 					
-					// send a log command for debug purpose
+					/*// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;	
 					
@@ -188,7 +188,7 @@ void cardRead (u32* cacheStruct) {
 			}
 			if(len == len2) {
 				len =0;
-				// send a log command for debug purpose
+				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
@@ -204,9 +204,9 @@ void cardRead (u32* cacheStruct) {
 			
 			} else {
 				// bigger than 32k unaligned command
-				len = len - len2;
-				src = src + len2;
-				dst = dst + len2;
+				len = cardStruct[2];
+				src = cardStruct[0];
+				dst = cardStruct[1];
 				page = (src/512)*512;
 				sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 			}			
