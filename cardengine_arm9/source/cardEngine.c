@@ -20,10 +20,10 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x6000
+#define READ_SIZE_ARM7 0x8000
 #define MARKER_ADDRESS_1 0x03740000
 #define MARKER_ADDRESS_2 0x03746004
-#define BUFFER_ADDRESS 0x03740004
+#define BUFFER_ADDRESS 0x03740000
 #define REG_MBK_B	(*(vu8*)0x4004047)
 
 extern vu32* volatile cardStruct;
@@ -43,11 +43,11 @@ u32 cardId (void) {
 void cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
 	
-	u32* cacheBuffer = cacheStruct + 8;
+	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
 	u32 src = cardStruct[0];
-	u32* dst = (u32*) (cardStruct[1]);
+	u8* dst = (u8*) (cardStruct[1]);
 	u32 len = cardStruct[2];
 	
 	u32 page = (src/512)*512;
@@ -92,18 +92,19 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
+				//DC_FlushRange((vu32*)BUFFER_ADDRESS, READ_SIZE_ARM7);
 				cacheFlush();
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_B=(vu8)0x81;					
 				
-				while(*((vu32*)MARKER_ADDRESS_1) == (vu32)0xDEADBABE) {
+				/*while(*((vu32*)MARKER_ADDRESS_1) == (vu32)0xDEADBABE) {
 					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
 				}
 				
 				while(*((vu32*)MARKER_ADDRESS_2) == (vu32)0xDEADBABE) {
 					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
-				}
+				}*/
 				
 				// write the command
 				sharedAddr[0] = BUFFER_ADDRESS;
@@ -118,7 +119,7 @@ void cardRead (u32* cacheStruct) {
 				// transfer back the WRAM-B cache to the arm9
 				REG_MBK_B=(vu8)0x80;
 				
-				DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
+				/*DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
 				while(*((vu32*)MARKER_ADDRESS_1) != (vu32)0xDEADBABE) {
 					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
 				}
@@ -126,7 +127,7 @@ void cardRead (u32* cacheStruct) {
 				DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
 				while(*((vu32*)MARKER_ADDRESS_2) != (vu32)0xDEADBABE) {
 					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
-				}
+				}*/
 				
 				currentSector = sector;
 			}			
@@ -147,11 +148,11 @@ void cardRead (u32* cacheStruct) {
 				// -------------------------------------*/
 			
 				// copy directly
-				fastCopy32(BUFFER_ADDRESS+src-sector,dst,len);	
+				fastCopy32(BUFFER_ADDRESS+(src-currentSector),dst,len);	
 			} else {			
 				bool remainToRead = true;
 				u32 src2 = cardStruct[0];
-				while (remainToRead && (src2-sector < READ_SIZE_ARM7) ) {
+				while (remainToRead && (src2-currentSector < READ_SIZE_ARM7) ) {
 					src2 = cardStruct[0];
 					u32 len2 = cardStruct[2];
 					u32 page2 = (src2/512)*512;
@@ -171,7 +172,7 @@ void cardRead (u32* cacheStruct) {
 					// -------------------------------------*/
 						
 					// read via the 512b ram cache
-					fastCopy32(BUFFER_ADDRESS+page2-sector, cacheBuffer, 512);
+					fastCopy32(BUFFER_ADDRESS+(page2-currentSector), cacheBuffer, 512);
 					*cachePage = page2;
 					remainToRead = (*readCachedRef)(cacheStruct);
 				}
@@ -192,8 +193,7 @@ void cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);
 				// -------------------------------------*/
 			
-			}
-			else {
+			} else {
 				// bigger than 32k unaligned command
 				len = len - READ_SIZE_ARM7 + (src-sector) ;
 				src = sector + READ_SIZE_ARM7;

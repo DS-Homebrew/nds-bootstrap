@@ -122,19 +122,17 @@ card_read_arm9:
     stmfd   sp!, {r4-r11,lr}
 		
 	@ get back the WRAM C to arm9    
-    ldr     r1,=0x8084888C	
-	ldr     r3,=0x9094989C
-	ldr     r4,=0x400404C 
-	sub     r2, r4, #(0x400404C - 0x4004050)
-	str     r1,[r4]
-	str     r3,[r2]
+	ldr     R3,=0x4004000 	
+	MOV     R2, #0xFFFFFF80	
+	STRB    R2, [R3,#0x4F]
 	
 	ldr		r3, =cardRead
-	ldr     r1, =0xE92D4FF0
-wait_for_wram_card_read:
-	ldr     r2, [r3]
-	cmp     r1, r2
-	bne     wait_for_wram_card_read
+	
+	@ldr     r1, =0xE92D4FF0
+@wait_for_wram_card_read:
+	@ldr     r2, [r3]
+	@cmp     r1, r2
+	@bne     wait_for_wram_card_read
 	
 	bl		_blx_r3_stub_card_read	
 
