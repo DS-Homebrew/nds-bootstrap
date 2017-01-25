@@ -278,7 +278,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* mpuDataOffset = 0;
     u32 mpuStartOffset =  
         getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u32*)mpuInitRegion3Signature, 1, 1);
+              (u32*)mpuInitRegion1Signature, 1, 1);
     if (!mpuStartOffset) {
         dbg_printf("Mpu init not found\n");
     } else {
@@ -338,13 +338,26 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		
 	// patch out all further mpu reconfiguration	
 	while(mpuStartOffset) {
-		mpuStartOffset = getOffset(mpuStartOffset+4, ndsHeader->arm9binarySize,
+		mpuStartOffset = getOffset(mpuStartOffset+4, 0x300000,
               (u32*)mpuInitRegion1Signature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
+			
 			*((u32*)mpuStartOffset) = 0xE1A00000 ;
+			
+			/*// try to found it
+			for (int i = 0; i<0x100; i++) {
+				mpuDataOffset = (u32*)(mpuStartOffset+i);
+				if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) {
+					*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;	
+					break;
+				}
+				if(i == 100) {
+					*((u32*)mpuStartOffset) = 0xE1A00000 ;
+				}
+			}*/
 		}
 	}
 	
