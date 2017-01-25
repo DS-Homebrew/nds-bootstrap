@@ -82,9 +82,37 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
+void initMBK() {
+	// give all DSI WRAM to arm7 at boot
+	
+	// arm7 is master of WRAM-A/B/C
+	REG_MBK_9=0x3000000F;
+	
+	// WRAM-A fully mapped to arm7
+	REG_MBK_1=0x8185898D;
+	
+	// WRAM-B fully mapped to arm7
+	REG_MBK_2=0x8185898D;
+	REG_MBK_3=0x9195999D;
+	
+	// WRAM-C fully mapped to arm7
+	REG_MBK_4=0x8185898D;
+	REG_MBK_5=0x9195999D;
+	
+	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
+	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
+	REG_MBK_6=0x07C03780;
+	// WRAM-B mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK_7=0x07803740;
+	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK_8=0x07403700;
+}
+
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
+	
+	initMBK();
 	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
