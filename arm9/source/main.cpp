@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpuRegion, u32 patchMpuSize) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -98,7 +98,7 @@ void runFile(string filename, string savPath) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), strdup(arm7DonorPath.c_str()), patchMpuRegion, patchMpuSize, argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -248,6 +248,12 @@ int main( int argc, char **argv) {
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 		
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");	
+		
+		std::string	arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+		
+		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
+		
+		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH__MPU_SIZE", 0);	
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
@@ -273,17 +279,17 @@ int main( int argc, char **argv) {
 				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
 				dbg_printf("Running %s\n", bootstrapPath.c_str());
 				
-				runFile(bootstrapPath.c_str(), savPath);
+				runFile(bootstrapPath.c_str(), savPath, arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
 			} else {				
 				dbg_printf("Running %s\n", ndsPath.c_str());
 				
-				runFile(ndsPath.c_str(), savPath.c_str());
+				runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
 			}
 		} else {
 			dbg_printf("TWL MODE enabled\n");			
 			dbg_printf("Running %s\n", ndsPath.c_str());
 					
-			runFile(ndsPath.c_str(), savPath.c_str());
+			runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
 		}		
 	} else {
 		consoleDemoInit();

@@ -29,6 +29,7 @@
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
+extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 static u32 currentSector = 0;
@@ -92,19 +93,10 @@ void cardRead (u32* cacheStruct) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 				
-				DC_FlushRange((vu32*)BUFFER_ADDRESS, READ_SIZE_ARM7);
-				//cacheFlush();
+				if(needFlushDCCache) DC_FlushRange((vu32*)BUFFER_ADDRESS, READ_SIZE_ARM7);
 				
 				// transfer the WRAM-B cache to the arm7
 				REG_MBK_B=(vu8)0x81;					
-				
-				/*while(*((vu32*)MARKER_ADDRESS_1) == (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
-				}
-				
-				while(*((vu32*)MARKER_ADDRESS_2) == (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
-				}*/
 				
 				// write the command
 				sharedAddr[0] = BUFFER_ADDRESS;
@@ -118,16 +110,6 @@ void cardRead (u32* cacheStruct) {
 				
 				// transfer back the WRAM-B cache to the arm9
 				REG_MBK_B=(vu8)0x80;
-				
-				/*DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
-				while(*((vu32*)MARKER_ADDRESS_1) != (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS_1, 4);
-				}
-				
-				DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
-				while(*((vu32*)MARKER_ADDRESS_2) != (vu32)0xDEADBABE) {
-					DC_FlushRange((vu32*)MARKER_ADDRESS_2, 4);
-				}*/
 				
 				currentSector = sector;
 			}		

@@ -29,7 +29,7 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 #include <nds.h>
 
-#include <maxmod7.h>
+// #include <maxmod7.h>
 #include <nds/ndstypes.h>
 
 #include "fifocheck.h"
@@ -127,11 +127,11 @@ int main(void) {
 	// Start the RTC tracking IRQ
 	initClockIRQ();
 
-	mmInstall(FIFO_MAXMOD);
+	// mmInstall(FIFO_MAXMOD);
 
 	SetYtrigger(80);
 
-	installSoundFIFO();
+	// installSoundFIFO();
 	installSystemFIFO();
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
