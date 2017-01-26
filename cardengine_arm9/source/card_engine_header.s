@@ -115,6 +115,9 @@ patches:
 .word   cacheFlushRef
 .word   readCachedRef
 .word   0x0
+.global needFlushDCCache
+needFlushDCCache:
+.word   0x0
 
 @---------------------------------------------------------------------------------
 card_read_arm9:

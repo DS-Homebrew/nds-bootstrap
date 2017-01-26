@@ -67,6 +67,9 @@ dsiSD:
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
 #define SAV_OFFSET 32
+#define DONOR_OFFSET 36
+#define PUR_OFFSET 40
+#define PUS_OFFSET 44
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
@@ -266,7 +269,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32  patchMpuRegion, u32 patchMpuSize, bool initDisc, bool dldiPatchNds, int argc, const char** argv)
 {
 	char* argStart;
 	u16* argData;
@@ -332,6 +335,9 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, bo
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
 	
 	writeAddr ((data_t*) LCDC_BANK_C, SAV_OFFSET, saveCluster);
+	writeAddr ((data_t*) LCDC_BANK_C, DONOR_OFFSET, donorCluster);
+	writeAddr ((data_t*) LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
+	writeAddr ((data_t*) LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
 		
 	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
@@ -369,10 +375,12 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, bo
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* savename, int argc, const char** argv)  {
+int runNdsFile (const char* filename, const char* savename,  const char* arm7DonorPath, int patchMpuRegion, int patchMpuSize, int argc, const char** argv)  {
 	struct stat st;
 	struct stat stSav;
+	struct stat stDonor;
 	u32 clusterSav = 0;
+	u32 clusterDonor = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
@@ -384,6 +392,10 @@ int runNdsFile (const char* filename, const char* savename, int argc, const char
 	
 	if (stat (savename, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
+	}
+	
+	if (stat (arm7DonorPath, &stDonor) >= 0) {
+		clusterDonor = stDonor.st_ino;
 	}
 
 	if (argc <= 0 || !argv) {
@@ -403,7 +415,7 @@ int runNdsFile (const char* filename, const char* savename, int argc, const char
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, true, true, argc, argv);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, patchMpuRegion, patchMpuSize, true, true, argc, argv);
 }
 
 /*

@@ -30,6 +30,9 @@
 	.global argSize
 	.global dsiSD
 	.global saveFileCluster
+	.global donorFileCluster
+	.global patchMpuRegion
+	.global patchMpuSize
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -55,6 +58,12 @@ dsiSD:
 	.word	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+donorFileCluster:
+	.word	0x00000000		@ donor .nds file
+patchMpuRegion:
+	.word	0x00000000		
+patchMpuSize:
+	.word	0x00000000		
 
 startUp:
 	mov	r0, #0x04000000

@@ -207,6 +207,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
 	u32 mpuInitRegionNewData = PAGE_32M  | 0x02000000 | 1;	
+	u32 needFlushCache = 0;	
+	int mpuAccessOffset = 0;
+	u32 mpuNewDataAccess = 0;
+	u32 mpuNewInstrAccess = 0;
+	
 	switch(patchMpuRegion) {
 		case 0 :		
 			mpuInitRegionSignature = mpuInitRegion0Signature;
@@ -216,15 +221,21 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		case 1 :
 			mpuInitRegionSignature = mpuInitRegion1Signature;
 			mpuInitRegionData = mpuInitRegion1Data;
+			needFlushCache = 1;
 			break;
 		case 2 :
 			mpuInitRegionSignature = mpuInitRegion2Signature;
 			mpuInitRegionData = mpuInitRegion2Data;
+			mpuNewDataAccess = 0x15111111;	
+			mpuNewInstrAccess = 0x5111111;	
+			mpuAccessOffset = 6;
 			break;
 		case 3 :
 			mpuInitRegionSignature = mpuInitRegion3Signature;
 			mpuInitRegionData = mpuInitRegion3Data;
-			mpuInitRegionNewData = PAGE_8M  | 0x03000000 | 1;	
+			mpuInitRegionNewData = PAGE_8M  | 0x03000000 | 1;
+			mpuNewInstrAccess = 0x5111111;		
+			mpuAccessOffset = 5;
 			break;
 	}
 
@@ -332,18 +343,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(mpuDataOffset) {
 		// change the region 1 configuration
 		*mpuDataOffset = mpuInitRegionNewData;
-
-		/*// Region 2 settings
-		// change intruction access
-		mpuDataOffset[6] = 0x5111111;	
-		// change data access
-		mpuDataOffset[7] = 0x15111111;	*/
 		
-		//	Region 3 settings	
-		// change intruction access
-		//mpuDataOffset[5] = 0x5103011;		
-		// change data access
-		//mpuDataOffset[6] = 0x15113011;
+		if(mpuAccessOffset) {
+			if(mpuNewInstrAccess) {
+				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;	
+			}
+			if(mpuNewDataAccess) {
+				mpuDataOffset[mpuAccessOffset] = mpuNewDataAccess;	
+			}
+		}
 	}
 	
 	// Find the mpu cache init
@@ -446,6 +454,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	*((u32*)patches[8]) = cardReadCachedOffset;
+	*((u32*)patches[10]) = needFlushCache;
 	
 	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
 	
@@ -698,7 +707,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 			dbg_printf("[Error] CardRead not found:\n");
 			dbg_hexa((u32)cardRead);
 			dbg_printf("\n");
-			return 1;
+			return 0;
 		}
 		
 		u32* cardId = (u32*) (JumpTableFunc + 0xE0);
@@ -767,7 +776,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		arm7Function[8] = saveFileCluster;
 	}    
 	
-	return 0;
+	return 1;
 }
 
 
@@ -962,7 +971,27 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     return 1;
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
+void swapBinary_ARM7(aFile donorfile)
+{
+	u32 ndsHeader[0x170>>2];
+	
+	nocashMessage("loadBinary_ARM7");
+
+	// read NDS header
+	fileRead ((char*)ndsHeader, donorfile, 0, 0x170);
+	// read ARM7 info from NDS header
+	u32 ARM7_SRC = ndsHeader[0x030>>2];
+	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
+	u32 ARM7_LEN = ndsHeader[0x03C>>2];	
+
+	fileRead(ARM7_DST, donorfile, ARM7_SRC, ARM7_LEN);
+	
+	NDS_HEAD[0x030>>2] = ARM7_SRC;
+	NDS_HEAD[0x038>>2] = ARM7_DST;
+	NDS_HEAD[0x03C>>2] = ARM7_LEN;
+}
+
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile) {
 	u32* debug = (u32*)0x03784000;
 	
 	u32* irqEnableStartSignature = irqEnableStartSignature1;	
@@ -1005,16 +1034,27 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if(!saveResult) {
+		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
+			dbg_printf("swap the arm7 binary");	
+			swapBinary_ARM7(donorFile);
+			// apply the arm7 binary swap and the save patch again, assume save v2 nds file
+			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+		} else {
+			dbg_printf("no arm7 binary specified for swapping");	
+		}
+	}
 	
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize) {	
+u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
+		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile) {	
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
-	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster);
+	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile);
 
 	dbg_printf("ERR_NONE");
 	return 0;
