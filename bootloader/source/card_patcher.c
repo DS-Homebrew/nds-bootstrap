@@ -276,9 +276,22 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	// Find the mpu init
 	u32* mpuDataOffset = 0;
+	u32 mpuInitSetRegionSignature = mpuInitRegion1Signature;
+	char game_TID[5];
+	strcpy(game_TID, ndsHeader->gameCode);
+	game_TID[4] = 0;
+	// Use Region 3 signature for the following games
+	if (strcmp(game_TID, "AKWE") == 0 ||	// Kirby: Squeak Squad
+		strcmp(game_TID, "AKWJ") == 0 ||	// Hoshi no Kirby: Sanjo! Dorotche Dan
+		strcmp(game_TID, "AKWK") == 0 ||	// Byeol ui Kieby: Dauphin Ildang ui Seupgyeok
+		strcmp(game_TID, "AKWP") == 0 ||	// Kirby: Mouse Attack
+		strcmp(game_TID, "Y2ME") == 0 )	// Kirby: Squeak Squad (Kiosk Demo)
+	{
+		mpuInitSetRegionSignature = mpuInitRegion3Signature;
+	}
     u32 mpuStartOffset =  
         getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u32*)mpuInitRegion1Signature, 1, 1);
+              (u32*)mpuInitSetRegionSignature, 1, 1);
     if (!mpuStartOffset) {
         dbg_printf("Mpu init not found\n");
     } else {
@@ -337,8 +350,17 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 		
 	// patch out all further mpu reconfiguration	
+	u32 arm9SetSize = 0x300000;
+	if (strcmp(game_TID, "AKWE") == 0 ||	// Kirby: Squeak Squad
+		strcmp(game_TID, "AKWJ") == 0 ||	// Hoshi no Kirby: Sanjo! Dorotche Dan
+		strcmp(game_TID, "AKWK") == 0 ||	// Byeol ui Kieby: Dauphin Ildang ui Seupgyeok
+		strcmp(game_TID, "AKWP") == 0 ||	// Kirby: Mouse Attack
+		strcmp(game_TID, "Y2ME") == 0 )	// Kirby: Squeak Squad (Kiosk Demo)
+	{
+		arm9SetSize = ndsHeader->arm9binarySize;
+	}
 	while(mpuStartOffset) {
-		mpuStartOffset = getOffset(mpuStartOffset+4, 0x300000,
+		mpuStartOffset = getOffset(mpuStartOffset+4, arm9SetSize,
               (u32*)mpuInitRegion1Signature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
