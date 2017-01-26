@@ -299,3 +299,37 @@ arm7Functions :
 .word    cardId 
 saveCluster:
 .word    0x00000000 
+
+.global tryLockMutex
+.type	tryLockMutex STT_FUNC
+tryLockMutex:
+adr     r1, mutex    
+mov r2, #1
+mutex_loop:
+    swp r0,r2, [r1]
+    cmp r0, #1
+    beq mutex_fail	
+
+mutex_success:
+	mov r2, #1
+    str r2, [r1]
+	mov r0, #1
+	b mutex_exit
+	
+mutex_fail:
+	mov r0, #0
+
+mutex_exit:
+	bx  lr
+
+
+.global unlockMutex
+.type	unlockMutex STT_FUNC
+unlockMutex:
+	adr r1, mutex    
+	mov r2, #0
+	str r2, [r1]
+	bx  lr
+	
+mutex:
+.word    0x00000000  
