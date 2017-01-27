@@ -253,7 +253,7 @@ int main( int argc, char **argv) {
 		
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
 		
-		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH__MPU_SIZE", 0);	
+		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);	
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
