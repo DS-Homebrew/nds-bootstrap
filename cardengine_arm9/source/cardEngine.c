@@ -34,13 +34,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 static u32 currentSector = 0;
 
-
-u32 cardId (void) {
-	//nocashMessage("\narm9 cardId\n");
-
-	return	1;
-}
-
 void cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
 	

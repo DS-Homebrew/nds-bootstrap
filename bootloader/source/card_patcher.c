@@ -57,6 +57,13 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
+u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
+u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
+u32 cardReadDmaEndSignature[3]   = {0x01FF8000,0x000001FF,0x027FFE60};     
+  
+ 
+
+     
 // irqEnable
 u32 irqEnableStartSignature1[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020};
@@ -278,7 +285,6 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
         dbg_printf("Card read cached end not found\n");
         return 0;
     }	
-	debug[1] = cardReadCachedEndOffset;	
     u32 cardReadCachedOffset =   
         getOffset((u32*)cardReadCachedEndOffset, -0xFF,
               (u32*)cardReadCachedStartSignature, 2, -1);
@@ -289,6 +295,27 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	dbg_printf("Card read cached :\t");
 	dbg_hexa(cardReadCachedOffset);
 	dbg_printf("\n");
+	
+	u32 cardReadDmaOffset = 0;
+	u32 cardReadDmaEndOffset =  
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+              (u32*)cardReadDmaEndSignature, 3, 1);
+    if (!cardReadDmaEndOffset) {
+        dbg_printf("Card read dma end not found\n");
+    } else {
+		cardReadDmaOffset =   
+			getOffset((u32*)cardReadDmaEndOffset, -0x200,
+				  (u32*)cardReadDmaStartSignature, 1, -1);
+		if (!cardReadDmaOffset) {
+			dbg_printf("Card read dma start not found\n");
+			cardReadDmaOffset =   
+				getOffset((u32*)cardReadDmaEndOffset, -0x200,
+					  (u32*)cardReadDmaStartSignatureAlt, 1, -1);			
+			if (!cardReadDmaOffset) {
+				dbg_printf("Card read dma start alt not found\n");
+			}
+		}		
+	}    
 		
 	// Find the card id
 	u32 cardIdStartOffset = 0;
@@ -310,7 +337,6 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_printf("\n");
 		}
 	}	
-	
 	
 	// Find the mpu init
 	u32* mpuDataOffset = 0;
@@ -432,6 +458,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	u32* cardPullOutPatch = patches[6];
 	
+	u32* cardIdPatch = patches[3];
+	
+	u32* cardDmaPatch = patches[4];
+	
 	debug[5] = patches;
 	
 	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
@@ -463,8 +493,16 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x5C);	
 	
 	if (cardIdStartOffset) {
-		copyLoop ((u32*)cardIdStartOffset, cardPullOutPatch, 0x4);	
+		copyLoop ((u32*)cardIdStartOffset, cardIdPatch, 0x8);	
 	}
+	
+	if (cardReadDmaOffset) {
+		dbg_printf("Card read dma :\t");
+		dbg_hexa(cardReadDmaOffset);
+		dbg_printf("\n");
+		
+		copyLoop ((u32*)cardReadDmaOffset, cardDmaPatch, 0x8);	
+	}	
 
 	dbg_printf("ERR_NONE");
 	return 0;
