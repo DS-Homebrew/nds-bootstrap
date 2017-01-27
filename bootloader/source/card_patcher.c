@@ -454,7 +454,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	*((u32*)patches[8]) = cardReadCachedOffset;
-	*((u32*)patches[10]) = needFlushCache;
+	patches[10] = needFlushCache;
 	
 	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
 	
