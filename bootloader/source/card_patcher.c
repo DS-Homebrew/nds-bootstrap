@@ -378,7 +378,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;	
 			}
 			if(mpuNewDataAccess) {
-				mpuDataOffset[mpuAccessOffset] = mpuNewDataAccess;	
+				mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;	
 			}
 		}
 	}
