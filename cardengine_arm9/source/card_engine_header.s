@@ -39,51 +39,6 @@ cacheStruct:
 
 card_engine_start:
 
-vblankHandler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_vblank
-	ldr 	r0,	intr_vblank_orig_return
-	bx  	r0
-
-fifoHandler:	
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_fifo
-	ldr 	r0,	intr_fifo_orig_return
-	bx  	r0
-	
-code_handler_start_vblank:
-	push	{r0-r12} 
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-	
-code_handler_start_fifo:
-	push	{r0-r12} 
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-  
-  
-    @ exit after return
-	b	exit
-	
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3	
-	
-@---------------------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-exit:	
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
-
-.pool
-
 .global fastCopy32
 .type	fastCopy32 STT_FUNC
 @ r0 : src, r1 : dst, r2 : len
@@ -108,8 +63,8 @@ patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
 .word	0x0
-.word	vblankHandler
-.word	fifoHandler
+.word	card_id_arm9
+.word	card_dma_arm9
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -157,18 +112,15 @@ cacheRef:
 @---------------------------------------------------------------------------------
 card_id_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r4-r11,lr}
+    mov r0, #1
+	bx      lr		
+@---------------------------------------------------------------------------------
 
-	ldr		r3, =cardId	
-	push    {lr}
-	bl		_blx_r3_stub_card_id
-	pop  	{lr}
-    
-    ldmfd   sp!, {r4-r11,lr}
-    bx      lr
-_blx_r3_stub_card_id:
-	bx	r3	
-.pool	
+@---------------------------------------------------------------------------------
+card_dma_arm9:
+@---------------------------------------------------------------------------------
+    mov r0, #0
+	bx      lr		
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

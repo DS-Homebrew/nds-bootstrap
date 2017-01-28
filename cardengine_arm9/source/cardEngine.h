@@ -26,7 +26,6 @@ extern "C" {
 #define is_aligned(POINTER, BYTE_COUNT) \
     (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
-u32 cardId (void);
 void cardRead (u32* cacheStruct);
 
 #ifdef __cplusplus
