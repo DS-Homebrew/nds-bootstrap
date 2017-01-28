@@ -303,6 +303,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardReadDmaEndOffset) {
         dbg_printf("Card read dma end not found\n");
     } else {
+		dbg_printf("Card read dma end :\t");
+		dbg_hexa(cardReadDmaEndOffset);
+		dbg_printf("\n");
 		cardReadDmaOffset =   
 			getOffset((u32*)cardReadDmaEndOffset, -0x200,
 				  (u32*)cardReadDmaStartSignature, 1, -1);
@@ -390,6 +393,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		*mpuCacheOffset = 0xE3A00046;
 	}	*/	
 	
+	dbg_printf("patchMpuSize :\t");
+	dbg_hexa(patchMpuSize);
+	dbg_printf("\n");
 		
 	// patch out all further mpu reconfiguration	
 	while(mpuStartOffset && patchMpuSize) {
@@ -398,7 +404,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			patchSize = patchMpuSize;
 		}
 		mpuStartOffset = getOffset(mpuStartOffset+4, patchSize,
-              (u32*)mpuInitRegion1Signature, 1, 1);
+              (u32*)mpuInitRegionSignature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
