@@ -112,7 +112,7 @@ void cardRead (u32* cacheStruct) {
 				len2 = len2 - ((src - currentSector) + len2 - READ_SIZE_ARM7);
 			}
 			
-			if((len2>512) && ((len2 % 32) == 0) && ((u32)dst)%4 == 0) {
+			if(false && (len2>512) && ((len2 % 32) == 0) && ((u32)dst)%4 == 0) {
 				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
