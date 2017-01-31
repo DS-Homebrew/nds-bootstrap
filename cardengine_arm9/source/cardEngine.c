@@ -111,6 +111,11 @@ void cardRead (u32* cacheStruct) {
 			if((src - currentSector) + len2 > READ_SIZE_ARM7){
 			    len2 = currentSector - src + READ_SIZE_ARM7;
 			}
+			
+			if(len2 > 512) {
+				len2 -= src%4;
+				len2 -= len2 % 32;
+			}
 
 			if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {				
 				/*// send a log command for debug purpose
