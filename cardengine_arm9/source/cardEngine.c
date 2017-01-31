@@ -112,7 +112,12 @@ void cardRead (u32* cacheStruct) {
 			    len2 = currentSector - src + READ_SIZE_ARM7;
 			}
 			
-			if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+			if(len2 > 512) {
+				len2 -= src%4;
+				len2 -= len2 % 32;
+			}
+
+			if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {				
 				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
@@ -134,54 +139,30 @@ void cardRead (u32* cacheStruct) {
 				cardStruct[0] = src + len2;
 				cardStruct[1] = dst + len2;
 				cardStruct[2] = len - len2;
-			} else {			
-				bool remainToRead = true;
-				u32 src2 = cardStruct[0];
-				while (remainToRead && (src2-currentSector < READ_SIZE_ARM7) ) {
-					u32 page2 = (src2/512)*512;
-					
-					/*// send a log command for debug purpose
-					// -------------------------------------
-					commandRead = 0x026ff800;	
-					
-					sharedAddr[0] = page2;
-					sharedAddr[1] = len2;
-					sharedAddr[2] = 0x03740000+page2-sector;
-					sharedAddr[3] = commandRead;
-					
-					IPC_SendSync(0xEE24);
-					
-					while(sharedAddr[3] != (vu32)0);
-					// -------------------------------------*/
-						
-					// read via the 512b ram cache
-					fastCopy32(BUFFER_ADDRESS+(page2-currentSector), cacheBuffer, 512);
-					*cachePage = page2;
-					remainToRead = (*readCachedRef)(cacheStruct);
-					src2 = cardStruct[0];
-				}
-			}
-			if(len == len2) {
-				len =0;
+			} else {				
 				/*// send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;	
 				
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len;
-				sharedAddr[2] = src;
+				sharedAddr[0] = page2;
+				sharedAddr[1] = len2;
+				sharedAddr[2] = 0x03740000+page2-sector;
 				sharedAddr[3] = commandRead;
 				
 				IPC_SendSync(0xEE24);
 				
 				while(sharedAddr[3] != (vu32)0);
 				// -------------------------------------*/
-			
-			} else {
-				// bigger than 32k unaligned command
+					
+				// read via the 512b ram cache
+				fastCopy32(BUFFER_ADDRESS+(page-currentSector), cacheBuffer, 512);
+				*cachePage = page;
+				(*readCachedRef)(cacheStruct);
+			}
+			len = cardStruct[2];
+			if(len>0) {
 				src = cardStruct[0];
 				dst = cardStruct[1];
-				len = cardStruct[2];
 				page = (src/512)*512;
 				sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
 			}			
