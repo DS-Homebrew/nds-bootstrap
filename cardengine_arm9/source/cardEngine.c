@@ -40,11 +40,12 @@ static u32 accessCounter = 0;
 
 int allocateCacheSlot() {
 	int slot = 0;
-	int lowerCounter = 0;
+	int lowerCounter = accessCounter;
 	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
-		if(lowerCounter && cacheCounter[i]<lowerCounter) {
+		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
+			if(!lowerCounter) break;
 		}
 	}
 	return slot;
