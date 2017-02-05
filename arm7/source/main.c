@@ -92,12 +92,12 @@ void initMBK() {
 	REG_MBK_1=0x8185898D;
 	
 	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8185898D;
-	REG_MBK_3=0x9195999D;
+	REG_MBK_2=0x8D898581;
+	REG_MBK_3=0x9D999591;
 	
 	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8185898D;
-	REG_MBK_5=0x9195999D;
+	REG_MBK_4=0x8D898581;
+	REG_MBK_5=0x9D999591;
 	
 	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
 	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k

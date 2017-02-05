@@ -21,10 +21,8 @@
 #include "cardEngine.h"
 
 #define READ_SIZE_ARM7 0x8000
-#define MARKER_ADDRESS_1 0x03740000
-#define MARKER_ADDRESS_2 0x03746004
 #define BUFFER_ADDRESS 0x03740000
-#define REG_MBK_B	(*(vu8*)0x4004047)
+#define REG_MBK_B	(*(vu8*)0x4004044)
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
