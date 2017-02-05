@@ -298,7 +298,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        getOffset(cardReadEndOffset, 0x00100000,//ndsHeader->arm9binarySize,
               (u32*)cardReadDmaEndSignature, 3, 1);
     if (!cardReadDmaEndOffset) {
         dbg_printf("Card read dma end not found\n");
