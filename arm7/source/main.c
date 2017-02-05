@@ -85,7 +85,7 @@ static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Nor
 void initMBK() {
 	// give all DSI WRAM to arm7 at boot
 	
-	// arm7 is master of WRAM-A/B/C
+	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK_9=0x3000000F;
 	
 	// WRAM-A fully mapped to arm7
@@ -102,10 +102,10 @@ void initMBK() {
 	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
 	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
 	REG_MBK_6=0x07C03780;
-	// WRAM-B mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK_7=0x07803740;
-	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK_8=0x07403700;
+	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK_7=0x07403700;
+	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK_8=0x07803740;
 }
 
 //---------------------------------------------------------------------------------

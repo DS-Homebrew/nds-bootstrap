@@ -22,7 +22,12 @@
 
 #define READ_SIZE_ARM7 0x8000
 #define BUFFER_ADDRESS 0x03740000
-#define REG_MBK_B	(*(vu8*)0x4004044)
+#define REG_MBK_B	(*(vu8*)0x400404C)
+
+#define CACHE_ADRESS_START 0x03705000
+#define CACHE_ADRESS_SIZE 0x75000
+#define REG_MBK_CACHE_START	0x4004045
+#define REG_MBK_CACHE_SIZE	15
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
