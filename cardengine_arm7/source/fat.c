@@ -314,14 +314,18 @@ bool FAT_InitFiles (bool initCard)
 	
 	if (initCard && !CARD_StartUp())
 	{
+		#ifdef DEBUG
 		nocashMessage("!CARD_StartUp()");
+		#endif
 		return (false);
 	}
 	
 	// Read first sector of card
 	if (!CARD_ReadSector (0, globalBuffer)) 
 	{
+		#ifdef DEBUG	
 		nocashMessage("!CARD_ReadSector (0, globalBuffer)");
+		#endif	
 		return false;
 	}
 	// Check if there is a FAT string, which indicates this is a boot sector
@@ -411,8 +415,10 @@ bool FAT_InitFiles (bool initCard)
 		}
 	}
 	
+	#ifdef DEBUG	
 	nocashMessage("FAT_InitFiles OK");
-
+	#endif
+		
 	return (true);
 }
 
@@ -440,7 +446,10 @@ aFile getBootFileCluster (const char* bootName)
 	// Check if fat has been initialised
 	if (discBytePerSec == 0)
 	{
+		#ifdef DEBUG	
 		nocashMessage("getBootFileCluster  fat not initialised");
+		#endif
+		
 		file.firstCluster = CLUSTER_FREE;
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
@@ -506,16 +515,22 @@ aFile getBootFileCluster (const char* bootName)
 	// If no file is found, return CLUSTER_FREE
 	if (notFound)
 	{
+		#ifdef DEBUG	
 		nocashMessage("getBootFileCluster  notFound");
+		#endif
+		
 		file.firstCluster = CLUSTER_FREE;
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
 		file.fatTableCached=false;
 		file.oneClusterCached=false;
+		
 		return file;
 	}
 	
+	#ifdef DEBUG	
 	nocashMessage("getBootFileCluster  found");
+	#endif
 	
 	file.firstCluster = (dir.startCluster | (dir.startClusterHigh << 16));
 	file.currentCluster = file.firstCluster;
@@ -540,7 +555,10 @@ fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 {
+	#ifdef DEBUG	
 	nocashMessage("fileRead");
+	#endif
+	
 	int curByte;
 	int curSect;
 	
@@ -666,7 +684,10 @@ fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 {
+	#ifdef DEBUG	
 	nocashMessage("fileWrite");
+	#endif
+	
 	int curByte;
 	int curSect;
 	
@@ -676,7 +697,9 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length)
 
 	if (file.firstCluster == CLUSTER_FREE || file.firstCluster == CLUSTER_EOF) 
 	{
+		#ifdef DEBUG	
 		nocashMessage("CLUSTER_FREE or CLUSTER_EOF");
+		#endif
 		return 0;
 	}
 	

@@ -33,7 +33,8 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99
+# ADD -DDEBUG here for logging/debug
+CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99 
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 

@@ -348,7 +348,9 @@ Initialize the interface, geting it into an idle, ready state
 returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
+	#ifdef DEBUG
 	nocashMessage("startup internal");
+	#endif
 	return true;	
 }
 
@@ -358,7 +360,9 @@ Is a card inserted?
 return true if a card is inserted and usable
 -----------------------------------------------------------------*/
 bool isInserted (void) {
+	#ifdef DEBUG
 	nocashMessage("isInserted internal");
+	#endif
 	return true;
 }
 
@@ -369,7 +373,9 @@ Reset the card, clearing any status errors
 return true if the card is idle and ready
 -----------------------------------------------------------------*/
 bool clearStatus (void) {
+	#ifdef DEBUG
 	nocashMessage("clearStatus internal");
+	#endif	
 	return true;
 }
 
@@ -382,7 +388,9 @@ The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
+	#ifdef DEBUG
 	nocashMessage("readSectors internal");
+	#endif	
 	//dbg_printf("readSectors internal");
 	return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
 }
@@ -397,7 +405,9 @@ The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
+	#ifdef DEBUG
 	nocashMessage("writeSectors internal");
+	#endif	
 	//dbg_printf("writeSectors internal");
 	return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
 }
@@ -411,7 +421,9 @@ it is merely for disabling the card.
 return true if the card is no longer active
 -----------------------------------------------------------------*/
 bool shutdown(void) {
+	#ifdef DEBUG	
 	nocashMessage("shutdown internal");
+	#endif	
 	return true;
 }
 
