@@ -155,10 +155,10 @@ void cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);	
 				
 				// transfer back the WRAM-B cache to the arm9
-				transfertToArm9(slot);
-				
-				updateDescriptor(slot, sector);
-			}			
+				transfertToArm9(slot);				
+			}		
+
+			updateDescriptor(slot, sector);
 			
 			u32 len2=len;
 			if((src - sector) + len2 > READ_SIZE_ARM7){
