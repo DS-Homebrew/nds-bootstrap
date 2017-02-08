@@ -48,6 +48,7 @@ void initLogging() {
 		else
 			savFile.firstCluster = CLUSTER_FREE;
 		buildFatTableCache(romFile);
+		#ifdef DEBUG		
 		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
@@ -59,134 +60,101 @@ void initLogging() {
 		dbg_printf("\n");	
 		dbg_printf("save file :");
 		dbg_hexa(saveCluster);	
-		dbg_printf("\n");			
+		dbg_printf("\n");
+		#endif			
 		initialized=true;
 	}
 	
 }
 
 void runCardEngineCheck (void) {
-	//dbg_printf("runCardEngineCheck\n");
-	int oldIME = enterCriticalSection();
+	//dbg_printf("runCardEngineCheck\n");	
+	//nocashMessage("runCardEngineCheck");
 	
-	initLogging();
-	
-	if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-    {
-        dbg_printf("\ncard read received\n");			
-			
-		if(calledViaIPC) {
-			dbg_printf("\ntriggered via IPC\n");
-		}
+	if(tryLockMutex()) {	
+		initLogging();
+		
+		//nocashMessage("runCardEngineCheck mutex ok");
+		
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		{			
+			#ifdef DEBUG		
+			u32 src = *(vu32*)(sharedAddr+2);
+			u32 dst = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
+			u32 marker = *(vu32*)(sharedAddr+3);			
+
+			dbg_printf("\ncard read received\n");			
 				
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-		u32 marker = *(vu32*)(sharedAddr+3);
-		
-		dbg_printf("\nstr : \n");
-		dbg_hexa(cardStruct);		
-		dbg_printf("\nsrc : \n");
-		dbg_hexa(src);		
-		dbg_printf("\ndst : \n");
-		dbg_hexa(dst);
-		dbg_printf("\nlen : \n");
-		dbg_hexa(len);
-		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);
-		
-		dbg_printf("\nlog only \n");
-		
-		*(vu32*)(0x027FFB14) = 0;	
-	}
-
-
-	if(*(vu32*)(0x027FFB14) == (vu32)0x027ff800)
-    {
-        dbg_printf("\ncard read received\n");			
+			if(calledViaIPC) {
+				dbg_printf("\ntriggered via IPC\n");
+			}
+			dbg_printf("\nstr : \n");
+			dbg_hexa(cardStruct);		
+			dbg_printf("\nsrc : \n");
+			dbg_hexa(src);		
+			dbg_printf("\ndst : \n");
+			dbg_hexa(dst);
+			dbg_printf("\nlen : \n");
+			dbg_hexa(len);
+			dbg_printf("\nmarker : \n");
+			dbg_hexa(marker);
 			
-		if(calledViaIPC) {
-			dbg_printf("\ntriggered via IPC\n");
+			dbg_printf("\nlog only \n");
+			#endif			
+			
+			*(vu32*)(0x027FFB14) = 0;	
 		}
-				
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-		u32 marker = *(vu32*)(sharedAddr+3);
 		
-		dbg_printf("\nstr : \n");
-		dbg_hexa(cardStruct);		
-		dbg_printf("\nsrc : \n");
-		dbg_hexa(src);		
-		dbg_printf("\ndst : \n");
-		dbg_hexa(dst);
-		dbg_printf("\nlen : \n");
-		dbg_hexa(len);
-		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+		{
+			u32 src = *(vu32*)(sharedAddr+2);
+			u32 dst = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
+			u32 marker = *(vu32*)(sharedAddr+3);
 		
-		fileRead(0x027ff800 ,romFile,src,len);
-		
-		dbg_printf("\nread \n");
-		
-		
-		if(is_aligned(dst,4) || is_aligned(len,4)) {
-			dbg_printf("\n aligned read : \n");
-			//*(vu32*)(0x027FFB0C) = (vu32)2;
-		} else {
-			dbg_printf("\n misaligned read : \n");
-			//*(vu32*)(0x027FFB0C) = (vu32)0;
-		}	
-		*(vu32*)(0x027FFB14) = 0;	
-	}
+			#ifdef DEBUG		
+			dbg_printf("\ncard read received v2\n");
+			
+			if(calledViaIPC) {
+				dbg_printf("\ntriggered via IPC\n");
+			}
+			
+			dbg_printf("\nstr : \n");
+			dbg_hexa(cardStruct);		
+			dbg_printf("\nsrc : \n");
+			dbg_hexa(src);		
+			dbg_printf("\ndst : \n");
+			dbg_hexa(dst);
+			dbg_printf("\nlen : \n");
+			dbg_hexa(len);
+			dbg_printf("\nmarker : \n");
+			dbg_hexa(marker);			
+			#endif		
+			
+			fileRead(dst,romFile,src,len);
+			
+			#ifdef DEBUG		
+			dbg_printf("\nread \n");			
+			if(is_aligned(dst,4) || is_aligned(len,4)) {
+				dbg_printf("\n aligned read : \n");
+			} else {
+				dbg_printf("\n misaligned read : \n");
+			}			
+			#endif	
 	
-	if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-    {
-        //dbg_printf("\ncard read received v2\n");
-		
-		if(calledViaIPC) {
-			//dbg_printf("\ntriggered via IPC\n");
+			*(vu32*)(0x027FFB14) = 0;		
 		}
-		
-		// old sdk version
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-		u32 marker = *(vu32*)(sharedAddr+3);
-		
-		/*dbg_printf("\nstr : \n");
-		dbg_hexa(cardStruct);		
-		dbg_printf("\nsrc : \n");
-		dbg_hexa(src);		
-		dbg_printf("\ndst : \n");
-		dbg_hexa(dst);
-		dbg_printf("\nlen : \n");
-		dbg_hexa(len);
-		dbg_printf("\nmarker : \n");
-		dbg_hexa(marker);
-		//*/
-		
-		fileRead(dst,romFile,src,len);
-		
-		//dbg_printf("\nread \n");
-		
-		if(is_aligned(dst,4) || is_aligned(len,4)) {
-			//dbg_printf("\n aligned read : \n");
-			//*(vu32*)(0x027FFB0C) = (vu32)2;
-		} else {
-			//dbg_printf("\n misaligned read : \n");
-			//*(vu32*)(0x027FFB0C) = (vu32)0;
-		}			
-		*(vu32*)(0x027FFB14) = 0;		
+		unlockMutex();
 	}
-
-	leaveCriticalSection(oldIME);
 }
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
-	//nocashMessage("myIrqHandlerFIFO");
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif	
 	
 	calledViaIPC = true;
 	
@@ -195,7 +163,9 @@ void myIrqHandlerFIFO(void) {
 
 
 void myIrqHandlerVBlank(void) {
-	//nocashMessage("myIrqHandlerVBlank");
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
 	
 	calledViaIPC = false;
 	
@@ -205,12 +175,13 @@ void myIrqHandlerVBlank(void) {
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();	
 	
-	//nocashMessage("myIrqEnable\n");
+	#ifdef DEBUG		
+	nocashMessage("myIrqEnable\n");
+	#endif	
 	
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-	//nocashMessage("IRQ_IPC_SYNC enabled\n");
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
@@ -221,10 +192,14 @@ void irqIPCSYNCEnable() {
 	if(!initializedIRQ) {
 		int oldIME = enterCriticalSection();	
 		initLogging();	
+		#ifdef DEBUG		
 		dbg_printf("\nirqIPCSYNCEnable\n");	
+		#endif	
 		REG_IE |= IRQ_IPC_SYNC;
 		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+		#ifdef DEBUG		
 		dbg_printf("IRQ_IPC_SYNC enabled\n");
+		#endif	
 		leaveCriticalSection(oldIME);
 		initializedIRQ = true;
 	}
@@ -233,12 +208,15 @@ void irqIPCSYNCEnable() {
 // ARM7 Redirected function
 
 bool eepromProtect (void) {
-	dbg_printf("\narm7 eepromProtect\n");	
+	#ifdef DEBUG		
+	dbg_printf("\narm7 eepromProtect\n");
+	#endif	
 	
 	return true;
 }
 
 bool eepromRead (u32 src, void *dst, u32 len) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromRead\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -247,6 +225,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
+	#endif	
 	
 	fileRead(dst,savFile,src,len);
 	
@@ -254,6 +233,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite (u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromPageWrite\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -262,6 +242,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
+	#endif	
 
 	fileWrite(src,savFile,dst,len);
 	
@@ -269,6 +250,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg (u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromPageProg\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -277,6 +259,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
+	#endif	
 
 	fileWrite(src,savFile,dst,len);
 	
@@ -284,6 +267,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageVerify (u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromPageVerify\n");	
 	
 	dbg_printf("\nsrc : \n");
@@ -292,24 +276,30 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
+	#endif	
 
 	//fileWrite(src,savFile,dst,len);
 	return true;
 }
 
 bool eepromPageErase (u32 dst) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromPageErase\n");	
+	#endif	
 	
 	return true;
 }
 
 u32 cardId (void) {
+	#ifdef DEBUG	
 	dbg_printf("\cardId\n");
+	#endif	
 
 	return	1;
 }
 
 bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
+	#ifdef DEBUG	
 	dbg_printf("\narm7 cardRead\n");	
 	
 	dbg_printf("\ndma : \n");
@@ -320,6 +310,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
+	#endif	
 	
 	fileRead(dst,romFile,src,len);
 	
