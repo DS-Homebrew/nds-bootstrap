@@ -91,7 +91,7 @@ void initMBK() {
 	REG_MBK9=0x3000000F;
 	
 	// WRAM-A fully mapped to arm7
-	*((vu32*)REG_MBK1)=0x8185898D;
+	//*((vu32*)REG_MBK1)=0x8185898D;
 	
 	// WRAM-B fully mapped to arm7
 	*((vu32*)REG_MBK2)=0x8D898581;
@@ -102,12 +102,12 @@ void initMBK() {
 	*((vu32*)REG_MBK5)=0x9D999591;
 	
 	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
-	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
-	REG_MBK6=0x07C03780;
-	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK7=0x07403700;
-	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK8=0x07803740;
+	// WRAM-A mapped to the 0x3700000 - 0x373FFFF area : 256k
+	//REG_MBK6=0x07403700;
+	// WRAM-B mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK7=0x07803740;
+	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK8=0x07C03780;
 }
 
 u32 dsi_powerOffSlot1() {
@@ -155,8 +155,8 @@ int main(void) {
 	nocashMessage("MBK inited");
 	
 	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
-	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
+	//u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
+	//wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
 	
 	nocashMessage("dldi found");
 	

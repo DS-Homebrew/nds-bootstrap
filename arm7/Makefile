@@ -25,7 +25,7 @@ INCLUDES	:=	include build
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv4t -mthumb -mthumb-interwork
+ARCH	:=	-mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O2\
  		-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
@@ -33,6 +33,7 @@ CFLAGS	:=	-g -Wall -O2\
 		$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM7
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -fno-rtti
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=ds_arm7.specs -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notdir $*).map
