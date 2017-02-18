@@ -144,19 +144,19 @@ void initMBK() {
 	//REG_MBK_5=0x9094989C;
 	
 	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8D898581;
-	REG_MBK_3=0x9D999591;
+	*((vu32*)REG_MBK2)=0x8D898581;
+	*((vu32*)REG_MBK3)=0x9D999591;
 	
 	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8D898581;
-	REG_MBK_5=0x9D999591;
+	*((vu32*)REG_MBK4)=0x8D898581;
+	*((vu32*)REG_MBK5)=0x9D999591;
 		
 	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK_6=0x00000000;
+	REG_MBK6=0x00000000;
 	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK_7=0x07403700;
+	REG_MBK7=0x07403700;
 	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK_8=0x07803740;
+	REG_MBK8=0x07803740;
 }
 
 int main( int argc, char **argv) {
