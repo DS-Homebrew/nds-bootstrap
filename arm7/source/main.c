@@ -155,8 +155,8 @@ int main(void) {
 	nocashMessage("MBK inited");
 	
 	// Find the DLDI reserved space in the file
-	//u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
-	//wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
+	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
+	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
 	
 	nocashMessage("dldi found");
 	
