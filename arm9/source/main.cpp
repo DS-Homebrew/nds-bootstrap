@@ -153,10 +153,10 @@ void initMBK() {
 		
 	// WRAM-A not mapped (reserved to arm7)
 	REG_MBK6=0x00000000;
-	// WRAM-B mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK7=0x07803740;
-	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8=0x07C03780;
+	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK7=0x07403700;
+	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK8=0x07803740;
 }
 
 int main( int argc, char **argv) {
