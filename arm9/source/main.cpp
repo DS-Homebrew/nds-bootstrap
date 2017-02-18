@@ -160,6 +160,7 @@ void initMBK() {
 }
 
 int main( int argc, char **argv) {
+	nocashMessage("arm9 main");
 
 	initMBK();
 
@@ -175,12 +176,15 @@ int main( int argc, char **argv) {
 	}
 	
 	if(ntrMode) {
+		nocashMessage("ntrMode");
 		// REG_SCFG_CLK = 0x80;
 		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 		fifoSendValue32(FIFO_USER_06, 1);
 	}
 	
+	nocashMessage("Initializing fat...");
 	if (fatInitDefault()) {
+		nocashMessage("fatInitDefault");
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
@@ -292,6 +296,7 @@ int main( int argc, char **argv) {
 			runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
 		}		
 	} else {
+		nocashMessage("SD init failed!\n");
 		consoleDemoInit();
 		printf("SD init failed!\n");
 	}

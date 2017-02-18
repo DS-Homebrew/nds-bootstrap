@@ -9,8 +9,8 @@ cp bootstrap.nds bootstrap-nogba.nds
 $DEVKITARM/bin/dlditool dldi/dsisd.dldi bootstrap.nds
 $DEVKITARM/bin/dlditool dldi/dsisd.dldi bootstrap-nogba.nds
 
-python patch_ndsheader_dsiware.py --mode dsi bootstrap.nds
-python patch_ndsheader_dsiware.py --mode dsinogba bootstrap-nogba.nds
+#python patch_ndsheader_dsiware.py --mode dsi bootstrap.nds
+#python patch_ndsheader_dsiware.py --mode dsinogba bootstrap-nogba.nds
 
 #./make_cia.exe --srl=bootstrap.nds
 #./make_cia.exe --srl=bootstrap-dldi.nds
