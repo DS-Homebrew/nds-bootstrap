@@ -137,11 +137,6 @@ static void myFIFOValue32Handler(u32 value,void* data)
 
 void initMBK() {
 	// default dsiware settings
-	//REG_MBK_1=0x8185898D;
-	//REG_MBK_2=0x8084888C;
-	//REG_MBK_3=0x9094989C;
-	//REG_MBK_4=0x8084888C;
-	//REG_MBK_5=0x9094989C;
 	
 	// WRAM-B fully mapped to arm7
 	*((vu32*)REG_MBK2)=0x8D898581;

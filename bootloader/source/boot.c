@@ -286,10 +286,38 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	return -1;
 }
 
+void initMBK() {
+	// give all DSI WRAM to arm7 at boot
+	
+	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9=0x3000000F;
+	
+	// WRAM-A fully mapped to arm7
+	*((vu32*)REG_MBK1)=0x8185898D;
+	
+	// WRAM-B fully mapped to arm7
+	*((vu32*)REG_MBK2)=0x8D898581;
+	*((vu32*)REG_MBK3)=0x9D999591;
+	
+	// WRAM-C fully mapped to arm7
+	*((vu32*)REG_MBK4)=0x8D898581;
+	*((vu32*)REG_MBK5)=0x9D999591;
+	
+	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
+	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
+	REG_MBK6=0x07C03780;
+	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK7=0x07403700;
+	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK8=0x07803740;
+}
+
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
 int main (void) {
 	nocashMessage("bootloader");
+	initMBK();
+	
 	if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
 		_io_dldi.fn_isInserted = sdmmc_inserted;
