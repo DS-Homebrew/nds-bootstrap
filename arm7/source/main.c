@@ -86,26 +86,61 @@ void initMBK() {
 	// give all DSI WRAM to arm7 at boot
 	
 	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK_9=0x3000000F;
+	REG_MBK9=0x3000000F;
 	
 	// WRAM-A fully mapped to arm7
-	REG_MBK_1=0x8185898D;
+	*((vu32*)REG_MBK1)=0x8185898D;
 	
 	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8D898581;
-	REG_MBK_3=0x9D999591;
+	*((vu32*)REG_MBK2)=0x8D898581;
+	*((vu32*)REG_MBK3)=0x9D999591;
 	
 	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8D898581;
-	REG_MBK_5=0x9D999591;
+	*((vu32*)REG_MBK4)=0x8D898581;
+	*((vu32*)REG_MBK5)=0x9D999591;
 	
 	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
 	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
-	REG_MBK_6=0x07C03780;
+	REG_MBK6=0x07C03780;
 	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK_7=0x07403700;
+	REG_MBK7=0x07403700;
 	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK_8=0x07803740;
+	REG_MBK8=0x07803740;
+}
+
+u32 dsi_powerOffSlot1() {
+	// Power Off Slot
+	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
+	if(REG_SCFG_MC&0x0C != 0x08) return 1; // exit if state<>2      
+	
+	REG_SCFG_MC = 0x0C; // set state=3 
+	while(REG_SCFG_MC&0x0C !=  0x00); // wait until state=0
+}
+
+u32 dsi_powerOnSlot1() {
+	// Power On Slot
+	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
+	if(REG_SCFG_MC&0x0C != 0x00) return 1; //  exit if state<>0
+	
+	REG_SCFG_MC = 0x04; // set state=1
+	while(REG_SCFG_MC&0x0C != 0x04); // wait until state=1
+	
+	REG_SCFG_MC = 0x08; // set state=2      
+	while(REG_SCFG_MC&0x0C != 0x08); // wait until state=2
+	
+	REG_ROMCTRL = 0x20000000; // set ROMCTRL=20000000h
+	
+	while(REG_ROMCTRL&0x8000000 != 0x8000000); // wait until ROMCTRL.bit31=1
+	
+	return 0;
+}
+
+//---------------------------------------------------------------------------------
+u32 dsi_resetSlot1() {
+//---------------------------------------------------------------------------------	
+	dsi_powerOffSlot1();
+	for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
+	dsi_powerOnSlot1();	
 }
 
 //---------------------------------------------------------------------------------

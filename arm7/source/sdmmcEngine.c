@@ -83,8 +83,6 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
     int retval = 0;
 	char buf[64];
 	
-	struct mmcdevice deviceSD =*getMMCDevice(1);
-
     getDatamsg(commandAddr, bytes, (u8*)&msg);
 
     int oldIME = enterCriticalSection();
@@ -94,13 +92,13 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
 		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_readsectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
 		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
 		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_writesectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     }
 
