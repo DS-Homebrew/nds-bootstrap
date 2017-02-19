@@ -367,43 +367,41 @@ int main (void) {
 	
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 	
-	// Patch with DLDI if desired
-	if (wantToPatchDLDI) {
-		nocashMessage("try to patch dldi");
-		wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-		if (wantToPatchDLDI) {		
-			nocashMessage("dldi patch successful");
-			// Find the DLDI reserved space in the file
-			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-			
-			int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-			if(error == ERR_NONE) {
-				nocashMessage("dldi hook Sucessfull");
-			} else {
-				nocashMessage("error during dldi hook");
-			}
-		} else {	
-			nocashMessage("dldi Patch Unsuccessful try to patch card");
-			copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
-			copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
-
-			module_params_t* params = findModuleParams(NDS_HEAD);
-			if(params)
-			{
-				ensureArm9Decompressed(NDS_HEAD, params);
-			}
-
-			patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
-			
-			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-				if(error == ERR_NONE) {
-				nocashMessage("card hook Sucessfull");
-			} else {
-				nocashMessage("error during card hook");
-			}
+	nocashMessage("try to patch dldi");
+	wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+	if (wantToPatchDLDI) {		
+		nocashMessage("dldi patch successful");
+		// Find the DLDI reserved space in the file
+		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+		
+		int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
+		if(error == ERR_NONE) {
+			nocashMessage("dldi hook Sucessfull");
+		} else {
+			nocashMessage("error during dldi hook");
 		}
-	} 
+	} else {	
+		nocashMessage("dldi Patch Unsuccessful try to patch card");
+		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
+		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
+
+		module_params_t* params = findModuleParams(NDS_HEAD);
+		if(params)
+		{
+			ensureArm9Decompressed(NDS_HEAD, params);
+		}
+
+		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
+		
+		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+			if(error == ERR_NONE) {
+			nocashMessage("card hook Sucessfull");
+		} else {
+			nocashMessage("error during card hook");
+		}
+	}
+ 
 	
 
 	// Pass command line arguments to loaded program
