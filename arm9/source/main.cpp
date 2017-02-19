@@ -105,26 +105,26 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpu
 }
 
 void getSFCG_ARM9() {
-	dbg_printf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
-	dbg_printf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
-	dbg_printf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
+	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
+	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
 void getSFCG_ARM7() {
 	
-	dbg_printf( "SCFG_ROM ARM7\n" );
+	iprintf( "SCFG_ROM ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);	
 	
 	nocashMessage("dbg_printf\n");	
 		  
-	dbg_printf( "SCFG_CLK ARM7\n" );
+	iprintf( "SCFG_CLK ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_CLK);
 	
-	dbg_printf( "SCFG_EXT ARM7\n" );
+	iprintf( "SCFG_EXT ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_EXT);
@@ -182,9 +182,7 @@ int main( int argc, char **argv) {
 			getSFCG_ARM7();		
 		}
 		
-
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",1) == 1) {			
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
 			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -195,8 +193,7 @@ int main( int argc, char **argv) {
 			for (int i=0; i<1000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
-			fclose (debugFile);
-			
+			fclose (debugFile);			
 		} else {
 			remove ("sd:/NDSBTSRP.LOG");
 		}
