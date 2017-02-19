@@ -121,59 +121,31 @@ u32 dsi_resetSlot1() {
 
 //---------------------------------------------------------------------------------
 int main(void) {
-//---------------------------------------------------------------------------------
-	nocashMessage("arm7 main");
-	
-	nocashMessage("MBK inited");
-	
+//---------------------------------------------------------------------------------	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
 	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
 	
-	nocashMessage("dldi found");
-	
 	// read User Settings from firmware
-	readUserSettings();	
-	nocashMessage("Settings inited");
-	
+	readUserSettings();		
 	irqInit();
-	nocashMessage("irq inited");
 	
 	// Start the RTC tracking IRQ
-	initClockIRQ();	
-	nocashMessage("Clock inited");
-	
+	initClockIRQ();		
 	fifoInit();	
-	nocashMessage("fifo inited");
 
 	SetYtrigger(80);	
-	//nocashMessage("Ytrigger inited");
 	
 	installSystemFIFO();		
-	nocashMessage("SystemFIFO inited");
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
 	irqSet(IRQ_IPC_SYNC, SyncHandler);
-	
-	nocashMessage("Hanler inited");
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK | IRQ_IPC_SYNC);
 	
-	nocashMessage("irq enabled");
-  
 	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
-	
-	nocashMessage("REG_IPC_SYNC enabled");
-
-	nocashMessage("waiting arm9...");
-
-	fifoWaitValue32(FIFO_USER_03);
-	if(fifoCheckValue32(FIFO_USER_04)) { dsi_resetSlot1(); }
-	fifoSendValue32(FIFO_USER_05, 1);
 
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
-	
-	nocashMessage("arm7 initOK");
 
 	// Keep the ARM7 mostly idle
 	while (1) { swiWaitForVBlank(); fifocheck(); }

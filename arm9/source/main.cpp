@@ -177,15 +177,14 @@ int main( int argc, char **argv) {
 		fifoSendValue32(FIFO_USER_06, 1);
 	}
 	
-	nocashMessage("Initializing fat...");
+	consoleDemoInit();
+	printf("Initializing fat...");
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
-			
-			consoleDemoInit();
 			
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
@@ -199,17 +198,6 @@ int main( int argc, char **argv) {
 
 		// consoleDemoInit();
 		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
-			if(REG_SCFG_MC == 0x11) { 
-				printf("Please insert a cartridge...\n");
-				do { swiWaitForVBlank(); } 
-				while (REG_SCFG_MC == 0x11);
-			}
-			fifoSendValue32(FIFO_USER_04, 1);
-		}
-
-		fifoSendValue32(FIFO_USER_03, 1);
-		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
 		
 		if (0 != argc ) {
@@ -291,8 +279,6 @@ int main( int argc, char **argv) {
 			runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
 		}		
 	} else {
-		nocashMessage("SD init failed!\n");
-		consoleDemoInit();
 		printf("SD init failed!\n");
 	}
 

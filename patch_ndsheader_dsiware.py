@@ -40,7 +40,7 @@ parser.add_argument('--digest-sector', type=file, help='dsi digest sector table'
 args = parser.parse_args()
 
 if args.mode is None:
-	args.mode = "ds"
+	args.mode = "dsi"
 
 #
 # CRC16 MODULE

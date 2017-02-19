@@ -2,6 +2,6 @@ $DEVKITARM/bin/ndstool -c bootstrap.nds -7 nds-bootstrap.arm7.elf -9 nds-bootstr
 
 $DEVKITARM/bin/dlditool dldi/dsisd.dldi bootstrap.nds
 
-python patch_ndsheader_dsiware.py --mode dsi bootstrap.nds
+python patch_ndsheader_dsiware.py bootstrap.nds
 
-./make_cia.exe --srl=bootstrap.nds
+#./make_cia --srl=bootstrap.nds
