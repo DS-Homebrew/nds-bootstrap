@@ -4,4 +4,4 @@ $DEVKITARM/bin/ndstool -c bootstrap.nds -7 nds-bootstrap.arm7.elf -9 nds-bootstr
 
 python patch_ndsheader_dsiware.py bootstrap.nds
 
-#./make_cia --srl=bootstrap.nds
+./make_cia --srl=bootstrap.nds

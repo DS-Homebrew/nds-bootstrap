@@ -15,7 +15,6 @@ install:
 
 script:
   - make
-  - bash build_cia.sh
   
 addons:
   apt:
