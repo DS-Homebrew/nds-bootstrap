@@ -30,7 +30,6 @@ redistribute it freely, subject to the following restrictions:
 #include <nds.h>
 
 #include <nds/ndstypes.h>
-#include "ntrswitch.h"
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
@@ -50,7 +49,11 @@ void myFIFOValue32Handler(u32 value,void* data)
 
 //---------------------------------------------------------------------------------
 int main(void) {
-//---------------------------------------------------------------------------------		
+//---------------------------------------------------------------------------------
+	// Switch to NTR Mode
+	REG_SCFG_ROM = 0x703;
+	REG_SCFG_EXT = 0x93A40000;
+		
 	// read User Settings from firmware
 	readUserSettings();		
 	irqInit();
@@ -73,6 +76,6 @@ int main(void) {
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiWaitForVBlank(); ntrSwitchCheck();}
+	while (1) { swiWaitForVBlank();}
 }
 

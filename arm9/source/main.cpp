@@ -161,7 +161,6 @@ int main( int argc, char **argv) {
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-	fifoSendValue32(FIFO_USER_06, 1);
 
 	initMBK();
 	

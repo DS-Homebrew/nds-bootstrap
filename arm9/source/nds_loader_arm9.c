@@ -29,10 +29,6 @@
 
 #include "load_bin.h"
 
-#ifndef _NO_BOOTSTUB_
-#include "bootstub_bin.h"
-#endif
-
 #include "nds_loader_arm9.h"
 #define LCDC_BANK_C (u16*)0x06840000
 #define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_C) + 1))
@@ -355,7 +351,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;	
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;		
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
@@ -367,7 +363,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	
 	nocashMessage("resetARM7");
 
-	resetARM7(0x06000000);
+	resetARM7(0x06000000);	
 
 	nocashMessage("swiSoftReset");
 
