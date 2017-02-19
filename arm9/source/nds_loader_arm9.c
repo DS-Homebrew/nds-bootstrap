@@ -368,9 +368,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	nocashMessage("resetARM7");
 
 	resetARM7(0x06000000);
-	
-	REG_SCFG_EXT &= 0xFFFF3FFF; // switch to 4MB mode 
-	
+
 	nocashMessage("swiSoftReset");
 
 	swiSoftReset(); 

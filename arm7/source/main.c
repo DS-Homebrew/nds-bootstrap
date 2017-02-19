@@ -30,13 +30,11 @@ redistribute it freely, subject to the following restrictions:
 #include <nds.h>
 
 #include <nds/ndstypes.h>
-
-#include "fifocheck.h"
+#include "ntrswitch.h"
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-    nocashMessage("VcountHandler");
 	inputGetAndSend();
 }
 
@@ -63,15 +61,18 @@ int main(void) {
 
 	SetYtrigger(80);	
 	
-	installSystemFIFO();			
-	
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	installSystemFIFO();		
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK);
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
+
+	fifoWaitValue32(FIFO_USER_03);	
+	fifoSendValue32(FIFO_USER_05, 1);	
+	
+	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiWaitForVBlank(); fifocheck(); }
+	while (1) { swiWaitForVBlank(); ntrSwitchCheck();}
 }
 

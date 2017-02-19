@@ -1,6 +1,6 @@
 #include <nds.h>
 
-void fifocheck (void)
+void ntrSwitchCheck (void)
 {
 	if(fifoCheckValue32(FIFO_USER_06)) {
 		REG_SCFG_ROM = 0x703;
