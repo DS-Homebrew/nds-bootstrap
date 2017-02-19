@@ -29,30 +29,18 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 #include <nds.h>
 
-// #include <maxmod7.h>
 #include <nds/ndstypes.h>
 
 #include "fifocheck.h"
-#include "sdmmcEngine.h"
-
-static u32 * wordCommandAddr;
-
-//---------------------------------------------------------------------------------
-void SyncHandler(void) {
-//---------------------------------------------------------------------------------
-    nocashMessage("SyncHandler");
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
-}
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
     nocashMessage("VcountHandler");
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
 	inputGetAndSend();
 }
 
-static void myFIFOValue32Handler(u32 value,void* data)
+void myFIFOValue32Handler(u32 value,void* data)
 {
   nocashMessage("myFIFOValue32Handler");
 
@@ -62,70 +50,9 @@ static void myFIFOValue32Handler(u32 value,void* data)
 
 }
 
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
-	const int* dataChunk = (const int*) data;
-	int searchChunk = ((const int*)search)[0];
-	u32 i;
-	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
-
-	for ( i = 0; i < dataChunkEnd; i++) {
-		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
-				return -1;
-			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
-				return i*sizeof(int);
-			}
-		}
-	}
-
-	return -1;
-}
-
-static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-
-u32 dsi_powerOffSlot1() {
-	// Power Off Slot
-	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
-	if(REG_SCFG_MC&0x0C != 0x08) return 1; // exit if state<>2      
-	
-	REG_SCFG_MC = 0x0C; // set state=3 
-	while(REG_SCFG_MC&0x0C !=  0x00); // wait until state=0
-}
-
-u32 dsi_powerOnSlot1() {
-	// Power On Slot
-	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
-	if(REG_SCFG_MC&0x0C != 0x00) return 1; //  exit if state<>0
-	
-	REG_SCFG_MC = 0x04; // set state=1
-	while(REG_SCFG_MC&0x0C != 0x04); // wait until state=1
-	
-	REG_SCFG_MC = 0x08; // set state=2      
-	while(REG_SCFG_MC&0x0C != 0x08); // wait until state=2
-	
-	REG_ROMCTRL = 0x20000000; // set ROMCTRL=20000000h
-	
-	while(REG_ROMCTRL&0x8000000 != 0x8000000); // wait until ROMCTRL.bit31=1
-	
-	return 0;
-}
-
-//---------------------------------------------------------------------------------
-u32 dsi_resetSlot1() {
-//---------------------------------------------------------------------------------	
-	dsi_powerOffSlot1();
-	for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
-	dsi_powerOnSlot1();	
-}
-
 //---------------------------------------------------------------------------------
 int main(void) {
-//---------------------------------------------------------------------------------	
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
-	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
-	
+//---------------------------------------------------------------------------------		
 	// read User Settings from firmware
 	readUserSettings();		
 	irqInit();
@@ -136,16 +63,13 @@ int main(void) {
 
 	SetYtrigger(80);	
 	
-	installSystemFIFO();		
+	installSystemFIFO();			
+	
+	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
-	irqSet(IRQ_IPC_SYNC, SyncHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK | IRQ_IPC_SYNC);
-	
-	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
-
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK);
 
 	// Keep the ARM7 mostly idle
 	while (1) { swiWaitForVBlank(); fifocheck(); }

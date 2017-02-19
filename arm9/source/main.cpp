@@ -39,7 +39,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRPCARD.LOG","a");
+	debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -116,6 +116,8 @@ void getSFCG_ARM7() {
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);	
+	
+	nocashMessage("dbg_printf\n");	
 		  
 	dbg_printf( "SCFG_CLK ARM7\n" );
 	
@@ -129,9 +131,10 @@ void getSFCG_ARM7() {
 
 }
 
-static void myFIFOValue32Handler(u32 value,void* data)
+void myFIFOValue32Handler(u32 value,void* data)
 {
-	dbg_printf( "ARM7 data %x\n", value );
+	nocashMessage("myFIFOValue32Handler\n");	
+	iprintf( "ARM7 data %x\n", value );
 }
 
 
@@ -154,34 +157,16 @@ void initMBK() {
 	REG_MBK8=0x07803740;
 }
 
-int main( int argc, char **argv) {
+int main( int argc, char **argv) {	
 	nocashMessage("arm9 main");
 
 	initMBK();
-
-	bool ntrMode = false;
-
-	// No! broke no$gba compatibility
-	//REG_SCFG_CLK = 0x85;
-
-	if (argc >= 2) {
-		if ( strcasecmp (argv[1], "NTR") == 0 ) {
-			ntrMode = true;
-		}		
-	}
-	
-	if(ntrMode) {
-		nocashMessage("ntrMode");
-		// REG_SCFG_CLK = 0x80;
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-		fifoSendValue32(FIFO_USER_06, 1);
-	}
 	
 	consoleDemoInit();
-	printf("Initializing fat...");
+	iprintf("Initializing fat...\n");
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
-		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
@@ -189,47 +174,26 @@ int main( int argc, char **argv) {
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();
-			getSFCG_ARM7();
-			
-			
-		} else {
-		
+			getSFCG_ARM7();			
 		}
 
 		// consoleDemoInit();
 		
-		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
-		
-		if (0 != argc ) {
-			dbg_printf("arguments passed\n");
-			int i;
-			for (i=0; i<argc; i++ ) {
-				if (argv[i]) dbg_printf("[%d] %s\n", i, argv[i]);
-			}
-			dbg_printf("\n");
-		} else {
-			dbg_printf("No arguments passed!\n");
-		}
-		
-		if(ntrMode) {
-			dbg_printf("NTR mode enabled\n");
-		}
-		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",1) == 1) {			
 			static FILE * debugFile;
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
 			fclose (debugFile);
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 			for (int i=0; i<1000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
 			fclose (debugFile);
 			
 		} else {
-			remove ("fat:/NDSBTSRP.LOG");
+			remove ("sd:/NDSBTSRP.LOG");
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
@@ -254,30 +218,9 @@ int main( int argc, char **argv) {
 			dbg_printf("ARM9_SCFG_EXT locked\n");
 			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
 		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
-			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
-			
-			// run an argv file
-			
-			dbg_printf("NTR MODE SWITCH\n");		
-			
-			if(!ntrMode) {
-				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
-				dbg_printf("Running %s\n", bootstrapPath.c_str());
-				
-				runFile(bootstrapPath.c_str(), savPath, arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-			} else {				
-				dbg_printf("Running %s\n", ndsPath.c_str());
-				
-				runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-			}
-		} else {
-			dbg_printf("TWL MODE enabled\n");			
-			dbg_printf("Running %s\n", ndsPath.c_str());
 					
-			runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-		}		
+		dbg_printf("Running %s\n", ndsPath.c_str());				
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
 	} else {
 		printf("SD init failed!\n");
 	}
