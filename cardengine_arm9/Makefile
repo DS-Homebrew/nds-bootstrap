@@ -34,7 +34,7 @@ CFLAGS	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99 
+CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 

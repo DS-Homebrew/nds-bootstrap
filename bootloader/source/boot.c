@@ -286,10 +286,38 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	return -1;
 }
 
+void initMBK() {
+	// give all DSI WRAM to arm7 at boot
+	
+	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9=0x3000000F;
+	
+	// WRAM-A fully mapped to arm7
+	*((vu32*)REG_MBK1)=0x8185898D;
+	
+	// WRAM-B fully mapped to arm7
+	*((vu32*)REG_MBK2)=0x8D898581;
+	*((vu32*)REG_MBK3)=0x9D999591;
+	
+	// WRAM-C fully mapped to arm7
+	*((vu32*)REG_MBK4)=0x8D898581;
+	*((vu32*)REG_MBK5)=0x9D999591;
+	
+	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
+	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
+	REG_MBK6=0x07C03780;
+	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK7=0x07403700;
+	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
+	REG_MBK8=0x07803740;
+}
+
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
 int main (void) {
 	nocashMessage("bootloader");
+	initMBK();
+	
 	if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
 		_io_dldi.fn_isInserted = sdmmc_inserted;
@@ -339,43 +367,41 @@ int main (void) {
 	
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 	
-	// Patch with DLDI if desired
-	if (wantToPatchDLDI) {
-		nocashMessage("try to patch dldi");
-		wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-		if (wantToPatchDLDI) {		
-			nocashMessage("dldi patch successful");
-			// Find the DLDI reserved space in the file
-			u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-			u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-			
-			int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-			if(error == ERR_NONE) {
-				nocashMessage("dldi hook Sucessfull");
-			} else {
-				nocashMessage("error during dldi hook");
-			}
-		} else {	
-			nocashMessage("dldi Patch Unsuccessful try to patch card");
-			copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
-			copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
-
-			module_params_t* params = findModuleParams(NDS_HEAD);
-			if(params)
-			{
-				ensureArm9Decompressed(NDS_HEAD, params);
-			}
-
-			patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
-			
-			int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-				if(error == ERR_NONE) {
-				nocashMessage("card hook Sucessfull");
-			} else {
-				nocashMessage("error during card hook");
-			}
+	nocashMessage("try to patch dldi");
+	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+	if (wantToPatchDLDI) {		
+		nocashMessage("dldi patch successful");
+		// Find the DLDI reserved space in the file
+		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+		
+		int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
+		if(error == ERR_NONE) {
+			nocashMessage("dldi hook Sucessfull");
+		} else {
+			nocashMessage("error during dldi hook");
 		}
-	} 
+	} else {	
+		nocashMessage("dldi Patch Unsuccessful try to patch card");
+		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
+		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
+
+		module_params_t* params = findModuleParams(NDS_HEAD);
+		if(params)
+		{
+			ensureArm9Decompressed(NDS_HEAD, params);
+		}
+
+		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
+		
+		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+			if(error == ERR_NONE) {
+			nocashMessage("card hook Sucessfull");
+		} else {
+			nocashMessage("error during card hook");
+		}
+	}
+ 
 	
 
 	// Pass command line arguments to loaded program

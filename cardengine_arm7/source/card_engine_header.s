@@ -156,7 +156,7 @@ cmd2:
 	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
 	@r0 dst, r1 len
 	ldr r9, cacheFlushRef
-	blx r9  			@ cache flush code
+	bx r9  			@ cache flush code
 	b 	send_cmd
 
 cmd1:	
@@ -196,7 +196,7 @@ loop_copy:
 	str     r11, [r0, #8]	@ cache page
 	
 	ldr r9, readCachedRef
-	blx r9  		
+	bx r9  		
 	
 	cmp r0,#0	
 	bne begin

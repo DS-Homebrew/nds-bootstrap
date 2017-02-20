@@ -29,10 +29,6 @@
 
 #include "load_bin.h"
 
-#ifndef _NO_BOOTSTUB_
-#include "bootstub_bin.h"
-#endif
-
 #include "nds_loader_arm9.h"
 #define LCDC_BANK_C (u16*)0x06840000
 #define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_C) + 1))
@@ -293,11 +289,6 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	// INIT_DISC = initDisc;
 	writeAddr ((data_t*) LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
 
-	if(argv[0][0]=='s' && argv[0][1]=='d') {
-		dldiPatchNds = false;
-		writeAddr ((data_t*) LCDC_BANK_C, HAVE_DSISD_OFFSET, 1);
-	}
-
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
 	writeAddr ((data_t*) LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
 	// Give arguments to loader
@@ -355,7 +346,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;	
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;		
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
@@ -367,8 +358,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	
 	nocashMessage("resetARM7");
 
-	resetARM7(0x06000000);
-	
+	resetARM7(0x06000000);	
+
 	nocashMessage("swiSoftReset");
 
 	swiSoftReset(); 
@@ -412,59 +403,7 @@ int runNdsFile (const char* filename, const char* savename,  const char* arm7Don
 	bool havedsiSD = false;
 
 	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
-	
-	//installBootStub(havedsiSD);
 
 	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, patchMpuRegion, patchMpuSize, true, true, argc, argv);
-}
-
-/*
-	b	startUp
-	
-storedFileCluster:
-	.word	0x0FFFFFFF		@ default BOOT.NDS
-initDisc:
-	.word	0x00000001		@ init the disc by default
-wantToPatchDLDI:
-	.word	0x00000001		@ by default patch the DLDI section of the loaded NDS
-@ Used for passing arguments to the loaded app
-argStart:
-	.word	_end - _start
-argSize:
-	.word	0x00000000
-dldiOffset:
-	.word	_dldi_start - _start
-dsiSD:
-	.word	0
-*/
-bool installBootStub(bool havedsiSD) {
-#ifndef _NO_BOOTSTUB_
-	nocashMessage("installBootStub");
-	extern char *fake_heap_end;
-	struct __bootstub *bootcode = (struct __bootstub *)fake_heap_end;
-
-	memcpy(fake_heap_end,bootstub_bin,bootstub_bin_size);
-	memcpy(fake_heap_end+bootstub_bin_size,load_bin,load_bin_size);
-	bool ret = false;
-
-	if( havedsiSD) {
-		ret = true;
-		u32 *bootcode = (u32*)(fake_heap_end+bootstub_bin_size);
-		bootcode[3] = 0; // don't dldi patch
-		bootcode[7] = 1; // use internal dsi SD code
-	} else {
-		ret = dldiPatchLoader((data_t*)(fake_heap_end+bootstub_bin_size), load_bin_size,false);
-	}
-	bootcode->arm9reboot = (VoidFn)(((u32)bootcode->arm9reboot)+fake_heap_end); 
-	bootcode->arm7reboot = (VoidFn)(((u32)bootcode->arm7reboot)+fake_heap_end); 
-	bootcode->bootsize = load_bin_size;
-	
-	DC_FlushAll();
-
-	return ret;
-#else
-	return true;
-#endif
-
 }
 
