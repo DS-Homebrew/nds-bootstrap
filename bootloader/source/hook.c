@@ -19,7 +19,7 @@
 #include "hook.h"
 #include "common.h"
 #include "cardengine_arm7_bin.h"
-#include "sdengine_bin.h"
+#include "dldiengine_bin.h"
 #include "fat.h"
 
 extern unsigned long cheat_engine_size;
@@ -242,7 +242,7 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
+int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* dldiengineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	
@@ -265,17 +265,17 @@ int hookNdsHomebrew (const tNDSHeader* ndsHeader, const u32* cheatData, u32* che
 		nocashMessage("ACCEL_IPC_2007_OK");
 	}
 	
-	hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	/*hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	
 	if (!hookAccel) {
 		nocashMessage("ACCEL_IPC_2010_ERR");
 	} else {
 		nocashMessage("ACCEL_IPC_2010_OK");
-	}
+	}*/
 	
-	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
+	copyLoop (dldiengineLocation, (u32*)dldiengine_bin, dldiengine_bin_size);	
 	
-	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
+	dldiengineLocation[1] = myMemUncached(wordCommandAddr);
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

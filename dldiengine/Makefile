@@ -16,7 +16,7 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET		:=	sdengine
+export TARGET		:=	dldiengine
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
@@ -38,7 +38,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-nostartfiles -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+LDFLAGS	=	-nostartfiles -T ../dldiengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:= 
 
