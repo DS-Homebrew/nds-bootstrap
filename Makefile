@@ -127,8 +127,12 @@ dist:	all
 	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 	
 $(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9 dldi/dsisd.dldi
-	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" -g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004
+	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf \
+			-b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
+			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004
 	dlditool dldi/dsisd.dldi $(TARGET).nds
+	python patch_ndsheader_dsiware.py $(CURDIR)/$(TARGET).nds
+	
 
 $(TARGET).arm7: arm7/$(TARGET).elf
 	cp arm7/$(TARGET).elf $(TARGET).arm7.elf
@@ -165,7 +169,7 @@ cardengine_arm9: data
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).arm9 data
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 data
 	@rm -fr nds-bootstrap.arm7.elf
 	@rm -fr nds-bootstrap.arm9.elf
 	@$(MAKE) -C bootloader clean
