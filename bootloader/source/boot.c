@@ -368,7 +368,7 @@ int main (void) {
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 	
 	nocashMessage("try to patch dldi");
-	wantToPatchDLDI = wantToPatchDLDI && dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	if (wantToPatchDLDI) {		
 		nocashMessage("dldi patch successful");
 		// Find the DLDI reserved space in the file

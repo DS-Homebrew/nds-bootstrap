@@ -49,15 +49,43 @@ extern vu32 words_msg;
 extern vu32* tmp_buf_addr;
 extern vu8 allocated_space;
 
+static char hexbuffer [9];
+
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+	
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
+
 void sendValue32(u32 value32) {
-	nocashMessage("sendValue32");
+	//nocashMessage("sendValue32");
+	//nocashMessage(tohex(myMemUncached(&word_command)));
 	*((vu32*)myMemUncached(&word_params)) = value32;
 	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
-	nocashMessage("sendMsg");
+	//nocashMessage("sendMsg");
 	*((vu32*)myMemUncached(&word_params)) = size;
 	for(int i=0;i<size;i++)  {
 		*((u8*)myMemUncached(&words_msg)+i) = msg[i];

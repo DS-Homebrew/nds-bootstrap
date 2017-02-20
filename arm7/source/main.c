@@ -31,10 +31,12 @@ redistribute it freely, subject to the following restrictions:
 
 #include <nds/ndstypes.h>
 
+static vu32 * wordCommandAddr;
+
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-	inputGetAndSend();
+	inputGetAndSend();	
 }
 
 void myFIFOValue32Handler(u32 value,void* data)
@@ -47,12 +49,68 @@ void myFIFOValue32Handler(u32 value,void* data)
 
 }
 
+static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+	const int* dataChunk = (const int*) data;
+	int searchChunk = ((const int*)search)[0];
+	u32 i;
+	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
+
+	for ( i = 0; i < dataChunkEnd; i++) {
+		if (dataChunk[i] == searchChunk) {
+			if ((i*sizeof(int) + searchLen) > dataLen) {
+				return -1;
+			}
+			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+				return i*sizeof(int);
+			}
+		}
+	}
+
+	return -1;
+}
+
+static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+
+static char hexbuffer [9];
+
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+	
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
+
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
 	// Switch to NTR Mode
 	REG_SCFG_ROM = 0x703;
 	REG_SCFG_EXT = 0x93A40000;
+	
+	// Find the DLDI reserved space in the file
+	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
+	if(patchOffset == -1) {
+		nocashMessage("dldi not found");
+	}
+	wordCommandAddr = myMemUncached((u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80));	
 		
 	// read User Settings from firmware
 	readUserSettings();		
@@ -69,6 +127,14 @@ int main(void) {
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
+	
+	nocashMessage("waiting dldi command");
+	//nocashMessage(tohex(wordCommandAddr));
+	// disable dldi sdmmc driver
+	while(*wordCommandAddr != (vu32)0x027FEE04){} 	
+	nocashMessage("sdmmc value received");
+	wordCommandAddr[1] = 0;
+	wordCommandAddr[0] = (vu32)0x027FEE08;
 
 	fifoWaitValue32(FIFO_USER_03);	
 	fifoSendValue32(FIFO_USER_05, 1);	
