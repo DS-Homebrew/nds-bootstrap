@@ -31,6 +31,8 @@ redistribute it freely, subject to the following restrictions:
 
 #include <nds/ndstypes.h>
 
+#include "fifocheck.h"
+
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
@@ -142,6 +144,9 @@ int main(void) {
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiWaitForVBlank();}
+	while (1) {
+		SCFGFifoCheck();
+		swiWaitForVBlank();
+	}
 }
 

@@ -161,7 +161,6 @@ int main( int argc, char **argv) {
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-
 	initMBK();
 	
 	if (fatInitDefault()) {
@@ -210,17 +209,30 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
-			REG_SCFG_CLK |= 0x1;
+			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+			if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
+				// This is nested in BOOT_CPU check as it won't make sense to enable this without TWL clock speeds being active.
+				dbg_printf("VRAM boosted\n");
+				REG_SCFG_EXT = 0x83002000;
+			} else {
+				// Do nothing for now. Default set at boot.
+			}
 		} else {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
-		
+
+		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
 			dbg_printf("ARM9_SCFG_EXT locked\n");
 			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
+			fifoSendValue32(FIFO_USER_08, 1);
 		}
-					
+		*/
+
+		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
+		fifoSendValue32(FIFO_USER_06, 1);
+	
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
 	} else {
