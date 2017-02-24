@@ -105,7 +105,7 @@ int main(void) {
 //---------------------------------------------------------------------------------
 	// Switch to NTR Mode
 	REG_SCFG_ROM = 0x703;
-	REG_SCFG_EXT = 0x93A40000;
+	REG_SCFG_EXT = 0x93A43000;
 	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
@@ -138,8 +138,8 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	fifoWaitValue32(FIFO_USER_03);	
-	fifoSendValue32(FIFO_USER_05, 1);	
+	// fifoWaitValue32(FIFO_USER_03);
+	// fifoSendValue32(FIFO_USER_05, 1);	
 	
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 
