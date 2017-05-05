@@ -86,23 +86,6 @@ exit:
 
 .pool
 
-.global fastCopy32
-.type	fastCopy32 STT_FUNC
-@ r0 : src, r1 : dst, r2 : len
-fastCopy32:
-    stmfd   sp!, {r3-r11,lr}
-	@ copy 512 bytes
-	mov     r10, r0	
-	mov     r9, r1	
-	mov     r8, r2	
-loop_fastCopy32:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_fastCopy32
-	ldmfd   sp!, {r3-r11,lr}
-    bx      lr
-
 card_engine_end:
 
 patches:
