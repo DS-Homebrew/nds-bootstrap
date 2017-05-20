@@ -39,7 +39,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRPCARD.LOG","a");
+	debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -105,83 +105,71 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpu
 }
 
 void getSFCG_ARM9() {
-	dbg_printf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
-	dbg_printf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
-	dbg_printf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
+	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
+	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
 void getSFCG_ARM7() {
 	
-	dbg_printf( "SCFG_ROM ARM7\n" );
+	iprintf( "SCFG_ROM ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);	
+	
+	nocashMessage("dbg_printf\n");	
 		  
-	dbg_printf( "SCFG_CLK ARM7\n" );
+	iprintf( "SCFG_CLK ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_CLK);
 	
-	dbg_printf( "SCFG_EXT ARM7\n" );
+	iprintf( "SCFG_EXT ARM7\n" );
 	
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");	
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_EXT);
 
 }
 
-static void myFIFOValue32Handler(u32 value,void* data)
+void myFIFOValue32Handler(u32 value,void* data)
 {
-	dbg_printf( "ARM7 data %x\n", value );
+	nocashMessage("myFIFOValue32Handler\n");	
+	iprintf( "ARM7 data %x\n", value );
 }
 
 
 void initMBK() {
 	// default dsiware settings
-	//REG_MBK_1=0x8185898D;
-	//REG_MBK_2=0x8084888C;
-	//REG_MBK_3=0x9094989C;
-	//REG_MBK_4=0x8084888C;
-	//REG_MBK_5=0x9094989C;
 	
 	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8D898581;
-	REG_MBK_3=0x9D999591;
+	*((vu32*)REG_MBK2)=0x8D898581;
+	*((vu32*)REG_MBK3)=0x9D999591;
 	
 	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8D898581;
-	REG_MBK_5=0x9D999591;
+	*((vu32*)REG_MBK4)=0x8D898581;
+	*((vu32*)REG_MBK5)=0x9D999591;
 		
 	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK_6=0x00000000;
+	REG_MBK6=0x00000000;
 	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK_7=0x07403700;
+	REG_MBK7=0x07403700;
 	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK_8=0x07803740;
+	REG_MBK8=0x07803740;
 }
 
-int main( int argc, char **argv) {
+int main( int argc, char **argv) {	
+
+	// switch to NTR mode
+	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
 	initMBK();
-
-	bool ntrMode = false;
-
-	// No! broke no$gba compatibility
-	//REG_SCFG_CLK = 0x85;
-
-	if (argc >= 2) {
-		if ( strcasecmp (argv[1], "NTR") == 0 ) {
-			ntrMode = true;
-		}		
-	}
-	
-	if(ntrMode) {
-		// REG_SCFG_CLK = 0x80;
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-		fifoSendValue32(FIFO_USER_06, 1);
-	}
 	
 	if (fatInitDefault()) {
-		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+		nocashMessage("fatInitDefault");
+		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
+		
+		// fifoSendValue32(FIFO_USER_03, 1);
+		// fifoWaitValue32(FIFO_USER_05);
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
@@ -191,58 +179,23 @@ int main( int argc, char **argv) {
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();
-			getSFCG_ARM7();
-			
-			
-		} else {
-		
-		}
-
-		// consoleDemoInit();
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
-			if(REG_SCFG_MC == 0x11) { 
-				printf("Please insert a cartridge...\n");
-				do { swiWaitForVBlank(); } 
-				while (REG_SCFG_MC == 0x11);
-			}
-			fifoSendValue32(FIFO_USER_04, 1);
-		}
-
-		fifoSendValue32(FIFO_USER_03, 1);
-		fifoWaitValue32(FIFO_USER_05);
-		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
-		
-		if (0 != argc ) {
-			dbg_printf("arguments passed\n");
-			int i;
-			for (i=0; i<argc; i++ ) {
-				if (argv[i]) dbg_printf("[%d] %s\n", i, argv[i]);
-			}
-			dbg_printf("\n");
-		} else {
-			dbg_printf("No arguments passed!\n");
+			getSFCG_ARM7();		
 		}
 		
-		if(ntrMode) {
-			dbg_printf("NTR mode enabled\n");
-		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",1) == 1) {			
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
 			fclose (debugFile);
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 			for (int i=0; i<1000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
-			fclose (debugFile);
-			
+			fclose (debugFile);			
 		} else {
-			remove ("fat:/NDSBTSRP.LOG");
+			remove ("sd:/NDSBTSRP.LOG");
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
@@ -257,40 +210,32 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
-			REG_SCFG_CLK |= 0x1;
+			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+			if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
+				// This is nested in BOOT_CPU check as it won't make sense to enable this without TWL clock speeds being active.
+				dbg_printf("VRAM boosted\n");
+				REG_SCFG_EXT = 0x83002000;
+			} else {
+				// Do nothing for now. Default set at boot.
+			}
 		} else {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
-		
+
+		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
 			dbg_printf("ARM9_SCFG_EXT locked\n");
 			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
+			fifoSendValue32(FIFO_USER_08, 1);
 		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
-			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
-			
-			// run an argv file
-			
-			dbg_printf("NTR MODE SWITCH\n");		
-			
-			if(!ntrMode) {
-				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
-				dbg_printf("Running %s\n", bootstrapPath.c_str());
-				
-				runFile(bootstrapPath.c_str(), savPath, arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-			} else {				
-				dbg_printf("Running %s\n", ndsPath.c_str());
-				
-				runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-			}
-		} else {
-			dbg_printf("TWL MODE enabled\n");			
-			dbg_printf("Running %s\n", ndsPath.c_str());
-					
-			runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);
-		}		
+		*/
+
+		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
+		fifoSendValue32(FIFO_USER_06, 1);
+	
+		dbg_printf("Running %s\n", ndsPath.c_str());				
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

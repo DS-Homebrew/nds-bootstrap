@@ -33,8 +33,6 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 
 int runNdsFile (const char* filename, const char* savename,  const char* arm7DonorPath, int patchMpuRegion, int patchMpuSize, int argc, const char** argv);
 
-bool installBootStub(bool havedsiSD);
-
 #ifdef __cplusplus
 }
 #endif

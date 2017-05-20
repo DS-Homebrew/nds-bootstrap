@@ -29,7 +29,9 @@ parser.add_argument('--title', help='Game title')
 parser.add_argument('--code', help='Game code')
 parser.add_argument('--maker', help='Maker code')
 parser.add_argument('--mode', help='target mode, default mode is ds [ds|dsi|dsinogba]')
+parser.add_argument('--arm9', type=file, help='swap the ds arm9 binary by the one provided')
 parser.add_argument('--arm7', type=file, help='swap the ds arm7 binary by the one provided')
+parser.add_argument('--arm9EntryAddress', help='arm9 ram address of the binary provided')
 parser.add_argument('--arm7EntryAddress', help='arm7 ram address of the binary provided')
 parser.add_argument('--arm9i', type=file, help='add a dsi arm9i binary to the file, not needed for homebrew so far')
 parser.add_argument('--arm7i', type=file, help='add a dsi arm7i binary to the file, not needed for homebrew so far')
@@ -38,7 +40,7 @@ parser.add_argument('--digest-sector', type=file, help='dsi digest sector table'
 args = parser.parse_args()
 
 if args.mode is None:
-	args.mode = "ds"
+	args.mode = "dsi"
 
 #
 # CRC16 MODULE
@@ -136,6 +138,14 @@ if args.verbose:
 #filew.close()
 file.close()
 
+if args.arm9 is not None:
+	arm9Fname=args.arm9.name
+	args.arm9.close()	
+	arm9File = open(arm9Fname, 'rb')
+	arm9FileSize=getSize(arm9File)
+	dataArm9=arm9File.read(arm9FileSize)
+	arm9File.close()
+
 if args.arm7 is not None:
 	arm7Fname=args.arm7.name
 	args.arm7.close()	
@@ -211,62 +221,11 @@ if srlHeader.arm7EntryAddress>0x2400000 and not args.read and args.arm7 is None:
 	print "WARNING: .nds arm7EntryAddress greater than 0x2400000 will not boot as cia"
 	print "you need to recompile or swap the arm7 binary with a precompiled one with --arm7 and --arm7EntryAddress"
 
-# Fix srlHeader
-srlHeaderPatched=srlHeader._replace(
-	secureCardControlRegSettings=	1575160,
-	normalCardControlRegSettings=	5791744,
-	internalFlag=					'\x00',
-	arm9RomOffset=					srlHeader.arm9RomOffset+0x3E00,
-	arm7RomOffset=					srlHeader.arm7RomOffset+0x3E00,
-	fntOffset=						srlHeader.fntOffset+0x4640,
-	fatOffset=						srlHeader.fatOffset+0x444C,
-	icon_bannerOffset=				srlHeader.icon_bannerOffset+0x3E00-0x200,						
-	ntrRomSize=						srlHeader.ntrRomSize+0x3E00-0x200,		
-	headerSize=						0x4000,
-	nintendoLogo= 					"$\xff\xaeQi\x9a\xa2!=\x84\x82\n\x84\xe4\t\xad\x11$\x8b\x98\xc0\x81\x7f!\xa3R\xbe\x19\x93\t\xce \x10FJJ\xf8'1\xecX\xc7\xe83\x82\xe3\xce\xbf\x85\xf4\xdf\x94\xceK\t\xc1\x94V\x8a\xc0\x13r\xa7\xfc\x9f\x84Ms\xa3\xca\x9aaX\x97\xa3'\xfc\x03\x98v#\x1d\xc7a\x03\x04\xaeV\xbf8\x84\x00@\xa7\x0e\xfd\xffR\xfe\x03o\x950\xf1\x97\xfb\xc0\x85`\xd6\x80%\xa9c\xbe\x03\x01N8\xe2\xf9\xa24\xff\xbb>\x03Dx\x00\x90\xcb\x88\x11:\x94e\xc0|c\x87\xf0<\xaf\xd6%\xe4\x8b8\n\xacr!\xd4\xf8\x07",
-	nintendoLogoCrc= 				'V\xcf',
-	secureAreaCrc=					secCrc,
-	reserved1=						'\x00'*156,
-	# better to recompile or swap the arm7 binary if this is needed
-	#arm7EntryAddress=				0x2380000,
-	#arm7RamAddress=					0x2380000,	
-	#arm7Autoload=					0x2380118,
-	#arm9EntryAddress=				0x2000000,
-	#arm9RamAddress=					0x2000000,
-	#arm9Autoload=					0x2000A60,
-	)
-
-if args.arm7 is not None:
-	if args.arm7EntryAddress is None:
-		print "WARNING : you may need to provide the ARM7 binary entry address via --arm7EntryAddress, default value 0x2380000 used"
-		args.arm7EntryAddress="0x2380000"
-	
-	srlHeaderPatched=srlHeaderPatched._replace(
-		arm7RamAddress=		int(args.arm7EntryAddress, 0),
-		arm7EntryAddress=	int(args.arm7EntryAddress, 0),
-		arm7Size=			arm7FileSize,
-		ntrRomSize=			srlHeaderPatched.ntrRomSize-srlHeader.arm7Size+arm7FileSize,
-		fntOffset=			srlHeaderPatched.fntOffset-srlHeader.arm7Size+arm7FileSize,
-		fatOffset=			srlHeaderPatched.fatOffset-srlHeader.arm7Size+arm7FileSize,
-		icon_bannerOffset=	srlHeaderPatched.icon_bannerOffset-srlHeader.arm7Size+arm7FileSize,
-		deviceCapacity=		srlHeader.deviceCapacity+1
-	)
-
 if "dsi" in args.mode :
-	srlHeaderPatched=srlHeaderPatched._replace(
-		deviceCapacity=				srlHeaderPatched.deviceCapacity+2,
+	srlHeaderPatched=srlHeader._replace(
 		dsiflags=					'\x01\x00', #disable modcrypt but enable twl
 		unitCode=					'\x03',
-		#arm7Autoload=				0,
-		#arm9Autoload=				0,
 		)
-
-if args.title is not None:
-	srlHeaderPatched=srlHeaderPatched._replace(gameTitle=args.title)
-if args.code is not None:
-	srlHeaderPatched=srlHeaderPatched._replace(gameCode=args.code)
-if args.maker is not None:
-	srlHeaderPatched=srlHeaderPatched._replace(makerCode=args.maker)
 	
 data1=pack(*[srlHeaderFormat]+srlHeaderPatched._asdict().values())
 newHdrCrc=CRC16(modbus_flag=True).calculate(data1[0:0x15E])
@@ -339,13 +298,6 @@ else:
 
 if not args.read:
 	# Fix srlTwlExtHeader
-	srlTwlExtHeader=srlTwlExtHeader._replace(
-		title_id=			srlHeaderPatched.gameCode[::-1]+"\x04\x00\x03\x00",
-		regionFlags=		'\xff\xff\xff\xff',
-		iconSize=			2112,
-		unknown1=			'\x00\x00\x01\x00',
-		reserved_flags=		0x01000000
-		)
 	if "dsi" in args.mode:
 		arm7iRomOffset=srlHeaderPatched.arm7RomOffset
 		arm9iRomOffset=srlHeaderPatched.arm9RomOffset	
@@ -376,38 +328,11 @@ if not args.read:
 			totaldsisize=arm9isize+arm7isize
 			
 		srlTwlExtHeader=srlTwlExtHeader._replace(
-			MBK_1_5_Settings= 		'\x81\x85\x89\x8d\x80\x84\x88\x8c\x90\x94\x98\x9c\x80\x84\x88\x8c\x90\x94\x98\x9c',
-			MBK_6_8_Settings_ARM7= 	'\xc07\x00\x08@7\xc0\x07\x007@\x07',
-			MBK_6_8_Settings_ARM9= 	'\x00\x00\x00\x00@7\xc0\x07\x007@\x07',
 			accessControl=			0x00000138,
-			#arm7ScfgExtMask= 		0x80044000,
 			arm7ScfgExtMask=		0x80040000,
-			#reserved_flags=		0x01000000,
-			reserved_flags=			0x00000000,
-			arm7iLoadAddress= 		0x2E80000,
-			arm7iRomOffset= 		arm7iRomOffset,
-			arm7iSize= 				arm7isize,
-			arm9iLoadAddress= 		0x2400000,
-			arm9iRomOffset= 		arm9iRomOffset,
-			arm9iSize= 				arm9isize,			
-			global_MBK_9_Setting= 	'\x0f\x00\x00\x03',	
-			iconSize=				2112,		
-			pubSaveDataSize= 		81920,
-			regionFlags=			'\xff\xff\xff\xff',	
-			title_id=				srlHeaderPatched.gameCode[::-1]+"\x04\x00\x03\x00",
-			twlRomSize=				srlHeaderPatched.ntrRomSize+totaldsisize,
-			unknown1=				'\x00\x00\x01\x00',
-			unknown2=				'\x00\x00\x00\x00|\x0f\x00\x00 \x05\x00\x00',
-			parentalControl=		'\x80'*16 
+			reserved_flags=			0x00000000
 			)
-			
-		if "dsinogba" in args.mode :
-			# Fix for no$gba 2.8d
-			srlTwlExtHeader=srlTwlExtHeader._replace(
-				arm7iLoadAddress= 		srlHeaderPatched.arm7EntryAddress,
-				arm9iLoadAddress= 		srlHeaderPatched.arm9EntryAddress
-				)
-
+				
 if args.verbose or args.read:	
 	pprint(dict(srlTwlExtHeader._asdict()))
 
@@ -435,6 +360,8 @@ else:
 	data = filer.read(3328)
 	srlSignedHeader=SrlSignedHeader._make(unpack_from(srlSignedHeaderFormat, data))
 	caddr=0x300+3328
+	filer.read(0x4000-caddr)
+	caddr=0x4000
 
 #pprint(dict(srlSignedHeader._asdict()))
 
@@ -508,42 +435,16 @@ if not args.read:
 	filew.write(data2)
 	filew.write(data3[0:0xC80])
 	filew.write('\xff'*16*8)
-	writeBlankuntilAddress(filew,0x1080,0x4000)
+	writeBlankuntilAddress(filew,0x1000,0x4000)
 	
 	if arm9Footer.nitrocode != 0xDEC00621:
 		# patch ARM9 footer 
 		skipUntilAddress(filer,filew,caddr,arm9FooterAddr)
 		filew.write(data4)
 		filer.read(12)
-		caddr=arm9FooterAddr+12
-		
-	if args.arm7 is not None:
-		skipUntilAddress(filer,filew,caddr,srlHeader.arm7RomOffset)
-		filew.write(dataArm7)
-		filer.read(srlHeader.arm7Size)
-		caddr = srlHeader.arm7RomOffset+srlHeader.arm7Size
-		
-	skipUntilAddress(filer,filew,caddr,srlHeader.icon_bannerOffset-0x200)
-	filer.read(0x200)	
+		caddr=arm9FooterAddr+12		
 	
-	caddr=srlHeader.icon_bannerOffset
-	
-	skipUntilAddress(filer,filew,caddr,srlHeader.ntrRomSize)
-	
-	if "dsi" in args.mode:
-		# add dsi specific data
-		# dixit apache : Digest Table offset first, then sector table, then Arm9i, then arm7i.
-		# digest block/sector table are not needed for homebrew
-		# Not needed for homebrew so far
-		if arm9iname is not None :
-			arm9ifile = open(arm9iname, "rb")
-			skipUntilAddress(arm9ifile,filew,0,arm9isize)
-			arm9ifile.close()
-			
-		if arm7iname is not None :
-			arm7ifile = open(arm7iname, "rb")
-			skipUntilAddress(arm7ifile,filew,0,arm7isize)
-			arm7ifile.close()
+	skipUntilAddress(filer,filew,caddr,srlTwlExtHeader.twlRomSize)
 		
 	filew.close()
 	filer.close()

@@ -68,8 +68,10 @@ void initLogging() {
 }
 
 void runCardEngineCheck (void) {
-	//dbg_printf("runCardEngineCheck\n");	
-	//nocashMessage("runCardEngineCheck");
+	//dbg_printf("runCardEngineCheck\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheck");
+	#endif	
 	
 	if(tryLockMutex()) {	
 		initLogging();

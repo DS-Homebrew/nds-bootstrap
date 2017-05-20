@@ -29,28 +29,19 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 #include <nds.h>
 
-// #include <maxmod7.h>
 #include <nds/ndstypes.h>
 
 #include "fifocheck.h"
-#include "sdmmcEngine.h"
 
-static u32 * wordCommandAddr;
-
-//---------------------------------------------------------------------------------
-void SyncHandler(void) {
-//---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
-}
+static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
-	inputGetAndSend();
+	inputGetAndSend();	
 }
 
-static void myFIFOValue32Handler(u32 value,void* data)
+void myFIFOValue32Handler(u32 value,void* data)
 {
   nocashMessage("myFIFOValue32Handler");
 
@@ -82,72 +73,80 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-void initMBK() {
-	// give all DSI WRAM to arm7 at boot
+static char hexbuffer [9];
+
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
 	
-	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK_9=0x3000000F;
-	
-	// WRAM-A fully mapped to arm7
-	REG_MBK_1=0x8185898D;
-	
-	// WRAM-B fully mapped to arm7
-	REG_MBK_2=0x8D898581;
-	REG_MBK_3=0x9D999591;
-	
-	// WRAM-C fully mapped to arm7
-	REG_MBK_4=0x8D898581;
-	REG_MBK_5=0x9D999591;
-	
-	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
-	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
-	REG_MBK_6=0x07C03780;
-	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK_7=0x07403700;
-	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK_8=0x07803740;
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
 }
 
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
-	
-	initMBK();
+	// Switch to NTR Mode
+	REG_SCFG_ROM = 0x703;
+	REG_SCFG_EXT = 0x93A43000;
 	
 	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
-	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
-	
-	irqInit();
-	fifoInit();
-
+	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
+	if(patchOffset == -1) {
+		nocashMessage("dldi not found");
+	}
+	wordCommandAddr = myMemUncached((u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80));	
+		
 	// read User Settings from firmware
-	readUserSettings();
-
+	readUserSettings();		
+	irqInit();
+	
 	// Start the RTC tracking IRQ
-	initClockIRQ();
+	initClockIRQ();		
+	fifoInit();	
 
-	// mmInstall(FIFO_MAXMOD);
-
-	SetYtrigger(80);
-
-	// installSoundFIFO();
-	installSystemFIFO();
+	SetYtrigger(80);	
+	
+	installSystemFIFO();		
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
-	irqSet(IRQ_IPC_SYNC, SyncHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK | IRQ_IPC_SYNC);
-  
-	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
+	
+	nocashMessage("waiting dldi command");
+	//nocashMessage(tohex(wordCommandAddr));
+	// disable dldi sdmmc driver
+	while(*wordCommandAddr != (vu32)0x027FEE04){} 	
+	nocashMessage("sdmmc value received");
+	wordCommandAddr[1] = 0;
+	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	fifoWaitValue32(FIFO_USER_03);
-	if(fifoCheckValue32(FIFO_USER_04)) { dsi_resetSlot1(); }
-	fifoSendValue32(FIFO_USER_05, 1);
-
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	// fifoWaitValue32(FIFO_USER_03);
+	// fifoSendValue32(FIFO_USER_05, 1);	
+	
+	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiWaitForVBlank(); fifocheck(); }
+	while (1) {
+		SCFGFifoCheck();
+		swiWaitForVBlank();
+	}
 }
 
