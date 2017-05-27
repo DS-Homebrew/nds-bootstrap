@@ -70,7 +70,7 @@ void sdmmc_controller_init();
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
-#define ENGINE_LOCATION_ARM7  	0x03780000
+#define ENGINE_LOCATION_ARM7  	0x037C0000 // WRAM-A
 #define ENGINE_LOCATION_ARM9  	0x03700000
 
 const char* bootName = "BOOT.NDS";
@@ -288,28 +288,29 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 void initMBK() {
 	// give all DSI WRAM to arm7 at boot
+	// this function have no effect on DSI with ARM7 SCFG locked
 	
 	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK9=0x3000000F;
 	
 	// WRAM-A fully mapped to arm7
-	*((vu32*)REG_MBK1)=0x8185898D;
+	*((vu32*)REG_MBK1)=0x8185898D; // same as dsiware
 	
-	// WRAM-B fully mapped to arm7
-	*((vu32*)REG_MBK2)=0x8D898581;
-	*((vu32*)REG_MBK3)=0x9D999591;
+	// WRAM-B fully mapped to arm7 // inverted order
+	*((vu32*)REG_MBK2)=0x9195999D;
+	*((vu32*)REG_MBK3)=0x8185898D;
 	
-	// WRAM-C fully mapped to arm7
-	*((vu32*)REG_MBK4)=0x8D898581;
-	*((vu32*)REG_MBK5)=0x9D999591;
+	// WRAM-C fully mapped to arm7 // inverted order
+	*((vu32*)REG_MBK4)=0x9195999D;
+	*((vu32*)REG_MBK5)=0x8185898D;
 	
-	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
-	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
-	REG_MBK6=0x07C03780;
-	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK7=0x07403700;
-	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK8=0x07803740;
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+	REG_MBK6=0x080037C0; // same as dsiware
+	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
+	REG_MBK7=0x07C03740; // same as dsiware
+	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK8=0x07403700; // same as dsiware
 }
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
