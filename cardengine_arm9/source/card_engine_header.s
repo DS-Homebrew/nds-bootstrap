@@ -82,7 +82,7 @@ card_read_arm9:
 	@ get back the WRAM C (last slot) to arm9    
 	ldr     R3,=0x4004000 	
 	MOV     R2, #0xFFFFFF80	
-	STRB    R2, [R3,#0x60]
+	STRB    R2, [R3,#0x53]
 	
 	ldr		r3, =cardRead
 	
