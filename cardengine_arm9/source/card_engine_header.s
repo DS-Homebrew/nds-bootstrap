@@ -79,10 +79,10 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r11,lr}
 		
-	@ get back the WRAM C to arm9    
+	@ get back the WRAM C (last slot) to arm9    
 	ldr     R3,=0x4004000 	
 	MOV     R2, #0xFFFFFF80	
-	STRB    R2, [R3,#0x44]
+	STRB    R2, [R3,#0x60]
 	
 	ldr		r3, =cardRead
 	
