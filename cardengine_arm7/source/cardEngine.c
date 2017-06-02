@@ -319,6 +319,16 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	return true;
 }
 
+struct fc32_chunk {
+    u32 values[8];
+};
 
+void fastCopy32 (const struct fc32_chunk *src, struct fc32_chunk *dest, u32 len) {
+    do {
+        *dest = *src;
+
+        len -= sizeof(*dest);
+    } while (len > 0);
+}
 
 
