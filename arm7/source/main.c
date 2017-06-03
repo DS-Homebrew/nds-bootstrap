@@ -101,11 +101,186 @@ char* tohex(u32 n)
 }
 
 //---------------------------------------------------------------------------------
+void NDSTouchscreenMode() {
+//---------------------------------------------------------------------------------
+	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
+	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
+	//unsigned char * *(unsigned char*)0x40001C2=	(unsigned char*)0x40001C2;
+	//unsigned char * I2C_DATA=	(unsigned char*)0x4004500;
+	//unsigned char * I2C_CNT=	(unsigned char*)0x4004501;
+
+
+	u8 volLevel;
+	
+	if(fifoCheckValue32(FIFO_USER_01)) {
+		// special setting (when found special gamecode)
+		volLevel = 0xAC;
+	} else {
+		// normal setting (for any other gamecodes)
+		volLevel = 0xA7;
+	}
+
+	volLevel += 0x13;
+
+	// Touchscr
+	readTSCReg(0);
+	writeTSCReg(0,0);
+	writeTSCReg(0x3a,0);
+	readTSCReg(0x51);
+	writeTSCReg(3,0);
+	readTSCReg(2);
+	writeTSCReg(0,0);
+	readTSCReg(0x3f);
+	writeTSCReg(0,1);
+	readTSCReg(0x38);
+	readTSCReg(0x2a);
+	readTSCReg(0x2E);
+	writeTSCReg(0,0);
+	writeTSCReg(0x52,0x80);
+	writeTSCReg(0x40,0xC);
+	writeTSCReg(0,1);
+	writeTSCReg(0x24,0xff);
+	writeTSCReg(0x25,0xff);
+	writeTSCReg(0x26,0x7f);
+	writeTSCReg(0x27,0x7f);
+	writeTSCReg(0x28,0x4a);
+	writeTSCReg(0x29,0x4a);
+	writeTSCReg(0x2a,0x10);
+	writeTSCReg(0x2b,0x10);
+	writeTSCReg(0,0);
+	writeTSCReg(0x51,0);
+	writeTSCReg(0,3);
+	readTSCReg(2);
+	writeTSCReg(2,0x98);
+	writeTSCReg(0,1);
+	writeTSCReg(0x23,0);
+	writeTSCReg(0x1f,0x14);
+	writeTSCReg(0x20,0x14);
+	writeTSCReg(0,0);
+	writeTSCReg(0x3f,0);
+	readTSCReg(0x0b);
+	writeTSCReg(0x5,0);
+	writeTSCReg(0xb,0x1);
+	writeTSCReg(0xc,0x2);
+	writeTSCReg(0x12,0x1);
+	writeTSCReg(0x13,0x2);
+	writeTSCReg(0,1);
+  writeTSCReg(0x2E,0x00);
+  writeTSCReg(0,0);
+  writeTSCReg(0x3A,0x60);
+  writeTSCReg(0x01,01);
+  writeTSCReg(0x9,0x66);
+  writeTSCReg(0,1);
+  readTSCReg(0x20);
+  writeTSCReg(0x20,0x10);
+  writeTSCReg(0,0);
+  writeTSCReg( 04,00);
+  writeTSCReg( 0x12,0x81);
+  writeTSCReg( 0x13,0x82);
+  writeTSCReg( 0x51,0x82);
+  writeTSCReg( 0x51,0x00);
+  writeTSCReg( 0x04,0x03);
+  writeTSCReg( 0x05,0xA1);
+  writeTSCReg( 0x06,0x15);
+  writeTSCReg( 0x0B,0x87);
+  writeTSCReg( 0x0C,0x83);
+  writeTSCReg( 0x12,0x87);
+  writeTSCReg( 0x13,0x83);
+  writeTSCReg(0,3);
+  readTSCReg(0x10);
+  writeTSCReg(0x10,0x08);
+  writeTSCReg(0,4);
+  writeTSCReg(0x08,0x7F);
+  writeTSCReg(0x09,0xE1);
+  writeTSCReg(0xa,0x80);
+  writeTSCReg(0xb,0x1F);
+  writeTSCReg(0xc,0x7F);
+  writeTSCReg(0xd,0xC1);
+  writeTSCReg(0,0);
+  writeTSCReg( 0x41, 0x08);
+  writeTSCReg( 0x42, 0x08);
+  writeTSCReg( 0x3A, 0x00);
+  writeTSCReg(0,4);
+  writeTSCReg(0x08,0x7F);
+  writeTSCReg(0x09,0xE1);
+  writeTSCReg(0xa,0x80);
+  writeTSCReg(0xb,0x1F);
+  writeTSCReg(0xc,0x7F);
+  writeTSCReg(0xd,0xC1);
+  writeTSCReg(0,1);
+  writeTSCReg(0x2F, 0x2B);
+  writeTSCReg(0x30, 0x40);
+  writeTSCReg(0x31, 0x40);
+  writeTSCReg(0x32, 0x60);
+  writeTSCReg(0,0);
+  readTSCReg( 0x74);
+  writeTSCReg( 0x74, 0x02);
+  readTSCReg( 0x74);
+  writeTSCReg( 0x74, 0x10);
+  readTSCReg( 0x74);
+  writeTSCReg( 0x74, 0x40);
+  writeTSCReg(0,1);
+  writeTSCReg( 0x21, 0x20);
+  writeTSCReg( 0x22, 0xF0);
+  writeTSCReg(0,0);
+  readTSCReg( 0x51);
+  readTSCReg( 0x3f);
+  writeTSCReg( 0x3f, 0xd4);
+  writeTSCReg(0,1);
+  writeTSCReg(0x23,0x44);
+  writeTSCReg(0x1F,0xD4);
+  writeTSCReg(0x28,0x4e);
+  writeTSCReg(0x29,0x4e);
+  writeTSCReg(0x24,0x9e);
+  writeTSCReg(0x24,0x9e);
+  writeTSCReg(0x20,0xD4);
+  writeTSCReg(0x2a,0x14);
+  writeTSCReg(0x2b,0x14);
+  writeTSCReg(0x26,volLevel);
+  writeTSCReg(0x27,volLevel);
+  writeTSCReg(0,0);
+  writeTSCReg(0x40,0);
+  writeTSCReg(0x3a,0x60);
+  writeTSCReg(0,1);
+  writeTSCReg(0x26,volLevel);
+  writeTSCReg(0x27,volLevel);
+  writeTSCReg(0x2e,0x03);
+  writeTSCReg(0,3);
+  writeTSCReg(3,0);
+  writeTSCReg(0,1);
+  writeTSCReg(0x21,0x20);
+  writeTSCReg(0x22,0xF0);
+  readTSCReg(0x22);
+  writeTSCReg(0x22,0xF0);
+  writeTSCReg(0,0);
+  writeTSCReg(0x52,0x80);
+  writeTSCReg(0x51,0x00);
+  writeTSCReg(0,3);
+  readTSCReg(0x02);
+  writeTSCReg(2,0x98);
+  writeTSCReg(0,0xff);
+  writeTSCReg(5,0);
+	
+	
+	
+	
+	
+	
+	
+	// Powerman
+	writePowerManagement(0x00,0x0D);
+	//*(unsigned char*)0x40001C2 = 0x80, 0x00;		// read PWR[0]   ;<-- also part of TSC !
+	//*(unsigned char*)0x40001C2 = 0x00, 0x0D;		// PWR[0]=0Dh    ;<-- also part of TSC !
+	
+
+}
+
+//---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
-	// Switch to NTR Mode
-	REG_SCFG_ROM = 0x703;
-	REG_SCFG_EXT = 0x93A43000;
+	// Switch to NTR Mode (doesn't work on DSi)
+	// REG_SCFG_ROM = 0x703;
+	// REG_SCFG_EXT = 0x93A43000;
 	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
@@ -132,6 +307,7 @@ int main(void) {
 	
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+	i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 
 	nocashMessage("waiting dldi command");
 	//nocashMessage(tohex(wordCommandAddr));
@@ -141,8 +317,15 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	// fifoWaitValue32(FIFO_USER_03);
-	// fifoSendValue32(FIFO_USER_05, 1);	
+	fifoWaitValue32(FIFO_USER_03);
+	//
+	NDSTouchscreenMode();
+
+	*(u16*)(0x4000500) = 0x807F;
+	
+	*(u16*)(0x4004700) = 0x800F;
+	//
+	fifoSendValue32(FIFO_USER_05, 1);
 	
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 

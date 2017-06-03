@@ -23,8 +23,9 @@
 #define READ_SIZE_ARM7 0x8000
 
 #define CACHE_ADRESS_START 0x03708000
+#define CACHE_ADRESS_END 0x03778000
 #define CACHE_ADRESS_SIZE 0x78000
-#define REG_MBK_CACHE_START	0x4004045
+#define REG_MBK_CACHE_START	0x4004044
 #define REG_MBK_CACHE_SIZE	15
 
 extern vu32* volatile cardStruct;
@@ -62,7 +63,7 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*0x8000);
+	return (vu32*)(CACHE_ADRESS_END-slot*0x8000);
 }
 
 void transfertToArm7(int slot) {
