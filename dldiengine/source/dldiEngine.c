@@ -102,9 +102,6 @@ void sdmmcCustomMsgHandler(int bytes) {
     sendValue32(retval);
 }
 
-bool keyPressed = false;
-int keyPressWait = 0;
-
 void runSdMmcEngineCheck (void) {
 	//dbg_printf("runSdMmcEngineCheck\n");
 
@@ -211,36 +208,6 @@ void runSdMmcEngineCheck (void) {
 			break;
 	}
 	REG_MASTER_VOLUME = volLevel;
-	
-	// Change screen backlight level, via L+R+UP or L+R+DOWN buttons.
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
-		if (!keyPressed) {
-			u8 backlightLevel = i2cReadRegister(0x4A, 0x41);
-			if (backlightLevel < 0x04) {
-				backlightLevel += 0x01;
-				i2cWriteRegister(0x4A, 0x41, backlightLevel);
-			}
-			keyPressed = true;
-		}
-	}
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN))) {
-		if (!keyPressed) {
-			u8 backlightLevel = i2cReadRegister(0x4A, 0x41);
-			if (backlightLevel > 0x00) {
-				backlightLevel -= 0x01;
-				i2cWriteRegister(0x4A, 0x41, backlightLevel);
-			}
-			keyPressed = true;
-		}
-	}
-	
-	if (keyPressed) {
-		keyPressWait += 1;
-		if (keyPressWait == 15) {
-			keyPressWait = 0;
-			keyPressed = false;
-		}
-	}
 	
 	int oldIME = enterCriticalSection();
 
