@@ -68,6 +68,36 @@ void initLogging() {
 	
 }
 
+void cardReadLED (bool on) {
+	u8 setting = i2cReadRegister(0x4A, 0x72);
+	
+	if(on) {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+		}
+	} else {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+		}
+	}
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -239,9 +269,9 @@ void runCardEngineCheck (void) {
 			dbg_hexa(marker);			
 			#endif		
 			
-			i2cWriteRegister(0x4A, 0x30, 0x13);    // When a file is loading, turn WiFi LED on
+			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
-			i2cWriteRegister(0x4A, 0x30, 0x12);    // After loading is done, turn WiFi LED off
+			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 			
 			#ifdef DEBUG		
 			dbg_printf("\nread \n");			
@@ -336,9 +366,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	i2cWriteRegister(0x4A, 0x31, 0x01);	// Turn Camera LED on
 	fileRead(dst,savFile,src,len);
-	i2cWriteRegister(0x4A, 0x31, 0x00);	// Turn Camera LED off
 	
 	return true;
 }
@@ -355,9 +383,9 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	i2cWriteRegister(0x4A, 0x31, 0x01);	// Turn Camera LED on
+	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
-	i2cWriteRegister(0x4A, 0x31, 0x00);	// Turn Camera LED off
+	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	
 	return true;
 }
@@ -374,9 +402,9 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	i2cWriteRegister(0x4A, 0x31, 0x01);	// Turn Camera LED on
+	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
-	i2cWriteRegister(0x4A, 0x31, 0x00);	// Turn Camera LED off
+	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	
 	return true;
 }
@@ -393,9 +421,9 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	//i2cWriteRegister(0x4A, 0x31, 0x01);	// Turn Camera LED on
+	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src,savFile,dst,len);
-	//i2cWriteRegister(0x4A, 0x31, 0x00);	// Turn Camera LED off
+	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
 
@@ -429,9 +457,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	i2cWriteRegister(0x4A, 0x30, 0x13);    // When a file is loading, turn WiFi LED on
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
-	i2cWriteRegister(0x4A, 0x30, 0x12);    // After loading is done, turn WiFi LED off
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
 	return true;
 }

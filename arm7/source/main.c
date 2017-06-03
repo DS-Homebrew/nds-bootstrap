@@ -31,7 +31,7 @@ redistribute it freely, subject to the following restrictions:
 
 #include <nds/ndstypes.h>
 
-#include "fifocheck.h"
+// #include "fifocheck.h"
 
 static vu32 * wordCommandAddr;
 
@@ -41,7 +41,7 @@ void VcountHandler() {
 	inputGetAndSend();	
 }
 
-void myFIFOValue32Handler(u32 value,void* data)
+/* void myFIFOValue32Handler(u32 value,void* data)
 {
   nocashMessage("myFIFOValue32Handler");
 
@@ -49,7 +49,7 @@ void myFIFOValue32Handler(u32 value,void* data)
   nocashMessage("fifoSendValue32");
   fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));	
 
-}
+} */
 
 static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
@@ -112,7 +112,7 @@ void NDSTouchscreenMode() {
 
 	u8 volLevel;
 	
-	if(fifoCheckValue32(FIFO_USER_01)) {
+	if(fifoCheckValue32(FIFO_USER_04)) {
 		// special setting (when found special gamecode)
 		volLevel = 0xAC;
 	} else {
@@ -307,7 +307,6 @@ int main(void) {
 	
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-	i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 
 	nocashMessage("waiting dldi command");
 	//nocashMessage(tohex(wordCommandAddr));
@@ -317,8 +316,17 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
+	// fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
+
 	fifoWaitValue32(FIFO_USER_03);
 	//
+	if(fifoCheckValue32(FIFO_USER_01)) {
+		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
+		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+	} else if(fifoCheckValue32(FIFO_USER_02)) {
+		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
+	}
+	
 	NDSTouchscreenMode();
 
 	*(u16*)(0x4000500) = 0x807F;
@@ -327,11 +335,9 @@ int main(void) {
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
 	
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
-
 	// Keep the ARM7 mostly idle
 	while (1) {
-		SCFGFifoCheck();
+		// SCFGFifoCheck();	// ARM7 SCFG is locked on DSi
 		swiWaitForVBlank();
 	}
 }
