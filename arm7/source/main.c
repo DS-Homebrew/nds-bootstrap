@@ -305,9 +305,6 @@ int main(void) {
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 	
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
-	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-
 	nocashMessage("waiting dldi command");
 	//nocashMessage(tohex(wordCommandAddr));
 	// disable dldi sdmmc driver
@@ -325,6 +322,11 @@ int main(void) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 	} else if(fifoCheckValue32(FIFO_USER_02)) {
 		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
+	}
+	if(fifoCheckValue32(FIFO_USER_06)) {
+		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to soft-reset to DSi Menu
+		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 	}
 	
 	NDSTouchscreenMode();

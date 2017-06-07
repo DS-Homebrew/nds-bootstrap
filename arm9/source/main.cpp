@@ -193,6 +193,10 @@ int main( int argc, char **argv) {
 				fifoSendValue32(FIFO_USER_02, 1);	// Set to use power LED (turn to purple) as card read indicator
 				break;
 		}
+		
+		if (bootstrapini.GetInt("NDS-BOOTSTRAP","SOFT_RESET",0) == 0) {
+			fifoSendValue32(FIFO_USER_06, 1);	// Set to soft-reset to DSi Menu
+		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 		
