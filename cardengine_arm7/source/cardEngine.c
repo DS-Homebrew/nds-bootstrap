@@ -22,6 +22,9 @@
 #include "debugToFile.h"
 #include "cardEngine.h"
 #include "fat.h"
+#include "i2c.h"
+
+#include "sr_data_fourswords.h"
 
 static bool initialized = false;
 static bool initializedIRQ = false;
@@ -72,6 +75,12 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
+	
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_A | KEY_B | KEY_X | KEY_Y))) {
+		memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);
+	}	
 	
 	if(tryLockMutex()) {	
 		initLogging();
