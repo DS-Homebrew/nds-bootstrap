@@ -38,8 +38,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-u8 srSetting;
-
 void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
@@ -212,14 +210,10 @@ void runCardEngineCheck (void) {
 	}
 	REG_MASTER_VOLUME = volLevel;
 	
-	srSetting = i2cReadRegister(0x4A, 0x73);
-	if (srSetting == 0x00) {
-		u8 powerButton = i2cReadRegister(0x4A, 0x10);
-		if(powerButton != 0) {
-			memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);
-		}
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_A | KEY_B | KEY_X | KEY_Y))) {
+		memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);
 	}
 	
 	if(tryLockMutex()) {	
@@ -399,7 +393,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
-	if (srSetting == 0x01) i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	
 	return true;
 }
@@ -418,7 +412,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
-	if (srSetting == 0x01) i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	
 	return true;
 }
@@ -437,7 +431,7 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src,savFile,dst,len);
-	//if (srSetting == 0x01) i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
 

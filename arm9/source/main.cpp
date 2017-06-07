@@ -194,10 +194,6 @@ int main( int argc, char **argv) {
 				break;
 		}
 		
-		if (bootstrapini.GetInt("NDS-BOOTSTRAP","SOFT_RESET",0) == 0) {
-			fifoSendValue32(FIFO_USER_06, 1);	// Set to soft-reset to DSi Menu
-		}
-
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 		
 		// adjust TSC[1:26h] and TSC[1:27h]
