@@ -161,8 +161,6 @@ int main( int argc, char **argv) {
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-
-	initMBK();
 	
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
@@ -202,7 +200,14 @@ int main( int argc, char **argv) {
 		
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");	
 		
-		std::string	arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+		bool useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);	
+
+		std::string	arm7DonorPath;	
+
+		if (useArm7Donor)
+			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+		else
+			arm7DonorPath = "";
 		
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
 		
@@ -230,10 +235,12 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_08, 1);
 		}
 		*/
-
+		
 		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
 		fifoSendValue32(FIFO_USER_06, 1);
-	
+		
+		initMBK();
+		
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
 	} else {
