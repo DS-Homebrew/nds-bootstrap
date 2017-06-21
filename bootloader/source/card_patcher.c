@@ -132,11 +132,15 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader)
 	uint32_t moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
 	if(!moduleparams)
 	{
+		moduleparams = malloc(0x100);
+		memset(moduleparams,0,0x100);
+		((module_params_t*)(moduleparams - 0x1C))->compressed_static_end = 0;
 		dbg_printf("No moduleparams?\n");
-        return 0;
+        return (module_params_t*)(moduleparams - 0x1C);
 	}
 	return (module_params_t*)(moduleparams - 0x1C);
 }
+
 
 void decompressLZ77Backwards(uint8_t* addr, size_t size)
 {
