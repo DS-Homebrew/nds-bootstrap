@@ -391,6 +391,8 @@ int main (void) {
 		if(params)
 		{
 			ensureArm9Decompressed(NDS_HEAD, params,forceDecompression);
+		}else if(forceDecompression){
+			ensureArm9Decompressed(NDS_HEAD, NULL,forceDecompression); //ignore the hackiness...
 		}
 
 		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
