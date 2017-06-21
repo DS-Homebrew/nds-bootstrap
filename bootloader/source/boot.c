@@ -86,6 +86,7 @@ extern unsigned long saveFileCluster;
 extern unsigned long donorFileCluster;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
+extern unsigned long forceDecompression;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -389,7 +390,7 @@ int main (void) {
 		module_params_t* params = findModuleParams(NDS_HEAD);
 		if(params)
 		{
-			ensureArm9Decompressed(NDS_HEAD, params);
+			ensureArm9Decompressed(NDS_HEAD, params,forceDecompression);
 		}
 
 		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);

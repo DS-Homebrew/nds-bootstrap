@@ -1,0 +1,302 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+vram             0x03700000         0x00004000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD cardEngine.o
+LOAD card_engine_header.o
+LOAD debugprint.o
+START GROUP
+LOAD c:/devkitpro/devkitarm/bin/../lib/gcc/arm-none-eabi/6.3.0\libgcc.a
+LOAD c:/devkitpro/devkitarm/bin/../lib/gcc/arm-none-eabi/6.3.0/../../../../arm-none-eabi/lib\libg.a
+LOAD c:/devkitpro/devkitarm/bin/../lib/gcc/arm-none-eabi/6.3.0/../../../../arm-none-eabi/lib\libc.a
+LOAD c:/devkitpro/devkitarm/bin/../lib/gcc/arm-none-eabi/6.3.0/../../../../arm-none-eabi/lib\libsysbase.a
+END GROUP
+                0x03700000                __vram_start = ORIGIN (vram)
+                0x03704000                __vram_top = (ORIGIN (vram) + LENGTH (vram))
+                0x03703fa0                __sp_irq = (__vram_top - 0x60)
+                0x03703ea0                __sp_svc = (__sp_irq - 0x100)
+                0x03703da0                __sp_usr = (__sp_svc - 0x100)
+                0x03703ff8                __irq_flags = (__vram_top - 0x8)
+                0x03703ffc                __irq_vector = (__vram_top - 0x4)
+
+.init           0x03700000      0x180
+                0x03700000                __text_start = .
+ *(.init)
+ .init          0x03700000      0x180 card_engine_header.o
+                0x03700000                patches_offset
+                0x0370000c                sdk_version
+                0x03700010                fileCluster
+                0x03700014                cardStruct
+                0x03700018                cacheStruct
+                0x0370001c                card_engine_start
+                0x0370001c                fastCopy32
+                0x03700044                card_engine_end
+                0x0370006c                needFlushDCCache
+                0x037000a4                readCachedRef
+                0x037000c4                cacheFlush
+                0x0370011c                DC_FlushRange
+                0x03700140                tryLockMutex
+                0x0370016c                unLockMutex
+                0x03700180                . = ALIGN (0x4)
+
+.plt
+ *(.plt)
+
+.text           0x03700180      0x498
+ *(.text*)
+ .text          0x03700180      0x3f4 cardEngine.o
+                0x03700180                allocateCacheSlot
+                0x037001c4                getSlotForSector
+                0x037001fc                getCacheAddress
+                0x0370020c                transfertToArm7
+                0x03700224                transfertToArm9
+                0x0370023c                updateDescriptor
+                0x0370025c                cardRead
+ .text          0x03700574        0x0 card_engine_header.o
+ .text          0x03700574       0xa4 debugprint.o
+                0x03700574                nocashWrite
+                0x03700576                nocashMessage
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7)
+ .glue_7        0x03700618        0x0 linker stubs
+ *(.glue_7t)
+ .glue_7t       0x03700618        0x0 linker stubs
+                0x03700618                . = ALIGN (0x4)
+
+.vfp11_veneer   0x03700618        0x0
+ .vfp11_veneer  0x03700618        0x0 linker stubs
+
+.v4_bx          0x03700618        0x0
+ .v4_bx         0x03700618        0x0 linker stubs
+
+.iplt           0x03700618        0x0
+ .iplt          0x03700618        0x0 cardEngine.o
+
+.rel.dyn        0x03700618        0x0
+ .rel.iplt      0x03700618        0x0 cardEngine.o
+ .rel.got       0x03700618        0x0 cardEngine.o
+
+.fini
+ *(.fini)
+                0x03700618                __text_end = .
+
+.rodata         0x03700618        0x0
+ *(.rodata)
+ *all.rodata*(*)
+ *(.roda)
+ *(.rodata.*)
+ *(.gnu.linkonce.r*)
+                0x03700618                . = ALIGN (0x4)
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+                0x03700618                __exidx_start = .
+
+.ARM.exidx
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0x03700618                __exidx_end = .
+                0x03700618                . = ALIGN (0x4)
+                [!provide]                PROVIDE (__preinit_array_start, .)
+
+.preinit_array
+ *(.preinit_array)
+                [!provide]                PROVIDE (__preinit_array_end, .)
+                [!provide]                PROVIDE (__init_array_start, .)
+
+.init_array
+ *(.init_array)
+                [!provide]                PROVIDE (__init_array_end, .)
+                [!provide]                PROVIDE (__fini_array_start, .)
+
+.fini_array
+ *(.fini_array)
+                [!provide]                PROVIDE (__fini_array_end, .)
+
+.ctors          0x03700618        0x0
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *(.ctors)
+                0x03700618                . = ALIGN (0x4)
+
+.dtors          0x03700618        0x0
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *(.dtors)
+                0x03700618                . = ALIGN (0x4)
+
+.eh_frame       0x03700618        0x0
+ *(.eh_frame)
+                0x03700618                . = ALIGN (0x4)
+
+.gcc_except_table
+                0x03700618        0x0
+ *(.gcc_except_table)
+                0x03700618                . = ALIGN (0x4)
+
+.jcr
+ *(.jcr)
+
+.got            0x03700618       0x1c
+ *(.got.plt)
+ .got.plt       0x03700618        0xc cardEngine.o
+                0x03700618                _GLOBAL_OFFSET_TABLE_
+ *(.got)
+ .got           0x03700624       0x10 cardEngine.o
+
+.vram           0x03700634        0x0
+                0x03700634                __vram_start = ABSOLUTE (.)
+ *(.vram)
+ *vram.*(.text)
+                0x03700634                . = ALIGN (0x4)
+                0x03700634                __vram_end = ABSOLUTE (.)
+
+.data           0x03700634        0x4
+                0x03700634                __data_start = ABSOLUTE (.)
+ *(.data)
+ .data          0x03700634        0x4 cardEngine.o
+                0x03700634                sharedAddr
+ .data          0x03700638        0x0 card_engine_header.o
+ .data          0x03700638        0x0 debugprint.o
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0x03700638                . = ALIGN (0x4)
+                0x03700638                __data_end = ABSOLUTE (.)
+
+.igot.plt       0x03700638        0x0
+ .igot.plt      0x03700638        0x0 cardEngine.o
+
+.bss            0x03700638       0x7c
+                0x03700638                __bss_start = ABSOLUTE (.)
+                0x03700638                __bss_start__ = ABSOLUTE (.)
+ *(.dynbss)
+ *(.gnu.linkonce.b*)
+ *(.bss*)
+ .bss           0x03700638       0x7c cardEngine.o
+ .bss           0x037006b4        0x0 card_engine_header.o
+ .bss           0x037006b4        0x0 debugprint.o
+ *(COMMON)
+                0x037006b4                . = ALIGN (0x4)
+                0x037006b4                __bss_end = .
+                0x037006b4                __bss_end__ = .
+                0x037006b4                _end = .
+                0x037006b4                __end__ = .
+                [!provide]                PROVIDE (end, _end)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x22
+ *(.comment)
+ .comment       0x00000000       0x22 cardEngine.o
+                                 0x23 (size before relaxing)
+
+.ARM.attributes
+                0x00000000       0x2a
+ .ARM.attributes
+                0x00000000       0x2c cardEngine.o
+ .ARM.attributes
+                0x0000002c       0x16 card_engine_header.o
+ .ARM.attributes
+                0x00000042       0x14 debugprint.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x60
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 cardEngine.o
+ .debug_aranges
+                0x00000020       0x20 card_engine_header.o
+ .debug_aranges
+                0x00000040       0x20 debugprint.o
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000     0x1a62
+ *(.debug_info)
+ .debug_info    0x00000000     0x18be cardEngine.o
+ .debug_info    0x000018be       0xd6 card_engine_header.o
+ .debug_info    0x00001994       0xce debugprint.o
+
+.debug_abbrev   0x00000000      0x3d9
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x3b1 cardEngine.o
+ .debug_abbrev  0x000003b1       0x14 card_engine_header.o
+ .debug_abbrev  0x000003c5       0x14 debugprint.o
+
+.debug_line     0x00000000      0x513
+ *(.debug_line)
+ .debug_line    0x00000000      0x38c cardEngine.o
+ .debug_line    0x0000038c       0xe5 card_engine_header.o
+ .debug_line    0x00000471       0xa2 debugprint.o
+
+.debug_frame    0x00000000       0xac
+ *(.debug_frame)
+ .debug_frame   0x00000000       0xac cardEngine.o
+
+.debug_str      0x00000000      0xdf2
+ *(.debug_str)
+ .debug_str     0x00000000      0xdf2 cardEngine.o
+                                0xeb0 (size before relaxing)
+
+.debug_loc      0x00000000      0x40b
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x40b cardEngine.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x00080000        0x0
+                0x00080000                _stack = .
+ *(.stack)
+OUTPUT(c:/Users/stoke/OneDrive/Documents/GitHub/nds-bootstrap/cardengine_arm9/../data/cardengine_arm9.elf elf32-littlearm)
+
+.debug_ranges   0x00000000       0x50
+ .debug_ranges  0x00000000       0x50 cardEngine.o

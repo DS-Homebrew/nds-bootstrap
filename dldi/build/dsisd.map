@@ -1,0 +1,429 @@
+Archive member included to satisfy reference by file (symbol)
+
+c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                              sdmmc.o (swiDelay)
+c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+                              iointerface.o (nocashMessage)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ddmem            0xbf800000         0x00002000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD iointerface.o
+LOAD memcpy.o
+LOAD sdmmc.o
+LOAD dldi_header.o
+LOAD mpu_setup.o
+LOAD c:/devkitPro/libnds/lib\libnds9.a
+                0x03fffff8                __irq_flags = 0x3fffff8
+                0x03ffffc0                __irq_flagsaux = 0x3ffffc0
+                0x03fffffc                __irq_vector = 0x3fffffc
+
+.init           0xbf800000       0x98
+                0xbf800000                __text_start = .
+ *(.init)
+ .init          0xbf800000       0x98 dldi_header.o
+                0xbf80000f                allocated_space
+                0xbf80005c                tmp_buf_addr
+                0xbf800080                word_command
+                0xbf800084                word_params
+                0xbf800088                words_msg
+                0xbf800098                _start
+                0xbf800098                . = ALIGN (0x4)
+
+.text           0xbf8000a0     0x1128
+ *(.text.*)
+ .text.swiDelay
+                0xbf8000a0        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000a0                swiDelay
+ .text.swiSleep
+                0xbf8000a4        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000a4                swiSleep
+ .text.swiChangeSoundBias
+                0xbf8000a8        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000a8                swiChangeSoundBias
+ .text.swiDivide
+                0xbf8000ac        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000ac                swiDivide
+ .text.swiRemainder
+                0xbf8000b0        0x8 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000b0                swiRemainder
+ .text.swiDivMod
+                0xbf8000b8        0xc c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000b8                swiDivMod
+ .text.swiCopy  0xbf8000c4        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000c4                swiCopy
+ .text.swiFastCopy
+                0xbf8000c8        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000c8                swiFastCopy
+ .text.swiSqrt  0xbf8000cc        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000cc                swiSqrt
+ .text.swiCRC16
+                0xbf8000d0        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000d0                swiCRC16
+ .text.swiIsDebugger
+                0xbf8000d4        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000d4                swiIsDebugger
+ .text.swiUnpackBits
+                0xbf8000d8        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000d8                swiUnpackBits
+ .text.swiDecompressLZSSWram
+                0xbf8000dc        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000dc                swiDecompressLZSSWram
+ .text.swiDecompressLZSSVramNTR
+                0xbf8000e0        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000e0                swiDecompressLZSSVramNTR
+ .text.swiDecompressLZSSVramTWL
+                0xbf8000e4        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000e4                swiDecompressLZSSVramTWL
+ .text.swiDecompressHuffman
+                0xbf8000e8        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000e8                swiDecompressHuffman
+ .text.swiDecompressRLEWram
+                0xbf8000ec        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000ec                swiDecompressRLEWram
+ .text.swiDecompressRLEVram
+                0xbf8000f0        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000f0                swiDecompressRLEVram
+ .text.swiWaitForIRQ
+                0xbf8000f4        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000f4                swiWaitForIRQ
+ .text.swiDecodeDelta8
+                0xbf8000f8        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000f8                swiDecodeDelta8
+ .text.swiDecodeDelta16
+                0xbf8000fc        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf8000fc                swiDecodeDelta16
+ .text.swiSetHaltCR
+                0xbf800100        0x4 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+                0xbf800100                swiSetHaltCR
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+                0xbf800104                __glue_start = ABSOLUTE (.)
+ *(.glue_7)
+ .glue_7        0xbf800104        0x0 linker stubs
+ *(.glue_7t)
+ .glue_7t       0xbf800104        0x0 linker stubs
+                0xbf800104                __glue_end = ABSOLUTE (.)
+                0xbf800104                . = ALIGN (0x4)
+ .text          0xbf800104      0x620 iointerface.o
+                0xbf800104                tohex
+                0xbf80017c                sendValue32
+                0xbf8001e4                sendMsg
+                0xbf800288                waitValue32
+                0xbf8002d8                getValue32
+                0xbf800314                goodOldCopy32
+                0xbf800348                sd_Startup
+                0xbf800394                sd_IsInserted
+                0xbf80039c                sd_ReadSectors
+                0xbf8004b8                sd_WriteSectors
+                0xbf8005cc                isArm7
+                0xbf8005e4                sd_ClearStatus
+                0xbf8005ec                sd_Shutdown
+                0xbf8005f4                startup
+                0xbf800630                isInserted
+                0xbf80064c                clearStatus
+                0xbf800668                readSectors
+                0xbf8006b8                writeSectors
+                0xbf800708                shutdown
+ .text          0xbf800724      0x104 memcpy.o
+                0xbf800724                memcpy
+ .text          0xbf800828      0x898 sdmmc.o
+                0xbf800828                geterror
+                0xbf800838                setTarget
+                0xbf8008bc                sdmmc_send_command
+                0xbf800b64                sdmmc_cardinserted
+                0xbf800b6c                sdmmc_controller_init
+                0xbf800cc0                sdmmc_sdcard_init
+                0xbf800f90                sdmmc_sdcard_readsectors
+                0xbf801028                sdmmc_sdcard_writesectors
+ .text          0xbf8010c0        0x0 dldi_header.o
+ .text          0xbf8010c0       0x40 mpu_setup.o
+                0xbf8010d0                myMemCached
+                0xbf8010e8                myMemUncached
+ .text          0xbf801100        0x0 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .text          0xbf801100       0xa4 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+                0xbf801100                nocashWrite
+                0xbf801102                nocashMessage
+ *fill*         0xbf8011a4        0x4 ff
+ .text.__stub   0xbf8011a8       0x18 linker stubs
+
+.vfp11_veneer   0xbf8011c8        0x0
+ .vfp11_veneer  0xbf8011c8        0x0 linker stubs
+
+.v4_bx          0xbf8011c8        0x0
+ .v4_bx         0xbf8011c8        0x0 linker stubs
+
+.iplt           0xbf8011c8        0x0
+ .iplt          0xbf8011c8        0x0 iointerface.o
+
+.fini           0xbf8011c8        0x0
+ *(.fini)
+                0xbf8011c8                . = ALIGN (0x4)
+                0xbf8011c8                __text_end = .
+
+.rodata         0xbf8011c8       0x80
+ *(.rodata)
+ *all.rodata*(*)
+ *(.roda)
+ *(.rodata.*)
+ .rodata.str1.4
+                0xbf8011c8       0x80 iointerface.o
+                                 0x7d (size before relaxing)
+ *(.gnu.linkonce.r*)
+                0xbf801248                . = ALIGN (0x4)
+
+.rel.dyn        0xbf801248        0x0
+ .rel.iplt      0xbf801248        0x0 iointerface.o
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+                0xbf801248                __exidx_start = .
+
+.ARM.exidx
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0xbf801248                __exidx_end = .
+                0xbf801248                . = ALIGN (0x4)
+                [!provide]                PROVIDE (__preinit_array_start, .)
+
+.preinit_array
+ *(.preinit_array)
+                [!provide]                PROVIDE (__preinit_array_end, .)
+                [!provide]                PROVIDE (__init_array_start, .)
+
+.init_array
+ *(.init_array)
+                [!provide]                PROVIDE (__init_array_end, .)
+                [!provide]                PROVIDE (__fini_array_start, .)
+
+.fini_array
+ *(.fini_array)
+                [!provide]                PROVIDE (__fini_array_end, .)
+
+.ctors          0xbf801248        0x0
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *(.ctors)
+                0xbf801248                . = ALIGN (0x4)
+
+.dtors          0xbf801248        0x0
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *(.dtors)
+                0xbf801248                . = ALIGN (0x4)
+
+.eh_frame       0xbf801248        0x0
+ *(.eh_frame)
+                0xbf801248                . = ALIGN (0x4)
+
+.gcc_except_table
+                0xbf801248        0x0
+ *(.gcc_except_table)
+                0xbf801248                . = ALIGN (0x4)
+
+.jcr
+ *(.jcr)
+                0xbf801248                __got_start = .
+
+.got            0xbf801248       0x20
+ *(.got.plt)
+ .got.plt       0xbf801248        0xc iointerface.o
+                0xbf801248                _GLOBAL_OFFSET_TABLE_
+ *(.got)
+ .got           0xbf801254       0x14 iointerface.o
+ *(.rel.got)
+ .rel.got       0xbf801268        0x0 iointerface.o
+                0xbf801268                __got_end = .
+
+.data           0xbf801268        0x0
+                0xbf801268                __data_start = ABSOLUTE (.)
+ *(.data)
+ .data          0xbf801268        0x0 iointerface.o
+ .data          0xbf801268        0x0 memcpy.o
+ .data          0xbf801268        0x0 sdmmc.o
+ .data          0xbf801268        0x0 dldi_header.o
+ .data          0xbf801268        0x0 mpu_setup.o
+ .data          0xbf801268        0x0 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .data          0xbf801268        0x0 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0xbf801268                . = ALIGN (0x4)
+                0xbf801268                __data_end = ABSOLUTE (.)
+                0xbf801268                __data_end = .
+
+.igot.plt       0xbf801268        0x0
+ .igot.plt      0xbf801268        0x0 iointerface.o
+
+.bss            0xbf801268       0x48
+                0xbf801268                __bss_start = ABSOLUTE (.)
+                0xbf801268                __bss_start__ = ABSOLUTE (.)
+ *(.dynbss)
+ *(.gnu.linkonce.b*)
+ *(.bss*)
+ .bss           0xbf801268        0x9 iointerface.o
+ .bss           0xbf801271        0x0 memcpy.o
+ *fill*         0xbf801271        0x3 
+ .bss           0xbf801274       0x3c sdmmc.o
+ .bss           0xbf8012b0        0x0 dldi_header.o
+ .bss           0xbf8012b0        0x0 mpu_setup.o
+ .bss           0xbf8012b0        0x0 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .bss           0xbf8012b0        0x0 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+ *(COMMON)
+                0xbf8012b0                . = ALIGN (0x4)
+                0xbf8012b0                __bss_end = .
+                0xbf8012b0                __bss_end__ = .
+                0xbf8012b0                _end = .
+                0xbf8012b0                __end__ = .
+                [!provide]                PROVIDE (end, _end)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x22
+ *(.comment)
+ .comment       0x00000000       0x22 iointerface.o
+                                 0x23 (size before relaxing)
+ .comment       0x00000022       0x23 memcpy.o
+ .comment       0x00000022       0x23 sdmmc.o
+
+.ARM.attributes
+                0x00000000       0x2b
+ .ARM.attributes
+                0x00000000       0x2c iointerface.o
+ .ARM.attributes
+                0x0000002c       0x2c memcpy.o
+ .ARM.attributes
+                0x00000058       0x2c sdmmc.o
+ .ARM.attributes
+                0x00000084       0x14 dldi_header.o
+ .ARM.attributes
+                0x00000098       0x21 mpu_setup.o
+ .ARM.attributes
+                0x000000b9       0x1b c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .ARM.attributes
+                0x000000d4       0x1b c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0x168
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 iointerface.o
+ .debug_aranges
+                0x00000020       0x20 memcpy.o
+ .debug_aranges
+                0x00000040       0x20 sdmmc.o
+ .debug_aranges
+                0x00000060       0x20 mpu_setup.o
+ .debug_aranges
+                0x00000080       0xc8 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_aranges
+                0x00000148       0x20 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000     0x38a8
+ *(.debug_info)
+ .debug_info    0x00000000     0x1025 iointerface.o
+ .debug_info    0x00001025       0xe3 memcpy.o
+ .debug_info    0x00001108     0x256a sdmmc.o
+ .debug_info    0x00003672       0xb7 mpu_setup.o
+ .debug_info    0x00003729       0xbd c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_info    0x000037e6       0xc2 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+
+.debug_abbrev   0x00000000      0x92f
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x3ba iointerface.o
+ .debug_abbrev  0x000003ba       0x9c memcpy.o
+ .debug_abbrev  0x00000456      0x49f sdmmc.o
+ .debug_abbrev  0x000008f5       0x14 mpu_setup.o
+ .debug_abbrev  0x00000909       0x12 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_abbrev  0x0000091b       0x14 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+
+.debug_line     0x00000000      0xcf5
+ *(.debug_line)
+ .debug_line    0x00000000      0x312 iointerface.o
+ .debug_line    0x00000312       0xa7 memcpy.o
+ .debug_line    0x000003b9      0x625 sdmmc.o
+ .debug_line    0x000009de       0x89 mpu_setup.o
+ .debug_line    0x00000a67      0x1ee c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_line    0x00000c55       0xa0 c:/devkitPro/libnds/lib\libnds9.a(debugprint.o)
+
+.debug_frame    0x00000000      0x3bc
+ *(.debug_frame)
+ .debug_frame   0x00000000      0x25c iointerface.o
+ .debug_frame   0x0000025c       0x38 memcpy.o
+ .debug_frame   0x00000294      0x128 sdmmc.o
+
+.debug_str      0x00000000     0x1480
+ *(.debug_str)
+ .debug_str     0x00000000      0x811 iointerface.o
+                                0x89a (size before relaxing)
+ .debug_str     0x00000811       0x73 memcpy.o
+                                0x100 (size before relaxing)
+ .debug_str     0x00000884      0xbfc sdmmc.o
+                                0xf01 (size before relaxing)
+
+.debug_loc      0x00000000     0x1415
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x698 iointerface.o
+ .debug_loc     0x00000698      0x184 memcpy.o
+ .debug_loc     0x0000081c      0xbf9 sdmmc.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x00080000        0x0
+                0x00080000                _stack = .
+ *(.stack)
+OUTPUT(c:/Users/stoke/OneDrive/Documents/GitHub/nds-bootstrap/dldi/dsisd.elf elf32-littlearm)
+
+.debug_ranges   0x00000000      0x378
+ .debug_ranges  0x00000000       0x48 iointerface.o
+ .debug_ranges  0x00000048      0x270 sdmmc.o
+ .debug_ranges  0x000002b8       0xc0 c:/devkitPro/libnds/lib\libnds9.a(biosCalls.o)

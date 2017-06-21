@@ -33,6 +33,7 @@
 	.global donorFileCluster
 	.global patchMpuRegion
 	.global patchMpuSize
+	.global forceDecompression
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -63,7 +64,9 @@ donorFileCluster:
 patchMpuRegion:
 	.word	0x00000000		
 patchMpuSize:
-	.word	0x00000000		
+	.word	0x00000000
+forceDecompression:
+	.word	0x00000000	
 
 startUp:
 	mov	r0, #0x04000000

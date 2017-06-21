@@ -174,9 +174,11 @@ void decompressLZ77Backwards(uint8_t* addr, size_t size)
 	}
 }
 
-void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams)
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams,bool force)
 {
-	if(!moduleParams->compressed_static_end)
+	if(force){ //mainly to be used with romhacks, which might not have valid data to determine compression
+		decompressLZ77Backwards((uint8_t*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+	}else if(!moduleParams->compressed_static_end)
 	{
 		dbg_printf("This rom is not compressed\n");
 		return; //not compressed

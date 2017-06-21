@@ -62,7 +62,7 @@ typedef struct
 
 
 module_params_t* findModuleParams(const tNDSHeader* ndsHeader);
-void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams,bool force);
 /*-------------------------------------------------------------------------
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
