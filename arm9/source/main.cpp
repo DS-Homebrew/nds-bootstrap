@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpuRegion, u32 patchMpuSize, u32 forceDecompression) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpuRegion, u32 patchMpuSize) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -98,7 +98,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 patchMpu
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), strdup(arm7DonorPath.c_str()), patchMpuRegion, patchMpuSize, forceDecompression, argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), strdup(arm7DonorPath.c_str()), patchMpuRegion, patchMpuSize, argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -222,8 +222,6 @@ int main( int argc, char **argv) {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
-		
-		
 
 		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
@@ -237,7 +235,7 @@ int main( int argc, char **argv) {
 		fifoSendValue32(FIFO_USER_06, 1);
 	
 		dbg_printf("Running %s\n", ndsPath.c_str());				
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize,bootstrapini.GetInt("NDS-BOOTSTRAP","FORCE_DECOMPRESS",0));	
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
