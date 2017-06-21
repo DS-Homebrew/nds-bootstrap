@@ -115,7 +115,7 @@ void getSFCG_ARM9() {
 	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
-void getSFCG_ARM7() {
+/* void getSFCG_ARM7() {
 	
 	iprintf( "SCFG_ROM ARM7\n" );
 
@@ -140,7 +140,7 @@ void myFIFOValue32Handler(u32 value,void* data)
 {
 	nocashMessage("myFIFOValue32Handler\n");	
 	iprintf( "ARM7 data %x\n", value );
-}
+} */
 
 
 void initMBK() {
@@ -166,8 +166,6 @@ int main( int argc, char **argv) {
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-
-	initMBK();
 	
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
@@ -178,10 +176,22 @@ int main( int argc, char **argv) {
 			
 			consoleDemoInit();
 			
-			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			// fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
 			getSFCG_ARM9();
-			getSFCG_ARM7();		
+			// getSFCG_ARM7();		// Returns 0 on DSi
+		}
+		
+		switch(bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1)) {
+			case 0:
+			default:
+				break;
+			case 1:
+				fifoSendValue32(FIFO_USER_01, 1);	// Set to use WiFi LED as card read indicator
+				break;
+			case 2:
+				fifoSendValue32(FIFO_USER_02, 1);	// Set to use power LED (turn to purple) as card read indicator
+				break;
 		}
 		
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
@@ -254,7 +264,7 @@ int main( int argc, char **argv) {
 			|| strcmp(game_TID, "YNZ") == 0	// NTR-YNZE Petz - Dogz Fashion
 			)
 		{
-			fifoSendValue32(FIFO_USER_01, 1);	// special setting (when found special gamecode)
+			fifoSendValue32(FIFO_USER_04, 1);	// special setting (when found special gamecode)
 		}
 
 		fifoSendValue32(FIFO_USER_03, 1);
@@ -279,7 +289,14 @@ int main( int argc, char **argv) {
 
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");	
 		
-		std::string	arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+		bool useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);	
+
+		std::string	arm7DonorPath;	
+
+		if (useArm7Donor)
+			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+		else
+			arm7DonorPath = "";
 		
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
 		
@@ -309,7 +326,9 @@ int main( int argc, char **argv) {
 		*/
 
 		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
-		fifoSendValue32(FIFO_USER_06, 1);
+		// fifoSendValue32(FIFO_USER_06, 1);	// ARM7 SCFG is locked on DSi
+		
+		initMBK();
 	
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), patchMpuRegion, patchMpuSize);	
