@@ -84,6 +84,7 @@ extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
 extern unsigned long donorFileCluster;
+extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 
@@ -386,7 +387,7 @@ int main (void) {
 		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
 		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
 
-		module_params_t* params = findModuleParams(NDS_HEAD);
+		module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
 		if(params)
 		{
 			ensureArm9Decompressed(NDS_HEAD, params);
