@@ -29,9 +29,9 @@ extern "C" {
 
 #define LOAD_DEFAULT_NDS 0
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32  patchMpuRegion, u32 patchMpuSize, bool initDisc, bool dldiPatchNds, int argc, const char** argv);
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, bool initDisc, bool dldiPatchNds, int argc, const char** argv);
 
-int runNdsFile (const char* filename, const char* savename,  const char* arm7DonorPath, int patchMpuRegion, int patchMpuSize, int argc, const char** argv);
+int runNdsFile (const char* filename, const char* savename,  const char* arm7DonorPath, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int argc, const char** argv);
 
 #ifdef __cplusplus
 }

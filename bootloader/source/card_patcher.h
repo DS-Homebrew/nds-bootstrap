@@ -61,7 +61,7 @@ typedef struct
 } module_params_t;
 
 
-module_params_t* findModuleParams(const tNDSHeader* ndsHeader);
+module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer);
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame
