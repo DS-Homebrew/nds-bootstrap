@@ -31,6 +31,7 @@
 	.global dsiSD
 	.global saveFileCluster
 	.global donorFileCluster
+	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
 @---------------------------------------------------------------------------------
@@ -60,6 +61,8 @@ saveFileCluster:
 	.word	0x00000000		@ .sav file
 donorFileCluster:
 	.word	0x00000000		@ donor .nds file
+donorSdkVer:
+	.word	0x00000000		@ donor SDK version
 patchMpuRegion:
 	.word	0x00000000		
 patchMpuSize:

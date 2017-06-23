@@ -126,21 +126,40 @@ u32 generateA7Instr(int arg1, int arg2) {
     return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-module_params_t* findModuleParams(const tNDSHeader* ndsHeader)
+module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 {
 	dbg_printf("Looking for moduleparams\n");
 	uint32_t moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
 	if(!moduleparams)
 	{
+		dbg_printf("No moduleparams?\n");
 		moduleparams = malloc(0x100);
 		memset(moduleparams,0,0x100);
 		((module_params_t*)(moduleparams - 0x1C))->compressed_static_end = 0;
-		dbg_printf("No moduleparams?\n");
-        return (module_params_t*)(moduleparams - 0x1C);
+		switch(donorSdkVer) {
+			case 0:
+			default:
+				break;
+			case 1:
+				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x1000500;
+				break;
+			case 2:
+				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x2001000;
+				break;
+			case 3:
+				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x3002001;
+				break;
+			case 4:
+				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x4002001;
+				break;
+			case 5:
+				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x5003001;
+				break;
+		}
+		return (module_params_t*)(moduleparams - 0x1C);
 	}
 	return (module_params_t*)(moduleparams - 0x1C);
 }
-
 
 void decompressLZ77Backwards(uint8_t* addr, size_t size)
 {
