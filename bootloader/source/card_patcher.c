@@ -156,7 +156,6 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x5003001;
 				break;
 		}
-		return (module_params_t*)(moduleparams - 0x1C);
 	}
 	return (module_params_t*)(moduleparams - 0x1C);
 }
