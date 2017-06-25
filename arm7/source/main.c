@@ -33,12 +33,29 @@ redistribute it freely, subject to the following restrictions:
 
 #include "fifocheck.h"
 
+#include "sr_data_twloader.h"
+
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
-void VcountHandler() {
+void VcountHandler_norm() {
 //---------------------------------------------------------------------------------
 	inputGetAndSend();	
+}
+
+int timeoutTimer = 0;
+
+//---------------------------------------------------------------------------------
+void VcountHandler_timeout() {
+//---------------------------------------------------------------------------------
+	inputGetAndSend();	
+	
+	timeoutTimer += 1;
+	if (timeoutTimer == 90) {
+		memcpy((u32*)0x02000000,sr_data_twloader,0x560);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, show an error screen
+	}
 }
 
 void myFIFOValue32Handler(u32 value,void* data)
@@ -125,7 +142,7 @@ int main(void) {
 	
 	installSystemFIFO();		
 	
-	irqSet(IRQ_VCOUNT, VcountHandler);
+	irqSet(IRQ_VCOUNT, VcountHandler_timeout);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 	
@@ -140,8 +157,24 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	// fifoWaitValue32(FIFO_USER_03);
-	// fifoSendValue32(FIFO_USER_05, 1);	
+	fifoWaitValue32(FIFO_USER_03);
+	//
+	irqSet(IRQ_VCOUNT, VcountHandler_norm);
+	
+	if(fifoCheckValue32(FIFO_DSWIFI)) {
+		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
+		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+	} else if(fifoCheckValue32(FIFO_MAXMOD)) {
+		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
+	} else if(fifoCheckValue32(FIFO_USER_08)) {
+		i2cWriteRegister(0x4A, 0x72, 0x03);		// Set to use Camera LED as card read indicator
+	}
+
+	if(fifoCheckValue32(FIFO_USER_04)) {
+		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run comptibility check
+	}
+	//
+	fifoSendValue32(FIFO_USER_05, 1);	
 	
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
 

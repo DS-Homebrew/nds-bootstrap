@@ -24,7 +24,7 @@
 #include "fat.h"
 #include "i2c.h"
 
-#include "sr_data_fourswords.h"
+#include "sr_data_twloader.h"	// For showing an error screen
 
 static bool initialized = false;
 static bool initializedIRQ = false;
@@ -37,6 +37,9 @@ extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
+
+static bool timeoutRun = true;
+static int timeoutTimer = 0;
 
 void initLogging() {
 	if(!initialized) {
@@ -70,6 +73,42 @@ void initLogging() {
 	
 }
 
+void cardReadLED (bool on) {
+	u8 setting = i2cReadRegister(0x4A, 0x72);
+	
+	if(on) {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+			case 0x03:
+				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+				break;
+		}
+	} else {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+			case 0x03:
+				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+				break;
+		}
+	}
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -77,11 +116,25 @@ void runCardEngineCheck (void) {
 	#endif	
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_A | KEY_B | KEY_X | KEY_Y))) {
-		memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
+		memcpy((u32*)0x02000000,sr_data_twloader,0x560);
 		i2cWriteRegister(0x4a,0x70,0x01);
 		i2cWriteRegister(0x4a,0x11,0x01);
 	}	
 	
+	if (timeoutRun) {
+		u8 setting = i2cReadRegister(0x4A, 0x73);
+		if (setting == 0x01) {
+			timeoutTimer += 1;
+			if (timeoutTimer == 60*2) {
+				memcpy((u32*)0x02000000,sr_data_twloader,0x560);
+				i2cWriteRegister(0x4a,0x70,0x01);
+				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
+			}
+		} else {
+			timeoutRun = false;
+		}
+	}
+
 	if(tryLockMutex()) {	
 		initLogging();
 		
@@ -143,7 +196,11 @@ void runCardEngineCheck (void) {
 			dbg_hexa(marker);			
 			#endif		
 			
+			timeoutRun = false;	// If card read received, do not show error screen
+
+			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
+			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 			
 			#ifdef DEBUG		
 			dbg_printf("\nread \n");			
@@ -329,7 +386,11 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+	timeoutRun = false;	// Do not show error screen
+
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
 	return true;
 }
