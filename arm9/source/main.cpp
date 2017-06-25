@@ -166,9 +166,6 @@ int main( int argc, char **argv) {
 		nocashMessage("fatInitDefault");
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 		
-		// fifoSendValue32(FIFO_USER_03, 1);
-		// fifoWaitValue32(FIFO_USER_05);
-
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
 			
@@ -179,6 +176,31 @@ int main( int argc, char **argv) {
 			getSFCG_ARM9();
 			getSFCG_ARM7();		
 		}
+		
+		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
+		switch(romread_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				dbg_printf("Using WiFi LED\n");
+				fifoSendValue32(FIFO_DSWIFI, 1);	// Set to use WiFi LED as card read indicator
+				break;
+			case 2:
+				dbg_printf("Using Power LED\n");
+				fifoSendValue32(FIFO_MAXMOD, 1);	// Set to use power LED (turn to purple) as card read indicator
+				break;
+			case 3:
+				dbg_printf("Using Camera LED\n");
+				fifoSendValue32(FIFO_USER_08, 1);	// Set to use Camera LED as card read indicator
+				break;
+		}
+
+		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
+		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
+
+		fifoSendValue32(FIFO_USER_03, 1);
+		fifoWaitValue32(FIFO_USER_05);
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
