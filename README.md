@@ -25,6 +25,6 @@ Option available in the ini :
 - RESETSLOT1 : 1 to reset the slot 1 before launching the .nds, could be useful for some homebrew (recommended value : 0)
 - LOCK_ARM9_SCFG_EXT : 1 to lock the arm9 SCFG_EXT avoiding conflict with recent libnds (recommended value : 1)
 
-I recommand to use a frontend menu to avoid manual ini file modification :
-- TWLoader (https://github.com/Robz8/TWLoader)
-- nds-hb-menu (https://github.com/ahezard/nds-hb-menu/releases)
+We strongly recommend to use a frontend menu to avoid manual ini file modification :
+- [TWLoader](https://github.com/Robz8/TWLoader)
+- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases) (Not supported)
