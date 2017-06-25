@@ -163,7 +163,7 @@ void initMBK() {
 }
 
 int main( int argc, char **argv) {	
-
+	
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	
@@ -182,18 +182,27 @@ int main( int argc, char **argv) {
 			// getSFCG_ARM7();		// Returns 0 on DSi
 		}
 		
-		switch(bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1)) {
+		fifoSendValue32(FIFO_USER_08, 1);	// Stop time-out timer
+		
+		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
+		switch(romread_LED) {
 			case 0:
 			default:
 				break;
 			case 1:
-				fifoSendValue32(FIFO_USER_01, 1);	// Set to use WiFi LED as card read indicator
+				dbg_printf("Using WiFi LED\n");
+				fifoSendValue32(FIFO_DSWIFI, 1);	// Set to use WiFi LED as card read indicator
 				break;
 			case 2:
-				fifoSendValue32(FIFO_USER_02, 1);	// Set to use power LED (turn to purple) as card read indicator
+				dbg_printf("Using Power LED\n");
+				fifoSendValue32(FIFO_USER_01, 1);	// Set to use power LED (turn to purple) as card read indicator
+				break;
+			case 3:
+				dbg_printf("Using Camera LED\n");
+				fifoSendValue32(FIFO_USER_02, 1);	// Set to use Camera LED as card read indicator
 				break;
 		}
-		
+
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
 		
 		// adjust TSC[1:26h] and TSC[1:27h]
@@ -264,8 +273,11 @@ int main( int argc, char **argv) {
 			|| strcmp(game_TID, "YNZ") == 0	// NTR-YNZE Petz - Dogz Fashion
 			)
 		{
-			fifoSendValue32(FIFO_USER_04, 1);	// special setting (when found special gamecode)
+			fifoSendValue32(FIFO_MAXMOD, 1);	// special setting (when found special gamecode)
 		}
+
+		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
+		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
@@ -329,7 +341,7 @@ int main( int argc, char **argv) {
 		// fifoSendValue32(FIFO_USER_06, 1);	// ARM7 SCFG is locked on DSi
 		
 		initMBK();
-	
+		
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
 	} else {

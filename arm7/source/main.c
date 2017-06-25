@@ -33,12 +33,33 @@ redistribute it freely, subject to the following restrictions:
 
 // #include "fifocheck.h"
 
+#include "sr_data_error.h"
+
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
-void VcountHandler() {
+void VcountHandler_norm() {
 //---------------------------------------------------------------------------------
 	inputGetAndSend();	
+}
+
+int timeoutTimer = 0;
+
+//---------------------------------------------------------------------------------
+void VcountHandler_timeout() {
+//---------------------------------------------------------------------------------
+	inputGetAndSend();	
+	
+	if(!fifoCheckValue32(FIFO_USER_08)) {
+		timeoutTimer += 1;
+		if (timeoutTimer == 90) {
+			memcpy((u32*)0x02000000,sr_data_error,0x560);
+			i2cWriteRegister(0x4a,0x70,0x01);
+			i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, show an error screen
+		}
+	} else {
+		irqSet(IRQ_VCOUNT, VcountHandler_norm);
+	}
 }
 
 /* void myFIFOValue32Handler(u32 value,void* data)
@@ -112,7 +133,7 @@ void NDSTouchscreenMode() {
 
 	u8 volLevel;
 	
-	if(fifoCheckValue32(FIFO_USER_04)) {
+	if(fifoCheckValue32(FIFO_MAXMOD)) {
 		// special setting (when found special gamecode)
 		volLevel = 0xAC;
 	} else {
@@ -300,7 +321,7 @@ int main(void) {
 	
 	installSystemFIFO();		
 	
-	irqSet(IRQ_VCOUNT, VcountHandler);
+	irqSet(IRQ_VCOUNT, VcountHandler_timeout);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 	
@@ -319,13 +340,19 @@ int main(void) {
 
 	fifoWaitValue32(FIFO_USER_03);
 	//
-	if(fifoCheckValue32(FIFO_USER_01)) {
+	if(fifoCheckValue32(FIFO_DSWIFI)) {
 		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-	} else if(fifoCheckValue32(FIFO_USER_02)) {
+	} else if(fifoCheckValue32(FIFO_USER_01)) {
 		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
+	} else if(fifoCheckValue32(FIFO_USER_02)) {
+		i2cWriteRegister(0x4A, 0x72, 0x03);		// Set to use Camera LED as card read indicator
 	}
-	
+
+	if(fifoCheckValue32(FIFO_USER_04)) {
+		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run comptibility check
+	}
+
 	NDSTouchscreenMode();
 
 	*(u16*)(0x4000500) = 0x807F;
