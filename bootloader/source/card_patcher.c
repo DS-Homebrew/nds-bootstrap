@@ -59,7 +59,8 @@ u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00
    
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
-u32 cardReadDmaEndSignature[3]   = {0x01FF8000,0x000001FF,0x027FFE60};     
+u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
+u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
   
  
 
@@ -321,8 +322,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
-        getOffset(cardReadEndOffset, 0x00100000,//ndsHeader->arm9binarySize,
-              (u32*)cardReadDmaEndSignature, 3, 1);
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+              (u32*)cardReadDmaEndSignature, 2, 1);
     if (!cardReadDmaEndOffset) {
         dbg_printf("Card read dma end not found\n");
     } else {
@@ -339,6 +340,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 					  (u32*)cardReadDmaStartSignatureAlt, 1, -1);			
 			if (!cardReadDmaOffset) {
 				dbg_printf("Card read dma start alt not found\n");
+			}
+		}
+		if (!cardReadDmaOffset) {
+			//dbg_printf("Card read dma start not found\n");
+			cardReadDmaOffset =   
+				getOffset((u32*)cardReadDmaEndOffset, -0x200,
+					  (u32*)cardReadDmaStartSignatureAlt2, 1, -1);			
+			if (!cardReadDmaOffset) {
+				dbg_printf("Card read dma start alt2 not found\n");
 			}
 		}		
 	}    
