@@ -341,6 +341,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			if (!cardReadDmaOffset) {
 				dbg_printf("Card read dma start alt not found\n");
 			}
+		}
+		if (!cardReadDmaOffset) {
+			//dbg_printf("Card read dma start not found\n");
+			cardReadDmaOffset =   
+				getOffset((u32*)cardReadDmaEndOffset, -0x200,
+					  (u32*)cardReadDmaStartSignatureAlt2, 1, -1);			
+			if (!cardReadDmaOffset) {
+				dbg_printf("Card read dma start alt2 not found\n");
+			}
 		}		
 	}    
 		
