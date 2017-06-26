@@ -138,6 +138,14 @@ void myFIFOValue32Handler(u32 value,void* data)
 }
 
 
+bool isMounted;
+
+void InitSD(){
+	fatUnmount("sd:/");
+	__io_dsisd.shutdown();
+	isMounted = fatMountSimple("sd", &__io_dsisd);  
+}
+
 void initMBK() {
 	// default dsiware settings
 	
@@ -157,13 +165,31 @@ void initMBK() {
 	REG_MBK8=0x07803740;
 }
 
+int reinittimer = 0;
+bool run_reinittimer = true;
+//---------------------------------------------------------------------------------
+void VcountHandler() {
+//---------------------------------------------------------------------------------
+	if (run_reinittimer) {
+		reinittimer++;
+		if (reinittimer == 90) {
+			InitSD();	// Re-init SD if fatInit is looping
+		}
+	}
+}
+
 int main( int argc, char **argv) {	
+
+	irqSet(IRQ_VCOUNT, VcountHandler);
+
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	
-	if (fatInitDefault()) {
-		nocashMessage("fatInitDefault");
+	InitSD();
+	if (isMounted) {
+		nocashMessage("isMounted");
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 		
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
@@ -177,6 +203,10 @@ int main( int argc, char **argv) {
 			getSFCG_ARM7();		
 		}
 		
+		fatInitDefault();
+		nocashMessage("fatInitDefault");
+		run_reinittimer = false;
+
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
 		switch(romread_LED) {
 			case 0:
@@ -266,6 +296,7 @@ int main( int argc, char **argv) {
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
 	} else {
+		run_reinittimer = false;
 		consoleDemoInit();
 		printf("SD init failed!\n");
 	}
