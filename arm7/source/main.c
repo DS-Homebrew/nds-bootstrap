@@ -33,33 +33,12 @@ redistribute it freely, subject to the following restrictions:
 
 // #include "fifocheck.h"
 
-#include "sr_data_error.h"
-
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
-void VcountHandler_norm() {
+void VcountHandler() {
 //---------------------------------------------------------------------------------
 	inputGetAndSend();	
-}
-
-int timeoutTimer = 0;
-
-//---------------------------------------------------------------------------------
-void VcountHandler_timeout() {
-//---------------------------------------------------------------------------------
-	inputGetAndSend();	
-	
-	if(!fifoCheckValue32(FIFO_USER_08)) {
-		timeoutTimer += 1;
-		if (timeoutTimer == 90) {
-			memcpy((u32*)0x02000000,sr_data_error,0x560);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, show an error screen
-		}
-	} else {
-		irqSet(IRQ_VCOUNT, VcountHandler_norm);
-	}
 }
 
 /* void myFIFOValue32Handler(u32 value,void* data)
@@ -321,7 +300,7 @@ int main(void) {
 	
 	installSystemFIFO();		
 	
-	irqSet(IRQ_VCOUNT, VcountHandler_timeout);
+	irqSet(IRQ_VCOUNT, VcountHandler);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 	
