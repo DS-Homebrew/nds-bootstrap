@@ -9,8 +9,7 @@ The dldi system is formed of 4 parts :
 - an arm7 patcher : this is integrated in the bootloader, it modify some part of the homebrew binary (the current method target "interruptDispatcher.s" of libnds) in order to get a "parralel" exection flow to the homebrew. This can be done via the interrupt mechanism and was inspired by NitroHax code (even if the NitroHax original method only work with retail games). This is the smallest part but it is quite hard to implements and debug. Most compatibility improvement in the future should come from this part.
 - a arm7 "sdengine" binary : this part is like "server" that waits command from the dldi driver (the "client"), process them (read the sd) then reply to arm9 (put the sd piece of data needed in the main memory and put some special value in memory to notify arm9 that the work is done).
 
-The compatibility is not yet perfect. Here is the compatibility list : 
-https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing
+The compatibility is not yet perfect. [Here is a compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing)
 
 It can be configured via the file _nds/nds-bootstrap.ini
 
@@ -25,6 +24,7 @@ Option available in the ini :
 - RESETSLOT1 : 1 to reset the slot 1 before launching the .nds, could be useful for some homebrew (recommended value : 0)
 - LOCK_ARM9_SCFG_EXT : 1 to lock the arm9 SCFG_EXT avoiding conflict with recent libnds (recommended value : 1)
 
-I recommand to use a frontend menu to avoid manual ini file modification :
-- TWLoader (https://github.com/Robz8/TWLoader)
-- nds-hb-menu (https://github.com/ahezard/nds-hb-menu/releases)
+We strongly recommend to use a frontend menu to avoid manual ini file modification :
+- [TWLoader](https://github.com/Robz8/TWLoader): A 3DS Frontend that tries to bring back the old DSI menu
+- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases): Another 3DS Frontend, but more designed like the DSI Homebrew selection
+- [SRLoader](https://github.com/Robz8/SRLoader): A port of the famous TWLoader to the DSI.
