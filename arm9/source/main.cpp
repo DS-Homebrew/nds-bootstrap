@@ -372,6 +372,7 @@ int main( int argc, char **argv) {
 		dbg_printf("Running %s\n", ndsPath.c_str());				
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
 	} else {
+		run_reinittimer = false;
 		consoleDemoInit();
 		printf("SD init failed!\n");
 	}
