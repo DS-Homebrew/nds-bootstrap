@@ -73,42 +73,6 @@ void initLogging() {
 	
 }
 
-void cardReadLED (bool on) {
-	u8 setting = i2cReadRegister(0x4A, 0x72);
-	
-	if(on) {
-		switch(setting) {
-			case 0x00:
-			default:
-				break;
-			case 0x01:
-				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-				break;
-			case 0x02:
-				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-				break;
-			case 0x03:
-				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-				break;
-		}
-	} else {
-		switch(setting) {
-			case 0x00:
-			default:
-				break;
-			case 0x01:
-				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-				break;
-			case 0x02:
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-				break;
-			case 0x03:
-				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-				break;
-		}
-	}
-}
-
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -198,9 +162,7 @@ void runCardEngineCheck (void) {
 			
 			timeoutRun = false;	// If card read received, do not show error screen
 
-			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
-			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 			
 			#ifdef DEBUG		
 			dbg_printf("\nread \n");			
@@ -388,9 +350,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	
 	timeoutRun = false;	// Do not show error screen
 
-	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
-	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
 	return true;
 }
