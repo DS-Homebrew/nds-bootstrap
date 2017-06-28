@@ -104,6 +104,16 @@ void cardReadLED (bool on) {
 	}
 }
 
+void asyncCardReadLED (bool on) {
+	u8 setting = i2cReadRegister(0x4A, 0x72);
+	
+	if(on && setting != 0) {
+		i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+	} else if(setting != 0) {
+		i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+	}
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -341,9 +351,9 @@ void runCardEngineCheck (void) {
 			
 			timeoutRun = false;	// If card read received, do not show error screen
 
-			i2cWriteRegister(0x4A, 0x31, 0x01);    // When a file is loading, turn on LED for async card read indicator
+			asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
 			fileRead(dst,romFile,src,len);
-			i2cWriteRegister(0x4A, 0x31, 0x00);    // After loading is done, turn off LED for async card read indicator
+			asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 			
 			#ifdef DEBUG		
 			dbg_printf("\nread \n");			
