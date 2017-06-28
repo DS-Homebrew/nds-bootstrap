@@ -225,10 +225,6 @@ int main( int argc, char **argv) {
 				dbg_printf("Using Power LED\n");
 				fifoSendValue32(FIFO_USER_01, 1);	// Set to use power LED (turn to purple) as card read indicator
 				break;
-			case 3:
-				dbg_printf("Using Camera LED\n");
-				fifoSendValue32(FIFO_USER_02, 1);	// Set to use Camera LED as card read indicator
-				break;
 		}
 		
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");

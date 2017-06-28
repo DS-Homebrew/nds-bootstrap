@@ -324,8 +324,6 @@ int main(void) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 	} else if(fifoCheckValue32(FIFO_USER_01)) {
 		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
-	} else if(fifoCheckValue32(FIFO_USER_02)) {
-		i2cWriteRegister(0x4A, 0x72, 0x03);		// Set to use Camera LED as card read indicator
 	}
 
 	if(fifoCheckValue32(FIFO_USER_04)) {
