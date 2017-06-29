@@ -323,7 +323,7 @@ void runCardEngineCheck (void) {
 			*(vu32*)(0x027FFB14) = 0;		
 		}
 
-		if(*(vu32*)(0x027FFB18) == (vu32)0x020ff800)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
 		{			
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
@@ -364,7 +364,7 @@ void runCardEngineCheck (void) {
 			}			
 			#endif	
 			
-			*(vu32*)(0x027FFB18) = 0;	
+			*(vu32*)(0x027FFB14) = 0;	
 		}
 		unlockMutex();
 	}
