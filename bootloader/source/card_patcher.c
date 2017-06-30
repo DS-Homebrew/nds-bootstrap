@@ -542,6 +542,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	if(cardReadCachedOffset==0x020777F0){
 		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS fix.
+	}else if(cardReadCachedOffset==0x021240E8){
+		cardReadCachedOffset = 0x0211E1A8; //ACWW fix.
+		cardIdStartOffset = 0x02123FF0; //ACWW fix part2.
 	}else{
 		*((u32*)patches[8]) = cardReadCachedOffset;
 	}
