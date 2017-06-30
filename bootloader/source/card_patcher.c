@@ -363,8 +363,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			  
 	if(!cardIdEndOffset){
 		cardIdEndOffset =  
-        getOffset((u32*)cardReadEndOffset+0x10, ndsHeader->arm9binarySize,
-              (u32*)a9cardIdSignature, 2, -1);
+        getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+              (u32*)a9cardIdSignature, 2, 1);
 	}
     if (!cardIdEndOffset) {
         dbg_printf("Card id end not found\n");
