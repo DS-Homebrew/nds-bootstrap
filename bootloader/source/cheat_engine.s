@@ -27,8 +27,8 @@ cheat_engine_size:
 
 intr_orig_return_offset:
 	.word	intr_orig_return - cheat_engine_start
-	
-	
+
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 cheat_engine_start:
@@ -49,20 +49,20 @@ code_handler_start:
 
 @ increment counter
 	ldrh	r0, counter_value
-	add		r0, r0, #1				
+	add		r0, r0, #1
 	strh	r0, counter_value
 
 @	r0-r3 are generic registers for the code processor to use
 @	0xCF000000 0x00000000 indicates the end of the code list
 @	r12 points to the next code to load
-	
+
 	adr		r12,	cheat_data
-	
+
 main_loop:
 	ldmia	r12!,	{r10, r11}		@ load a code
 	cmp 	r10,	#0xCF000000
 	beq		exit
-	
+
 	mov		r0,		r10, lsr #28
 	cmp		r0,		#0xE
 	beq		patch_code
@@ -70,11 +70,11 @@ main_loop:
 	beq		dx_codes
 	cmp		r0,		#0xC
 	beq		type_c
-	
+
 @ check execution status
 	tst		r8,		#0x00000001
 	bne		main_loop
-	
+
 @ check code group
 	cmp		r0,		#0x3
 	blt		raw_write
@@ -89,7 +89,7 @@ main_loop:
 counter_value:
 	.word	0x00000000
 
-	
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ type 0-2 
 
@@ -100,7 +100,7 @@ raw_write:
 	streqh	r11, [r10, r9]		@ type 1
 	strgtb	r11, [r10, r9]		@ type 2
 	b		main_loop
-	
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ type 3-6 
 @ r0 still contains the code type
@@ -119,7 +119,7 @@ if_32bit:
 	blt		if_32bit_bcc
 	beq		if_32bit_beq
 	@ fall through to if_32bit_bne
-	
+
 @ type 6
 if_32bit_bne:
 	cmp		r11, r1
@@ -160,7 +160,7 @@ if_16bit_mask:
 	mov		r3, r11, lsl #16	@ compare data
 	mov		r3, r3, lsr #16
 	bic		r1, r1, r2		@ clear any bit that is set in the mask
-	
+
 	mov		r8, r8, lsl #1	@ push execution status
 	cmp		r0, #0x7
 	beq		if_16bit_bhi
@@ -168,7 +168,7 @@ if_16bit_mask:
 	blt		if_16bit_bcc
 	beq		if_16bit_beq
 	@ fall through to if_16bit_bne
-	
+
 @ type A
 if_16bit_bne:
 	cmp		r3, r1
@@ -211,10 +211,10 @@ type_c:
 	beq		exec_remote_function
 	cmp		r0,  #0xC2
 	beq		exec_custom_function
-	
+
 	tst		r8,		#0x00000001		@ make sure execution is enabled
 	bne		main_loop
-	
+
 	cmp		r0,  #0xC0
 	beq		loop_start
 	cmp		r0,	 #0xC5
@@ -232,7 +232,7 @@ loop_start:
 	mov		r6, r11		@ loop repeat amount
 	mov		r7, r12		@ loop start
 	b		main_loop
-	
+
 exec_remote_function:
 	ldmia	r12,	{r0, r1, r2, r3}	@ load arguments
 	and		r10, r10, #0x00000007
@@ -242,7 +242,7 @@ exec_remote_function:
 	stmdb	sp!,	{r12}
 	adr		lr,	exec_function_return
 	bx		r11
-	
+
 exec_custom_function:
 	and		r0, r10, #0x00000001	@ thumb mode?
 	add		r0, r0, r12				@ custom function location
@@ -256,7 +256,7 @@ exec_custom_function:
 exec_function_return:
 	ldmia	sp!,	{r12}
 	b		align_cheat_list
-	
+
 
 execution_counter:
 	ldr		r0, counter_value		@ we only need the low 16 bits but counter_value is out of immediate range for ldrh
@@ -280,12 +280,12 @@ dx_codes:
 	bgt		end_loop_clear
 	beq		end_loop_no_clear
 	@ fall through to end_if
-	
+
 @ type D0
-end_if:	
+end_if:
 	mov		r8,	r8, lsr #1		@ pop exec status
 	b		main_loop
-	
+
 @ type D2
 end_loop_clear:
 	mov		r8, r4				@ restore the old execution status
@@ -316,7 +316,7 @@ dx_conditional_exec:
 
 	cmp		r0, #0xD6
 	bcs		dx_write
-	
+
 	cmp		r0, #0xD4
 @ type D3 - Offset Set
 	movlt	r9, r11
@@ -324,11 +324,11 @@ dx_conditional_exec:
 @ type D5 - Dx Data set
 	movgt	r5, r11
 	b		main_loop
-	
+
 dx_write:
 	cmp		r0, #0xD9
 	bcs		dx_load
-	
+
 	cmp		r0, #0xD7
 @ type D6 - Dx Data write 32 bits
 	strlt	r5, [r11, r9]
@@ -344,7 +344,7 @@ dx_write:
 dx_load:
 	cmp		r0, #0xDC
 	bcs		dx_offset_add_addr
-	
+
 	cmp		r0, #0xDA
 @ type D9 - Dx Data load 32 bits
 	ldrlt	r5, [r11, r9]
@@ -353,7 +353,7 @@ dx_load:
 @ type DB - Dx Data load 8 bits
 	ldrgtb	r5, [r11, r9]
 	b		main_loop
-	
+
 @ type DC
 dx_offset_add_addr:
 	add		r9, r9, r11
@@ -375,21 +375,21 @@ dx_data_op:
 @ type D4000003 - xor
 	eoreq	r5, r5, r11
 	ble		main_loop
-	
+
 	cmp		r0, #0x05
 @ type D4000004 - lsl
 	movlt	r5, r5, lsl r11
 @ type D4000005 - lsr
 	moveq	r5, r5, lsr r11
 	ble		main_loop
-	
+
 	cmp		r0, #0x07
 @ type D4000006 - ror
 	movlt	r5, r5, ror r11
 @ type D4000007 - asr
 	moveq	r5, r5, asr r11
 	ble		main_loop
-	
+
 	cmp		r0, #0x09
 @ type D4000008 - mul
 	mullt	r5, r11, r5
@@ -405,7 +405,7 @@ patch_code:
 	tst		r8,		#0x00000001
 	addne	r12, r12, r11			@ skip the data section
 	bne		align_cheat_list
-	
+
 	bic		r10, r10, #0xf0000000	@ destination address
 	add		r10, r10, r9			@ add offset to dest
 	@ r11 is bytes remaining
@@ -418,7 +418,7 @@ patch_code_word_loop:
 	str		r1, [r10], #4
 	sub		r11, r11, #4
 	b		patch_code_word_loop
-	
+
 patch_code_byte_loop:
 	cmp		r11, #1
 	blt		align_cheat_list		@ patch_code_end
@@ -440,7 +440,7 @@ mem_copy_code:
 	bic		r10, r10, #0xf0000000	@ destination address
 	@ r11 is bytes remaining
 	mov		r2, r9					@ source address
-	
+
 mem_copy_code_word_loop:
 	cmp		r11, #4
 	blt		mem_copy_code_byte_loop
@@ -448,7 +448,7 @@ mem_copy_code_word_loop:
 	str		r1, [r10], #4
 	sub		r11, r11, #4
 	b		mem_copy_code_word_loop
-	
+
 mem_copy_code_byte_loop:
 	cmp		r11, #1
 	blt		main_loop				@ mem_copy_code_end
@@ -456,11 +456,11 @@ mem_copy_code_byte_loop:
 	strb	r1, [r10], #1
 	sub		r11, r11, #1
 	b		mem_copy_code_byte_loop
-	
+
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-exit:	
+exit:
 	ldmia	sp!,	{r0-r12} 
 	ldmia	sp!,	{lr}
 	bx		lr

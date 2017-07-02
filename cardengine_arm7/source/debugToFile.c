@@ -24,7 +24,7 @@ static aFile _debugFileCluster;
 static u32 _currentPos = 0;
 static char hexbuffer [9];
 
-void enableDebug(aFile debugFileCluster) {	
+void enableDebug(aFile debugFileCluster) {
 	_debug = true;
 	_debugFileCluster = debugFileCluster;
 }
@@ -32,13 +32,13 @@ void enableDebug(aFile debugFileCluster) {
 u32 dbg_printf( char * message)
 {
 	nocashMessage(message);
-	
-	if(!_debug) return 0;	
-	
+
+	if(!_debug) return 0;
+
 	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message));
-	
+
 	_currentPos+=strlen(message);
-	
+
 	return ret;
 }
 
@@ -51,7 +51,7 @@ char* tohex(u32 n)
 	for (int i=0; i<size; i++) {
 		buffer[i] = '0';
 	}
-	
+
     while (n > 0)
     {
         unsigned mod = n % 16;

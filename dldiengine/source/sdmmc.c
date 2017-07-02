@@ -347,9 +347,9 @@ startUp
 Initialize the interface, geting it into an idle, ready state
 returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
-bool startup(void) {	
+bool startup(void) {
 	nocashMessage("startup internal");
-	return true;	
+	return true;
 }
 
 /*-----------------------------------------------------------------

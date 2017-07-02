@@ -3,7 +3,7 @@
  Interface template for low level disc functions.
 
  Copyright (c) 2006 Michael "Chishm" Chisholm
-	
+
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
 
@@ -27,7 +27,7 @@
 
 	2006-07-11 - Chishm
 		* Original release
-		
+
 	2006-07-16 - Chishm
 		* Renamed _CF_USE_DMA to _IO_USE_DMA
 		* Renamed _CF_ALLOW_UNALIGNED to _IO_ALLOW_UNALIGNED

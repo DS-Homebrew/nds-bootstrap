@@ -22,7 +22,7 @@ irqHandler:
 	.word	0x00000000
 irqSig:
 	.word	0x00000000
-	
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 sdmmc_engine_start:
@@ -36,7 +36,7 @@ sdmmc_engine_irqEnable:
     push    {lr}
 	push	{r1-r12}
 	ldr	r3, =myIrqEnable
-	bl	_blx_r3_stub		@ jump to myIrqEnable	
+	bl	_blx_r3_stub		@ jump to myIrqEnable
 	pop   	{r1-r12} 
 	pop  	{lr}
 	bx  lr
@@ -47,7 +47,7 @@ call_handler:
 	ldr		r2, [r1]
 	ldr		r0, [r2]
 	bx  	r0
-	
+
 code_handler_start:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandler
@@ -55,11 +55,11 @@ code_handler_start:
   
   @ exit after return
 	b	exit
-	
+
 @---------------------------------------------------------------------------------
 _blx_r3_stub:
 @---------------------------------------------------------------------------------
-	bx	r3	
+	bx	r3
 
 @---------------------------------------------------------------------------------
 @ my patch
@@ -69,14 +69,14 @@ myPatch:
 	str    r2, [r1, #-8]		@ irqhandler
 	str    pc, [r1, #-4]		@ irqsig
 	b      got_handler
-.pool	
+.pool
 got_handler:
 	str	r0, [r12, #4]	@ IF Clear
 @---------------------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-exit:	
+exit:
 	pop   	{r0-r12} 
 	pop  	{lr}
 	bx  lr
