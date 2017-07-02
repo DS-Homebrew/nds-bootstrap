@@ -36,7 +36,7 @@ void sendValue32(vu32 value32) {
 void getDatamsg(int size, vu8* msg) {
 	for(int i=0;i<size;i++)  {
 		msg[i]=*((vu8*)commandAddr+8+i);
-	}	
+	}
 }
 
 //---------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ static const u32 homebrewSig[5] = {
 	0x1A000001, // bne    got_handler
 	0xE1A01000, // mov    r1, r0
 	0xEAFFFFF6  // b    no_handler
-};	
+};
 
 // interruptDispatcher.s jump_intr:
 //patch
@@ -138,9 +138,9 @@ static const u32 homebrewSigPatched[5] = {
 };
 
 static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	dbg_printf("restoreInterruptHandlerHomebrew\n");	
+	dbg_printf("restoreInterruptHandlerHomebrew\n");
 	u32* end = addr + size/sizeof(u32);
-	
+
 	// Find the start of the handler
 	while (addr < end) {
 		if ((addr[0] == homebrewSigPatched[0]) && 
@@ -153,12 +153,12 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 		}
 		addr++;
 	}
-	
+
 	if (addr >= end) {
-		dbg_printf("addr >= end");	
+		dbg_printf("addr >= end");
 		return 0;
 	}
-	
+
 	// patch the program
 	addr -= 5;
 	addr[0] = homebrewSig[0];
@@ -166,9 +166,9 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	addr[2] = homebrewSig[2];
 	addr[3] = homebrewSig[3];
 	addr[4] = homebrewSig[4];
-	
-	dbg_printf("restoreSuccessfull\n");	
-	
+
+	dbg_printf("restoreSuccessfull\n");
+
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
@@ -183,44 +183,44 @@ void SyncHandler(void) {
 //---------------------------------------------------------------------------------
 void checkIRQ_IPC_SYNC() {
 //---------------------------------------------------------------------------------
-	if(!initialized) {	
-		nocashMessage("!initialized");	
+	if(!initialized) {
+		nocashMessage("!initialized");
 		u32* current=irqHandler+1;
-		
+
 		while(*current!=IRQ_IPC_SYNC && *current!=0) {
 			current+=2;
 		}
 		if(current==IRQ_IPC_SYNC) {
-			nocashMessage("IRQ_IPC_SYNC slot found");	
+			nocashMessage("IRQ_IPC_SYNC slot found");
 		} else {
 			*((IntFn*)current-1)	= SyncHandler;
 			*current				= IRQ_IPC_SYNC;
-		
+
 			nocashMessage("IRQ_IPC_SYNC setted");
-		}				
-	
+		}
+
 		initialized = true;
-	}	
+	}
 }
 
 
 void myIrqHandler(void) {
-	//dbg_printf("myIrqHandler\n");	
-	
+	//dbg_printf("myIrqHandler\n");
+
 	checkIRQ_IPC_SYNC();
 	runSdMmcEngineCheck();
 }
 
-void myIrqEnable(u32 irq) {	
+void myIrqEnable(u32 irq) {
 	dbg_printf("myIrqEnable\n");
-	int oldIME = enterCriticalSection();	
+	int oldIME = enterCriticalSection();
 	if (irq & IRQ_VBLANK)
 		REG_DISPSTAT |= DISP_VBLANK_IRQ ;
 	if (irq & IRQ_HBLANK)
 		REG_DISPSTAT |= DISP_HBLANK_IRQ ;
 	if (irq & IRQ_VCOUNT)
 		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-		
+
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 	nocashMessage("IRQ_IPC_SYNC enabled");

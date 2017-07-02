@@ -115,7 +115,7 @@ u8 i2cReadRegister(u8 device, u8 reg) {
 	int i;
 
 	for(i = 0; i < 8; i++) {
-		
+
 		if((i2cSelectDevice(device) != 0) && (i2cSelectRegister(reg) != 0)) {
 			i2cDelay();
 			if(i2cSelectDevice(device | 1)) {

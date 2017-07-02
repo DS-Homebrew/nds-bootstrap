@@ -34,7 +34,7 @@ cardStruct:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
-	
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 card_engine_start:
@@ -45,9 +45,9 @@ card_engine_start:
 fastCopy32:
     stmfd   sp!, {r3-r11,lr}
 	@ copy r2 bytes
-	mov     r10, r0	
-	mov     r9, r1	
-	mov     r8, r2	
+	mov     r10, r0
+	mov     r9, r1
+	mov     r8, r2
 loop_fastCopy32:
 	ldmia   r10!, {r0-r7}
 	stmia   r9!,  {r0-r7}
@@ -78,27 +78,27 @@ needFlushDCCache:
 card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r11,lr}
-		
+
 	@ get back the WRAM C to arm9    
-	ldr     R3,=0x4004000 	
-	MOV     R2, #0xFFFFFF80	
+	ldr     R3,=0x4004000 
+	MOV     R2, #0xFFFFFF80
 	STRB    R2, [R3,#0x44]
-	
+
 	ldr		r3, =cardRead
-	
+
 	@ldr     r1, =0xE92D4FF0
 @wait_for_wram_card_read:
 	@ldr     r2, [r3]
 	@cmp     r1, r2
 	@bne     wait_for_wram_card_read
-	
-	bl		_blx_r3_stub_card_read	
+
+	bl		_blx_r3_stub_card_read
 
     ldmfd   sp!, {r4-r11,lr}
     bx      lr
 _blx_r3_stub_card_read:
-	bx	r3	
-.pool	
+	bx	r3
+.pool
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
@@ -113,14 +113,14 @@ cacheRef:
 card_id_arm9:
 @---------------------------------------------------------------------------------
     mov r0, #1
-	bx      lr		
+	bx      lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
     mov r0, #0
-	bx      lr		
+	bx      lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -137,20 +137,20 @@ card_pull:
 .type	cacheFlush STT_FUNC
 cacheFlush:
     stmfd   sp!, {r0-r11,lr}
-	
-	@disable interrupt	
+
+	@disable interrupt
 	ldr r8,= 0x4000208
 	ldr r11,[r8]
 	mov r7, #0
-	str r7, [r8]		
-	
+	str r7, [r8]
+
 //---------------------------------------------------------------------------------
 IC_InvalidateAll:
 /*---------------------------------------------------------------------------------
 	Clean and invalidate entire data cache
 ---------------------------------------------------------------------------------*/
 	mcr	p15, 0, r7, c7, c5, 0
-		
+
 //---------------------------------------------------------------------------------
 DC_FlushAll:
 /*---------------------------------------------------------------------------------
@@ -169,19 +169,19 @@ inner_loop:
 	add	r1, r1, #0x40000000
 	cmp	r1, #0
 	bne	outer_loop
-	
-//---------------------------------------------------------------------------------	
+
+//---------------------------------------------------------------------------------
 DC_WaitWriteBufferEmpty:
 //---------------------------------------------------------------------------------               
     MCR     p15, 0, R7,c7,c10, 4
-	
+
 	@restore interrupt
 	str r11, [r8]
-	
+
     ldmfd   sp!, {r0-r11,lr}
     bx      lr
 	.pool
-	
+
 .global DC_FlushRange
 .type	DC_FlushRange STT_FUNC
 DC_FlushRange:
@@ -195,7 +195,7 @@ loop_flush_range :
 	CMP             R0, R1
 	BLT             loop_flush_range
 	BX              LR
-	
+
 .global tryLockMutex
 .type	tryLockMutex STT_FUNC
 tryLockMutex:
@@ -204,14 +204,14 @@ mov r2, #1
 mutex_loop:
     swp r0,r2, [r1]
     cmp r0, #1
-    beq mutex_fail	
+    beq mutex_fail
 
 mutex_success:
 	mov r2, #1
     str r2, [r1]
 	mov r0, #1
 	b mutex_exit
-	
+
 mutex_fail:
 	mov r0, #0
 
@@ -226,6 +226,6 @@ unLockMutex:
 	mov r2, #0
 	str r2, [r1]
 	bx  lr
-	
+
 mutex:
 .word    0x00000000  

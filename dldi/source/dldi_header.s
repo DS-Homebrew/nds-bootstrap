@@ -31,12 +31,12 @@
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE | FIX_ALL	@ Sections to fix
 	allocated_space:
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
 	.asciz "DSI 3DS sd card"
-	
+
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -60,7 +60,7 @@
 	.word	writeSectors	@ 
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
-	
+
 	word_command:
 	.word	0x00000000
 	word_params:
@@ -70,7 +70,7 @@
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
-	
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------

@@ -6,12 +6,12 @@
 
 	.text
 	.arm
-	
+
 dsmasks:
 	.word	0x00Cfffff, 0x02000000, 0x02400000
 
 masks:	.word	dsmasks
-	
+
 	.global myMemCached
 	.type	myMemCached STT_FUNC
 @---------------------------------------------------------------------------------

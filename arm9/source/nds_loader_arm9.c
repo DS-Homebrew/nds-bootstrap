@@ -38,7 +38,7 @@
 
 /*
 	b	startUp
-	
+
 storedFileCluster:
 	.word	0x0FFFFFFF		@ default BOOT.NDS
 initDisc:
@@ -99,9 +99,9 @@ enum DldiOffsets {
 	// IO_INTERFACE data
 	DO_ioType = 0x60,
 	DO_features = 0x64,
-	DO_startup = 0x68,	
-	DO_isInserted = 0x6C,	
-	DO_readSectors = 0x70,	
+	DO_startup = 0x68,
+	DO_isInserted = 0x6C,
+	DO_readSectors = 0x70,
 	DO_writeSectors = 0x74,
 	DO_clearStatus = 0x78,
 	DO_shutdown = 0x7C,
@@ -120,13 +120,13 @@ static void vramcpy (void* dst, const void* src, int len)
 {
 	u16* dst16 = (u16*)dst;
 	u16* src16 = (u16*)src;
-	
+
 	//dmaCopy(src, dst, len);
 
 	for ( ; len > 0; len -= 2) {
 		*dst16++ = *src16++;
 	}
-}	
+}
 
 static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
 	const int* dataChunk = (const int*) data;
@@ -169,9 +169,9 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	data_t *pAH;
 
 	size_t dldiFileSize = 0;
-	
+
 	nocashMessage("dldiPatchLoader");
-	
+
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
 
@@ -181,7 +181,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	}
 
 	pDH = (data_t*)(io_dldi_data);
-	
+
 	pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
@@ -191,11 +191,11 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	}
 
 	if (pDH[DO_driverSize] > pAH[DO_allocatedSpace]) {
-		// Not enough space for patch	
+		// Not enough space for patch
 		nocashMessage("Not enough space for patch");
 		return false;
 	}
-	
+
 	dldiFileSize = 1 << pDH[DO_driverSize];
 
 	memOffset = readAddr (pAH, DO_text_start);
@@ -273,14 +273,14 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	u16 argTempVal = 0;
 	int argSize;
 	const char* argChar;
-	
+
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
 
 	// Direct CPU access to VRAM bank C
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;	
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
 	vramcpy (LCDC_BANK_C, loader, loaderSize);
 
@@ -297,7 +297,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	argStart = (char*)(((int)argStart + 3) & ~3);	// Align to word
 	argData = (u16*)argStart;
 	argSize = 0;
-	
+
 	for (; argc > 0 && *argv; ++argv, --argc) 
 	{
 		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) 
@@ -322,16 +322,16 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 		++argSize;
 	}
 	*argData = argTempVal;
-	
+
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_C);
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
-	
+
 	writeAddr ((data_t*) LCDC_BANK_C, SAV_OFFSET, saveCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, DONOR_OFFSET, donorCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, DONORSDK_OFFSET, donorSdkVer);
 	writeAddr ((data_t*) LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
 	writeAddr ((data_t*) LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
-		
+
 	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
@@ -340,27 +340,27 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 			return 3;
 		}
 	}
-	
+
 	nocashMessage("irqDisable(IRQ_ALL);");
 
 	irqDisable(IRQ_ALL);
 
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;		
-	
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
+
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
-	
+
 	*((vu32*)0x02FFFFFC) = 0;
 	*((vu32*)0x02FFFE04) = (u32)0xE59FF018;
 	*((vu32*)0x02FFFE24) = (u32)0x02FFFE04;
-	
+
 	nocashMessage("resetARM7");
 
-	resetARM7(0x06000000);	
+	resetARM7(0x06000000);
 
 	nocashMessage("swiSoftReset");
 
@@ -378,15 +378,15 @@ int runNdsFile (const char* filename, const char* savename,  const char* arm7Don
 	int pathLen;
 	const char* args[1];
 
-	
+
 	if (stat (filename, &st) < 0) {
 		return 1;
 	}
-	
+
 	if (stat (savename, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
 	}
-	
+
 	if (stat (arm7DonorPath, &stDonor) >= 0) {
 		clusterDonor = stDonor.st_ino;
 	}

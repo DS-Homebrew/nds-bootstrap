@@ -64,9 +64,9 @@ donorFileCluster:
 donorSdkVer:
 	.word	0x00000000		@ donor SDK version
 patchMpuRegion:
-	.word	0x00000000		
+	.word	0x00000000
 patchMpuSize:
-	.word	0x00000000		
+	.word	0x00000000
 
 startUp:
 	mov	r0, #0x04000000

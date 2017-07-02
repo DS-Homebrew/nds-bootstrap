@@ -103,26 +103,26 @@ u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int directio
 	u32* end = addr + size/sizeof(u32);
 	u32* debug = (u32*)0x037D0000;
 	debug[3] = end;
-	
+
     u32 result = 0;
 	bool found = false;
-	
+
 	do {
 		for(int i=0;i<sizeofFind;i++) {
 			if (addr[i] != find[i]) 
 			{
 				break;
 			} else if(i==sizeofFind-1) {
-				found = true;				
+				found = true;
 			}
-		}	
+		}
 		if(!found) addr+=direction;
 	} while (addr != end && !found);
-	
+
 	if (addr == end) {
 		return NULL;
 	}
-	
+
 	return addr;
 }
 
@@ -212,12 +212,12 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 	moduleParams->compressed_static_end = 0;
 }
 
-u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {	
+u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	u32* debug = (u32*)0x03784000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
-	
+
 	u32* a9cardReadSignature = a9cardReadSignature1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardPullOutSignature = cardPullOutSignature1;
@@ -235,21 +235,21 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
-	} 	
-	
+	} 
+
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
-	u32 mpuInitRegionNewData = PAGE_32M  | 0x02000000 | 1;	
-	u32 needFlushCache = 0;	
+	u32 mpuInitRegionNewData = PAGE_32M  | 0x02000000 | 1;
+	u32 needFlushCache = 0;
 	int mpuAccessOffset = 0;
 	u32 mpuNewDataAccess = 0;
 	u32 mpuNewInstrAccess = 0;
-	
+
 	switch(patchMpuRegion) {
-		case 0 :		
+		case 0 :
 			mpuInitRegionSignature = mpuInitRegion0Signature;
 			mpuInitRegionData = mpuInitRegion0Data;
-			mpuInitRegionNewData = PAGE_128M  | 0x00000000 | 1;	
+			mpuInitRegionNewData = PAGE_128M  | 0x00000000 | 1;
 			break;
 		case 1 :
 			mpuInitRegionSignature = mpuInitRegion1Signature;
@@ -259,15 +259,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		case 2 :
 			mpuInitRegionSignature = mpuInitRegion2Signature;
 			mpuInitRegionData = mpuInitRegion2Data;
-			mpuNewDataAccess = 0x15111111;	
-			mpuNewInstrAccess = 0x5111111;	
+			mpuNewDataAccess = 0x15111111;
+			mpuNewInstrAccess = 0x5111111;
 			mpuAccessOffset = 6;
 			break;
 		case 3 :
 			mpuInitRegionSignature = mpuInitRegion3Signature;
 			mpuInitRegionData = mpuInitRegion3Data;
 			mpuInitRegionNewData = PAGE_8M  | 0x03000000 | 1;
-			mpuNewInstrAccess = 0x5111111;		
+			mpuNewInstrAccess = 0x5111111;
 			mpuAccessOffset = 5;
 			break;
 	}
@@ -279,15 +279,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardReadEndOffset) {
         dbg_printf("Card read end not found\n");
         return 0;
-    }	
-	debug[1] = cardReadEndOffset;	
+    }
+	debug[1] = cardReadEndOffset;
     u32 cardReadStartOffset =   
         getOffset((u32*)cardReadEndOffset, -0xF9,
               (u32*)cardReadStartSignature, 1, -1);
     if (!cardReadStartOffset) {
         dbg_printf("Card read start not found\n");
         return 0;
-    }	
+    }
 	dbg_printf("Arm9 Card read:\t");
 	dbg_hexa(cardReadStartOffset);
 	dbg_printf("\n");
@@ -302,15 +302,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	dbg_printf("Card pull out handler:\t");
 	dbg_hexa(cardPullOutOffset);
 	dbg_printf("\n");
-	
-	
+
+
     u32 cardReadCachedEndOffset =  
         getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
               (u32*)cardReadCachedEndSignature, 4, 1);
     if (!cardReadCachedEndOffset) {
         dbg_printf("Card read cached end not found\n");
         return 0;
-    }	
+    }
     u32 cardReadCachedOffset =   
         getOffset((u32*)cardReadCachedEndOffset, -0xFF,
               (u32*)cardReadCachedStartSignature, 2, -1);
@@ -321,7 +321,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	dbg_printf("Card read cached :\t");
 	dbg_hexa(cardReadCachedOffset);
 	dbg_printf("\n");
-	
+
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
         getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
@@ -339,7 +339,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_printf("Card read dma start not found\n");
 			cardReadDmaOffset =   
 				getOffset((u32*)cardReadDmaEndOffset, -0x200,
-					  (u32*)cardReadDmaStartSignatureAlt, 1, -1);			
+					  (u32*)cardReadDmaStartSignatureAlt, 1, -1);
 			if (!cardReadDmaOffset) {
 				dbg_printf("Card read dma start alt not found\n");
 			}
@@ -348,13 +348,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			//dbg_printf("Card read dma start not found\n");
 			cardReadDmaOffset =   
 				getOffset((u32*)cardReadDmaEndOffset, -0x200,
-					  (u32*)cardReadDmaStartSignatureAlt2, 1, -1);			
+					  (u32*)cardReadDmaStartSignatureAlt2, 1, -1);
 			if (!cardReadDmaOffset) {
 				dbg_printf("Card read dma start alt2 not found\n");
 			}
-		}		
+		}
 	}    
-		
+
 	// Find the card id
 	u32 cardIdStartOffset = 0;
     u32 cardIdEndOffset =  
@@ -369,7 +369,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardIdEndOffset) {
         dbg_printf("Card id end not found\n");
     } else {
-		debug[1] = cardIdEndOffset;	
+		debug[1] = cardIdEndOffset;
 		cardIdStartOffset =   
 			getOffset((u32*)cardIdEndOffset, -0x100,
 				  (u32*)cardIdStartSignature, 1, -1);
@@ -390,8 +390,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_hexa(cardIdStartOffset);
 			dbg_printf("\n");
 		}
-	}	
-	
+	}
+
 	// Find the mpu init
 	u32* mpuDataOffset = 0;
     u32 mpuStartOffset =  
@@ -410,8 +410,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_hexa((u32)mpuDataOffset);
 			dbg_printf("\n");
 		}
-	}	
-	
+	}
+
 	if(!mpuDataOffset) {
 		// try to found it
 		for (int i = 0; i<0x100; i++) {
@@ -419,21 +419,21 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) break;
 		}
 	}
-	
+
 	if(mpuDataOffset) {
 		// change the region 1 configuration
 		*mpuDataOffset = mpuInitRegionNewData;
-		
+
 		if(mpuAccessOffset) {
 			if(mpuNewInstrAccess) {
-				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;	
+				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
 			}
 			if(mpuNewDataAccess) {
-				mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;	
+				mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;
 			}
 		}
 	}
-	
+
 	// Find the mpu cache init
     /*u32* mpuCacheOffset =  
         getOffset((u32*)mpuStartOffset, 0x100,
@@ -442,13 +442,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
         dbg_printf("Mpu init cache not found\n");
     } else {
 		*mpuCacheOffset = 0xE3A00046;
-	}	*/	
-	
+	}	*/
+
 	dbg_printf("patchMpuSize :\t");
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n");
-		
-	// patch out all further mpu reconfiguration	
+
+	// patch out all further mpu reconfiguration
 	while(mpuStartOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
 		if(patchMpuSize>1) {
@@ -460,14 +460,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
-			
+
 			*((u32*)mpuStartOffset) = 0xE1A00000 ; // nop
-			
+
 			/*// try to found it
 			for (int i = 0; i<0x100; i++) {
 				mpuDataOffset = (u32*)(mpuStartOffset+i);
 				if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) {
-					*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;	
+					*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;
 					break;
 				}
 				if(i == 100) {
@@ -476,7 +476,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			}*/
 		}
 	}
-	
+
 	/*u32 arenaLoOffset =   
         getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
               (u32*)arenaLowSignature, 4, 1);
@@ -485,60 +485,60 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     } else {
 		debug[0] = arenaLoOffset;
 		nocashMessage("Arenow low found\n");
-		
+
 		arenaLoOffset += 0x88;
 		debug[10] = arenaLoOffset;
 		debug[11] = *((u32*)arenaLoOffset);
-			
+
 		u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
-		
+
 		// *((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x800; // shrink heap by 8 kb
-		// *(vu32*)(0x027FFDA0) = *((u32*)arenaLoOffset);	
+		// *(vu32*)(0x027FFDA0) = *((u32*)arenaLoOffset);
 		debug[12] = *((u32*)arenaLoOffset);
 
 		u32 arenaLo2Offset =   
 			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00100000,//, ndsHeader->arm9binarySize,
-				  oldArenaLow, 1, 1);	
-		
+				  oldArenaLow, 1, 1);
+
 		// *((u32*)arenaLo2Offset) = *((u32*)arenaLo2Offset) + 0x800; // shrink heap by 8 kb
-			
+
 		debug[13] = arenaLo2Offset;
 	}*/
 
 	debug[2] = cardEngineLocation;
-	
+
 	u32* patches =  (u32*) cardEngineLocation[0];
-	
+
 	cardEngineLocation[3] = moduleParams->sdk_version;
-	
+
 	u32* cardReadPatch = (u32*) patches[0];
 
 	u32* cardPullOutPatch = patches[6];
-	
+
 	u32* cardIdPatch = patches[3];
-	
+
 	u32* cardDmaPatch = patches[4];
-	
+
 	debug[5] = patches;
-	
+
 	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
 	//u32* cache_struct = ((u32*)cardIdStartOffset) - 1;
-	
+
 	debug[6] = *card_struct;
 	//debug[7] = *cache_struct;
-	
+
 	cardEngineLocation[5] = ((u32*)*card_struct)+6;
 	if(moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = ((u32*)*card_struct)+7;	
-	}		
+		cardEngineLocation[5] = ((u32*)*card_struct)+7;
+	}
 	//cardEngineLocation[6] = *cache_struct;
-	
+
 	// cache management alternative
-	*((u32*)patches[5]) = ((u32*)*card_struct)+6;	
+	*((u32*)patches[5]) = ((u32*)*card_struct)+6;
 	if(moduleParams->sdk_version > 0x3000000) {
-		*((u32*)patches[5]) = ((u32*)*card_struct)+7;	
-	}	
-	
+		*((u32*)patches[5]) = ((u32*)*card_struct)+7;
+	}
+
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	if(cardReadCachedOffset==0x020777F0){
 		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS fix.
@@ -549,24 +549,24 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		*((u32*)patches[8]) = cardReadCachedOffset;
 	}
 	patches[10] = needFlushCache;
-	
-	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);	
-	
-	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);		
 
-	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x5C);	
-	
+	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);
+
+	copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);
+
+	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x5C);
+
 	if (cardIdStartOffset) {
-		copyLoop ((u32*)cardIdStartOffset, cardIdPatch, 0x8);	
+		copyLoop ((u32*)cardIdStartOffset, cardIdPatch, 0x8);
 	}
-	
+
 	if (cardReadDmaOffset) {
 		dbg_printf("Card read dma :\t");
 		dbg_hexa(cardReadDmaOffset);
 		dbg_printf("\n");
-		
-		copyLoop ((u32*)cardReadDmaOffset, cardDmaPatch, 0x8);	
-	}	
+
+		copyLoop ((u32*)cardReadDmaOffset, cardDmaPatch, 0x8);
+	}
 
 	dbg_printf("ERR_NONE");
 	return 0;
@@ -583,7 +583,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Relocation start not found\n");
 		return 0;
     }
-	
+
 	// Validate the relocation signature
     u32 forwardedRelocStartAddr = relocationStart + 4;
     if (!*(u32*)forwardedRelocStartAddr)
@@ -600,8 +600,8 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Error in relocation checking\n");
 		return 0;
     }
-	
-	
+
+
     // Get the remaining details regarding relocation
     u32 valueAtRelocStart =
         *(u32*)forwardedRelocStartAddr;
@@ -618,13 +618,13 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 			return 0;
         }
     }
-	
+
     dbg_printf("Relocation src: ");
 	dbg_hexa(vAddrOfRelocSrc);
 	dbg_printf("\n");
 	dbg_printf("Relocation dst: ");
 	dbg_hexa(relocDestAtSharedMem);
-	dbg_printf("\n");	
+	dbg_printf("\n");
 
     // Find the card read
     u32 cardReadEndAddr =
@@ -633,18 +633,18 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     if (!cardReadEndAddr) {
         dbg_printf("[Error!] Card read addr not found\n"); return 0;
     }
-	
+
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
 	dbg_printf("\n");
-	
+
 	// nonsense variable names below
     u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
-	
+
 	dbg_printf("cardstructAddr: ");
 	dbg_hexa(cardstructAddr);
 	dbg_printf("\n");
-	
+
     u32 readCacheEnd =
          getOffset(cardReadEndAddr,
              0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
@@ -658,15 +658,15 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("[Error!] ___ addr not found\n"); return 0;
     }
     u32 JumpTableFunc = readCacheEnd + 4;
-	
+
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
-	
+
 	//
     // Here is where the differences in the retry begin
     //
-	
+
 	u32 returned_A0_with_MKDS =
         getOffset(JumpTableFunc, 0x100,
             (void*)a7something1Signature, 2, 1);
@@ -674,7 +674,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("[Error!]...\n");
         return 0;
     }
-	
+
 	dbg_printf("returned_A0_with_MKDS: ");
 	dbg_hexa(returned_A0_with_MKDS);
 	dbg_printf("\n");
@@ -687,19 +687,19 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("[Error!] ...\n");
         return 0;
     }
-	
+
 	dbg_printf("addrOfSomething_85C0: ");
 	dbg_hexa(addrOfSomething_85C0);
 	dbg_printf("\n");
 
     u32 anotherLocinA7WRAM = *(u32*)(addrOfSomething_85C0 - 4);
-	
+
 	dbg_printf("anotherLocinA7WRAM: ");
 	dbg_hexa(anotherLocinA7WRAM);
 	dbg_printf("\n");
 
     u32 amal_8CBC = returned_A0_with_MKDS;
-	
+
 	dbg_printf("amal_8CBC: ");
 	dbg_hexa((u32)amal_8CBC);
 	dbg_printf("\n");
@@ -716,27 +716,27 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
                 ) + JumpTableFunc) | 0xFF000000
               )
         + 8);
-		
+
 	dbg_printf("aFinalLocation: ");
 	dbg_hexa((u32)aFinalLocation);
 	dbg_printf("\n");
-	
+
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* arm7Function =  (u32*) patches[9];
 	u32 srcAddr;
-	
+
 	u32* eepromProtect = (u32*) (JumpTableFunc + 0xE0);
 	u32* cardRead = (u32*) (JumpTableFunc + 0x108);
 	if((((*eepromProtect) & 0xFF000000) == 0xEB000000) 
 		&& (((*cardRead) & 0xFF000000) == 0xEB000000)) {
 		dbg_printf("Eeprom protect:\t");
 		dbg_hexa((u32)eepromProtect);
-		dbg_printf("\n");	
+		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0xE0 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchProtect = generateA7Instr(srcAddr,
 			arm7Function[0] );
 		*eepromProtect=patchProtect; 
-		
+
 		u32* cardId = (u32*) (JumpTableFunc + 0xE8);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);
@@ -744,8 +744,8 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		srcAddr = JumpTableFunc + 0xE8 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchCardId = generateA7Instr(srcAddr,
 			arm7Function[7]);
-		*cardId=patchCardId;		
-		
+		*cardId=patchCardId;
+
 		dbg_printf("Card  read:\t");
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
@@ -753,7 +753,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchCardRead = generateA7Instr(srcAddr,
 			arm7Function[6]);
 		*cardRead=patchCardRead;
-		
+
 		u32* eepromRead = (u32*) (JumpTableFunc + 0x120);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
@@ -762,7 +762,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchRead = generateA7Instr(srcAddr,
 			arm7Function[5]);
 		*eepromRead=patchRead;
-		
+
 		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x138);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
@@ -771,7 +771,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchWrite = generateA7Instr(srcAddr,
 			arm7Function[3]);
 		*eepromPageWrite=patchWrite;
-		
+
 		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x150);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
@@ -780,21 +780,21 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchProg = generateA7Instr(srcAddr,
 			arm7Function[4]);
 		*eepromPageProg=patchProg;
-		
+
 		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x168);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
-		dbg_printf("\n");	
+		dbg_printf("\n");
 		srcAddr =  JumpTableFunc + 0x168 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchVerify = generateA7Instr(srcAddr,
 			arm7Function[2]);
-		*eepromPageVerify=patchVerify;	
+		*eepromPageVerify=patchVerify;
 
-			
+
 		u32* eepromPageErase = (u32*) (JumpTableFunc + 0x178);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
-		dbg_printf("\n");	
+		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x178 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchErase = generateA7Instr(srcAddr,
 			arm7Function[1]);
@@ -804,14 +804,14 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
-		
+
 		if(((*cardRead) & 0xFF000000) != 0xEB000000) {
 			dbg_printf("[Error] CardRead not found:\n");
 			dbg_hexa((u32)cardRead);
 			dbg_printf("\n");
 			return 0;
 		}
-		
+
 		u32* cardId = (u32*) (JumpTableFunc + 0xE0);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);
@@ -820,7 +820,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchCardId = generateA7Instr(srcAddr,
 			arm7Function[7]);
 		*cardId=patchCardId;
-		
+
 		dbg_printf("Card  read:\t");
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
@@ -828,7 +828,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchCardRead = generateA7Instr(srcAddr,
 			arm7Function[6]);
 		*cardRead=patchCardRead;
-		
+
 		u32* eepromRead = (u32*) (JumpTableFunc + 0x118);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
@@ -837,7 +837,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchRead = generateA7Instr(srcAddr,
 			arm7Function[5]);
 		*eepromRead=patchRead;
-		
+
 		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x130);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
@@ -846,7 +846,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchWrite = generateA7Instr(srcAddr,
 			arm7Function[3]);
 		*eepromPageWrite=patchWrite;
-		
+
 		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x148);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
@@ -855,21 +855,21 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		u32 patchProg = generateA7Instr(srcAddr,
 			arm7Function[4]);
 		*eepromPageProg=patchProg;
-		
+
 		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x160);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
-		dbg_printf("\n");	
+		dbg_printf("\n");
 		srcAddr =  JumpTableFunc + 0x160 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchVerify = generateA7Instr(srcAddr,
 			arm7Function[2]);
-		*eepromPageVerify=patchVerify;	
+		*eepromPageVerify=patchVerify;
 
-			
+
 		u32* eepromPageErase = (u32*) (JumpTableFunc + 0x170);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
-		dbg_printf("\n");	
+		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x170 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchErase = generateA7Instr(srcAddr,
 			arm7Function[1]);
@@ -877,7 +877,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 
 		arm7Function[8] = saveFileCluster;
 	}    
-	
+
 	return 1;
 }
 
@@ -893,7 +893,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Relocation start not found\n");
 		return 0;
     }
-	
+
 	// Validate the relocation signature
     u32 forwardedRelocStartAddr = relocationStart + 4;
     if (!*(u32*)forwardedRelocStartAddr)
@@ -910,8 +910,8 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Error in relocation checking\n");
 		return 0;
     }
-	
-	
+
+
     // Get the remaining details regarding relocation
     u32 valueAtRelocStart =
         *(u32*)forwardedRelocStartAddr;
@@ -928,13 +928,13 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 			return 0;
         }
     }
-	
+
     dbg_printf("Relocation src: ");
 	dbg_hexa(vAddrOfRelocSrc);
 	dbg_printf("\n");
 	dbg_printf("Relocation dst: ");
 	dbg_hexa(relocDestAtSharedMem);
-	dbg_printf("\n");	
+	dbg_printf("\n");
 
     // Find the card read
     u32 cardReadEndAddr =
@@ -943,18 +943,18 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     if (!cardReadEndAddr) {
         dbg_printf("[Error!] Card read addr not found\n"); return 0;
     }
-	
+
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
 	dbg_printf("\n");
-	
+
 	// nonsense variable names below
     u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
-	
+
 	dbg_printf("cardstructAddr: ");
 	dbg_hexa(cardstructAddr);
 	dbg_printf("\n");
-	
+
     u32 readCacheEnd =
          getOffset(cardReadEndAddr,
              0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
@@ -968,11 +968,11 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("[Error!] ___ addr not found\n"); return 0;
     }
     u32 JumpTableFunc = readCacheEnd + 4;
-	
+
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
-	
+
 	//
     // Here is where the differences in the retry begin
     //
@@ -989,10 +989,10 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		dbg_printf("\n");	  
         specificWramAddr = *(u32*)(JumpTableFunc + 0x10);
 		if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
-			return 0;		
+			return 0;
 		}
     }
-	
+
 	dbg_printf("specificWramAddr: ");
 	dbg_hexa(specificWramAddr);
 	dbg_printf("\n");
@@ -1001,51 +1001,51 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         2, 1);
     if (!someAddr_799C) {
         dbg_printf("[Error!] ___ someOffset not found\n"); return 0;
-    }	
-	
+    }
+
 	dbg_printf("someAddr_799C: ");
 	dbg_hexa(someAddr_799C);
-	dbg_printf("\n");	
-	
+	dbg_printf("\n");
+
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* arm7Function =  (u32*) patches[9];
-	
+
 	u32* eepromPageErase = (u32*) (JumpTableFunc + 0x10);
     dbg_printf("Eeprom page erase:\t");
 	dbg_hexa((u32)eepromPageErase);
-	dbg_printf("\n");	
+	dbg_printf("\n");
 	*eepromPageErase=arm7Function[1];
-		
+
 	u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x2C);
 	dbg_printf("Eeprom verify:\t");
 	dbg_hexa((u32)eepromPageVerify);
-	dbg_printf("\n");	
+	dbg_printf("\n");
 	*eepromPageVerify=arm7Function[2];
-		
+
 	u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x48);
 	dbg_printf("Eeprom page write:\t");
 	dbg_hexa((u32)eepromPageWrite);
 	dbg_printf("\n");
 	*eepromPageWrite=arm7Function[3];
-		
+
 	u32* eepromPageProg = (u32*) (JumpTableFunc + 0x64);
 	dbg_printf("Eeprom page prog:\t");
 	dbg_hexa((u32)eepromPageProg);
 	dbg_printf("\n");
 	*eepromPageProg=arm7Function[4];
-	
+
 	u32* eepromRead = (u32*) (JumpTableFunc + 0x80);
 	dbg_printf("Eeprom read:\t");
 	dbg_hexa((u32)eepromRead);
 	dbg_printf("\n");
 	*eepromRead=arm7Function[5];
-		
+
 	u32* cardRead = (u32*) (JumpTableFunc + 0xA0);
 	dbg_printf("Card  read:\t");
 	dbg_hexa((u32)cardRead);
 	dbg_printf("\n");
 	*cardRead=arm7Function[6];
-		
+
 	// different patch for card id
 	u32* cardId = (u32*) (JumpTableFunc + 0xAC);
 	dbg_printf("Card id:\t");
@@ -1055,17 +1055,17 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	u32 patchCardID = generateA7Instr(srcAddr,
         arm7Function[7]);
 	*cardId=patchCardID; 
-		
+
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
     if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
         u32* current = (u32*)(JumpTableFunc + 0xD0);
         dbg_printf("???:\t\t\t");
 		dbg_hexa((u32)current);
-		dbg_printf("\n");		
-		
+		dbg_printf("\n");
+
 		*current=arm7Function[0];
     }
-	
+
 	arm7Function[8] = saveFileCluster;
 
 	dbg_printf("Arm7 patched!\n");
@@ -1076,7 +1076,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 void swapBinary_ARM7(aFile donorfile)
 {
 	u32 ndsHeader[0x170>>2];
-	
+
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
@@ -1084,10 +1084,10 @@ void swapBinary_ARM7(aFile donorfile)
 	// read ARM7 info from NDS header
 	u32 ARM7_SRC = ndsHeader[0x030>>2];
 	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
-	u32 ARM7_LEN = ndsHeader[0x03C>>2];	
+	u32 ARM7_LEN = ndsHeader[0x03C>>2];
 
 	fileRead(ARM7_DST, donorfile, ARM7_SRC, ARM7_LEN);
-	
+
 	NDS_HEAD[0x030>>2] = ARM7_SRC;
 	NDS_HEAD[0x038>>2] = ARM7_DST;
 	NDS_HEAD[0x03C>>2] = ARM7_LEN;
@@ -1095,13 +1095,13 @@ void swapBinary_ARM7(aFile donorfile)
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile) {
 	u32* debug = (u32*)0x03784000;
-	
-	u32* irqEnableStartSignature = irqEnableStartSignature1;	
+
+	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature3;
 	}
-	
+
 	if(moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
@@ -1126,44 +1126,44 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }
 	debug[0] = cardIrqEnableOffset;
     dbg_printf("irq enable found\n");
-	
-	
+
+
 	cardEngineLocation[3] = moduleParams->sdk_version;
-	
+
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardIrqEnablePatch = (u32*) patches[2];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];
-	
+
 	if(cardCheckPullOutOffset>0)
-		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);		
+		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
-	
+
 	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	if(!saveResult) {
-		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
-			dbg_printf("swap the arm7 binary");	
+		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {
+			dbg_printf("swap the arm7 binary");
 			swapBinary_ARM7(donorFile);
 			// apply the arm7 binary swap and the save patch again, assume save v2 nds file
 			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		} else {
-			dbg_printf("no arm7 binary specified for swapping");	
+			dbg_printf("no arm7 binary specified for swapping");
 		}
 	}
-	
+
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
-		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile) {	
+		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile) {
 
 	//Debug stuff.
-	
+
 	/*aFile myDebugFile = getBootFileCluster ("NDSBTSR2.LOG");
 	enableDebug(myDebugFile);*/
-	
+
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
