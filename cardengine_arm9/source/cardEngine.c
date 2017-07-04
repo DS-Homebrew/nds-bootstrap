@@ -39,6 +39,13 @@ static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
+//---------------------------------------------------------------------------------
+void setExceptionHandler2() {
+//---------------------------------------------------------------------------------
+	exceptionStack = (u32)0x23EFFFC ;
+	EXCEPTION_VECTOR = enterException ;
+}
+
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = accessCounter;
@@ -79,8 +86,10 @@ void updateDescriptor(int slot, u32 sector) {
 	cacheCounter[slot] = accessCounter;
 }
 
-void cardRead (u32* cacheStruct) {
+int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
+	
+	setExceptionHandler2();
 	
 	accessCounter++;
 	
@@ -228,6 +237,7 @@ void cardRead (u32* cacheStruct) {
 			}			
 		}
 	}	
+	return 0;
 }
 
 
