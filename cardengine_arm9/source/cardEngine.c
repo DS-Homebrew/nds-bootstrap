@@ -38,11 +38,14 @@ static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
+void user_exception(void);
+
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
 	exceptionStack = (u32)0x23EFFFC ;
 	EXCEPTION_VECTOR = enterException ;
+	*exceptionC = user_exception;
 }
 
 int allocateCacheSlot() {
