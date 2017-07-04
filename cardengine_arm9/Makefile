@@ -38,7 +38,7 @@ CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE) 
 LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:= 
