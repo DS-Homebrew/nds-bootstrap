@@ -20,13 +20,15 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x8000
+#define READ_SIZE_ARM7 0x1000
+#define SLOT_SIZE      0x8000
 
 #define CACHE_ADRESS_START 0x03708000
 #define CACHE_ADRESS_END 0x03778000
 #define CACHE_ADRESS_SIZE 0x78000
 #define REG_MBK_CACHE_START	0x4004044
-#define REG_MBK_CACHE_SIZE	15
+#define REG_MBK_SLOT_SIZE	15
+#define REG_MBK_CACHE_SIZE	120
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -40,27 +42,40 @@ static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
 static u32 asyncSector = 0;
+static u32 currentSlot = 0;
 static u32 asyncQueue [5];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
+
+void user_exception(void);
 
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
 	exceptionStack = (u32)0x23EFFFC ;
 	EXCEPTION_VECTOR = enterException ;
+	*exceptionC = user_exception;
+}
+
+bool isSlotAccessibleFromArm9(int slot) {
+	return (*((vu8*)(REG_MBK_CACHE_START+(slot/8))) & 0x1 == 0);
 }
 
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
-		if(cacheCounter[i]<=lowerCounter) {
-			lowerCounter = cacheCounter[i];
-			slot = i;
-			if(!lowerCounter) break;
-		}
+		if((currentSlot/8) == (i/8) || !isSlotAccessibleFromArm9(i)) {			
+			i = (i/8) * 8 + 8 - 1;
+			if(i>=REG_MBK_CACHE_SIZE) break;
+		} else {
+			if(cacheCounter[i]<=lowerCounter) {
+				lowerCounter = cacheCounter[i];
+				slot = i;
+				if(!lowerCounter) break;
+			}
+		}		
 	}
 	return slot;
 }
@@ -76,15 +91,15 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_END-slot*0x8000);
+	return (vu32*)(CACHE_ADRESS_END-slot*READ_SIZE_ARM7);
 }
 
 void transfertToArm7(int slot) {
-	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
+	*((vu8*)(REG_MBK_CACHE_START+(slot/8))) |= 0x1;
 }
 
 void transfertToArm9(int slot) {
-	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
+	*((vu8*)(REG_MBK_CACHE_START+(slot/8))) &= 0xFE;
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -249,6 +264,7 @@ int cardRead (u32* cacheStruct) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
 			u32 nextSector = sector+READ_SIZE_ARM7;	
+
 			// read max 32k via the WRAM cache
 			if(slot==-1) {
 				getAsyncSector();
@@ -257,6 +273,7 @@ int cardRead (u32* cacheStruct) {
 				commandRead = 0x025FFB08;
 				
 				slot = allocateCacheSlot();
+				currentSlot = slot;
 				
 				buffer = getCacheAddress(slot);
 				
@@ -281,7 +298,8 @@ int cardRead (u32* cacheStruct) {
 	
 				triggerAsyncPrefetch(nextSector);		
 			} else {
-				if(cacheCounter[slot] == 0x0FFFFFFF) {
+				currentSlot = slot;
+				if(cacheCounter[slot] == 0x0FFFFFFF || !isSlotAccessibleFromArm9(slot)) {
 					// prefetch successfull
 					getAsyncSector();
 					

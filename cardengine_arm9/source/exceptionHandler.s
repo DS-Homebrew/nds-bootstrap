@@ -36,54 +36,57 @@ BEGIN_ASM_FUNC getCPSR
 @---------------------------------------------------------------------------------
 BEGIN_ASM_FUNC enterException
 @---------------------------------------------------------------------------------
-user_exception:
-    mov r12, #0x04000000
-    mov r11, #0x20000
-    str r11, [r12]
-    mov r11, #0x80
-    strb r11, [r12, #0x240]
-    mov r11, #0x6800000
-    mov r10, #0x8000
-    orr r10, r10, #0x1F
-    mov r9, #(128 * 1024)
-    //clear screen
-1:
-    strh r10, [r11], #2
-    subs r9, #2
-    bne 1b
-	ldr r4, =0x02FFFD90
-	ldr	r7,[r4,#0xC]
-	ldr	r4,[r4,#8]
-    mov r5, #8
-    mov r6, #0x6800000
-    mov r8, #0
-2:
-    mov r0, r4, lsr #28
-    mov r1, r6
-    bl put_dotrow
-    mov r4, r4, lsl #4
-    add r6, #2048
-    subs r5, #1
-    bne 2b
+	// store context
+	ldr	r12,=exceptionRegisters
+	stmia	r12,{r0-r11}
+	str	r13,[r12,#oldStack - exceptionRegisters]
+	// assign a stack
+	ldr	r13,=exceptionStack
+	ldr	r13,[r13]
 
-    cmp r8, #1
-    beq .
-    add r6, #4096
-    mov r4, r7
-    mov r5, #8
-    mov r8, #1
-    b 2b
+	// renable MPU
+	mrc	p15,0,r0,c1,c0,0
+	orr	r0,r0,#1
+	mcr	p15,0,r0,c1,c0,0
 
-    //r0 = count
-    //r1 = at
-put_dotrow:
-    ldr r2,= 0xFFFF
-    add r1, #2 //skip one pixel
-1:
-    subs r0, #1
-    strgeh r2, [r1], #4
-    bge 1b
-    bx lr
+	// bios exception stack
+	ldr 	r0, =0x02FFFD90
+
+	// grab r15 from bios exception stack
+	ldr	r2,[r0,#8]
+	str	r2,[r12,#reg15 - exceptionRegisters]
+
+	// grab stored r12 and SPSR from bios exception stack
+	ldmia	r0,{r2,r12}
+
+
+	// grab banked registers from correct processor mode
+	mrs	r3,cpsr
+	bic	r4,r3,#0x1F
+	and	r2,r2,#0x1F
+
+	// Check for user mode & use system mode instead
+	cmp	r2, #0x10
+	moveq	r2, #0x1F
+
+	orr	r4,r4,r2
+	msr	cpsr,r4
+	ldr	r0,=reg12
+	stmia	r0,{r12-r14}
+	msr	cpsr,r3
+
+	// Get C function & call it
+	ldr	r12,=exceptionC
+	ldr	r12,[r12,#0]
+	blxne	r12
+
+	// restore registers
+	ldr	r12,=exceptionRegisters
+	ldmia	r12,{r0-r11}
+	ldr	r13,[r12,#oldStack - exceptionRegisters]
+
+	// return through bios
+	mov	pc,lr
 
 @---------------------------------------------------------------------------------
 	.global exceptionC
