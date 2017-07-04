@@ -45,6 +45,13 @@ static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
 
+//---------------------------------------------------------------------------------
+void setExceptionHandler2() {
+//---------------------------------------------------------------------------------
+	exceptionStack = (u32)0x23EFFFC ;
+	EXCEPTION_VECTOR = enterException ;
+}
+
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
@@ -183,8 +190,10 @@ void getAsyncSector() {
 	}	
 }
 
-void cardRead (u32* cacheStruct) {
+int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
+	
+	setExceptionHandler2();
 	
 	accessCounter++;
 	
