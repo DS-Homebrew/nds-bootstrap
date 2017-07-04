@@ -236,6 +236,7 @@ int cardRead (u32* cacheStruct) {
 			}
 		}
 	}
+	return 0;
 }
 
 
