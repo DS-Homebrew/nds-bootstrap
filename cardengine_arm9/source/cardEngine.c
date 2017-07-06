@@ -41,8 +41,8 @@ static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
-static u32 asyncSector = 0;
-static u32 currentSlot = 0;
+static u32 asyncSector = 0xFFFFFFFF;
+static u32 currentSlot = 0xFFFFFFFF;
 static u32 asyncQueue [5];
 static int aQHead = 0;
 static int aQTail = 0;
