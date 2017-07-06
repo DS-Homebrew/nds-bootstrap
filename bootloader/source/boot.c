@@ -223,8 +223,57 @@ void loadBinary_ARM7 (aFile file)
 	
 	//Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170);
-	if(*(u32*)(0x27FF00C) == 0x45414441 || *(u32*)(0x27FF00C) == 0x50414441	// Diamond
-	|| *(u32*)(0x27FF00C) == 0x45415041 || *(u32*)(0x27FF00C) == 0x50415041)	// Pearl
+	if(*(u32*)(0x27FF00C) == 0x41414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x42414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x43414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x44414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x45414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x46414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x47414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x48414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x49414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x4B414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x4C414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x4D414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x4E414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x4F414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x50414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x51414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x52414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x53414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x54414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x55414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x56414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x57414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x58414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x59414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x5A414441	// Diamond
+	|| *(u32*)(0x27FF00C) == 0x41415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x42415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x43415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x44415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x45415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x46415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x47415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x48415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x49415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4A415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4B415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4C415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4D415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4E415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x4F415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x50415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x51415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x52415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x53415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x54415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x55415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x56415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x57415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x58415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x59415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x5A415041)	// Pearl
 	{
 		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
