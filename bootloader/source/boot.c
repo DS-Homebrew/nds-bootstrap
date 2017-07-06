@@ -226,7 +226,7 @@ void loadBinary_ARM7 (aFile file)
 	if(*(u32*)(0x27FF00C) == 0x45414441 || *(u32*)(0x27FF00C) == 0x50414441	// Diamond
 	|| *(u32*)(0x27FF00C) == 0x45415041 || *(u32*)(0x27FF00C) == 0x50415041)	// Pearl
 	{
-		*(u8*)(0x27FF00F) = 0x4A;//Make the Pokemon game code ADAJ/APAJ.
+		*(u8*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
 
 	// Load binaries into memory
