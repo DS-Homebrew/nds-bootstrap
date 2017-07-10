@@ -393,13 +393,13 @@ int cardRead (u32* cacheStruct) {
 				
 				triggerAsyncPrefetch(nextSector);		
 			} else {
-				currentSlot = slot;
-				if(cacheCounter[slot] == 0x0FFFFFFF) {
+				// currentSlot = slot;
+				// if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
 					
 					triggerAsyncPrefetch(nextSector);	
-				} else {
+				/* } else {
 					int i;
 					for(i=0; i<5; i++) {
 						if(asyncQueue[i]==sector) {
@@ -408,7 +408,7 @@ int cardRead (u32* cacheStruct) {
 							break;
 						}
 					}
-				}
+				} */
 				updateDescriptor(slot, sector);
 			}
 			
