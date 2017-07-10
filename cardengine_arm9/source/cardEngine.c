@@ -90,8 +90,6 @@ void updateDescriptor(int slot, u32 sector) {
 
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
-
-	REG_SCFG_EXT = 0x83008000;
 	
 	setExceptionHandler2();
 	
@@ -124,6 +122,8 @@ int cardRead (u32* cacheStruct) {
 	// -------------------------------------*/
 	#endif
 
+
+	REG_SCFG_EXT = 0x83008000;
 
 	if(page == src && len > READ_SIZE_ARM7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
