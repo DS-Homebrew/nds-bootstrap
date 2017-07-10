@@ -20,7 +20,7 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x8000
+#define READ_SIZE_ARM7 0x1000
 
 #define CACHE_ADRESS_START 0x02400000
 #define CACHE_ADRESS_END 0x02FF8000
@@ -39,7 +39,7 @@ static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
-static u32 asyncSector = 0xFFFFFFFF;
+static u32 asyncSector = 0;
 static int currentSlot = 0x0FFFFFFF;
 static u32 asyncQueue [5];
 static int aQHead = 0;
@@ -210,7 +210,7 @@ void triggerAsyncPrefetch(sector) {
 	nocashMessage(tohex(asyncSector));
 	#endif
 	
-	if(asyncSector == 0xFFFFFFFF) {
+	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
 		// read max 32k via the WRAM cache
 		// do it only if there is no async command ongoing
@@ -257,7 +257,7 @@ void processAsyncCommand() {
 	nocashMessage(tohex(asyncSector));
 	#endif
 	
-	if(asyncSector != 0xFFFFFFFF) {
+	if(asyncSector != 0) {
 		int slot = getSlotForSector(asyncSector);
 		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
 			// get back the data from arm7
@@ -266,7 +266,7 @@ void processAsyncCommand() {
 				// transfertToArm9(slot);		
 				
 				updateDescriptor(slot, asyncSector);
-				asyncSector = 0xFFFFFFFF;
+				asyncSector = 0;
 			}			
 		}	
 	}	
@@ -279,7 +279,7 @@ void getAsyncSector() {
 	nocashMessage(tohex(asyncSector));
 	#endif
 	
-	if(asyncSector != 0xFFFFFFFF) {
+	if(asyncSector != 0) {
 		int slot = getSlotForSector(asyncSector);
 		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
 			// get back the data from arm7
@@ -289,7 +289,7 @@ void getAsyncSector() {
 			// transfertToArm9(slot);		
 			
 			updateDescriptor(slot, asyncSector);
-			asyncSector = 0xFFFFFFFF;
+			asyncSector = 0;
 		}	
 	}	
 }
@@ -393,13 +393,13 @@ int cardRead (u32* cacheStruct) {
 				
 				triggerAsyncPrefetch(nextSector);		
 			} else {
-				// currentSlot = slot;
-				// if(cacheCounter[slot] == 0x0FFFFFFF) {
+				currentSlot = slot;
+				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
 					
 					triggerAsyncPrefetch(nextSector);	
-				/* } else {
+				} else {
 					int i;
 					for(i=0; i<5; i++) {
 						if(asyncQueue[i]==sector) {
@@ -408,7 +408,7 @@ int cardRead (u32* cacheStruct) {
 							break;
 						}
 					}
-				} */
+				}
 				updateDescriptor(slot, sector);
 			}
 			
