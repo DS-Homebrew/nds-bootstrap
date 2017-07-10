@@ -94,8 +94,6 @@ int cardRead (u32* cacheStruct) {
 	
 	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
 	
-	REG_SCFG_EXT = 0x83008000;
-	
 	setExceptionHandler2();
 	
 	accessCounter++;
@@ -128,6 +126,8 @@ int cardRead (u32* cacheStruct) {
 	#endif
 
 	
+	REG_SCFG_EXT = 0x83008000;
+
 	if(page == src && len > READ_SIZE_ARM7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
