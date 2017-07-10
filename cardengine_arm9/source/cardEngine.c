@@ -22,11 +22,11 @@
 
 #define READ_SIZE_ARM7 0x8000
 
-#define CACHE_ADRESS_START 0x03708000
-#define CACHE_ADRESS_END 0x03778000
-#define CACHE_ADRESS_SIZE 0x78000
+#define CACHE_ADRESS_START 0x02400000
+#define CACHE_ADRESS_END 0x02FF8000
+#define CACHE_ADRESS_SIZE 0xBF8000
 #define REG_MBK_CACHE_START	0x4004044
-#define REG_MBK_CACHE_SIZE	15
+#define REG_MBK_CACHE_SIZE	0x17F
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -92,6 +92,10 @@ void updateDescriptor(int slot, u32 sector) {
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");	
 	
+	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
+	
+	REG_SCFG_EXT = 0x83008000;
+	
 	setExceptionHandler2();
 	
 	accessCounter++;
@@ -156,7 +160,7 @@ int cardRead (u32* cacheStruct) {
 				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_ARM7);
 				
 				// transfer the WRAM-B cache to the arm7
-				transfertToArm7(slot);				
+				//transfertToArm7(slot);				
 				
 				// write the command
 				sharedAddr[0] = buffer;
@@ -169,7 +173,7 @@ int cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);	
 				
 				// transfer back the WRAM-B cache to the arm9
-				transfertToArm9(slot);				
+				//transfertToArm9(slot);				
 			}		
 
 			updateDescriptor(slot, sector);
@@ -240,6 +244,7 @@ int cardRead (u32* cacheStruct) {
 			}			
 		}
 	}	
+	REG_SCFG_EXT = 0x83000000;
 	return 0;
 }
 
