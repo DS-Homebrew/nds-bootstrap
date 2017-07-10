@@ -20,15 +20,13 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x1000
-#define SLOT_SIZE      0x8000
+#define READ_SIZE_ARM7 0x8000
 
-#define CACHE_ADRESS_START 0x03708000
-#define CACHE_ADRESS_END 0x03778000
-#define CACHE_ADRESS_SIZE 0x78000
+#define CACHE_ADRESS_START 0x02400000
+#define CACHE_ADRESS_END 0x02FF8000
+#define CACHE_ADRESS_SIZE 0xBF8000
 #define REG_MBK_CACHE_START	0x4004044
-#define REG_MBK_SLOT_SIZE	15
-#define REG_MBK_CACHE_SIZE	120
+#define REG_MBK_CACHE_SIZE	0x17F
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -91,7 +89,7 @@ bool isSlotAccessibleFromArm9(int slot) {
 	nocashMessage(tohex(slot));
 	#endif
 		
-	vu8 value = *((vu8*)(REG_MBK_CACHE_START+(slot/8)));
+	vu8 value = *((vu8*)(REG_MBK_CACHE_START+slot));
 	
 	#ifdef DEBUG	
 	nocashMessage("\narm9 value\n");	
@@ -116,16 +114,11 @@ int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
-		if((currentSlot/8) == (i/8) || (cacheCounter[i] && !isSlotAccessibleFromArm9(i))) {			
-			i = (i/8) * 8 + 8 - 1;
-			if(i>=REG_MBK_CACHE_SIZE) break;
-		} else {
-			if(cacheCounter[i]<=lowerCounter) {
-				lowerCounter = cacheCounter[i];
-				slot = i;
-				if(!lowerCounter) break;
-			}
-		}		
+		if(cacheCounter[i]<=lowerCounter) {
+			lowerCounter = cacheCounter[i];
+			slot = i;
+			if(!lowerCounter) break;
+		}
 	}
 	return slot;
 }
@@ -157,7 +150,7 @@ void transfertToArm7(int slot) {
 	nocashMessage("\narm9 transfertToArm7\n");	
 	#endif
 	
-	*((vu8*)(REG_MBK_CACHE_START+(slot/8))) |= 0x1;
+	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
 }
 
 void transfertToArm9(int slot) {
@@ -165,7 +158,7 @@ void transfertToArm9(int slot) {
 	nocashMessage("\narm9 transfertToArm9\n");	
 	#endif
 	
-	*((vu8*)(REG_MBK_CACHE_START+(slot/8))) &= 0xFE;
+	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -233,7 +226,7 @@ void triggerAsyncPrefetch(sector) {
 			if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_ARM7);
 			
 			// transfer the WRAM-B cache to the arm7
-			transfertToArm7(slot);		
+			// transfertToArm7(slot);		
 
 			cacheDescriptor[slot] = sector;
 			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
@@ -270,13 +263,13 @@ void processAsyncCommand() {
 			// get back the data from arm7
 			if(sharedAddr[3] == (vu32)0) {
 				// transfer back the WRAM-B cache to the arm9
-				transfertToArm9(slot);		
+				// transfertToArm9(slot);		
 				
 				updateDescriptor(slot, asyncSector);
 				asyncSector = 0xFFFFFFFF;
 			}			
 		}	
-	}
+	}	
 }
 
 void getAsyncSector() {
@@ -293,7 +286,7 @@ void getAsyncSector() {
 			while(sharedAddr[3] != (vu32)0);
 			
 			// transfer back the WRAM-B cache to the arm9
-			transfertToArm9(slot);		
+			// transfertToArm9(slot);		
 			
 			updateDescriptor(slot, asyncSector);
 			asyncSector = 0xFFFFFFFF;
@@ -305,6 +298,8 @@ int cardRead (u32* cacheStruct) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 cardRead\n");	
 	#endif
+	
+	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
 	
 	setExceptionHandler2();
 	
@@ -337,6 +332,8 @@ int cardRead (u32* cacheStruct) {
 	// -------------------------------------*/
 	#endif
 	
+	REG_SCFG_EXT = 0x83008000;
+
 	processAsyncCommand();
 	
 	if(page == src && len > READ_SIZE_ARM7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
@@ -378,7 +375,7 @@ int cardRead (u32* cacheStruct) {
 				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_ARM7);
 				
 				// transfer the WRAM-B cache to the arm7
-				transfertToArm7(slot);				
+				// transfertToArm7(slot);				
 				
 				// write the command
 				sharedAddr[0] = buffer;
@@ -391,13 +388,13 @@ int cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);	
 				
 				// transfer back the WRAM-B cache to the arm9
-				transfertToArm9(slot);		
-				updateDescriptor(slot, sector);				
-	
+				// transfertToArm9(slot);		
+				updateDescriptor(slot, sector);
+				
 				triggerAsyncPrefetch(nextSector);		
 			} else {
 				currentSlot = slot;
-				if(cacheCounter[slot] == 0x0FFFFFFF || !isSlotAccessibleFromArm9(slot)) {
+				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
 					
@@ -482,6 +479,7 @@ int cardRead (u32* cacheStruct) {
 			}			
 		}
 	}	
+	REG_SCFG_EXT = 0x83000000;
 	return 0;
 }
 
