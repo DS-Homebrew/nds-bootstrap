@@ -335,7 +335,7 @@ int main( int argc, char **argv) {
 		if (useArm7Donor)
 			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
 		else
-			arm7DonorPath = "";
+			arm7DonorPath = "sd:/_nds/null.nds";
 		
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
 		
@@ -344,13 +344,13 @@ int main( int argc, char **argv) {
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
 			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-			if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
+			// if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
 				// This is nested in BOOT_CPU check as it won't make sense to enable this without TWL clock speeds being active.
-				dbg_printf("VRAM boosted\n");
-				REG_SCFG_EXT = 0x83002000;
-			} else {
+				// dbg_printf("VRAM boosted\n");
+				// REG_SCFG_EXT = 0x83002000;
+			// } else {
 				// Do nothing for now. Default set at boot.
-			}
+			// }
 		} else {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
