@@ -23,6 +23,7 @@
 #define READ_SIZE_ARM7 0x8000
 
 #define CACHE_ADRESS_START 0x02400000
+#define CACHE_ADRESS_END 0x02FF8000
 #define CACHE_ADRESS_SIZE 0xBF8000
 #define REG_MBK_CACHE_START	0x4004045
 #define REG_MBK_CACHE_SIZE	0x17F
@@ -72,7 +73,7 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*0x8000);
+	return (vu32*)(CACHE_ADRESS_END-slot*0x8000);
 }
 
 void transfertToArm7(int slot) {
@@ -90,6 +91,8 @@ void updateDescriptor(int slot, u32 sector) {
 
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
+	
+	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
 	
 	setExceptionHandler2();
 	
