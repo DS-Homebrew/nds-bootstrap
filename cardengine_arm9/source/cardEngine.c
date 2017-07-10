@@ -20,13 +20,13 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x4000
+#define READ_SIZE_ARM7 0x2000
 
 #define CACHE_ADRESS_START 0x02400000
-#define CACHE_ADRESS_END 0x02FFC000
-#define CACHE_ADRESS_SIZE 0xBFC000
+#define CACHE_ADRESS_END 0x02FF8000
+#define CACHE_ADRESS_SIZE 0xBF8000
 #define REG_MBK_CACHE_START	0x4004044
-#define REG_MBK_CACHE_SIZE	0x2FF
+#define REG_MBK_CACHE_SIZE	0x5FC
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
