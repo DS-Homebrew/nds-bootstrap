@@ -1093,15 +1093,15 @@ void swapBinary_ARM7(aFile donorfile)
 	NDS_HEAD[0x03C>>2] = ARM7_LEN;
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile) {
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
 	u32* debug = (u32*)0x03784000;
-	
-	u32* irqEnableStartSignature = irqEnableStartSignature1;	
+
+	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature3;
 	}
-	
+
 	if(moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
@@ -1126,47 +1126,63 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }
 	debug[0] = cardIrqEnableOffset;
     dbg_printf("irq enable found\n");
-	
-	
+
+
 	cardEngineLocation[3] = moduleParams->sdk_version;
-	
+
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardIrqEnablePatch = (u32*) patches[2];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];
-	
+
 	if(cardCheckPullOutOffset>0)
-		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);		
+		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
-	
+
 	u32 saveResult = 0;
-	if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
-		dbg_printf("swap the arm7 binary");	
-		swapBinary_ARM7(donorFile);
-		// apply the arm7 binary swap and the save patch again, assume save v2 nds file
-		saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if (useArm7Donor == 2) {
+		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
+			dbg_printf("swap the arm7 binary");	
+			swapBinary_ARM7(donorFile);
+			// apply the arm7 binary swap and the save patch, assume save v2 nds file
+			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+		} else {
+			dbg_printf("no arm7 binary specified for swapping");	
+		}
+	} else if (useArm7Donor == 1) {
+		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+		if(!saveResult) {
+			if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
+				dbg_printf("swap the arm7 binary");	
+				swapBinary_ARM7(donorFile);
+				// apply the arm7 binary swap and the save patch again, assume save v2 nds file
+				saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+			} else {
+				dbg_printf("no arm7 binary specified for swapping");	
+			}
+		}
 	} else {
-		dbg_printf("no arm7 binary specified for swapping");	
 		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 	}
-	
+
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
-		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile) {	
+		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile, u32 useArm7Donor) {
 
 	//Debug stuff.
-	
+
 	/*aFile myDebugFile = getBootFileCluster ("NDSBTSR2.LOG");
 	enableDebug(myDebugFile);*/
-	
+
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
-	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile);
+	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile, useArm7Donor);
 
 	dbg_printf("ERR_NONE");
 	return 0;

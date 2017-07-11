@@ -84,6 +84,7 @@ extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
 extern unsigned long donorFileCluster;
+extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
@@ -451,7 +452,7 @@ int main (void) {
 			ensureArm9Decompressed(NDS_HEAD, params);
 		}
 
-		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile);
+		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
 		
 		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 			if(error == ERR_NONE) {
