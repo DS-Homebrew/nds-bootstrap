@@ -34,8 +34,8 @@ extern u32 sdk_version;
 extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 
-static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
 static u32 cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
 
