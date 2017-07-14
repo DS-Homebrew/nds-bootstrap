@@ -14,7 +14,6 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
-.global cacheDescriptor
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -35,10 +34,6 @@ cardStruct:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
-cacheDescriptor:
-	.rept 0x17F
-	.word	0x00000000
-	.endr
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
