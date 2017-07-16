@@ -22,10 +22,10 @@
 
 #define READ_SIZE_ARM7 0x8000
 
-#define CACHE_ADRESS_START 0x028B0000
+#define CACHE_ADRESS_START 0x02800000
 #define CACHE_ADRESS_END 0x02FF8000
-#define CACHE_ADRESS_SIZE 0x748000
-#define REG_MBK_CACHE_SIZE	0xE9
+#define CACHE_ADRESS_SIZE 0x7F8000
+#define REG_MBK_CACHE_SIZE	0xFF
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
