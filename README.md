@@ -1,4 +1,4 @@
-nds-bootstrap is a WIP project, that can allow people to play their Nintendo DS Homebrew & ROMs on their Nintendo DS<sup>i</sup> or their Nintendo 3DS natively using their SD card with no flashcarts or emulators. [While compatibility isn't perfect yet, it can still play a handfull of games.
+nds-bootstrap is a WIP project, that can allow people to play their Nintendo DS Homebrew & ROMs on their Nintendo DS<sup>i</sup> or their Nintendo 3DS natively using their SD card with no flashcarts or emulators. While compatibility isn't perfect yet, it can still play a handfull of games.
 
 # Compiling
 
