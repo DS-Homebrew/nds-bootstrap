@@ -2,8 +2,8 @@ nds-bootstrap is a WIP project that allows people to play their Nintendo DS Home
 
 # Help! I found a bug!!!
 
-Firstly, if you found a bug with a game, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if its already reported.     
-Secondly, you need to explain your bug in detail. We don't know what's the problem if all you are going to say.     
+Firstly, if you found a bug with a game, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if it's already reported.     
+Secondly, be sure to explain your bug in detail. We don't know what's the problem if all you are going to say is "Help me! I found a bug!".     
 If you met all these citeria's, you can report the bug in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
 
 # Compiling
