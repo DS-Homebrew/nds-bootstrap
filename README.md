@@ -10,7 +10,7 @@ To self-compile this, you'll need to have DevKitPro with DevKitARM. You'll also 
 
 Firstly, if you found a bug with a game, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if its already reported.     
 Secondly, you need to explain your bug in detail. We don't know what's the problem if all you are going to say.     
-If you met all these citeria's, you can report the bug in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ)
+If you met all these citeria's, you can report the bug in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
 
 In order to use this, you'll need to get a frontend. Here are some frontends that we recommend:
 - [TWLoader](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
