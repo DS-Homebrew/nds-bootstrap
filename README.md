@@ -1,30 +1,18 @@
-# nds-bootstrap
-Boot an nds file
+nds-bootstrap is a WIP project that allows people to play their Nintendo DS Homebrew & ROMs on a Nintendo DS<sup>i</sup> or on a Nintendo 3DS natively using an SD card without using a flashcart or an emulator. Even though compatibility isn't perfect yet, it can still play a handful of games.
 
-nds-bootstrap introduce a dldi driver and an arm7 patcher allowing to have some dldi compatibility without flashcard and without recompilation of homebrews. 
+# Help! I found a bug!!!
 
-The dldi system is formed of 4 parts :
-- a bootloader : this one was taken from the original hbmenu, it loads the homebrew and all the other pieces in memory and transfert the execution to the homebrew.
-- a dldi driver : this is the easy part, it detect if the execution take place in arm7 or arm9. If it takes place in arm7 it just access the sdcard. If it takes place in arm9 it writes a command for arm7 in the main memory shared between both, try to trigger some interrupts ar arm7 level then wait for arm7. 
-- an arm7 patcher : this is integrated in the bootloader, it modify some part of the homebrew binary (the current method target "interruptDispatcher.s" of libnds) in order to get a "parralel" exection flow to the homebrew. This can be done via the interrupt mechanism and was inspired by NitroHax code (even if the NitroHax original method only work with retail games). This is the smallest part but it is quite hard to implements and debug. Most compatibility improvement in the future should come from this part.
-- a arm7 "sdengine" binary : this part is like "server" that waits command from the dldi driver (the "client"), process them (read the sd) then reply to arm9 (put the sd piece of data needed in the main memory and put some special value in memory to notify arm9 that the work is done).
+Firstly, if you found a bug with a game, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if it's already reported.     
+Secondly, be sure to explain your bug in detail. We don't know what's the problem if all you are going to say is "Help me! I found a bug!".     
+If you met all these citeria's, you can report the bug in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
 
-The compatibility is not yet perfect. [Here is a compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing)
+# Compiling
 
-It can be configured via the file _nds/nds-bootstrap.ini
+Firstly, if you want to self compile, check [travis](https://travis-ci.org/ahezard/nds-bootstrap) and see if it can compile successfully.
 
-Option available in the ini :
+To self-compile this, you'll need to have DevKitPro with DevKitARM. You'll also need the latest libnds. Once all that is downloaded, git clone this repo, open command prompt, navigate to the folder, and type `make`. It should compile nds-bootstrap. If there is an error, let us know.
 
-- NDS_PATH : path to the .nds file to run (eg : fat:/nds/cf_ds.nds)
-- BOOTSTRAP_PATH : path the bootstrap nds (recommended value : fat:/_nds/bootstrap-dldi.nds)
-- NTR_MODE_SWITCH : needs the BOOTSTRAP_PATH to be filled, allow to switch from TWL to NTR mode. (recommended value : 0)
-- BOOST_CPU : 0 for normal ds 66mhz arm9 speed, 1 for enhanced dsi 133mhz arm9 speed. Can cause glitches in some homebrews (recommended value : 0)
-- BOOTSPLASH : 0 to not show the DS/DSI BOOTSPLASH, 1 to show it (recommended value : 0)
-- DEBUG : 1 to print debug information (recommended value : 0)
-- RESETSLOT1 : 1 to reset the slot 1 before launching the .nds, could be useful for some homebrew (recommended value : 0)
-- LOCK_ARM9_SCFG_EXT : 1 to lock the arm9 SCFG_EXT avoiding conflict with recent libnds (recommended value : 1)
-
-We strongly recommend to use a frontend menu to avoid manual ini file modification :
-- [TWLoader](https://github.com/Robz8/TWLoader): A 3DS Frontend that tries to bring back the old DSI menu
-- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases): Another 3DS Frontend, but more designed like the DSI Homebrew selection
-- [SRLoader](https://github.com/Robz8/SRLoader): A port of the famous TWLoader to the DSI.
+In order to use this, you'll need to get a frontend. Here are some frontends that we recommend:
+- [TWLoader](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
+- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases) is another 3DS frontend, but based off the Nintendo DS<sup>i</sup> homebrew menu.
+- [SRLoader](https://github.com/Robz8/SRLoader) is a port of the famous TWLoader to the DS<sup>i</sup>.
