@@ -68,7 +68,8 @@ void dopause() {
 void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize) {
 	vector<char*> argarray;
 
-	if(debug) dopause();
+	if(debug)
+		for (int i=0; i<60; i++) swiWaitForVBlank();
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
 		FILE *argfile = fopen(filename.c_str(),"rb");

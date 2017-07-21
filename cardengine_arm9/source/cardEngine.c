@@ -83,7 +83,9 @@ void updateDescriptor(int slot, u32 sector) {
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
+	REG_SCFG_EXT = 0x83008000;
 	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
+	REG_SCFG_EXT = 0x83000000;
 	
 	setExceptionHandler2();
 	
