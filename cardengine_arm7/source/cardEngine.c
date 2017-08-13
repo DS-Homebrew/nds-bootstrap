@@ -38,6 +38,14 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
+u32* NDMA0SAD = 0x4004104;
+u32* NDMA0DAD = 0x4004108;
+u32* NDMA0TCNT = 0x400410C;
+u32* NDMA0WCNT = 0x4004110;
+u32* NDMA0BCNT = 0x4004114;
+u32* NDMA0FDATA = 0x4004118;
+u32* NDMA0CNT = 0x400411C;
+
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
@@ -71,6 +79,42 @@ void initLogging() {
 		initialized=true;
 	}
 
+}
+
+void cardReadLED (bool on) {
+	u8 setting = i2cReadRegister(0x4A, 0x72);
+	
+	if(on) {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+			case 0x03:
+				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+				break;
+		}
+	} else {
+		switch(setting) {
+			case 0x00:
+			default:
+				break;
+			case 0x01:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+			case 0x02:
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+			case 0x03:
+				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+				break;
+		}
+	}
 }
 
 void runCardEngineCheck (void) {
@@ -141,6 +185,11 @@ void runCardEngineCheck (void) {
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
 
+			*NDMA0SAD = src;
+			*NDMA0DAD = dst;
+			*NDMA0TCNT = 0x8000;
+			*NDMA0WCNT = len;
+
 			#ifdef DEBUG
 			dbg_printf("\ncard read received v2\n");
 
@@ -160,9 +209,13 @@ void runCardEngineCheck (void) {
 			dbg_hexa(marker);
 			#endif
 
+			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			timeoutRun = false;	// If card read received, do not show error screen
+			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
+			//*NDMA0CNT |= BIT(31);	// Enable DMA
 			fileRead(dst,romFile,src,len);
+			//*NDMA0CNT &= ~(BIT(31));	// Disable DMA
 
 			#ifdef DEBUG
 			dbg_printf("\nread \n");
@@ -350,7 +403,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 
 	timeoutRun = false;	// Do not show error screen
 
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	return true;
 }
