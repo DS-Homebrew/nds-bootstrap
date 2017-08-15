@@ -279,6 +279,11 @@ void loadBinary_ARM7 (aFile file)
 		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
 	
+        if(*(u32*)(0x27FF00C) == 0x454C5741){
+                *(u32*)(0x203E7B0) = 0;
+        }
+
+	
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
