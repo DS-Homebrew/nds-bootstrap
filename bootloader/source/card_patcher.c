@@ -64,7 +64,8 @@ u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
-  
+
+u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
  
 
      
@@ -504,6 +505,17 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 		debug[13] = arenaLo2Offset;
 	}*/
+	
+	u32 randomPatchOffset =  
+        	getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        	      (u32*)aRandomPatch, 4, 1);
+		if(randomPatchOffset){
+			*(u32*)(randomPatchOffset+0xC) = 0x0;
+		}
+    		if (!randomPatchOffset) {
+        		//dbg_printf("Card read end not found\n"); Don't bother logging it.
+	        	return 0;
+    		}
 
 	debug[2] = cardEngineLocation;
 
