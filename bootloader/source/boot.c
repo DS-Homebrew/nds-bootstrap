@@ -225,11 +225,11 @@ void loadBinary_ARM7 (aFile file)
 	//Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170);
 
-	if((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x414441;	// Diamond
-	|| *((u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415041;	// Pearl
-	|| *((u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415043;	// Platinum
-	|| *((u32*)(0x27FF00C) & 0x00FFFFFF) == 0x4B5049;	// HG
-	|| *((u32*)(0x27FF00C) & 0x00FFFFFF) == 0x475049;	// HG
+	if(*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x414441	// Diamond
+	|| *(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415041	// Pearl
+	|| *(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415043	// Platinum
+	|| *(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x4B5049	// HG
+	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x475049)// SS
 	{
 		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
