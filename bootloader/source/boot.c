@@ -274,7 +274,8 @@ void loadBinary_ARM7 (aFile file)
 	|| *(u32*)(0x27FF00C) == 0x57415041	// Pearl
 	|| *(u32*)(0x27FF00C) == 0x58415041	// Pearl
 	|| *(u32*)(0x27FF00C) == 0x59415041	// Pearl
-	|| *(u32*)(0x27FF00C) == 0x5A415041)	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x5A415041	// Pearl
+	|| *(u32*)(0x27FF00C) == 0x45555043)	// Platinum(U)
 	{
 		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
