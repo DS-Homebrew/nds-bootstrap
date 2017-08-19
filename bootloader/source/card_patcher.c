@@ -506,16 +506,18 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		debug[13] = arenaLo2Offset;
 	}*/
 	
-	u32 randomPatchOffset =  
-        	getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-        	      (u32*)aRandomPatch, 4, 1);
-		if(randomPatchOffset){
-			*(u32*)(randomPatchOffset+0xC) = 0x0;
-		}
-    		if (!randomPatchOffset) {
-        		//dbg_printf("Card read end not found\n"); Don't bother logging it.
-	        	return 0;
-    		}
+	if(moduleParams->sdk_version > 0x3000000) {
+		u32 randomPatchOffset =  
+				getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+					  (u32*)aRandomPatch, 4, 1);
+			if(randomPatchOffset){
+				*(u32*)(randomPatchOffset+0xC) = 0x0;
+			}
+				if (!randomPatchOffset) {
+					//dbg_printf("Card read end not found\n"); Don't bother logging it.
+					return 0;
+				}
+	}
 
 	debug[2] = cardEngineLocation;
 
