@@ -506,7 +506,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		debug[13] = arenaLo2Offset;
 	}*/
 	
-	if(moduleParams->sdk_version > 0x3000000) {
+	if(moduleParams->sdk_version > 0x3000000 && (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x4C5741) {
 		u32 randomPatchOffset =  
 				getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 					  (u32*)aRandomPatch, 4, 1);
