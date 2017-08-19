@@ -24,7 +24,6 @@
 #include "fat.h"
 #include "i2c.h"
 
-#include "sr_data_fourswords.h"	// For soft-reset
 #include "sr_data_error.h"	// For showing an error screen
 
 static bool initialized = false;
@@ -219,12 +218,6 @@ void runCardEngineCheck (void) {
 			break;
 	}
 	REG_MASTER_VOLUME = volLevel;
-	
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_A | KEY_B | KEY_X | KEY_Y))) {
-		memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
-		i2cWriteRegister(0x4a,0x70,0x01);
-		i2cWriteRegister(0x4a,0x11,0x01);
-	}
 	
 	if (timeoutRun) {
 		u8 setting = i2cReadRegister(0x4A, 0x73);
