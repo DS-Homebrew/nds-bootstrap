@@ -209,13 +209,13 @@ void runCardEngineCheck (void) {
 			dbg_hexa(marker);
 			#endif
 
-			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			timeoutRun = false;	// If card read received, do not show error screen
-			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
+			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			//*NDMA0CNT |= BIT(31);	// Enable DMA
 			fileRead(dst,romFile,src,len);
 			//*NDMA0CNT &= ~(BIT(31));	// Disable DMA
+			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 			#ifdef DEBUG
 			dbg_printf("\nread \n");
