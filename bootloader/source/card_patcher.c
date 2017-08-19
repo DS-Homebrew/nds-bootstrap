@@ -514,8 +514,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 				*(u32*)(randomPatchOffset+0xC) = 0x0;
 			}
 				if (!randomPatchOffset) {
-					//dbg_printf("Card read end not found\n"); Don't bother logging it.
-					return 0;
+					//dbg_printf("Random patch not found\n"); Don't bother logging it.
 				}
 	}
 
