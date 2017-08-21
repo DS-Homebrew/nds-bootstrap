@@ -171,6 +171,8 @@ void initMBK() {
 	REG_MBK8=0x07403700; // same as dsiware
 }
 
+bool consoleInited = false;
+
 int reinittimer = 0;
 bool run_reinittimer = true;
 //---------------------------------------------------------------------------------
@@ -180,6 +182,14 @@ void VcountHandler() {
 		reinittimer++;
 		if (reinittimer == 90) {
 			InitSD();	// Re-init SD if fatInit is looping
+		}
+		if (reinittimer == 180) {
+			if(!consoleInited) consoleDemoInit();
+			consoleInited = true;
+			consoleClear();
+			nocashMessage("fatInitDefault crashed!");
+			printf("fatInitDefault crashed!");
+			run_reinittimer = false;
 		}
 	}
 }
@@ -201,7 +211,8 @@ int main( int argc, char **argv) {
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
 			
-			consoleDemoInit();
+			if(!consoleInited) consoleDemoInit();
+			consoleInited = true;
 			
 			// fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 			
@@ -211,7 +222,7 @@ int main( int argc, char **argv) {
 		
 		fatInitDefault();
 		nocashMessage("fatInitDefault");
-		run_reinittimer = false;
+		reinittimer = 0;
 
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
 		switch(romread_LED) {
@@ -233,6 +244,7 @@ int main( int argc, char **argv) {
 		}
 		
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
+		reinittimer = 0;
 		
 		// adjust TSC[1:26h] and TSC[1:27h]
 		// for certain gamecodes
@@ -307,6 +319,8 @@ int main( int argc, char **argv) {
 
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
+		reinittimer = 0;
+		run_reinittimer = false;
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
