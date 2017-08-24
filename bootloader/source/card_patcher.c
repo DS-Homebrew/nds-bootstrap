@@ -508,6 +508,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	
 	if(moduleParams->sdk_version > 0x3000000
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x544B41	// Doctor Tendo
+	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x434241	// Harvest Moon DS
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x4C5741) // TWEWY
 	{
 		u32 randomPatchOffset =  
