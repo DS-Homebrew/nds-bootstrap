@@ -20,12 +20,12 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x8000
+#define READ_SIZE_ARM7 0x10000
 
 #define CACHE_ADRESS_START 0x02800000
 #define CACHE_ADRESS_END 0x02FF8000
 #define CACHE_ADRESS_SIZE 0x7F8000
-#define REG_MBK_CACHE_SIZE	0xFF
+#define REG_MBK_CACHE_SIZE	0x7F
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -72,7 +72,7 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*0x8000);
+	return (vu32*)(CACHE_ADRESS_START+slot*READ_SIZE_ARM7);
 }
 
 void updateDescriptor(int slot, u32 sector) {
