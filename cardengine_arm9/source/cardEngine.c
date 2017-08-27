@@ -20,12 +20,11 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_ARM7 0x10000
+#define READ_SIZE_NDMA7 0x40000
 
 #define CACHE_ADRESS_START 0x02800000
-#define CACHE_ADRESS_END 0x02FF8000
 #define CACHE_ADRESS_SIZE 0x7F8000
-#define REG_MBK_CACHE_SIZE	0x7F
+#define REG_MBK_CACHE_SIZE	0x1F
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -72,7 +71,7 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*READ_SIZE_ARM7);
+	return (vu32*)(CACHE_ADRESS_START+slot*READ_SIZE_NDMA7);
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -100,7 +99,7 @@ int cardRead (u32* cacheStruct) {
 
 	u32 page = (src/512)*512;
 
-	u32 sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
+	u32 sector = (src/READ_SIZE_NDMA7)*READ_SIZE_NDMA7;
 
 	#ifdef DEBUG
 	// send a log command for debug purpose
@@ -121,7 +120,7 @@ int cardRead (u32* cacheStruct) {
 
 	REG_SCFG_EXT = 0x83008000;
 
-	if(page == src && len > READ_SIZE_ARM7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+	if(page == src && len > READ_SIZE_NDMA7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
 
@@ -150,14 +149,14 @@ int cardRead (u32* cacheStruct) {
 
 				buffer = getCacheAddress(slot);
 
-				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_ARM7);
+				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_NDMA7);
 
 				// transfer the WRAM-B cache to the arm7
 				//transfertToArm7(slot);
 
 				// write the command
 				sharedAddr[0] = buffer;
-				sharedAddr[1] = READ_SIZE_ARM7;
+				sharedAddr[1] = READ_SIZE_NDMA7;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -172,8 +171,8 @@ int cardRead (u32* cacheStruct) {
 			updateDescriptor(slot, sector);
 
 			u32 len2=len;
-			if((src - sector) + len2 > READ_SIZE_ARM7){
-			    len2 = sector - src + READ_SIZE_ARM7;
+			if((src - sector) + len2 > READ_SIZE_NDMA7){
+			    len2 = sector - src + READ_SIZE_NDMA7;
 			}
 
 			if(len2 > 512) {
@@ -232,7 +231,7 @@ int cardRead (u32* cacheStruct) {
 				src = cardStruct[0];
 				dst = cardStruct[1];
 				page = (src/512)*512;
-				sector = (src/READ_SIZE_ARM7)*READ_SIZE_ARM7;
+				sector = (src/READ_SIZE_NDMA7)*READ_SIZE_NDMA7;
 				accessCounter++;
 			}
 		}
