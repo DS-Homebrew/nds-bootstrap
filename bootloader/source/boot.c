@@ -88,7 +88,6 @@ extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
-extern unsigned long useDSiWRAM;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -242,7 +241,6 @@ void loadBinary_ARM7 (aFile file)
 	if(*(u32*)(0x27FF00C) == 0x454C5741){
                 *(u32*)(0x203E7B0) = 0;
         }
-
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
@@ -413,7 +411,6 @@ int main (void) {
 		}
 
 		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
-		*(u32*)(0x3703FF0) = useDSiWRAM;	// Use DSi WRAM as cache
 
 		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 			if(error == ERR_NONE) {

@@ -35,7 +35,6 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
-	.global useDSiWRAM
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -70,8 +69,6 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000		
 patchMpuSize:
-	.word	0x00000000		
-useDSiWRAM:
 	.word	0x00000000		
 
 startUp:

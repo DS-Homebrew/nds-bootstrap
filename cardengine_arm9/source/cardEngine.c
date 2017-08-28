@@ -129,11 +129,16 @@ void WRAM_updateDescriptor(int slot, u32 sector) {
 	WRAM_cacheCounter[slot] = WRAM_accessCounter;
 }
 
+bool cacheTypeSet = false;
+
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
-	if (*(u32*)(0x3703FF0) == 0x01) {
-		useDSiWRAM = true;
+	if(!cacheTypeSet) {
+		if(REG_KEYINPUT & KEY_A) {
+			useDSiWRAM = true;
+		}
+		cacheTypeSet = true;
 	}
 	
 	if (useDSiWRAM) {
