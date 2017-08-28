@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 useDSiWRAM) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -99,7 +99,15 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], strdup(savPath.c_str()), strdup(arm7DonorPath.c_str()), useArm7Donor, donorSdkVer, patchMpuRegion, patchMpuSize, argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0],
+							strdup(savPath.c_str()),
+							strdup(arm7DonorPath.c_str()),
+							useArm7Donor,
+							donorSdkVer,
+							patchMpuRegion,
+							patchMpuSize,
+							useDSiWRAM,
+							argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -308,7 +316,7 @@ int main( int argc, char **argv) {
 		initMBK();
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_WRAM_CACHE", 0));	
 	} else {
 		run_reinittimer = false;
 		consoleDemoInit();
