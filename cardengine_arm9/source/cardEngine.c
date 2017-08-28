@@ -20,11 +20,18 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define READ_SIZE_NDMA7 0x40000
+static u32 READ_SIZE_NDMA7 = 0x40000;
 
 #define CACHE_ADRESS_START 0x02800000
 #define CACHE_ADRESS_SIZE 0x7F8000
-#define REG_MBK_CACHE_SIZE	0x1F
+#define RAM_CACHE_SLOTS 0x1F
+
+static bool useDSiWRAM = false;
+#define WRAM_CACHE_ADRESS_START 0x03708000
+#define WRAM_CACHE_ADRESS_END 0x03778000
+#define WRAM_CACHE_ADRESS_SIZE 0x78000
+#define REG_MBK_CACHE_START	0x4004045
+#define REG_MBK_CACHE_SIZE	15
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -33,9 +40,12 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 cacheDescriptor [REG_MBK_CACHE_SIZE];
-static u32 cacheCounter [REG_MBK_CACHE_SIZE];
+static u32 cacheDescriptor [RAM_CACHE_SLOTS];
+static u32 cacheCounter [RAM_CACHE_SLOTS];
+static u32 WRAM_cacheDescriptor [REG_MBK_CACHE_SIZE];
+static u32 WRAM_cacheCounter [REG_MBK_CACHE_SIZE];
 static u32 accessCounter = 0;
+static u32 WRAM_accessCounter = 0;
 
 void user_exception(void);
 
@@ -50,7 +60,7 @@ void setExceptionHandler2() {
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = accessCounter;
-	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
+	for(int i=0; i<RAM_CACHE_SLOTS; i++) {
 		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -61,8 +71,31 @@ int allocateCacheSlot() {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
+	for(int i=0; i<RAM_CACHE_SLOTS; i++) {
 		if(cacheDescriptor[i]==sector) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+int WRAM_allocateCacheSlot() {
+	int slot = 0;
+	int lowerCounter = WRAM_accessCounter;
+	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
+		if(WRAM_cacheCounter[i]<=lowerCounter) {
+			lowerCounter = WRAM_cacheCounter[i];
+			slot = i;
+			if(!lowerCounter) break;
+		}
+	}
+	return slot;
+}
+
+int WRAM_getSlotForSector(u32 sector) {
+	for(int i=0; i<REG_MBK_CACHE_SIZE; i++) {
+		if(WRAM_cacheDescriptor[i]==sector) {
 			return i;
 		}
 	}
@@ -74,22 +107,47 @@ vu8* getCacheAddress(int slot) {
 	return (vu32*)(CACHE_ADRESS_START+slot*READ_SIZE_NDMA7);
 }
 
+vu8* WRAM_getCacheAddress(int slot) {
+	return (vu32*)(WRAM_CACHE_ADRESS_START+slot*READ_SIZE_NDMA7);
+}
+
+void transfertToArm7(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
+}
+
+void transfertToArm9(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
+}
+
 void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
 }
 
+void WRAM_updateDescriptor(int slot, u32 sector) {
+	WRAM_cacheDescriptor[slot] = sector;
+	WRAM_cacheCounter[slot] = WRAM_accessCounter;
+}
+
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
-	REG_SCFG_EXT = 0x83008000;
-	*(u32*)(0x2FFFFFC) = &cacheDescriptor;
-	REG_SCFG_EXT = 0x83000000;
+	if (*(u32*)(0x3703FF0) == 0x01) {
+		useDSiWRAM = true;
+	}
+	
+	if (useDSiWRAM) {
+		READ_SIZE_NDMA7 = 0x8000;
+	}
 	
 	setExceptionHandler2();
 	
-	accessCounter++;
-
+	if (useDSiWRAM) {
+		WRAM_accessCounter++;
+	} else {
+		accessCounter++;
+	}
+	
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
@@ -118,7 +176,7 @@ int cardRead (u32* cacheStruct) {
 	#endif
 
 
-	REG_SCFG_EXT = 0x83008000;
+	if (!useDSiWRAM) REG_SCFG_EXT = 0x83008000;
 
 	if(page == src && len > READ_SIZE_NDMA7 && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
@@ -138,21 +196,34 @@ int cardRead (u32* cacheStruct) {
 	} else {
 		// read via the WRAM cache
 		while(len > 0) {
-			int slot = getSlotForSector(sector);
-			vu8* buffer = getCacheAddress(slot);
+			int slot = 0;
+			vu8* buffer = 0;
+			if (useDSiWRAM) {
+				slot = WRAM_getSlotForSector(sector);
+				buffer = WRAM_getCacheAddress(slot);
+			} else {
+				slot = getSlotForSector(sector);
+				buffer = getCacheAddress(slot);
+			}
 			// read max 32k via the WRAM cache
 			if(slot==-1) {
 				// send a command to the arm7 to fill the WRAM cache
 				commandRead = 0x025FFB08;
 
-				slot = allocateCacheSlot();
-
-				buffer = getCacheAddress(slot);
+				if (useDSiWRAM) {
+					slot = WRAM_allocateCacheSlot();
+					
+					buffer = WRAM_getCacheAddress(slot);
+				} else {
+					slot = allocateCacheSlot();
+					
+					buffer = getCacheAddress(slot);
+				}
 
 				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_NDMA7);
 
 				// transfer the WRAM-B cache to the arm7
-				//transfertToArm7(slot);
+				if (useDSiWRAM) transfertToArm7(slot);
 
 				// write the command
 				sharedAddr[0] = buffer;
@@ -165,10 +236,14 @@ int cardRead (u32* cacheStruct) {
 				while(sharedAddr[3] != (vu32)0);
 
 				// transfer back the WRAM-B cache to the arm9
-				//transfertToArm9(slot);
+				if (useDSiWRAM) transfertToArm9(slot);
 			}
 
-			updateDescriptor(slot, sector);
+			if (useDSiWRAM) {
+				WRAM_updateDescriptor(slot, sector);
+			} else {
+				updateDescriptor(slot, sector);
+			}
 
 			u32 len2=len;
 			if((src - sector) + len2 > READ_SIZE_NDMA7){
@@ -232,7 +307,11 @@ int cardRead (u32* cacheStruct) {
 				dst = cardStruct[1];
 				page = (src/512)*512;
 				sector = (src/READ_SIZE_NDMA7)*READ_SIZE_NDMA7;
-				accessCounter++;
+				if (useDSiWRAM) {
+					WRAM_accessCounter++;
+				} else {
+					accessCounter++;
+				}
 			}
 		}
 	}
