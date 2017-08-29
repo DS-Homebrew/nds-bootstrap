@@ -132,9 +132,9 @@ int cardRead (u32* cacheStruct) {
 	} else {
 		// read via the WRAM cache
 		while(len > 0) {
-			REG_SCFG_EXT = 0x83008000;
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
+			REG_SCFG_EXT = 0x83008000;
 			// read max READ_SIZE_NDMA7 via the main RAM cache
 			if(slot==-1) {
 				// send a command to the arm7 to fill the RAM cache
@@ -216,9 +216,9 @@ int cardRead (u32* cacheStruct) {
 				// read via the 512b ram cache
 				REG_SCFG_EXT = 0x83008000;
 				fastCopy32(buffer+(page-sector), cacheBuffer, 512);
+				REG_SCFG_EXT = 0x83000000;
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
-				REG_SCFG_EXT = 0x83000000;
 			}
 			len = cardStruct[2];
 			if(len>0) {
