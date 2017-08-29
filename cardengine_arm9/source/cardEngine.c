@@ -22,9 +22,9 @@
 
 #define READ_SIZE_NDMA7 0x20000
 
-#define CACHE_ADRESS_START 0x02800000
-#define CACHE_ADRESS_SIZE 0x7F8000
-#define RAM_CACHE_SLOTS 0x3F
+#define CACHE_ADRESS_START 0x0C400000
+#define CACHE_ADRESS_SIZE 0xC00000
+#define RAM_CACHE_SLOTS 0x60
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -130,11 +130,11 @@ int cardRead (u32* cacheStruct) {
 		while(sharedAddr[3] != (vu32)0);
 
 	} else {
+		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
 		// read via the WRAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			REG_SCFG_EXT = 0x83008000;
 			// read max READ_SIZE_NDMA7 via the main RAM cache
 			if(slot==-1) {
 				// send a command to the arm7 to fill the RAM cache
@@ -143,6 +143,8 @@ int cardRead (u32* cacheStruct) {
 				slot = allocateCacheSlot();
 				
 				buffer = getCacheAddress(slot);
+
+				REG_SCFG_EXT = 0x83008000;
 
 				if(needFlushDCCache) DC_FlushRange(buffer, READ_SIZE_NDMA7);
 
@@ -155,10 +157,11 @@ int cardRead (u32* cacheStruct) {
 				IPC_SendSync(0xEE24);
 
 				while(sharedAddr[3] != (vu32)0);
+
+				REG_SCFG_EXT = 0x83000000;
 			}
 
 			updateDescriptor(slot, sector);
-			REG_SCFG_EXT = 0x83000000;
 
 			u32 len2=len;
 			if((src - sector) + len2 > READ_SIZE_NDMA7){
