@@ -38,14 +38,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-u32* NDMA0SAD = 0x4004104;
-u32* NDMA0DAD = 0x4004108;
-u32* NDMA0TCNT = 0x400410C;
-u32* NDMA0WCNT = 0x4004110;
-u32* NDMA0BCNT = 0x4004114;
-u32* NDMA0FDATA = 0x4004118;
-u32* NDMA0CNT = 0x400411C;
-
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
@@ -178,11 +170,6 @@ void runCardEngineCheck (void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
-
-			*NDMA0SAD = src;
-			*NDMA0DAD = dst;
-			*NDMA0TCNT = 0x8000;
-			*NDMA0WCNT = len;
 
 			#ifdef DEBUG
 			dbg_printf("\ncard read received v2\n");
