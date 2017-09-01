@@ -24,7 +24,8 @@
 #include "fat.h"
 #include "i2c.h"
 
-#include "sr_data_twloader.h"	// For showing an error screen
+#include "sr_data_error.h"	// For showing an error screen
+#include "sr_data_srloader.h"	// For rebooting into SRLoader
 
 static bool initialized = false;
 static bool initializedIRQ = false;
@@ -54,23 +55,23 @@ void initLogging() {
 		else
 			savFile.firstCluster = CLUSTER_FREE;
 		buildFatTableCache(romFile);
-		#ifdef DEBUG
+		#ifdef DEBUG		
 		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
 		enableDebug(myDebugFile);
-		dbg_printf("logging initialized\n");
+		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
-		dbg_hexa(sdk_version);
-		dbg_printf("\n");
+		dbg_hexa(sdk_version);		
+		dbg_printf("\n");	
 		dbg_printf("rom file :");
-		dbg_hexa(fileCluster);
-		dbg_printf("\n");
+		dbg_hexa(fileCluster);	
+		dbg_printf("\n");	
 		dbg_printf("save file :");
-		dbg_hexa(saveCluster);
+		dbg_hexa(saveCluster);	
 		dbg_printf("\n");
-		#endif
+		#endif			
 		initialized=true;
 	}
-
+	
 }
 
 void cardReadLED (bool on) {
@@ -114,13 +115,19 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG
 	nocashMessage("runCardEngineCheck");
 	#endif
-
+	
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {} else {
+		memcpy((u32*)0x02000300,sr_data_srloader,0x020);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
+	}
+	
 	if (timeoutRun) {
 		u8 setting = i2cReadRegister(0x4A, 0x73);
 		if (setting == 0x01) {
 			timeoutTimer += 1;
 			if (timeoutTimer == 60*2) {
-				memcpy((u32*)0x02000000,sr_data_twloader,0x560);
+				memcpy((u32*)0x02000300,sr_data_error,0x020);
 				i2cWriteRegister(0x4a,0x70,0x01);
 				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
 			}
@@ -128,86 +135,84 @@ void runCardEngineCheck (void) {
 			timeoutRun = false;
 		}
 	}
-
-	if(tryLockMutex()) {
+	
+	if(tryLockMutex()) {	
 		initLogging();
-
+		
 		//nocashMessage("runCardEngineCheck mutex ok");
-
+		
 		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-		{
-			#ifdef DEBUG
+		{			
+			#ifdef DEBUG		
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);
+			u32 marker = *(vu32*)(sharedAddr+3);			
 
-			dbg_printf("\ncard read received\n");
-
+			dbg_printf("\ncard read received\n");			
+				
 			if(calledViaIPC) {
 				dbg_printf("\ntriggered via IPC\n");
 			}
 			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);
+			dbg_hexa(cardStruct);		
 			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);
+			dbg_hexa(src);		
 			dbg_printf("\ndst : \n");
 			dbg_hexa(dst);
 			dbg_printf("\nlen : \n");
 			dbg_hexa(len);
 			dbg_printf("\nmarker : \n");
 			dbg_hexa(marker);
-
+			
 			dbg_printf("\nlog only \n");
-			#endif
-
-			*(vu32*)(0x027FFB14) = 0;
+			#endif			
+			
+			*(vu32*)(0x027FFB14) = 0;	
 		}
-
+		
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
-
-			#ifdef DEBUG
+		
+			#ifdef DEBUG		
 			dbg_printf("\ncard read received v2\n");
-
+			
 			if(calledViaIPC) {
 				dbg_printf("\ntriggered via IPC\n");
 			}
-
+			
 			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);
+			dbg_hexa(cardStruct);		
 			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);
+			dbg_hexa(src);		
 			dbg_printf("\ndst : \n");
 			dbg_hexa(dst);
 			dbg_printf("\nlen : \n");
 			dbg_hexa(len);
 			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);
-			#endif
-
+			dbg_hexa(marker);			
+			#endif		
+			
 			timeoutRun = false;	// If card read received, do not show error screen
-
+			
 			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-			//*NDMA0CNT |= BIT(31);	// Enable DMA
 			fileRead(dst,romFile,src,len);
-			//*NDMA0CNT &= ~(BIT(31));	// Disable DMA
 			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-
-			#ifdef DEBUG
-			dbg_printf("\nread \n");
+			
+			#ifdef DEBUG		
+			dbg_printf("\nread \n");			
 			if(is_aligned(dst,4) || is_aligned(len,4)) {
 				dbg_printf("\n aligned read : \n");
 			} else {
 				dbg_printf("\n misaligned read : \n");
-			}
-			#endif
-
-			*(vu32*)(0x027FFB14) = 0;
+			}			
+			#endif	
+	
+			*(vu32*)(0x027FFB14) = 0;		
 		}
 		unlockMutex();
 	}
@@ -216,34 +221,34 @@ void runCardEngineCheck (void) {
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG
+	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerFIFO");
-	#endif
-
+	#endif	
+	
 	calledViaIPC = true;
-
+	
 	runCardEngineCheck();
 }
 
 
 void myIrqHandlerVBlank(void) {
-	#ifdef DEBUG
+	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
-	#endif
-
+	#endif	
+	
 	calledViaIPC = false;
-
+	
 	runCardEngineCheck();
 }
 
-u32 myIrqEnable(u32 irq) {
-	int oldIME = enterCriticalSection();
-
-	#ifdef DEBUG
+u32 myIrqEnable(u32 irq) {	
+	int oldIME = enterCriticalSection();	
+	
+	#ifdef DEBUG		
 	nocashMessage("myIrqEnable\n");
-	#endif
-
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
+	#endif	
+	
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
@@ -252,18 +257,18 @@ u32 myIrqEnable(u32 irq) {
 	return irq_before;
 }
 
-void irqIPCSYNCEnable() {
+void irqIPCSYNCEnable() {	
 	if(!initializedIRQ) {
-		int oldIME = enterCriticalSection();
-		initLogging();
-		#ifdef DEBUG
-		dbg_printf("\nirqIPCSYNCEnable\n");
-		#endif
+		int oldIME = enterCriticalSection();	
+		initLogging();	
+		#ifdef DEBUG		
+		dbg_printf("\nirqIPCSYNCEnable\n");	
+		#endif	
 		REG_IE |= IRQ_IPC_SYNC;
 		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-		#ifdef DEBUG
+		#ifdef DEBUG		
 		dbg_printf("IRQ_IPC_SYNC enabled\n");
-		#endif
+		#endif	
 		leaveCriticalSection(oldIME);
 		initializedIRQ = true;
 	}
@@ -272,79 +277,79 @@ void irqIPCSYNCEnable() {
 // ARM7 Redirected function
 
 bool eepromProtect (void) {
-	#ifdef DEBUG
+	#ifdef DEBUG		
 	dbg_printf("\narm7 eepromProtect\n");
-	#endif
-
+	#endif	
+	
 	return true;
 }
 
 bool eepromRead (u32 src, void *dst, u32 len) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 eepromRead\n");
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromRead\n");	
+	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
+	dbg_hexa(src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif
-
+	#endif	
+	
 	fileRead(dst,savFile,src,len);
-
+	
 	return true;
 }
 
 bool eepromPageWrite (u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 eepromPageWrite\n");
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageWrite\n");	
+	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif
+	#endif	
 
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-
+	
 	return true;
 }
 
 bool eepromPageProg (u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 eepromPageProg\n");
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageProg\n");	
+	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif
+	#endif	
 
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-
+	
 	return true;
 }
 
 bool eepromPageVerify (u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 eepromPageVerify\n");
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageVerify\n");	
+	
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);
+	dbg_hexa((u32)src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif
+	#endif	
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src,savFile,dst,len);
@@ -353,41 +358,41 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageErase (u32 dst) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 eepromPageErase\n");
-	#endif
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageErase\n");	
+	#endif	
+	
 	return true;
 }
 
 u32 cardId (void) {
-	#ifdef DEBUG
+	#ifdef DEBUG	
 	dbg_printf("\cardId\n");
-	#endif
+	#endif	
 
 	return	1;
 }
 
 bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
-	#ifdef DEBUG
-	dbg_printf("\narm7 cardRead\n");
-
+	#ifdef DEBUG	
+	dbg_printf("\narm7 cardRead\n");	
+	
 	dbg_printf("\ndma : \n");
-	dbg_hexa(dma);
+	dbg_hexa(dma);		
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
+	dbg_hexa(src);		
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif
-
+	#endif	
+	
 	timeoutRun = false;	// Do not show error screen
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-
+	
 	return true;
 }
 

@@ -322,7 +322,7 @@ int cardRead (u32* cacheStruct) {
 
 	} else {
 		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
-		// read via the WRAM cache
+		// read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
