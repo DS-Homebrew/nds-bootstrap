@@ -26,12 +26,15 @@
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
 
-#define _64KB_CACHE_ADRESS_START 0x0C400000
+#define _32KB_CACHE_ADRESS_START 0x0C400000
+#define _32KB_CACHE_ADRESS_SIZE 0x80000
+#define _32KB_CACHE_SLOTS 0x10
+#define _64KB_CACHE_ADRESS_START 0x0C480000
 #define _64KB_CACHE_ADRESS_SIZE 0x80000
 #define _64KB_CACHE_SLOTS 0x8
-#define _128KB_CACHE_ADRESS_START 0x0C480000
-#define _128KB_CACHE_ADRESS_SIZE 0x380000
-#define _128KB_CACHE_SLOTS 0x1C
+#define _128KB_CACHE_ADRESS_START 0x0C500000
+#define _128KB_CACHE_ADRESS_SIZE 0x300000
+#define _128KB_CACHE_SLOTS 0x15
 #define _256KB_CACHE_ADRESS_START 0x0C800000
 #define _256KB_CACHE_ADRESS_SIZE 0x400000
 #define _256KB_CACHE_SLOTS 0x10
@@ -46,6 +49,8 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
+static u32 _32KB_cacheDescriptor [_32KB_CACHE_SLOTS];
+static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS];
 static u32 _64KB_cacheDescriptor [_64KB_CACHE_SLOTS];
 static u32 _64KB_cacheCounter [_64KB_CACHE_SLOTS];
 static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS];
@@ -54,6 +59,7 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS];
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS];
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
+static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
 static u32 _256KB_accessCounter = 0;
@@ -77,6 +83,17 @@ int allocateCacheSlot() {
 	switch(selectedSize) {
 		case 0:
 		default:
+			lowerCounter = _32KB_accessCounter;
+			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
+				if(_32KB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = _32KB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			return slot;
+			break;
+		case 1:
 			lowerCounter = _64KB_accessCounter;
 			for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
 				if(_64KB_cacheCounter[i]<=lowerCounter) {
@@ -87,7 +104,7 @@ int allocateCacheSlot() {
 			}
 			return slot;
 			break;
-		case 1:
+		case 2:
 			lowerCounter = _128KB_accessCounter;
 			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
 				if(_128KB_cacheCounter[i]<=lowerCounter) {
@@ -98,7 +115,7 @@ int allocateCacheSlot() {
 			}
 			return slot;
 			break;
-		case 2:
+		case 3:
 			lowerCounter = _256KB_accessCounter;
 			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
 				if(_256KB_cacheCounter[i]<=lowerCounter) {
@@ -109,7 +126,7 @@ int allocateCacheSlot() {
 			}
 			return slot;
 			break;
-		case 3:
+		case 4:
 			lowerCounter = _512KB_accessCounter;
 			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
 				if(_512KB_cacheCounter[i]<=lowerCounter) {
@@ -127,27 +144,34 @@ int getSlotForSector(u32 sector) {
 	switch(selectedSize) {
 		case 0:
 		default:
+			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
+				if(_32KB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 1:
 			for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
 				if(_64KB_cacheDescriptor[i]==sector) {
 					return i;
 				}
 			}
 			break;
-		case 1:
+		case 2:
 			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
 				if(_128KB_cacheDescriptor[i]==sector) {
 					return i;
 				}
 			}
 			break;
-		case 2:
+		case 3:
 			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
 				if(_256KB_cacheDescriptor[i]==sector) {
 					return i;
 				}
 			}
 			break;
-		case 3:
+		case 4:
 			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
 				if(_512KB_cacheDescriptor[i]==sector) {
 					return i;
@@ -163,15 +187,18 @@ vu8* getCacheAddress(int slot) {
 	switch(selectedSize) {
 		case 0:
 		default:
-			return (vu32*)(_64KB_CACHE_ADRESS_START+slot*_64KB_READ_SIZE);
+			return (vu32*)(_32KB_CACHE_ADRESS_START+slot*_32KB_READ_SIZE);
 			break;
 		case 1:
-			return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			return (vu32*)(_64KB_CACHE_ADRESS_START+slot*_64KB_READ_SIZE);
 			break;
 		case 2:
-			return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 			break;
 		case 3:
+			return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			break;
+		case 4:
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
 	}
@@ -181,17 +208,22 @@ void updateDescriptor(int slot, u32 sector) {
 	switch(selectedSize) {
 		case 0:
 		default:
+			_32KB_cacheDescriptor[slot] = sector;
+			_32KB_cacheCounter[slot] = _32KB_accessCounter;
+			break;
+		case 1:
 			_64KB_cacheDescriptor[slot] = sector;
 			_64KB_cacheCounter[slot] = _64KB_accessCounter;
 			break;
-		case 1:
+		case 2:
 			_128KB_cacheDescriptor[slot] = sector;
 			_128KB_cacheCounter[slot] = _128KB_accessCounter;
 			break;
-		case 2:
+		case 3:
 			_256KB_cacheDescriptor[slot] = sector;
 			_256KB_cacheCounter[slot] = _256KB_accessCounter;
-		case 3:
+			break;
+		case 4:
 			_512KB_cacheDescriptor[slot] = sector;
 			_512KB_cacheCounter[slot] = _512KB_accessCounter;
 			break;
@@ -202,15 +234,18 @@ void accessCounterIncrease() {
 	switch(selectedSize) {
 		case 0:
 		default:
-			_64KB_accessCounter++;
+			_32KB_accessCounter++;
 			break;
 		case 1:
-			_128KB_accessCounter++;
+			_64KB_accessCounter++;
 			break;
 		case 2:
-			_256KB_accessCounter++;
+			_128KB_accessCounter++;
 			break;
 		case 3:
+			_256KB_accessCounter++;
+			break;
+		case 4:
 			_512KB_accessCounter++;
 			break;
 	}
@@ -247,18 +282,22 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	selectedSize = 3;
+	selectedSize = 4;
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
-	if(len <= _64KB_READ_SIZE) {
+	if(len <= _32KB_READ_SIZE) {
 		selectedSize = 0;
+		CACHE_READ_SIZE = _32KB_READ_SIZE;
+	}
+	if(len <= _64KB_READ_SIZE) {
+		selectedSize = 1;
 		CACHE_READ_SIZE = _64KB_READ_SIZE;
 	}
 	if(len <= _128KB_READ_SIZE) {
-		selectedSize = 1;
+		selectedSize = 2;
 		CACHE_READ_SIZE = _128KB_READ_SIZE;
 	}
 	if(len <= _256KB_READ_SIZE) {
-		selectedSize = 2;
+		selectedSize = 3;
 		CACHE_READ_SIZE = _256KB_READ_SIZE;
 	}
 	
