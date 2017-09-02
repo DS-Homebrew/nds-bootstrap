@@ -26,23 +26,21 @@
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
 
-#define REG_MBK_32KB_CACHE_START	0x4004045
-#define _32KB_CACHE_ADRESS_START 0x03708000
-#define _32KB_CACHE_ADRESS_END 0x03778000
-#define _32KB_CACHE_ADRESS_SIZE 0x78000
-#define _32KB_CACHE_SLOTS 15
-#define _64KB_CACHE_ADRESS_START 0x0C400000
-#define _64KB_CACHE_ADRESS_SIZE 0x100000
-#define _64KB_CACHE_SLOTS 0x10
-#define _128KB_CACHE_ADRESS_START 0x0C500000
-#define _128KB_CACHE_ADRESS_SIZE 0x300000
-#define _128KB_CACHE_SLOTS 0x15
-#define _256KB_CACHE_ADRESS_START 0x0C800000
-#define _256KB_CACHE_ADRESS_SIZE 0x400000
-#define _256KB_CACHE_SLOTS 0x10
-#define _512KB_CACHE_ADRESS_START 0x0CC00000
-#define _512KB_CACHE_ADRESS_SIZE 0x400000
-#define _512KB_CACHE_SLOTS 0x8
+#define _32KB_CACHE_ADRESS_START 0x0C400000
+#define _32KB_CACHE_ADRESS_SIZE 0x200000
+#define _32KB_CACHE_SLOTS 0x40
+#define _64KB_CACHE_ADRESS_START 0x0C600000
+#define _64KB_CACHE_ADRESS_SIZE 0x400000
+#define _64KB_CACHE_SLOTS 0x40
+#define _128KB_CACHE_ADRESS_START 0x0CA00000
+#define _128KB_CACHE_ADRESS_SIZE 0x600000
+#define _128KB_CACHE_SLOTS 0x30
+#define _256KB_CACHE_ADRESS_START 0x0D000000
+#define _256KB_CACHE_ADRESS_SIZE 0x800000
+#define _256KB_CACHE_SLOTS 0x20
+#define _512KB_CACHE_ADRESS_START 0x0D800000
+#define _512KB_CACHE_ADRESS_SIZE 0x800000
+#define _512KB_CACHE_SLOTS 0x10
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -206,14 +204,6 @@ vu8* getCacheAddress(int slot) {
 	}
 }
 
-void transfertToArm7(int slot) {
-	*((vu8*)(REG_MBK_32KB_CACHE_START+slot)) |= 0x1;
-}
-
-void transfertToArm9(int slot) {
-	*((vu8*)(REG_MBK_32KB_CACHE_START+slot)) &= 0xFE;
-}
-
 void updateDescriptor(int slot, u32 sector) {
 	switch(selectedSize) {
 		case 0:
@@ -345,13 +335,10 @@ int cardRead (u32* cacheStruct) {
 				
 				buffer = getCacheAddress(slot);
 
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+				REG_SCFG_EXT = 0x8300C000;
 
 				if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
-				// transfer the WRAM-B cache to the arm7
-				if (selectedSize == 0) transfertToArm7(slot);				
-				
 				// write the command
 				sharedAddr[0] = buffer;
 				sharedAddr[1] = CACHE_READ_SIZE;
@@ -361,11 +348,8 @@ int cardRead (u32* cacheStruct) {
 				IPC_SendSync(0xEE24);
 
 				while(sharedAddr[3] != (vu32)0);
-				
-				// transfer back the WRAM-B cache to the arm9
-				if (selectedSize == 0) transfertToArm9(slot);
 
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+				REG_SCFG_EXT = 0x83000000;
 			}
 
 			updateDescriptor(slot, sector);
@@ -398,9 +382,9 @@ int cardRead (u32* cacheStruct) {
 				#endif
 
 				// copy directly
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+				REG_SCFG_EXT = 0x8300C000;
 				fastCopy32(buffer+(src-sector),dst,len2);
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+				REG_SCFG_EXT = 0x83000000;
 
 				// update cardi common
 				cardStruct[0] = src + len2;
@@ -424,9 +408,9 @@ int cardRead (u32* cacheStruct) {
 				#endif
 
 				// read via the 512b ram cache
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+				REG_SCFG_EXT = 0x8300C000;
 				fastCopy32(buffer+(page-sector), cacheBuffer, 512);
-				if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+				REG_SCFG_EXT = 0x83000000;
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
 			}
