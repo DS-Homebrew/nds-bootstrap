@@ -54,17 +54,17 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 static u32 _32KB_cacheDescriptor [_32KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS];
 static u32 _64KB_cacheDescriptor [_64KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _64KB_cacheCounter [_64KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _64KB_cacheCounter [_64KB_CACHE_SLOTS];
 static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _128KB_cacheCounter [_128KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _128KB_cacheCounter [_128KB_CACHE_SLOTS];
 static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
 static u32 _1MB_cacheDescriptor [_1MB_CACHE_SLOTS] = {0xffffffff};
-static u32 _1MB_cacheCounter [_1MB_CACHE_SLOTS] = {0xffffffff};
+static u32 _1MB_cacheCounter [_1MB_CACHE_SLOTS];
 static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
