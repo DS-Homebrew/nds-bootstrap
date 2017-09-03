@@ -20,6 +20,8 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
+#define ROM_LOCATION 0x0C400000
+
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
 #define _128KB_READ_SIZE 0x20000
@@ -66,6 +68,9 @@ static u32 _256KB_accessCounter = 0;
 static u32 _512KB_accessCounter = 0;
 
 static int selectedSize = 0;
+
+static bool flagset_ROMinRAM = false;
+static bool ROMinRAM = false;
 
 void user_exception(void);
 
@@ -264,6 +269,15 @@ int cardRead (u32* cacheStruct) {
 	u32 len = cardStruct[2];
 
 	u32 page = (src/512)*512;
+	
+	if(!flagset_ROMinRAM) {
+		REG_SCFG_EXT = 0x8300C000;
+		// Check ROM size in ROM header...
+		// If ROM size is 0x01C00000 or below, then read from ROM in RAM.
+		if(*(u32*)(ROM_LOCATION+0xC0) <= 0x01C00000) ROMinRAM = true;
+		flagset_ROMinRAM = true;
+		REG_SCFG_EXT = 0x83000000;
+	}
 
 	#ifdef DEBUG
 	// send a log command for debug purpose
@@ -301,7 +315,7 @@ int cardRead (u32* cacheStruct) {
 		CACHE_READ_SIZE = _256KB_READ_SIZE;
 	}
 	
-	accessCounterIncrease();
+	if(!ROMinRAM) accessCounterIncrease();
 
 	u32 sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 
@@ -324,103 +338,162 @@ int cardRead (u32* cacheStruct) {
 		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
 		// read via the main RAM cache
 		while(len > 0) {
-			int slot = getSlotForSector(sector);
-			vu8* buffer = getCacheAddress(slot);
-			// read max CACHE_READ_SIZE via the main RAM cache
-			if(slot==-1) {
-				// send a command to the arm7 to fill the RAM cache
-				commandRead = 0x025FFB08;
+			if(!ROMinRAM) {
+				int slot = getSlotForSector(sector);
+				vu8* buffer = getCacheAddress(slot);
+				// read max CACHE_READ_SIZE via the main RAM cache
+				if(slot==-1) {
+					// send a command to the arm7 to fill the RAM cache
+					commandRead = 0x025FFB08;
 
-				slot = allocateCacheSlot();
-				
-				buffer = getCacheAddress(slot);
+					slot = allocateCacheSlot();
+					
+					buffer = getCacheAddress(slot);
 
-				REG_SCFG_EXT = 0x8300C000;
+					REG_SCFG_EXT = 0x8300C000;
 
-				if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
-				// write the command
-				sharedAddr[0] = buffer;
-				sharedAddr[1] = CACHE_READ_SIZE;
-				sharedAddr[2] = sector;
-				sharedAddr[3] = commandRead;
+					// write the command
+					sharedAddr[0] = buffer;
+					sharedAddr[1] = CACHE_READ_SIZE;
+					sharedAddr[2] = sector;
+					sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+					IPC_SendSync(0xEE24);
 
-				while(sharedAddr[3] != (vu32)0);
+					while(sharedAddr[3] != (vu32)0);
 
-				REG_SCFG_EXT = 0x83000000;
-			}
+					REG_SCFG_EXT = 0x83000000;
+				}
 
-			updateDescriptor(slot, sector);
+				updateDescriptor(slot, sector);
 
-			u32 len2=len;
-			if((src - sector) + len2 > CACHE_READ_SIZE){
-			    len2 = sector - src + CACHE_READ_SIZE;
-			}
+				u32 len2=len;
+				if((src - sector) + len2 > CACHE_READ_SIZE){
+					len2 = sector - src + CACHE_READ_SIZE;
+				}
 
-			if(len2 > 512) {
-				len2 -= src%4;
-				len2 -= len2 % 32;
-			}
+				if(len2 > 512) {
+					len2 -= src%4;
+					len2 -= len2 % 32;
+				}
 
-			if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
-				#ifdef DEBUG
-				// send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
+				if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
 
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+src-sector;
-				sharedAddr[3] = commandRead;
+					sharedAddr[0] = dst;
+					sharedAddr[1] = len2;
+					sharedAddr[2] = buffer+src-sector;
+					sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+					IPC_SendSync(0xEE24);
 
-				while(sharedAddr[3] != (vu32)0);
-				// -------------------------------------*/
-				#endif
+					while(sharedAddr[3] != (vu32)0);
+					// -------------------------------------*/
+					#endif
 
-				// copy directly
-				REG_SCFG_EXT = 0x8300C000;
-				fastCopy32(buffer+(src-sector),dst,len2);
-				REG_SCFG_EXT = 0x83000000;
+					// copy directly
+					REG_SCFG_EXT = 0x8300C000;
+					fastCopy32(buffer+(src-sector),dst,len2);
+					REG_SCFG_EXT = 0x83000000;
 
-				// update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = dst + len2;
-				cardStruct[2] = len - len2;
+					// update cardi common
+					cardStruct[0] = src + len2;
+					cardStruct[1] = dst + len2;
+					cardStruct[2] = len - len2;
+				} else {
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
+
+					sharedAddr[0] = page;
+					sharedAddr[1] = len2;
+					sharedAddr[2] = buffer+page-sector;
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
+					// -------------------------------------*/
+					#endif
+
+					// read via the 512b ram cache
+					REG_SCFG_EXT = 0x8300C000;
+					fastCopy32(buffer+(page-sector), cacheBuffer, 512);
+					REG_SCFG_EXT = 0x83000000;
+					*cachePage = page;
+					(*readCachedRef)(cacheStruct);
+				}
+				len = cardStruct[2];
+				if(len>0) {
+					src = cardStruct[0];
+					dst = cardStruct[1];
+					page = (src/512)*512;
+					sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
+					accessCounterIncrease();
+				}
 			} else {
-				#ifdef DEBUG
-				// send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
+				if(len >= 512 && len % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
 
-				sharedAddr[0] = page;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+page-sector;
-				sharedAddr[3] = commandRead;
+					sharedAddr[0] = dst;
+					sharedAddr[1] = len;
+					sharedAddr[2] = ROM_LOCATION+src;
+					sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+					IPC_SendSync(0xEE24);
 
-				while(sharedAddr[3] != (vu32)0);
-				// -------------------------------------*/
-				#endif
+					while(sharedAddr[3] != (vu32)0);
+					// -------------------------------------*/
+					#endif
 
-				// read via the 512b ram cache
-				REG_SCFG_EXT = 0x8300C000;
-				fastCopy32(buffer+(page-sector), cacheBuffer, 512);
-				REG_SCFG_EXT = 0x83000000;
-				*cachePage = page;
-				(*readCachedRef)(cacheStruct);
-			}
-			len = cardStruct[2];
-			if(len>0) {
-				src = cardStruct[0];
-				dst = cardStruct[1];
-				page = (src/512)*512;
-				sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
-				accessCounterIncrease();
+					// copy directly
+					REG_SCFG_EXT = 0x8300C000;
+					fastCopy32(ROM_LOCATION+src,dst,len);
+					REG_SCFG_EXT = 0x83000000;
+
+					// update cardi common
+					cardStruct[0] = src + len;
+					cardStruct[1] = dst + len;
+					cardStruct[2] = len - len;
+				} else {
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
+
+					sharedAddr[0] = page;
+					sharedAddr[1] = len;
+					sharedAddr[2] = ROM_LOCATION+page;
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
+					// -------------------------------------
+					#endif
+
+					// read via the 512b ram cache
+					REG_SCFG_EXT = 0x8300C000;
+					fastCopy32(ROM_LOCATION+page, cacheBuffer, 512);
+					REG_SCFG_EXT = 0x83000000;
+					*cachePage = page;
+					(*readCachedRef)(cacheStruct);
+				}
+				len = cardStruct[2];
+				if(len>0) {
+					src = cardStruct[0];
+					dst = cardStruct[1];
+					page = (src/512)*512;
+				}
 			}
 		}
 	}

@@ -235,6 +235,7 @@ int main( int argc, char **argv) {
 			if(romSize <= 0x01C00000) {
 				dbg_printf("Loading ROM into RAM...\n");
 				fread((void*)0x0C400000,1,romSize,ndsFile);
+				*(u32*)(0x0C4000C0) = romSize;
 			}
 			fclose(ndsFile);
 		} else {
