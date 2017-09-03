@@ -25,22 +25,26 @@
 #define _128KB_READ_SIZE 0x20000
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
+#define _1MB_READ_SIZE 0x100000
 
 #define _32KB_CACHE_ADRESS_START 0x0C400000
-#define _32KB_CACHE_ADRESS_SIZE 0x200000
-#define _32KB_CACHE_SLOTS 0x40
-#define _64KB_CACHE_ADRESS_START 0x0C600000
-#define _64KB_CACHE_ADRESS_SIZE 0x400000
-#define _64KB_CACHE_SLOTS 0x40
-#define _128KB_CACHE_ADRESS_START 0x0CA00000
-#define _128KB_CACHE_ADRESS_SIZE 0x600000
-#define _128KB_CACHE_SLOTS 0x30
-#define _256KB_CACHE_ADRESS_START 0x0D000000
-#define _256KB_CACHE_ADRESS_SIZE 0x800000
-#define _256KB_CACHE_SLOTS 0x20
-#define _512KB_CACHE_ADRESS_START 0x0D800000
+#define _32KB_CACHE_ADRESS_SIZE 0x180000
+#define _32KB_CACHE_SLOTS 0x30
+#define _64KB_CACHE_ADRESS_START 0x0C580000
+#define _64KB_CACHE_ADRESS_SIZE 0x280000
+#define _64KB_CACHE_SLOTS 0x28
+#define _128KB_CACHE_ADRESS_START 0x0C800000
+#define _128KB_CACHE_ADRESS_SIZE 0x500000
+#define _128KB_CACHE_SLOTS 0x28
+#define _256KB_CACHE_ADRESS_START 0x0CD00000
+#define _256KB_CACHE_ADRESS_SIZE 0x700000
+#define _256KB_CACHE_SLOTS 0x1C
+#define _512KB_CACHE_ADRESS_START 0x0D400000
 #define _512KB_CACHE_ADRESS_SIZE 0x800000
 #define _512KB_CACHE_SLOTS 0x10
+#define _1MB_CACHE_ADRESS_START 0x0DC00000
+#define _1MB_CACHE_ADRESS_SIZE 0x400000
+#define _1MB_CACHE_SLOTS 0x4
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -59,11 +63,14 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS];
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS];
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
+static u32 _1MB_cacheDescriptor [_1MB_CACHE_SLOTS];
+static u32 _1MB_cacheCounter [_1MB_CACHE_SLOTS];
 static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
 static u32 _256KB_accessCounter = 0;
 static u32 _512KB_accessCounter = 0;
+static u32 _1MB_accessCounter = 0;
 
 static int selectedSize = 0;
 
@@ -137,6 +144,17 @@ int allocateCacheSlot() {
 			}
 			return slot;
 			break;
+		case 5:
+			lowerCounter = _1MB_accessCounter;
+			for(int i=0; i<_1MB_CACHE_SLOTS; i++) {
+				if(_1MB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = _1MB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			return slot;
+			break;
 	}
 }
 
@@ -178,6 +196,13 @@ int getSlotForSector(u32 sector) {
 				}
 			}
 			break;
+		case 5:
+			for(int i=0; i<_1MB_CACHE_SLOTS; i++) {
+				if(_1MB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
 	}
 	return -1;
 }
@@ -200,6 +225,9 @@ vu8* getCacheAddress(int slot) {
 			break;
 		case 4:
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			break;
+		case 5:
+			return (vu32*)(_1MB_CACHE_ADRESS_START+slot*_1MB_READ_SIZE);
 			break;
 	}
 }
@@ -227,6 +255,10 @@ void updateDescriptor(int slot, u32 sector) {
 			_512KB_cacheDescriptor[slot] = sector;
 			_512KB_cacheCounter[slot] = _512KB_accessCounter;
 			break;
+		case 5:
+			_1MB_cacheDescriptor[slot] = sector;
+			_1MB_cacheCounter[slot] = _1MB_accessCounter;
+			break;
 	}
 }
 
@@ -247,6 +279,9 @@ void accessCounterIncrease() {
 			break;
 		case 4:
 			_512KB_accessCounter++;
+			break;
+		case 5:
+			_1MB_accessCounter++;
 			break;
 	}
 }
@@ -282,8 +317,8 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	selectedSize = 4;
-	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
+	selectedSize = 5;
+	u32 CACHE_READ_SIZE = _1MB_READ_SIZE;
 	if(len <= _32KB_READ_SIZE) {
 		selectedSize = 0;
 		CACHE_READ_SIZE = _32KB_READ_SIZE;
@@ -299,6 +334,10 @@ int cardRead (u32* cacheStruct) {
 	if(len <= _256KB_READ_SIZE) {
 		selectedSize = 3;
 		CACHE_READ_SIZE = _256KB_READ_SIZE;
+	}
+	if(len <= _512KB_READ_SIZE) {
+		selectedSize = 4;
+		CACHE_READ_SIZE = _512KB_READ_SIZE;
 	}
 	
 	accessCounterIncrease();
