@@ -469,14 +469,20 @@ int cardRead (u32* cacheStruct) {
 					accessCounterIncrease();
 				}
 			} else {
-				//if(len >= 512 && len % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+				u32 len2=len;
+				if(len2 > 512) {
+					len2 -= src%4;
+					len2 -= len2 % 32;
+				}
+
+				if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;
 
 					sharedAddr[0] = dst;
-					sharedAddr[1] = len;
+					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION+src;
 					sharedAddr[3] = commandRead;
 
@@ -488,21 +494,21 @@ int cardRead (u32* cacheStruct) {
 
 					// copy directly
 					REG_SCFG_EXT = 0x8300C000;
-					fastCopy32(ROM_LOCATION+src,dst,len);
+					fastCopy32(ROM_LOCATION+src,dst,len2);
 					REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common
-					cardStruct[0] = src + len;
-					cardStruct[1] = dst + len;
-					cardStruct[2] = len - len;
-				/*} else {
+					cardStruct[0] = src + len2;
+					cardStruct[1] = dst + len2;
+					cardStruct[2] = len - len2;
+				} else {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;
 
 					sharedAddr[0] = page;
-					sharedAddr[1] = len;
+					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION+page;
 					sharedAddr[3] = commandRead;
 
@@ -518,7 +524,7 @@ int cardRead (u32* cacheStruct) {
 					REG_SCFG_EXT = 0x83000000;
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
-				}*/
+				}
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
