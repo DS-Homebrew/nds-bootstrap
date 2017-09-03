@@ -224,17 +224,17 @@ int main( int argc, char **argv) {
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
 		
 		FILE* ndsFile = fopen(ndsPath.c_str(), "rb");
-		off_t fsize = 0;
 		
 		reinittimer = 0;
 		run_reinittimer = false;
 		if (ndsFile) {
-			fseek(ndsFile, 0, SEEK_END);
-			fsize = ftell(ndsFile);
-			fseek(ndsFile, 0, SEEK_SET);
-			if(fsize <= 0x01C00000) {
+			u32 tempNdsHeader[0x170>>2];
+
+			fread((void*)tempNdsHeader,1,0x170,ndsFile);
+			u32 romSize = tempNdsHeader[0x080>>2];
+			if(romSize <= 0x01C00000) {
 				dbg_printf("Loading ROM into RAM...\n");
-				fread((void*)0x0C400000,1,fsize,ndsFile);
+				fread((void*)0x0C400000,1,romSize,ndsFile);
 			}
 			fclose(ndsFile);
 		} else {
