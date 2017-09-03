@@ -203,7 +203,7 @@ int main( int argc, char **argv) {
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 
 	// switch to NTR mode
-	REG_SCFG_EXT = 0x8300C000; // NAND/SD Access, with 32MB of RAM
+	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
 	InitSD();
 	if (isMounted) {
@@ -215,47 +215,16 @@ int main( int argc, char **argv) {
 
 			if(!consoleInited) consoleDemoInit();
 			consoleInited = true;
-		}
-		
-		fatInitDefault();
-		nocashMessage("fatInitDefault");
-		reinittimer = 0;
 
-		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-		
-		FILE* ndsFile = fopen(ndsPath.c_str(), "rb");
-		
-		reinittimer = 0;
-		run_reinittimer = false;
-		if (ndsFile) {
-			u32 tempNdsHeader[0x170>>2];
-
-			fread((void*)tempNdsHeader,1,0x170,ndsFile);
-			u32 romSize = tempNdsHeader[0x080>>2];
-			if(romSize <= 0x01C00000) {
-				dbg_printf("Loading ROM into RAM...\n");
-				fread((void*)0x0C400000,1,romSize,ndsFile);
-				*(u32*)(0x0C4000C0) = romSize;
-			}
-			fclose(ndsFile);
-		} else {
-			fclose(ndsFile);
-			if(!consoleInited) consoleDemoInit();
-			consoleInited = true;
-			printf(".nds file not found");
-			while(1) { swiWaitForVBlank(); }
-		}
-		run_reinittimer = true;
-
-		// switch to NTR mode
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-
-		if(debug) {
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
 			getSFCG_ARM9();
 			getSFCG_ARM7();
 		}
+
+		fatInitDefault();
+		nocashMessage("fatInitDefault");
+		reinittimer = 0;
 
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
 		switch(romread_LED) {
@@ -299,6 +268,8 @@ int main( int argc, char **argv) {
 		} else {
 			remove ("sd:/NDSBTSRP.LOG");
 		}
+
+		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
 
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");
 

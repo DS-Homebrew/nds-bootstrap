@@ -272,9 +272,40 @@ int cardRead (u32* cacheStruct) {
 	
 	if(!flagset_ROMinRAM) {
 		REG_SCFG_EXT = 0x8300C000;
+		
+		u32 tempNdsHeader[0x170>>2];
+
+		// read directly at arm7 level
+		commandRead = 0x025FFB08;
+
+		sharedAddr[0] = tempNdsHeader;
+		sharedAddr[1] = 0x170;
+		sharedAddr[2] = 0;
+		sharedAddr[3] = commandRead;
+
+		IPC_SendSync(0xEE24);
+
+		while(sharedAddr[3] != (vu32)0);
+
 		// Check ROM size in ROM header...
+		u32 romSize = tempNdsHeader[0x080>>2];
+
 		// If ROM size is 0x01C00000 or below, then read from ROM in RAM.
-		if(*(u32*)(ROM_LOCATION+0xC0) <= 0x01C00000) ROMinRAM = true;
+		if(romSize <= 0x01C00000) {
+			// read directly at arm7 level
+			commandRead = 0x025FFB08;
+
+			sharedAddr[0] = ROM_LOCATION;
+			sharedAddr[1] = romSize;
+			sharedAddr[2] = 0;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
+
+			ROMinRAM = true;
+		}
 		flagset_ROMinRAM = true;
 		REG_SCFG_EXT = 0x83000000;
 	}
@@ -438,7 +469,7 @@ int cardRead (u32* cacheStruct) {
 					accessCounterIncrease();
 				}
 			} else {
-				if(len >= 512 && len % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+				//if(len >= 512 && len % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
@@ -464,7 +495,7 @@ int cardRead (u32* cacheStruct) {
 					cardStruct[0] = src + len;
 					cardStruct[1] = dst + len;
 					cardStruct[2] = len - len;
-				} else {
+				/*} else {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
@@ -487,7 +518,7 @@ int cardRead (u32* cacheStruct) {
 					REG_SCFG_EXT = 0x83000000;
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
-				}
+				}*/
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
