@@ -51,6 +51,10 @@ static u32 ROM_TID;
 #define _512KB_CACHE_ADRESS_SIZE 0xC00000
 #define _512KB_CACHE_SLOTS 0x18
 
+#define only_512KB_CACHE_ADRESS_START 0x0C400000
+#define only_512KB_CACHE_ADRESS_SIZE 0x1C00000
+#define only_512KB_CACHE_SLOTS 0x38
+
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
@@ -70,12 +74,15 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
+static u32 only_512KB_cacheDescriptor [only_512KB_CACHE_SLOTS] = {0xffffffff};
+static u32 only_512KB_cacheCounter [only_512KB_CACHE_SLOTS];
 static u32 WRAM_accessCounter = 0;
 static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
 static u32 _256KB_accessCounter = 0;
 static u32 _512KB_accessCounter = 0;
+static u32 only_512KB_accessCounter = 0;
 
 static int selectedSize = 0;
 
@@ -161,6 +168,16 @@ int allocateCacheSlot() {
 				}
 			}
 			break;
+		case 14:
+			lowerCounter = only_512KB_accessCounter;
+			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
+				if(only_512KB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_512KB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
 	}
 	return slot;
 }
@@ -212,6 +229,13 @@ int getSlotForSector(u32 sector) {
 				}
 			}
 			break;
+		case 14:
+			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
+				if(only_512KB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
 	}
 	return -1;
 }
@@ -238,6 +262,9 @@ vu8* getCacheAddress(int slot) {
 			break;
 		case 4:
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			break;
+		case 14:
+			return (vu32*)(only_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
 	}
 }
@@ -278,6 +305,10 @@ void updateDescriptor(int slot, u32 sector) {
 			_512KB_cacheDescriptor[slot] = sector;
 			_512KB_cacheCounter[slot] = _512KB_accessCounter;
 			break;
+		case 14:
+			only_512KB_cacheDescriptor[slot] = sector;
+			only_512KB_cacheCounter[slot] = only_512KB_accessCounter;
+			break;
 	}
 }
 
@@ -298,6 +329,9 @@ void accessCounterIncrease() {
 			break;
 		case 4:
 			_512KB_accessCounter++;
+			break;
+		case 14:
+			only_512KB_accessCounter++;
 			break;
 	}
 }
@@ -387,7 +421,7 @@ int cardRead (u32* cacheStruct) {
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 	if(!dsiWramUsed) {
 		if((ROM_TID & 0x00FFFFFF) == 0x593341) {
-			// Do nothing
+			selectedSize = 14;
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
 			selectedSize = 2;
 			CACHE_READ_SIZE = _128KB_READ_SIZE;
