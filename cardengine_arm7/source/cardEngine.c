@@ -42,6 +42,8 @@ static aFile savFile;
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
+bool ndmaUsed = true;
+
 void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
@@ -198,7 +200,7 @@ void runCardEngineCheck (void) {
 			#endif		
 			
 			timeoutRun = false;	// If card read received, do not show error screen
-			
+
 			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
 			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
@@ -390,7 +392,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	timeoutRun = false;	// Do not show error screen
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	ndmaUsed = false;
 	fileRead(dst,romFile,src,len);
+	ndmaUsed = true;
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
 	return true;

@@ -120,7 +120,6 @@ int allocateCacheSlot() {
 					if(!lowerCounter) break;
 				}
 			}
-			return slot;
 			break;
 		case 1:
 			lowerCounter = _64KB_accessCounter;
@@ -131,7 +130,6 @@ int allocateCacheSlot() {
 					if(!lowerCounter) break;
 				}
 			}
-			return slot;
 			break;
 		case 2:
 			lowerCounter = _128KB_accessCounter;
@@ -142,7 +140,6 @@ int allocateCacheSlot() {
 					if(!lowerCounter) break;
 				}
 			}
-			return slot;
 			break;
 		case 3:
 			lowerCounter = _256KB_accessCounter;
@@ -153,7 +150,6 @@ int allocateCacheSlot() {
 					if(!lowerCounter) break;
 				}
 			}
-			return slot;
 			break;
 		case 4:
 			lowerCounter = _512KB_accessCounter;
@@ -164,9 +160,9 @@ int allocateCacheSlot() {
 					if(!lowerCounter) break;
 				}
 			}
-			return slot;
 			break;
 	}
+	return slot;
 }
 
 int WRAM_getSlotForSector(u32 sector) {
@@ -337,7 +333,7 @@ int cardRead (u32* cacheStruct) {
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
 		
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642 || (ROM_TID & 0x00FFFFFF) == 0x494B42) {
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642 || (ROM_TID & 0x00FFFFFF) == 0x494B42 || (ROM_TID & 0x00FFFFFF) == 0x4B4C41) {
 			dsiWramUsed = true;
 		}
 
@@ -392,18 +388,16 @@ int cardRead (u32* cacheStruct) {
 	if(!dsiWramUsed) {
 		if((ROM_TID & 0x00FFFFFF) == 0x593341) {
 			// Do nothing
-		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241 || (ROM_TID & 0x00FFFFFF) == 0x4B4C41) {
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
 			selectedSize = 2;
 			CACHE_READ_SIZE = _128KB_READ_SIZE;
-			if((ROM_TID & 0x00FFFFFF) != 0x4B4C41) {
-				if(len <= _32KB_READ_SIZE) {
-					selectedSize = 0;
-					CACHE_READ_SIZE = _32KB_READ_SIZE;
-				}
-				if(len <= _64KB_READ_SIZE) {
-					selectedSize = 1;
-					CACHE_READ_SIZE = _64KB_READ_SIZE;
-				}
+			if(len <= _32KB_READ_SIZE) {
+				selectedSize = 0;
+				CACHE_READ_SIZE = _32KB_READ_SIZE;
+			}
+			if(len <= _64KB_READ_SIZE) {
+				selectedSize = 1;
+				CACHE_READ_SIZE = _64KB_READ_SIZE;
 			}
 		} else {
 			if(len <= _32KB_READ_SIZE) {
