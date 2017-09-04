@@ -399,8 +399,11 @@ int cardRead (u32* cacheStruct) {
 			dsiWramUsed = true;
 		}
 
+		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
+		romSize -= 0x4000;
+		romSize -= ARM9_LEN;
 		
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0C400000;
 		else ROM_LOCATION = 0x0C800000;
@@ -414,12 +417,15 @@ int cardRead (u32* cacheStruct) {
 
 			sharedAddr[0] = ROM_LOCATION;
 			sharedAddr[1] = romSize;
-			sharedAddr[2] = 0;
+			sharedAddr[2] = 0x4000+ARM9_LEN;
 			sharedAddr[3] = commandRead;
 
 			IPC_SendSync(0xEE24);
 
 			while(sharedAddr[3] != (vu32)0);
+
+			ROM_LOCATION -= 0x4000;
+			ROM_LOCATION -= ARM9_LEN;
 
 			REG_SCFG_EXT = 0x83000000;
 
