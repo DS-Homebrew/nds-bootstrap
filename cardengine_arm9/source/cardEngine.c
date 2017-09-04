@@ -405,10 +405,13 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 		
-		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0C400000;
+		if(romSize > 0x01B00000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0C400000;
+		if(romSize > 0x01A00000 && romSize <= 0x01B00000) ROM_LOCATION = 0x0C500000;
+		if(romSize > 0x01900000 && romSize <= 0x01A00000) ROM_LOCATION = 0x0C600000;
+		if(romSize > 0x01800000 && romSize <= 0x01900000) ROM_LOCATION = 0x0C700000;
 		else ROM_LOCATION = 0x0C800000;
 
-		// If ROM size is 0x01C00000 or below, then read from ROM in RAM.
+		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 		if(romSize <= 0x01C00000) {
 			REG_SCFG_EXT = 0x8300C000;
 
@@ -656,7 +659,7 @@ int cardRead (u32* cacheStruct) {
 					// -------------------------------------*/
 					#endif
 
-					// copy directly
+					// read ROM loaded into RAM
 					REG_SCFG_EXT = 0x8300C000;
 					fastCopy32(ROM_LOCATION+src,dst,len2);
 					REG_SCFG_EXT = 0x83000000;
