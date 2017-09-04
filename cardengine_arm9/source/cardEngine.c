@@ -337,7 +337,9 @@ int cardRead (u32* cacheStruct) {
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
 		
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642) dsiWramUsed = true;
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642 || (ROM_TID & 0x00FFFFFF) == 0x494B42) {
+			dsiWramUsed = true;
+		}
 
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
@@ -393,13 +395,15 @@ int cardRead (u32* cacheStruct) {
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241 || (ROM_TID & 0x00FFFFFF) == 0x4B4C41) {
 			selectedSize = 2;
 			CACHE_READ_SIZE = _128KB_READ_SIZE;
-			if(len <= _32KB_READ_SIZE) {
-				selectedSize = 0;
-				CACHE_READ_SIZE = _32KB_READ_SIZE;
-			}
-			if(len <= _64KB_READ_SIZE) {
-				selectedSize = 1;
-				CACHE_READ_SIZE = _64KB_READ_SIZE;
+			if((ROM_TID & 0x00FFFFFF) != 0x4B4C41) {
+				if(len <= _32KB_READ_SIZE) {
+					selectedSize = 0;
+					CACHE_READ_SIZE = _32KB_READ_SIZE;
+				}
+				if(len <= _64KB_READ_SIZE) {
+					selectedSize = 1;
+					CACHE_READ_SIZE = _64KB_READ_SIZE;
+				}
 			}
 		} else {
 			if(len <= _32KB_READ_SIZE) {
