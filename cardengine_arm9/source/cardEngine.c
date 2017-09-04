@@ -20,7 +20,7 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define ROM_LOCATION 0x0C400000
+static u32 ROM_LOCATION;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -271,8 +271,6 @@ int cardRead (u32* cacheStruct) {
 	u32 page = (src/512)*512;
 	
 	if(!flagset_ROMinRAM) {
-		REG_SCFG_EXT = 0x8300C000;
-		
 		u32 tempNdsHeader[0x170>>2];
 
 		// read directly at arm7 level
@@ -289,9 +287,14 @@ int cardRead (u32* cacheStruct) {
 
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
+		
+		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0C400000;
+		else ROM_LOCATION = 0x0C800000;
 
 		// If ROM size is 0x01C00000 or below, then read from ROM in RAM.
 		if(romSize <= 0x01C00000) {
+			REG_SCFG_EXT = 0x8300C000;
+
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
@@ -304,10 +307,11 @@ int cardRead (u32* cacheStruct) {
 
 			while(sharedAddr[3] != (vu32)0);
 
+			REG_SCFG_EXT = 0x83000000;
+
 			ROMinRAM = true;
 		}
 		flagset_ROMinRAM = true;
-		REG_SCFG_EXT = 0x83000000;
 	}
 
 	#ifdef DEBUG
