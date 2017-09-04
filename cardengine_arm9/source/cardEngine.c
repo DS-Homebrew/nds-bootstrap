@@ -246,6 +246,14 @@ vu8* getCacheAddress(int slot) {
 	}
 }
 
+void transfertToArm7(int slot) {
+	*((vu8*)(REG_MBK_WRAM_CACHE_START+slot)) |= 0x1;
+}
+
+void transfertToArm9(int slot) {
+	*((vu8*)(REG_MBK_WRAM_CACHE_START+slot)) &= 0xFE;
+}
+
 void WRAM_updateDescriptor(int slot, u32 sector) {
 	WRAM_cacheDescriptor[slot] = sector;
 	WRAM_cacheCounter[slot] = WRAM_accessCounter;
@@ -471,6 +479,9 @@ int cardRead (u32* cacheStruct) {
 
 					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
+					// transfer the WRAM-B cache to the arm7
+					if(dsiWramUsed) transfertToArm7(slot);				
+					
 					// write the command
 					sharedAddr[0] = buffer;
 					sharedAddr[1] = CACHE_READ_SIZE;
@@ -480,6 +491,9 @@ int cardRead (u32* cacheStruct) {
 					IPC_SendSync(0xEE24);
 
 					while(sharedAddr[3] != (vu32)0);
+
+					// transfer back the WRAM-B cache to the arm9
+					if(dsiWramUsed) transfertToArm9(slot);
 
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				}
