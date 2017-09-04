@@ -21,6 +21,7 @@
 #include "cardEngine.h"
 
 static u32 ROM_LOCATION;
+static u32 ROM_TID;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -28,18 +29,24 @@ static u32 ROM_LOCATION;
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
 
-#define _32KB_CACHE_ADRESS_START 0x0C800000
+#define REG_MBK_WRAM_CACHE_START	0x4004045
+#define WRAM_CACHE_ADRESS_START 0x03708000
+#define WRAM_CACHE_ADRESS_END 0x03778000
+#define WRAM_CACHE_ADRESS_SIZE 0x78000
+#define WRAM_CACHE_SLOTS 15
+
+#define _32KB_CACHE_ADRESS_START 0x02800000
 #define _32KB_CACHE_ADRESS_SIZE 0x180000
 #define _32KB_CACHE_SLOTS 0x30
-#define _64KB_CACHE_ADRESS_START 0x0C980000
+#define _64KB_CACHE_ADRESS_START 0x02980000
 #define _64KB_CACHE_ADRESS_SIZE 0x280000
 #define _64KB_CACHE_SLOTS 0x28
-#define _128KB_CACHE_ADRESS_START 0x0CC00000
-#define _128KB_CACHE_ADRESS_SIZE 0x500000
-#define _128KB_CACHE_SLOTS 0x28
-#define _256KB_CACHE_ADRESS_START 0x0D100000
-#define _256KB_CACHE_ADRESS_SIZE 0x700000
-#define _256KB_CACHE_SLOTS 0x1C
+#define _128KB_CACHE_ADRESS_START 0x02C00000
+#define _128KB_CACHE_ADRESS_SIZE 0x400000
+#define _128KB_CACHE_SLOTS 0x20
+#define _256KB_CACHE_ADRESS_START 0x0D000000
+#define _256KB_CACHE_ADRESS_SIZE 0x800000
+#define _256KB_CACHE_SLOTS 0x20
 #define _512KB_CACHE_ADRESS_START 0x0D800000
 #define _512KB_CACHE_ADRESS_SIZE 0x800000
 #define _512KB_CACHE_SLOTS 0x10
@@ -51,6 +58,8 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
+static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
+static u32 WRAM_cacheCounter [WRAM_CACHE_SLOTS];
 static u32 _32KB_cacheDescriptor [_32KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS];
 static u32 _64KB_cacheDescriptor [_64KB_CACHE_SLOTS] = {0xffffffff};
@@ -61,6 +70,7 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
+static u32 WRAM_accessCounter = 0;
 static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
@@ -69,8 +79,9 @@ static u32 _512KB_accessCounter = 0;
 
 static int selectedSize = 0;
 
-static bool flagset_ROMinRAM = false;
+static bool flagsSet = false;
 static bool ROMinRAM = false;
+static bool dsiWramUsed = false;
 
 void user_exception(void);
 
@@ -80,6 +91,19 @@ void setExceptionHandler2() {
 	exceptionStack = (u32)0x23EFFFC ;
 	EXCEPTION_VECTOR = enterException ;
 	*exceptionC = user_exception;
+}
+
+int WRAM_allocateCacheSlot() {
+	int slot = 0;
+	int lowerCounter = WRAM_accessCounter;
+	for(int i=0; i<WRAM_CACHE_SLOTS; i++) {
+		if(WRAM_cacheCounter[i]<=lowerCounter) {
+			lowerCounter = WRAM_cacheCounter[i];
+			slot = i;
+			if(!lowerCounter) break;
+		}
+	}
+	return slot;
 }
 
 int allocateCacheSlot() {
@@ -145,6 +169,15 @@ int allocateCacheSlot() {
 	}
 }
 
+int WRAM_getSlotForSector(u32 sector) {
+	for(int i=0; i<WRAM_CACHE_SLOTS; i++) {
+		if(WRAM_cacheDescriptor[i]==sector) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 int getSlotForSector(u32 sector) {
 	switch(selectedSize) {
 		case 0:
@@ -188,6 +221,10 @@ int getSlotForSector(u32 sector) {
 }
 
 
+vu8* WRAM_getCacheAddress(int slot) {
+	return (vu32*)(WRAM_CACHE_ADRESS_START+slot*_32KB_READ_SIZE);
+}
+
 vu8* getCacheAddress(int slot) {
 	switch(selectedSize) {
 		case 0:
@@ -207,6 +244,11 @@ vu8* getCacheAddress(int slot) {
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
 	}
+}
+
+void WRAM_updateDescriptor(int slot, u32 sector) {
+	WRAM_cacheDescriptor[slot] = sector;
+	WRAM_cacheCounter[slot] = WRAM_accessCounter;
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -270,7 +312,7 @@ int cardRead (u32* cacheStruct) {
 
 	u32 page = (src/512)*512;
 	
-	if(!flagset_ROMinRAM) {
+	if(!flagsSet) {
 		u32 tempNdsHeader[0x170>>2];
 
 		// read directly at arm7 level
@@ -284,6 +326,10 @@ int cardRead (u32* cacheStruct) {
 		IPC_SendSync(0xEE24);
 
 		while(sharedAddr[3] != (vu32)0);
+
+		ROM_TID = tempNdsHeader[0x00C>>2];
+		
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642) dsiWramUsed = true;
 
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
@@ -311,7 +357,7 @@ int cardRead (u32* cacheStruct) {
 
 			ROMinRAM = true;
 		}
-		flagset_ROMinRAM = true;
+		flagsSet = true;
 	}
 
 	#ifdef DEBUG
@@ -333,24 +379,47 @@ int cardRead (u32* cacheStruct) {
 	
 	selectedSize = 4;
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
-	if(len <= _32KB_READ_SIZE) {
+	if(!dsiWramUsed) {
+		if((ROM_TID & 0x00FFFFFF) == 0x593341) {
+			// Do nothing
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
+			selectedSize = 2;
+			CACHE_READ_SIZE = _128KB_READ_SIZE;
+			if(len <= _32KB_READ_SIZE) {
+				selectedSize = 0;
+				CACHE_READ_SIZE = _32KB_READ_SIZE;
+			}
+			if(len <= _64KB_READ_SIZE) {
+				selectedSize = 1;
+				CACHE_READ_SIZE = _64KB_READ_SIZE;
+			}
+		} else {
+			if(len <= _32KB_READ_SIZE) {
+				selectedSize = 0;
+				CACHE_READ_SIZE = _32KB_READ_SIZE;
+			}
+			if(len <= _64KB_READ_SIZE) {
+				selectedSize = 1;
+				CACHE_READ_SIZE = _64KB_READ_SIZE;
+			}
+			if(len <= _128KB_READ_SIZE) {
+				selectedSize = 2;
+				CACHE_READ_SIZE = _128KB_READ_SIZE;
+			}
+			if(len <= _256KB_READ_SIZE) {
+				selectedSize = 3;
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+			}
+		}
+	} else {
 		selectedSize = 0;
 		CACHE_READ_SIZE = _32KB_READ_SIZE;
 	}
-	if(len <= _64KB_READ_SIZE) {
-		selectedSize = 1;
-		CACHE_READ_SIZE = _64KB_READ_SIZE;
-	}
-	if(len <= _128KB_READ_SIZE) {
-		selectedSize = 2;
-		CACHE_READ_SIZE = _128KB_READ_SIZE;
-	}
-	if(len <= _256KB_READ_SIZE) {
-		selectedSize = 3;
-		CACHE_READ_SIZE = _256KB_READ_SIZE;
-	}
 	
-	if(!ROMinRAM) accessCounterIncrease();
+	if(!ROMinRAM) {
+		if(dsiWramUsed) WRAM_accessCounter++;
+		else accessCounterIncrease();
+	}
 
 	u32 sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 
@@ -374,18 +443,31 @@ int cardRead (u32* cacheStruct) {
 		// read via the main RAM cache
 		while(len > 0) {
 			if(!ROMinRAM) {
-				int slot = getSlotForSector(sector);
-				vu8* buffer = getCacheAddress(slot);
+				int slot = 0;
+				vu8* buffer = 0;
+				if(dsiWramUsed) {
+					slot = WRAM_getSlotForSector(sector);
+					buffer = WRAM_getCacheAddress(slot);
+				} else {
+					slot = getSlotForSector(sector);
+					buffer = getCacheAddress(slot);
+				}
 				// read max CACHE_READ_SIZE via the main RAM cache
 				if(slot==-1) {
 					// send a command to the arm7 to fill the RAM cache
 					commandRead = 0x025FFB08;
 
-					slot = allocateCacheSlot();
-					
-					buffer = getCacheAddress(slot);
+					if(dsiWramUsed) {
+						slot = WRAM_allocateCacheSlot();
+						
+						buffer = WRAM_getCacheAddress(slot);
+					} else {
+						slot = allocateCacheSlot();
+						
+						buffer = getCacheAddress(slot);
+					}
 
-					REG_SCFG_EXT = 0x8300C000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 
 					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
@@ -399,10 +481,14 @@ int cardRead (u32* cacheStruct) {
 
 					while(sharedAddr[3] != (vu32)0);
 
-					REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				}
 
-				updateDescriptor(slot, sector);
+				if(dsiWramUsed) {
+					WRAM_updateDescriptor(slot, sector);
+				} else {
+					updateDescriptor(slot, sector);
+				}
 
 				u32 len2=len;
 				if((src - sector) + len2 > CACHE_READ_SIZE){
@@ -432,9 +518,9 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// copy directly
-					REG_SCFG_EXT = 0x8300C000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					fastCopy32(buffer+(src-sector),dst,len2);
-					REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common
 					cardStruct[0] = src + len2;
@@ -458,9 +544,9 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// read via the 512b ram cache
-					REG_SCFG_EXT = 0x8300C000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					fastCopy32(buffer+(page-sector), cacheBuffer, 512);
-					REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
 				}
@@ -470,7 +556,8 @@ int cardRead (u32* cacheStruct) {
 					dst = cardStruct[1];
 					page = (src/512)*512;
 					sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
-					accessCounterIncrease();
+					if(dsiWramUsed) WRAM_accessCounter++;
+					else accessCounterIncrease();
 				}
 			} else {
 				u32 len2=len;
