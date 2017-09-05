@@ -408,7 +408,7 @@ int cardRead (u32* cacheStruct) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0E000000-romSize;
 
 		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-		if(romSize <= 0x01C00000) {
+		if(romSize <= 0x01C00000 && (ROM_TID & 0x00FFFFFF) != 0x474441) {
 			REG_SCFG_EXT = 0x8300C000;
 
 			// read directly at arm7 level
@@ -453,7 +453,13 @@ int cardRead (u32* cacheStruct) {
 	selectedSize = 4;
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 	if(!dsiWramUsed) {
-		if((ROM_TID & 0x00FFFFFF) == 0x593341) {
+		if((ROM_TID & 0x00FFFFFF) == 0x593341
+		|| (ROM_TID & 0x00FFFFFF) == 0x414441	// Diamond
+		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// Pearl
+		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// Platinum
+		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// HG
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// SS
+		{
 			selectedSize = 14;
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
 			selectedSize = 13;
