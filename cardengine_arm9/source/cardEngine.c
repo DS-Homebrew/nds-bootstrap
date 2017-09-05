@@ -35,21 +35,18 @@ static u32 ROM_TID;
 #define WRAM_CACHE_ADRESS_SIZE 0x78000
 #define WRAM_CACHE_SLOTS 15
 
-#define _32KB_CACHE_ADRESS_START 0x0C400000
-#define _32KB_CACHE_ADRESS_SIZE 0x180000
-#define _32KB_CACHE_SLOTS 0x30
-#define _64KB_CACHE_ADRESS_START 0x0C580000
-#define _64KB_CACHE_ADRESS_SIZE 0x270000
-#define _64KB_CACHE_SLOTS 0x27
-#define _128KB_CACHE_ADRESS_START 0x0C800000
+#define _64KB_CACHE_ADRESS_START 0x0C800000
+#define _64KB_CACHE_ADRESS_SIZE 0x200000
+#define _64KB_CACHE_SLOTS 0x20
+#define _128KB_CACHE_ADRESS_START 0x0CA00000
 #define _128KB_CACHE_ADRESS_SIZE 0x400000
 #define _128KB_CACHE_SLOTS 0x20
-#define _256KB_CACHE_ADRESS_START 0x0CC00000
+#define _256KB_CACHE_ADRESS_START 0x0CE00000
 #define _256KB_CACHE_ADRESS_SIZE 0x800000
 #define _256KB_CACHE_SLOTS 0x20
-#define _512KB_CACHE_ADRESS_START 0x0D400000
-#define _512KB_CACHE_ADRESS_SIZE 0xC00000
-#define _512KB_CACHE_SLOTS 0x18
+#define _512KB_CACHE_ADRESS_START 0x0D600000
+#define _512KB_CACHE_ADRESS_SIZE 0xA00000
+#define _512KB_CACHE_SLOTS 0x14
 
 #define only_CACHE_ADRESS_START 0x0C800000
 #define only_CACHE_ADRESS_SIZE 0x1800000
@@ -65,8 +62,6 @@ extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of
 
 static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
 static u32 WRAM_cacheCounter [WRAM_CACHE_SLOTS];
-static u32 _32KB_cacheDescriptor [_32KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS];
 static u32 _64KB_cacheDescriptor [_64KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _64KB_cacheCounter [_64KB_CACHE_SLOTS];
 static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
@@ -80,7 +75,6 @@ static u32 only_256KB_cacheCounter [only_256KB_CACHE_SLOTS];
 static u32 only_512KB_cacheDescriptor [only_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 only_512KB_cacheCounter [only_512KB_CACHE_SLOTS];
 static u32 WRAM_accessCounter = 0;
-static u32 _32KB_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
 static u32 _256KB_accessCounter = 0;
@@ -122,14 +116,6 @@ int allocateCacheSlot() {
 	switch(selectedSize) {
 		case 0:
 		default:
-			lowerCounter = _32KB_accessCounter;
-			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
-				if(_32KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _32KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
-			}
 			break;
 		case 1:
 			lowerCounter = _64KB_accessCounter;
@@ -208,11 +194,6 @@ int getSlotForSector(u32 sector) {
 	switch(selectedSize) {
 		case 0:
 		default:
-			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
-				if(_32KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
-			}
 			break;
 		case 1:
 			for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
@@ -269,7 +250,6 @@ vu8* getCacheAddress(int slot) {
 	switch(selectedSize) {
 		case 0:
 		default:
-			return (vu32*)(_32KB_CACHE_ADRESS_START+slot*_32KB_READ_SIZE);
 			break;
 		case 1:
 			return (vu32*)(_64KB_CACHE_ADRESS_START+slot*_64KB_READ_SIZE);
@@ -309,8 +289,6 @@ void updateDescriptor(int slot, u32 sector) {
 	switch(selectedSize) {
 		case 0:
 		default:
-			_32KB_cacheDescriptor[slot] = sector;
-			_32KB_cacheCounter[slot] = _32KB_accessCounter;
 			break;
 		case 1:
 			_64KB_cacheDescriptor[slot] = sector;
@@ -343,7 +321,6 @@ void accessCounterIncrease() {
 	switch(selectedSize) {
 		case 0:
 		default:
-			_32KB_accessCounter++;
 			break;
 		case 1:
 			_64KB_accessCounter++;
@@ -465,10 +442,6 @@ int cardRead (u32* cacheStruct) {
 			selectedSize = 13;
 			CACHE_READ_SIZE = _256KB_READ_SIZE;
 		} else {
-			if(len <= _32KB_READ_SIZE) {
-				selectedSize = 0;
-				CACHE_READ_SIZE = _32KB_READ_SIZE;
-			}
 			if(len <= _64KB_READ_SIZE) {
 				selectedSize = 1;
 				CACHE_READ_SIZE = _64KB_READ_SIZE;
