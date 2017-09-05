@@ -27,6 +27,8 @@
 #include "sr_data_error.h"	// For showing an error screen
 #include "sr_data_srloader.h"	// For rebooting into SRLoader
 
+extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 124 & 134
+
 static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
