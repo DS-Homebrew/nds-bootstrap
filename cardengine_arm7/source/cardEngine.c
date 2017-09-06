@@ -27,7 +27,9 @@
 #include "sr_data_error.h"	// For showing an error screen
 #include "sr_data_srloader.h"	// For rebooting into SRLoader
 
-extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 124 & 134
+extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
+extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
+extern int unlockMutex(void);					// Fixes implicit declaration @ line 223
 
 static bool initialized = false;
 static bool initializedIRQ = false;
