@@ -57,7 +57,7 @@ extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
-vu32* volatile sharedAddr = (vu32*)0x0DFFFFE8;
+vu32* volatile sharedAddr = (vu32*)0x02400008;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
@@ -361,8 +361,6 @@ int cardRead (u32* cacheStruct) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
 
-		REG_SCFG_EXT = 0x8300C000;
-
 		sharedAddr[0] = tempNdsHeader;
 		sharedAddr[1] = 0x170;
 		sharedAddr[2] = 0;
@@ -371,8 +369,6 @@ int cardRead (u32* cacheStruct) {
 		IPC_SendSync(0xEE24);
 
 		while(sharedAddr[3] != (vu32)0);
-
-		REG_SCFG_EXT = 0x83000000;
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
 		
@@ -389,10 +385,10 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 		
-		if(romSize > 0x017FFFE0 && romSize <= 0x01BFFFE0) ROM_LOCATION = 0x0DFFFFE0-romSize;
+		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0E000000-romSize;
 
-		// If ROM size is 0x01BFFFE0 or below, then load the ROM into RAM.
-		if(romSize <= 0x01BFFFE0) {
+		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
+		if(romSize <= 0x01C00000) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
@@ -479,8 +475,6 @@ int cardRead (u32* cacheStruct) {
 		commandRead = 0x025FFB08;
 
 		cacheFlush();
-		
-		REG_SCFG_EXT = 0x8300C000;
 
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
@@ -490,8 +484,6 @@ int cardRead (u32* cacheStruct) {
 		IPC_SendSync(0xEE24);
 
 		while(sharedAddr[3] != (vu32)0);
-
-		REG_SCFG_EXT = 0x83000000;
 
 	} else {
 		// Prevent writing above DS 4MB RAM area
@@ -523,7 +515,7 @@ int cardRead (u32* cacheStruct) {
 						buffer = getCacheAddress(slot);
 					}
 
-					REG_SCFG_EXT = 0x8300C000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 
 					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
@@ -543,7 +535,7 @@ int cardRead (u32* cacheStruct) {
 					// transfer back the WRAM-B cache to the arm9
 					if(dsiWramUsed) transfertToArm9(slot);
 
-					REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				}
 
 				if(dsiWramUsed) {
