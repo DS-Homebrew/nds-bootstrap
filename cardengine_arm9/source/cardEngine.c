@@ -57,7 +57,7 @@ extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+vu32* volatile sharedAddr = (vu32*)0x02400008;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
@@ -388,11 +388,11 @@ int cardRead (u32* cacheStruct) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0E000000-romSize;
 
 		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-		if(romSize <= 0x01C00000 && (ROM_TID & 0x00FFFFFF) != 0x474441) {
-			REG_SCFG_EXT = 0x8300C000;
-
+		if(romSize <= 0x01C00000) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
+
+			REG_SCFG_EXT = 0x8300C000;
 
 			sharedAddr[0] = ROM_LOCATION;
 			sharedAddr[1] = romSize;
@@ -403,10 +403,10 @@ int cardRead (u32* cacheStruct) {
 
 			while(sharedAddr[3] != (vu32)0);
 
+			REG_SCFG_EXT = 0x83000000;
+
 			ROM_LOCATION -= 0x4000;
 			ROM_LOCATION -= ARM9_LEN;
-
-			REG_SCFG_EXT = 0x83000000;
 
 			ROMinRAM = true;
 		}
@@ -521,7 +521,7 @@ int cardRead (u32* cacheStruct) {
 
 					// transfer the WRAM-B cache to the arm7
 					if(dsiWramUsed) transfertToArm7(slot);				
-					
+
 					// write the command
 					sharedAddr[0] = buffer;
 					sharedAddr[1] = CACHE_READ_SIZE;
