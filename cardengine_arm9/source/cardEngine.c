@@ -57,7 +57,8 @@ extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
-vu32* volatile sharedAddr = (vu32*)0x02400008;
+vu32* volatile sharedAddr_ROMinRAM = (vu32*)0x0DFFFFE8;
+vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
@@ -385,23 +386,23 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 		
-		if(romSize > 0x01800000 && romSize <= 0x01C00000) ROM_LOCATION = 0x0E000000-romSize;
+		if(romSize > 0x017FFFE0 && romSize <= 0x01BFFFE0) ROM_LOCATION = 0x0DFFFFE0-romSize;
 
-		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-		if(romSize <= 0x01C00000) {
+		// If ROM size is 0x01BFFFE0 or below, then load the ROM into RAM.
+		if(romSize <= 0x01BFFFE0) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
 			REG_SCFG_EXT = 0x8300C000;
 
-			sharedAddr[0] = ROM_LOCATION;
-			sharedAddr[1] = romSize;
-			sharedAddr[2] = 0x4000+ARM9_LEN;
-			sharedAddr[3] = commandRead;
+			sharedAddr_ROMinRAM[0] = ROM_LOCATION;
+			sharedAddr_ROMinRAM[1] = romSize;
+			sharedAddr_ROMinRAM[2] = 0x4000+ARM9_LEN;
+			sharedAddr_ROMinRAM[3] = commandRead;
 
 			IPC_SendSync(0xEE24);
 
-			while(sharedAddr[3] != (vu32)0);
+			while(sharedAddr_ROMinRAM[3] != (vu32)0);
 
 			REG_SCFG_EXT = 0x83000000;
 
@@ -414,19 +415,39 @@ int cardRead (u32* cacheStruct) {
 	}
 
 	#ifdef DEBUG
-	// send a log command for debug purpose
-	// -------------------------------------
-	commandRead = 0x026ff800;
+	if(ROMinRAM) {
+		REG_SCFG_EXT = 0x8300C000;
 
-	sharedAddr[0] = dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
+		// send a log command for debug purpose
+		// -------------------------------------
+		commandRead = 0x026ff800;
 
-	IPC_SendSync(0xEE24);
+		sharedAddr_ROMinRAM[0] = dst;
+		sharedAddr_ROMinRAM[1] = len;
+		sharedAddr_ROMinRAM[2] = src;
+		sharedAddr_ROMinRAM[3] = commandRead;
 
-	while(sharedAddr[3] != (vu32)0);
-	// -------------------------------------*/
+		IPC_SendSync(0xEE24);
+
+		while(sharedAddr_ROMinRAM[3] != (vu32)0);
+		// -------------------------------------*/
+
+		REG_SCFG_EXT = 0x83000000;
+	} else {
+		// send a log command for debug purpose
+		// -------------------------------------
+		commandRead = 0x026ff800;
+
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = src;
+		sharedAddr[3] = commandRead;
+
+		IPC_SendSync(0xEE24);
+
+		while(sharedAddr[3] != (vu32)0);
+		// -------------------------------------*/
+	}
 	#endif
 	
 	
@@ -476,15 +497,29 @@ int cardRead (u32* cacheStruct) {
 
 		cacheFlush();
 
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
+		if(ROMinRAM) {
+			REG_SCFG_EXT = 0x8300C000;
 
-		IPC_SendSync(0xEE24);
+			sharedAddr_ROMinRAM[0] = dst;
+			sharedAddr_ROMinRAM[1] = len;
+			sharedAddr_ROMinRAM[2] = src;
+			sharedAddr_ROMinRAM[3] = commandRead;
 
-		while(sharedAddr[3] != (vu32)0);
+			IPC_SendSync(0xEE24);
 
+			while(sharedAddr_ROMinRAM[3] != (vu32)0);
+
+			REG_SCFG_EXT = 0x83000000;
+		} else {
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len;
+			sharedAddr[2] = src;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
+		}
 	} else {
 		// Prevent writing above DS 4MB RAM area
 		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;
@@ -626,14 +661,16 @@ int cardRead (u32* cacheStruct) {
 					// -------------------------------------
 					commandRead = 0x026ff800;
 
-					sharedAddr[0] = dst;
-					sharedAddr[1] = len2;
-					sharedAddr[2] = ROM_LOCATION+src;
-					sharedAddr[3] = commandRead;
+					REG_SCFG_EXT = 0x8300C000;
+
+					sharedAddr_ROMinRAM[0] = dst;
+					sharedAddr_ROMinRAM[1] = len2;
+					sharedAddr_ROMinRAM[2] = ROM_LOCATION+src;
+					sharedAddr_ROMinRAM[3] = commandRead;
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					while(sharedAddr_ROMinRAM[3] != (vu32)0);
 					// -------------------------------------*/
 					#endif
 
@@ -652,14 +689,16 @@ int cardRead (u32* cacheStruct) {
 					// -------------------------------------
 					commandRead = 0x026ff800;
 
-					sharedAddr[0] = page;
-					sharedAddr[1] = len2;
-					sharedAddr[2] = ROM_LOCATION+page;
-					sharedAddr[3] = commandRead;
+					REG_SCFG_EXT = 0x8300C000;
+
+					sharedAddr_ROMinRAM[0] = page;
+					sharedAddr_ROMinRAM[1] = len2;
+					sharedAddr_ROMinRAM[2] = ROM_LOCATION+page;
+					sharedAddr_ROMinRAM[3] = commandRead;
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					while(sharedAddr_ROMinRAM[3] != (vu32)0);
 					// -------------------------------------
 					#endif
 
