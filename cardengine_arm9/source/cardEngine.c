@@ -57,7 +57,7 @@ extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
-vu32* volatile sharedAddr_ROMinRAM = (vu32*)0x0DFFFFE8;
+vu32* volatile sharedAddr_ROMinRAM = (vu32*)0x02400008;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
@@ -386,10 +386,15 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 		
-		if(romSize > 0x017FFFE0 && romSize <= 0x01BFFFE0) ROM_LOCATION = 0x0DFFFFE0-romSize;
+		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
+			ROM_LOCATION = 0x0E000000-romSize;
+			if((ROM_TID & 0x00FFFFFF) == 0x474441) {
+				ROM_LOCATION = 0x0DFFFFE0-romSize;	// Fix for Nintendogs - Dachshund & Friends
+			}
+		}
 
-		// If ROM size is 0x01BFFFE0 or below, then load the ROM into RAM.
-		if(romSize <= 0x01BFFFE0) {
+		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
+		if(romSize <= 0x01C00000) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 

@@ -35,7 +35,7 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
-vu32* volatile sharedAddr_ROMinRAM = (vu32*)0x0DFFFFE8;
+vu32* volatile sharedAddr_ROMinRAM = (vu32*)0x02400008;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
@@ -172,7 +172,7 @@ void runCardEngineCheck (void) {
 			#endif
 
 			*(vu32*)(0x027FFB14) = 0;
-		} else if(*(vu32*)(0x0DFFFFF4) == (vu32)0x026ff800)
+		} else if(*(vu32*)(0x02400014) == (vu32)0x026ff800)
 		{
 			#ifdef DEBUG		
 			u32 src = *(vu32*)(sharedAddr_ROMinRAM+2);
@@ -199,7 +199,7 @@ void runCardEngineCheck (void) {
 			dbg_printf("\nlog only \n");
 			#endif
 
-			*(vu32*)(0x0DFFFFF4) = 0;
+			*(vu32*)(0x02400014) = 0;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
@@ -244,7 +244,7 @@ void runCardEngineCheck (void) {
 			#endif
 
 			*(vu32*)(0x027FFB14) = 0;		
-		} else if(*(vu32*)(0x0DFFFFF4) == (vu32)0x025FFB08)
+		} else if(*(vu32*)(0x02400014) == (vu32)0x025FFB08)
 		{
 			u32 src = *(vu32*)(sharedAddr_ROMinRAM+2);
 			u32 dst = *(vu32*)(sharedAddr_ROMinRAM);
@@ -285,7 +285,7 @@ void runCardEngineCheck (void) {
 			}
 			#endif
 
-			*(vu32*)(0x0DFFFFF4) = 0;		
+			*(vu32*)(0x02400014) = 0;		
 		}
 		unlockMutex();
 	}
