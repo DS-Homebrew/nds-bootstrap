@@ -372,7 +372,10 @@ int cardRead (u32* cacheStruct) {
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
 		
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642 || (ROM_TID & 0x00FFFFFF) == 0x494B42) {
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+		|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// Zelda: Spirit Tracks
+		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+		{
 			dsiWramUsed = true;
 		}
 
