@@ -384,6 +384,17 @@ int cardRead (u32* cacheStruct) {
 		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
+		if((romSize & 0x0000000F) == 0x1
+		|| (romSize & 0x0000000F) == 0x3
+		|| (romSize & 0x0000000F) == 0x5
+		|| (romSize & 0x0000000F) == 0x7
+		|| (romSize & 0x0000000F) == 0x9
+		|| (romSize & 0x0000000F) == 0xB
+		|| (romSize & 0x0000000F) == 0xD
+		|| (romSize & 0x0000000F) == 0xF)
+		{
+			romSize--;	// If ROM size is at an odd number, subtract 1 from it.
+		}
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 		
