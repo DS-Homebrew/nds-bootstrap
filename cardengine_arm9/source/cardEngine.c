@@ -394,7 +394,7 @@ int cardRead (u32* cacheStruct) {
 		}
 
 		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-		if(romSize <= 0x01C00000) {
+		if(romSize <= 0x01C00000 && !dsiWramUsed) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
