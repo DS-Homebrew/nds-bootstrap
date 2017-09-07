@@ -43,7 +43,7 @@ static aFile savFile;
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
-bool ndmaUsed = true;
+bool ndmaUsed = false;
 
 void initLogging() {
 	if(!initialized) {
@@ -463,9 +463,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	timeoutRun = false;	// Do not show error screen
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-	ndmaUsed = false;
+	//ndmaUsed = false;
 	fileRead(dst,romFile,src,len);
-	ndmaUsed = true;
+	//ndmaUsed = true;
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
 	return true;
