@@ -214,7 +214,7 @@ void runCardEngineCheck (void) {
 			}
 			#endif
 
-			*(vu32*)(0x027FFB14) = 0;		
+			*(vu32*)(0x027FFB14) = 0;
 		}
 		unlockMutex();
 	}
