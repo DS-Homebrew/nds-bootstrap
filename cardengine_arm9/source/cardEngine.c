@@ -432,39 +432,19 @@ int cardRead (u32* cacheStruct) {
 	}
 
 	#ifdef DEBUG
-	if(ROMinRAM) {
-		REG_SCFG_EXT = 0x8300C000;
+	// send a log command for debug purpose
+	// -------------------------------------
+	commandRead = 0x026ff800;
 
-		// send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
 
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
+	IPC_SendSync(0xEE24);
 
-		IPC_SendSync(0xEE24);
-
-		while(sharedAddr[3] != (vu32)0);
-		// -------------------------------------*/
-
-		REG_SCFG_EXT = 0x83000000;
-	} else {
-		// send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
-
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
-
-		IPC_SendSync(0xEE24);
-
-		while(sharedAddr[3] != (vu32)0);
-		// -------------------------------------*/
-	}
+	while(sharedAddr[3] != (vu32)0);
+	// -------------------------------------*/
 	#endif
 	
 	
@@ -514,29 +494,15 @@ int cardRead (u32* cacheStruct) {
 
 		cacheFlush();
 
-		if(ROMinRAM) {
-			REG_SCFG_EXT = 0x8300C000;
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = src;
+		sharedAddr[3] = commandRead;
 
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = src;
-			sharedAddr[3] = commandRead;
+		IPC_SendSync(0xEE24);
 
-			IPC_SendSync(0xEE24);
+		while(sharedAddr[3] != (vu32)0);
 
-			while(sharedAddr[3] != (vu32)0);
-
-			REG_SCFG_EXT = 0x83000000;
-		} else {
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = src;
-			sharedAddr[3] = commandRead;
-
-			IPC_SendSync(0xEE24);
-
-			while(sharedAddr[3] != (vu32)0);
-		}
 	} else {
 		// Prevent writing above DS 4MB RAM area
 		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;
@@ -678,8 +644,6 @@ int cardRead (u32* cacheStruct) {
 					// -------------------------------------
 					commandRead = 0x026ff800;
 
-					REG_SCFG_EXT = 0x8300C000;
-
 					sharedAddr[0] = dst;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION+src;
@@ -705,8 +669,6 @@ int cardRead (u32* cacheStruct) {
 					// send a log command for debug purpose
 					// -------------------------------------
 					commandRead = 0x026ff800;
-
-					REG_SCFG_EXT = 0x8300C000;
 
 					sharedAddr[0] = page;
 					sharedAddr[1] = len2;
