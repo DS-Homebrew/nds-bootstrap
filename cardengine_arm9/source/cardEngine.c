@@ -20,7 +20,7 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define ROM_LOCATION 0x0C400000
+static u32 ROM_LOCATION = 0x0C800000;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -299,6 +299,8 @@ int cardRead (u32* cacheStruct) {
 
 		// Check ROM size in ROM header...
 		u32 romSize = tempNdsHeader[0x080>>2];
+		
+		if(romSize > 0x00800000 && romSize <= 0x00C00000) ROM_LOCATION = 0x0D000000-romSize;
 
 		// If ROM size is 0x00C00000 or below, then read from ROM in RAM.
 		if(romSize <= 0x00C00000) {

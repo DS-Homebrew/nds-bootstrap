@@ -224,7 +224,7 @@ void runCardEngineCheck (void) {
 		if (setting == 0x01) {
 			timeoutTimer += 1;
 			if (timeoutTimer == 60*2) {
-				memcpy((u32*)0x02000000,sr_data_error,0x560);
+				memcpy((u32*)0x02000300,sr_data_error,0x020);
 				i2cWriteRegister(0x4a,0x70,0x01);
 				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
 			}
