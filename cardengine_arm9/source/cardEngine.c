@@ -50,8 +50,14 @@ static u32 ROM_TID;
 
 #define only_CACHE_ADRESS_START 0x0C800000
 #define only_CACHE_ADRESS_SIZE 0x1800000
+#define only_8MB_CACHE_ADRESS_START 0x02800000
+#define only_8MB_CACHE_ADRESS_SIZE 0x800000
+#define only_128KB_CACHE_SLOTS 0xC0
+#define only_8MB_128KB_CACHE_SLOTS 0x40
 #define only_256KB_CACHE_SLOTS 0x60
+#define only_8MB_256KB_CACHE_SLOTS 0x20
 #define only_512KB_CACHE_SLOTS 0x30
+#define only_8MB_512KB_CACHE_SLOTS 0x10
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -70,10 +76,8 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
-static u32 only_256KB_cacheDescriptor [only_256KB_CACHE_SLOTS] = {0xffffffff};
-static u32 only_256KB_cacheCounter [only_256KB_CACHE_SLOTS];
-static u32 only_512KB_cacheDescriptor [only_512KB_CACHE_SLOTS] = {0xffffffff};
-static u32 only_512KB_cacheCounter [only_512KB_CACHE_SLOTS];
+static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
+static u32 only_cacheCounter [only_128KB_CACHE_SLOTS];
 static u32 WRAM_accessCounter = 0;
 static u32 _64KB_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
@@ -84,6 +88,7 @@ static u32 only_accessCounter = 0;
 static int selectedSize = 0;
 
 static bool flagsSet = false;
+static bool _8MB_RAM_CACHE = false;
 static bool ROMinRAM = false;
 static bool dsiWramUsed = false;
 
@@ -113,6 +118,7 @@ int WRAM_allocateCacheSlot() {
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = 0;
+	int cacheSlots = 0;
 	switch(selectedSize) {
 		case 0:
 		default:
@@ -157,11 +163,25 @@ int allocateCacheSlot() {
 				}
 			}
 			break;
+		case 12:
+			lowerCounter = only_accessCounter;
+			cacheSlots = only_128KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_128KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
 		case 13:
 			lowerCounter = only_accessCounter;
-			for(int i=0; i<only_256KB_CACHE_SLOTS; i++) {
-				if(only_256KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = only_256KB_cacheCounter[i];
+			cacheSlots = only_256KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_256KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
 					slot = i;
 					if(!lowerCounter) break;
 				}
@@ -169,9 +189,11 @@ int allocateCacheSlot() {
 			break;
 		case 14:
 			lowerCounter = only_accessCounter;
-			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
-				if(only_512KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = only_512KB_cacheCounter[i];
+			cacheSlots = only_512KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_512KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
 					slot = i;
 					if(!lowerCounter) break;
 				}
@@ -191,6 +213,7 @@ int WRAM_getSlotForSector(u32 sector) {
 }
 
 int getSlotForSector(u32 sector) {
+	int cacheSlots = 0;
 	switch(selectedSize) {
 		case 0:
 		default:
@@ -223,16 +246,29 @@ int getSlotForSector(u32 sector) {
 				}
 			}
 			break;
+		case 12:
+			cacheSlots = only_128KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_128KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
 		case 13:
-			for(int i=0; i<only_256KB_CACHE_SLOTS; i++) {
-				if(only_256KB_cacheDescriptor[i]==sector) {
+			cacheSlots = only_256KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_256KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
 					return i;
 				}
 			}
 			break;
 		case 14:
-			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
-				if(only_512KB_cacheDescriptor[i]==sector) {
+			cacheSlots = only_512KB_CACHE_SLOTS;
+			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_512KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
 					return i;
 				}
 			}
@@ -263,11 +299,17 @@ vu8* getCacheAddress(int slot) {
 		case 4:
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
+		case 12:
+			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			else return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			break;
 		case 13:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			else return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
 			break;
 		case 14:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			else return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
 	}
 }
@@ -306,13 +348,11 @@ void updateDescriptor(int slot, u32 sector) {
 			_512KB_cacheDescriptor[slot] = sector;
 			_512KB_cacheCounter[slot] = _512KB_accessCounter;
 			break;
+		case 12:
 		case 13:
-			only_256KB_cacheDescriptor[slot] = sector;
-			only_256KB_cacheCounter[slot] = only_accessCounter;
-			break;
 		case 14:
-			only_512KB_cacheDescriptor[slot] = sector;
-			only_512KB_cacheCounter[slot] = only_accessCounter;
+			only_cacheDescriptor[slot] = sector;
+			only_cacheCounter[slot] = only_accessCounter;
 			break;
 	}
 }
@@ -334,6 +374,7 @@ void accessCounterIncrease() {
 		case 4:
 			_512KB_accessCounter++;
 			break;
+		case 12:
 		case 13:
 		case 14:
 			only_accessCounter++;
@@ -462,6 +503,9 @@ int cardRead (u32* cacheStruct) {
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
 			selectedSize = 13;
 			CACHE_READ_SIZE = _256KB_READ_SIZE;
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41) {
+			selectedSize = 12;
+			CACHE_READ_SIZE = _128KB_READ_SIZE;
 		} else {
 			if(len <= _64KB_READ_SIZE) {
 				selectedSize = 1;
