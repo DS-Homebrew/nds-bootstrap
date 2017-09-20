@@ -23,6 +23,9 @@
 static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
 
+static u32 ARM9_LEN;
+static u32 romSize;
+
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
 #define _128KB_READ_SIZE 0x20000
@@ -88,8 +91,10 @@ static u32 only_accessCounter = 0;
 static int selectedSize = 0;
 
 static bool flagsSet = false;
+static bool ROMinRAM_flagSet = false;
 static bool _8MB_RAM_CACHE = false;
 static bool ROMinRAM = false;
+static bool ROMinRAM_secondHalf = false;
 static bool dsiWramUsed = false;
 
 void user_exception(void);
@@ -421,9 +426,9 @@ int cardRead (u32* cacheStruct) {
 			dsiWramUsed = true;
 		}
 
-		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
+		ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
-		u32 romSize = tempNdsHeader[0x080>>2];
+		romSize = tempNdsHeader[0x080>>2];
 		if((romSize & 0x0000000F) == 0x1
 		|| (romSize & 0x0000000F) == 0x3
 		|| (romSize & 0x0000000F) == 0x5
@@ -437,7 +442,7 @@ int cardRead (u32* cacheStruct) {
 		}
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
-		
+
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 			if((ROM_TID & 0x00FFFFFF) == 0x474441)	// Nintendogs - Dachshund & Friends
@@ -446,8 +451,12 @@ int cardRead (u32* cacheStruct) {
 			}
 		}
 
-		// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-		if(romSize <= 0x01C00000 && !dsiWramUsed) {
+		flagsSet = true;
+	}
+	
+	if(!ROMinRAM_flagSet && !dsiWramUsed) {
+		// If ROM size is 0x01C00000 or below, load the ROM into RAM.
+		if(romSize <= 0x01C00000) {
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
@@ -468,8 +477,33 @@ int cardRead (u32* cacheStruct) {
 			ROM_LOCATION -= ARM9_LEN;
 
 			ROMinRAM = true;
+		} else
+		// If ROM size is between 0x01C00000 and 0x03800000, load the first half of the ROM into RAM.
+		if(romSize > 0x01C00000 && romSize <= 0x03800000) {
+			ROM_LOCATION = 0x0C400000;
+
+			// read directly at arm7 level
+			commandRead = 0x025FFB08;
+
+			REG_SCFG_EXT = 0x8300C000;
+
+			sharedAddr[0] = ROM_LOCATION;
+			sharedAddr[1] = 0x01C00000;
+			sharedAddr[2] = 0x4000+ARM9_LEN;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
+
+			REG_SCFG_EXT = 0x83000000;
+
+			ROM_LOCATION -= 0x4000;
+			ROM_LOCATION -= ARM9_LEN;
+
+			ROMinRAM = true;
 		}
-		flagsSet = true;
+		ROMinRAM_flagSet = true;
 	}
 
 	#ifdef DEBUG
@@ -676,6 +710,58 @@ int cardRead (u32* cacheStruct) {
 					else accessCounterIncrease();
 				}
 			} else {
+				if(src > 0x01C00000+0x4000+ARM9_LEN) {
+					if(!ROMinRAM_secondHalf) {
+						ROM_LOCATION = 0x0C400000;
+					
+						// read directly at arm7 level
+						commandRead = 0x025FFB08;
+
+						REG_SCFG_EXT = 0x8300C000;
+
+						sharedAddr[0] = ROM_LOCATION;
+						sharedAddr[1] = romSize-0x01C00000;
+						sharedAddr[2] = 0x4000+ARM9_LEN+0x01C00000;
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+
+						REG_SCFG_EXT = 0x83000000;
+
+						ROM_LOCATION -= 0x4000;
+						ROM_LOCATION -= ARM9_LEN;
+
+						ROMinRAM_secondHalf = true;
+					}
+				} else {
+					if(ROMinRAM_secondHalf) {
+						ROM_LOCATION = 0x0C400000;
+					
+						// read directly at arm7 level
+						commandRead = 0x025FFB08;
+
+						REG_SCFG_EXT = 0x8300C000;
+
+						sharedAddr[0] = ROM_LOCATION;
+						sharedAddr[1] = 0x01C00000;
+						sharedAddr[2] = 0x4000+ARM9_LEN;
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+
+						REG_SCFG_EXT = 0x83000000;
+
+						ROM_LOCATION -= 0x4000;
+						ROM_LOCATION -= ARM9_LEN;
+
+						ROMinRAM_secondHalf = false;
+					}
+				}
+
 				u32 len2=len;
 				if(len2 > 512) {
 					len2 -= src%4;
@@ -701,7 +787,11 @@ int cardRead (u32* cacheStruct) {
 
 					// read ROM loaded into RAM
 					REG_SCFG_EXT = 0x8300C000;
-					fastCopy32(ROM_LOCATION+src,dst,len2);
+					if(ROMinRAM_secondHalf) {
+						fastCopy32(ROM_LOCATION+(src-0x01C00000),dst,len2);
+					} else {
+						fastCopy32(ROM_LOCATION+src,dst,len2);
+					}
 					REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common

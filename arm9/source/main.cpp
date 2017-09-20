@@ -202,6 +202,8 @@ int main( int argc, char **argv) {
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 
+	initMBK();
+
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
@@ -311,8 +313,6 @@ int main( int argc, char **argv) {
 
 		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
 		fifoSendValue32(FIFO_USER_06, 1);
-
-		initMBK();
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
