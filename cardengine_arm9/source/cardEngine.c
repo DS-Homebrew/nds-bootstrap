@@ -385,8 +385,6 @@ void accessCounterIncrease() {
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
-	setExceptionHandler2();
-	
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
@@ -412,6 +410,12 @@ int cardRead (u32* cacheStruct) {
 		while(sharedAddr[3] != (vu32)0);
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
+
+		if((ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
+		|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
+		{} else {
+			setExceptionHandler2();
+		}
 		
 		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
 		|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// Zelda: Spirit Tracks
