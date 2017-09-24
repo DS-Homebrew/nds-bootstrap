@@ -446,10 +446,10 @@ int cardRead (u32* cacheStruct) {
 			ROM_LOCATION = 0x0E000000-romSize;
 			if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
 			|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
-			|| (ROM_TID & 0x00FFFFFF) == 0x474441	// Nintendogs - Dachshund & Friends
-			|| (ROM_TID & 0x00FFFFFF) == 0x354441)	// Nintendogs - Best Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x354441	// Nintendogs - Best Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x474441)	// Nintendogs - Dachshund & Friends
 			{
-				ROM_LOCATION = 0x0DFFFFE0-romSize;	// Fix some games white-screening
+				ROM_LOCATION -= 0x20;	// Fix some games white-screening (the fix no longer works)
 			}
 		}
 
@@ -539,7 +539,7 @@ int cardRead (u32* cacheStruct) {
 
 	u32 sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 
-	if(page == src && len > CACHE_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+	if(!ROMinRAM && page == src && len > CACHE_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 		// read directly at arm7 level
 		commandRead = 0x025FFB08;
 

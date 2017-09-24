@@ -39,6 +39,8 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
+static u32 u32Bak = 0;
+
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
@@ -170,7 +172,10 @@ void runCardEngineCheck (void) {
 			dbg_printf("\nlog only \n");
 			#endif
 
+			u32Bak = *(vu32*)(0x027FFB14);
 			*(vu32*)(0x027FFB14) = 0;
+			i2cWriteRegister(0x4A, 0x63, 0x00);    // slight delay, so arm9 can continue
+			*(vu32*)(0x027FFB14) = u32Bak;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
@@ -214,7 +219,10 @@ void runCardEngineCheck (void) {
 			}
 			#endif
 
+			u32Bak = *(vu32*)(0x027FFB14);
 			*(vu32*)(0x027FFB14) = 0;
+			i2cWriteRegister(0x4A, 0x63, 0x00);    // slight delay, so arm9 can continue
+			*(vu32*)(0x027FFB14) = u32Bak;
 		}
 		unlockMutex();
 	}
