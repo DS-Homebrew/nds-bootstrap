@@ -444,7 +444,10 @@ int cardRead (u32* cacheStruct) {
 		
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
-			if((ROM_TID & 0x00FFFFFF) == 0x474441)	// Nintendogs - Dachshund & Friends
+			if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x474441	// Nintendogs - Dachshund & Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x354441)	// Nintendogs - Best Friends
 			{
 				ROM_LOCATION = 0x0DFFFFE0-romSize;	// Fix some games white-screening
 			}
