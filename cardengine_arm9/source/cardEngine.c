@@ -464,6 +464,8 @@ int cardRead (u32* cacheStruct) {
 			sharedAddr[1] = romSize;
 			sharedAddr[2] = 0x4000+ARM9_LEN;
 			sharedAddr[3] = commandRead;
+			if(romSize > 0x01800000 && romSize <= 0x01C00000) sharedAddr[4] = true;
+			else sharedAddr[4] = false;
 
 			IPC_SendSync(0xEE24);
 
