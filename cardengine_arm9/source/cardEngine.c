@@ -411,9 +411,11 @@ int cardRead (u32* cacheStruct) {
 
 		ROM_TID = tempNdsHeader[0x00C>>2];
 
-		if((ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
-		|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
-		{} else {
+		// ExceptionHandler2 (red screen) blacklist
+		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+		|| (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
+		|| (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+		{
 			setExceptionHandler2();
 		}
 		
