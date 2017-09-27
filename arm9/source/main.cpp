@@ -250,6 +250,10 @@ int main( int argc, char **argv) {
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
 		reinittimer = 0;
+
+		bool softReset = bootstrapini.GetInt( "NDS-BOOTSTRAP", "SOFT_RESET", 1);
+		if (softReset) fifoSendValue32(FIFO_USER_08, 1);
+		reinittimer = 0;
 		run_reinittimer = false;
 
 		fifoSendValue32(FIFO_USER_03, 1);
