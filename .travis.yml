@@ -7,11 +7,6 @@ before_install:
 
 install:
   - sudo perl devkitARMupdate.pl
-  - wget --no-check-certificate https://codeload.github.com/ahezard/libnds/zip/master -O /tmp/libnds.zip
-  - unzip /tmp/libnds.zip
-  - cd libnds-master
-  - make && sudo make install
-  - cd ..
 
 script:
   - make
