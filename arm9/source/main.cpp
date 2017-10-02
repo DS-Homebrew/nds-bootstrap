@@ -112,6 +112,11 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 	}
 }
 
+typedef struct {
+	char gameTitle[12];			//!< 12 characters for the game title.
+	char gameCode[4];			//!< 4 characters for the game code.
+} sNDSHeadertitlecodeonly;
+
 void getSFCG_ARM9() {
 	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
 	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
@@ -186,8 +191,10 @@ void VcountHandler() {
 			InitSD();	// Re-init SD if fatInit is looping
 		}
 		if (reinittimer == 180) {
-			if(!consoleInited) consoleDemoInit();
-			consoleInited = true;
+			if(!consoleInited) {
+				consoleDemoInit();
+				consoleInited = true;
+			}
 			consoleClear();
 			nocashMessage("fatInitDefault crashed!");
 			printf("fatInitDefault crashed!");
@@ -215,8 +222,10 @@ int main( int argc, char **argv) {
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {
 			debug=true;
 
-			if(!consoleInited) consoleDemoInit();
-			consoleInited = true;
+			if(!consoleInited) {
+				consoleDemoInit();
+				consoleInited = true;
+			}
 
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
@@ -247,12 +256,39 @@ int main( int argc, char **argv) {
 				break;
 		}
 
+		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
+		reinittimer = 0;
+
+		/*FILE *f_nds_file = fopen(ndsPath.c_str(), "rb");
+
+		char game_TID[5];
+		fseek(f_nds_file, offsetof(sNDSHeadertitlecodeonly, gameCode), SEEK_SET);
+		fread(game_TID, 1, 4, f_nds_file);
+		game_TID[4] = 0;
+		game_TID[3] = 0;
+		game_TID[2] = 0;
+		game_TID[1] = 0;
+		fclose(f_nds_file);
+		
+		if (strcmp(game_TID, "I") != 0) {
+			fifoSendValue32(FIFO_USER_08, 1);	// Disable Slot-1 access for games with no built-in Infrared port
+		}*/
+
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
 		reinittimer = 0;
 
 		bool softReset = bootstrapini.GetInt( "NDS-BOOTSTRAP", "SOFT_RESET", 1);
-		if (softReset) fifoSendValue32(FIFO_USER_08, 1);
+		if (softReset) fifoSendValue32(FIFO_USER_07, 1);
+		reinittimer = 0;
+
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
+			dbg_printf("CPU boosted\n");
+			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+		} else {
+			REG_SCFG_CLK = 0x80;
+			fifoSendValue32(FIFO_USER_06, 1);
+		}
 		reinittimer = 0;
 		run_reinittimer = false;
 
@@ -275,8 +311,6 @@ int main( int argc, char **argv) {
 			remove ("sd:/NDSBTSRP.LOG");
 		}
 
-		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");
 
 		int useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);
@@ -292,21 +326,6 @@ int main( int argc, char **argv) {
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
-			dbg_printf("CPU boosted\n");
-			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-			// if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
-				// This is nested in BOOT_CPU check as it won't make sense to enable this without TWL clock speeds being active.
-				// dbg_printf("VRAM boosted\n");
-				// REG_SCFG_EXT = 0x83002000;
-			// } else {
-				// Do nothing for now. Default set at boot.
-			// }
-		} else {
-			REG_SCFG_CLK = 0x80;
-			fifoSendValue32(FIFO_USER_07, 1);
-		}
-
 		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {
 			dbg_printf("ARM9_SCFG_EXT locked\n");
@@ -314,9 +333,6 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_08, 1);
 		}
 		*/
-
-		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
-		fifoSendValue32(FIFO_USER_06, 1);
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	

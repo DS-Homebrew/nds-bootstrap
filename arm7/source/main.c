@@ -33,6 +33,37 @@ redistribute it freely, subject to the following restrictions:
 
 #include "fifocheck.h"
 
+#define BASE_DELAY (100)
+
+void twlEnableSlot1() {
+	int oldIME = enterCriticalSection();
+
+	while((REG_SCFG_MC & 0x0c) == 0x0c) swiDelay(1 * BASE_DELAY);
+
+	if(!(REG_SCFG_MC & 0x0c)) {
+
+		REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 4;
+		swiDelay(10 * BASE_DELAY);
+		REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 8;
+		swiDelay(10 * BASE_DELAY);
+	}
+	leaveCriticalSection(oldIME);
+}
+
+void twlDisableSlot1() {
+	int oldIME = enterCriticalSection();
+
+	while((REG_SCFG_MC & 0x0c) == 0x0c) swiDelay(1 * BASE_DELAY);
+
+	if((REG_SCFG_MC & 0x0c) == 8) {
+
+		REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 0x0c;
+		while((REG_SCFG_MC & 0x0c) != 0) swiDelay(1 * BASE_DELAY);
+	}
+
+	leaveCriticalSection(oldIME);
+}
+
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
@@ -154,8 +185,14 @@ int main(void) {
 	}
 
 	if(fifoCheckValue32(FIFO_USER_04)) {
-		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run comptibility check
+		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run compatibility check
 	}
+
+	if(fifoCheckValue32(FIFO_USER_07)) {
+		i2cWriteRegister(0x4A, 0x74, 0x01);		// Set to turn on soft-reset button combo
+	}
+	
+	SCFGFifoCheck();
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
 
@@ -163,7 +200,6 @@ int main(void) {
 
 	// Keep the ARM7 mostly idle
 	while (1) {
-		SCFGFifoCheck();
 		swiWaitForVBlank();
 	}
 }
