@@ -33,18 +33,14 @@ Helpful information:
  This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
+#ifndef ARM7
+# define ARM7
+#endif
 #include <nds/ndstypes.h>
 #include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>
-#define ARM9
-#undef ARM7
-#include <nds/memory.h>
-#include <nds/arm9/video.h>
-#include <nds/arm9/input.h>
-#undef ARM9
-#define ARM7
 #include <nds/arm7/audio.h>
 
 #include "fat.h"
@@ -53,7 +49,6 @@ Helpful information:
 #include "card_patcher.h"
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
-#include "boot.h"
 #include "hook.h"
 #include "common.h"
 
@@ -88,6 +83,30 @@ extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Used for debugging purposes
+static void errorOutput (u32 code) {
+	// Wait until the ARM9 is ready
+	while (arm9_stateFlag != ARM9_READY);
+	// Set the error code, then tell ARM9 to display it
+	arm9_errorCode = code;
+	arm9_errorClearBG = true;
+	arm9_stateFlag = ARM9_DISPERR;
+	// Stop
+	while(1);
+}
+
+static void debugOutput (u32 code) {
+	// Wait until the ARM9 is ready
+	while (arm9_stateFlag != ARM9_READY);
+	// Set the error code, then tell ARM9 to display it
+	arm9_errorCode = code;
+	arm9_errorClearBG = false;
+	arm9_stateFlag = ARM9_DISPERR;
+	// Wait for completion
+	while (arm9_stateFlag != ARM9_READY);
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -262,7 +281,11 @@ void startBinary_ARM7 (void) {
 	while(REG_VCOUNT==191);
 	// copy NDS ARM9 start address into the header, starting ARM9
 	*((vu32*)0x02FFFE24) = TEMP_ARM9_START_ADDRESS;
-	ARM9_START_FLAG = 1;
+	// Get the ARM9 to boot
+	arm9_stateFlag = ARM9_BOOTBIN;
+
+	while(REG_VCOUNT!=191);
+	while(REG_VCOUNT==191);
 	// Start ARM7
 	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
@@ -332,8 +355,9 @@ void initMBK() {
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-int main (void) {
+void arm7_main (void) {
 	nocashMessage("bootloader");
+
 	initMBK();
 
 	if (dsiSD) {
@@ -362,42 +386,39 @@ int main (void) {
 		return -1;
 	}
 
-	// ARM9 clears its memory part 2
-	// copy ARM9 function to RAM, and make the ARM9 jump to it
-	copyLoop((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
-	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
-	// Wait until the ARM9 has completed its task
-	nocashMessage("Wait until the ARM9 has completed its task");
-	while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
+	int errorCode;
+
+	// Wait for ARM9 to at least start
+	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Get ARM7 to clear RAM");
+	debugOutput (ERR_STS_CLR_MEM);
 	resetMemory_ARM7();
-
-	// ARM9 enters a wait loop
-	// copy ARM9 function to RAM, and make the ARM9 jump to it
-	copyLoop((void*)TEMP_MEM, (void*)startBinary_ARM9, startBinary_ARM9_size);
-	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
+	debugOutput (ERR_STS_LOAD_BIN);
 	loadBinary_ARM7(file);
 
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 
 	nocashMessage("try to patch dldi");
+	debugOutput (ERR_STS_HOOK_BIN);
 	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	if (wantToPatchDLDI) {
 		nocashMessage("dldi patch successful");
+
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
 
-		int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-		if(error == ERR_NONE) {
+		errorCode = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
+		if(errorCode == ERR_NONE) {
 			nocashMessage("dldi hook Sucessfull");
 		} else {
 			nocashMessage("error during dldi hook");
+			errorOutput(errorCode);
 		}
 	} else {
 		nocashMessage("dldi Patch Unsuccessful try to patch card");
@@ -410,13 +431,17 @@ int main (void) {
 			ensureArm9Decompressed(NDS_HEAD, params);
 		}
 
-		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+		if (errorCode != ERR_NONE) {
+			errorOutput(errorCode);
+		}
 
-		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-			if(error == ERR_NONE) {
+		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+		if(errorCode == ERR_NONE) {
 			nocashMessage("card hook Sucessfull");
 		} else {
 			nocashMessage("error during card hook");
+			errorOutput(errorCode);
 		}
 	}
  
@@ -426,6 +451,7 @@ int main (void) {
 	//passArgs_ARM7();
 
 	nocashMessage("Start the NDS file");
+	debugOutput (ERR_STS_START);
 	startBinary_ARM7();
 
 	return 0;

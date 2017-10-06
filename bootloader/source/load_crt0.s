@@ -95,9 +95,21 @@ startUp:
 	sub	r1, r1, r0
 	bl	ClearMem
 
+@ Load ARM9 region into main RAM
+	ldr	r1, =__arm9_source_start
+	ldr	r2, =__arm9_start	
+	ldr	r3, =__arm9_source_end
+	sub	r3, r3, r1
+	bl	CopyMem
+
+@ Start ARM9 binary
+	ldr	r0, =0x027FFE24	
+	ldr	r1, =_arm9_start
+	str	r1, [r0]
+
 	mov	r0, #0			@ int argc
 	mov	r1, #0			@ char *argv[]
-	ldr	r3, =main
+	ldr	r3, =arm7_main
 	bl	_blx_r3_stub		@ jump to user code
 
 	@ If the user ever returns, restart
