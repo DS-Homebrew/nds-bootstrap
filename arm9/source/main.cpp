@@ -99,6 +99,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
+		powerOn(PM_BACKLIGHT_TOP);
 		int err = runNdsFile (argarray[0],
 							strdup(savPath.c_str()),
 							strdup(arm7DonorPath.c_str()),
@@ -107,6 +108,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 							patchMpuRegion,
 							patchMpuSize,
 							argarray.size(), (const char **)&argarray[0]);
+		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -223,6 +225,7 @@ int main( int argc, char **argv) {
 			debug=true;
 
 			if(!consoleInited) {
+				powerOff(PM_BACKLIGHT_TOP);
 				consoleDemoInit();
 				consoleInited = true;
 			}
