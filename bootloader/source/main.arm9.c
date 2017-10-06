@@ -43,6 +43,7 @@ volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_errorCode = 0xFFFFFFFF;
 volatile bool arm9_errorClearBG = false;
 volatile u32 arm9_BLANK_RAM = 0;
+volatile bool arm9_extRAM = false;
 
 /*-------------------------------------------------------------------------
 External functions
@@ -227,6 +228,11 @@ void arm9_main (void)
 	// set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while ( arm9_stateFlag != ARM9_BOOTBIN ) {
+		if(arm9_extRAM) {
+			REG_SCFG_EXT = 0x8300C000;
+		} else {
+			REG_SCFG_EXT = 0x83000000;
+		}
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			arm9_errorOutput (arm9_errorCode, arm9_errorClearBG);
 			if ( arm9_stateFlag == ARM9_DISPERR) {

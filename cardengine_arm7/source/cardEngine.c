@@ -43,9 +43,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-static u32 u32Bak = 0;
-static bool dou32Bak = false;
-
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
@@ -176,9 +173,6 @@ void runCardEngineCheck (void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
-			u32 flag4 = *(vu32*)(sharedAddr+4);
-
-			dou32Bak = flag4;
 
 			dbg_printf("\ncard read received\n");
 
@@ -199,14 +193,7 @@ void runCardEngineCheck (void) {
 			dbg_printf("\nlog only \n");
 			#endif
 
-			if(dou32Bak) {
-				u32Bak = *(vu32*)(0x027FFB14);
-				*(vu32*)(0x027FFB14) = 0;
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // slight delay, so arm9 can continue
-				*(vu32*)(0x027FFB14) = u32Bak;
-			} else {
-				*(vu32*)(0x027FFB14) = 0;
-			}
+			*(vu32*)(0x027FFB14) = 0;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
@@ -215,9 +202,6 @@ void runCardEngineCheck (void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
-			u32 flag4 = *(vu32*)(sharedAddr+4);
-
-			dou32Bak = flag4;
 
 			#ifdef DEBUG
 			dbg_printf("\ncard read received v2\n");
@@ -253,14 +237,7 @@ void runCardEngineCheck (void) {
 			}
 			#endif
 
-			if(dou32Bak) {
-				u32Bak = *(vu32*)(0x027FFB14);
-				*(vu32*)(0x027FFB14) = 0;
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // slight delay, so arm9 can continue
-				*(vu32*)(0x027FFB14) = u32Bak;
-			} else {
-				*(vu32*)(0x027FFB14) = 0;
-			}
+			*(vu32*)(0x027FFB14) = 0;
 		}
 		unlockMutex();
 	}

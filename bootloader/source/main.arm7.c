@@ -224,6 +224,11 @@ void resetMemory_ARM7 (void)
 }
 
 
+u32 ROM_LOCATION = 0x0C800000;
+u32 ROM_TID;
+u32 ARM9_LEN;
+u32 romSize;
+
 void loadBinary_ARM7 (aFile file)
 {
 	u32 ndsHeader[0x170>>2];
@@ -235,11 +240,14 @@ void loadBinary_ARM7 (aFile file)
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
-	u32 ARM9_LEN = ndsHeader[0x02C>>2];
+	ARM9_LEN = ndsHeader[0x02C>>2];
 	// read ARM7 info from NDS header
 	u32 ARM7_SRC = ndsHeader[0x030>>2];
 	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
+
+	ROM_TID = ndsHeader[0x00C>>2];
+	romSize = ndsHeader[0x080>>2];
 
 	//Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170);
@@ -266,6 +274,41 @@ void loadBinary_ARM7 (aFile file)
 	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
 	ndsHeader[0x024>>2] = 0;
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
+}
+
+void loadRomIntoRam(aFile file) {
+	if((romSize & 0x0000000F) == 0x1
+	|| (romSize & 0x0000000F) == 0x3
+	|| (romSize & 0x0000000F) == 0x5
+	|| (romSize & 0x0000000F) == 0x7
+	|| (romSize & 0x0000000F) == 0x9
+	|| (romSize & 0x0000000F) == 0xB
+	|| (romSize & 0x0000000F) == 0xD
+	|| (romSize & 0x0000000F) == 0xF)
+	{
+		romSize--;	// If ROM size is at an odd number, subtract 1 from it.
+	}
+	romSize -= 0x4000;
+	romSize -= ARM9_LEN;
+
+	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
+	if(romSize <= 0x01C00000) {
+		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
+			ROM_LOCATION = 0x0E000000-romSize;
+			if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x354441	// Nintendogs - Best Friends
+			|| (ROM_TID & 0x00FFFFFF) == 0x474441)	// Nintendogs - Dachshund & Friends
+			{
+				ROM_LOCATION -= 0x20;	// Fix some games white-screening
+			}
+		}
+
+		debugOutput (ERR_LOAD_NORM);
+		arm9_extRAM = true;
+		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
+		arm9_extRAM = false;
+	}
 }
 
 /*-------------------------------------------------------------------------
@@ -449,6 +492,8 @@ void arm7_main (void) {
 
 	// Pass command line arguments to loaded program
 	//passArgs_ARM7();
+
+	loadRomIntoRam(file);
 
 	nocashMessage("Start the NDS file");
 	debugOutput (ERR_STS_START);
