@@ -86,26 +86,30 @@ extern unsigned long patchMpuSize;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
-static void errorOutput (u32 code) {
+static void errorOutput (void) {
 	// Wait until the ARM9 is ready
 	while (arm9_stateFlag != ARM9_READY);
 	// Set the error code, then tell ARM9 to display it
-	arm9_errorCode = code;
+	arm9_errorColor = true;
 	arm9_errorClearBG = true;
 	arm9_stateFlag = ARM9_DISPERR;
 	// Stop
 	while(1);
 }
 
-static void debugOutput (u32 code) {
+static void debugOutput (void) {
 	// Wait until the ARM9 is ready
 	while (arm9_stateFlag != ARM9_READY);
 	// Set the error code, then tell ARM9 to display it
-	arm9_errorCode = code;
 	arm9_errorClearBG = false;
 	arm9_stateFlag = ARM9_DISPERR;
 	// Wait for completion
 	while (arm9_stateFlag != ARM9_READY);
+}
+
+static void increaseLoadBarLength (void) {
+	arm9_loadBarLength++;
+	debugOutput();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -304,7 +308,6 @@ void loadRomIntoRam(aFile file) {
 			}
 		}
 
-		debugOutput (ERR_LOAD_NORM);
 		arm9_extRAM = true;
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 		arm9_extRAM = false;
@@ -436,18 +439,17 @@ void arm7_main (void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Get ARM7 to clear RAM");
-	debugOutput (ERR_STS_CLR_MEM);
+	debugOutput();	// 1 dot
 	resetMemory_ARM7();
 
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
-	debugOutput (ERR_STS_LOAD_BIN);
 	loadBinary_ARM7(file);
+	increaseLoadBarLength();	// 2 dots
 
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 
 	nocashMessage("try to patch dldi");
-	debugOutput (ERR_STS_HOOK_BIN);
 	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	if (wantToPatchDLDI) {
 		nocashMessage("dldi patch successful");
@@ -461,31 +463,36 @@ void arm7_main (void) {
 			nocashMessage("dldi hook Sucessfull");
 		} else {
 			nocashMessage("error during dldi hook");
-			errorOutput(errorCode);
+			errorOutput();
 		}
 	} else {
 		nocashMessage("dldi Patch Unsuccessful try to patch card");
 		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+		increaseLoadBarLength();	// 3 dots
 		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+		increaseLoadBarLength();	// 4 dots
 
 		module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
 		if(params)
 		{
 			ensureArm9Decompressed(NDS_HEAD, params);
 		}
+		increaseLoadBarLength();	// 5 dots
 
 		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
 		if (errorCode != ERR_NONE) {
-			errorOutput(errorCode);
+			errorOutput();
 		}
+		increaseLoadBarLength();	// 6 dots
 
 		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 		if(errorCode == ERR_NONE) {
 			nocashMessage("card hook Sucessfull");
 		} else {
 			nocashMessage("error during card hook");
-			errorOutput(errorCode);
+			errorOutput();
 		}
+		increaseLoadBarLength();	// 7 dots
 	}
  
 
@@ -494,9 +501,10 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
+	increaseLoadBarLength();	// 8 dots
 
 	nocashMessage("Start the NDS file");
-	debugOutput (ERR_STS_START);
+	increaseLoadBarLength();	// and finally, 9 dots
 	startBinary_ARM7();
 
 	return 0;

@@ -39,11 +39,17 @@
 
 #include "common.h"
 
+#define red 0x001F
+#define yellow 0x03FF
+#define green 0x03E0
+#define blue 0x7C00
+
 volatile int arm9_stateFlag = ARM9_BOOT;
-volatile u32 arm9_errorCode = 0xFFFFFFFF;
+volatile bool arm9_errorColor = false;
 volatile bool arm9_errorClearBG = false;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile bool arm9_extRAM = false;
+volatile int arm9_loadBarLength = 0;
 
 /*-------------------------------------------------------------------------
 External functions
@@ -53,10 +59,12 @@ extern void arm9_clearCache (void);
 /*-------------------------------------------------------------------------
 arm9_errorOutput
 Displays an error code on screen.
-Written by Chishm
+Written by Chishm.
+Modified by Robz8:
+ * Use dots as loading bar
 --------------------------------------------------------------------------*/
-static void arm9_errorOutput (u32 code, bool clearBG) {
-	int i, j, k;
+static void arm9_errorOutput (bool clearBG) {
+	int i, y, k;
 	u16 colour;
 
 	REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
@@ -70,62 +78,22 @@ static void arm9_errorOutput (u32 code, bool clearBG) {
 		}
 	}
 
-	// Draw boxes of colour, signifying error codes
-
-	if ((code >> 16) != 0) {
-		// high 16 bits
-		for (i = 0; i < 8; i++) {						// Pair of bits to use
-			if (((code>>(30-2*i))&3) == 0) {
-				colour = 0x001F; // Red
-			} else if (((code>>(30-2*i))&3) == 1) {
-				colour = 0x03FF; // Yellow
-			} else if (((code>>(30-2*i))&3) == 2) {
-				colour = 0x03E0; // Green
-			} else {
-				colour = 0x7C00; // Blue
-			}
-			for (j = 71; j < 87; j++) { 				// Row
-				for (k = 32*i+8; k < 32*i+24; k++) {	// Column
-					VRAM_A[j*256+k] = colour;
-				}
-			}
+	for (i = 0; i <= arm9_loadBarLength; i++) {
+		if(arm9_errorColor) {
+			colour = red;
+		} else {
+			colour = green;
 		}
-	}
 
-	if ((code >> 8) != 0) {
-		// Low 16 bits
-		for (i = 0; i < 8; i++) {						// Pair of bits to use
-			if (((code>>(14-2*i))&3) == 0) {
-				colour = 0x001F; // Red
-			} else if (((code>>(14-2*i))&3) == 1) {
-				colour = 0x03FF; // Yellow
-			} else if (((code>>(14-2*i))&3) == 2) {
-				colour = 0x03E0; // Green
+		for (y = 71; y < 87; y++) {
+			for (k = 32*i+8; k < 32*i+24; k++) {
+				VRAM_A[y*256+k] = colour;
+			}
+			// Lower color brightness on next vertical line for gradient effect
+			if(arm9_errorColor) {
+				colour -= 0x0003;
 			} else {
-				colour = 0x7C00; // Blue
-			}
-			for (j = 103; j < 119; j++) { 				// Row
-				for (k = 32*i+8; k < 32*i+24; k++) {	// Column
-					VRAM_A[j*256+k] = colour;
-				}
-			}
-		}
-	} else {
-		// Low 8 bits
-		for (i = 0; i < 4; i++) {						// Pair of bits to use
-			if (((code>>(6-2*i))&3) == 0) {
-				colour = 0x001F; // Red
-			} else if (((code>>(6-2*i))&3) == 1) {
-				colour = 0x03FF; // Yellow
-			} else if (((code>>(6-2*i))&3) == 2) {
-				colour = 0x03E0; // Green
-			} else {
-				colour = 0x7C00; // Blue
-			}
-			for (j = 87; j < 103; j++) { 				// Row
-				for (k = 32*i+72; k < 32*i+88; k++) {	// Column
-					VRAM_A[j*256+k] = colour;
-				}
+				colour -= 0x0030;
 			}
 		}
 	}
@@ -234,7 +202,7 @@ void arm9_main (void)
 			REG_SCFG_EXT = 0x83000000;
 		}
 		if (arm9_stateFlag == ARM9_DISPERR) {
-			arm9_errorOutput (arm9_errorCode, arm9_errorClearBG);
+			arm9_errorOutput (arm9_errorClearBG);
 			if ( arm9_stateFlag == ARM9_DISPERR) {
 				arm9_stateFlag = ARM9_READY;
 			}
