@@ -85,15 +85,15 @@ static void arm9_errorOutput (bool clearBG) {
 			colour = green;
 		}
 
-		for (y = 71; y < 87; y++) {
+		for (y = 175; y < 191; y++) {
 			for (k = 32*i+8; k < 32*i+24; k++) {
 				VRAM_A[y*256+k] = colour;
 			}
 			// Lower color brightness on next vertical line for gradient effect
 			if(arm9_errorColor) {
-				colour -= 0x0003;
+				colour -= 0x0004;
 			} else {
-				colour -= 0x0030;
+				colour -= 0x0040;
 			}
 		}
 	}

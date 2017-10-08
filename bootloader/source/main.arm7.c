@@ -501,10 +501,9 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
-	increaseLoadBarLength();	// 8 dots
 
 	nocashMessage("Start the NDS file");
-	increaseLoadBarLength();	// and finally, 9 dots
+	increaseLoadBarLength();	// and finally, 8 dots
 	startBinary_ARM7();
 
 	return 0;
