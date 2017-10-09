@@ -61,7 +61,7 @@ arm9_errorOutput
 Displays an error code on screen.
 Written by Chishm.
 Modified by Robz8:
- * Use dots as loading bar
+ * Replace dots with loading bar and icon
 --------------------------------------------------------------------------*/
 static void arm9_errorOutput (bool clearBG) {
 	int i, y, k;
@@ -78,6 +78,7 @@ static void arm9_errorOutput (bool clearBG) {
 		}
 	}
 
+	// Draw loading bar
 	for (i = 0; i <= arm9_loadBarLength; i++) {
 		if(arm9_errorColor) {
 			colour = red;
@@ -85,8 +86,8 @@ static void arm9_errorOutput (bool clearBG) {
 			colour = green;
 		}
 
-		for (y = 175; y < 191; y++) {
-			for (k = 32*i; k < 32*i+32; k++) {
+		for (y = 176; y <= 191; y++) {
+			for (k = 32*i+16; k < 32*i+48; k++) {
 				VRAM_A[y*256+k] = colour;
 			}
 			// Lower color brightness on next vertical line for gradient effect
@@ -97,6 +98,79 @@ static void arm9_errorOutput (bool clearBG) {
 			}
 		}
 	}
+	
+	// Draw loading icon
+	if(arm9_errorColor) {
+		colour = red;
+	} else {
+		colour = green;
+	}
+	for (y = 177; y <= 180; y++) {
+		VRAM_A[y*256+1] = colour;
+		VRAM_A[y*256+2] = colour;
+		VRAM_A[y*256+3] = colour;
+		VRAM_A[y*256+4] = colour;
+		VRAM_A[y*256+5] = 0x0000;
+		VRAM_A[y*256+6] = colour;
+		VRAM_A[y*256+7] = colour;
+		VRAM_A[y*256+8] = colour;
+		VRAM_A[y*256+9] = colour;
+		VRAM_A[y*256+10] = 0x0000;
+		VRAM_A[y*256+11] = colour;
+		VRAM_A[y*256+12] = colour;
+		VRAM_A[y*256+13] = colour;
+		VRAM_A[y*256+14] = colour;
+		// Lower color brightness on next vertical line for gradient effect
+		if(arm9_errorColor) {
+			colour -= 0x0002;
+		} else {
+			colour -= 0x0020;
+		}
+	}	
+	for (y = 182; y <= 185; y++) {
+		VRAM_A[y*256+1] = colour;
+		VRAM_A[y*256+2] = colour;
+		VRAM_A[y*256+3] = colour;
+		VRAM_A[y*256+4] = colour;
+		VRAM_A[y*256+5] = 0x0000;
+		VRAM_A[y*256+6] = colour;
+		VRAM_A[y*256+7] = colour;
+		VRAM_A[y*256+8] = colour;
+		VRAM_A[y*256+9] = colour;
+		VRAM_A[y*256+10] = 0x0000;
+		VRAM_A[y*256+11] = colour;
+		VRAM_A[y*256+12] = colour;
+		VRAM_A[y*256+13] = colour;
+		VRAM_A[y*256+14] = colour;
+		// Lower color brightness on next vertical line for gradient effect
+		if(arm9_errorColor) {
+			colour -= 0x0002;
+		} else {
+			colour -= 0x0020;
+		}
+	}	
+	for (y = 187; y <= 190; y++) {
+		VRAM_A[y*256+1] = colour;
+		VRAM_A[y*256+2] = colour;
+		VRAM_A[y*256+3] = colour;
+		VRAM_A[y*256+4] = colour;
+		VRAM_A[y*256+5] = 0x0000;
+		VRAM_A[y*256+6] = colour;
+		VRAM_A[y*256+7] = colour;
+		VRAM_A[y*256+8] = colour;
+		VRAM_A[y*256+9] = colour;
+		VRAM_A[y*256+10] = 0x0000;
+		VRAM_A[y*256+11] = colour;
+		VRAM_A[y*256+12] = colour;
+		VRAM_A[y*256+13] = colour;
+		VRAM_A[y*256+14] = colour;
+		// Lower color brightness on next vertical line for gradient effect
+		if(arm9_errorColor) {
+			colour -= 0x0002;
+		} else {
+			colour -= 0x0020;
+		}
+	}	
 }
 
 /*-------------------------------------------------------------------------
