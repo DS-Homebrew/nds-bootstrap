@@ -92,7 +92,7 @@ static void arm9_errorOutput (bool clearBG) {
 			}
 			// Lower color brightness on next vertical line for gradient effect
 			if(arm9_errorColor) {
-				colour -= 0x0004;
+				colour -= 0x0002;
 			} else {
 				colour -= 0x0040;
 			}
@@ -122,7 +122,7 @@ static void arm9_errorOutput (bool clearBG) {
 		VRAM_A[y*256+14] = colour;
 		// Lower color brightness on next vertical line for gradient effect
 		if(arm9_errorColor) {
-			colour -= 0x0002;
+			colour -= 0x0001;
 		} else {
 			colour -= 0x0020;
 		}
@@ -144,7 +144,7 @@ static void arm9_errorOutput (bool clearBG) {
 		VRAM_A[y*256+14] = colour;
 		// Lower color brightness on next vertical line for gradient effect
 		if(arm9_errorColor) {
-			colour -= 0x0002;
+			colour -= 0x0001;
 		} else {
 			colour -= 0x0020;
 		}
@@ -166,7 +166,7 @@ static void arm9_errorOutput (bool clearBG) {
 		VRAM_A[y*256+14] = colour;
 		// Lower color brightness on next vertical line for gradient effect
 		if(arm9_errorColor) {
-			colour -= 0x0002;
+			colour -= 0x0001;
 		} else {
 			colour -= 0x0020;
 		}

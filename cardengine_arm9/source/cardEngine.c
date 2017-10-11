@@ -22,6 +22,7 @@
 
 static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
+static u32 romSize;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -429,7 +430,7 @@ int cardRead (u32* cacheStruct) {
 
 		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
-		u32 romSize = tempNdsHeader[0x080>>2];
+		romSize = tempNdsHeader[0x080>>2];
 		if((romSize & 0x0000000F) == 0x1
 		|| (romSize & 0x0000000F) == 0x3
 		|| (romSize & 0x0000000F) == 0x5
@@ -485,18 +486,21 @@ int cardRead (u32* cacheStruct) {
 	selectedSize = 4;
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 	if(!dsiWramUsed) {
-		if((ROM_TID & 0x00FFFFFF) == 0x593341
-		|| (ROM_TID & 0x00FFFFFF) == 0x414441	// Diamond
-		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// Pearl
-		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// Platinum
-		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// HG
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// SS
+		if((ROM_TID & 0x00FFFFFF) == 0x593341	// Sonic Rush Adventure
+		|| (ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
+		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
+		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
+		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// PKMN SS
 		{
 			selectedSize = 14;
-		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241) {
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+				|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+		{
 			selectedSize = 13;
 			CACHE_READ_SIZE = _256KB_READ_SIZE;
-		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41) {
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+		{
 			selectedSize = 12;
 			CACHE_READ_SIZE = _128KB_READ_SIZE;
 		} else {
@@ -541,8 +545,6 @@ int cardRead (u32* cacheStruct) {
 		while(sharedAddr[3] != (vu32)0);
 
 	} else {
-		// Prevent writing above DS 4MB RAM area
-		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;
 		// read via the main RAM cache
 		while(len > 0) {
 			if(!ROMinRAM) {
@@ -669,6 +671,11 @@ int cardRead (u32* cacheStruct) {
 					else accessCounterIncrease();
 				}
 			} else {
+				// Prevent overwriting ROM in RAM
+				if(romSize <= 0x01800000 && dst >= 0x02400000 && dst < 0x02800000) {
+					dst -= 0x00400000;
+				}
+
 				u32 len2=len;
 				if(len2 > 512) {
 					len2 -= src%4;

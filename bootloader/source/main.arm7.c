@@ -480,9 +480,6 @@ void arm7_main (void) {
 		increaseLoadBarLength();	// 5 dots
 
 		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
-		if (errorCode != ERR_NONE) {
-			errorOutput();
-		}
 		increaseLoadBarLength();	// 6 dots
 
 		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
