@@ -29,6 +29,8 @@ static u32 romSize;
 #define _128KB_READ_SIZE 0x20000
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
+#define _768KB_READ_SIZE 0xC0000
+#define _1MB_READ_SIZE 0x100000
 
 #define REG_MBK_WRAM_CACHE_START	0x4004045
 #define WRAM_CACHE_ADRESS_START 0x03708000
@@ -51,14 +53,11 @@ static u32 romSize;
 
 #define only_CACHE_ADRESS_START 0x0C800000
 #define only_CACHE_ADRESS_SIZE 0x1800000
-#define only_8MB_CACHE_ADRESS_START 0x02800000
-#define only_8MB_CACHE_ADRESS_SIZE 0x800000
 #define only_128KB_CACHE_SLOTS 0xC0
-#define only_8MB_128KB_CACHE_SLOTS 0x40
 #define only_256KB_CACHE_SLOTS 0x60
-#define only_8MB_256KB_CACHE_SLOTS 0x20
 #define only_512KB_CACHE_SLOTS 0x30
-#define only_8MB_512KB_CACHE_SLOTS 0x10
+#define only_768KB_CACHE_SLOTS 0x20
+#define only_1MB_CACHE_SLOTS 0x18
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -89,7 +88,6 @@ static u32 only_accessCounter = 0;
 static int selectedSize = 0;
 
 static bool flagsSet = false;
-static bool _8MB_RAM_CACHE = false;
 static bool ROMinRAM = false;
 static bool dsiWramUsed = false;
 
@@ -167,7 +165,6 @@ int allocateCacheSlot() {
 		case 12:
 			lowerCounter = only_accessCounter;
 			cacheSlots = only_128KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_128KB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
@@ -179,7 +176,6 @@ int allocateCacheSlot() {
 		case 13:
 			lowerCounter = only_accessCounter;
 			cacheSlots = only_256KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_256KB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
@@ -191,7 +187,28 @@ int allocateCacheSlot() {
 		case 14:
 			lowerCounter = only_accessCounter;
 			cacheSlots = only_512KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_512KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 15:
+			lowerCounter = only_accessCounter;
+			cacheSlots = only_768KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 16:
+			lowerCounter = only_accessCounter;
+			cacheSlots = only_1MB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
@@ -249,7 +266,6 @@ int getSlotForSector(u32 sector) {
 			break;
 		case 12:
 			cacheSlots = only_128KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_128KB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheDescriptor[i]==sector) {
 					return i;
@@ -258,7 +274,6 @@ int getSlotForSector(u32 sector) {
 			break;
 		case 13:
 			cacheSlots = only_256KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_256KB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheDescriptor[i]==sector) {
 					return i;
@@ -267,7 +282,22 @@ int getSlotForSector(u32 sector) {
 			break;
 		case 14:
 			cacheSlots = only_512KB_CACHE_SLOTS;
-			if(_8MB_RAM_CACHE) cacheSlots = only_8MB_512KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 15:
+			cacheSlots = only_768KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 16:
+			cacheSlots = only_1MB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
 				if(only_cacheDescriptor[i]==sector) {
 					return i;
@@ -301,16 +331,19 @@ vu8* getCacheAddress(int slot) {
 			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
 			break;
 		case 12:
-			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
-			else return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 			break;
 		case 13:
-			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
-			else return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
 			break;
 		case 14:
-			if(_8MB_RAM_CACHE) return (vu32*)(only_8MB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
-			else return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			break;
+		case 15:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_768KB_READ_SIZE);
+			break;
+		case 16:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_1MB_READ_SIZE);
 			break;
 	}
 }
@@ -352,6 +385,8 @@ void updateDescriptor(int slot, u32 sector) {
 		case 12:
 		case 13:
 		case 14:
+		case 15:
+		case 16:
 			only_cacheDescriptor[slot] = sector;
 			only_cacheCounter[slot] = only_accessCounter;
 			break;
@@ -378,6 +413,8 @@ void accessCounterIncrease() {
 		case 12:
 		case 13:
 		case 14:
+		case 15:
+		case 16:
 			only_accessCounter++;
 			break;
 	}
@@ -486,14 +523,17 @@ int cardRead (u32* cacheStruct) {
 	selectedSize = 4;
 	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 	if(!dsiWramUsed) {
-		if((ROM_TID & 0x00FFFFFF) == 0x593341	// Sonic Rush Adventure
-		|| (ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
+		if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
 		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
 		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
 		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
 		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// PKMN SS
 		{
 			selectedSize = 14;
+		} else if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+		{
+			selectedSize = 16;
+			CACHE_READ_SIZE = _1MB_READ_SIZE;
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
 				|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
 		{
