@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -107,6 +107,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 							donorSdkVer,
 							patchMpuRegion,
 							patchMpuSize,
+							loadingScreen,
 							argarray.size(), (const char **)&argarray[0]);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
@@ -338,7 +339,7 @@ int main( int argc, char **argv) {
 		*/
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1));	
 	} else {
 		run_reinittimer = false;
 		consoleDemoInit();

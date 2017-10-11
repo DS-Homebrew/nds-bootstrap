@@ -83,28 +83,33 @@ extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
+extern unsigned long loadingScreen;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
 static void errorOutput (void) {
-	// Wait until the ARM9 is ready
-	while (arm9_stateFlag != ARM9_READY);
-	// Set the error code, then tell ARM9 to display it
-	arm9_errorColor = true;
-	arm9_errorClearBG = true;
-	arm9_stateFlag = ARM9_DISPERR;
+	if(loadingScreen == 1) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_errorColor = true;
+		arm9_errorClearBG = true;
+		arm9_stateFlag = ARM9_DISPERR;
+	}
 	// Stop
 	while(1);
 }
 
 static void debugOutput (void) {
-	// Wait until the ARM9 is ready
-	while (arm9_stateFlag != ARM9_READY);
-	// Set the error code, then tell ARM9 to display it
-	arm9_errorClearBG = false;
-	arm9_stateFlag = ARM9_DISPERR;
-	// Wait for completion
-	while (arm9_stateFlag != ARM9_READY);
+	if(loadingScreen == 1) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_errorClearBG = false;
+		arm9_stateFlag = ARM9_DISPERR;
+		// Wait for completion
+		while (arm9_stateFlag != ARM9_READY);
+	}
 }
 
 static void increaseLoadBarLength (void) {

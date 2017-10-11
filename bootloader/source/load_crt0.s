@@ -35,6 +35,7 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
+	.global loadingScreen
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -69,6 +70,8 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000		
 patchMpuSize:
+	.word	0x00000000		
+loadingScreen:
 	.word	0x00000000		
 
 startUp:
