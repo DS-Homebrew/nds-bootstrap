@@ -22,7 +22,9 @@
 
 static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
+static u32 ARM9_LEN;
 static u32 romSize;
+static u32 romSize_lastHalf;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -89,6 +91,9 @@ static int selectedSize = 0;
 
 static bool flagsSet = false;
 static bool ROMinRAM = false;
+static bool use28MB = false;
+static bool _32MBROM = false;
+static bool _32MBROM_LastHalfLoaded = false;
 static bool dsiWramUsed = false;
 
 void user_exception(void);
@@ -466,7 +471,7 @@ int cardRead (u32* cacheStruct) {
 			dsiWramUsed = true;
 		}
 
-		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
+		ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
 		romSize = tempNdsHeader[0x080>>2];
 		if((romSize & 0x0000000F) == 0x1
@@ -483,9 +488,20 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 
+		if(romSize > 0x01C00000 && romSize <= 0x02000000) {
+			_32MBROM = true;
+
+			ROM_LOCATION -= 0x4000;
+			ROM_LOCATION -= ARM9_LEN;
+			
+			romSize_lastHalf = romSize-0x01800000;
+
+			ROMinRAM = true;
+		} else
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
 		if(romSize <= 0x01C00000 && !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
+				use28MB = true;
 				ROM_LOCATION = 0x0E000000-romSize;
 				if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
 				|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
@@ -713,8 +729,64 @@ int cardRead (u32* cacheStruct) {
 				}
 			} else {
 				// Prevent overwriting ROM in RAM
-				if(romSize <= 0x01800000 && dst >= 0x02400000 && dst < 0x02800000) {
+				if(use28MB && dst >= 0x02400000 && dst < 0x02800000) {
 					dst -= 0x00400000;
+				}
+
+				if(_32MBROM) {
+					u32 src2 = src-0x4000-ARM9_LEN;
+					if (src2 >= 0x01800000) {
+						if(!_32MBROM_LastHalfLoaded) {
+							ROM_LOCATION = 0x0C800000;
+
+							REG_SCFG_EXT = 0x8300C000;
+
+							// read directly at arm7 level
+							commandRead = 0x025FFB08;
+
+							sharedAddr[0] = ROM_LOCATION;
+							sharedAddr[1] = romSize_lastHalf;
+							sharedAddr[2] = 0x4000+ARM9_LEN+0x01800000;
+							sharedAddr[3] = commandRead;
+
+							IPC_SendSync(0xEE24);
+
+							while(sharedAddr[3] != (vu32)0);
+
+							REG_SCFG_EXT = 0x83000000;
+
+							ROM_LOCATION -= 0x4000;
+							ROM_LOCATION -= ARM9_LEN;
+							ROM_LOCATION -= 0x01800000;
+
+							_32MBROM_LastHalfLoaded = true;
+						}
+					} else {
+						if(_32MBROM_LastHalfLoaded) {
+							ROM_LOCATION = 0x0C800000;
+
+							REG_SCFG_EXT = 0x8300C000;
+
+							// read directly at arm7 level
+							commandRead = 0x025FFB08;
+
+							sharedAddr[0] = ROM_LOCATION;
+							sharedAddr[1] = romSize_lastHalf;
+							sharedAddr[2] = 0x4000+ARM9_LEN;
+							sharedAddr[3] = commandRead;
+
+							IPC_SendSync(0xEE24);
+
+							while(sharedAddr[3] != (vu32)0);
+
+							REG_SCFG_EXT = 0x83000000;
+
+							ROM_LOCATION -= 0x4000;
+							ROM_LOCATION -= ARM9_LEN;
+
+							_32MBROM_LastHalfLoaded = false;
+						}
+					}
 				}
 
 				u32 len2=len;

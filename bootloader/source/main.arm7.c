@@ -306,6 +306,11 @@ void loadRomIntoRam(aFile file) {
 		dsiWramUsed = true;
 	}
 
+	if(romSize > 0x01C00000 && romSize <= 0x02000000) {
+		arm9_extRAM = true;
+		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, 0x01800000);
+		arm9_extRAM = false;
+	} else
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if(romSize <= 0x01C00000 && !dsiWramUsed) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
