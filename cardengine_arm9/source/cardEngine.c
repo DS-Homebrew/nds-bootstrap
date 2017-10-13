@@ -488,7 +488,7 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 
-		if(romSize > 0x01C00000 && romSize <= 0x02000000) {
+		if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
 			_32MBROM = true;
 
 			ROM_LOCATION -= 0x4000;
