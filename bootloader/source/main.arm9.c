@@ -89,6 +89,96 @@ static void arm9_errorOutput (void) {
 			VRAM_A[i] = 0x7FFF;
 		}
 
+		// Draw "Loading..." text
+		// L: Part 1
+		for (y = 10; y <= 42; y++) {
+			for (k = 54; k <= 57; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// L: Part 2
+		for (y = 39; y <= 42; y++) {
+			for (k = 58; k <= 68; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// o: Part 1
+		for (y = 21; y <= 24; y++) {
+			for (k = 77; k <= 87; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// o: Part 2
+		for (y = 39; y <= 42; y++) {
+			for (k = 77; k <= 87; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// o: Part 3
+		for (y = 25; y <= 38; y++) {
+			for (k = 73; k <= 76; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// o: Part 4
+		for (y = 25; y <= 38; y++) {
+			for (k = 88; k <= 91; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// a: Part 1
+		for (y = 21; y <= 24; y++) {
+			for (k = 96; k <= 110; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// a: Part 2
+		for (y = 25; y <= 42; y++) {
+			for (k = 111; k <= 114; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// a: Part 3
+		for (y = 32; y <= 38; y++) {
+			for (k = 96; k <= 99; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// a: Part 4
+		for (y = 28; y <= 31; y++) {
+			for (k = 100; k <= 110; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// a: Part 5
+		for (y = 39; y <= 42; y++) {
+			for (k = 100; k <= 110; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// (not yet) End of Draw "Loading..." text
+
 		// Draw loading bar top edge
 		for (y = 154; y <= 158; y++) {
 			for (k = 8; k <= 247; k++) {
