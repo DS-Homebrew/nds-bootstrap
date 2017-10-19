@@ -306,8 +306,10 @@ void loadRomIntoRam(aFile file) {
 
 	if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
 		arm9_extRAM = true;
+		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, 0x01800000);
 		arm9_extRAM = false;
+		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if(romSize <= 0x01C00000 && !dsiWramUsed) {
@@ -323,8 +325,10 @@ void loadRomIntoRam(aFile file) {
 		}
 
 		arm9_extRAM = true;
+		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 		arm9_extRAM = false;
+		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	}
 }
 

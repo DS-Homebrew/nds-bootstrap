@@ -48,6 +48,7 @@ volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile bool arm9_errorColor = false;
 volatile bool arm9_extRAM = false;
+volatile u32 arm9_SCFG_EXT = 0;
 volatile int arm9_loadBarLength = 0;
 
 static bool loadingScreen = false;
@@ -469,44 +470,41 @@ static void arm9_loadingCircle (void) {
 			break;
 	}
 
-	// Draw loading circle
-	for (y = 64; y <= 87; y++) {
-		for (k = 88; k <= 111; k++) {
-			VRAM_A[y*256+k] = colour1;
+	// Draw loading circle (7 times, for slow animation)
+	for (i = 0; i < 7; i++) {
+		for (y = 64; y <= 87; y++) {
+			for (k = 88; k <= 111; k++) {
+				VRAM_A[y*256+k] = colour1;
+			}
+			for (k = 116; k <= 139; k++) {
+				VRAM_A[y*256+k] = colour2;
+			}
+			for (k = 144; k <= 167; k++) {
+				VRAM_A[y*256+k] = colour3;
+			}
+		}	
+		for (y = 92; y <= 115; y++) {
+			for (k = 88; k <= 111; k++) {
+				VRAM_A[y*256+k] = colour8;
+			}
+			for (k = 116; k <= 139; k++) {
+				VRAM_A[y*256+k] = 0x5294;
+			}
+			for (k = 144; k <= 167; k++) {
+				VRAM_A[y*256+k] = colour4;
+			}
+		}	
+		for (y = 120; y <= 143; y++) {
+			for (k = 88; k <= 111; k++) {
+				VRAM_A[y*256+k] = colour7;
+			}
+			for (k = 116; k <= 139; k++) {
+				VRAM_A[y*256+k] = colour6;
+			}
+			for (k = 144; k <= 167; k++) {
+				VRAM_A[y*256+k] = colour5;
+			}
 		}
-		for (k = 116; k <= 139; k++) {
-			VRAM_A[y*256+k] = colour2;
-		}
-		for (k = 144; k <= 167; k++) {
-			VRAM_A[y*256+k] = colour3;
-		}
-	}	
-	for (y = 92; y <= 115; y++) {
-		for (k = 88; k <= 111; k++) {
-			VRAM_A[y*256+k] = colour8;
-		}
-		for (k = 116; k <= 139; k++) {
-			VRAM_A[y*256+k] = 0x5294;
-		}
-		for (k = 144; k <= 167; k++) {
-			VRAM_A[y*256+k] = colour4;
-		}
-	}	
-	for (y = 120; y <= 143; y++) {
-		for (k = 88; k <= 111; k++) {
-			VRAM_A[y*256+k] = colour7;
-		}
-		for (k = 116; k <= 139; k++) {
-			VRAM_A[y*256+k] = colour6;
-		}
-		for (k = 144; k <= 167; k++) {
-			VRAM_A[y*256+k] = colour5;
-		}
-	}
-	
-	// Delay
-	for (i = 0; i < 256*192; i++) {
-		VRAM_A[0] = 0x7FFF;
 	}
 	
 	loadingCircleFrame++;
@@ -615,6 +613,7 @@ void arm9_main (void)
 		} else {
 			REG_SCFG_EXT = 0x83000000;
 		}
+		arm9_SCFG_EXT = REG_SCFG_EXT;
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			arm9_errorOutput();
 			if ( arm9_stateFlag == ARM9_DISPERR) {
