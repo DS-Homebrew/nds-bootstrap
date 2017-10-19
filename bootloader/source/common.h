@@ -35,7 +35,6 @@ enum {	ERR_NONE=0x00, ERR_STS_CLR_MEM=0x01, ERR_STS_LOAD_BIN=0x02, ERR_STS_HOOK_
 enum {ARM9_BOOT, ARM9_START, ARM9_MEMCLR, ARM9_READY, ARM9_BOOTBIN, ARM9_DISPERR} ARM9_STATE;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
-extern volatile bool arm9_errorClearBG;
 extern volatile bool arm9_extRAM;
 extern volatile int arm9_loadBarLength;
 

@@ -93,7 +93,6 @@ static void errorOutput (void) {
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
 		arm9_errorColor = true;
-		arm9_errorClearBG = true;
 		arm9_stateFlag = ARM9_DISPERR;
 	}
 	// Stop
@@ -105,7 +104,6 @@ static void debugOutput (void) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
-		arm9_errorClearBG = false;
 		arm9_stateFlag = ARM9_DISPERR;
 		// Wait for completion
 		while (arm9_stateFlag != ARM9_READY);
