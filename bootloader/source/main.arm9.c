@@ -177,7 +177,143 @@ static void arm9_errorOutput (void) {
 			}
 		}
 
-		// (not yet) End of Draw "Loading..." text
+		// Draw "Loading..." text
+		// d: Part 1
+		for (y = 21; y <= 24; y++) {
+			for (k = 123; k <= 133; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// d: Part 2
+		for (y = 39; y <= 42; y++) {
+			for (k = 123; k <= 133; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// d: Part 3
+		for (y = 25; y <= 38; y++) {
+			for (k = 119; k <= 122; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// d: Part 4
+		for (y = 10; y <= 42; y++) {
+			for (k = 134; k <= 137; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// i: Part 1
+		for (y = 13; y <= 16; y++) {
+			for (k = 142; k <= 145; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// i: Part 2
+		for (y = 21; y <= 42; y++) {
+			for (k = 142; k <= 145; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// n: Part 1
+		for (y = 21; y <= 24; y++) {
+			for (k = 150; k <= 164; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// n: Part 2
+		for (y = 25; y <= 42; y++) {
+			for (k = 150; k <= 153; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// n: Part 3
+		for (y = 25; y <= 42; y++) {
+			for (k = 165; k <= 168; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// g: Part 1
+		for (y = 21; y <= 24; y++) {
+			for (k = 177; k <= 187; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// g: Part 2
+		for (y = 36; y <= 39; y++) {
+			for (k = 177; k <= 187; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// g: Part 3
+		for (y = 43; y <= 46; y++) {
+			for (k = 173; k <= 187; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// g: Part 4
+		for (y = 25; y <= 35; y++) {
+			for (k = 173; k <= 176; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// g: Part 5
+		for (y = 21; y <= 42; y++) {
+			for (k = 188; k <= 191; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// Dot 1
+		for (y = 39; y <= 42; y++) {
+			for (k = 196; k <= 199; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// Dot 2
+		for (y = 39; y <= 42; y++) {
+			for (k = 204; k <= 207; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// Draw "Loading..." text
+		// Dot 3
+		for (y = 39; y <= 42; y++) {
+			for (k = 212; k <= 215; k++) {
+				VRAM_A[y*256+k] = 0x5AD6;
+			}
+		}
+
+		// End of Draw "Loading..." text
 
 		// Draw loading bar top edge
 		for (y = 154; y <= 158; y++) {
