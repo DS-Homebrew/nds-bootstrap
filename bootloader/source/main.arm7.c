@@ -94,7 +94,6 @@ static void errorOutput (void) {
 		// Set the error code, then tell ARM9 to display it
 		arm9_errorColor = true;
 		arm9_stateFlag = ARM9_DISPERR;
-		arm9_animateLoadingCircle = false;
 	}
 	// Stop
 	while(1);

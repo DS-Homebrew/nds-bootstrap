@@ -364,15 +364,9 @@ static void arm9_errorOutput (void) {
 
 	// Draw loading bar
 	for (i = 0; i <= arm9_loadBarLength; i++) {
-		if(arm9_errorColor) {
-			colour = 0x001B;
-		} else {
-			colour = 0x6F7B;
-		}
-
 		for (y = 160; y <= 183; y++) {
 			for (k = 30*i+8; k < 30*i+38; k++) {
-				VRAM_A[y*256+k] = colour;
+				VRAM_A[y*256+k] = 0x6F7B;
 			}
 		}
 	}
@@ -506,6 +500,177 @@ static void arm9_loadingCircle (void) {
 	if(loadingCircleFrame==8) loadingCircleFrame = 0;
 }
 
+static void arm9_errorText (void) {
+	// Cover "Loading..." text
+	for (i = 0; i < 256*48; i++) {
+		VRAM_A[i] = 0x7FFF;
+	}
+
+	// Draw "Error!" text
+	// E: Part 1
+	for (y = 12; y <= 44; y++) {
+		for (k = 76; k <= 79; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+	
+	// Draw "Error!" text
+	// E: Part 2
+	for (y = 12; y <= 15; y++) {
+		for (k = 80; k <= 90; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+	
+	// Draw "Error!" text
+	// E: Part 3
+	for (y = 26; y <= 29; y++) {
+		for (k = 80; k <= 90; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+	
+	// Draw "Error!" text
+	// E: Part 4
+	for (y = 41; y <= 44; y++) {
+		for (k = 80; k <= 90; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// Draw 2 r's.
+	for (i = 0; i < 2; i++) {
+		// Draw "Error!" text
+		// r: Part 1
+		for (y = 23; y <= 44; y++) {
+			for (k = 95; k <= 98; k++) {
+				VRAM_A[y*256+k+i*19] = 0x5AD6;
+			}
+		}
+		
+		// Draw "Error!" text
+		// r: Part 2
+		for (y = 26; y <= 29; y++) {
+			for (k = 99; k <= 102; k++) {
+				VRAM_A[y*256+k+i*19] = 0x5AD6;
+			}
+		}
+		
+		// Draw "Error!" text
+		// r: Part 3
+		for (y = 23; y <= 26; y++) {
+			for (k = 103; k <= 109; k++) {
+				VRAM_A[y*256+k+i*19] = 0x5AD6;
+			}
+		}
+	}
+	
+	// Draw "Error!" text
+	// o: Part 1
+	for (y = 23; y <= 26; y++) {
+		for (k = 137; k <= 147; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// o: Part 2
+	for (y = 41; y <= 44; y++) {
+		for (k = 137; k <= 147; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// o: Part 3
+	for (y = 27; y <= 40; y++) {
+		for (k = 133; k <= 136; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// o: Part 4
+	for (y = 27; y <= 40; y++) {
+		for (k = 148; k <= 151; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// 3rd r: Part 1
+	for (y = 23; y <= 44; y++) {
+		for (k = 156; k <= 159; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// 3rd r: Part 2
+	for (y = 26; y <= 29; y++) {
+		for (k = 160; k <= 163; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// 3rd r: Part 3
+	for (y = 23; y <= 26; y++) {
+		for (k = 164; k <= 170; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+	
+	// Draw "Error!" text
+	// !: Part 1
+	for (y = 12; y <= 32; y++) {
+		for (k = 175; k <= 178; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// Draw "Error!" text
+	// !: Part 2
+	for (y = 38; y <= 44; y++) {
+		for (k = 175; k <= 178; k++) {
+			VRAM_A[y*256+k] = 0x5AD6;
+		}
+	}
+
+	// End of Draw "Error!" text
+	
+	// Change dots of loading circle to form an X
+	for (y = 64; y <= 87; y++) {
+		// 1st dot
+		for (k = 88; k <= 111; k++) {
+			VRAM_A[y*256+k] = 0x001B;
+		}
+		// 3rd dot
+		for (k = 144; k <= 167; k++) {
+			VRAM_A[y*256+k] = 0x001B;
+		}
+	}
+	for (y = 92; y <= 115; y++) {
+		// 5th dot
+		for (k = 116; k <= 139; k++) {
+			VRAM_A[y*256+k] = 0x001B;
+		}
+	}	
+	for (y = 120; y <= 143; y++) {
+		// 7th dot
+		for (k = 88; k <= 111; k++) {
+			VRAM_A[y*256+k] = 0x001B;
+		}
+		// 9th dot
+		for (k = 144; k <= 167; k++) {
+			VRAM_A[y*256+k] = 0x001B;
+		}
+	}
+
+	arm9_animateLoadingCircle = false;
+}
+
 /*-------------------------------------------------------------------------
 arm9_main
 
@@ -611,6 +776,7 @@ void arm9_main (void)
 		arm9_SCFG_EXT = REG_SCFG_EXT;
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			arm9_errorOutput();
+			if(arm9_errorColor) arm9_errorText();
 			if ( arm9_stateFlag == ARM9_DISPERR) {
 				arm9_stateFlag = ARM9_READY;
 			}
