@@ -38,6 +38,7 @@ extern volatile bool arm9_errorColor;
 extern volatile bool arm9_extRAM;
 extern volatile u32 arm9_SCFG_EXT;
 extern volatile int arm9_loadBarLength;
+extern volatile bool arm9_animateLoadingCircle;
 
 static inline void dmaFill(const void* src, void* dest, uint32 size) {
 	DMA_SRC(3)  = (uint32)src;

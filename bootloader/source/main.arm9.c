@@ -39,19 +39,14 @@
 
 #include "common.h"
 
-#define red 0x001F
-#define yellow 0x03FF
-#define green 0x03E0
-#define blue 0x7C00
-
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile bool arm9_errorColor = false;
 volatile bool arm9_extRAM = false;
 volatile u32 arm9_SCFG_EXT = 0;
 volatile int arm9_loadBarLength = 0;
+volatile bool arm9_animateLoadingCircle = false;
 
-static bool loadingScreen = false;
 static int loadingCircleFrame = 0;
 static bool drawnStuff = false;
 
@@ -370,7 +365,7 @@ static void arm9_errorOutput (void) {
 	// Draw loading bar
 	for (i = 0; i <= arm9_loadBarLength; i++) {
 		if(arm9_errorColor) {
-			colour = red;
+			colour = 0x001B;
 		} else {
 			colour = 0x6F7B;
 		}
@@ -382,7 +377,7 @@ static void arm9_errorOutput (void) {
 		}
 	}
 	
-	loadingScreen = true;
+	arm9_animateLoadingCircle = true;
 }
 
 static void arm9_loadingCircle (void) {
@@ -620,7 +615,7 @@ void arm9_main (void)
 				arm9_stateFlag = ARM9_READY;
 			}
 		}
-		if(loadingScreen) arm9_loadingCircle();
+		if(arm9_animateLoadingCircle) arm9_loadingCircle();
 	}
 
 	//REG_IME=0;
