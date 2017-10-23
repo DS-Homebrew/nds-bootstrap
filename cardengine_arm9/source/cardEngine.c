@@ -29,6 +29,7 @@ static u32 romSize_lastHalf;
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
 #define _128KB_READ_SIZE 0x20000
+#define _192KB_READ_SIZE 0x30000
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
@@ -56,6 +57,7 @@ static u32 romSize_lastHalf;
 #define only_CACHE_ADRESS_START 0x0C800000
 #define only_CACHE_ADRESS_SIZE 0x1800000
 #define only_128KB_CACHE_SLOTS 0xC0
+#define only_192KB_CACHE_SLOTS 0x80
 #define only_256KB_CACHE_SLOTS 0x60
 #define only_512KB_CACHE_SLOTS 0x30
 #define only_768KB_CACHE_SLOTS 0x20
@@ -178,6 +180,17 @@ int allocateCacheSlot() {
 				}
 			}
 			break;
+		case 125:
+			lowerCounter = only_accessCounter;
+			cacheSlots = only_192KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
 		case 13:
 			lowerCounter = only_accessCounter;
 			cacheSlots = only_256KB_CACHE_SLOTS;
@@ -277,6 +290,14 @@ int getSlotForSector(u32 sector) {
 				}
 			}
 			break;
+		case 125:
+			cacheSlots = only_192KB_CACHE_SLOTS;
+			for(int i=0; i<cacheSlots; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
 		case 13:
 			cacheSlots = only_256KB_CACHE_SLOTS;
 			for(int i=0; i<cacheSlots; i++) {
@@ -338,6 +359,9 @@ vu8* getCacheAddress(int slot) {
 		case 12:
 			return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 			break;
+		case 125:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_192KB_READ_SIZE);
+			break;
 		case 13:
 			return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
 			break;
@@ -388,6 +412,7 @@ void updateDescriptor(int slot, u32 sector) {
 			_512KB_cacheCounter[slot] = _512KB_accessCounter;
 			break;
 		case 12:
+		case 125:
 		case 13:
 		case 14:
 		case 15:
@@ -416,6 +441,7 @@ void accessCounterIncrease() {
 			_512KB_accessCounter++;
 			break;
 		case 12:
+		case 125:
 		case 13:
 		case 14:
 		case 15:
@@ -432,6 +458,9 @@ int cardRead (u32* cacheStruct) {
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
 	u32 src = cardStruct[0];
+	if(src==0) {
+		return 0;	// If ROM read location is 0, do not proceed.
+	}
 	u8* dst = (u8*) (cardStruct[1]);
 	u32 len = cardStruct[2];
 
@@ -558,8 +587,8 @@ int cardRead (u32* cacheStruct) {
 			CACHE_READ_SIZE = _256KB_READ_SIZE;
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
 		{
-			selectedSize = 12;
-			CACHE_READ_SIZE = _128KB_READ_SIZE;
+			selectedSize = 125;
+			CACHE_READ_SIZE = _192KB_READ_SIZE;
 		} else {
 			if(len <= _64KB_READ_SIZE) {
 				selectedSize = 1;
