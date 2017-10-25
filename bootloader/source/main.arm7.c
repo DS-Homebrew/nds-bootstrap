@@ -299,10 +299,10 @@ void loadRomIntoRam(aFile file) {
 	romSize -= ARM9_LEN;
 
 	bool dsiWramUsed = false;
-	if((ROM_TID & 0x00FFFFFF) == 0x5A4341)	// Cars
-	{
-		dsiWramUsed = true;
-	}
+	//if((ROM_TID & 0x00FFFFFF) == 0x5A4341)	// Cars
+	//{
+	//	dsiWramUsed = true;
+	//}
 
 	if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
 		arm9_extRAM = true;

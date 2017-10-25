@@ -43,6 +43,9 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
+static bool cardReadLoop = false;
+static int cardReadTimer = 0;
+
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
@@ -122,6 +125,74 @@ void cardReadLED (bool on) {
 	}
 }
 
+void log_arm9() {
+	#ifdef DEBUG		
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\ncard read received\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+
+	dbg_printf("\nlog only \n");
+	#endif
+}
+
+void cardRead_arm9() {
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	#ifdef DEBUG
+	dbg_printf("\ncard read received v2\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);	
+	#endif
+
+	timeoutRun = false;	// If card read received, do not show error screen
+
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	fileRead(dst,romFile,src,len);
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+
+	#ifdef DEBUG
+	dbg_printf("\nread \n");
+	if(is_aligned(dst,4) || is_aligned(len,4)) {
+		dbg_printf("\n aligned read : \n");
+	} else {
+		dbg_printf("\n misaligned read : \n");
+	}
+	#endif
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG
@@ -168,76 +239,39 @@ void runCardEngineCheck (void) {
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 		{
-			#ifdef DEBUG		
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);
-
-			dbg_printf("\ncard read received\n");
-
-			if(calledViaIPC) {
-				dbg_printf("\ntriggered via IPC\n");
-			}
-			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);
-			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);
-			dbg_printf("\ndst : \n");
-			dbg_hexa(dst);
-			dbg_printf("\nlen : \n");
-			dbg_hexa(len);
-			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);
-
-			dbg_printf("\nlog only \n");
-			#endif
-
+			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);
-
-			#ifdef DEBUG
-			dbg_printf("\ncard read received v2\n");
-
-			if(calledViaIPC) {
-				dbg_printf("\ntriggered via IPC\n");
-			}
-
-			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);
-			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);
-			dbg_printf("\ndst : \n");
-			dbg_hexa(dst);
-			dbg_printf("\nlen : \n");
-			dbg_hexa(len);
-			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);	
-			#endif
-
-			timeoutRun = false;	// If card read received, do not show error screen
-
-			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-			fileRead(dst,romFile,src,len);
-			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-
-			#ifdef DEBUG
-			dbg_printf("\nread \n");
-			if(is_aligned(dst,4) || is_aligned(len,4)) {
-				dbg_printf("\n aligned read : \n");
-			} else {
-				dbg_printf("\n misaligned read : \n");
-			}
-			#endif
-
+			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
+			cardReadLoop = true;
+		}
+
+		while(cardReadLoop == true) {
+			if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+			{
+				log_arm9();
+				*(vu32*)(0x027FFB14) = 0;
+			}
+
+			if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+			{
+				cardRead_arm9();
+				*(vu32*)(0x027FFB14) = 0;
+				cardReadTimer = 0;
+			}
+
+			for(int i = 0; i < 30; i++) {
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
+			}
+			cardReadTimer++;
+			if(cardReadTimer == 60) {
+				cardReadTimer = 0;
+				cardReadLoop = false;
+			}
 		}
 		unlockMutex();
 	}
