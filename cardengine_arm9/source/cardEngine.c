@@ -24,7 +24,7 @@ static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
 static u32 ARM9_LEN;
 static u32 romSize;
-//static u32 romSize_lastHalf;
+static u32 romSize_lastHalf;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -529,6 +529,7 @@ int cardRead (u32* cacheStruct) {
 		if(romSize <= 0x01C00000 && !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 				use28MB = true;
+				romSize_lastHalf = romSize-0x01800000;
 				ROM_LOCATION = 0x0E000000-romSize;
 				if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
 				|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
@@ -756,7 +757,7 @@ int cardRead (u32* cacheStruct) {
 				}
 			} else {
 				// Prevent overwriting ROM in RAM
-				if(use28MB && dst >= 0x02400000 && dst < 0x02800000) {
+				if(use28MB && dst >= 0x02800000-romSize_lastHalf && dst < 0x02800000) {
 					dst -= 0x00400000;
 				}
 
