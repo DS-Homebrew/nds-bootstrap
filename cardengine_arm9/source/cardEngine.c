@@ -24,7 +24,7 @@ static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
 static u32 ARM9_LEN;
 static u32 romSize;
-static u32 romSize_lastHalf;
+//static u32 romSize_lastHalf;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -94,8 +94,8 @@ static int selectedSize = 0;
 static bool flagsSet = false;
 static bool ROMinRAM = false;
 static bool use28MB = false;
-static bool _32MBROM = false;
-static bool _32MBROM_LastHalfLoaded = false;
+//static bool _32MBROM = false;
+//static bool _32MBROM_LastHalfLoaded = false;
 static bool dsiWramUsed = false;
 
 void user_exception(void);
@@ -515,7 +515,7 @@ int cardRead (u32* cacheStruct) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 
-		if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
+		/* if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
 			_32MBROM = true;
 
 			ROM_LOCATION -= 0x4000;
@@ -524,7 +524,7 @@ int cardRead (u32* cacheStruct) {
 			romSize_lastHalf = romSize-0x01800000;
 
 			ROMinRAM = true;
-		} else
+		} else */
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
 		if(romSize <= 0x01C00000 && !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
@@ -760,7 +760,7 @@ int cardRead (u32* cacheStruct) {
 					dst -= 0x00400000;
 				}
 
-				if(_32MBROM) {
+				/* if(_32MBROM) {
 					u32 src2 = src-0x4000-ARM9_LEN;
 					if (src2 >= 0x01800000) {
 						if(!_32MBROM_LastHalfLoaded) {
@@ -814,7 +814,7 @@ int cardRead (u32* cacheStruct) {
 							_32MBROM_LastHalfLoaded = false;
 						}
 					}
-				}
+				} */
 
 				u32 len2=len;
 				if(len2 > 512) {
