@@ -580,7 +580,8 @@ int cardRead (u32* cacheStruct) {
 			selectedSize = 16;
 			CACHE_READ_SIZE = _1MB_READ_SIZE;
 		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-				|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+				|| (ROM_TID & 0x00FFFFFF) == 0x575941	// Yoshi's Island DS
+				|| (ROM_TID & 0x00FFFFFF) == 0x574B59)	// Kirby Super Star Ultra
 		{
 			selectedSize = 13;
 			CACHE_READ_SIZE = _256KB_READ_SIZE;
