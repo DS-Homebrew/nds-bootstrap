@@ -41,15 +41,24 @@ static u32 romSize_lastHalf;
 #define WRAM_CACHE_ADRESS_SIZE 0x78000
 #define WRAM_CACHE_SLOTS 15
 
-#define CACHE_ADRESS_START 0x0C800000
-#define CACHE_ADRESS_SIZE 0x1800000
-#define _64KB_CACHE_SLOTS 0x180
-#define _128KB_CACHE_SLOTS 0xC0
-#define _192KB_CACHE_SLOTS 0x80
-#define _256KB_CACHE_SLOTS 0x60
-#define _512KB_CACHE_SLOTS 0x30
-#define _768KB_CACHE_SLOTS 0x20
-#define _1MB_CACHE_SLOTS 0x18
+#define _128KB_CACHE_ADRESS_START 0x0C800000
+#define _128KB_CACHE_ADRESS_SIZE 0x600000
+#define _128KB_CACHE_SLOTS 0x30
+#define _256KB_CACHE_ADRESS_START 0x0CE00000
+#define _256KB_CACHE_ADRESS_SIZE 0x800000
+#define _256KB_CACHE_SLOTS 0x20
+#define _512KB_CACHE_ADRESS_START 0x0D600000
+#define _512KB_CACHE_ADRESS_SIZE 0xA00000
+#define _512KB_CACHE_SLOTS 0x14
+
+#define only_CACHE_ADRESS_START 0x0C800000
+#define only_CACHE_ADRESS_SIZE 0x1800000
+#define only_128KB_CACHE_SLOTS 0xC0
+#define only_192KB_CACHE_SLOTS 0x80
+#define only_256KB_CACHE_SLOTS 0x60
+#define only_512KB_CACHE_SLOTS 0x30
+#define only_768KB_CACHE_SLOTS 0x20
+#define only_1MB_CACHE_SLOTS 0x18
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -60,10 +69,21 @@ extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of
 
 static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS];
 static u32 WRAM_cacheCounter [WRAM_CACHE_SLOTS];
-static u32 only_cacheDescriptor [_64KB_CACHE_SLOTS];
-static u32 only_cacheCounter [_64KB_CACHE_SLOTS];
+static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _128KB_cacheCounter [_128KB_CACHE_SLOTS];
+static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
+static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
+static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
+static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS];
+static u32 only_cacheCounter [only_128KB_CACHE_SLOTS];
 static u32 WRAM_accessCounter = 0;
+static u32 _128KB_accessCounter = 0;
+static u32 _256KB_accessCounter = 0;
+static u32 _512KB_accessCounter = 0;
 static u32 only_accessCounter = 0;
+
+static int selectedSize = 0;
 
 static bool flagsSet = false;
 static bool ROMinRAM = false;
@@ -97,13 +117,99 @@ int WRAM_allocateCacheSlot() {
 
 int allocateCacheSlot() {
 	int slot = 0;
-	int lowerCounter = only_accessCounter;
-	for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
-		if(only_cacheCounter[i]<=lowerCounter) {
-			lowerCounter = only_cacheCounter[i];
-			slot = i;
-			if(!lowerCounter) break;
-		}
+	int lowerCounter = 0;
+	switch(selectedSize) {
+		case 0:
+		default:
+			lowerCounter = _128KB_accessCounter;
+			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+				if(_128KB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = _128KB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 1:
+			lowerCounter = _256KB_accessCounter;
+			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
+				if(_256KB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = _256KB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 2:
+			lowerCounter = _512KB_accessCounter;
+			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
+				if(_512KB_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = _512KB_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 10:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 11:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_256KB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 12:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 13:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_192KB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 14:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_768KB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
+		case 15:
+			lowerCounter = only_accessCounter;
+			for(int i=0; i<only_1MB_CACHE_SLOTS; i++) {
+				if(only_cacheCounter[i]<=lowerCounter) {
+					lowerCounter = only_cacheCounter[i];
+					slot = i;
+					if(!lowerCounter) break;
+				}
+			}
+			break;
 	}
 	return slot;
 }
@@ -118,10 +224,71 @@ int WRAM_getSlotForSector(u32 sector) {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
-		if(only_cacheDescriptor[i]==sector) {
-			return i;
-		}
+	switch(selectedSize) {
+		case 0:
+		default:
+			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+				if(_128KB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 1:
+			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
+				if(_256KB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 2:
+			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
+				if(_512KB_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 10:
+			for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 11:
+			for(int i=0; i<only_256KB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 12:
+			for(int i=0; i<only_512KB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 13:
+			for(int i=0; i<only_192KB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 14:
+			for(int i=0; i<only_768KB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
+		case 15:
+			for(int i=0; i<only_1MB_CACHE_SLOTS; i++) {
+				if(only_cacheDescriptor[i]==sector) {
+					return i;
+				}
+			}
+			break;
 	}
 	return -1;
 }
@@ -132,7 +299,36 @@ vu8* WRAM_getCacheAddress(int slot) {
 }
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*_64KB_READ_SIZE);
+	switch(selectedSize) {
+		case 0:
+		default:
+			return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			break;
+		case 1:
+			return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			break;
+		case 2:
+			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			break;
+		case 10:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+			break;
+		case 11:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+			break;
+		case 12:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+			break;
+		case 13:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_192KB_READ_SIZE);
+			break;
+		case 14:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_768KB_READ_SIZE);
+			break;
+		case 15:
+			return (vu32*)(only_CACHE_ADRESS_START+slot*_1MB_READ_SIZE);
+			break;
+	}
 }
 
 void transfertToArm7(int slot) {
@@ -149,12 +345,53 @@ void WRAM_updateDescriptor(int slot, u32 sector) {
 }
 
 void updateDescriptor(int slot, u32 sector) {
-	only_cacheDescriptor[slot] = sector;
-	only_cacheCounter[slot] = only_accessCounter;
+	switch(selectedSize) {
+		case 0:
+		default:
+			_128KB_cacheDescriptor[slot] = sector;
+			_128KB_cacheCounter[slot] = _128KB_accessCounter;
+			break;
+		case 1:
+			_256KB_cacheDescriptor[slot] = sector;
+			_256KB_cacheCounter[slot] = _256KB_accessCounter;
+			break;
+		case 2:
+			_512KB_cacheDescriptor[slot] = sector;
+			_512KB_cacheCounter[slot] = _512KB_accessCounter;
+			break;
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+			only_cacheDescriptor[slot] = sector;
+			only_cacheCounter[slot] = only_accessCounter;
+			break;
+	}
 }
 
 void accessCounterIncrease() {
-	only_accessCounter++;
+	switch(selectedSize) {
+		case 0:
+		default:
+			_128KB_accessCounter++;
+			break;
+		case 1:
+			_256KB_accessCounter++;
+			break;
+		case 2:
+			_512KB_accessCounter++;
+			break;
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+			only_accessCounter++;
+			break;
+	}
 }
 
 int cardRead (u32* cacheStruct) {
@@ -271,8 +508,40 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	u32 CACHE_READ_SIZE = _64KB_READ_SIZE;
-	if(dsiWramUsed) {
+	selectedSize = 2;
+	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
+	if(!dsiWramUsed) {
+		if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
+		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
+		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
+		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// PKMN SS
+		{
+			selectedSize = 12;
+		} else if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+		{
+			selectedSize = 15;
+			CACHE_READ_SIZE = _1MB_READ_SIZE;
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+				|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+		{
+			selectedSize = 11;
+			CACHE_READ_SIZE = _256KB_READ_SIZE;
+		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+		{
+			selectedSize = 13;
+			CACHE_READ_SIZE = _192KB_READ_SIZE;
+		} else {
+			if(len <= _128KB_READ_SIZE) {
+				selectedSize = 0;
+				CACHE_READ_SIZE = _128KB_READ_SIZE;
+			}
+			if(len <= _256KB_READ_SIZE) {
+				selectedSize = 1;
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+			}
+		}
+	} else {
 		CACHE_READ_SIZE = _32KB_READ_SIZE;
 	}
 	
