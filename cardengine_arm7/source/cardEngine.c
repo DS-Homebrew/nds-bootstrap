@@ -43,8 +43,7 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-static bool cardReadLoop = false;
-static int cardReadTimer = 0;
+static bool delayRan = false;
 
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
@@ -247,30 +246,12 @@ void runCardEngineCheck (void) {
 		{
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			cardReadLoop = true;
-		}
 
-		while(cardReadLoop == true) {
-			if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-			{
-				log_arm9();
-				*(vu32*)(0x027FFB14) = 0;
-			}
-
-			if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-			{
-				cardRead_arm9();
-				*(vu32*)(0x027FFB14) = 0;
-				cardReadTimer = 0;
-			}
-
-			for(int i = 0; i < 30; i++) {
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
-			}
-			cardReadTimer++;
-			if(cardReadTimer == 60) {
-				cardReadTimer = 0;
-				cardReadLoop = false;
+			if(!delayRan) {
+				for(int i = 0; i < 30*60; i++) {
+					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
+				}
+				delayRan = true;
 			}
 		}
 		unlockMutex();
