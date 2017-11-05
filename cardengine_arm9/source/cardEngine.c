@@ -84,6 +84,9 @@ static u32 _512KB_accessCounter = 0;
 static u32 only_accessCounter = 0;
 
 static int selectedSize = 0;
+static u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
+static bool cacheSizeSet = false;
+static bool dynamicCaching = false;
 
 static bool flagsSet = false;
 static bool ROMinRAM = false;
@@ -126,7 +129,7 @@ int allocateCacheSlot() {
 				if(_128KB_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = _128KB_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -136,7 +139,7 @@ int allocateCacheSlot() {
 				if(_256KB_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = _256KB_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -146,7 +149,7 @@ int allocateCacheSlot() {
 				if(_512KB_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = _512KB_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -156,7 +159,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -166,7 +169,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -176,7 +179,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -186,7 +189,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -196,7 +199,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -206,7 +209,7 @@ int allocateCacheSlot() {
 				if(only_cacheCounter[i]<=lowerCounter) {
 					lowerCounter = only_cacheCounter[i];
 					slot = i;
-					if(!lowerCounter) break;
+					if(!lowerCounter) return slot;
 				}
 			}
 			break;
@@ -345,52 +348,30 @@ void WRAM_updateDescriptor(int slot, u32 sector) {
 }
 
 void updateDescriptor(int slot, u32 sector) {
-	switch(selectedSize) {
-		case 0:
-		default:
-			_128KB_cacheDescriptor[slot] = sector;
-			_128KB_cacheCounter[slot] = _128KB_accessCounter;
-			break;
-		case 1:
-			_256KB_cacheDescriptor[slot] = sector;
-			_256KB_cacheCounter[slot] = _256KB_accessCounter;
-			break;
-		case 2:
-			_512KB_cacheDescriptor[slot] = sector;
-			_512KB_cacheCounter[slot] = _512KB_accessCounter;
-			break;
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-		case 14:
-		case 15:
-			only_cacheDescriptor[slot] = sector;
-			only_cacheCounter[slot] = only_accessCounter;
-			break;
+	if(selectedSize==0) {
+		_128KB_cacheDescriptor[slot] = sector;
+		_128KB_cacheCounter[slot] = _128KB_accessCounter;
+	} else if(selectedSize==1) {
+		_256KB_cacheDescriptor[slot] = sector;
+		_256KB_cacheCounter[slot] = _256KB_accessCounter;
+	} else if(selectedSize==2) {
+		_512KB_cacheDescriptor[slot] = sector;
+		_512KB_cacheCounter[slot] = _512KB_accessCounter;
+	} else if(selectedSize >= 10) {
+		only_cacheDescriptor[slot] = sector;
+		only_cacheCounter[slot] = only_accessCounter;
 	}
 }
 
 void accessCounterIncrease() {
-	switch(selectedSize) {
-		case 0:
-		default:
-			_128KB_accessCounter++;
-			break;
-		case 1:
-			_256KB_accessCounter++;
-			break;
-		case 2:
-			_512KB_accessCounter++;
-			break;
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-		case 14:
-		case 15:
-			only_accessCounter++;
-			break;
+	if(selectedSize==0) {
+		_128KB_accessCounter++;
+	} else if(selectedSize==1) {
+		_256KB_accessCounter++;
+	} else if(selectedSize==2) {
+		_512KB_accessCounter++;
+	} else if(selectedSize >= 10) {
+		only_accessCounter++;
 	}
 }
 
@@ -508,30 +489,34 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	selectedSize = 2;
-	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 	if(!dsiWramUsed) {
-		if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
-		|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
-		|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
-		|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049)	// PKMN SS
-		{
-			selectedSize = 12;
-		} else if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-		{
-			selectedSize = 15;
-			CACHE_READ_SIZE = _1MB_READ_SIZE;
-		} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-				|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-		{
-			selectedSize = 11;
-			CACHE_READ_SIZE = _256KB_READ_SIZE;
-		} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
-		{
-			selectedSize = 13;
-			CACHE_READ_SIZE = _192KB_READ_SIZE;
-		} else {
+		if(!cacheSizeSet) {
+			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+			{
+				selectedSize = 15;
+				CACHE_READ_SIZE = _1MB_READ_SIZE;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
+					|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
+					|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
+					|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
+					|| (ROM_TID & 0x00FFFFFF) == 0x475049	// PKMN SS
+					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+			{
+				selectedSize = 11;
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+			{
+				selectedSize = 13;
+				CACHE_READ_SIZE = _192KB_READ_SIZE;
+			} else {
+				dynamicCaching = true;
+			}
+			cacheSizeSet = true;
+		}
+		if(dynamicCaching) {
+			selectedSize = 2;
+			CACHE_READ_SIZE = _512KB_READ_SIZE;
 			if(len <= _128KB_READ_SIZE) {
 				selectedSize = 0;
 				CACHE_READ_SIZE = _128KB_READ_SIZE;
