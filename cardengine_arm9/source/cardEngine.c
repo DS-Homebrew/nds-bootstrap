@@ -83,7 +83,7 @@ static u32 _256KB_accessCounter = 0;
 static u32 _512KB_accessCounter = 0;
 static u32 only_accessCounter = 0;
 
-static int selectedSize = 0;
+static int selectedSize = -1;
 static u32 only_cacheSlots = 0;
 static u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
 static bool cacheSizeSet = false;
@@ -206,35 +206,14 @@ vu8* WRAM_getCacheAddress(int slot) {
 }
 
 vu8* getCacheAddress(int slot) {
-	switch(selectedSize) {
-		case 0:
-		default:
-			return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
-			break;
-		case 1:
-			return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
-			break;
-		case 2:
-			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
-			break;
-		case 10:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
-			break;
-		case 11:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
-			break;
-		case 12:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
-			break;
-		case 13:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_192KB_READ_SIZE);
-			break;
-		case 14:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_768KB_READ_SIZE);
-			break;
-		case 15:
-			return (vu32*)(only_CACHE_ADRESS_START+slot*_1MB_READ_SIZE);
-			break;
+	if(selectedSize==0) {
+		return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+	} else if(selectedSize==1) {
+		return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+	} else if(selectedSize==2) {
+		return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+	} else {
+		return (vu32*)(only_CACHE_ADRESS_START+slot*CACHE_READ_SIZE);
 	}
 }
 
@@ -397,7 +376,6 @@ int cardRead (u32* cacheStruct) {
 		if(!cacheSizeSet) {
 			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
 			{
-				selectedSize = 15;
 				CACHE_READ_SIZE = _1MB_READ_SIZE;
 				only_cacheSlots = only_1MB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
@@ -408,12 +386,10 @@ int cardRead (u32* cacheStruct) {
 					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
 					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
 			{
-				selectedSize = 11;
 				CACHE_READ_SIZE = _256KB_READ_SIZE;
 				only_cacheSlots = only_256KB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
 			{
-				selectedSize = 13;
 				CACHE_READ_SIZE = _192KB_READ_SIZE;
 				only_cacheSlots = only_192KB_CACHE_SLOTS;
 			} else {
