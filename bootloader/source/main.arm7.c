@@ -233,6 +233,7 @@ void resetMemory_ARM7 (void)
 
 u32 ROM_LOCATION = 0x0C800000;
 u32 ROM_TID;
+u32 ARM9_LEN;
 u32 romSize;
 
 void loadBinary_ARM7 (aFile file)
@@ -246,7 +247,7 @@ void loadBinary_ARM7 (aFile file)
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
-	u32 ARM9_LEN = ndsHeader[0x02C>>2];
+	ARM9_LEN = ndsHeader[0x02C>>2];
 	// read ARM7 info from NDS header
 	u32 ARM7_SRC = ndsHeader[0x030>>2];
 	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
@@ -283,18 +284,33 @@ void loadBinary_ARM7 (aFile file)
 }
 
 void loadRomIntoRam(aFile file) {
+	if((romSize & 0x0000000F) == 0x1
+	|| (romSize & 0x0000000F) == 0x3
+	|| (romSize & 0x0000000F) == 0x5
+	|| (romSize & 0x0000000F) == 0x7
+	|| (romSize & 0x0000000F) == 0x9
+	|| (romSize & 0x0000000F) == 0xB
+	|| (romSize & 0x0000000F) == 0xD
+	|| (romSize & 0x0000000F) == 0xF)
+	{
+		romSize--;	// If ROM size is at an odd number, subtract 1 from it.
+	}
+	romSize -= 0x4000;
+	romSize -= ARM9_LEN;
+
 	if(romSize <= 0x00BFFFE0) {
 		if(romSize > 0x007FFFE0 && romSize <= 0x00BFFFE0) {
 			ROM_LOCATION = 0x0CFFFFE0-romSize;
 			arm9_extRAM = true;
 			while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+			*(u32*)(0x0CFFFFE4) = 0x00000001;
 			*(u32*)(0x0CFFFFE8) = romSize-0x007FFFE0;
 		}
 
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-		fileRead(ROM_LOCATION, file, 0, romSize);
-		*(u32*)(0x0CFFFFE0) = ROM_LOCATION;
+		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
+		*(u32*)(0x0CFFFFE0) = ROM_LOCATION-0x4000-ARM9_LEN;
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	}
@@ -486,7 +502,7 @@ void arm7_main (void) {
 
 	arm9_extRAM = true;
 	while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-	*(u32*)(0x0CFFFFE4) = ROM_TID;
+	*(u32*)(0x0CFFFFEC) = ROM_TID;
 	arm9_extRAM = false;
 	while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 

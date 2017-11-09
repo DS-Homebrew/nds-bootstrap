@@ -272,7 +272,7 @@ int cardRead (u32* cacheStruct) {
 	if(!flagsSet) {
 		REG_SCFG_EXT = 0x83008000;
 
-		ROM_TID = *(u32*)(0x0CFFFFE4);
+		ROM_TID = *(u32*)(0x0CFFFFEC);
 
 		// ExceptionHandler2 (red screen) blacklist
 		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
@@ -290,8 +290,8 @@ int cardRead (u32* cacheStruct) {
 		}
 
 		ROM_LOCATION = *(u32*)(0x0CFFFFE0);
-		if(ROM_LOCATION >= 0x0C400000) {
-			if(ROM_LOCATION < 0x0C800000) {
+		if(ROM_LOCATION > 0x0C000000) {
+			if(*(u32*)(0x0CFFFFE4) == 0x00000001) {
 				use12MB = true;
 				romSize_lastHalf = *(u32*)(0x0CFFFFE8);
 			}
