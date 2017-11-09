@@ -500,12 +500,6 @@ void arm7_main (void) {
 	// Pass command line arguments to loaded program
 	//passArgs_ARM7();
 
-	arm9_extRAM = true;
-	while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-	*(u32*)(0x0CFFFFEC) = ROM_TID;
-	arm9_extRAM = false;
-	while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
-
 	loadRomIntoRam(file);
 
 	nocashMessage("Start the NDS file");

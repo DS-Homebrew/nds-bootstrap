@@ -256,7 +256,9 @@ void accessCounterIncrease() {
 
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
-	
+
+	setExceptionHandler2();
+
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
@@ -272,23 +274,6 @@ int cardRead (u32* cacheStruct) {
 	if(!flagsSet) {
 		REG_SCFG_EXT = 0x83008000;
 
-		ROM_TID = *(u32*)(0x0CFFFFEC);
-
-		// ExceptionHandler2 (red screen) blacklist
-		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
-		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
-		{
-			setExceptionHandler2();
-		}
-
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-		|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
-		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-		{
-			dsiWramUsed = true;
-		}
-
 		ROM_LOCATION = *(u32*)(0x0CFFFFE0);
 		if(ROM_LOCATION > 0x0C000000) {
 			if(*(u32*)(0x0CFFFFE4) == 0x00000001) {
@@ -296,6 +281,31 @@ int cardRead (u32* cacheStruct) {
 				romSize_lastHalf = *(u32*)(0x0CFFFFE8);
 			}
 			ROMinRAM = true;
+		}
+		
+		if(!ROMinRAM) {
+			u32 tempNdsHeader[0x170>>2];
+
+			// read directly at arm7 level
+			commandRead = 0x025FFB08;
+
+			sharedAddr[0] = tempNdsHeader;
+			sharedAddr[1] = 0x170;
+			sharedAddr[2] = 0;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
+
+			ROM_TID = tempNdsHeader[0x00C>>2];
+
+			if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+			|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
+			|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+			{
+				dsiWramUsed = true;
+			}
 		}
 		flagsSet = true;
 		REG_SCFG_EXT = 0x83000000;
@@ -319,7 +329,7 @@ int cardRead (u32* cacheStruct) {
 	
 	
 	if(!dsiWramUsed) {
-		if(!cacheSizeSet) {
+		if(!cacheSizeSet && !ROMinRAM) {
 			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
 			{
 				CACHE_READ_SIZE = _1MB_READ_SIZE;
