@@ -31,15 +31,16 @@ redistribute it freely, subject to the following restrictions:
 
 #include <nds/ndstypes.h>
 
-// #include "fifocheck.h"
+#include "fifocheck.h"
 
 static vu32 * wordCommandAddr;
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
-	inputGetAndSend();	
+	inputGetAndSend();
 }
+
 
 /* void myFIFOValue32Handler(u32 value,void* data)
 {
@@ -47,7 +48,7 @@ void VcountHandler() {
 
   nocashMessage("default");
   nocashMessage("fifoSendValue32");
-  fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));	
+  fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));
 
 } */
 
@@ -84,7 +85,7 @@ char* tohex(u32 n)
 	for (int i=0; i<size; i++) {
 		buffer[i] = '0';
 	}
-	
+
     while (n > 0)
     {
         unsigned mod = n % 16;
@@ -278,71 +279,71 @@ void NDSTouchscreenMode() {
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
-	// Switch to NTR Mode (doesn't work if arm7 SCFG is locked)
+	// Switch to NTR Mode
 	REG_SCFG_ROM = 0x703;
-	
+
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
 	if(patchOffset == -1) {
 		nocashMessage("dldi not found");
 	}
-	wordCommandAddr = myMemUncached((u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80));	
-		
-	// read User Settings from firmware
-	readUserSettings();		
-	irqInit();
-	
-	// Start the RTC tracking IRQ
-	initClockIRQ();		
-	fifoInit();	
+	wordCommandAddr = myMemUncached((u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80));
 
-	SetYtrigger(80);	
-	
-	installSystemFIFO();		
-	
+	// read User Settings from firmware
+	readUserSettings();
+	irqInit();
+
+	// Start the RTC tracking IRQ
+	initClockIRQ();
+	fifoInit();
+
+	SetYtrigger(80);
+
+	installSystemFIFO();
+
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
-	
+
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 
 	nocashMessage("waiting dldi command");
 	//nocashMessage(tohex(wordCommandAddr));
 	// disable dldi sdmmc driver
-	while(*wordCommandAddr != (vu32)0x027FEE04){} 	
+	while(*wordCommandAddr != (vu32)0x027FEE04){} 
 	nocashMessage("sdmmc value received");
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	// fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);	
-
 	fifoWaitValue32(FIFO_USER_03);
 	//
-	if(fifoCheckValue32(FIFO_DSWIFI)) {
+	int romread_LED = fifoGetValue32(FIFO_DSWIFI);
+	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-	} else if(fifoCheckValue32(FIFO_USER_01)) {
+	} else if(romread_LED == 2) {
 		i2cWriteRegister(0x4A, 0x72, 0x02);		// Set to use power LED (turn to purple) as card read indicator
-	} else if(fifoCheckValue32(FIFO_USER_02)) {
+	} else if(romread_LED == 3) {
 		i2cWriteRegister(0x4A, 0x72, 0x03);		// Set to use Camera LED as card read indicator
 	}
 
 	if(fifoCheckValue32(FIFO_USER_04)) {
-		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run comptibility check
+		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run compatibility check
 	}
 
 	NDSTouchscreenMode();
-
 	*(u16*)(0x4000500) = 0x807F;
-	
 	*(u16*)(0x4004700) = 0x800F;
+
+	SCFGFifoCheck();
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
-	
+
+	// fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+
 	// Keep the ARM7 mostly idle
 	while (1) {
-		// SCFGFifoCheck();	// ARM7 SCFG is locked on DSi
 		swiWaitForVBlank();
 	}
 }

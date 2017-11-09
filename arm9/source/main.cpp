@@ -37,18 +37,18 @@ static bool debug = false;
 static inline int dbg_printf( const char* format, ... )
 {
 	if(!debug) return 0;
-	
+
 	static FILE * debugFile;
 	debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
-	
+
 	va_list args;
     va_start( args, format );
     int ret = vprintf( format, args );
 	ret = vfprintf(debugFile, format, args );
 	va_end(args);
-	
+
 	fclose (debugFile);
-	
+
     return ret;
 }
 
@@ -65,12 +65,12 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen) {
 	vector<char*> argarray;
-	
+
 	if(debug)
 		for (int i=0; i<60; i++) swiWaitForVBlank();
-	
+
 	if ( strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
 		FILE *argfile = fopen(filename.c_str(),"rb");
 		char str[PATH_MAX], *pstr;
@@ -99,6 +99,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
+		powerOn(PM_BACKLIGHT_TOP);
 		int err = runNdsFile (argarray[0],
 							strdup(savPath.c_str()),
 							strdup(arm7DonorPath.c_str()),
@@ -106,7 +107,9 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 							donorSdkVer,
 							patchMpuRegion,
 							patchMpuSize,
+							loadingScreen,
 							argarray.size(), (const char **)&argarray[0]);
+		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -124,29 +127,29 @@ void getSFCG_ARM9() {
 }
 
 /* void getSFCG_ARM7() {
-	
+
 	iprintf( "SCFG_ROM ARM7\n" );
 
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");	
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);	
-	
-	nocashMessage("dbg_printf\n");	
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
+	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
+
+	nocashMessage("dbg_printf\n");
 		  
 	iprintf( "SCFG_CLK ARM7\n" );
-	
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");	
+
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_CLK);
-	
+
 	iprintf( "SCFG_EXT ARM7\n" );
-	
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");	
+
+	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_EXT);\n");
 	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_EXT);
 
 }
 
 void myFIFOValue32Handler(u32 value,void* data)
 {
-	nocashMessage("myFIFOValue32Handler\n");	
+	nocashMessage("myFIFOValue32Handler\n");
 	iprintf( "ARM7 data %x\n", value );
 } */
 
@@ -191,8 +194,10 @@ void VcountHandler() {
 			InitSD();	// Re-init SD if fatInit is looping
 		}
 		if (reinittimer == 180) {
-			if(!consoleInited) consoleDemoInit();
-			consoleInited = true;
+			if(!consoleInited) {
+				consoleDemoInit();
+				consoleInited = true;
+			}
 			consoleClear();
 			nocashMessage("fatInitDefault crashed!");
 			printf("fatInitDefault crashed!");
@@ -201,32 +206,37 @@ void VcountHandler() {
 	}
 }
 
-int main( int argc, char **argv) {	
-	
+int main( int argc, char **argv) {
+
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
 
+	initMBK();
+
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-	
+
 	InitSD();
 	if (isMounted) {
 		nocashMessage("isMounted");
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;			
-			
-			if(!consoleInited) consoleDemoInit();
-			consoleInited = true;
-			
+
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {
+			debug=true;
+
+			if(!consoleInited) {
+				powerOff(PM_BACKLIGHT_TOP);
+				consoleDemoInit();
+				consoleInited = true;
+			}
+
 			// fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-			
+
 			getSFCG_ARM9();
-			// getSFCG_ARM7();		// Returns 0 on DSi
+			// getSFCG_ARM7();
 		}
-		
+
 		fatInitDefault();
 		nocashMessage("fatInitDefault");
 		reinittimer = 0;
@@ -242,17 +252,17 @@ int main( int argc, char **argv) {
 				break;
 			case 2:
 				dbg_printf("Using Power LED\n");
-				fifoSendValue32(FIFO_USER_01, 1);	// Set to use power LED (turn to purple) as card read indicator
+				fifoSendValue32(FIFO_DSWIFI, 2);	// Set to use power LED (turn to purple) as card read indicator
 				break;
 			case 3:
 				dbg_printf("Using Camera LED\n");
-				fifoSendValue32(FIFO_USER_02, 1);	// Set to use Camera LED as card read indicator
+				fifoSendValue32(FIFO_DSWIFI, 3);	// Set to use Camera LED as card read indicator
 				break;
 		}
-		
+
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
 		reinittimer = 0;
-		
+
 		// adjust TSC[1:26h] and TSC[1:27h]
 		// for certain gamecodes
 		FILE *f_nds_file = fopen(ndsPath.c_str(), "rb");
@@ -263,7 +273,7 @@ int main( int argc, char **argv) {
 		game_TID[4] = 0;
 		game_TID[3] = 0;
 		fclose(f_nds_file);
-		
+
 		if 	(	strcmp(game_TID, "ABX") == 0	// NTR-ABXE Bomberman Land Touch!
 			|| strcmp(game_TID, "YO9") == 0	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
 			|| strcmp(game_TID, "ALH") == 0	// NTR-ALHE Flushed Away
@@ -327,72 +337,61 @@ int main( int argc, char **argv) {
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
 		reinittimer = 0;
+
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
+			dbg_printf("CPU boosted\n");
+			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+		} else {
+			REG_SCFG_CLK = 0x80;
+			fifoSendValue32(FIFO_USER_06, 1);
+		}
+		reinittimer = 0;
 		run_reinittimer = false;
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {
 			static FILE * debugFile;
 			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
-			fprintf(debugFile, "DEBUG MODE\n");			
+			fprintf(debugFile, "DEBUG MODE\n");
 			fclose (debugFile);
-			
+
 			// create a big file (minimal sdengine libfat cannot append to a file)
 			debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 			for (int i=0; i<1000; i++) {
-				fprintf(debugFile, "                                                                                                                                          \n");			
+				fprintf(debugFile, "                                                                                                                                          \n");
 			}
-			fclose (debugFile);			
+			fclose (debugFile);
 		} else {
 			remove ("sd:/NDSBTSRP.LOG");
 		}
 
-		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");	
-		
-		int useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);	
+		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");
 
-		std::string	arm7DonorPath;	
+		int useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);
+
+		std::string	arm7DonorPath;
 
 		if (useArm7Donor >= 1)
-			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
+			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");
 		else
 			arm7DonorPath = "sd:/_nds/null.nds";
-		
-		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);	
-		
-		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);	
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
-			dbg_printf("CPU boosted\n");
-			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-			// if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_VRAM",0) == 1) {
-				// This is nested in BOOT_CPU check as it won't make sense to enable this without TWL clock speeds being active.
-				// dbg_printf("VRAM boosted\n");
-				// REG_SCFG_EXT = 0x83002000;
-			// } else {
-				// Do nothing for now. Default set at boot.
-			// }
-		} else {
-			REG_SCFG_CLK = 0x80;
-			fifoSendValue32(FIFO_USER_07, 1);
-		}
+		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
+
+		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 
 		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {
 			dbg_printf("ARM9_SCFG_EXT locked\n");
 			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
 			fifoSendValue32(FIFO_USER_08, 1);
 		}
 		*/
 
-		// Options from INI file set. Now tell Arm7 to check to apply changes if any were requested.
-		// fifoSendValue32(FIFO_USER_06, 1);	// ARM7 SCFG is locked on DSi
-		
-		initMBK();
-		
-		dbg_printf("Running %s\n", ndsPath.c_str());				
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize);	
+		dbg_printf("Running %s\n", ndsPath.c_str());
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1));	
 	} else {
 		run_reinittimer = false;
 		consoleDemoInit();

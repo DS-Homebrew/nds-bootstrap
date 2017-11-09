@@ -33,18 +33,14 @@ Helpful information:
  This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
+#ifndef ARM7
+# define ARM7
+#endif
 #include <nds/ndstypes.h>
 #include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>
-#define ARM9
-#undef ARM7
-#include <nds/memory.h>
-#include <nds/arm9/video.h>
-#include <nds/arm9/input.h>
-#undef ARM9
-#define ARM7
 #include <nds/arm7/audio.h>
 
 #include "fat.h"
@@ -53,7 +49,6 @@ Helpful information:
 #include "card_patcher.h"
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
-#include "boot.h"
 #include "hook.h"
 #include "common.h"
 
@@ -70,7 +65,7 @@ void sdmmc_controller_init();
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
-#define ENGINE_LOCATION_ARM7  	0x037C0000 // WRAM-A
+#define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x03700000
 
 const char* bootName = "BOOT.NDS";
@@ -88,6 +83,37 @@ extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
+extern unsigned long loadingScreen;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Used for debugging purposes
+static void errorOutput (void) {
+	if(loadingScreen == 1) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_errorColor = true;
+		arm9_stateFlag = ARM9_DISPERR;
+	}
+	// Stop
+	while(1);
+}
+
+static void debugOutput (void) {
+	if(loadingScreen == 1) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_stateFlag = ARM9_DISPERR;
+		// Wait for completion
+		while (arm9_stateFlag != ARM9_READY);
+	}
+}
+
+static void increaseLoadBarLength (void) {
+	arm9_loadBarLength++;
+	debugOutput();
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -131,15 +157,15 @@ void passArgs_ARM7 (void) {
 	u32 ARM9_LEN = *((u32*)(NDS_HEAD + 0x02C));
 	u32* argSrc;
 	u32* argDst;
-	
+
 	if (!argStart || !argSize) return;
-	
+
 	argSrc = (u32*)(argStart + (int)&_start);
-	
+
 	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned 
-	
+
 	copyLoop(argDst, argSrc, argSize);
-	
+
 	__system_argv->argvMagic = ARGV_MAGIC;
 	__system_argv->commandLine = (char*)argDst;
 	__system_argv->length = argSize;
@@ -160,7 +186,7 @@ void resetMemory_ARM7 (void)
 	int i;
 	u8 settings1, settings2;
 	u32 settingsOffset = 0;
-	
+
 	REG_IME = 0;
 
 	for (i=0; i<16; i++) {
@@ -180,7 +206,7 @@ void resetMemory_ARM7 (void)
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
 	}
-	
+
 	arm7clearRAM();
 
 	REG_IE = 0;
@@ -188,15 +214,15 @@ void resetMemory_ARM7 (void)
 	(*(vu32*)(0x04000000-4)) = 0;  //IRQ_HANDLER ARM7 version
 	(*(vu32*)(0x04000000-8)) = ~0; //VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  //turn off power to stuff
-	
+
 	// Get settings location
 	boot_readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
 	settingsOffset *= 8;
-	
+
 	// Reload DS Firmware settings
 	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
-	
+
 	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
 		boot_readFirmware(settingsOffset + 0x000, (u8*)0x02FFFC80, 0x70);
 	} else {
@@ -205,10 +231,14 @@ void resetMemory_ARM7 (void)
 }
 
 
+u32 ROM_LOCATION = 0x0C800000;
+u32 ROM_TID;
+u32 romSize;
+
 void loadBinary_ARM7 (aFile file)
 {
 	u32 ndsHeader[0x170>>2];
-	
+
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
@@ -221,7 +251,10 @@ void loadBinary_ARM7 (aFile file)
 	u32 ARM7_SRC = ndsHeader[0x030>>2];
 	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
-	
+
+	ROM_TID = ndsHeader[0x00C>>2];
+	romSize = ndsHeader[0x080>>2];
+
 	//Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170);
 
@@ -233,7 +266,6 @@ void loadBinary_ARM7 (aFile file)
 	{
 		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
 	}
-
 	
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
@@ -250,6 +282,20 @@ void loadBinary_ARM7 (aFile file)
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
 }
 
+void loadRomIntoRam(aFile file) {
+	if(romSize <= 0x00C00000) {
+		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
+			ROM_LOCATION = 0x0D000000-romSize;
+		}
+
+		arm9_extRAM = true;
+		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+		fileRead(ROM_LOCATION, file, 0, romSize);
+		arm9_extRAM = false;
+		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+	}
+}
+
 /*-------------------------------------------------------------------------
 startBinary_ARM7
 Jumps to the ARM7 NDS binary in sync with the display and ARM9
@@ -257,13 +303,17 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void startBinary_ARM7 (void) {	
+void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// copy NDS ARM9 start address into the header, starting ARM9
 	*((vu32*)0x02FFFE24) = TEMP_ARM9_START_ADDRESS;
-	ARM9_START_FLAG = 1;
+	// Get the ARM9 to boot
+	arm9_stateFlag = ARM9_BOOTBIN;
+
+	while(REG_VCOUNT!=191);
+	while(REG_VCOUNT==191);
 	// Start ARM7
 	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
@@ -334,26 +384,27 @@ void initMBK() {
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-int main (void) {
+void arm7_main (void) {
 	nocashMessage("bootloader");
+
 	initMBK();
-	
+
 	if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
 		_io_dldi.fn_isInserted = sdmmc_inserted;
 		_io_dldi.fn_startup = sdmmc_startup;
 	}
-	
+
 	// Init card
 	if(!FAT_InitFiles(initDisc))
 	{
 		nocashMessage("!FAT_InitFiles");
 		return -1;
 	}
-	
+
 	aFile file = getFileFromCluster (storedFileCluster);
 	aFile donorFile = getFileFromCluster (donorFileCluster);
-	
+
 	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
 		file = getBootFileCluster(bootName);
@@ -363,71 +414,76 @@ int main (void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
-	
-	// ARM9 clears its memory part 2
-	// copy ARM9 function to RAM, and make the ARM9 jump to it
-	copyLoop((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
-	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
-	// Wait until the ARM9 has completed its task
-	nocashMessage("Wait until the ARM9 has completed its task");
-	while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
+
+	int errorCode;
+
+	// Wait for ARM9 to at least start
+	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Get ARM7 to clear RAM");
-	resetMemory_ARM7();	
-	
-	// ARM9 enters a wait loop
-	// copy ARM9 function to RAM, and make the ARM9 jump to it
-	copyLoop((void*)TEMP_MEM, (void*)startBinary_ARM9, startBinary_ARM9_size);
-	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
+	debugOutput();	// 1 dot
+	resetMemory_ARM7();
 
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(file);
-	
+	increaseLoadBarLength();	// 2 dots
+
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
-	
+
 	nocashMessage("try to patch dldi");
 	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-	if (wantToPatchDLDI) {		
+	if (wantToPatchDLDI) {
 		nocashMessage("dldi patch successful");
+
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-		
-		int error = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-		if(error == ERR_NONE) {
+
+		errorCode = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
+		if(errorCode == ERR_NONE) {
 			nocashMessage("dldi hook Sucessfull");
 		} else {
 			nocashMessage("error during dldi hook");
+			errorOutput();
 		}
-	} else {	
+	} else {
 		nocashMessage("dldi Patch Unsuccessful try to patch card");
-		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);	
-		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);			
+		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+		increaseLoadBarLength();	// 3 dots
+		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+		increaseLoadBarLength();	// 4 dots
 
 		module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
 		if(params)
 		{
 			ensureArm9Decompressed(NDS_HEAD, params);
 		}
+		increaseLoadBarLength();	// 5 dots
 
-		patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
-		
-		int error = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-			if(error == ERR_NONE) {
+		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+		increaseLoadBarLength();	// 6 dots
+
+		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+		if(errorCode == ERR_NONE) {
 			nocashMessage("card hook Sucessfull");
 		} else {
 			nocashMessage("error during card hook");
+			errorOutput();
 		}
+		increaseLoadBarLength();	// 7 dots
 	}
  
-	
+
 
 	// Pass command line arguments to loaded program
 	//passArgs_ARM7();
-	
+
+	loadRomIntoRam(file);
+
 	nocashMessage("Start the NDS file");
+	increaseLoadBarLength();	// and finally, 8 dots
 	startBinary_ARM7();
 
 	return 0;

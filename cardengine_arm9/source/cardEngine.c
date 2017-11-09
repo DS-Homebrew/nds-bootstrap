@@ -304,18 +304,6 @@ int cardRead (u32* cacheStruct) {
 
 		// If ROM size is 0x00C00000 or below, then read from ROM in RAM.
 		if(romSize <= 0x00C00000) {
-			// read directly at arm7 level
-			commandRead = 0x025FFB08;
-
-			sharedAddr[0] = ROM_LOCATION;
-			sharedAddr[1] = romSize;
-			sharedAddr[2] = 0;
-			sharedAddr[3] = commandRead;
-
-			IPC_SendSync(0xEE24);
-
-			while(sharedAddr[3] != (vu32)0);
-
 			ROMinRAM = true;
 		}
 		flagset_ROMinRAM = true;
@@ -378,7 +366,6 @@ int cardRead (u32* cacheStruct) {
 		while(sharedAddr[3] != (vu32)0);
 
 	} else {
-		if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
 		// read via the main RAM/DSi WRAM cache
 		while(len > 0) {
 			if(!ROMinRAM) {
@@ -487,6 +474,8 @@ int cardRead (u32* cacheStruct) {
 					accessCounterIncrease();
 				}
 			} else {
+				if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
+
 				u32 len2=len;
 				if(len2 > 512) {
 					len2 -= src%4;
