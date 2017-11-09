@@ -275,8 +275,6 @@ void runCardEngineCheck (void) {
 			dbg_hexa(marker);			
 			#endif		
 
-			timeoutRun = false;	// If card read received, do not show error screen
-
 			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
 			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
@@ -465,8 +463,6 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	timeoutRun = false;	// Do not show error screen
-
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
