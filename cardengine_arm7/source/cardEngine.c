@@ -24,8 +24,6 @@
 #include "fat.h"
 #include "i2c.h"
 
-#include "sr_data_error.h"	// For showing an error screen
-
 static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
@@ -37,9 +35,6 @@ extern u32 sdk_version;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
-
-static bool timeoutRun = true;
-static int timeoutTimer = 0;
 
 void initLogging() {
 	if(!initialized) {
@@ -114,7 +109,7 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
-	
+
 	// Control volume with the - and + buttons.
 	u8 volLevel;
 	u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
@@ -218,26 +213,12 @@ void runCardEngineCheck (void) {
 			break;
 	}
 	REG_MASTER_VOLUME = volLevel;
-	
-	if (timeoutRun) {
-		u8 setting = i2cReadRegister(0x4A, 0x73);
-		if (setting == 0x01) {
-			timeoutTimer += 1;
-			if (timeoutTimer == 60*2) {
-				memcpy((u32*)0x02000300,sr_data_error,0x020);
-				i2cWriteRegister(0x4a,0x70,0x01);
-				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
-			}
-		} else {
-			timeoutRun = false;
-		}
-	}
-	
+
 	if(tryLockMutex()) {	
 		initLogging();
-		
+
 		//nocashMessage("runCardEngineCheck mutex ok");
-		
+
 		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 		{			
 			#ifdef DEBUG		
@@ -247,7 +228,7 @@ void runCardEngineCheck (void) {
 			u32 marker = *(vu32*)(sharedAddr+3);			
 
 			dbg_printf("\ncard read received\n");			
-				
+
 			if(calledViaIPC) {
 				dbg_printf("\ntriggered via IPC\n");
 			}
@@ -261,27 +242,27 @@ void runCardEngineCheck (void) {
 			dbg_hexa(len);
 			dbg_printf("\nmarker : \n");
 			dbg_hexa(marker);
-			
+
 			dbg_printf("\nlog only \n");
 			#endif			
-			
-			*(vu32*)(0x027FFB14) = 0;	
+
+			*(vu32*)(0x027FFB14) = 0;
 		}
-		
+
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 			u32 marker = *(vu32*)(sharedAddr+3);
-		
+
 			#ifdef DEBUG		
 			dbg_printf("\ncard read received v2\n");
-			
+
 			if(calledViaIPC) {
 				dbg_printf("\ntriggered via IPC\n");
 			}
-			
+
 			dbg_printf("\nstr : \n");
 			dbg_hexa(cardStruct);		
 			dbg_printf("\nsrc : \n");
@@ -293,13 +274,13 @@ void runCardEngineCheck (void) {
 			dbg_printf("\nmarker : \n");
 			dbg_hexa(marker);			
 			#endif		
-			
+
 			timeoutRun = false;	// If card read received, do not show error screen
-			
+
 			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 			fileRead(dst,romFile,src,len);
 			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-			
+
 			#ifdef DEBUG		
 			dbg_printf("\nread \n");			
 			if(is_aligned(dst,4) || is_aligned(len,4)) {
@@ -309,7 +290,7 @@ void runCardEngineCheck (void) {
 			}			
 			#endif	
 	
-			*(vu32*)(0x027FFB14) = 0;		
+			*(vu32*)(0x027FFB14) = 0;
 		}
 		unlockMutex();
 	}

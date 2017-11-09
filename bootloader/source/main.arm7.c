@@ -283,14 +283,18 @@ void loadBinary_ARM7 (aFile file)
 }
 
 void loadRomIntoRam(aFile file) {
-	if(romSize <= 0x00C00000) {
-		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
-			ROM_LOCATION = 0x0D000000-romSize;
+	if(romSize <= 0x00BFFFE0) {
+		if(romSize > 0x007FFFE0 && romSize <= 0x00BFFFE0) {
+			ROM_LOCATION = 0x0CFFFFE0-romSize;
+			arm9_extRAM = true;
+			while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+			*(u32*)(0x0CFFFFE8) = romSize-0x007FFFE0;
 		}
 
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0, romSize);
+		*(u32*)(0x0CFFFFE0) = ROM_LOCATION;
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	}
@@ -479,6 +483,12 @@ void arm7_main (void) {
 
 	// Pass command line arguments to loaded program
 	//passArgs_ARM7();
+
+	arm9_extRAM = true;
+	while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+	*(u32*)(0x0CFFFFE4) = ROM_TID;
+	arm9_extRAM = false;
+	while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 
 	loadRomIntoRam(file);
 

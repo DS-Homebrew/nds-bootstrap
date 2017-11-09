@@ -20,31 +20,43 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-static u32 ROM_LOCATION = 0x0C800000;
+static u32 ROM_LOCATION;
+static u32 ROM_TID;
+static u32 romSize_lastHalf;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
 #define _128KB_READ_SIZE 0x20000
+#define _192KB_READ_SIZE 0x30000
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
+#define _768KB_READ_SIZE 0xC0000
+#define _1MB_READ_SIZE 0x100000
 
-#define REG_MBK_32KB_CACHE_START	0x4004044
-#define _32KB_CACHE_ADRESS_START 0x03708000
-#define _32KB_CACHE_ADRESS_END 0x03778000
-#define _32KB_CACHE_ADRESS_SIZE 0x78000
-#define _32KB_CACHE_SLOTS 15
-#define _64KB_CACHE_ADRESS_START 0x0C400000
-#define _64KB_CACHE_ADRESS_SIZE 0x100000
-#define _64KB_CACHE_SLOTS 0x10
-#define _128KB_CACHE_ADRESS_START 0x0C500000
-#define _128KB_CACHE_ADRESS_SIZE 0x300000
-#define _128KB_CACHE_SLOTS 0x15
-#define _256KB_CACHE_ADRESS_START 0x0C800000
-#define _256KB_CACHE_ADRESS_SIZE 0x400000
-#define _256KB_CACHE_SLOTS 0x10
+#define REG_MBK_WRAM_CACHE_START	0x4004044
+#define WRAM_CACHE_ADRESS_START 0x03708000
+#define WRAM_CACHE_ADRESS_END 0x03778000
+#define WRAM_CACHE_ADRESS_SIZE 0x78000
+#define WRAM_CACHE_SLOTS 15
+
+#define _128KB_CACHE_ADRESS_START 0x0C800000
+#define _128KB_CACHE_ADRESS_SIZE 0x200000
+#define _128KB_CACHE_SLOTS 0x10
+#define _256KB_CACHE_ADRESS_START 0x0CA00000
+#define _256KB_CACHE_ADRESS_SIZE 0x200000
+#define _256KB_CACHE_SLOTS 0x8
 #define _512KB_CACHE_ADRESS_START 0x0CC00000
 #define _512KB_CACHE_ADRESS_SIZE 0x400000
 #define _512KB_CACHE_SLOTS 0x8
+
+#define only_CACHE_ADRESS_START 0x0C800000
+#define only_CACHE_ADRESS_SIZE 0x800000
+#define only_128KB_CACHE_SLOTS 0x40
+#define only_192KB_CACHE_SLOTS 0x2A
+#define only_256KB_CACHE_SLOTS 0x20
+#define only_512KB_CACHE_SLOTS 0x10
+#define only_768KB_CACHE_SLOTS 0xA
+#define only_1MB_CACHE_SLOTS 0x8
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -53,26 +65,32 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 _32KB_cacheDescriptor [_32KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _32KB_cacheCounter [_32KB_CACHE_SLOTS];
-static u32 _64KB_cacheDescriptor [_64KB_CACHE_SLOTS] = {0xffffffff};
-static u32 _64KB_cacheCounter [_64KB_CACHE_SLOTS];
+static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS];
+static u32 WRAM_cacheCounter [WRAM_CACHE_SLOTS];
 static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _128KB_cacheCounter [_128KB_CACHE_SLOTS];
 static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
-static u32 _32KB_accessCounter = 0;
-static u32 _64KB_accessCounter = 0;
+static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS];
+static u32 only_cacheCounter [only_128KB_CACHE_SLOTS];
+static u32 WRAM_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
 static u32 _256KB_accessCounter = 0;
 static u32 _512KB_accessCounter = 0;
+static u32 only_accessCounter = 0;
 
-static int selectedSize = 0;
+static int selectedSize = -1;
+static u32 only_cacheSlots = 0;
+static u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
+static bool cacheSizeSet = false;
+static bool dynamicCaching = false;
 
-static bool flagset_ROMinRAM = false;
+static bool flagsSet = false;
 static bool ROMinRAM = false;
+static bool use12MB = false;
+static bool dsiWramUsed = false;
 
 void user_exception(void);
 
@@ -84,229 +102,202 @@ void setExceptionHandler2() {
 	*exceptionC = user_exception;
 }
 
+int WRAM_allocateCacheSlot() {
+	int slot = 0;
+	int lowerCounter = WRAM_accessCounter;
+	for(int i=0; i<WRAM_CACHE_SLOTS; i++) {
+		if(WRAM_cacheCounter[i]<=lowerCounter) {
+			lowerCounter = WRAM_cacheCounter[i];
+			slot = i;
+			if(!lowerCounter) break;
+		}
+	}
+	return slot;
+}
+
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = 0;
-	switch(selectedSize) {
-		case 0:
-		default:
-			lowerCounter = _32KB_accessCounter;
-			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
-				if(_32KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _32KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
+	if(selectedSize==0) {
+		lowerCounter = _128KB_accessCounter;
+		for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+			if(_128KB_cacheCounter[i]<=lowerCounter) {
+				lowerCounter = _128KB_cacheCounter[i];
+				slot = i;
+				if(!lowerCounter) break;
 			}
-			return slot;
-			break;
-		case 1:
-			lowerCounter = _64KB_accessCounter;
-			for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
-				if(_64KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _64KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
+		}
+	} else if(selectedSize==1) {
+		lowerCounter = _256KB_accessCounter;
+		for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
+			if(_256KB_cacheCounter[i]<=lowerCounter) {
+				lowerCounter = _256KB_cacheCounter[i];
+				slot = i;
+				if(!lowerCounter) break;
 			}
-			return slot;
-			break;
-		case 2:
-			lowerCounter = _128KB_accessCounter;
-			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
-				if(_128KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _128KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
+		}
+	} else if(selectedSize==2) {
+		lowerCounter = _512KB_accessCounter;
+		for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
+			if(_512KB_cacheCounter[i]<=lowerCounter) {
+				lowerCounter = _512KB_cacheCounter[i];
+				slot = i;
+				if(!lowerCounter) break;
 			}
-			return slot;
-			break;
-		case 3:
-			lowerCounter = _256KB_accessCounter;
-			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
-				if(_256KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _256KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
+		}
+	} else {
+		lowerCounter = only_accessCounter;
+		for(int i=0; i<only_cacheSlots; i++) {
+			if(only_cacheCounter[i]<=lowerCounter) {
+				lowerCounter = only_cacheCounter[i];
+				slot = i;
+				if(!lowerCounter) break;
 			}
-			return slot;
-			break;
-		case 4:
-			lowerCounter = _512KB_accessCounter;
-			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
-				if(_512KB_cacheCounter[i]<=lowerCounter) {
-					lowerCounter = _512KB_cacheCounter[i];
-					slot = i;
-					if(!lowerCounter) break;
-				}
-			}
-			return slot;
-			break;
+		}
 	}
+	return slot;
+}
+
+int WRAM_getSlotForSector(u32 sector) {
+	for(int i=0; i<WRAM_CACHE_SLOTS; i++) {
+		if(WRAM_cacheDescriptor[i]==sector) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 int getSlotForSector(u32 sector) {
-	switch(selectedSize) {
-		case 0:
-		default:
-			for(int i=0; i<_32KB_CACHE_SLOTS; i++) {
-				if(_32KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
+	if(selectedSize==0) {
+		for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+			if(_128KB_cacheDescriptor[i]==sector) {
+				return i;
 			}
-			break;
-		case 1:
-			for(int i=0; i<_64KB_CACHE_SLOTS; i++) {
-				if(_64KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
+		}
+	} else if(selectedSize==1) {
+		for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
+			if(_256KB_cacheDescriptor[i]==sector) {
+				return i;
 			}
-			break;
-		case 2:
-			for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
-				if(_128KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
+		}
+	} else if(selectedSize==2) {
+		for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
+			if(_512KB_cacheDescriptor[i]==sector) {
+				return i;
 			}
-			break;
-		case 3:
-			for(int i=0; i<_256KB_CACHE_SLOTS; i++) {
-				if(_256KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
+		}
+	} else {
+		for(int i=0; i<only_cacheSlots; i++) {
+			if(only_cacheDescriptor[i]==sector) {
+				return i;
 			}
-			break;
-		case 4:
-			for(int i=0; i<_512KB_CACHE_SLOTS; i++) {
-				if(_512KB_cacheDescriptor[i]==sector) {
-					return i;
-				}
-			}
-			break;
+		}
 	}
 	return -1;
 }
 
 
+vu8* WRAM_getCacheAddress(int slot) {
+	return (vu32*)(WRAM_CACHE_ADRESS_END-slot*_32KB_READ_SIZE);
+}
+
 vu8* getCacheAddress(int slot) {
-	switch(selectedSize) {
-		case 0:
-		default:
-			return (vu32*)(_32KB_CACHE_ADRESS_END-slot*_32KB_READ_SIZE);
-			break;
-		case 1:
-			return (vu32*)(_64KB_CACHE_ADRESS_START+slot*_64KB_READ_SIZE);
-			break;
-		case 2:
-			return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
-			break;
-		case 3:
-			return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
-			break;
-		case 4:
-			return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
-			break;
+	if(selectedSize==0) {
+		return (vu32*)(_128KB_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+	} else if(selectedSize==1) {
+		return (vu32*)(_256KB_CACHE_ADRESS_START+slot*_256KB_READ_SIZE);
+	} else if(selectedSize==2) {
+		return (vu32*)(_512KB_CACHE_ADRESS_START+slot*_512KB_READ_SIZE);
+	} else {
+		return (vu32*)(only_CACHE_ADRESS_START+slot*CACHE_READ_SIZE);
 	}
 }
 
 void transfertToArm7(int slot) {
-	*((vu8*)(REG_MBK_32KB_CACHE_START+slot)) |= 0x1;
+	*((vu8*)(REG_MBK_WRAM_CACHE_START+slot)) |= 0x1;
 }
 
 void transfertToArm9(int slot) {
-	*((vu8*)(REG_MBK_32KB_CACHE_START+slot)) &= 0xFE;
+	*((vu8*)(REG_MBK_WRAM_CACHE_START+slot)) &= 0xFE;
+}
+
+void WRAM_updateDescriptor(int slot, u32 sector) {
+	WRAM_cacheDescriptor[slot] = sector;
+	WRAM_cacheCounter[slot] = WRAM_accessCounter;
 }
 
 void updateDescriptor(int slot, u32 sector) {
-	switch(selectedSize) {
-		case 0:
-		default:
-			_32KB_cacheDescriptor[slot] = sector;
-			_32KB_cacheCounter[slot] = _32KB_accessCounter;
-			break;
-		case 1:
-			_64KB_cacheDescriptor[slot] = sector;
-			_64KB_cacheCounter[slot] = _64KB_accessCounter;
-			break;
-		case 2:
-			_128KB_cacheDescriptor[slot] = sector;
-			_128KB_cacheCounter[slot] = _128KB_accessCounter;
-			break;
-		case 3:
-			_256KB_cacheDescriptor[slot] = sector;
-			_256KB_cacheCounter[slot] = _256KB_accessCounter;
-			break;
-		case 4:
-			_512KB_cacheDescriptor[slot] = sector;
-			_512KB_cacheCounter[slot] = _512KB_accessCounter;
-			break;
+	if(selectedSize==0) {
+		_128KB_cacheDescriptor[slot] = sector;
+		_128KB_cacheCounter[slot] = _128KB_accessCounter;
+	} else if(selectedSize==1) {
+		_256KB_cacheDescriptor[slot] = sector;
+		_256KB_cacheCounter[slot] = _256KB_accessCounter;
+	} else if(selectedSize==2) {
+		_512KB_cacheDescriptor[slot] = sector;
+		_512KB_cacheCounter[slot] = _512KB_accessCounter;
+	} else {
+		only_cacheDescriptor[slot] = sector;
+		only_cacheCounter[slot] = only_accessCounter;
 	}
 }
 
 void accessCounterIncrease() {
-	switch(selectedSize) {
-		case 0:
-		default:
-			_32KB_accessCounter++;
-			break;
-		case 1:
-			_64KB_accessCounter++;
-			break;
-		case 2:
-			_128KB_accessCounter++;
-			break;
-		case 3:
-			_256KB_accessCounter++;
-			break;
-		case 4:
-			_512KB_accessCounter++;
-			break;
+	if(selectedSize==0) {
+		_128KB_accessCounter++;
+	} else if(selectedSize==1) {
+		_256KB_accessCounter++;
+	} else if(selectedSize==2) {
+		_512KB_accessCounter++;
+	} else {
+		only_accessCounter++;
 	}
 }
 
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
-	setExceptionHandler2();
-	
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
 	u32 src = cardStruct[0];
+	if(src==0) {
+		return 0;	// If ROM read location is 0, do not proceed.
+	}
 	u8* dst = (u8*) (cardStruct[1]);
 	u32 len = cardStruct[2];
 
 	u32 page = (src/512)*512;
 
-	if(!flagset_ROMinRAM) {
+	if(!flagsSet) {
 		REG_SCFG_EXT = 0x83008000;
-		
-		u32 tempNdsHeader[0x170>>2];
 
-		// read directly at arm7 level
-		commandRead = 0x025FFB08;
+		ROM_TID = *(u32*)(0x0CFFFFE4);
 
-		sharedAddr[0] = tempNdsHeader;
-		sharedAddr[1] = 0x170;
-		sharedAddr[2] = 0;
-		sharedAddr[3] = commandRead;
+		// ExceptionHandler2 (red screen) blacklist
+		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
+		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+		{
+			setExceptionHandler2();
+		}
 
-		IPC_SendSync(0xEE24);
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+		|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
+		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+		{
+			dsiWramUsed = true;
+		}
 
-		while(sharedAddr[3] != (vu32)0);
-
-		// Check ROM size in ROM header...
-		u32 romSize = tempNdsHeader[0x080>>2];
-		
-		if(romSize > 0x00800000 && romSize <= 0x00C00000) ROM_LOCATION = 0x0D000000-romSize;
-
-		// If ROM size is 0x00C00000 or below, then read from ROM in RAM.
-		if(romSize <= 0x00C00000) {
+		ROM_LOCATION = *(u32*)(0x0CFFFFE0);
+		if(ROM_LOCATION >= 0x0C400000) {
+			if(ROM_LOCATION < 0x0C800000) {
+				use12MB = true;
+				romSize_lastHalf = *(u32*)(0x0CFFFFE8);
+			}
 			ROMinRAM = true;
 		}
-		flagset_ROMinRAM = true;
+		flagsSet = true;
 		REG_SCFG_EXT = 0x83000000;
 	}
 
@@ -327,26 +318,55 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	selectedSize = 4;
-	u32 CACHE_READ_SIZE = _512KB_READ_SIZE;
-	if(len <= _32KB_READ_SIZE) {
-		selectedSize = 0;
+	if(!dsiWramUsed) {
+		if(!cacheSizeSet) {
+			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+			{
+				CACHE_READ_SIZE = _1MB_READ_SIZE;
+				only_cacheSlots = only_1MB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
+					|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
+					|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
+					|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
+					|| (ROM_TID & 0x00FFFFFF) == 0x475049	// PKMN SS
+					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+			{
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+				only_cacheSlots = only_256KB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+			{
+				CACHE_READ_SIZE = _192KB_READ_SIZE;
+				only_cacheSlots = only_192KB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5341)	// Super Mario 64 DS
+			{
+				CACHE_READ_SIZE = _128KB_READ_SIZE;
+				only_cacheSlots = only_128KB_CACHE_SLOTS;
+			} else {
+				dynamicCaching = true;
+			}
+			cacheSizeSet = true;
+		}
+		if(dynamicCaching) {
+			selectedSize = 2;
+			CACHE_READ_SIZE = _512KB_READ_SIZE;
+			if(len <= _128KB_READ_SIZE) {
+				selectedSize = 0;
+				CACHE_READ_SIZE = _128KB_READ_SIZE;
+			}
+			if(len <= _256KB_READ_SIZE) {
+				selectedSize = 1;
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+			}
+		}
+	} else {
 		CACHE_READ_SIZE = _32KB_READ_SIZE;
 	}
-	if(len <= _64KB_READ_SIZE) {
-		selectedSize = 1;
-		CACHE_READ_SIZE = _64KB_READ_SIZE;
-	}
-	if(len <= _128KB_READ_SIZE) {
-		selectedSize = 2;
-		CACHE_READ_SIZE = _128KB_READ_SIZE;
-	}
-	if(len <= _256KB_READ_SIZE) {
-		selectedSize = 3;
-		CACHE_READ_SIZE = _256KB_READ_SIZE;
-	}
 	
-	if(!ROMinRAM) accessCounterIncrease();
+	if(!ROMinRAM) {
+		if(dsiWramUsed) WRAM_accessCounter++;
+		else accessCounterIncrease();
+	}
 
 	u32 sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 
@@ -369,23 +389,36 @@ int cardRead (u32* cacheStruct) {
 		// read via the main RAM/DSi WRAM cache
 		while(len > 0) {
 			if(!ROMinRAM) {
-				int slot = getSlotForSector(sector);
-				vu8* buffer = getCacheAddress(slot);
+				int slot = 0;
+				vu8* buffer = 0;
+				if(dsiWramUsed) {
+					slot = WRAM_getSlotForSector(sector);
+					buffer = WRAM_getCacheAddress(slot);
+				} else {
+					slot = getSlotForSector(sector);
+					buffer = getCacheAddress(slot);
+				}
 				// read max CACHE_READ_SIZE via the main RAM cache
 				if(slot==-1) {
 					// send a command to the arm7 to fill the RAM cache
 					commandRead = 0x025FFB08;
 
-					slot = allocateCacheSlot();
-					
-					buffer = getCacheAddress(slot);
+					if(dsiWramUsed) {
+						slot = WRAM_allocateCacheSlot();
+						
+						buffer = WRAM_getCacheAddress(slot);
+					} else {
+						slot = allocateCacheSlot();
+						
+						buffer = getCacheAddress(slot);
+					}
 
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 
 					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
 					// transfer the WRAM-B cache to the arm7
-					if (selectedSize == 0) transfertToArm7(slot);				
+					if(dsiWramUsed) transfertToArm7(slot);				
 					
 					// write the command
 					sharedAddr[0] = buffer;
@@ -398,9 +431,9 @@ int cardRead (u32* cacheStruct) {
 					while(sharedAddr[3] != (vu32)0);
 					
 					// transfer back the WRAM-B cache to the arm9
-					if (selectedSize == 0) transfertToArm9(slot);
+					if(dsiWramUsed) transfertToArm9(slot);
 
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				}
 
 				updateDescriptor(slot, sector);
@@ -433,9 +466,9 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// copy directly
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 					fastCopy32(buffer+(src-sector),dst,len2);
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common
 					cardStruct[0] = src + len2;
@@ -459,9 +492,9 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// read via the 512b ram cache
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83008000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 					fastCopy32(buffer+(page-sector), cacheBuffer, 512);
-					if(selectedSize != 0) REG_SCFG_EXT = 0x83000000;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
 				}
@@ -474,7 +507,10 @@ int cardRead (u32* cacheStruct) {
 					accessCounterIncrease();
 				}
 			} else {
-				if(dst >= 0x02400000 && dst < 0x02800000) dst -= 0x00400000;	// Prevent writing above DS 4MB RAM area
+				// Prevent overwriting ROM in RAM
+				if(use12MB && dst >= 0x02800000-romSize_lastHalf && dst < 0x02800000) {
+					dst -= 0x00400000;
+				}
 
 				u32 len2=len;
 				if(len2 > 512) {
