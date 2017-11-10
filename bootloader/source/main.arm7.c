@@ -298,7 +298,7 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if(romSize <= 0x00C00000) {
+	if(romSize <= 0x00C00000 && (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941) {
 		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
 			ROM_LOCATION = 0x0D000000-romSize;
 		}
