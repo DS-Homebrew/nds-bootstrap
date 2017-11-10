@@ -298,19 +298,14 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if(romSize <= 0x00BFFFE0) {
-		if(romSize > 0x007FFFE0 && romSize <= 0x00BFFFE0) {
-			ROM_LOCATION = 0x0CFFFFE0-romSize;
-			arm9_extRAM = true;
-			while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-			*(u32*)(0x0CFFFFE4) = 0x00000001;
-			*(u32*)(0x0CFFFFE8) = romSize-0x007FFFE0;
+	if(romSize <= 0x00C00000) {
+		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
+			ROM_LOCATION = 0x0D000000-romSize;
 		}
 
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-		*(u32*)(0x0CFFFFE0) = ROM_LOCATION-0x4000-ARM9_LEN;
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	}

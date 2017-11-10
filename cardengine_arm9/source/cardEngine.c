@@ -20,7 +20,7 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-static u32 ROM_LOCATION;
+static u32 ROM_LOCATION = 0x0C800000;
 static u32 ROM_TID;
 static u32 romSize_lastHalf;
 
@@ -257,8 +257,6 @@ void accessCounterIncrease() {
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	setExceptionHandler2();
-
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
@@ -274,38 +272,66 @@ int cardRead (u32* cacheStruct) {
 	if(!flagsSet) {
 		REG_SCFG_EXT = 0x83008000;
 
-		ROM_LOCATION = *(u32*)(0x0CFFFFE0);
-		if(ROM_LOCATION > 0x0C000000) {
-			if(*(u32*)(0x0CFFFFE4) == 0x00000001) {
-				use12MB = true;
-				romSize_lastHalf = *(u32*)(0x0CFFFFE8);
-			}
-			ROMinRAM = true;
+		u32 tempNdsHeader[0x170>>2];
+
+		// read directly at arm7 level
+		commandRead = 0x025FFB08;
+
+		sharedAddr[0] = tempNdsHeader;
+		sharedAddr[1] = 0x170;
+		sharedAddr[2] = 0;
+		sharedAddr[3] = commandRead;
+
+		IPC_SendSync(0xEE24);
+
+		while(sharedAddr[3] != (vu32)0);
+
+		ROM_TID = tempNdsHeader[0x00C>>2];
+
+		// ExceptionHandler2 (red screen) blacklist
+		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
+		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+		{
+			setExceptionHandler2();
 		}
-		
-		if(!ROMinRAM) {
-			u32 tempNdsHeader[0x170>>2];
 
-			// read directly at arm7 level
-			commandRead = 0x025FFB08;
+		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+		|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
+		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+		{
+			dsiWramUsed = true;
+		}
 
-			sharedAddr[0] = tempNdsHeader;
-			sharedAddr[1] = 0x170;
-			sharedAddr[2] = 0;
-			sharedAddr[3] = commandRead;
+		u32 ARM9_LEN = tempNdsHeader[0x02C>>2];
+		// Check ROM size in ROM header...
+		u32 romSize = tempNdsHeader[0x080>>2];
+		if((romSize & 0x0000000F) == 0x1
+		|| (romSize & 0x0000000F) == 0x3
+		|| (romSize & 0x0000000F) == 0x5
+		|| (romSize & 0x0000000F) == 0x7
+		|| (romSize & 0x0000000F) == 0x9
+		|| (romSize & 0x0000000F) == 0xB
+		|| (romSize & 0x0000000F) == 0xD
+		|| (romSize & 0x0000000F) == 0xF)
+		{
+			romSize--;	// If ROM size is at an odd number, subtract 1 from it.
+		}
+		romSize -= 0x4000;
+		romSize -= ARM9_LEN;
 
-			IPC_SendSync(0xEE24);
-
-			while(sharedAddr[3] != (vu32)0);
-
-			ROM_TID = tempNdsHeader[0x00C>>2];
-
-			if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-			|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
-			|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-			{
-				dsiWramUsed = true;
+		// If ROM size is 0x00C00000 or below, then the ROM is in RAM.
+		if(romSize <= 0x00C00000 && !dsiWramUsed) {
+			if(romSize > 0x00800000 && romSize <= 0x00C00000) {
+				use12MB = true;
+				romSize_lastHalf = romSize-0x00800000;
+				ROM_LOCATION = 0x0D000000-romSize;
 			}
+
+			ROM_LOCATION -= 0x4000;
+			ROM_LOCATION -= ARM9_LEN;
+
+			ROMinRAM = true;
 		}
 		flagsSet = true;
 		REG_SCFG_EXT = 0x83000000;
