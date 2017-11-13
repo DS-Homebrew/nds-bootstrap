@@ -174,7 +174,7 @@ int main(void) {
 
 	fifoWaitValue32(FIFO_USER_03);
 	//
-	int romread_LED = fifoGetValue32(FIFO_DSWIFI);
+	int romread_LED = fifoGetValue32(FIFO_USER_05);
 	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
@@ -188,10 +188,6 @@ int main(void) {
 		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run compatibility check
 	}
 
-	if(fifoCheckValue32(FIFO_USER_07)) {
-		i2cWriteRegister(0x4A, 0x74, 0x01);		// Set to turn on soft-reset button combo
-	}
-	
 	SCFGFifoCheck();
 	//
 	fifoSendValue32(FIFO_USER_05, 1);

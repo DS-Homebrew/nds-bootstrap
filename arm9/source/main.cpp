@@ -248,15 +248,15 @@ int main( int argc, char **argv) {
 				break;
 			case 1:
 				dbg_printf("Using WiFi LED\n");
-				fifoSendValue32(FIFO_DSWIFI, 1);	// Set to use WiFi LED as card read indicator
+				fifoSendValue32(FIFO_USER_05, 1);	// Set to use WiFi LED as card read indicator
 				break;
 			case 2:
 				dbg_printf("Using Power LED\n");
-				fifoSendValue32(FIFO_DSWIFI, 2);	// Set to use power LED (turn to purple) as card read indicator
+				fifoSendValue32(FIFO_USER_05, 2);	// Set to use power LED (turn to purple) as card read indicator
 				break;
 			case 3:
 				dbg_printf("Using Camera LED\n");
-				fifoSendValue32(FIFO_DSWIFI, 3);	// Set to use Camera LED as card read indicator
+				fifoSendValue32(FIFO_USER_05, 3);	// Set to use Camera LED as card read indicator
 				break;
 		}
 
@@ -280,10 +280,6 @@ int main( int argc, char **argv) {
 
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
-		reinittimer = 0;
-
-		bool softReset = bootstrapini.GetInt( "NDS-BOOTSTRAP", "SOFT_RESET", 1);
-		if (softReset) fifoSendValue32(FIFO_USER_07, 1);
 		reinittimer = 0;
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {

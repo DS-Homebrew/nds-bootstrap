@@ -48,8 +48,7 @@ static bool delayRan = false;
 static bool timeoutRun = true;
 static int timeoutTimer = 0;
 
-static bool softResetSettingChecked = false;
-static bool softReset = false;
+static int softResetTimer = 0;
 
 static bool compatibilityCheckSettingChecked = false;
 static bool compatibilityCheck = false;
@@ -198,18 +197,15 @@ void runCardEngineCheck (void) {
 	nocashMessage("runCardEngineCheck");
 	#endif
 	
-	if(!softResetSettingChecked) {
-		u8 setting = i2cReadRegister(0x4A, 0x74);
-		if(setting == 0x01) softReset = true;
-		softResetSettingChecked = true;
-	}
-
-	if(softReset) {
-		if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {} else {
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
+		softResetTimer = 0;
+	} else {
+		if(softResetTimer == 60*2) {
 			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
 			i2cWriteRegister(0x4a,0x70,0x01);
 			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
 		}
+		softResetTimer++;
 	}
 	
 	if(!compatibilityCheckSettingChecked) {
