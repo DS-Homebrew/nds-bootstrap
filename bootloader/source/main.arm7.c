@@ -85,6 +85,10 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 
+// ROM data blacklist.
+// 1 = start of data address, 2 = end of data address, 3 = data size
+u32 dataBlacklist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
 static void errorOutput (void) {
@@ -233,17 +237,20 @@ void resetMemory_ARM7 (void)
 
 u32 ROM_LOCATION = 0x0C800000;
 u32 ROM_TID;
+u8 ROM_VER;
 u32 ARM9_LEN;
 u32 romSize;
 
 void loadBinary_ARM7 (aFile file)
 {
 	u32 ndsHeader[0x170>>2];
+	u32 ndsHeaderNorm[0x170];
 
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
 	fileRead ((char*)ndsHeader, file, 0, 0x170);
+	fileRead ((char*)ndsHeaderNorm, file, 0, 0x170);
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
@@ -254,6 +261,7 @@ void loadBinary_ARM7 (aFile file)
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
 
 	ROM_TID = ndsHeader[0x00C>>2];
+	ROM_VER = ndsHeaderNorm[0x01E];
 	romSize = ndsHeader[0x080>>2];
 
 	//Fix Pokemon games needing header data.
@@ -298,13 +306,20 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	/* if((ROM_TID & 0x00FFFFFF) == 0x475241 || romSize > 0x01C00000 && romSize <= 0x02000000) {
+	if((ROM_TID == 0x454D4441) && (ROM_VER == 0x00)) {
+		dataBlacklist_ADME0[0] -= 0x4000;
+		dataBlacklist_ADME0[0] -= ARM9_LEN;
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
-		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, 0x01800000);
+		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, dataBlacklist_ADME0[0]);
+		u32 lastRomSize = 0;
+		for(u32 i = dataBlacklist_ADME0[1]-0x4000-ARM9_LEN; i < romSize; i++) {
+			lastRomSize++;
+		}
+		fileRead(ROM_LOCATION+dataBlacklist_ADME0[0], file, dataBlacklist_ADME0[1], lastRomSize);
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
-	} else */
+	} else
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if(romSize <= 0x01C00000) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
