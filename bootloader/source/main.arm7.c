@@ -85,10 +85,14 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 
+// ROM data whitelist.
+// 1 = start of data address, 2 = end of data address, 3 = data size
+u32 dataWhitelist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};	// Animal Crossing: Wild World (U)
+u32 dataWhitelist_AZWE0[3] = {0x00000000, 0x00F9B800, 0x00F9B800};	// WarioWare: Touched (U)
+
 // ROM data blacklist.
 // 1 = start of data address, 2 = end of data address, 3 = data size
-u32 dataWhitelist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};
-u32 dataWhitelist_AZWE0[3] = {0x00000000, 0x00F9B800, 0x00F9B800};
+u32 dataBlacklist_APHE0[3] = {0x00399400, 0x0145EC70, 0x010C5870};	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -325,16 +329,9 @@ void loadRomIntoRam(aFile file) {
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {
-			//dataWhitelist_ADME0[0] -= 0x4000;
-			//dataWhitelist_ADME0[0] -= ARM9_LEN;
 			arm9_extRAM = true;
 			while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 			fileRead(ROM_LOCATION, file, dataWhitelist_ADME0[0], dataWhitelist_ADME0[2]);
-			//u32 lastRomSize = 0;
-			//for(u32 i = dataWhitelist_ADME0[1]-0x4000-ARM9_LEN; i < romSize; i++) {
-			//	lastRomSize++;
-			//}
-			//fileRead(ROM_LOCATION+dataWhitelist_ADME0[0], file, dataWhitelist_ADME0[1], lastRomSize);
 			arm9_extRAM = false;
 			while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 		} else if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {
@@ -345,6 +342,19 @@ void loadRomIntoRam(aFile file) {
 			arm9_extRAM = true;
 			while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 			fileRead(ROM_LOCATION, file, dataWhitelist_AZWE0[0], dataWhitelist_AZWE0[2]);
+			arm9_extRAM = false;
+			while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {
+			dataBlacklist_APHE0[0] -= 0x4000;
+			dataBlacklist_APHE0[0] -= ARM9_LEN;
+			arm9_extRAM = true;
+			while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
+			fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, dataBlacklist_APHE0[0]);
+			u32 lastRomSize = 0;
+			for(u32 i = dataBlacklist_APHE0[1]; i < romSize; i++) {
+				lastRomSize++;
+			}
+			fileRead(ROM_LOCATION+dataBlacklist_APHE0[0], file, dataBlacklist_APHE0[1], lastRomSize);
 			arm9_extRAM = false;
 			while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 		}
