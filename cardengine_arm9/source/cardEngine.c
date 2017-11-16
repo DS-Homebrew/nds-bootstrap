@@ -102,6 +102,7 @@ static u32 GAME_READ_SIZE = _256KB_READ_SIZE;
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataWhitelist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};	// Animal Crossing: Wild World (U)
 u32 dataWhitelist_AZWE0[3] = {0x0011E9F8, 0x00F9B800, 0x00E7CE08};	// WarioWare: Touched (U)
+u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -411,6 +412,19 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D680000;
 				GAME_CACHE_SLOTS = 0x26;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)
+					|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {
+				setDataBWlist_0[0] = dataWhitelist_ADAE0[0];
+				setDataBWlist_0[1] = dataWhitelist_ADAE0[1];
+				setDataBWlist_0[2] = dataWhitelist_ADAE0[2];
+
+				ROM_LOCATION -= setDataBWlist_0[0];
+
+				GAME_CACHE_ADRESS_START = 0x0D1C0000;
+				GAME_CACHE_SLOTS = 0x39;
 
 				ROMinRAM = 2;
 				whitelist = true;
