@@ -328,10 +328,20 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_AZWE0[1];
 			setDataBWlist[2] = dataWhitelist_AZWE0[2];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x50575A41) && (ROM_HEADERCRC == 0x8E8FCF56)) {
+			setDataBWlist[0] = dataWhitelist_AZWP0[0];
+			setDataBWlist[1] = dataWhitelist_AZWP0[1];
+			setDataBWlist[2] = dataWhitelist_AZWP0[2];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {
 			setDataBWlist[0] = dataWhitelist_ADME0[0];
 			setDataBWlist[1] = dataWhitelist_ADME0[1];
 			setDataBWlist[2] = dataWhitelist_ADME0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0x5744CF56)) {
+			setDataBWlist[0] = dataWhitelist_ADME1[0];
+			setDataBWlist[1] = dataWhitelist_ADME1[1];
+			setDataBWlist[2] = dataWhitelist_ADME1[2];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {
 			setDataBWlist[0] = dataWhitelist_ABHE0[0];
@@ -343,10 +353,20 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_ARZE0[1];
 			setDataBWlist[2] = dataWhitelist_ARZE0[2];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x505A5241) && (ROM_HEADERCRC == 0xBD7ECF56)) {
+			setDataBWlist[0] = dataWhitelist_ARZP0[0];
+			setDataBWlist[1] = dataWhitelist_ARZP0[1];
+			setDataBWlist[2] = dataWhitelist_ARZP0[2];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {
 			setDataBWlist[0] = dataWhitelist_ALKE0[0];
 			setDataBWlist[1] = dataWhitelist_ALKE0[1];
 			setDataBWlist[2] = dataWhitelist_ALKE0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)) {
+			setDataBWlist[0] = dataWhitelist_ALKP0[0];
+			setDataBWlist[1] = dataWhitelist_ALKP0[1];
+			setDataBWlist[2] = dataWhitelist_ALKP0[2];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {
@@ -358,6 +378,11 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataWhitelist_YZXE0[0];
 			setDataBWlist[1] = dataWhitelist_YZXE0[1];
 			setDataBWlist[2] = dataWhitelist_YZXE0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x50585A59) && (ROM_HEADERCRC == 0xB2ADCF56)) {
+			setDataBWlist[0] = dataWhitelist_YZXP0[0];
+			setDataBWlist[1] = dataWhitelist_YZXP0[1];
+			setDataBWlist[2] = dataWhitelist_YZXP0[2];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {
 			setDataBWlist[0] = dataBlacklist_AGYE0[0];
@@ -371,6 +396,10 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_ARME0[0];
 			setDataBWlist[1] = dataBlacklist_ARME0[1];
 			setDataBWlist[2] = dataBlacklist_ARME0[2];
+		} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {
+			setDataBWlist[0] = dataBlacklist_ARMP0[0];
+			setDataBWlist[1] = dataBlacklist_ARMP0[1];
+			setDataBWlist[2] = dataBlacklist_ARMP0[2];
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {
 			setDataBWlist[0] = dataBlacklist_APHE0[0];
 			setDataBWlist[1] = dataBlacklist_APHE0[1];
@@ -379,6 +408,10 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_AKWE0[0];
 			setDataBWlist[1] = dataBlacklist_AKWE0[1];
 			setDataBWlist[2] = dataBlacklist_AKWE0[2];
+		} else if((ROM_TID == 0x50574B41) && (ROM_HEADERCRC == 0x706CCF56)) {
+			setDataBWlist[0] = dataBlacklist_AKWP0[0];
+			setDataBWlist[1] = dataBlacklist_AKWP0[1];
+			setDataBWlist[2] = dataBlacklist_AKWP0[2];
 		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {
 			setDataBWlist[0] = dataBlacklist_A3YE0[0];
 			setDataBWlist[1] = dataBlacklist_A3YE0[1];
