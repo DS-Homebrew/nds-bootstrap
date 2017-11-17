@@ -109,6 +109,7 @@ u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
+u32 dataBlacklist_ARME0[3] = {0x00D42600, 0x02879FA8, 0x01B379A8};	// Mario & Luigi: Partners in Time (U)
 u32 dataBlacklist_APHE0[3] = {0x00399400, 0x0145EC70, 0x010C5870};	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 
@@ -465,6 +466,19 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {
+				setDataBWlist[0] = dataBlacklist_ARME0[0];
+				setDataBWlist[1] = dataBlacklist_ARME0[1];
+				setDataBWlist[2] = dataBlacklist_ARME0[2];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DF80000;
+				GAME_CACHE_SLOTS = 0x4;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {
 				setDataBWlist[0] = dataBlacklist_APHE0[0];
 				setDataBWlist[1] = dataBlacklist_APHE0[1];
