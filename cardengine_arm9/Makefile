@@ -20,7 +20,7 @@ export TARGET		:=	cardengine_arm9
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../include
 
 
 #---------------------------------------------------------------------------------
