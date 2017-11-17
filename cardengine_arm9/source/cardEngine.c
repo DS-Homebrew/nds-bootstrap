@@ -386,6 +386,7 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D680000;
 				GAME_CACHE_SLOTS = 0x26;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -398,6 +399,7 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D240000;
 				GAME_CACHE_SLOTS = 0x37;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -450,6 +452,7 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D1C0000;
 				GAME_CACHE_SLOTS = 0x39;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -529,6 +532,19 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0DBA0000;
 				GAME_CACHE_SLOTS = 0x22;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {
+				setDataBWlist[0] = dataBlacklist_A3YE0[0];
+				setDataBWlist[1] = dataBlacklist_A3YE0[1];
+				setDataBWlist[2] = dataBlacklist_A3YE0[2];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DEC0000;
+				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			}
