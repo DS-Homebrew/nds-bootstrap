@@ -87,15 +87,16 @@ extern unsigned long loadingScreen;
 
 // ROM data include list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
-u32 dataWhitelist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};	// Animal Crossing: Wild World (U)
 u32 dataWhitelist_AZWE0[3] = {0x0011E9F8, 0x00F9B800, 0x00E7CE08};	// WarioWare: Touched (U)
+u32 dataWhitelist_ADME0[3] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80};	// Animal Crossing: Wild World (U)
+u32 dataWhitelist_ARZE0[3] = {0x0238DC00, 0x02B94600, 0x00806A00};	// MegaMan ZX (U)
+u32 dataWhitelist_ALKE0[3] = {0x06694E00, 0x073CF444, 0x00D3A644};	// Lunar Knights (U)
 u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
+u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataBlacklist_APHE0[3] = {0x00399400, 0x0145EC70, 0x010C5870};	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
-//u32 dataBlacklist_ARZE0_0[3] = {0x015F8E00, 0x0212F4C0, 0x00B366C0};	// MegaMan ZX (U)
-//u32 dataBlacklist_ARZE0_1[3] = {0x0238DC00, 0x02B94600, 0x00806A00};	// MegaMan ZX (U)
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 
 u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
@@ -334,15 +335,25 @@ void loadRomIntoRam(aFile file) {
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
-		if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {
+		if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {
+			setDataBWlist[0] = dataWhitelist_AZWE0[0];
+			setDataBWlist[1] = dataWhitelist_AZWE0[1];
+			setDataBWlist[2] = dataWhitelist_AZWE0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {
 			setDataBWlist[0] = dataWhitelist_ADME0[0];
 			setDataBWlist[1] = dataWhitelist_ADME0[1];
 			setDataBWlist[2] = dataWhitelist_ADME0[2];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {
-			setDataBWlist[0] = dataWhitelist_AZWE0[0];
-			setDataBWlist[1] = dataWhitelist_AZWE0[1];
-			setDataBWlist[2] = dataWhitelist_AZWE0[2];
+		} else if((ROM_TID == 0x455A5241) && (ROM_HEADERCRC == 0xDBFFCF56)) {
+			setDataBWlist[0] = dataWhitelist_ARZE0[0];
+			setDataBWlist[1] = dataWhitelist_ARZE0[1];
+			setDataBWlist[2] = dataWhitelist_ARZE0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {
+			setDataBWlist[0] = dataWhitelist_ALKE0[0];
+			setDataBWlist[1] = dataWhitelist_ALKE0[1];
+			setDataBWlist[2] = dataWhitelist_ALKE0[2];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {
@@ -350,21 +361,15 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_ADAE0[1];
 			setDataBWlist[2] = dataWhitelist_ADAE0[2];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x45585A59) && (ROM_HEADERCRC == 0x3057CF56)) {
+			setDataBWlist[0] = dataWhitelist_YZXE0[0];
+			setDataBWlist[1] = dataWhitelist_YZXE0[1];
+			setDataBWlist[2] = dataWhitelist_YZXE0[2];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {
 			setDataBWlist[0] = dataBlacklist_APHE0[0];
 			setDataBWlist[1] = dataBlacklist_APHE0[1];
 			setDataBWlist[2] = dataBlacklist_APHE0[2];
-		/* } else if((ROM_TID == 0x455A5241) && (ROM_HEADERCRC == 0xDBFFCF56)) {
-			setDataBWlist[0] = dataBlacklist_ARZE0[0];
-			setDataBWlist[1] = dataBlacklist_ARZE0[1];
-			setDataBWlist[2] = dataBlacklist_ARZE0[2];
-			u32 lastRomSize = 0;
-			for(u32 i = dataBlacklist_ARZE0_1[1]; i < romSize; i++) {
-				lastRomSize++;
-			}
-			fileRead(ROM_LOCATION+dataBlacklist_ARZE0_1[0]-0x4000-ARM9_LEN, file, dataBlacklist_ARZE0_1[1], lastRomSize);
-			arm9_extRAM = false;
-			while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9 */
 		} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {
 			setDataBWlist[0] = dataBlacklist_AKWE0[0];
 			setDataBWlist[1] = dataBlacklist_AKWE0[1];
