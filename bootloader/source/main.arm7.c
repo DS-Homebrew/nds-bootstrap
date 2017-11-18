@@ -389,6 +389,11 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_YKWE0[1];
 			setDataBWlist[2] = dataWhitelist_YKWE0[2];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {
+			setDataBWlist[0] = dataBlacklist_ACVE0[0];
+			setDataBWlist[1] = dataBlacklist_ACVE0[1];
+			setDataBWlist[2] = dataBlacklist_ACVE0[2];
+			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {
 			setDataBWlist[0] = dataBlacklist_AGYE0[0];
 			setDataBWlist[1] = dataBlacklist_AGYE0[1];

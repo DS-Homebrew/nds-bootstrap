@@ -19,6 +19,7 @@ u32 dataWhitelist_YKWE0[3] = {0x01632600, 0x024D7E00, 0x00EA5800};	// Kirby Supe
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
+u32 dataBlacklist_ACVE0[3] = {0x01AC1600, 0x02F6DA0C, 0x014AC40C};	// Castlevania: Dawn of Sorrow (U)
 u32 dataBlacklist_AGYE0[3] = {0x000F8E00, 0x030656A8, 0x02F6C8A8};	// Phoenix Wright: Ace Attorney (U)
 u32 dataBlacklist_ASCE0[3] = {0x0171E600, 0x03CA8DE0, 0x0258A7E0};	// Sonic Rush (U)
 u32 dataBlacklist_ARME0[3] = {0x00D42600, 0x02879FA8, 0x01B379A8};	// Mario & Luigi: Partners in Time (U)
