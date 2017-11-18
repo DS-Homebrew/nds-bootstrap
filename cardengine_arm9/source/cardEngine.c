@@ -468,6 +468,32 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x45464641) && (ROM_HEADERCRC == 0x70A6CF56)) {	// Final Fantasy III (U)
+				setDataBWlist[0] = dataWhitelist_AFFE0[0];
+				setDataBWlist[1] = dataWhitelist_AFFE0[1];
+				setDataBWlist[2] = dataWhitelist_AFFE0[2];
+
+				ROM_LOCATION -= setDataBWlist[0];
+
+				GAME_CACHE_ADRESS_START = 0x0D000000;
+				GAME_CACHE_SLOTS = 0x1F;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x50464641) && (ROM_HEADERCRC == 0x1AE7CF56)) {	// Final Fantasy III (E)
+				setDataBWlist[0] = dataWhitelist_AFFP0[0];
+				setDataBWlist[1] = dataWhitelist_AFFP0[1];
+				setDataBWlist[2] = dataWhitelist_AFFP0[2];
+
+				ROM_LOCATION -= setDataBWlist[0];
+
+				GAME_CACHE_ADRESS_START = 0x0D680000;
+				GAME_CACHE_SLOTS = 0x15;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {	// Lunar Knights (U)
 				setDataBWlist[0] = dataWhitelist_ALKE0[0];
 				setDataBWlist[1] = dataWhitelist_ALKE0[1];

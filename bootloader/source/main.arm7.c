@@ -358,6 +358,16 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_ARZP0[1];
 			setDataBWlist[2] = dataWhitelist_ARZP0[2];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x45464641) && (ROM_HEADERCRC == 0x70A6CF56)) {
+			setDataBWlist[0] = dataWhitelist_AFFE0[0];
+			setDataBWlist[1] = dataWhitelist_AFFE0[1];
+			setDataBWlist[2] = dataWhitelist_AFFE0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x50464641) && (ROM_HEADERCRC == 0x1AE7CF56)) {
+			setDataBWlist[0] = dataWhitelist_AFFP0[0];
+			setDataBWlist[1] = dataWhitelist_AFFP0[1];
+			setDataBWlist[2] = dataWhitelist_AFFP0[2];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {
 			setDataBWlist[0] = dataWhitelist_ALKE0[0];
 			setDataBWlist[1] = dataWhitelist_ALKE0[1];
