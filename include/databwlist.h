@@ -15,6 +15,7 @@ u32 dataWhitelist_ALKP0[3] = {0x06697400, 0x073D1A44, 0x00D3A644};	// Lunar Knig
 u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
 u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX Advent (E)
+u32 dataWhitelist_YKWE0[3] = {0x01632600, 0x024D7E00, 0x00EA5800};	// Kirby Super Star Ultra (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -23,6 +24,7 @@ u32 dataBlacklist_ASCE0[3] = {0x0171E600, 0x03CA8DE0, 0x0258A7E0};	// Sonic Rush
 u32 dataBlacklist_ARME0[3] = {0x00D42600, 0x02879FA8, 0x01B379A8};	// Mario & Luigi: Partners in Time (U)
 u32 dataBlacklist_ARMP0[3] = {0x00842E00, 0x0372762C, 0x02EE482C};	// Mario & Luigi: Partners in Time (E)
 u32 dataBlacklist_APHE0[3] = {0x00399400, 0x0145EC70, 0x010C5870};	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
+u32 dataBlacklist_AYWE0[3] = {0x01635E00, 0x01D9F240, 0x00769440};	// Yoshi's Island DS (U)
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mouse Attack (E)
 u32 dataBlacklist_A3YE0[3] = {0x0100A400, 0x02961B20, 0x01957720};	// Sonic Rush Adventure (U)

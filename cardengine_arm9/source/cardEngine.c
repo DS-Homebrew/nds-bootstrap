@@ -534,6 +534,19 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {
+				setDataBWlist[0] = dataWhitelist_YKWE0[0];
+				setDataBWlist[1] = dataWhitelist_YKWE0[1];
+				setDataBWlist[2] = dataWhitelist_YKWE0[2];
+
+				ROM_LOCATION -= setDataBWlist[0];
+
+				GAME_CACHE_ADRESS_START = 0x0D6C0000;
+				GAME_CACHE_SLOTS = 0x29;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {
 				setDataBWlist[0] = dataBlacklist_AGYE0[0];
 				setDataBWlist[1] = dataBlacklist_AGYE0[1];
@@ -595,8 +608,22 @@ int cardRead (u32* cacheStruct) {
 				ROM_LOCATION -= ARM9_LEN;
 
 				GAME_CACHE_ADRESS_START = 0x0D400000;
-				GAME_CACHE_SLOTS = 0xC;
-				GAME_READ_SIZE = _1MB_READ_SIZE;
+				GAME_CACHE_SLOTS = 0x18;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
+					|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {
+				setDataBWlist[0] = dataBlacklist_AYWE0[0];
+				setDataBWlist[1] = dataBlacklist_AYWE0[1];
+				setDataBWlist[2] = dataBlacklist_AYWE0[2];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DEC0000;
+				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {
