@@ -429,6 +429,19 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x45533241) && (ROM_HEADERCRC == 0xA860CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (U)
+				setDataBWlist[0] = dataWhitelist_A2SE0[0];
+				setDataBWlist[1] = dataWhitelist_A2SE0[1];
+				setDataBWlist[2] = dataWhitelist_A2SE0[2];
+
+				ROM_LOCATION -= setDataBWlist[0];
+
+				GAME_CACHE_ADRESS_START = 0x0D180000;
+				GAME_CACHE_SLOTS = 0x13;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {	// Resident Evil: Deadly Silence (U)
 				setDataBWlist[0] = dataWhitelist_ABHE0[0];
 				setDataBWlist[1] = dataWhitelist_ABHE0[1];
@@ -517,6 +530,19 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0D540000;
 				GAME_CACHE_SLOTS = 0x56;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
+				setDataBWlist[0] = dataWhitelist_ACBE0[0];
+				setDataBWlist[1] = dataWhitelist_ACBE0[1];
+				setDataBWlist[2] = dataWhitelist_ACBE0[2];
+
+				ROM_LOCATION -= setDataBWlist[0];
+
+				GAME_CACHE_ADRESS_START = 0x0DB40000;
+				GAME_CACHE_SLOTS = 0x13;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
