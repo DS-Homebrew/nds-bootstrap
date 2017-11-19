@@ -19,10 +19,11 @@ u32 dataWhitelist_ACBE0[3] = {0x018D6000, 0x02C15200, 0x0133F200};	// Castlevani
 u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
 u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX Advent (E)
-u32 dataWhitelist_YKWE0[3] = {0x01632600, 0x024D7E00, 0x00EA5800};	// Kirby Super Star Ultra (U)
+//u32 dataWhitelist_YKWE0[3] = {0x01632600, 0x024D7E00, 0x00EA5800};	// Kirby Super Star Ultra (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
+u32 dataBlacklist_ASKE0[3] = {0x01BD0000, 0x024E95E0, 0x009195E0};	// Lost in Blue (U)
 u32 dataBlacklist_ACVE0[3] = {0x01AC1600, 0x02F6DA0C, 0x014AC40C};	// Castlevania: Dawn of Sorrow (U)
 u32 dataBlacklist_AGYE0[3] = {0x000F8E00, 0x030656A8, 0x02F6C8A8};	// Phoenix Wright: Ace Attorney (U)
 u32 dataBlacklist_ASCE0[3] = {0x0171E600, 0x03CA8DE0, 0x0258A7E0};	// Sonic Rush (U)

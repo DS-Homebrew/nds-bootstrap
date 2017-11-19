@@ -586,7 +586,7 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-			} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
+			/* } else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
 				setDataBWlist[0] = dataWhitelist_YKWE0[0];
 				setDataBWlist[1] = dataWhitelist_YKWE0[1];
 				setDataBWlist[2] = dataWhitelist_YKWE0[2];
@@ -599,6 +599,21 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+				setDataBWlist[0] = dataBlacklist_ASKE0[0];
+				setDataBWlist[1] = dataBlacklist_ASKE0[1];
+				setDataBWlist[2] = dataBlacklist_ASKE0[2];
+
+				ROM_LOCATION = 0x0C400000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DF40000;
+				GAME_CACHE_SLOTS = 0x3;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use28MB = true;
 			} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
 				setDataBWlist[0] = dataBlacklist_ACVE0[0];
 				setDataBWlist[1] = dataBlacklist_ACVE0[1];
