@@ -88,6 +88,9 @@ extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 
 u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
+int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -409,7 +412,8 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_YKWE0[1];
 			setDataBWlist[2] = dataWhitelist_YKWE0[2];
 			setDataBWlist[3] = true;
-		*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+		*/
+		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			setDataBWlist[0] = dataBlacklist_ASKE0[0];
 			setDataBWlist[1] = dataBlacklist_ASKE0[1];
 			setDataBWlist[2] = dataBlacklist_ASKE0[2];
@@ -435,6 +439,18 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_ARMP0[0];
 			setDataBWlist[1] = dataBlacklist_ARMP0[1];
 			setDataBWlist[2] = dataBlacklist_ARMP0[2];
+		} else if((ROM_TID == 0x4A334241) && (ROM_HEADERCRC == 0x0C22CF56)) {	// Mario Basketball: 3 on 3 (J)
+			setDataBWlist[0] = dataBlacklist_AB3J0[0];
+			setDataBWlist[1] = dataBlacklist_AB3J0[1];
+			setDataBWlist[2] = dataBlacklist_AB3J0[2];
+		} else if((ROM_TID == 0x45334241) && (ROM_HEADERCRC == 0xE6D9CF56)) {	// Mario Hoops 3 on 3 (U)
+			setDataBWlist[0] = dataBlacklist_AB3E0[0];
+			setDataBWlist[1] = dataBlacklist_AB3E0[1];
+			setDataBWlist[2] = dataBlacklist_AB3E0[2];
+		} else if((ROM_TID == 0x50334241) && (ROM_HEADERCRC == 0xB642CF56)) {	// Mario Slam Basketball (E)
+			setDataBWlist[0] = dataBlacklist_AB3P0[0];
+			setDataBWlist[1] = dataBlacklist_AB3P0[1];
+			setDataBWlist[2] = dataBlacklist_AB3P0[2];
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 			setDataBWlist[0] = dataBlacklist_APHE0[0];
 			setDataBWlist[1] = dataBlacklist_APHE0[1];
@@ -463,6 +479,12 @@ void loadRomIntoRam(aFile file) {
 				arm9_extRAM = true;
 				while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
+				if(dataAmount >= 1) {
+					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
+				}
+				if(dataAmount == 2) {
+					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
+				}
 				arm9_extRAM = false;
 				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			} else {
