@@ -512,6 +512,18 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
+				setDataBWlist[0] = dataWhitelist_AMQP0[0];
+				setDataBWlist[1] = dataWhitelist_AMQP0[1];
+				setDataBWlist[2] = dataWhitelist_AMQP0[2];
+
+				GAME_CACHE_ADRESS_START = 0x0D4E0000;
+				GAME_CACHE_SLOTS = 0x69;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			*/
 			} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
 				setDataBWlist[0] = dataWhitelist_ACBE0[0];
 				setDataBWlist[1] = dataWhitelist_ACBE0[1];
@@ -557,18 +569,6 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-			/* } else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
-				setDataBWlist[0] = dataWhitelist_YKWE0[0];
-				setDataBWlist[1] = dataWhitelist_YKWE0[1];
-				setDataBWlist[2] = dataWhitelist_YKWE0[2];
-
-				GAME_CACHE_ADRESS_START = 0x0D6C0000;
-				GAME_CACHE_SLOTS = 0x29;
-				GAME_READ_SIZE = _256KB_READ_SIZE;
-
-				ROMinRAM = 2;
-				whitelist = true;
-			*/
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 				setDataBWlist[0] = dataBlacklist_ASKE0[0];
 				setDataBWlist[1] = dataBlacklist_ASKE0[1];
@@ -754,6 +754,19 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0DEC0000;
 				GAME_CACHE_SLOTS = 0x5;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
+				setDataBWlist[0] = dataBlacklist_YKWE0[0];
+				setDataBWlist[1] = dataBlacklist_YKWE0[1];
+				setDataBWlist[2] = dataBlacklist_YKWE0[2];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x6;
+				GAME_READ_SIZE = _1MB_READ_SIZE;
 
 				ROMinRAM = 2;
 			}

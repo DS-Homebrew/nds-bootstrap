@@ -15,11 +15,11 @@ u32 dataWhitelist_AFFE0[3] = {0x012E2600, 0x01AC4A00, 0x007E2400};	// Final Fant
 u32 dataWhitelist_AFFP0[3] = {0x01466600, 0x02282200, 0x00E1BC00};	// Final Fantasy III (E)
 u32 dataWhitelist_ALKE0[3] = {0x06694E00, 0x073CF444, 0x00D3A644};	// Lunar Knights (U)
 u32 dataWhitelist_ALKP0[3] = {0x06697400, 0x073D1A44, 0x00D3A644};	// Lunar Knights (E)
+//u32 dataWhitelist_AMQP0[3] = {0x0024EE00, 0x00F2E300, 0x00CDF500};	// Mario Vs Donkey Kong 2: March of the Minis (E)
 u32 dataWhitelist_ACBE0[3] = {0x018D6000, 0x02C15200, 0x0133F200};	// Castlevania: Portrait of Ruin (U)
 u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
 u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX Advent (E)
-//u32 dataWhitelist_YKWE0[3] = {0x01632600, 0x024D7E00, 0x00EA5800};	// Kirby Super Star Ultra (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -37,5 +37,6 @@ u32 dataBlacklist_AYWE0[3] = {0x01635E00, 0x01D9F240, 0x00769440};	// Yoshi's Is
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mouse Attack (E)
 u32 dataBlacklist_A3YE0[3] = {0x0100A400, 0x02961B20, 0x01957720};	// Sonic Rush Adventure (U)
+u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Super Star Ultra (U)
 
 #endif // _DATABWLIST_H
