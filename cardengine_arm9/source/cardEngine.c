@@ -756,6 +756,36 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
+				setDataBWlist[0] = dataBlacklist_YW2E0[0];
+				setDataBWlist[1] = dataBlacklist_YW2E0[1];
+				setDataBWlist[2] = dataBlacklist_YW2E0[2];
+
+				ROM_LOCATION = 0x0C400000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x6;
+				GAME_READ_SIZE = _1MB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use28MB = true;
+			} else if((ROM_TID == 0x50325759) && (ROM_HEADERCRC == 0x8CA3CF56)) {	// Advance Wars: Dark Conflict (E)
+				setDataBWlist[0] = dataBlacklist_YW2P0[0];
+				setDataBWlist[1] = dataBlacklist_YW2P0[1];
+				setDataBWlist[2] = dataBlacklist_YW2P0[2];
+
+				ROM_LOCATION = 0x0C400000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x6;
+				GAME_READ_SIZE = _1MB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use28MB = true;
 			} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
 				setDataBWlist[0] = dataBlacklist_YKWE0[0];
 				setDataBWlist[1] = dataBlacklist_YKWE0[1];

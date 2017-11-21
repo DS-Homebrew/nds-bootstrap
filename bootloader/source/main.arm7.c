@@ -472,6 +472,16 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_A3YE0[0];
 			setDataBWlist[1] = dataBlacklist_A3YE0[1];
 			setDataBWlist[2] = dataBlacklist_A3YE0[2];
+		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
+			setDataBWlist[0] = dataBlacklist_YW2E0[0];
+			setDataBWlist[1] = dataBlacklist_YW2E0[1];
+			setDataBWlist[2] = dataBlacklist_YW2E0[2];
+			ROM_LOCATION = 0x0C400000;
+		} else if((ROM_TID == 0x50325759) && (ROM_HEADERCRC == 0x8CA3CF56)) {	// Advance Wars: Dark Conflict (E)
+			setDataBWlist[0] = dataBlacklist_YW2P0[0];
+			setDataBWlist[1] = dataBlacklist_YW2P0[1];
+			setDataBWlist[2] = dataBlacklist_YW2P0[2];
+			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
 			setDataBWlist[0] = dataBlacklist_YKWE0[0];
 			setDataBWlist[1] = dataBlacklist_YKWE0[1];
