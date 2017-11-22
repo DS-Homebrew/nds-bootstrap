@@ -46,6 +46,7 @@ u32 dataBlacklist_YW2E0[3] = {0x0122EE00, 0x02E5CE40, 0x01C2E040};	// Advance Wa
 u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wars: Dark Conflict (E)
 u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Super Star Ultra (U)
 u32 dataBlacklist_CJCE0[3] = {0x01102E00, 0x02E3EE00, 0x01D3C000};	// My Japanese Coach - Learn a New Language (U)
+u32 dataBlacklist_CLJE0[3] = {0x01022600, 0x05944A00, 0x04922400};	// Mario & Luigi - Bowser's Inside Story (U)
 //u32 dataBlacklist_B6ZE0[3] = {0x0013CE00, 0x03AB6E00, 0x026E8E00};	// MegaMan Zero Collection (U)
 
 #endif // _DATABWLIST_H

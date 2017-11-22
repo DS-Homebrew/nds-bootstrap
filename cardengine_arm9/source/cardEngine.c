@@ -829,6 +829,19 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				use28MB = 1;
+			} else if((ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0xCE77CF56)
+					|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi - Bowser's Inside Story (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_CLJE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D800000;
+				GAME_CACHE_SLOTS = 0x20;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_B6ZE0[i];
