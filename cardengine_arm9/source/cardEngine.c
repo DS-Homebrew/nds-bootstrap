@@ -1172,7 +1172,7 @@ int cardRead (u32* cacheStruct) {
 							IPC_SendSync(0xEE24);
 
 							while(sharedAddr[3] != (vu32)0);
-							// -------------------------------------*/
+							// -------------------------------------
 							#endif
 
 							// read ROM loaded into RAM
@@ -1215,7 +1215,7 @@ int cardRead (u32* cacheStruct) {
 							page = (src/512)*512;
 						}
 					}
-					if(dataAmount >= 1 && src >= setDataBWlist_1[0] && src < setDataBWlist_1[1]) {
+					/* if(dataAmount >= 1 && src >= setDataBWlist_1[0] && src < setDataBWlist_1[1]) {
 						u32 src2=src;
 						src2 -= setDataBWlist_1[0];
 						src2 += setDataBWlist[2];
@@ -1243,7 +1243,7 @@ int cardRead (u32* cacheStruct) {
 							IPC_SendSync(0xEE24);
 
 							while(sharedAddr[3] != (vu32)0);
-							// -------------------------------------*/
+							// -------------------------------------
 							#endif
 
 							// read ROM loaded into RAM
@@ -1316,7 +1316,7 @@ int cardRead (u32* cacheStruct) {
 							IPC_SendSync(0xEE24);
 
 							while(sharedAddr[3] != (vu32)0);
-							// -------------------------------------*/
+							// -------------------------------------
 							#endif
 
 							// read ROM loaded into RAM
@@ -1358,8 +1358,7 @@ int cardRead (u32* cacheStruct) {
 							dst = cardStruct[1];
 							page = (src/512)*512;
 						}
-					}
-					sharedAddr[3] = 0;
+					} */
 				} else if(!whitelist && src > 0 && src < setDataBWlist[0]) {
 					u32 len2=len;
 					if(len2 > 512) {
