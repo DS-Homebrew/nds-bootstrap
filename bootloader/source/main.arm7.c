@@ -326,7 +326,17 @@ void loadRomIntoRam(aFile file) {
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
-		if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {		// WarioWare: Touched (U)
+		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
+			setDataBWlist[0] = dataWhitelist_AZWJ0[0];
+			setDataBWlist[1] = dataWhitelist_AZWJ0[1];
+			setDataBWlist[2] = dataWhitelist_AZWJ0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0xE37BCF56)) {	// Sawaru - Made in Wario (J) (v02)
+			setDataBWlist[0] = dataWhitelist_AZWJ2[0];
+			setDataBWlist[1] = dataWhitelist_AZWJ2[1];
+			setDataBWlist[2] = dataWhitelist_AZWJ2[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {	// WarioWare: Touched (U)
 			setDataBWlist[0] = dataWhitelist_AZWE0[0];
 			setDataBWlist[1] = dataWhitelist_AZWE0[1];
 			setDataBWlist[2] = dataWhitelist_AZWE0[2];
@@ -335,6 +345,16 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataWhitelist_AZWP0[0];
 			setDataBWlist[1] = dataWhitelist_AZWP0[1];
 			setDataBWlist[2] = dataWhitelist_AZWP0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x43575A41) && (ROM_HEADERCRC == 0xE10BCF56)) {	// Momo Waliou Zhizao (C)
+			setDataBWlist[0] = dataWhitelist_AZWC0[0];
+			setDataBWlist[1] = dataWhitelist_AZWC0[1];
+			setDataBWlist[2] = dataWhitelist_AZWC0[2];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4B575A41) && (ROM_HEADERCRC == 0xB5C6CF56)) {	// Manjyeora! Made in Wario (KS)
+			setDataBWlist[0] = dataWhitelist_AZWK0[0];
+			setDataBWlist[1] = dataWhitelist_AZWK0[1];
+			setDataBWlist[2] = dataWhitelist_AZWK0[2];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {	// Animal Crossing: Wild World (U)
 			setDataBWlist[0] = dataWhitelist_ADME0[0];
@@ -413,7 +433,12 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[1] = dataWhitelist_YZXP0[1];
 			setDataBWlist[2] = dataWhitelist_YZXP0[2];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+		/* } else if((ROM_TID == 0x45463541) && (ROM_HEADERCRC == 0x9EA0CF56)) {	// Professor Layton and the Curious Village (U)
+			setDataBWlist[0] = dataWhitelist_A5FE0[0];
+			setDataBWlist[1] = dataWhitelist_A5FE0[1];
+			setDataBWlist[2] = dataWhitelist_A5FE0[2];
+			setDataBWlist[3] = true;
+		*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			setDataBWlist[0] = dataBlacklist_ASKE0[0];
 			setDataBWlist[1] = dataBlacklist_ASKE0[1];
 			setDataBWlist[2] = dataBlacklist_ASKE0[2];
@@ -435,6 +460,7 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_ARME0[0];
 			setDataBWlist[1] = dataBlacklist_ARME0[1];
 			setDataBWlist[2] = dataBlacklist_ARME0[2];
+			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {	// Mario & Luigi: Partners in Time (E)
 			setDataBWlist[0] = dataBlacklist_ARMP0[0];
 			setDataBWlist[1] = dataBlacklist_ARMP0[1];
@@ -486,7 +512,16 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[0] = dataBlacklist_YKWE0[0];
 			setDataBWlist[1] = dataBlacklist_YKWE0[1];
 			setDataBWlist[2] = dataBlacklist_YKWE0[2];
-		}
+		} else if((ROM_TID == 0x45434A43) && (ROM_HEADERCRC == 0xF0BACF56)) {	// My Japanese Coach - Learn a New Language (U)
+			setDataBWlist[0] = dataBlacklist_CJCE0[0];
+			setDataBWlist[1] = dataBlacklist_CJCE0[1];
+			setDataBWlist[2] = dataBlacklist_CJCE0[2];
+			ROM_LOCATION = 0x0C400000;
+		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
+			setDataBWlist[0] = dataBlacklist_B6ZE0[0];
+			setDataBWlist[1] = dataBlacklist_B6ZE0[1];
+			setDataBWlist[2] = dataBlacklist_B6ZE0[2];
+		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
 			if(setDataBWlist[3] == true) {
