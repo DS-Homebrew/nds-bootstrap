@@ -390,11 +390,10 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ALKP0[i];
 			setDataBWlist[3] = true;
-		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
+		} else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
 			setDataBWlist[3] = true;
-		*/
 		} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ACBE0[i];
@@ -412,11 +411,11 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YZXP0[i];
 			setDataBWlist[3] = true;
-		/* } else if((ROM_TID == 0x45463541) && (ROM_HEADERCRC == 0x9EA0CF56)) {	// Professor Layton and the Curious Village (U)
+		} else if((ROM_TID == 0x45463541) && (ROM_HEADERCRC == 0x9EA0CF56)) {	// Professor Layton and the Curious Village (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_A5FE0[i];
 			setDataBWlist[3] = true;
-		*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;
