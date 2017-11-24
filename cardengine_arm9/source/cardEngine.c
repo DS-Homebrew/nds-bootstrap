@@ -1144,8 +1144,8 @@ int cardRead (u32* cacheStruct) {
 					}
 				}
 
-				if(whitelist) {
-					if(src >= setDataBWlist[0] && src < setDataBWlist[1]) {
+				if(whitelist && src >= setDataBWlist[0] && src < setDataBWlist[1]) {
+					// if(src >= setDataBWlist[0] && src < setDataBWlist[1]) {
 						u32 src2=src;
 						src2 -= setDataBWlist[0];
 						u32 page2=page;
@@ -1213,7 +1213,7 @@ int cardRead (u32* cacheStruct) {
 							dst = cardStruct[1];
 							page = (src/512)*512;
 						}
-					}
+					// }
 					/* if(dataAmount >= 1 && src >= setDataBWlist_1[0] && src < setDataBWlist_1[1]) {
 						u32 src2=src;
 						src2 -= setDataBWlist_1[0];
@@ -1358,8 +1358,7 @@ int cardRead (u32* cacheStruct) {
 							page = (src/512)*512;
 						}
 					} */
-				}
-				if(!whitelist && src > 0 && src < setDataBWlist[0]) {
+				} else if(!whitelist && src > 0 && src < setDataBWlist[0]) {
 					u32 len2=len;
 					if(len2 > 512) {
 						len2 -= src%4;
