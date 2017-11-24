@@ -44,7 +44,7 @@ Helpful information:
 #include <nds/arm7/audio.h>
 
 #include "fat.h"
-#include "dldi_patcher.h"
+//#include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
 #include "cardengine_arm7_bin.h"
@@ -415,6 +415,14 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45463541) && (ROM_HEADERCRC == 0x9EA0CF56)) {	// Professor Layton and the Curious Village (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_A5FE0[i];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_YF4E0[i];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x50344659) && (ROM_HEADERCRC == 0xDB3BCF56)) {	// Final Fantasy IV (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_YF4P0[i];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			for(int i = 0; i < 3; i++)

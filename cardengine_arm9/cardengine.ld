@@ -4,7 +4,7 @@ ENTRY(_start)
 
 MEMORY {
 
-	vram	: ORIGIN = 0x03700000, LENGTH = 16K /* WRAM C  */
+	vram	: ORIGIN = 0x03700000, LENGTH = 24K /* WRAM C  */
 }
 
 __vram_start	=	ORIGIN(vram);

@@ -600,6 +600,26 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_YF4E0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0CE40000;
+				GAME_CACHE_SLOTS = 0x4B;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x50344659) && (ROM_HEADERCRC == 0xDB3BCF56)) {	// Final Fantasy IV (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_YF4P0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0CD40000;
+				GAME_CACHE_SLOTS = 0x4F;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASKE0[i];

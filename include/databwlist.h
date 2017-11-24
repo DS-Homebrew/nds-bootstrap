@@ -25,6 +25,8 @@ u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Di
 u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX Advent (E)
 u32 dataWhitelist_A5FE0[3] = {0x017FA000, 0x02D39400, 0x0153F400};	// Professor Layton and the Curious Village (U)
+u32 dataWhitelist_YF4E0[3] = {0x069A2600, 0x06FC3400, 0x0061FE00};	// Final Fantasy IV (U)
+u32 dataWhitelist_YF4P0[3] = {0x069A3400, 0x06EA4E00, 0x00501A00};	// Final Fantasy IV (E)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -49,6 +51,7 @@ u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Supe
 u32 dataBlacklist_CJCE0[3] = {0x01102E00, 0x02E3EE00, 0x01D3C000};	// My Japanese Coach - Learn a New Language (U)
 u32 dataBlacklist_CLJE0[3] = {0x01022600, 0x05944A00, 0x04922400};	// Mario & Luigi - Bowser's Inside Story (U)
 u32 dataBlacklist_BKIE0[3] = {0x00A2E200, 0x0523F600, 0x04811400};	// The Legend of Zelda - Spirit Tracks (U)
+//u32 dataBlacklist_BKIE0_patch[3] = {0x01447600, 0x057F7E00, 0x043B0800};	// The Legend of Zelda - Spirit Tracks (U) (XPA's AP-patch)
 //u32 dataBlacklist_B6ZE0[3] = {0x0013CE00, 0x03AB6E00, 0x026E8E00};	// MegaMan Zero Collection (U)
 
 #endif // _DATABWLIST_H
