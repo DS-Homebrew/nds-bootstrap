@@ -465,6 +465,7 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {	// Sonic Rush Adventure (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YE0[i];
+			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_YW2E0[i];
@@ -484,6 +485,9 @@ void loadRomIntoRam(aFile file) {
 				|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi - Bowser's Inside Story (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_CLJE0[i];
+		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda - Spirit Tracks (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_BKIE0[i];
 		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
 			setDataBWlist[0] = dataBlacklist_B6ZE0[0];
 			setDataBWlist[1] = dataBlacklist_B6ZE0[1];

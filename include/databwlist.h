@@ -24,7 +24,7 @@ u32 dataWhitelist_ACBE0[3] = {0x018D6000, 0x02C15200, 0x0133F200};	// Castlevani
 u32 dataWhitelist_ADAE0[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U)
 u32 dataWhitelist_YZXE0[3] = {0x02221600, 0x02DC07A8, 0x00B9F1A8};	// MegaMan ZX Advent (U)
 u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX Advent (E)
-//u32 dataWhitelist_A5FE0[3] = {0x030B1200, 0x03DB09E0, 0x00D957E0};	// Professor Layton and the Curious Village (U)
+u32 dataWhitelist_A5FE0[3] = {0x017FA000, 0x02D39400, 0x0153F400};	// Professor Layton and the Curious Village (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -38,6 +38,7 @@ u32 dataBlacklist_AB3J0[3] = {0x00F77200, 0x03442200, 0x024CB000};	// Mario Bask
 u32 dataBlacklist_AB3E0[3] = {0x00F76E00, 0x03222200, 0x022AB400};	// Mario Hoops 3 on 3 (U)
 u32 dataBlacklist_AB3P0[3] = {0x01940200, 0x03441E00, 0x01B01C00};	// Mario Slam Basketball (E)
 u32 dataBlacklist_APHE0[3] = {0x00399400, 0x0145EC70, 0x010C5870};	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
+u32 dataBlacklist_ARGE0[3] = {0x003FCE00, 0x00ADAC00, 0x006DDE00};	// Pokemon Ranger (U)
 u32 dataBlacklist_AYWE0[3] = {0x01635E00, 0x01D9F240, 0x00769440};	// Yoshi's Island DS (U)
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mouse Attack (E)
@@ -47,6 +48,7 @@ u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wa
 u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Super Star Ultra (U)
 u32 dataBlacklist_CJCE0[3] = {0x01102E00, 0x02E3EE00, 0x01D3C000};	// My Japanese Coach - Learn a New Language (U)
 u32 dataBlacklist_CLJE0[3] = {0x01022600, 0x05944A00, 0x04922400};	// Mario & Luigi - Bowser's Inside Story (U)
+u32 dataBlacklist_BKIE0[3] = {0x00A2E200, 0x0523F600, 0x04811400};	// The Legend of Zelda - Spirit Tracks (U)
 //u32 dataBlacklist_B6ZE0[3] = {0x0013CE00, 0x03AB6E00, 0x026E8E00};	// MegaMan Zero Collection (U)
 
 #endif // _DATABWLIST_H

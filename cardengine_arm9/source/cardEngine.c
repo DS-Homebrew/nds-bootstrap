@@ -854,6 +854,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda - Spirit Tracks (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_BKIE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D980000;
+				GAME_CACHE_SLOTS = 0x1A;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_B6ZE0[i];
