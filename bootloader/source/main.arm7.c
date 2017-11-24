@@ -659,7 +659,7 @@ void arm7_main (void) {
 
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 
-	nocashMessage("try to patch dldi");
+	/* nocashMessage("try to patch dldi");
 	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	if (wantToPatchDLDI) {
 		nocashMessage("dldi patch successful");
@@ -676,7 +676,8 @@ void arm7_main (void) {
 			errorOutput();
 		}
 	} else {
-		nocashMessage("dldi Patch Unsuccessful try to patch card");
+		nocashMessage("dldi Patch Unsuccessful try to patch card"); */
+		nocashMessage("try to patch card");
 		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 		increaseLoadBarLength();	// 3 dots
 		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
@@ -700,7 +701,7 @@ void arm7_main (void) {
 			errorOutput();
 		}
 		increaseLoadBarLength();	// 7 dots
-	}
+	// }
  
 
 
