@@ -656,16 +656,14 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ARME0[i];
 
-				ROM_LOCATION = 0x0C400000;
 				ROM_LOCATION -= 0x4000;
 				ROM_LOCATION -= ARM9_LEN;
 
-				GAME_CACHE_ADRESS_START = 0x0DB80000;
-				GAME_CACHE_SLOTS = 0x12;
+				GAME_CACHE_ADRESS_START = 0x0DA40000;
+				GAME_CACHE_SLOTS = 0x17;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
-				use28MB = 2;
 			} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {	// Mario & Luigi: Partners in Time (E)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ARMP0[i];
@@ -862,8 +860,8 @@ int cardRead (u32* cacheStruct) {
 				ROM_LOCATION -= ARM9_LEN;
 
 				GAME_CACHE_ADRESS_START = 0x0D980000;
-				GAME_CACHE_SLOTS = 0x1A;
-				GAME_READ_SIZE = _256KB_READ_SIZE;
+				GAME_CACHE_SLOTS = 0xD;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)

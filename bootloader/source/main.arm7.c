@@ -433,7 +433,6 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {	// Mario & Luigi: Partners in Time (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARME0[i];
-			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {	// Mario & Luigi: Partners in Time (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARMP0[i];
