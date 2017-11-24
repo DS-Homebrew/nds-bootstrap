@@ -308,7 +308,7 @@ void loadRomIntoRam(aFile file) {
 	romSize -= ARM9_LEN;
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-	if(romSize <= 0x01C00000) {
+	if((romSize <= 0x01C00000) && (ROM_TID != 0x45475241)) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 			if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
@@ -390,10 +390,11 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ALKP0[i];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
+		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
 			setDataBWlist[3] = true;
+		*/
 		} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ACBE0[i];
@@ -448,6 +449,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_APHE0[i];
+		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ARGE0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 3; i++)

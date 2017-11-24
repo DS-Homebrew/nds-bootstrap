@@ -360,7 +360,7 @@ int cardRead (u32* cacheStruct) {
 		romSize -= ARM9_LEN;
 
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
-		if(romSize <= 0x01C00000 && !dsiWramUsed) {
+		if((romSize <= 0x01C00000) && (ROM_TID != 0x45475241) && !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 				use28MB = 1;
 				ROM_LOCATION = 0x0E000000-romSize;
@@ -538,16 +538,17 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-			} else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
+			/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_AMQP0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0D4E0000;
-				GAME_CACHE_SLOTS = 0x69;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D500000;
+				GAME_CACHE_SLOTS = 0x2C;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
+			*/
 			} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ACBE0[i];
@@ -593,9 +594,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_A5FE0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0D5A0000;
-				GAME_CACHE_SLOTS = 0x53;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0DD40000;
+				GAME_CACHE_SLOTS = 0xB;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -723,6 +724,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0D400000;
 				GAME_CACHE_SLOTS = 0x18;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ARGE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA80000;
+				GAME_CACHE_SLOTS = 0x2C;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
