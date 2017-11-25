@@ -53,7 +53,7 @@ static int softResetTimer = 0;
 static bool compatibilityCheckSettingChecked = false;
 static bool compatibilityCheck = false;
 
-bool ndmaUsed = false;
+bool ndmaUsed = true;
 
 void initLogging() {
 	if(!initialized) {
@@ -191,6 +191,12 @@ void cardRead_arm9() {
 	#endif
 }
 
+void cardRead_delay() {
+	for(int i = 0; i < 30*60; i++) {
+		i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
+	}
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG
@@ -244,9 +250,7 @@ void runCardEngineCheck (void) {
 			*(vu32*)(0x027FFB14) = 0;
 
 			if(!delayRan) {
-				for(int i = 0; i < 30*60; i++) {
-					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
-				}
+				cardRead_delay();
 				delayRan = true;
 			}
 		}
