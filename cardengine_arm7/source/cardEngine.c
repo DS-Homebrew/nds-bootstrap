@@ -53,7 +53,7 @@ static int softResetTimer = 0;
 static bool compatibilityCheckSettingChecked = false;
 static bool compatibilityCheck = false;
 
-bool ndmaUsed = true;
+bool ndmaUsed = false;
 
 void initLogging() {
 	if(!initialized) {
