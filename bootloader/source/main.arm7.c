@@ -472,7 +472,7 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {	// Sonic Rush Adventure (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YE0[i];
-			ROM_LOCATION = 0x0C400000;
+			ROM_LOCATION = 0x0C700000;
 		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_YW2E0[i];
@@ -496,9 +496,8 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_BKIE0[i];
 		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
-			setDataBWlist[0] = dataBlacklist_B6ZE0[0];
-			setDataBWlist[1] = dataBlacklist_B6ZE0[1];
-			setDataBWlist[2] = dataBlacklist_B6ZE0[2];
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_B6ZE0[i];
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
