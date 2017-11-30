@@ -49,13 +49,14 @@ u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mous
 u32 dataBlacklist_A3YJ0[3] = {0x0100A400, 0x02961000, 0x01956C00};	// Sonic Rush Adventure (J)
 u32 dataBlacklist_A3YE0[3] = {0x0100A400, 0x02961B20, 0x01957720};	// Sonic Rush Adventure (UE)
 u32 dataBlacklist_A3YK0[3] = {0x01009400, 0x02908800, 0x018FF400};	// Sonic Rush Adventure (KS)
+u32 dataBlacklist_YCOE0[3] = {0x0075DA00, 0x03D36800, 0x035D8E00};	// Call of Duty 4: Modern Warfare (U)
 u32 dataBlacklist_YW2E0[3] = {0x0122EE00, 0x02E5CE40, 0x01C2E040};	// Advance Wars: Days of Ruin (U)
 u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wars: Dark Conflict (E)
 u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Super Star Ultra (U)
-u32 dataBlacklist_CJCE0[3] = {0x01102E00, 0x02E3EE00, 0x01D3C000};	// My Japanese Coach - Learn a New Language (U)
-u32 dataBlacklist_CLJE0[3] = {0x01022600, 0x05944A00, 0x04922400};	// Mario & Luigi - Bowser's Inside Story (U)
-u32 dataBlacklist_BKIE0[3] = {0x00A2E200, 0x0523F600, 0x04811400};	// The Legend of Zelda - Spirit Tracks (U)
-//u32 dataBlacklist_BKIE0_patch[3] = {0x01447600, 0x057F7E00, 0x043B0800};	// The Legend of Zelda - Spirit Tracks (U) (XPA's AP-patch)
+u32 dataBlacklist_CJCE0[3] = {0x01102E00, 0x02E3EE00, 0x01D3C000};	// My Japanese Coach: Learn a New Language (U)
+u32 dataBlacklist_CLJE0[3] = {0x01022600, 0x05944A00, 0x04922400};	// Mario & Luigi: Bowser's Inside Story (U)
+u32 dataBlacklist_BKIE0[3] = {0x00A2E200, 0x0523F600, 0x04811400};	// The Legend of Zelda: Spirit Tracks (U)
+//u32 dataBlacklist_BKIE0_patch[3] = {0x01447600, 0x057F7E00, 0x043B0800};	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
 //u32 dataBlacklist_B6ZE0[3] = {0x0013CE00, 0x03AB6E00, 0x026E8E00};	// MegaMan Zero Collection (U)
 
 #endif // _DATABWLIST_H

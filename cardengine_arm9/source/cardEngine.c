@@ -859,6 +859,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_YCOE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0CF00000;
+				GAME_CACHE_SLOTS = 0x22;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_YW2E0[i];
@@ -899,7 +911,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _1MB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x45434A43) && (ROM_HEADERCRC == 0xF0BACF56)) {	// My Japanese Coach - Learn a New Language (U)
+			} else if((ROM_TID == 0x45434A43) && (ROM_HEADERCRC == 0xF0BACF56)) {	// My Japanese Coach: Learn a New Language (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_CJCE0[i];
 
@@ -914,7 +926,7 @@ int cardRead (u32* cacheStruct) {
 				ROMinRAM = 2;
 				use28MB = 1;
 			} else if((ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0xCE77CF56)
-					|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi - Bowser's Inside Story (U)
+					|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi: Bowser's Inside Story (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_CLJE0[i];
 
@@ -926,7 +938,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda - Spirit Tracks (U)
+			} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda: Spirit Tracks (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_BKIE0[i];
 
