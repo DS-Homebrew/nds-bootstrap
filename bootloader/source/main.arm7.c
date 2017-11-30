@@ -424,7 +424,10 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YF4P0[i];
 			setDataBWlist[3] = true;
-		*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+		*/ } else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ARRE0[i];
+		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;

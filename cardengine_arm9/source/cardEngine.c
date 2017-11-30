@@ -620,6 +620,18 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true; */
+			} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ARRE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D380000;
+				GAME_CACHE_SLOTS = 0x19;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASKE0[i];
