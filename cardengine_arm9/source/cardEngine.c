@@ -600,13 +600,13 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-			} else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
+			/* } else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_YF4E0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0CE40000;
-				GAME_CACHE_SLOTS = 0x4B;
-				GAME_READ_SIZE = _256KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0CE80000;
+				GAME_CACHE_SLOTS = 0x23;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -614,12 +614,12 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_YF4P0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0CD40000;
-				GAME_CACHE_SLOTS = 0x4F;
-				GAME_READ_SIZE = _256KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0CD80000;
+				GAME_CACHE_SLOTS = 0x25;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
-				whitelist = true;
+				whitelist = true; */
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASKE0[i];
@@ -660,7 +660,20 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (U)
+			} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ASCJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DEC0000;
+				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)	// Sonic Rush (U)
+					|| (ROM_TID == 0x50435341) && (ROM_HEADERCRC == 0x04C8CF56)) {	// Sonic Rush (E)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASCE0[i];
 
@@ -793,7 +806,22 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {	// Sonic Rush Adventure (U)
+			} else if((ROM_TID == 0x4A593341) && (ROM_HEADERCRC == 0x77E4CF56)) {	// Sonic Rush Adventure (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_A3YJ0[i];
+
+				ROM_LOCATION = 0x0C700000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DE00000;
+				GAME_CACHE_SLOTS = 0x4;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)	// Sonic Rush Adventure (U)
+					|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xB96BCF56)	// Sonic Rush Adventure (E)
+					|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xD1B2CF56)) {	// Sonic Rush Adventure (E) (v01)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A3YE0[i];
 
@@ -803,6 +831,19 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0DE00000;
 				GAME_CACHE_SLOTS = 0x4;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_A3YK0[i];
+
+				ROM_LOCATION = 0x0C700000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DC80000;
+				GAME_CACHE_SLOTS = 0x7;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;

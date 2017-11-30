@@ -416,7 +416,7 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_A5FE0[i];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
+		/* } else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YF4E0[i];
 			setDataBWlist[3] = true;
@@ -424,7 +424,7 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YF4P0[i];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
+		*/ } else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;
@@ -435,7 +435,11 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AGYE0[i];
-		} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (U)
+		} else if((ROM_TID == 0x4A435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ASCJ0[i];
+		} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)	// Sonic Rush (U)
+				|| (ROM_TID == 0x50435341) && (ROM_HEADERCRC == 0x04C8CF56)) {	// Sonic Rush (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASCE0[i];
 		} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {	// Mario & Luigi: Partners in Time (U)
@@ -469,9 +473,19 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x50574B41) && (ROM_HEADERCRC == 0x706CCF56)) {	// Kirby Mouse Attack (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AKWP0[i];
-		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)) {	// Sonic Rush Adventure (U)
+		} else if((ROM_TID == 0x4A593341) && (ROM_HEADERCRC == 0x77E4CF56)) {	// Sonic Rush Adventure (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_A3YJ0[i];
+			ROM_LOCATION = 0x0C700000;
+		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)	// Sonic Rush Adventure (U)
+				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xB96BCF56)	// Sonic Rush Adventure (E)
+				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xD1B2CF56)) {	// Sonic Rush Adventure (E) (v01)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YE0[i];
+			ROM_LOCATION = 0x0C700000;
+		} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_A3YK0[i];
 			ROM_LOCATION = 0x0C700000;
 		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
 			for(int i = 0; i < 3; i++)
