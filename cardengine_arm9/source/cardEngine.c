@@ -646,6 +646,20 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				use28MB = 1;
+			} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_A59E0[i];
+
+				ROM_LOCATION = 0x0C600000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0C400000;
+				GAME_CACHE_SLOTS = 0x1;
+				GAME_READ_SIZE = _1MB_READ_SIZE*2;
+
+				ROMinRAM = 2;
+				use28MB = 1;
 			} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ACVE0[i];
@@ -657,6 +671,20 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0C400000;
 				GAME_CACHE_SLOTS = 0x1;
 				GAME_READ_SIZE = _1MB_READ_SIZE*2;
+
+				ROMinRAM = 2;
+				use28MB = 1;
+			} else if((ROM_TID == 0x50564341) && (ROM_HEADERCRC == 0x7ACDCF56)) {	// Castlevania: Dawn of Sorrow (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ACVP0[i];
+
+				ROM_LOCATION = 0x0C480000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0C400000;
+				GAME_CACHE_SLOTS = 0x1;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				use28MB = 1;
@@ -791,6 +819,30 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0DEC0000;
 				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ADNJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DEC0000;
+				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ADNE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x18;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;

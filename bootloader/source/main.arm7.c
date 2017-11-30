@@ -431,10 +431,18 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;
+		} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_A59E0[i];
+			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ACVE0[i];
 			ROM_LOCATION = 0x0C600000;
+		} else if((ROM_TID == 0x50564341) && (ROM_HEADERCRC == 0x7ACDCF56)) {	// Castlevania: Dawn of Sorrow (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ACVP0[i];
+			ROM_LOCATION = 0x0C480000;
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AGYE0[i];
@@ -470,6 +478,12 @@ void loadRomIntoRam(aFile file) {
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AYWE0[i];
+		} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
+		} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ADNE0[i];
 		} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {	// Kirby Squeak Squad (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AKWE0[i];
