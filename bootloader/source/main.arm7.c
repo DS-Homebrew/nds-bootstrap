@@ -281,9 +281,55 @@ void loadBinary_ARM7 (aFile file)
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
 	
-	if(*(u32*)(0x27FF00C) == 0x454C5741){
-                *(u32*)(0x203E7B0) = 0;
-        }
+	// Castlevania - Portrait of Ruin (USA)
+	if(ROM_TID == 0x45424341){
+		*(u32*)(0x02007910) = 0xeb02508e;
+		*(u32*)(0x02007918) = 0xea000004;
+		*(u32*)(0x02007a00) = 0xeb025052;
+		*(u32*)(0x02007a08) = 0xe59f1030;
+		*(u32*)(0x02007a0c) = 0xe59f0028;
+		*(u32*)(0x02007a10) = 0xe0281097;
+		*(u32*)(0x02007a14) = 0xea000003;
+	}
+
+	// Akumajou Dracula - Gallery of Labyrinth (Japan)
+	if(ROM_TID == 0x4A424341){
+		*(u32*)(0x02007910) = 0xeb0250b0;
+		*(u32*)(0x02007918) = 0xea000004;
+		*(u32*)(0x02007a00) = 0xeb025074;
+		*(u32*)(0x02007a08) = 0xe59f1030;
+		*(u32*)(0x02007a0c) = 0xe59f0028;
+		*(u32*)(0x02007a10) = 0xe0281097;
+		*(u32*)(0x02007a14) = 0xea000003;
+	}
+
+	// Castlevania - Portrait of Ruin (Europe)
+	if(ROM_TID == 0x50424341){
+		*(u32*)(0x02007b00) = 0xeb025370;
+		*(u32*)(0x02007b08) = 0xea000004;
+		*(u32*)(0x02007bf0) = 0xeb025334;
+		*(u32*)(0x02007bf8) = 0xe59f1030;
+		*(u32*)(0x02007bfc) = 0xe59f0028;
+		*(u32*)(0x02007c00) = 0xe0281097;
+		*(u32*)(0x02007c04) = 0xea000003;
+	}
+
+	// The World Ends With You (USA)
+	if(ROM_TID == 0x454C5741){
+		*(u32*)(0x203E7B0) = 0;
+	}
+
+	// Miami Nights - Singles in the City (USA)
+	if(ROM_TID == 0x45575641){
+		//fixes not enough memory error
+		*(u32*)(0x0204cccc) = 0xe1a00000; //nop
+	}
+
+	// Miami Nights - Singles in the City (Europe)
+	if(ROM_TID == 0x50575641){
+		//fixes not enough memory error
+		*(u32*)(0x0204cdbc) = 0xe1a00000; //nop
+	}
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
