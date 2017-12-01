@@ -281,39 +281,6 @@ void loadBinary_ARM7 (aFile file)
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
 	
-	// Castlevania - Portrait of Ruin (USA)
-	if(ROM_TID == 0x45424341){
-		*(u32*)(0x02007910) = 0xeb02508e;
-		*(u32*)(0x02007918) = 0xea000004;
-		*(u32*)(0x02007a00) = 0xeb025052;
-		*(u32*)(0x02007a08) = 0xe59f1030;
-		*(u32*)(0x02007a0c) = 0xe59f0028;
-		*(u32*)(0x02007a10) = 0xe0281097;
-		*(u32*)(0x02007a14) = 0xea000003;
-	}
-
-	// Akumajou Dracula - Gallery of Labyrinth (Japan)
-	if(ROM_TID == 0x4A424341){
-		*(u32*)(0x02007910) = 0xeb0250b0;
-		*(u32*)(0x02007918) = 0xea000004;
-		*(u32*)(0x02007a00) = 0xeb025074;
-		*(u32*)(0x02007a08) = 0xe59f1030;
-		*(u32*)(0x02007a0c) = 0xe59f0028;
-		*(u32*)(0x02007a10) = 0xe0281097;
-		*(u32*)(0x02007a14) = 0xea000003;
-	}
-
-	// Castlevania - Portrait of Ruin (Europe)
-	if(ROM_TID == 0x50424341){
-		*(u32*)(0x02007b00) = 0xeb025370;
-		*(u32*)(0x02007b08) = 0xea000004;
-		*(u32*)(0x02007bf0) = 0xeb025334;
-		*(u32*)(0x02007bf8) = 0xe59f1030;
-		*(u32*)(0x02007bfc) = 0xe59f0028;
-		*(u32*)(0x02007c00) = 0xe0281097;
-		*(u32*)(0x02007c04) = 0xea000003;
-	}
-
 	// The World Ends With You (USA)
 	if(ROM_TID == 0x454C5741){
 		*(u32*)(0x203E7B0) = 0;
@@ -550,6 +517,11 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YK0[i];
 			ROM_LOCATION = 0x0C700000;
+		} else if((ROM_TID == 0x45575641) && (ROM_HEADERCRC == 0x1652CF56)	// Miami Nights - Singles in the City (U)
+				|| (ROM_TID == 0x50575641) && (ROM_HEADERCRC == 0x8329CF56)) {	// Miami Nights - Singles in the City (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AVWE0[i];
+			ROM_LOCATION = 0x0C680000;
 		} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_YCOE0[i];

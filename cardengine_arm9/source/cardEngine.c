@@ -911,6 +911,21 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45575641) && (ROM_HEADERCRC == 0x1652CF56)	// Miami Nights - Singles in the City (U)
+					|| (ROM_TID == 0x50575641) && (ROM_HEADERCRC == 0x8329CF56)) {	// Miami Nights - Singles in the City (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AVWE0[i];
+
+				ROM_LOCATION = 0x0C680000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0C400000;
+				GAME_CACHE_SLOTS = 0x5;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use28MB = 1;
 			} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_YCOE0[i];

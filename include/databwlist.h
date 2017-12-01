@@ -53,6 +53,7 @@ u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mous
 u32 dataBlacklist_A3YJ0[3] = {0x0100A400, 0x02961000, 0x01956C00};	// Sonic Rush Adventure (J)
 u32 dataBlacklist_A3YE0[3] = {0x0100A400, 0x02961B20, 0x01957720};	// Sonic Rush Adventure (UE)
 u32 dataBlacklist_A3YK0[3] = {0x01009400, 0x02908800, 0x018FF400};	// Sonic Rush Adventure (KS)
+u32 dataBlacklist_AVWE0[3] = {0x01459200, 0x018A9200, 0x00450000};	// Miami Nights - Singles in the City (U)
 u32 dataBlacklist_YCOE0[3] = {0x0075DA00, 0x03D36800, 0x035D8E00};	// Call of Duty 4: Modern Warfare (U)
 u32 dataBlacklist_YW2E0[3] = {0x0122EE00, 0x02E5CE40, 0x01C2E040};	// Advance Wars: Days of Ruin (U)
 u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wars: Dark Conflict (E)
