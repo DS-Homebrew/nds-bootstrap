@@ -41,10 +41,14 @@ u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
 
-u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};  
+u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
-u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};   
+u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};
 u32 cardIdStartSignatureAlt2[1]   = {0xE92D4010};
+u32 cardIdStartSignatureThumb[1]   = {0xB081B500};
+u32 cardIdStartSignatureThumbAlt[1]   = {0x202EB508};
+u32 cardIdStartSignatureThumbAlt2[1]   = {0x20B8B508};
+u32 cardIdStartSignatureThumbAlt3[1]   = {0x24B8B510};
   
 u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
@@ -215,7 +219,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
-	u32* debug = (u32*)0x03784000;
+	u32* debug = (u32*)0x03786000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
@@ -383,6 +387,26 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardIdStartOffset =   
 			getOffset((u32*)cardIdEndOffset, -0x100,
 				  (u32*)cardIdStartSignatureAlt2, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumb, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt2, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt3, 1, -1);
 		}
 		if (!cardIdStartOffset) {
 			dbg_printf("Card id start not found\n");
@@ -1112,7 +1136,7 @@ void swapBinary_ARM7(aFile donorfile)
 }
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
-	u32* debug = (u32*)0x03784000;
+	u32* debug = (u32*)0x03786000;
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;

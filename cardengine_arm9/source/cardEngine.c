@@ -619,6 +619,16 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x45555159) && (ROM_HEADERCRC == 0xC2DFCF56)) {	// Chrono Trigger (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_YQUE0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0D940000;
+				GAME_CACHE_SLOTS = 0x1C;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
 				whitelist = true; */
 			} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
 				for(int i = 0; i < 3; i++)

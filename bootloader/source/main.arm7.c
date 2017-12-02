@@ -298,6 +298,29 @@ void loadBinary_ARM7 (aFile file)
 		*(u32*)(0x0204cdbc) = 0xe1a00000; //nop
 	}
 
+	// "Chrono Trigger (Japan)"
+	/*if(ROM_TID == 0x4a555159){
+		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
+		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
+	}
+
+	// "Chrono Trigger (USA/Europe)"
+	if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
+		*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
+		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
+	}*/
+
+	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
+	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
+	/*if(ROM_TID == 0x45584759 || ROM_TID == 0x50584759){
+		*(u16*)(-0x02037a34) = 0x46c0;
+		*(u32*)(0x0216ac0c) = 0x0001fffb;
+	}*/
+
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
 	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
@@ -437,7 +460,11 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YF4P0[i];
 			setDataBWlist[3] = true;
-		*/ } else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
+		} else if((ROM_TID == 0x45555159) && (ROM_HEADERCRC == 0xC2DFCF56)) {	// Chrono Trigger (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_YQUE0[i];
+			setDataBWlist[3] = true; */
+		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARRE0[i];
 		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
