@@ -50,9 +50,6 @@ static int timeoutTimer = 0;
 
 static int softResetTimer = 0;
 
-static bool compatibilityCheckSettingChecked = false;
-static bool compatibilityCheck = false;
-
 bool ndmaUsed = false;
 
 void initLogging() {
@@ -213,20 +210,15 @@ void runCardEngineCheck (void) {
 		}
 		softResetTimer++;
 	}
-	
-	if(!compatibilityCheckSettingChecked) {
-		u8 setting = i2cReadRegister(0x4A, 0x73);
-		if(setting == 0x01) compatibilityCheck = true;
-		compatibilityCheckSettingChecked = true;
-	}
-	
+
 	if (timeoutRun) {
-		if (compatibilityCheck) {
+		u8 setting = i2cReadRegister(0x4A, 0x73);
+		if(setting == 0x01) {
 			timeoutTimer += 1;
 			if (timeoutTimer == 60*2) {
 				memcpy((u32*)0x02000300,sr_data_error,0x020);
 				i2cWriteRegister(0x4a,0x70,0x01);
-				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
+				i2cWriteRegister(0x4a,0x11,0x01);	// If on loading/white screen for a while, the game is incompatible, so show an error screen
 			}
 		} else {
 			timeoutRun = false;
