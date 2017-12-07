@@ -856,6 +856,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4A574B41) && (ROM_HEADERCRC == 0x5CE4CF56)) {	// Hoshi no Kirby: Sanjou! Dorotche Dan (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AKWJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DBA0000;
+				GAME_CACHE_SLOTS = 0x22;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {	// Kirby Squeak Squad (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_AKWE0[i];

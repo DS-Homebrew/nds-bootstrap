@@ -524,6 +524,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ADNE0[i];
+		} else if((ROM_TID == 0x4A574B41) && (ROM_HEADERCRC == 0x5CE4CF56)) {	// Hoshi no Kirby: Sanjou! Dorotche Dan (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AKWJ0[i];
 		} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {	// Kirby Squeak Squad (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AKWE0[i];

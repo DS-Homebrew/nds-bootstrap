@@ -27,6 +27,7 @@ u32 dataWhitelist_YZXP0[3] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8};	// MegaMan ZX
 u32 dataWhitelist_A5FE0[3] = {0x017FA000, 0x02D39400, 0x0153F400};	// Professor Layton and the Curious Village (U)
 //u32 dataWhitelist_YF4E0[3] = {0x069A2600, 0x06FC3400, 0x0061FE00};	// Final Fantasy IV (U)
 //u32 dataWhitelist_YF4P0[3] = {0x069A3400, 0x06EA4E00, 0x00501A00};	// Final Fantasy IV (E)
+//u32 dataWhitelist_YQUE0[3] = {0x03F5AC00, 0x05066600, 0x0110BA00};	// Chrono Trigger (U)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
@@ -48,12 +49,13 @@ u32 dataBlacklist_ARGE0[3] = {0x003FCE00, 0x00ADAC00, 0x006DDE00};	// Pokemon Ra
 u32 dataBlacklist_AYWE0[3] = {0x01635E00, 0x01D9F240, 0x00769440};	// Yoshi's Island DS (U)
 u32 dataBlacklist_ADNJ0[3] = {0x013EFA00, 0x02CEC200, 0x018FC800};	// Digimon Story (J)
 u32 dataBlacklist_ADNE0[3] = {0x00F0EC00, 0x0320EA00, 0x022FFE00};	// Digimon World DS (U)
+u32 dataBlacklist_AKWJ0[3] = {0x00BE4400, 0x02821600, 0x01C3D200};	// Hoshi no Kirby: Sanjou! Dorotche Dan (J)
 u32 dataBlacklist_AKWE0[3] = {0x00BEB000, 0x02819A00, 0x01C2EA00};	// Kirby Squeak Squad (U)
 u32 dataBlacklist_AKWP0[3] = {0x00D61800, 0x0357D400, 0x0281BC00};	// Kirby Mouse Attack (E)
 u32 dataBlacklist_A3YJ0[3] = {0x0100A400, 0x02961000, 0x01956C00};	// Sonic Rush Adventure (J)
 u32 dataBlacklist_A3YE0[3] = {0x0100A400, 0x02961B20, 0x01957720};	// Sonic Rush Adventure (UE)
 u32 dataBlacklist_A3YK0[3] = {0x01009400, 0x02908800, 0x018FF400};	// Sonic Rush Adventure (KS)
-u32 dataBlacklist_AVWE0[3] = {0x01459200, 0x018A9200, 0x00450000};	// Miami Nights - Singles in the City (U)
+u32 dataBlacklist_AVWE0[3] = {0x01459200, 0x018A9200, 0x00450000};	// Miami Nights: Singles in the City (UE)
 u32 dataBlacklist_YCOE0[3] = {0x0075DA00, 0x03D36800, 0x035D8E00};	// Call of Duty 4: Modern Warfare (U)
 u32 dataBlacklist_YW2E0[3] = {0x0122EE00, 0x02E5CE40, 0x01C2E040};	// Advance Wars: Days of Ruin (U)
 u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wars: Dark Conflict (E)
