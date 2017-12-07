@@ -402,6 +402,10 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ABHE0[i];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4A5A5241) && (ROM_HEADERCRC == 0x82C7CF56)) {	// Rockman ZX (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_ARZJ0[i];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x455A5241) && (ROM_HEADERCRC == 0xDBFFCF56)) {	// MegaMan ZX (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ARZE0[i];
@@ -439,6 +443,10 @@ void loadRomIntoRam(aFile file) {
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ADAE0[i];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_YZXJ0[i];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45585A59) && (ROM_HEADERCRC == 0x3057CF56)) {	// MegaMan ZX Advent (U)
 			for(int i = 0; i < 3; i++)
@@ -486,6 +494,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AGYE0[i];
+		} else if((ROM_TID == 0x50594741) && (ROM_HEADERCRC == 0x0744CF56)) {	// Phoenix Wright: Ace Attorney (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AGYP0[i];
 		} else if((ROM_TID == 0x4A435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASCJ0[i];
@@ -514,6 +525,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARGE0[i];
+		} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 3; i++)

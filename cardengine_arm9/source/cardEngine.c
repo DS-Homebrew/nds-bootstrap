@@ -478,6 +478,16 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x4A5A5241) && (ROM_HEADERCRC == 0x82C7CF56)) {	// Rockman ZX (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_ARZJ0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0CFE0000;
+				GAME_CACHE_SLOTS = 0x81;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x455A5241) && (ROM_HEADERCRC == 0xDBFFCF56)) {	// MegaMan ZX (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ARZE0[i];
@@ -567,6 +577,16 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0D1C0000;
 				GAME_CACHE_SLOTS = 0x39;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_YZXJ0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0D3C0000;
+				GAME_CACHE_SLOTS = 0x5C;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -710,6 +730,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x50594741) && (ROM_HEADERCRC == 0x0744CF56)) {	// Phoenix Wright: Ace Attorney (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AGYP0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D180000;
+				GAME_CACHE_SLOTS = 0x38;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASCJ0[i];
@@ -817,6 +849,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0DA80000;
 				GAME_CACHE_SLOTS = 0x2C;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AYWJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DF00000;
+				GAME_CACHE_SLOTS = 0x4;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
