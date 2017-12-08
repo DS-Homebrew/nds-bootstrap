@@ -281,9 +281,14 @@ void loadBinary_ARM7 (aFile file)
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
 	
-	// The World Ends With You (USA)
-	if(ROM_TID == 0x454C5741){
+	// The World Ends With You (USA) (Europe)
+	if(ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741){
 		*(u32*)(0x203E7B0) = 0;
+	}
+
+	// Subarashiki Kono Sekai - It's a Wonderful World (Japan)
+	if(ROM_TID == 0x4A4C5741){
+		*(u32*)(0x203F114) = 0;
 	}
 
 	// Miami Nights - Singles in the City (USA)
