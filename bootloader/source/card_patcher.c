@@ -37,12 +37,12 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 
-// sdk 4 version
+// sdk > 4 version
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
 
 // sdk 5 version
-u32 cardReadStartSignature5[1] = {0xE92D4008};	// Is this correct?
+//u32 cardReadStartSignature5[1] = {0xE92D4070};	// Is this correct?
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
@@ -67,8 +67,8 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
 
-u32 cardReadCachedStartSignature5[2]   = {0xE92D4070,0xE59F407C};	// Is this correct? Looks like it, lol.
-u32 cardReadCachedEndSignature5[4]   = {0xE5900004,0xE3500000,0x13A00001,0x03A00000};	// Is this correct?
+//u32 cardReadCachedStartSignature5[2]   = {0xE92D4070,0xE59F407C};	// Is this correct? Looks like it, lol.
+//u32 cardReadCachedEndSignature5[4]   = {0xE5900004,0xE3500000,0x13A00001,0x03A00000};	// Is this correct?
    
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
@@ -247,11 +247,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	} 
-	if(moduleParams->sdk_version > 0x5000000) {
+	/*if(moduleParams->sdk_version > 0x5000000) {
 		cardReadStartSignature = cardReadStartSignature5;
 		cardReadCachedStartSignature = cardReadCachedStartSignature5;
 		cardReadCachedEndSignature = cardReadCachedEndSignature5;
-	}
+	}*/
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
@@ -597,10 +597,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	if(cardReadCachedOffset==0x020777F0){
 		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS (U) fix.
-	}else if (cardReadCachedOffset==0x02076DAC){
+	/* }else if (cardReadCachedOffset==0x02076DAC){
 		*((u32*)patches[8]) = cardReadCachedOffset-0x7D9C; //NSMBDS (J) fix.
 	}else if (cardReadCachedOffset==0x02067758){
-		*((u32*)patches[8]) = cardReadCachedOffset-0x8748; //NSMBDS (E) fix.
+		*((u32*)patches[8]) = cardReadCachedOffset-0x8748; //NSMBDS (E) fix. */
 	}else if(cardReadCachedOffset==0x021240E8){
 		*((u32*)patches[8]) = 0x0211E1A8; //ACWW fix.
 		cardIdStartOffset = 0x02123FF0; //ACWW fix part2.

@@ -360,7 +360,7 @@ int cardRead (u32* cacheStruct) {
 		romSize -= ARM9_LEN;
 
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
-		if((romSize <= 0x01C00000) && (ROM_TID != 0x45475241) && !dsiWramUsed) {
+		if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241) && !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 				use28MB = 1;
 				ROM_LOCATION = 0x0E000000-romSize;
@@ -827,6 +827,32 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _1MB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x4B0ECF56)
+					|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x23C2CF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_APHJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D400000;
+				GAME_CACHE_SLOTS = 0x18;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x498ECF56)
+					|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x398BCF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J) (Rev 1)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_APHJ1[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D400000;
+				GAME_CACHE_SLOTS = 0x18;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_APHE0[i];
@@ -836,6 +862,18 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D400000;
 				GAME_CACHE_SLOTS = 0x18;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x50485041) && (ROM_HEADERCRC == 0xF167CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_APHP0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D600000;
+				GAME_CACHE_SLOTS = 0x14;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
@@ -851,7 +889,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+			/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 
@@ -875,7 +913,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_SLOTS = 0x5;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
-				ROMinRAM = 2;
+				ROMinRAM = 2; */
 			} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ADNJ0[i];

@@ -349,7 +349,7 @@ void loadRomIntoRam(aFile file) {
 	romSize -= ARM9_LEN;
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-	if((romSize <= 0x01C00000) && (ROM_TID != 0x45475241)) {
+	if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 			if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
@@ -524,19 +524,30 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x50334241) && (ROM_HEADERCRC == 0xB642CF56)) {	// Mario Slam Basketball (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[0] = dataBlacklist_AB3P0[i];
+		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x4B0ECF56)
+				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x23C2CF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_APHJ0[i];
+		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x498ECF56)
+				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x398BCF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J) (Rev 1)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_APHJ1[i];
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_APHE0[i];
+		} else if((ROM_TID == 0x50485041) && (ROM_HEADERCRC == 0xF167CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_APHP0[i];
 		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARGE0[i];
-		} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+		/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataBlacklist_AYWE0[i];
+				setDataBWlist[i] = dataBlacklist_AYWE0[i]; */
 		} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
