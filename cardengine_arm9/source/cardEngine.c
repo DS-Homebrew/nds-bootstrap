@@ -877,6 +877,18 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4B485041) && (ROM_HEADERCRC == 0xA6C2CF56)) {	// Pokemon Bulgasaui Dungeon: Parang Gujodae (KS)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_APHK0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0D400000;
+				GAME_CACHE_SLOTS = 0x18;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ARGE0[i];
@@ -1070,9 +1082,33 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				use28MB = 1;
+			} else if((ROM_TID == 0x4A574B59) && (ROM_HEADERCRC == 0xF999CF56)) {	// Hoshi no Kirby: Ultra Super Deluxe (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_YKWJ0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x6;
+				GAME_READ_SIZE = _1MB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_YKWE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DA00000;
+				GAME_CACHE_SLOTS = 0x6;
+				GAME_READ_SIZE = _1MB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x4B574B59) && (ROM_HEADERCRC == 0xE2E5CF56)) {	// Kirby Ultra Super Deluxe (KS)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_YKWK0[i];
 
 				ROM_LOCATION -= 0x4000;
 				ROM_LOCATION -= ARM9_LEN;
