@@ -403,6 +403,10 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_A2SE0[i];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x50424441) && (ROM_HEADERCRC == 0x53C2CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_ADBP0[i];
+			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {	// Resident Evil: Deadly Silence (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ABHE0[i];
@@ -418,6 +422,10 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x505A5241) && (ROM_HEADERCRC == 0xBD7ECF56)) {	// MegaMan ZX (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ARZP0[i];
+			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4A464641) && (ROM_HEADERCRC == 0xBE5ACF56)) {	// Final Fantasy III (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_AFFJ0[i];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45464641) && (ROM_HEADERCRC == 0x70A6CF56)) {	// Final Fantasy III (U)
 			for(int i = 0; i < 3; i++)
@@ -487,6 +495,10 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A59E0[i];
+			ROM_LOCATION = 0x0C600000;
+		} else if((ROM_TID == 0x4A564341) && (ROM_HEADERCRC == 0x9A94CF56)) {	// Akumajou Dracula: Sougetsu no Juujika (J)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_ACVJ1[i];
 			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
 			for(int i = 0; i < 3; i++)
@@ -616,6 +628,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda: Spirit Tracks (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_BKIE0[i];
+		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0x4471CF56)) {	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_BKIE0_patch[i];
 		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_B6ZE0[i];

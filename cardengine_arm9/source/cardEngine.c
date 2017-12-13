@@ -468,6 +468,16 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
+			} else if((ROM_TID == 0x50424441) && (ROM_HEADERCRC == 0x53C2CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_ADBP0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0D180000;
+				GAME_CACHE_SLOTS = 0x13;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
 			} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {	// Resident Evil: Deadly Silence (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ABHE0[i];
@@ -505,6 +515,16 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0CFE0000;
 				GAME_CACHE_SLOTS = 0x81;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} else if((ROM_TID == 0x4A464641) && (ROM_HEADERCRC == 0xBE5ACF56)) {	// Final Fantasy III (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_AFFJ0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0D000000;
+				GAME_CACHE_SLOTS = 0x1F;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -679,6 +699,20 @@ int cardRead (u32* cacheStruct) {
 			} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A59E0[i];
+
+				ROM_LOCATION = 0x0C600000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0C400000;
+				GAME_CACHE_SLOTS = 0x1;
+				GAME_READ_SIZE = _1MB_READ_SIZE*2;
+
+				ROMinRAM = 2;
+				use28MB = 1;
+			} else if((ROM_TID == 0x4A564341) && (ROM_HEADERCRC == 0x9A94CF56)) {	// Akumajou Dracula: Sougetsu no Juujika (J)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_ACVJ1[i];
 
 				ROM_LOCATION = 0x0C600000;
 				ROM_LOCATION -= 0x4000;
@@ -1154,6 +1188,18 @@ int cardRead (u32* cacheStruct) {
 
 				GAME_CACHE_ADRESS_START = 0x0D980000;
 				GAME_CACHE_SLOTS = 0xD;
+				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0x4471CF56)) {	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_BKIE0_patch[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DE00000;
+				GAME_CACHE_SLOTS = 0x4;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
