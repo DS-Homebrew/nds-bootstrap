@@ -334,7 +334,6 @@ int main(void) {
 
 	NDSTouchscreenMode();
 	*(u16*)(0x4000500) = 0x807F;
-	*(u16*)(0x4004700) = 0x800F;
 
 	SCFGFifoCheck();
 	//
