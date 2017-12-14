@@ -581,17 +581,14 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x4A593341) && (ROM_HEADERCRC == 0x77E4CF56)) {	// Sonic Rush Adventure (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YJ0[i];
-			ROM_LOCATION = 0x0C700000;
 		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)	// Sonic Rush Adventure (U)
 				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xB96BCF56)	// Sonic Rush Adventure (E)
 				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xD1B2CF56)) {	// Sonic Rush Adventure (E) (v01)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YE0[i];
-			ROM_LOCATION = 0x0C700000;
 		} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A3YK0[i];
-			ROM_LOCATION = 0x0C700000;
 		} else if((ROM_TID == 0x45575641) && (ROM_HEADERCRC == 0x1652CF56)	// Miami Nights - Singles in the City (U)
 				|| (ROM_TID == 0x50575641) && (ROM_HEADERCRC == 0x8329CF56)) {	// Miami Nights - Singles in the City (E)
 			for(int i = 0; i < 3; i++)

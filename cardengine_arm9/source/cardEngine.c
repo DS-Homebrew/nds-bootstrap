@@ -1024,12 +1024,11 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A3YJ0[i];
 
-				ROM_LOCATION = 0x0C700000;
 				ROM_LOCATION -= 0x4000;
 				ROM_LOCATION -= ARM9_LEN;
 
-				GAME_CACHE_ADRESS_START = 0x0DE00000;
-				GAME_CACHE_SLOTS = 0x4;
+				GAME_CACHE_ADRESS_START = 0x0DF00000;
+				GAME_CACHE_SLOTS = 0x2;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
@@ -1039,12 +1038,11 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A3YE0[i];
 
-				ROM_LOCATION = 0x0C700000;
 				ROM_LOCATION -= 0x4000;
 				ROM_LOCATION -= ARM9_LEN;
 
-				GAME_CACHE_ADRESS_START = 0x0DE00000;
-				GAME_CACHE_SLOTS = 0x4;
+				GAME_CACHE_ADRESS_START = 0x0DF00000;
+				GAME_CACHE_SLOTS = 0x2;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
@@ -1052,12 +1050,11 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A3YK0[i];
 
-				ROM_LOCATION = 0x0C700000;
 				ROM_LOCATION -= 0x4000;
 				ROM_LOCATION -= ARM9_LEN;
 
-				GAME_CACHE_ADRESS_START = 0x0DC80000;
-				GAME_CACHE_SLOTS = 0x7;
+				GAME_CACHE_ADRESS_START = 0x0DD80000;
+				GAME_CACHE_SLOTS = 0x5;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
