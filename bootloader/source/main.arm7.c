@@ -44,13 +44,15 @@ Helpful information:
 #include <nds/arm7/audio.h>
 
 #include "fat.h"
-#include "dldi_patcher.h"
+//#include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
 #include "hook.h"
 #include "common.h"
+
+#include "databwlist.h"
 
 void arm7clearRAM();
 int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
@@ -84,6 +86,11 @@ extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
+
+u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
+int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -352,6 +359,40 @@ void loadRomIntoRam(aFile file) {
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+	} else {
+		/*if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AYIE0[i];
+		}*/
+		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
+		} else {
+			if(setDataBWlist[3] == true) {
+				arm9_extRAM = true;
+				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
+				if(dataAmount >= 1) {
+					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
+				}
+				if(dataAmount == 2) {
+					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
+				}
+				arm9_extRAM = false;
+				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+			} else {
+				setDataBWlist[0] -= 0x4000;
+				setDataBWlist[0] -= ARM9_LEN;
+				arm9_extRAM = true;
+				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+				fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, setDataBWlist[0]);
+				u32 lastRomSize = 0;
+				for(u32 i = setDataBWlist[1]; i < romSize; i++) {
+					lastRomSize++;
+				}
+				fileRead(ROM_LOCATION+setDataBWlist[0], file, setDataBWlist[1], lastRomSize);
+				arm9_extRAM = false;
+				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+			}
+		}
 	}
 }
 
@@ -491,7 +532,7 @@ void arm7_main (void) {
 
 	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
 
-	nocashMessage("try to patch dldi");
+	/* nocashMessage("try to patch dldi");
 	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
 	if (wantToPatchDLDI) {
 		nocashMessage("dldi patch successful");
@@ -508,7 +549,8 @@ void arm7_main (void) {
 			errorOutput();
 		}
 	} else {
-		nocashMessage("dldi Patch Unsuccessful try to patch card");
+		nocashMessage("dldi Patch Unsuccessful try to patch card"); */
+		nocashMessage("try to patch card");
 		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 		increaseLoadBarLength();	// 3 dots
 		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
@@ -532,7 +574,7 @@ void arm7_main (void) {
 			errorOutput();
 		}
 		increaseLoadBarLength();	// 7 dots
-	}
+	// }
  
 
 
