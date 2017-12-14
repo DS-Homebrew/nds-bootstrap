@@ -360,10 +360,18 @@ void loadRomIntoRam(aFile file) {
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
-		/*if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
+		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataWhitelist_A5TE0[i];
+			setDataBWlist[3] = true;
+		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AYIE0[i];
-		}*/
+		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AWRE0[i];
+			ROM_LOCATION = 0x0C400000;
+		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
 			if(setDataBWlist[3] == true) {

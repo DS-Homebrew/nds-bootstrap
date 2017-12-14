@@ -372,7 +372,17 @@ int cardRead (u32* cacheStruct) {
 
 			ROMinRAM = 1;
 		} else {
-			/*if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
+			if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataWhitelist_A5TE0[i];
+
+				GAME_CACHE_ADRESS_START = 0x0C900000;
+				GAME_CACHE_SLOTS = 0x1C;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+			} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_AYIE0[i];
 
@@ -384,7 +394,21 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			}*/
+			} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AWRE0[i];
+
+				ROM_LOCATION = 0x0C400000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0CBC0000;
+				GAME_CACHE_SLOTS = 0x11;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use12MB = 1;
+			} */
 		}
 		flagsSet = true;
 	}
