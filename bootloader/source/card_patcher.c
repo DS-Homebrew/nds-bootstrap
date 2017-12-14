@@ -28,7 +28,7 @@ u32 a7cardReadSignature[2]     = {0x04100010,0x040001A4};
 u32 a7something1Signature[2]   = {0xE350000C,0x908FF100};
 u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
-u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000}; 
+u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
@@ -41,15 +41,22 @@ u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
 
-u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};  
+// sdk 5 version
+//u32 cardReadStartSignature5[1] = {0xE92D4070};	// Is this correct?
+
+u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
-u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};   
+u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};
 u32 cardIdStartSignatureAlt2[1]   = {0xE92D4010};
+u32 cardIdStartSignatureThumb[1]   = {0xB081B500};
+u32 cardIdStartSignatureThumbAlt[1]   = {0x202EB508};
+u32 cardIdStartSignatureThumbAlt2[1]   = {0x20B8B508};
+u32 cardIdStartSignatureThumbAlt3[1]   = {0x24B8B510};
   
-u32 a9instructionBHI[1]       = {0x8A000001};
+//u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
-u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
+//u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
 u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
@@ -59,6 +66,9 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
+
+//u32 cardReadCachedStartSignature5[2]   = {0xE92D4070,0xE59F407C};	// Is this correct? Looks like it, lol.
+//u32 cardReadCachedEndSignature5[4]   = {0xE5900004,0xE3500000,0x13A00001,0x03A00000};	// Is this correct?
    
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
@@ -73,7 +83,7 @@ u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
 u32 irqEnableStartSignature1[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
 u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020};
 
-u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
+//u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
 
 u32 mpuInitRegion0Signature[1] = {0xEE060F10};
 u32 mpuInitRegion0Data[1] = {0x4000033};
@@ -215,7 +225,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
-	u32* debug = (u32*)0x03784000;
+	u32* debug = (u32*)0x03786000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
@@ -237,6 +247,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	} 
+	/*if(moduleParams->sdk_version > 0x5000000) {
+		cardReadStartSignature = cardReadStartSignature5;
+		cardReadCachedStartSignature = cardReadCachedStartSignature5;
+		cardReadCachedEndSignature = cardReadCachedEndSignature5;
+	}*/
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
@@ -298,11 +313,12 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
               (u32*)cardPullOutSignature, 4, 1);
     if (!cardPullOutOffset) {
         dbg_printf("Card pull out handler not found\n");
-        return 0;
-    }
-	dbg_printf("Card pull out handler:\t");
-	dbg_hexa(cardPullOutOffset);
-	dbg_printf("\n");
+        //return 0;
+    } else {
+		dbg_printf("Card pull out handler:\t");
+		dbg_hexa(cardPullOutOffset);
+		dbg_printf("\n");
+	}
 
 
     u32 cardReadCachedEndOffset =  
@@ -383,6 +399,26 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardIdStartOffset =   
 			getOffset((u32*)cardIdEndOffset, -0x100,
 				  (u32*)cardIdStartSignatureAlt2, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumb, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt2, 1, -1);
+		}
+		if (!cardIdStartOffset) {
+		cardIdStartOffset =   
+			getOffset((u32*)cardIdEndOffset, -0x100,
+				  (u32*)cardIdStartSignatureThumbAlt3, 1, -1);
 		}
 		if (!cardIdStartOffset) {
 			dbg_printf("Card id start not found\n");
@@ -510,6 +546,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x544B41	// Doctor Tendo
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x5A4341	// Cars
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x434241	// Harvest Moon DS
+	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x414441	// Pokemon
 	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x4C5741)	// TWEWY
 	{
 		u32 randomPatchOffset =  
@@ -559,7 +596,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	*((u32*)patches[7]) = cardPullOutOffset+4;
 	if(cardReadCachedOffset==0x020777F0){
-		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS fix.
+		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS (U) fix.
+	/* }else if (cardReadCachedOffset==0x02076DAC){
+		*((u32*)patches[8]) = cardReadCachedOffset-0x7D9C; //NSMBDS (J) fix.
+	}else if (cardReadCachedOffset==0x02067758){
+		*((u32*)patches[8]) = cardReadCachedOffset-0x8748; //NSMBDS (E) fix. */
 	}else if(cardReadCachedOffset==0x021240E8){
 		*((u32*)patches[8]) = 0x0211E1A8; //ACWW fix.
 		cardIdStartOffset = 0x02123FF0; //ACWW fix part2.
@@ -1112,7 +1153,7 @@ void swapBinary_ARM7(aFile donorfile)
 }
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
-	u32* debug = (u32*)0x03784000;
+	u32* debug = (u32*)0x03786000;
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;

@@ -321,7 +321,8 @@ int cardRead (u32* cacheStruct) {
 		romSize -= ARM9_LEN;
 
 		// If ROM size is 0x00C00000 or below, then the ROM is in RAM.
-		if(romSize <= 0x00C00000 && (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941 && !dsiWramUsed) {
+		if((romSize > 0) && (romSize <= 0x00C00000)
+		&& (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941 && !dsiWramUsed) {
 			if(romSize > 0x00800000 && romSize <= 0x00C00000) {
 				use12MB = true;
 				romSize_lastHalf = romSize-0x00800000;
