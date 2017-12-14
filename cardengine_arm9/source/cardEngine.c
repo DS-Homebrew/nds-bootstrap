@@ -492,9 +492,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ARZJ0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0CFE0000;
-				GAME_CACHE_SLOTS = 0x81;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D000000;
+				GAME_CACHE_SLOTS = 0x40;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -502,9 +502,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ARZE0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0D020000;
-				GAME_CACHE_SLOTS = 0x7F;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D040000;
+				GAME_CACHE_SLOTS = 0x3F;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -512,9 +512,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_ARZP0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0CFE0000;
-				GAME_CACHE_SLOTS = 0x81;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D000000;
+				GAME_CACHE_SLOTS = 0x40;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -605,8 +605,8 @@ int cardRead (u32* cacheStruct) {
 					setDataBWlist[i] = dataWhitelist_YZXJ0[i];
 
 				GAME_CACHE_ADRESS_START = 0x0D3C0000;
-				GAME_CACHE_SLOTS = 0x5C;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_SLOTS = 0x31;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -614,9 +614,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_YZXE0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0D3A0000;
-				GAME_CACHE_SLOTS = 0x5D;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D3C0000;
+				GAME_CACHE_SLOTS = 0x31;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
@@ -624,9 +624,9 @@ int cardRead (u32* cacheStruct) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_YZXP0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0D3A0000;
-				GAME_CACHE_SLOTS = 0x5D;
-				GAME_READ_SIZE = _128KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0D3C0000;
+				GAME_CACHE_SLOTS = 0x31;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
