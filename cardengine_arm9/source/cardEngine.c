@@ -360,17 +360,12 @@ int cardRead (u32* cacheStruct) {
 		romSize -= ARM9_LEN;
 
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
-		if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241) && !dsiWramUsed) {
+		if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
+		&& (ROM_TID != 0x45324441) && (ROM_TID != 0x45334441) && (ROM_TID != 0x45354441) && (ROM_TID != 0x45474441)
+		&& !dsiWramUsed) {
 			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 				use28MB = 1;
 				ROM_LOCATION = 0x0E000000-romSize;
-				if((ROM_TID & 0x00FFFFFF) == 0x324441	// Nintendogs - Chihuahua & Friends
-				|| (ROM_TID & 0x00FFFFFF) == 0x334441	// Nintendogs - Lab & Friends
-				|| (ROM_TID & 0x00FFFFFF) == 0x354441	// Nintendogs - Best Friends
-				|| (ROM_TID & 0x00FFFFFF) == 0x474441)	// Nintendogs - Dachshund & Friends
-				{
-					ROM_LOCATION -= 0x20;	// Fix some games white-screening
-				}
 			}
 
 			ROM_LOCATION -= 0x4000;
@@ -680,6 +675,21 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_ADRESS_START = 0x0D380000;
 				GAME_CACHE_SLOTS = 0x19;
 				GAME_READ_SIZE = _512KB_READ_SIZE;
+
+				ROMinRAM = 2;
+			} else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
+					|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
+					|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
+					|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AD2E0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DD00000;
+				GAME_CACHE_SLOTS = 0xC;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
 
 				ROMinRAM = 2;
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)

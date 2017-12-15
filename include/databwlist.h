@@ -36,6 +36,7 @@ u32 dataWhitelist_A5FE0[3] = {0x017FA000, 0x02D39400, 0x0153F400};	// Professor 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataBlacklist_ARRE0[3] = {0x0096D400, 0x01AC4800, 0x01157400};	// Ridge Racer DS (U)
+u32 dataBlacklist_AD2E0[3] = {0x00442200, 0x00A7DC00, 0x0063BA00};	// Nintendogs: First 4 (U)
 u32 dataBlacklist_ASKE0[3] = {0x01BD0000, 0x024E95E0, 0x009195E0};	// Lost in Blue (U)
 u32 dataBlacklist_A59E0[3] = {0x01A51400, 0x02EFD80C, 0x014AC40C};	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
 u32 dataBlacklist_ACVJ1[3] = {0x01ABB000, 0x02F6740C, 0x014AC40C};	// Akumajou Dracula: Sougetsu no Juujika (J)
