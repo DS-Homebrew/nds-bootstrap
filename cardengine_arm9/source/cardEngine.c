@@ -671,6 +671,32 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true; */
+			} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)) {	// Tomodachi Collection (J)
+				for(int i = 0; i < 3; i++) {
+					setDataBWlist[i] = dataWhitelist_CCUJ0_0[i];
+					setDataBWlist_1[i] = dataWhitelist_CCUJ0_1[i];
+				}
+
+				GAME_CACHE_ADRESS_START = 0x0DDE0000;
+				GAME_CACHE_SLOTS = 0x11;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+				dataAmount = 1;
+			} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x9B26CF56)) {	// Tomodachi Collection (J) (Rev 1)
+				for(int i = 0; i < 3; i++) {
+					setDataBWlist[i] = dataWhitelist_CCUJ1_0[i];
+					setDataBWlist_1[i] = dataWhitelist_CCUJ1_1[i];
+				}
+
+				GAME_CACHE_ADRESS_START = 0x0DDE0000;
+				GAME_CACHE_SLOTS = 0x11;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				whitelist = true;
+				dataAmount = 1;
 			} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ARRE0[i];

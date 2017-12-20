@@ -35,6 +35,10 @@ u32 dataWhitelist_A5FE0[3] = {0x017FA000, 0x02D39400, 0x0153F400};	// Professor 
 //u32 dataWhitelist_YF4E0[3] = {0x069A2600, 0x06FC3400, 0x0061FE00};	// Final Fantasy IV (U)
 //u32 dataWhitelist_YF4P0[3] = {0x069A3400, 0x06EA4E00, 0x00501A00};	// Final Fantasy IV (E)
 //u32 dataWhitelist_YQUE0[3] = {0x03F5AC00, 0x05066600, 0x0110BA00};	// Chrono Trigger (U)
+u32 dataWhitelist_CCUJ0_0[3] = {0x00255C00, 0x010DF400, 0x00E89800};	// Tomodachi Collection (J) (part 1)
+u32 dataWhitelist_CCUJ0_1[3] = {0x016D3E00, 0x01E1E000, 0x0074A200};	// Tomodachi Collection (J) (part 2)
+u32 dataWhitelist_CCUJ1_0[3] = {0x00255E00, 0x010DF600, 0x00E89800};	// Tomodachi Collection (J) (Rev 1) (part 1)
+u32 dataWhitelist_CCUJ1_1[3] = {0x016D4000, 0x01E1E200, 0x0074A200};	// Tomodachi Collection (J) (Rev 1) (part 2)
 
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size

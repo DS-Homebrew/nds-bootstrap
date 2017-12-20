@@ -473,6 +473,20 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_A5FE0[i];
 			setDataBWlist[3] = true;
+		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)) {	// Tomodachi Collection (J)
+			for(int i = 0; i < 3; i++) {
+				setDataBWlist[i] = dataWhitelist_CCUJ0_0[i];
+				setDataBWlist_1[i] = dataWhitelist_CCUJ0_1[i];
+			}
+			setDataBWlist[3] = true;
+			dataAmount = 1;
+		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x9B26CF56)) {	// Tomodachi Collection (J) (Rev 1)
+			for(int i = 0; i < 3; i++) {
+				setDataBWlist[i] = dataWhitelist_CCUJ1_0[i];
+				setDataBWlist_1[i] = dataWhitelist_CCUJ1_1[i];
+			}
+			setDataBWlist[3] = true;
+			dataAmount = 1;
 		/* } else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YF4E0[i];
