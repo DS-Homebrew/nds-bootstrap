@@ -90,6 +90,7 @@ extern unsigned long loadingScreen;
 u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -448,9 +449,14 @@ void loadRomIntoRam(aFile file) {
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
-			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_ADAE0[i];
+			for(int i = 0; i < 3; i++) {
+				setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
+				setDataBWlist_1[i] = dataWhitelist_ADAE0_1[i];
+				setDataBWlist_2[i] = dataWhitelist_ADAE0_2[i];
+				setDataBWlist_3[i] = dataWhitelist_ADAE0_3[i];
+			}
 			setDataBWlist[3] = true;
+			dataAmount = 3;
 		} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YZXJ0[i];
@@ -641,8 +647,11 @@ void loadRomIntoRam(aFile file) {
 				if(dataAmount >= 1) {
 					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
 				}
-				if(dataAmount == 2) {
+				if(dataAmount >= 2) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
+				}
+				if(dataAmount == 3) {
+					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2], file, setDataBWlist_3[0], setDataBWlist_3[2]);
 				}
 				arm9_extRAM = false;
 				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
