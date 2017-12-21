@@ -103,6 +103,7 @@ u32 setDataBWlist[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_4[3] = {0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
 
 static bool whitelist = false;
@@ -545,25 +546,31 @@ int cardRead (u32* cacheStruct) {
 				ROMinRAM = 2;
 				whitelist = true;
 			} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {	// Lunar Knights (U)
-				for(int i = 0; i < 3; i++)
-					setDataBWlist[i] = dataWhitelist_ALKE0[i];
+				for(int i = 0; i < 3; i++) {
+					setDataBWlist[i] = dataWhitelist_ALKE0_0[i];
+					setDataBWlist_1[i] = dataWhitelist_ALKE0_1[i];
+				}
 
-				GAME_CACHE_ADRESS_START = 0x0D540000;
-				GAME_CACHE_SLOTS = 0x56;
+				GAME_CACHE_ADRESS_START = 0x0D580000;
+				GAME_CACHE_SLOTS = 0x54;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
+				dataAmount = 1;
 			} else if((ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)) {	// Lunar Knights (E)
-				for(int i = 0; i < 3; i++)
-					setDataBWlist[i] = dataWhitelist_ALKP0[i];
+				for(int i = 0; i < 3; i++) {
+					setDataBWlist[i] = dataWhitelist_ALKP0_0[i];
+					setDataBWlist_1[i] = dataWhitelist_ALKP0_1[i];
+				}
 
-				GAME_CACHE_ADRESS_START = 0x0D540000;
-				GAME_CACHE_SLOTS = 0x56;
+				GAME_CACHE_ADRESS_START = 0x0D580000;
+				GAME_CACHE_SLOTS = 0x54;
 				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
+				dataAmount = 1;
 			/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_AMQP0[i];
@@ -1755,7 +1762,7 @@ int cardRead (u32* cacheStruct) {
 						dst = cardStruct[1];
 						page = (src/512)*512;
 					}
-				} else if(whitelist && dataAmount == 3 && src >= setDataBWlist_3[0] && src < setDataBWlist_3[1]) {
+				} else if(whitelist && dataAmount >= 3 && src >= setDataBWlist_3[0] && src < setDataBWlist_3[1]) {
 					u32 src2=src;
 					src2 -= setDataBWlist_3[0];
 					src2 += setDataBWlist[2];
@@ -1766,6 +1773,82 @@ int cardRead (u32* cacheStruct) {
 					page2 += setDataBWlist[2];
 					page2 += setDataBWlist_1[2];
 					page2 += setDataBWlist_2[2];
+
+					u32 len2=len;
+					if(len2 > 512) {
+						len2 -= src%4;
+						len2 -= len2 % 32;
+					}
+
+					if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+						#ifdef DEBUG
+						// send a log command for debug purpose
+						// -------------------------------------
+						commandRead = 0x026ff800;
+
+						sharedAddr[0] = dst;
+						sharedAddr[1] = len2;
+						sharedAddr[2] = ROM_LOCATION+src2;
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------
+						#endif
+
+						// read ROM loaded into RAM
+						REG_SCFG_EXT = 0x8300C000;
+						fastCopy32(ROM_LOCATION+src2,dst,len2);
+						REG_SCFG_EXT = 0x83000000;
+
+						// update cardi common
+						cardStruct[0] = src + len2;
+						cardStruct[1] = dst + len2;
+						cardStruct[2] = len - len2;
+					} else {
+						#ifdef DEBUG
+						// send a log command for debug purpose
+						// -------------------------------------
+						commandRead = 0x026ff800;
+
+						sharedAddr[0] = page;
+						sharedAddr[1] = len2;
+						sharedAddr[2] = ROM_LOCATION+page2;
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------
+						#endif
+
+						// read via the 512b ram cache
+						REG_SCFG_EXT = 0x8300C000;
+						fastCopy32(ROM_LOCATION+page2, cacheBuffer, 512);
+						REG_SCFG_EXT = 0x83000000;
+						*cachePage = page;
+						(*readCachedRef)(cacheStruct);
+					}
+					len = cardStruct[2];
+					if(len>0) {
+						src = cardStruct[0];
+						dst = cardStruct[1];
+						page = (src/512)*512;
+					}
+				} else if(whitelist && dataAmount == 4 && src >= setDataBWlist_4[0] && src < setDataBWlist_4[1]) {
+					u32 src2=src;
+					src2 -= setDataBWlist_4[0];
+					src2 += setDataBWlist[2];
+					src2 += setDataBWlist_1[2];
+					src2 += setDataBWlist_2[2];
+					src2 += setDataBWlist_3[2];
+					u32 page2=page;
+					page2 -= setDataBWlist_4[0];
+					page2 += setDataBWlist[2];
+					page2 += setDataBWlist_1[2];
+					page2 += setDataBWlist_2[2];
+					page2 += setDataBWlist_3[2];
 
 					u32 len2=len;
 					if(len2 > 512) {

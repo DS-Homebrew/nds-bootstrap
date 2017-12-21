@@ -91,6 +91,7 @@ u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist_4[3] = {0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -431,13 +432,19 @@ void loadRomIntoRam(aFile file) {
 				setDataBWlist[i] = dataWhitelist_AFFP0[i];
 			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {	// Lunar Knights (U)
-			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_ALKE0[i];
+			for(int i = 0; i < 3; i++) {
+				setDataBWlist[i] = dataWhitelist_ALKE0_0[i];
+				setDataBWlist_1[i] = dataWhitelist_ALKE0_1[i];
+			}
 			setDataBWlist[3] = true;
+			dataAmount = 1;
 		} else if((ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)) {	// Lunar Knights (E)
-			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_ALKP0[i];
+			for(int i = 0; i < 3; i++) {
+				setDataBWlist[i] = dataWhitelist_ALKP0_0[i];
+				setDataBWlist_1[i] = dataWhitelist_ALKP0_1[i];
+			}
 			setDataBWlist[3] = true;
+			dataAmount = 1;
 		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
@@ -664,8 +671,11 @@ void loadRomIntoRam(aFile file) {
 				if(dataAmount >= 2) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
 				}
-				if(dataAmount == 3) {
+				if(dataAmount >= 3) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2], file, setDataBWlist_3[0], setDataBWlist_3[2]);
+				}
+				if(dataAmount == 4) {
+					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2]+setDataBWlist_3[2], file, setDataBWlist_4[0], setDataBWlist_4[2]);
 				}
 				arm9_extRAM = false;
 				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
