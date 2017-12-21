@@ -632,6 +632,10 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_YW2P0[i];
 			ROM_LOCATION = 0x0C400000;
+		} else if((ROM_TID == 0x45594659) && (ROM_HEADERCRC == 0xB0CECF56)	// Pokemon Mystery Dungeon: Explorers of Darkness (U)
+				|| (ROM_TID == 0x45544659) && (ROM_HEADERCRC == 0xA0BDCF56)) {	// Pokemon Mystery Dungeon: Explorers of Time (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_YFYE0[i];
 		} else if((ROM_TID == 0x4A574B59) && (ROM_HEADERCRC == 0xF999CF56)) {	// Hoshi no Kirby: Ultra Super Deluxe (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_YKWJ0[i];

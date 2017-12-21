@@ -80,6 +80,7 @@ u32 dataBlacklist_AVWE0[3] = {0x01459200, 0x018A9200, 0x00450000};	// Miami Nigh
 u32 dataBlacklist_YCOE0[3] = {0x0075DA00, 0x03D36800, 0x035D8E00};	// Call of Duty 4: Modern Warfare (U)
 u32 dataBlacklist_YW2E0[3] = {0x0122EE00, 0x02E5CE40, 0x01C2E040};	// Advance Wars: Days of Ruin (U)
 u32 dataBlacklist_YW2P0[3] = {0x011CD400, 0x02DFB440, 0x01C2E040};	// Advance Wars: Dark Conflict (E)
+u32 dataBlacklist_YFYE0[3] = {0x00751400, 0x03196600, 0x02A45200};	// Pokemon Mystery Dungeon: Explorers of Darkness and Time (U)
 u32 dataBlacklist_YKWJ0[3] = {0x00B62200, 0x042A3A00, 0x03741800};	// Hoshi no Kirby: Ultra Super Deluxe (J)
 u32 dataBlacklist_YKWE0[3] = {0x00B3A200, 0x04276000, 0x0373BE00};	// Kirby Super Star Ultra (U)
 u32 dataBlacklist_YKWK0[3] = {0x00B39C00, 0x04273400, 0x03739800};	// Kirby Ultra Super Deluxe (KS)

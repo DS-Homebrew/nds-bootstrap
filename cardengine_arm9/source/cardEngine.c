@@ -1162,6 +1162,19 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				use28MB = 1;
+			} else if((ROM_TID == 0x45594659) && (ROM_HEADERCRC == 0xB0CECF56)	// Pokemon Mystery Dungeon: Explorers of Darkness (U)
+					|| (ROM_TID == 0x45544659) && (ROM_HEADERCRC == 0xA0BDCF56)) {	// Pokemon Mystery Dungeon: Explorers of Time (U)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_YFYE0[i];
+
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DB00000;
+				GAME_CACHE_SLOTS = 0x14;
+				GAME_READ_SIZE = _256KB_READ_SIZE;
+
+				ROMinRAM = 2;
 			} else if((ROM_TID == 0x4A574B59) && (ROM_HEADERCRC == 0xF999CF56)) {	// Hoshi no Kirby: Ultra Super Deluxe (J)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_YKWJ0[i];
