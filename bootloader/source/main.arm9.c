@@ -455,7 +455,7 @@ static void arm9_pong (void) {
 
 	if(ball_moveLR==false) {
 		ball_xPos -= 2;
-		if((ball_yPos > leftpaddle_yPos) && (ball_yPos < leftpaddle_yPos+32)) {
+		if((ball_yPos > leftpaddle_yPos-8) && (ball_yPos < leftpaddle_yPos+32)) {
 			if(ball_xPos == 16) ball_moveLR = true;
 		} else {
 			if(ball_xPos <= 0) {
