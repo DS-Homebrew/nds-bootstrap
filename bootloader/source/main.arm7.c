@@ -97,7 +97,7 @@ int dataAmount = 0;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
 static void errorOutput (void) {
-	if(loadingScreen == 1) {
+	if(loadingScreen >= 1) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
@@ -109,7 +109,7 @@ static void errorOutput (void) {
 }
 
 static void debugOutput (void) {
-	if(loadingScreen == 1) {
+	if(loadingScreen >= 1) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
