@@ -449,8 +449,8 @@ static void arm9_pong (void) {
 		if((ball_yPos > leftpaddle_yPos-8) && (ball_yPos < leftpaddle_yPos+32)) {
 			if(ball_xPos == 16) {
 				ball_moveLR = true;
-				if(ball_ySpeed != 16) {
-					ball_ySpeed += 2;	// Increase Y speed of ball
+				if(ball_ySpeed != 8) {
+					ball_ySpeed++;	// Increase Y speed of ball
 				}
 			}
 		} else {
@@ -472,8 +472,8 @@ static void arm9_pong (void) {
 		ball_xPos += 2;
 		if(ball_xPos == 236) {
 			ball_moveLR = false;
-			if(ball_ySpeed != 16) {
-				ball_ySpeed += 2;	// Increase Y speed of ball
+			if(ball_ySpeed != 8) {
+				ball_ySpeed++;	// Increase Y speed of ball
 			}
 		}
 	}
