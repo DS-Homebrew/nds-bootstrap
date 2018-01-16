@@ -381,13 +381,18 @@ static int ball_ySpeed = 2;
 static int ball_moveUD = false;	// false = up, true = down
 static int ball_moveLR = true;	// false = left, true = right
 
-static u16 pong_color = 0x7FFF;
+static u16 pong_color = 0x0000;
 
 static void arm9_pong (void) {
 	if(!drawnStuff) {
 		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
+
+		// Draw white BG
+		for (i = 0; i < 256*192; i++) {
+			VRAM_A[i] = 0x7FFF;
+		}
 
 		drawnStuff = true;
 	}
@@ -403,7 +408,7 @@ static void arm9_pong (void) {
 	// Draw ball
 	for (y = ball_yPos-16; y <= ball_yPos+24; y++) {
 		for (k = ball_xPos-2; k <= ball_xPos+10; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = 0x7FFF;
 		}
 	}
 	for (y = ball_yPos; y <= ball_yPos+8; y++) {
@@ -415,7 +420,7 @@ static void arm9_pong (void) {
 	// Draw left paddle
 	for (y = leftpaddle_yPos-4; y <= leftpaddle_yPos+36; y++) {
 		for (k = 8; k <= 16; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = 0x7FFF;
 		}
 	}
 	for (y = leftpaddle_yPos; y <= leftpaddle_yPos+32; y++) {
@@ -427,7 +432,7 @@ static void arm9_pong (void) {
 	// Draw right paddle
 	for (y = rightpaddle_yPos-16; y <= rightpaddle_yPos+48; y++) {
 		for (k = 240; k <= 248; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = 0x7FFF;
 		}
 	}
 	for (y = rightpaddle_yPos; y <= rightpaddle_yPos+32; y++) {
@@ -457,7 +462,7 @@ static void arm9_pong (void) {
 			if(ball_xPos <= 0) {
 				// Restart minigame
 				for (i = 0; i < 256*192; i++) {
-					VRAM_A[i] = 0x0000;
+					VRAM_A[i] = 0x7FFF;
 				}
 				leftpaddle_yPos = 76;
 				rightpaddle_yPos = 76;
