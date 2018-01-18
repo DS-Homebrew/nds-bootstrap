@@ -102,7 +102,6 @@ static void errorOutput (void) {
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
 		arm9_errorColor = true;
-		arm9_stateFlag = ARM9_DISPERR;
 	}
 	// Stop
 	while(1);
@@ -122,7 +121,6 @@ static void debugOutput (void) {
 
 static void increaseLoadBarLength (void) {
 	arm9_loadBarLength++;
-	debugOutput();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

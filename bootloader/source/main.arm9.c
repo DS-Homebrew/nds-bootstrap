@@ -671,6 +671,7 @@ static void arm9_errorText (void) {
 	}
 
 	arm9_animateLoadingCircle = false;
+	displayScreen = false;
 }
 
 static int leftpaddle_yPos = 76;
