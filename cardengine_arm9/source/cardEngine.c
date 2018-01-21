@@ -61,7 +61,7 @@ static u32 romSize;
 #define only_768KB_CACHE_SLOTS 0x20
 #define only_1MB_CACHE_SLOTS 0x18
 
-extern vu32* volatile cardStruct;
+vu32* volatile cardStruct = 0x27FFBC0;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
@@ -1444,13 +1444,11 @@ int cardRead (u32* cacheStruct) {
 
 					// copy directly
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
-					fastCopy32(buffer+(src-sector),dst,len2);
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
-
-					// update cardi common
+					copy8(buffer+(src-sector),dst,len2);
 					cardStruct[0] = src + len2;
 					cardStruct[1] = dst + len2;
 					cardStruct[2] = len - len2;
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				} else {
 					#ifdef DEBUG
 					// send a log command for debug purpose
@@ -1470,10 +1468,11 @@ int cardRead (u32* cacheStruct) {
 
 					// read via the 512b ram cache
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
-					fastCopy32(buffer+(page-sector), cacheBuffer, 512);
+					copy8(buffer+(page-sector)+(src%512), dst, len2);
+					cardStruct[0] = src + len2;
+		                	cardStruct[1] = dst + len2;
+                		    	cardStruct[2] = len - len2;
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
-					*cachePage = page;
-					(*readCachedRef)(cacheStruct);
 				}
 				len = cardStruct[2];
 				if(len>0) {
