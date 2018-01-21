@@ -298,7 +298,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }
 	debug[1] = cardReadEndOffset;
     u32 cardReadStartOffset =   
-        getOffset((u32*)cardReadEndOffset, -0xF9,
+        getOffset((u32*)cardReadEndOffset, -0x120,
               (u32*)cardReadStartSignature, 1, -1);
     if (!cardReadStartOffset) {
         dbg_printf("Card read start not found\n");
