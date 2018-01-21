@@ -42,7 +42,7 @@
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile bool arm9_errorColor = false;
-volatile int arm9_screenMode = 0;	// 0 = Regular, 1 = Pong
+volatile int arm9_screenMode = 0;	// 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
 volatile bool arm9_extRAM = false;
 volatile u32 arm9_SCFG_EXT = 0;
 volatile int arm9_loadBarLength = 0;
@@ -62,7 +62,7 @@ static u16 colour6;
 static u16 colour7;
 static u16 colour8;
 
-static int i, y, k;
+static int e, i, y, k;
 
 /*-------------------------------------------------------------------------
 External functions
@@ -812,6 +812,214 @@ static void arm9_pong (void) {
 
 }
 
+static int ttt_selected[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};	// 0 = Blank, 1 = N, 2 = T
+static int ttt_highlighted = 0;
+
+static u16 ttt_rectColor[9] = {0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF};
+
+static u16 ttt_selColor = 0x03A0;
+
+//static bool ttt_keypressed = false;
+
+static void arm9_ttt (void) {
+	if(!drawnStuff) {
+		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
+		REG_DISPCNT = MODE_FB0;
+		VRAM_A_CR = VRAM_ENABLE;
+
+		// Draw white BG
+		for (i = 0; i < 256*192; i++) {
+			VRAM_A[i] = 0x7FFF;
+		}
+
+		// Draw top of v line 1
+		for (y = 56; y <= 59; y++) {
+			for (k = 0; k <= 256; k++) {
+				VRAM_A[y*256+k] = 0x4631;
+			}
+		}
+
+		// Draw v line 1
+		for (y = 60; y <= 67; y++) {
+			for (k = 0; k <= 256; k++) {
+				VRAM_A[y*256+k] = 0x0000;
+			}
+		}
+
+		// Draw v line 2
+		for (y = 124; y <= 131; y++) {
+			for (k = 0; k <= 256; k++) {
+				VRAM_A[y*256+k] = 0x0000;
+			}
+		}
+
+		// Draw bottom of v line 2
+		for (y = 132; y <= 135; y++) {
+			for (k = 0; k <= 256; k++) {
+				VRAM_A[y*256+k] = 0x4631;
+			}
+		}
+
+		// Draw h line 1
+		for (y = 0; y <= 191; y++) {
+			for (k = 80; k <= 87; k++) {
+				VRAM_A[y*256+k] = 0x0000;
+			}
+		}
+
+		// Draw h line 2
+		for (y = 0; y <= 191; y++) {
+			for (k = 168; k <= 175; k++) {
+				VRAM_A[y*256+k] = 0x0000;
+			}
+		}
+
+		drawnStuff = true;
+	}
+	
+	if(arm9_errorColor) ttt_selColor = 0x001B;
+	
+	// Draw highlighter, vertical line 1
+	for (e = 0; e <= 2; e++) {
+		// Vertical parts
+		for (y = 0; y <= 7; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e];
+			}
+		}
+		for (y = 48; y <= 55; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e];
+			}
+		}
+		// Horizontal parts
+		for (i = 0; i <= 72; i += 72) {
+			for (y = 8; y <= 47; y++) {
+				for (k = 0; k <= 7; k++) {
+					VRAM_A[y*256+k+i+e*88] = ttt_rectColor[e];
+				}
+			}
+		}
+	}
+
+	// Draw highlighter, vertical line 2
+	for (e = 0; e <= 2; e++) {
+		// Vertical parts
+		for (y = 68; y <= 75; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e+3];
+			}
+		}
+		for (y = 116; y <= 123; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e+3];
+			}
+		}
+		// Horizontal parts
+		for (i = 0; i <= 72; i += 72) {
+			for (y = 76; y <= 115; y++) {
+				for (k = 0; k <= 7; k++) {
+					VRAM_A[y*256+k+i+e*88] = ttt_rectColor[e+3];
+				}
+			}
+		}
+	}
+
+	// Draw highlighter, vertical line 3
+	for (e = 0; e <= 2; e++) {
+		// Vertical parts
+		for (y = 136; y <= 143; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e+6];
+			}
+		}
+		for (y = 184; y <= 191; y++) {
+			for (k = 0; k <= 79; k++) {
+				VRAM_A[y*256+k+e*88] = ttt_rectColor[e+6];
+			}
+		}
+		// Horizontal parts
+		for (i = 0; i <= 72; i += 72) {
+			for (y = 144; y <= 183; y++) {
+				for (k = 0; k <= 7; k++) {
+					VRAM_A[y*256+k+i+e*88] = ttt_rectColor[e+6];
+				}
+			}
+		}
+	}
+
+	while(REG_VCOUNT!=191);	// fix speed
+
+	// Control highlighter
+	if(REG_KEYINPUT & (KEY_UP)) {} else {
+		ttt_highlighted -= 3;
+		if(ttt_highlighted < 0) ttt_highlighted = 0;
+		//ttt_keypressed = true;
+	}
+	if(REG_KEYINPUT & (KEY_DOWN)) {} else {
+		ttt_highlighted += 3;
+		if(ttt_highlighted > 8) ttt_highlighted = 8;
+		//ttt_keypressed = true;
+	}
+	if(REG_KEYINPUT & (KEY_LEFT)) {} else {
+		ttt_highlighted--;
+		if(ttt_highlighted < 0) ttt_highlighted = 0;
+		//ttt_keypressed = true;
+	}
+	if(REG_KEYINPUT & (KEY_RIGHT)) {} else {
+		ttt_highlighted++;
+		if(ttt_highlighted > 8) ttt_highlighted = 8;
+		//ttt_keypressed = true;
+	}
+
+	if(ttt_highlighted == 0) {
+		ttt_rectColor[0] = ttt_selColor;
+	} else {
+		ttt_rectColor[0] = 0x7FFF;
+	}
+	if(ttt_highlighted == 1) {
+		ttt_rectColor[1] = ttt_selColor;
+	} else {
+		ttt_rectColor[1] = 0x7FFF;
+	}
+	if(ttt_highlighted == 2) {
+		ttt_rectColor[2] = ttt_selColor;
+	} else {
+		ttt_rectColor[2] = 0x7FFF;
+	}
+	if(ttt_highlighted == 3) {
+		ttt_rectColor[3] = ttt_selColor;
+	} else {
+		ttt_rectColor[3] = 0x7FFF;
+	}
+	if(ttt_highlighted == 4) {
+		ttt_rectColor[4] = ttt_selColor;
+	} else {
+		ttt_rectColor[4] = 0x7FFF;
+	}
+	if(ttt_highlighted == 5) {
+		ttt_rectColor[5] = ttt_selColor;
+	} else {
+		ttt_rectColor[5] = 0x7FFF;
+	}
+	if(ttt_highlighted == 6) {
+		ttt_rectColor[6] = ttt_selColor;
+	} else {
+		ttt_rectColor[6] = 0x7FFF;
+	}
+	if(ttt_highlighted == 7) {
+		ttt_rectColor[7] = ttt_selColor;
+	} else {
+		ttt_rectColor[7] = 0x7FFF;
+	}
+	if(ttt_highlighted == 8) {
+		ttt_rectColor[8] = ttt_selColor;
+	} else {
+		ttt_rectColor[8] = 0x7FFF;
+	}
+	
+}
+
 /*-------------------------------------------------------------------------
 arm9_main
 
@@ -922,7 +1130,9 @@ void arm9_main (void)
 			}
 		}
 		if(displayScreen) {
-			if(arm9_screenMode == 1) {
+			if(arm9_screenMode == 2) {
+				arm9_ttt();
+			} else if(arm9_screenMode == 1) {
 				arm9_pong();
 			} else {
 				arm9_regularLoadingScreen();
