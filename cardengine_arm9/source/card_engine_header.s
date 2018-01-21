@@ -73,7 +73,7 @@ loop_copy8:
         subs    r8, r8, #1
         bgt     loop_copy8
         ldmfd   sp!, {r3-r11,lr}
-    bx   
+    bx	    lr
 
 card_engine_end:
 
