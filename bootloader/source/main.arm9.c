@@ -1120,11 +1120,9 @@ void arm9_main (void)
 		if(arm9_extRAM) {
 			REG_SCFG_EXT = 0x8300C000;
 		} else {
-			REG_SCFG_EXT = 0x8300C000;
+			REG_SCFG_EXT = 0x83000000;
 		}
 		arm9_SCFG_EXT = REG_SCFG_EXT;
-		*(u32*)(0x23ffc40) = 01;
-		*(u32*)(0x2fffc40) = 01;
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			displayScreen = true;
 			if ( arm9_stateFlag == ARM9_DISPERR) {
@@ -1148,6 +1146,8 @@ void arm9_main (void)
 	REG_EXMEMCNT = 0xE880;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
+	*(u32*)(0x23ffc40) = 01;
+	*(u32*)(0x2fffc40) = 01;
 	VoidFn arm9code = *(VoidFn*)(0x2FFFE24);
 	arm9code();
 	while(1);
