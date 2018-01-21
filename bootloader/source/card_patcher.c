@@ -38,8 +38,8 @@ u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 
 // sdk > 4 version
-u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
-u32 cardReadStartSignature4[1] = {0xE92D4070};
+u32 a9cardReadSignature4[2]    = {0x04100010, 0x040001A4};
+u32 cardReadStartSignature4[1] = {0xE92D4FF8};
 
 // sdk 5 version
 //u32 cardReadStartSignature5[1] = {0xE92D4070};	// Is this correct?
@@ -55,7 +55,7 @@ u32 cardIdStartSignatureThumbAlt3[1]   = {0x24B8B510};
   
 //u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
-u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
+u32 cardPullOutSignature4[4]   = {0xE92D4038,0xE201003F,0xE3500011,0x1A000011};
 //u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
@@ -326,14 +326,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
               (u32*)cardReadCachedEndSignature, 4, 1);
     if (!cardReadCachedEndOffset) {
         dbg_printf("Card read cached end not found\n");
-        return 0;
+        //return 0;
     }
     u32 cardReadCachedOffset =   
         getOffset((u32*)cardReadCachedEndOffset, -0xFF,
               (u32*)cardReadCachedStartSignature, 2, -1);
     if (!cardReadStartOffset) {
         dbg_printf("Card read cached start not found\n");
-        return 0;
+        //return 0;
     }
 	dbg_printf("Card read cached :\t");
 	dbg_hexa(cardReadCachedOffset);
