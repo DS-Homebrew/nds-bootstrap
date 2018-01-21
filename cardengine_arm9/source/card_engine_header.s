@@ -30,7 +30,7 @@ sdk_version:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
-cardStruct:
+cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
@@ -55,6 +55,25 @@ loop_fastCopy32:
 	bgt     loop_fastCopy32
 	ldmfd   sp!, {r3-r11,lr}
     bx      lr
+
+.global copy8
+.type   copy8 STT_FUNC
+@ r0 : src, r1 : dst, r2 : len
+copy8:
+    stmfd   sp!, {r3-r11,lr}
+        @ copy r2 bytes
+        mov     r10, r0
+        mov     r9, r1
+        mov     r8, r2
+loop_copy8:
+        ldrb   r0,[r10]
+        strb   r0,[r9]
+	add r10,r10,#1
+	add r9,r9,#1
+        subs    r8, r8, #1
+        bgt     loop_copy8
+        ldmfd   sp!, {r3-r11,lr}
+    bx   
 
 card_engine_end:
 
