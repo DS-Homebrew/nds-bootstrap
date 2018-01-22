@@ -1228,8 +1228,8 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32*
 
 	//Debug stuff.
 
-	aFile myDebugFile = getBootFileCluster ("NDSBTSR2.LOG");
-	enableDebug(myDebugFile);
+	/*aFile myDebugFile = getBootFileCluster ("NDSBTSR2.LOG");
+	enableDebug(myDebugFile);*/
 
 	dbg_printf("patchCardNds");
 
