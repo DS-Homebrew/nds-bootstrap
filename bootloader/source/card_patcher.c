@@ -37,7 +37,7 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 
-// sdk > 5 version
+// sdk 5 version
 u32 a9cardReadSignature4[2]    = {0x04100010, 0x040001A4};
 u32 cardReadStartSignature4[1] = {0xE92D4FF8};
 
@@ -240,12 +240,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
-	} 
-	/*if(moduleParams->sdk_version > 0x5000000) {
-		cardReadStartSignature = cardReadStartSignature5;
-		cardReadCachedStartSignature = cardReadCachedStartSignature5;
-		cardReadCachedEndSignature = cardReadCachedEndSignature5;
-	}*/
+	}
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
@@ -1192,7 +1187,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
 	u32 saveResult = 0;
-	/* if (useArm7Donor == 2) {
+	/*if (useArm7Donor == 2) {
 		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 			dbg_printf("swap the arm7 binary");	
 			swapBinary_ARM7(donorFile);
@@ -1217,7 +1212,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	} else {
 		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	} */
+	}*/
 
 	dbg_printf("ERR_NONE");
 	return 0;

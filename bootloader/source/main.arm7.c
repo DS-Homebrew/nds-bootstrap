@@ -67,7 +67,7 @@ void sdmmc_controller_init();
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
-#define ENGINE_LOCATION_ARM7  	0x03780000
+#define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x03700000
 
 const char* bootName = "BOOT.NDS";
@@ -90,8 +90,6 @@ extern unsigned long loadingScreen;
 u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_4[3] = {0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -349,7 +347,6 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if((romSize > 0) && (romSize <= 0x01C00000)) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
@@ -359,16 +356,20 @@ void loadRomIntoRam(aFile file) {
 		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 		arm9_extRAM = false;
-		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 	} else {
-		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
+		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
 			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_AZWJ0[i];
+				setDataBWlist[i] = dataWhitelist_A5TE0[i];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
+		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataBlacklist_ARRE0[i];
-		}
+				setDataBWlist[i] = dataBlacklist_AYIE0[i];
+		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AWRE0[i];
+			ROM_LOCATION = 0x0C400000;
+		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
 			if(setDataBWlist[3] == true) {
@@ -378,17 +379,11 @@ void loadRomIntoRam(aFile file) {
 				if(dataAmount >= 1) {
 					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
 				}
-				if(dataAmount >= 2) {
+				if(dataAmount == 2) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
 				}
-				if(dataAmount >= 3) {
-					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2], file, setDataBWlist_3[0], setDataBWlist_3[2]);
-				}
-				if(dataAmount == 4) {
-					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2]+setDataBWlist_3[2], file, setDataBWlist_4[0], setDataBWlist_4[2]);
-				}
 				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 			} else {
 				setDataBWlist[0] -= 0x4000;
 				setDataBWlist[0] -= ARM9_LEN;
@@ -401,7 +396,7 @@ void loadRomIntoRam(aFile file) {
 				}
 				fileRead(ROM_LOCATION+setDataBWlist[0], file, setDataBWlist[1], lastRomSize);
 				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
+				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 			}
 		}
 	}
@@ -468,28 +463,29 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 void initMBK() {
 	// give all DSI WRAM to arm7 at boot
-
+	// this function have no effect on DSI with ARM7 SCFG locked
+	
 	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK9=0x3000000F;
-
+	
 	// WRAM-A fully mapped to arm7
-	*((vu32*)REG_MBK1)=0x8185898D;
-
-	// WRAM-B fully mapped to arm7
-	*((vu32*)REG_MBK2)=0x8D898581;
-	*((vu32*)REG_MBK3)=0x9D999591;
-
-	// WRAM-C fully mapped to arm7
-	*((vu32*)REG_MBK4)=0x8D898581;
-	*((vu32*)REG_MBK5)=0x9D999591;
-
-	// WRAM mapped to the 0x3700000 - 0x37AFFFF area 
-	// WRAM-A mapped to the 0x3780000 - 0x37BFFFF area : 256k
-	REG_MBK6=0x07C03780;
-	// WRAM-B mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK7=0x07403700;
-	// WRAM-C mapped to the 0x3740000 - 0x377FFFF area : 256k
-	REG_MBK8=0x07803740;
+	*((vu32*)REG_MBK1)=0x8185898D; // same as dsiware
+	
+	// WRAM-B fully mapped to arm7 // inverted order
+	*((vu32*)REG_MBK2)=0x9195999D;
+	*((vu32*)REG_MBK3)=0x8185898D;
+	
+	// WRAM-C fully mapped to arm7 // inverted order
+	*((vu32*)REG_MBK4)=0x9195999D;
+	*((vu32*)REG_MBK5)=0x8185898D;
+	
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+	REG_MBK6=0x080037C0; // same as dsiware
+	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
+	REG_MBK7=0x07C03740; // same as dsiware
+	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK8=0x07403700; // same as dsiware
 }
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
