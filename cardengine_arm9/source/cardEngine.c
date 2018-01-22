@@ -22,7 +22,7 @@
 
 #include "databwlist.h"
 
-static u32 ROM_LOCATION = 0x0C800000;
+static u32 ROM_LOCATION = 0x0D000000;
 static u32 ROM_TID;
 static u32 ARM9_LEN;
 static u32 romSize;
@@ -42,24 +42,24 @@ static u32 romSize;
 #define WRAM_CACHE_ADRESS_SIZE 0x78000
 #define WRAM_CACHE_SLOTS 15
 
-#define _128KB_CACHE_ADRESS_START 0x0C800000
-#define _128KB_CACHE_ADRESS_SIZE 0x600000
-#define _128KB_CACHE_SLOTS 0x30
-#define _256KB_CACHE_ADRESS_START 0x0CE00000
-#define _256KB_CACHE_ADRESS_SIZE 0x800000
-#define _256KB_CACHE_SLOTS 0x20
-#define _512KB_CACHE_ADRESS_START 0x0D600000
-#define _512KB_CACHE_ADRESS_SIZE 0xA00000
-#define _512KB_CACHE_SLOTS 0x14
+#define _128KB_CACHE_ADRESS_START 0x0D800000
+#define _128KB_CACHE_ADRESS_SIZE 0x200000
+#define _128KB_CACHE_SLOTS 0x10
+#define _256KB_CACHE_ADRESS_START 0x0DA00000
+#define _256KB_CACHE_ADRESS_SIZE 0x200000
+#define _256KB_CACHE_SLOTS 0x8
+#define _512KB_CACHE_ADRESS_START 0x0DC00000
+#define _512KB_CACHE_ADRESS_SIZE 0x400000
+#define _512KB_CACHE_SLOTS 0x8
 
-#define only_CACHE_ADRESS_START 0x0C800000
-#define only_CACHE_ADRESS_SIZE 0x1800000
-#define only_128KB_CACHE_SLOTS 0xC0
-#define only_192KB_CACHE_SLOTS 0x80
-#define only_256KB_CACHE_SLOTS 0x60
-#define only_512KB_CACHE_SLOTS 0x30
-#define only_768KB_CACHE_SLOTS 0x20
-#define only_1MB_CACHE_SLOTS 0x18
+#define only_CACHE_ADRESS_START 0x0D800000
+#define only_CACHE_ADRESS_SIZE 0x800000
+#define only_128KB_CACHE_SLOTS 0x40
+#define only_192KB_CACHE_SLOTS 0x2A
+#define only_256KB_CACHE_SLOTS 0x20
+#define only_512KB_CACHE_SLOTS 0x10
+#define only_768KB_CACHE_SLOTS 0xA
+#define only_1MB_CACHE_SLOTS 0x8
 
 vu32* volatile cardStruct = 0x3707BC0;
 //extern vu32* volatile cacheStruct;
@@ -95,7 +95,7 @@ static int ROMinRAM = 0;
 static int use28MB = 0;
 static bool dsiWramUsed = false;
 
-static u32 GAME_CACHE_ADRESS_START = 0x0C800000;
+static u32 GAME_CACHE_ADRESS_START = 0x0D000000;
 static u32 GAME_CACHE_SLOTS = 0;
 static u32 GAME_READ_SIZE = _256KB_READ_SIZE;
 
@@ -334,15 +334,9 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		ROM_TID = tempNdsHeader[0x00C>>2];
 		u32 ROM_HEADERCRC = tempNdsHeader[0x15C>>2];
 
-		// ExceptionHandler2 (red screen) blacklist
-		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
-		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
-		{
-			setExceptionHandler2();
-		}
+		setExceptionHandler2();
 
-		//f((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+		//if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
 		//|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
 		//|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
 		//{
@@ -366,29 +360,22 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		romSize -= 0x4000;
 		romSize -= ARM9_LEN;
 
-		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.
-		if((romSize > 0) && (romSize <= 0x01C00000) && !dsiWramUsed) {
-			if(romSize > 0x01800000 && romSize <= 0x01C00000) {
-				use28MB = 1;
-				ROM_LOCATION = 0x0E000000-romSize;
-			}
-
+		// If ROM size is 0x01000000 or below, then the ROM is in RAM.
+		if((romSize > 0) && (romSize <= 0x01000000) && !dsiWramUsed) {
 			ROM_LOCATION -= 0x4000;
 			ROM_LOCATION -= ARM9_LEN;
 
 			ROMinRAM = 1;
 		} else {
-			if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
+			/* if((ROM_TID == 0x45535842) && (ROM_HEADERCRC == 0x1657CF56)) {		// Sonic Colors (U)
 				for(int i = 0; i < 3; i++)
-					setDataBWlist[i] = dataWhitelist_A5TE0[i];
+					setDataBWlist[i] = dataWhitelist_BXSE0[i];
 
-				GAME_CACHE_ADRESS_START = 0x0C900000;
-				GAME_CACHE_SLOTS = 0x1C;
-				GAME_READ_SIZE = _256KB_READ_SIZE;
+				GAME_READ_SIZE = _32KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
-			} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
+			} else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_AYIE0[i];
 

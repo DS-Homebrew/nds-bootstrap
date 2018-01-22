@@ -238,7 +238,7 @@ void resetMemory_ARM7 (void)
 }
 
 
-u32 ROM_LOCATION = 0x0C800000;
+u32 ROM_LOCATION = 0x0D000000;
 u32 ROM_TID;
 u32 ROM_HEADERCRC;
 u32 ARM9_LEN;
@@ -280,51 +280,6 @@ void loadBinary_ARM7 (aFile file)
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
-	
-	// The World Ends With You (USA) (Europe)
-	if(ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741){
-		*(u32*)(0x203E7B0) = 0;
-	}
-
-	// Subarashiki Kono Sekai - It's a Wonderful World (Japan)
-	if(ROM_TID == 0x4A4C5741){
-		*(u32*)(0x203F114) = 0;
-	}
-
-	// Miami Nights - Singles in the City (USA)
-	if(ROM_TID == 0x45575641){
-		//fixes not enough memory error
-		*(u32*)(0x0204cccc) = 0xe1a00000; //nop
-	}
-
-	// Miami Nights - Singles in the City (Europe)
-	if(ROM_TID == 0x50575641){
-		//fixes not enough memory error
-		*(u32*)(0x0204cdbc) = 0xe1a00000; //nop
-	}
-
-	// "Chrono Trigger (Japan)"
-	/*if(ROM_TID == 0x4a555159){
-		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
-		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
-	}
-
-	// "Chrono Trigger (USA/Europe)"
-	if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
-		*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
-		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
-	}*/
-
-	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
-	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
-	/*if(ROM_TID == 0x45584759 || ROM_TID == 0x50584759){
-		*(u16*)(-0x02037a34) = 0x46c0;
-		*(u32*)(0x0216ac0c) = 0x0001fffb;
-	}*/
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
@@ -348,22 +303,18 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if((romSize > 0) && (romSize <= 0x01C00000)) {
-		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
-			ROM_LOCATION = 0x0E000000-romSize;
-		}
-
-		//arm9_extRAM = true;
-		//while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
-		//fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-		//arm9_extRAM = false;
-		//while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-	} else {
-		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
+	/* if((romSize > 0) && (romSize <= 0x01000000)) {
+		arm9_extRAM = true;
+		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
+		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
+		arm9_extRAM = false;
+		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+	} else { */
+		/* if((ROM_TID == 0x45535842) && (ROM_HEADERCRC == 0x1657CF56)) {		// Sonic Colors (U)
 			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_A5TE0[i];
+				setDataBWlist[i] = dataWhitelist_BXSE0[i];
 			setDataBWlist[3] = true;
-		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
+		} else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_AYIE0[i];
 		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
@@ -400,7 +351,7 @@ void loadRomIntoRam(aFile file) {
 				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 			}
 		}
-	}
+	//}
 }
 
 /*-------------------------------------------------------------------------
