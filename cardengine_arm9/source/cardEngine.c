@@ -61,7 +61,7 @@ static u32 romSize;
 #define only_768KB_CACHE_SLOTS 0x20
 #define only_1MB_CACHE_SLOTS 0x18
 
-vu32* volatile cardStruct = 0x27FFBC0;
+vu32* volatile cardStruct = 0x3707BC0;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
@@ -342,12 +342,12 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			setExceptionHandler2();
 		}
 
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-		|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
-		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-		{
+		//f((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+		//|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
+		//|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+		//{
 			dsiWramUsed = true;
-		}
+		//}
 
 		ARM9_LEN = tempNdsHeader[0x02C>>2];
 		// Check ROM size in ROM header...
@@ -438,27 +438,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	
 	if(!dsiWramUsed) {
 		if(!cacheSizeSet && ROMinRAM==0) {
-			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-			{
-				CACHE_READ_SIZE = _1MB_READ_SIZE;
-				only_cacheSlots = only_1MB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
-					|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
-					|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
-					|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
-					|| (ROM_TID & 0x00FFFFFF) == 0x475049	// PKMN SS
-					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
-			{
-				CACHE_READ_SIZE = _192KB_READ_SIZE;
-				only_cacheSlots = only_192KB_CACHE_SLOTS;
-			} else {
-				dynamicCaching = true;
-			}
+			dynamicCaching = true;
 			cacheSizeSet = true;
 		}
 		if(dynamicCaching) {
@@ -586,12 +566,12 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					// copy directly
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					copy8(buffer+(src-sector),dst,len2);
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common
 					cardStruct[0] = src + len2;
 					cardStruct[1] = dst + len2;
 					cardStruct[2] = len - len2;
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				} else {
 					#ifdef DEBUG
 					// send a log command for debug purpose
@@ -612,18 +592,16 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					// read via the 512b ram cache
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					copy8(buffer+(page-sector)+(src%512), dst, len2);
+					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 					cardStruct[0] = src + len2;
                                         cardStruct[1] = dst + len2;
                                         cardStruct[2] = len - len2;
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 					//(*readCachedRef)(cacheStruct);
 				}
-				REG_SCFG_EXT = 0x83008000;
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
 					dst = cardStruct[1];
-					REG_SCFG_EXT = 0x83000000;
 					page = (src/512)*512;
 					sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 					if(dsiWramUsed) WRAM_accessCounter++;
@@ -664,7 +642,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 					// read ROM loaded into RAM
 					REG_SCFG_EXT = 0x8300C000;
-					fastCopy32(ROM_LOCATION+src,dst,len2);
+					copy8(ROM_LOCATION+src,dst,len2);
 					REG_SCFG_EXT = 0x83000000;
 
 					// update cardi common
@@ -696,12 +674,10 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
                                         cardStruct[1] = dst + len2;
                                         cardStruct[2] = len - len2;
 				}
-				REG_SCFG_EXT = 0x83008000;
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
 					dst = cardStruct[1];
-					REG_SCFG_EXT = 0x83000000;
 					page = (src/512)*512;
 				}
 			} else if (ROMinRAM==2) {
@@ -745,8 +721,8 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 							// read ROM loaded into RAM
 							REG_SCFG_EXT = 0x8300C000;
-							fastCopy32(ROM_LOCATION+src2,dst,len2);
-							//REG_SCFG_EXT = 0x83000000;
+							copy8(ROM_LOCATION+src2,dst,len2);
+							REG_SCFG_EXT = 0x83000000;
 
 							// update cardi common
 							cardStruct[0] = src + len2;
@@ -772,18 +748,16 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							// read via the 512b ram cache
 							REG_SCFG_EXT = 0x8300C000;
 		                                        copy8(ROM_LOCATION+page2, dst, len);
+                		                        REG_SCFG_EXT = 0x83000000;
                                 		        cardStruct[0] = src + len2;
                                 		        cardStruct[1] = dst + len2;
 		                                        cardStruct[2] = len - len2;
-                		                        REG_SCFG_EXT = 0x83000000;
 							//(*readCachedRef)(cacheStruct);
 						}
-						REG_SCFG_EXT = 0x83008000;
 						len = cardStruct[2];
 						if(len>0) {
 							src = cardStruct[0];
 							dst = cardStruct[1];
-							REG_SCFG_EXT = 0x83000000;
 							page = (src/512)*512;
 						}
 					// }
@@ -957,8 +931,8 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 						// read ROM loaded into RAM
 						REG_SCFG_EXT = 0x8300C000;
-						fastCopy32(ROM_LOCATION+src,dst,len2);
-						//REG_SCFG_EXT = 0x83000000;
+						copy8(ROM_LOCATION+src,dst,len2);
+						REG_SCFG_EXT = 0x83000000;
 
 						// update cardi common
 						cardStruct[0] = src + len2;
@@ -984,21 +958,18 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						// read via the 512b ram cache
 						REG_SCFG_EXT = 0x8300C000;
                         	                copy8(ROM_LOCATION+page, dst, len);
+                	                        REG_SCFG_EXT = 0x83000000;
         	                                cardStruct[0] = src + len2;
 	                                        cardStruct[1] = dst + len2;
                                 	        cardStruct[2] = len - len2;
-                	                        REG_SCFG_EXT = 0x83000000;
 						//(*readCachedRef)(cacheStruct);
 					}
-					REG_SCFG_EXT = 0x83008000;
 					len = cardStruct[2];
 					if(len>0) {
 						src = cardStruct[0];
 						dst = cardStruct[1];
-						REG_SCFG_EXT = 0x83000000;
 						page = (src/512)*512;
 					}
-					sharedAddr[3] = 0;
 				} else if(!whitelist && src >= setDataBWlist[1] && src < romSize) {
 					u32 len2=len;
 					if(len2 > 512) {
@@ -1025,8 +996,8 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 						// read ROM loaded into RAM
 						REG_SCFG_EXT = 0x8300C000;
-						fastCopy32(ROM_LOCATION-setDataBWlist[2]+src,dst,len2);
-						//REG_SCFG_EXT = 0x83000000;
+						copy8(ROM_LOCATION-setDataBWlist[2]+src,dst,len2);
+						REG_SCFG_EXT = 0x83000000;
 
 						// update cardi common
 						cardStruct[0] = src + len2;
@@ -1052,21 +1023,18 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						// read via the 512b ram cache
 						REG_SCFG_EXT = 0x8300C000;
         	                                copy8(ROM_LOCATION-setDataBWlist[2]+page, dst, len);
+	                                        REG_SCFG_EXT = 0x83000000;
                 	                        cardStruct[0] = src + len2;
                         	                cardStruct[1] = dst + len2;
                                 	        cardStruct[2] = len - len2;
-	                                        REG_SCFG_EXT = 0x83000000;
 						//(*readCachedRef)(cacheStruct);
 					}
-					REG_SCFG_EXT = 0x83008000;
 					len = cardStruct[2];
 					if(len>0) {
 						src = cardStruct[0];
 						dst = cardStruct[1];
-						REG_SCFG_EXT = 0x83000000;
 						page = (src/512)*512;
 					}
-					sharedAddr[3] = 0;
 				} else if(page == src && len > GAME_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 					if(dsiWramUsed) WRAM_accessCounter++;
 					else only_accessCounter++;
@@ -1172,7 +1140,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 						// copy directly
 						if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
-						fastCopy32(buffer+(src-sector),dst,len2);
+						copy8(buffer+(src-sector),dst,len2);
 						if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 
 						// update cardi common
@@ -1199,18 +1167,16 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						// read via the 512b ram cache
 						if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
                                 	        copy8(buffer+(page-sector), dst, len);
+                	                        if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
         	                                cardStruct[0] = src + len2;
 	                                        cardStruct[1] = dst + len2;
                                         	cardStruct[2] = len - len2;
-                	                        if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 						//(*readCachedRef)(cacheStruct);
 					}
-					REG_SCFG_EXT = 0x83008000;
 					len = cardStruct[2];
 					if(len>0) {
 						src = cardStruct[0];
 						dst = cardStruct[1];
-						REG_SCFG_EXT = 0x83000000;
 						page = (src/512)*512;
 						sector = (src/GAME_READ_SIZE)*GAME_READ_SIZE;
 						if(!dsiWramUsed) WRAM_accessCounter++;

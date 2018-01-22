@@ -119,6 +119,7 @@ static void debugOutput (void) {
 
 static void increaseLoadBarLength (void) {
 	arm9_loadBarLength++;
+	if(loadingScreen == 1) debugOutput();	// Let the loading bar finish before ROM starts
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -352,11 +353,11 @@ void loadRomIntoRam(aFile file) {
 			ROM_LOCATION = 0x0E000000-romSize;
 		}
 
-		arm9_extRAM = true;
-		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
-		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-		arm9_extRAM = false;
-		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
+		//arm9_extRAM = true;
+		//while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
+		//fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
+		//arm9_extRAM = false;
+		//while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
 			for(int i = 0; i < 3; i++)
