@@ -121,6 +121,7 @@ static void debugOutput (void) {
 
 static void increaseLoadBarLength (void) {
 	arm9_loadBarLength++;
+	if(loadingScreen == 1) debugOutput();	// Let the loading bar finish before ROM starts
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -453,7 +454,7 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_ACBE0[i];
 			setDataBWlist[3] = true;
-		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
+		/* } else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
 			for(int i = 0; i < 3; i++) {
 				setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
@@ -462,7 +463,7 @@ void loadRomIntoRam(aFile file) {
 				setDataBWlist_3[i] = dataWhitelist_ADAE0_3[i];
 			}
 			setDataBWlist[3] = true;
-			dataAmount = 3;
+			dataAmount = 3; */
 		} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_YZXJ0[i];
@@ -508,16 +509,20 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ARRE0[i];
-		} else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
+		/* } else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
 				|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
 				|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
 				|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
 			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataBlacklist_AD2E0[i];
+				setDataBWlist[i] = dataBlacklist_AD2E0[i]; */
 		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;
+		/* } else if((ROM_TID == 0x50525741) && (ROM_HEADERCRC == 0xD82BCF56)) {	// Advance Wars: Dual Strike (E)
+			for(int i = 0; i < 3; i++)
+				setDataBWlist[i] = dataBlacklist_AWRP0[i];
+			ROM_LOCATION = 0x0C400000; */
 		} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataBlacklist_A59E0[i];

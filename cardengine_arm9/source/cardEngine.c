@@ -592,7 +592,7 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-			} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
+			/* } else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
 					|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
 				for(int i = 0; i < 3; i++) {
 					setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
@@ -607,7 +607,7 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				whitelist = true;
-				dataAmount = 3;
+				dataAmount = 3; */
 			} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_YZXJ0[i];
@@ -716,7 +716,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_READ_SIZE = _512KB_READ_SIZE;
 
 				ROMinRAM = 2;
-			} else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
+			/* } else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
 					|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
 					|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
 					|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
@@ -730,7 +730,7 @@ int cardRead (u32* cacheStruct) {
 				GAME_CACHE_SLOTS = 0xC;
 				GAME_READ_SIZE = _256KB_READ_SIZE;
 
-				ROMinRAM = 2;
+				ROMinRAM = 2; */
 			} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_ASKE0[i];
@@ -745,6 +745,20 @@ int cardRead (u32* cacheStruct) {
 
 				ROMinRAM = 2;
 				use28MB = 1;
+			/* } else if((ROM_TID == 0x50525741) && (ROM_HEADERCRC == 0xD82BCF56)) {	// Advance Wars: Dual Strike (E)
+				for(int i = 0; i < 3; i++)
+					setDataBWlist[i] = dataBlacklist_AWRP0[i];
+
+				ROM_LOCATION = 0x0C400000;
+				ROM_LOCATION -= 0x4000;
+				ROM_LOCATION -= ARM9_LEN;
+
+				GAME_CACHE_ADRESS_START = 0x0DFD0000;
+				GAME_CACHE_SLOTS = 0x1;
+				GAME_READ_SIZE = _192KB_READ_SIZE;
+
+				ROMinRAM = 2;
+				use28MB = 1; */
 			} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataBlacklist_A59E0[i];
@@ -1301,20 +1315,24 @@ int cardRead (u32* cacheStruct) {
 			{
 				CACHE_READ_SIZE = _1MB_READ_SIZE;
 				only_cacheSlots = only_1MB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+			{
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+				only_cacheSlots = only_256KB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
 					|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
 					|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
 					|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
 					|| (ROM_TID & 0x00FFFFFF) == 0x475049	// PKMN SS
-					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+					|| (ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
 			{
 				CACHE_READ_SIZE = _192KB_READ_SIZE;
 				only_cacheSlots = only_192KB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5341)	// Super Mario 64 DS
+			{
+				CACHE_READ_SIZE = _128KB_READ_SIZE;
+				only_cacheSlots = only_128KB_CACHE_SLOTS;
 			} else {
 				dynamicCaching = true;
 			}
