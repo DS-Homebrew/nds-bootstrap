@@ -436,17 +436,17 @@ int cardRead (u32* cacheStruct) {
 			{
 				CACHE_READ_SIZE = _1MB_READ_SIZE;
 				only_cacheSlots = only_1MB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
+			{
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+				only_cacheSlots = only_256KB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x414441	// PKMN Diamond
 					|| (ROM_TID & 0x00FFFFFF) == 0x415041	// PKMN Pearl
 					|| (ROM_TID & 0x00FFFFFF) == 0x555043	// PKMN Platinum
 					|| (ROM_TID & 0x00FFFFFF) == 0x4B5049	// PKMN HG
 					|| (ROM_TID & 0x00FFFFFF) == 0x475049	// PKMN SS
-					|| (ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+					|| (ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
 			{
 				CACHE_READ_SIZE = _192KB_READ_SIZE;
 				only_cacheSlots = only_192KB_CACHE_SLOTS;
@@ -977,7 +977,6 @@ int cardRead (u32* cacheStruct) {
 						dst = cardStruct[1];
 						page = (src/512)*512;
 					}
-					sharedAddr[3] = 0;
 				} else if(!whitelist && src >= setDataBWlist[1] && src < romSize) {
 					u32 len2=len;
 					if(len2 > 512) {
@@ -1041,7 +1040,6 @@ int cardRead (u32* cacheStruct) {
 						dst = cardStruct[1];
 						page = (src/512)*512;
 					}
-					sharedAddr[3] = 0;
 				} else if(page == src && len > GAME_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 					if(dsiWramUsed) WRAM_accessCounter++;
 					else only_accessCounter++;

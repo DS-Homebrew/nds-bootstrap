@@ -95,22 +95,22 @@ int dataAmount = 0;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
 static void errorOutput (void) {
-	if(loadingScreen == 1) {
+	if(loadingScreen > 0) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
 		arm9_errorColor = true;
-		arm9_stateFlag = ARM9_DISPERR;
 	}
 	// Stop
 	while(1);
 }
 
 static void debugOutput (void) {
-	if(loadingScreen == 1) {
+	if(loadingScreen > 0) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
+		arm9_screenMode = loadingScreen-1;
 		arm9_stateFlag = ARM9_DISPERR;
 		// Wait for completion
 		while (arm9_stateFlag != ARM9_READY);
@@ -119,7 +119,7 @@ static void debugOutput (void) {
 
 static void increaseLoadBarLength (void) {
 	arm9_loadBarLength++;
-	debugOutput();
+	if(loadingScreen == 1) debugOutput();	// Let the loading bar finish before ROM starts
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
