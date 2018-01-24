@@ -821,6 +821,57 @@ static u16 ttt_selColor = 0x03A0;
 
 //static bool ttt_keypressed = false;
 
+static int ttt_drawXpos = 0;
+static int ttt_drawYpos = 0;
+
+static void ttt_drawN (void) {
+	// 1st h line
+	for (y = ttt_drawYpos+0; y <= ttt_drawYpos+39; y++) {
+		for (k = ttt_drawXpos+0; k <= ttt_drawXpos+7; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+	// 2nd h line
+	for (y = ttt_drawYpos+8; y <= ttt_drawYpos+15; y++) {
+		for (k = ttt_drawXpos+8; k <= ttt_drawXpos+15; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+	// 3rd h line
+	for (y = ttt_drawYpos+16; y <= ttt_drawYpos+23; y++) {
+		for (k = ttt_drawXpos+16; k <= ttt_drawXpos+23; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+	// 4th h line
+	for (y = ttt_drawYpos+24; y <= ttt_drawYpos+31; y++) {
+		for (k = ttt_drawXpos+24; k <= ttt_drawXpos+31; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+	// 5th h line
+	for (y = ttt_drawYpos+0; y <= ttt_drawYpos+39; y++) {
+		for (k = ttt_drawXpos+32; k <= ttt_drawXpos+39; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+}
+
+static void ttt_drawT (void) {
+	// Top
+	for (y = ttt_drawYpos+0; y <= ttt_drawYpos+7; y++) {
+		for (k = ttt_drawXpos+0; k <= ttt_drawXpos+39; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+	// Bottom
+	for (y = ttt_drawYpos+8; y <= ttt_drawYpos+39; y++) {
+		for (k = ttt_drawXpos+16; k <= ttt_drawXpos+23; k++) {
+			VRAM_A[y*256+k] = 0x0000;
+		}
+	}
+}
+
 static void arm9_ttt (void) {
 	if(!drawnStuff) {
 		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
@@ -970,6 +1021,101 @@ static void arm9_ttt (void) {
 		ttt_highlighted++;
 		if(ttt_highlighted > 8) ttt_highlighted = 8;
 		//ttt_keypressed = true;
+	}
+
+	if(REG_KEYINPUT & (KEY_L)) {} else {
+		if(ttt_selected[ttt_highlighted] == 0){
+			ttt_selected[ttt_highlighted] = 1;	// N
+			// Set X position
+			switch(ttt_highlighted) {
+				case 0:
+				case 3:
+				case 6:
+				default:
+					ttt_drawXpos = 20;
+					break;
+				case 1:
+				case 4:
+				case 7:
+					ttt_drawXpos = 108;
+					break;
+				case 2:
+				case 5:
+				case 8:
+					ttt_drawXpos = 196;
+					break;
+			}
+			// Set Y position
+			switch(ttt_highlighted) {
+				case 0:
+				case 1:
+				case 2:
+				default:
+					ttt_drawYpos = 8;
+					break;
+				case 3:
+				case 4:
+				case 5:
+					ttt_drawYpos = 76;
+					break;
+				case 6:
+				case 7:
+				case 8:
+					ttt_drawYpos = 144;
+					break;
+			}
+			ttt_drawN();
+		}
+	}
+	if(REG_KEYINPUT & (KEY_R)) {} else {
+		if(ttt_selected[ttt_highlighted] == 0){
+			ttt_selected[ttt_highlighted] = 2;	// T
+			// Set X position
+			switch(ttt_highlighted) {
+				case 0:
+				case 3:
+				case 6:
+				default:
+					ttt_drawXpos = 20;
+					break;
+				case 1:
+				case 4:
+				case 7:
+					ttt_drawXpos = 108;
+					break;
+				case 2:
+				case 5:
+				case 8:
+					ttt_drawXpos = 196;
+					break;
+			}
+			// Set Y position
+			switch(ttt_highlighted) {
+				case 0:
+				case 1:
+				case 2:
+				default:
+					ttt_drawYpos = 8;
+					break;
+				case 3:
+				case 4:
+				case 5:
+					ttt_drawYpos = 76;
+					break;
+				case 6:
+				case 7:
+				case 8:
+					ttt_drawYpos = 144;
+					break;
+			}
+			ttt_drawT();
+		}
+	}
+
+	if(REG_KEYINPUT & (KEY_START)) {} else {
+		// Clear all marks
+		drawnStuff = false;
+		for(i = 0; i < 9; i++) ttt_selected[i] = 0;
 	}
 
 	if(ttt_highlighted == 0) {
