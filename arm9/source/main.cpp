@@ -231,6 +231,8 @@ int main( int argc, char **argv) {
 				consoleInited = true;
 			}
 
+			dbg_printf("nds-bootstrap SDK5\n");
+
 			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
 			getSFCG_ARM9();
