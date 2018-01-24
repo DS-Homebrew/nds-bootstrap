@@ -1290,8 +1290,8 @@ void arm9_main (void)
 		}
 	}
 
-	//REG_IME=0;
-	//REG_EXMEMCNT = 0xE880;
+	REG_IME=0;
+	REG_EXMEMCNT = 0xE880;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	VoidFn arm9code = *(VoidFn*)(0x2FFFE24);
