@@ -41,9 +41,9 @@ u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 u32 a9cardReadSignature4[2]    = {0x04100010, 0x040001A4};
 u32 cardReadStartSignature4[1] = {0xE92D4FF8};
 
-u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
-u32 cardIdStartSignature[1]   = {0xE92D4000};
-u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};
+u32 a9cardIdSignature[2]      = {0x04100010,0xE92D4038};
+u32 cardIdStartSignature[2]   = {0xE92D4010,0xE3A050B8};
+u32 cardIdStartSignatureAlt[1]   = {0xE92D4038};
 u32 cardIdStartSignatureAlt2[1]   = {0xE92D4010};
 u32 cardIdStartSignatureThumb[1]   = {0xB081B500};
 u32 cardIdStartSignatureThumbAlt[1]   = {0x202EB508};
@@ -64,12 +64,14 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
    
-u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
+u32 cardReadDmaStartSignature[1]   = {0xE92D43F8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
 
-u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
+u32 aRandomPatch[4] = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002};
+u32 aRandomPatch2[3] = {0xE59F003C,0xE590001C,0xE3500000};
+
  
 
      
@@ -378,7 +380,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		debug[1] = cardIdEndOffset;
 		cardIdStartOffset =   
 			getOffset((u32*)cardIdEndOffset, -0x100,
-				  (u32*)cardIdStartSignature, 1, -1);
+				  (u32*)cardIdStartSignature, 2, -1);
 		if (!cardIdStartOffset) {
 		cardIdStartOffset =   
 			getOffset((u32*)cardIdEndOffset, -0x100,
@@ -531,22 +533,30 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		debug[13] = arenaLo2Offset;
 	}*/
 	
-	if(moduleParams->sdk_version > 0x3000000
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x544B41	// Doctor Tendo
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x5A4341	// Cars
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x434241	// Harvest Moon DS
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x4C5741)	// TWEWY
-	{
 		u32 randomPatchOffset =  
 				getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 					  (u32*)aRandomPatch, 4, 1);
 			if(randomPatchOffset){
-				*(u32*)(randomPatchOffset+0xC) = 0x0;
+				*(u32*)(randomPatchOffset) = 0xE3A00000;
+				*(u32*)(randomPatchOffset+4) = 0xE12FFF1E;
 			}
 				if (!randomPatchOffset) {
 					//dbg_printf("Random patch not found\n"); Don't bother logging it.
 				}
-	}
+
+		u32 randomPatch2Offset =
+                                getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+                                          (u32*)aRandomPatch2, 3, 1);
+                        if(randomPatch2Offset){
+                                *(u32*)(randomPatch2Offset) = 0xE3A00000;
+                                *(u32*)(randomPatch2Offset+4) = 0xE12FFF1E;
+                        }
+                                if (!randomPatchOffset) {
+                                        //dbg_printf("Random patch not found\n"); Don't bother logging it.
+                                }
+
+
+
 
 	debug[2] = cardEngineLocation;
 

@@ -255,9 +255,31 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 
 	if (!hookLocation) {
 		nocashMessage("ERR_HOOK");
-		return ERR_HOOK;
+		//return ERR_HOOK;
 	}
 
+	if(!hookLocation){
+
+	if((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x4F5356){
+		hookLocation = 0x239227C;
+	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x454756)){
+		hookLocation = 0x2391918;
+	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x425249)){
+                hookLocation = 0x2391918;
+	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415249)){
+                hookLocation = 0x2391918;
+	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x595056)){
+                hookLocation = 0x2391ADC;
+        }
+
+	}
+
+	if (!hookLocation) {
+                nocashMessage("ERR_HOOK");
+                return ERR_HOOK;
+        }
+
+	
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation+16;
 
@@ -291,5 +313,4 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
-
 
