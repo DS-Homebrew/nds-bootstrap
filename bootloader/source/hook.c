@@ -260,24 +260,20 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 
 	if(!hookLocation){
 
-	if((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x4F5356){
-		hookLocation = 0x239227C;
-	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x454756)){
-		hookLocation = 0x2391918;
-	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x425249)){
-                hookLocation = 0x2391918;
-	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415249)){
-                hookLocation = 0x2391918;
-	}else if(((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x595056)){
-                hookLocation = 0x2391ADC;
-        }
+		if(*(u32*)(0x27FF03C) == 0x0002AF18){
+			hookLocation = 0x239227C;
+		}else if(*(u32*)(0x27FF03C) == 0x00028F84){
+			hookLocation = 0x2391918;
+		}else if(*(u32*)(0x27FF03C) == 0x00029164){
+			hookLocation = 0x2391ADC;
+		}
 
 	}
 
 	if (!hookLocation) {
-                nocashMessage("ERR_HOOK");
-                return ERR_HOOK;
-        }
+		nocashMessage("ERR_HOOK");
+		return ERR_HOOK;
+	}
 
 	
 	u32* vblankHandler = hookLocation;
