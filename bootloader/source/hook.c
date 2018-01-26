@@ -260,12 +260,26 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 
 	if(!hookLocation){
 
-		if(*(u32*)(0x27FF03C) == 0x0002AF18){
-			hookLocation = 0x239227C;
+		if(*(u32*)(0x27FF03C) == 0x00022B40){
+			// TODO
+		}else if(*(u32*)(0x27FF03C) == 0x00022BCC){
+			// TODO
 		}else if(*(u32*)(0x27FF03C) == 0x00028F84){
 			hookLocation = 0x2391918;
+		}else if(*(u32*)(0x27FF03C) == 0x0002909C){
+			// TODO
+		}else if(*(u32*)(0x27FF03C) == 0x0002914C){
+			// TODO
 		}else if(*(u32*)(0x27FF03C) == 0x00029164){
 			hookLocation = 0x2391ADC;
+		}else if(*(u32*)(0x27FF03C) == 0x0002A2EC){
+			// TODO
+		}else if(*(u32*)(0x27FF03C) == 0x0002A318){
+			// TODO
+		}else if(*(u32*)(0x27FF03C) == 0x0002AF18){
+			hookLocation = 0x239227C;
+		}else if(*(u32*)(0x27FF03C) == 0x0002C5B4){
+			// TODO
 		}
 
 	}
