@@ -1263,7 +1263,11 @@ void arm9_main (void)
 	// set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while ( arm9_stateFlag != ARM9_BOOTBIN ) {
-		REG_SCFG_EXT = 0x8300C000;
+		if(arm9_extRAM) {
+			REG_SCFG_EXT = 0x8300C000;
+		} else {
+			REG_SCFG_EXT = 0x83008000;
+		}
 		*(u32*)(0x23ffc40) = 01;
 		*(u32*)(0x2fffc40) = 01;
 		arm9_SCFG_EXT = REG_SCFG_EXT;
