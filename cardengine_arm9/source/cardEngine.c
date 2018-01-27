@@ -44,14 +44,14 @@ static u32 romSize;
 
 #define only_CACHE_ADRESS_START 0x0D000000
 #define only_CACHE_ADRESS_SIZE 0x1000000
-#define only_128KB_CACHE_SLOTS 0x80
+#define only_128KB_CACHE_SLOTS 0x7F
 #define only_192KB_CACHE_SLOTS 0x55
 #define only_256KB_CACHE_SLOTS 0x40
 #define only_512KB_CACHE_SLOTS 0x20
 #define only_768KB_CACHE_SLOTS 0x15
 #define only_1MB_CACHE_SLOTS 0x10
 
-vu32* volatile cardStruct = 0x3707BC0;
+vu32* volatile cardStruct = 0x0DFF7BC0;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
@@ -372,8 +372,6 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						buffer = getCacheAddress(slot);
 					}
 
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
-
 					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
 					// transfer the WRAM-B cache to the arm7
@@ -391,8 +389,6 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					
 					// transfer back the WRAM-B cache to the arm9
 					if(dsiWramUsed) transfertToArm9(slot);
-
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 				}
 
 				if(dsiWramUsed) {
@@ -429,9 +425,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					#endif
 
 					// copy directly
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					copy8(buffer+(src-sector),dst,len2);
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 
 					// update cardi common
 					cardStruct[0] = src + len2;
@@ -455,9 +449,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					#endif
 
 					// read via the 512b ram cache
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 					copy8(buffer+(page-sector)+(src%512), dst, len2);
-					if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 					cardStruct[0] = src + len2;
                                         cardStruct[1] = dst + len2;
                                         cardStruct[2] = len - len2;
@@ -506,9 +498,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					#endif
 
 					// read ROM loaded into RAM
-					REG_SCFG_EXT = 0x8300C000;
 					copy8(ROM_LOCATION+src,dst,len2);
-					REG_SCFG_EXT = 0x83008000;
 
 					// update cardi common
 					cardStruct[0] = src + len2;
@@ -532,9 +522,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					#endif
 
 					// read via the 512b ram cache
-					REG_SCFG_EXT = 0x8300C000;
                                         copy8(ROM_LOCATION+page, dst, len);
-                                        REG_SCFG_EXT = 0x83008000;
                                         cardStruct[0] = src + len2;
                                         cardStruct[1] = dst + len2;
                                         cardStruct[2] = len - len2;
@@ -586,9 +574,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read ROM loaded into RAM
-							REG_SCFG_EXT = 0x8300C000;
 							copy8(ROM_LOCATION+src2,dst,len2);
-							REG_SCFG_EXT = 0x83008000;
 
 							// update cardi common
 							cardStruct[0] = src + len2;
@@ -612,9 +598,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read via the 512b ram cache
-							REG_SCFG_EXT = 0x8300C000;
 		                                        copy8(ROM_LOCATION+page2, dst, len);
-                		                        REG_SCFG_EXT = 0x83008000;
                                 		        cardStruct[0] = src + len2;
                                 		        cardStruct[1] = dst + len2;
 		                                        cardStruct[2] = len - len2;
@@ -659,9 +643,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read ROM loaded into RAM
-							REG_SCFG_EXT = 0x8300C000;
 							fastCopy32(ROM_LOCATION+src2,dst,len2);
-							REG_SCFG_EXT = 0x83008000;
 
 							// update cardi common
 							cardStruct[0] = src + len2;
@@ -685,9 +667,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read via the 512b ram cache
-							REG_SCFG_EXT = 0x8300C000;
 							fastCopy32(ROM_LOCATION+page2, cacheBuffer, 512);
-							REG_SCFG_EXT = 0x83008000;
 							*cachePage = page;
 							(*readCachedRef)(cacheStruct);
 						}
@@ -732,9 +712,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read ROM loaded into RAM
-							REG_SCFG_EXT = 0x8300C000;
 							fastCopy32(ROM_LOCATION+src2,dst,len2);
-							REG_SCFG_EXT = 0x83008000;
 
 							// update cardi common
 							cardStruct[0] = src + len2;
@@ -758,9 +736,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							#endif
 
 							// read via the 512b ram cache
-							REG_SCFG_EXT = 0x8300C000;
 							fastCopy32(ROM_LOCATION+page2, cacheBuffer, 512);
-							REG_SCFG_EXT = 0x83008000;
 							*cachePage = page;
 							(*readCachedRef)(cacheStruct);
 						}
@@ -796,9 +772,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// read ROM loaded into RAM
-						REG_SCFG_EXT = 0x8300C000;
 						copy8(ROM_LOCATION+src,dst,len2);
-						REG_SCFG_EXT = 0x83008000;
 
 						// update cardi common
 						cardStruct[0] = src + len2;
@@ -822,9 +796,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// read via the 512b ram cache
-						REG_SCFG_EXT = 0x8300C000;
                         	                copy8(ROM_LOCATION+page, dst, len);
-                	                        REG_SCFG_EXT = 0x83008000;
         	                                cardStruct[0] = src + len2;
 	                                        cardStruct[1] = dst + len2;
                                 	        cardStruct[2] = len - len2;
@@ -861,9 +833,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// read ROM loaded into RAM
-						REG_SCFG_EXT = 0x8300C000;
 						copy8(ROM_LOCATION-setDataBWlist[2]+src,dst,len2);
-						REG_SCFG_EXT = 0x83008000;
 
 						// update cardi common
 						cardStruct[0] = src + len2;
@@ -887,9 +857,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// read via the 512b ram cache
-						REG_SCFG_EXT = 0x8300C000;
         	                                copy8(ROM_LOCATION-setDataBWlist[2]+page, dst, len);
-	                                        REG_SCFG_EXT = 0x83008000;
                 	                        cardStruct[0] = src + len2;
                         	                cardStruct[1] = dst + len2;
                                 	        cardStruct[2] = len - len2;
@@ -948,8 +916,6 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 							buffer = GAME_getCacheAddress(slot);
 						}
 
-						if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
-
 						if(needFlushDCCache) DC_FlushRange(buffer, GAME_READ_SIZE);
 
 						// transfer the WRAM-B cache to the arm7
@@ -967,8 +933,6 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 						// transfer back the WRAM-B cache to the arm9
 						if(dsiWramUsed) transfertToArm9(slot);
-
-						if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 					}
 
 					if(dsiWramUsed) {
@@ -1005,9 +969,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// copy directly
-						if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
 						copy8(buffer+(src-sector),dst,len2);
-						if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
 
 						// update cardi common
 						cardStruct[0] = src + len2;
@@ -1031,9 +993,7 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 						#endif
 
 						// read via the 512b ram cache
-						if(!dsiWramUsed) REG_SCFG_EXT = 0x8300C000;
                                 	        copy8(buffer+(page-sector), dst, len);
-                	                        if(!dsiWramUsed) REG_SCFG_EXT = 0x83008000;
         	                                cardStruct[0] = src + len2;
 	                                        cardStruct[1] = dst + len2;
                                         	cardStruct[2] = len - len2;
