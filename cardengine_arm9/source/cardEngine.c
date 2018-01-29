@@ -548,7 +548,11 @@ int cardRead (u32* cacheStruct) {
 					if(!dsiWramUsed) REG_SCFG_EXT = 0x83000000;
 				}
 
-				updateDescriptor(slot, sector);
+				if(dsiWramUsed) {
+					WRAM_updateDescriptor(slot, sector);
+				} else {
+					updateDescriptor(slot, sector);
+				}
 
 				u32 len2=len;
 				if((src - sector) + len2 > CACHE_READ_SIZE){

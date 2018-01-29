@@ -112,11 +112,6 @@ $(LOADELF)	:	$(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
 	
-dldiengine.bin.o : dldiengine.bin
-
-dldiengine.bin:
-	cp $(CURDIR)/../../data/dldiengine.bin dldiengine.bin
-	
 cardengine_arm7.bin.o : cardengine_arm7.bin
 
 cardengine_arm7.bin:
