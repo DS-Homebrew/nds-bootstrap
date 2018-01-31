@@ -51,7 +51,7 @@ static u32 romSize;
 #define only_768KB_CACHE_SLOTS 0x15
 #define only_1MB_CACHE_SLOTS 0x10
 
-vu32* volatile cardStruct = 0x3707BC0;
+vu32* volatile cardStruct = 0x0C804BC0;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
@@ -266,7 +266,9 @@ int cardRead (u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				for(int i = 0; i < 3; i++)
 					setDataBWlist[i] = dataWhitelist_BXSE0[i];
 
-				GAME_READ_SIZE = _32KB_READ_SIZE;
+				GAME_CACHE_ADRESS_START = 0x0DC40000;
+				GAME_CACHE_SLOTS = 0x1E;
+				GAME_READ_SIZE = _128KB_READ_SIZE;
 
 				ROMinRAM = 2;
 				whitelist = true;
