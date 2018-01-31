@@ -331,6 +331,7 @@ int cardRead (u32* cacheStruct) {
 
 		// ExceptionHandler2 (red screen) blacklist
 		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+		&& (ROM_TID & 0x00FFFFFF) != 0x534D53	// SMSW
 		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
 		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
 		{
@@ -1329,7 +1330,8 @@ int cardRead (u32* cacheStruct) {
 			{
 				CACHE_READ_SIZE = _192KB_READ_SIZE;
 				only_cacheSlots = only_192KB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5341)	// Super Mario 64 DS
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// Super Mario 64 DS
+					|| (ROM_TID & 0x00FFFFFF) == 0x534D53)	// Super Mario Star World
 			{
 				CACHE_READ_SIZE = _128KB_READ_SIZE;
 				only_cacheSlots = only_128KB_CACHE_SLOTS;
