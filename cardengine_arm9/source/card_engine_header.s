@@ -14,6 +14,11 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
+.global ROMinRAM
+.global ROM_TID
+.global ROM_HEADERCRC
+.global ARM9_LEN
+.global romSize
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -33,6 +38,16 @@ fileCluster:
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
+	.word	0x00000000
+ROMinRAM:
+	.word	0x00000000
+ROM_TID:
+	.word	0x00000000
+ROM_HEADERCRC:
+	.word	0x00000000
+ARM9_LEN:
+	.word	0x00000000
+romSize:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

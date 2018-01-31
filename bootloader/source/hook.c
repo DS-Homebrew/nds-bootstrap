@@ -21,6 +21,11 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern u32 ROM_TID;
+extern u32 ROM_HEADERCRC;
+extern u32 ARM9_LEN;
+extern u32 romSize;
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -324,3 +329,10 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	return ERR_NONE;
 }
 
+void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM) {
+	cardEngineLocation9[7] = ROMinRAM;
+	cardEngineLocation9[8] = ROM_TID;
+	cardEngineLocation9[9] = ROM_HEADERCRC;
+	cardEngineLocation9[10] = ARM9_LEN;
+	cardEngineLocation9[11] = romSize;
+}

@@ -280,6 +280,8 @@ void loadBinary_ARM7 (aFile file)
 }
 
 void loadRomIntoRam(aFile file) {
+	u32 ROMinRAM = 0;
+
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -294,13 +296,14 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	/* if((romSize > 0) && (romSize <= 0x01000000)) {
+	if((romSize > 0) && (romSize <= 0x01000000)) {
+		ROMinRAM = 1;
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 		arm9_extRAM = false;
 		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
-	} else { */
+	} else {
 		/* if((ROM_TID == 0x45535842) && (ROM_HEADERCRC == 0x1657CF56)) {		// Sonic Colors (U)
 			for(int i = 0; i < 3; i++)
 				setDataBWlist[i] = dataWhitelist_BXSE0[i];
@@ -315,6 +318,7 @@ void loadRomIntoRam(aFile file) {
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
+			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {
 				arm9_extRAM = true;
 				while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
@@ -342,7 +346,9 @@ void loadRomIntoRam(aFile file) {
 				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 			}
 		}
-	//}
+	}
+
+	hookNdsRetail_ROMinRAM((u32*)ENGINE_LOCATION_ARM9, ROMinRAM);
 }
 
 /*-------------------------------------------------------------------------
