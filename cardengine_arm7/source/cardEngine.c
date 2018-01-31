@@ -43,11 +43,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-static bool delayRan = false;
-
-static bool timeoutRun = true;
-static int timeoutTimer = 0;
-
 static int softResetTimer = 0;
 
 bool ndmaUsed = false;
@@ -172,8 +167,6 @@ void cardRead_arm9() {
 	dbg_hexa(marker);	
 	#endif
 
-	timeoutRun = false;	// If card read received, do not show error screen
-
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
@@ -186,12 +179,6 @@ void cardRead_arm9() {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
-}
-
-void cardRead_delay() {
-	for(int i = 0; i < 30*60; i++) {
-		i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal (used for delay)
-	}
 }
 
 void runCardEngineCheck (void) {
@@ -211,21 +198,7 @@ void runCardEngineCheck (void) {
 		softResetTimer++;
 	}
 
-	if (timeoutRun) {
-		u8 setting = i2cReadRegister(0x4A, 0x73);
-		if(setting == 0x01) {
-			timeoutTimer += 1;
-			if (timeoutTimer == 60*2) {
-				memcpy((u32*)0x02000300,sr_data_error,0x020);
-				i2cWriteRegister(0x4a,0x70,0x01);
-				i2cWriteRegister(0x4a,0x11,0x01);	// If on loading/white screen for a while, the game is incompatible, so show an error screen
-			}
-		} else {
-			timeoutRun = false;
-		}
-	}
-	
-	if(tryLockMutex()) {	
+	if(tryLockMutex()) {
 		initLogging();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
@@ -240,11 +213,6 @@ void runCardEngineCheck (void) {
 		{
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-
-			if(!delayRan) {
-				cardRead_delay();
-				delayRan = true;
-			}
 		}
 		unlockMutex();
 	}
@@ -419,8 +387,6 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	timeoutRun = false;	// Do not show error screen
-
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	//ndmaUsed = false;
 	fileRead(dst,romFile,src,len);
