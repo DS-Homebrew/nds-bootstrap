@@ -266,25 +266,26 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	if(!hookLocation){
 
 		if(*(u32*)(0x27FF03C) == 0x00022B40){
-			// TODO
+			hookLocation = 0x238DED8;
 		}else if(*(u32*)(0x27FF03C) == 0x00022BCC){
-			// TODO
+			hookLocation = 0x238DF60;
 		}else if(*(u32*)(0x27FF03C) == 0x00028F84){
 			hookLocation = 0x2391918;
 		}else if(*(u32*)(0x27FF03C) == 0x0002909C){
-			// TODO
-		}else if(*(u32*)(0x27FF03C) == 0x0002914C){
-			// TODO
-		}else if(*(u32*)(0x27FF03C) == 0x00029164){
+			hookLocation = 0x2391A30;
+		}else if((*(u32*)(0x27FF03C) == 0x0002914C)
+				||(*(u32*)(0x27FF03C) == 0x00029164)){
 			hookLocation = 0x2391ADC;
+		}else if(*(u32*)(0x27FF03C) == 0x00029EE8){
+			hookLocation = 0x2391F70;
 		}else if(*(u32*)(0x27FF03C) == 0x0002A2EC){
-			// TODO
+			hookLocation = 0x23921BC;
 		}else if(*(u32*)(0x27FF03C) == 0x0002A318){
-			// TODO
+			hookLocation = 0x23921D8;
 		}else if(*(u32*)(0x27FF03C) == 0x0002AF18){
 			hookLocation = 0x239227C;
 		}else if(*(u32*)(0x27FF03C) == 0x0002C5B4){
-			// TODO
+			hookLocation = 0x2392E74;
 		}
 
 	}
