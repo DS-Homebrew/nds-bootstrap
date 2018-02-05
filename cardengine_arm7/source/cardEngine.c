@@ -176,6 +176,9 @@ void cardRead_arm9() {
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
+	if(*(u32*)(0x028128ac) == 0x4B434148){
+                *(u32*)(0x028128ac) = 0xA00;
+        }
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	#ifdef DEBUG
