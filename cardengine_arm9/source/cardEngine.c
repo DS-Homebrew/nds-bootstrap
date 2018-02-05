@@ -361,7 +361,7 @@ int cardRead (u32* cacheStruct) {
 
 		// If ROM size is 0x00C00000 or below, then the ROM is in RAM.
 		if((romSize > 0) && (romSize <= 0x00C00000)
-		&& (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941 && !dsiWramUsed) {
+		&& (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941 && (tempNdsHeader[0x080>>2] != 0x012C7066) && !dsiWramUsed) {
 			if(romSize > 0x00800000 && romSize <= 0x00C00000) {
 				use12MB = 1;
 				ROM_LOCATION = 0x0D000000-romSize;
