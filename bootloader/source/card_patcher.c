@@ -30,6 +30,8 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
+u32 swiGetPitchTableSignature[1] = {0x4770DF1B};
+
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
@@ -40,9 +42,6 @@ u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 // sdk > 4 version
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
-
-// sdk 5 version
-//u32 cardReadStartSignature5[1] = {0xE92D4070};	// Is this correct?
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
@@ -66,9 +65,6 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
-
-//u32 cardReadCachedStartSignature5[2]   = {0xE92D4070,0xE59F407C};	// Is this correct? Looks like it, lol.
-//u32 cardReadCachedEndSignature5[4]   = {0xE5900004,0xE3500000,0x13A00001,0x03A00000};	// Is this correct?
    
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
@@ -246,12 +242,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
-	} 
-	/*if(moduleParams->sdk_version > 0x5000000) {
-		cardReadStartSignature = cardReadStartSignature5;
-		cardReadCachedStartSignature = cardReadCachedStartSignature5;
-		cardReadCachedEndSignature = cardReadCachedEndSignature5;
-	}*/
+	}
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
@@ -1155,6 +1146,19 @@ void swapBinary_ARM7(aFile donorfile)
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
 	u32* debug = (u32*)0x03786000;
 
+	u32* patches =  (u32*) cardEngineLocation[0];
+
+	u32 swiGetPitchTableOffset =   
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)swiGetPitchTableSignature, 1, 1);
+    if (!swiGetPitchTableOffset) {
+        dbg_printf("swiGetPitchTable call not found\n");
+    } else {
+		u32* swiGetPitchTablePatch = (u32*) patches[10];
+		copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+		dbg_printf("swiGetPitchTable call found\n");
+	}
+
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
@@ -1182,14 +1186,14 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardIrqEnableOffset) {
         dbg_printf("irq enable not found\n");
         return 0;
-    }
-	debug[0] = cardIrqEnableOffset;
-    dbg_printf("irq enable found\n");
+    } else {
+		debug[0] = cardIrqEnableOffset;
+		dbg_printf("irq enable found\n");
+	}
 
 
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
-	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardIrqEnablePatch = (u32*) patches[2];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];
 
