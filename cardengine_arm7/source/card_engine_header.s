@@ -221,23 +221,21 @@ cacheRef:
 @---------------------------------------------------------------------------------
 branchTo_newGetPitchTable:
 @---------------------------------------------------------------------------------
-	@ldr		r3, =newGetPitchTable
-	@bx	r3
-	@ TODO: somehow jump to newGetPitchTable from main memory, but keep the jump function 4 bytes (code above does not work, and breaks games)
-	bx	lr
-	bx	lr
+	@ TODO: somehow jump to newGetPitchTable from main memory, but keep the function 4 bytes
+	add	r0, r0
+	bx lr
 @---------------------------------------------------------------------------------
 
+	.arm
 @---------------------------------------------------------------------------------
 newGetPitchTable:
 @---------------------------------------------------------------------------------
-	ldr r2, =pitchTable
-    lsl r0, r0, #1
-    ldrh r0, [r2, r0]
+	ldr r12, = pitchTable
+    mov r0, r0, lsl #1
+    ldrh r0, [r12, r0]
 	bx      lr
 @---------------------------------------------------------------------------------
 
-	.arm	
 @---------------------------------------------------------------------------------
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
