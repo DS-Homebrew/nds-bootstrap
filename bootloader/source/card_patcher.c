@@ -1207,6 +1207,17 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 			dbg_printf("swap the arm7 binary");	
 			swapBinary_ARM7(donorFile);
+			// Patch swiGetPitchTable call again
+			swiGetPitchTableOffset =   
+				getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+					  (u32*)swiGetPitchTableSignature, 1, 1);
+			if (!swiGetPitchTableOffset) {
+				dbg_printf("swiGetPitchTable call not found\n");
+			} else {
+				u32* swiGetPitchTablePatch = (u32*) patches[10];
+				copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+				dbg_printf("swiGetPitchTable call found\n");
+			}
 			// apply the arm7 binary swap and the save patch, assume save v2 nds file
 			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		} else {
@@ -1219,6 +1230,17 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 				dbg_printf("swap the arm7 binary");	
 				swapBinary_ARM7(donorFile);
+				// Patch swiGetPitchTable call again
+				swiGetPitchTableOffset =   
+					getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+						  (u32*)swiGetPitchTableSignature, 1, 1);
+				if (!swiGetPitchTableOffset) {
+					dbg_printf("swiGetPitchTable call not found\n");
+				} else {
+					u32* swiGetPitchTablePatch = (u32*) patches[10];
+					copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+					dbg_printf("swiGetPitchTable call found\n");
+				}
 				// apply the arm7 binary swap and the save patch again, assume save v2 nds file
 				saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 			} else {
