@@ -1147,17 +1147,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* debug = (u32*)0x03786000;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
-
-	u32 swiGetPitchTableOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
-              (u32*)swiGetPitchTableSignature, 1, 1);
-    if (!swiGetPitchTableOffset) {
-        dbg_printf("swiGetPitchTable call not found\n");
-    } else {
-		u32* swiGetPitchTablePatch = (u32*) patches[10];
-		copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
-		dbg_printf("swiGetPitchTable call found\n");
-	}
+	u32* cardCheckPullOutPatch = (u32*) patches[1];
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
@@ -1180,6 +1170,19 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_printf("Card check pull out found\n");
 	}
 
+	u32 swiGetPitchTableOffset =   
+        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+              (u32*)swiGetPitchTableSignature, 1, 1);
+    if (!swiGetPitchTableOffset) {
+        dbg_printf("swiGetPitchTable call not found\n");
+    } else {
+		u32* swiGetPitchTablePatch = (0b11100 << 10 | (swiGetPitchTableOffset - cardCheckPullOutOffset+4));
+		u32* swiGetPitchTablePatch2 = (u32*) patches[11];
+		copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+		copyLoop ((u32*)cardCheckPullOutOffset+4, swiGetPitchTablePatch2, 0x8);
+		dbg_printf("swiGetPitchTable call found\n");
+	}
+
 	u32 cardIrqEnableOffset =   
         getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
               (u32*)irqEnableStartSignature, 4, 1);
@@ -1195,7 +1198,6 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
 	u32* cardIrqEnablePatch = (u32*) patches[2];
-	u32* cardCheckPullOutPatch = (u32*) patches[1];
 
 	if(cardCheckPullOutOffset>0)
 		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
@@ -1214,8 +1216,10 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			if (!swiGetPitchTableOffset) {
 				dbg_printf("swiGetPitchTable call not found\n");
 			} else {
-				u32* swiGetPitchTablePatch = (u32*) patches[10];
+				u32* swiGetPitchTablePatch = (0b11100 << 10 | (swiGetPitchTableOffset - cardCheckPullOutOffset+4));
+				u32* swiGetPitchTablePatch2 = (u32*) patches[11];
 				copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+				copyLoop ((u32*)cardCheckPullOutOffset+4, swiGetPitchTablePatch2, 0x8);
 				dbg_printf("swiGetPitchTable call found\n");
 			}
 			// apply the arm7 binary swap and the save patch, assume save v2 nds file
@@ -1237,8 +1241,10 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 				if (!swiGetPitchTableOffset) {
 					dbg_printf("swiGetPitchTable call not found\n");
 				} else {
-					u32* swiGetPitchTablePatch = (u32*) patches[10];
+					u32* swiGetPitchTablePatch = (0b11100 << 10 | (swiGetPitchTableOffset - cardCheckPullOutOffset+4));
+					u32* swiGetPitchTablePatch2 = (u32*) patches[11];
 					copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x4);
+					copyLoop ((u32*)cardCheckPullOutOffset+4, swiGetPitchTablePatch2, 0x8);
 					dbg_printf("swiGetPitchTable call found\n");
 				}
 				// apply the arm7 binary swap and the save patch again, assume save v2 nds file
