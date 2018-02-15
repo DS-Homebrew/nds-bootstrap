@@ -890,6 +890,11 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
+	
+	// Switch to NTR mode BIOS
+	nocashMessage("Switch to NTR mode BIOS");
+	REG_SCFG_ROM = 0x703;
+
 
 	nocashMessage("Start the NDS file");
 	increaseLoadBarLength();	// and finally, 8 dots

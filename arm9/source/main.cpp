@@ -158,8 +158,8 @@ bool isMounted;
 
 void InitSD(){
 	fatUnmount("sd:/");
-	__io_dsisd.shutdown();
-	isMounted = fatMountSimple("sd", &__io_dsisd);  
+	get_io_dsisd()->shutdown();
+	isMounted = fatMountSimple("sd", get_io_dsisd());  
 }
 
 void initMBK() {
@@ -190,9 +190,9 @@ void VcountHandler() {
 //---------------------------------------------------------------------------------
 	if (run_reinittimer) {
 		reinittimer++;
-		if (reinittimer == 90) {
-			InitSD();	// Re-init SD if fatInit is looping
-		}
+		//if (reinittimer == 90) {
+		//	InitSD();	// Re-init SD if fatInit is looping
+		//}
 		if (reinittimer == 180) {
 			if(!consoleInited) {
 				consoleDemoInit();
@@ -216,10 +216,12 @@ int main( int argc, char **argv) {
 
 	// switch to NTR mode
 	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+	__NDSHeader->unitCode = 1;
 
-	InitSD();
-	if (isMounted) {
-		nocashMessage("isMounted");
+	//InitSD();
+	if (fatInitDefault()) {
+		nocashMessage("fatInitDefault");
+		run_reinittimer = false;
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {
@@ -237,9 +239,9 @@ int main( int argc, char **argv) {
 			getSFCG_ARM7();
 		}
 
-		fatInitDefault();
-		nocashMessage("fatInitDefault");
-		reinittimer = 0;
+		//fatInitDefault();
+		//nocashMessage("fatInitDefault");
+		//reinittimer = 0;
 
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
 		switch(romread_LED) {
@@ -261,7 +263,7 @@ int main( int argc, char **argv) {
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-		reinittimer = 0;
+		//reinittimer = 0;
 
 		/*FILE *f_nds_file = fopen(ndsPath.c_str(), "rb");
 
@@ -280,7 +282,7 @@ int main( int argc, char **argv) {
 
 		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
 		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
-		reinittimer = 0;
+		//reinittimer = 0;
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
 			dbg_printf("CPU boosted\n");
@@ -289,8 +291,8 @@ int main( int argc, char **argv) {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_06, 1);
 		}
-		reinittimer = 0;
-		run_reinittimer = false;
+		//reinittimer = 0;
+		//run_reinittimer = false;
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);

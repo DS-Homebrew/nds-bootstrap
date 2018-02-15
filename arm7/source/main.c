@@ -136,7 +136,7 @@ char* tohex(u32 n)
 int main(void) {
 //---------------------------------------------------------------------------------
 	// Switch to NTR Mode
-	REG_SCFG_ROM = 0x703;
+	//REG_SCFG_ROM = 0x703;
 
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
@@ -172,7 +172,7 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	fifoWaitValue32(FIFO_USER_03);
+	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
 	int romread_LED = fifoGetValue32(FIFO_USER_05);
 	if(romread_LED == 1) {
