@@ -6,7 +6,7 @@ before_install:
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 install:
-  - sudo perl devkitARMupdate.pl
+  - perl devkitARMupdate.pl
 
 script:
   - make
