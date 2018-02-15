@@ -196,7 +196,7 @@ int main(void) {
 
 	// Keep the ARM7 mostly idle
 	while (1) {
-		swiWaitForVBlank();
+		swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	}
 }
 
