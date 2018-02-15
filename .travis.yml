@@ -31,4 +31,3 @@ after_success:
         lftp ftp://nds-bootstrap:$BUILD_PASSWORD@joshuadoes.com  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
         lftp sftp://twlbuild:$BUILD_PASSWORD2@labs.projectkaeru.xyz  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
     fi
-	
