@@ -193,7 +193,7 @@ void VcountHandler() {
 		//if (reinittimer == 90) {
 		//	InitSD();	// Re-init SD if fatInit is looping
 		//}
-		if (reinittimer == 180) {
+		if (reinittimer == 360) {
 			if(!consoleInited) {
 				consoleDemoInit();
 				consoleInited = true;
