@@ -28,5 +28,5 @@ after_success:
         GITREV="`git show -s --format='%h'`"
         REV_NAME="nds-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
         cp nds-bootstrap.nds $REV_NAME
-        lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
+        lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
     fi
