@@ -303,6 +303,9 @@ int cardRead (u32* cacheStruct) {
 	u32* cachePage = cacheStruct + 2;
 	u32 commandRead;
 	u32 src = cardStruct[0];
+	if(src <= 0x8000){
+		src = 0x8000+(src & 0x1FF);
+	}
 	if(src==0) {
 		return 0;	// If ROM read location is 0, do not proceed.
 	}
