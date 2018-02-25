@@ -181,10 +181,10 @@ void initMBK() {
 	REG_MBK8=0x07803740;
 }
 
-bool consoleInited = false;
+static bool consoleInited = false;
 
-int reinittimer = 0;
-bool run_reinittimer = true;
+static int reinittimer = 0;
+static bool run_reinittimer = true;
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ void VcountHandler() {
 		//if (reinittimer == 90) {
 		//	InitSD();	// Re-init SD if fatInit is looping
 		//}
-		if (reinittimer == 360) {
+		if (reinittimer == 720) {
 			if(!consoleInited) {
 				consoleDemoInit();
 				consoleInited = true;
@@ -220,8 +220,9 @@ int main( int argc, char **argv) {
 
 	//InitSD();
 	if (fatInitDefault()) {
-		nocashMessage("fatInitDefault");
 		run_reinittimer = false;
+		nocashMessage("fatInitDefault");
+		if (consoleInited) consoleClear();
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {
