@@ -354,7 +354,7 @@ void loadRomIntoRam(aFile file) {
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
-	&& (romSize != 0x012C7066)) {
+	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 		}
