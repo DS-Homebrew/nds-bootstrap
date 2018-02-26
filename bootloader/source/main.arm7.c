@@ -87,7 +87,7 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 
-u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
@@ -336,6 +336,8 @@ void loadBinary_ARM7 (aFile file)
 }
 
 void loadRomIntoRam(aFile file) {
+	u32 ROMinRAM = 0;
+
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -352,11 +354,12 @@ void loadRomIntoRam(aFile file) {
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
-	&& (*(u32*)(0x027FF000+0x080) != 0x012C7066)) {
+	&& (romSize != 0x012C7066)) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 		}
 
+		ROMinRAM = 1;
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
@@ -364,311 +367,281 @@ void loadRomIntoRam(aFile file) {
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWJ0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0xE37BCF56)) {	// Sawaru - Made in Wario (J) (v02)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWJ2[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {	// WarioWare: Touched (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x50575A41) && (ROM_HEADERCRC == 0x8E8FCF56)) {	// WarioWare: Touched (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWP0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x43575A41) && (ROM_HEADERCRC == 0xE10BCF56)) {	// Momo Waliou Zhizao (C)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWC0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x4B575A41) && (ROM_HEADERCRC == 0xB5C6CF56)) {	// Manjyeora! Made in Wario (KS)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWK0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {	// Animal Crossing: Wild World (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ADME0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0x5744CF56)) {	// Animal Crossing: Wild World (U) (v01)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ADME1[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45533241) && (ROM_HEADERCRC == 0xA860CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_A2SE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x50424441) && (ROM_HEADERCRC == 0x53C2CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ADBP0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {	// Resident Evil: Deadly Silence (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ABHE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x4A5A5241) && (ROM_HEADERCRC == 0x82C7CF56)) {	// Rockman ZX (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ARZJ0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x455A5241) && (ROM_HEADERCRC == 0xDBFFCF56)) {	// MegaMan ZX (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ARZE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x505A5241) && (ROM_HEADERCRC == 0xBD7ECF56)) {	// MegaMan ZX (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ARZP0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x4A464641) && (ROM_HEADERCRC == 0xBE5ACF56)) {	// Final Fantasy III (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AFFJ0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45464641) && (ROM_HEADERCRC == 0x70A6CF56)) {	// Final Fantasy III (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AFFE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x50464641) && (ROM_HEADERCRC == 0x1AE7CF56)) {	// Final Fantasy III (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AFFP0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {	// Lunar Knights (U)
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_ALKE0_0[i];
-				setDataBWlist_1[i] = dataWhitelist_ALKE0_1[i];
+				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ALKE0_1[i];
 			}
-			setDataBWlist[3] = true;
 			dataAmount = 1;
 		} else if((ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)) {	// Lunar Knights (E)
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_ALKP0_0[i];
-				setDataBWlist_1[i] = dataWhitelist_ALKP0_1[i];
+				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ALKP0_1[i];
 			}
-			setDataBWlist[3] = true;
 			dataAmount = 1;
 		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
-			setDataBWlist[3] = true;
 		*/
 		} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ACBE0[i];
-			setDataBWlist[3] = true;
 		/* } else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
-				setDataBWlist_1[i] = dataWhitelist_ADAE0_1[i];
-				setDataBWlist_2[i] = dataWhitelist_ADAE0_2[i];
-				setDataBWlist_3[i] = dataWhitelist_ADAE0_3[i];
+				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ADAE0_1[i];
+				if (i < 3) setDataBWlist_2[i] = dataWhitelist_ADAE0_2[i];
+				if (i < 3) setDataBWlist_3[i] = dataWhitelist_ADAE0_3[i];
 			}
-			setDataBWlist[3] = true;
 			dataAmount = 3; */
 		} else if((ROM_TID == 0x4A585A59) && (ROM_HEADERCRC == 0xC0CCCF56)) {	// Rockman ZX Advent (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_YZXJ0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45585A59) && (ROM_HEADERCRC == 0x3057CF56)) {	// MegaMan ZX Advent (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_YZXE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x50585A59) && (ROM_HEADERCRC == 0xB2ADCF56)) {	// MegaMan ZX Advent (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_YZXP0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45463541) && (ROM_HEADERCRC == 0x9EA0CF56)) {	// Professor Layton and the Curious Village (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_A5FE0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)) {	// Tomodachi Collection (J)
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_CCUJ0_0[i];
-				setDataBWlist_1[i] = dataWhitelist_CCUJ0_1[i];
+				if (i != 3) setDataBWlist_1[i] = dataWhitelist_CCUJ0_1[i];
 			}
-			setDataBWlist[3] = true;
 			dataAmount = 1;
 		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x9B26CF56)) {	// Tomodachi Collection (J) (Rev 1)
-			for(int i = 0; i < 3; i++) {
+			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_CCUJ1_0[i];
-				setDataBWlist_1[i] = dataWhitelist_CCUJ1_1[i];
+				if (i < 3) setDataBWlist_1[i] = dataWhitelist_CCUJ1_1[i];
 			}
-			setDataBWlist[3] = true;
 			dataAmount = 1;
 		/* } else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_YF4E0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x50344659) && (ROM_HEADERCRC == 0xDB3BCF56)) {	// Final Fantasy IV (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_YF4P0[i];
-			setDataBWlist[3] = true;
 		} else if((ROM_TID == 0x45555159) && (ROM_HEADERCRC == 0xC2DFCF56)) {	// Chrono Trigger (U)
-			for(int i = 0; i < 3; i++)
-				setDataBWlist[i] = dataWhitelist_YQUE0[i];
-			setDataBWlist[3] = true; */
+			for(int i = 0; i < 7; i++)
+				setDataBWlist[i] = dataWhitelist_YQUE0[i]; */
 		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARRE0[i];
 		/* } else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
 				|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
 				|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
 				|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AD2E0[i]; */
 		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ASKE0[i];
 			ROM_LOCATION = 0x0C400000;
 		/* } else if((ROM_TID == 0x50525741) && (ROM_HEADERCRC == 0xD82BCF56)) {	// Advance Wars: Dual Strike (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AWRP0[i];
 			ROM_LOCATION = 0x0C400000; */
 		} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_A59E0[i];
 			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x4A564341) && (ROM_HEADERCRC == 0x9A94CF56)) {	// Akumajou Dracula: Sougetsu no Juujika (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ACVJ1[i];
 			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ACVE0[i];
 			ROM_LOCATION = 0x0C600000;
 		} else if((ROM_TID == 0x50564341) && (ROM_HEADERCRC == 0x7ACDCF56)) {	// Castlevania: Dawn of Sorrow (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ACVP0[i];
 			ROM_LOCATION = 0x0C480000;
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AGYE0[i];
 		} else if((ROM_TID == 0x50594741) && (ROM_HEADERCRC == 0x0744CF56)) {	// Phoenix Wright: Ace Attorney (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AGYP0[i];
 		} else if((ROM_TID == 0x4A435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ASCJ0[i];
 		} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)	// Sonic Rush (U)
 				|| (ROM_TID == 0x50435341) && (ROM_HEADERCRC == 0x04C8CF56)) {	// Sonic Rush (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ASCE0[i];
 		} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {	// Mario & Luigi: Partners in Time (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARME0[i];
 		} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {	// Mario & Luigi: Partners in Time (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARMP0[i];
 		} else if((ROM_TID == 0x4A334241) && (ROM_HEADERCRC == 0x0C22CF56)) {	// Mario Basketball: 3 on 3 (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AB3J0[i];
 		} else if((ROM_TID == 0x45334241) && (ROM_HEADERCRC == 0xE6D9CF56)) {	// Mario Hoops 3 on 3 (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AB3E0[i];
 		} else if((ROM_TID == 0x50334241) && (ROM_HEADERCRC == 0xB642CF56)) {	// Mario Slam Basketball (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[0] = dataBlacklist_AB3P0[i];
 		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x4B0ECF56)
 				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x23C2CF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_APHJ0[i];
 		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x498ECF56)
 				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x398BCF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J) (Rev 1)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_APHJ1[i];
 		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_APHE0[i];
 		} else if((ROM_TID == 0x50485041) && (ROM_HEADERCRC == 0xF167CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_APHP0[i];
 		} else if((ROM_TID == 0x4B485041) && (ROM_HEADERCRC == 0xA6C2CF56)) {	// Pokemon Bulgasaui Dungeon: Parang Gujodae (KS)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_APHK0[i];
 		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARGE0[i];
 		/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYWE0[i]; */
 		} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
 		} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ADNE0[i];
 		} else if((ROM_TID == 0x4A574B41) && (ROM_HEADERCRC == 0x5CE4CF56)) {	// Hoshi no Kirby: Sanjou! Dorotche Dan (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AKWJ0[i];
 		} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {	// Kirby Squeak Squad (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AKWE0[i];
 		} else if((ROM_TID == 0x50574B41) && (ROM_HEADERCRC == 0x706CCF56)) {	// Kirby Mouse Attack (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AKWP0[i];
 		} else if((ROM_TID == 0x4A593341) && (ROM_HEADERCRC == 0x77E4CF56)) {	// Sonic Rush Adventure (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_A3YJ0[i];
 		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)	// Sonic Rush Adventure (U)
 				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xB96BCF56)	// Sonic Rush Adventure (E)
 				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xD1B2CF56)) {	// Sonic Rush Adventure (E) (v01)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_A3YE0[i];
 		} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_A3YK0[i];
 		} else if((ROM_TID == 0x45575641) && (ROM_HEADERCRC == 0x1652CF56)	// Miami Nights - Singles in the City (U)
 				|| (ROM_TID == 0x50575641) && (ROM_HEADERCRC == 0x8329CF56)) {	// Miami Nights - Singles in the City (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AVWE0[i];
 			ROM_LOCATION = 0x0C680000;
 		} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YCOE0[i];
 		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YW2E0[i];
 			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x50325759) && (ROM_HEADERCRC == 0x8CA3CF56)) {	// Advance Wars: Dark Conflict (E)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YW2P0[i];
 			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x45594659) && (ROM_HEADERCRC == 0xB0CECF56)	// Pokemon Mystery Dungeon: Explorers of Darkness (U)
 				|| (ROM_TID == 0x45544659) && (ROM_HEADERCRC == 0xA0BDCF56)) {	// Pokemon Mystery Dungeon: Explorers of Time (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YFYE0[i];
 		} else if((ROM_TID == 0x4A574B59) && (ROM_HEADERCRC == 0xF999CF56)) {	// Hoshi no Kirby: Ultra Super Deluxe (J)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YKWJ0[i];
 		} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YKWE0[i];
 		} else if((ROM_TID == 0x4B574B59) && (ROM_HEADERCRC == 0xE2E5CF56)) {	// Kirby Ultra Super Deluxe (KS)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YKWK0[i];
 		} else if((ROM_TID == 0x45434A43) && (ROM_HEADERCRC == 0xF0BACF56)) {	// My Japanese Coach: Learn a New Language (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_CJCE0[i];
 			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0xCE77CF56)
 				|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi: Bowser's Inside Story (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_CLJE0[i];
 		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda: Spirit Tracks (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_BKIE0[i];
 		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0x4471CF56)) {	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_BKIE0_patch[i];
 		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_B6ZE0[i];
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
+			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {
 				arm9_extRAM = true;
 				while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
@@ -703,6 +676,8 @@ void loadRomIntoRam(aFile file) {
 			}
 		}
 	}
+
+	hookNdsRetail_ROMinRAM((u32*)ENGINE_LOCATION_ARM9, ROMinRAM);
 }
 
 /*-------------------------------------------------------------------------
@@ -890,7 +865,7 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
-	
+
 	// Switch to NTR mode BIOS
 	nocashMessage("Switch to NTR mode BIOS");
 	REG_SCFG_ROM = 0x703;

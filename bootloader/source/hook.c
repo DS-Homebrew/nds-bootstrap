@@ -21,6 +21,17 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern u32 ROM_TID;
+extern u32 ROM_HEADERCRC;
+extern u32 ARM9_LEN;
+extern u32 romSize;
+
+extern u32 setDataBWlist[7];
+extern u32 setDataBWlist_1[3];
+extern u32 setDataBWlist_2[3];
+extern u32 setDataBWlist_3[3];
+extern u32 setDataBWlist_4[3];
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -292,4 +303,20 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	return ERR_NONE;
 }
 
-
+void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM) {
+	cardEngineLocation9[7] = ROMinRAM;
+	cardEngineLocation9[8] = ROM_TID;
+	cardEngineLocation9[9] = ROM_HEADERCRC;
+	cardEngineLocation9[10] = ARM9_LEN;
+	cardEngineLocation9[11] = romSize;
+	for (int i = 0; i < 7; i++)
+		cardEngineLocation9[12+i] = setDataBWlist[i];
+	for (int i = 0; i < 3; i++)
+		cardEngineLocation9[19+i] = setDataBWlist_1[i];
+	for (int i = 0; i < 3; i++)
+		cardEngineLocation9[22+i] = setDataBWlist_2[i];
+	for (int i = 0; i < 3; i++)
+		cardEngineLocation9[25+i] = setDataBWlist_3[i];
+	for (int i = 0; i < 3; i++)
+		cardEngineLocation9[28+i] = setDataBWlist_4[i];
+}

@@ -14,6 +14,16 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
+.global ROMinRAM
+.global ROM_TID
+.global ROM_HEADERCRC
+.global ARM9_LEN
+.global romSize
+.global setDataBWlist
+.global setDataBWlist_1
+.global setDataBWlist_2
+.global setDataBWlist_3
+.global setDataBWlist_4
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -33,6 +43,40 @@ fileCluster:
 cardStruct:
 	.word	0x00000000
 cacheStruct:
+	.word	0x00000000
+ROMinRAM:
+	.word	0x00000000
+ROM_TID:
+	.word	0x00000000
+ROM_HEADERCRC:
+	.word	0x00000000
+ARM9_LEN:
+	.word	0x00000000
+romSize:
+	.word	0x00000000
+setDataBWlist:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+setDataBWlist_1:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+setDataBWlist_2:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+setDataBWlist_3:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+setDataBWlist_4:
+	.word	0x00000000
+	.word	0x00000000
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -77,7 +121,7 @@ needFlushDCCache:
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r4-r11,lr}
+    stmfd   sp!, {r4-r6,lr}
 
 	@ get back the WRAM C to arm9    
 	ldr     R3,=0x4004000 
@@ -94,7 +138,7 @@ card_read_arm9:
 
 	bl		_blx_r3_stub_card_read
 
-    ldmfd   sp!, {r4-r11,lr}
+    ldmfd   sp!, {r4-r6,lr}
     bx      lr
 _blx_r3_stub_card_read:
 	bx	r3
