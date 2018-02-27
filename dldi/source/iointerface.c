@@ -41,216 +41,8 @@
 #include "sdmmc.h"
 #include "memcpy.h"
 
-extern vu32 word_command;
-extern vu32 word_params;
-extern vu32 words_msg;
-
- // Use the dldi remaining space as temporary buffer : 28k usually available
-extern vu32* tmp_buf_addr;
-extern vu8 allocated_space;
-
-static char hexbuffer [9];
-
-char* tohex(u32 n)
-{
-    unsigned size = 9;
-    char *buffer = hexbuffer;
-    unsigned index = size - 2;
-
-	for (int i=0; i<size; i++) {
-		buffer[i] = '0';
-	}
-
-    while (n > 0)
-    {
-        unsigned mod = n % 16;
-
-        if (mod >= 10)
-            buffer[index--] = (mod - 10) + 'A';
-        else
-            buffer[index--] = mod + '0';
-
-        n /= 16;
-    }
-    buffer[size - 1] = '\0';
-    return buffer;
-}
-
-void sendValue32(u32 value32) {
-	//nocashMessage("sendValue32");
-	//nocashMessage(tohex(myMemUncached(&word_command)));
-	*((vu32*)myMemUncached(&word_params)) = value32;
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
-	IPC_SendSync(0xEE24);
-}
-
-void sendMsg(int size, u8* msg) {
-	//nocashMessage("sendMsg");
-	*((vu32*)myMemUncached(&word_params)) = size;
-	for(int i=0;i<size;i++)  {
-		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
-	}
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
-	IPC_SendSync(0xEE24);
-}
-
-void waitValue32() {
-	nocashMessage("waitValue32");
-	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
-}
-
-u32 getValue32() {
-	nocashMessage("getValue32");
-	return *((vu32*)myMemUncached(&word_params));
-}
-
-void goodOldCopy32(u32* src, u32* dst, int size) {
-	for(int i = 0 ; i<size/4; i++) {
-		dst[i]=src[i];
-	}
-}
-
-void __custom_mpu_setup();
-void __custom_mpu_restore();
-
-//---------------------------------------------------------------------------------
-bool sd_Startup() {
-//---------------------------------------------------------------------------------
-	nocashMessage("sdio_Startup");
-	//if (!isSDAcessible()) return false;
-
-	//REG_SCFG_EXT &= 0xC000;
-  
-	//__custom_mpu_setup();
-
-	sendValue32(SDMMC_HAVE_SD);
-
-	waitValue32();
-
-	int result = getValue32();
-
-	if(result==0) return false;
-
-	sendValue32(SDMMC_SD_START);
-
-	waitValue32();
-
-	result = getValue32();
-
-	//__custom_mpu_restore();
-
-	return result == 0;
-}
-
-//---------------------------------------------------------------------------------
-bool sd_IsInserted() {
-//---------------------------------------------------------------------------------
-	/*if (!isSDAcessible()) return false;
-
-	fifoSendValue32(FIFO_SDMMCDSI,SDMMC_SD_IS_INSERTED);
-
-	fifoWaitValue32(FIFO_SDMMCDSI);
-
-	int result = fifoGetValue32(FIFO_SDMMCDSI);*/
-
-	return true;
-}
-
-//---------------------------------------------------------------------------------
-bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
-//---------------------------------------------------------------------------------
-	nocashMessage("sd_ReadSectors");
-	//if (!isSDAcessible()) return false;
-	FifoMessage msg;
-	int result = 0;
-	sec_t startsector, readsectors;
-
-	//__custom_mpu_setup();
-
-	int max_reads = ((1 << allocated_space) / 512) - 11;
-
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads; 
-
-		vu32* mybuffer = myMemUncached(tmp_buf_addr);
-
-		msg.type = SDMMC_SD_READ_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = mybuffer;
-
-		sendMsg(sizeof(msg), (u8*)&msg);
-
-		waitValue32();
-
-		result = getValue32();
-
-		memcpy(mybuffer, buffer+numreads*512, readsectors*512);
-	}
-
-	//__custom_mpu_restore();
-
-	return result == 0;
-}
-
-//---------------------------------------------------------------------------------
-bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
-//---------------------------------------------------------------------------------
-	nocashMessage("sd_ReadSectors");
-	//if (!isSDAcessible()) return false;
-	FifoMessage msg;
-	int result = 0;
-	sec_t startsector, readsectors;
-
-	//__custom_mpu_setup();
-
-	int max_reads = ((1 << allocated_space) / 512) - 11;
-
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads; 
-
-		vu32* mybuffer = myMemUncached(tmp_buf_addr);
-
-		memcpy(buffer+numreads*512, mybuffer, readsectors*512);
-
-		msg.type = SDMMC_SD_WRITE_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = mybuffer;
-
-		sendMsg(sizeof(msg), (u8*)&msg);
-
-		waitValue32();
-
-		result = getValue32();
-	}
-
-	//__custom_mpu_restore();
-
-	return result == 0;
-}
-
 bool isArm7() {
 	return sdmmc_read16(REG_SDSTATUS0)!=0;
-}
-
-
-//---------------------------------------------------------------------------------
-bool sd_ClearStatus() {
-//---------------------------------------------------------------------------------
-	//if (!isSDAcessible()) return false;
-	return true;
-}
-
-//---------------------------------------------------------------------------------
-bool sd_Shutdown() {
-//---------------------------------------------------------------------------------
-	//if (!isSDAcessible()) return false;
-	return true;
 }
 
 
@@ -265,7 +57,7 @@ bool startup(void) {
 		sdmmc_controller_init();
 		return sdmmc_sdcard_init()==0;
 	} else {
-		return sd_Startup();
+		return false;
 	}
 }
 
@@ -276,7 +68,7 @@ return true if a card is inserted and usable
 -----------------------------------------------------------------*/
 bool isInserted (void) {
 	nocashMessage("isInserted");
-	return sd_IsInserted();
+	return true;
 }
 
 
@@ -287,7 +79,7 @@ return true if the card is idle and ready
 -----------------------------------------------------------------*/
 bool clearStatus (void) {
 	nocashMessage("clearStatus");
-	return sd_ClearStatus();
+	return true;
 }
 
 
@@ -303,11 +95,9 @@ bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	if(isArm7()) {
 		return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
 	} else {
-		return sd_ReadSectors(sector,numSectors,buffer);
+		return false;
 	}
 }
-
-
 
 /*-----------------------------------------------------------------
 writeSectors
@@ -321,7 +111,7 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	if(isArm7()) {
 		return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
 	} else {
-		return sd_WriteSectors(sector,numSectors,buffer);
+		return false;
 	}
 }
 
@@ -334,5 +124,5 @@ return true if the card is no longer active
 -----------------------------------------------------------------*/
 bool shutdown(void) {
 	nocashMessage("shutdown");
-	return sd_Shutdown();
+	return true;
 }
