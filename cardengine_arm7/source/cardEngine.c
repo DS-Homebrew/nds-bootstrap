@@ -36,10 +36,12 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
+bool ndmaUsed = false;
+
 void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-			sdmmc_controller_init();
+			sdmmc_controller_init(false);
 			sdmmc_sdcard_init();
 		}
 		FAT_InitFiles(false);
