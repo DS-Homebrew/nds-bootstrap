@@ -67,7 +67,7 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS];
+static u32 WRAM_cacheDescriptor [WRAM_CACHE_SLOTS] = {0xffffffff};
 static u32 WRAM_cacheCounter [WRAM_CACHE_SLOTS];
 static u32 _128KB_cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _128KB_cacheCounter [_128KB_CACHE_SLOTS];
@@ -75,7 +75,7 @@ static u32 _256KB_cacheDescriptor [_256KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _256KB_cacheCounter [_256KB_CACHE_SLOTS];
 static u32 _512KB_cacheDescriptor [_512KB_CACHE_SLOTS] = {0xffffffff};
 static u32 _512KB_cacheCounter [_512KB_CACHE_SLOTS];
-static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS];
+static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
 static u32 only_cacheCounter [only_128KB_CACHE_SLOTS];
 static u32 WRAM_accessCounter = 0;
 static u32 _128KB_accessCounter = 0;
@@ -92,7 +92,8 @@ static bool dynamicCaching = false;
 static bool flagsSet = false;
 extern u32 ROMinRAM;
 static int use28MB = 0;
-static bool dsiWramUsed = false;
+extern u32 enableExceptionHandler;
+extern u32 dsiWramUsed;
 
 // 1 = start of data address, 2 = end of data address, 3 = data size, 4 = DATAEXCLUDE,
 // 5 = GAME_CACHE_ADRESS_START, 6 = GAME_CACHE_SLOTS, 7 = GAME_READ_SIZE
@@ -307,20 +308,8 @@ int cardRead (u32* cacheStruct) {
 	u32 page = (src/512)*512;
 	
 	if(!flagsSet) {
-		// ExceptionHandler2 (red screen) blacklist
-		if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-		&& (ROM_TID & 0x00FFFFFF) != 0x534D53	// SMSW
-		&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
-		&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
-		{
+		if (enableExceptionHandler) {
 			setExceptionHandler2();
-		}
-
-		if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-		|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
-		|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-		{
-			dsiWramUsed = true;
 		}
 
 		// If ROM size is 0x01C00000 or below, then the ROM is in RAM.

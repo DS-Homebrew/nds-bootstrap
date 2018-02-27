@@ -335,8 +335,27 @@ void loadBinary_ARM7 (aFile file)
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
 }
 
+u32 enableExceptionHandler = true;
+u32 dsiWramUsed = false;
+
 void loadRomIntoRam(aFile file) {
 	u32 ROMinRAM = 0;
+
+	// ExceptionHandler2 (red screen) blacklist
+	if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+	&& (ROM_TID & 0x00FFFFFF) != 0x534D53	// SMSW
+	&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
+	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+	{
+		enableExceptionHandler = false;
+	}
+
+	if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
+	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+	{
+		dsiWramUsed = true;
+	}
 
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
