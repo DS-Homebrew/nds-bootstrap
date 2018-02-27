@@ -1,17 +1,12 @@
 language: cpp
 
 before_install:
-  - wget http://sourceforge.net/projects/devkitpro/files/Automated%20Installer/devkitARMupdate.pl
+  - curl -L https://raw.githubusercontent.com/devkitPro/installer/master/perl/devkitARMupdate.pl -o devkitARMupdate.pl
   - export DEVKITPRO=/home/travis/devkitPro
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 install:
-  - sudo perl devkitARMupdate.pl
-  - wget --no-check-certificate https://codeload.github.com/ahezard/libnds/zip/master -O /tmp/libnds.zip
-  - unzip /tmp/libnds.zip
-  - cd libnds-master
-  - make && sudo make install
-  - cd ..
+  - perl devkitARMupdate.pl
 
 script:
   - make
@@ -28,11 +23,10 @@ addons:
 
 after_success:
   - >
-    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "card" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "dsi" ] || [ "$TRAVIS_BRANCH" == "sdk5" ] || [ "$TRAVIS_BRANCH" == "sdk5dsi" ] || [ "$TRAVIS_BRANCH" == "hb" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
-        REV_NAME="bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
-        cp bootstrap.nds $REV_NAME
-        lftp ftp://nds-bootstrap:$BUILD_PASSWORD@joshuadoes.com  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
-        lftp sftp://twlbuild:$BUILD_PASSWORD2@labs.projectkaeru.xyz  -e "set net:timeout 5; set net:max-retries 2; cd files; put ${REV_NAME}; bye"
+        REV_NAME="dsi-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
+        cp dsi-bootstrap.nds $REV_NAME
+        lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
     fi
