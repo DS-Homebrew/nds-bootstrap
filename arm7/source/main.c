@@ -345,13 +345,6 @@ int main(void) {
 	// Switch to NTR Mode
 	//REG_SCFG_ROM = 0x703;
 
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
-	if(patchOffset == -1) {
-		nocashMessage("dldi not found");
-	}
-	wordCommandAddr = myMemUncached((u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80));
-
 	// read User Settings from firmware
 	readUserSettings();
 	irqInit();
@@ -370,14 +363,6 @@ int main(void) {
 
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-
-	nocashMessage("waiting dldi command");
-	//nocashMessage(tohex(wordCommandAddr));
-	// disable dldi sdmmc driver
-	while(*wordCommandAddr != (vu32)0x027FEE04){} 
-	nocashMessage("sdmmc value received");
-	wordCommandAddr[1] = 0;
-	wordCommandAddr[0] = (vu32)0x027FEE08;
 
 	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
