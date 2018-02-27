@@ -351,7 +351,6 @@ void loadRomIntoRam(aFile file) {
 	}
 
 	if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operation Shooting Star
 	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
 	{
 		dsiWramUsed = true;
@@ -373,7 +372,8 @@ void loadRomIntoRam(aFile file) {
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if((romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
-	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))) {
+	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
+	&& !dsiWramUsed) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
 			ROM_LOCATION = 0x0E000000-romSize;
 		}
