@@ -87,9 +87,7 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 
-u32 setDataBWlist[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
+u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -333,7 +331,27 @@ void loadBinary_ARM7 (aFile file)
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
 }
 
+u32 enableExceptionHandler = true;
+u32 dsiWramUsed = false;
+
 void loadRomIntoRam(aFile file) {
+	u32 ROMinRAM = 0;
+
+	// ExceptionHandler2 (red screen) blacklist
+	if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
+	&& (ROM_TID & 0x00FFFFFF) != 0x534D53	// SMSW
+	&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
+	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+	{
+		enableExceptionHandler = false;
+	}
+
+	if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
+	{
+		dsiWramUsed = true;
+	}
+
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -349,11 +367,13 @@ void loadRomIntoRam(aFile file) {
 	romSize -= ARM9_LEN;
 
 	if((romSize > 0) && (romSize <= 0x00C00000)
-	&& (ROM_TID & 0x00FFFFFF) != 0x524941 && (ROM_TID & 0x00FFFFFF) != 0x534941 && (*(u32*)(0x027FF000+0x080) != 0x012C7066)) {
+	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
+	&& !dsiWramUsed) {
 		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
 			ROM_LOCATION = 0x0D000000-romSize;
 		}
 
+		ROMinRAM = 1;
 		arm9_extRAM = true;
 		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
@@ -361,29 +381,29 @@ void loadRomIntoRam(aFile file) {
 		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_A5TE0[i];
-			setDataBWlist[3] = true;
 		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYIE0[i];
 		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AWRE0[i];
 			ROM_LOCATION = 0x0C400000;
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
+			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {
 				arm9_extRAM = true;
 				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
-				if(dataAmount >= 1) {
+				/*if(dataAmount >= 1) {
 					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
 				}
 				if(dataAmount == 2) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
-				}
+				}*/
 				arm9_extRAM = false;
 				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			} else {
@@ -402,6 +422,8 @@ void loadRomIntoRam(aFile file) {
 			}
 		}
 	}
+
+	hookNdsRetail_ROMinRAM((u32*)ENGINE_LOCATION_ARM9, ROMinRAM);
 }
 
 /*-------------------------------------------------------------------------
@@ -590,6 +612,11 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
+
+	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
+	nocashMessage("Switch to NTR mode BIOS");
+	REG_SCFG_ROM = 0x703;
+
 
 	nocashMessage("Start the NDS file");
 	increaseLoadBarLength();	// and finally, 8 dots

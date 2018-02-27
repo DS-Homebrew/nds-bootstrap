@@ -21,6 +21,16 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern u32 ROM_TID;
+extern u32 ROM_HEADERCRC;
+extern u32 ARM9_LEN;
+extern u32 romSize;
+
+extern u32 enableExceptionHandler;
+extern u32 dsiWramUsed;
+
+extern u32 setDataBWlist[7];
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -245,7 +255,7 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
-	u32* debug = (u32*)0x03786000;
+	u32* debug = (u32*)0x037C4000;
 
 	nocashMessage("hookNdsRetail");
 
@@ -293,3 +303,14 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 }
 
 
+void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM) {
+	cardEngineLocation9[7] = ROMinRAM;
+	cardEngineLocation9[8] = ROM_TID;
+	cardEngineLocation9[9] = ROM_HEADERCRC;
+	cardEngineLocation9[10] = ARM9_LEN;
+	cardEngineLocation9[11] = romSize;
+	cardEngineLocation9[12] = enableExceptionHandler;
+	cardEngineLocation9[13] = dsiWramUsed;
+	for (int i = 0; i < 7; i++)
+		cardEngineLocation9[14+i] = setDataBWlist[i];
+}

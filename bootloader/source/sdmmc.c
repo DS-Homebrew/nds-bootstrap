@@ -159,6 +159,7 @@ void sdmmc_send_command(struct mmcdevice *ctx, uint32_t cmd, uint32_t args) {
     }
 }
 
+
 //---------------------------------------------------------------------------------
 int sdmmc_cardinserted() {
 //---------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ int sdmmc_cardinserted() {
 }
 
 //---------------------------------------------------------------------------------
-void sdmmc_controller_init() {
+void sdmmc_controller_init(bool force) {
 //---------------------------------------------------------------------------------
     deviceSD.isSDHC = 0;
     deviceSD.SDOPT = 0;
@@ -215,34 +216,6 @@ void sdmmc_controller_init() {
 }
 
 //---------------------------------------------------------------------------------
-static u32 calcSDSize(u8* csd, int type) {
-//---------------------------------------------------------------------------------
-    u32 result = 0;
-    if (type == -1) type = csd[14] >> 6;
-    switch (type) {
-        case 0:
-            {
-                u32 block_len = csd[9] & 0xf;
-                block_len = 1 << block_len;
-                u32 mult = (csd[4] >> 7) | ((csd[5] & 3) << 1);
-                mult = 1 << (mult + 2);
-                result = csd[8] & 3;
-                result = (result << 8) | csd[7];
-                result = (result << 2) | (csd[6] >> 6);
-                result = (result + 1) * mult * block_len / 512;
-            }
-            break;
-        case 1:
-            result = csd[7] & 0x3f;
-            result = (result << 8) | csd[6];
-            result = (result << 8) | csd[5];
-            result = (result + 1) * 1024;
-            break;
-    }
-    return result;
-}
-
-//---------------------------------------------------------------------------------
 int sdmmc_sdcard_init() {
 //---------------------------------------------------------------------------------
     setTarget(&deviceSD);
@@ -276,11 +249,16 @@ int sdmmc_sdcard_init() {
     sdmmc_send_command(&deviceSD,0x10609,deviceSD.initarg << 0x10);
     if (deviceSD.error & 0x4) return -1;
 
-    deviceSD.total_size = calcSDSize((u8*)&deviceSD.ret[0],-1);
     deviceSD.clk = 1;
     setckl(1);
 
     sdmmc_send_command(&deviceSD,0x10507,deviceSD.initarg << 0x10);
+    if (deviceSD.error & 0x4) return -1;
+
+    sdmmc_send_command(&deviceSD,0x10437,deviceSD.initarg << 0x10);
+    if (deviceSD.error & 0x4) return -1;
+
+    sdmmc_send_command(&deviceSD,0x1076A,0x0);
     if (deviceSD.error & 0x4) return -1;
 
     sdmmc_send_command(&deviceSD,0x10437,deviceSD.initarg << 0x10);

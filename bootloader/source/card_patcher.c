@@ -222,7 +222,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
-	u32* debug = (u32*)0x03786000;
+	u32* debug = (u32*)0x037C4000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
@@ -1144,7 +1144,7 @@ void swapBinary_ARM7(aFile donorfile)
 }
 
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
-	u32* debug = (u32*)0x03786000;
+	u32* debug = (u32*)0x037C4000;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];

@@ -101,6 +101,69 @@ char* tohex(u32 n)
     return buffer;
 }
 
+
+// The following 3 functions are not in devkitARM r47
+//---------------------------------------------------------------------------------
+u32 readTSCReg(u32 reg) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+ 
+	while(REG_SPICNT & 0x80);
+ 
+	REG_SPIDATA = 0;
+ 
+	while(REG_SPICNT & 0x80);
+
+	REG_SPICNT = 0;
+
+	return REG_SPIDATA;
+}
+
+//---------------------------------------------------------------------------------
+void readTSCRegArray(u32 reg, void *buffer, int size) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+
+	char *buf = (char*)buffer;
+	while(REG_SPICNT & 0x80);
+	int count = 0;
+	while(count<size) {
+		REG_SPIDATA = 0;
+ 
+		while(REG_SPICNT & 0x80);
+
+
+		buf[count++] = REG_SPIDATA;
+		
+	}
+	REG_SPICNT = 0;
+
+}
+
+
+//---------------------------------------------------------------------------------
+u32 writeTSCReg(u32 reg, u32 value) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1)) & 0xFF;
+ 
+	while(REG_SPICNT & 0x80);
+ 
+	REG_SPIDATA = value;
+ 
+	while(REG_SPICNT & 0x80);
+
+	REG_SPICNT = 0;
+
+	return REG_SPIDATA;
+}
+
+
 //---------------------------------------------------------------------------------
 void NDSTouchscreenMode() {
 //---------------------------------------------------------------------------------
@@ -280,7 +343,7 @@ void NDSTouchscreenMode() {
 int main(void) {
 //---------------------------------------------------------------------------------
 	// Switch to NTR Mode
-	REG_SCFG_ROM = 0x703;
+	//REG_SCFG_ROM = 0x703;
 
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
@@ -316,9 +379,9 @@ int main(void) {
 	wordCommandAddr[1] = 0;
 	wordCommandAddr[0] = (vu32)0x027FEE08;
 
-	fifoWaitValue32(FIFO_USER_03);
+	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
-	int romread_LED = fifoGetValue32(FIFO_DSWIFI);
+	int romread_LED = fifoGetValue32(FIFO_USER_05);
 	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x72, 0x01);		// Set to use WiFi LED as card read indicator
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
@@ -343,7 +406,7 @@ int main(void) {
 
 	// Keep the ARM7 mostly idle
 	while (1) {
-		swiWaitForVBlank();
+		swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	}
 }
 
