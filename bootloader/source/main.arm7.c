@@ -349,6 +349,7 @@ void loadRomIntoRam(aFile file) {
 	}
 
 	if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
+	|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// The Legend of Zelda: Spirit Tracks
 	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
 	{
 		dsiWramUsed = true;
