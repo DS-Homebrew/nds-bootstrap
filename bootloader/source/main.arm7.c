@@ -350,6 +350,7 @@ void loadRomIntoRam(aFile file) {
 
 	if((ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
 	|| (ROM_TID & 0x00FFFFFF) == 0x575A41	// WarioWare: Touched
+	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
 	|| (ROM_TID & 0x00FFFFFF) == 0x414259	// Bomberman 2
 	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operate Shooting Star
 	|| (ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
