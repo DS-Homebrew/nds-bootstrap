@@ -33,7 +33,7 @@ u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
 u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
 u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
-//u32 j_GetPitchTableSignature1Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};	// Breaks Bomberman, for some reason
+u32 j_GetPitchTableSignature1Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
 u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
 u32 j_GetPitchTableSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803829};
 u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
@@ -1160,14 +1160,14 @@ void patchGetPitchTable (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
 				  (u32*)j_GetPitchTableSignature1Alt1, 4, 1);
 	}
-	/*if (!swiGetPitchTableOffset) {
+	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 1 not found\n");
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
 				  (u32*)j_GetPitchTableSignature1Alt2, 3, 1);
-	}*/
+	}
 	if (!swiGetPitchTableOffset) {
-		dbg_printf("swiGetPitchTable SDK2 call alt 1 not found\n");
+		dbg_printf("swiGetPitchTable SDK2 call alt 2 not found\n");
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
 				  (u32*)j_GetPitchTableSignature3, 3, 1);
