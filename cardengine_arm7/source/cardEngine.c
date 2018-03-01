@@ -32,6 +32,7 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
+extern u32 romread_LED;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
@@ -71,35 +72,33 @@ void initLogging() {
 }
 
 void cardReadLED (bool on) {
-	u8 setting = i2cReadRegister(0x4A, 0x72);
-	
 	if(on) {
-		switch(setting) {
-			case 0x00:
+		switch(romread_LED) {
+			case 0:
 			default:
 				break;
-			case 0x01:
+			case 1:
 				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
 				break;
-			case 0x02:
+			case 2:
 				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
 				break;
-			case 0x03:
+			case 3:
 				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
 				break;
 		}
 	} else {
-		switch(setting) {
-			case 0x00:
+		switch(romread_LED) {
+			case 0:
 			default:
 				break;
-			case 0x01:
+			case 1:
 				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 				break;
-			case 0x02:
+			case 2:
 				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
 				break;
-			case 0x03:
+			case 3:
 				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
 				break;
 		}

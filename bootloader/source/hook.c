@@ -21,6 +21,8 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern unsigned long romread_LED;
+
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
@@ -292,6 +294,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *ipcSyncHandler;
 	cardEngineLocation[4] = file.firstCluster;
+	cardEngineLocation[7] = romread_LED;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 

@@ -1156,17 +1156,16 @@ void patchGetPitchTable (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
 				  (u32*)j_GetPitchTableSignatureAlt1, 4, 1);
-		if (!swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable call alt not found\n");
-			swiGetPitchTableOffset =   
-				getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
-					  (u32*)swiGetPitchTableSignature5, 4, 1);
-		}
-		if (!swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable call SDK5 not found\n");
-		} else {
-			sdk5 = true;
-		}
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable call alt not found\n");
+		sdk5 = true;
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+				  (u32*)swiGetPitchTableSignature5, 4, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable call SDK5 not found\n");
 	}
 	if (swiGetPitchTableOffset>0) {
 		dbg_printf("swiGetPitchTable call found\n");

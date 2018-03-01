@@ -44,6 +44,7 @@ Helpful information:
 #include <nds/arm7/audio.h>
 
 #include "fat.h"
+#include "i2c.h"
 //#include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
@@ -86,6 +87,7 @@ extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
+extern unsigned long romread_LED;
 
 u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
@@ -366,7 +368,7 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if((romSize > 0) && (romSize <= 0x00C00000)
+	if((romSize > 0) && (romSize <= 0x00C00000) && ((ROM_TID & 0x00FFFFFF) != 0x524941) && ((ROM_TID & 0x00FFFFFF) != 0x534941)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
 		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
@@ -612,6 +614,10 @@ void arm7_main (void) {
 	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
+
+	if(romread_LED == 1) {
+		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+	}
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 	nocashMessage("Switch to NTR mode BIOS");

@@ -14,6 +14,7 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
+.global romread_LED
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -33,6 +34,8 @@ fileCluster:
 cardStruct:
 	.word	0x00000000
 cacheStruct:
+	.word	0x00000000
+romread_LED:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
