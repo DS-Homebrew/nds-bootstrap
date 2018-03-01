@@ -32,7 +32,7 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
 u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
-u32 j_GetPitchTableSignatureAlt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000BAEB};
+u32 j_GetPitchTableSignatureAlt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
 u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // Subroutine function signatures arm9
