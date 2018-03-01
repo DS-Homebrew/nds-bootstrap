@@ -42,8 +42,6 @@ bool eepromPageErase (u32 dst);
 u32 cardId (void);
 bool cardRead (u32 dma,  u32 src, void *dst, u32 len);
 
-u16 pitchTable[0x300];
-
 #ifdef __cplusplus
 }
 #endif

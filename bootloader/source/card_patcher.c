@@ -1174,7 +1174,7 @@ void patchGetPitchTable (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		} else {
 			u32* swiGetPitchTablePatch = (u32*) patches[10];
-			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0x10);
+			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}
 }
