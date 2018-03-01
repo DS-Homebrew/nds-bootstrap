@@ -342,10 +342,10 @@ void loadRomIntoRam(aFile file) {
 	u32 ROMinRAM = 0;
 
 	// ExceptionHandler2 (red screen) blacklist
-	if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-	&& (ROM_TID & 0x00FFFFFF) != 0x534D53	// SMSW
-	&& (ROM_TID & 0x00FFFFFF) != 0x443241	// NSMB
-	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// AC:WW
+	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
+	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
+	|| (ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
+	|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
 	{
 		enableExceptionHandler = false;
 	}
