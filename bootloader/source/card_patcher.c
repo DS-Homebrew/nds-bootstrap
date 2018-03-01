@@ -35,6 +35,7 @@ u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x000047
 u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
 //u32 j_GetPitchTableSignature1Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};	// Breaks Bomberman, for some reason
 u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
+u32 j_GetPitchTableSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803829};
 u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // Subroutine function signatures arm9
@@ -1173,6 +1174,12 @@ void patchGetPitchTable (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+				  (u32*)j_GetPitchTableSignature4, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK4 call not found\n");
 		sdk5 = true;
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
