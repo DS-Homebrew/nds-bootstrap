@@ -12,6 +12,7 @@
 .global irqSig
 .global sdmmc_engine_size
 .global commandAddr
+.global ntrModeTouch
 
 
 sdmmc_engine_size:
@@ -21,6 +22,8 @@ commandAddr:
 irqHandler:
 	.word	0x00000000
 irqSig:
+	.word	0x00000000
+ntrModeTouch:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

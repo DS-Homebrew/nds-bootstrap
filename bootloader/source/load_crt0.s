@@ -29,6 +29,7 @@
 	.global argStart
 	.global argSize
 	.global dsiSD
+	.global ntrMode
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -52,6 +53,8 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
+ntrMode:
+	.word	0x00000000
 
 startUp:
 	mov	r0, #0x04000000

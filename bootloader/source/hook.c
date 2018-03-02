@@ -20,6 +20,8 @@
 #include "common.h"
 #include "sdengine_bin.h"
 
+extern unsigned long ntrMode;
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -245,6 +247,7 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
 	
 	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
+	sdEngineLocation[4] = ntrMode;
 	
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

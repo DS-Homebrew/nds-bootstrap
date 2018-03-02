@@ -29,7 +29,6 @@
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
-#include "bootsplash.h"
 
 using namespace std;
 
@@ -40,7 +39,7 @@ static inline int dbg_printf( const char* format, ... )
 	if(!debug) return 0;
 	
 	static FILE * debugFile;
-	debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+	debugFile = fopen ("fat:/NDSBTSRPHB.LOG","a");
 	
 	va_list args;
     va_start( args, format );
@@ -66,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename) {
+void runFile(string filename, bool ntrMode) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -99,7 +98,7 @@ void runFile(string filename) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], ntrMode, argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -135,35 +134,44 @@ static void myFIFOValue32Handler(u32 value,void* data)
 	dbg_printf( "ARM7 data %x\n", value );
 }
 
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
 int main( int argc, char **argv) {
 
 	bool ntrMode = false;
 
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
-
-	if (argc >= 2) {
-		if ( strcasecmp (argv[1], "NTR") == 0 ) {
-			ntrMode = true;
-		}		
-	}
-	
-	if(ntrMode) {
-		// REG_SCFG_CLK = 0x80;
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-		fifoSendValue32(FIFO_USER_06, 1);
-	}
 	
 	if (fatInitDefault()) {
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+
+		ntrMode = bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE",1);
 		
-		if(argc < 2 && bootstrapini.GetInt("NDS-BOOTSTRAP","BOOTSPLASH",0) == 1) {	
-			// Start BootSplash. No button triggers for now since ini/conf system is used to configure that.
-			BootSplashInit();
+		if(ntrMode) {
+			// REG_SCFG_CLK = 0x80;
+			REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+			fifoSendValue32(FIFO_MAXMOD, 1);
 		}
 
-		consoleDemoInit();
-		
+		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
+			debug=true;			
+			
+			consoleDemoInit();
+
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			
+			getSFCG_ARM9();
+			//getSFCG_ARM7();
+		}
+
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
 			if(REG_SCFG_MC == 0x11) { 
 				printf("Please insert a cartridge...\n");
@@ -178,32 +186,21 @@ int main( int argc, char **argv) {
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
 		
 		if (0 != argc ) {
-			printf("arguments passed\n");
+			dbg_printf("arguments passed\n");
 			int i;
 			for (i=0; i<argc; i++ ) {
 				if (argv[i]) printf("[%d] %s\n", i, argv[i]);
 			}
-			printf("\n");
+			dbg_printf("\n");
 		} else {
-			printf("No arguments passed!\n");
+			dbg_printf("No arguments passed!\n");
 		}
-		
+	
 		if(ntrMode) {
 			printf("NTR mode enabled\n");
 		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;			
-			
-			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-			
-			getSFCG_ARM9();
-			getSFCG_ARM7();
-		} else {
-		
-		}
-	
-		
+
+
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
@@ -220,11 +217,12 @@ int main( int argc, char **argv) {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
 
-		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");	
+		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
+		ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");
-			REG_SCFG_CLK |= 0x1;
+			//REG_SCFG_CLK |= 0x1;
 		} else {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
@@ -234,30 +232,9 @@ int main( int argc, char **argv) {
 			dbg_printf("ARM9_SCFG_EXT locked\n");
 			REG_SCFG_EXT = 0x03000000; // NAND/SD Access
 		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE_SWITCH",0) == 1) {		
-			std::string	bootstrapPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "BOOTSTRAP_PATH", "");
-			
-			// run an argv file
-			
-			dbg_printf("NTR MODE SWITCH\n");		
-			
-			if(!ntrMode) {
-				dbg_printf("RERUN BOOTSTRAP in NTR mode via argv\n");				
-				dbg_printf("Running %s\n", bootstrapPath.c_str());
-				
-				runFile(bootstrapPath.c_str());
-			} else {				
-				dbg_printf("Running %s\n", ndsPath.c_str());
-				
-				runFile(ndsPath.c_str());
-			}
-		} else {
-			printf("TWL MODE enabled\n");			
-			dbg_printf("Running %s\n", ndsPath.c_str());
-					
-			runFile(ndsPath.c_str());
-		}		
+
+		dbg_printf("Running %s\n", ndsPath.c_str());
+		runFile(ndsPath.c_str(), ntrMode);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

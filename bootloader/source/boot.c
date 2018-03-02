@@ -77,6 +77,7 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern unsigned long ntrMode;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
