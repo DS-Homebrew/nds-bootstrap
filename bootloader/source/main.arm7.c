@@ -331,6 +331,10 @@ void loadBinary_ARM7 (aFile file)
 	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
 	ndsHeader[0x024>>2] = 0;
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
+
+	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
+	nocashMessage("Switch to NTR mode BIOS");
+	REG_SCFG_ROM = 0x703;
 }
 
 u32 enableExceptionHandler = true;
@@ -624,11 +628,6 @@ void arm7_main (void) {
 	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 	}
-
-	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
-	nocashMessage("Switch to NTR mode BIOS");
-	REG_SCFG_ROM = 0x703;
-
 
 	nocashMessage("Start the NDS file");
 	increaseLoadBarLength();	// and finally, 8 dots
