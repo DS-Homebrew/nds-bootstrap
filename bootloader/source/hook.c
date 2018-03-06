@@ -270,8 +270,12 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 		return ERR_HOOK;
 	}
 
-	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation+16;
+	u32* vblankHandler = hookLocation;		/*!< vertical blank interrupt mask */
+	u32* networkHandler = hookLocation+7;	/*!< serial interrupt mask */
+	u32* cartHandler = hookLocation+13;		/*!< GBA cartridge interrupt mask */
+	u32* ipcSyncHandler = hookLocation+16;	/*!< IPC sync interrupt mask */
+	u32* cardHandler = hookLocation+19;		/*!< interrupt mask DS Card Slot*/
+	u32* cardLineHandler = hookLocation+20;	/*!< interrupt mask */
 
 	debug[9] = hookLocation;
 

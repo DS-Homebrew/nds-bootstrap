@@ -33,9 +33,10 @@ u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
 u32 swi12Signature[1] = {0x4770DF12};	// LZ77UnCompReadByCallbackWrite16bit
 u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
-u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
-u32 j_GetPitchTableSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
-u32 j_GetPitchTableSignature1Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
+u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
+u32 j_GetPitchTableSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
+u32 j_GetPitchTableSignature1Alt3[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
+u32 j_GetPitchTableSignature1Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
 u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
 u32 j_GetPitchTableSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
 u32 j_GetPitchTableSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03804119};
@@ -1196,6 +1197,12 @@ void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 3 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature1Alt4, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call alt 4 not found\n");
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
 				  (u32*)j_GetPitchTableSignature3, 3, 1);
