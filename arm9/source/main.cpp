@@ -114,7 +114,6 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 			case 2:
 				powerOff(PM_BACKLIGHT_TOP);
 				powerOn(PM_BACKLIGHT_BOTTOM);
-				lcdMainOnBottom();	// Move loading screen to top screen
 				break;
 			case 3:
 				powerOff(PM_BACKLIGHT_TOP);
