@@ -24,6 +24,9 @@
 #include "fat.h"
 #include "i2c.h"
 
+#define REG_SEND_FIFO	(*((vu32*)0x04000188))
+#define REG_RECV_FIFO	(*((vu32*)0x04100000))
+
 static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
@@ -110,9 +113,8 @@ void log_arm9() {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	u32 marker = *(vu32*)(sharedAddr+3);
 
-	dbg_printf("\ncard read received\n");
+	dbg_printf("\nlog command received\n");
 
 	if(calledViaIPC) {
 		dbg_printf("\ntriggered via IPC\n");
@@ -125,10 +127,6 @@ void log_arm9() {
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);
-
-	dbg_printf("\nlog only \n");
 	#endif
 }
 
@@ -136,10 +134,9 @@ void cardRead_arm9() {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	u32 marker = *(vu32*)(sharedAddr+3);
 
 	#ifdef DEBUG
-	dbg_printf("\ncard read received v2\n");
+	dbg_printf("\ncard read received\n");
 
 	if(calledViaIPC) {
 		dbg_printf("\ntriggered via IPC\n");
@@ -153,8 +150,6 @@ void cardRead_arm9() {
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);	
 	#endif
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
@@ -179,6 +174,48 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
+
+	if(tryLockMutex()) {	
+		initLogging();
+
+		//nocashMessage("runCardEngineCheck mutex ok");
+
+		switch(REG_RECV_FIFO) {
+			case 0x026ff800:
+				log_arm9();
+				REG_SEND_FIFO = 0x55AAAA55;	//send done command to arm9
+				break;
+			case 0x025FFB08:
+				cardRead_arm9();
+				REG_SEND_FIFO = 0x55AAAA55;	//send done command to arm9
+				break;
+			case 0:
+			default:
+				break;
+		}
+		unlockMutex();
+	}
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerFIFO(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif	
+	
+	calledViaIPC = true;
+
+	runCardEngineCheck();
+}
+
+
+void myIrqHandlerVBlank(void) {
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+	
+	calledViaIPC = false;
 
 	// Control volume with the - and + buttons.
 	u8 volLevel;
@@ -284,46 +321,6 @@ void runCardEngineCheck (void) {
 	}
 	REG_MASTER_VOLUME = volLevel;
 
-	if(tryLockMutex()) {	
-		initLogging();
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-
-		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-		{			
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-		{
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-		unlockMutex();
-	}
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerFIFO(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerFIFO");
-	#endif	
-	
-	calledViaIPC = true;
-	
-	runCardEngineCheck();
-}
-
-
-void myIrqHandlerVBlank(void) {
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerVBlank");
-	#endif	
-	
-	calledViaIPC = false;
-	
 	runCardEngineCheck();
 }
 
