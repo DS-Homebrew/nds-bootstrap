@@ -193,6 +193,10 @@ void accessCounterIncrease() {
 	}
 }
 
+void waitForArm7() {
+	while(sharedAddr[3] != (vu32)0);
+}
+
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 
@@ -243,10 +247,6 @@ int cardRead (u32* cacheStruct) {
 			{
 				CACHE_READ_SIZE = _1MB_READ_SIZE;
 				only_cacheSlots = only_1MB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x343243)	// Phantasy Star 0
-			{
-				CACHE_READ_SIZE = _512KB_READ_SIZE;
-				only_cacheSlots = only_512KB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
 					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
 			{
@@ -271,7 +271,7 @@ int cardRead (u32* cacheStruct) {
 
 	IPC_SendSync(0xEE24);
 
-	while(sharedAddr[3] != (vu32)0);
+	waitForArm7();
 	// -------------------------------------*/
 	#endif
 	
@@ -292,7 +292,7 @@ int cardRead (u32* cacheStruct) {
 
 			IPC_SendSync(0xEE24);
 
-			while(sharedAddr[3] != (vu32)0);
+			waitForArm7();
 
 		} else {
 			// read via the main RAM/DSi WRAM cache
@@ -322,7 +322,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						
 						// transfer back the WRAM-B cache to the arm9
 						transfertToArm9(slot);
@@ -353,7 +353,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						// -------------------------------------*/
 						#endif
 
@@ -377,7 +377,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						// -------------------------------------*/
 						#endif
 
@@ -418,7 +418,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						
 						REG_SCFG_EXT = 0x83000000;
 					}
@@ -448,7 +448,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						// -------------------------------------*/
 						#endif
 
@@ -474,7 +474,7 @@ int cardRead (u32* cacheStruct) {
 
 						IPC_SendSync(0xEE24);
 
-						while(sharedAddr[3] != (vu32)0);
+						waitForArm7();
 						// -------------------------------------*/
 						#endif
 
@@ -526,7 +526,7 @@ int cardRead (u32* cacheStruct) {
 
 				IPC_SendSync(0xEE24);
 
-				while(sharedAddr[3] != (vu32)0);
+				waitForArm7();
 				// -------------------------------------*/
 				#endif
 
@@ -552,7 +552,7 @@ int cardRead (u32* cacheStruct) {
 
 				IPC_SendSync(0xEE24);
 
-				while(sharedAddr[3] != (vu32)0);
+				waitForArm7();
 				// -------------------------------------
 				#endif
 
@@ -602,7 +602,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------
 					#endif
 
@@ -628,7 +628,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------
 					#endif
 
@@ -667,7 +667,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------*/
 					#endif
 
@@ -693,7 +693,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------
 					#endif
 
@@ -732,7 +732,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------*/
 					#endif
 
@@ -758,7 +758,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------
 					#endif
 
@@ -791,7 +791,7 @@ int cardRead (u32* cacheStruct) {
 
 			IPC_SendSync(0xEE24);
 
-			while(sharedAddr[3] != (vu32)0);
+			waitForArm7();
 		} else {
 			accessCounterIncrease();
 
@@ -837,7 +837,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 
 					// transfer back the WRAM-B cache to the arm9
 					if(dsiWramUsed) transfertToArm9(slot);
@@ -874,7 +874,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------*/
 					#endif
 
@@ -900,7 +900,7 @@ int cardRead (u32* cacheStruct) {
 
 					IPC_SendSync(0xEE24);
 
-					while(sharedAddr[3] != (vu32)0);
+					waitForArm7();
 					// -------------------------------------*/
 					#endif
 
