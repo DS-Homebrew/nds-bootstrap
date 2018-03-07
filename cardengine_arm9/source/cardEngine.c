@@ -65,6 +65,7 @@ static u32 WRAM_accessCounter = 0;
 static u32 only_accessCounter = 0;
 
 static u32 CACHE_READ_SIZE = _128KB_READ_SIZE;
+static u32 only_cacheSlots = only_128KB_CACHE_SLOTS;
 
 static bool flagsSet = false;
 extern u32 ROMinRAM;
@@ -103,7 +104,7 @@ int WRAM_allocateCacheSlot() {
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = only_accessCounter;
-	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<only_cacheSlots; i++) {
 		if(only_cacheCounter[i]<=lowerCounter) {
 			lowerCounter = only_cacheCounter[i];
 			slot = i;
@@ -136,7 +137,7 @@ int WRAM_getSlotForSector(u32 sector) {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<only_cacheSlots; i++) {
 		if(only_cacheDescriptor[i]==sector) {
 			return i;
 		}
@@ -159,7 +160,7 @@ vu8* WRAM_getCacheAddress(int slot) {
 }
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+	return (vu32*)(only_CACHE_ADRESS_START+slot*CACHE_READ_SIZE);
 }
 
 vu8* GAME_getCacheAddress(int slot) {
@@ -237,6 +238,22 @@ int cardRead (u32* cacheStruct) {
 
 		if(dsiWramUsed) {
 			CACHE_READ_SIZE = _32KB_READ_SIZE;
+		} else if (ROMinRAM==0) {
+			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+			{
+				CACHE_READ_SIZE = _1MB_READ_SIZE;
+				only_cacheSlots = only_1MB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x343243)	// Phantasy Star 0
+			{
+				CACHE_READ_SIZE = _512KB_READ_SIZE;
+				only_cacheSlots = only_512KB_CACHE_SLOTS;
+			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941	// Yoshi's Island DS
+					|| (ROM_TID & 0x00FFFFFF) == 0x4A4C43)	// Mario & Luigi: Bowser's Inside Story
+			{
+				CACHE_READ_SIZE = _256KB_READ_SIZE;
+				only_cacheSlots = only_256KB_CACHE_SLOTS;
+			}
 		}
 		flagsSet = true;
 	}
@@ -392,11 +409,11 @@ int cardRead (u32* cacheStruct) {
 
 						REG_SCFG_EXT = 0x83008000;
 
-						if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
+						if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
 						// write the command
 						sharedAddr[0] = buffer;
-						sharedAddr[1] = _128KB_READ_SIZE;
+						sharedAddr[1] = CACHE_READ_SIZE;
 						sharedAddr[2] = sector;
 						sharedAddr[3] = commandRead;
 
@@ -410,8 +427,8 @@ int cardRead (u32* cacheStruct) {
 					updateDescriptor(slot, sector);
 
 					u32 len2=len;
-					if((src - sector) + len2 > _128KB_READ_SIZE){
-						len2 = sector - src + _128KB_READ_SIZE;
+					if((src - sector) + len2 > CACHE_READ_SIZE){
+						len2 = sector - src + CACHE_READ_SIZE;
 					}
 
 					if(len2 > 512) {
@@ -474,7 +491,7 @@ int cardRead (u32* cacheStruct) {
 						src = cardStruct[0];
 						dst = cardStruct[1];
 						page = (src/512)*512;
-						sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+						sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
 						only_accessCounter++;
 					}
 				}
