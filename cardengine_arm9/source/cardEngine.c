@@ -248,8 +248,7 @@ int cardRead (u32* cacheStruct) {
 				CACHE_READ_SIZE = _512KB_READ_SIZE;
 				only_cacheSlots = only_512KB_CACHE_SLOTS;
 			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941	// Yoshi's Island DS
-					|| (ROM_TID & 0x00FFFFFF) == 0x4A4C43)	// Mario & Luigi: Bowser's Inside Story
+					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
 			{
 				CACHE_READ_SIZE = _256KB_READ_SIZE;
 				only_cacheSlots = only_256KB_CACHE_SLOTS;
