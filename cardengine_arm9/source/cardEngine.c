@@ -20,9 +20,6 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define REG_SEND_FIFO	(*((vu32*)0x04000188))
-#define REG_RECV_FIFO	(*((vu32*)0x04100000))
-
 static u32 ROM_LOCATION = 0x0C800000;
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
@@ -68,7 +65,6 @@ static u32 WRAM_accessCounter = 0;
 static u32 only_accessCounter = 0;
 
 static u32 CACHE_READ_SIZE = _128KB_READ_SIZE;
-static u32 only_cacheSlots = only_128KB_CACHE_SLOTS;
 
 static bool flagsSet = false;
 extern u32 ROMinRAM;
@@ -107,7 +103,7 @@ int WRAM_allocateCacheSlot() {
 int allocateCacheSlot() {
 	int slot = 0;
 	int lowerCounter = only_accessCounter;
-	for(int i=0; i<only_cacheSlots; i++) {
+	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
 		if(only_cacheCounter[i]<=lowerCounter) {
 			lowerCounter = only_cacheCounter[i];
 			slot = i;
@@ -140,7 +136,7 @@ int WRAM_getSlotForSector(u32 sector) {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<only_cacheSlots; i++) {
+	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
 		if(only_cacheDescriptor[i]==sector) {
 			return i;
 		}
@@ -163,7 +159,7 @@ vu8* WRAM_getCacheAddress(int slot) {
 }
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(only_CACHE_ADRESS_START+slot*CACHE_READ_SIZE);
+	return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 }
 
 vu8* GAME_getCacheAddress(int slot) {
@@ -241,22 +237,6 @@ int cardRead (u32* cacheStruct) {
 
 		if(dsiWramUsed) {
 			CACHE_READ_SIZE = _32KB_READ_SIZE;
-		} else if (ROMinRAM==0) {
-			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-			{
-				CACHE_READ_SIZE = _1MB_READ_SIZE;
-				only_cacheSlots = only_1MB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x343243)	// Phantasy Star 0
-			{
-				CACHE_READ_SIZE = _512KB_READ_SIZE;
-				only_cacheSlots = only_512KB_CACHE_SLOTS;
-			}else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941	// Yoshi's Island DS
-					|| (ROM_TID & 0x00FFFFFF) == 0x4A4C43)	// Mario & Luigi: Bowser's Inside Story
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			}
 		}
 		flagsSet = true;
 	}
@@ -271,12 +251,11 @@ int cardRead (u32* cacheStruct) {
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
 	sharedAddr[2] = src;
-	REG_SEND_FIFO = commandRead;
-	//wait for response
-	do
-	{
-		while(*((vu32*)0x04000184) & (1 << 8));
-	} while(REG_RECV_FIFO != 0x55AAAA55);
+	sharedAddr[3] = commandRead;
+
+	IPC_SendSync(0xEE24);
+
+	while(sharedAddr[3] != (vu32)0);
 	// -------------------------------------*/
 	#endif
 	
@@ -293,12 +272,11 @@ int cardRead (u32* cacheStruct) {
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
 			sharedAddr[2] = src;
-			REG_SEND_FIFO = commandRead;
-			//wait for response
-			do
-			{
-				while(*((vu32*)0x04000184) & (1 << 8));
-			} while(REG_RECV_FIFO != 0x55AAAA55);
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
 
 		} else {
 			// read via the main RAM/DSi WRAM cache
@@ -324,12 +302,7 @@ int cardRead (u32* cacheStruct) {
 						sharedAddr[0] = buffer;
 						sharedAddr[1] = _32KB_READ_SIZE;
 						sharedAddr[2] = sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
+						sharedAddr[3] = commandRead;
 
 						IPC_SendSync(0xEE24);
 
@@ -360,13 +333,12 @@ int cardRead (u32* cacheStruct) {
 						sharedAddr[0] = dst;
 						sharedAddr[1] = len2;
 						sharedAddr[2] = buffer+src-sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
-						// -------------------------------------
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------*/
 						#endif
 
 						// copy directly
@@ -385,13 +357,12 @@ int cardRead (u32* cacheStruct) {
 						sharedAddr[0] = page;
 						sharedAddr[1] = len2;
 						sharedAddr[2] = buffer+page-sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
-						// -------------------------------------
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------*/
 						#endif
 
 						// read via the 512b ram cache
@@ -421,27 +392,26 @@ int cardRead (u32* cacheStruct) {
 
 						REG_SCFG_EXT = 0x83008000;
 
-						if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+						if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
 
 						// write the command
 						sharedAddr[0] = buffer;
-						sharedAddr[1] = CACHE_READ_SIZE;
+						sharedAddr[1] = _128KB_READ_SIZE;
 						sharedAddr[2] = sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
+						sharedAddr[3] = commandRead;
 
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						
 						REG_SCFG_EXT = 0x83000000;
 					}
 
 					updateDescriptor(slot, sector);
 
 					u32 len2=len;
-					if((src - sector) + len2 > CACHE_READ_SIZE){
-						len2 = sector - src + CACHE_READ_SIZE;
+					if((src - sector) + len2 > _128KB_READ_SIZE){
+						len2 = sector - src + _128KB_READ_SIZE;
 					}
 
 					if(len2 > 512) {
@@ -458,13 +428,12 @@ int cardRead (u32* cacheStruct) {
 						sharedAddr[0] = dst;
 						sharedAddr[1] = len2;
 						sharedAddr[2] = buffer+src-sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
-						// -------------------------------------
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------*/
 						#endif
 
 						// copy directly
@@ -485,13 +454,12 @@ int cardRead (u32* cacheStruct) {
 						sharedAddr[0] = page;
 						sharedAddr[1] = len2;
 						sharedAddr[2] = buffer+page-sector;
-						REG_SEND_FIFO = commandRead;
-						//wait for response
-						do
-						{
-							while(*((vu32*)0x04000184) & (1 << 8));
-						} while(REG_RECV_FIFO != 0x55AAAA55);
-						// -------------------------------------
+						sharedAddr[3] = commandRead;
+
+						IPC_SendSync(0xEE24);
+
+						while(sharedAddr[3] != (vu32)0);
+						// -------------------------------------*/
 						#endif
 
 						// read via the 512b ram cache
@@ -506,7 +474,7 @@ int cardRead (u32* cacheStruct) {
 						src = cardStruct[0];
 						dst = cardStruct[1];
 						page = (src/512)*512;
-						sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
+						sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 						only_accessCounter++;
 					}
 				}
@@ -538,12 +506,11 @@ int cardRead (u32* cacheStruct) {
 				sharedAddr[0] = dst;
 				sharedAddr[1] = len2;
 				sharedAddr[2] = ROM_LOCATION+src;
-				REG_SEND_FIFO = commandRead;
-				//wait for response
-				do
-				{
-					while(*((vu32*)0x04000184) & (1 << 8));
-				} while(REG_RECV_FIFO != 0x55AAAA55);
+				sharedAddr[3] = commandRead;
+
+				IPC_SendSync(0xEE24);
+
+				while(sharedAddr[3] != (vu32)0);
 				// -------------------------------------*/
 				#endif
 
@@ -565,12 +532,11 @@ int cardRead (u32* cacheStruct) {
 				sharedAddr[0] = page;
 				sharedAddr[1] = len2;
 				sharedAddr[2] = ROM_LOCATION+page;
-				REG_SEND_FIFO = commandRead;
-				//wait for response
-				do
-				{
-					while(*((vu32*)0x04000184) & (1 << 8));
-				} while(REG_RECV_FIFO != 0x55AAAA55);
+				sharedAddr[3] = commandRead;
+
+				IPC_SendSync(0xEE24);
+
+				while(sharedAddr[3] != (vu32)0);
 				// -------------------------------------
 				#endif
 
@@ -616,12 +582,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = dst;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION2+src;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------
 					#endif
 
@@ -643,12 +608,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = page;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION2+page;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------
 					#endif
 
@@ -683,12 +647,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = dst;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION+src;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------*/
 					#endif
 
@@ -710,12 +673,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = page;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION+page;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------
 					#endif
 
@@ -750,12 +712,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = dst;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION-setDataBWlist[2]+src;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------*/
 					#endif
 
@@ -777,12 +738,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = page;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = ROM_LOCATION-setDataBWlist[2]+page;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------
 					#endif
 
@@ -811,12 +771,11 @@ int cardRead (u32* cacheStruct) {
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
 			sharedAddr[2] = src;
-			REG_SEND_FIFO = commandRead;
-			//wait for response
-			do
-			{
-				while(*((vu32*)0x04000184) & (1 << 8));
-			} while(REG_RECV_FIFO != 0x55AAAA55);
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);
+
+			while(sharedAddr[3] != (vu32)0);
 		} else {
 			accessCounterIncrease();
 
@@ -858,12 +817,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = buffer;
 					sharedAddr[1] = setDataBWlist[6];
 					sharedAddr[2] = sector;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 
 					// transfer back the WRAM-B cache to the arm9
 					if(dsiWramUsed) transfertToArm9(slot);
@@ -896,12 +854,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = dst;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = buffer+src-sector;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------*/
 					#endif
 
@@ -923,12 +880,11 @@ int cardRead (u32* cacheStruct) {
 					sharedAddr[0] = page;
 					sharedAddr[1] = len2;
 					sharedAddr[2] = buffer+page-sector;
-					REG_SEND_FIFO = commandRead;
-					//wait for response
-					do
-					{
-						while(*((vu32*)0x04000184) & (1 << 8));
-					} while(REG_RECV_FIFO != 0x55AAAA55);
+					sharedAddr[3] = commandRead;
+
+					IPC_SendSync(0xEE24);
+
+					while(sharedAddr[3] != (vu32)0);
 					// -------------------------------------*/
 					#endif
 
