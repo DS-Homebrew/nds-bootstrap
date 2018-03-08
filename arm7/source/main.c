@@ -33,8 +33,6 @@ redistribute it freely, subject to the following restrictions:
 
 #include "fifocheck.h"
 
-static vu32 * wordCommandAddr;
-
 //---------------------------------------------------------------------------------
 void VcountHandler() {
 //---------------------------------------------------------------------------------
@@ -42,7 +40,7 @@ void VcountHandler() {
 }
 
 
-/* void myFIFOValue32Handler(u32 value,void* data)
+void myFIFOValue32Handler(u32 value,void* data)
 {
   nocashMessage("myFIFOValue32Handler");
 
@@ -50,7 +48,7 @@ void VcountHandler() {
   nocashMessage("fifoSendValue32");
   fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));
 
-} */
+}
 
 static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
@@ -377,7 +375,7 @@ int main(void) {
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
 
-	// fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 
 	// Keep the ARM7 mostly idle
 	while (1) {

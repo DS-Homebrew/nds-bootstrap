@@ -146,15 +146,15 @@ void getSFCG_ARM9() {
 	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
-/* void getSFCG_ARM7() {
+void getSFCG_ARM7() {
 
 	iprintf( "SCFG_ROM ARM7\n" );
 
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
+	//nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
+	//fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
 
-	nocashMessage("dbg_printf\n");
-		  
+	//nocashMessage("dbg_printf\n");
+
 	iprintf( "SCFG_CLK ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");
@@ -171,7 +171,7 @@ void myFIFOValue32Handler(u32 value,void* data)
 {
 	nocashMessage("myFIFOValue32Handler\n");
 	iprintf( "ARM7 data %x\n", value );
-} */
+}
 
 
 void initMBK() {
@@ -207,10 +207,10 @@ int main( int argc, char **argv) {
 			powerOff(PM_BACKLIGHT_TOP);
 			consoleDemoInit();
 
-			// fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
 			getSFCG_ARM9();
-			// getSFCG_ARM7();
+			getSFCG_ARM7();
 		}
 
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
@@ -338,7 +338,7 @@ int main( int argc, char **argv) {
 
 		std::string	arm7DonorPath;
 
-		if (useArm7Donor >= 1)
+		if (useArm7Donor > 0)
 			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");
 		else
 			arm7DonorPath = "sd:/_nds/null.nds";
@@ -346,14 +346,6 @@ int main( int argc, char **argv) {
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
-
-		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {
-			dbg_printf("ARM9_SCFG_EXT locked\n");
-			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
-			fifoSendValue32(FIFO_USER_08, 1);
-		}
-		*/
 
 		backlightMode = bootstrapini.GetInt( "NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
 
