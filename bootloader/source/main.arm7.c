@@ -352,7 +352,7 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if((ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
+	/*if((ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
 	|| (ROM_TID & 0x00FFFFFF) == 0x575A41	// WarioWare: Touched
 	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
 	|| (ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
@@ -363,7 +363,7 @@ void loadRomIntoRam(aFile file) {
 	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
 	{
 		dsiWramUsed = true;
-	}
+	}*/
 
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
@@ -405,6 +405,7 @@ void loadRomIntoRam(aFile file) {
 			ROM_LOCATION = 0x0C400000;
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
+			dsiWramUsed = true;
 		} else {
 			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {

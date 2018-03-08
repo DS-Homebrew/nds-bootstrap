@@ -251,7 +251,7 @@ void triggerAsyncPrefetch(sector) {
 
 				buffer = WRAM_getCacheAddress(slot);
 			} else {
-				tempSlot = 1;
+				tempSlot = 0;
 
 				buffer = WRAM_getCacheAddress(tempSlot);
 				tempBuffer = buffer;
