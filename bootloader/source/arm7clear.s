@@ -56,6 +56,6 @@ clear_EWRAM_loop:
 	blt	clear_EWRAM_loop
 
 	pop	{r0-r9}
-	
+
 	bx	lr
   

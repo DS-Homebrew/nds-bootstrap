@@ -52,9 +52,9 @@ enum DldiOffsets {
 	// IO_INTERFACE data
 	DO_ioType = 0x60,
 	DO_features = 0x64,
-	DO_startup = 0x68,	
-	DO_isInserted = 0x6C,	
-	DO_readSectors = 0x70,	
+	DO_startup = 0x68,
+	DO_isInserted = 0x6C,
+	DO_readSectors = 0x70,
 	DO_writeSectors = 0x74,
 	DO_clearStatus = 0x78,
 	DO_shutdown = 0x7C,
@@ -111,7 +111,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	data_t *pAH;
 
 	size_t dldiFileSize = 0;
-	
+
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
 
@@ -132,7 +132,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		// Not enough space for patch
 		return false;
 	}
-	
+
 	dldiFileSize = 1 << pDH[DO_driverSize];
 
 	memOffset = readAddr (pAH, DO_text_start);

@@ -15,7 +15,7 @@ endif
 TARGET		:=	load
 BUILD		:=	build
 SOURCES		:=	source source/patches 
-INCLUDES	:=	build
+INCLUDES	:=	build ../include
 DATA		:=	../data
 SPECS		:=  specs
  
@@ -111,11 +111,6 @@ $(LOADELF)	:	$(OFILES)
 	@echo linking $(notdir $@)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
-	
-dldiengine.bin.o : dldiengine.bin
-
-dldiengine.bin:
-	cp $(CURDIR)/../../data/dldiengine.bin dldiengine.bin
 	
 cardengine_arm7.bin.o : cardengine_arm7.bin
 

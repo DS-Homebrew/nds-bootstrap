@@ -50,7 +50,7 @@ void crypt_64bit_down (u32* ptr) {
 	u32 y = ptr[0];
 	u32 z;
 	int i;
-	
+
 	for (i = 0x11; i > 0x01; i--) {
 		z = keybuf[i] ^ x;
 		x = keybuf[0x012 + ((z>>24)&0xff)];

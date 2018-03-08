@@ -24,9 +24,6 @@
 #include "fat.h"
 #include "i2c.h"
 
-#include "sr_data_fourswords.h"	// For soft-reset
-#include "sr_data_error.h"	// For showing an error screen
-
 static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
@@ -35,17 +32,17 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
+extern u32 romread_LED;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
-static bool timeoutRun = true;
-static int timeoutTimer = 0;
+bool ndmaUsed = false;
 
 void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-			sdmmc_controller_init();
+			sdmmc_controller_init(false);
 			sdmmc_sdcard_init();
 		}
 		FAT_InitFiles(false);
@@ -75,43 +72,153 @@ void initLogging() {
 }
 
 void cardReadLED (bool on) {
-	u8 setting = i2cReadRegister(0x4A, 0x72);
-	
 	if(on) {
-		switch(setting) {
-			case 0x00:
+		switch(romread_LED) {
+			case 0:
 			default:
 				break;
-			case 0x01:
+			case 1:
 				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
 				break;
-			case 0x02:
+			case 2:
 				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+			case 3:
+				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
 				break;
 		}
 	} else {
-		switch(setting) {
-			case 0x00:
+		switch(romread_LED) {
+			case 0:
 			default:
 				break;
-			case 0x01:
+			case 1:
 				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 				break;
-			case 0x02:
+			case 2:
 				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+			case 3:
+				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
 				break;
 		}
 	}
 }
 
 void asyncCardReadLED (bool on) {
-	u8 setting = i2cReadRegister(0x4A, 0x72);
-	
-	if(on && setting != 0) {
+	if(on && romread_LED != 0) {
 		i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-	} else if(setting != 0) {
+	} else if(romread_LED != 0) {
 		i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
 	}
+}
+
+void log_arm9() {
+	#ifdef DEBUG		
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\ncard read received\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+
+	dbg_printf("\nlog only \n");
+	#endif
+}
+
+void cardRead_arm9() {
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	#ifdef DEBUG
+	dbg_printf("\ncard read received v2\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);	
+	#endif
+
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	fileRead(dst,romFile,src,len);
+	if(*(u32*)(0x028128ac) == 0x4B434148){
+               *(u32*)(0x028128ac) = 0xA00;
+        }
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+
+	#ifdef DEBUG
+	dbg_printf("\nread \n");
+	if(is_aligned(dst,4) || is_aligned(len,4)) {
+		dbg_printf("\n aligned read : \n");
+	} else {
+		dbg_printf("\n misaligned read : \n");
+	}
+	#endif
+}
+
+void asyncCardRead_arm9() {
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	#ifdef DEBUG
+	dbg_printf("\nasync card read received\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);	
+	#endif
+
+	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
+	fileRead(dst,romFile,src,len);
+	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
+
+	#ifdef DEBUG
+	dbg_printf("\nread \n");
+	if(is_aligned(dst,4) || is_aligned(len,4)) {
+		dbg_printf("\n aligned read : \n");
+	} else {
+		dbg_printf("\n misaligned read : \n");
+	}
+	#endif
 }
 
 void runCardEngineCheck (void) {
@@ -119,6 +226,52 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
+
+	if(tryLockMutex()) {	
+		initLogging();
+
+		//nocashMessage("runCardEngineCheck mutex ok");
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		{			
+			log_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+		{
+			cardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
+		{
+			asyncCardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+		unlockMutex();
+	}
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerFIFO(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif	
+	
+	calledViaIPC = true;
+	
+	runCardEngineCheck();
+}
+
+
+void myIrqHandlerVBlank(void) {
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+	
+	calledViaIPC = false;
 	
 	// Control volume with the - and + buttons.
 	u8 volLevel;
@@ -223,173 +376,7 @@ void runCardEngineCheck (void) {
 			break;
 	}
 	REG_MASTER_VOLUME = volLevel;
-	
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_A | KEY_B | KEY_X | KEY_Y))) {
-		memcpy((u32*)0x02000000,sr_data_fourswords,0x560);
-		i2cWriteRegister(0x4a,0x70,0x01);
-		i2cWriteRegister(0x4a,0x11,0x01);
-	}
-	
-	if (timeoutRun) {
-		u8 setting = i2cReadRegister(0x4A, 0x73);
-		if (setting == 0x01) {
-			timeoutTimer += 1;
-			if (timeoutTimer == 60*2) {
-				memcpy((u32*)0x02000000,sr_data_error,0x560);
-				i2cWriteRegister(0x4a,0x70,0x01);
-				i2cWriteRegister(0x4a,0x11,0x01);	// If on white screen for a while, the game is incompatible, so show an error screen
-			}
-		} else {
-			timeoutRun = false;
-		}
-	}
-	
-	if(tryLockMutex()) {	
-		initLogging();
-		
-		//nocashMessage("runCardEngineCheck mutex ok");
-		
-		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-		{			
-			#ifdef DEBUG		
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);			
 
-			dbg_printf("\ncard read received\n");			
-				
-			if(calledViaIPC) {
-				dbg_printf("\ntriggered via IPC\n");
-			}
-			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);		
-			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);		
-			dbg_printf("\ndst : \n");
-			dbg_hexa(dst);
-			dbg_printf("\nlen : \n");
-			dbg_hexa(len);
-			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);
-			
-			dbg_printf("\nlog only \n");
-			#endif			
-			
-			*(vu32*)(0x027FFB14) = 0;	
-		}
-		
-		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-		{
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);
-		
-			#ifdef DEBUG		
-			dbg_printf("\ncard read received v2\n");
-			
-			if(calledViaIPC) {
-				dbg_printf("\ntriggered via IPC\n");
-			}
-			
-			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);		
-			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);		
-			dbg_printf("\ndst : \n");
-			dbg_hexa(dst);
-			dbg_printf("\nlen : \n");
-			dbg_hexa(len);
-			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);			
-			#endif		
-			
-			timeoutRun = false;	// If card read received, do not show error screen
-			
-			cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-			fileRead(dst,romFile,src,len);
-			cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-			
-			#ifdef DEBUG		
-			dbg_printf("\nread \n");			
-			if(is_aligned(dst,4) || is_aligned(len,4)) {
-				dbg_printf("\n aligned read : \n");
-			} else {
-				dbg_printf("\n misaligned read : \n");
-			}			
-			#endif	
-	
-			*(vu32*)(0x027FFB14) = 0;		
-		}
-
-		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
-		{			
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-			u32 marker = *(vu32*)(sharedAddr+3);
-		
-			#ifdef DEBUG		
-			dbg_printf("\nasync card read received\n");
-			
-			if(calledViaIPC) {
-				dbg_printf("\ntriggered via IPC\n");
-			}
-			
-			dbg_printf("\nstr : \n");
-			dbg_hexa(cardStruct);		
-			dbg_printf("\nsrc : \n");
-			dbg_hexa(src);		
-			dbg_printf("\ndst : \n");
-			dbg_hexa(dst);
-			dbg_printf("\nlen : \n");
-			dbg_hexa(len);
-			dbg_printf("\nmarker : \n");
-			dbg_hexa(marker);			
-			#endif		
-			
-			timeoutRun = false;	// If card read received, do not show error screen
-
-			asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
-			fileRead(dst,romFile,src,len);
-			asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
-			
-			#ifdef DEBUG		
-			dbg_printf("\nread \n");			
-			if(is_aligned(dst,4) || is_aligned(len,4)) {
-				dbg_printf("\n aligned read : \n");
-			} else {
-				dbg_printf("\n misaligned read : \n");
-			}			
-			#endif	
-			
-			*(vu32*)(0x027FFB14) = 0;	
-		}
-		unlockMutex();
-	}
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerFIFO(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerFIFO");
-	#endif	
-	
-	calledViaIPC = true;
-	
-	runCardEngineCheck();
-}
-
-
-void myIrqHandlerVBlank(void) {
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerVBlank");
-	#endif	
-	
-	calledViaIPC = false;
-	
 	runCardEngineCheck();
 }
 
@@ -539,8 +526,6 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	timeoutRun = false;	// Do not show error screen
-
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator

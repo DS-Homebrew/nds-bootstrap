@@ -42,7 +42,7 @@ _dldi_start:
 	.byte	0x0e		@ 16KiB	@ Log [base-2] of the size of this driver in bytes.
 	.byte	0x00			@ Sections to fix
 	.byte 	0x0e		@ 16KiB	@ Log [base-2] of the allocated space in bytes.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 16 bytes
 	.align	4
@@ -71,7 +71,7 @@ _io_dldi:
 	.word	_DLDI_writeSectors		@ 
 	.word	_DLDI_clearStatus		@ 
 	.word	_DLDI_shutdown			@ 
-	
+
 @---------------------------------------------------------------------------------
 
 _DLDI_startup:
