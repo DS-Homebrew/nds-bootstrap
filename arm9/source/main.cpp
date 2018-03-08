@@ -148,7 +148,7 @@ void getSFCG_ARM9() {
 
 void getSFCG_ARM7() {
 
-	iprintf( "SCFG_ROM ARM7\n" );
+	//iprintf( "SCFG_ROM ARM7\n" );
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
 	//fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
