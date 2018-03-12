@@ -276,6 +276,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	u32* ipcSyncHandler = hookLocation+16;	/*!< IPC sync interrupt mask */
 	u32* cardHandler = hookLocation+19;		/*!< interrupt mask DS Card Slot*/
 	u32* cardLineHandler = hookLocation+20;	/*!< interrupt mask */
+	u32* sdmmcHandler = hookLocation+40;	/*!< Sdmmc interrupt mask (DSi ARM7)*/
 
 	debug[9] = hookLocation;
 

@@ -180,6 +180,46 @@ void runCardEngineCheck (void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
+	if(tryLockMutex()) {	
+		initLogging();
+
+		//nocashMessage("runCardEngineCheck mutex ok");
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		{			
+			log_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+		{
+			cardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+		unlockMutex();
+	}
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerFIFO(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif	
+	
+	calledViaIPC = true;
+	
+	runCardEngineCheck();
+}
+
+
+void myIrqHandlerVBlank(void) {
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+	
+	calledViaIPC = false;
+	
 	// Control volume with the - and + buttons.
 	u8 volLevel;
 	u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
@@ -284,46 +324,6 @@ void runCardEngineCheck (void) {
 	}
 	REG_MASTER_VOLUME = volLevel;
 
-	if(tryLockMutex()) {	
-		initLogging();
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-
-		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
-		{			
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-		{
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-		unlockMutex();
-	}
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerFIFO(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerFIFO");
-	#endif	
-	
-	calledViaIPC = true;
-	
-	runCardEngineCheck();
-}
-
-
-void myIrqHandlerVBlank(void) {
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerVBlank");
-	#endif	
-	
-	calledViaIPC = false;
-	
 	runCardEngineCheck();
 }
 
