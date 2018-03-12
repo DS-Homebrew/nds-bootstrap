@@ -118,6 +118,8 @@ u32 mpuInitRegion3Data[1] = {0x8000035};
 
 u32 mpuInitCache[1] = {0xE3A00042};
 
+bool usesThumb = false;
+
 //
 // Look in @data for @find and return the position of it.
 //
@@ -296,32 +298,34 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	// Find the card read
-    u32 cardReadEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-              (u32*)a9cardReadSignature, 2, 1);
-    if (!cardReadEndOffset) {
-        dbg_printf("Card read end not found\n");
-        return 0;
-    }
+	u32 cardReadEndOffset =  
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignature, 2, 1);
+	if (!cardReadEndOffset) {
+		dbg_printf("Card read end not found\n");
+		if (ndsHeader->fatSize > 0) usesThumb = true;
+		return 0;
+	}
 	debug[1] = cardReadEndOffset;
-    u32 cardReadStartOffset =   
-        getOffset((u32*)cardReadEndOffset, -0xF9,
-              (u32*)cardReadStartSignature, 1, -1);
-    if (!cardReadStartOffset) {
-        dbg_printf("Card read start not found\n");
-        return 0;
-    }
+	u32 cardReadStartOffset =   
+		getOffset((u32*)cardReadEndOffset, -0xF9,
+			(u32*)cardReadStartSignature, 1, -1);
+	if (!cardReadStartOffset) {
+		dbg_printf("Card read start not found\n");
+		if (ndsHeader->fatSize > 0) usesThumb = true;
+		return 0;
+	}
 	dbg_printf("Arm9 Card read:\t");
 	dbg_hexa(cardReadStartOffset);
 	dbg_printf("\n");
 
 	u32 cardPullOutOffset =   
-        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-              (u32*)cardPullOutSignature, 4, 1);
-    if (!cardPullOutOffset) {
-        dbg_printf("Card pull out handler not found\n");
-        //return 0;
-    } else {
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+			(u32*)cardPullOutSignature, 4, 1);
+	if (!cardPullOutOffset) {
+		dbg_printf("Card pull out handler not found\n");
+		//return 0;
+	} else {
 		dbg_printf("Card pull out handler:\t");
 		dbg_hexa(cardPullOutOffset);
 		dbg_printf("\n");
@@ -1329,7 +1333,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
 	u32 saveResult = 0;
-	if (useArm7Donor == 2) {
+	if (useArm7Donor == 2 && ndsHeader->fatSize > 0) {
 		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 			dbg_printf("swap the arm7 binary");	
 			swapBinary_ARM7(donorFile);
@@ -1345,7 +1349,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	} else if (useArm7Donor == 1) {
 		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult) {
+		if(!saveResult && ndsHeader->fatSize > 0) {
 			if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 				dbg_printf("swap the arm7 binary");	
 				swapBinary_ARM7(donorFile);
@@ -1379,8 +1383,13 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32*
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
-	patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile, useArm7Donor);
+	if (!usesThumb) {
+		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile, useArm7Donor);
 
-	dbg_printf("ERR_NONE");
-	return 0;
+		dbg_printf("ERR_NONE");
+		return ERR_NONE;
+	} else {
+		dbg_printf("ERR_LOAD_OTHR");
+		return ERR_LOAD_OTHR;
+	}
 }
