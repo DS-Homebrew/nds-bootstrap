@@ -1,10 +1,15 @@
-nds-bootstrap is a WIP project that allows people to play their Nintendo DS Homebrew & ROMs on a Nintendo DS<sup>i</sup> or on a Nintendo 3DS natively using an SD card without using a flashcart or an emulator. Even though compatibility isn't perfect yet, it can still play a handful of games.
+nds-bootstrap is an application that allows users the usage of Nintendo DS Homebrew & ROMs through the SD cards of the Nintendo DS/3DS, rather than through emulators or flashcarts. Check the linked compatibility list to see which games are playable.
 
-# Help! I found a bug!!!
+# Bug Reporting
 
-Firstly, if you found a bug with a game, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if it's already reported.     
-Secondly, be sure to explain your bug in detail. We don't know what's the problem if all you are going to say is "Help me! I found a bug!".     
-If you met all these citeria's, you can report the bug in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
+Before reporting a bug, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if it has already been reported.
+
+A few questions one can answer:
+1) How you encountered the bug
+2) What happens when the bug occurs
+3) If the bug is reproduce-able, what steps can one take in order to get there. 
+
+Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
 
 # Compiling
 
