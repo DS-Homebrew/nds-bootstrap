@@ -1,4 +1,4 @@
-nds-bootstrap is an application that allows users the usage of Nintendo DS Homebrew & ROMs through the SD cards of the Nintendo DS/3DS, rather than through emulators or flashcarts. Check the linked compatibility list to see which games are playable.
+nds-bootstrap is an application that allows the usage of Nintendo DS Homebrew & ROMs through the SD cards of the Nintendo DS/3DS, rather than through emulators or flashcarts. Check the linked compatibility list to see which games are playable.
 
 # Bug Reporting
 
