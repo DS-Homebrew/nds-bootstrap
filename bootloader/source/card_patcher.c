@@ -35,14 +35,12 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
 // sdk < 4 version
 u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
+u32 a9cardReadSignatureThumb1[2]    = {0x000001FF, 0x040001A4};	// not really thumb
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
 
 // sdk > 4 version
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
 u32 cardReadStartSignature4[1] = {0xE92D4070};
-
-// sdk 5 version
-//u32 cardReadStartSignature5[1] = {0xE92D4070};	// Is this correct?
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
@@ -67,9 +65,6 @@ u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00
 u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
 
-//u32 cardReadCachedStartSignature5[2]   = {0xE92D4070,0xE59F407C};	// Is this correct? Looks like it, lol.
-//u32 cardReadCachedEndSignature5[4]   = {0xE5900004,0xE3500000,0x13A00001,0x03A00000};	// Is this correct?
-   
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
@@ -106,7 +101,7 @@ u32 mpuInitRegion3Data[1] = {0x8000035};
 
 u32 mpuInitCache[1] = {0xE3A00042};
 
-bool usesThumb = false;
+bool cardReadFound = false;
 
 //
 // Look in @data for @find and return the position of it.
@@ -232,6 +227,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[8] = moduleParams->sdk_version;
 
 	u32* a9cardReadSignature = a9cardReadSignature1;
+	u32* a9cardReadSignatureThumb = a9cardReadSignatureThumb1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardPullOutSignature = cardPullOutSignature1;
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
