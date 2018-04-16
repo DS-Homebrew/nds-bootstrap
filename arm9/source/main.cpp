@@ -121,20 +121,20 @@ typedef struct {
 } sNDSHeadertitlecodeonly;
 
 void getSFCG_ARM9() {
-	//iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
+	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
 	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
-	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+	//iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
 void getSFCG_ARM7() {
 
-	iprintf( "SCFG_ROM ARM7\n" );
+	//iprintf( "SCFG_ROM ARM7\n" );
 
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
+	//nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
+	//fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
 
-	nocashMessage("dbg_printf\n");
-		  
+	//nocashMessage("dbg_printf\n");
+
 	iprintf( "SCFG_CLK ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");
