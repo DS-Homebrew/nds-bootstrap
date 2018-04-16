@@ -354,7 +354,8 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if((ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
+	if((ROM_TID & 0x00FFFFFF) == 0x475541	// Need for Speed: Underground 2
+	|| (ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
 	|| (ROM_TID & 0x00FFFFFF) == 0x575A41	// WarioWare: Touched
 	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
 	|| (ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters

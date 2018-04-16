@@ -143,7 +143,7 @@ typedef struct {
 void getSFCG_ARM9() {
 	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
 	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
-	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+	//iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
 void getSFCG_ARM7() {
