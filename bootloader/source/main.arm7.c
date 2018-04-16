@@ -306,7 +306,7 @@ void loadBinary_ARM7 (aFile file)
 	}
 
 	// "Chrono Trigger (Japan)"
-	/*if(ROM_TID == 0x4a555159){
+	if(ROM_TID == 0x4a555159){
 		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
@@ -319,7 +319,7 @@ void loadBinary_ARM7 (aFile file)
 		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
-	}*/
+	}
 
 	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
 	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
