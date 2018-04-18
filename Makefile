@@ -127,7 +127,10 @@ dist:	all
 	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 	
 $(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9 dldi/dsisd.dldi
-	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b icon.bmp "NDS BOOTSTRAP;Runs an .ds file;made by devkitpro"
+	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf \
+			-b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
+			-g KBSE 01 "NDSBOOTSTRAP" 
+			#-z 80040000 -u 00030004
 	dlditool dldi/dsisd.dldi $(TARGET).nds
 
 $(TARGET).arm7: arm7/$(TARGET).elf

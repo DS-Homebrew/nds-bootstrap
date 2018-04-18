@@ -340,8 +340,11 @@ int main(void) {
 //---------------------------------------------------------------------------------
 	
 	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__NDSHeader->arm9destination, dldiMagicString, __NDSHeader->arm9binarySize, sizeof(dldiMagicString));
-	wordCommandAddr = (u32 *) (((u32)__NDSHeader->arm9destination)+patchOffset+0x80);
+	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
+	if(patchOffset == -1) {
+		nocashMessage("dldi not found");
+	}
+	wordCommandAddr = (u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80);
 	
 	irqInit();
 	fifoInit();
