@@ -146,7 +146,9 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 int main( int argc, char **argv) {
 
 	bool ntrMode = false;
-
+	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+	__NDSHeader->unitCode = 1;
+	
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
 	

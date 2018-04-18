@@ -381,6 +381,6 @@ int main(void) {
 	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiWaitForVBlank(); fifocheck(); }
+	while (1) { swiIntrWait(0,IRQ_FIFO_NOT_EMPTY); fifocheck(); }
 }
 
