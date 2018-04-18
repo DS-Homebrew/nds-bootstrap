@@ -366,7 +366,7 @@ int main(void) {
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 
-	fifoWaitValue32(FIFO_USER_03);
+	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
 	if(fifoCheckValue32(FIFO_USER_04)) { dsi_resetSlot1(); }
 	if(fifoCheckValue32(FIFO_MAXMOD)) {
