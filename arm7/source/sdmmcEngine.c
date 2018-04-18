@@ -49,18 +49,8 @@ void sdmmcCustomValueHandler(vu32* commandAddr, u32 value) {
         if (sdmmc_read16(REG_SDSTATUS0) == 0) {
             result = 1;
         } else {
-            sdmmc_controller_init();
+            sdmmc_controller_init(true);
             result = sdmmc_sdcard_init();
-        }
-        break;
-		
-	case SDMMC_NAND_START:
-		// disable nand start by default until no$gba handle it correctly
-        if (sdmmc_read16(REG_SDSTATUS0) == 0) {
-            result = 1;
-        } else {
-            sdmmc_controller_init();
-            result = sdmmc_nand_init();
         }
         break;
 
@@ -82,8 +72,6 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
     FifoMessage msg;
     int retval = 0;
 	char buf[64];
-	
-	struct mmcdevice deviceSD =*getMMCDevice(1);
 
     getDatamsg(commandAddr, bytes, (u8*)&msg);
 
@@ -92,15 +80,15 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 
     case SDMMC_SD_READ_SECTORS:
 		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
-		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+		//siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_readsectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
 		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
-		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+		//siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_writesectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     }
 

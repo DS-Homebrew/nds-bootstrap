@@ -56,7 +56,7 @@ void sdmmcCustomValueHandler(u32 value) {
         if (sdmmc_read16(REG_SDSTATUS0) == 0) {
             result = 1;
         } else {
-            sdmmc_controller_init();
+            sdmmc_controller_init(true);
             result = sdmmc_sdcard_init();
         }
 		//FAT_InitFiles(false);

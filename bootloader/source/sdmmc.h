@@ -3,8 +3,9 @@
 
 #include <nds/ndstypes.h>
 
-#define SDMMC_BASE	0x04004800
+#define DATA32_SUPPORT
 
+#define SDMMC_BASE	0x04004800
 
 #define REG_SDCMD       0x00
 #define REG_SDPORTSEL   0x02
@@ -102,6 +103,8 @@
 
 #define TMIO_MASK_READOP  (TMIO_STAT1_RXRDY | TMIO_STAT1_DATAEND)
 #define TMIO_MASK_WRITEOP (TMIO_STAT1_TXRQ | TMIO_STAT1_DATAEND)
+
+#define DEVICE_TYPE_DSI_SD ('i') | ('_' << 8) | ('S' << 16) | ('D' << 24)
 
 typedef struct mmcdevice {
     u8* data;

@@ -81,6 +81,93 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 
 static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
+void dsi_resetSlot1() {
+		
+	// Power off Slot
+	while(REG_SCFG_MC&0x0C !=  0x0C); 		// wait until state<>3
+	if(REG_SCFG_MC&0x0C != 0x08) return; 		// exit if state<>2      
+	
+	REG_SCFG_MC = 0x0C;          		// set state=3 
+	while(REG_SCFG_MC&0x0C !=  0x00);  // wait until state=0
+
+	swiWaitForVBlank();
+
+	// Power On Slot
+	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
+	if(REG_SCFG_MC&0x0C != 0x00) return; //  exit if state<>0
+	
+	REG_SCFG_MC = 0x04;    // wait 1ms, then set state=1
+	while(REG_SCFG_MC&0x0C != 0x04);
+	
+	REG_SCFG_MC = 0x08;    // wait 10ms, then set state=2      
+	while(REG_SCFG_MC&0x0C != 0x08);
+	
+	REG_ROMCTRL = 0x20000000; // wait 27ms, then set REG_ROMCTRL=20000000h
+	
+	while(REG_ROMCTRL&0x8000000 != 0x8000000);
+}
+
+// The following 3 functions are not in devkitARM r47
+//---------------------------------------------------------------------------------
+u32 readTSCReg(u32 reg) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+ 
+	while(REG_SPICNT & 0x80);
+ 
+	REG_SPIDATA = 0;
+ 
+	while(REG_SPICNT & 0x80);
+
+	REG_SPICNT = 0;
+
+	return REG_SPIDATA;
+}
+
+//---------------------------------------------------------------------------------
+void readTSCRegArray(u32 reg, void *buffer, int size) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+
+	char *buf = (char*)buffer;
+	while(REG_SPICNT & 0x80);
+	int count = 0;
+	while(count<size) {
+		REG_SPIDATA = 0;
+ 
+		while(REG_SPICNT & 0x80);
+
+
+		buf[count++] = REG_SPIDATA;
+		
+	}
+	REG_SPICNT = 0;
+
+}
+
+
+//---------------------------------------------------------------------------------
+u32 writeTSCReg(u32 reg, u32 value) {
+//---------------------------------------------------------------------------------
+ 
+	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
+	REG_SPIDATA = ((reg<<1)) & 0xFF;
+ 
+	while(REG_SPICNT & 0x80);
+ 
+	REG_SPIDATA = value;
+ 
+	while(REG_SPICNT & 0x80);
+
+	REG_SPICNT = 0;
+
+	return REG_SPIDATA;
+}
+
 //---------------------------------------------------------------------------------
 void NDSTouchscreenMode() {
 //---------------------------------------------------------------------------------
