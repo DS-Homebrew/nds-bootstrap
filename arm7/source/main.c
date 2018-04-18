@@ -178,7 +178,15 @@ void NDSTouchscreenMode() {
 	//unsigned char * I2C_CNT=	(unsigned char*)0x4004501;
 
 
-	u8 volLevel = 0xA7;
+	u8 volLevel;
+	
+	if(fifoCheckValue32(FIFO_MAXMOD)) {
+		// special setting (when found special gamecode)
+		volLevel = 0xAC;
+	} else {
+		// normal setting (for any other gamecodes)
+		volLevel = 0xA7;
+	}
 
 	volLevel += 0x13;
 
@@ -351,10 +359,12 @@ int main(void) {
 
 	// read User Settings from firmware
 	readUserSettings();
+	irqInit();
 
 	// Start the RTC tracking IRQ
 	initClockIRQ();
-
+	fifoInit();
+	
 	SetYtrigger(80);
 
 	installSystemFIFO();
