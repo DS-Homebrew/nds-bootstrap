@@ -1409,7 +1409,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32*
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
-	if (cardReadFound) {
+	if (cardReadFound || ndsHeader->fatSize == 0) {
 		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile, useArm7Donor);
 
 		dbg_printf("ERR_NONE");
