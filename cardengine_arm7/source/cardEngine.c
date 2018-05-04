@@ -24,6 +24,13 @@
 #include "fat.h"
 #include "i2c.h"
 
+#include "sr_data_error.h"	// For showing an error screen
+#include "sr_data_srloader.h"	// For rebooting into SRLoader
+
+extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
+extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
+extern int unlockMutex(void);					// Fixes implicit declaration @ line 223
+
 static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
@@ -36,6 +43,8 @@ extern u32 romread_LED;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
+
+static int softResetTimer = 0;
 
 bool ndmaUsed = false;
 
@@ -220,6 +229,19 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
+	if (REG_SCFG_EXT != 0) {
+		if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
+			softResetTimer = 0;
+		} else {
+			if(softResetTimer == 60*2) {
+				memcpy((u32*)0x02000300,sr_data_srloader,0x020);
+				i2cWriteRegister(0x4a,0x70,0x01);
+				i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
+			}
+			softResetTimer++;
+		}
+	}
+
 	// Control volume with the - and + buttons.
 	u8 volLevel;
 	u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
