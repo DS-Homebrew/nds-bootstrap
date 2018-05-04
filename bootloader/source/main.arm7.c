@@ -374,6 +374,7 @@ void loadRomIntoRam(aFile file) {
 
 	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
 	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
+	&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
 		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
@@ -646,6 +647,12 @@ void loadRomIntoRam(aFile file) {
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_CJCE0[i];
 			ROM_LOCATION = 0x0C400000;
+		} else if((ROM_TID == 0x45525243) && (ROM_HEADERCRC == 0xAB01CF56)) {	// Megaman Star Force 3: Red Joker (U)
+			for(int i = 0; i < 7; i++)
+				setDataBWlist[i] = dataBlacklist_CRRE0[i];
+		} else if((ROM_TID == 0x45425243) && (ROM_HEADERCRC == 0xE8CFCF56)) {	// Megaman Star Force 3: Black Ace (U)
+			for(int i = 0; i < 7; i++)
+				setDataBWlist[i] = dataBlacklist_CRBE0[i];
 		} else if((ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0xCE77CF56)
 				|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi: Bowser's Inside Story (U)
 			for(int i = 0; i < 7; i++)
