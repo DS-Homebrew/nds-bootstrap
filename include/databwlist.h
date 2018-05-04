@@ -160,10 +160,10 @@ u32 dataBlacklist_YKWK0[7] = {0x00B39C00, 0x04273400, 0x03739800, 0x00000000,	//
 							0x0DA00000, 0x00000006, 0x00100000};
 u32 dataBlacklist_CJCE0[7] = {0x01102E00, 0x02E3EE00, 0x01D3C000, 0x00000000,	// My Japanese Coach: Learn a New Language (U)
 							0x0DA00000, 0x00000030, 0x00040000};
-u32 dataBlacklist_CRRE0[7] = {0x0078B600, 0x00B2AC00, 0x0039F600, 0x00000000,	// Megaman Star Force 3: Red Joker (U)
-							0x0DD20000, 0x00000027, 0x00020000};
-u32 dataBlacklist_CRBE0[7] = {0x0078A800, 0x00B29E00, 0x0039F600, 0x00000000,	// Megaman Star Force 3: Black Ace (U)
-							0x0DD20000, 0x00000027, 0x00020000};
+u32 dataBlacklist_CRRE0[7] = {0x0039BA00, 0x005D1A00, 0x00236000, 0x00000000,	// Megaman Star Force 3: Red Joker (U)
+							0x0DE80000, 0x0000000C, 0x00020000};
+u32 dataBlacklist_CRBE0[7] = {0x0039AC00, 0x005D0C00, 0x00236000, 0x00000000,	// Megaman Star Force 3: Black Ace (U)
+							0x0DE80000, 0x0000000C, 0x00020000};
 u32 dataBlacklist_CLJE0[7] = {0x01022600, 0x05944A00, 0x04922400, 0x00000000,	// Mario & Luigi: Bowser's Inside Story (U)
 							0x0D800000, 0x00000020, 0x00040000};
 u32 dataBlacklist_BKIE0[7] = {0x00A2E200, 0x0523F600, 0x04811400, 0x00000000,	// The Legend of Zelda: Spirit Tracks (U)
