@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen, u32 romread_LED) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -108,6 +108,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 							patchMpuRegion,
 							patchMpuSize,
 							loadingScreen,
+							romread_LED,
 							argarray.size(), (const char **)&argarray[0]);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
@@ -200,15 +201,12 @@ int main( int argc, char **argv) {
 				break;
 			case 1:
 				dbg_printf("Using WiFi LED\n");
-				fifoSendValue32(FIFO_USER_05, 1);	// Set to use WiFi LED as card read indicator
 				break;
 			case 2:
 				dbg_printf("Using Power LED\n");
-				fifoSendValue32(FIFO_USER_05, 2);	// Set to use power LED (turn to purple) as card read indicator
 				break;
 			case 3:
 				dbg_printf("Using Camera LED\n");
-				fifoSendValue32(FIFO_USER_05, 3);	// Set to use Camera LED as card read indicator
 				break;
 		}
 
@@ -229,8 +227,8 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_08, 1);	// Disable Slot-1 access for games with no built-in Infrared port
 		}*/
 
-		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
-		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
+		//bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
+		//if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
 			dbg_printf("CPU boosted\n");
@@ -275,7 +273,7 @@ int main( int argc, char **argv) {
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1));	
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
