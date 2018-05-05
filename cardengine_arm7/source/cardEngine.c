@@ -197,28 +197,6 @@ void runCardEngineCheck (void) {
 	#ifdef DEBUG
 	nocashMessage("runCardEngineCheck");
 	#endif
-	
-	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
-		softResetTimer[0] = 0;
-	} else if (!saveInProgress) {
-		if(softResetTimer[0] == 60*2) {
-			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
-		}
-		softResetTimer[0]++;
-	}
-
-	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-		//softResetTimer[1] = 0;
-	} else if (!saveInProgress) {
-		//if(softResetTimer[1] == 60*2) {
-			memcpy((u32*)0x02000300,sr_data_twlnandside,0x020);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
-		//}
-		//softResetTimer[1]++;
-	}
 
 	if(tryLockMutex()) {	
 		initLogging();
@@ -260,6 +238,28 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
+		softResetTimer[0] = 0;
+	} else if (!saveInProgress) {
+		if(softResetTimer[0] == 60*2) {
+			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
+			i2cWriteRegister(0x4a,0x70,0x01);
+			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
+		}
+		softResetTimer[0]++;
+	}
+
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
+		//softResetTimer[1] = 0;
+	} else if (!saveInProgress) {
+		//if(softResetTimer[1] == 60*2) {
+			memcpy((u32*)0x02000300,sr_data_twlnandside,0x020);
+			i2cWriteRegister(0x4a,0x70,0x01);
+			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
+		//}
+		//softResetTimer[1]++;
+	}
+
 	runCardEngineCheck();
 }
 
