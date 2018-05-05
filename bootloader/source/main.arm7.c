@@ -88,6 +88,7 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
+extern unsigned long gameSoftReset;
 
 u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};

@@ -41,13 +41,14 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
 extern u32 romread_LED;
+extern u32 gameSoftReset;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
 
 static bool saveInProgress = false;
 
-static int softResetTimer[2] = {0};
+static int softResetTimer = 0;
 
 bool ndmaUsed = false;
 
@@ -239,25 +240,21 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
-		softResetTimer[0] = 0;
+		softResetTimer = 0;
 	} else if (!saveInProgress) {
-		if(softResetTimer[0] == 60*2) {
+		if(softResetTimer == 60*2) {
 			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
 			i2cWriteRegister(0x4a,0x70,0x01);
 			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
 		}
-		softResetTimer[0]++;
+		softResetTimer++;
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-		//softResetTimer[1] = 0;
-	} else if (!saveInProgress) {
-		//if(softResetTimer[1] == 60*2) {
-			memcpy((u32*)0x02000300,sr_data_twlnandside,0x020);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
-		//}
-		//softResetTimer[1]++;
+	} else if (!saveInProgress && !gameSoftReset) {
+		memcpy((u32*)0x02000300,sr_data_twlnandside,0x020);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
 	}
 
 	runCardEngineCheck();
