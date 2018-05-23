@@ -26,6 +26,7 @@
 
 #include "sr_data_error.h"	// For showing an error screen
 #include "sr_data_srloader.h"	// For rebooting into SRLoader
+#include "sr_data_srllastran.h"	// For rebooting the game
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
@@ -40,9 +41,12 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
 extern u32 romread_LED;
+extern u32 gameSoftReset;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
 static aFile savFile;
+
+static bool saveInProgress = false;
 
 static int softResetTimer = 0;
 
@@ -229,17 +233,22 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
-	if (REG_SCFG_EXT != 0) {
-		if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
-			softResetTimer = 0;
-		} else {
-			if(softResetTimer == 60*2) {
-				memcpy((u32*)0x02000300,sr_data_srloader,0x020);
-				i2cWriteRegister(0x4a,0x70,0x01);
-				i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
-			}
-			softResetTimer++;
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
+		softResetTimer = 0;
+	} else {
+		if(softResetTimer == 60*2) {
+			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
+			i2cWriteRegister(0x4a,0x70,0x01);
+			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into SRLoader
 		}
+		softResetTimer++;
+	}
+
+	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
+	} else if (!saveInProgress && !gameSoftReset) {
+		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
 	}
 
 	// Control volume with the - and + buttons.
@@ -421,9 +430,11 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
+	saveInProgress = true;
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	saveInProgress = false;
 	
 	return true;
 }
@@ -440,9 +451,11 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
+	saveInProgress = true;
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	fileWrite(src,savFile,dst,len);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	saveInProgress = false;
 	
 	return true;
 }
