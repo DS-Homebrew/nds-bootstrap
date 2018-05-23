@@ -119,6 +119,8 @@ u32 mpuInitRegion3Data[1] = {0x8000035};
 
 u32 mpuInitCache[1] = {0xE3A00042};
 
+extern u32 returnedSDKver;
+
 bool cardReadFound = false;
 
 //
@@ -187,6 +189,7 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 				break;
 		}
 	}
+	returnedSDKver = ((module_params_t*)(moduleparams - 0x1C))->sdk_version;
 	return (module_params_t*)(moduleparams - 0x1C);
 }
 
