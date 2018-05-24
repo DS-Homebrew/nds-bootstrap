@@ -361,6 +361,7 @@ void loadRomIntoRam(aFile file) {
 	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
 	|| (ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
 	|| (ROM_TID & 0x00FFFFFF) == 0x414259	// Bomberman 2
+	|| (ROM_TID & 0x00FFFFFF) == 0x4C4F43	// Mario & Sonic at the Olympic Winter Games
 	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operate Shooting Star
 	|| (ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
 	|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// The Legend of Zelda: Spirit Tracks
