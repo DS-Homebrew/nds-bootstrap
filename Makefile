@@ -40,7 +40,7 @@ CFLAGS	:=	-g -Wall -O2\
 		-ffast-math \
 		$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9
+CFLAGS	+=	$(INCLUDE) -DARM9 -std=gnu99
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
@@ -129,8 +129,7 @@ dist:	all
 $(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9 dldi/dsisd.dldi
 	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf \
 			-b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
-			-g KBSE 01 "NDSBOOTSTRAP" 
-			#-z 80040000 -u 00030004
+			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 	dlditool dldi/dsisd.dldi $(TARGET).nds
 
 $(TARGET).arm7: arm7/$(TARGET).elf

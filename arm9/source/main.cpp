@@ -146,7 +146,6 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 int main( int argc, char **argv) {
 
 	bool ntrMode = false;
-	REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 	__NDSHeader->unitCode = 1;
 	
 	// No! broke no$gba compatibility
@@ -156,12 +155,10 @@ int main( int argc, char **argv) {
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
 		ntrMode = bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE",1);
-		
-		if(ntrMode) {
-			// REG_SCFG_CLK = 0x80;
-			REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-			fifoSendValue32(FIFO_MAXMOD, 1);
-		}
+			
+          // REG_SCFG_CLK = 0x80;
+		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+		fifoSendValue32(FIFO_MAXMOD, 1);
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			

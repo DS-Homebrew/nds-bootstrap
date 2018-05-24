@@ -18,7 +18,7 @@
 
 #include <nds.h> 
 #include <nds/fifomessages.h>
-#include "sdmmc.h"
+#include <nds/arm7/sdmmc.h>
 #include "debugToFile.h"
 #include "fat.h"
 #include "i2c.h"
