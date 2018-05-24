@@ -342,7 +342,6 @@ void loadBinary_ARM7 (aFile file)
 
 u32 enableExceptionHandler = true;
 u32 dsiWramUsed = false;
-u32 returnedSDKver = 0;
 
 void loadRomIntoRam(aFile file) {
 	u32 ROMinRAM = 0;
@@ -368,10 +367,6 @@ void loadRomIntoRam(aFile file) {
 	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
 	{
 		dsiWramUsed = true;
-	}
-
-	if (useArm7Donor == 0 && returnedSDKver > 0x4000000) {
-		dsiWramUsed = true;	// Use DSi WRAM as cache, for SDK4 games to work without donor ROM
 	}
 
 	if((romSize & 0x0000000F) == 0x1
