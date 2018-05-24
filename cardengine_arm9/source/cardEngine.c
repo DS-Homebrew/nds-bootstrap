@@ -297,6 +297,7 @@ void waitForArm7() {
 }
 
 int cardRead (u32* cacheStruct) {
+	REG_IME = IME_DISABLE;
 	//nocashMessage("\narm9 cardRead\n");
 	
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
@@ -1258,6 +1259,7 @@ int cardRead (u32* cacheStruct) {
 			}
 		}
 	}
+	REG_IME = IME_ENABLE;
 	return 0;
 }
 
