@@ -55,6 +55,15 @@ clear_EWRAM_loop:
 	cmp	r8, r9
 	blt	clear_EWRAM_loop
 
+	// clear other part of EWRAM
+	mov	r8, #0x02400000
+
+	mov	r9, #0x02800000
+clear_EWRAM2_loop:
+	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
+	cmp	r8, r9
+	blt	clear_EWRAM2_loop
+
 	pop	{r0-r9}
 
 	bx	lr
