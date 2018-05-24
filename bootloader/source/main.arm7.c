@@ -69,7 +69,7 @@ void sdmmc_controller_init();
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
 #define ENGINE_LOCATION_ARM7  	0x037C0000
-#define ENGINE_LOCATION_ARM9  	0x03700000
+#define ENGINE_LOCATION_ARM9  	0x02400000
 
 const char* bootName = "BOOT.NDS";
 
@@ -330,21 +330,6 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if((ROM_TID & 0x00FFFFFF) == 0x475541	// Need for Speed: Underground 2
-	|| (ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
-	|| (ROM_TID & 0x00FFFFFF) == 0x575A41	// WarioWare: Touched
-	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
-	|| (ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
-	|| (ROM_TID & 0x00FFFFFF) == 0x414259	// Bomberman 2
-	|| (ROM_TID & 0x00FFFFFF) == 0x4C4F43	// Mario & Sonic at the Olympic Winter Games
-	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operate Shooting Star
-	|| (ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-	|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// The Legend of Zelda: Spirit Tracks
-	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-	{
-		dsiWramUsed = true;
-	}
-
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -359,13 +344,9 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x00C00000) && ((ROM_TID & 0x00FFFFFF) != 0x524941) && ((ROM_TID & 0x00FFFFFF) != 0x534941)
+	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x00800000) && ((ROM_TID & 0x00FFFFFF) != 0x524941) && ((ROM_TID & 0x00FFFFFF) != 0x534941)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
-		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
-			ROM_LOCATION = 0x0D000000-romSize;
-		}
-
 		ROMinRAM = 1;
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
 	} else {
