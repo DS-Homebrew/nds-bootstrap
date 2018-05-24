@@ -63,13 +63,13 @@ void sdmmc_controller_init();
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
 #define TEMP_MEM 0x02FFE000
-#define NDS_HEAD 0x02FFFE00
-#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x02FFFFF4)
+#define NDS_HEAD 0x027FFE00
+#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x027FFFF4)
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
 #define ENGINE_LOCATION_ARM7  	0x03780000
-#define ENGINE_LOCATION_ARM9  	0x03700000
+#define ENGINE_LOCATION_ARM9  	0x02400000
 
 const char* bootName = "BOOT.NDS";
 
@@ -159,30 +159,6 @@ void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
-/*-------------------------------------------------------------------------
-passArgs_ARM7
-Copies the command line arguments to the end of the ARM9 binary, 
-then sets a flag in memory for the loaded NDS to use
---------------------------------------------------------------------------*/
-void passArgs_ARM7 (void) {
-	u32 ARM9_DST = *((u32*)(NDS_HEAD + 0x028));
-	u32 ARM9_LEN = *((u32*)(NDS_HEAD + 0x02C));
-	u32* argSrc;
-	u32* argDst;
-
-	if (!argStart || !argSize) return;
-
-	argSrc = (u32*)(argStart + (int)&_start);
-
-	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned 
-
-	copyLoop(argDst, argSrc, argSize);
-
-	__system_argv->argvMagic = ARGV_MAGIC;
-	__system_argv->commandLine = (char*)argDst;
-	__system_argv->length = argSize;
-}
-
 
 
 
@@ -236,9 +212,9 @@ void resetMemory_ARM7 (void)
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
 	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x000, (u8*)0x027FFC80, 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x100, (u8*)0x027FFC80, 0x70);
 	}
 }
 
@@ -355,12 +331,6 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if((ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-	{
-		dsiWramUsed = true;
-	}
-
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -375,21 +345,13 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	// If ROM size is 0x01C00000 or below, then load the ROM into RAM.
-	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x01C00000) && (ROM_TID != 0x45475241)
+	// If ROM size is 0x01800000 or below, then load the ROM into RAM.
+	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x01800000) && (ROM_TID != 0x45475241)
 	&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
-		if(romSize > 0x01800000 && romSize <= 0x01C00000) {
-			ROM_LOCATION = 0x0E000000-romSize;
-		}
-
 		ROMinRAM = 1;
-		arm9_extRAM = true;
-		while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-		arm9_extRAM = false;
-		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
 			for(int i = 0; i < 7; i++)
@@ -506,36 +468,12 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARRE0[i];
-		/* } else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
+		} else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
 				|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
 				|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
 				|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
 			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AD2E0[i]; */
-		} else if((ROM_TID == 0x454B5341) && (ROM_HEADERCRC == 0xB10BCF56)) {	// Lost in Blue (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ASKE0[i];
-			ROM_LOCATION = 0x0C400000;
-		/* } else if((ROM_TID == 0x50525741) && (ROM_HEADERCRC == 0xD82BCF56)) {	// Advance Wars: Dual Strike (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AWRP0[i];
-			ROM_LOCATION = 0x0C400000; */
-		} else if((ROM_TID == 0x45393541) && (ROM_HEADERCRC == 0x5836CF56)) {	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_A59E0[i];
-			ROM_LOCATION = 0x0C600000;
-		} else if((ROM_TID == 0x4A564341) && (ROM_HEADERCRC == 0x9A94CF56)) {	// Akumajou Dracula: Sougetsu no Juujika (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ACVJ1[i];
-			ROM_LOCATION = 0x0C600000;
-		} else if((ROM_TID == 0x45564341) && (ROM_HEADERCRC == 0x0399CF56)) {	// Castlevania: Dawn of Sorrow (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ACVE0[i];
-			ROM_LOCATION = 0x0C600000;
-		} else if((ROM_TID == 0x50564341) && (ROM_HEADERCRC == 0x7ACDCF56)) {	// Castlevania: Dawn of Sorrow (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ACVP0[i];
-			ROM_LOCATION = 0x0C480000;
+				setDataBWlist[i] = dataBlacklist_AD2E0[i];
 		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AGYE0[i];
@@ -584,13 +522,13 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARGE0[i];
-		/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+		} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AYWE0[i]; */
+				setDataBWlist[i] = dataBlacklist_AYWE0[i];
 		} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
@@ -617,22 +555,9 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_A3YK0[i];
-		} else if((ROM_TID == 0x45575641) && (ROM_HEADERCRC == 0x1652CF56)	// Miami Nights - Singles in the City (U)
-				|| (ROM_TID == 0x50575641) && (ROM_HEADERCRC == 0x8329CF56)) {	// Miami Nights - Singles in the City (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AVWE0[i];
-			ROM_LOCATION = 0x0C680000;
 		} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YCOE0[i];
-		} else if((ROM_TID == 0x45325759) && (ROM_HEADERCRC == 0xD1EBCF56)) {	// Advance Wars: Days of Ruin (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YW2E0[i];
-			ROM_LOCATION = 0x0C400000;
-		} else if((ROM_TID == 0x50325759) && (ROM_HEADERCRC == 0x8CA3CF56)) {	// Advance Wars: Dark Conflict (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YW2P0[i];
-			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x45594659) && (ROM_HEADERCRC == 0xB0CECF56)	// Pokemon Mystery Dungeon: Explorers of Darkness (U)
 				|| (ROM_TID == 0x45544659) && (ROM_HEADERCRC == 0xA0BDCF56)) {	// Pokemon Mystery Dungeon: Explorers of Time (U)
 			for(int i = 0; i < 7; i++)
@@ -646,10 +571,6 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x4B574B59) && (ROM_HEADERCRC == 0xE2E5CF56)) {	// Kirby Ultra Super Deluxe (KS)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_YKWK0[i];
-		} else if((ROM_TID == 0x45434A43) && (ROM_HEADERCRC == 0xF0BACF56)) {	// My Japanese Coach: Learn a New Language (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_CJCE0[i];
-			ROM_LOCATION = 0x0C400000;
 		} else if((ROM_TID == 0x45525243) && (ROM_HEADERCRC == 0xAB01CF56)) {	// Megaman Star Force 3: Red Joker (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_CRRE0[i];
@@ -666,16 +587,14 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0x4471CF56)) {	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_BKIE0_patch[i];
-		} /* else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
+		} else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_B6ZE0[i];
-		} */
+		}
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
 			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {
-				arm9_extRAM = true;
-				while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
 				if(dataAmount >= 1) {
 					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
@@ -689,21 +608,15 @@ void loadRomIntoRam(aFile file) {
 				if(dataAmount == 4) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2]+setDataBWlist_3[2], file, setDataBWlist_4[0], setDataBWlist_4[2]);
 				}
-				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			} else {
 				setDataBWlist[0] -= 0x4000;
 				setDataBWlist[0] -= ARM9_LEN;
-				arm9_extRAM = true;
-				while (arm9_SCFG_EXT != 0x8300C000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, setDataBWlist[0]);
 				u32 lastRomSize = 0;
 				for(u32 i = setDataBWlist[1]; i < romSize; i++) {
 					lastRomSize++;
 				}
 				fileRead(ROM_LOCATION+setDataBWlist[0], file, setDataBWlist[1], lastRomSize);
-				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			}
 		}
 	}
@@ -723,14 +636,14 @@ void startBinary_ARM7 (void) {
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// copy NDS ARM9 start address into the header, starting ARM9
-	*((vu32*)0x02FFFE24) = TEMP_ARM9_START_ADDRESS;
+	*((vu32*)0x027FFE24) = TEMP_ARM9_START_ADDRESS;
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
+	VoidFn arm7code = *(VoidFn*)(0x27FFE34);
 	arm7code();
 }
 
@@ -844,57 +757,36 @@ void arm7_main (void) {
 	loadBinary_ARM7(file);
 	increaseLoadBarLength();	// 2 dots
 
-	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
+	nocashMessage("try to patch card");
+	copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+	increaseLoadBarLength();	// 3 dots
+	copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	increaseLoadBarLength();	// 4 dots
 
-	/* nocashMessage("try to patch dldi");
-	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-	if (wantToPatchDLDI) {
-		nocashMessage("dldi patch successful");
+	module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
+	if(params)
+	{
+		ensureArm9Decompressed(NDS_HEAD, params);
+	}
+	increaseLoadBarLength();	// 5 dots
 
-		// Find the DLDI reserved space in the file
-		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-
-		errorCode = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-		if(errorCode == ERR_NONE) {
-			nocashMessage("dldi hook Sucessfull");
-		} else {
-			nocashMessage("error during dldi hook");
-			errorOutput();
-		}
+	errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+	if(errorCode == ERR_NONE) {
+		nocashMessage("patch card Sucessfull");
 	} else {
-		nocashMessage("dldi Patch Unsuccessful try to patch card"); */
-		nocashMessage("try to patch card");
-		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-		increaseLoadBarLength();	// 3 dots
-		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-		increaseLoadBarLength();	// 4 dots
+		nocashMessage("game uses thumb");
+		errorOutput();
+	}
+	increaseLoadBarLength();	// 6 dots
 
-		module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
-		if(params)
-		{
-			ensureArm9Decompressed(NDS_HEAD, params);
-		}
-		increaseLoadBarLength();	// 5 dots
-
-		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
-		if(errorCode == ERR_NONE) {
-			nocashMessage("patch card Sucessfull");
-		} else {
-			nocashMessage("game uses thumb");
-			errorOutput();
-		}
-		increaseLoadBarLength();	// 6 dots
-
-		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-		if(errorCode == ERR_NONE) {
+	errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+	if(errorCode == ERR_NONE) {
 			nocashMessage("card hook Sucessfull");
-		} else {
-			nocashMessage("error during card hook");
-			errorOutput();
-		}
-		increaseLoadBarLength();	// 7 dots
-	// }
+	} else {
+		nocashMessage("error during card hook");
+		errorOutput();
+	}
+	increaseLoadBarLength();	// 7 dots
  
 
 

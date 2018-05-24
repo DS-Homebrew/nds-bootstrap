@@ -78,20 +78,8 @@ u32 dataWhitelist_CCUJ1_1[3] = {0x016D4000, 0x01E1E200, 0x0074A200};	// Tomodach
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataBlacklist_ARRE0[7] = {0x0096D400, 0x01AC4800, 0x01157400, 0x00000000,	// Ridge Racer DS (U)
 							0x0D380000, 0x00000019, 0x00080000};
-//u32 dataBlacklist_AD2E0[7] = {0x00442200, 0x00A7DC00, 0x0063BA00, 0x00000000,	// Nintendogs: First 4 (U)
-//							0x0DD00000, 0x0000000C, 0x00040000};
-u32 dataBlacklist_ASKE0[7] = {0x01BD0000, 0x024E95E0, 0x009195E0, 0x00000000,	// Lost in Blue (U)
-							0x0DF40000, 0x00000003, 0x00040000};
-//u32 dataBlacklist_AWRP0[7] = {0x01427D20, 0x01679B20, 0x00251E00, 0x00000000,	// Advance Wars: Dual Strike (E)
-//							0x0DFD0000, 0x00000001, 0x00030000};
-u32 dataBlacklist_A59E0[7] = {0x01A51400, 0x02EFD80C, 0x014AC40C, 0x00000000,	// Castlevania: Dawn of Sorrow (U) (Kiosk Demo)
-							0x0C400000, 0x00000001, 0x00200000};
-u32 dataBlacklist_ACVJ1[7] = {0x01ABB000, 0x02F6740C, 0x014AC40C, 0x00000000,	// Akumajou Dracula: Sougetsu no Juujika (J)
-							0x0C400000, 0x00000001, 0x00200000};
-u32 dataBlacklist_ACVE0[7] = {0x01AC1600, 0x02F6DA0C, 0x014AC40C, 0x00000000,	// Castlevania: Dawn of Sorrow (U)
-							0x0C400000, 0x00000001, 0x00200000};
-u32 dataBlacklist_ACVP0[7] = {0x01C42800, 0x030EEC0C, 0x014AC40C, 0x00000000,	// Castlevania: Dawn of Sorrow (E)
-							0x0C400000, 0x00000001, 0x00080000};
+u32 dataBlacklist_AD2E0[7] = {0x00442200, 0x00A7DC00, 0x0063BA00, 0x00000000,	// Nintendogs: First 4 (U)
+							0x0DD00000, 0x0000000C, 0x00040000};
 u32 dataBlacklist_AGYE0[7] = {0x000F8E00, 0x030656A8, 0x02F6C8A8, 0x00000000,	// Phoenix Wright: Ace Attorney (U)
 							0x0CE80000, 0x00000044, 0x00040000};
 u32 dataBlacklist_AGYP0[7] = {0x000FAE00, 0x0323C598, 0x03141798, 0x00000000,	// Phoenix Wright: Ace Attorney (E)
@@ -122,10 +110,10 @@ u32 dataBlacklist_APHK0[7] = {0x00390400, 0x01455C70, 0x010C5870, 0x00000000,	//
 							0x0D400000, 0x00000018, 0x00080000};
 u32 dataBlacklist_ARGE0[7] = {0x003FCE00, 0x00ADAC00, 0x006DDE00, 0x00000000,	// Pokemon Ranger (U)
 							0x0DA80000, 0x0000002C, 0x00020000};
-//u32 dataBlacklist_AYWJ0[7] = {0x0163A600, 0x01DCA840, 0x00790240, 0x00000000,	// Yoshi's Island DS (J)
-//							0x0DF00000, 0x00000004, 0x00040000};
-//u32 dataBlacklist_AYWE0[7] = {0x01635E00, 0x01D9F240, 0x00769440, 0x00000000,	// Yoshi's Island DS (U)
-//							0x0DEC0000, 0x00000005, 0x00040000};
+u32 dataBlacklist_AYWJ0[7] = {0x0163A600, 0x01DCA840, 0x00790240, 0x00000000,	// Yoshi's Island DS (J)
+							0x0DF00000, 0x00000004, 0x00040000};
+u32 dataBlacklist_AYWE0[7] = {0x01635E00, 0x01D9F240, 0x00769440, 0x00000000,	// Yoshi's Island DS (U)
+							0x0DEC0000, 0x00000005, 0x00040000};
 u32 dataBlacklist_ADNJ0[7] = {0x013EFA00, 0x02CEC200, 0x018FC800, 0x00000000,	// Digimon Story (J)
 							0x0DEC0000, 0x00000005, 0x00040000};
 u32 dataBlacklist_ADNE0[7] = {0x00F0EC00, 0x0320EA00, 0x022FFE00, 0x00000000,	// Digimon World DS (U)
@@ -142,14 +130,8 @@ u32 dataBlacklist_A3YE0[7] = {0x0100A400, 0x02961B20, 0x01957720, 0x00000000,	//
 							0x0DF00000, 0x00000002, 0x00080000};
 u32 dataBlacklist_A3YK0[7] = {0x01009400, 0x02908800, 0x018FF400, 0x00000000,	// Sonic Rush Adventure (KS)
 							0x0DD80000, 0x00000005, 0x00080000};
-u32 dataBlacklist_AVWE0[7] = {0x01459200, 0x018A9200, 0x00450000, 0x00000000,	// Miami Nights: Singles in the City (UE)
-							0x0C400000, 0x00000005, 0x00080000};
 u32 dataBlacklist_YCOE0[7] = {0x0075DA00, 0x03D36800, 0x035D8E00, 0x00000000,	// Call of Duty 4: Modern Warfare (U)
 							0x0CF00000, 0x00000022, 0x00080000};
-u32 dataBlacklist_YW2E0[7] = {0x0122EE00, 0x02E5CE40, 0x01C2E040, 0x00000000,	// Advance Wars: Days of Ruin (U)
-							0x0DA00000, 0x00000006, 0x00100000};
-u32 dataBlacklist_YW2P0[7] = {0x011CD400, 0x02DFB440, 0x01C2E040, 0x00000000,	// Advance Wars: Dark Conflict (E)
-							0x0DA00000, 0x00000006, 0x00100000};
 u32 dataBlacklist_YFYE0[7] = {0x00751400, 0x03196600, 0x02A45200, 0x00000000,	// Pokemon Mystery Dungeon: Explorers of Darkness and Time (U)
 							0x0DB00000, 0x00000014, 0x00040000};
 u32 dataBlacklist_YKWJ0[7] = {0x00B62200, 0x042A3A00, 0x03741800, 0x00000000,	// Hoshi no Kirby: Ultra Super Deluxe (J)
@@ -170,7 +152,7 @@ u32 dataBlacklist_BKIE0[7] = {0x00A2E200, 0x0523F600, 0x04811400, 0x00000000,	//
 							0x0D980000, 0x0000000D, 0x00080000};
 u32 dataBlacklist_BKIE0_patch[7] = {0x01447600, 0x057F7E00, 0x043B0800, 0x00000000,	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
 							0x0DE00000, 0x00000004, 0x00080000};
-//u32 dataBlacklist_B6ZE0[7] = {0x0013CE00, 0x03AB6E00, 0x026E8E00, 0x00000000,	// MegaMan Zero Collection (U)
-//							0x00000000, 0x00000000, 0x00008000};
+u32 dataBlacklist_B6ZE0[7] = {0x013CE000, 0x03AB6E00, 0x026E8E00, 0x00000000,	// MegaMan Zero Collection (U)
+							0x0DF60000, 0x00000005, 0x00020000};
 
 #endif // _DATABWLIST_H
