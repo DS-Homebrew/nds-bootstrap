@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <nds/system.h>
 #include "card_patcher.h"
 #include "common.h"
 #include "cardengine_arm9_bin.h"
@@ -30,6 +31,23 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 u32 a7JumpTableSignatureV3[4] = {0xE92D41F0,0xE59F4224,0xE3A05000};
+
+u32 swi12Signature[1] = {0x4770DF12};	// LZ77UnCompReadByCallbackWrite16bit
+u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
+u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
+u32 j_GetPitchTableSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
+u32 j_GetPitchTableSignature1Alt3[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
+u32 j_GetPitchTableSignature1Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
+u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
+u32 j_GetPitchTableSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
+u32 j_GetPitchTableSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03804119};
+u32 j_GetPitchTableSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03804305};
+u32 j_GetPitchTableSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03804395};
+u32 j_GetPitchTableSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03804439};
+u32 j_GetPitchTableSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03804615};
+u32 j_GetPitchTableSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
+u32 j_GetPitchTableSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03803829};
+u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
@@ -223,7 +241,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
-	u32* debug = (u32*)0x03786000;
+	u32* debug = (u32*)0x037C6000;
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
@@ -1473,8 +1491,130 @@ void swapBinary_ARM7(aFile donorfile)
 	NDS_HEAD[0x03C>>2] = ARM7_LEN;
 }
 
+void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+	u32* patches =  (u32*) cardEngineLocation[0];
+	u32 swi12Offset =   
+		getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+			  (u32*)swi12Signature, 1, 1);
+	if (!swi12Offset) {
+		dbg_printf("swi 0x12 call not found\n");
+	} else {
+		// Patch to call swi 0x02 instead of 0x12
+		dbg_printf("swi 0x12 call found\n");
+		u32* swi12Patch = (u32*) patches[10];
+		copyLoop ((u32*)swi12Offset, swi12Patch, 0x4);
+	}
+
+	bool sdk5 = false;
+	u32 swiGetPitchTableOffset =   
+		getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+			  (u32*)j_GetPitchTableSignature1, 4, 1);
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature1Alt1, 4, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call alt 1 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature1Alt2, 4, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call alt 2 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature1Alt3, 4, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call alt 3 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature1Alt4, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK2 call alt 4 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt1, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 1 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt2, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 2 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt3, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 3 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt4, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 4 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt5, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 5 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt6, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 6 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature4, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK4 call not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature4Alt1, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK4 call alt 1 not found\n");
+		sdk5 = true;
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)swiGetPitchTableSignature5, 4, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable call SDK5 not found\n");
+	}
+	if (swiGetPitchTableOffset>0) {
+		dbg_printf("swiGetPitchTable call found\n");
+		if (sdk5) {
+			u32* swiGetPitchTablePatch = (u32*) patches[12];
+			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+		} else {
+			u32* swiGetPitchTablePatch = (u32*) patches[11];
+			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+		}
+	}
+}
+
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
-	u32* debug = (u32*)0x03786000;
+	u32* debug = (u32*)0x037C6000;
+
+	if(REG_SCFG_ROM != 0x703) {
+		fixForDsiBios(ndsHeader, cardEngineLocation);
+	}
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
@@ -1524,6 +1664,10 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 			dbg_printf("swap the arm7 binary");	
 			swapBinary_ARM7(donorFile);
+			// Patch swiGetPitchTable call again
+			if(REG_SCFG_ROM != 0x703) {
+				fixForDsiBios(ndsHeader, cardEngineLocation);
+			}
 			// apply the arm7 binary swap and the save patch, assume save v2 nds file
 			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 		} else {
@@ -1537,6 +1681,10 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
 				dbg_printf("swap the arm7 binary");	
 				swapBinary_ARM7(donorFile);
+				// Patch swiGetPitchTable call again
+				if(REG_SCFG_ROM != 0x703) {
+					fixForDsiBios(ndsHeader, cardEngineLocation);
+				}
 				// apply the arm7 binary swap and the save patch again, assume save v2 nds file
 				saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 			} else {
