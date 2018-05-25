@@ -364,12 +364,10 @@ int main(void) {
 
 	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
-	if(fifoCheckValue32(FIFO_USER_04)) {
-		i2cWriteRegister(0x4A, 0x73, 0x01);		// Set to run compatibility check
+	if (REG_SCFG_EXT == 0) {
+		NDSTouchscreenMode();
+		*(u16*)(0x4000500) = 0x807F;
 	}
-
-	NDSTouchscreenMode();
-	*(u16*)(0x4000500) = 0x807F;
 
 	SCFGFifoCheck();
 	//
