@@ -423,11 +423,10 @@ void loadRomIntoRam(aFile file) {
 		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
-		*/
 		} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_ACBE0[i];
-		/* } else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
+		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
 				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
 			for(int i = 0; i < 7; i++) {
 				setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
@@ -526,14 +525,14 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARGE0[i];
-		} else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
+		/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
 		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
 				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYWE0[i];
-		} else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
+		*/ } else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
 		} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)

@@ -46,8 +46,8 @@ u32 dataWhitelist_ALKP0_0[7] = {0x06697400, 0x073D1A44, 0x00D3A644, 0x00000001,	
 u32 dataWhitelist_ALKP0_1[3] = {0x063AC400, 0x063CD0C0, 0x00020CC0};	// Lunar Knights (E) (Title call)
 //u32 dataWhitelist_AMQP0[7] = {0x0024EE00, 0x00F2E300, 0x00CDF500, 0x00000001,	// Mario Vs Donkey Kong 2: March of the Minis (E)
 //							0x0D500000, 0x0000002C, 0x00040000};
-u32 dataWhitelist_ACBE0[7] = {0x018D6000, 0x02C15200, 0x0133F200, 0x00000001,	// Castlevania: Portrait of Ruin (U)
-							0x0DB40000, 0x00000013, 0x00040000};
+//u32 dataWhitelist_ACBE0[7] = {0x018D6000, 0x02C15200, 0x0133F200, 0x00000001,	// Castlevania: Portrait of Ruin (U)
+//							0x0DB40000, 0x00000013, 0x00040000};
 //u32 dataWhitelist_ADAE0_0[7] = {0x01C35400, 0x01D61C00, 0x0012C800, 0x00000001,	// Pokemon Diamond & Pearl (U) (part 1)
 //							0x0D780000, 0x00000022, 0x00040000};
 //u32 dataWhitelist_ADAE0_1[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U) (part 2)
