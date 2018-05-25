@@ -281,9 +281,6 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_MAXMOD, 1);	// special setting (when found special gamecode)
 		}
 
-		bool run_timeout = bootstrapini.GetInt( "NDS-BOOTSTRAP", "CHECK_COMPATIBILITY", 1);
-		if (run_timeout) fifoSendValue32(FIFO_USER_04, 1);
-
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {
 			dbg_printf("CPU boosted\n");
 			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
