@@ -356,10 +356,6 @@ void loadRomIntoRam(aFile file) {
 		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYIE0[i];
-		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AWRE0[i];
-			ROM_LOCATION = 0x0C400000;
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
 		} else {
