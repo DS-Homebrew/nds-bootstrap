@@ -1,8 +1,0 @@
-swi 0x1B
-bx lr
-
-Gericom - Today at 12:43 AM
-It's a function like that yeah
-So you could replace with a branch to your code, adjust r0 and call the swi
-
-Remember that if you use arm code you need to use swi #0x1B0000
