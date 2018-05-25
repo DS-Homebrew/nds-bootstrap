@@ -50,7 +50,7 @@ static bool saveInProgress = false;
 
 static int softResetTimer = 0;
 
-bool ndmaUsed = true;
+bool ndmaUsed = false;
 
 void initLogging() {
 	if(!initialized) {
@@ -508,13 +508,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	ndmaUsed = false;
-	
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead(dst,romFile,src,len);
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-	
-	ndmaUsed = true;
 	
 	return true;
 }

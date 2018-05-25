@@ -13,23 +13,6 @@ extern bool ndmaUsed;
     return &deviceSD;
 }
 */
-
-//---------------------------------------------------------------------------------
-void irqDisableAUX(uint32 irq) {
-//---------------------------------------------------------------------------------
-	int oldIME = enterCriticalSection();
-	REG_AUXIE &= ~irq;
-	leaveCriticalSection(oldIME);
-}
-
-//---------------------------------------------------------------------------------
- void irqEnableAUX(uint32 irq) {
-//---------------------------------------------------------------------------------
-	int oldIME = enterCriticalSection();
-	REG_AUXIE |= irq;
-	leaveCriticalSection(oldIME);
-}
-
 //---------------------------------------------------------------------------------
 int __attribute__((noinline)) geterror(struct mmcdevice *ctx) {
 //---------------------------------------------------------------------------------
@@ -303,9 +286,7 @@ void __attribute__((noinline)) sdmmc_send_command_ndma(struct mmcdevice *ctx, ui
         }
 
         if(!(status1 & TMIO_STAT1_CMD_BUSY)) {
-			// do not wait anymore
-			break;
-            /*status0 = sdmmc_read16(REG_SDSTATUS0);
+            status0 = sdmmc_read16(REG_SDSTATUS0);
             if(sdmmc_read16(REG_SDSTATUS0) & TMIO_STAT0_CMDRESPEND) {
                 ctx->error |= 0x1;
             }
@@ -313,37 +294,11 @@ void __attribute__((noinline)) sdmmc_send_command_ndma(struct mmcdevice *ctx, ui
                 ctx->error |= 0x2;
             }
 
-            if((status0 & flags) == flags)
-                break;*/
+            if((status0 & flags) == flags){
+                break;
+			}
         }
     }
-	
-	int oldIME = enterCriticalSection();
-	
-	irqEnableAUX(IRQ_SDMMC);
-	
-	REG_IME = 1;
-	
-	//wait via irq
-	swiIntrWaitAux(1,IRQ_SDMMC);
-	
-	REG_IME = 0;
-	
-	irqDisableAUX(IRQ_SDMMC);
-	
-	leaveCriticalSection(oldIME);
-	
-	status0 = sdmmc_read16(REG_SDSTATUS0);
-	if(sdmmc_read16(REG_SDSTATUS0) & TMIO_STAT0_CMDRESPEND) {
-		ctx->error |= 0x1;
-	}
-	if(status0 & TMIO_STAT0_DATAEND) {
-		ctx->error |= 0x2;
-	}
-
-	//if((status0 & flags) == flags)
-	//	OK
-	
     ctx->stat0 = sdmmc_read16(REG_SDSTATUS0);
     ctx->stat1 = sdmmc_read16(REG_SDSTATUS1);
     sdmmc_write16(REG_SDSTATUS0,0);
