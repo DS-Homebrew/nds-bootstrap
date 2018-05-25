@@ -22,6 +22,7 @@
 #include "fat.h"
 
 extern unsigned long romread_LED;
+extern unsigned long gameSoftReset;
 
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
@@ -276,6 +277,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	u32* ipcSyncHandler = hookLocation+16;	/*!< IPC sync interrupt mask */
 	u32* cardHandler = hookLocation+19;		/*!< interrupt mask DS Card Slot*/
 	u32* cardLineHandler = hookLocation+20;	/*!< interrupt mask */
+	u32* sdmmcHandler = hookLocation+40;	/*!< Sdmmc interrupt mask (DSi ARM7)*/
 
 	debug[9] = hookLocation;
 
@@ -299,6 +301,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[2] = *ipcSyncHandler;
 	cardEngineLocation[4] = file.firstCluster;
 	cardEngineLocation[7] = romread_LED;
+	cardEngineLocation[8] = gameSoftReset;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 

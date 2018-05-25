@@ -63,13 +63,13 @@ void sdmmc_controller_init();
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
 #define TEMP_MEM 0x02FFE000
-#define NDS_HEAD 0x02FFFE00
-#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x02FFFFF4)
+#define NDS_HEAD 0x027FFE00
+#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x027FFFF4)
 
 #define CHEAT_ENGINE_LOCATION	0x027FE000
 #define CHEAT_DATA_LOCATION  	0x06010000
 #define ENGINE_LOCATION_ARM7  	0x037C0000
-#define ENGINE_LOCATION_ARM9  	0x03700000
+#define ENGINE_LOCATION_ARM9  	0x02400000
 
 const char* bootName = "BOOT.NDS";
 
@@ -88,6 +88,7 @@ extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
+extern unsigned long gameSoftReset;
 
 u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 int dataAmount = 0;
@@ -154,31 +155,6 @@ void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
-/*-------------------------------------------------------------------------
-passArgs_ARM7
-Copies the command line arguments to the end of the ARM9 binary, 
-then sets a flag in memory for the loaded NDS to use
---------------------------------------------------------------------------*/
-void passArgs_ARM7 (void) {
-	u32 ARM9_DST = *((u32*)(NDS_HEAD + 0x028));
-	u32 ARM9_LEN = *((u32*)(NDS_HEAD + 0x02C));
-	u32* argSrc;
-	u32* argDst;
-
-	if (!argStart || !argSize) return;
-
-	argSrc = (u32*)(argStart + (int)&_start);
-
-	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned 
-
-	copyLoop(argDst, argSrc, argSize);
-
-	__system_argv->argvMagic = ARGV_MAGIC;
-	__system_argv->commandLine = (char*)argDst;
-	__system_argv->length = argSize;
-}
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -231,9 +207,9 @@ void resetMemory_ARM7 (void)
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
 	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x000, (u8*)0x027FFC80, 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x100, (u8*)0x027FFC80, 0x70);
 	}
 }
 
@@ -242,6 +218,7 @@ u32 ROM_LOCATION = 0x0C800000;
 u32 ROM_TID;
 u32 ROM_HEADERCRC;
 u32 ARM9_LEN;
+u32 fatSize;
 u32 romSize;
 
 void loadBinary_ARM7 (aFile file)
@@ -262,6 +239,7 @@ void loadBinary_ARM7 (aFile file)
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
 
 	ROM_TID = ndsHeader[0x00C>>2];
+	fatSize = ndsHeader[0x04C>>2];
 	romSize = ndsHeader[0x080>>2];
 	ROM_HEADERCRC = ndsHeader[0x15C>>2];
 
@@ -304,7 +282,7 @@ void loadBinary_ARM7 (aFile file)
 	}
 
 	// "Chrono Trigger (Japan)"
-	/*if(ROM_TID == 0x4a555159){
+	if(ROM_TID == 0x4a555159){
 		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
@@ -317,7 +295,7 @@ void loadBinary_ARM7 (aFile file)
 		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
-	}*/
+	}
 
 	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
 	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
@@ -352,19 +330,6 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	/*if((ROM_TID & 0x00FFFFFF) == 0x495941	// Yoshi Touch & Go
-	|| (ROM_TID & 0x00FFFFFF) == 0x575A41	// WarioWare: Touched
-	|| (ROM_TID & 0x00FFFFFF) == 0x525741	// Advance Wars: Dual Strike
-	|| (ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
-	|| (ROM_TID & 0x00FFFFFF) == 0x414259	// Bomberman 2
-	|| (ROM_TID & 0x00FFFFFF) == 0x583642	// Rockman EXE: Operate Shooting Star
-	|| (ROM_TID & 0x00FFFFFF) == 0x5A3642	// MegaMan Zero Collection
-	|| (ROM_TID & 0x00FFFFFF) == 0x494B42	// The Legend of Zelda: Spirit Tracks
-	|| (ROM_TID & 0x00FFFFFF) == 0x323343)	// Ace Attorney Investigations: Miles Edgeworth
-	{
-		dsiWramUsed = true;
-	}*/
-
 	if((romSize & 0x0000000F) == 0x1
 	|| (romSize & 0x0000000F) == 0x3
 	|| (romSize & 0x0000000F) == 0x5
@@ -379,19 +344,11 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	if((romSize > 0) && (romSize <= 0x00C00000) && ((ROM_TID & 0x00FFFFFF) != 0x524941) && ((ROM_TID & 0x00FFFFFF) != 0x534941)
+	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x00800000) && ((ROM_TID & 0x00FFFFFF) != 0x524941) && ((ROM_TID & 0x00FFFFFF) != 0x534941)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
-		if(romSize > 0x00800000 && romSize <= 0x00C00000) {
-			ROM_LOCATION = 0x0D000000-romSize;
-		}
-
 		ROMinRAM = 1;
-		arm9_extRAM = true;
-		while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-		arm9_extRAM = false;
-		while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 	} else {
 		if((ROM_TID == 0x45543541) && (ROM_HEADERCRC == 0x161CCF56)) {		// MegaMan Battle Network 5: Double Team DS (U)
 			for(int i = 0; i < 7; i++)
@@ -399,18 +356,11 @@ void loadRomIntoRam(aFile file) {
 		} /*else if((ROM_TID == 0x45495941) && (ROM_HEADERCRC == 0x3ACCCF56)) {	// Yoshi Touch & Go (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AYIE0[i];
-		} else if((ROM_TID == 0x45525741) && (ROM_HEADERCRC == 0xB586CF56)) {	// Advance Wars: Dual Strike (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AWRE0[i];
-			ROM_LOCATION = 0x0C400000;
 		} */
 		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
-			dsiWramUsed = true;
 		} else {
 			ROMinRAM = 2;
 			if(setDataBWlist[3] == true) {
-				arm9_extRAM = true;
-				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
 				/*if(dataAmount >= 1) {
 					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
@@ -418,21 +368,15 @@ void loadRomIntoRam(aFile file) {
 				if(dataAmount == 2) {
 					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
 				}*/
-				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			} else {
 				setDataBWlist[0] -= 0x4000;
 				setDataBWlist[0] -= ARM9_LEN;
-				arm9_extRAM = true;
-				while (arm9_SCFG_EXT != 0x83008000);	// Wait for arm9
 				fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, setDataBWlist[0]);
 				u32 lastRomSize = 0;
 				for(u32 i = setDataBWlist[1]; i < romSize; i++) {
 					lastRomSize++;
 				}
 				fileRead(ROM_LOCATION+setDataBWlist[0], file, setDataBWlist[1], lastRomSize);
-				arm9_extRAM = false;
-				while (arm9_SCFG_EXT != 0x83000000);	// Wait for arm9
 			}
 		}
 	}
@@ -452,14 +396,14 @@ void startBinary_ARM7 (void) {
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// copy NDS ARM9 start address into the header, starting ARM9
-	*((vu32*)0x02FFFE24) = TEMP_ARM9_START_ADDRESS;
+	*((vu32*)0x027FFE24) = TEMP_ARM9_START_ADDRESS;
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
+	VoidFn arm7code = *(VoidFn*)(0x27FFE34);
 	arm7code();
 }
 
@@ -574,56 +518,38 @@ void arm7_main (void) {
 	loadBinary_ARM7(file);
 	increaseLoadBarLength();	// 2 dots
 
-	//wantToPatchDLDI = wantToPatchDLDI && ((u32*)NDS_HEAD)[0x084] > 0x200;
+	nocashMessage("try to patch card");
+	copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+	increaseLoadBarLength();	// 3 dots
+	copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	increaseLoadBarLength();	// 4 dots
 
-	/* nocashMessage("try to patch dldi");
-	wantToPatchDLDI = dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
-	if (wantToPatchDLDI) {
-		nocashMessage("dldi patch successful");
+	module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
+	if(params)
+	{
+		ensureArm9Decompressed(NDS_HEAD, params);
+	}
+	increaseLoadBarLength();	// 5 dots
 
-		// Find the DLDI reserved space in the file
-		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-
-		errorCode = hookNdsHomebrew(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7, wordCommandAddr);
-		if(errorCode == ERR_NONE) {
-			nocashMessage("dldi hook Sucessfull");
-		} else {
-			nocashMessage("error during dldi hook");
-			errorOutput();
-		}
+	errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+	if(errorCode == ERR_NONE) {
+		nocashMessage("patch card Sucessfull");
 	} else {
-		nocashMessage("dldi Patch Unsuccessful try to patch card"); */
-		nocashMessage("try to patch card");
-		copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-		increaseLoadBarLength();	// 3 dots
-		copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-		increaseLoadBarLength();	// 4 dots
+		nocashMessage("game uses thumb");
+		errorOutput();
+	}
+	increaseLoadBarLength();	// 6 dots
 
-		module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
-		if(params)
-		{
-			ensureArm9Decompressed(NDS_HEAD, params);
-		}
-		increaseLoadBarLength();	// 5 dots
-
-		errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
-		increaseLoadBarLength();	// 6 dots
-
-		errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-		if(errorCode == ERR_NONE) {
-			nocashMessage("card hook Sucessfull");
-		} else {
-			nocashMessage("error during card hook");
-			errorOutput();
-		}
-		increaseLoadBarLength();	// 7 dots
-	// }
+	errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+	if(errorCode == ERR_NONE) {
+		nocashMessage("card hook Sucessfull");
+	} else {
+		nocashMessage("error during card hook");
+		errorOutput();
+	}
+	increaseLoadBarLength();	// 7 dots
  
 
-
-	// Pass command line arguments to loaded program
-	//passArgs_ARM7();
 
 	loadRomIntoRam(file);
 

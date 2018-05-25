@@ -67,7 +67,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen, u32 romread_LED) {
+void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -129,6 +129,7 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 							patchMpuSize,
 							loadingScreen,
 							romread_LED,
+							gameSoftReset,
 							argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
@@ -143,18 +144,18 @@ typedef struct {
 void getSFCG_ARM9() {
 	iprintf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
 	iprintf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
-	iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
+	//iprintf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
 }
 
-/* void getSFCG_ARM7() {
+void getSFCG_ARM7() {
 
-	iprintf( "SCFG_ROM ARM7\n" );
+	//iprintf( "SCFG_ROM ARM7\n" );
 
-	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
-	fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
+	//nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_ROM);\n");
+	//fifoSendValue32(FIFO_USER_01,(long unsigned int)&REG_SCFG_ROM);
 
-	nocashMessage("dbg_printf\n");
-		  
+	//nocashMessage("dbg_printf\n");
+
 	iprintf( "SCFG_CLK ARM7\n" );
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01,MSG_SCFG_CLK);\n");
@@ -171,31 +172,9 @@ void myFIFOValue32Handler(u32 value,void* data)
 {
 	nocashMessage("myFIFOValue32Handler\n");
 	iprintf( "ARM7 data %x\n", value );
-} */
-
-
-void initMBK() {
-	// default dsiware settings
-	
-	// WRAM-B fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK2)=0x9195999D;
-	*((vu32*)REG_MBK3)=0x8185898D;
-	
-	// WRAM-C fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK4)=0x9195999D;
-	*((vu32*)REG_MBK5)=0x8185898D;
-		
-	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK6=0x00000000;
-	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7=0x07C03740; // same as dsiware
-	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8=0x07403700; // same as dsiware
 }
 
 int main( int argc, char **argv) {
-
-	initMBK();
 
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
@@ -207,10 +186,10 @@ int main( int argc, char **argv) {
 			powerOff(PM_BACKLIGHT_TOP);
 			consoleDemoInit();
 
-			// fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
 			getSFCG_ARM9();
-			// getSFCG_ARM7();
+			getSFCG_ARM7();
 		}
 
 		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP","ROMREAD_LED",1);
@@ -338,7 +317,7 @@ int main( int argc, char **argv) {
 
 		std::string	arm7DonorPath;
 
-		if (useArm7Donor >= 1)
+		if (useArm7Donor > 0)
 			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");
 		else
 			arm7DonorPath = "sd:/_nds/null.nds";
@@ -347,18 +326,10 @@ int main( int argc, char **argv) {
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 
-		/* Can't seem to do it here for some reason. It hangs if I do. I have lock scfg code occuring in the boost_cpu check instead.
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {
-			dbg_printf("ARM9_SCFG_EXT locked\n");
-			REG_SCFG_EXT &= 0x7FFFFFFF; // Only lock bit 31
-			fifoSendValue32(FIFO_USER_08, 1);
-		}
-		*/
-
 		backlightMode = bootstrapini.GetInt( "NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED);	
+		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0));	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

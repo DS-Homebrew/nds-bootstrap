@@ -26,10 +26,10 @@ INCLUDES	:=	include ../include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
+ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s   -DARM9
 
 CFLAGS	:=	-g -Wall -O2\
-			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
+		 -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 

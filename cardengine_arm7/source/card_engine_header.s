@@ -15,6 +15,7 @@
 .global fileCluster
 .global saveCluster
 .global romread_LED
+.global gameSoftReset
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -37,7 +38,9 @@ cacheStruct:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000
-	
+gameSoftReset:
+	.word	0x00000000		
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 card_engine_start:

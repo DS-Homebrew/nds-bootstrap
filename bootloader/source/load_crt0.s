@@ -37,6 +37,7 @@
 	.global patchMpuSize
 	.global loadingScreen
 	.global romread_LED
+	.global gameSoftReset
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -75,6 +76,8 @@ patchMpuSize:
 loadingScreen:
 	.word	0x00000000		
 romread_LED:
+	.word	0x00000000		
+gameSoftReset:
 	.word	0x00000000		
 
 startUp:
