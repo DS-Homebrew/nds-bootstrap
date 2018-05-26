@@ -131,11 +131,11 @@ u32 dataBlacklist_YCOE0[7] = {0x0075DA00, 0x03D36800, 0x035D8E00, 0x00000000,	//
 u32 dataBlacklist_YFYE0[7] = {0x00751400, 0x03196600, 0x02A45200, 0x00000000,	// Pokemon Mystery Dungeon: Explorers of Darkness and Time (U)
 							0x0DB00000, 0x00000014, 0x00040000};
 u32 dataBlacklist_YKWJ0[7] = {0x00B62200, 0x042A3A00, 0x03741800, 0x00000000,	// Hoshi no Kirby: Ultra Super Deluxe (J)
-							0x0DA00000, 0x0000000E, 0x00080000};
+							0x0DA00000, 0x00000030, 0x00020000};
 u32 dataBlacklist_YKWE0[7] = {0x00B3A200, 0x04276000, 0x0373BE00, 0x00000000,	// Kirby Super Star Ultra (U)
-							0x0DA00000, 0x0000000E, 0x00080000};
+							0x0DA00000, 0x00000030, 0x00020000};
 u32 dataBlacklist_YKWK0[7] = {0x00B39C00, 0x04273400, 0x03739800, 0x00000000,	// Kirby Ultra Super Deluxe (KS)
-							0x0DA00000, 0x0000000E, 0x00080000};
+							0x0DA00000, 0x00000030, 0x00020000};
 u32 dataBlacklist_CJCE0[7] = {0x01102E00, 0x02E3EE00, 0x01D3C000, 0x00000000,	// My Japanese Coach: Learn a New Language (U)
 							0x0DA00000, 0x00000030, 0x00040000};
 u32 dataBlacklist_CRRE0[7] = {0x0039BA00, 0x005D1A00, 0x00236000, 0x00000000,	// Megaman Star Force 3: Red Joker (U)
