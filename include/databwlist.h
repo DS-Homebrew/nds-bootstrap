@@ -89,11 +89,11 @@ u32 dataBlacklist_ARME0[7] = {0x00803800, 0x0287A000, 0x02076800, 0x00000000,	//
 u32 dataBlacklist_ARMP0[7] = {0x00842E00, 0x0372762C, 0x02EE482C, 0x00000000,	// Mario & Luigi: Partners in Time (E)
 							0x0D000000, 0x00000040, 0x00040000};
 u32 dataBlacklist_AB3J0[7] = {0x00F77200, 0x03442200, 0x024CB000, 0x00000000,	// Mario Basketball: 3 on 3 (J)
-							0x0D900000, 0x00000007, 0x00100000};
+							0x0D900000, 0x0000003C, 0x00020000};
 u32 dataBlacklist_AB3E0[7] = {0x00F76E00, 0x03222200, 0x022AB400, 0x00000000,	// Mario Hoops 3 on 3 (U)
-							0x0D900000, 0x00000007, 0x00100000};
+							0x0D900000, 0x0000003C, 0x00020000};
 u32 dataBlacklist_AB3P0[7] = {0x01940200, 0x03441E00, 0x01B01C00, 0x00000000,	// Mario Slam Basketball (E)
-							0x0DF00000, 0x00000001, 0x00100000};
+							0x0DF00000, 0x00000008, 0x00020000};
 u32 dataBlacklist_APHJ0[7] = {0x0039FE00, 0x01465670, 0x010C5870, 0x00000000,	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)
 							0x0D400000, 0x00000018, 0x00080000};
 u32 dataBlacklist_APHJ1[7] = {0x003A0000, 0x01465870, 0x010C5870, 0x00000000,	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J) (Rev 1)
@@ -131,11 +131,11 @@ u32 dataBlacklist_YCOE0[7] = {0x0075DA00, 0x03D36800, 0x035D8E00, 0x00000000,	//
 u32 dataBlacklist_YFYE0[7] = {0x00751400, 0x03196600, 0x02A45200, 0x00000000,	// Pokemon Mystery Dungeon: Explorers of Darkness and Time (U)
 							0x0DB00000, 0x00000014, 0x00040000};
 u32 dataBlacklist_YKWJ0[7] = {0x00B62200, 0x042A3A00, 0x03741800, 0x00000000,	// Hoshi no Kirby: Ultra Super Deluxe (J)
-							0x0DA00000, 0x00000006, 0x00100000};
+							0x0DA00000, 0x0000000E, 0x00080000};
 u32 dataBlacklist_YKWE0[7] = {0x00B3A200, 0x04276000, 0x0373BE00, 0x00000000,	// Kirby Super Star Ultra (U)
-							0x0DA00000, 0x00000006, 0x00100000};
+							0x0DA00000, 0x0000000E, 0x00080000};
 u32 dataBlacklist_YKWK0[7] = {0x00B39C00, 0x04273400, 0x03739800, 0x00000000,	// Kirby Ultra Super Deluxe (KS)
-							0x0DA00000, 0x00000006, 0x00100000};
+							0x0DA00000, 0x0000000E, 0x00080000};
 u32 dataBlacklist_CJCE0[7] = {0x01102E00, 0x02E3EE00, 0x01D3C000, 0x00000000,	// My Japanese Coach: Learn a New Language (U)
 							0x0DA00000, 0x00000030, 0x00040000};
 u32 dataBlacklist_CRRE0[7] = {0x0039BA00, 0x005D1A00, 0x00236000, 0x00000000,	// Megaman Star Force 3: Red Joker (U)
@@ -145,10 +145,10 @@ u32 dataBlacklist_CRBE0[7] = {0x0039AC00, 0x005D0C00, 0x00236000, 0x00000000,	//
 u32 dataBlacklist_CLJE0[7] = {0x01022600, 0x05944A00, 0x04922400, 0x00000000,	// Mario & Luigi: Bowser's Inside Story (U)
 							0x0D800000, 0x00000020, 0x00040000};
 u32 dataBlacklist_BKIE0[7] = {0x00A2E200, 0x0523F600, 0x04811400, 0x00000000,	// The Legend of Zelda: Spirit Tracks (U)
-							0x0D980000, 0x0000000D, 0x00080000};
+							0x0D980000, 0x0000001A, 0x00040000};
 u32 dataBlacklist_BKIE0_patch[7] = {0x01447600, 0x057F7E00, 0x043B0800, 0x00000000,	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
-							0x0DE00000, 0x00000004, 0x00080000};
+							0x0DE00000, 0x00000008, 0x00040000};
 u32 dataBlacklist_B6ZE0[7] = {0x013CE000, 0x03AB6E00, 0x026E8E00, 0x00000000,	// MegaMan Zero Collection (U)
-							0x0DF60000, 0x0000000A, 0x00010000};
+							0x0DF60000, 0x00000014, 0x00008000};
 
 #endif // _DATABWLIST_H
