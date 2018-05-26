@@ -1621,8 +1621,6 @@ void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
 	u32* debug = (u32*)0x037C4000;
 
-	u32* patches =  (u32*) cardEngineLocation[0];
-
 	if(REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, cardEngineLocation);
 	}
@@ -1661,6 +1659,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
+	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* cardIrqEnablePatch = (u32*) patches[2];
 	u32* cardCheckPullOutPatch = (u32*) patches[1];
 
