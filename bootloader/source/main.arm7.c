@@ -483,13 +483,6 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x50594741) && (ROM_HEADERCRC == 0x0744CF56)) {	// Phoenix Wright: Ace Attorney (E)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_AGYP0[i];
-		} else if((ROM_TID == 0x4A435341) && (ROM_HEADERCRC == 0xFB0CCF56)) {	// Sonic Rush (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ASCJ0[i];
-		} else if((ROM_TID == 0x45435341) && (ROM_HEADERCRC == 0xFB0CCF56)	// Sonic Rush (U)
-				|| (ROM_TID == 0x50435341) && (ROM_HEADERCRC == 0x04C8CF56)) {	// Sonic Rush (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ASCE0[i];
 		} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {	// Mario & Luigi: Partners in Time (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataBlacklist_ARME0[i];

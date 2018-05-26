@@ -84,10 +84,6 @@ u32 dataBlacklist_AGYE0[7] = {0x000F8E00, 0x030656A8, 0x02F6C8A8, 0x00000000,	//
 							0x0CE80000, 0x00000044, 0x00040000};
 u32 dataBlacklist_AGYP0[7] = {0x000FAE00, 0x0323C598, 0x03141798, 0x00000000,	// Phoenix Wright: Ace Attorney (E)
 							0x0D180000, 0x00000038, 0x00040000};
-u32 dataBlacklist_ASCJ0[7] = {0x0171E400, 0x03C8DC00, 0x0256F800, 0x00000000,	// Sonic Rush (J)
-							0x0DF00000, 0x00000002, 0x00080000};
-u32 dataBlacklist_ASCE0[7] = {0x0171E600, 0x03CA8E00, 0x0258A800, 0x00000000,	// Sonic Rush (UE)
-							0x0DF00000, 0x00000002, 0x00080000};
 u32 dataBlacklist_ARME0[7] = {0x00803800, 0x0287A000, 0x02076800, 0x00000000,	// Mario & Luigi: Partners in Time (U)
 							0x0DA40000, 0x00000017, 0x00040000};
 u32 dataBlacklist_ARMP0[7] = {0x00842E00, 0x0372762C, 0x02EE482C, 0x00000000,	// Mario & Luigi: Partners in Time (E)
