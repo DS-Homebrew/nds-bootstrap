@@ -89,9 +89,9 @@ u32 dataBlacklist_ARME0[7] = {0x00803800, 0x0287A000, 0x02076800, 0x00000000,	//
 u32 dataBlacklist_ARMP0[7] = {0x00842E00, 0x0372762C, 0x02EE482C, 0x00000000,	// Mario & Luigi: Partners in Time (E)
 							0x0D000000, 0x00000040, 0x00040000};
 u32 dataBlacklist_AB3J0[7] = {0x00F77200, 0x03442200, 0x024CB000, 0x00000000,	// Mario Basketball: 3 on 3 (J)
-							0x0D900000, 0x0000003C, 0x00020000};
+							0x0D900000, 0x00000038, 0x00020000};
 u32 dataBlacklist_AB3E0[7] = {0x00F76E00, 0x03222200, 0x022AB400, 0x00000000,	// Mario Hoops 3 on 3 (U)
-							0x0D900000, 0x0000003C, 0x00020000};
+							0x0D900000, 0x00000038, 0x00020000};
 u32 dataBlacklist_AB3P0[7] = {0x01940200, 0x03441E00, 0x01B01C00, 0x00000000,	// Mario Slam Basketball (E)
 							0x0DF00000, 0x00000008, 0x00020000};
 u32 dataBlacklist_APHJ0[7] = {0x0039FE00, 0x01465670, 0x010C5870, 0x00000000,	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)

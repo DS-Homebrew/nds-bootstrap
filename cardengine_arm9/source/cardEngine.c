@@ -216,38 +216,73 @@ void triggerAsyncPrefetch(sector) {
 	#endif
 	
 	if(asyncSector == 0xFFFFFFFF) {
-		int slot = getSlotForSector(sector);
-		// read max 32k via the WRAM cache
-		// do it only if there is no async command ongoing
-		if(slot==-1) {
-			addToAsyncQueue(sector);
-			// send a command to the arm7 to fill the WRAM cache
-			u32 commandRead = 0x020ff800;		
+		if (ROMinRAM == 2) {
+			int slot = GAME_getSlotForSector(sector);
+			// read max 32k via the WRAM cache
+			// do it only if there is no async command ongoing
+			if(slot==-1) {
+				addToAsyncQueue(sector);
+				// send a command to the arm7 to fill the WRAM cache
+				u32 commandRead = 0x020ff800;		
 
-			slot = allocateCacheSlot();
-			vu8* buffer = getCacheAddress(slot);
+				slot = GAME_allocateCacheSlot();
+				vu8* buffer = GAME_getCacheAddress(slot);
 
-			if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+				if(needFlushDCCache) DC_FlushRange(buffer, setDataBWlist[6]);
 
-			cacheDescriptor[slot] = sector;
-			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
-			asyncSector = sector;		
+				cacheDescriptor[slot] = sector;
+				cacheCounter[slot] = 0x0FFFFFFF ; // async marker
+				asyncSector = sector;		
 
-			// write the command
-			sharedAddr[0] = buffer;
-			sharedAddr[1] = CACHE_READ_SIZE;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
+				// write the command
+				sharedAddr[0] = buffer;
+				sharedAddr[1] = setDataBWlist[6];
+				sharedAddr[2] = sector;
+				sharedAddr[3] = commandRead;
 
-			IPC_SendSync(0xEE24);			
+				IPC_SendSync(0xEE24);			
 
 
-			// do it asynchronously
-			/*while(sharedAddr[3] != (vu32)0);	
-			
-			// transfer back the WRAM-B cache to the arm9
-			//transfertToArm9(tempSlot);*/
-		}	
+				// do it asynchronously
+				/*while(sharedAddr[3] != (vu32)0);	
+				
+				// transfer back the WRAM-B cache to the arm9
+				//transfertToArm9(tempSlot);*/
+			}
+		} else {
+			int slot = getSlotForSector(sector);
+			// read max 32k via the WRAM cache
+			// do it only if there is no async command ongoing
+			if(slot==-1) {
+				addToAsyncQueue(sector);
+				// send a command to the arm7 to fill the WRAM cache
+				u32 commandRead = 0x020ff800;		
+
+				slot = allocateCacheSlot();
+				vu8* buffer = getCacheAddress(slot);
+
+				if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+
+				cacheDescriptor[slot] = sector;
+				cacheCounter[slot] = 0x0FFFFFFF ; // async marker
+				asyncSector = sector;		
+
+				// write the command
+				sharedAddr[0] = buffer;
+				sharedAddr[1] = CACHE_READ_SIZE;
+				sharedAddr[2] = sector;
+				sharedAddr[3] = commandRead;
+
+				IPC_SendSync(0xEE24);			
+
+
+				// do it asynchronously
+				/*while(sharedAddr[3] != (vu32)0);	
+				
+				// transfer back the WRAM-B cache to the arm9
+				//transfertToArm9(tempSlot);*/
+			}
+		}
 	}	
 }
 
