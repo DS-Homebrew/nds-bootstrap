@@ -119,10 +119,30 @@ void cardReadLED (bool on) {
 }
 
 void asyncCardReadLED (bool on) {
-	if(on && romread_LED != 0) {
-		i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-	} else if(romread_LED != 0) {
-		i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+	if(on) {
+		switch(romread_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+		}
+	} else {
+		switch(romread_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+		}
 	}
 }
 

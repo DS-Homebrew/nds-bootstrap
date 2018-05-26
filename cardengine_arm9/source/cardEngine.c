@@ -320,19 +320,6 @@ int cardRead (u32* cacheStruct) {
 				ROM_LOCATION -= ARM9_LEN;
 			}
 		}
-
-		if (ROMinRAM==0) {
-			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-			{
-				CACHE_READ_SIZE = _1MB_READ_SIZE;
-				only_cacheSlots = only_1MB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			}
-		}
 		flagsSet = true;
 	}
 
