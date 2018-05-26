@@ -51,12 +51,19 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 only_cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
-static u32 only_cacheCounter [only_128KB_CACHE_SLOTS];
-static u32 only_accessCounter = 0;
+static u32 cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
+static u32 cacheCounter [only_128KB_CACHE_SLOTS];
+static u32 accessCounter = 0;
 
 static u32 CACHE_READ_SIZE = _128KB_READ_SIZE;
 static u32 only_cacheSlots = only_128KB_CACHE_SLOTS;
+
+static u32 asyncSector = 0xFFFFFFFF;
+static u32 asyncQueue [5];
+static int aQHead = 0;
+static int aQTail = 0;
+static int aQSize = 0;
+static char hexbuffer [9];
 
 static bool flagsSet = false;
 extern u32 ROMinRAM;
@@ -69,6 +76,31 @@ int dataAmount = 0;
 
 void user_exception(void);
 
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+	
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
+
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
@@ -79,10 +111,10 @@ void setExceptionHandler2() {
 
 int allocateCacheSlot() {
 	int slot = 0;
-	int lowerCounter = only_accessCounter;
+	u32 lowerCounter = accessCounter;
 	for(int i=0; i<only_cacheSlots; i++) {
-		if(only_cacheCounter[i]<=lowerCounter) {
-			lowerCounter = only_cacheCounter[i];
+		if(cacheCounter[i]<=lowerCounter) {
+			lowerCounter = cacheCounter[i];
 			slot = i;
 			if(!lowerCounter) break;
 		}
@@ -92,10 +124,10 @@ int allocateCacheSlot() {
 
 int GAME_allocateCacheSlot() {
 	int slot = 0;
-	int lowerCounter = only_accessCounter;
+	u32 lowerCounter = accessCounter;
 	for(int i=0; i<setDataBWlist[5]; i++) {
-		if(only_cacheCounter[i]<=lowerCounter) {
-			lowerCounter = only_cacheCounter[i];
+		if(cacheCounter[i]<=lowerCounter) {
+			lowerCounter = cacheCounter[i];
 			slot = i;
 			if(!lowerCounter) break;
 		}
@@ -105,7 +137,7 @@ int GAME_allocateCacheSlot() {
 
 int getSlotForSector(u32 sector) {
 	for(int i=0; i<only_cacheSlots; i++) {
-		if(only_cacheDescriptor[i]==sector) {
+		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
 	}
@@ -114,7 +146,7 @@ int getSlotForSector(u32 sector) {
 
 int GAME_getSlotForSector(u32 sector) {
 	for(int i=0; i<setDataBWlist[5]; i++) {
-		if(only_cacheDescriptor[i]==sector) {
+		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
 	}
@@ -131,16 +163,130 @@ vu8* GAME_getCacheAddress(int slot) {
 }
 
 void updateDescriptor(int slot, u32 sector) {
-	only_cacheDescriptor[slot] = sector;
-	only_cacheCounter[slot] = only_accessCounter;
+	cacheDescriptor[slot] = sector;
+	cacheCounter[slot] = accessCounter;
 }
 
 void accessCounterIncrease() {
-	only_accessCounter++;
+	accessCounter++;
 }
 
 void waitForArm7() {
 	while(sharedAddr[3] != (vu32)0);
+}
+
+void addToAsyncQueue(sector) {
+	#ifdef DEBUG
+	nocashMessage("\narm9 addToAsyncQueue\n");	
+	nocashMessage("\narm9 sector\n");	
+	nocashMessage(tohex(sector));
+	#endif
+	
+	asyncQueue[aQHead] = sector;
+	aQHead++;
+	aQSize++;
+	if(aQHead>4) {
+		aQHead=0;
+	}
+	if(aQSize>5) {
+		aQSize=5;
+		aQTail++;
+		if(aQTail>4) aQTail=0;
+	}
+}
+
+u32 popFromAsyncQueueHead() {	
+	if(aQSize>0) {
+	
+		aQHead--;
+		if(aQHead == -1) aQHead = 4;
+		aQSize--;
+		
+		return asyncQueue[aQHead];
+	} else return 0;
+}
+
+void triggerAsyncPrefetch(sector) {	
+	#ifdef DEBUG
+	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
+	nocashMessage("\narm9 sector\n");	
+	nocashMessage(tohex(sector));
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	if(asyncSector == 0xFFFFFFFF) {
+		int slot = getSlotForSector(sector);
+		// read max 32k via the WRAM cache
+		// do it only if there is no async command ongoing
+		if(slot==-1) {
+			addToAsyncQueue(sector);
+			// send a command to the arm7 to fill the WRAM cache
+			u32 commandRead = 0x020ff800;		
+
+			slot = allocateCacheSlot();
+			vu8* buffer = getCacheAddress(slot);
+
+			if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+
+			cacheDescriptor[slot] = sector;
+			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
+			asyncSector = sector;		
+
+			// write the command
+			sharedAddr[0] = buffer;
+			sharedAddr[1] = CACHE_READ_SIZE;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0xEE24);			
+
+
+			// do it asynchronously
+			/*while(sharedAddr[3] != (vu32)0);	
+			
+			// transfer back the WRAM-B cache to the arm9
+			//transfertToArm9(tempSlot);*/
+		}	
+	}	
+}
+
+void processAsyncCommand() {
+	#ifdef DEBUG
+	nocashMessage("\narm9 processAsyncCommand\n");	
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	if(asyncSector != 0xFFFFFFFF) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			// get back the data from arm7
+			if(sharedAddr[3] == (vu32)0) {
+				updateDescriptor(slot, asyncSector);
+				asyncSector = 0xFFFFFFFF;
+			}			
+		}	
+	}
+}
+
+void getAsyncSector() {
+	#ifdef DEBUG
+	nocashMessage("\narm9 getAsyncSector\n");	
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	if(asyncSector != 0xFFFFFFFF) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			// get back the data from arm7
+			while(sharedAddr[3] != (vu32)0);
+
+			updateDescriptor(slot, asyncSector);
+			asyncSector = 0xFFFFFFFF;
+		}	
+	}	
 }
 
 int cardRead (u32* cacheStruct) {
@@ -174,19 +320,6 @@ int cardRead (u32* cacheStruct) {
 				ROM_LOCATION -= ARM9_LEN;
 			}
 		}
-
-		if (ROMinRAM==0) {
-			if((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-			{
-				CACHE_READ_SIZE = _1MB_READ_SIZE;
-				only_cacheSlots = only_1MB_CACHE_SLOTS;
-			} else if((ROM_TID & 0x00FFFFFF) == 0x4D5241	// Mario & Luigi: Partners in Time
-					|| (ROM_TID & 0x00FFFFFF) == 0x575941)	// Yoshi's Island DS
-			{
-				CACHE_READ_SIZE = _256KB_READ_SIZE;
-				only_cacheSlots = only_256KB_CACHE_SLOTS;
-			}
-		}
 		flagsSet = true;
 	}
 
@@ -212,7 +345,11 @@ int cardRead (u32* cacheStruct) {
 	if(ROMinRAM==0) {
 		accessCounterIncrease();
 
+		processAsyncCommand();
+
 		if(page == src && len > CACHE_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+			getAsyncSector();
+
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
 
@@ -232,8 +369,11 @@ int cardRead (u32* cacheStruct) {
 			while(len > 0) {
 				int slot = getSlotForSector(sector);
 				vu8* buffer = getCacheAddress(slot);
+				u32 nextSector = sector+CACHE_READ_SIZE;	
 				// read max CACHE_READ_SIZE via the main RAM cache
 				if(slot==-1) {
+					getAsyncSector();
+
 					// send a command to the arm7 to fill the RAM cache
 					commandRead = 0x025FFB08;
 
@@ -241,7 +381,7 @@ int cardRead (u32* cacheStruct) {
 
 					buffer = getCacheAddress(slot);
 
-						if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
 
 					// write the command
 					sharedAddr[0] = buffer;
@@ -252,9 +392,29 @@ int cardRead (u32* cacheStruct) {
 					IPC_SendSync(0xEE24);
 
 					waitForArm7();
+
+					updateDescriptor(slot, sector);	
+		
+					triggerAsyncPrefetch(nextSector);
+				} else {
+					if(cacheCounter[slot] == 0x0FFFFFFF) {
+						// prefetch successfull
+						getAsyncSector();
+						
+						triggerAsyncPrefetch(nextSector);	
+					} else {
+						int i;
+						for(i=0; i<5; i++) {
+							if(asyncQueue[i]==sector) {
+								// prefetch successfull
+								triggerAsyncPrefetch(nextSector);	
+								break;
+							}
+						}
+					}
+					updateDescriptor(slot, sector);
 				}
 
-				updateDescriptor(slot, sector);
 
 				u32 len2=len;
 				if((src - sector) + len2 > CACHE_READ_SIZE){
@@ -318,7 +478,7 @@ int cardRead (u32* cacheStruct) {
 					dst = cardStruct[1];
 					page = (src/512)*512;
 					sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
-					only_accessCounter++;
+					accessCounter++;
 				}
 			}
 		}

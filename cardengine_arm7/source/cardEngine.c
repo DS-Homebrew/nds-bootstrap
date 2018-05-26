@@ -118,6 +118,34 @@ void cardReadLED (bool on) {
 	}
 }
 
+void asyncCardReadLED (bool on) {
+	if(on) {
+		switch(romread_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+		}
+	} else {
+		switch(romread_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+		}
+	}
+}
+
 void log_arm9() {
 	#ifdef DEBUG		
 	u32 src = *(vu32*)(sharedAddr+2);
@@ -187,6 +215,45 @@ void cardRead_arm9() {
 	#endif
 }
 
+void asyncCardRead_arm9() {
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	#ifdef DEBUG
+	dbg_printf("\nasync card read received\n");
+
+	if(calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+
+	dbg_printf("\nstr : \n");
+	dbg_hexa(cardStruct);
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);	
+	#endif
+
+	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
+	fileRead(dst,romFile,src,len);
+	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
+
+	#ifdef DEBUG
+	dbg_printf("\nread \n");
+	if(is_aligned(dst,4) || is_aligned(len,4)) {
+		dbg_printf("\n aligned read : \n");
+	} else {
+		dbg_printf("\n misaligned read : \n");
+	}
+	#endif
+}
+
 void runCardEngineCheck (void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -207,6 +274,12 @@ void runCardEngineCheck (void) {
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
 			cardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
+		{
+			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 		unlockMutex();
