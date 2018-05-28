@@ -216,6 +216,7 @@ void triggerAsyncPrefetch(sector, len) {
 	nocashMessage(tohex(asyncSector));
 	#endif
 	
+	asyncReadSizeSubtract = 0;
 	if(asyncSector == 0xFFFFFFFF) {
 		if (ROMinRAM == 2) {
 			if (sector > cleanRomSize) {
