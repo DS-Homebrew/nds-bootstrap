@@ -837,19 +837,19 @@ int cardRead (u32* cacheStruct) {
 
 					updateDescriptor(slot, sector);	
 		
-					triggerAsyncPrefetch(nextSector);
+					triggerAsyncPrefetch(nextSector, len);
 				} else {
 					if(cacheCounter[slot] == 0x0FFFFFFF) {
 						// prefetch successfull
 						getAsyncSector();
 						
-						triggerAsyncPrefetch(nextSector);	
+						triggerAsyncPrefetch(nextSector, len);	
 					} else {
 						int i;
 						for(i=0; i<5; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
-								triggerAsyncPrefetch(nextSector);	
+								triggerAsyncPrefetch(nextSector, len);	
 								break;
 							}
 						}
