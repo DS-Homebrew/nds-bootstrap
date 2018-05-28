@@ -325,6 +325,7 @@ u32 dsiWramUsed = false;
 
 void loadRomIntoRam(aFile file) {
 	u32 ROMinRAM = 0;
+	u32 cleanRomSize = romSize;
 
 	// ExceptionHandler2 (red screen) blacklist
 	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
@@ -617,7 +618,7 @@ void loadRomIntoRam(aFile file) {
 		}
 	}
 
-	hookNdsRetail_ROMinRAM((u32*)ENGINE_LOCATION_ARM9, ROMinRAM);
+	hookNdsRetail_ROMinRAM((u32*)ENGINE_LOCATION_ARM9, ROMinRAM, cleanRomSize);
 }
 
 /*-------------------------------------------------------------------------

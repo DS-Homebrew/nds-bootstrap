@@ -311,14 +311,14 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	return ERR_NONE;
 }
 
-void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM) {
+void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM, u32 cleanRomSize) {
 	cardEngineLocation9[7] = ROMinRAM;
 	cardEngineLocation9[8] = ROM_TID;
 	cardEngineLocation9[9] = ROM_HEADERCRC;
 	cardEngineLocation9[10] = ARM9_LEN;
 	cardEngineLocation9[11] = romSize;
-	cardEngineLocation9[12] = enableExceptionHandler;
-	cardEngineLocation9[13] = dsiWramUsed;
+	cardEngineLocation9[12] = cleanRomSize;
+	cardEngineLocation9[13] = enableExceptionHandler;
 	for (int i = 0; i < 7; i++)
 		cardEngineLocation9[14+i] = setDataBWlist[i];
 	for (int i = 0; i < 3; i++)
