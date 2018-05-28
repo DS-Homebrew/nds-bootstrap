@@ -19,8 +19,8 @@
 .global ROM_HEADERCRC
 .global ARM9_LEN
 .global romSize
+.global cleanRomSize
 .global enableExceptionHandler
-.global dsiWramUsed
 .global setDataBWlist
 
 #define ICACHE_SIZE	0x2000
@@ -52,9 +52,9 @@ ARM9_LEN:
 	.word	0x00000000
 romSize:
 	.word	0x00000000
-enableExceptionHandler:
+cleanRomSize:
 	.word	0x00000000
-dsiWramUsed:
+enableExceptionHandler:
 	.word	0x00000000
 setDataBWlist:
 	.word	0x00000000

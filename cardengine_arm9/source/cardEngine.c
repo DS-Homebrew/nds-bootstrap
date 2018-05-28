@@ -25,6 +25,7 @@ extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
 extern u32 romSize;
+extern u32 cleanRomSize;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -55,8 +56,8 @@ static u32 cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
 static u32 cacheCounter [only_128KB_CACHE_SLOTS];
 static u32 accessCounter = 0;
 
-static u32 CACHE_READ_SIZE = _128KB_READ_SIZE;
-static u32 only_cacheSlots = only_128KB_CACHE_SLOTS;
+static u32 cacheReadSizeSubtract = 0;
+static u32 asyncReadSizeSubtract = 0;
 
 static u32 asyncSector = 0xFFFFFFFF;
 static u32 asyncQueue [5];
@@ -112,7 +113,7 @@ void setExceptionHandler2() {
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for(int i=0; i<only_cacheSlots; i++) {
+	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
 		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -136,7 +137,7 @@ int GAME_allocateCacheSlot() {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<only_cacheSlots; i++) {
+	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
 		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
@@ -155,7 +156,7 @@ int GAME_getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(only_CACHE_ADRESS_START+slot*CACHE_READ_SIZE);
+	return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 }
 
 vu8* GAME_getCacheAddress(int slot) {
@@ -202,7 +203,7 @@ u32 popFromAsyncQueueHead() {
 	} else return 0;
 }
 
-void triggerAsyncPrefetch(sector) {	
+void triggerAsyncPrefetch(sector, len) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -211,14 +212,23 @@ void triggerAsyncPrefetch(sector) {
 	nocashMessage(tohex(asyncSector));
 	#endif
 	
+	asyncReadSizeSubtract = 0;
 	if(asyncSector == 0xFFFFFFFF) {
 		if (ROMinRAM == 2) {
+			if (sector > cleanRomSize) {
+				sector = 0;
+			} else if ((sector+len) > cleanRomSize) {
+				for (u32 i = 0; i < setDataBWlist[6]; i++) {
+					asyncReadSizeSubtract++;
+					if (((sector+len)-asyncReadSizeSubtract) == cleanRomSize) break;
+				}
+			}
 			int slot = GAME_getSlotForSector(sector);
-			// read max 32k via the WRAM cache
+			// read max CACHE_READ_SIZE via the main RAM cache
 			// do it only if there is no async command ongoing
 			if(slot==-1) {
 				addToAsyncQueue(sector);
-				// send a command to the arm7 to fill the WRAM cache
+				// send a command to the arm7 to fill the RAM cache
 				u32 commandRead = 0x020ff800;		
 
 				slot = GAME_allocateCacheSlot();
@@ -232,7 +242,7 @@ void triggerAsyncPrefetch(sector) {
 
 				// write the command
 				sharedAddr[0] = buffer;
-				sharedAddr[1] = setDataBWlist[6];
+				sharedAddr[1] = setDataBWlist[6]-asyncReadSizeSubtract;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -246,18 +256,26 @@ void triggerAsyncPrefetch(sector) {
 				//transfertToArm9(tempSlot);*/
 			}
 		} else {
+			if (sector > cleanRomSize) {
+				sector = 0;
+			} else if ((sector+len) > cleanRomSize) {
+				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+					asyncReadSizeSubtract++;
+					if (((sector+len)-asyncReadSizeSubtract) == cleanRomSize) break;
+				}
+			}
 			int slot = getSlotForSector(sector);
-			// read max 32k via the WRAM cache
+			// read max CACHE_READ_SIZE via the main RAM cache
 			// do it only if there is no async command ongoing
 			if(slot==-1) {
 				addToAsyncQueue(sector);
-				// send a command to the arm7 to fill the WRAM cache
+				// send a command to the arm7 to fill the RAM cache
 				u32 commandRead = 0x020ff800;		
 
 				slot = allocateCacheSlot();
 				vu8* buffer = getCacheAddress(slot);
 
-				if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+				if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
 
 				cacheDescriptor[slot] = sector;
 				cacheCounter[slot] = 0x0FFFFFFF ; // async marker
@@ -265,7 +283,7 @@ void triggerAsyncPrefetch(sector) {
 
 				// write the command
 				sharedAddr[0] = buffer;
-				sharedAddr[1] = CACHE_READ_SIZE;
+				sharedAddr[1] = _128KB_READ_SIZE-asyncReadSizeSubtract;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -273,10 +291,7 @@ void triggerAsyncPrefetch(sector) {
 
 
 				// do it asynchronously
-				/*while(sharedAddr[3] != (vu32)0);	
-				
-				// transfer back the WRAM-B cache to the arm9
-				//transfertToArm9(tempSlot);*/
+				//waitForArm7();
 			}
 		}
 	}	
@@ -292,7 +307,6 @@ void processAsyncCommand() {
 	if(asyncSector != 0xFFFFFFFF) {
 		int slot = getSlotForSector(asyncSector);
 		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			// get back the data from arm7
 			if(sharedAddr[3] == (vu32)0) {
 				updateDescriptor(slot, asyncSector);
 				asyncSector = 0xFFFFFFFF;
@@ -311,8 +325,7 @@ void getAsyncSector() {
 	if(asyncSector != 0xFFFFFFFF) {
 		int slot = getSlotForSector(asyncSector);
 		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			// get back the data from arm7
-			while(sharedAddr[3] != (vu32)0);
+			waitForArm7();
 
 			updateDescriptor(slot, asyncSector);
 			asyncSector = 0xFFFFFFFF;
@@ -354,7 +367,14 @@ int cardRead (u32* cacheStruct) {
 		flagsSet = true;
 	}
 
-	u32 sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
+	u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+	cacheReadSizeSubtract = 0;
+	if ((sector+len) > cleanRomSize) {
+		for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+			cacheReadSizeSubtract++;
+			if (((sector+len)-cacheReadSizeSubtract) == cleanRomSize) break;
+		}
+	}
 
 	#ifdef DEBUG
 	// send a log command for debug purpose
@@ -378,7 +398,7 @@ int cardRead (u32* cacheStruct) {
 
 		processAsyncCommand();
 
-		if(page == src && len > CACHE_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+		if(page == src && len > _128KB_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
 			getAsyncSector();
 
 			// read directly at arm7 level
@@ -396,11 +416,11 @@ int cardRead (u32* cacheStruct) {
 			waitForArm7();
 
 		} else {
-			// read via the main RAM/DSi WRAM cache
+			// read via the main RAM cache
 			while(len > 0) {
 				int slot = getSlotForSector(sector);
 				vu8* buffer = getCacheAddress(slot);
-				u32 nextSector = sector+CACHE_READ_SIZE;	
+				u32 nextSector = sector+_128KB_READ_SIZE;
 				// read max CACHE_READ_SIZE via the main RAM cache
 				if(slot==-1) {
 					getAsyncSector();
@@ -412,11 +432,11 @@ int cardRead (u32* cacheStruct) {
 
 					buffer = getCacheAddress(slot);
 
-					if(needFlushDCCache) DC_FlushRange(buffer, CACHE_READ_SIZE);
+					if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
 
 					// write the command
 					sharedAddr[0] = buffer;
-					sharedAddr[1] = CACHE_READ_SIZE;
+					sharedAddr[1] = _128KB_READ_SIZE-cacheReadSizeSubtract;
 					sharedAddr[2] = sector;
 					sharedAddr[3] = commandRead;
 
@@ -426,19 +446,19 @@ int cardRead (u32* cacheStruct) {
 
 					updateDescriptor(slot, sector);	
 		
-					triggerAsyncPrefetch(nextSector);
+					triggerAsyncPrefetch(nextSector, len);
 				} else {
 					if(cacheCounter[slot] == 0x0FFFFFFF) {
 						// prefetch successfull
 						getAsyncSector();
 						
-						triggerAsyncPrefetch(nextSector);	
+						triggerAsyncPrefetch(nextSector, len);	
 					} else {
 						int i;
 						for(i=0; i<5; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
-								triggerAsyncPrefetch(nextSector);	
+								triggerAsyncPrefetch(nextSector, len);	
 								break;
 							}
 						}
@@ -448,8 +468,8 @@ int cardRead (u32* cacheStruct) {
 
 
 				u32 len2=len;
-				if((src - sector) + len2 > CACHE_READ_SIZE){
-					len2 = sector - src + CACHE_READ_SIZE;
+				if((src - sector) + len2 > _128KB_READ_SIZE){
+					len2 = sector - src + _128KB_READ_SIZE;
 				}
 
 				if(len2 > 512) {
@@ -508,7 +528,7 @@ int cardRead (u32* cacheStruct) {
 					src = cardStruct[0];
 					dst = cardStruct[1];
 					page = (src/512)*512;
-					sector = (src/CACHE_READ_SIZE)*CACHE_READ_SIZE;
+					sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 					accessCounter++;
 				}
 			}
@@ -807,7 +827,7 @@ int cardRead (u32* cacheStruct) {
 
 					// write the command
 					sharedAddr[0] = buffer;
-					sharedAddr[1] = setDataBWlist[6];
+					sharedAddr[1] = setDataBWlist[6]-cacheReadSizeSubtract;
 					sharedAddr[2] = sector;
 					sharedAddr[3] = commandRead;
 
