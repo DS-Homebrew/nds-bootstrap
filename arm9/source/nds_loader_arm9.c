@@ -71,8 +71,8 @@ dsiSD:
 #define LOADSCR_OFFSET 56
 #define ROMREADLED_OFFSET 60
 #define GAMESOFTRESET_OFFSET 64
-#define CARDENGINE_ARM7_OFFSET 64
-#define CARDENGINE_ARM9_OFFSET 68
+#define CARDENGINE_ARM7_OFFSET 68
+#define CARDENGINE_ARM9_OFFSET 72
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
@@ -113,6 +113,32 @@ enum DldiOffsets {
 	DO_shutdown = 0x7C,
 	DO_code = 0x80
 };
+
+static char hexbuffer [9];
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
 
 static addr_t readAddr (data_t *mem, addr_t offset) {
 	return ((addr_t*)mem)[offset/sizeof(addr_t)];
@@ -427,13 +453,26 @@ static inline void copyLoop (u32* dest, const u32* src, u32 size) {
 }
 
 int loadCheatData (u32* cheat_data) {
-     u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-     u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
-     u32 cheatDataOffset = cardengineArm7[9];
-     u32* cheatDataDest = cardengineArm7 + cheatDataOffset;
-     
-     copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
-     
-     return true;
+    nocashMessage("loadCheatData");
+            
+    u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+    nocashMessage("cardengineArm7Offset");
+    nocashMessage(tohex(cardengineArm7Offset));
+    
+    u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
+    nocashMessage("cardengineArm7");
+    nocashMessage(tohex(cardengineArm7));
+    
+    u32 cheatDataOffset = cardengineArm7[9];
+    nocashMessage("cheatDataOffset");
+    nocashMessage(tohex(cheatDataOffset));
+    
+    u32* cheatDataDest = cardengineArm7 + cheatDataOffset;
+    nocashMessage("cheatDataDest");
+    nocashMessage(tohex(cheatDataDest));
+    
+    copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
+    
+    return true;
 }
 
