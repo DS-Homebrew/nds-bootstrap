@@ -401,6 +401,7 @@ void myIrqHandlerVBlank(void) {
 
 	runCardEngineCheck();
     
+    nocashMessage("cheat_engine_start\n");
     cheat_engine_start();
 }
 
