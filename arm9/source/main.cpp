@@ -316,6 +316,7 @@ int main( int argc, char **argv) {
                 dbg_printf(" ");
                 cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 
             }
+            cheatData[cheats.size()] = 0xCF000000;
             loadCheatData((u32*)cheatData);
         } 
 
