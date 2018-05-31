@@ -125,6 +125,7 @@ patches:
 .word   swi02
 .word   j_twlGetPitchTable
 .word   getPitchTableStub
+.word   cheat_data - patches @ cheat data offset 
 
 @---------------------------------------------------------------------------------
 card_read_arm9:

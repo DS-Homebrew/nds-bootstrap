@@ -21,16 +21,12 @@
 .type	cheat_engine_start STT_FUNC
 
 .global cheat_engine_end
-.global intr_orig_return_offset
+.global cheat_data
 .global cheat_engine_size
 
 
 cheat_engine_size:
 	.word	cheat_engine_end - cheat_engine_start
-
-intr_orig_return_offset:
-	.word	intr_orig_return - cheat_engine_start
-	
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -459,11 +455,7 @@ mem_copy_code_byte_loop:
 
 exit:	
 	ldmia	sp!,	{r0-r12} 
-	ldmia	sp!,	{lr}
 	bx		lr
-
-intr_orig_return:
-	.word	0x00000000
 
 .pool
 
