@@ -119,20 +119,8 @@ thumbPatches:
 card_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r4-r6,lr}
-		
-	@ get back the WRAM C (last slot) to arm9    
-	ldr     R3,=0x4004000 	
-	MOV     R2, #0xFFFFFF80	
-	STRB    R2, [R3,#0x53]
-	
+
 	ldr		r3, =cardRead
-	
-	@ldr     r1, =0xE92D4FF0
-@wait_for_wram_card_read:
-	@ldr     r2, [r3]
-	@cmp     r1, r2
-	@bne     wait_for_wram_card_read
-	
 	bl		_blx_r3_stub_card_read	
 
     ldmfd   sp!, {r4-r6,lr}
