@@ -399,6 +399,9 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	runCardEngineCheck();
+
+    nocashMessage("cheat_engine_start\n");
+    cheat_engine_start();
 }
 
 u32 myIrqEnable(u32 irq) {	
