@@ -310,7 +310,10 @@ int main( int argc, char **argv) {
         std::vector< std::string >  cheats;      
         bootstrapini.GetStringVector("NDS-BOOTSTRAP","CHEAT_DATA",cheats, ' ');
         if(cheats.size() > 0) {
-            for (int i=0; i++; i<cheats.size()) {
+            dbg_printf("Cheat data present\n");
+            for (int i=0; i<cheats.size(); i++) {
+                dbg_printf(cheats[i].c_str());
+                dbg_printf(" ");
                 cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 
             }
             loadCheatData((u32*)cheatData);
