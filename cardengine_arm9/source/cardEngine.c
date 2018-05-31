@@ -203,7 +203,7 @@ u32 popFromAsyncQueueHead() {
 	} else return 0;
 }
 
-void triggerAsyncPrefetch(sector, len) {	
+void triggerAsyncPrefetch(sector) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -217,10 +217,10 @@ void triggerAsyncPrefetch(sector, len) {
 		if (ROMinRAM == 2) {
 			if (sector > cleanRomSize) {
 				sector = 0;
-			} else if ((sector+len) > cleanRomSize) {
+			} else if ((sector+setDataBWlist[6]) > cleanRomSize) {
 				for (u32 i = 0; i < setDataBWlist[6]; i++) {
 					asyncReadSizeSubtract++;
-					if (((sector+len)-asyncReadSizeSubtract) == cleanRomSize) break;
+					if (((sector+setDataBWlist[6])-asyncReadSizeSubtract) == cleanRomSize) break;
 				}
 			}
 			int slot = GAME_getSlotForSector(sector);
@@ -250,18 +250,15 @@ void triggerAsyncPrefetch(sector, len) {
 
 
 				// do it asynchronously
-				/*while(sharedAddr[3] != (vu32)0);	
-				
-				// transfer back the WRAM-B cache to the arm9
-				//transfertToArm9(tempSlot);*/
+				//waitForArm7();
 			}
 		} else {
 			if (sector > cleanRomSize) {
 				sector = 0;
-			} else if ((sector+len) > cleanRomSize) {
+			} else if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
 				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 					asyncReadSizeSubtract++;
-					if (((sector+len)-asyncReadSizeSubtract) == cleanRomSize) break;
+					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == cleanRomSize) break;
 				}
 			}
 			int slot = getSlotForSector(sector);
@@ -367,15 +364,6 @@ int cardRead (u32* cacheStruct) {
 		flagsSet = true;
 	}
 
-	u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
-	cacheReadSizeSubtract = 0;
-	if ((sector+len) > cleanRomSize) {
-		for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
-			cacheReadSizeSubtract++;
-			if (((sector+len)-cacheReadSizeSubtract) == cleanRomSize) break;
-		}
-	}
-
 	#ifdef DEBUG
 	// send a log command for debug purpose
 	// -------------------------------------
@@ -394,6 +382,15 @@ int cardRead (u32* cacheStruct) {
 	
 
 	if(ROMinRAM==0) {
+		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+		cacheReadSizeSubtract = 0;
+		if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
+			for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+				cacheReadSizeSubtract++;
+				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == cleanRomSize) break;
+			}
+		}
+
 		accessCounter++;
 
 		processAsyncCommand();
@@ -446,19 +443,19 @@ int cardRead (u32* cacheStruct) {
 
 					updateDescriptor(slot, sector);	
 		
-					triggerAsyncPrefetch(nextSector, len);
+					triggerAsyncPrefetch(nextSector);
 				} else {
 					if(cacheCounter[slot] == 0x0FFFFFFF) {
 						// prefetch successfull
 						getAsyncSector();
 						
-						triggerAsyncPrefetch(nextSector, len);	
+						triggerAsyncPrefetch(nextSector);	
 					} else {
 						int i;
 						for(i=0; i<5; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
-								triggerAsyncPrefetch(nextSector, len);	
+								triggerAsyncPrefetch(nextSector);	
 								break;
 							}
 						}
@@ -807,6 +804,13 @@ int cardRead (u32* cacheStruct) {
 			processAsyncCommand();
 
 			u32 sector = (src/setDataBWlist[6])*setDataBWlist[6];
+			cacheReadSizeSubtract = 0;
+			if ((sector+setDataBWlist[6]) > cleanRomSize) {
+				for (u32 i = 0; i < setDataBWlist[6]; i++) {
+					cacheReadSizeSubtract++;
+					if (((sector+setDataBWlist[6])-cacheReadSizeSubtract) == cleanRomSize) break;
+				}
+			}
 
 			while(len > 0) {
 				int slot = GAME_getSlotForSector(sector);
@@ -837,19 +841,19 @@ int cardRead (u32* cacheStruct) {
 
 					updateDescriptor(slot, sector);	
 		
-					triggerAsyncPrefetch(nextSector, len);
+					triggerAsyncPrefetch(nextSector);
 				} else {
 					if(cacheCounter[slot] == 0x0FFFFFFF) {
 						// prefetch successfull
 						getAsyncSector();
 						
-						triggerAsyncPrefetch(nextSector, len);	
+						triggerAsyncPrefetch(nextSector);	
 					} else {
 						int i;
 						for(i=0; i<5; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
-								triggerAsyncPrefetch(nextSector, len);	
+								triggerAsyncPrefetch(nextSector);	
 								break;
 							}
 						}
