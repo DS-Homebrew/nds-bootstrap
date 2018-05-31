@@ -526,6 +526,13 @@ int cardRead (u32* cacheStruct) {
 					dst = cardStruct[1];
 					page = (src/512)*512;
 					sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+					cacheReadSizeSubtract = 0;
+					if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
+						for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+							cacheReadSizeSubtract++;
+							if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == cleanRomSize) break;
+						}
+					}
 					accessCounter++;
 				}
 			}
@@ -924,6 +931,13 @@ int cardRead (u32* cacheStruct) {
 					dst = cardStruct[1];
 					page = (src/512)*512;
 					sector = (src/setDataBWlist[6])*setDataBWlist[6];
+					cacheReadSizeSubtract = 0;
+					if ((sector+setDataBWlist[6]) > cleanRomSize) {
+						for (u32 i = 0; i < setDataBWlist[6]; i++) {
+							cacheReadSizeSubtract++;
+							if (((sector+setDataBWlist[6])-cacheReadSizeSubtract) == cleanRomSize) break;
+						}
+					}
 					accessCounter++;
 				}
 			}
