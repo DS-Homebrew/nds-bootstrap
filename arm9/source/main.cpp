@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include "stringtool.h"
 
 #include <nds/fifocommon.h>
 
@@ -33,6 +34,8 @@
 using namespace std;
 
 static bool debug = false;
+
+static u32 cheatData [1024];
 
 static inline int dbg_printf( const char* format, ... )
 {
@@ -303,10 +306,19 @@ int main( int argc, char **argv) {
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
+        
+        std::vector< std::string >  cheats;      
+        bootstrapini.GetStringVector("NDS-BOOTSTRAP","CHEAT_DATA",cheats, ' ');
+        if(cheats.size() > 0) {
+            for (int i=0; i++; i<cheats.size()) {
+                cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 
+            }
+            loadCheatData((u32*)cheatData);
+        } 
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0));	
-	} else {
+    } else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
 	}

@@ -71,6 +71,8 @@ dsiSD:
 #define LOADSCR_OFFSET 56
 #define ROMREADLED_OFFSET 60
 #define GAMESOFTRESET_OFFSET 64
+#define CARDENGINE_ARM7_OFFSET 64
+#define CARDENGINE_ARM9_OFFSET 68
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
@@ -415,5 +417,23 @@ int runNdsFile (const char* filename, const char* savename, const char* arm7Dono
 	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 
 	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, useArm7Donor, donorSdkVer, patchMpuRegion, patchMpuSize, loadingScreen, romread_LED, gameSoftReset, true, true, argc, argv);
+}
+
+static inline void copyLoop (u32* dest, const u32* src, u32 size) {
+	size = (size +3) & ~3;
+	do {
+		*dest++ = *src++;
+	} while (size -= 4);
+}
+
+int loadCheatData (u32* cheat_data) {
+     u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+     u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
+     u32 cheatDataOffset = cardengineArm7[9];
+     u32* cheatDataDest = cardengineArm7 + cheatDataOffset;
+     
+     copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
+     
+     return true;
 }
 

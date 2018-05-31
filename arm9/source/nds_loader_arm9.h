@@ -33,6 +33,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 
 int runNdsFile (const char* filename, const char* savename,  const char* arm7DonorPath, int useArm7Donor, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int loadingScreen, int romread_LED, int gameSoftReset, int argc, const char** argv);
 
+int loadCheatData (u32* cheat_data);
+
 #ifdef __cplusplus
 }
 #endif
