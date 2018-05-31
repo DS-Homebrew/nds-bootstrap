@@ -282,6 +282,8 @@ void runCardEngineCheck (void) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
+          
+        cheat_engine_start();
 		unlockMutex();
 	}
 }
