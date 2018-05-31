@@ -219,12 +219,14 @@ void triggerAsyncPrefetch(sector) {
 	asyncReadSizeSubtract = 0;
 	if(asyncSector == 0xFFFFFFFF) {
 		if (ROMinRAM == 2) {
-			if (sector > cleanRomSize) {
-				sector = 0;
-			} else if ((sector+setDataBWlist[6]) > cleanRomSize) {
-				for (u32 i = 0; i < setDataBWlist[6]; i++) {
-					asyncReadSizeSubtract++;
-					if (((sector+setDataBWlist[6])-asyncReadSizeSubtract) == cleanRomSize) break;
+			if (cleanRomSize > 0) {
+				if (sector > cleanRomSize) {
+					sector = 0;
+				} else if ((sector+setDataBWlist[6]) > cleanRomSize) {
+					for (u32 i = 0; i < setDataBWlist[6]; i++) {
+						asyncReadSizeSubtract++;
+						if (((sector+setDataBWlist[6])-asyncReadSizeSubtract) == cleanRomSize) break;
+					}
 				}
 			}
 			int slot = GAME_getSlotForSector(sector);
@@ -257,12 +259,14 @@ void triggerAsyncPrefetch(sector) {
 				//waitForArm7();
 			}
 		} else {
-			if (sector > cleanRomSize) {
-				sector = 0;
-			} else if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
-				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
-					asyncReadSizeSubtract++;
-					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == cleanRomSize) break;
+			if (cleanRomSize > 0) {
+				if (sector > cleanRomSize) {
+					sector = 0;
+				} else if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
+					for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+						asyncReadSizeSubtract++;
+						if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == cleanRomSize) break;
+					}
 				}
 			}
 			int slot = getSlotForSector(sector);
@@ -396,7 +400,7 @@ int cardRead (u32* cacheStruct) {
 	if(ROMinRAM==0) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;
-		if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
+		if ((cleanRomSize > 0) && ((sector+_128KB_READ_SIZE) > cleanRomSize)) {
 			for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 				cacheReadSizeSubtract++;
 				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == cleanRomSize) break;
@@ -475,7 +479,6 @@ int cardRead (u32* cacheStruct) {
 					updateDescriptor(slot, sector);
 				}
 
-
 				u32 len2=len;
 				if((src - sector) + len2 > _128KB_READ_SIZE){
 					len2 = sector - src + _128KB_READ_SIZE;
@@ -539,7 +542,7 @@ int cardRead (u32* cacheStruct) {
 					page = (src/512)*512;
 					sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 					cacheReadSizeSubtract = 0;
-					if ((sector+_128KB_READ_SIZE) > cleanRomSize) {
+					if ((cleanRomSize > 0) && ((sector+_128KB_READ_SIZE) > cleanRomSize)) {
 						for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 							cacheReadSizeSubtract++;
 							if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == cleanRomSize) break;
@@ -1076,7 +1079,7 @@ int cardRead (u32* cacheStruct) {
 
 			u32 sector = (src/setDataBWlist[6])*setDataBWlist[6];
 			cacheReadSizeSubtract = 0;
-			if ((sector+setDataBWlist[6]) > cleanRomSize) {
+			if ((cleanRomSize > 0) && ((sector+setDataBWlist[6]) > cleanRomSize)) {
 				for (u32 i = 0; i < setDataBWlist[6]; i++) {
 					cacheReadSizeSubtract++;
 					if (((sector+setDataBWlist[6])-cacheReadSizeSubtract) == cleanRomSize) break;
@@ -1196,7 +1199,7 @@ int cardRead (u32* cacheStruct) {
 					page = (src/512)*512;
 					sector = (src/setDataBWlist[6])*setDataBWlist[6];
 					cacheReadSizeSubtract = 0;
-					if ((sector+setDataBWlist[6]) > cleanRomSize) {
+					if ((cleanRomSize > 0) && ((sector+setDataBWlist[6]) > cleanRomSize)) {
 						for (u32 i = 0; i < setDataBWlist[6]; i++) {
 							cacheReadSizeSubtract++;
 							if (((sector+setDataBWlist[6])-cacheReadSizeSubtract) == cleanRomSize) break;
