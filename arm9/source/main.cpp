@@ -35,7 +35,7 @@ using namespace std;
 
 static bool debug = false;
 
-static u32 cheatData [1024];
+static u32 cheatData [256];
 
 static inline int dbg_printf( const char* format, ... )
 {
@@ -312,13 +312,17 @@ int main( int argc, char **argv) {
         bootstrapini.GetStringVector("NDS-BOOTSTRAP","CHEAT_DATA",cheats, ' ');
         if(cheats.size() > 0) {
             dbg_printf("Cheat data present\n");
-            for (int i=0; i<cheats.size(); i++) {
-                dbg_printf(cheats[i].c_str());
-                dbg_printf(" ");
-                cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 
+            
+            if(cheats.size() < 256) {
+                 for (int i=0; i<cheats.size(); i++) {
+                    dbg_printf(cheats[i].c_str());
+                    dbg_printf(" ");
+                    cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 
+                }
+                cheatData[cheats.size()] = 0xCF000000;
+            } else {
+                printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
             }
-            cheatData[cheats.size()] = 0xCF000000;
-            //loadCheatData((u32*)cheatData);
         } else {
 			cheatData[0] = 0xCF000000;
 		}
