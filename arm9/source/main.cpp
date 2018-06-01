@@ -307,7 +307,8 @@ int main( int argc, char **argv) {
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
-        
+
+		cheatData[0] = 0xCF000000;
         std::vector< std::string >  cheats;      
         bootstrapini.GetStringVector("NDS-BOOTSTRAP","CHEAT_DATA",cheats, ' ');
         if(cheats.size() > 0) {
@@ -321,10 +322,8 @@ int main( int argc, char **argv) {
                 }
                 cheatData[cheats.size()] = 0xCF000000;
             } else {
-                printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
-            }
-        } else {
-			cheatData[0] = 0xCF000000;
+				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
+			}
 		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
