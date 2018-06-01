@@ -39,7 +39,9 @@ cacheStruct:
 romread_LED:
 	.word	0x00000000
 gameSoftReset:
-	.word	0x00000000		
+	.word	0x00000000
+cheat_data_offset:    
+	.word	cheat_data - patches_offset	
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -124,7 +126,7 @@ patches:
 .word   arm7Functions
 .word   swi02
 .word   j_twlGetPitchTable
-.word   getPitchTableStub
+.word   getPitchTableStub 
 
 @---------------------------------------------------------------------------------
 card_read_arm9:

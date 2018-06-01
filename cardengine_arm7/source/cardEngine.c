@@ -282,6 +282,7 @@ void runCardEngineCheck (void) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
+        
 		unlockMutex();
 	}
 }
@@ -399,6 +400,9 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	runCardEngineCheck();
+    
+    nocashMessage("cheat_engine_start\n");
+    cheat_engine_start();
 }
 
 u32 myIrqEnable(u32 irq) {	
