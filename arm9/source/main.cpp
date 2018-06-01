@@ -319,7 +319,9 @@ int main( int argc, char **argv) {
             }
             cheatData[cheats.size()] = 0xCF000000;
             //loadCheatData((u32*)cheatData);
-        } 
+        } else {
+			cheatData[0] = 0xCF000000;
+		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0), (u32*)cheatData);	
