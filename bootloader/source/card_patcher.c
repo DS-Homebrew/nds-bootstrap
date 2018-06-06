@@ -263,12 +263,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
 		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
-	} 
-	/*if(moduleParams->sdk_version > 0x5000000) {
-		cardReadStartSignature = cardReadStartSignature5;
-		cardReadCachedStartSignature = cardReadCachedStartSignature5;
-		cardReadCachedEndSignature = cardReadCachedEndSignature5;
-	}*/
+	}
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
 	u32* mpuInitRegionData = mpuInitRegion1Data;
