@@ -16,8 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds.h> 
 #include <nds/fifomessages.h>
+#include <nds/ipc.h>
+#include <nds/interrupts.h>
+#include <nds/system.h>
+#include <nds/input.h>
+#include <nds/arm7/audio.h>
 #include "sdmmc.h"
 #include "debugToFile.h"
 #include "cardEngine.h"
@@ -55,8 +59,8 @@ bool ndmaUsed = false;
 void initLogging() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-			sdmmc_controller_init(false);
-			sdmmc_sdcard_init();
+			sdmmc_init();
+			SD_Init();
 		}
 		FAT_InitFiles(false);
 		romFile = getFileFromCluster(fileCluster);
