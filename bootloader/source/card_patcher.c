@@ -1466,26 +1466,6 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     return 1;
 }
 
-void swapBinary_ARM7(aFile donorfile)
-{
-	u32 ndsHeader[0x170>>2];
-
-	nocashMessage("loadBinary_ARM7");
-
-	// read NDS header
-	fileRead ((char*)ndsHeader, donorfile, 0, 0x170);
-	// read ARM7 info from NDS header
-	u32 ARM7_SRC = ndsHeader[0x030>>2];
-	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
-	u32 ARM7_LEN = ndsHeader[0x03C>>2];
-
-	fileRead(ARM7_DST, donorfile, ARM7_SRC, ARM7_LEN);
-
-	NDS_HEAD[0x030>>2] = ARM7_SRC;
-	NDS_HEAD[0x038>>2] = ARM7_DST;
-	NDS_HEAD[0x03C>>2] = ARM7_LEN;
-}
-
 void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32 swi12Offset =   
@@ -1604,7 +1584,7 @@ void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, aFile donorFile, u32 useArm7Donor) {
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
 	u32* debug = (u32*)0x037C6000;
 
 	if(REG_SCFG_ROM != 0x703) {
@@ -1654,50 +1634,16 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
-	u32 saveResult = 0;
-	if (useArm7Donor == 2 && ndsHeader->fatSize > 0) {
-		if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
-			dbg_printf("swap the arm7 binary");	
-			swapBinary_ARM7(donorFile);
-			// Patch swiGetPitchTable call again
-			if(REG_SCFG_ROM != 0x703) {
-				fixForDsiBios(ndsHeader, cardEngineLocation);
-			}
-			// apply the arm7 binary swap and the save patch, assume save v2 nds file
-			saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		} else {
-			dbg_printf("no arm7 binary specified for swapping");	
-		}
-	} else if (useArm7Donor == 1) {
-		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult) saveResult = savePatchV3(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult && ndsHeader->fatSize > 0) {
-			if ((donorFile.firstCluster >= CLUSTER_FIRST) && (donorFile.firstCluster < CLUSTER_EOF)) {			
-				dbg_printf("swap the arm7 binary");	
-				swapBinary_ARM7(donorFile);
-				// Patch swiGetPitchTable call again
-				if(REG_SCFG_ROM != 0x703) {
-					fixForDsiBios(ndsHeader, cardEngineLocation);
-				}
-				// apply the arm7 binary swap and the save patch again, assume save v2 nds file
-				saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-			} else {
-				dbg_printf("no arm7 binary specified for swapping");	
-			}
-		}
-	} else {
-		saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-		if(!saveResult) saveResult = savePatchV3(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	}
+	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	if(!saveResult) saveResult = savePatchV3(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
 
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
-		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize, aFile donorFile, u32 useArm7Donor) {
+		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	//Debug stuff.
 
@@ -1708,7 +1654,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32*
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
 	if (cardReadFound || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, donorFile, useArm7Donor);
+		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

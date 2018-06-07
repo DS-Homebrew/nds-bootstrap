@@ -81,8 +81,6 @@ extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
-extern unsigned long donorFileCluster;
-extern unsigned long useArm7Donor;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
@@ -728,7 +726,6 @@ void arm7_main (void) {
 	}
 
 	aFile file = getFileFromCluster (storedFileCluster);
-	aFile donorFile = getFileFromCluster (donorFileCluster);
 
 	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
@@ -768,7 +765,7 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 5 dots
 
-	errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize, donorFile, useArm7Donor);
+	errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("patch card Sucessfull");
 	} else {

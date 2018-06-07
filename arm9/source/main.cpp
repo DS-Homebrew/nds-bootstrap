@@ -68,7 +68,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7Donor, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
+void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -105,8 +105,6 @@ void runFile(string filename, string savPath, string arm7DonorPath, u32 useArm7D
 		powerOn(PM_BACKLIGHT_TOP);
 		int err = runNdsFile (argarray[0],
 							strdup(savPath.c_str()),
-							strdup(arm7DonorPath.c_str()),
-							useArm7Donor,
 							donorSdkVer,
 							patchMpuRegion,
 							patchMpuSize,
@@ -295,15 +293,6 @@ int main( int argc, char **argv) {
 
 		std::string	savPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "SAV_PATH", "");
 
-		int useArm7Donor = bootstrapini.GetInt( "NDS-BOOTSTRAP", "USE_ARM7_DONOR", 1);
-
-		std::string	arm7DonorPath;
-
-		if (useArm7Donor >= 1)
-			arm7DonorPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "ARM7_DONOR_PATH", "");	
-		else
-			arm7DonorPath = "sd:/_nds/null.nds";
-
 		u32	patchMpuRegion = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 
 		u32	patchMpuSize = bootstrapini.GetInt( "NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
@@ -327,7 +316,7 @@ int main( int argc, char **argv) {
 		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), arm7DonorPath.c_str(), useArm7Donor, bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0), (u32*)cheatData);	
+		runFile(ndsPath.c_str(), savPath.c_str(), bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0), (u32*)cheatData);	
     } else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
