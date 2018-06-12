@@ -33,6 +33,7 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
+	.global ntrTouch
 	.global loadingScreen
 	.global romread_LED
 	.global gameSoftReset
@@ -66,6 +67,8 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000		
 patchMpuSize:
+	.word	0x00000000		
+ntrTouch:
 	.word	0x00000000		
 loadingScreen:
 	.word	0x00000000		

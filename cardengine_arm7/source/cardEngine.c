@@ -44,6 +44,7 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
+extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
@@ -329,7 +330,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
 	}
 
-	if (REG_SCFG_EXT == 0) {
+	if (REG_SCFG_EXT == 0 || ntrTouch) {
 		// Control volume with the - and + buttons.
 		u8 volLevel;
 		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
