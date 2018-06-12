@@ -347,88 +347,60 @@ void myIrqHandlerVBlank(void) {
 					volLevel = 1;
 					break;
 				case 0x04:
+				case 0x05:
 					volLevel = 2;
 					break;
-				case 0x05:
+				case 0x06:
+				case 0x07:
 					volLevel = 3;
 					break;
-				case 0x06:
+				case 0x08:
+				case 0x09:
 					volLevel = 4;
 					break;
-				case 0x07:
+				case 0x0A:
+				case 0x0B:
 					volLevel = 5;
 					break;
-				case 0x08:
+				case 0x0C:
+				case 0x0D:
 					volLevel = 6;
 					break;
-				case 0x09:
+				case 0x0E:
+				case 0x0F:
 					volLevel = 7;
 					break;
-				case 0x0A:
+				case 0x10:
+				case 0x11:
 					volLevel = 8;
 					break;
-				case 0x0B:
+				case 0x12:
+				case 0x13:
 					volLevel = 9;
 					break;
-				case 0x0C:
+				case 0x14:
+				case 0x15:
 					volLevel = 10;
 					break;
-				case 0x0D:
+				case 0x16:
+				case 0x17:
 					volLevel = 11;
 					break;
-				case 0x0E:
+				case 0x18:
+				case 0x19:
 					volLevel = 12;
 					break;
-				case 0x0F:
+				case 0x1A:
+				case 0x1B:
 					volLevel = 13;
 					break;
-				case 0x10:
+				case 0x1C:
+				case 0x1D:
 					volLevel = 14;
 					break;
-				case 0x11:
-					volLevel = 15;
-					break;
-				case 0x12:
-					volLevel = 16;
-					break;
-				case 0x13:
-					volLevel = 17;
-					break;
-				case 0x14:
-					volLevel = 18;
-					break;
-				case 0x15:
-					volLevel = 19;
-					break;
-				case 0x16:
-					volLevel = 20;
-					break;
-				case 0x17:
-					volLevel = 21;
-					break;
-				case 0x18:
-					volLevel = 22;
-					break;
-				case 0x19:
-					volLevel = 23;
-					break;
-				case 0x1A:
-					volLevel = 24;
-					break;
-				case 0x1B:
-					volLevel = 25;
-					break;
-				case 0x1C:
-					volLevel = 26;
-					break;
-				case 0x1D:
-					volLevel = 27;
-					break;
 				case 0x1E:
-					volLevel = 28;
-					break;
 				case 0x1F:
-					volLevel = 29;
+					volLevel = 15;
 					break;
 			}
 		} else {
