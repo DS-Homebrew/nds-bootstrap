@@ -21,6 +21,7 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern unsigned long consoleModel;
 extern unsigned long ntrTouch;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
@@ -300,9 +301,10 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *ipcSyncHandler;
 	cardEngineLocation[4] = file.firstCluster;
-	cardEngineLocation[7] = ntrTouch;
-	cardEngineLocation[8] = romread_LED;
-	cardEngineLocation[9] = gameSoftReset;
+	cardEngineLocation[7] = consoleModel;
+	cardEngineLocation[8] = ntrTouch;
+	cardEngineLocation[9] = romread_LED;
+	cardEngineLocation[10] = gameSoftReset;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 

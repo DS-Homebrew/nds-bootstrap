@@ -44,6 +44,7 @@ extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 sdk_version;
+extern u32 consoleModel;
 extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
@@ -334,72 +335,170 @@ void myIrqHandlerVBlank(void) {
 		// Control volume with the - and + buttons.
 		u8 volLevel;
 		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-		switch(i2cVolLevel) {
-			case 0x00:
-			case 0x01:
-			default:
-				volLevel = 0;
-				break;
-			case 0x02:
-			case 0x03:
-				volLevel = 1;
-				break;
-			case 0x04:
-			case 0x05:
-				volLevel = 3;
-				break;
-			case 0x06:
-			case 0x07:
-				volLevel = 6;
-				break;
-			case 0x08:
-			case 0x09:
-				volLevel = 10;
-				break;
-			case 0x0A:
-			case 0x0B:
-				volLevel = 15;
-				break;
-			case 0x0C:
-			case 0x0D:
-				volLevel = 21;
-				break;
-			case 0x0E:
-			case 0x0F:
-				volLevel = 28;
-				break;
-			case 0x10:
-			case 0x11:
-				volLevel = 36;
-				break;
-			case 0x12:
-			case 0x13:
-				volLevel = 45;
-				break;
-			case 0x14:
-			case 0x15:
-				volLevel = 55;
-				break;
-			case 0x16:
-			case 0x17:
-				volLevel = 66;
-				break;
-			case 0x18:
-			case 0x19:
-				volLevel = 78;
-				break;
-			case 0x1A:
-			case 0x1B:
-				volLevel = 91;
-				break;
-			case 0x1C:
-			case 0x1D:
-				volLevel = 105;
-				break;
-			case 0x1E:
-			case 0x1F:
-				volLevel = 120;
-				break;
+		if (consoleModel >= 2) {
+			switch(i2cVolLevel) {
+				case 0x00:
+				case 0x01:
+				default:
+					volLevel = 0;
+					break;
+				case 0x02:
+				case 0x03:
+					volLevel = 1;
+					break;
+				case 0x04:
+					volLevel = 2;
+					break;
+				case 0x05:
+					volLevel = 3;
+					break;
+				case 0x06:
+					volLevel = 4;
+					break;
+				case 0x07:
+					volLevel = 5;
+					break;
+				case 0x08:
+					volLevel = 6;
+					break;
+				case 0x09:
+					volLevel = 7;
+					break;
+				case 0x0A:
+					volLevel = 8;
+					break;
+				case 0x0B:
+					volLevel = 9;
+					break;
+				case 0x0C:
+					volLevel = 10;
+					break;
+				case 0x0D:
+					volLevel = 11;
+					break;
+				case 0x0E:
+					volLevel = 12;
+					break;
+				case 0x0F:
+					volLevel = 13;
+					break;
+				case 0x10:
+					volLevel = 14;
+					break;
+				case 0x11:
+					volLevel = 15;
+					break;
+				case 0x12:
+					volLevel = 16;
+					break;
+				case 0x13:
+					volLevel = 17;
+					break;
+				case 0x14:
+					volLevel = 18;
+					break;
+				case 0x15:
+					volLevel = 19;
+					break;
+				case 0x16:
+					volLevel = 20;
+					break;
+				case 0x17:
+					volLevel = 21;
+					break;
+				case 0x18:
+					volLevel = 22;
+					break;
+				case 0x19:
+					volLevel = 23;
+					break;
+				case 0x1A:
+					volLevel = 24;
+					break;
+				case 0x1B:
+					volLevel = 25;
+					break;
+				case 0x1C:
+					volLevel = 26;
+					break;
+				case 0x1D:
+					volLevel = 27;
+					break;
+				case 0x1E:
+					volLevel = 28;
+					break;
+				case 0x1F:
+					volLevel = 29;
+					break;
+			}
+		} else {
+			switch(i2cVolLevel) {
+				case 0x00:
+				case 0x01:
+				default:
+					volLevel = 0;
+					break;
+				case 0x02:
+				case 0x03:
+					volLevel = 1;
+					break;
+				case 0x04:
+				case 0x05:
+					volLevel = 3;
+					break;
+				case 0x06:
+				case 0x07:
+					volLevel = 6;
+					break;
+				case 0x08:
+				case 0x09:
+					volLevel = 10;
+					break;
+				case 0x0A:
+				case 0x0B:
+					volLevel = 15;
+					break;
+				case 0x0C:
+				case 0x0D:
+					volLevel = 21;
+					break;
+				case 0x0E:
+				case 0x0F:
+					volLevel = 28;
+					break;
+				case 0x10:
+				case 0x11:
+					volLevel = 36;
+					break;
+				case 0x12:
+				case 0x13:
+					volLevel = 45;
+					break;
+				case 0x14:
+				case 0x15:
+					volLevel = 55;
+					break;
+				case 0x16:
+				case 0x17:
+					volLevel = 66;
+					break;
+				case 0x18:
+				case 0x19:
+					volLevel = 78;
+					break;
+				case 0x1A:
+				case 0x1B:
+					volLevel = 91;
+					break;
+				case 0x1C:
+				case 0x1D:
+					volLevel = 105;
+					break;
+				case 0x1E:
+				case 0x1F:
+					volLevel = 120;
+					break;
+			}
 		}
 		REG_MASTER_VOLUME = volLevel;
 	}

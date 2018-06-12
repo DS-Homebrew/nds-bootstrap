@@ -14,6 +14,7 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
+.global consoleModel
 .global ntrTouch
 .global romread_LED
 .global gameSoftReset
@@ -36,6 +37,8 @@ fileCluster:
 cardStruct:
 	.word	0x00000000
 cacheStruct:
+	.word	0x00000000
+consoleModel:
 	.word	0x00000000
 ntrTouch:
 	.word	0x00000000
