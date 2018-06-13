@@ -84,6 +84,7 @@ extern unsigned long saveFileCluster;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
+extern unsigned long consoleModel;
 extern unsigned long ntrTouch;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
@@ -562,6 +563,8 @@ u32 dsiWramUsed = false;
 void loadRomIntoRam(aFile file) {
 	u32 ROMinRAM = 0;
 	u32 cleanRomSize = romSize;
+	u32 ramRomSizeLimit = 0x00800000;
+	if (consoleModel > 0) ramRomSizeLimit = 0x01800000;
 
 	// ExceptionHandler2 (red screen) blacklist
 	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
@@ -586,14 +589,14 @@ void loadRomIntoRam(aFile file) {
 	romSize -= 0x4000;
 	romSize -= ARM9_LEN;
 
-	// If ROM size is 0x01800000 or below, then load the ROM into RAM.
-	if((fatSize > 0) && (romSize > 0) && (romSize <= 0x01800000) && (ROM_TID != 0x45475241)
+	// If ROM size is 0x01800000 (0x00800000 for retail DSi) or below, then load the ROM into RAM.
+	if((fatSize > 0) && (romSize > 0) && (romSize <= ramRomSizeLimit) && (ROM_TID != 0x45475241)
 	&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
 	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
 	&& !dsiWramUsed) {
 		ROMinRAM = 1;
 		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-	} else {
+	} else if (consoleModel > 0) {
 		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWJ0[i];

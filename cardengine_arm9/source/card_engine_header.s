@@ -21,6 +21,7 @@
 .global romSize
 .global cleanRomSize
 .global enableExceptionHandler
+.global consoleModel
 .global setDataBWlist
 .global setDataBWlist_1
 .global setDataBWlist_2
@@ -59,6 +60,8 @@ romSize:
 cleanRomSize:
 	.word	0x00000000
 enableExceptionHandler:
+	.word	0x00000000
+consoleModel:
 	.word	0x00000000
 setDataBWlist:
 	.word	0x00000000

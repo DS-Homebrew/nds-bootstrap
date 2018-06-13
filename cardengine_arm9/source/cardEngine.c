@@ -26,6 +26,7 @@ extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
 extern u32 romSize;
 extern u32 cleanRomSize;
+extern u32 consoleModel;
 
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
@@ -36,14 +37,21 @@ extern u32 cleanRomSize;
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE 0x100000
 
-#define only_CACHE_ADRESS_START 0x0C800000
-#define only_CACHE_ADRESS_SIZE 0x1800000
-#define only_128KB_CACHE_SLOTS 0xC0
-#define only_192KB_CACHE_SLOTS 0x80
-#define only_256KB_CACHE_SLOTS 0x60
-#define only_512KB_CACHE_SLOTS 0x30
-#define only_768KB_CACHE_SLOTS 0x20
-#define only_1MB_CACHE_SLOTS 0x18
+#define CACHE_ADRESS_START 0x0C800000
+#define retail_CACHE_ADRESS_SIZE 0x800000
+#define retail_128KB_CACHE_SLOTS 0x40
+#define retail_192KB_CACHE_SLOTS 0x2A
+#define retail_256KB_CACHE_SLOTS 0x20
+#define retail_512KB_CACHE_SLOTS 0x10
+#define retail_768KB_CACHE_SLOTS 0xA
+#define retail_1MB_CACHE_SLOTS 0x8
+#define dev_CACHE_ADRESS_SIZE 0x1800000
+#define dev_128KB_CACHE_SLOTS 0xC0
+#define dev_192KB_CACHE_SLOTS 0x80
+#define dev_256KB_CACHE_SLOTS 0x60
+#define dev_512KB_CACHE_SLOTS 0x30
+#define dev_768KB_CACHE_SLOTS 0x20
+#define dev_1MB_CACHE_SLOTS 0x18
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -52,9 +60,11 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 cacheDescriptor [only_128KB_CACHE_SLOTS] = {0xffffffff};
-static u32 cacheCounter [only_128KB_CACHE_SLOTS];
+static u32 cacheDescriptor [dev_128KB_CACHE_SLOTS] = {0xffffffff};
+static u32 cacheCounter [dev_128KB_CACHE_SLOTS];
 static u32 accessCounter = 0;
+
+static u16 cacheSlots = retail_128KB_CACHE_SLOTS;
 
 static u32 cacheReadSizeSubtract = 0;
 static u32 asyncReadSizeSubtract = 0;
@@ -117,7 +127,7 @@ void setExceptionHandler2() {
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<cacheSlots; i++) {
 		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -141,7 +151,7 @@ int GAME_allocateCacheSlot() {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<only_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<cacheSlots; i++) {
 		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
@@ -160,7 +170,7 @@ int GAME_getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(only_CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+	return (vu32*)(CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 }
 
 vu8* GAME_getCacheAddress(int slot) {
@@ -358,13 +368,19 @@ int cardRead (u32* cacheStruct) {
 			setExceptionHandler2();
 		}
 
+		u32 ramRomSizeLimit = 0x00800000;
+		if (consoleModel > 0) {
+			ramRomSizeLimit = 0x01800000;
+			cacheSlots = dev_128KB_CACHE_SLOTS;
+		}
+
 		// If ROM size is 0x01800000 or below, then the ROM is in RAM.
-		if((romSize > 0) && (romSize <= 0x01800000) && (ROM_TID != 0x45475241)
+		if((romSize > 0) && (romSize <= ramRomSizeLimit) && (ROM_TID != 0x45475241)
 		&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
 		&& (romSize != (0x012C7066-0x4000-ARM9_LEN))) {
 			ROM_LOCATION -= 0x4000;
 			ROM_LOCATION -= ARM9_LEN;
-		} else {
+		} else if (consoleModel > 0) {
 			if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)		// Lunar Knights (U)
 			|| (ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)		// Lunar Knights (E)
 			|| (ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)		// Tomodachi Collection (J)

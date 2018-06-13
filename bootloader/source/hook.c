@@ -323,14 +323,15 @@ void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM, u32 cleanRo
 	cardEngineLocation9[11] = romSize;
 	cardEngineLocation9[12] = cleanRomSize;
 	cardEngineLocation9[13] = enableExceptionHandler;
+	cardEngineLocation9[14] = consoleModel;
 	for (int i = 0; i < 7; i++)
-		cardEngineLocation9[14+i] = setDataBWlist[i];
+		cardEngineLocation9[15+i] = setDataBWlist[i];
 	for (int i = 0; i < 3; i++)
-		cardEngineLocation9[21+i] = setDataBWlist_1[i];
+		cardEngineLocation9[22+i] = setDataBWlist_1[i];
 	for (int i = 0; i < 3; i++)
-		cardEngineLocation9[24+i] = setDataBWlist_2[i];
+		cardEngineLocation9[25+i] = setDataBWlist_2[i];
 	for (int i = 0; i < 3; i++)
-		cardEngineLocation9[27+i] = setDataBWlist_3[i];
+		cardEngineLocation9[28+i] = setDataBWlist_3[i];
 	for (int i = 0; i < 3; i++)
-		cardEngineLocation9[30+i] = setDataBWlist_4[i];
+		cardEngineLocation9[31+i] = setDataBWlist_4[i];
 }
