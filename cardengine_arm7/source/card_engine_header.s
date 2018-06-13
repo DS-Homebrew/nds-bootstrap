@@ -18,6 +18,7 @@
 .global ntrTouch
 .global romread_LED
 .global gameSoftReset
+.global numberToActivateRunViaHalt
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -46,6 +47,8 @@ romread_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
+numberToActivateRunViaHalt:
+	.word	0x00000000		
 cheat_data_offset:    
 	.word	cheat_data - patches_offset	
 
@@ -131,8 +134,9 @@ patches:
 .word   readCachedRef
 .word   arm7Functions
 .word   swi02
+.word   j_newSwiHalt
 .word   j_twlGetPitchTable
-.word   getPitchTableStub 
+.word   getPitchTableStub
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -243,11 +247,28 @@ swi02:
 
 	.arm
 @---------------------------------------------------------------------------------
+j_newSwiHalt:
+@---------------------------------------------------------------------------------
+	ldr	r12, = newSwiHalt
+	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 j_twlGetPitchTable:
 @---------------------------------------------------------------------------------
 	ldr	r12, = twlGetPitchTable
 	bx	r12
 .pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+newSwiHalt:
+@---------------------------------------------------------------------------------
+	ldr	r12, =myIrqHandlerHalt
+	bx	r12
+	swi	#0x060000
+	bx	lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

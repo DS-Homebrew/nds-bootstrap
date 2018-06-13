@@ -26,12 +26,6 @@ u32 dataWhitelist_ADBP0[7] = {0x0010C400, 0x00A21000, 0x00914C00, 0x00000001,	//
 							0x0D180000, 0x00000013, 0x00080000};
 u32 dataWhitelist_ABHE0[7] = {0x00300E00, 0x00D20E70, 0x00A20070, 0x00000001,	// Resident Evil: Deadly Silence (U)
 							0x0D300000, 0x0000000D, 0x00100000};
-u32 dataWhitelist_ARZJ0[7] = {0x0284F200, 0x0302DD6C, 0x007DEB6C, 0x00000001,	// Rockman ZX (J) (FMV cutscenes)
-							0x0D000000, 0x00000040, 0x00040000};
-u32 dataWhitelist_ARZE0[7] = {0x0238DC00, 0x02B94600, 0x00806A00, 0x00000001,	// MegaMan ZX (U) (FMV cutscenes)
-							0x0D040000, 0x0000003F, 0x00040000};
-u32 dataWhitelist_ARZP0[7] = {0x0287A400, 0x03058F6C, 0x007DEB6C, 0x00000001,	// MegaMan ZX (E) (FMV cutscenes)
-							0x0D000000, 0x00000040, 0x00040000};
 u32 dataWhitelist_AFFJ0[7] = {0x012E2000, 0x01AC4400, 0x007E2400, 0x00000001,	// Final Fantasy III (J)
 							0x0D000000, 0x0000001F, 0x00080000};
 u32 dataWhitelist_AFFE0[7] = {0x012E2600, 0x01AC4A00, 0x007E2400, 0x00000001,	// Final Fantasy III (U)
@@ -53,14 +47,6 @@ u32 dataWhitelist_ALKP0_1[3] = {0x063AC400, 0x063CD0C0, 0x00020CC0};	// Lunar Kn
 //u32 dataWhitelist_ADAE0_1[3] = {0x00339200, 0x00CBB160, 0x00981F60};	// Pokemon Diamond & Pearl (U) (part 2)
 //u32 dataWhitelist_ADAE0_2[3] = {0x02119C00, 0x0225E200, 0x00144600};	// Pokemon Diamond & Pearl (U) (part 3)
 //u32 dataWhitelist_ADAE0_3[3] = {0x01DA6200, 0x0207E400, 0x002D8200};	// Pokemon Diamond & Pearl (U) (part 4)
-u32 dataWhitelist_YZXJ0[7] = {0x0217DE00, 0x02D1E200, 0x00BA0400, 0x00000001,	// Rockman ZX Advent (J) (FMV cutscenes)
-							0x0D3C0000, 0x00000031, 0x00040000};
-u32 dataWhitelist_YZXE0[7] = {0x02221600, 0x02DC07A8, 0x00B9F1A8, 0x00000001,	// MegaMan ZX Advent (U) (FMV cutscenes)
-							0x0D3C0000, 0x00000031, 0x00040000};
-u32 dataWhitelist_YZXP0[7] = {0x02405A00, 0x02FA4BA8, 0x00B9F1A8, 0x00000001,	// MegaMan ZX Advent (E) (FMV cutscenes)
-							0x0D3C0000, 0x00000031, 0x00040000};
-u32 dataWhitelist_A5FE0[7] = {0x017FA000, 0x02D39400, 0x0153F400, 0x00000001,	// Professor Layton and the Curious Village (U)
-							0x0DD40000, 0x0000000B, 0x00040000};
 //u32 dataWhitelist_YF4E0[7] = {0x069A2600, 0x06FC3400, 0x0061FE00, 0x00000001,	// Final Fantasy IV (U)
 //							0x0CE80000, 0x00000023, 0x00080000};
 //u32 dataWhitelist_YF4P0[7] = {0x069A3400, 0x06EA4E00, 0x00501A00, 0x00000001,	// Final Fantasy IV (E)
@@ -121,11 +107,11 @@ u32 dataBlacklist_AKWE0[7] = {0x00BEB000, 0x02819A00, 0x01C2EA00, 0x00000000,	//
 u32 dataBlacklist_AKWP0[7] = {0x00D61800, 0x0357D400, 0x0281BC00, 0x00000000,	// Kirby Mouse Attack (E)
 							0x0DC00000, 0x0000001F, 0x00020000};
 u32 dataBlacklist_A3YJ0[7] = {0x0100A400, 0x02961000, 0x01956C00, 0x00000000,	// Sonic Rush Adventure (J)
-							0x0DF00000, 0x00000002, 0x00080000};
+							0x0DF00000, 0x00000008, 0x00020000};
 u32 dataBlacklist_A3YE0[7] = {0x0100A400, 0x02961B20, 0x01957720, 0x00000000,	// Sonic Rush Adventure (UE)
-							0x0DF00000, 0x00000002, 0x00080000};
+							0x0DF00000, 0x00000008, 0x00020000};
 u32 dataBlacklist_A3YK0[7] = {0x01009400, 0x02908800, 0x018FF400, 0x00000000,	// Sonic Rush Adventure (KS)
-							0x0DD80000, 0x00000005, 0x00080000};
+							0x0DD80000, 0x00000014, 0x00020000};
 u32 dataBlacklist_YCOE0[7] = {0x0075DA00, 0x03D36800, 0x035D8E00, 0x00000000,	// Call of Duty 4: Modern Warfare (U)
 							0x0CF00000, 0x00000022, 0x00080000};
 u32 dataBlacklist_YFYE0[7] = {0x00751400, 0x03196600, 0x02A45200, 0x00000000,	// Pokemon Mystery Dungeon: Explorers of Darkness and Time (U)

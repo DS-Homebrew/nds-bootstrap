@@ -32,6 +32,25 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 u32 a7JumpTableSignatureV3[4] = {0xE92D41F0,0xE59F4224,0xE3A05000};
 
+u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
+u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B837};
+u32 j_HaltSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B92B};
+u32 j_HaltSignature1Alt3[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000BAEB};
+u32 j_HaltSignature1Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803B93};
+u32 j_HaltSignature1Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03803DAF};
+u32 j_HaltSignature1Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03803DB3};
+u32 j_HaltSignature1Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03804133};
+u32 j_HaltSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x038011BF};
+u32 j_HaltSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03800F7F};
+u32 j_HaltSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03803597};
+u32 j_HaltSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x038040C3};
+u32 j_HaltSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
+u32 j_HaltSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
+u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
+u32 j_HaltSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x038036BF};
+u32 j_HaltSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038037D3};
+u32 j_HaltSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
+
 u32 swi12Signature[1] = {0x4770DF12};	// LZ77UnCompReadByCallbackWrite16bit
 u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
 u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
@@ -1466,6 +1485,123 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     return 1;
 }
 
+void patchSwiHalt (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+	u32* patches =  (u32*) cardEngineLocation[0];
+	u32 swiHaltOffset =   
+		getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+			  (u32*)j_HaltSignature1, 4, 1);
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt1, 4, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 1 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt2, 4, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 2 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt3, 4, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 3 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt4, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 4 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt5, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 5 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt6, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 6 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature1Alt7, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK2 call alt 7 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt1, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 1 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt2, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 2 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt3, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 3 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt4, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 4 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt5, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 5 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt6, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 6 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature4, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK4 call not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature4Alt1, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK4 call alt 1 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature4Alt2, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK4 call alt 2 not found\n");
+	}
+	if (swiHaltOffset>0) {
+		dbg_printf("swiHalt call found\n");
+		u32* swiHaltPatch = (u32*) patches[11];
+		copyLoop ((u32*)swiHaltOffset, swiHaltPatch, 0xC);
+	}
+}
+
 void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32 swi12Offset =   
@@ -1590,6 +1726,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, cardEngineLocation);
 	}
+	patchSwiHalt(ndsHeader, cardEngineLocation);
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;

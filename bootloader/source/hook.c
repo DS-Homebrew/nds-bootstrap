@@ -32,7 +32,7 @@ extern u32 ARM9_LEN;
 extern u32 romSize;
 
 extern u32 enableExceptionHandler;
-extern u32 dsiWramUsed;
+extern u32 numberToActivateRunViaHalt;
 
 extern u32 setDataBWlist[7];
 extern u32 setDataBWlist_1[3];
@@ -305,6 +305,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[8] = ntrTouch;
 	cardEngineLocation[9] = romread_LED;
 	cardEngineLocation[10] = gameSoftReset;
+	cardEngineLocation[11] = numberToActivateRunViaHalt;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 
@@ -315,7 +316,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	return ERR_NONE;
 }
 
-void hookNdsRetail_ROMinRAM (u32* cardEngineLocation9, u32 ROMinRAM, u32 cleanRomSize) {
+void hookNdsRetail9 (u32* cardEngineLocation9, u32 ROMinRAM, u32 cleanRomSize) {
 	cardEngineLocation9[7] = ROMinRAM;
 	cardEngineLocation9[8] = ROM_TID;
 	cardEngineLocation9[9] = ROM_HEADERCRC;
