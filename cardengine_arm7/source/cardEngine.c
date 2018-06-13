@@ -415,60 +415,88 @@ void myIrqHandlerVBlank(void) {
 					volLevel = 1;
 					break;
 				case 0x04:
+					volLevel = 2;
+					break;
 				case 0x05:
 					volLevel = 3;
 					break;
 				case 0x06:
+					volLevel = 4;
+					break;
 				case 0x07:
 					volLevel = 6;
 					break;
 				case 0x08:
+					volLevel = 8;
+					break;
 				case 0x09:
 					volLevel = 10;
 					break;
 				case 0x0A:
+					volLevel = 12;
+					break;
 				case 0x0B:
 					volLevel = 15;
 					break;
 				case 0x0C:
+					volLevel = 17;
+					break;
 				case 0x0D:
 					volLevel = 21;
 					break;
 				case 0x0E:
+					volLevel = 24;
+					break;
 				case 0x0F:
 					volLevel = 28;
 					break;
 				case 0x10:
+					volLevel = 32;
+					break;
 				case 0x11:
 					volLevel = 36;
 					break;
 				case 0x12:
+					volLevel = 40;
+					break;
 				case 0x13:
 					volLevel = 45;
 					break;
 				case 0x14:
+					volLevel = 50;
+					break;
 				case 0x15:
 					volLevel = 55;
 					break;
 				case 0x16:
+					volLevel = 60;
+					break;
 				case 0x17:
 					volLevel = 66;
 					break;
 				case 0x18:
+					volLevel = 71;
+					break;
 				case 0x19:
 					volLevel = 78;
 					break;
 				case 0x1A:
+					volLevel = 85;
+					break;
 				case 0x1B:
 					volLevel = 91;
 					break;
 				case 0x1C:
+					volLevel = 100;
+					break;
 				case 0x1D:
-					volLevel = 105;
+					volLevel = 113;
 					break;
 				case 0x1E:
-				case 0x1F:
 					volLevel = 120;
+					break;
+				case 0x1F:
+					volLevel = 127;
 					break;
 			}
 		}
