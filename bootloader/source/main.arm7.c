@@ -850,6 +850,10 @@ void setNumberToActivateRunViaHalt (void) {
 	{
 		numberToActivateRunViaHalt = 10;
 	}
+	else if ((ROM_TID & 0x00FFFFFF) == 0x474B59)	// Kingdom Hearts: 358-2 Days
+	{
+		numberToActivateRunViaHalt = 20;
+	}
 	else if ((ROM_TID & 0x00FFFFFF) == 0x484241	// Resident Evil: Deadly Silence
 			|| (ROM_TID & 0x00FFFFFF) == 0x413641	// MegaMan Star Force: Pegasus
 			|| (ROM_TID & 0x00FFFFFF) == 0x423641	// MegaMan Star Force: Leo
