@@ -346,7 +346,7 @@ int main( int argc, char **argv) {
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
 				patchMpuRegion,
 				patchMpuSize,
-				bootstrapini.GetInt( "NDS-BOOTSTRAP", "CONSOLE_MODEL", 1),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "CONSOLE_MODEL", 0),
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "NTR_TOUCH", 0),
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), 
 				romread_LED,
