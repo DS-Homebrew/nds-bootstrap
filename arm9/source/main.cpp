@@ -135,6 +135,7 @@ void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegio
 							gameSoftReset,
 							argarray.size(), (const char **)&argarray[0],
                             cheat_data);
+		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
