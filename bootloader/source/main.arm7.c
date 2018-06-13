@@ -845,6 +845,7 @@ void setNumberToActivateRunViaHalt (void) {
 	// Set number of reads to activate running cardEngine7 via halt SWI branch
 	if ((ROM_TID & 0x00FFFFFF) == 0x545041		// Pokemon Trozei
 	|| (ROM_TID & 0x00FFFFFF) == 0x334241	// Mario Hoops 3 on 3
+	|| (ROM_TID & 0x00FFFFFF) == 0x474C59	// LEGO Star Wars: The Complete Saga
 	|| (ROM_TID & 0x00FFFFFF) == 0x574B59)	// Kirby Super Star Ultra
 	{
 		numberToActivateRunViaHalt = 10;
