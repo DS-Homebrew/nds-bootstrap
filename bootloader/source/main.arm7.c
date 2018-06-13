@@ -850,7 +850,8 @@ void setNumberToActivateRunViaHalt (void) {
 	{
 		numberToActivateRunViaHalt = 10;
 	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x413641	// MegaMan Star Force: Pegasus
+	else if ((ROM_TID & 0x00FFFFFF) == 0x484241	// Resident Evil: Deadly Silence
+			|| (ROM_TID & 0x00FFFFFF) == 0x413641	// MegaMan Star Force: Pegasus
 			|| (ROM_TID & 0x00FFFFFF) == 0x423641	// MegaMan Star Force: Leo
 			|| (ROM_TID & 0x00FFFFFF) == 0x433641	// MegaMan Star Force: Dragon
 			|| (ROM_TID & 0x00FFFFFF) == 0x583642)	// Rockman EXE: Operate Star Force
@@ -864,6 +865,10 @@ void setNumberToActivateRunViaHalt (void) {
 	else if ((ROM_TID & 0x00FFFFFF) == 0x484D41)	// Metroid Prime Hunters
 	{
 		numberToActivateRunViaHalt = 55;
+	}
+	else if ((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
+	{
+		numberToActivateRunViaHalt = 64;
 	}
 	
 	if (consoleModel > 0) {

@@ -70,7 +70,7 @@ static u32 cacheReadSizeSubtract = 0;
 static u32 asyncReadSizeSubtract = 0;
 
 static u32 asyncSector = 0xFFFFFFFF;
-static u32 asyncQueue [5];
+static u32 asyncQueue [10];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
@@ -196,13 +196,13 @@ void addToAsyncQueue(sector) {
 	asyncQueue[aQHead] = sector;
 	aQHead++;
 	aQSize++;
-	if(aQHead>4) {
+	if(aQHead>9) {
 		aQHead=0;
 	}
-	if(aQSize>5) {
-		aQSize=5;
+	if(aQSize>10) {
+		aQSize=10;
 		aQTail++;
-		if(aQTail>4) aQTail=0;
+		if(aQTail>9) aQTail=0;
 	}
 }
 
@@ -374,7 +374,7 @@ int cardRead (u32* cacheStruct) {
 			cacheSlots = dev_128KB_CACHE_SLOTS;
 		}
 
-		// If ROM size is 0x01800000 or below, then the ROM is in RAM.
+		// If ROM size is 0x01800000 (0x00800000 for retail DSi) or below, then the ROM is in RAM.
 		if((romSize > 0) && (romSize <= ramRomSizeLimit) && (ROM_TID != 0x45475241)
 		&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
 		&& (romSize != (0x012C7066-0x4000-ARM9_LEN))) {
@@ -484,7 +484,7 @@ int cardRead (u32* cacheStruct) {
 						triggerAsyncPrefetch(nextSector);	
 					} else {
 						int i;
-						for(i=0; i<5; i++) {
+						for(i=0; i<10; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
 								triggerAsyncPrefetch(nextSector);	
@@ -1140,7 +1140,7 @@ int cardRead (u32* cacheStruct) {
 						triggerAsyncPrefetch(nextSector);	
 					} else {
 						int i;
-						for(i=0; i<5; i++) {
+						for(i=0; i<10; i++) {
 							if(asyncQueue[i]==sector) {
 								// prefetch successfull
 								triggerAsyncPrefetch(nextSector);	

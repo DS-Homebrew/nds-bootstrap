@@ -25,7 +25,7 @@ u32 dataWhitelist_A2SE0[7] = {0x00103A00, 0x00A17800, 0x00914400, 0x00000001,	//
 u32 dataWhitelist_ADBP0[7] = {0x0010C400, 0x00A21000, 0x00914C00, 0x00000001,	// Dragon Ball Z: Supersonic Warriors 2 (E)
 							0x0D180000, 0x00000013, 0x00080000};
 u32 dataWhitelist_ABHE0[7] = {0x00300E00, 0x00D20E70, 0x00A20070, 0x00000001,	// Resident Evil: Deadly Silence (U)
-							0x0D300000, 0x0000000D, 0x00100000};
+							0x0D300000, 0x00000034, 0x00040000};
 u32 dataWhitelist_AFFJ0[7] = {0x012E2000, 0x01AC4400, 0x007E2400, 0x00000001,	// Final Fantasy III (J)
 							0x0D000000, 0x0000001F, 0x00080000};
 u32 dataWhitelist_AFFE0[7] = {0x012E2600, 0x01AC4A00, 0x007E2400, 0x00000001,	// Final Fantasy III (U)
