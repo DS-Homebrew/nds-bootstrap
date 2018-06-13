@@ -18,6 +18,7 @@
 .global ntrTouch
 .global romread_LED
 .global gameSoftReset
+.global noSoundStutter
 .global numberToActivateRunViaHalt
 
 #define ICACHE_SIZE	0x2000
@@ -47,6 +48,8 @@ romread_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
+noSoundStutter:
+	.word	0x00000000		
 numberToActivateRunViaHalt:
 	.word	0x00000000		
 cheat_data_offset:    

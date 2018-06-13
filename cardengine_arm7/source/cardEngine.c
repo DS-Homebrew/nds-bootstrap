@@ -48,6 +48,7 @@ extern u32 consoleModel;
 extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
+extern u32 noSoundStutter;
 extern u32 numberToActivateRunViaHalt;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile romFile;
@@ -277,7 +278,7 @@ void runCardEngineCheck (void) {
 		//nocashMessage("runCardEngineCheck mutex ok");
 
 		if (*(vu32*)(0x027FFB14) != 0 && !readInProgress) {
-			if (accessCounter > numberToActivateRunViaHalt-1) {
+			if ((noSoundStutter) && (accessCounter > numberToActivateRunViaHalt-1)) {
 				accessCounter = numberToActivateRunViaHalt;
 				runViaHalt = true;
 			} else if (!runViaHalt) {

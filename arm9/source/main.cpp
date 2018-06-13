@@ -70,7 +70,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
+void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 noSoundStutter, u32* cheat_data) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -133,6 +133,7 @@ void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegio
 							loadingScreen,
 							romread_LED,
 							gameSoftReset,
+							noSoundStutter,
 							argarray.size(), (const char **)&argarray[0],
                             cheat_data);
 		powerOff(PM_BACKLIGHT_TOP);
@@ -340,7 +341,18 @@ int main( int argc, char **argv) {
 		backlightMode = bootstrapini.GetInt( "NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), savPath.c_str(), bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0), patchMpuRegion, patchMpuSize, bootstrapini.GetInt( "NDS-BOOTSTRAP", "CONSOLE_MODEL", 1), bootstrapini.GetInt( "NDS-BOOTSTRAP", "NTR_TOUCH", 0), bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), romread_LED, bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0), (u32*)cheatData);	
+		runFile(ndsPath.c_str(),
+				savPath.c_str(),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
+				patchMpuRegion,
+				patchMpuSize,
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "CONSOLE_MODEL", 1),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "NTR_TOUCH", 0),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), 
+				romread_LED,
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "NO_SOUND_STUTTER", 1),
+				(u32*)cheatData);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

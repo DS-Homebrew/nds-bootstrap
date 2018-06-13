@@ -843,10 +843,10 @@ u32 numberToActivateRunViaHalt = 30;
 
 void setNumberToActivateRunViaHalt (void) {
 	// Set number of reads to activate running cardEngine7 via halt SWI branch
-	if ((ROM_TID & 0x00FFFFFF) == 0x545041		// Pokemon Trozei
-	|| (ROM_TID & 0x00FFFFFF) == 0x334241	// Mario Hoops 3 on 3
-	|| (ROM_TID & 0x00FFFFFF) == 0x474C59	// LEGO Star Wars: The Complete Saga
-	|| (ROM_TID & 0x00FFFFFF) == 0x574B59)	// Kirby Super Star Ultra
+	if ((ROM_TID & 0x00FFFFFF) == 0x545041			// Pokemon Trozei
+	|| (ROM_TID & 0x00FFFFFF) == 0x334241			// Mario Hoops 3 on 3
+	|| (ROM_TID & 0x00FFFFFF) == 0x474C59			// LEGO Star Wars: The Complete Saga
+	|| (ROM_TID & 0x00FFFFFF) == 0x574B59)			// Kirby Super Star Ultra
 	{
 		numberToActivateRunViaHalt = 10;
 	}
@@ -867,7 +867,8 @@ void setNumberToActivateRunViaHalt (void) {
 	}
 	
 	if (consoleModel > 0) {
-		if ((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
+		if ((ROM_TID & 0x00FFFFFF) == 0x574B41		// Kirby Squeak Squad
+		|| (ROM_TID & 0x00FFFFFF) == 0x593341)		// Sonic Rush Adventure
 		{
 			numberToActivateRunViaHalt = 2;
 		}
