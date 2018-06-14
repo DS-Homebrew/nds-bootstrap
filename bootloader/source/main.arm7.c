@@ -639,18 +639,6 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x50464641) && (ROM_HEADERCRC == 0x1AE7CF56)) {	// Final Fantasy III (E)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AFFP0[i];
-		} else if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)) {	// Lunar Knights (U)
-			for(int i = 0; i < 7; i++) {
-				setDataBWlist[i] = dataWhitelist_ALKE0_0[i];
-				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ALKE0_1[i];
-			}
-			dataAmount = 1;
-		} else if((ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)) {	// Lunar Knights (E)
-			for(int i = 0; i < 7; i++) {
-				setDataBWlist[i] = dataWhitelist_ALKP0_0[i];
-				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ALKP0_1[i];
-			}
-			dataAmount = 1;
 		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AMQP0[i];
@@ -869,10 +857,6 @@ void setNumberToActivateRunViaHalt (void) {
 	else if ((ROM_TID & 0x00FFFFFF) == 0x484D41)	// Metroid Prime Hunters
 	{
 		numberToActivateRunViaHalt = 55;
-	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x4B4C41)	// Lunar Knights
-	{
-		numberToActivateRunViaHalt = 64;
 	}
 	
 	if (consoleModel > 0) {

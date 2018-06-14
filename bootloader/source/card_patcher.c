@@ -48,7 +48,8 @@ u32 j_HaltSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03803597};
 u32 j_HaltSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x038040C3};
 u32 j_HaltSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
 u32 j_HaltSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
-u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
+u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x038043E3};
+u32 j_HaltSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
 u32 j_HaltSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x038036BF};
 u32 j_HaltSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038037D3};
 u32 j_HaltSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
@@ -2202,6 +2203,12 @@ void patchSwiHalt (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 6 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt7, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 7 not found\n");
 		swiHaltOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm7binarySize,
 				  (u32*)j_HaltSignature4, 3, 1);

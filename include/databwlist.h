@@ -32,12 +32,6 @@ u32 dataWhitelist_AFFE0[7] = {0x012E2600, 0x01AC4A00, 0x007E2400, 0x00000001,	//
 							0x0D000000, 0x0000001F, 0x00080000};
 u32 dataWhitelist_AFFP0[7] = {0x01466600, 0x02282200, 0x00E1BC00, 0x00000001,	// Final Fantasy III (E)
 							0x0D680000, 0x00000015, 0x00080000};
-u32 dataWhitelist_ALKE0_0[7] = {0x06694E00, 0x073CF444, 0x00D3A644, 0x00000001,	// Lunar Knights (U) (FMV cutscenes)
-							0x0D580000, 0x00000054, 0x00020000};
-u32 dataWhitelist_ALKE0_1[3] = {0x063A9E00, 0x063CAAC0, 0x00020CC0};	// Lunar Knights (U) (Title call)
-u32 dataWhitelist_ALKP0_0[7] = {0x06697400, 0x073D1A44, 0x00D3A644, 0x00000001,	// Lunar Knights (E) (FMV cutscenes)
-							0x0D580000, 0x00000054, 0x00020000};
-u32 dataWhitelist_ALKP0_1[3] = {0x063AC400, 0x063CD0C0, 0x00020CC0};	// Lunar Knights (E) (Title call)
 //u32 dataWhitelist_AMQP0[7] = {0x0024EE00, 0x00F2E300, 0x00CDF500, 0x00000001,	// Mario Vs Donkey Kong 2: March of the Minis (E)
 //							0x0D500000, 0x0000002C, 0x00040000};
 //u32 dataWhitelist_ACBE0[7] = {0x018D6000, 0x02C15200, 0x0133F200, 0x00000001,	// Castlevania: Portrait of Ruin (U)

@@ -381,9 +381,7 @@ int cardRead (u32* cacheStruct) {
 			ROM_LOCATION -= 0x4000;
 			ROM_LOCATION -= ARM9_LEN;
 		} else if (consoleModel > 0) {
-			if((ROM_TID == 0x454B4C41) && (ROM_HEADERCRC == 0xB8C7CF56)		// Lunar Knights (U)
-			|| (ROM_TID == 0x504B4C41) && (ROM_HEADERCRC == 0x5973CF56)		// Lunar Knights (E)
-			|| (ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)		// Tomodachi Collection (J)
+			if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)		// Tomodachi Collection (J)
 			|| (ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x9B26CF56)) {	// Tomodachi Collection (J) (Rev 1)
 				dataAmount = 1;
 			}
