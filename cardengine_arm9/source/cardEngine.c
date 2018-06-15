@@ -206,17 +206,6 @@ void addToAsyncQueue(sector) {
 	}
 }
 
-u32 popFromAsyncQueueHead() {	
-	if(aQSize>0) {
-	
-		aQHead--;
-		if(aQHead == -1) aQHead = 4;
-		aQSize--;
-		
-		return asyncQueue[aQHead];
-	} else return 0;
-}
-
 void triggerAsyncPrefetch(sector) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
