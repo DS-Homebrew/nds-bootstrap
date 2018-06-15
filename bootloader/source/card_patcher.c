@@ -30,9 +30,9 @@ u32 a7something1Signature[2]   = {0xE350000C,0x908FF100};
 u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
-u32 a7JumpTableSignatureV3_1[4] = {0xE92D4FF0,0xE24DD004,0xE59F91F8};
-u32 a7JumpTableSignatureV3_2[4] = {0xE92D4FF0,0xE24DD004,0xE59F91D4};
-u32 a7JumpTableSignatureV4[4] = {0xE92D41F0,0xE59F4224,0xE3A05000};
+u32 a7JumpTableSignatureV3_1[3] = {0xE92D4FF0,0xE24DD004,0xE59F91F8};
+u32 a7JumpTableSignatureV3_2[3] = {0xE92D4FF0,0xE24DD004,0xE59F91D4};
+u32 a7JumpTableSignatureV4[3] = {0xE92D41F0,0xE59F4224,0xE3A05000};
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
 u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B837};
@@ -763,7 +763,7 @@ u32 savePatchV4 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("[Error!] ___ addr not found\n"); return 0;
     }*/
     u32 JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        a7JumpTableSignature, 4, 1);
+        a7JumpTableSignatureV4, 3, 1);
 
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
