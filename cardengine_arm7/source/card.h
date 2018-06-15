@@ -36,20 +36,20 @@ static inline bool CARD_IsInserted (void) {
 	return __myio_dsisd.fn_isInserted();
 }
 
-static inline bool CARD_ReadSector (u32 sector, void *buffer) {
-	return __myio_dsisd.fn_readSectors(sector, 1, buffer);
+static inline bool CARD_ReadSector (u32 sector, void *buffer, int ndmaSlot) {
+	return __myio_dsisd.fn_readSectors(sector, 1, buffer, ndmaSlot);
 }
 
-static inline bool CARD_ReadSectors (u32 sector, int count, void *buffer) {
-	return __myio_dsisd.fn_readSectors(sector, count, buffer);
+static inline bool CARD_ReadSectors (u32 sector, int count, void *buffer, int ndmaSlot) {
+	return __myio_dsisd.fn_readSectors(sector, count, buffer, ndmaSlot);
 }
 
-static inline bool CARD_WriteSector (u32 sector, void *buffer) {
-	return __myio_dsisd.fn_writeSectors(sector, 1, buffer);
+static inline bool CARD_WriteSector (u32 sector, void *buffer, int ndmaSlot) {
+	return __myio_dsisd.fn_writeSectors(sector, 1, buffer, ndmaSlot);
 }
 
-static inline bool CARD_WriteSectors (u32 sector, int count, void *buffer) {
-	return __myio_dsisd.fn_writeSectors(sector, count, buffer);
+static inline bool CARD_WriteSectors (u32 sector, int count, void *buffer, int ndmaSlot) {
+	return __myio_dsisd.fn_writeSectors(sector, count, buffer, ndmaSlot);
 }
 
 #endif // CARD_H

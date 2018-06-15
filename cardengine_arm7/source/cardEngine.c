@@ -70,15 +70,15 @@ void initLogging() {
 			sdmmc_init();
 			SD_Init();
 		}
-		FAT_InitFiles(false);
+		FAT_InitFiles(false, 3);
 		romFile = getFileFromCluster(fileCluster);
 		if(saveCluster>0)
 			savFile = getFileFromCluster(saveCluster);
 		else
 			savFile.firstCluster = CLUSTER_FREE;
-		buildFatTableCache(romFile);
+		buildFatTableCache(romFile, 3);
 		#ifdef DEBUG		
-		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
+		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG", 3);
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
@@ -211,7 +211,7 @@ void cardRead_arm9() {
 	#endif
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-	fileRead(dst,romFile,src,len);
+	fileRead(dst,romFile,src,len,0);
 	if(*(u32*)(0x028128ac) == 0x4B434148){ //Primary fix for Mario's Holiday, will eventually be moved to the patch engine soon:tm:
                 *(u32*)(0x028128ac) = 0xA00;
         }
@@ -253,7 +253,7 @@ void asyncCardRead_arm9() {
 	#endif
 
 	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
-	fileRead(dst,romFile,src,len);
+	fileRead(dst,romFile,src,len,0);
 	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 
 	#ifdef DEBUG
@@ -642,7 +642,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	fileRead(dst,savFile,src,len);
+	fileRead(dst,savFile,src,len,1);
 
 	return true;
 }
@@ -661,7 +661,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 
 	saveInProgress = true;
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	fileWrite(src,savFile,dst,len);
+	fileWrite(src,savFile,dst,len,1);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	saveInProgress = false;
 	
@@ -682,7 +682,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 
 	saveInProgress = true;
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	fileWrite(src,savFile,dst,len);
+	fileWrite(src,savFile,dst,len,1);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	saveInProgress = false;
 	
@@ -702,7 +702,7 @@ bool eepromPageVerify (u32 dst, const void *src, u32 len) {
 	#endif	
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src,savFile,dst,len);
+	//fileWrite(src,savFile,dst,len,1);
 	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
@@ -739,7 +739,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	//ndmaUsed = false;
-	fileRead(dst,romFile,src,len);
+	fileRead(dst,romFile,src,len,2);
 	//ndmaUsed = true;
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	
