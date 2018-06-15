@@ -854,7 +854,8 @@ void setNumberToActivateRunViaHalt (void) {
 	{
 		numberToActivateRunViaHalt = 40;
 	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x484D41)	// Metroid Prime Hunters
+	else if ((ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
+			|| (ROM_TID & 0x00FFFFFF) == 0x514D41)	// Mario Vs Donkey Kong 2: March of the Minis
 	{
 		numberToActivateRunViaHalt = 55;
 	}
