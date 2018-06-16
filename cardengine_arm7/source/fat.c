@@ -565,6 +565,8 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	int dataPos = 0;
 	int chunks;
 	int beginBytes;
+    
+    u32 clusterIndex;
 
 	if (file.firstCluster == CLUSTER_FREE || file.firstCluster == CLUSTER_EOF) 
 	{
@@ -584,7 +586,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	}
 
 	if(file.fatTableCached) {
-		u32 clusterIndex = startOffset/discBytePerClus;
+		clusterIndex = startOffset/discBytePerClus;
 		file.currentCluster = file.fatTableCache[clusterIndex];
 		file.currentOffset=clusterIndex*discBytePerClus;
 	} else {
@@ -633,24 +635,57 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		{
 			int sectorsToRead;
 
-			// Move to the next cluster if necessary
-			if (curSect >= discSecPerClus)
-			{
-				curSect = 0;
-				file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
-				file.currentOffset+=discBytePerClus;
-			}
-
-			// Calculate how many sectors to read (read a maximum of discSecPerClus at a time)
-			sectorsToRead = discSecPerClus - curSect;
-			if(chunks < sectorsToRead)
+			if(file.fatTableCached) {
+                // Move to the next cluster if necessary
+                if (curSect >= discSecPerClus)
+    			{
+    				curSect = 0;
+                    clusterIndex+= curSect/discSecPerClus;
+                    file.currentCluster = file.fatTableCache[clusterIndex];
+    				file.currentOffset+=discBytePerClus;
+    			}
+                
+                sectorsToRead = discSecPerClus - curSect;
+                if(chunks < sectorsToRead)
+				    sectorsToRead = chunks;
+                else {
+                     // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
+                    for(; sectorsToRead<=chunks; ) {
+                        if(file.fatTableCache[clusterIndex]+1 == file.fatTableCache[clusterIndex+1]) {
+                            // the 2 cluster are consecutive
+                            sectorsToRead += discSecPerClus;
+                            clusterIndex++;    
+                        } else {
+                          break;
+                        }
+                    }
+                  
+                    // Read the sectors
+        			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+        			chunks  -= sectorsToRead;
+        			curSect += sectorsToRead;
+        			dataPos += BYTES_PER_SECTOR * sectorsToRead;    
+                }
+            } else {
+                // Move to the next cluster if necessary
+    			if (curSect >= discSecPerClus)
+    			{
+    				curSect = 0;
+                    file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+    				file.currentOffset+=discBytePerClus;
+    			}
+            
+                // Calculate how many sectors to read (read a maximum of discSecPerClus at a time)
+			    sectorsToRead = discSecPerClus - curSect;
+			    if(chunks < sectorsToRead)
 				sectorsToRead = chunks;
-
-			// Read the sectors
-			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
-			chunks  -= sectorsToRead;
-			curSect += sectorsToRead;
-			dataPos += BYTES_PER_SECTOR * sectorsToRead;
+                
+                // Read the sectors
+    			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+    			chunks  -= sectorsToRead;
+    			curSect += sectorsToRead;
+    			dataPos += BYTES_PER_SECTOR * sectorsToRead;
+            }			
 		}
 
 		// Take care of any bytes left over before end of read
@@ -662,7 +697,12 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			if (curSect >= discSecPerClus)
 			{
 				curSect = 0;
-				file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+				if(file.fatTableCached ) {
+                      clusterIndex++;
+                      file.currentCluster = file.fatTableCache[clusterIndex]; 
+                } else {
+                    file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                }
 				file.currentOffset+=discBytePerClus;
 			}
 			CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
