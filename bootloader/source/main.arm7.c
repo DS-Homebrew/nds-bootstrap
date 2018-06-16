@@ -81,6 +81,7 @@ extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
+extern unsigned long saveSize;
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
@@ -1025,7 +1026,7 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 5 dots
 
-	errorCode = patchCardNds(NDS_HEAD,ENGINE_LOCATION_ARM7,ENGINE_LOCATION_ARM9,params,saveFileCluster, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds(NDS_HEAD, ENGINE_LOCATION_ARM7, ENGINE_LOCATION_ARM9, params, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("patch card Sucessfull");
 	} else {

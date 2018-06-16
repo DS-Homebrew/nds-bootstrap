@@ -685,7 +685,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
-u32 savePatchV4 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchV4 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 
     dbg_printf("\nArm7 (patch v4.0)\n");
 
@@ -915,6 +915,7 @@ u32 savePatchV4 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
@@ -990,12 +991,13 @@ u32 savePatchV4 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	}    
 
 	return 1;
 }
 
-u32 savePatchV3_2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchV3_2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 
     dbg_printf("\nArm7 (patch v3.0)\n");
 
@@ -1227,6 +1229,7 @@ u32 savePatchV3_2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
@@ -1302,12 +1305,13 @@ u32 savePatchV3_2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	}
 
 	return 1;
 }
 
-u32 savePatchV3_1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchV3_1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 
     dbg_printf("\nArm7 (patch v3.0)\n");
 
@@ -1539,6 +1543,7 @@ u32 savePatchV3_1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
@@ -1614,12 +1619,13 @@ u32 savePatchV3_1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	}    
 
 	return 1;
 }
 
-u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 
     dbg_printf("\nArm7 (patch v2.0)\n");
 
@@ -1848,6 +1854,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 		cardRead = (u32*) (JumpTableFunc + 0x100);
@@ -1923,13 +1930,14 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 		*eepromPageErase=patchErase; 
 
 		arm7Function[8] = saveFileCluster;
+		arm7Function[9] = saveSize;
 	}    
 
 	return 1;
 }
 
 
-u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster ) {
+u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 
     dbg_printf("\nArm7 (patch v1.0)\n");
 
@@ -2114,6 +2122,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     }
 
 	arm7Function[8] = saveFileCluster;
+	arm7Function[9] = saveSize;
 
 	dbg_printf("Arm7 patched!\n");
 
@@ -2409,7 +2418,7 @@ void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
 
 	if(REG_SCFG_ROM != 0x703) {
@@ -2460,18 +2469,22 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
-	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	if(!saveResult) saveResult = savePatchV3_1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	if(!saveResult) saveResult = savePatchV3_2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
-	if(!saveResult) saveResult = savePatchV4(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster);
+	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	if(!saveResult) saveResult = savePatchV3_1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	if(!saveResult) saveResult = savePatchV3_2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	if(!saveResult) saveResult = savePatchV4(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	if ((saveResult == 1) && (saveSize > 0) && (saveSize <= 0x00300000)) {
+		aFile saveFile = getFileFromCluster (saveFileCluster);
+		fileRead(0x0C480000, saveFile, 0, saveSize);
+	}
 
 	dbg_printf("ERR_NONE");
 	return 0;
 }
 
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
-		u32 saveFileCluster, u32 patchMpuRegion, u32 patchMpuSize) {
+		u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	//Debug stuff.
 
@@ -2482,7 +2495,7 @@ u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32*
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
 	if (cardReadFound || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster);
+		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

@@ -70,7 +70,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 noSoundStutter, u32* cheat_data) {
+void runFile(string filename, string savPath, u32 saveSize, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 noSoundStutter, u32* cheat_data) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -125,6 +125,7 @@ void runFile(string filename, string savPath, u32 donorSdkVer, u32 patchMpuRegio
 		}
 		int err = runNdsFile (argarray[0],
 							strdup(savPath.c_str()),
+							saveSize,
 							donorSdkVer,
 							patchMpuRegion,
 							patchMpuSize,
@@ -178,6 +179,18 @@ void myFIFOValue32Handler(u32 value,void* data)
 {
 	nocashMessage("myFIFOValue32Handler\n");
 	iprintf( "ARM7 data %x\n", value );
+}
+
+off_t getSaveSize(const char* path) {
+    FILE* fp = fopen(path, "rb");
+    off_t fsize = 0;
+    if (fp) {
+        fseek(fp, 0, SEEK_END);
+        fsize = ftell(fp);
+        if (!fsize) fsize = 0;
+        fclose(fp);
+    }
+    return fsize;
 }
 
 int main( int argc, char **argv) {
@@ -343,6 +356,7 @@ int main( int argc, char **argv) {
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(ndsPath.c_str(),
 				savPath.c_str(),
+				getSaveSize(savPath.c_str()),
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
 				patchMpuRegion,
 				patchMpuSize,

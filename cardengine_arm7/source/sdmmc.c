@@ -466,7 +466,11 @@ int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int n
 	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
 	handleSD.tData = in;
 	handleSD.size = numsectors << 9;
-	sdmmc_send_command_ndma(&handleSD,0x52C19,sector_no,ndmaSlot);
+	if (ndmaSlot == -1) {
+		sdmmc_send_command(&handleSD,0x52C19,sector_no);
+	} else {
+		sdmmc_send_command_ndma(&handleSD,0x52C19,sector_no,ndmaSlot);
+	}
 	return get_error(&handleSD);
 }
 
@@ -482,7 +486,11 @@ int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlo
 	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
 	handleSD.rData = out;
 	handleSD.size = numsectors << 9;
-	sdmmc_send_command_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+	if (ndmaSlot == -1) {
+		sdmmc_send_command(&handleSD,0x33C12,sector_no);
+	} else {
+		sdmmc_send_command_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+	}
 	return get_error(&handleSD);
 }
 

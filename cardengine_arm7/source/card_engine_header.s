@@ -14,6 +14,7 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
+.global saveSize
 .global consoleModel
 .global ntrTouch
 .global romread_LED
@@ -380,6 +381,8 @@ arm7Functions :
 .word    cardRead 
 .word    cardId 
 saveCluster:
+.word    0x00000000 
+saveSize:
 .word    0x00000000 
 
 .global tryLockMutex

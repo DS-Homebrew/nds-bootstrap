@@ -32,6 +32,8 @@
 #include "sr_data_srloader.h"	// For rebooting into DSiMenu++
 #include "sr_data_srllastran.h"	// For rebooting the game
 
+#define SAVE_LOCATION	0x0C480000
+
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
 extern int unlockMutex(void);					// Fixes implicit declaration @ line 223
@@ -43,6 +45,7 @@ extern vu32* volatile cardStruct;
 extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 consoleModel;
 extern u32 ntrTouch;
@@ -55,9 +58,9 @@ static aFile romFile;
 static aFile savFile;
 
 static bool runViaHalt = false;
+static bool saveWritten = false;
 static bool saveInProgress = false;
 static bool readInProgress = false;
-static int waitForReadTime = 0;
 static int accessCounter = 0;
 
 static int softResetTimer = 0;
@@ -281,40 +284,32 @@ void runCardEngineCheck (void) {
 			if ((noSoundStutter) && (accessCounter > numberToActivateRunViaHalt-1)) {
 				accessCounter = numberToActivateRunViaHalt;
 				runViaHalt = true;
-			} else if (!runViaHalt) {
-				waitForReadTime = 9;
 			}
-			waitForReadTime++;
-			if((waitForReadTime == 10) && (*(vu32*)(0x027FFB14) == (vu32)0x026ff800))
+			if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 			{
 				readInProgress = true;
 				log_arm9();
 				*(vu32*)(0x027FFB14) = 0;
 				readInProgress = false;
-				waitForReadTime = 0;
 			}
 
-			if((waitForReadTime == 10) && (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08))
+			if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 			{
 				readInProgress = true;
 				cardRead_arm9();
 				*(vu32*)(0x027FFB14) = 0;
 				accessCounter++;
 				readInProgress = false;
-				waitForReadTime = 0;
 			}
 
-			if((waitForReadTime == 10) && (*(vu32*)(0x027FFB14) == (vu32)0x020ff800))
+			if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
 			{
 				readInProgress = true;
 				asyncCardRead_arm9();
 				*(vu32*)(0x027FFB14) = 0;
 				accessCounter++;
 				readInProgress = false;
-				waitForReadTime = 0;
 			}
-		} else {
-			waitForReadTime = 0;
 		}
 		unlockMutex();
 	}
@@ -332,26 +327,26 @@ void runCardEngineCheckHalt (void) {
 		//nocashMessage("runCardEngineCheck mutex ok");
 		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 		{
-			//readInProgress = true;
+			readInProgress = true;
 			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			//readInProgress = false;
+			readInProgress = false;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
-			//readInProgress = true;
+			readInProgress = true;
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			//readInProgress = false;
+			readInProgress = false;
 		}
 
 		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
 		{
-			//readInProgress = true;
+			readInProgress = true;
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			//readInProgress = false;
+			readInProgress = false;
 		}
 		unlockMutex();
 	}
@@ -391,10 +386,26 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
+	u8 i2cPowerButton = i2cReadRegister(0x4A, 0x10);
+	if (i2cPowerButton == 0x08 && !saveInProgress) {
+		if (saveWritten) {
+			REG_MASTER_VOLUME = 0;
+			while (readInProgress == true);
+			fileWrite(SAVE_LOCATION,savFile,0,saveSize,-1);	// Write save to SD card, before rebooting
+		}
+		i2cWriteRegister(0x4a,0x70,0x01);
+		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot console
+	}
+
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
 	} else if (!saveInProgress) {
 		if(softResetTimer == 60*2) {
+			if (saveWritten) {
+				REG_MASTER_VOLUME = 0;
+				while (readInProgress == true);
+				fileWrite(SAVE_LOCATION,savFile,0,saveSize,-1);	// Write save to SD card
+			}
 			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
 			i2cWriteRegister(0x4a,0x70,0x01);
 			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into DSiMenu++
@@ -403,7 +414,12 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-	} else if (!saveInProgress && !gameSoftReset) {
+	} else if (gameSoftReset) {
+		if (saveWritten) {
+			REG_MASTER_VOLUME = 0;
+			while (readInProgress == true);
+			fileWrite(SAVE_LOCATION,savFile,0,saveSize,-1);	// Write save to SD card
+		}
 		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
 		i2cWriteRegister(0x4a,0x70,0x01);
 		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
@@ -642,7 +658,11 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	fileRead(dst,savFile,src,len,1);
+	if((saveSize > 0) && (saveSize <= 0x00300000)) {
+		memcpy(dst,SAVE_LOCATION+src,len);
+	} else {
+		fileRead(dst,savFile,src,len,1);
+	}
 
 	return true;
 }
@@ -660,9 +680,12 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	#endif	
 
 	saveInProgress = true;
-	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	fileWrite(src,savFile,dst,len,1);
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	if((saveSize > 0) && (saveSize <= 0x00300000)) {
+		saveWritten = true;
+		memcpy(SAVE_LOCATION+dst,src,len);
+	} else {
+		fileWrite(src,savFile,dst,len,1);
+	}
 	saveInProgress = false;
 	
 	return true;
@@ -681,9 +704,12 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	#endif	
 
 	saveInProgress = true;
-	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	fileWrite(src,savFile,dst,len,1);
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	if((saveSize > 0) && (saveSize <= 0x00300000)) {
+		saveWritten = true;
+		memcpy(SAVE_LOCATION+dst,src,len);
+	} else {
+		fileWrite(src,savFile,dst,len,1);
+	}
 	saveInProgress = false;
 	
 	return true;
