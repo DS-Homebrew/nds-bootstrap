@@ -361,7 +361,7 @@ void myIrqHandlerFIFO(void) {
 	
 	calledViaIPC = true;
 	
-	if (!runViaHalt) runCardEngineCheck();
+	//if (!runViaHalt) runCardEngineCheck();
 }
 
 //---------------------------------------------------------------------------------
@@ -373,9 +373,9 @@ void myIrqHandlerHalt(void) {
 	
 	calledViaIPC = false;
 	
-	if (runViaHalt) {
+	//if (runViaHalt) {
 		runCardEngineCheckHalt();
-	}
+	//}
 }
 
 
@@ -414,7 +414,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-	} else if (gameSoftReset) {
+	} else if (gameSoftReset && !saveInProgress) {
 		if (saveWritten) {
 			REG_MASTER_VOLUME = 0;
 			while (readInProgress == true);
@@ -597,7 +597,7 @@ void myIrqHandlerVBlank(void) {
 		REG_MASTER_VOLUME = volLevel;
 	}
 
-	if (!runViaHalt) runCardEngineCheck();
+	//if (!runViaHalt) runCardEngineCheck();
     
     nocashMessage("cheat_engine_start\n");
     cheat_engine_start();
