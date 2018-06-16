@@ -196,8 +196,8 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 // Global sector buffer to save on stack space
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 
-#define CLUSTER_CACHE      0x37D5000 // WRAM A
-#define CLUSTER_CACHE_SIZE 0x20000 // 128K
+#define CLUSTER_CACHE      0x3700000 // WRAM C+B
+#define CLUSTER_CACHE_SIZE 0x80000 // 512K
 
 #define ONE_CACHE  0x37C5000 // WRAM A
 #define ONE_CACHE_SIZE 0x10000 // 64K
