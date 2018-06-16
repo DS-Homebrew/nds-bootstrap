@@ -195,8 +195,8 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 // Global sector buffer to save on stack space
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 
-#define CLUSTER_CACHE      0x37D5000 // WRAM A
-#define CLUSTER_CACHE_SIZE 0x20000 // 128K
+#define CLUSTER_CACHE      0x3700000 // WRAM C+B
+#define CLUSTER_CACHE_SIZE 0x80000 // 512K
 
 #define ONE_CACHE  0x37C5000 // WRAM A
 #define ONE_CACHE_SIZE 0x10000 // 64K
@@ -555,9 +555,9 @@ fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
 {
-	#ifdef DEBUG
+	//#ifdef DEBUG
 	nocashMessage("fileRead");
-	#endif
+	//#endif
 
 	int curByte;
 	int curSect;
@@ -586,10 +586,12 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	}
 
 	if(file.fatTableCached) {
+        nocashMessage("fat table cached");
 		clusterIndex = startOffset/discBytePerClus;
 		file.currentCluster = file.fatTableCache[clusterIndex];
 		file.currentOffset=clusterIndex*discBytePerClus;
 	} else {
+        nocashMessage("fatTable not cached");
 		if(startOffset<file.currentOffset) {
 			file.currentOffset=0;
 			file.currentCluster = file.firstCluster;
@@ -636,6 +638,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			int sectorsToRead;
 
 			if(file.fatTableCached) {
+            
                 // Move to the next cluster if necessary
                 if (curSect >= discSecPerClus)
     			{
@@ -652,6 +655,9 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
                      // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
                     for(; sectorsToRead<=chunks; ) {
                         if(file.fatTableCache[clusterIndex]+1 == file.fatTableCache[clusterIndex+1]) {
+                            //#ifdef DEBUG
+                        	nocashMessage("contiguous read");
+                        	//#endif
                             // the 2 cluster are consecutive
                             sectorsToRead += discSecPerClus;
                             clusterIndex++;    
@@ -835,27 +841,31 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSl
 	return dataPos;
 }
 
-void buildFatTableCache (aFile file, int ndmaSlot) {
-	file.currentOffset=0;
-	file.currentCluster = file.firstCluster;
+void buildFatTableCache (aFile * file, int ndmaSlot) {
+	nocashMessage("buildFatTableCache");
+	file->currentOffset=0;
+	file->currentCluster = file->firstCluster;
 
-	file.fatTableCache = lastClusterCacheUsed;
+	file->fatTableCache = lastClusterCacheUsed;
 
 	// Follow cluster list until desired one is found
-	while (file.currentCluster != CLUSTER_EOF && file.firstCluster != CLUSTER_FREE 
+	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
 		&& lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
 	{
-		*lastClusterCacheUsed = file.currentCluster;
-		file.currentOffset+=discBytePerClus;
-		file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+		*lastClusterCacheUsed = file->currentCluster;
+		file->currentOffset+=discBytePerClus;
+		file->currentCluster = FAT_NextCluster (file->currentCluster, ndmaSlot);
 		lastClusterCacheUsed++;
 	}
 
-	if(file.currentCluster == CLUSTER_EOF) {
-		file.fatTableCached = true;
-		file.oneClusterCached = false;
-	}
+	if(file->currentCluster == CLUSTER_EOF) {
+        nocashMessage("fat table cached");
+		file->fatTableCached = true;
+		file->oneClusterCached = false;
+	} else {
+      nocashMessage("fat table not cached");  
+    }
 
-	file.currentOffset=0;
-	file.currentCluster = file.firstCluster;
+	file->currentOffset=0;
+	file->currentCluster = file->firstCluster;
 }
