@@ -39,7 +39,6 @@
 	.global loadingScreen
 	.global romread_LED
 	.global gameSoftReset
-	.global noSoundStutter
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -83,8 +82,6 @@ romread_LED:
 	.word	0x00000000		
 gameSoftReset:
 	.word	0x00000000
-noSoundStutter:
-	.word	0x00000000		
 cardengine_arm7_offset:
     .word   cardengine_arm7_bin - _start
 cardengine_arm9_offset:

@@ -19,8 +19,6 @@
 .global ntrTouch
 .global romread_LED
 .global gameSoftReset
-.global noSoundStutter
-.global numberToActivateRunViaHalt
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -49,10 +47,6 @@ romread_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
-noSoundStutter:
-	.word	0x00000000		
-numberToActivateRunViaHalt:
-	.word	0x00000000		
 cheat_data_offset:    
 	.word	cheat_data - patches_offset	
 
@@ -269,7 +263,7 @@ j_twlGetPitchTable:
 @---------------------------------------------------------------------------------
 newSwiHalt:
 @---------------------------------------------------------------------------------
-	ldr	r12, =myIrqHandlerHalt
+	ldr	r12, =runCardEngineCheck
 	bx	r12
 	swi	#0x060000
 	bx	lr
