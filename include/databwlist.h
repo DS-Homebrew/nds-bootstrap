@@ -57,7 +57,7 @@ u32 dataWhitelist_CCUJ1_1[3] = {0x016D4000, 0x01E1E200, 0x0074A200};	// Tomodach
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataBlacklist_ARRE0[7] = {0x0096D400, 0x01AC4800, 0x01157400, 0x00000000,	// Ridge Racer DS (U)
-							0x0D380000, 0x00000019, 0x00080000};
+							0x0D380000, 0x00000064, 0x00020000};
 u32 dataBlacklist_AD2E0[7] = {0x00442200, 0x00A7DC00, 0x0063BA00, 0x00000000,	// Nintendogs: First 4 (U)
 							0x0DD00000, 0x0000000C, 0x00040000};
 u32 dataBlacklist_AGYE0[7] = {0x000F8E00, 0x030656A8, 0x02F6C8A8, 0x00000000,	// Phoenix Wright: Ace Attorney (U)
