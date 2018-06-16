@@ -72,9 +72,8 @@ dsiSD:
 #define LOADSCR_OFFSET 60
 #define ROMREADLED_OFFSET 64
 #define GAMESOFTRESET_OFFSET 68
-#define NOSOUNDSTUTTER_OFFSET 72
-#define CARDENGINE_ARM7_OFFSET 76
-#define CARDENGINE_ARM9_OFFSET 80
+#define CARDENGINE_ARM7_OFFSET 72
+#define CARDENGINE_ARM9_OFFSET 76
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
@@ -300,7 +299,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 noSoundStutter, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheat_data)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 ntrTouch, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheat_data)
 {
 	char* argStart;
 	u16* argData;
@@ -370,10 +369,9 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	writeAddr ((data_t*) LCDC_BANK_C, LOADSCR_OFFSET, loadingScreen);
 	writeAddr ((data_t*) LCDC_BANK_C, ROMREADLED_OFFSET, romread_LED);
 	writeAddr ((data_t*) LCDC_BANK_C, GAMESOFTRESET_OFFSET, gameSoftReset);
-	writeAddr ((data_t*) LCDC_BANK_C, NOSOUNDSTUTTER_OFFSET, noSoundStutter);
     
     loadCheatData(cheat_data);
-		
+
 	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
@@ -410,7 +408,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* savename, int saveSize, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int ntrTouch, int loadingScreen, int romread_LED, int gameSoftReset, int noSoundStutter, int argc, const char** argv, u32* cheat_data)  {
+int runNdsFile (const char* filename, const char* savename, int saveSize, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int ntrTouch, int loadingScreen, int romread_LED, int gameSoftReset, int argc, const char** argv, u32* cheat_data)  {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
@@ -442,7 +440,7 @@ int runNdsFile (const char* filename, const char* savename, int saveSize, int do
 
 	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, saveSize, donorSdkVer, patchMpuRegion, patchMpuSize, consoleModel, ntrTouch, loadingScreen, romread_LED, gameSoftReset, noSoundStutter, true, true, argc, argv, cheat_data);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, saveSize, donorSdkVer, patchMpuRegion, patchMpuSize, consoleModel, ntrTouch, loadingScreen, romread_LED, gameSoftReset, true, true, argc, argv, cheat_data);
 }
 
 static inline void copyLoop (u32* dest, const u32* src, u32 size) {
@@ -465,7 +463,7 @@ int loadCheatData (u32* cheat_data) {
     nocashMessage("cardengineArm7");
     nocashMessage(tohex(cardengineArm7));
     
-    u32 cheatDataOffset = cardengineArm7[13];
+    u32 cheatDataOffset = cardengineArm7[11];
     nocashMessage("cheatDataOffset");
     nocashMessage(tohex(cheatDataOffset));
     

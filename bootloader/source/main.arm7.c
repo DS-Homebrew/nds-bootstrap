@@ -53,8 +53,6 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 
-#include "databwlist.h"
-
 void arm7clearRAM();
 int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
 int sdmmc_sdcard_init();
@@ -90,13 +88,6 @@ extern unsigned long ntrTouch;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
-
-u32 setDataBWlist[7] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_1[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_2[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_3[3] = {0x00000000, 0x00000000, 0x00000000};
-u32 setDataBWlist_4[3] = {0x00000000, 0x00000000, 0x00000000};
-int dataAmount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -559,13 +550,8 @@ void loadBinary_ARM7 (aFile file)
 }
 
 u32 enableExceptionHandler = true;
-u32 dsiWramUsed = false;
 
-void loadRomIntoRam(aFile file) {
-	u32 ROMinRAM = 0;
-	u32 cleanRomSize = romSize;
-	u32 ramRomSizeLimit = 0x00800000;
-	if (consoleModel > 0) ramRomSizeLimit = 0x01800000;
+void setArm9Stuff(void) {
 
 	// ExceptionHandler2 (red screen) blacklist
 	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
@@ -576,297 +562,7 @@ void loadRomIntoRam(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if((romSize & 0x0000000F) == 0x1
-	|| (romSize & 0x0000000F) == 0x3
-	|| (romSize & 0x0000000F) == 0x5
-	|| (romSize & 0x0000000F) == 0x7
-	|| (romSize & 0x0000000F) == 0x9
-	|| (romSize & 0x0000000F) == 0xB
-	|| (romSize & 0x0000000F) == 0xD
-	|| (romSize & 0x0000000F) == 0xF)
-	{
-		romSize--;	// If ROM size is at an odd number, subtract 1 from it.
-	}
-	romSize -= 0x4000;
-	romSize -= ARM9_LEN;
-
-	// If ROM size is 0x01800000 (0x00800000 for retail DSi) or below, then load the ROM into RAM.
-	if((fatSize > 0) && (romSize > 0) && (romSize <= ramRomSizeLimit) && (ROM_TID != 0x45475241)
-	&& (ROM_TID != 0x45525243) && (ROM_TID != 0x45425243)
-	&& (romSize != (0x012C7066-0x4000-ARM9_LEN))
-	&& !dsiWramUsed) {
-		ROMinRAM = 1;
-		fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, romSize);
-	} else if (consoleModel > 0) {
-		if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0x539FCF56)) {		// Sawaru - Made in Wario (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWJ0[i];
-		} else if((ROM_TID == 0x4A575A41) && (ROM_HEADERCRC == 0xE37BCF56)) {	// Sawaru - Made in Wario (J) (v02)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWJ2[i];
-		} else if((ROM_TID == 0x45575A41) && (ROM_HEADERCRC == 0x7356CF56)) {	// WarioWare: Touched (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWE0[i];
-		} else if((ROM_TID == 0x50575A41) && (ROM_HEADERCRC == 0x8E8FCF56)) {	// WarioWare: Touched (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWP0[i];
-		} else if((ROM_TID == 0x43575A41) && (ROM_HEADERCRC == 0xE10BCF56)) {	// Momo Waliou Zhizao (C)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWC0[i];
-		} else if((ROM_TID == 0x4B575A41) && (ROM_HEADERCRC == 0xB5C6CF56)) {	// Manjyeora! Made in Wario (KS)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AZWK0[i];
-		} else if((ROM_TID == 0x45533241) && (ROM_HEADERCRC == 0xA860CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_A2SE0[i];
-		} else if((ROM_TID == 0x50424441) && (ROM_HEADERCRC == 0x53C2CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_ADBP0[i];
-		} else if((ROM_TID == 0x45484241) && (ROM_HEADERCRC == 0x3AFCCF56)) {	// Resident Evil: Deadly Silence (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_ABHE0[i];
-		} else if((ROM_TID == 0x4A464641) && (ROM_HEADERCRC == 0xBE5ACF56)) {	// Final Fantasy III (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AFFJ0[i];
-		} else if((ROM_TID == 0x45464641) && (ROM_HEADERCRC == 0x70A6CF56)) {	// Final Fantasy III (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AFFE0[i];
-		} else if((ROM_TID == 0x50464641) && (ROM_HEADERCRC == 0x1AE7CF56)) {	// Final Fantasy III (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AFFP0[i];
-		/* } else if((ROM_TID == 0x50514D41) && (ROM_HEADERCRC == 0x9703CF56)) {	// Mario Vs Donkey Kong 2: March of the Minis (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_AMQP0[i];
-		} else if((ROM_TID == 0x45424341) && (ROM_HEADERCRC == 0xF10BCF56)) {	// Castlevania: Portrait of Ruin (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_ACBE0[i];
-		} else if((ROM_TID == 0x45414441) && (ROM_HEADERCRC == 0xCA37CF56)		// Pokemon Diamond (U)
-				|| (ROM_TID == 0x45415041) && (ROM_HEADERCRC == 0xA80CCF56)) {	// Pokemon Pearl (U)
-			for(int i = 0; i < 7; i++) {
-				setDataBWlist[i] = dataWhitelist_ADAE0_0[i];
-				if (i < 3) setDataBWlist_1[i] = dataWhitelist_ADAE0_1[i];
-				if (i < 3) setDataBWlist_2[i] = dataWhitelist_ADAE0_2[i];
-				if (i < 3) setDataBWlist_3[i] = dataWhitelist_ADAE0_3[i];
-			}
-			dataAmount = 3; */
-		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x61DCCF56)) {	// Tomodachi Collection (J)
-			for(int i = 0; i < 7; i++) {
-				setDataBWlist[i] = dataWhitelist_CCUJ0_0[i];
-				if (i != 3) setDataBWlist_1[i] = dataWhitelist_CCUJ0_1[i];
-			}
-			dataAmount = 1;
-		} else if((ROM_TID == 0x4A554343) && (ROM_HEADERCRC == 0x9B26CF56)) {	// Tomodachi Collection (J) (Rev 1)
-			for(int i = 0; i < 7; i++) {
-				setDataBWlist[i] = dataWhitelist_CCUJ1_0[i];
-				if (i < 3) setDataBWlist_1[i] = dataWhitelist_CCUJ1_1[i];
-			}
-			dataAmount = 1;
-		/* } else if((ROM_TID == 0x45344659) && (ROM_HEADERCRC == 0x2635CF56)) {	// Final Fantasy IV (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_YF4E0[i];
-		} else if((ROM_TID == 0x50344659) && (ROM_HEADERCRC == 0xDB3BCF56)) {	// Final Fantasy IV (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_YF4P0[i];
-		} else if((ROM_TID == 0x45555159) && (ROM_HEADERCRC == 0xC2DFCF56)) {	// Chrono Trigger (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_YQUE0[i]; */
-		} else if((ROM_TID == 0x45525241) && (ROM_HEADERCRC == 0xBE09CF56)) {	// Ridge Racer DS (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ARRE0[i];
-		} else if((ROM_TID == 0x45324441) && (ROM_HEADERCRC == 0x8AE1CF56)		// Nintendogs: Chihuahua & Friends (U)
-				|| (ROM_TID == 0x45334441) && (ROM_HEADERCRC == 0x9D25CF56)		// Nintendogs: Lab & Friends (U)
-				|| (ROM_TID == 0x45354441) && (ROM_HEADERCRC == 0x0451CF56)		// Nintendogs: Best Friends (U)
-				|| (ROM_TID == 0x45474441) && (ROM_HEADERCRC == 0x164BCF56)) {	// Nintendogs: Dachshund & Friends (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AD2E0[i];
-		} else if((ROM_TID == 0x45594741) && (ROM_HEADERCRC == 0x9AD6CF56)) {	// Phoenix Wright: Ace Attorney (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AGYE0[i];
-		} else if((ROM_TID == 0x50594741) && (ROM_HEADERCRC == 0x0744CF56)) {	// Phoenix Wright: Ace Attorney (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AGYP0[i];
-		} else if((ROM_TID == 0x454D5241) && (ROM_HEADERCRC == 0x089ECF56)) {	// Mario & Luigi: Partners in Time (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ARME0[i];
-		} else if((ROM_TID == 0x504D5241) && (ROM_HEADERCRC == 0xD0BCCF56)) {	// Mario & Luigi: Partners in Time (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ARMP0[i];
-		} else if((ROM_TID == 0x4A334241) && (ROM_HEADERCRC == 0x0C22CF56)) {	// Mario Basketball: 3 on 3 (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AB3J0[i];
-		} else if((ROM_TID == 0x45334241) && (ROM_HEADERCRC == 0xE6D9CF56)) {	// Mario Hoops 3 on 3 (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AB3E0[i];
-		} else if((ROM_TID == 0x50334241) && (ROM_HEADERCRC == 0xB642CF56)) {	// Mario Slam Basketball (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[0] = dataBlacklist_AB3P0[i];
-		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x4B0ECF56)
-				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x23C2CF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_APHJ0[i];
-		} else if((ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x498ECF56)
-				|| (ROM_TID == 0x4A485041) && (ROM_HEADERCRC == 0x398BCF56)) {	// Pokemon Fushigi no Dungeon: Ao no Kyuujotai (J) (Rev 1)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_APHJ1[i];
-		} else if((ROM_TID == 0x45485041) && (ROM_HEADERCRC == 0xD376CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_APHE0[i];
-		} else if((ROM_TID == 0x50485041) && (ROM_HEADERCRC == 0xF167CF56)) {	// Pokemon Mystery Dungeon: Blue Rescue Team (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_APHP0[i];
-		} else if((ROM_TID == 0x4B485041) && (ROM_HEADERCRC == 0xA6C2CF56)) {	// Pokemon Bulgasaui Dungeon: Parang Gujodae (KS)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_APHK0[i];
-		} else if((ROM_TID == 0x45475241) && (ROM_HEADERCRC == 0x5461CF56)) {	// Pokemon Ranger (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ARGE0[i];
-		/* } else if((ROM_TID == 0x4A575941) && (ROM_HEADERCRC == 0x404FCF56)) {	// Yoshi's Island DS (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AYWJ0[i];
-		} else if((ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xA300CF56)
-				|| (ROM_TID == 0x45575941) && (ROM_HEADERCRC == 0xFA95CF56)) {	// Yoshi's Island DS (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AYWE0[i];
-		*/ } else if((ROM_TID == 0x4A4E4441) && (ROM_HEADERCRC == 0x462DCF56)) {	// Digimon Story (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ADNJ0[i];
-		} else if((ROM_TID == 0x454E4441) && (ROM_HEADERCRC == 0xAC46CF56)) {	// Digimon World DS (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_ADNE0[i];
-		} else if((ROM_TID == 0x4A574B41) && (ROM_HEADERCRC == 0x5CE4CF56)) {	// Hoshi no Kirby: Sanjou! Dorotche Dan (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AKWJ0[i];
-		} else if((ROM_TID == 0x45574B41) && (ROM_HEADERCRC == 0xC8C3CF56)) {	// Kirby Squeak Squad (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AKWE0[i];
-		} else if((ROM_TID == 0x50574B41) && (ROM_HEADERCRC == 0x706CCF56)) {	// Kirby Mouse Attack (E)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_AKWP0[i];
-		} else if((ROM_TID == 0x4A593341) && (ROM_HEADERCRC == 0x77E4CF56)) {	// Sonic Rush Adventure (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_A3YJ0[i];
-		} else if((ROM_TID == 0x45593341) && (ROM_HEADERCRC == 0x7A5ACF56)	// Sonic Rush Adventure (U)
-				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xB96BCF56)	// Sonic Rush Adventure (E)
-				|| (ROM_TID == 0x50593341) && (ROM_HEADERCRC == 0xD1B2CF56)) {	// Sonic Rush Adventure (E) (v01)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_A3YE0[i];
-		} else if((ROM_TID == 0x4B593341) && (ROM_HEADERCRC == 0x3DF8CF56)) {	// Sonic Rush Adventure (KS)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_A3YK0[i];
-		} else if((ROM_TID == 0x454F4359) && (ROM_HEADERCRC == 0x7591CF56)) {	// Call of Duty 4: Modern Warfare (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YCOE0[i];
-		} else if((ROM_TID == 0x45594659) && (ROM_HEADERCRC == 0xB0CECF56)	// Pokemon Mystery Dungeon: Explorers of Darkness (U)
-				|| (ROM_TID == 0x45544659) && (ROM_HEADERCRC == 0xA0BDCF56)) {	// Pokemon Mystery Dungeon: Explorers of Time (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YFYE0[i];
-		} else if((ROM_TID == 0x4A574B59) && (ROM_HEADERCRC == 0xF999CF56)) {	// Hoshi no Kirby: Ultra Super Deluxe (J)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YKWJ0[i];
-		} else if((ROM_TID == 0x45574B59) && (ROM_HEADERCRC == 0x317DCF56)) {	// Kirby Super Star Ultra (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YKWE0[i];
-		} else if((ROM_TID == 0x4B574B59) && (ROM_HEADERCRC == 0xE2E5CF56)) {	// Kirby Ultra Super Deluxe (KS)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_YKWK0[i];
-		} else if((ROM_TID == 0x45525243) && (ROM_HEADERCRC == 0xAB01CF56)) {	// Megaman Star Force 3: Red Joker (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_CRRE0[i];
-		} else if((ROM_TID == 0x45425243) && (ROM_HEADERCRC == 0xE8CFCF56)) {	// Megaman Star Force 3: Black Ace (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_CRBE0[i];
-		} else if((ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0xCE77CF56)
-				|| (ROM_TID == 0x454A4C43) && (ROM_HEADERCRC == 0x8F73CF56)) {	// Mario & Luigi: Bowser's Inside Story (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_CLJE0[i];
-		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0xE25BCF56)) {	// The Legend of Zelda: Spirit Tracks (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_BKIE0[i];
-		} else if((ROM_TID == 0x45494B42) && (ROM_HEADERCRC == 0x4471CF56)) {	// The Legend of Zelda: Spirit Tracks (U) (XPA's AP-patch)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_BKIE0_patch[i];
-		} else if((ROM_TID == 0x455A3642) && (ROM_HEADERCRC == 0x0026CF56)) {	// MegaMan Zero Collection (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataBlacklist_B6ZE0[i];
-		}
-		if(setDataBWlist[0] == 0 && setDataBWlist[1] == 0 && setDataBWlist[2] == 0){
-		} else {
-			ROMinRAM = 2;
-			if(setDataBWlist[3] == true) {
-				fileRead(ROM_LOCATION, file, setDataBWlist[0], setDataBWlist[2]);
-				if(dataAmount >= 1) {
-					fileRead(ROM_LOCATION+setDataBWlist[2], file, setDataBWlist_1[0], setDataBWlist_1[2]);
-				}
-				if(dataAmount >= 2) {
-					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2], file, setDataBWlist_2[0], setDataBWlist_2[2]);
-				}
-				if(dataAmount >= 3) {
-					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2], file, setDataBWlist_3[0], setDataBWlist_3[2]);
-				}
-				if(dataAmount == 4) {
-					fileRead(ROM_LOCATION+setDataBWlist[2]+setDataBWlist_1[2]+setDataBWlist_2[2]+setDataBWlist_3[2], file, setDataBWlist_4[0], setDataBWlist_4[2]);
-				}
-			} else {
-				setDataBWlist[0] -= 0x4000;
-				setDataBWlist[0] -= ARM9_LEN;
-				fileRead(ROM_LOCATION, file, 0x4000+ARM9_LEN, setDataBWlist[0]);
-				u32 lastRomSize = 0;
-				for(u32 i = setDataBWlist[1]; i < romSize; i++) {
-					lastRomSize++;
-				}
-				fileRead(ROM_LOCATION+setDataBWlist[0], file, setDataBWlist[1], lastRomSize);
-			}
-		}
-	}
-
-	hookNdsRetail9((u32*)ENGINE_LOCATION_ARM9, ROMinRAM, cleanRomSize);
-}
-
-u32 numberToActivateRunViaHalt = 30;
-
-void setNumberToActivateRunViaHalt (void) {
-	// Set number of reads to activate running cardEngine7 via halt SWI branch
-	if ((ROM_TID & 0x00FFFFFF) == 0x545041			// Pokemon Trozei
-	|| (ROM_TID & 0x00FFFFFF) == 0x334241			// Mario Hoops 3 on 3
-	|| (ROM_TID & 0x00FFFFFF) == 0x474C59			// LEGO Star Wars: The Complete Saga
-	|| (ROM_TID & 0x00FFFFFF) == 0x574B59)			// Kirby Super Star Ultra
-	{
-		numberToActivateRunViaHalt = 10;
-	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x474B59)	// Kingdom Hearts: 358-2 Days
-	{
-		numberToActivateRunViaHalt = 20;
-	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x484241	// Resident Evil: Deadly Silence
-			|| (ROM_TID & 0x00FFFFFF) == 0x413641	// MegaMan Star Force: Pegasus
-			|| (ROM_TID & 0x00FFFFFF) == 0x423641	// MegaMan Star Force: Leo
-			|| (ROM_TID & 0x00FFFFFF) == 0x433641	// MegaMan Star Force: Dragon
-			|| (ROM_TID & 0x00FFFFFF) == 0x583642)	// Rockman EXE: Operate Star Force
-	{
-		numberToActivateRunViaHalt = 24;
-	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x4D4441)	// Animal Crossing: Wild World
-	{
-		numberToActivateRunViaHalt = 40;
-	}
-	else if ((ROM_TID & 0x00FFFFFF) == 0x484D41	// Metroid Prime Hunters
-			|| (ROM_TID & 0x00FFFFFF) == 0x514D41)	// Mario Vs Donkey Kong 2: March of the Minis
-	{
-		numberToActivateRunViaHalt = 55;
-	}
-	
-	if (consoleModel > 0) {
-		if ((ROM_TID & 0x00FFFFFF) == 0x574B41		// Kirby Squeak Squad
-		|| (ROM_TID & 0x00FFFFFF) == 0x593341)		// Sonic Rush Adventure
-		{
-			numberToActivateRunViaHalt = 2;
-		}
-	} else {
-		if ((ROM_TID & 0x00FFFFFF) == 0x593341)	// Sonic Rush Adventure
-		{
-			numberToActivateRunViaHalt = 20;
-		}
-	}
+	hookNdsRetail9((u32*)ENGINE_LOCATION_ARM9, romSize);
 }
 
 /*-------------------------------------------------------------------------
@@ -1029,7 +725,6 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
-	setNumberToActivateRunViaHalt();
 	errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
@@ -1041,9 +736,9 @@ void arm7_main (void) {
  
 
 
-	loadRomIntoRam(file);
+	setArm9Stuff();
 
-	if(romread_LED == 1 || romread_LED == 2) {
+	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 	}
 

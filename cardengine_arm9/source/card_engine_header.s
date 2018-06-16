@@ -14,19 +14,12 @@
 .global sdk_version
 .global fileCluster
 .global saveCluster
-.global ROMinRAM
 .global ROM_TID
 .global ROM_HEADERCRC
 .global ARM9_LEN
 .global romSize
-.global cleanRomSize
 .global enableExceptionHandler
 .global consoleModel
-.global setDataBWlist
-.global setDataBWlist_1
-.global setDataBWlist_2
-.global setDataBWlist_3
-.global setDataBWlist_4
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -47,8 +40,6 @@ cardStruct:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
-ROMinRAM:
-	.word	0x00000000
 ROM_TID:
 	.word	0x00000000
 ROM_HEADERCRC:
@@ -57,35 +48,9 @@ ARM9_LEN:
 	.word	0x00000000
 romSize:
 	.word	0x00000000
-cleanRomSize:
-	.word	0x00000000
 enableExceptionHandler:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-setDataBWlist:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-setDataBWlist_1:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-setDataBWlist_2:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-setDataBWlist_3:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-setDataBWlist_4:
-	.word	0x00000000
-	.word	0x00000000
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
