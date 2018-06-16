@@ -555,9 +555,9 @@ fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
 u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
 {
-	//#ifdef DEBUG
+	#ifdef DEBUG
 	nocashMessage("fileRead");
-	//#endif
+	#endif
 
 	int curByte;
 	int curSect;
@@ -586,12 +586,16 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	}
 
 	if(file.fatTableCached) {
+    	#ifdef DEBUG
         nocashMessage("fat table cached");
+        #endif
 		clusterIndex = startOffset/discBytePerClus;
 		file.currentCluster = file.fatTableCache[clusterIndex];
 		file.currentOffset=clusterIndex*discBytePerClus;
 	} else {
+        #ifdef DEBUG
         nocashMessage("fatTable not cached");
+        #endif
 		if(startOffset<file.currentOffset) {
 			file.currentOffset=0;
 			file.currentCluster = file.firstCluster;
@@ -655,9 +659,9 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
                      // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
                     for(; sectorsToRead<=chunks; ) {
                         if(file.fatTableCache[clusterIndex]+1 == file.fatTableCache[clusterIndex+1]) {
-                            //#ifdef DEBUG
+                            #ifdef DEBUG
                         	nocashMessage("contiguous read");
-                        	//#endif
+                        	#endif
                             // the 2 cluster are consecutive
                             sectorsToRead += discSecPerClus;
                             clusterIndex++;    
@@ -842,7 +846,10 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSl
 }
 
 void buildFatTableCache (aFile * file, int ndmaSlot) {
+    #ifdef DEBUG
 	nocashMessage("buildFatTableCache");
+    #endif
+    
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;
 
@@ -859,12 +866,17 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
+        #ifdef DEBUG
         nocashMessage("fat table cached");
+        #endif
 		file->fatTableCached = true;
 		file->oneClusterCached = false;
-	} else {
+	}
+    #ifdef DEBUG 
+    else {
       nocashMessage("fat table not cached");  
     }
+    #endif
 
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;

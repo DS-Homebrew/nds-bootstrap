@@ -76,11 +76,13 @@ void initLogging() {
 		FAT_InitFiles(false, 3);
 		romFile = getFileFromCluster(fileCluster);
         buildFatTableCache(&romFile, 3);
+        #ifdef DEBUG	
         if(romFile.fatTableCached) {
             nocashMessage("fat table cached");
         } else {
            nocashMessage("fat table not cached"); 
         }
+        #endif
         
 		if(saveCluster>0)
 			savFile = getFileFromCluster(saveCluster);
@@ -222,7 +224,9 @@ void cardRead_arm9() {
 	#endif
 
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+    #ifdef DEBUG
     nocashMessage("fileRead romFile");
+    #endif
 	fileRead(dst,romFile,src,len,0);
 	if(*(u32*)(0x028128ac) == 0x4B434148){ //Primary fix for Mario's Holiday, will eventually be moved to the patch engine soon:tm:
                 *(u32*)(0x028128ac) = 0xA00;
@@ -265,7 +269,9 @@ void asyncCardRead_arm9() {
 	#endif
 
 	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
+    #ifdef DEBUG
     nocashMessage("fileRead romFile");
+    #endif
 	fileRead(dst,romFile,src,len,0);
 	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 
@@ -778,7 +784,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	//ndmaUsed = false;
+    #ifdef DEBUG	
     nocashMessage("fileRead romFile");
+    #endif	
 	fileRead(dst,romFile,src,len,2);
 	//ndmaUsed = true;
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
