@@ -16,14 +16,10 @@ u32 dataWhitelist_AZWC0[7] = {0x000E74D8, 0x00FE1C00, 0x00EFA728, 0x00000001,	//
 							0x0D740000, 0x0000001F, 0x00040000};
 u32 dataWhitelist_AZWK0[7] = {0x000D7378, 0x0112DE00, 0x00DA5A90, 0x00000001,	// Manjyeora! Made in Wario (KS)
 							0x0D5C0000, 0x00000029, 0x00040000};
-u32 dataWhitelist_ADME0[7] = {0x012E2BFC, 0x01D17A7C, 0x00A34E80, 0x00000001,	// Animal Crossing: Wild World (U)
-							0x0D240000, 0x00000037, 0x00040000};
-u32 dataWhitelist_ADME1[7] = {0x012E3D14, 0x01D179B4, 0x00A347E0, 0x00000001,	// Animal Crossing: Wild World (U) (v01)
-							0x0D240000, 0x00000037, 0x00040000};
 u32 dataWhitelist_A2SE0[7] = {0x00103A00, 0x00A17800, 0x00914400, 0x00000001,	// Dragon Ball Z: Supersonic Warriors 2 (U)
-							0x0D180000, 0x00000013, 0x00080000};
+							0x0D140000, 0x0000003B, 0x00040000};
 u32 dataWhitelist_ADBP0[7] = {0x0010C400, 0x00A21000, 0x00914C00, 0x00000001,	// Dragon Ball Z: Supersonic Warriors 2 (E)
-							0x0D180000, 0x00000013, 0x00080000};
+							0x0D140000, 0x0000003B, 0x00040000};
 u32 dataWhitelist_ABHE0[7] = {0x00300E00, 0x00D20E70, 0x00A20070, 0x00000001,	// Resident Evil: Deadly Silence (U)
 							0x0D300000, 0x00000034, 0x00040000};
 u32 dataWhitelist_AFFJ0[7] = {0x012E2000, 0x01AC4400, 0x007E2400, 0x00000001,	// Final Fantasy III (J)
@@ -45,8 +41,6 @@ u32 dataWhitelist_AFFP0[7] = {0x01466600, 0x02282200, 0x00E1BC00, 0x00000001,	//
 //							0x0CE80000, 0x00000023, 0x00080000};
 //u32 dataWhitelist_YF4P0[7] = {0x069A3400, 0x06EA4E00, 0x00501A00, 0x00000001,	// Final Fantasy IV (E)
 //							0x0CD80000, 0x00000025, 0x00080000};
-//u32 dataWhitelist_YQUE0[7] = {0x03F5AC00, 0x05066600, 0x0110BA00, 0x00000001,	// Chrono Trigger (U)
-//							0x0D940000, 0x0000001C, 0x00040000};
 u32 dataWhitelist_CCUJ0_0[7] = {0x00255C00, 0x010DF400, 0x00E89800, 0x00000001,	// Tomodachi Collection (J) (part 1)
 							0x0DDE0000, 0x00000011, 0x00020000};
 u32 dataWhitelist_CCUJ0_1[3] = {0x016D3E00, 0x01E1E000, 0x0074A200};	// Tomodachi Collection (J) (part 2)
@@ -57,7 +51,7 @@ u32 dataWhitelist_CCUJ1_1[3] = {0x016D4000, 0x01E1E200, 0x0074A200};	// Tomodach
 // ROM data exclude list.
 // 1 = start of data address, 2 = end of data address, 3 = data size
 u32 dataBlacklist_ARRE0[7] = {0x0096D400, 0x01AC4800, 0x01157400, 0x00000000,	// Ridge Racer DS (U)
-							0x0D380000, 0x00000019, 0x00080000};
+							0x0D380000, 0x00000064, 0x00020000};
 u32 dataBlacklist_AD2E0[7] = {0x00442200, 0x00A7DC00, 0x0063BA00, 0x00000000,	// Nintendogs: First 4 (U)
 							0x0DD00000, 0x0000000C, 0x00040000};
 u32 dataBlacklist_AGYE0[7] = {0x000F8E00, 0x030656A8, 0x02F6C8A8, 0x00000000,	// Phoenix Wright: Ace Attorney (U)

@@ -616,12 +616,6 @@ void loadRomIntoRam(aFile file) {
 		} else if((ROM_TID == 0x4B575A41) && (ROM_HEADERCRC == 0xB5C6CF56)) {	// Manjyeora! Made in Wario (KS)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_AZWK0[i];
-		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0xFEBBCF56)) {	// Animal Crossing: Wild World (U)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_ADME0[i];
-		} else if((ROM_TID == 0x454D4441) && (ROM_HEADERCRC == 0x5744CF56)) {	// Animal Crossing: Wild World (U) (v01)
-			for(int i = 0; i < 7; i++)
-				setDataBWlist[i] = dataWhitelist_ADME1[i];
 		} else if((ROM_TID == 0x45533241) && (ROM_HEADERCRC == 0xA860CF56)) {	// Dragon Ball Z: Supersonic Warriors 2 (U)
 			for(int i = 0; i < 7; i++)
 				setDataBWlist[i] = dataWhitelist_A2SE0[i];
