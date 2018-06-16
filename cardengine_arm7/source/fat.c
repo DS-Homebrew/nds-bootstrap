@@ -31,6 +31,7 @@ License:
 
 #include "fat.h"
 #include "card.h"
+#include "debugToFile.h"
 
 
 //---------------------------------------------------------------
@@ -639,7 +640,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		// Read in all the 512 byte chunks of the file directly, saving time
 		for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
 		{
-			int sectorsToRead;
+			int sectorsToRead=0;
 
 			if(file.fatTableCached) {
             
@@ -652,30 +653,38 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
     				file.currentOffset+=discBytePerClus;
     			}
                 
-                sectorsToRead = discSecPerClus - curSect;
-                if(chunks < sectorsToRead)
-				    sectorsToRead = chunks;
-                else {
-                     // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
-                    for(; sectorsToRead<=chunks; ) {
-                        if(file.fatTableCache[clusterIndex]+1 == file.fatTableCache[clusterIndex+1]) {
-                            #ifdef DEBUG
-                        	nocashMessage("contiguous read");
-                        	#endif
-                            // the 2 cluster are consecutive
-                            sectorsToRead += discSecPerClus;
-                            clusterIndex++;    
-                        } else {
-                          break;
-                        }
+                 // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
+                for(; sectorsToRead<=chunks; ) {
+                    if(file.fatTableCache[clusterIndex]+1 == file.fatTableCache[clusterIndex+1]) {
+                        #ifdef DEBUG
+                    	nocashMessage("contiguous read");
+                    	#endif
+                        // the 2 cluster are consecutive
+                        sectorsToRead += discSecPerClus;
+                        clusterIndex++;    
+                    } else {
+                      break;
                     }
-                  
-                    // Read the sectors
-        			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
-        			chunks  -= sectorsToRead;
-        			curSect += sectorsToRead;
-        			dataPos += BYTES_PER_SECTOR * sectorsToRead;    
                 }
+                
+                if(!sectorsToRead) sectorsToRead = discSecPerClus - curSect;  
+                else sectorsToRead = sectorsToRead - curSect;
+                
+                if(chunks < sectorsToRead) {
+				    sectorsToRead = chunks;
+                }
+                
+                #ifdef DEBUG
+                dbg_hexa(curSect + FAT_ClustToSect(file.currentCluster));
+                dbg_hexa(sectorsToRead);
+                dbg_hexa(buffer + dataPos);
+                #endif
+                
+                // Read the sectors
+      			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+      			chunks  -= sectorsToRead;
+      			curSect += sectorsToRead;
+      			dataPos += BYTES_PER_SECTOR * sectorsToRead;    
             } else {
                 // Move to the next cluster if necessary
     			if (curSect >= discSecPerClus)
@@ -707,7 +716,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			if (curSect >= discSecPerClus)
 			{
 				curSect = 0;
-				if(file.fatTableCached ) {
+				if(file.fatTableCached) {
                       clusterIndex++;
                       file.currentCluster = file.fatTableCache[clusterIndex]; 
                 } else {
@@ -724,7 +733,12 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 				curByte++;
 			}
 		}
-
+        
+        #ifdef DEBUG
+        nocashMessage("fileRead completed");
+        nocashMessage("");
+        #endif
+        
 		return dataPos;
 	}
 }
@@ -869,7 +883,7 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
         #ifdef DEBUG
         nocashMessage("fat table cached");
         #endif
-		file->fatTableCached = false;
+		file->fatTableCached = true;
 		file->oneClusterCached = false;
 	}
     #ifdef DEBUG 
