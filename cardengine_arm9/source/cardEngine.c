@@ -20,10 +20,6 @@
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-static u32 ROM_LOCATION = 0x0C800000;
-extern u32 romSize;
-extern u32 consoleModel;
-
 #define _32KB_READ_SIZE 0x8000
 #define _64KB_READ_SIZE 0x10000
 #define _128KB_READ_SIZE 0x20000
@@ -34,13 +30,8 @@ extern u32 consoleModel;
 #define _1MB_READ_SIZE 0x100000
 
 #define CACHE_ADRESS_START 0x0C420000
-#define CACHE_ADRESS_SIZE 0x2E0000
-#define _128KB_CACHE_SLOTS 0x17
-#define _192KB_CACHE_SLOTS 0xF
-#define _256KB_CACHE_SLOTS 0xB
-#define _512KB_CACHE_SLOTS 0x5
-#define _768KB_CACHE_SLOTS 0x3
-#define _1MB_CACHE_SLOTS 0x2
+#define CACHE_ADRESS_SIZE 0x1E0000
+#define CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -49,13 +40,15 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 cacheDescriptor [_128KB_CACHE_SLOTS] = {0xffffffff};
-static u32 cacheCounter [_128KB_CACHE_SLOTS];
+static u32 cacheDescriptor [CACHE_SLOTS] = {0xffffffff};
+static u32 cacheCounter [CACHE_SLOTS];
 static u32 accessCounter = 0;
 
 static u32 cacheReadSizeSubtract = 0;
 
 static bool flagsSet = false;
+extern u32 romSize;
+extern u32 consoleModel;
 extern u32 enableExceptionHandler;
 
 static char hexbuffer [9];
@@ -98,7 +91,7 @@ void setExceptionHandler2() {
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<CACHE_SLOTS; i++) {
 		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -109,7 +102,7 @@ int allocateCacheSlot() {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<_128KB_CACHE_SLOTS; i++) {
+	for(int i=0; i<CACHE_SLOTS; i++) {
 		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
