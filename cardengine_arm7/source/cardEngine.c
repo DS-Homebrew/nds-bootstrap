@@ -51,7 +51,7 @@ extern u32 consoleModel;
 extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-vu32* volatile sharedAddr = (vu32*)0x026fFB08;
+vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile * romFile = (aFile *)0x37D5000;
 static aFile savFile;
 
@@ -293,27 +293,27 @@ void runCardEngineCheck (void) {
 		initLogging();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if(*(vu32*)(0x026fFB14) == (vu32)0x026ff800)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 		{
 			readInProgress = true;
 			log_arm9();
-			*(vu32*)(0x026fFB14) = 0;
+			*(vu32*)(0x027FFB14) = 0;
 			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x026fFB14) == (vu32)0x025FFB08)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
 			readInProgress = true;
 			cardRead_arm9();
-			*(vu32*)(0x026fFB14) = 0;
+			*(vu32*)(0x027FFB14) = 0;
 			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x026fFB14) == (vu32)0x020ff800)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
 		{
 			readInProgress = true;
 			asyncCardRead_arm9();
-			*(vu32*)(0x026fFB14) = 0;
+			*(vu32*)(0x027FFB14) = 0;
 			readInProgress = false;
 		}
 		unlockMutex();
