@@ -462,7 +462,7 @@ void loadBinary_ARM7 (aFile file)
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead ((char*)ndsHeader, file, 0, 0x170);
+	fileRead ((char*)ndsHeader, file, 0, 0x170, 3);
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
@@ -478,7 +478,7 @@ void loadBinary_ARM7 (aFile file)
 	ROM_HEADERCRC = ndsHeader[0x15C>>2];
 
 	//Fix Pokemon games needing header data.
-	fileRead ((char*)0x027FF000, file, 0, 0x170);
+	fileRead ((char*)0x027FF000, file, 0, 0x170, 3);
 
 	if((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x414441	// Diamond
 	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415041	// Pearl
@@ -490,8 +490,8 @@ void loadBinary_ARM7 (aFile file)
 	}
 	
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
-	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
+	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
+	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
 	
 	// The World Ends With You (USA) (Europe)
 	if(ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741){
@@ -665,7 +665,7 @@ void arm7_main (void) {
 	}
 
 	// Init card
-	if(!FAT_InitFiles(initDisc))
+	if(!FAT_InitFiles(initDisc, 3))
 	{
 		nocashMessage("!FAT_InitFiles");
 		return -1;
@@ -675,7 +675,7 @@ void arm7_main (void) {
 
 	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
-		file = getBootFileCluster(bootName);
+		file = getBootFileCluster(bootName, 3);
 	}
 	if (file.firstCluster == CLUSTER_FREE)
 	{

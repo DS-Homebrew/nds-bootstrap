@@ -2573,7 +2573,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(!saveResult) saveResult = savePatchV4(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	if ((saveResult == 1) && (saveSize > 0) && (saveSize <= 0x00100000)) {
 		aFile saveFile = getFileFromCluster (saveFileCluster);
-		fileRead(0x0C600000, saveFile, 0, saveSize);
+		fileRead(0x0C600000, saveFile, 0, saveSize, 3);
 	}
 
 	dbg_printf("ERR_NONE");
