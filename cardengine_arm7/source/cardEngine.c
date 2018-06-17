@@ -338,6 +338,8 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
+	runCardEngineCheck();
+	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
 	} else if (!saveInProgress) {
