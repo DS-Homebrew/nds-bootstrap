@@ -204,6 +204,7 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 {
 	dbg_printf("Looking for moduleparams\n");
 	uint32_t moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
+	*(vu32*)(0x2800008) = (getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1) - 0x8);
 	if(!moduleparams)
 	{
 		dbg_printf("No moduleparams?\n");
@@ -272,6 +273,7 @@ void decompressLZ77Backwards(uint8_t* addr, size_t size)
 
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams)
 {
+	*(vu32*)(0x280000C) = moduleParams->compressed_static_end;
 	if(!moduleParams->compressed_static_end)
 	{
 		dbg_printf("This rom is not compressed\n");
@@ -527,6 +529,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	if(mpuDataOffset) {
 		// change the region 1 configuration
+		
+		*(vu32*)(0x2800000) = mpuDataOffset;
+		*(vu32*)(0x2800004) = *mpuDataOffset;
+		
 		*mpuDataOffset = mpuInitRegionNewData;
 
 		if(mpuAccessOffset) {
