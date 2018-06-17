@@ -37,7 +37,7 @@ extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+vu32* volatile sharedAddr = (vu32*)0x026FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 static u32 cacheDescriptor [CACHE_SLOTS] = {0xffffffff};
@@ -45,6 +45,9 @@ static u32 cacheCounter [CACHE_SLOTS];
 static u32 accessCounter = 0;
 
 static u32 cacheReadSizeSubtract = 0;
+
+static u32 readNum = 0;
+static bool alreadySetMpu = false;
 
 static bool flagsSet = false;
 extern u32 romSize;
@@ -139,7 +142,17 @@ int cardRead (u32* cacheStruct) {
 
 	u32 page = (src/512)*512;
 	
+	if(readNum >= 0x100){ //don't set too early or some games will crash
+		*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)(0x2800004);
+		*(vu32*)(*(vu32*)(0x2800008)) = *(vu32*)(0x280000C);
+		alreadySetMpu = true;
+	}else{
+		readNum += 1;
+	}
+	
 	if(!flagsSet) {
+		romSize += 0x1000;
+		
 		if (enableExceptionHandler) {
 			setExceptionHandler2();
 		}
