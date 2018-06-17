@@ -89,6 +89,8 @@ extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 
+static aFile * romFile = (aFile *)0x37D5000;
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
 static void errorOutput (void) {
@@ -656,7 +658,16 @@ static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Nor
 void arm7_main (void) {
 	nocashMessage("bootloader");
 
-	initMBK();
+	initMBK(); 
+    
+    // Wait for ARM9 to at least start
+	while (arm9_stateFlag < ARM9_START);
+
+	// Get ARM7 to clear RAM
+	nocashMessage("Get ARM7 to clear RAM");
+	debugOutput();	// 1 dot
+	resetMemory_ARM7();
+
 
 	if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
@@ -671,27 +682,21 @@ void arm7_main (void) {
 		return -1;
 	}
 
-	aFile file = getFileFromCluster (storedFileCluster);
+	*romFile = getFileFromCluster (storedFileCluster);
 
-	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
+	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
-		file = getBootFileCluster(bootName, 3);
+		*romFile = getBootFileCluster(bootName, 3);
 	}
-	if (file.firstCluster == CLUSTER_FREE)
+	if (romFile->firstCluster == CLUSTER_FREE)
 	{
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
+    
+    buildFatTableCache(romFile, 3);
 
 	int errorCode;
-
-	// Wait for ARM9 to at least start
-	while (arm9_stateFlag < ARM9_START);
-
-	// Get ARM7 to clear RAM
-	nocashMessage("Get ARM7 to clear RAM");
-	debugOutput();	// 1 dot
-	resetMemory_ARM7();
 
 	if (REG_SCFG_EXT == 0 || ntrTouch) {
 		NDSTouchscreenMode();
@@ -700,7 +705,7 @@ void arm7_main (void) {
 
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
-	loadBinary_ARM7(file);
+	loadBinary_ARM7(*romFile);
 	increaseLoadBarLength();	// 2 dots
 
 	nocashMessage("try to patch card");
@@ -725,7 +730,7 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
-	errorCode = hookNdsRetail(NDS_HEAD, file, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
 	} else {

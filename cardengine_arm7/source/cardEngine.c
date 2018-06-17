@@ -32,7 +32,7 @@
 #include "sr_data_srloader.h"	// For rebooting into DSiMenu++
 #include "sr_data_srllastran.h"	// For rebooting the game
 
-#define SAVE_LOCATION	0x0C5E0000
+#define SAVE_LOCATION	0x0C600000
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
@@ -52,7 +52,7 @@ extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 vu32* volatile sharedAddr = (vu32*)0x026fFB08;
-static aFile romFile;
+static aFile * romFile = (aFile *)0x37D5000;
 static aFile savFile;
 
 static bool runViaHalt = false;
@@ -72,10 +72,10 @@ void initLogging() {
 			SD_Init();
 		}
 		FAT_InitFiles(false, 3);
-		romFile = getFileFromCluster(fileCluster);
-        buildFatTableCache(&romFile, 3);
+		//romFile = getFileFromCluster(fileCluster);
+        //buildFatTableCache(&romFile, 3);
         #ifdef DEBUG	
-        if(romFile.fatTableCached) {
+        if(romFile->fatTableCached) {
             nocashMessage("fat table cached");
         } else {
            nocashMessage("fat table not cached"); 
@@ -225,7 +225,7 @@ void cardRead_arm9() {
     #ifdef DEBUG
     nocashMessage("fileRead romFile");
     #endif
-	fileRead(dst,romFile,src,len,0);
+	fileRead(dst,*romFile,src,len,0);
 	if(*(u32*)(0x028128ac) == 0x4B434148){ //Primary fix for Mario's Holiday, will eventually be moved to the patch engine soon:tm:
                 *(u32*)(0x028128ac) = 0xA00;
         }
@@ -270,7 +270,7 @@ void asyncCardRead_arm9() {
     #ifdef DEBUG
     nocashMessage("fileRead romFile");
     #endif
-	fileRead(dst,romFile,src,len,0);
+	fileRead(dst,*romFile,src,len,0);
 	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 
 	#ifdef DEBUG
@@ -699,7 +699,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
     #ifdef DEBUG	
     nocashMessage("fileRead romFile");
     #endif	
-	fileRead(dst,romFile,src,len,2);
+	fileRead(dst,*romFile,src,len,2);
 	//ndmaUsed = true;
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	

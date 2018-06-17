@@ -48,7 +48,9 @@ romread_LED:
 gameSoftReset:
 	.word	0x00000000
 cheat_data_offset:    
-	.word	cheat_data - patches_offset	
+	.word	cheat_data - patches_offset
+romFileOffset:    
+	.word	0x37D5000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
