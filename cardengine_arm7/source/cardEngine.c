@@ -32,7 +32,7 @@
 #include "sr_data_srloader.h"	// For rebooting into DSiMenu++
 #include "sr_data_srllastran.h"	// For rebooting the game
 
-#define SAVE_LOCATION	0x0C600000
+#define SAVE_LOCATION	0x0C5E0000
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145

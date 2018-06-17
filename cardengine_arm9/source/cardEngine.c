@@ -30,8 +30,8 @@
 #define _1MB_READ_SIZE 0x100000
 
 #define CACHE_ADRESS_START 0x0C420000
-#define CACHE_ADRESS_SIZE 0x1E0000
-#define CACHE_SLOTS 0xF
+#define CACHE_ADRESS_SIZE 0x1C0000
+#define CACHE_SLOTS 0xE
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
