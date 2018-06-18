@@ -19,6 +19,7 @@
 .global ntrTouch
 .global romread_LED
 .global gameSoftReset
+.global runViaIRQ
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -46,6 +47,8 @@ ntrTouch:
 romread_LED:
 	.word	0x00000000
 gameSoftReset:
+	.word	0x00000000
+runViaIRQ:
 	.word	0x00000000
 cheat_data_offset:    
 	.word	cheat_data - patches_offset

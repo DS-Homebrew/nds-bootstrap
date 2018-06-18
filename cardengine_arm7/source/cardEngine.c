@@ -51,12 +51,12 @@ extern u32 consoleModel;
 extern u32 ntrTouch;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
+extern u32 runViaIRQ;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile * romFile = (aFile *)0x37D5000;
 static aFile savFile;
 
-static bool runViaHalt = false;
-static bool saveWritten = false;
+//static bool saveWritten = false;
 static bool saveInProgress = false;
 static bool readInProgress = false;
 static int accessCounter = 0;
@@ -293,7 +293,7 @@ void runCardEngineCheck (void) {
 		initLogging();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800 && !readInProgress)
 		{
 			readInProgress = true;
 			log_arm9();
@@ -301,7 +301,7 @@ void runCardEngineCheck (void) {
 			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08 && !readInProgress)
 		{
 			readInProgress = true;
 			cardRead_arm9();
@@ -309,7 +309,7 @@ void runCardEngineCheck (void) {
 			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800 && !readInProgress)
 		{
 			readInProgress = true;
 			asyncCardRead_arm9();
@@ -338,7 +338,7 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
-	runCardEngineCheck();
+	if (runViaIRQ) runCardEngineCheck();
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;

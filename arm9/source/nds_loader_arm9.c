@@ -463,7 +463,7 @@ int loadCheatData (u32* cheat_data) {
     nocashMessage("cardengineArm7");
     nocashMessage(tohex(cardengineArm7));
     
-    u32 cheatDataOffset = cardengineArm7[11];
+    u32 cheatDataOffset = cardengineArm7[12];
     nocashMessage("cheatDataOffset");
     nocashMessage(tohex(cheatDataOffset));
     

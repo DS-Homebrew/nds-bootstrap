@@ -26,6 +26,8 @@ extern unsigned long ntrTouch;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 
+extern u32 runViaIRQ;
+
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
@@ -298,6 +300,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[8] = ntrTouch;
 	cardEngineLocation[9] = romread_LED;
 	cardEngineLocation[10] = gameSoftReset;
+	cardEngineLocation[11] = runViaIRQ;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 

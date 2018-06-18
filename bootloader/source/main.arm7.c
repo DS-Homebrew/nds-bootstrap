@@ -551,6 +551,15 @@ void loadBinary_ARM7 (aFile file)
 	REG_SCFG_ROM = 0x703;
 }
 
+u32 runViaIRQ = false;
+
+void setToRunViaIRQ(void) {
+	if((ROM_TID & 0x00FFFFFF) == 0x414259)	// Bomberman 2
+	{
+		runViaIRQ = true;
+	}
+}
+
 u32 enableExceptionHandler = true;
 
 void setArm9Stuff(void) {
@@ -730,6 +739,7 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
+	setToRunViaIRQ();
 	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
