@@ -32,11 +32,15 @@ u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
 u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 u32 a7JumpTableSignatureV3_1[3] = {0xE92D4FF0,0xE24DD004,0xE59F91F8};
 u32 a7JumpTableSignatureV3_2[3] = {0xE92D4FF0,0xE24DD004,0xE59F91D4};
-u32 a7JumpTableSignatureV4_1[3] = {0xE92D41F0,0xE59F4224,0xE3A05000};
+u32 a7JumpTableSignatureV4_1[3] = {0xE92D41F0,0xE59F4224,0xE3A05000}; 
 u32 a7JumpTableSignatureV4_2[3] = {0xE92D41F0,0xE59F4200,0xE3A05000};
 
 u32 a7JumpTableSignatureUniversal[3] = {0xE592000C,0xE5921010,0xE5922014};
+u32 a7JumpTableSignatureUniversal_pt2[3] = {0xE5920010,0xE592100C,0xE5922014};
+u32 a7JumpTableSignatureUniversal_pt3[2] = {0xE5920010,0xE5921014};
 u32 a7JumpTableSignatureUniversal_2[3] = {0xE593000C,0xE5931010,0xE5932014};
+u32 a7JumpTableSignatureUniversal_2_pt2[3] = {0xE5930010,0xE593100C,0xE5932014};
+u32 a7JumpTableSignatureUniversal_2_pt3[2] = {0xE5930010,0xE5931014};
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
 u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B7A3};
@@ -796,9 +800,40 @@ u32 savePatchUniveral (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
     u32 JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
         a7JumpTableSignatureUniversal, 3, 1);
 
+	u32 EepromReadJump = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal, 3, 1);
+		
+	u32 EepromWriteJump = getOffset((u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3, 1);
+		
+	u32 EepromProgJump = getOffset((u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3, 1);
+	
+	u32 EepromVerifyJump = getOffset((u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3, 1);
+		
+	u32 EepromEraseJump = getOffset((u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt3, 2, 1);
+	
 	if(!JumpTableFunc){
 		JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal_2, 3, 1);
+			a7JumpTableSignatureUniversal_2, 3, 1);
+
+		EepromReadJump = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2, 3, 1);
+			
+		EepromWriteJump = getOffset((u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
+			
+		EepromProgJump = getOffset((u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
+		
+		EepromVerifyJump = getOffset((u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
+			
+		EepromEraseJump = getOffset((u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt3, 2, 1);
+		
 	}
 		
 	dbg_printf("JumpTableFunc: ");
@@ -897,48 +932,48 @@ u32 savePatchUniveral (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 			arm7Function[6]);
 		*cardRead=patchCardRead;*/
 
-		u32* eepromRead = (u32*) (JumpTableFunc + 0xC);
+		u32* eepromRead = (u32*) (EepromReadJump + 0xC);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0xC  - vAddrOfRelocSrc + relocDestAtSharedMem ;
+		srcAddr = EepromReadJump + 0xC  - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchRead = generateA7Instr(srcAddr,
 			arm7Function[5]);
 		*eepromRead=patchRead;
 
-		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x24);
+		u32* eepromPageWrite = (u32*) (EepromWriteJump + 0xC);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x24 - vAddrOfRelocSrc + relocDestAtSharedMem ;
+		srcAddr = EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchWrite = generateA7Instr(srcAddr,
 			arm7Function[3]);
 		*eepromPageWrite=patchWrite;
 
-		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x3C);
+		u32* eepromPageProg = (u32*) (EepromProgJump + 0xC);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x3C - vAddrOfRelocSrc + relocDestAtSharedMem ;
+		srcAddr = EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchProg = generateA7Instr(srcAddr,
 			arm7Function[4]);
 		*eepromPageProg=patchProg;
 
-		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x54);
+		u32* eepromPageVerify = (u32*) (EepromVerifyJump + 0xC);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
-		srcAddr =  JumpTableFunc + 0x54 - vAddrOfRelocSrc + relocDestAtSharedMem ;
+		srcAddr =  EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchVerify = generateA7Instr(srcAddr,
 			arm7Function[2]);
 		*eepromPageVerify=patchVerify;
 
 
-		u32* eepromPageErase = (u32*) (JumpTableFunc + 0x68);
+		u32* eepromPageErase = (u32*) (EepromEraseJump + 0x8);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x68 - vAddrOfRelocSrc + relocDestAtSharedMem ;
+		srcAddr = EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem ;
 		u32 patchErase = generateA7Instr(srcAddr,
 			arm7Function[1]);
 		*eepromPageErase=patchErase; 
