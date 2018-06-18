@@ -518,20 +518,20 @@ void loadBinary_ARM7 (aFile file)
 	}
 
 	// "Chrono Trigger (Japan)"
-	if(ROM_TID == 0x4a555159){
-		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
-		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
-	}
+	//if(ROM_TID == 0x4a555159){
+	//	*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
+	//	*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
+	//	*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
+	//	*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
+	//}
 
 	// "Chrono Trigger (USA/Europe)"
-	if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
-		*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
-		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
-		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
-	}
+	//if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
+	//	*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
+	//	*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
+	//	*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
+	//	*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
+	//}
 
 	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
 	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
@@ -539,6 +539,11 @@ void loadBinary_ARM7 (aFile file)
 		*(u16*)(-0x02037a34) = 0x46c0;
 		*(u32*)(0x0216ac0c) = 0x0001fffb;
 	}*/
+
+	// "WarioWare: DIY (USA)"
+	if(ROM_TID == 0x45524F55){
+		*(u32*)(0x02003114) = 0xE12FFF1E; //mov r0, #0
+	}
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
