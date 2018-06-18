@@ -349,7 +349,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	// Find the card read
 	u32 cardReadEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		getOffset((u32*)ndsHeader->arm9destination+0x8000, 0x00300000,//ndsHeader->arm9binarySize,
 			(u32*)a9cardReadSignature, 2, 1);
 	if (!cardReadEndOffset) {
 		dbg_printf("Card read end not found. Trying thumb\n");
