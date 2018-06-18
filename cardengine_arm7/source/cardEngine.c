@@ -330,6 +330,18 @@ void myIrqHandlerFIFO(void) {
 	calledViaIPC = true;
 }
 
+//---------------------------------------------------------------------------------
+void mySwiHalt(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("mySwiHalt");
+	#endif	
+	
+	calledViaIPC = false;
+
+	if (!runViaIRQ) runCardEngineCheck();
+}
+
 
 void myIrqHandlerVBlank(void) {
 	#ifdef DEBUG		
