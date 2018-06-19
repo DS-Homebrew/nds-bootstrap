@@ -735,16 +735,6 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 5 dots
 
-	setToRunViaIRQ();
-	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
-	if(errorCode == ERR_NONE) {
-		nocashMessage("card hook Sucessfull");
-	} else {
-		nocashMessage("error during card hook");
-		errorOutput();
-	}
-	increaseLoadBarLength();	// 7 dots
-
 	errorCode = patchCardNds(NDS_HEAD, ENGINE_LOCATION_ARM7, ENGINE_LOCATION_ARM9, params, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("patch card Sucessfull");
@@ -754,6 +744,15 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
+	setToRunViaIRQ();
+	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+	if(errorCode == ERR_NONE) {
+		nocashMessage("card hook Sucessfull");
+	} else {
+		nocashMessage("error during card hook");
+		errorOutput();
+	}
+	increaseLoadBarLength();	// 7 dots
  
 
 
