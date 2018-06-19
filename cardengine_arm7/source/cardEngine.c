@@ -350,7 +350,7 @@ void myIrqHandlerVBlank(void) {
 	
 	calledViaIPC = false;
 	
-	if (runViaIRQ) runCardEngineCheck();
+	runCardEngineCheck(); //LEAVE THIS ALONE. IT BREAKS STUFF WHEN IT'S NOT LIKE THIS. PLEASE AND THANKS.
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
