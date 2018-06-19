@@ -60,12 +60,13 @@ u32 j_HaltSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038010F3};
 u32 j_HaltSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x038011BF};
 u32 j_HaltSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03803597};
 u32 j_HaltSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038040C3};
-u32 j_HaltSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
-u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
-u32 j_HaltSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x038043E3};
-u32 j_HaltSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
-u32 j_HaltSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
-u32 j_HaltSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x0380538B};
+u32 j_HaltSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AB};
+u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
+u32 j_HaltSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
+u32 j_HaltSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x038043E3};
+u32 j_HaltSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
+u32 j_HaltSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
+u32 j_HaltSignature3Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x0380538B};
 u32 j_HaltSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x0380064B};
 u32 j_HaltSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038008C3};
 u32 j_HaltSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x038008CF};
@@ -90,12 +91,13 @@ u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
 u32 j_GetPitchTableSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03801149};
 u32 j_GetPitchTableSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
 u32 j_GetPitchTableSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03804119};
-u32 j_GetPitchTableSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03804305};
-u32 j_GetPitchTableSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03804395};
-u32 j_GetPitchTableSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03804439};
-u32 j_GetPitchTableSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03804559};
-u32 j_GetPitchTableSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804615};
-u32 j_GetPitchTableSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x038053E1};
+u32 j_GetPitchTableSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03804301};
+u32 j_GetPitchTableSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03804305};
+u32 j_GetPitchTableSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03804395};
+u32 j_GetPitchTableSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03804439};
+u32 j_GetPitchTableSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804559};
+u32 j_GetPitchTableSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x03804615};
+u32 j_GetPitchTableSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x038053E1};
 u32 j_GetPitchTableSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x038006A1};
 u32 j_GetPitchTableSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03800919};
 u32 j_GetPitchTableSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03800925};
@@ -2967,6 +2969,12 @@ void patchSwiHalt (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 		dbg_printf("swiHalt SDK3 call alt 10 not found\n");
 		swiHaltOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_HaltSignature3Alt11, 3, 1);
+	}
+	if (!swiHaltOffset) {
+		dbg_printf("swiHalt SDK3 call alt 11 not found\n");
+		swiHaltOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
 				  (u32*)j_HaltSignature4, 3, 1);
 	}
 	if (!swiHaltOffset) {
@@ -3155,6 +3163,12 @@ void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 9 not found\n");
+		swiGetPitchTableOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
+				  (u32*)j_GetPitchTableSignature3Alt10, 3, 1);
+	}
+	if (!swiGetPitchTableOffset) {
+		dbg_printf("swiGetPitchTable SDK3 call alt 10 not found\n");
 		swiGetPitchTableOffset =   
 			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
 				  (u32*)j_GetPitchTableSignature4, 3, 1);
