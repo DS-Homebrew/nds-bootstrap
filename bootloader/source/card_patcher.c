@@ -23,6 +23,8 @@
 #include "cardengine_arm7_bin.h"
 #include "debugToFile.h"
 
+extern u32 ROM_TID;
+
 // Subroutine function signatures arm7
 u32 relocateStartSignature[1]  = {0x027FFFFA};
 u32 a7cardReadSignature[2]     = {0x04100010,0x040001A4};
@@ -361,9 +363,17 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	bool usesThumb = false;
 
 	// Find the card read
-	u32 cardReadEndOffset =  
+	u32 cardReadEndOffset = 0;
+	if (ROM_TID == 0x45524F55) {
+		// Start at 0x3800 for "WarioWare: DIY (USA)"
+		cardReadEndOffset =  
 		getOffset((u32*)ndsHeader->arm9destination+0x3800, 0x00300000,//ndsHeader->arm9binarySize,
 			(u32*)a9cardReadSignature, 2, 1);
+	} else {
+		cardReadEndOffset =  
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignature, 2, 1);
+	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Card read end not found. Trying thumb\n");
 		cardReadEndOffset =  
@@ -3238,7 +3248,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	u32 cardCheckPullOutOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
               (u32*)cardCheckPullOutSignature, 4, 1);
     if (!cardCheckPullOutOffset) {
         dbg_printf("Card check pull out not found\n");
@@ -3249,7 +3259,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	u32 cardIrqEnableOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000,//, ndsHeader->arm9binarySize,
+        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
               (u32*)irqEnableStartSignature, 4, 1);
     if (!cardIrqEnableOffset) {
         dbg_printf("irq enable not found\n");
