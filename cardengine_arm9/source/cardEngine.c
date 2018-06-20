@@ -29,9 +29,13 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE 0x100000
 
-#define CACHE_ADRESS_START 0x0C420000
-#define CACHE_ADRESS_SIZE 0x1E0000
-#define CACHE_SLOTS 0xF
+#define CACHE_ADRESS_START 0x0C820000
+#define retail_CACHE_ADRESS_SIZE 0x7E0000
+#define dev_CACHE_ADRESS_SIZE 0x17E0000
+#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
+#define retail_CACHE_SLOTS 0x3F
+#define dev_CACHE_SLOTS 0xBF
+#define HGSS_CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -40,16 +44,18 @@ extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 cacheDescriptor [CACHE_SLOTS] = {0xffffffff};
-static u32 cacheCounter [CACHE_SLOTS];
+static u32 cacheDescriptor [dev_CACHE_SLOTS] = {0xffffffff};
+static u32 cacheCounter [dev_CACHE_SLOTS];
 static u32 accessCounter = 0;
 
+static u16 cacheSlots = retail_CACHE_SLOTS;
 static u32 cacheReadSizeSubtract = 0;
 
 static u32 readNum = 0;
 static bool alreadySetMpu = false;
 
 static bool flagsSet = false;
+extern u32 ROM_TID;
 extern u32 romSize;
 extern u32 consoleModel;
 extern u32 enableExceptionHandler;
@@ -94,7 +100,7 @@ void setExceptionHandler2() {
 int allocateCacheSlot() {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for(int i=0; i<CACHE_SLOTS; i++) {
+	for(int i=0; i<cacheSlots; i++) {
 		if(cacheCounter[i]<=lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -105,7 +111,7 @@ int allocateCacheSlot() {
 }
 
 int getSlotForSector(u32 sector) {
-	for(int i=0; i<CACHE_SLOTS; i++) {
+	for(int i=0; i<cacheSlots; i++) {
 		if(cacheDescriptor[i]==sector) {
 			return i;
 		}
@@ -151,6 +157,13 @@ int cardRead (u32* cacheStruct) {
 	}
 	
 	if(!flagsSet) {
+		if ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049) // Pokemon SoulSilver
+		{
+			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
+		}
+		else if (consoleModel > 0) cacheSlots = dev_CACHE_SLOTS;
+
 		romSize += 0x1000;
 
 		if (enableExceptionHandler) {
