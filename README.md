@@ -18,6 +18,6 @@ Firstly, if you want to self compile, check [travis](https://travis-ci.org/aheza
 To self-compile this, you'll need to have DevKitPro with DevKitARM. You'll also need the latest libnds. Once all that is downloaded, git clone this repo, open command prompt, navigate to the folder, and type `make`. It should compile nds-bootstrap. If there is an error, let us know.
 
 In order to use this, you'll need to get a frontend. Here are some frontends that we recommend:
-- [TWLoader](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
+- [TWLoader(Discontinued](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
 - [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases) is another 3DS frontend, but based off the Nintendo DS<sup>i</sup> homebrew menu.
-- [SRLoader](https://github.com/Robz8/SRLoader) is a port of the famous TWLoader to the DS<sup>i</sup>.
+- [DSIMenuPlusPlus](https://github.com/Robz8/SRLoader) is a port of the dsi menu to the 3ds,dsi,and ds<sup>i</sup>.
