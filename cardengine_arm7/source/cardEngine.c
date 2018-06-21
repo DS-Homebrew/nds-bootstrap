@@ -35,9 +35,9 @@
 #define SAVE_LOCATION	0x0C5E0000
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
-extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
-extern int lockMutex(void);					    // Fixes implicit declaration
-extern int unlockMutex(void);					// Fixes implicit declaration @ line 223
+extern int tryLockMutex(int * addr);					// Fixes implicit declaration @ line 145
+extern int lockMutex(int * addr);					    // Fixes implicit declaration
+extern int unlockMutex(int * addr);					// Fixes implicit declaration @ line 223
 
 static bool initialized = false;
 static bool initializedIRQ = false;
@@ -62,6 +62,9 @@ static int accessCounter = 0;
 static int softResetTimer = 0;
 
 bool ndmaUsed = false;
+
+static int cardEgnineCommandMutex = 0;
+static int saveMutex = 0;
 
 void initialize() {
 	if(!initialized) {
@@ -287,7 +290,7 @@ void runCardEngineCheck (void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-	if(tryLockMutex()) {
+	if(tryLockMutex(&cardEgnineCommandMutex)) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
@@ -308,7 +311,7 @@ void runCardEngineCheck (void) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
-		unlockMutex();
+		unlockMutex(&cardEgnineCommandMutex);
 	}
 }
 
@@ -320,7 +323,7 @@ void runCardEngineCheckHalt (void) {
 
     // lockMutex should be possible to be used here instead of tryLockMutex since the execution of irq is not blocked
     // to be checked
-	if(lockMutex()) {
+	if(lockMutex(&cardEgnineCommandMutex)) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
@@ -341,7 +344,7 @@ void runCardEngineCheckHalt (void) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
-		unlockMutex();
+		unlockMutex(&cardEgnineCommandMutex);
 	}
 }
 
@@ -382,23 +385,25 @@ void myIrqHandlerVBlank(void) {
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
-	} else if (lockMutex()) {
+	} else 
 		if(softResetTimer == 60*2) {
-			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
-			i2cWriteRegister(0x4a,0x70,0x01);
-			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into DSiMenu++
+            if (lockMutex(&saveMutex)) {
+    			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
+    			i2cWriteRegister(0x4a,0x70,0x01);
+    			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into DSiMenu++
+                unlockMutex(&saveMutex);
+            }
 		}
 		softResetTimer++;
-        unlockMutex();
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
 	} else if (gameSoftReset) {
-        if(lockMutex()) {
+        if(lockMutex(&saveMutex)) {
     		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
     		i2cWriteRegister(0x4a,0x70,0x01);
     		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
-         unlockMutex();
+         unlockMutex(&saveMutex);
         }
 	}
 
@@ -657,12 +662,18 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	#endif	
 
 	initialize();
-	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
-	//	memcpy(SAVE_LOCATION+dst,src,len);
-	//}
-	fileWrite(src,*savFile,dst,len,-1);
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+    
+    int oldIME = enterCriticalSection();	
+    if (lockMutex(&saveMutex)) {
+    	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+    	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
+    	//	memcpy(SAVE_LOCATION+dst,src,len);
+    	//}
+    	fileWrite(src,*savFile,dst,len,-1);
+    	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+        unlockMutex(&saveMutex);
+	}
+    leaveCriticalSection(oldIME);
 	
 	return true;
 }
@@ -680,12 +691,19 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	#endif	
 
     initialize();
-	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(SAVE_LOCATION+dst,src,len);
 	//}
-	fileWrite(src,*savFile,dst,len,-1);
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+    int oldIME = enterCriticalSection();	
+    if (lockMutex(&saveMutex)) {
+    	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
+    	fileWrite(src,*savFile,dst,len,-1);
+        i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+        unlockMutex(&saveMutex);
+	}
+    leaveCriticalSection(oldIME);
+
 	
 	return true;
 }
