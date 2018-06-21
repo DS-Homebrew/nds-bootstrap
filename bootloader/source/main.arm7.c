@@ -517,6 +517,39 @@ void loadBinary_ARM7 (aFile file)
 		//fixes not enough memory error
 		*(u32*)(0x0204cdbc) = 0xe1a00000; //nop
 	}
+	
+	// 0735 - Castlevania - Portrait of Ruin (USA)
+	if(ROM_TID == 0x45424341){
+		*(u32*)(0x02007910) = 0xeb02508e;
+		*(u32*)(0x02007918) = 0xea000004;
+		*(u32*)(0x02007a00) = 0xeb025052;
+		*(u32*)(0x02007a08) = 0xe59f1030;
+		*(u32*)(0x02007a0c) = 0xe59f0028;
+		*(u32*)(0x02007a10) = 0xe0281097;
+		*(u32*)(0x02007a14) = 0xea000003;	
+	}
+	
+	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
+	if(ROM_TID == 0x4a424341){
+		*(u32*)(0x02007910) = 0xeb0250b0;
+		*(u32*)(0x02007918) = 0xea000004;
+		*(u32*)(0x02007a00) = 0xeb025074;
+		*(u32*)(0x02007a08) = 0xe59f1030;
+		*(u32*)(0x02007a0c) = 0xe59f0028;
+		*(u32*)(0x02007a10) = 0xe0281097;
+		*(u32*)(0x02007a14) = 0xea000003;	
+	}
+	
+	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
+	if(ROM_TID == 0x4a424341){
+		*(u32*)(0x02007b00) = 0xeb025370;
+		*(u32*)(0x02007b08) = 0xea000004;
+		*(u32*)(0x02007bf0) = 0xeb025334;
+		*(u32*)(0x02007bf8) = 0xe59f1030;
+		*(u32*)(0x02007bfc) = 0xe59f0028;
+		*(u32*)(0x02007c00) = 0xe0281097;
+		*(u32*)(0x02007c04) = 0xea000003;	
+	}
 
 	// "Chrono Trigger (Japan)"
 	//if(ROM_TID == 0x4a555159){
