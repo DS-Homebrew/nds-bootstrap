@@ -32,10 +32,10 @@
 #define CACHE_ADRESS_START 0x0C820000
 #define retail_CACHE_ADRESS_SIZE 0x7E0000
 #define dev_CACHE_ADRESS_SIZE 0x17E0000
-#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
+//#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
 #define retail_CACHE_SLOTS 0x3F
 #define dev_CACHE_SLOTS 0xBF
-#define HGSS_CACHE_SLOTS 0xF
+//#define HGSS_CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
@@ -157,12 +157,12 @@ int cardRead (u32* cacheStruct) {
 	}
 	
 	if(!flagsSet) {
-		if ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
+		/*if ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
 		|| (ROM_TID & 0x00FFFFFF) == 0x475049) // Pokemon SoulSilver
 		{
 			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
 		}
-		else if (consoleModel > 0) cacheSlots = dev_CACHE_SLOTS;
+		else*/ if (consoleModel > 0) cacheSlots = dev_CACHE_SLOTS;
 
 		romSize += 0x1000;
 
