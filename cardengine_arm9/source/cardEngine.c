@@ -255,7 +255,7 @@ int cardRead (u32* cacheStruct) {
 				len2 -= len2 % 32;
 			}
 
-			if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+			/*if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {*/
 				#ifdef DEBUG
 				// send a log command for debug purpose
 				// -------------------------------------
@@ -273,13 +273,13 @@ int cardRead (u32* cacheStruct) {
 				#endif
 
 				// copy directly
-				fastCopy32(buffer+(src-sector),dst,len2);
+				memcpy(dst,buffer+(src-sector),len2);
 
 				// update cardi common
 				cardStruct[0] = src + len2;
 				cardStruct[1] = dst + len2;
 				cardStruct[2] = len - len2;
-			} else {
+			/*} else {
 				#ifdef DEBUG
 				// send a log command for debug purpose
 				// -------------------------------------
@@ -293,14 +293,14 @@ int cardRead (u32* cacheStruct) {
 				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
-				// -------------------------------------*/
+				// -------------------------------------
 				#endif
 
 				// read via the 512b ram cache
-				fastCopy32(buffer+(page-sector), cacheBuffer, 512);
+				memcpy(cacheBuffer, buffer+(page-sector), 512);
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
-			}
+			}*/
 			len = cardStruct[2];
 			if(len>0) {
 				src = cardStruct[0];
