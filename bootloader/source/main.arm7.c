@@ -541,7 +541,7 @@ void loadBinary_ARM7 (aFile file)
 	}
 	
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
-	if(ROM_TID == 0x4a424341){
+	if(ROM_TID == 0x50424341){
 		*(u32*)(0x02007b00) = 0xeb025370;
 		*(u32*)(0x02007b08) = 0xea000004;
 		*(u32*)(0x02007bf0) = 0xeb025334;
