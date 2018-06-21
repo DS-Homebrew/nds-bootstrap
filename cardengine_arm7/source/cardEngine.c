@@ -385,7 +385,7 @@ void myIrqHandlerVBlank(void) {
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
-	} else 
+	} else { 
 		if(softResetTimer == 60*2) {
             if (lockMutex(&saveMutex)) {
     			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
