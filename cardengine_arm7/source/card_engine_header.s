@@ -389,22 +389,28 @@ saveSize:
 tryLockMutex:
 adr     r1, mutex    
 mov r2, #1
-mutex_loop:
     swp r0,r2, [r1]
-    cmp r0, #1
-    beq mutex_fail
-
-mutex_success:
-	mov r2, #1
-    str r2, [r1]
+    cmp r0, r2
+    beq trymutex_fail	
 	mov r0, #1
-	b mutex_exit
-
-mutex_fail:
+	b mutex_exit	
+trymutex_fail:
 	mov r0, #0
-
 mutex_exit:
 	bx  lr
+
+.global lockMutex
+.type	lockMutex STT_FUNC
+lockMutex:
+  adr r1, mutex    
+  mov r2, #1
+mutex_loop:
+  swp r0,r2, [r1]
+  cmp r0,r2
+  beq mutex_loop    
+  mov r0, #1	
+  bx  lr
+
 
 
 .global unlockMutex

@@ -90,6 +90,7 @@ extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 
 static aFile * romFile = (aFile *)0x37D5000;
+static aFile * savFile = ((aFile *)0x37D5000)+1;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -709,6 +710,13 @@ void arm7_main (void) {
 	}
     
     buildFatTableCache(romFile, 3);
+    
+    *savFile = getFileFromCluster(saveFileCluster);
+    
+    if (savFile->firstCluster != CLUSTER_FREE)
+    {
+         buildFatTableCache(savFile, 3);
+	}
 
 	int errorCode;
 

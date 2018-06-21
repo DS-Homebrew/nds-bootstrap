@@ -36,6 +36,7 @@
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(void);					// Fixes implicit declaration @ line 145
+extern int lockMutex(void);					    // Fixes implicit declaration
 extern int unlockMutex(void);					// Fixes implicit declaration @ line 223
 
 static bool initialized = false;
@@ -54,18 +55,15 @@ extern u32 gameSoftReset;
 extern u32 runViaIRQ;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile * romFile = (aFile *)0x37D5000;
-static aFile savFile;
+static aFile * savFile = ((aFile *)0x37D5000)+1;
 
-//static bool saveWritten = false;
-static bool saveInProgress = false;
-static bool readInProgress = false;
 static int accessCounter = 0;
 
 static int softResetTimer = 0;
 
 bool ndmaUsed = false;
 
-void initLogging() {
+void initialize() {
 	if(!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
@@ -82,10 +80,10 @@ void initLogging() {
         }
         #endif
         
-		if(saveCluster>0)
+		/*if(saveCluster>0)
 			savFile = getFileFromCluster(saveCluster);
 		else
-			savFile.firstCluster = CLUSTER_FREE;
+			savFile.firstCluster = CLUSTER_FREE;*/
             
 		#ifdef DEBUG		
 		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG", 3);
@@ -290,35 +288,63 @@ void runCardEngineCheck (void) {
 	#endif	
 
 	if(tryLockMutex()) {
-		initLogging();
+		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800 && !readInProgress)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
 		{
-			readInProgress = true;
 			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08 && !readInProgress)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
 		{
-			readInProgress = true;
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			readInProgress = false;
 		}
 
-		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800 && !readInProgress)
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
 		{
-			readInProgress = true;
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-			readInProgress = false;
 		}
 		unlockMutex();
 	}
 }
+
+void runCardEngineCheckHalt (void) {
+	//dbg_printf("runCardEngineCheckHalt\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheckHalt");
+	#endif	
+
+    // lockMutex should be possible to be used here instead of tryLockMutex since the execution of irq is not blocked
+    // to be checked
+	if(lockMutex()) {
+		initialize();
+
+		//nocashMessage("runCardEngineCheck mutex ok");
+		if(*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		{
+			log_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
+		{
+			cardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+
+		if(*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
+		{
+			asyncCardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
+		unlockMutex();
+	}
+}
+
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -328,6 +354,8 @@ void myIrqHandlerFIFO(void) {
 	#endif	
 	
 	calledViaIPC = true;
+    
+    runCardEngineCheck();
 }
 
 //---------------------------------------------------------------------------------
@@ -339,7 +367,7 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	if (!runViaIRQ) runCardEngineCheck();
+	/*if (!runViaIRQ)*/ runCardEngineCheckHalt();
 }
 
 
@@ -354,20 +382,24 @@ void myIrqHandlerVBlank(void) {
 	
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
-	} else if (!saveInProgress) {
+	} else if (lockMutex()) {
 		if(softResetTimer == 60*2) {
 			memcpy((u32*)0x02000300,sr_data_srloader,0x020);
 			i2cWriteRegister(0x4a,0x70,0x01);
 			i2cWriteRegister(0x4a,0x11,0x01);	// Reboot into DSiMenu++
 		}
 		softResetTimer++;
+        unlockMutex();
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-	} else if (gameSoftReset && !saveInProgress) {
-		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
-		i2cWriteRegister(0x4a,0x70,0x01);
-		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
+	} else if (gameSoftReset) {
+        if(lockMutex()) {
+    		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
+    		i2cWriteRegister(0x4a,0x70,0x01);
+    		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
+         unlockMutex();
+        }
 	}
 
 	if (REG_SCFG_EXT == 0 || ntrTouch) {
@@ -568,7 +600,7 @@ u32 myIrqEnable(u32 irq) {
 void irqIPCSYNCEnable() {	
 	if(!initializedIRQ) {
 		int oldIME = enterCriticalSection();	
-		initLogging();	
+		initialize();	
 		#ifdef DEBUG		
 		dbg_printf("\nirqIPCSYNCEnable\n");	
 		#endif	
@@ -607,7 +639,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(dst,SAVE_LOCATION+src,len);
 	//} else {
-		fileRead(dst,savFile,src,len,-1);
+		fileRead(dst,*savFile,src,len,-1);
 	//}
 	return true;
 }
@@ -624,14 +656,13 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	saveInProgress = true;
+	initialize();
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(SAVE_LOCATION+dst,src,len);
 	//}
-	fileWrite(src,savFile,dst,len,-1);
+	fileWrite(src,*savFile,dst,len,-1);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-	saveInProgress = false;
 	
 	return true;
 }
@@ -648,14 +679,13 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	saveInProgress = true;
+    initialize();
 	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(SAVE_LOCATION+dst,src,len);
 	//}
-	fileWrite(src,savFile,dst,len,-1);
+	fileWrite(src,*savFile,dst,len,-1);
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-	saveInProgress = false;
 	
 	return true;
 }
@@ -708,6 +738,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+    initialize();
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	//ndmaUsed = false;
     #ifdef DEBUG	
