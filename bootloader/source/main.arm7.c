@@ -552,20 +552,34 @@ void loadBinary_ARM7 (aFile file)
 	}
 
 	// "Chrono Trigger (Japan)"
-	//if(ROM_TID == 0x4a555159){
-	//	*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
-	//	*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
-	//	*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
-	//	*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
-	//}
+	if(ROM_TID == 0x4a555159){
+		decompressLZ77Backwards((uint8_t*)ARM9_DST, ARM9_LEN);
+		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
+		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
+	}
 
 	// "Chrono Trigger (USA/Europe)"
-	//if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
-	//	*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
-	//	*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
-	//	*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
-	//	*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
-	//}
+	if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
+		decompressLZ77Backwards((uint8_t*)ARM9_DST, ARM9_LEN);
+		*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
+		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
+	}
+	
+	// "Dementium II (USA/EUR)"
+	if(ROM_TID == 0x45454442 || ROM_TID == 0x50454442){
+		*(u32*)(0x020e9120) = 0xe3a00002;
+		*(u32*)(0x020e9124) = 0xea000029;
+	}
+	
+	// "Dementium II: Tozasareta Byoutou (JPN)"
+	if(ROM_TID == 0x4a454442){
+		*(u32*)(0x020d9f60) = 0xe3a00005;
+		*(u32*)(0x020d9f68) = 0xea000029;
+	}
 
 	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
 	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
