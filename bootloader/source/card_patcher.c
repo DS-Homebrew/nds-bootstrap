@@ -114,9 +114,13 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
 // sdk < 4 version
 u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
-u32 a9cardReadSignatureThumb1[2]    = {0xFFFFFE00, 0x040001A4};
+u32 a9cardReadSignatureThumb1[2]    = {0x040001A4, 0x00000200};
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
-u32 cardReadStartSignatureThumb1[1] = {0xB082B5F8};
+u32 cardReadStartSignatureThumb1[1] = {0xB083B5F0};
+
+// sdk > 3 version
+u32 a9cardReadSignatureThumb3[2]    = {0xFFFFFE00, 0x040001A4};
+u32 cardReadStartSignatureThumb3[1] = {0xB082B5F8};
 
 // sdk > 4 version
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
@@ -149,8 +153,10 @@ u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
-u32 cardReadDmaStartSignatureThumb[1]   = {0xB084B5F8};
-u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
+u32 cardReadDmaStartSignatureThumb1[1]   = {0xB083B5F0};
+u32 cardReadDmaStartSignatureThumb3[1]   = {0xB084B5F8};
+u32 cardReadDmaEndSignatureAll[2]   = {0x01FF8000,0x000001FF};     
+u32 cardReadDmaEndSignatureThumb1[2]   = {0x01FF8000,0x02000000};     
 
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
  
@@ -314,11 +320,16 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* a9cardReadSignatureThumb = a9cardReadSignatureThumb1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardReadStartSignatureThumb = cardReadStartSignatureThumb1;
+	u32* cardReadDmaEndSignature = cardReadDmaEndSignatureAll;
 	u32* cardPullOutSignature = cardPullOutSignature1;
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
 	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
+	if(moduleParams->sdk_version > 0x3000000) {
+		a9cardReadSignatureThumb = a9cardReadSignatureThumb3;
+		cardReadStartSignatureThumb = cardReadStartSignatureThumb3;
+	}
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardReadCachedEndSignature = cardReadCachedEndSignature3;
 		mpuInitRegion2Data = mpuInitRegion2Data3;
@@ -390,6 +401,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			return 0;
 		} else {
 			usesThumb = true;
+			if(moduleParams->sdk_version < 0x3000000) {
+				cardReadDmaEndSignature = cardReadDmaEndSignatureThumb1;
+			}
 		}
 	}
 	debug[1] = cardReadEndOffset;
@@ -463,10 +477,16 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if (usesThumb) {
 			//dbg_printf("Card read dma start not found\n");
 			cardReadDmaOffset =   
-				getOffset((u32*)cardReadDmaEndOffset, -0x200,
-					  (u32*)cardReadDmaStartSignatureThumb, 1, -1);
+				getOffset((u32*)cardReadDmaEndOffset, -0x100,
+					  (u32*)cardReadDmaStartSignatureThumb1, 1, -1);
 			if (!cardReadDmaOffset) {
-				dbg_printf("Thumb card read dma start not found\n");
+				dbg_printf("Thumb card read dma start 1 not found\n");
+				cardReadDmaOffset =   
+				getOffset((u32*)cardReadDmaEndOffset, -0x200,
+					  (u32*)cardReadDmaStartSignatureThumb3, 1, -1);
+			}
+			if (!cardReadDmaOffset) {
+				dbg_printf("Thumb card read dma start 3 not found\n");
 			}
 		} else {
 			cardReadDmaOffset =   
