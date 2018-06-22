@@ -20,6 +20,6 @@ To self-compile this, you'll need to have DevKitPro with DevKitARM. You'll also 
 # Frontends
 
 In order to use this, you'll need to get a frontend. Here are some frontends that we recommend:
-- [TWLoader(Discontinued)(https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
+- [TWLoader(Discontinued)](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
 - [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases) is another 3DS frontend, but based off the Nintendo DS<sup>i</sup> homebrew menu.
 - [DSIMenuPlusPlus](https://github.com/Robz8/SRLoader) is a port of the dsi menu to the 3ds,and ds<sup>i</sup>.
