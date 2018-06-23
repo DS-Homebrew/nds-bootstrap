@@ -21,6 +21,7 @@ before_install:
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
   - yes | sudo dkp-pacman -Syu devkitARM --needed
+  - yes | sudo dkp-pacman -Syu libnds --needed
 
 script:
   - make
