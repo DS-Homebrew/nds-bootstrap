@@ -142,13 +142,6 @@ u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
 //u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
-u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
-u32 cardReadCachedEndSignature1[4]   = {0xE5950020,0xE3500000,0x13A00001,0x03A00000};
-
-u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
-
-u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
-u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
 
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
@@ -322,8 +315,6 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32* cardReadStartSignatureThumb = cardReadStartSignatureThumb1;
 	u32* cardReadDmaEndSignature = cardReadDmaEndSignatureAll;
 	u32* cardPullOutSignature = cardPullOutSignature1;
-	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
-	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	if(moduleParams->sdk_version > 0x3000000) {
@@ -331,14 +322,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		cardReadStartSignatureThumb = cardReadStartSignatureThumb3;
 	}
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
-		cardReadCachedEndSignature = cardReadCachedEndSignature3;
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	} else if(moduleParams->sdk_version > 0x4000000) {
 		a9cardReadSignature = a9cardReadSignature4;
 		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
-		cardReadCachedStartSignature = cardReadCachedStartSignature4;
-		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	}
 
@@ -442,27 +430,6 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_hexa(cardPullOutOffset);
 		dbg_printf("\n");
 	}
-
-
-	u32 cardReadCachedEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)cardReadCachedEndSignature, 4, 1);
-	if (!cardReadCachedEndOffset) {
-		dbg_printf("Card read cached end not found\n");
-		//cardReadFound = false;
-		//return 0;
-	}
-	u32 cardReadCachedOffset =   
-		getOffset((u32*)cardReadCachedEndOffset, -0xFF,
-			(u32*)cardReadCachedStartSignature, 2, -1);
-	if (!cardReadStartOffset) {
-		dbg_printf("Card read cached start not found\n");
-		//cardReadFound = false;
-		//return 0;
-	}
-	dbg_printf("Card read cached :\t");
-	dbg_hexa(cardReadCachedOffset);
-	dbg_printf("\n");
 
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
@@ -752,18 +719,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	*((u32*)patches[7]) = cardPullOutOffset+4;
-	if(cardReadCachedOffset==0x020777F0){
-		*((u32*)patches[8]) = cardReadCachedOffset-0x87E0; //NSMBDS (U) fix.
-	/* }else if (cardReadCachedOffset==0x02076DAC){
-		*((u32*)patches[8]) = cardReadCachedOffset-0x7D9C; //NSMBDS (J) fix.
-	}else if (cardReadCachedOffset==0x02067758){
-		*((u32*)patches[8]) = cardReadCachedOffset-0x8748; //NSMBDS (E) fix. */
-	}else if(cardReadCachedOffset==0x021240E8){
-		*((u32*)patches[8]) = 0x0211E1A8; //ACWW fix.
-		cardIdStartOffset = 0x02123FF0; //ACWW fix part2.
-	}else{
-		*((u32*)patches[8]) = cardReadCachedOffset;
-	}
+	
 	patches[10] = needFlushCache;
 
 	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);
