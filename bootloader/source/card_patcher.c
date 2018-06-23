@@ -777,12 +777,17 @@ u32 savePatchUniveral (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 		return 0;
     }
 
+   // found the beginning of the next function
+   u32 nextFunction = getOffset(relocationStart, ndsHeader->arm7binarySize,
+      nextFunctiontSignature, 1, 1);
+
+   	// Validate the relocation signature
+    u32 forwardedRelocStartAddr = nextFunction  - 0x14;
+    
 	// Validate the relocation signature
-    u32 forwardedRelocStartAddr = relocationStart + 4;
-    if (!*(u32*)forwardedRelocStartAddr)
-        forwardedRelocStartAddr += 4;
     u32 vAddrOfRelocSrc =
-        *(u32*)(forwardedRelocStartAddr + 8);
+        *(u32*)(nextFunction - 0xC);
+        
     // sanity checks
     u32 relocationCheck1 =
         *(u32*)(forwardedRelocStartAddr + 0xC);
@@ -2682,13 +2687,18 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Relocation start not found\n");
 		return 0;
     }
+    
+    // found the beginning of the next function
+    u32 nextFunction = getOffset(relocationStart, ndsHeader->arm7binarySize,
+      nextFunctiontSignature, 1, 1);
 
+   	// Validate the relocation signature
+    u32 forwardedRelocStartAddr = nextFunction  - 0x14;
+    
 	// Validate the relocation signature
-    u32 forwardedRelocStartAddr = relocationStart + 4;
-    if (!*(u32*)forwardedRelocStartAddr)
-        forwardedRelocStartAddr += 4;
     u32 vAddrOfRelocSrc =
-        *(u32*)(forwardedRelocStartAddr + 8);
+        *(u32*)(nextFunction - 0xC);
+
     // sanity checks
     u32 relocationCheck1 =
         *(u32*)(forwardedRelocStartAddr + 0xC);
