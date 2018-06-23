@@ -1,12 +1,14 @@
 language: cpp
 
 before_install:
-  - curl -L https://raw.githubusercontent.com/devkitPro/installer/master/perl/devkitARMupdate.pl -o devkitARMupdate.pl
-  - export DEVKITPRO=/home/travis/devkitPro
-  - export DEVKITARM=${DEVKITPRO}/devkitARM
+  - curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
 
 install:
-  - perl devkitARMupdate.pl
+  - sudo dpkg -i pacman.deb
+  - sudo dkp-pacman -Sy
+  - sudo dkp-pacman -S devkitARM libnds --noconfirm
+  - export DEVKITPRO=/opt/devkitpro
+  - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 script:
   - make
