@@ -15,7 +15,6 @@ cache:
     - "$DEVKITPRO"
 
 before_install:
-  - mkdir -p "${PORTLIBREPOS}"
   - mkdir -p "${DEVKITPRO}"
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -O /tmp/devkitpro-pacman.deb; fi
 
