@@ -114,13 +114,11 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
 // sdk < 4 version
 u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
-u32 a9cardReadSignatureThumb1[2]    = {0x040001A4, 0x00000200};
+u32 a9cardReadSignatureThumb[2]    = {0x040001A4, 0x00000200};
+u32 a9cardReadSignatureThumbAlt1[2]    = {0xFFFFFE00, 0x040001A4};
 u32 cardReadStartSignature1[1] = {0xE92D4FF0};
-u32 cardReadStartSignatureThumb1[1] = {0xB083B5F0};
-
-// sdk > 3 version
-u32 a9cardReadSignatureThumb3[2]    = {0xFFFFFE00, 0x040001A4};
-u32 cardReadStartSignatureThumb3[1] = {0xB082B5F8};
+u32 cardReadStartSignatureThumb[1] = {0xB082B5F8};
+u32 cardReadStartSignatureThumbAlt1[1] = {0xB083B5F0};
 
 // sdk > 4 version
 u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
@@ -148,15 +146,15 @@ u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 u32 cardReadDmaStartSignatureThumb1[1]   = {0xB083B5F0};
 u32 cardReadDmaStartSignatureThumb3[1]   = {0xB084B5F8};
-u32 cardReadDmaEndSignatureAll[2]   = {0x01FF8000,0x000001FF};     
-u32 cardReadDmaEndSignatureThumb1[2]   = {0x01FF8000,0x02000000};     
+u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
+u32 cardReadDmaEndSignatureThumbAlt[2]   = {0x01FF8000,0x02000000};     
 
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
  
 
      
 // irqEnable
-u32 irqEnableStartSignature1[4] = {0xE59FC028,0xE1DC30B0,0xE3A01000,0xE1CC10B0};
+u32 irqEnableStartSignature1[4] = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0};
 u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020};
 
 //u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
@@ -310,17 +308,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[8] = moduleParams->sdk_version;
 
 	u32* a9cardReadSignature = a9cardReadSignature1;
-	u32* a9cardReadSignatureThumb = a9cardReadSignatureThumb1;
 	u32* cardReadStartSignature = cardReadStartSignature1;
-	u32* cardReadStartSignatureThumb = cardReadStartSignatureThumb1;
-	u32* cardReadDmaEndSignature = cardReadDmaEndSignatureAll;
 	u32* cardPullOutSignature = cardPullOutSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
-	if(moduleParams->sdk_version > 0x3000000) {
-		a9cardReadSignatureThumb = a9cardReadSignatureThumb3;
-		cardReadStartSignatureThumb = cardReadStartSignatureThumb3;
-	}
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	} else if(moduleParams->sdk_version > 0x4000000) {
@@ -381,18 +372,20 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Card read end not found. Trying thumb\n");
+		usesThumb = true;
 		cardReadEndOffset =  
 			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				(u32*)a9cardReadSignatureThumb, 2, 1);
-		if (!cardReadEndOffset) {
-			dbg_printf("Thumb card read end not found\n");
-			return 0;
-		} else {
-			usesThumb = true;
-			if(moduleParams->sdk_version < 0x3000000) {
-				cardReadDmaEndSignature = cardReadDmaEndSignatureThumb1;
-			}
-		}
+	}
+	if (!cardReadEndOffset) {
+		dbg_printf("Thumb card read end not found\n");
+		cardReadEndOffset =  
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignatureThumbAlt1, 2, 1);
+	}
+	if (!cardReadEndOffset) {
+		dbg_printf("Thumb card read end alt 1 not found\n");
+		return 0;
 	}
 	debug[1] = cardReadEndOffset;
     u32 cardReadStartOffset = 0;
@@ -400,19 +393,24 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		getOffset((u32*)cardReadEndOffset, -0x109,
 			  (u32*)cardReadStartSignature, 1, -1);
 	if (!cardReadStartOffset) {
-		dbg_printf("Card read start not found\n");
+		dbg_printf("Card read start not found. Trying thumb\n");
 		cardReadStartOffset =   
 			getOffset((u32*)cardReadEndOffset, -0xC0,
-				  (u32*)cardReadStartSignatureThumb, 1, -1);
-		if (!cardReadStartOffset) {
-			dbg_printf("Thumb card read start not found\n");
-			return 0;
-		} else {
-			if (!usesThumb) {
-				cardReadEndOffset -= 0x4;
-				usesThumb = true;
-			}
+				(u32*)cardReadStartSignatureThumb, 1, -1);
+		if (!usesThumb) {
+			cardReadEndOffset -= 0x4;
+			usesThumb = true;
 		}
+	}
+	if (!cardReadStartOffset) {
+		dbg_printf("Thumb card read start not found\n");
+		cardReadStartOffset =   
+			getOffset((u32*)cardReadEndOffset, -0xC0,
+				(u32*)cardReadStartSignatureThumbAlt1, 1, -1);
+	}
+	if (!cardReadStartOffset) {
+		dbg_printf("Thumb card read start alt 1 not found\n");
+		return 0;
 	}
 	cardReadFound = true;
 	dbg_printf("Arm9 Card read:\t");
@@ -437,7 +435,17 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
               (u32*)cardReadDmaEndSignature, 2, 1);
     if (!cardReadDmaEndOffset) {
         dbg_printf("Card read dma end not found\n");
-    } else {
+	}
+    if (!cardReadDmaEndOffset && usesThumb) {
+        dbg_printf("Trying thumb alt\n");
+		cardReadDmaEndOffset =  
+        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+              (u32*)cardReadDmaEndSignatureThumbAlt, 2, 1);
+	}
+    if (!cardReadDmaEndOffset && usesThumb) {
+        dbg_printf("Thumb card read dma end alt not found\n");
+	}
+	if (cardReadDmaEndOffset>0) {
 		dbg_printf("Card read dma end :\t");
 		dbg_hexa(cardReadDmaEndOffset);
 		dbg_printf("\n");
@@ -719,7 +727,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	*((u32*)patches[7]) = cardPullOutOffset+4;
-	
+
 	patches[10] = needFlushCache;
 
 	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);
@@ -3304,7 +3312,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
               (u32*)irqEnableStartSignature, 4, 1);
     if (!cardIrqEnableOffset) {
         dbg_printf("irq enable not found\n");
-        return 0;
+		return 0;
     }
 	debug[0] = cardIrqEnableOffset;
     dbg_printf("irq enable found\n");
