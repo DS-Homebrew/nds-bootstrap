@@ -16,7 +16,6 @@
 .global saveCluster
 .global saveSize
 .global consoleModel
-.global ntrTouch
 .global romread_LED
 .global gameSoftReset
 .global runViaIRQ
@@ -41,8 +40,6 @@ cardStruct:
 cacheStruct:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-ntrTouch:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000
@@ -370,15 +367,15 @@ DC_WaitWriteBufferEmpty:
     bx      lr
 	.pool
 
-arm7Functions :
-.word    eepromProtect 
-.word    eepromPageErase 
-.word    eepromPageVerify  
-.word    eepromPageWrite  
-.word    eepromPageProg  
-.word    eepromRead  
-.word    cardRead 
-.word    cardId 
+arm7Functions:
+.word    eepromProtect
+.word    eepromPageErase
+.word    eepromPageVerify
+.word    eepromPageWrite
+.word    eepromPageProg
+.word    eepromRead
+.word    cardRead
+.word    cardId
 saveCluster:
 .word    0x00000000 
 saveSize:

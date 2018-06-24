@@ -35,7 +35,6 @@
 	.global patchMpuRegion
 	.global patchMpuSize
 	.global consoleModel
-	.global ntrTouch
 	.global loadingScreen
 	.global romread_LED
 	.global gameSoftReset
@@ -73,8 +72,6 @@ patchMpuRegion:
 patchMpuSize:
 	.word	0x00000000		
 consoleModel:
-	.word	0x00000000		
-ntrTouch:
 	.word	0x00000000		
 loadingScreen:
 	.word	0x00000000		

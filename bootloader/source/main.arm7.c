@@ -84,7 +84,6 @@ extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
 extern unsigned long consoleModel;
-extern unsigned long ntrTouch;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
@@ -583,10 +582,10 @@ void loadBinary_ARM7 (aFile file)
 
 	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
 	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
-	/*if(ROM_TID == 0x45584759 || ROM_TID == 0x50584759){
-		*(u16*)(-0x02037a34) = 0x46c0;
+	if(ROM_TID == 0x45584759 || ROM_TID == 0x50584759){
+		*(u16*)(0x02037a34) = 0x46c0;
 		*(u32*)(0x0216ac0c) = 0x0001fffb;
-	}*/
+	}
 
 	// "WarioWare: DIY (USA)"
 	if(ROM_TID == 0x45524F55){
@@ -767,7 +766,7 @@ void arm7_main (void) {
 
 	int errorCode;
 
-	if (REG_SCFG_EXT == 0 || ntrTouch == 1) {
+	if (REG_SCFG_EXT == 0) {
 		NDSTouchscreenMode();
 		*(u16*)(0x4000500) = 0x807F;
 	}
