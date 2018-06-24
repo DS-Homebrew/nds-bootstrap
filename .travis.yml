@@ -15,13 +15,14 @@ cache:
     - "$DEVKITPRO"
 
 before_install:
-  - mkdir -p "${DEVKITPRO}"
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -O /tmp/devkitpro-pacman.deb; fi
+  - curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
-  - yes | sudo dkp-pacman -Syu devkitARM --needed
-  - yes | sudo dkp-pacman -Syu libnds --needed
+  - sudo dpkg -i pacman.deb
+  - sudo dkp-pacman -Sy
+  - sudo dkp-pacman -S devkitARM libnds --noconfirm
+  - export DEVKITPRO=/opt/devkitpro
+  - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 script:
   - make
