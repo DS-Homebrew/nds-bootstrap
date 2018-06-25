@@ -154,6 +154,7 @@ u32 cardReadDmaEndSignatureThumbAlt[2]   = {0x01FF8000,0x02000000};
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
 u32 sleepPatch[2] = {0x0A000001, 0xE3A00601}; 
 u32 sleepPatchThumb[1] = {0x4831D002}; 
+u32 sleepPatchThumbAlt[2] = {0xD0022800, 0x90024831}; 
 
 
      
@@ -2907,8 +2908,19 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
         getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
               (u32*)sleepPatchThumb, 1, 1);
 		if (!sleepPatchOffset) {
-			dbg_printf("Thumb sleep patch not found\n");
+			dbg_printf("Thumb sleep patch not found. Trying alt\n");
 			//return 0;
+			sleepPatchOffset =   
+			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+				  (u32*)sleepPatchThumbAlt, 2, 1);
+			if (!sleepPatchOffset) {
+				dbg_printf("Thumb sleep patch alt not found\n");
+				//return 0;
+			} else {
+				dbg_printf("Thumb sleep patch alt found\n");
+				*(u16*)(sleepPatchOffset+6) = 0;
+				*(u16*)(sleepPatchOffset+8) = 0;
+			}
 		} else {
 			dbg_printf("Thumb sleep patch found\n");
 			*(u32*)(sleepPatchOffset+4) = 0;
