@@ -20,7 +20,7 @@ before_install:
 install:
   - sudo dpkg -i pacman.deb
   - sudo dkp-pacman -Sy
-  - sudo dkp-pacman -S devkitARM libnds --noconfirm
+  - sudo dkp-pacman -S devkitARM general-tools dstools ndstool libnds libfat-nds --noconfirm
   - export DEVKITPRO=/opt/devkitpro
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
