@@ -152,7 +152,8 @@ u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};
 u32 cardReadDmaEndSignatureThumbAlt[2]   = {0x01FF8000,0x02000000};     
 
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
- 
+u32 sleepPatch[2] = {0x0A000001, 0xE3A00601}; 
+
 
      
 // irqEnable
@@ -2903,7 +2904,19 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     }
 	debug[0] = cardIrqEnableOffset;
     dbg_printf("irq enable found\n");
-
+	
+	u32 sleepPatchOffset =   
+        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+              (u32*)sleepPatch, 2, 1);
+    if (!sleepPatchOffset) {
+        dbg_printf("sleep patch not found\n");
+        //return 0;
+    }
+    dbg_printf("sleep patch found\n");
+	
+	if(sleepPatchOffset){
+		*(u32*)(sleepPatchOffset+8) = 0;
+	}
 
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
