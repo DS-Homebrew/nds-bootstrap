@@ -15,7 +15,13 @@ Bugs can be reported in the [Github issues section](https://github.com/ahezard/n
 
 Firstly, if you want to self compile, check [travis](https://travis-ci.org/ahezard/nds-bootstrap) and see if it can compile successfully.
 
-To self-compile this, you'll need to have DevKitPro with DevKitARM. You'll also need the latest libnds. Once all that is downloaded, git clone this repo, open command prompt, navigate to the folder, and type `make`. It should compile nds-bootstrap. If there is an error, let us know.
+To self-compile this you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. DevkitPro includes `dkp-pacman` for easy installation of all components:
+
+```
+ $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
+```
+
+Once all that is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
 
 # Frontends
 
