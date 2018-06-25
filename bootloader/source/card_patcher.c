@@ -223,7 +223,14 @@ u32 generateA7Instr(int arg1, int arg2) {
 }
 
 u32 generateA7InstrThumb(int arg1, int arg2) {
-    return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xF7000000;
+    // 23 bit offset
+    u32 offset = ((u32)(arg2 - arg1 - 8);
+    // 1st instruction contains the upper 11 bit of the offset
+    u16 firstInstr = (( offset >> 13) & 0x7FF) | 0xF000;
+
+    // 1st instruction contains the lower 11 bit of the offset
+    u16 secndInstr = (( offset >> 1) & 0x7FF) | 0xF800; 
+    return ( secndInstr << 16)  | firstInstr;
 }
 
 module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
