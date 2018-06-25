@@ -39,7 +39,7 @@ addons:
 
 after_success:
   - >
-    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "dsi" ] || [ "$TRAVIS_BRANCH" == "sdk5" ] || [ "$TRAVIS_BRANCH" == "sdk5dsi" ] || [ "$TRAVIS_BRANCH" == "hb" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "sdk5" ] || [ "$TRAVIS_BRANCH" == "hb" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
         GITREV="`git show -s --format='%h'`"
         REV_NAME="nds-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
