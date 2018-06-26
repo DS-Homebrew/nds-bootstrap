@@ -47,6 +47,8 @@ volatile int arm9_loadBarLength = 0;
 volatile bool arm9_animateLoadingCircle = false;
 
 static bool displayScreen = false;
+static bool fadeType = true;
+static int screenBrightness = 31;
 
 static int loadingCircleTime = 3;
 static int loadingCircleFrame = 0;
@@ -86,6 +88,17 @@ void initMBKARM9() {
 	REG_MBK7=0x07C03740; // same as dsiware
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
 	REG_MBK8=0x07403700; // same as dsiware
+}
+
+void SetBrightness(u8 screen, s8 bright) {
+	u16 mode = 1 << 14;
+
+	if (bright < 0) {
+		mode = 2 << 14;
+		bright = -bright;
+	}
+	if (bright > 31) bright = 31;
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
 /*-------------------------------------------------------------------------
@@ -1278,6 +1291,11 @@ void arm9_main (void)
 	VRAM_I_CR = 0;
 	REG_POWERCNT  = 0x820F;
 
+	*(u16*)(0x0400006C) |= BIT(14);
+	*(u16*)(0x0400006C) &= BIT(15);
+	SetBrightness(0, 31);
+	SetBrightness(1, 31);
+
 	// Return to passme loop
 	//*((vu32*)0x02FFFE04) = (u32)0xE59FF018;		// ldr pc, 0x02FFFE24
 	//*((vu32*)0x02FFFE24) = (u32)0x02FFFE04;		// Set ARM9 Loop address
@@ -1299,6 +1317,16 @@ void arm9_main (void)
 			}
 		}
 		if(displayScreen) {
+			if(fadeType == true) {
+				screenBrightness--;
+				if (screenBrightness < 0) screenBrightness = 0;
+			} else {
+				screenBrightness++;
+				if (screenBrightness > 31) screenBrightness = 31;
+			}
+			SetBrightness(0, screenBrightness);
+			SetBrightness(1, screenBrightness);
+
 			if(arm9_screenMode == 2) {
 				arm9_ttt();
 			} else if(arm9_screenMode == 1) {
