@@ -130,7 +130,7 @@ thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
     push	{r3-r7, lr}
 
-	ldr		r6, =cardRead+1
+	ldr		r6, =cardRead
 
 	bl		_blx_r3_stub_thumb_card_read	
 
