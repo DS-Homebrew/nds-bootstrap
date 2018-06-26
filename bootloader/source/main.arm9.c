@@ -45,10 +45,10 @@ volatile bool arm9_errorColor = false;
 volatile int arm9_screenMode = 0;	// 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
 volatile int arm9_loadBarLength = 0;
 volatile bool arm9_animateLoadingCircle = false;
+volatile int screenBrightness = 31;
+volatile bool fadeType = true;
 
 static bool displayScreen = false;
-static bool fadeType = true;
-static int screenBrightness = 31;
 
 static int loadingCircleTime = 3;
 static int loadingCircleFrame = 0;
@@ -1306,6 +1306,9 @@ void arm9_main (void)
 	//);
 
 	REG_SCFG_EXT = 0x8300C000;
+	
+	screenBrightness = 31;
+	fadeType = true;
 
 	// set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;

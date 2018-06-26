@@ -38,6 +38,8 @@ extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;
 extern volatile int arm9_loadBarLength;
 extern volatile bool arm9_animateLoadingCircle;
+extern volatile int screenBrightness;
+extern volatile bool fadeType;
 
 static inline void dmaFill(const void* src, void* dest, uint32 size) {
 	DMA_SRC(3)  = (uint32)src;

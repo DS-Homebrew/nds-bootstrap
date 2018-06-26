@@ -816,8 +816,11 @@ void arm7_main (void) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 	}
 
-	nocashMessage("Start the NDS file");
 	increaseLoadBarLength();	// and finally, 8 dots
+	fadeType = false;
+	while (screenBrightness != 31);	// Wait for screen to fade-out
+
+	nocashMessage("Start the NDS file");
 	startBinary_ARM7();
 
 	return 0;
