@@ -48,6 +48,7 @@ volatile bool arm9_animateLoadingCircle = false;
 
 static bool displayScreen = false;
 
+static int loadingCircleTime = 3;
 static int loadingCircleFrame = 0;
 static bool drawnStuff = false;
 
@@ -479,8 +480,12 @@ static void arm9_loadingCircle (void) {
 			break;
 	}
 
-	// Draw loading circle (7 times, for slow animation)
-	for (i = 0; i < 7; i++) {
+	while(REG_VCOUNT!=191);
+
+	// Draw loading circle
+	if (loadingCircleTime == 3) {
+		loadingCircleTime = 0;
+
 		for (y = 64; y <= 87; y++) {
 			for (k = 88; k <= 111; k++) {
 				VRAM_A[y*256+k] = colour1;
@@ -514,10 +519,12 @@ static void arm9_loadingCircle (void) {
 				VRAM_A[y*256+k] = colour5;
 			}
 		}
+
+		loadingCircleFrame++;
+		if(loadingCircleFrame==8) loadingCircleFrame = 0;
+	} else {
+		loadingCircleTime++;
 	}
-	
-	loadingCircleFrame++;
-	if(loadingCircleFrame==8) loadingCircleFrame = 0;
 }
 
 static void arm9_errorText (void) {
