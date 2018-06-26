@@ -48,6 +48,7 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
 extern u32 sdk_version;
+extern u32 gottenSCFGExt;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
@@ -406,7 +407,7 @@ void myIrqHandlerVBlank(void) {
         }
 	}
 
-	if (REG_SCFG_EXT == 0) {
+	if (gottenSCFGExt == 0) {
 		// Control volume with the - and + buttons.
 		u8 volLevel;
 		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);

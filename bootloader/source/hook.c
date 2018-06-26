@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <nds/system.h>
+
 #include "hook.h"
 #include "common.h"
 #include "cardengine_arm7_bin.h"
@@ -295,10 +297,10 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *ipcSyncHandler;
 	cardEngineLocation[4] = file.firstCluster;
-	cardEngineLocation[7] = consoleModel;
-	cardEngineLocation[8] = romread_LED;
-	cardEngineLocation[9] = gameSoftReset;
-	cardEngineLocation[10] = runViaIRQ;
+	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
+	cardEngineLocation[8] = consoleModel;
+	cardEngineLocation[9] = romread_LED;
+	cardEngineLocation[10] = gameSoftReset;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 

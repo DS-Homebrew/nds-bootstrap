@@ -820,6 +820,9 @@ void arm7_main (void) {
 	fadeType = false;
 	while (screenBrightness != 31);	// Wait for screen to fade-out
 
+    // lock SCFG
+    REG_SCFG_EXT &= ~(1UL << 31);
+
 	nocashMessage("Start the NDS file");
 	startBinary_ARM7();
 

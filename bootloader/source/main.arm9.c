@@ -1307,6 +1307,9 @@ void arm9_main (void)
 
 	REG_SCFG_EXT = 0x8300C000;
 	
+    // lock SCFG
+    REG_SCFG_EXT &= ~(1UL << 31);
+
 	screenBrightness = 31;
 	fadeType = true;
 
