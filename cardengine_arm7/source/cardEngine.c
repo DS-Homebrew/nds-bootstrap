@@ -397,12 +397,12 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-	} else if (gameSoftReset) {
+	} else if (!gameSoftReset) {
         if(lockMutex(&saveMutex)) {
     		memcpy((u32*)0x02000300,sr_data_srllastran,0x020);
     		i2cWriteRegister(0x4a,0x70,0x01);
     		i2cWriteRegister(0x4a,0x11,0x01);	// Reboot game
-         unlockMutex(&saveMutex);
+			unlockMutex(&saveMutex);
         }
 	}
 
