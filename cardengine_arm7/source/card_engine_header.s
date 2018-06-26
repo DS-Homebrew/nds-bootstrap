@@ -137,6 +137,7 @@ patches:
 .word   j_newSwiHalt
 .word   j_twlGetPitchTable
 .word   getPitchTableStub
+.word   arm7FunctionsThumb
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -381,6 +382,52 @@ saveCluster:
 saveSize:
 .word    0x00000000 
 
+arm7FunctionsThumb :
+.word    eepromProtectThumbStub 
+.word    eepromPageEraseThumbStub  
+.word    eepromPageVerifyThumbStub   
+.word    eepromPageWriteThumbStub   
+.word    eepromPageProgThumbStub   
+.word    eepromReadThumbStub   
+.word    cardReadThumbStub  
+.word    cardIdThumbStub
+
+.thumb
+eepromProtectThumbStub:
+    ldr r0, =eepromProtect
+    bx r0
+    
+eepromPageEraseThumbStub:
+    ldr r0, =eepromPageErase
+    bx r0    
+
+eepromPageVerifyThumbStub:
+    ldr r0, =eepromPageVerify
+    bx r0
+    
+eepromPageWriteThumbStub:
+    ldr r0, =eepromPageWrite
+    bx r0
+    
+eepromPageProgThumbStub:
+    ldr r0, =eepromPageProg
+    bx r0
+
+cardReadThumbStub:
+    ldr r0, =cardRead
+    bx r0
+
+eepromReadThumbStub:
+    ldr r0, =eepromRead
+    bx r0
+    
+cardIdThumbStub:
+    ldr r0, =cardId
+    bx r0
+
+    .pool
+
+	.arm
 .global tryLockMutex
 .type	tryLockMutex STT_FUNC
 @ r0 : mutex adr
