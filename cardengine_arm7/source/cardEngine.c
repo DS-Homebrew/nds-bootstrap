@@ -646,6 +646,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst,*savFile,src,len,-1);
+        unlockMutex(&saveMutex);
 	}
 	//}
 	return true;
