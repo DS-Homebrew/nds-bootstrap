@@ -643,7 +643,10 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(dst,SAVE_LOCATION+src,len);
 	//} else {
+    if (lockMutex(&saveMutex)) {
+		initialize();
 		fileRead(dst,*savFile,src,len,-1);
+	}
 	//}
 	return true;
 }
@@ -659,11 +662,9 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	#endif	
-
-	initialize();
     
-    int oldIME = enterCriticalSection();	
     if (lockMutex(&saveMutex)) {
+		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
     	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
     	//	memcpy(SAVE_LOCATION+dst,src,len);
@@ -672,7 +673,6 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
     	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
 	}
-    leaveCriticalSection(oldIME);
 	
 	return true;
 }
@@ -689,20 +689,16 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-    initialize();
-
 	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
 	//	memcpy(SAVE_LOCATION+dst,src,len);
 	//}
-    int oldIME = enterCriticalSection();	
     if (lockMutex(&saveMutex)) {
+		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
     	fileWrite(src,*savFile,dst,len,-1);
         i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
 	}
-    leaveCriticalSection(oldIME);
-
 	
 	return true;
 }
@@ -755,15 +751,17 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-    initialize();
-	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-	//ndmaUsed = false;
-    #ifdef DEBUG	
-    nocashMessage("fileRead romFile");
-    #endif	
-	fileRead(dst,*romFile,src,len,2);
-	//ndmaUsed = true;
-	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+    if (lockMutex(&saveMutex)) {
+		initialize();
+		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+		//ndmaUsed = false;
+		#ifdef DEBUG	
+		nocashMessage("fileRead romFile");
+		#endif	
+		fileRead(dst,*romFile,src,len,2);
+		//ndmaUsed = true;
+		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+	}
 	
 	return true;
 }
