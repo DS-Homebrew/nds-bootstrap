@@ -394,36 +394,36 @@ arm7FunctionsThumb :
 
 .thumb
 eepromProtectThumbStub:
-    ldr r0, =eepromProtect
-    bx r0
+    ldr r4, =eepromProtect
+    bx r4
     
 eepromPageEraseThumbStub:
-    ldr r0, =eepromPageErase
-    bx r0    
+    ldr r4, =eepromPageErase
+    bx r4    
 
 eepromPageVerifyThumbStub:
-    ldr r0, =eepromPageVerify
-    bx r0
+    ldr r4, =eepromPageVerify
+    bx r4
     
 eepromPageWriteThumbStub:
-    ldr r0, =eepromPageWrite
-    bx r0
+    ldr r4, =eepromPageWrite
+    bx r4
     
 eepromPageProgThumbStub:
-    ldr r0, =eepromPageProg
-    bx r0
+    ldr r4, =eepromPageProg
+    bx r4
 
 cardReadThumbStub:
-    ldr r0, =cardRead
-    bx r0
+    ldr r4, =cardRead
+    bx r4
 
 eepromReadThumbStub:
-    ldr r0, =eepromRead
-    bx r0
+    ldr r4, =eepromRead
+    bx r4
     
 cardIdThumbStub:
-    ldr r0, =cardId
-    bx r0
+    ldr r4, =cardId
+    bx r4
 
     .pool
 
