@@ -43,11 +43,11 @@ static bool initialized = false;
 static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 extern vu32* volatile cardStruct;
-extern vu32* volatile cacheStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
 extern u32 sdk_version;
+extern u32 language;
 extern u32 gottenSCFGExt;
 extern u32 consoleModel;
 extern u32 romread_LED;
@@ -378,11 +378,15 @@ void myIrqHandlerVBlank(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
-	
+
 	calledViaIPC = false;
-	
-	runCardEngineCheck(); //LEAVE THIS ALONE. IT BREAKS STUFF WHEN IT'S NOT LIKE THIS. PLEASE AND THANKS.
-	
+
+	if (language >= 0 && language < 6) {
+		*(u8*)(0x027FFCE4) = language;	// Change language
+	}
+
+	runCardEngineCheck();
+
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
 	} else { 

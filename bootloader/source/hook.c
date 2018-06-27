@@ -23,6 +23,7 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern unsigned long language;
 extern unsigned long consoleModel;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
@@ -297,6 +298,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData
 	cardEngineLocation[1] = *vblankHandler;
 	cardEngineLocation[2] = *ipcSyncHandler;
 	cardEngineLocation[4] = file.firstCluster;
+	cardEngineLocation[6] = language;
 	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
 	cardEngineLocation[8] = consoleModel;
 	cardEngineLocation[9] = romread_LED;

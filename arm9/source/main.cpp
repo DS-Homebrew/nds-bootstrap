@@ -70,7 +70,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, u32 saveSize, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
+void runFile(string filename, string savPath, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -126,6 +126,7 @@ void runFile(string filename, string savPath, u32 saveSize, u32 donorSdkVer, u32
 		int err = runNdsFile (argarray[0],
 							strdup(savPath.c_str()),
 							saveSize,
+							language,
 							donorSdkVer,
 							patchMpuRegion,
 							patchMpuSize,
@@ -355,6 +356,7 @@ int main( int argc, char **argv) {
 		runFile(ndsPath.c_str(),
 				savPath.c_str(),
 				getSaveSize(savPath.c_str()),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "LANGUAGE", -1),
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
 				patchMpuRegion,
 				patchMpuSize,

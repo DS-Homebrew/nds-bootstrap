@@ -29,9 +29,9 @@ extern "C" {
 
 #define LOAD_DEFAULT_NDS 0
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheat_data);
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheat_data);
 
-int runNdsFile (const char* filename, const char* savename, int saveSize, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int argc, const char** argv, u32* cheat_data);
+int runNdsFile (const char* filename, const char* savename, int saveSize, int language, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int argc, const char** argv, u32* cheat_data);
 
 #ifdef __cplusplus
 }
