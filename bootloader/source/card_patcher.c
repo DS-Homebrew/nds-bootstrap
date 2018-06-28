@@ -118,17 +118,14 @@ u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
-// sdk < 4 version
-u32 a9cardReadSignature1[2]    = {0x04100010, 0x040001A4};
+u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
+u32 a9cardReadSignatureAlt[2]    = {0x040001A4, 0x04100010};
 u32 a9cardReadSignatureThumb[2]    = {0x040001A4, 0x00000200};
 u32 a9cardReadSignatureThumbAlt1[2]    = {0xFFFFFE00, 0x040001A4};
-u32 cardReadStartSignature1[1] = {0xE92D4FF0};
+u32 cardReadStartSignature[1] = {0xE92D4FF0};
+u32 cardReadStartSignatureAlt[1] = {0xE92D4070};
 u32 cardReadStartSignatureThumb[1] = {0xB082B5F8};
 u32 cardReadStartSignatureThumbAlt1[1] = {0xB083B5F0};
-
-// sdk > 4 version
-u32 a9cardReadSignature4[2]    = {0x040001A4, 0x04100010};
-u32 cardReadStartSignature4[1] = {0xE92D4070};
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
 u32 a9cardIdSignatureThumb[3]    = {0xF8FFFFFF, 0x040001A4, 0x04100010};
@@ -332,16 +329,12 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[4] = ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
-	u32* a9cardReadSignature = a9cardReadSignature1;
-	u32* cardReadStartSignature = cardReadStartSignature1;
 	u32* cardPullOutSignature = cardPullOutSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	} else if(moduleParams->sdk_version > 0x4000000) {
-		a9cardReadSignature = a9cardReadSignature4;
-		cardReadStartSignature = cardReadStartSignature4;
 		cardPullOutSignature = cardPullOutSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	}
@@ -382,21 +375,30 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	bool usesThumb = false;
+	int readType = 0;
 
 	// Find the card read
 	u32 cardReadEndOffset = 0;
 	if (ROM_TID == 0x45524F55) {
 		// Start at 0x3800 for "WarioWare: DIY (USA)"
+		readType = 1;
 		cardReadEndOffset =  
 		getOffset((u32*)ndsHeader->arm9destination+0x3800, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)a9cardReadSignature, 2, 1);
+			(u32*)a9cardReadSignatureAlt, 2, 1);
 	} else {
 		cardReadEndOffset =  
 		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			(u32*)a9cardReadSignature, 2, 1);
 	}
+	if (!cardReadEndOffset && readType != 1) {
+		dbg_printf("Card read end not found. Trying alt\n");
+		readType = 1;
+		cardReadEndOffset =  
+			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				(u32*)a9cardReadSignatureAlt, 2, 1);
+	}
 	if (!cardReadEndOffset) {
-		dbg_printf("Card read end not found. Trying thumb\n");
+		dbg_printf("Card read end alt not found. Trying thumb\n");
 		usesThumb = true;
 		cardReadEndOffset =  
 			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
@@ -414,9 +416,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 	debug[1] = cardReadEndOffset;
     u32 cardReadStartOffset = 0;
-	cardReadStartOffset =   
-		getOffset((u32*)cardReadEndOffset, -0x109,
-			  (u32*)cardReadStartSignature, 1, -1);
+	if (readType == 1) {
+		cardReadStartOffset =   
+			getOffset((u32*)cardReadEndOffset, -0x109,
+				  (u32*)cardReadStartSignatureAlt, 1, -1);
+	} else {
+		cardReadStartOffset =   
+			getOffset((u32*)cardReadEndOffset, -0x109,
+				  (u32*)cardReadStartSignature, 1, -1);
+	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Card read start not found. Trying thumb\n");
 		cardReadStartOffset =   
