@@ -141,6 +141,7 @@ u32 cardIdStartSignatureThumbAlt3[1]   = {0x24B8B510};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
 u32 cardPullOutSignatureThumb[2]   = {0x203FB508,0x28114008};
+u32 cardPullOutSignatureThumbAlt1[2]   = {0xB081B500,0x4001203F};
 //u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
@@ -150,6 +151,7 @@ u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 u32 cardReadDmaStartSignatureThumb1[1]   = {0xB083B5F0};
 u32 cardReadDmaStartSignatureThumb3[1]   = {0xB084B5F8};
+u32 cardReadDmaStartSignatureThumb3Alt1[1]   = {0xB085B5F0};
 u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
 u32 cardReadDmaEndSignatureThumbAlt[2]   = {0x01FF8000,0x02000000};     
 
@@ -456,9 +458,15 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
 				(u32*)cardPullOutSignatureThumb, 2, 1);
 		if (!cardPullOutOffset) {
-			dbg_printf("Thumb card pull out handler not found\n");
-			//return 0;
-		} else {
+			dbg_printf("Thumb card pull out handler not found. Trying alt\n");
+			cardPullOutOffset = 
+			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+				(u32*)cardPullOutSignatureThumbAlt1, 2, 1);
+		}
+		if (!cardPullOutOffset) {
+			dbg_printf("Thumb card pull out handler alt not found\n");
+		}
+		if (cardPullOutOffset>0) {
 			dbg_printf("Thumb card pull out handler:\t");
 			dbg_hexa(cardPullOutOffset);
 			dbg_printf("\n");
@@ -510,6 +518,12 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 			}
 			if (!cardReadDmaOffset) {
 				dbg_printf("Thumb card read dma start 3 not found\n");
+				cardReadDmaOffset =   
+				getOffset((u32*)cardReadDmaEndOffset, -0x100,
+					  (u32*)cardReadDmaStartSignatureThumb3Alt1, 1, -1);
+			}
+			if (!cardReadDmaOffset) {
+				dbg_printf("Thumb card read dma start 3 alt 1 not found\n");
 			}
 		} else {
 			cardReadDmaOffset =   
