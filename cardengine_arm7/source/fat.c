@@ -751,11 +751,9 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
 			// Read in last partial chunk
-			for (; dataPos < length; dataPos++)
-			{
-				buffer[dataPos] = globalBuffer[curByte];
-				curByte++;
-			}
+            memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
+            curByte+=length;
+            dataPos+=length;
 		}
         
         #ifdef DEBUG
