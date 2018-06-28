@@ -44,10 +44,10 @@ u32 a7JumpTableSignatureUniversal_pt3[2] = {0xE5920010,0xE5921014};
 u32 a7JumpTableSignatureUniversal_2[3] = {0xE593000C,0xE5931010,0xE5932014};
 u32 a7JumpTableSignatureUniversal_2_pt2[3] = {0xE5930010,0xE593100C,0xE5932014};
 u32 a7JumpTableSignatureUniversal_2_pt3[2] = {0xE5930010,0xE5931014};
-u32 a7JumpTableSignatureUniversalThumb[2] = {0x68D06822,0x69526911};
-u32 a7JumpTableSignatureUniversalThumb_pt2[2] = {0x69106822,0x695268D1};
-u32 a7JumpTableSignatureUniversalThumb_pt3[1] = {0x69496908};
-u32 a7JumpTableSignatureUniversalThumbAlt[1] = {0x691168D0};
+u16 a7JumpTableSignatureUniversalThumb[4] = {0x6822,0x68D0,0x6911,0x6952};
+u16 a7JumpTableSignatureUniversalThumb_pt2[4] = {0x6822,0x6910,0x68D1,0x6952};
+u16 a7JumpTableSignatureUniversalThumb_pt3[2] = {0x6908,0x6949};
+u16 a7JumpTableSignatureUniversalThumbAlt[2] = {0x68D0,0x6911};
 
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
@@ -120,28 +120,28 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
 u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
 u32 a9cardReadSignatureAlt[2]    = {0x040001A4, 0x04100010};
-u32 a9cardReadSignatureThumb[2]    = {0x040001A4, 0x00000200};
-u32 a9cardReadSignatureThumbAlt1[2]    = {0xFFFFFE00, 0x040001A4};
+u16 a9cardReadSignatureThumb[4]    = {0x01A4,0x0400,0x0200,0x0000};
+u16 a9cardReadSignatureThumbAlt1[4]    = {0xFE00,0xFFFF,0x01A4,0x0400};
 u32 cardReadStartSignature[1] = {0xE92D4FF0};
 u32 cardReadStartSignatureAlt[1] = {0xE92D4070};
-u32 cardReadStartSignatureThumb[1] = {0xB082B5F8};
-u32 cardReadStartSignatureThumbAlt1[1] = {0xB083B5F0};
+u16 cardReadStartSignatureThumb[2] = {0xB5F8,0xB082};
+u16 cardReadStartSignatureThumbAlt1[2] = {0xB5F0,0xB083};
 
 u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
-u32 a9cardIdSignatureThumb[3]    = {0xF8FFFFFF, 0x040001A4, 0x04100010};
+u16 a9cardIdSignatureThumb[6]    = {0xFFFF,0xF8FF,0x01A4,0x0400,0x0010,0x0410};
 u32 cardIdStartSignature[1]   = {0xE92D4000};
 u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};
 u32 cardIdStartSignatureAlt2[1]   = {0xE92D4010};
-u32 cardIdStartSignatureThumb[1]   = {0xB081B500};
-u32 cardIdStartSignatureThumbAlt[1]   = {0x202EB508};
-u32 cardIdStartSignatureThumbAlt2[1]   = {0x20B8B508};
-u32 cardIdStartSignatureThumbAlt3[1]   = {0x24B8B510};
+u16 cardIdStartSignatureThumb[2]   = {0xB500,0xB081};
+u16 cardIdStartSignatureThumbAlt[2]   = {0xB508,0x202E};
+u16 cardIdStartSignatureThumbAlt2[2]   = {0xB508,0x20B8};
+u16 cardIdStartSignatureThumbAlt3[2]   = {0xB510,0x24B8};
   
 //u32 a9instructionBHI[1]       = {0x8A000001};
 u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
 u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
-u32 cardPullOutSignatureThumb[2]   = {0x203FB508,0x28114008};
-u32 cardPullOutSignatureThumbAlt1[2]   = {0xB081B500,0x4001203F};
+u16 cardPullOutSignatureThumb[4]   = {0xB508,0x203F,0x4008,0x2811};
+u16 cardPullOutSignatureThumbAlt1[4]   = {0xB500,0xB081,0x203F,0x4001};
 //u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
@@ -149,18 +149,18 @@ u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
-u32 cardReadDmaStartSignatureThumb1[1]   = {0xB083B5F0};
-u32 cardReadDmaStartSignatureThumb3[1]   = {0xB084B5F8};
-u32 cardReadDmaStartSignatureThumb3Alt1[1]   = {0xB085B5F0};
+u16 cardReadDmaStartSignatureThumb1[2]   = {0xB5F0,0xB083};
+u16 cardReadDmaStartSignatureThumb3[2]   = {0xB5F8,0xB084};
+u16 cardReadDmaStartSignatureThumb3Alt1[2]   = {0xB5F0,0xB085};
 u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
-u32 cardReadDmaEndSignatureThumbAlt[2]   = {0x01FF8000,0x02000000};     
+u16 cardReadDmaEndSignatureThumbAlt[4]   = {0x8000,0x01FF,0x0000,0x0200};     
 
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
 u32 sleepPatch[2] = {0x0A000001, 0xE3A00601}; 
-u32 sleepPatchThumb[1] = {0x4831D002}; 
-u32 sleepPatchThumbAlt1[2] = {0xD0022900, 0xF7F44831}; 
-u32 sleepPatchThumbAlt2[1] = {0x0440D002}; 
-u32 sleepPatchThumbAlt3[2] = {0xD0024201, 0xF7F60440}; 
+u16 sleepPatchThumb[2] = {0xD002,0x4831}; 
+u16 sleepPatchThumbAlt1[4] = {0x2900,0xD002,0x4831,0xF7F4}; 
+u16 sleepPatchThumbAlt2[2] = {0xD002,0x0440}; 
+u16 sleepPatchThumbAlt3[4] = {0x4201,0xD002,0x0440,0xF7F6}; 
 
 
      
@@ -226,6 +226,32 @@ u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int directio
 
 u32 generateA7Instr(int arg1, int arg2) {
     return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
+u32 getOffsetThumb(u16* addr, size_t size, u16* find, size_t sizeofFind, int direction)
+{
+	u16* end = addr + size/sizeof(u16);
+
+    u32 result = 0;
+	bool found = false;
+
+	do {
+		for(int i=0;i<sizeofFind;i++) {
+			if (addr[i] != find[i]) 
+			{
+				break;
+			} else if(i==sizeofFind-1) {
+				found = true;
+			}
+		}
+		if(!found) addr+=direction;
+	} while (addr != end && !found);
+
+	if (addr == end) {
+		return NULL;
+	}
+
+	return addr;
 }
 
 void generateA7InstrThumb(u16* instrs, int arg1, int arg2) {
@@ -403,14 +429,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_printf("Card read end alt not found. Trying thumb\n");
 		usesThumb = true;
 		cardReadEndOffset =  
-			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-				(u32*)a9cardReadSignatureThumb, 2, 1);
+			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				(u16*)a9cardReadSignatureThumb, 4, 1);
 	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Thumb card read end not found\n");
 		cardReadEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)a9cardReadSignatureThumbAlt1, 2, 1);
+		getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u16*)a9cardReadSignatureThumbAlt1, 4, 1);
 	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Thumb card read end alt 1 not found\n");
@@ -430,8 +456,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if (!cardReadStartOffset) {
 		dbg_printf("Card read start not found. Trying thumb\n");
 		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0xC0,
-				(u32*)cardReadStartSignatureThumb, 1, -1);
+			getOffsetThumb((u16*)cardReadEndOffset, -0xC0,
+				(u16*)cardReadStartSignatureThumb, 2, -1);
 		if (!usesThumb) {
 			cardReadEndOffset -= 0x4;
 			usesThumb = true;
@@ -440,8 +466,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if (!cardReadStartOffset) {
 		dbg_printf("Thumb card read start not found\n");
 		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0xC0,
-				(u32*)cardReadStartSignatureThumbAlt1, 1, -1);
+			getOffsetThumb((u16*)cardReadEndOffset, -0xC0,
+				(u16*)cardReadStartSignatureThumbAlt1, 2, -1);
 	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Thumb card read start alt 1 not found\n");
@@ -455,13 +481,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32 cardPullOutOffset = 0;
 	if (usesThumb) {
 		cardPullOutOffset = 
-			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				(u32*)cardPullOutSignatureThumb, 2, 1);
+			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+				(u16*)cardPullOutSignatureThumb, 4, 1);
 		if (!cardPullOutOffset) {
 			dbg_printf("Thumb card pull out handler not found. Trying alt\n");
 			cardPullOutOffset = 
-			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				(u32*)cardPullOutSignatureThumbAlt1, 2, 1);
+			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+				(u16*)cardPullOutSignatureThumbAlt1, 4, 1);
 		}
 		if (!cardPullOutOffset) {
 			dbg_printf("Thumb card pull out handler alt not found\n");
@@ -495,8 +521,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     if (!cardReadDmaEndOffset && usesThumb) {
         dbg_printf("Trying thumb alt\n");
 		cardReadDmaEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-              (u32*)cardReadDmaEndSignatureThumbAlt, 2, 1);
+        getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+              (u16*)cardReadDmaEndSignatureThumbAlt, 4, 1);
 	}
     if (!cardReadDmaEndOffset && usesThumb) {
         dbg_printf("Thumb card read dma end alt not found\n");
@@ -508,19 +534,19 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if (usesThumb) {
 			//dbg_printf("Card read dma start not found\n");
 			cardReadDmaOffset =   
-				getOffset((u32*)cardReadDmaEndOffset, -0x100,
-					  (u32*)cardReadDmaStartSignatureThumb1, 1, -1);
+				getOffsetThumb((u16*)cardReadDmaEndOffset, -0x100,
+					  (u16*)cardReadDmaStartSignatureThumb1, 2, -1);
 			if (!cardReadDmaOffset) {
 				dbg_printf("Thumb card read dma start 1 not found\n");
 				cardReadDmaOffset =   
-				getOffset((u32*)cardReadDmaEndOffset, -0x200,
-					  (u32*)cardReadDmaStartSignatureThumb3, 1, -1);
+				getOffsetThumb((u16*)cardReadDmaEndOffset, -0x200,
+					  (u16*)cardReadDmaStartSignatureThumb3, 2, -1);
 			}
 			if (!cardReadDmaOffset) {
 				dbg_printf("Thumb card read dma start 3 not found\n");
 				cardReadDmaOffset =   
-				getOffset((u32*)cardReadDmaEndOffset, -0x100,
-					  (u32*)cardReadDmaStartSignatureThumb3Alt1, 1, -1);
+				getOffsetThumb((u16*)cardReadDmaEndOffset, -0x100,
+					  (u16*)cardReadDmaStartSignatureThumb3Alt1, 2, -1);
 			}
 			if (!cardReadDmaOffset) {
 				dbg_printf("Thumb card read dma start 3 alt 1 not found\n");
@@ -563,8 +589,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 	if(!cardIdEndOffset && usesThumb){
 		cardIdEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u32*)a9cardIdSignatureThumb, 3, 1);
+        getOffsetThumb((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+              (u16*)a9cardIdSignatureThumb, 6, 1);
 	}
     if (!cardIdEndOffset) {
         dbg_printf("Card id end not found\n");
@@ -576,23 +602,23 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if (usesThumb) {
 			if (!cardIdStartOffset) {
 			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x40,
-					  (u32*)cardIdStartSignatureThumb, 1, -1);
+				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
+					  (u16*)cardIdStartSignatureThumb, 2, -1);
 			}
 			if (!cardIdStartOffset) {
 			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x40,
-					  (u32*)cardIdStartSignatureThumbAlt, 1, -1);
+				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
+					  (u16*)cardIdStartSignatureThumbAlt, 2, -1);
 			}
 			if (!cardIdStartOffset) {
 			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x40,
-					  (u32*)cardIdStartSignatureThumbAlt2, 1, -1);
+				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
+					  (u16*)cardIdStartSignatureThumbAlt2, 2, -1);
 			}
 			if (!cardIdStartOffset) {
 			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x40,
-					  (u32*)cardIdStartSignatureThumbAlt3, 1, -1);
+				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
+					  (u16*)cardIdStartSignatureThumbAlt3, 2, -1);
 			}
 		} else {
 			if (!cardIdStartOffset) {
@@ -954,34 +980,34 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
 			a7JumpTableSignatureUniversal_2_pt3, 2, 1);
 		if(!JumpTableFunc){
             usesThumb = true;
-    		JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb, 2, 1);
+    		JumpTableFunc = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb, 4, 1);
                 
             dbg_printf("usesThumb");
             dbg_printf("JumpTableFunc");
 	        dbg_hexa(JumpTableFunc);
     
-    		EepromReadJump = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb, 2, 1);
+    		EepromReadJump = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb, 4, 1);
     			
-    		EepromWriteJump = getOffset((u32*)EepromReadJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 2, 1);
+    		EepromWriteJump = getOffsetThumb((u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb_pt2, 4, 1);
     			
-    		EepromProgJump = getOffset((u32*)EepromWriteJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 2, 1);
+    		EepromProgJump = getOffsetThumb((u16*)EepromWriteJump+2, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb_pt2, 4, 1);
     		
-    		EepromVerifyJump = getOffset((u32*)EepromProgJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 2, 1);
+    		EepromVerifyJump = getOffsetThumb((u16*)EepromProgJump+2, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb_pt2, 4, 1);
     			
-    		EepromEraseJump = getOffset((u32*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt3, 1, 1);
+    		EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb_pt3, 2, 1);
     		
     	}	
     
 		if(!JumpTableFunc){
 			thumbType = 1;
-    		JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumbAlt, 1, 1);
+    		JumpTableFunc = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumbAlt, 2, 1);
                 
             dbg_printf("usesThumb");
             dbg_printf("JumpTableFunc");
@@ -2156,28 +2182,28 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		int alignType = 0;
 	
 		sleepPatchOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-              (u32*)sleepPatchThumb, 1, 1);
+        getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+              (u16*)sleepPatchThumb, 2, 1);
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch not found. Trying alt\n");
 			alignType = 1;
 			sleepPatchOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u32*)sleepPatchThumbAlt1, 2, 1);
+			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+				  (u16*)sleepPatchThumbAlt1, 4, 1);
 		}
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch alt not found. Trying alt2\n");
 			alignType = 0;
 			sleepPatchOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u32*)sleepPatchThumbAlt2, 1, 1);
+			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+				  (u16*)sleepPatchThumbAlt2, 2, 1);
 		}
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch alt2 not found. Trying alt3\n");
 			alignType = 1;
 			sleepPatchOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u32*)sleepPatchThumbAlt3, 2, 1);
+			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+				  (u16*)sleepPatchThumbAlt3, 4, 1);
 		}
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch alt3 not found\n");
