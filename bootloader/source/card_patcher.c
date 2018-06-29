@@ -48,7 +48,6 @@ u16 a7JumpTableSignatureUniversalThumb[3] = {0x68D0,0x6911,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt2[3] = {0x6910,0x68D1,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt3[2] = {0x6908,0x6949};
 a7JumpTableSignatureUniversalThumb_pt3_alt[2] = {0x6910,0x6951};
-u16 a7JumpTableSignatureUniversalThumbAlt[2] = {0x68D0,0x6911};
 
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
@@ -1010,16 +1009,6 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
             
     		
     	}	
-    
-		if(!JumpTableFunc){
-			thumbType = 1;
-    		JumpTableFunc = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumbAlt, 2, 1);
-                
-            dbg_printf("usesThumb");
-            dbg_printf("JumpTableFunc");
-	        dbg_hexa(JumpTableFunc);
-    	}
 	}
 
     if(!JumpTableFunc){
@@ -1041,110 +1030,57 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
 
         u16 instrs [2];
 
-		if (thumbType == 1) {
-			u16* eepromRead = (u16*) (JumpTableFunc + 0x4);
-			dbg_printf("Eeprom read:\t");
-			dbg_hexa((u32)eepromRead);
-			dbg_printf("\n");
-			srcAddr = JumpTableFunc + 0x4  - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[5]);
-			eepromRead[0]=instrs[0];
-			eepromRead[1]=instrs[1];
-		
-			u16* eepromPageWrite = (u16*) (JumpTableFunc + 0x14);
-			dbg_printf("Eeprom page write:\t");
-			dbg_hexa((u32)eepromPageWrite);
-			dbg_printf("\n");
-			srcAddr = JumpTableFunc + 0x14 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[3]);
-			eepromPageWrite[0]=instrs[0];
-			eepromPageWrite[1]=instrs[1];
+		u16* eepromRead = (u16*) (EepromReadJump + 0x6);
+		dbg_printf("Eeprom read:\t");
+		dbg_hexa((u32)eepromRead);
+		dbg_printf("\n");
+		srcAddr = EepromReadJump + 0x6  - vAddrOfRelocSrc + 0x37F8000 ;
+		generateA7InstrThumb(instrs, srcAddr,
+			arm7FunctionThumb[5]);
+		eepromRead[0]=instrs[0];
+		eepromRead[1]=instrs[1];
+	
+		u16* eepromPageWrite = (u16*) (EepromWriteJump + 0x6);
+		dbg_printf("Eeprom page write:\t");
+		dbg_hexa((u32)eepromPageWrite);
+		dbg_printf("\n");
+		srcAddr = EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
+		generateA7InstrThumb(instrs, srcAddr,
+			arm7FunctionThumb[3]);
+		eepromPageWrite[0]=instrs[0];
+		eepromPageWrite[1]=instrs[1];
 
-			u16* eepromPageProg = (u16*) (JumpTableFunc + 0x22);
-			dbg_printf("Eeprom page prog:\t");
-			dbg_hexa((u32)eepromPageProg);
-			dbg_printf("\n");
-			srcAddr = JumpTableFunc + 0x22 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[4]);
-			eepromPageProg[0]=instrs[0];
-			eepromPageProg[1]=instrs[1];
+		u16* eepromPageProg = (u16*) (EepromProgJump + 0x6);
+		dbg_printf("Eeprom page prog:\t");
+		dbg_hexa((u32)eepromPageProg);
+		dbg_printf("\n");
+		srcAddr = EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
+		generateA7InstrThumb(instrs, srcAddr,
+			arm7FunctionThumb[4]);
+		eepromPageProg[0]=instrs[0];
+		eepromPageProg[1]=instrs[1];
 
-			u16* eepromPageVerify = (u16*) (JumpTableFunc + 0x30);
-			dbg_printf("Eeprom verify:\t");
-			dbg_hexa((u32)eepromPageVerify);
-			dbg_printf("\n");
-			srcAddr =  JumpTableFunc + 0x30 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[2]);
-			eepromPageVerify[0]=instrs[0];
-			eepromPageVerify[1]=instrs[1];
-
-
-			u16* eepromPageErase = (u16*) (JumpTableFunc + 0x3C);
-			dbg_printf("Eeprom page erase:\t");
-			dbg_hexa((u32)eepromPageErase);
-			dbg_printf("\n");
-			srcAddr = JumpTableFunc + 0x3C - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[1]);        
-			eepromPageErase[0]=instrs[0];
-			eepromPageErase[1]=instrs[1];
-		} else {
-			u16* eepromRead = (u16*) (EepromReadJump + 0x6);
-			dbg_printf("Eeprom read:\t");
-			dbg_hexa((u32)eepromRead);
-			dbg_printf("\n");
-			srcAddr = EepromReadJump + 0x6  - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[5]);
-			eepromRead[0]=instrs[0];
-			eepromRead[1]=instrs[1];
-		
-			u16* eepromPageWrite = (u16*) (EepromWriteJump + 0x6);
-			dbg_printf("Eeprom page write:\t");
-			dbg_hexa((u32)eepromPageWrite);
-			dbg_printf("\n");
-			srcAddr = EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[3]);
-			eepromPageWrite[0]=instrs[0];
-			eepromPageWrite[1]=instrs[1];
-
-			u16* eepromPageProg = (u16*) (EepromProgJump + 0x6);
-			dbg_printf("Eeprom page prog:\t");
-			dbg_hexa((u32)eepromPageProg);
-			dbg_printf("\n");
-			srcAddr = EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[4]);
-			eepromPageProg[0]=instrs[0];
-			eepromPageProg[1]=instrs[1];
-
-			u16* eepromPageVerify = (u16*) (EepromVerifyJump + 0x6);
-			dbg_printf("Eeprom verify:\t");
-			dbg_hexa((u32)eepromPageVerify);
-			dbg_printf("\n");
-			srcAddr =  EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[2]);
-			eepromPageVerify[0]=instrs[0];
-			eepromPageVerify[1]=instrs[1];
+		u16* eepromPageVerify = (u16*) (EepromVerifyJump + 0x6);
+		dbg_printf("Eeprom verify:\t");
+		dbg_hexa((u32)eepromPageVerify);
+		dbg_printf("\n");
+		srcAddr =  EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
+		generateA7InstrThumb(instrs, srcAddr,
+			arm7FunctionThumb[2]);
+		eepromPageVerify[0]=instrs[0];
+		eepromPageVerify[1]=instrs[1];
 
 
-			u16* eepromPageErase = (u16*) (EepromEraseJump + 0x4);
-			dbg_printf("Eeprom page erase:\t");
-			dbg_hexa((u32)eepromPageErase);
-			dbg_printf("\n");
-			srcAddr = EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000 ;
-			generateA7InstrThumb(instrs, srcAddr,
-				arm7FunctionThumb[1]);        
-			eepromPageErase[0]=instrs[0];
-			eepromPageErase[1]=instrs[1];
-		}
-
+		u16* eepromPageErase = (u16*) (EepromEraseJump + 0x4);
+		dbg_printf("Eeprom page erase:\t");
+		dbg_hexa((u32)eepromPageErase);
+		dbg_printf("\n");
+		srcAddr = EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000 ;
+		generateA7InstrThumb(instrs, srcAddr,
+			arm7FunctionThumb[1]);        
+		eepromPageErase[0]=instrs[0];
+		eepromPageErase[1]=instrs[1];
+        
 	} else {
 
     	u32* eepromRead = (u32*) (EepromReadJump + 0xC);
