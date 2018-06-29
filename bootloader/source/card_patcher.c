@@ -47,8 +47,7 @@ u32 a7JumpTableSignatureUniversal_2_pt3[2] = {0xE5930010,0xE5931014};
 u16 a7JumpTableSignatureUniversalThumb[3] = {0x68D0,0x6911,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt2[3] = {0x6910,0x68D1,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt3[2] = {0x6908,0x6949};
-a7JumpTableSignatureUniversalThumb_pt3_alt[2] = {0x6910,0x6951};
-
+u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2] = {0x6910,0x6951};
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
 u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B7A3};
