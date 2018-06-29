@@ -258,7 +258,7 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 }
 
 
-int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, const u32* cheatData, u32* cheatEngineLocation, u32* cardEngineLocation) {
+int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	u32* debug = (u32*)0x037C6000;

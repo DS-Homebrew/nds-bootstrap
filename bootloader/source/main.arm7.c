@@ -64,8 +64,6 @@ void sdmmc_controller_init();
 #define NDS_HEAD 0x027FFE00
 #define TEMP_ARM9_START_ADDRESS (*(vu32*)0x027FFFF4)
 
-#define CHEAT_ENGINE_LOCATION	0x027FE000
-#define CHEAT_DATA_LOCATION  	0x06010000
 #define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x02400000
 
@@ -803,7 +801,7 @@ void arm7_main (void) {
 	increaseLoadBarLength();	// 6 dots
 
 	setToRunViaIRQ();
-	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
 	} else {
