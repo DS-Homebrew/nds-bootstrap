@@ -48,6 +48,7 @@ u16 a7JumpTableSignatureUniversalThumb[3] = {0x68D0,0x6911,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt2[3] = {0x6910,0x68D1,0x6952};
 u16 a7JumpTableSignatureUniversalThumb_pt3[2] = {0x6908,0x6949};
 u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2] = {0x6910,0x6951};
+u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800,0x6900};
 
 u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
 u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B7A3};
@@ -991,22 +992,36 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
     			
     		EepromWriteJump = getOffsetThumb((u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
     			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-    			
-    		EepromProgJump = getOffsetThumb((u16*)EepromWriteJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-    		
-    		EepromVerifyJump = getOffsetThumb((u16*)EepromProgJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-    			
-    		EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt3, 2, 1);
                 
-           if(!EepromEraseJump){
-                EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt3_alt, 2, 1);
-           }    
-            
-    		
+            if(!EepromWriteJump) {
+              // alternate v1 order
+              EepromProgJump = getOffsetThumb((u16*)JumpTableFunc, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
+                
+              EepromWriteJump = getOffsetThumb((u16*)EepromProgJump-2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
+                
+              EepromVerifyJump = getOffsetThumb((u16*)EepromWriteJump-2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
+                
+              EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump-2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt3_alt2, 2, -1);  
+
+            } else {
+              EepromProgJump = getOffsetThumb((u16*)EepromWriteJump+2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
+      		
+      		EepromVerifyJump = getOffsetThumb((u16*)EepromProgJump+2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
+      			
+      		EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt3, 2, 1);
+                  
+             if(!EepromEraseJump){
+                  EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
+      			a7JumpTableSignatureUniversalThumb_pt3_alt, 2, 1);
+             }    
+            } 
     	}	
 	}
 
