@@ -157,10 +157,8 @@ u16 cardReadDmaEndSignatureThumbAlt[4]   = {0x8000,0x01FF,0x0000,0x0200};
 
 u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
 u32 sleepPatch[2] = {0x0A000001, 0xE3A00601}; 
-u16 sleepPatchThumb[2] = {0xD002,0x4831}; 
-u16 sleepPatchThumbAlt1[4] = {0x2900,0xD002,0x4831,0xF7F4}; 
-u16 sleepPatchThumbAlt2[2] = {0xD002,0x0440}; 
-u16 sleepPatchThumbAlt3[4] = {0x4201,0xD002,0x0440,0xF7F6}; 
+u16 sleepPatchThumb[2] = {0xD002,0x4831};
+u16 sleepPatchThumbAlt[2] = {0xD002,0x0440};
 
 
      
@@ -2171,43 +2169,22 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		*(u32*)(sleepPatchOffset+8) = 0;
 	}
 	if (usesThumb) {
-		int alignType = 0;
-	
 		sleepPatchOffset =   
         getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
               (u16*)sleepPatchThumb, 2, 1);
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch not found. Trying alt\n");
-			alignType = 1;
 			sleepPatchOffset =   
 			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u16*)sleepPatchThumbAlt1, 4, 1);
+				  (u16*)sleepPatchThumbAlt, 2, 1);
 		}
 		if (!sleepPatchOffset) {
-			dbg_printf("Thumb sleep patch alt not found. Trying alt2\n");
-			alignType = 0;
-			sleepPatchOffset =   
-			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u16*)sleepPatchThumbAlt2, 2, 1);
-		}
-		if (!sleepPatchOffset) {
-			dbg_printf("Thumb sleep patch alt2 not found. Trying alt3\n");
-			alignType = 1;
-			sleepPatchOffset =   
-			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u16*)sleepPatchThumbAlt3, 4, 1);
-		}
-		if (!sleepPatchOffset) {
-			dbg_printf("Thumb sleep patch alt3 not found\n");
+			dbg_printf("Thumb sleep patch alt not found\n");
 		}
 		if (sleepPatchOffset>0) {
 			dbg_printf("Thumb sleep patch found\n");
-			if (alignType == 0) {
-				*(u32*)(sleepPatchOffset+4) = 0;
-			} else if (alignType == 1) {
-				*(u16*)(sleepPatchOffset+6) = 0;
-				*(u16*)(sleepPatchOffset+8) = 0;
-			}
+			*(u16*)(sleepPatchOffset+4) = 0;
+			*(u16*)(sleepPatchOffset+6) = 0;
 		}
 	}
 
