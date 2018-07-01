@@ -145,6 +145,7 @@ u16 cardPullOutSignatureThumbAlt1[4]   = {0xB500,0xB081,0x203F,0x4001};
 //u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
 u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
+u32 forceToPowerOffSignature[4]   = {0xE92D4000,0xE24DD004,0xE59F0028,0xE28D1000};
 
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
@@ -508,6 +509,18 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		}
 	}
 
+	u32 forceToPowerOffOffset = 
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+			(u32*)forceToPowerOffSignature, 4, 1);
+	if (!forceToPowerOffOffset) {
+		dbg_printf("Force to power off handler not found\n");
+		//return 0;
+	} else {
+		dbg_printf("Force to power off handler:\t");
+		dbg_hexa(forceToPowerOffOffset);
+		dbg_printf("\n");
+	}
+
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
         getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
@@ -818,6 +831,9 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x4);
+
+	if (forceToPowerOffOffset>0)
+		copyLoop ((u32*)forceToPowerOffOffset, cardPullOutPatch, 0x4);
 
 	if (cardIdStartOffset) {
 		if (usesThumb) {
