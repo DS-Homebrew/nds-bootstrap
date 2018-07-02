@@ -29,12 +29,14 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE 0x100000
 
-#define CACHE_ADRESS_START 0x0C820000
-#define retail_CACHE_ADRESS_SIZE 0x7E0000
-#define dev_CACHE_ADRESS_SIZE 0x17E0000
+#define ROM_LOCATION 0x0C804000
+
+#define CACHE_ADRESS_START 0x0C920000
+#define retail_CACHE_ADRESS_SIZE 0x6E0000
+#define dev_CACHE_ADRESS_SIZE 0x16E0000
 #define HGSS_CACHE_ADRESS_SIZE 0x1E0000
-#define retail_CACHE_SLOTS 0x3F
-#define dev_CACHE_SLOTS 0xBF
+#define retail_CACHE_SLOTS 0x37
+#define dev_CACHE_SLOTS 0xB7
 #define HGSS_CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct;
@@ -50,17 +52,26 @@ static u32 accessCounter = 0;
 
 static u16 cacheSlots = retail_CACHE_SLOTS;
 static u32 cacheReadSizeSubtract = 0;
+static u32 asyncReadSizeSubtract = 0;
+
+static u32 asyncSector = 0xFFFFFFFF;
+static u32 asyncQueue [10];
+static int aQHead = 0;
+static int aQTail = 0;
+static int aQSize = 0;
+static char hexbuffer [9];
 
 static u32 readNum = 0;
 static bool alreadySetMpu = false;
 
 static bool flagsSet = false;
+static bool hgssFix = false;
+extern u32 ROMinRAM;
 extern u32 ROM_TID;
+extern u32 ARM9_LEN;
 extern u32 romSize;
 extern u32 consoleModel;
 extern u32 enableExceptionHandler;
-
-static char hexbuffer [9];
 
 char* tohex(u32 n)
 {
@@ -133,6 +144,115 @@ void waitForArm7() {
 	while(sharedAddr[3] != (vu32)0);
 }
 
+void addToAsyncQueue(sector) {
+	#ifdef DEBUG
+	nocashMessage("\narm9 addToAsyncQueue\n");	
+	nocashMessage("\narm9 sector\n");	
+	nocashMessage(tohex(sector));
+	#endif
+	
+	asyncQueue[aQHead] = sector;
+	aQHead++;
+	aQSize++;
+	if(aQHead>9) {
+		aQHead=0;
+	}
+	if(aQSize>10) {
+		aQSize=10;
+		aQTail++;
+		if(aQTail>9) aQTail=0;
+	}
+}
+
+void triggerAsyncPrefetch(sector) {	
+	#ifdef DEBUG
+	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
+	nocashMessage("\narm9 sector\n");	
+	nocashMessage(tohex(sector));
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	asyncReadSizeSubtract = 0;
+	if(asyncSector == 0xFFFFFFFF) {
+		if (romSize > 0) {
+			if (sector > romSize) {
+				sector = 0;
+			} else if ((sector+_128KB_READ_SIZE) > romSize) {
+				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+					asyncReadSizeSubtract++;
+					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == romSize) break;
+				}
+			}
+		}
+		int slot = getSlotForSector(sector);
+		// read max CACHE_READ_SIZE via the main RAM cache
+		// do it only if there is no async command ongoing
+		if(slot==-1) {
+			addToAsyncQueue(sector);
+			// send a command to the arm7 to fill the RAM cache
+			u32 commandRead = 0x020ff800;		
+
+			slot = allocateCacheSlot();
+			vu8* buffer = getCacheAddress(slot);
+
+			if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
+
+			cacheDescriptor[slot] = sector;
+			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
+			asyncSector = sector;		
+
+			// write the command
+			sharedAddr[0] = buffer;
+			sharedAddr[1] = _128KB_READ_SIZE-asyncReadSizeSubtract;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			//IPC_SendSync(0xEE24);			
+
+
+			// do it asynchronously
+			//waitForArm7();
+		}
+	}
+}
+
+void processAsyncCommand() {
+	#ifdef DEBUG
+	nocashMessage("\narm9 processAsyncCommand\n");	
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	if(asyncSector != 0xFFFFFFFF) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			if(sharedAddr[3] == (vu32)0) {
+				updateDescriptor(slot, asyncSector);
+				asyncSector = 0xFFFFFFFF;
+			}			
+		}	
+	}
+}
+
+void getAsyncSector() {
+	#ifdef DEBUG
+	nocashMessage("\narm9 getAsyncSector\n");	
+	nocashMessage("\narm9 asyncSector\n");	
+	nocashMessage(tohex(asyncSector));
+	#endif
+	
+	if(asyncSector != 0xFFFFFFFF) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			waitForArm7();
+
+			updateDescriptor(slot, asyncSector);
+			asyncSector = 0xFFFFFFFF;
+		}	
+	}	
+}
+
 int cardRead (u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	
@@ -161,6 +281,7 @@ int cardRead (u32* cacheStruct) {
 		|| (ROM_TID & 0x00FFFFFF) == 0x475049) // Pokemon SoulSilver
 		{
 			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
+			hgssFix = true;
 		}
 		else if (consoleModel > 0) cacheSlots = dev_CACHE_SLOTS;
 
@@ -189,132 +310,198 @@ int cardRead (u32* cacheStruct) {
 	#endif
 	
 	
-	u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
-	cacheReadSizeSubtract = 0;
-	if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
-		for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
-			cacheReadSizeSubtract++;
-			if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
+	if (ROMinRAM == false) {
+		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+		cacheReadSizeSubtract = 0;
+		if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
+			for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+				cacheReadSizeSubtract++;
+				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
+			}
 		}
-	}
 
-	accessCounter++;
+		accessCounter++;
 
-	if(page == src && len > _128KB_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
-		// read directly at arm7 level
-		commandRead = 0x025FFB08;
+		if (!hgssFix) processAsyncCommand();
 
-		cacheFlush();
+		if(page == src && len > _128KB_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+			if (!hgssFix) getAsyncSector();
 
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
+			// read directly at arm7 level
+			commandRead = 0x025FFB08;
 
-		//IPC_SendSync(0xEE24);
+			cacheFlush();
 
-		waitForArm7();
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len;
+			sharedAddr[2] = src;
+			sharedAddr[3] = commandRead;
 
+			//IPC_SendSync(0xEE24);
+
+			waitForArm7();
+
+		} else {
+			// read via the main RAM cache
+			while(len > 0) {
+				int slot = getSlotForSector(sector);
+				vu8* buffer = getCacheAddress(slot);
+				u32 nextSector = sector+_128KB_READ_SIZE;	
+				// read max CACHE_READ_SIZE via the main RAM cache
+				if(slot==-1) {
+					if (!hgssFix) getAsyncSector();
+
+					// send a command to the arm7 to fill the RAM cache
+					commandRead = 0x025FFB08;
+
+					slot = allocateCacheSlot();
+
+					buffer = getCacheAddress(slot);
+
+					if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
+
+					// write the command
+					sharedAddr[0] = buffer;
+					sharedAddr[1] = _128KB_READ_SIZE-cacheReadSizeSubtract;
+					sharedAddr[2] = sector;
+					sharedAddr[3] = commandRead;
+
+					//IPC_SendSync(0xEE24);
+
+					waitForArm7();
+
+					updateDescriptor(slot, sector);	
+		
+					if (!hgssFix) triggerAsyncPrefetch(nextSector);
+				} else {
+					if (!hgssFix) {
+						if(cacheCounter[slot] == 0x0FFFFFFF) {
+							// prefetch successfull
+							getAsyncSector();
+							
+							triggerAsyncPrefetch(nextSector);	
+						} else {
+							int i;
+							for(i=0; i<10; i++) {
+								if(asyncQueue[i]==sector) {
+									// prefetch successfull
+									triggerAsyncPrefetch(nextSector);	
+									break;
+								}
+							}
+						}
+					}
+					updateDescriptor(slot, sector);
+				}
+
+				u32 len2=len;
+				if((src - sector) + len2 > _128KB_READ_SIZE){
+					len2 = sector - src + _128KB_READ_SIZE;
+				}
+
+				if(len2 > 512) {
+					len2 -= src%4;
+					len2 -= len2 % 32;
+				}
+
+				/*if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {*/
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
+
+					sharedAddr[0] = dst;
+					sharedAddr[1] = len2;
+					sharedAddr[2] = buffer+src-sector;
+					sharedAddr[3] = commandRead;
+
+					//IPC_SendSync(0xEE24);
+
+					waitForArm7();
+					// -------------------------------------*/
+					#endif
+
+					// copy directly
+					memcpy(dst,buffer+(src-sector),len2);
+
+					// update cardi common
+					cardStruct[0] = src + len2;
+					cardStruct[1] = dst + len2;
+					cardStruct[2] = len - len2;
+				/*} else {
+					#ifdef DEBUG
+					// send a log command for debug purpose
+					// -------------------------------------
+					commandRead = 0x026ff800;
+
+					sharedAddr[0] = page;
+					sharedAddr[1] = len2;
+					sharedAddr[2] = buffer+page-sector;
+					sharedAddr[3] = commandRead;
+
+					//IPC_SendSync(0xEE24);
+
+					waitForArm7();
+					// -------------------------------------
+					#endif
+
+					// read via the 512b ram cache
+					memcpy(cacheBuffer, buffer+(page-sector), 512);
+					*cachePage = page;
+					(*readCachedRef)(cacheStruct);
+				}*/
+				len = cardStruct[2];
+				if(len>0) {
+					src = cardStruct[0];
+					dst = cardStruct[1];
+					page = (src/512)*512;
+					sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+					cacheReadSizeSubtract = 0;
+					if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
+						for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+							cacheReadSizeSubtract++;
+							if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
+						}
+					}
+					accessCounter++;
+				}
+			}
+		}
 	} else {
-		// read via the main RAM cache
 		while(len > 0) {
-			int slot = getSlotForSector(sector);
-			vu8* buffer = getCacheAddress(slot);
-			u32 nextSector = sector+_128KB_READ_SIZE;	
-			// read max CACHE_READ_SIZE via the main RAM cache
-			if(slot==-1) {
-				// send a command to the arm7 to fill the RAM cache
-				commandRead = 0x025FFB08;
-
-				slot = allocateCacheSlot();
-
-				buffer = getCacheAddress(slot);
-
-				if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
-
-				// write the command
-				sharedAddr[0] = buffer;
-				sharedAddr[1] = _128KB_READ_SIZE-cacheReadSizeSubtract;
-				sharedAddr[2] = sector;
-				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
-
-				waitForArm7();
-			}
-
-			updateDescriptor(slot, sector);
-
 			u32 len2=len;
-			if((src - sector) + len2 > _128KB_READ_SIZE){
-				len2 = sector - src + _128KB_READ_SIZE;
-			}
-
 			if(len2 > 512) {
 				len2 -= src%4;
 				len2 -= len2 % 32;
 			}
 
-			/*if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {*/
-				#ifdef DEBUG
-				// send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
+			#ifdef DEBUG
+			// send a log command for debug purpose
+			// -------------------------------------
+			commandRead = 0x026ff800;
 
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+src-sector;
-				sharedAddr[3] = commandRead;
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len2;
+			sharedAddr[2] = (ROM_LOCATION-0x4000-ARM9_LEN)+src;
+			sharedAddr[3] = commandRead;
 
-				//IPC_SendSync(0xEE24);
+			//IPC_SendSync(0xEE24);
 
-				waitForArm7();
-				// -------------------------------------*/
-				#endif
+			waitForArm7();
+			// -------------------------------------
+			#endif
 
-				// copy directly
-				memcpy(dst,buffer+(src-sector),len2);
+			// copy directly
+			memcpy(dst,(ROM_LOCATION-0x4000-ARM9_LEN)+src,len2);
 
-				// update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = dst + len2;
-				cardStruct[2] = len - len2;
-			/*} else {
-				#ifdef DEBUG
-				// send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
-
-				sharedAddr[0] = page;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+page-sector;
-				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
-
-				waitForArm7();
-				// -------------------------------------
-				#endif
-
-				// read via the 512b ram cache
-				memcpy(cacheBuffer, buffer+(page-sector), 512);
-				*cachePage = page;
-				(*readCachedRef)(cacheStruct);
-			}*/
+			// update cardi common
+			cardStruct[0] = src + len2;
+			cardStruct[1] = dst + len2;
+			cardStruct[2] = len - len2;
 			len = cardStruct[2];
 			if(len>0) {
 				src = cardStruct[0];
 				dst = cardStruct[1];
-				page = (src/512)*512;
-				sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
-				cacheReadSizeSubtract = 0;
-				if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
-					for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
-						cacheReadSizeSubtract++;
-						if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
-					}
-				}
-				accessCounter++;
 			}
 		}
 	}

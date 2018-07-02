@@ -32,7 +32,7 @@
 #include "sr_data_srloader.h"	// For rebooting into DSiMenu++
 #include "sr_data_srllastran.h"	// For rebooting the game
 
-#define SAVE_LOCATION	0x0C5E0000
+#define SAVE_LOCATION	0x0C820000
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
 extern int tryLockMutex(int * addr);					// Fixes implicit declaration @ line 145
@@ -49,6 +49,7 @@ extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 language;
 extern u32 gottenSCFGExt;
+extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
@@ -645,15 +646,13 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
-	//	memcpy(dst,SAVE_LOCATION+src,len);
-	//} else {
-    if (lockMutex(&saveMutex)) {
+	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+		memcpy(dst,SAVE_LOCATION+src,len);
+	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst,*savFile,src,len,-1);
         unlockMutex(&saveMutex);
 	}
-	//}
 	return true;
 }
 
@@ -672,9 +671,9 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-    	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
-    	//	memcpy(SAVE_LOCATION+dst,src,len);
-    	//}
+    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+    		memcpy(SAVE_LOCATION+dst,src,len);
+    	}
     	fileWrite(src,*savFile,dst,len,-1);
     	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
@@ -695,12 +694,12 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	//if((saveSize > 0) && (saveSize <= 0x00100000)) {
-	//	memcpy(SAVE_LOCATION+dst,src,len);
-	//}
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
+    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+    		memcpy(SAVE_LOCATION+dst,src,len);
+    	}
     	fileWrite(src,*savFile,dst,len,-1);
         i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
@@ -757,7 +756,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-    if (lockMutex(&saveMutex)) {
+	if (lockMutex(&saveMutex)) {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;

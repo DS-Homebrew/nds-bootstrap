@@ -25,4 +25,4 @@ arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation);
-void hookNdsRetail9 (u32* cardEngineLocation9, u32 romSize);
+void hookNdsRetail9 (u32* cardEngineLocation9);

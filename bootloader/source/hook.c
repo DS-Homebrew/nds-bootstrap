@@ -30,6 +30,7 @@ extern unsigned long gameSoftReset;
 
 extern u32 runViaIRQ;
 
+extern u32 ROMinRAM;
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
@@ -313,11 +314,12 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	return ERR_NONE;
 }
 
-void hookNdsRetail9 (u32* cardEngineLocation9, u32 romSize) {
-	cardEngineLocation9[7] = ROM_TID;
-	cardEngineLocation9[8] = ROM_HEADERCRC;
-	cardEngineLocation9[9] = ARM9_LEN;
-	cardEngineLocation9[10] = romSize;
-	cardEngineLocation9[11] = enableExceptionHandler;
-	cardEngineLocation9[12] = consoleModel;
+void hookNdsRetail9 (u32* cardEngineLocation9) {
+	cardEngineLocation9[7] = ROMinRAM;
+	cardEngineLocation9[8] = ROM_TID;
+	cardEngineLocation9[9] = ROM_HEADERCRC;
+	cardEngineLocation9[10] = ARM9_LEN;
+	cardEngineLocation9[11] = romSize;
+	cardEngineLocation9[12] = enableExceptionHandler;
+	cardEngineLocation9[13] = consoleModel;
 }
