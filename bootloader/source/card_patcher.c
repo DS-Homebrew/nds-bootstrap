@@ -23,6 +23,7 @@
 #include "cardengine_arm7_bin.h"
 #include "debugToFile.h"
 
+extern u32 ROMinRAM;
 extern u32 ROM_TID;
 
 // Subroutine function signatures arm7
@@ -2146,7 +2147,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, cardEngineLocation);
 	}
-	patchSwiHalt(ndsHeader, cardEngineLocation);
+	if (ROMinRAM == false) patchSwiHalt(ndsHeader, cardEngineLocation);
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;

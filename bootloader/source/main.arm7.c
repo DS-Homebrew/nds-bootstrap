@@ -459,6 +459,7 @@ u32 ROM_HEADERCRC;
 u32 ARM9_LEN;
 u32 fatSize;
 u32 romSize;
+u32 romSizeNoArm9;
 
 void loadBinary_ARM7 (aFile file)
 {
@@ -480,7 +481,14 @@ void loadBinary_ARM7 (aFile file)
 	ROM_TID = ndsHeader[0x00C>>2];
 	fatSize = ndsHeader[0x04C>>2];
 	romSize = ndsHeader[0x080>>2];
+	romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
 	ROM_HEADERCRC = ndsHeader[0x15C>>2];
+
+	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x017FC000)
+	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x007FC000)) {
+		// Set to load ROM into RAM
+		ROMinRAM = true;
+	}
 
 	//Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170, 3);
@@ -609,8 +617,6 @@ void loadBinary_ARM7 (aFile file)
 u32 enableExceptionHandler = true;
 
 void setArm9Stuff(aFile file) {
-	u32 romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
-
 	// ExceptionHandler2 (red screen) blacklist
 	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
 	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
@@ -620,10 +626,8 @@ void setArm9Stuff(aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x017FC000)
-	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x007FC000)) {
+	if (ROMinRAM == true) {
 		// Load ROM into RAM
-		ROMinRAM = true;
 		fileRead (ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
 	}
 
