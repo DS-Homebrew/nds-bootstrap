@@ -70,8 +70,6 @@ extern u32 romSize;
 extern u32 consoleModel;
 extern u32 enableExceptionHandler;
 
-static char hexbuffer [9];
-
 char* tohex(u32 n)
 {
     unsigned size = 9;
