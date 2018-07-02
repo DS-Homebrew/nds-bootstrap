@@ -821,10 +821,10 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSl
 	beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
 
 	// Read first part from buffer, to align with sector boundary
-	for (dataPos = 0 ; dataPos < beginBytes; dataPos++)
-	{
-		globalBuffer[curByte++] = buffer[dataPos];
-	}
+    dataPos=0;
+    memcpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
+    curByte+=beginBytes;
+    dataPos+=beginBytes;
 
 	CARD_WriteSector(curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
@@ -882,11 +882,9 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSl
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
-		for (; dataPos < length; dataPos++)
-		{
-			globalBuffer[curByte] = buffer[dataPos];
-			curByte++;
-		}
+        memcpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
+        curByte+=length;
+        dataPos+=length;
 
 		CARD_WriteSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 	}
