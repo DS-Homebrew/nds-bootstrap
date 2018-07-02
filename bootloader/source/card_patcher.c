@@ -2227,10 +2227,10 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	if(!saveResult) saveResult = savePatchUniversal(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
-	//if ((saveResult == 1) && (saveSize > 0) && (saveSize <= 0x00100000)) {
-	//	aFile saveFile = getFileFromCluster (saveFileCluster);
-	//	fileRead(0x0C5E0000, saveFile, 0, saveSize, 3);
-	//}
+	if ((saveResult == 1) && (saveSize > 0) && (saveSize <= 0x00100000)) {
+		aFile saveFile = getFileFromCluster (saveFileCluster);
+		fileRead(0x0C820000, saveFile, 0, saveSize, 3);
+	}
 
 	dbg_printf("ERR_NONE");
 	return 0;
