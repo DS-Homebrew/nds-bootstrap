@@ -29,6 +29,8 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE 0x100000
 
+#define ROM_LOCATION 0x0C804000
+
 #define CACHE_ADRESS_START 0x0C920000
 #define retail_CACHE_ADRESS_SIZE 0x6E0000
 #define dev_CACHE_ADRESS_SIZE 0x16E0000
@@ -476,7 +478,7 @@ int cardRead (u32* cacheStruct) {
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = (CACHE_ADRESS_START-0x4000-ARM9_LEN)+src;
+			sharedAddr[2] = (ROM_LOCATION-0x4000-ARM9_LEN)+src;
 			sharedAddr[3] = commandRead;
 
 			//IPC_SendSync(0xEE24);
@@ -486,7 +488,7 @@ int cardRead (u32* cacheStruct) {
 			#endif
 
 			// copy directly
-			memcpy(dst,(CACHE_ADRESS_START-0x4000-ARM9_LEN)+src,len2);
+			memcpy(dst,(ROM_LOCATION-0x4000-ARM9_LEN)+src,len2);
 
 			// update cardi common
 			cardStruct[0] = src + len2;

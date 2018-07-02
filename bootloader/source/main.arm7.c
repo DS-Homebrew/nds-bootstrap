@@ -66,7 +66,7 @@ void sdmmc_controller_init();
 
 #define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x02400000
-#define ROM_LOCATION			0x0C920000
+#define ROM_LOCATION			0x0C804000
 
 const char* bootName = "BOOT.NDS";
 
@@ -484,8 +484,8 @@ void loadBinary_ARM7 (aFile file)
 	romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
 	ROM_HEADERCRC = ndsHeader[0x15C>>2];
 
-	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x016E0000)
-	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x006E0000)) {
+	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x017FC000)
+	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x007FC000)) {
 		// Set to load ROM into RAM
 		ROMinRAM = true;
 	}

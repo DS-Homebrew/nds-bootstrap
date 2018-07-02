@@ -49,6 +49,7 @@ extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 language;
 extern u32 gottenSCFGExt;
+extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
@@ -645,7 +646,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if((saveSize > 0) && (saveSize <= 0x00100000)) {
+	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
 		memcpy(dst,SAVE_LOCATION+src,len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
@@ -670,7 +671,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-    	if((saveSize > 0) && (saveSize <= 0x00100000)) {
+    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
     		memcpy(SAVE_LOCATION+dst,src,len);
     	}
     	fileWrite(src,*savFile,dst,len,-1);
@@ -696,7 +697,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
-    	if((saveSize > 0) && (saveSize <= 0x00100000)) {
+    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
     		memcpy(SAVE_LOCATION+dst,src,len);
     	}
     	fileWrite(src,*savFile,dst,len,-1);
@@ -755,7 +756,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-    if (lockMutex(&saveMutex)) {
+	if (lockMutex(&saveMutex)) {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;

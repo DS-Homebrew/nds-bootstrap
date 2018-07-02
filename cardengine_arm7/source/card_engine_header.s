@@ -16,6 +16,7 @@
 .global saveSize
 .global language
 .global gottenSCFGExt
+.global ROMinRAM
 .global consoleModel
 .global romread_LED
 .global gameSoftReset
@@ -40,6 +41,8 @@ cardStruct:
 language:
 	.word	0x00000000
 gottenSCFGExt:
+	.word	0x00000000
+ROMinRAM:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
