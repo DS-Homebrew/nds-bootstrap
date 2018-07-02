@@ -66,6 +66,7 @@ void sdmmc_controller_init();
 
 #define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x02400000
+#define ROM_LOCATION			0x0C804000
 
 const char* bootName = "BOOT.NDS";
 
@@ -452,7 +453,7 @@ void NDSTouchscreenMode() {
 }
 
 
-u32 ROM_LOCATION = 0x0C800000;
+u32 ROMinRAM = false;
 u32 ROM_TID;
 u32 ROM_HEADERCRC;
 u32 ARM9_LEN;
@@ -605,18 +606,10 @@ void loadBinary_ARM7 (aFile file)
 	REG_SCFG_ROM = 0x703;
 }
 
-u32 runViaIRQ = false;
-
-void setToRunViaIRQ(void) {
-	if((ROM_TID & 0x00FFFFFF) == 0x414259)	// Bomberman 2
-	{
-		runViaIRQ = true;
-	}
-}
-
 u32 enableExceptionHandler = true;
 
-void setArm9Stuff(void) {
+void setArm9Stuff(aFile file) {
+	u32 romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
 
 	// ExceptionHandler2 (red screen) blacklist
 	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
@@ -627,7 +620,14 @@ void setArm9Stuff(void) {
 		enableExceptionHandler = false;
 	}
 
-	hookNdsRetail9((u32*)ENGINE_LOCATION_ARM9, romSize);
+	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x017FC000)
+	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x007FC000)) {
+		// Load ROM into RAM
+		ROMinRAM = true;
+		fileRead (ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
+	}
+
+	hookNdsRetail9((u32*)ENGINE_LOCATION_ARM9);
 }
 
 /*-------------------------------------------------------------------------
@@ -800,7 +800,6 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
-	setToRunViaIRQ();
 	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
@@ -812,7 +811,7 @@ void arm7_main (void) {
  
 
 
-	setArm9Stuff();
+	setArm9Stuff(*romFile);
 
 	if(romread_LED == 1) {
 		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
