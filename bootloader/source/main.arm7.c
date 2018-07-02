@@ -66,7 +66,7 @@ void sdmmc_controller_init();
 
 #define ENGINE_LOCATION_ARM7  	0x037C0000
 #define ENGINE_LOCATION_ARM9  	0x02400000
-#define ROM_LOCATION			0x0C900000
+#define ROM_LOCATION			0x0C920000
 
 const char* bootName = "BOOT.NDS";
 
