@@ -301,9 +301,10 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	cardEngineLocation[4] = file.firstCluster;
 	cardEngineLocation[6] = language;
 	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
-	cardEngineLocation[8] = consoleModel;
-	cardEngineLocation[9] = romread_LED;
-	cardEngineLocation[10] = gameSoftReset;
+	cardEngineLocation[8] = ROMinRAM;
+	cardEngineLocation[9] = consoleModel;
+	cardEngineLocation[10] = romread_LED;
+	cardEngineLocation[11] = gameSoftReset;
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 
