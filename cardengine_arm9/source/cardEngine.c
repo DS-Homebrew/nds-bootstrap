@@ -309,7 +309,7 @@ int cardRead (u32* cacheStruct) {
 	// -------------------------------------*/
 	#endif
 	
-	
+
 	if (ROMinRAM == false) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;

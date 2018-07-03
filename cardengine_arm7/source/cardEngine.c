@@ -228,9 +228,9 @@ void cardRead_arm9() {
     nocashMessage("fileRead romFile");
     #endif
 	fileRead(dst,*romFile,src,len,0);
-	if(*(u32*)(0x028128ac) == 0x4B434148){ //Primary fix for Mario's Holiday, will eventually be moved to the patch engine soon:tm:
-                *(u32*)(0x028128ac) = 0xA00;
-        }
+	if(*(u32*)(0x028128ac) == 0x4B434148){ //Primary fix for Mario's Holiday
+		*(u32*)(0x028128ac) = 0xA00;
+	}
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	#ifdef DEBUG

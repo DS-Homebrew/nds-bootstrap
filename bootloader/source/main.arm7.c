@@ -629,6 +629,9 @@ void setArm9Stuff(aFile file) {
 	if (ROMinRAM == true) {
 		// Load ROM into RAM
 		fileRead (ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
+		if(*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) == 0x4B434148){ //Primary fix for Mario's Holiday
+			*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) = 0xA00;
+		}
 	}
 
 	hookNdsRetail9((u32*)ENGINE_LOCATION_ARM9);
