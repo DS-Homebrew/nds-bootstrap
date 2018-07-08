@@ -408,7 +408,7 @@ int cardRead (u32* cacheStruct) {
 					len2 -= len2 % 32;
 				}
 
-				/*if(len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {*/
+				if(readCachedRef == 0 || len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
@@ -432,7 +432,7 @@ int cardRead (u32* cacheStruct) {
 					cardStruct[0] = src + len2;
 					cardStruct[1] = dst + len2;
 					cardStruct[2] = len - len2;
-				/*} else {
+				} else {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
@@ -453,7 +453,7 @@ int cardRead (u32* cacheStruct) {
 					memcpy(cacheBuffer, buffer+(page-sector), 512);
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
-				}*/
+				}
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
@@ -479,33 +479,57 @@ int cardRead (u32* cacheStruct) {
 				len2 -= len2 % 32;
 			}
 
-			#ifdef DEBUG
-			// send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+			if(readCachedRef == 0 || len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+				#ifdef DEBUG
+				// send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
 
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len2;
-			sharedAddr[2] = (ROM_LOCATION-0x4000-ARM9_LEN)+src;
-			sharedAddr[3] = commandRead;
+				sharedAddr[0] = dst;
+				sharedAddr[1] = len2;
+				sharedAddr[2] = (ROM_LOCATION-0x4000-ARM9_LEN)+src;
+				sharedAddr[3] = commandRead;
 
-			//IPC_SendSync(0xEE24);
+				//IPC_SendSync(0xEE24);
 
-			waitForArm7();
-			// -------------------------------------
-			#endif
+				waitForArm7();
+				// -------------------------------------
+				#endif
 
-			// copy directly
-			memcpy(dst,(ROM_LOCATION-0x4000-ARM9_LEN)+src,len2);
+				// copy directly
+				memcpy(dst,(ROM_LOCATION-0x4000-ARM9_LEN)+src,len2);
 
-			// update cardi common
-			cardStruct[0] = src + len2;
-			cardStruct[1] = dst + len2;
-			cardStruct[2] = len - len2;
+				// update cardi common
+				cardStruct[0] = src + len2;
+				cardStruct[1] = dst + len2;
+				cardStruct[2] = len - len2;
+			} else {
+				#ifdef DEBUG
+				// send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
+
+				sharedAddr[0] = page;
+				sharedAddr[1] = len2;
+				sharedAddr[2] = (ROM_LOCATION-0x4000-ARM9_LEN)+page;
+				sharedAddr[3] = commandRead;
+
+				//IPC_SendSync(0xEE24);
+
+				waitForArm7();
+				// -------------------------------------
+				#endif
+
+				// read via the 512b ram cache
+				memcpy(cacheBuffer, (ROM_LOCATION-0x4000-ARM9_LEN)+page, 512);
+				*cachePage = page;
+				(*readCachedRef)(cacheStruct);
+			}
 			len = cardStruct[2];
 			if(len>0) {
 				src = cardStruct[0];
 				dst = cardStruct[1];
+				page = (src/512)*512;
 			}
 		}
 	}

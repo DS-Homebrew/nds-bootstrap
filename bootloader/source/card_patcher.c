@@ -147,6 +147,14 @@ u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210
 u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
 //u32 forceToPowerOffSignature[4]   = {0xE92D4000,0xE24DD004,0xE59F0028,0xE28D1000};
 
+u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
+u32 cardReadCachedEndSignature1[4]   = {0xE5950020,0xE3500000,0x13A00001,0x03A00000};
+
+u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
+
+u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
+u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
+
 u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
 u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
@@ -356,12 +364,17 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[8] = moduleParams->sdk_version;
 
 	u32* cardPullOutSignature = cardPullOutSignature1;
+	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
+	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
 	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
 	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+		cardReadCachedEndSignature = cardReadCachedEndSignature3;
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	} else if(moduleParams->sdk_version > 0x4000000) {
 		cardPullOutSignature = cardPullOutSignature4;
+		cardReadCachedStartSignature = cardReadCachedStartSignature4;
+		cardReadCachedEndSignature = cardReadCachedEndSignature4;
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	}
 
@@ -515,6 +528,26 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_hexa(forceToPowerOffOffset);
 		dbg_printf("\n");
 	}*/
+	
+	u32 cardReadCachedEndOffset =  
+		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)cardReadCachedEndSignature, 4, 1);
+	if (!cardReadCachedEndOffset) {
+		dbg_printf("Card read cached end not found\n");
+		//cardReadFound = false;
+		//return 0;
+	}
+	u32 cardReadCachedOffset =   
+		getOffset((u32*)cardReadCachedEndOffset, -0xFF,
+			(u32*)cardReadCachedStartSignature, 2, -1);
+	if (!cardReadStartOffset) {
+		dbg_printf("Card read cached start not found\n");
+		//cardReadFound = false;
+		//return 0;
+	}
+	dbg_printf("Card read cached :\t");
+	dbg_hexa(cardReadCachedOffset);
+	dbg_printf("\n");
 
 	u32 cardReadDmaOffset = 0;
 	u32 cardReadDmaEndOffset =  
@@ -762,10 +795,10 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}*/
 	
 	if(moduleParams->sdk_version > 0x3000000
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x544B41	// Doctor Tendo
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x5A4341	// Cars
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x434241	// Harvest Moon DS
-	&& (*(u32*)(0x27FF00C) & 0x00FFFFFF) != 0x4C5741)	// TWEWY
+	&& (ROM_TID & 0x00FFFFFF) != 0x544B41		// Doctor Tendo
+	&& (ROM_TID & 0x00FFFFFF) != 0x5A4341		// Cars
+	&& (ROM_TID & 0x00FFFFFF) != 0x434241		// Harvest Moon DS
+	&& (ROM_TID & 0x00FFFFFF) != 0x4C5741)		// TWEWY
 	{
 		u32 randomPatchOffset =  
 				getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
@@ -818,6 +851,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	}
 
 	*((u32*)patches[7]) = cardPullOutOffset+4;
+	if((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
+	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crosing: Wild World
+	{
+		*((u32*)patches[8]) = cardReadCachedOffset;
+	}
 
 	patches[10] = needFlushCache;
 
