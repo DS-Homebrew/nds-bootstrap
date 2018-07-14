@@ -87,6 +87,7 @@ extern unsigned long consoleModel;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
+extern unsigned long asyncPrefetch;
 
 static aFile * romFile = (aFile *)0x37D5000;
 static aFile * savFile = ((aFile *)0x37D5000)+1;
@@ -820,8 +821,10 @@ void arm7_main (void) {
 
 	setArm9Stuff(*romFile);
 
-	if(ROMinRAM == false && romread_LED > 0) {
-		i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+	if(ROMinRAM == false) {
+		if (romread_LED == 1 || asyncPrefetch == 1) {
+			i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+		}
 	}
 
 	increaseLoadBarLength();	// and finally, 8 dots

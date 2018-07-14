@@ -39,6 +39,7 @@
 	.global loadingScreen
 	.global romread_LED
 	.global gameSoftReset
+	.global asyncPrefetch
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -81,6 +82,8 @@ loadingScreen:
 romread_LED:
 	.word	0x00000000		
 gameSoftReset:
+	.word	0x00000000
+asyncPrefetch:
 	.word	0x00000000
 cardengine_arm7_offset:
     .word   cardengine_arm7_bin - _start

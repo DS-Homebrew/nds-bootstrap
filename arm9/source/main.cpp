@@ -70,7 +70,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string savPath, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32* cheat_data) {
+void runFile(string filename, string savPath, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, u32* cheat_data) {
 	vector<char*> argarray;
 
 	if(debug)
@@ -134,6 +134,7 @@ void runFile(string filename, string savPath, u32 saveSize, u32 language, u32 do
 							loadingScreen,
 							romread_LED,
 							gameSoftReset,
+							asyncPrefetch,
 							argarray.size(), (const char **)&argarray[0],
                             cheat_data);
 		powerOff(PM_BACKLIGHT_TOP);
@@ -364,6 +365,7 @@ int main( int argc, char **argv) {
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "LOADING_SCREEN", 1), 
 				romread_LED,
 				bootstrapini.GetInt( "NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0),
+				bootstrapini.GetInt( "NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0),
 				(u32*)cheatData);	
 	} else {
 		consoleDemoInit();

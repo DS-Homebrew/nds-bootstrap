@@ -71,6 +71,7 @@ extern u32 ROM_TID;
 extern u32 ARM9_LEN;
 extern u32 romSize;
 extern u32 consoleModel;
+extern u32 asyncPrefetch;
 extern u32 enableExceptionHandler;
 
 char* tohex(u32 n)
@@ -326,10 +327,10 @@ int cardRead (u32* cacheStruct) {
 
 		accessCounter++;
 
-		if (!hgssFix) processAsyncCommand();
+		if (asyncPrefetch == 1 && !hgssFix) processAsyncCommand();
 
 		if(page == src && len > _128KB_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
-			if (!hgssFix) getAsyncSector();
+			if (asyncPrefetch == 1 && !hgssFix) getAsyncSector();
 
 			// read directly at arm7 level
 			commandRead = 0x025FFB08;
@@ -353,7 +354,7 @@ int cardRead (u32* cacheStruct) {
 				u32 nextSector = sector+_128KB_READ_SIZE;	
 				// read max CACHE_READ_SIZE via the main RAM cache
 				if(slot==-1) {
-					if (!hgssFix) getAsyncSector();
+					if (asyncPrefetch == 1 && !hgssFix) getAsyncSector();
 
 					// send a command to the arm7 to fill the RAM cache
 					commandRead = 0x025FFB08;
@@ -376,9 +377,9 @@ int cardRead (u32* cacheStruct) {
 
 					updateDescriptor(slot, sector);	
 		
-					if (!hgssFix) triggerAsyncPrefetch(nextSector);
+					if (asyncPrefetch == 1 && !hgssFix) triggerAsyncPrefetch(nextSector);
 				} else {
-					if (!hgssFix) {
+					if (asyncPrefetch == 1 && !hgssFix) {
 						if(cacheCounter[slot] == 0x0FFFFFFF) {
 							// prefetch successfull
 							getAsyncSector();
