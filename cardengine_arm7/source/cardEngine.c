@@ -53,7 +53,6 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-extern u32 runViaIRQ;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile * romFile = (aFile *)0x37D5000;
 static aFile * savFile = ((aFile *)0x37D5000)+1;
