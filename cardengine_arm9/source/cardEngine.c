@@ -269,8 +269,7 @@ int cardRead (u32* cacheStruct) {
 
 	u32 page = (src/512)*512;
 	
-	if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-	&& (ROM_TID & 0x00FFFFFF) != 0x534D53)	// SMSW
+	if(*(vu32*)(0x2800010) != 1)
 	{
 		if(readNum >= 0x100){ //don't set too early or some games will crash
 			*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)(0x2800004);

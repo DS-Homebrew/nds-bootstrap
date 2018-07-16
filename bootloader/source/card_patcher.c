@@ -281,6 +281,7 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 	if(!moduleparams)
 	{
 		dbg_printf("No moduleparams?\n");
+		*(vu32*)(0x2800010) = 1;
 		moduleparams = malloc(0x100);
 		memset(moduleparams,0,0x100);
 		((module_params_t*)(moduleparams - 0x1C))->compressed_static_end = 0;
@@ -673,96 +674,92 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		}
 	}
 
-	if((ROM_TID & 0x00FFFFFF) != 0x4D5341	// SM64DS
-	&& (ROM_TID & 0x00FFFFFF) != 0x534D53)	// SMSW
-	{
-		// Find the mpu init
-		u32* mpuDataOffset = 0;
-		u32 mpuStartOffset =  
-			getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-				  (u32*)mpuInitRegionSignature, 1, 1);
-		if (!mpuStartOffset) {
-			dbg_printf("Mpu init not found\n");
+	// Find the mpu init
+	u32* mpuDataOffset = 0;
+	u32 mpuStartOffset =  
+		getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			  (u32*)mpuInitRegionSignature, 1, 1);
+	if (!mpuStartOffset) {
+		dbg_printf("Mpu init not found\n");
+	} else {
+		mpuDataOffset =   
+			getOffset((u32*)mpuStartOffset, 0x100,
+				  (u32*)mpuInitRegionData, 1, 1);
+		if (!mpuDataOffset) {
+			dbg_printf("Mpu data not found\n");
 		} else {
-			mpuDataOffset =   
-				getOffset((u32*)mpuStartOffset, 0x100,
-					  (u32*)mpuInitRegionData, 1, 1);
-			if (!mpuDataOffset) {
-				dbg_printf("Mpu data not found\n");
-			} else {
-				dbg_printf("Mpu data :\t");
-				dbg_hexa((u32)mpuDataOffset);
-				dbg_printf("\n");
+			dbg_printf("Mpu data :\t");
+			dbg_hexa((u32)mpuDataOffset);
+			dbg_printf("\n");
+		}
+	}
+
+	if(!mpuDataOffset) {
+		// try to found it
+		for (int i = 0; i<0x100; i++) {
+			mpuDataOffset = (u32*)(mpuStartOffset+i);
+			if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) break;
+		}
+	}
+
+	if(mpuDataOffset) {
+		// change the region 1 configuration
+
+		*(vu32*)(0x2800000) = mpuDataOffset;
+		*(vu32*)(0x2800004) = *mpuDataOffset;
+
+		*mpuDataOffset = mpuInitRegionNewData;
+
+		if(mpuAccessOffset) {
+			if(mpuNewInstrAccess) {
+				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			}
+			if(mpuNewDataAccess) {
+				mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;
 			}
 		}
+	}
 
-		if(!mpuDataOffset) {
-			// try to found it
+	// Find the mpu cache init
+	/*u32* mpuCacheOffset =  
+		getOffset((u32*)mpuStartOffset, 0x100,
+			  (u32*)mpuInitCache, 1, 1);
+	if (!mpuCacheOffset) {
+		dbg_printf("Mpu init cache not found\n");
+	} else {
+		*mpuCacheOffset = 0xE3A00046;
+	}	*/
+
+	dbg_printf("patchMpuSize :\t");
+	dbg_hexa(patchMpuSize);
+	dbg_printf("\n");
+
+	// patch out all further mpu reconfiguration
+	while(mpuStartOffset && patchMpuSize) {
+		u32 patchSize = ndsHeader->arm9binarySize;
+		if(patchMpuSize>1) {
+			patchSize = patchMpuSize;
+		}
+		mpuStartOffset = getOffset(mpuStartOffset+4, patchSize,
+			  (u32*)mpuInitRegionSignature, 1, 1);
+		if(mpuStartOffset) {
+			dbg_printf("Mpu init :\t");
+			dbg_hexa(mpuStartOffset);
+			dbg_printf("\n");
+
+			*((u32*)mpuStartOffset) = 0xE1A00000 ; // nop
+
+			/*// try to found it
 			for (int i = 0; i<0x100; i++) {
 				mpuDataOffset = (u32*)(mpuStartOffset+i);
-				if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) break;
-			}
-		}
-
-		if(mpuDataOffset) {
-			// change the region 1 configuration
-			
-			*(vu32*)(0x2800000) = mpuDataOffset;
-			*(vu32*)(0x2800004) = *mpuDataOffset;
-			
-			*mpuDataOffset = mpuInitRegionNewData;
-
-			if(mpuAccessOffset) {
-				if(mpuNewInstrAccess) {
-					mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+				if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) {
+					*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;
+					break;
 				}
-				if(mpuNewDataAccess) {
-					mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;
+				if(i == 100) {
+					*((u32*)mpuStartOffset) = 0xE1A00000 ;
 				}
-			}
-		}
-
-		// Find the mpu cache init
-		/*u32* mpuCacheOffset =  
-			getOffset((u32*)mpuStartOffset, 0x100,
-				  (u32*)mpuInitCache, 1, 1);
-		if (!mpuCacheOffset) {
-			dbg_printf("Mpu init cache not found\n");
-		} else {
-			*mpuCacheOffset = 0xE3A00046;
-		}	*/
-
-		dbg_printf("patchMpuSize :\t");
-		dbg_hexa(patchMpuSize);
-		dbg_printf("\n");
-
-		// patch out all further mpu reconfiguration
-		while(mpuStartOffset && patchMpuSize) {
-			u32 patchSize = ndsHeader->arm9binarySize;
-			if(patchMpuSize>1) {
-				patchSize = patchMpuSize;
-			}
-			mpuStartOffset = getOffset(mpuStartOffset+4, patchSize,
-				  (u32*)mpuInitRegionSignature, 1, 1);
-			if(mpuStartOffset) {
-				dbg_printf("Mpu init :\t");
-				dbg_hexa(mpuStartOffset);
-				dbg_printf("\n");
-
-				*((u32*)mpuStartOffset) = 0xE1A00000 ; // nop
-
-				/*// try to found it
-				for (int i = 0; i<0x100; i++) {
-					mpuDataOffset = (u32*)(mpuStartOffset+i);
-					if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) {
-						*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;
-						break;
-					}
-					if(i == 100) {
-						*((u32*)mpuStartOffset) = 0xE1A00000 ;
-					}
-				}*/
-			}
+			}*/
 		}
 	}
 

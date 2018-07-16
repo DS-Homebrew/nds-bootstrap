@@ -822,7 +822,7 @@ void arm7_main (void) {
 	setArm9Stuff(*romFile);
 
 	if(ROMinRAM == false) {
-		if (romread_LED == 1 || asyncPrefetch == 1) {
+		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
 			i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
 		}
 	}
