@@ -32,6 +32,7 @@
 #include "sr_data_srloader.h"	// For rebooting into DSiMenu++
 #include "sr_data_srllastran.h"	// For rebooting the game
 
+#define ROM_LOCATION	0x0C804000
 #define SAVE_LOCATION	0x0C820000
 
 extern void* memcpy(const void * src0, void * dst0, int len0);	// Fixes implicit declaration @ line 126 & 136
@@ -385,7 +386,7 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)(0x027FFCE4) = language;	// Change language
 	}
 
-	runCardEngineCheck();
+	if (ROMinRAM == false) runCardEngineCheck();
 
 	if(REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
@@ -645,7 +646,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
 		memcpy(dst,SAVE_LOCATION+src,len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
@@ -670,7 +671,7 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+    	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
     		memcpy(SAVE_LOCATION+dst,src,len);
     	}
     	fileWrite(src,*savFile,dst,len,-1);
@@ -696,7 +697,7 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
     if (lockMutex(&saveMutex)) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
-    	if(ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
+    	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
     		memcpy(SAVE_LOCATION+dst,src,len);
     	}
     	fileWrite(src,*savFile,dst,len,-1);
@@ -755,7 +756,9 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (lockMutex(&saveMutex)) {
+	if(ROMinRAM == true) {
+		memcpy(dst,ROM_LOCATION+src,len);
+	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
