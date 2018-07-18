@@ -457,11 +457,11 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
     u32 cardReadStartOffset = 0;
 	if (readType == 1) {
 		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0x109,
+			getOffset((u32*)cardReadEndOffset, -0x118,
 				  (u32*)cardReadStartSignatureAlt, 1, -1);
 	} else {
 		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0x109,
+			getOffset((u32*)cardReadEndOffset, -0x118,
 				  (u32*)cardReadStartSignature, 1, -1);
 	}
 	if (!cardReadStartOffset) {
