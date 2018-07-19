@@ -58,6 +58,14 @@ static inline int dbg_printf( const char* format, ... )
 }
 
 //---------------------------------------------------------------------------------
+void stop (void) {
+//---------------------------------------------------------------------------------
+	while (1) {
+		swiWaitForVBlank();
+	}
+}
+
+//---------------------------------------------------------------------------------
 void dopause() {
 //---------------------------------------------------------------------------------
 	iprintf("Press start...\n");
@@ -197,6 +205,15 @@ int main( int argc, char **argv) {
 
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
+
+		if (access("fat:/", F_OK) == 0) {
+			consoleDemoInit();
+			printf("This edition of nds-bootstrap\n");
+			printf("can only be used on the\n");
+			printf("SD card.\n");
+			stop();
+		}
+
 		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {
@@ -372,6 +389,6 @@ int main( int argc, char **argv) {
 		printf("SD init failed!\n");
 	}
 
-	while(1) { swiWaitForVBlank(); }
+	stop();
 }
 
