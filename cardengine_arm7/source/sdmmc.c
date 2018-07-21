@@ -256,7 +256,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	if (ndmaSlot > 3) ndmaSlot = 3;
 
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = ctx->rData;
+	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
 	
 	*(u32*)(0x400410C+(ndmaSlot*0x1C)) = ctx->size;
 	

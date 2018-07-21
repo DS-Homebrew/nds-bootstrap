@@ -28,6 +28,8 @@ extern "C" {
 
 void myIrqHandlerFIFO(void);
 
+void cheat_engine_start();
+
 u32 myIrqEnable(u32 irq);
 
 /*void runCardEngineCheck (void);*/

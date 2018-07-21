@@ -28,15 +28,16 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork -march=armv4t
 
-CFLAGS	:=	-g -Wall -O2\
+COMMON	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
+COMMON	+=	$(INCLUDE) -DARM7
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+CFLAGS	:=	$(COMMON) -std=gnu99
+CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map

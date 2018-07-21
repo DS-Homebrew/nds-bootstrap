@@ -58,7 +58,7 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 static aFile * romFile = (aFile *)0x37D5000;
 static aFile * savFile = ((aFile *)0x37D5000)+1;
 
-static int accessCounter = 0;
+//static int accessCounter = 0;
 
 static int softResetTimer = 0;
 
@@ -202,7 +202,7 @@ void cardRead_arm9() {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	u32 marker = *(vu32*)(sharedAddr+3);
+	//u32 marker = *(vu32*)(sharedAddr+3);
 
 	#ifdef DEBUG
 	dbg_printf("\ncard read received v2\n");
@@ -227,7 +227,7 @@ void cardRead_arm9() {
     #ifdef DEBUG
     nocashMessage("fileRead romFile");
     #endif
-	fileRead(dst,*romFile,src,len,0);
+	fileRead((char*)dst,*romFile,src,len,0);
 	if(*(u32*)(0x0C9328ac) == 0x4B434148){ //Primary fix for Mario's Holiday
 		*(u32*)(0x0C9328ac) = 0xA00;
 	}
@@ -247,7 +247,7 @@ void asyncCardRead_arm9() {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	u32 marker = *(vu32*)(sharedAddr+3);
+	//u32 marker = *(vu32*)(sharedAddr+3);
 
 	#ifdef DEBUG
 	dbg_printf("\nasync card read received\n");
@@ -272,7 +272,7 @@ void asyncCardRead_arm9() {
     #ifdef DEBUG
     nocashMessage("fileRead romFile");
     #endif
-	fileRead(dst,*romFile,src,len,0);
+	fileRead((char*)dst,*romFile,src,len,0);
 	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 
 	#ifdef DEBUG
@@ -647,7 +647,7 @@ bool eepromRead (u32 src, void *dst, u32 len) {
 	#endif	
 
 	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
-		memcpy(dst,SAVE_LOCATION+src,len);
+		memcpy(dst,(void*)(SAVE_LOCATION+src),len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst,*savFile,src,len,-1);
@@ -672,9 +672,9 @@ bool eepromPageWrite (u32 dst, const void *src, u32 len) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
     	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
-    		memcpy(SAVE_LOCATION+dst,src,len);
+    		memcpy((void*)(SAVE_LOCATION+dst),(void*)src,len);
     	}
-    	fileWrite(src,*savFile,dst,len,-1);
+    	fileWrite((void*)src,*savFile,dst,len,-1);
     	i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
 	}
@@ -698,9 +698,9 @@ bool eepromPageProg (u32 dst, const void *src, u32 len) {
 		initialize();
     	i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
     	if(ROMinRAM == false && (saveSize > 0) && (saveSize <= 0x00100000)) {
-    		memcpy(SAVE_LOCATION+dst,src,len);
+    		memcpy((void*)SAVE_LOCATION+dst,(void*)src,len);
     	}
-    	fileWrite(src,*savFile,dst,len,-1);
+    	fileWrite((void*)src,*savFile,dst,len,-1);
         i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
         unlockMutex(&saveMutex);
 	}
@@ -757,7 +757,7 @@ bool cardRead (u32 dma,  u32 src, void *dst, u32 len) {
 	#endif	
 	
 	if(ROMinRAM == true) {
-		memcpy(dst,ROM_LOCATION+src,len);
+		memcpy(dst,(void*)(ROM_LOCATION+src),len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator

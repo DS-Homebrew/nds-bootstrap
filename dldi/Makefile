@@ -28,14 +28,15 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+COMMON	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -fPIC -std=gnu99
+COMMON	+=	$(INCLUDE) -DARM9 -fPIC
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+CFLAGS	:=	$(COMMON) -std=gnu99
+CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -nostdlib -T ../dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map

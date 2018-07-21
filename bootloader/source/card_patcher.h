@@ -19,6 +19,7 @@
 #ifndef CARD_PATCHER_H
 #define CARD_PATCHER_H
 
+#include <stddef.h>
 #include <nds/memory.h>
 #include <nds/ndstypes.h>
 #include "fat.h"
@@ -45,7 +46,7 @@
 #define PAGE_2G		(0b11110 << 1)
 #define PAGE_4G		(0b11111 << 1)
 
-#define NDS_HEAD ((u32*)0x02FFFE00)
+//#define NDS_HEAD ((u32*)0x02FFFE00)
 
 typedef struct 
 {
@@ -62,6 +63,7 @@ typedef struct
 
 
 module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer);
+void decompressLZ77Backwards(uint8_t* addr, size_t size);
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame

@@ -27,13 +27,15 @@ redistribute it freely, subject to the following restrictions:
 	distribution.
 
 ---------------------------------------------------------------------------------*/
+#include <string.h>
+
 #include <nds.h>
 
 #include <nds/ndstypes.h>
 
 #include "fifocheck.h"
 
-static vu32 * wordCommandAddr;
+//static vu32* wordCommandAddr;
 
 //---------------------------------------------------------------------------------
 void VcountHandler() {
@@ -52,7 +54,7 @@ void myFIFOValue32Handler(u32 value,void* data)
 
 }
 
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
@@ -70,9 +72,9 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	}
 
 	return -1;
-}
+}*/
 
-static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+//static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
 static char hexbuffer [9];
 

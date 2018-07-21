@@ -182,7 +182,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+//static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 
 #define DEVICE_TYPE_DLDI 0x49444C44
@@ -298,6 +298,39 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	}
 
 	return true;
+}
+
+static inline void copyLoop (u32* dest, const u32* src, u32 size) {
+	size = (size +3) & ~3;
+	do {
+        writeAddr ((data_t*) dest, 0, *src);
+		dest++;
+        src++;
+	} while (size -= 4);
+}
+
+int loadCheatData (u32* cheat_data) {
+    nocashMessage("loadCheatData");
+            
+    u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+    nocashMessage("cardengineArm7Offset");
+    nocashMessage(tohex(cardengineArm7Offset));
+    
+    u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
+    nocashMessage("cardengineArm7");
+    nocashMessage(tohex((u32)cardengineArm7));
+    
+    u32 cheatDataOffset = cardengineArm7[12];
+    nocashMessage("cheatDataOffset");
+    nocashMessage(tohex(cheatDataOffset));
+    
+    u32* cheatDataDest = (u32*) (((u32)LCDC_BANK_C) + cardengineArm7Offset + cheatDataOffset);
+    nocashMessage("cheatDataDest");
+    nocashMessage(tohex((u32)cheatDataDest));
+    
+    copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
+    
+    return true;
 }
 
 int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheat_data)
@@ -438,43 +471,10 @@ int runNdsFile (const char* filename, const char* savename, int saveSize, int la
 		argv = args;
 	}
 
-	bool havedsiSD = false;
+	//bool havedsiSD = false;
 
-	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
+	//if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 
 	return runNds (load_bin, load_bin_size, st.st_ino, clusterSav, saveSize, language, donorSdkVer, patchMpuRegion, patchMpuSize, consoleModel, loadingScreen, romread_LED, gameSoftReset, asyncPrefetch, true, true, argc, argv, cheat_data);
-}
-
-static inline void copyLoop (u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3;
-	do {
-        writeAddr ((data_t*) dest, 0, *src);
-		dest++;
-        src++;
-	} while (size -= 4);
-}
-
-int loadCheatData (u32* cheat_data) {
-    nocashMessage("loadCheatData");
-            
-    u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-    nocashMessage("cardengineArm7Offset");
-    nocashMessage(tohex(cardengineArm7Offset));
-    
-    u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
-    nocashMessage("cardengineArm7");
-    nocashMessage(tohex(cardengineArm7));
-    
-    u32 cheatDataOffset = cardengineArm7[12];
-    nocashMessage("cheatDataOffset");
-    nocashMessage(tohex(cheatDataOffset));
-    
-    u32* cheatDataDest = (u32*) (((u32)LCDC_BANK_C) + cardengineArm7Offset + cheatDataOffset);
-    nocashMessage("cheatDataDest");
-    nocashMessage(tohex(cheatDataDest));
-    
-    copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
-    
-    return true;
 }
 

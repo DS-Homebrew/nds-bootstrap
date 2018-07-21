@@ -19,6 +19,8 @@
 #include <string.h>
 #include "fat.h"
 
+extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+
 static bool _debug = false;
 static aFile _debugFileCluster;
 static u32 _currentPos = 0;

@@ -29,6 +29,7 @@ License:
  project at chishm@hotmail.com
 ------------------------------------------------------------------*/
 
+#include <string.h>
 #include "fat.h"
 #include "card.h"
 #include "debugToFile.h"
@@ -570,7 +571,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	int chunks;
 	int beginBytes;
     
-    u32 clusterIndex;
+    u32 clusterIndex = 0;
 
 	if (file.firstCluster == CLUSTER_FREE || file.firstCluster == CLUSTER_EOF) 
 	{
@@ -585,7 +586,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	if(file.oneClusterCached && length == 512 && ((startOffset / discBytePerClus) * discBytePerClus) == file.currentOffset) {
 		// read from cache
 		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,ONE_CACHE+curByte,length);
+		memcpy(buffer,(void*)(ONE_CACHE+curByte),length);
 		return length;
 	}
 
@@ -615,10 +616,10 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 
 	if(file.oneClusterCached && length == 512) {
 		// fill the cache
-		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, ONE_CACHE, ndmaSlot);
+		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, (void*)ONE_CACHE, ndmaSlot);
 		// read from cache
 		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,ONE_CACHE+curByte,length);
+		memcpy(buffer,(void*)(ONE_CACHE+curByte),length);
 		return length;
 
 	} else {
@@ -780,7 +781,7 @@ u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSl
 	int dataPos = 0;
 	int chunks;
 	int beginBytes;
-    u32 clusterIndex;
+    u32 clusterIndex = 0;
 
 	if (file.firstCluster == CLUSTER_FREE || file.firstCluster == CLUSTER_EOF) 
 	{
@@ -904,7 +905,7 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-		&& lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
+		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
 	{
 		*lastClusterCacheUsed = file->currentCluster;
 		file->currentOffset+=discBytePerClus;
