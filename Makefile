@@ -35,13 +35,14 @@ GRAPHICS	:=  gfx
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+COMMON	:=	-g -Wall -O2\
  		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 		-ffast-math \
 		$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -std=gnu99
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+COMMON	+=	$(INCLUDE) -DARM9
+CFLAGS	:=	$(COMMON) -std=gnu99
+CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=ds_arm9.specs -g -Wl,--gc-sections $(ARCH) -Wl,-Map,$(notdir $*.map)

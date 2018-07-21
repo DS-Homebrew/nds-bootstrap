@@ -23,6 +23,8 @@
 #include "cardengine_arm7_bin.h"
 #include "fat.h"
 
+extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+
 extern unsigned long language;
 extern unsigned long consoleModel;
 extern unsigned long romread_LED;
@@ -262,7 +264,7 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
-	u32* hookAccel = NULL;
+	//u32* hookAccel = NULL;
 	u32* debug = (u32*)0x037C6000;
 
 	nocashMessage("hookNdsRetail");
@@ -279,7 +281,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation+16;
 
-	debug[9] = hookLocation;
+	debug[9] = (u32)hookLocation;
 
 	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 

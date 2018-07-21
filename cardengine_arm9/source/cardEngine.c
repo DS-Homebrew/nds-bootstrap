@@ -133,7 +133,7 @@ int getSlotForSector(u32 sector) {
 
 
 vu8* getCacheAddress(int slot) {
-	return (vu32*)(CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
+	return (vu8*)(CACHE_ADRESS_START+slot*_128KB_READ_SIZE);
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -145,7 +145,7 @@ void waitForArm7() {
 	while(sharedAddr[3] != (vu32)0);
 }
 
-void addToAsyncQueue(sector) {
+void addToAsyncQueue(u32 sector) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 addToAsyncQueue\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -165,7 +165,7 @@ void addToAsyncQueue(sector) {
 	}
 }
 
-void triggerAsyncPrefetch(sector) {	
+void triggerAsyncPrefetch(u32 sector) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -197,14 +197,14 @@ void triggerAsyncPrefetch(sector) {
 			slot = allocateCacheSlot();
 			vu8* buffer = getCacheAddress(slot);
 
-			if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
+			if(needFlushDCCache) DC_FlushRange((const void*)buffer, _128KB_READ_SIZE);
 
 			cacheDescriptor[slot] = sector;
 			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
 			asyncSector = sector;		
 
 			// write the command
-			sharedAddr[0] = buffer;
+			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = _128KB_READ_SIZE-asyncReadSizeSubtract;
 			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
@@ -328,7 +328,7 @@ int cardRead (u32* cacheStruct) {
 
 		if (asyncPrefetch == 1 && !hgssFix) processAsyncCommand();
 
-		if(page == src && len > _128KB_READ_SIZE && dst < 0x02700000 && dst > 0x02000000 && ((u32)dst)%4==0) {
+		if(page == src && len > _128KB_READ_SIZE && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && ((u32)dst)%4==0) {
 			if (asyncPrefetch == 1 && !hgssFix) getAsyncSector();
 
 			// read directly at arm7 level
@@ -336,7 +336,7 @@ int cardRead (u32* cacheStruct) {
 
 			cacheFlush();
 
-			sharedAddr[0] = dst;
+			sharedAddr[0] = (vu32)dst;
 			sharedAddr[1] = len;
 			sharedAddr[2] = src;
 			sharedAddr[3] = commandRead;
@@ -362,10 +362,10 @@ int cardRead (u32* cacheStruct) {
 
 					buffer = getCacheAddress(slot);
 
-					if(needFlushDCCache) DC_FlushRange(buffer, _128KB_READ_SIZE);
+					if(needFlushDCCache) DC_FlushRange((const void*)buffer, _128KB_READ_SIZE);
 
 					// write the command
-					sharedAddr[0] = buffer;
+					sharedAddr[0] = (vu32) buffer;
 					sharedAddr[1] = _128KB_READ_SIZE-cacheReadSizeSubtract;
 					sharedAddr[2] = sector;
 					sharedAddr[3] = commandRead;
@@ -408,7 +408,7 @@ int cardRead (u32* cacheStruct) {
 					len2 -= len2 % 32;
 				}
 
-				if(readCachedRef == 0 || len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+				if(readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 					#ifdef DEBUG
 					// send a log command for debug purpose
 					// -------------------------------------
@@ -426,11 +426,11 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// copy directly
-					memcpy(dst,buffer+(src-sector),len2);
+					memcpy(dst,(void*)(buffer+(src-sector)),len2);
 
 					// update cardi common
 					cardStruct[0] = src + len2;
-					cardStruct[1] = dst + len2;
+					cardStruct[1] = (vu32)(dst + len2);
 					cardStruct[2] = len - len2;
 				} else {
 					#ifdef DEBUG
@@ -450,14 +450,14 @@ int cardRead (u32* cacheStruct) {
 					#endif
 
 					// read via the 512b ram cache
-					memcpy(cacheBuffer, buffer+(page-sector), 512);
+					memcpy(cacheBuffer, (void*)(buffer+(page-sector)), 512);
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
 				}
 				len = cardStruct[2];
 				if(len>0) {
 					src = cardStruct[0];
-					dst = cardStruct[1];
+					dst = (u8*)cardStruct[1];
 					page = (src/512)*512;
 					sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 					cacheReadSizeSubtract = 0;
@@ -479,7 +479,7 @@ int cardRead (u32* cacheStruct) {
 				len2 -= len2 % 32;
 			}
 
-			if(readCachedRef == 0 || len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0) {
+			if(readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 				#ifdef DEBUG
 				// send a log command for debug purpose
 				// -------------------------------------
@@ -497,11 +497,11 @@ int cardRead (u32* cacheStruct) {
 				#endif
 
 				// copy directly
-				memcpy(dst,(ROM_LOCATION-0x4000-ARM9_LEN)+src,len2);
+				memcpy(dst,(void*)((ROM_LOCATION-0x4000-ARM9_LEN)+src),len2);
 
 				// update cardi common
 				cardStruct[0] = src + len2;
-				cardStruct[1] = dst + len2;
+				cardStruct[1] = (vu32)(dst + len2);
 				cardStruct[2] = len - len2;
 			} else {
 				#ifdef DEBUG
@@ -521,14 +521,14 @@ int cardRead (u32* cacheStruct) {
 				#endif
 
 				// read via the 512b ram cache
-				memcpy(cacheBuffer, (ROM_LOCATION-0x4000-ARM9_LEN)+page, 512);
+				memcpy(cacheBuffer, (void*)((ROM_LOCATION-0x4000-ARM9_LEN)+page), 512);
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
 			}
 			len = cardStruct[2];
 			if(len>0) {
 				src = cardStruct[0];
-				dst = cardStruct[1];
+				dst = (u8*)cardStruct[1];
 				page = (src/512)*512;
 			}
 		}

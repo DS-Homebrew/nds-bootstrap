@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <string.h>
 #include <nds/system.h>
 #include "card_patcher.h"
 #include "common.h"
@@ -206,9 +207,9 @@ u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int directio
 {
 	u32* end = addr + size/sizeof(u32);
 	u32* debug = (u32*)0x037D0000;
-	debug[3] = end;
+	debug[3] = (u32)end;
 
-    u32 result = 0;
+    //u32 result = 0;
 	bool found = false;
 
 	do {
@@ -224,10 +225,10 @@ u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int directio
 	} while (addr != end && !found);
 
 	if (addr == end) {
-		return NULL;
+		return (u32)NULL;
 	}
 
-	return addr;
+	return (u32)addr;
 }
 
 u32 generateA7Instr(int arg1, int arg2) {
@@ -238,7 +239,7 @@ u32 getOffsetThumb(u16* addr, size_t size, u16* find, size_t sizeofFind, int dir
 {
 	u16* end = addr + size/sizeof(u16);
 
-    u32 result = 0;
+    //u32 result = 0;
 	bool found = false;
 
 	do {
@@ -254,10 +255,10 @@ u32 getOffsetThumb(u16* addr, size_t size, u16* find, size_t sizeofFind, int dir
 	} while (addr != end && !found);
 
 	if (addr == end) {
-		return NULL;
+		return (u32)NULL;
 	}
 
-	return addr;
+	return (u32)addr;
 }
 
 void generateA7InstrThumb(u16* instrs, int arg1, int arg2) {
@@ -282,8 +283,8 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 	{
 		dbg_printf("No moduleparams?\n");
 		*(vu32*)(0x2800010) = 1;
-		moduleparams = malloc(0x100);
-		memset(moduleparams,0,0x100);
+		moduleparams = (u32)malloc(0x100);
+		memset((u32*)moduleparams,0,0x100);
 		((module_params_t*)(moduleparams - 0x1C))->compressed_static_end = 0;
 		switch(donorSdkVer) {
 			case 0:
@@ -361,7 +362,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	u32* debug = (u32*)0x037C6000;
-	debug[4] = ndsHeader->arm9destination;
+	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
 	u32* cardPullOutSignature = cardPullOutSignature1;
@@ -676,14 +677,14 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	// Find the mpu init
 	u32* mpuDataOffset = 0;
-	u32 mpuStartOffset =  
+	u32 mpuStartOffset =
 		getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
 			  (u32*)mpuInitRegionSignature, 1, 1);
 	if (!mpuStartOffset) {
 		dbg_printf("Mpu init not found\n");
 	} else {
-		mpuDataOffset =   
-			getOffset((u32*)mpuStartOffset, 0x100,
+		mpuDataOffset =
+			(u32*)getOffset((u32*)mpuStartOffset, 0x100,
 				  (u32*)mpuInitRegionData, 1, 1);
 		if (!mpuDataOffset) {
 			dbg_printf("Mpu data not found\n");
@@ -705,8 +706,8 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(mpuDataOffset) {
 		// change the region 1 configuration
 
-		*(vu32*)(0x2800000) = mpuDataOffset;
-		*(vu32*)(0x2800004) = *mpuDataOffset;
+		*(vu32*)(0x2800000) = (vu32)mpuDataOffset;
+		*(vu32*)(0x2800004) = (vu32)*mpuDataOffset;
 
 		*mpuDataOffset = mpuInitRegionNewData;
 
@@ -740,7 +741,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		if(patchMpuSize>1) {
 			patchSize = patchMpuSize;
 		}
-		mpuStartOffset = getOffset(mpuStartOffset+4, patchSize,
+		mpuStartOffset = getOffset((u32*)(mpuStartOffset+4), patchSize,
 			  (u32*)mpuInitRegionSignature, 1, 1);
 		if(mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
@@ -808,7 +809,7 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 				}
 	}
 
-	debug[2] = cardEngineLocation;
+	debug[2] = (u32)cardEngineLocation;
 
 	u32* patches = 0;
 	if (usesThumb) {
@@ -821,13 +822,13 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	u32* cardReadPatch = (u32*) patches[0];
 
-	u32* cardPullOutPatch = patches[6];
+	u32* cardPullOutPatch = (u32*)patches[6];
 
-	u32* cardIdPatch = patches[3];
+	u32* cardIdPatch = (u32*)patches[3];
 
-	u32* cardDmaPatch = patches[4];
+	u32* cardDmaPatch = (u32*)patches[4];
 
-	debug[5] = patches;
+	debug[5] = (u32)patches;
 
 	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
 	//u32* cache_struct = ((u32*)cardIdStartOffset) - 1;
@@ -835,16 +836,16 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	debug[6] = *card_struct;
 	//debug[7] = *cache_struct;
 
-	cardEngineLocation[5] = ((u32*)*card_struct)+6;
+	cardEngineLocation[5] = (u32) (((u32*)*card_struct)+6);
 	if(moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = ((u32*)*card_struct)+7;
+		cardEngineLocation[5] = (u32) (((u32*)*card_struct)+7);
 	}
 	//cardEngineLocation[6] = *cache_struct;
 
 	// cache management alternative
-	*((u32*)patches[5]) = ((u32*)*card_struct)+6;
+	*((u32*)patches[5]) = (u32) (((u32*)*card_struct)+6);
 	if(moduleParams->sdk_version > 0x3000000) {
-		*((u32*)patches[5]) = ((u32*)*card_struct)+7;
+		*((u32*)patches[5]) = (u32) (((u32*)*card_struct)+7);
 	}
 
 	*((u32*)patches[7]) = cardPullOutOffset+4;
@@ -924,7 +925,7 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
         dbg_printf("Error in relocation checking method 1\n");
         
         // found the beginning of the next function
-       u32 nextFunction = getOffset(relocationStart, ndsHeader->arm7binarySize,
+       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
           nextFunctiontSignature, 1, 1);
     
        	// Validate the relocation signature
@@ -1254,7 +1255,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Error in relocation checking method 1\n");
         
         // found the beginning of the next function
-       u32 nextFunction = getOffset(relocationStart, ndsHeader->arm7binarySize,
+       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
           nextFunctiontSignature, 1, 1);
     
        	// Validate the relocation signature
@@ -1320,7 +1321,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("\n");
 
     u32 readCacheEnd =
-         getOffset(cardReadEndAddr,
+         getOffset((u32*)cardReadEndAddr,
              0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
 			 
 	dbg_printf("readCacheEnd: ");
@@ -1342,7 +1343,7 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     //
 
 	u32 returned_A0_with_MKDS =
-        getOffset(JumpTableFunc, 0x100,
+        getOffset((u32*)JumpTableFunc, 0x100,
             (void*)a7something1Signature, 2, 1);
     if (!returned_A0_with_MKDS) {
         dbg_printf("[Error!]...\n");
@@ -1586,7 +1587,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("Error in relocation checking method 1\n");
         
         // found the beginning of the next function
-       u32 nextFunction = getOffset(relocationStart, ndsHeader->arm7binarySize,
+       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
           nextFunctiontSignature, 1, 1);
     
        	// Validate the relocation signature
@@ -1653,7 +1654,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("\n");
 
     u32 readCacheEnd =
-         getOffset(cardReadEndAddr,
+         getOffset((u32*)cardReadEndAddr,
              0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
 			 
 	dbg_printf("readCacheEnd: ");
@@ -1679,7 +1680,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
 		dbg_printf("Retry the search\n");
         JumpTableFunc =
-            getOffset(JumpTableFunc,
+            getOffset((u32*)JumpTableFunc,
               0x18000 - JumpTableFunc, &cardstructAddr, 1, 1) + 4;
 		dbg_printf("JumpTableFunc: ");
 		dbg_hexa(JumpTableFunc);
@@ -2268,7 +2269,7 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if(!saveResult) saveResult = savePatchUniversal(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	if ((saveResult == 1) && ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
 		aFile saveFile = getFileFromCluster (saveFileCluster);
-		fileRead(0x0C820000, saveFile, 0, saveSize, 3);
+		fileRead((char*)0x0C820000, saveFile, 0, saveSize, 3);
 	}
 
 	dbg_printf("ERR_NONE");

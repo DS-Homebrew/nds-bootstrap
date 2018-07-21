@@ -28,6 +28,8 @@ extern "C" {
 
 int cardRead (u32* cacheStruct);
 
+void cacheFlush();
+
 #ifdef __cplusplus
 }
 #endif

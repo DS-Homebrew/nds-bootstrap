@@ -186,7 +186,7 @@ void getSFCG_ARM7() {
 void myFIFOValue32Handler(u32 value,void* data)
 {
 	nocashMessage("myFIFOValue32Handler\n");
-	iprintf( "ARM7 data %x\n", value );
+	iprintf( "ARM7 data %lx\n", value );
 }
 
 off_t getSaveSize(const char* path) {
@@ -357,7 +357,7 @@ int main( int argc, char **argv) {
             dbg_printf("Cheat data present\n");
             
             if(cheats.size() < 256) {
-                 for (int i=0; i<cheats.size(); i++) {
+                 for (unsigned int i=0; i<cheats.size(); i++) {
                     dbg_printf(cheats[i].c_str());
                     dbg_printf(" ");
                     cheatData[i] = strtol(("0x"+cheats[i]).c_str(),NULL,16); 

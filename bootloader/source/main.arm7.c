@@ -53,6 +53,8 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 
+extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+
 void arm7clearRAM();
 int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
 int sdmmc_sdcard_init();
@@ -485,8 +487,8 @@ void loadBinary_ARM7 (aFile file)
 	romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
 	ROM_HEADERCRC = ndsHeader[0x15C>>2];
 
-	if ((consoleModel > 0) && (romSizeNoArm9 <= 0x017FC000)
-	|| (consoleModel == 0) && (romSizeNoArm9 <= 0x007FC000)) {
+	if ((consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
+	|| (consoleModel == 0 && romSizeNoArm9 <= 0x007FC000)) {
 		// Set to load ROM into RAM
 		ROMinRAM = true;
 	}
@@ -629,7 +631,7 @@ void setArm9Stuff(aFile file) {
 
 	if (ROMinRAM == true) {
 		// Load ROM into RAM
-		fileRead (ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
+		fileRead ((char*)ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
 		if(*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) == 0x4B434148){ //Primary fix for Mario's Holiday
 			*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) = 0xA00;
 		}
@@ -677,7 +679,7 @@ bool sdmmc_readsectors(u32 sector_no, u32 numsectors, void *out) {
 	return sdmmc_sdcard_readsectors(sector_no, numsectors, out) == 0;
 }
 
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
@@ -695,7 +697,7 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	}
 
 	return -1;
-}
+}*/
 
 void initMBK() {
 	// give all DSI WRAM to arm7 at boot
@@ -724,9 +726,9 @@ void initMBK() {
 	REG_MBK8=0x07403700; // same as dsiware
 }
 
-static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+//static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-void arm7_main (void) {
+int arm7_main (void) {
 	nocashMessage("bootloader");
 
 	initMBK(); 
@@ -787,19 +789,19 @@ void arm7_main (void) {
 	increaseLoadBarLength();	// 2 dots
 
 	nocashMessage("try to patch card");
-	copyLoop (ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+	copyLoop ((u32*)ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 	increaseLoadBarLength();	// 3 dots
-	copyLoop (ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	copyLoop ((u32*)ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength();	// 4 dots
 
-	module_params_t* params = findModuleParams(NDS_HEAD, donorSdkVer);
+	module_params_t* params = findModuleParams((tNDSHeader*)NDS_HEAD, donorSdkVer);
 	if(params)
 	{
-		ensureArm9Decompressed(NDS_HEAD, params);
+		ensureArm9Decompressed((tNDSHeader*)NDS_HEAD, params);
 	}
 	increaseLoadBarLength();	// 5 dots
 
-	errorCode = patchCardNds(NDS_HEAD, ENGINE_LOCATION_ARM7, ENGINE_LOCATION_ARM9, params, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds((tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, params, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("patch card Sucessfull");
 	} else {
@@ -808,7 +810,7 @@ void arm7_main (void) {
 	}
 	increaseLoadBarLength();	// 6 dots
 
-	errorCode = hookNdsRetail(NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetail((tNDSHeader*)NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if(errorCode == ERR_NONE) {
 		nocashMessage("card hook Sucessfull");
 	} else {
