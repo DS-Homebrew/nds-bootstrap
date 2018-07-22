@@ -62,7 +62,8 @@ typedef struct
 } module_params_t;
 
 
-module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer);
+u32 generateA7Instr(int arg1, int arg2);
+void generateA7InstrThumb(u16* instrs, int arg1, int arg2);
 void decompressLZ77Backwards(uint8_t* addr, size_t size);
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
