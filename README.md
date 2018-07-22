@@ -1,4 +1,4 @@
-nds-bootstrap is an application that allows the usage of Nintendo DS Homebrew & ROMs through the SD cards of the Nintendo DS/3DS, rather than through emulators or flashcarts. Check the linked compatibility list to see which games are playable.
+nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebrew and ROMs through the SD card of the Nintendo DSi/3DS, rather than through emulators or flashcarts.
 
 # Bug Reporting
 
@@ -25,7 +25,7 @@ Once all that is downloaded and installed, `git clone` this repository, navigate
 
 # Frontends
 
-In order to use this, you'll need to get a frontend. Here are some frontends that we recommend:
-- [TWLoader(Discontinued)](https://github.com/Robz8/TWLoader) is a CTR-mode GUI that looks and feels like the Nintendo DS<sup>i</sup> menu, but the theme can be changed to R4 or akmenu/Wood.
-- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu/releases) is another 3DS frontend, but based off the Nintendo DS<sup>i</sup> homebrew menu.
-- [DSIMenuPlusPlus](https://github.com/Robz8/SRLoader) is a port of the dsi menu to the 3ds,and ds<sup>i</sup>.
+In order to use this, you'll need to get a frontend:
+- [DSiMenu++](https://github.com/Robz8/SRLoader) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
+- [TWLoader](https://github.com/Robz8/TWLoader) is a discontinued 3DS frontend.
+- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a 3DS frontend based off the Nintendo DSi homebrew menu.
