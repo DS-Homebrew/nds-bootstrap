@@ -27,174 +27,177 @@
 extern u32 ROMinRAM;
 extern u32 ROM_TID;
 
-// Subroutine function signatures arm7
-u32 relocateStartSignature[1]  = {0x027FFFFA};
-u32 nextFunctiontSignature[1]  = {0xE92D4000};
-u32 a7cardReadSignature[2]     = {0x04100010,0x040001A4};
-u32 a7something1Signature[2]   = {0xE350000C,0x908FF100};
-u32 a7something2Signature[2]   = {0x0000A040,0x040001A0};
+//
+// Subroutine function signatures ARM7
+//
 
-u32 a7JumpTableSignature[4] = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
+u32 relocateStartSignature[1] = {0x027FFFFA};
+u32 nextFunctiontSignature[1] = {0xE92D4000};
+u32 a7cardReadSignature[2]    = {0x04100010,0x040001A4};
+u32 a7something1Signature[2]  = {0xE350000C,0x908FF100};
+u32 a7something2Signature[2]  = {0x0000A040,0x040001A0};
+
+u32 a7JumpTableSignature[4]     = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 u32 a7JumpTableSignatureV3_1[3] = {0xE92D4FF0,0xE24DD004,0xE59F91F8};
 u32 a7JumpTableSignatureV3_2[3] = {0xE92D4FF0,0xE24DD004,0xE59F91D4};
-u32 a7JumpTableSignatureV4_1[3] = {0xE92D41F0,0xE59F4224,0xE3A05000}; 
+u32 a7JumpTableSignatureV4_1[3] = {0xE92D41F0,0xE59F4224,0xE3A05000};
 u32 a7JumpTableSignatureV4_2[3] = {0xE92D41F0,0xE59F4200,0xE3A05000};
 
-u32 a7JumpTableSignatureUniversal[3] = {0xE592000C,0xE5921010,0xE5922014};
-u32 a7JumpTableSignatureUniversal_pt2[3] = {0xE5920010,0xE592100C,0xE5922014};
-u32 a7JumpTableSignatureUniversal_pt3[2] = {0xE5920010,0xE5921014};
-u32 a7JumpTableSignatureUniversal_2[3] = {0xE593000C,0xE5931010,0xE5932014};
-u32 a7JumpTableSignatureUniversal_2_pt2[3] = {0xE5930010,0xE593100C,0xE5932014};
-u32 a7JumpTableSignatureUniversal_2_pt3[2] = {0xE5930010,0xE5931014};
-u16 a7JumpTableSignatureUniversalThumb[3] = {0x68D0,0x6911,0x6952};
-u16 a7JumpTableSignatureUniversalThumb_pt2[3] = {0x6910,0x68D1,0x6952};
-u16 a7JumpTableSignatureUniversalThumb_pt3[2] = {0x6908,0x6949};
-u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2] = {0x6910,0x6951};
+u32 a7JumpTableSignatureUniversal[3]               = {0xE592000C,0xE5921010,0xE5922014};
+u32 a7JumpTableSignatureUniversal_pt2[3]           = {0xE5920010,0xE592100C,0xE5922014};
+u32 a7JumpTableSignatureUniversal_pt3[2]           = {0xE5920010,0xE5921014};
+u32 a7JumpTableSignatureUniversal_2[3]             = {0xE593000C,0xE5931010,0xE5932014};
+u32 a7JumpTableSignatureUniversal_2_pt2[3]         = {0xE5930010,0xE593100C,0xE5932014};
+u32 a7JumpTableSignatureUniversal_2_pt3[2]         = {0xE5930010,0xE5931014};
+u16 a7JumpTableSignatureUniversalThumb[3]          = {0x68D0,0x6911,0x6952};
+u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910,0x68D1,0x6952};
+u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908,0x6949};
+u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910,0x6951};
 u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800,0x6900};
 
-u32 j_HaltSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
-u32 j_HaltSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B7A3};
-u32 j_HaltSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B837};
-u32 j_HaltSignature1Alt3[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B92B};
-u32 j_HaltSignature1Alt4[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000BAEB};
-u32 j_HaltSignature1Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03803B93};
-u32 j_HaltSignature1Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03803DAF};
-u32 j_HaltSignature1Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03803DB3};
-u32 j_HaltSignature1Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03803ECB};
-u32 j_HaltSignature1Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F13};
+u32 j_HaltSignature1[4]      = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00007BAF};
+u32 j_HaltSignature1Alt1[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B7A3};
+u32 j_HaltSignature1Alt2[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B837};
+u32 j_HaltSignature1Alt3[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000B92B};
+u32 j_HaltSignature1Alt4[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x0000BAEB};
+u32 j_HaltSignature1Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803B93};
+u32 j_HaltSignature1Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803DAF};
+u32 j_HaltSignature1Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803DB3};
+u32 j_HaltSignature1Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ECB};
+u32 j_HaltSignature1Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F13};
 u32 j_HaltSignature1Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x03804133};
-u32 j_HaltSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03800F7F};
-u32 j_HaltSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038010F3};
-u32 j_HaltSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x038011BF};
-u32 j_HaltSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03803597};
-u32 j_HaltSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038040C3};
-u32 j_HaltSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AB};
-u32 j_HaltSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
-u32 j_HaltSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
-u32 j_HaltSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x038043E3};
-u32 j_HaltSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
+u32 j_HaltSignature3[3]      = {0xE59FC000, 0xE12FFF1C, 0x03800F7F};
+u32 j_HaltSignature3Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x038010F3};
+u32 j_HaltSignature3Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x038011BF};
+u32 j_HaltSignature3Alt3[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803597};
+u32 j_HaltSignature3Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0x038040C3};
+u32 j_HaltSignature3Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x038042AB};
+u32 j_HaltSignature3Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x038042AF};
+u32 j_HaltSignature3Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x0380433F};
+u32 j_HaltSignature3Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x038043E3};
+u32 j_HaltSignature3Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804503};
 u32 j_HaltSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x038045BF};
 u32 j_HaltSignature3Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x0380538B};
-u32 j_HaltSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x0380064B};
-u32 j_HaltSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x038008C3};
-u32 j_HaltSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x038008CF};
-u32 j_HaltSignature4Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x0380356F};
-u32 j_HaltSignature4Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038036BF};
-u32 j_HaltSignature4Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x038037D3};
-u32 j_HaltSignature4Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03803E7F};
-u32 j_HaltSignature4Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03803EBF};
-u32 j_HaltSignature4Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804503};
+u32 j_HaltSignature4[3]      = {0xE59FC000, 0xE12FFF1C, 0x0380064B};
+u32 j_HaltSignature4Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x038008C3};
+u32 j_HaltSignature4Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x038008CF};
+u32 j_HaltSignature4Alt3[3]  = {0xE59FC000, 0xE12FFF1C, 0x0380356F};
+u32 j_HaltSignature4Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0x038036BF};
+u32 j_HaltSignature4Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x038037D3};
+u32 j_HaltSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803E7F};
+u32 j_HaltSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803EBF};
+u32 j_HaltSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804503};
 
-u32 swi12Signature[1] = {0x4770DF12};	// LZ77UnCompReadByCallbackWrite16bit
-u32 j_GetPitchTableSignature1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
-u32 j_GetPitchTableSignature1Alt1[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
-u32 j_GetPitchTableSignature1Alt2[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
-u32 j_GetPitchTableSignature1Alt3[4] = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
-u32 j_GetPitchTableSignature1Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
-u32 j_GetPitchTableSignature1Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03803E05};
-u32 j_GetPitchTableSignature1Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03803E09};
-u32 j_GetPitchTableSignature1Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F21};
-u32 j_GetPitchTableSignature1Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804189};
-u32 j_GetPitchTableSignature3[3] = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
-u32 j_GetPitchTableSignature3Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03801149};
-u32 j_GetPitchTableSignature3Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03801215};
-u32 j_GetPitchTableSignature3Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x03804119};
-u32 j_GetPitchTableSignature3Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x03804301};
-u32 j_GetPitchTableSignature3Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03804305};
-u32 j_GetPitchTableSignature3Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03804395};
-u32 j_GetPitchTableSignature3Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03804439};
-u32 j_GetPitchTableSignature3Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03804559};
-u32 j_GetPitchTableSignature3Alt9[3] = {0xE59FC000, 0xE12FFF1C, 0x03804615};
+u32 swi12Signature[1]                 = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
+u32 j_GetPitchTableSignature1[4]      = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
+u32 j_GetPitchTableSignature1Alt1[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
+u32 j_GetPitchTableSignature1Alt2[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
+u32 j_GetPitchTableSignature1Alt3[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BE5};
+u32 j_GetPitchTableSignature1Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803BE9};
+u32 j_GetPitchTableSignature1Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803E05};
+u32 j_GetPitchTableSignature1Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803E09};
+u32 j_GetPitchTableSignature1Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F21};
+u32 j_GetPitchTableSignature1Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804189};
+u32 j_GetPitchTableSignature3[3]      = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
+u32 j_GetPitchTableSignature3Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801149};
+u32 j_GetPitchTableSignature3Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801215};
+u32 j_GetPitchTableSignature3Alt3[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804119};
+u32 j_GetPitchTableSignature3Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804301};
+u32 j_GetPitchTableSignature3Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804305};
+u32 j_GetPitchTableSignature3Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804395};
+u32 j_GetPitchTableSignature3Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804439};
+u32 j_GetPitchTableSignature3Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804559};
+u32 j_GetPitchTableSignature3Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804615};
 u32 j_GetPitchTableSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x038053E1};
-u32 j_GetPitchTableSignature4[3] = {0xE59FC000, 0xE12FFF1C, 0x038006A1};
-u32 j_GetPitchTableSignature4Alt1[3] = {0xE59FC000, 0xE12FFF1C, 0x03800919};
-u32 j_GetPitchTableSignature4Alt2[3] = {0xE59FC000, 0xE12FFF1C, 0x03800925};
-u32 j_GetPitchTableSignature4Alt3[3] = {0xE59FC000, 0xE12FFF1C, 0x038035C5};
-u32 j_GetPitchTableSignature4Alt4[3] = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
-u32 j_GetPitchTableSignature4Alt5[3] = {0xE59FC000, 0xE12FFF1C, 0x03803715};
-u32 j_GetPitchTableSignature4Alt6[3] = {0xE59FC000, 0xE12FFF1C, 0x03803829};
-u32 j_GetPitchTableSignature4Alt7[3] = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
-u32 j_GetPitchTableSignature4Alt8[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
-u32 swiGetPitchTableSignature5[4] = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
+u32 j_GetPitchTableSignature4[3]      = {0xE59FC000, 0xE12FFF1C, 0x038006A1};
+u32 j_GetPitchTableSignature4Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x03800919};
+u32 j_GetPitchTableSignature4Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x03800925};
+u32 j_GetPitchTableSignature4Alt3[3]  = {0xE59FC000, 0xE12FFF1C, 0x038035C5};
+u32 j_GetPitchTableSignature4Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
+u32 j_GetPitchTableSignature4Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803715};
+u32 j_GetPitchTableSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803829};
+u32 j_GetPitchTableSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
+u32 j_GetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
+u32 swiGetPitchTableSignature5[4]     = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
-// Subroutine function signatures arm9
-u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 
-u32 a9cardReadSignature[2]    = {0x04100010, 0x040001A4};
-u32 a9cardReadSignatureAlt[2]    = {0x040001A4, 0x04100010};
-u16 a9cardReadSignatureThumb[4]    = {0x01A4,0x0400,0x0200,0x0000};
-u32 cardReadStartSignature[1] = {0xE92D4FF0};
-u32 cardReadStartSignatureAlt[1] = {0xE92D4070};
-u16 cardReadStartSignatureThumb[2] = {0xB5F8,0xB082};
+//
+// Subroutine function signatures ARM9
+//
+
+u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
+
+u32 a9cardReadSignature[2]             = {0x04100010, 0x040001A4};
+u32 a9cardReadSignatureAlt[2]          = {0x040001A4, 0x04100010};
+u16 a9cardReadSignatureThumb[4]        = {0x01A4,0x0400,0x0200,0x0000};
+u32 cardReadStartSignature[1]          = {0xE92D4FF0};
+u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
+u16 cardReadStartSignatureThumb[2]     = {0xB5F8,0xB082};
 u16 cardReadStartSignatureThumbAlt1[2] = {0xB5F0,0xB083};
 
-u32 a9cardIdSignature[2]      = {0x040001A4,0x04100010};
-u16 a9cardIdSignatureThumb[6]    = {0xFFFF,0xF8FF,0x01A4,0x0400,0x0010,0x0410};
-u32 cardIdStartSignature[1]   = {0xE92D4000};
-u32 cardIdStartSignatureAlt[1]   = {0xE92D4008};
-u32 cardIdStartSignatureAlt2[1]   = {0xE92D4010};
-u16 cardIdStartSignatureThumb[2]   = {0xB500,0xB081};
-u16 cardIdStartSignatureThumbAlt[2]   = {0xB508,0x202E};
-u16 cardIdStartSignatureThumbAlt2[2]   = {0xB508,0x20B8};
-u16 cardIdStartSignatureThumbAlt3[2]   = {0xB510,0x24B8};
+u32 a9cardIdSignature[2]             = {0x040001A4,0x04100010};
+u16 a9cardIdSignatureThumb[6]        = {0xFFFF,0xF8FF,0x01A4,0x0400,0x0010,0x0410};
+u32 cardIdStartSignature[1]          = {0xE92D4000};
+u32 cardIdStartSignatureAlt[1]       = {0xE92D4008};
+u32 cardIdStartSignatureAlt2[1]      = {0xE92D4010};
+u16 cardIdStartSignatureThumb[2]     = {0xB500,0xB081};
+u16 cardIdStartSignatureThumbAlt[2]  = {0xB508,0x202E};
+u16 cardIdStartSignatureThumbAlt2[2] = {0xB508,0x20B8};
+u16 cardIdStartSignatureThumbAlt3[2] = {0xB510,0x24B8};
   
-//u32 a9instructionBHI[1]       = {0x8A000001};
-u32 cardPullOutSignature1[4]   = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
-u32 cardPullOutSignature4[4]   = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
-u16 cardPullOutSignatureThumb[4]   = {0xB508,0x203F,0x4008,0x2811};
-u16 cardPullOutSignatureThumbAlt1[4]   = {0xB500,0xB081,0x203F,0x4001};
-//u32 a9cardSendSignature[7]    = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
-u32 cardCheckPullOutSignature1[4]   = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
-u32 cardCheckPullOutSignature3[4]   = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
-//u32 forceToPowerOffSignature[4]   = {0xE92D4000,0xE24DD004,0xE59F0028,0xE28D1000};
+//u32 a9instructionBHI[1] = {0x8A000001};
 
-u32 cardReadCachedStartSignature1[2]   = {0xE92D4030,0xE24DD004};
+u32 cardPullOutSignature1[4]         = {0xE92D4000,0xE24DD004,0xE201003F,0xE3500011};
+u32 cardPullOutSignature4[4]         = {0xE92D4008,0xE201003F,0xE3500011,0x1A00000D};
+u16 cardPullOutSignatureThumb[4]     = {0xB508,0x203F,0x4008,0x2811};
+u16 cardPullOutSignatureThumbAlt1[4] = {0xB500,0xB081,0x203F,0x4001};
+
+//u32 a9cardSendSignature[7] = {0xE92D40F0,0xE24DD004,0xE1A07000,0xE1A06001,0xE1A01007,0xE3A0000E,0xE3A02000};
+
+u32 cardCheckPullOutSignature1[4] = {0xE92D4018,0xE24DD004,0xE59F204C,0xE1D210B0};
+u32 cardCheckPullOutSignature3[4] = {0xE92D4000,0xE24DD004,0xE59F002C,0xE1D000B0};
+
+//u32 forceToPowerOffSignature[4] = {0xE92D4000,0xE24DD004,0xE59F0028,0xE28D1000};
+
+u32 cardReadCachedStartSignature1[2] = {0xE92D4030,0xE24DD004};
 u32 cardReadCachedEndSignature1[4]   = {0xE5950020,0xE3500000,0x13A00001,0x03A00000};
 
 u32 cardReadCachedEndSignature3[4]   = {0xE5950024,0xE3500000,0x13A00001,0x03A00000};
 
-u32 cardReadCachedStartSignature4[2]   = {0xE92D4038,0xE59F407C};
+u32 cardReadCachedStartSignature4[2] = {0xE92D4038,0xE59F407C};
 u32 cardReadCachedEndSignature4[4]   = {0xE5940024,0xE3500000,0x13A00001,0x03A00000};
 
-u32 cardReadDmaStartSignature[1]   = {0xE92D4FF8};
-u32 cardReadDmaStartSignatureAlt[1]   = {0xE92D47F0};
+u32 cardReadDmaStartSignature[1]       = {0xE92D4FF8};
+u32 cardReadDmaStartSignatureAlt[1]    = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
-u16 cardReadDmaStartSignatureThumb1[1]   = {0xB5F0};
-u16 cardReadDmaStartSignatureThumb3[1]   = {0xB5F8};
-u32 cardReadDmaEndSignature[2]   = {0x01FF8000,0x000001FF};     
-u16 cardReadDmaEndSignatureThumbAlt[4]   = {0x8000,0x01FF,0x0000,0x0200};     
+u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0};
+u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8};
 
-u32 aRandomPatch[4] = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
-u32 sleepPatch[2] = {0x0A000001, 0xE3A00601}; 
-u16 sleepPatchThumb[2] = {0xD002,0x4831};
+u32 cardReadDmaEndSignature[2]         = {0x01FF8000,0x000001FF};    
+u16 cardReadDmaEndSignatureThumbAlt[4] = {0x8000,0x01FF,0x0000,0x0200};    
+
+u32 aRandomPatch[4]       = {0xE3500000, 0x1597002C, 0x10406004,0x03E06000};
+u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
+u16 sleepPatchThumb[2]    = {0xD002,0x4831};
 u16 sleepPatchThumbAlt[2] = {0xD002,0x0440};
 
-
-     
 // irqEnable
 u32 irqEnableStartSignature1[4] = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0};
 u32 irqEnableStartSignature4[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020};
 
-//u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0};  
+//u32 arenaLowSignature[4] = {0xE1A00100,0xE2800627,0xE2800AFF,0xE5801DA0}; 
 
 u32 mpuInitRegion0Signature[1] = {0xEE060F10};
-u32 mpuInitRegion0Data[1] = {0x4000033};
-
+u32 mpuInitRegion0Data[1]      = {0x4000033};
 u32 mpuInitRegion1Signature[1] = {0xEE060F11};
-u32 mpuInitRegion1Data1[1] = {0x200002D};
-// sdk >= 4 version
-u32 mpuInitRegion1Data4[1] = {0x200002D};
-
-u32 mpuInitRegion1DataAlt[1] = {0x200002B};
-
+u32 mpuInitRegion1Data1[1]     = {0x200002D};
+u32 mpuInitRegion1Data4[1]     = {0x200002D}; // sdk >= 4 version
+u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
 u32 mpuInitRegion2Signature[1] = {0xEE060F12};
-// sdk < 3 version
-u32 mpuInitRegion2Data1[1] = {0x27C0023};
-// sdk >= 3 version
-u32 mpuInitRegion2Data3[1] = {0x27E0021};
-
+u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // sdk < 3 version
+u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // sdk >= 3 version
 u32 mpuInitRegion3Signature[1] = {0xEE060F13};
-u32 mpuInitRegion3Data[1] = {0x8000035};
+u32 mpuInitRegion3Data[1]      = {0x8000035};
 
 u32 mpuInitCache[1] = {0xE3A00042};
 
@@ -203,62 +206,49 @@ bool cardReadFound = false;
 //
 // Look in @data for @find and return the position of it.
 //
-u32 getOffset(u32* addr, size_t size, u32* find, size_t sizeofFind, int direction)
-{
-	u32* end = addr + size/sizeof(u32);
+u32 getOffset(u32* addr, size_t size, u32* find, size_t lenofFind, int direction) {
 	u32* debug = (u32*)0x037D0000;
+	u32* end = addr + size/sizeof(u32);
 	debug[3] = (u32)end;
+	for (; addr != end; addr += direction) {
+		bool found = true;
 
-    //u32 result = 0;
-	bool found = false;
-
-	do {
-		for(int i=0;i<sizeofFind;i++) {
-			if (addr[i] != find[i]) 
-			{
+		for (int i = 0; i < lenofFind; i++) {
+			if (addr[i] != find[i]) {
+				found = false;
 				break;
-			} else if(i==sizeofFind-1) {
-				found = true;
 			}
 		}
-		if(!found) addr+=direction;
-	} while (addr != end && !found);
 
-	if (addr == end) {
-		return (u32)NULL;
+		if (found) {
+			return (u32)addr;
+		}
 	}
 
-	return (u32)addr;
+	return (u32)NULL;
+}
+
+u32 getOffsetThumb(u16* addr, size_t size, u16* find, size_t lenofFind, int direction) {
+	for (u16* end = addr + size/sizeof(u16); addr != end; addr += direction) {
+		bool found = true;
+
+		for (int i = 0; i < lenofFind; i++) {
+			if (addr[i] != find[i]) {
+				found = false;
+				break;
+			}
+		}
+
+		if (found) {
+			return (u32)addr;
+		}
+	}
+
+	return (u32)NULL;
 }
 
 u32 generateA7Instr(int arg1, int arg2) {
     return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
-}
-
-u32 getOffsetThumb(u16* addr, size_t size, u16* find, size_t sizeofFind, int direction)
-{
-	u16* end = addr + size/sizeof(u16);
-
-    //u32 result = 0;
-	bool found = false;
-
-	do {
-		for(int i=0;i<sizeofFind;i++) {
-			if (addr[i] != find[i]) 
-			{
-				break;
-			} else if(i==sizeofFind-1) {
-				found = true;
-			}
-		}
-		if(!found) addr+=direction;
-	} while (addr != end && !found);
-
-	if (addr == end) {
-		return (u32)NULL;
-	}
-
-	return (u32)addr;
 }
 
 void generateA7InstrThumb(u16* instrs, int arg1, int arg2) {
@@ -267,26 +257,23 @@ void generateA7InstrThumb(u16* instrs, int arg1, int arg2) {
     //dbg_printf("generateA7InstrThumb offset\n");
     //dbg_hexa(offset);
     // 1st instruction contains the upper 11 bit of the offset
-    instrs[0] = (( offset >> 12) & 0x7FF) | 0xF000;
+    instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
 
     // 2nd instruction contains the lower 11 bit of the offset
-    instrs[1] = (( offset >> 1) & 0x7FF) | 0xF800;
+    instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 }
 
-
-module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
-{
+module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer) {
 	dbg_printf("Looking for moduleparams\n");
-	uint32_t moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
-	*(vu32*)(0x2800008) = (getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1) - 0x8);
-	if(!moduleparams)
-	{
+	u32 moduleparams = getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, (u32*)moduleParamsSignature, 2, 1);
+	*(vu32*)(0x2800008) = (moduleparams - 0x8);
+	if (!moduleparams) {
 		dbg_printf("No moduleparams?\n");
 		*(vu32*)(0x2800010) = 1;
 		moduleparams = (u32)malloc(0x100);
-		memset((u32*)moduleparams,0,0x100);
+		memset((u32*)moduleparams, 0, 0x100);
 		((module_params_t*)(moduleparams - 0x1C))->compressed_static_end = 0;
-		switch(donorSdkVer) {
+		switch (donorSdkVer) {
 			case 0:
 			default:
 				break;
@@ -310,134 +297,142 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer)
 	return (module_params_t*)(moduleparams - 0x1C);
 }
 
-void decompressLZ77Backwards(uint8_t* addr, size_t size)
-{
-	uint32_t leng = *((uint32_t*)(addr + size - 4)) + size;
-	//byte[] Result = new byte[leng];
+void decompressLZ77Backwards(u8* addr, size_t size) {
+	u32 len = *(u32*)(addr + size - 4) + size;
+
+	//byte[] Result = new byte[len];
 	//Array.Copy(Data, Result, Data.Length);
-	uint32_t end = (*((uint32_t*)(addr + size - 8))) & 0xFFFFFF;
-	uint8_t* result = addr;
-	int Offs = (int)(size - ((*((uint32_t*)(addr + size - 8))) >> 24));
-	int dstoffs = (int)leng;
-	while (true)
-	{
-		uint8_t header = result[--Offs];
-		for (int i = 0; i < 8; i++)
-		{
-			if ((header & 0x80) == 0) result[--dstoffs] = result[--Offs];
-			else
-			{
-				uint8_t a = result[--Offs];
-				uint8_t b = result[--Offs];
+
+	u32 end = *(u32*)(addr + size - 8) & 0xFFFFFF;
+
+	u8* result = addr;
+
+	int Offs = (int)(size - (*(u32*)(addr + size - 8) >> 24));
+	int dstoffs = (int)len;
+	while (true) {
+		u8 header = result[--Offs];
+		for (int i = 0; i < 8; i++) {
+			if ((header & 0x80) == 0) {
+				result[--dstoffs] = result[--Offs];
+			} else {
+				u8 a = result[--Offs];
+				u8 b = result[--Offs];
 				int offs = (((a & 0xF) << 8) | b) + 2;//+ 1;
 				int length = (a >> 4) + 2;
-				do
-				{
+				do {
 					result[dstoffs - 1] = result[dstoffs + offs];
 					dstoffs--;
 					length--;
-				}
-				while (length >= 0);
+				} while (length >= 0);
 			}
-			if (Offs <= size - end)
+
+			if (Offs <= size - end) {
 				return;
+			}
+
 			header <<= 1;
 		}
 	}
 }
 
-void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams)
-{
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
 	*(vu32*)(0x280000C) = moduleParams->compressed_static_end;
-	if(!moduleParams->compressed_static_end)
-	{
+	if (!moduleParams->compressed_static_end) {
 		dbg_printf("This rom is not compressed\n");
-		return; //not compressed
+		return; // Not compressed
 	}
-	dbg_printf("This rom is compressed ;)\n");
-	decompressLZ77Backwards((uint8_t*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+	dbg_printf("This rom is compressed;)\n");
+	decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	moduleParams->compressed_static_end = 0;
 }
 
-u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32* debug = (u32*)0x037C6000;
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
-	u32* cardPullOutSignature = cardPullOutSignature1;
+	u32* cardPullOutSignature         = cardPullOutSignature1;
 	u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
-	u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
-	u32* mpuInitRegion2Data = mpuInitRegion2Data1;
-	u32* mpuInitRegion1Data = mpuInitRegion1Data1;
-	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+	u32* cardReadCachedEndSignature   = cardReadCachedEndSignature1;
+	u32* mpuInitRegion2Data           = mpuInitRegion2Data1;
+	u32* mpuInitRegion1Data           = mpuInitRegion1Data1;
+
+	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardReadCachedEndSignature = cardReadCachedEndSignature3;
-		mpuInitRegion2Data = mpuInitRegion2Data3;
-	} else if(moduleParams->sdk_version > 0x4000000) {
-		cardPullOutSignature = cardPullOutSignature4;
+		mpuInitRegion2Data         = mpuInitRegion2Data3;
+	} else if (moduleParams->sdk_version > 0x4000000) {
+		cardPullOutSignature         = cardPullOutSignature4;
 		cardReadCachedStartSignature = cardReadCachedStartSignature4;
-		cardReadCachedEndSignature = cardReadCachedEndSignature4;
-		mpuInitRegion1Data = mpuInitRegion1Data4;
+		cardReadCachedEndSignature   = cardReadCachedEndSignature4;
+		mpuInitRegion1Data           = mpuInitRegion1Data4;
 	}
 
 	u32* mpuInitRegionSignature = mpuInitRegion1Signature;
-	u32* mpuInitRegionData = mpuInitRegion1Data;
-	u32 mpuInitRegionNewData = PAGE_32M  | 0x02000000 | 1;
-	u32 needFlushCache = 0;
-	int mpuAccessOffset = 0;
-	u32 mpuNewDataAccess = 0;
-	u32 mpuNewInstrAccess = 0;
+	u32* mpuInitRegionData      = mpuInitRegion1Data;
+	u32 mpuInitRegionNewData    = PAGE_32M | 0x02000000 | 1;
+	u32 needFlushCache          = 0;
+	u32 mpuNewDataAccess        = 0;
+	u32 mpuNewInstrAccess       = 0;
+	int mpuAccessOffset         = 0;
 
-	switch(patchMpuRegion) {
-		case 0 :
+	switch (patchMpuRegion) {
+		case 0:
 			mpuInitRegionSignature = mpuInitRegion0Signature;
-			mpuInitRegionData = mpuInitRegion0Data;
-			mpuInitRegionNewData = PAGE_128M  | 0x00000000 | 1;
+			mpuInitRegionData      = mpuInitRegion0Data;
+			mpuInitRegionNewData   = PAGE_128M | 0x00000000 | 1;
 			break;
-		case 1 :
+		case 1:
 			mpuInitRegionSignature = mpuInitRegion1Signature;
-			mpuInitRegionData = mpuInitRegion1Data;
-			needFlushCache = 1;
+			mpuInitRegionData      = mpuInitRegion1Data;
+			needFlushCache         = 1;
 			break;
-		case 2 :
+		case 2:
 			mpuInitRegionSignature = mpuInitRegion2Signature;
-			mpuInitRegionData = mpuInitRegion2Data;
-			mpuNewDataAccess = 0x15111111;
-			mpuNewInstrAccess = 0x5111111;
-			mpuAccessOffset = 6;
+			mpuInitRegionData      = mpuInitRegion2Data;
+			mpuNewDataAccess       = 0x15111111;
+			mpuNewInstrAccess      = 0x5111111;
+			mpuAccessOffset        = 6;
 			break;
-		case 3 :
+		case 3:
 			mpuInitRegionSignature = mpuInitRegion3Signature;
-			mpuInitRegionData = mpuInitRegion3Data;
-			mpuInitRegionNewData = PAGE_8M  | 0x03000000 | 1;
-			mpuNewInstrAccess = 0x5111111;
-			mpuAccessOffset = 5;
+			mpuInitRegionData      = mpuInitRegion3Data;
+			mpuInitRegionNewData   = PAGE_8M | 0x03000000 | 1;
+			mpuNewInstrAccess      = 0x5111111;
+			mpuAccessOffset        = 5;
 			break;
 	}
 
 	bool usesThumb = false;
 	int readType = 0;
 
-	// Find the card read
+	//
+	// Find CARD READ END
+	//
 	u32 cardReadEndOffset = 0;
 	if (ROM_TID == 0x45524F55) {
 		// Start at 0x3800 for "WarioWare: DIY (USA)"
 		readType = 1;
-		cardReadEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination+0x3800, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)a9cardReadSignatureAlt, 2, 1);
+		cardReadEndOffset = getOffset(
+			(u32*)ndsHeader->arm9destination + 0x3800, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignatureAlt, 2,
+			1
+		);
 	} else if (moduleParams->sdk_version < 0x4000000) {
-		cardReadEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)a9cardReadSignature, 2, 1);
+		cardReadEndOffset = getOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignature, 2,
+			1
+		);
 	}
 	if (!cardReadEndOffset && readType != 1) {
 		dbg_printf("Card read end not found. Trying alt\n");
 		readType = 1;
-		cardReadEndOffset =  
-			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-				(u32*)a9cardReadSignatureAlt, 2, 1);
-		if (*(u32*)(cardReadEndOffset-4) == 0xFFFFFE00) {
+		cardReadEndOffset = getOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)a9cardReadSignatureAlt, 2,
+			1
+		);
+		if (*(u32*)(cardReadEndOffset - 4) == 0xFFFFFE00) {
 			dbg_printf("Found thumb\n");
 			cardReadEndOffset -= 4;
 			usesThumb = true;
@@ -446,36 +441,50 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	if (!cardReadEndOffset) {
 		dbg_printf("Card read end alt not found. Trying thumb\n");
 		usesThumb = true;
-		cardReadEndOffset =  
-			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-				(u16*)a9cardReadSignatureThumb, 4, 1);
+		cardReadEndOffset = getOffsetThumb(
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u16*)a9cardReadSignatureThumb, 4,
+			1
+		);
 	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Thumb card read end not found\n");
 		return 0;
 	}
 	debug[1] = cardReadEndOffset;
-    u32 cardReadStartOffset = 0;
+
+	//
+	// Find CARD READ START
+	//
+	u32 cardReadStartOffset = 0;
 	if (readType == 1) {
-		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0x118,
-				  (u32*)cardReadStartSignatureAlt, 1, -1);
+		cardReadStartOffset = getOffset(
+			(u32*)cardReadEndOffset, -0x118,
+			(u32*)cardReadStartSignatureAlt, 1,
+			-1
+		);
 	} else {
-		cardReadStartOffset =   
-			getOffset((u32*)cardReadEndOffset, -0x118,
-				  (u32*)cardReadStartSignature, 1, -1);
+		cardReadStartOffset = getOffset(
+			(u32*)cardReadEndOffset, -0x118,
+			(u32*)cardReadStartSignature, 1,
+			-1
+		);
 	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Card read start not found. Trying thumb\n");
-		cardReadStartOffset =   
-			getOffsetThumb((u16*)cardReadEndOffset, -0xC0,
-				(u16*)cardReadStartSignatureThumb, 2, -1);
+		cardReadStartOffset = getOffsetThumb(
+			(u16*)cardReadEndOffset, -0xC0,
+			(u16*)cardReadStartSignatureThumb, 2,
+			-1
+		);
 	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Thumb card read start not found\n");
-		cardReadStartOffset =   
-			getOffsetThumb((u16*)cardReadEndOffset, -0xC0,
-				(u16*)cardReadStartSignatureThumbAlt1, 2, -1);
+		cardReadStartOffset = getOffsetThumb(
+			(u16*)cardReadEndOffset, -0xC0,
+			(u16*)cardReadStartSignatureThumbAlt1, 2,
+			-1
+		);
 	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Thumb card read start alt 1 not found\n");
@@ -486,42 +495,53 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	dbg_hexa(cardReadStartOffset);
 	dbg_printf("\n");
 
+	//
+	// Find CARD PULL OUT
+	//
 	u32 cardPullOutOffset = 0;
 	if (usesThumb) {
-		cardPullOutOffset = 
-			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				(u16*)cardPullOutSignatureThumb, 4, 1);
+		cardPullOutOffset = getOffsetThumb(
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u16*)cardPullOutSignatureThumb, 4,
+			1
+		);
 		if (!cardPullOutOffset) {
 			dbg_printf("Thumb card pull out handler not found. Trying alt\n");
-			cardPullOutOffset = 
-			getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				(u16*)cardPullOutSignatureThumbAlt1, 4, 1);
+			cardPullOutOffset = getOffsetThumb(
+				(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				(u16*)cardPullOutSignatureThumbAlt1, 4,
+				1
+			);
 		}
 		if (!cardPullOutOffset) {
 			dbg_printf("Thumb card pull out handler alt not found\n");
-		}
-		if (cardPullOutOffset>0) {
-			dbg_printf("Thumb card pull out handler:\t");
-			dbg_hexa(cardPullOutOffset);
-			dbg_printf("\n");
+			//return 0;
 		}
 	} else {
-		cardPullOutOffset = 
-			getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-				(u32*)cardPullOutSignature, 4, 1);
+		cardPullOutOffset = getOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)cardPullOutSignature, 4,
+			1
+		);
 		if (!cardPullOutOffset) {
 			dbg_printf("Card pull out handler not found\n");
 			//return 0;
-		} else {
-			dbg_printf("Card pull out handler:\t");
-			dbg_hexa(cardPullOutOffset);
-			dbg_printf("\n");
 		}
 	}
+	if (cardPullOutOffset) { //cardPullOutOffset > 0
+		dbg_printf("Card pull out handler:\t");
+		dbg_hexa(cardPullOutOffset);
+		dbg_printf("\n");
+	}
 
-	/*u32 forceToPowerOffOffset = 
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-			(u32*)forceToPowerOffSignature, 4, 1);
+	//
+	// Find FORCE TO POWER OFF
+	//
+	/*u32 forceToPowerOffOffset = getOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u32*)forceToPowerOffSignature, 4,
+		1
+	);
 	if (!forceToPowerOffOffset) {
 		dbg_printf("Force to power off handler not found\n");
 		//return 0;
@@ -531,143 +551,204 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_printf("\n");
 	}*/
 	
-	u32 cardReadCachedEndOffset =  
-		getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			(u32*)cardReadCachedEndSignature, 4, 1);
+	//
+	// Find CARD READ CACHED END
+	//
+	u32 cardReadCachedEndOffset = getOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u32*)cardReadCachedEndSignature, 4,
+		1
+	);
 	if (!cardReadCachedEndOffset) {
 		dbg_printf("Card read cached end not found\n");
 		//cardReadFound = false;
 		//return 0;
 	}
-	u32 cardReadCachedOffset =   
-		getOffset((u32*)cardReadCachedEndOffset, -0xFF,
-			(u32*)cardReadCachedStartSignature, 2, -1);
-	if (!cardReadStartOffset) {
+
+	//
+	// Find CARD READ CACHED START
+	//
+	u32 cardReadCachedStartOffset = getOffset(
+		(u32*)cardReadCachedEndOffset, -0xFF,
+		(u32*)cardReadCachedStartSignature, 2,
+		-1
+	);
+	if (!cardReadCachedStartOffset) {
 		dbg_printf("Card read cached start not found\n");
 		//cardReadFound = false;
 		//return 0;
 	}
 	dbg_printf("Card read cached :\t");
-	dbg_hexa(cardReadCachedOffset);
+	dbg_hexa(cardReadCachedStartOffset);
 	dbg_printf("\n");
 
-	u32 cardReadDmaOffset = 0;
-	u32 cardReadDmaEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-              (u32*)cardReadDmaEndSignature, 2, 1);
+	//
+	// Find CARD READ DMA END
+	//
+	u32 cardReadDmaEndOffset = getOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        (u32*)cardReadDmaEndSignature, 2,
+		1
+	);
     if (!cardReadDmaEndOffset) {
         dbg_printf("Card read dma end not found\n");
 	}
     if (!cardReadDmaEndOffset && usesThumb) {
         dbg_printf("Trying thumb alt\n");
-		cardReadDmaEndOffset =  
-        getOffsetThumb((u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-              (u16*)cardReadDmaEndSignatureThumbAlt, 4, 1);
+		cardReadDmaEndOffset = getOffsetThumb(
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            (u16*)cardReadDmaEndSignatureThumbAlt, 4,
+			1
+		);
 	}
     if (!cardReadDmaEndOffset && usesThumb) {
         dbg_printf("Thumb card read dma end alt not found\n");
 	}
-	if (cardReadDmaEndOffset>0) {
+	if (!cardReadDmaEndOffset) {
+		//return 0;
+	}
+
+	//
+	// Find CARD READ DMA START
+	//
+	u32 cardReadDmaStartOffset = 0;
+	if (cardReadDmaEndOffset) { // cardReadDmaEndOffset > 0
 		dbg_printf("Card read dma end :\t");
 		dbg_hexa(cardReadDmaEndOffset);
 		dbg_printf("\n");
 		if (usesThumb) {
 			//dbg_printf("Card read dma start not found\n");
-			cardReadDmaOffset =   
-				getOffsetThumb((u16*)cardReadDmaEndOffset, -0x100,
-					  (u16*)cardReadDmaStartSignatureThumb1, 1, -1);
-			if (!cardReadDmaOffset) {
+			cardReadDmaStartOffset = getOffsetThumb(
+				(u16*)cardReadDmaEndOffset, -0x100,
+				(u16*)cardReadDmaStartSignatureThumb1, 1,
+				-1
+			);
+			if (!cardReadDmaStartOffset) {
 				dbg_printf("Thumb card read dma start 1 not found\n");
-				cardReadDmaOffset =   
-				getOffsetThumb((u16*)cardReadDmaEndOffset, -0x200,
-					  (u16*)cardReadDmaStartSignatureThumb3, 1, -1);
+				cardReadDmaStartOffset = getOffsetThumb(
+					(u16*)cardReadDmaEndOffset, -0x200,
+					(u16*)cardReadDmaStartSignatureThumb3, 1,
+					-1
+				);
 			}
-			if (!cardReadDmaOffset) {
+			if (!cardReadDmaStartOffset) {
 				dbg_printf("Thumb card read dma start 3 not found\n");
 			}
 		} else {
-			cardReadDmaOffset =   
-				getOffset((u32*)cardReadDmaEndOffset, -0x200,
-					  (u32*)cardReadDmaStartSignature, 1, -1);
-			if (!cardReadDmaOffset) {
+			cardReadDmaStartOffset = getOffset(
+				(u32*)cardReadDmaEndOffset, -0x200,
+				(u32*)cardReadDmaStartSignature, 1,
+				-1
+			);
+			if (!cardReadDmaStartOffset) {
 				dbg_printf("Card read dma start not found\n");
-				cardReadDmaOffset =   
-					getOffset((u32*)cardReadDmaEndOffset, -0x200,
-						  (u32*)cardReadDmaStartSignatureAlt, 1, -1);
-				if (!cardReadDmaOffset) {
-					dbg_printf("Card read dma start alt not found\n");
-				}
+				cardReadDmaStartOffset = getOffset(
+					(u32*)cardReadDmaEndOffset, -0x200,
+					(u32*)cardReadDmaStartSignatureAlt, 1,
+					-1
+				);
 			}
-			if (!cardReadDmaOffset) {
-				//dbg_printf("Card read dma start not found\n");
-				cardReadDmaOffset =   
-					getOffset((u32*)cardReadDmaEndOffset, -0x200,
-						  (u32*)cardReadDmaStartSignatureAlt2, 1, -1);
-				if (!cardReadDmaOffset) {
-					dbg_printf("Card read dma start alt2 not found\n");
-				}
+			if (!cardReadDmaStartOffset) {
+				dbg_printf("Card read dma start alt not found\n");
+				cardReadDmaStartOffset = getOffset(
+					(u32*)cardReadDmaEndOffset, -0x200,
+					(u32*)cardReadDmaStartSignatureAlt2, 1,
+					-1
+				);
+			}
+			if (!cardReadDmaStartOffset) {
+				dbg_printf("Card read dma start alt2 not found\n");
 			}
 		}
-	}    
-
-	// Find the card id
-	u32 cardIdStartOffset = 0;
-    u32 cardIdEndOffset =  
-        getOffset((u32*)cardReadEndOffset+0x10, ndsHeader->arm9binarySize,
-              (u32*)a9cardIdSignature, 2, 1);
-			  
-	if(!cardIdEndOffset && !usesThumb){
-		cardIdEndOffset =  
-        getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u32*)a9cardIdSignature, 2, 1);
 	}
-	if(!cardIdEndOffset && usesThumb){
-		cardIdEndOffset =  
-        getOffsetThumb((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-              (u16*)a9cardIdSignatureThumb, 6, 1);
+
+	//
+	// Find CARD ID END (the card id)
+	//
+    u32 cardIdEndOffset = getOffset(
+		(u32*)cardReadEndOffset + 0x10, ndsHeader->arm9binarySize,
+        (u32*)a9cardIdSignature, 2,
+		1
+	);
+	if (!cardIdEndOffset && !usesThumb) {
+		cardIdEndOffset = getOffset(
+			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+            (u32*)a9cardIdSignature, 2,
+			1
+		);
+	}
+	if (!cardIdEndOffset && usesThumb) {
+		cardIdEndOffset = getOffsetThumb(
+			(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+            (u16*)a9cardIdSignatureThumb, 6,
+			1
+		);
 	}
     if (!cardIdEndOffset) {
         dbg_printf("Card id end not found\n");
+		//return 0;
     } else {
 		debug[1] = cardIdEndOffset;
-		cardIdStartOffset =   
-			getOffset((u32*)cardIdEndOffset, -0x100,
-				  (u32*)cardIdStartSignature, 1, -1);
+	}
+	
+	//
+	// Find CARD ID START (the card id)
+	//
+	u32 cardIdStartOffset = 0;
+	if (cardIdEndOffset) { //cardIdEndOffset > 0
+		cardIdStartOffset = getOffset(
+			(u32*)cardIdEndOffset, -0x100,
+			(u32*)cardIdStartSignature, 1,
+			-1
+		);
 		if (usesThumb) {
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
-					  (u16*)cardIdStartSignatureThumb, 2, -1);
+				cardIdStartOffset = getOffsetThumb(
+					(u16*)cardIdEndOffset, -0x40,
+					(u16*)cardIdStartSignatureThumb, 2,
+					-1
+				);
 			}
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
-					  (u16*)cardIdStartSignatureThumbAlt, 2, -1);
+				cardIdStartOffset = getOffsetThumb(
+					(u16*)cardIdEndOffset, -0x40,
+					(u16*)cardIdStartSignatureThumbAlt, 2,
+					-1
+				);
 			}
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
-					  (u16*)cardIdStartSignatureThumbAlt2, 2, -1);
+				cardIdStartOffset = getOffsetThumb(
+					(u16*)cardIdEndOffset, -0x40,
+					(u16*)cardIdStartSignatureThumbAlt2, 2,
+					-1
+				);
 			}
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffsetThumb((u16*)cardIdEndOffset, -0x40,
-					  (u16*)cardIdStartSignatureThumbAlt3, 2, -1);
+				cardIdStartOffset = getOffsetThumb(
+					(u16*)cardIdEndOffset, -0x40,
+					(u16*)cardIdStartSignatureThumbAlt3, 2,
+					-1
+				);
 			}
 		} else {
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x100,
-					  (u32*)cardIdStartSignatureAlt, 1, -1);
+				cardIdStartOffset = getOffset(
+					(u32*)cardIdEndOffset, -0x100,
+					(u32*)cardIdStartSignatureAlt, 1,
+					-1
+				);
 			}
 			if (!cardIdStartOffset) {
-			cardIdStartOffset =   
-				getOffset((u32*)cardIdEndOffset, -0x100,
-					  (u32*)cardIdStartSignatureAlt2, 1, -1);
+				cardIdStartOffset = getOffset(
+					(u32*)cardIdEndOffset, -0x100,
+					(u32*)cardIdStartSignatureAlt2, 1,
+					-1
+				);
 			}
 		}
 		if (!cardIdStartOffset) {
 			dbg_printf("Card id start not found\n");
+			//return 0;
 		} else {
 			dbg_printf("Card id :\t");
 			dbg_hexa(cardIdStartOffset);
@@ -675,235 +756,263 @@ u32 patchCardNdsArm9 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		}
 	}
 
-	// Find the mpu init
-	u32* mpuDataOffset = 0;
-	u32 mpuStartOffset =
-		getOffset((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			  (u32*)mpuInitRegionSignature, 1, 1);
+	//
+	// Find MPU START (the mpu unit)
+	//
+	u32 mpuStartOffset = getOffset(
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)mpuInitRegionSignature, 1,
+		1
+	);
 	if (!mpuStartOffset) {
 		dbg_printf("Mpu init not found\n");
-	} else {
-		mpuDataOffset =
-			(u32*)getOffset((u32*)mpuStartOffset, 0x100,
-				  (u32*)mpuInitRegionData, 1, 1);
+		//return 0;
+	}
+	
+	//
+	// Find MPU DATA (the mpu unit)
+	//
+	u32* mpuDataOffset = 0;
+	if (mpuStartOffset) { //mpuStartOffset > 0
+		mpuDataOffset = (u32*)getOffset(
+			(u32*)mpuStartOffset, 0x100,
+			(u32*)mpuInitRegionData, 1,
+			1
+		);
 		if (!mpuDataOffset) {
 			dbg_printf("Mpu data not found\n");
+			//return 0;
 		} else {
 			dbg_printf("Mpu data :\t");
 			dbg_hexa((u32)mpuDataOffset);
 			dbg_printf("\n");
 		}
 	}
-
-	if(!mpuDataOffset) {
-		// try to found it
-		for (int i = 0; i<0x100; i++) {
-			mpuDataOffset = (u32*)(mpuStartOffset+i);
-			if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) break;
+	if (!mpuDataOffset) {
+		// Try to find it
+		for (int i = 0; i < 0x100; i++) {
+			mpuDataOffset += i;
+			if ((*mpuDataOffset & 0xFFFFFF00) == 0x02000000) {
+				break;
+			}
 		}
 	}
-
-	if(mpuDataOffset) {
-		// change the region 1 configuration
+	if (!mpuDataOffset) {
+		//return 0;
+	} else {
+		// Change the region 1 configuration
 
 		*(vu32*)(0x2800000) = (vu32)mpuDataOffset;
 		*(vu32*)(0x2800004) = (vu32)*mpuDataOffset;
 
 		*mpuDataOffset = mpuInitRegionNewData;
 
-		if(mpuAccessOffset) {
-			if(mpuNewInstrAccess) {
+		if (mpuAccessOffset) {
+			if (mpuNewInstrAccess) {
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
 			}
-			if(mpuNewDataAccess) {
-				mpuDataOffset[mpuAccessOffset+1] = mpuNewDataAccess;
+			if (mpuNewDataAccess) {
+				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			}
 		}
 	}
 
-	// Find the mpu cache init
-	/*u32* mpuCacheOffset =  
-		getOffset((u32*)mpuStartOffset, 0x100,
-			  (u32*)mpuInitCache, 1, 1);
-	if (!mpuCacheOffset) {
+	//
+	// Find MPU CACHE (the mpu cache init)
+	//
+	/*u32* mpuInitCacheOffset = getOffset(
+		(u32*)mpuStartOffset, 0x100,
+		(u32*)mpuInitCache, 1,
+		1
+	);
+	if (!mpuInitCacheOffset) {
 		dbg_printf("Mpu init cache not found\n");
+		//return 0;
 	} else {
-		*mpuCacheOffset = 0xE3A00046;
-	}	*/
+		*mpuInitCacheOffset = 0xE3A00046;
+	}*/
 
+	//
+	// Patch out all further mpu reconfiguration
+	//
 	dbg_printf("patchMpuSize :\t");
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n");
-
-	// patch out all further mpu reconfiguration
-	while(mpuStartOffset && patchMpuSize) {
+	while (mpuStartOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
-		if(patchMpuSize>1) {
+		if (patchMpuSize > 1) {
 			patchSize = patchMpuSize;
 		}
-		mpuStartOffset = getOffset((u32*)(mpuStartOffset+4), patchSize,
-			  (u32*)mpuInitRegionSignature, 1, 1);
-		if(mpuStartOffset) {
+		mpuStartOffset = getOffset(
+			(u32*)(mpuStartOffset + 4), patchSize,
+			(u32*)mpuInitRegionSignature, 1,
+			1
+		);
+		if (mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
 			dbg_hexa(mpuStartOffset);
 			dbg_printf("\n");
 
-			*((u32*)mpuStartOffset) = 0xE1A00000 ; // nop
+			*(u32*)mpuStartOffset = 0xE1A00000; // nop
 
-			/*// try to found it
-			for (int i = 0; i<0x100; i++) {
-				mpuDataOffset = (u32*)(mpuStartOffset+i);
-				if(((*mpuDataOffset) & 0xFFFFFF00) == 0x02000000) {
-					*mpuDataOffset = PAGE_32M  | 0x02000000 | 1;
+			// Try to find it
+			/*for (int i = 0; i < 0x100; i++) {
+				mpuDataOffset += i;
+				if ((*mpuDataOffset & 0xFFFFFF00) == 0x02000000) {
+					*mpuDataOffset = PAGE_32M | 0x02000000 | 1;
 					break;
 				}
-				if(i == 100) {
-					*((u32*)mpuStartOffset) = 0xE1A00000 ;
+				if (i == 100) {
+					*(u32*)mpuStartOffset = 0xE1A00000;
 				}
 			}*/
 		}
 	}
 
-	/*u32 arenaLoOffset =   
-        getOffsetA9((u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-              (u32*)arenaLowSignature, 4, 1);
-    if (!arenaLoOffset) {
-        nocashMessage("Arenow low not found\n");
+	//
+	// Find ARENA LOW
+	//
+	/*u32 arenaLowOffset = getOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        (u32*)arenaLowSignature, 4,
+		1
+	);
+    if (!arenaLowOffset) {
+        dbg_printf("Arena low not found\n");
     } else {
-		debug[0] = arenaLoOffset;
-		nocashMessage("Arenow low found\n");
+		debug[0] = arenaLowOffset;
+		dbg_printf("Arena low found\n");
 
-		arenaLoOffset += 0x88;
-		debug[10] = arenaLoOffset;
-		debug[11] = *((u32*)arenaLoOffset);
+		arenaLowOffset += 0x88;
+		debug[10] = arenaLowOffset;
+		debug[11] = *((u32*)arenaLowOffset);
 
-		u32* oldArenaLow = (u32*) *((u32*)arenaLoOffset);
+		u32* oldArenaLow = (u32*) *((u32*)arenaLowOffset);
 
-		// *((u32*)arenaLoOffset) = *((u32*)arenaLoOffset) + 0x800; // shrink heap by 8 kb
-		// *(vu32*)(0x027FFDA0) = *((u32*)arenaLoOffset);
-		debug[12] = *((u32*)arenaLoOffset);
+		// *(u32*)arenaLowOffset += 0x800; // shrink heap by 8 kb
+		// *(vu32*)(0x027FFDA0) = *(u32*)arenaLowOffset;
+		debug[12] = *((u32*)arenaLowOffset);
 
-		u32 arenaLo2Offset =   
-			getOffsetA9((u32*)ndsHeader->arm9destination, 0x00100000,//, ndsHeader->arm9binarySize,
-				  oldArenaLow, 1, 1);
+		u32 arenaLow2Offset = getOffset(
+			(u32*)ndsHeader->arm9destination, 0x00100000,//ndsHeader->arm9binarySize,
+			oldArenaLow, 1,
+			1
+		);
 
-		// *((u32*)arenaLo2Offset) = *((u32*)arenaLo2Offset) + 0x800; // shrink heap by 8 kb
+		// *(u32*)arenaLow2Offset += 0x800; // shrink heap by 8 kb
 
-		debug[13] = arenaLo2Offset;
+		debug[13] = arenaLow2Offset;
 	}*/
 	
-	if(moduleParams->sdk_version > 0x3000000
+	if (moduleParams->sdk_version > 0x3000000
 	&& (ROM_TID & 0x00FFFFFF) != 0x544B41		// Doctor Tendo
 	&& (ROM_TID & 0x00FFFFFF) != 0x5A4341		// Cars
 	&& (ROM_TID & 0x00FFFFFF) != 0x434241		// Harvest Moon DS
 	&& (ROM_TID & 0x00FFFFFF) != 0x4C5741)		// TWEWY
 	{
-		u32 randomPatchOffset =  
-				getOffset((u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-					  (u32*)aRandomPatch, 4, 1);
-			if(randomPatchOffset){
-				*(u32*)(randomPatchOffset+0xC) = 0x0;
-			}
-				if (!randomPatchOffset) {
-					//dbg_printf("Random patch not found\n"); Don't bother logging it.
-				}
+		u32 randomPatchOffset = getOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)aRandomPatch, 4,
+			1
+		);
+		if (randomPatchOffset) {
+			*(u32*)(randomPatchOffset + 0xC) = 0x0;
+		}
+		if (!randomPatchOffset) {
+			//dbg_printf("Random patch not found\n"); // Don't bother logging it.
+		}
 	}
 
 	debug[2] = (u32)cardEngineLocation;
 
-	u32* patches = 0;
-	if (usesThumb) {
-		patches = (u32*) cardEngineLocation[1];
-	} else {
-		patches = (u32*) cardEngineLocation[0];
-	}
-
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
-	u32* cardReadPatch = (u32*) patches[0];
+	u32* patches = (u32*)cardEngineLocation[usesThumb ? 1 : 0];
 
+	u32* cardReadPatch    = (u32*)patches[0];
 	u32* cardPullOutPatch = (u32*)patches[6];
-
-	u32* cardIdPatch = (u32*)patches[3];
-
-	u32* cardDmaPatch = (u32*)patches[4];
+	u32* cardIdPatch      = (u32*)patches[3];
+	u32* cardDmaPatch     = (u32*)patches[4];
 
 	debug[5] = (u32)patches;
 
-	u32* card_struct = ((u32*)cardReadEndOffset) - 1;
-	//u32* cache_struct = ((u32*)cardIdStartOffset) - 1;
+	u32* card_struct = (u32*)cardReadEndOffset - 1;
+	//u32* cache_struct = (u32*)cardIdStartOffset - 1;
 
 	debug[6] = *card_struct;
 	//debug[7] = *cache_struct;
 
-	cardEngineLocation[5] = (u32) (((u32*)*card_struct)+6);
-	if(moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = (u32) (((u32*)*card_struct)+7);
+	cardEngineLocation[5] = (u32)(((u32*)*card_struct) + 6);
+	if (moduleParams->sdk_version > 0x3000000) {
+		cardEngineLocation[5] = (u32)(((u32*)*card_struct) + 7);
 	}
 	//cardEngineLocation[6] = *cache_struct;
 
-	// cache management alternative
-	*((u32*)patches[5]) = (u32) (((u32*)*card_struct)+6);
-	if(moduleParams->sdk_version > 0x3000000) {
-		*((u32*)patches[5]) = (u32) (((u32*)*card_struct)+7);
+	// Cache management alternative
+	*((u32*)patches[5]) = (u32)(((u32*)*card_struct)+6);
+	if (moduleParams->sdk_version > 0x3000000) {
+		*((u32*)patches[5]) = (u32)(((u32*)*card_struct)+7);
 	}
 
-	*((u32*)patches[7]) = cardPullOutOffset+4;
-	if((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
+	*(u32*)patches[7] = cardPullOutOffset + 4;
+	if ((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
 	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crosing: Wild World
 	{
-		*((u32*)patches[8]) = cardReadCachedOffset;
+		*((u32*)patches[8]) = cardReadCachedStartOffset;
 	}
 
 	patches[10] = needFlushCache;
 
-	//copyLoop (oldArenaLow, cardReadPatch, 0xF0);
+	//copyLoop(oldArenaLow, cardReadPatch, 0xF0);
 
 	if (usesThumb) {
-		copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xA0);
+		copyLoop((u32*)cardReadStartOffset, cardReadPatch, 0xA0);
 	} else {
-		copyLoop ((u32*)cardReadStartOffset, cardReadPatch, 0xF0);
+		copyLoop((u32*)cardReadStartOffset, cardReadPatch, 0xF0);
 	}
 
-	copyLoop ((u32*)(cardPullOutOffset), cardPullOutPatch, 0x4);
+	copyLoop((u32*)(cardPullOutOffset), cardPullOutPatch, 0x4);
 
-	//if (forceToPowerOffOffset>0)
-	//	copyLoop ((u32*)forceToPowerOffOffset, cardPullOutPatch, 0x4);
+	/*if (forceToPowerOffOffset) { //forceToPowerOffOffset > 0
+		copyLoop((u32*)forceToPowerOffOffset, cardPullOutPatch, 0x4);
+	}*/
 
-	if (cardIdStartOffset) {
+	if (cardIdStartOffset) { //cardIdStartOffset > 0
 		if (usesThumb) {
-			copyLoop ((u32*)cardIdStartOffset, cardIdPatch, 0x4);
+			copyLoop((u32*)cardIdStartOffset, cardIdPatch, 0x4);
 		} else {
-			copyLoop ((u32*)cardIdStartOffset, cardIdPatch, 0x8);
+			copyLoop((u32*)cardIdStartOffset, cardIdPatch, 0x8);
 		}
 	}
 
-	if (cardReadDmaOffset) {
+	if (cardReadDmaStartOffset) { //cardReadDmaStartOffset > 0
 		dbg_printf("Card read dma :\t");
-		dbg_hexa(cardReadDmaOffset);
+		dbg_hexa(cardReadDmaStartOffset);
 		dbg_printf("\n");
 
 		if (usesThumb) {
-			copyLoop ((u32*)cardReadDmaOffset, cardDmaPatch, 0x4);
+			copyLoop((u32*)cardReadDmaStartOffset, cardDmaPatch, 0x4);
 		} else {
-			copyLoop ((u32*)cardReadDmaOffset, cardDmaPatch, 0x8);
+			copyLoop((u32*)cardReadDmaStartOffset, cardDmaPatch, 0x8);
 		}
 	}
 
 	dbg_printf("ERR_NONE");
-	return 0;
+	return ERR_NONE;
 }
 
-u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-
+u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
     dbg_printf("\nArm7 (patch vAll)\n");
     
     bool usesThumb = false;
     int thumbType = 0;
 
 	// Find the relocation signature
-    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        relocateStartSignature, 1, 1);
+    u32 relocationStart = getOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        relocateStartSignature, 1,
+		1
+	);
     if (!relocationStart) {
         dbg_printf("Relocation start not found\n");
 		return 0;
@@ -911,53 +1020,45 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
 
    // Validate the relocation signature
     u32 forwardedRelocStartAddr = relocationStart + 4;
-    if (!*(u32*)forwardedRelocStartAddr)
-        forwardedRelocStartAddr += 4;
-    u32 vAddrOfRelocSrc =
-        *(u32*)(forwardedRelocStartAddr + 8);
-    // sanity checks
-    u32 relocationCheck1 =
-        *(u32*)(forwardedRelocStartAddr + 0xC);
-    u32 relocationCheck2 =
-        *(u32*)(forwardedRelocStartAddr + 0x10);
-    if ( vAddrOfRelocSrc != relocationCheck1
-      || vAddrOfRelocSrc != relocationCheck2) {
+    if (!*(u32*)forwardedRelocStartAddr) {
+		forwardedRelocStartAddr += 4;
+	}
+    u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+    // Sanity checks
+    u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+    u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+    if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
         dbg_printf("Error in relocation checking method 1\n");
         
-        // found the beginning of the next function
-       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
-          nextFunctiontSignature, 1, 1);
+        // Find the beginning of the next function
+       	u32 nextFunction = getOffset(
+			(u32*)relocationStart, ndsHeader->arm7binarySize,
+        	nextFunctiontSignature, 1,
+			1
+		);
     
        	// Validate the relocation signature
-        forwardedRelocStartAddr = nextFunction  - 0x14;
+        forwardedRelocStartAddr = nextFunction - 0x14;
         
     	// Validate the relocation signature
-        vAddrOfRelocSrc =
-            *(u32*)(nextFunction - 0xC);
+        vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
         
-        // sanity checks
-        relocationCheck1 =
-            *(u32*)(forwardedRelocStartAddr + 0xC);
-        relocationCheck2 =
-            *(u32*)(forwardedRelocStartAddr + 0x10);
-        if ( vAddrOfRelocSrc != relocationCheck1
-          || vAddrOfRelocSrc != relocationCheck2) {
+        // Sanity checks
+        relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+        relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+        if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
             dbg_printf("Error in relocation checking method 2\n");
     		return 0;
         }
     }
 
     // Get the remaining details regarding relocation
-    u32 valueAtRelocStart =
-        *(u32*)forwardedRelocStartAddr;
-    u32 relocDestAtSharedMem =
-        *(u32*)valueAtRelocStart;
-    if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
+    u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
+    u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
+    if (relocDestAtSharedMem != 0x37F8000) { // Shared memory in RAM
         // Try again
-        vAddrOfRelocSrc +=
-            *(u32*)(valueAtRelocStart + 4);
-        relocDestAtSharedMem =
-            *(u32*)(valueAtRelocStart + 0xC);
+        vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
+        relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
         if (relocDestAtSharedMem != 0x37F8000) {
             dbg_printf("Error in finding shared memory relocation area\n");
 			return 0;
@@ -972,253 +1073,285 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
 	dbg_printf("\n");
 
     // Find the card read
-    /*u32 cardReadEndAddr =
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2, 1);
+    /*u32 cardReadEndAddr = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00400000, 
+		a7cardReadSignature, 2,
+		1
+	);
     if (!cardReadEndAddr) {
-        dbg_printf("[Error!] Card read addr not found\n"); return 0;
+        dbg_printf("[Error!] Card read addr not found\n");
+		return 0;
     }
-
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
-	dbg_printf("\n");
-    */
+	dbg_printf("\n");*/
     
-    u32 JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal, 3, 1);
-
-	u32 EepromReadJump = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal, 3, 1);
-		
-	u32 EepromWriteJump = getOffset((u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal_pt2, 3, 1);
-		
-	u32 EepromProgJump = getOffset((u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal_pt2, 3, 1);
-	
-	u32 EepromVerifyJump = getOffset((u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal_pt2, 3, 1);
-		
-	u32 EepromEraseJump = getOffset((u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
-        a7JumpTableSignatureUniversal_pt3, 2, 1);
-	
-	if(!JumpTableFunc){
-		JumpTableFunc = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2, 3, 1);
-
-		EepromReadJump = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2, 3, 1);
-			
-		EepromWriteJump = getOffset((u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
-			
-		EepromProgJump = getOffset((u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
-		
-		EepromVerifyJump = getOffset((u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3, 1);
-			
-		EepromEraseJump = getOffset((u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt3, 2, 1);
-		if(!JumpTableFunc){
+    u32 JumpTableFunc = getOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal, 3,
+		1
+	);
+	u32 EepromReadJump = getOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal, 3,
+		1
+	);
+	u32 EepromWriteJump = getOffset(
+		(u32*)EepromReadJump + 4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3,
+		1
+	);
+	u32 EepromProgJump = getOffset(
+		(u32*)EepromWriteJump + 4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3,
+		1
+	);
+	u32 EepromVerifyJump = getOffset(
+		(u32*)EepromProgJump + 4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt2, 3,
+		1
+	);
+	u32 EepromEraseJump = getOffset(
+		(u32*)EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+        a7JumpTableSignatureUniversal_pt3, 2,
+		1
+	);
+	if (!JumpTableFunc) {
+		JumpTableFunc = getOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2, 3,
+			1
+		);
+		EepromReadJump = getOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2, 3,
+			1
+		);
+		EepromWriteJump = getOffset(
+			(u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3,
+			1
+		);
+		EepromProgJump = getOffset(
+			(u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3,
+			1
+		);
+		EepromVerifyJump = getOffset(
+			(u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt2, 3,
+			1
+		);
+		EepromEraseJump = getOffset(
+			(u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_2_pt3, 2,
+			1
+		);
+		if (!JumpTableFunc) {
             usesThumb = true;
-    		JumpTableFunc = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb, 3, 1);
-                
+    		JumpTableFunc = getOffsetThumb(
+				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb, 3,
+				1
+			);
+
             dbg_printf("usesThumb");
             dbg_printf("JumpTableFunc");
 	        dbg_hexa(JumpTableFunc);
     
-    		EepromReadJump = getOffsetThumb((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb, 3, 1);
-    			
-    		EepromWriteJump = getOffsetThumb((u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
-    			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-                
-            if(!EepromWriteJump) {
-              // alternate v1 order
-              thumbType = 1;
-              EepromProgJump = getOffsetThumb((u16*)JumpTableFunc, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
-                
-              EepromWriteJump = getOffsetThumb((u16*)EepromProgJump-2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
-                
-              EepromVerifyJump = getOffsetThumb((u16*)EepromWriteJump-2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt2, 2, -1);
-                
-              EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump-2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt3_alt2, 2, -1);  
+    		EepromReadJump = getOffsetThumb(
+				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb, 3,
+				1
+			);
 
-            } else {
-              EepromProgJump = getOffsetThumb((u16*)EepromWriteJump+2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-      		
-      		EepromVerifyJump = getOffsetThumb((u16*)EepromProgJump+2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt2, 3, 1);
-      			
-      		EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt3, 2, 1);
-                  
-             if(!EepromEraseJump){
-                  EepromEraseJump = getOffsetThumb((u16*)EepromVerifyJump+2, ndsHeader->arm7binarySize,
-      			a7JumpTableSignatureUniversalThumb_pt3_alt, 2, 1);
-             }    
-            } 
-    	}	
+    		EepromWriteJump = getOffsetThumb(
+				(u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
+    			a7JumpTableSignatureUniversalThumb_pt2, 3,
+				1
+			);
+			if (!EepromWriteJump) {
+				// alternate v1 order
+				thumbType = 1;
+
+				EepromProgJump = getOffsetThumb(
+					(u16*)JumpTableFunc, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 2,
+					-1
+				);
+				EepromWriteJump = getOffsetThumb(
+					(u16*)EepromProgJump - 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 2,
+					-1
+				);
+				EepromVerifyJump = getOffsetThumb(
+					(u16*)EepromWriteJump - 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 2,
+					-1
+				);
+				EepromEraseJump = getOffsetThumb(
+					(u16*)EepromVerifyJump - 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt3_alt2, 2,
+					-1
+				);
+			} else {
+				EepromProgJump = getOffsetThumb(
+					(u16*)EepromWriteJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 3,
+					1
+				);
+				EepromVerifyJump = getOffsetThumb(
+					(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 3,
+					1
+				);
+				EepromEraseJump = getOffsetThumb(
+					(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt3, 2,
+					1
+				);
+				if (!EepromEraseJump) {
+					EepromEraseJump = getOffsetThumb(
+						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+						a7JumpTableSignatureUniversalThumb_pt3_alt, 2,
+						1
+					);
+				}
+			}
+		}
 	}
-
-    if(!JumpTableFunc){
+    if (!JumpTableFunc) {
 		return 0;
-	}    
+	}
 		
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
 
-
-
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32* arm7Function =  (u32*) patches[9];
-    u32* arm7FunctionThumb =  (u32*) patches[14];
+	u32* patches           = (u32*)cardEngineLocation[0];
+	u32* arm7Function      = (u32*)patches[9];
+    u32* arm7FunctionThumb = (u32*)patches[14];
 	u32 srcAddr;
     
     if (usesThumb) {
-        if(thumbType==1) {
-            u32* eepromRead = (u32*) (EepromReadJump + 0xA);
+        if (thumbType == 1) {
+            u32* eepromRead = (u32*)(EepromReadJump + 0xA);
     		dbg_printf("Eeprom read:\t");
     		dbg_hexa((u32)eepromRead);
     		dbg_printf("\n");
-            *eepromRead=arm7FunctionThumb[5];
+            *eepromRead = arm7FunctionThumb[5];
             
-            u32* eepromPageWrite = (u32*) (EepromWriteJump + 0xA);
+            u32* eepromPageWrite = (u32*)(EepromWriteJump + 0xA);
     		dbg_printf("Eeprom page write:\t");
     		dbg_hexa((u32)eepromPageWrite);
     		dbg_printf("\n");
-            *eepromPageWrite=arm7FunctionThumb[3];
+            *eepromPageWrite = arm7FunctionThumb[3];
             
-            u32* eepromPageProg = (u32*) (EepromProgJump + 0xA);
+            u32* eepromPageProg = (u32*)(EepromProgJump + 0xA);
     		dbg_printf("Eeprom page prog:\t");
     		dbg_hexa((u32)eepromPageProg);
     		dbg_printf("\n");
-            *eepromPageProg=arm7FunctionThumb[4];
+            *eepromPageProg = arm7FunctionThumb[4];
 
-            u32* eepromPageVerify = (u32*) (EepromVerifyJump + 0xA);
+            u32* eepromPageVerify = (u32*)(EepromVerifyJump + 0xA);
     		dbg_printf("Eeprom verify:\t");
     		dbg_hexa((u32)eepromPageVerify);
     		dbg_printf("\n");
-            *eepromPageVerify=arm7FunctionThumb[2];    
+            *eepromPageVerify = arm7FunctionThumb[2];   
     
-    		u32* eepromPageErase = (u32*) (EepromEraseJump + 0x8);
+    		u32* eepromPageErase = (u32*)(EepromEraseJump + 0x8);
     		dbg_printf("Eeprom page erase:\t");
     		dbg_hexa((u32)eepromPageErase);
     		dbg_printf("\n");
-            *eepromPageErase=arm7FunctionThumb[1];
-
+            *eepromPageErase = arm7FunctionThumb[1];
         } else {
-            u16 instrs [2];
-    
-    		u16* eepromRead = (u16*) (EepromReadJump + 0x6);
+            u16 instrs[2];
+
+    		u16* eepromRead = (u16*)(EepromReadJump + 0x6);
     		dbg_printf("Eeprom read:\t");
     		dbg_hexa((u32)eepromRead);
     		dbg_printf("\n");
-    		srcAddr = EepromReadJump + 0x6  - vAddrOfRelocSrc + 0x37F8000 ;
-    		generateA7InstrThumb(instrs, srcAddr,
-    			arm7FunctionThumb[5]);
-    		eepromRead[0]=instrs[0];
-    		eepromRead[1]=instrs[1];
+    		srcAddr = EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+    		generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[5]);
+    		eepromRead[0] = instrs[0];
+    		eepromRead[1] = instrs[1];
     	
-    		u16* eepromPageWrite = (u16*) (EepromWriteJump + 0x6);
+    		u16* eepromPageWrite = (u16*)(EepromWriteJump + 0x6);
     		dbg_printf("Eeprom page write:\t");
     		dbg_hexa((u32)eepromPageWrite);
     		dbg_printf("\n");
-    		srcAddr = EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-    		generateA7InstrThumb(instrs, srcAddr,
-    			arm7FunctionThumb[3]);
-    		eepromPageWrite[0]=instrs[0];
-    		eepromPageWrite[1]=instrs[1];
+    		srcAddr = EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+    		generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[3]);
+    		eepromPageWrite[0] = instrs[0];
+    		eepromPageWrite[1] = instrs[1];
     
-    		u16* eepromPageProg = (u16*) (EepromProgJump + 0x6);
+    		u16* eepromPageProg = (u16*)(EepromProgJump + 0x6);
     		dbg_printf("Eeprom page prog:\t");
     		dbg_hexa((u32)eepromPageProg);
     		dbg_printf("\n");
-    		srcAddr = EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-    		generateA7InstrThumb(instrs, srcAddr,
-    			arm7FunctionThumb[4]);
-    		eepromPageProg[0]=instrs[0];
-    		eepromPageProg[1]=instrs[1];
+    		srcAddr = EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+    		generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[4]);
+    		eepromPageProg[0] = instrs[0];
+    		eepromPageProg[1] = instrs[1];
     
-    		u16* eepromPageVerify = (u16*) (EepromVerifyJump + 0x6);
+    		u16* eepromPageVerify = (u16*)(EepromVerifyJump + 0x6);
     		dbg_printf("Eeprom verify:\t");
     		dbg_hexa((u32)eepromPageVerify);
     		dbg_printf("\n");
-    		srcAddr =  EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000 ;
-    		generateA7InstrThumb(instrs, srcAddr,
-    			arm7FunctionThumb[2]);
-    		eepromPageVerify[0]=instrs[0];
-    		eepromPageVerify[1]=instrs[1];
-    
-    
+    		srcAddr = EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+    		generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[2]);
+    		eepromPageVerify[0] = instrs[0];
+    		eepromPageVerify[1] = instrs[1];
+
     		u16* eepromPageErase = (u16*) (EepromEraseJump + 0x4);
     		dbg_printf("Eeprom page erase:\t");
     		dbg_hexa((u32)eepromPageErase);
     		dbg_printf("\n");
-    		srcAddr = EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000 ;
-    		generateA7InstrThumb(instrs, srcAddr,
-    			arm7FunctionThumb[1]);        
-    		eepromPageErase[0]=instrs[0];
-    		eepromPageErase[1]=instrs[1];
-        
+    		srcAddr = EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
+    		generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[1]);       
+    		eepromPageErase[0] = instrs[0];
+    		eepromPageErase[1] = instrs[1];
         }
-
-        
 	} else {
-
-    	u32* eepromRead = (u32*) (EepromReadJump + 0xC);
+    	u32* eepromRead = (u32*)(EepromReadJump + 0xC);
     	dbg_printf("Eeprom read:\t");
     	dbg_hexa((u32)eepromRead);
     	dbg_printf("\n");
-    	srcAddr = EepromReadJump + 0xC  - vAddrOfRelocSrc + relocDestAtSharedMem ;
-    	u32 patchRead = generateA7Instr(srcAddr,
-    		arm7Function[5]);
-    	*eepromRead=patchRead;
+    	srcAddr = EepromReadJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+    	u32 patchRead = generateA7Instr(srcAddr, arm7Function[5]);
+    	*eepromRead = patchRead;
     
-    	u32* eepromPageWrite = (u32*) (EepromWriteJump + 0xC);
+    	u32* eepromPageWrite = (u32*)(EepromWriteJump + 0xC);
     	dbg_printf("Eeprom page write:\t");
     	dbg_hexa((u32)eepromPageWrite);
     	dbg_printf("\n");
-    	srcAddr = EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
-    	u32 patchWrite = generateA7Instr(srcAddr,
-    		arm7Function[3]);
-    	*eepromPageWrite=patchWrite;
+    	srcAddr = EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+    	u32 patchWrite = generateA7Instr(srcAddr, arm7Function[3]);
+    	*eepromPageWrite = patchWrite;
     
-    	u32* eepromPageProg = (u32*) (EepromProgJump + 0xC);
+    	u32* eepromPageProg = (u32*)(EepromProgJump + 0xC);
     	dbg_printf("Eeprom page prog:\t");
     	dbg_hexa((u32)eepromPageProg);
     	dbg_printf("\n");
-    	srcAddr = EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
-    	u32 patchProg = generateA7Instr(srcAddr,
-    		arm7Function[4]);
-    	*eepromPageProg=patchProg;
+    	srcAddr = EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+    	u32 patchProg = generateA7Instr(srcAddr, arm7Function[4]);
+    	*eepromPageProg = patchProg;
     
-    	u32* eepromPageVerify = (u32*) (EepromVerifyJump + 0xC);
+    	u32* eepromPageVerify = (u32*)(EepromVerifyJump + 0xC);
     	dbg_printf("Eeprom verify:\t");
     	dbg_hexa((u32)eepromPageVerify);
     	dbg_printf("\n");
-    	srcAddr =  EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem ;
-    	u32 patchVerify = generateA7Instr(srcAddr,
-    		arm7Function[2]);
-    	*eepromPageVerify=patchVerify;
+    	srcAddr = EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+    	u32 patchVerify = generateA7Instr(srcAddr, arm7Function[2]);
+    	*eepromPageVerify = patchVerify;
     
-    
-    	u32* eepromPageErase = (u32*) (EepromEraseJump + 0x8);
+    	u32* eepromPageErase = (u32*)(EepromEraseJump + 0x8);
     	dbg_printf("Eeprom page erase:\t");
     	dbg_hexa((u32)eepromPageErase);
     	dbg_printf("\n");
-    	srcAddr = EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-    	u32 patchErase = generateA7Instr(srcAddr,
-    		arm7Function[1]);
-    	*eepromPageErase=patchErase;
+    	srcAddr = EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem;
+    	u32 patchErase = generateA7Instr(srcAddr, arm7Function[1]);
+    	*eepromPageErase = patchErase;
     }
 
 	arm7Function[8] = saveFileCluster;
@@ -1227,13 +1360,15 @@ u32 savePatchUniversal (const tNDSHeader* ndsHeader, u32* cardEngineLocation, mo
 	return 1;
 }
 
-u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-
+u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
     dbg_printf("\nArm7 (patch v2.0)\n");
 
 	// Find the relocation signature
-    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        relocateStartSignature, 1, 1);
+    u32 relocationStart = getOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        relocateStartSignature, 1,
+		1
+	);
     if (!relocationStart) {
         dbg_printf("Relocation start not found\n");
 		return 0;
@@ -1241,53 +1376,46 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 
 	// Validate the relocation signature
     u32 forwardedRelocStartAddr = relocationStart + 4;
-    if (!*(u32*)forwardedRelocStartAddr)
-        forwardedRelocStartAddr += 4;
-    u32 vAddrOfRelocSrc =
-        *(u32*)(forwardedRelocStartAddr + 8);
-    // sanity checks
-    u32 relocationCheck1 =
-        *(u32*)(forwardedRelocStartAddr + 0xC);
-    u32 relocationCheck2 =
-        *(u32*)(forwardedRelocStartAddr + 0x10);
-    if ( vAddrOfRelocSrc != relocationCheck1
-      || vAddrOfRelocSrc != relocationCheck2) {
+    if (!*(u32*)forwardedRelocStartAddr) {
+		forwardedRelocStartAddr += 4;
+	}
+    u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+
+    // Sanity checks
+    u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+    u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+    if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
         dbg_printf("Error in relocation checking method 1\n");
         
-        // found the beginning of the next function
-       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
-          nextFunctiontSignature, 1, 1);
+        // Found the beginning of the next function
+        u32 nextFunction = getOffset(
+			(u32*)relocationStart, ndsHeader->arm7binarySize,
+          	nextFunctiontSignature, 1,
+			1
+		);
     
        	// Validate the relocation signature
-        forwardedRelocStartAddr = nextFunction  - 0x14;
+        forwardedRelocStartAddr = nextFunction - 0x14;
         
     	// Validate the relocation signature
-        vAddrOfRelocSrc =
-            *(u32*)(nextFunction - 0xC);
+        vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
         
         // sanity checks
-        relocationCheck1 =
-            *(u32*)(forwardedRelocStartAddr + 0xC);
-        relocationCheck2 =
-            *(u32*)(forwardedRelocStartAddr + 0x10);
-        if ( vAddrOfRelocSrc != relocationCheck1
-          || vAddrOfRelocSrc != relocationCheck2) {
+        relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+        relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+        if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
             dbg_printf("Error in relocation checking method 2\n");
     		return 0;
         }
     }
     
     // Get the remaining details regarding relocation
-    u32 valueAtRelocStart =
-        *(u32*)forwardedRelocStartAddr;
-    u32 relocDestAtSharedMem =
-        *(u32*)valueAtRelocStart;
+    u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
+    u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
     if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
         // Try again
-        vAddrOfRelocSrc +=
-            *(u32*)(valueAtRelocStart + 4);
-        relocDestAtSharedMem =
-            *(u32*)(valueAtRelocStart + 0xC);
+        vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
+        relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
         if (relocDestAtSharedMem != 0x37F8000) {
             dbg_printf("Error in finding shared memory relocation area\n");
 			return 0;
@@ -1302,38 +1430,40 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("\n");
 
     // Find the card read
-    u32 cardReadEndAddr =
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2, 1);
+    u32 cardReadEndAddr = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00400000, 
+		a7cardReadSignature, 2,
+		1
+	);
     if (!cardReadEndAddr) {
-        dbg_printf("[Error!] Card read addr not found\n"); return 0;
+        dbg_printf("[Error!] Card read addr not found\n");
+		return 0;
     }
-
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
 	dbg_printf("\n");
 
-	// nonsense variable names below
+	// Nonsense variable names below
     u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
-
 	dbg_printf("cardstructAddr: ");
 	dbg_hexa(cardstructAddr);
 	dbg_printf("\n");
 
-    u32 readCacheEnd =
-         getOffset((u32*)cardReadEndAddr,
-             0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
-			 
+    u32 readCacheEnd = getOffset(
+		(u32*)cardReadEndAddr, 0x18000 - cardReadEndAddr,
+		&cardstructAddr, 1,
+		1
+	); 
 	dbg_printf("readCacheEnd: ");
 	dbg_hexa(readCacheEnd);
 	dbg_printf("\n");
 
-    if (!readCacheEnd)
-    {
-        dbg_printf("[Error!] ___ addr not found\n"); return 0;
+    if (!readCacheEnd) {
+        dbg_printf("[Error!] ___ addr not found\n");
+		return 0;
     }
-    u32 JumpTableFunc = readCacheEnd + 4;
 
+    u32 JumpTableFunc = readCacheEnd + 4;
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
@@ -1342,9 +1472,11 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     // Here is where the differences in the retry begin
     //
 
-	u32 returned_A0_with_MKDS =
-        getOffset((u32*)JumpTableFunc, 0x100,
-            (void*)a7something1Signature, 2, 1);
+	u32 returned_A0_with_MKDS = getOffset(
+		(u32*)JumpTableFunc, 0x100,
+        (void*)a7something1Signature, 2,
+		1
+	);
     if (!returned_A0_with_MKDS) {
         dbg_printf("[Error!]...\n");
         return 0;
@@ -1354,11 +1486,12 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_hexa(returned_A0_with_MKDS);
 	dbg_printf("\n");
 
-    u32 addrOfSomething_85C0 =
-        getOffset((u32*)ndsHeader->arm7destination, 0x18000,
-            (void*)a7something2Signature, 2, 1);
-    if ( !addrOfSomething_85C0 )
-    {
+    u32 addrOfSomething_85C0 = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x18000,
+        (void*)a7something2Signature, 2,
+		1
+	);
+    if (!addrOfSomething_85C0) {
         dbg_printf("[Error!] ...\n");
         return 0;
     }
@@ -1382,174 +1515,158 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     // no, no idea what this is yet
     // and no idea how to cleanly fix this warning yet.
     // but it should be (in MKDS), 0x7F54
-    u8* aFinalLocation =
-        (u8*)(JumpTableFunc
+    u8* aFinalLocation = (u8*)(
+		JumpTableFunc
         + 4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF)
         + 0x48
         + 4 * (*(u32*)((
                 4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF) + 0x48
-                ) + JumpTableFunc) | 0xFF000000
-              )
-        + 8);
+               ) + JumpTableFunc) | 0xFF000000
+             )
+        + 8
+	);
 
 	dbg_printf("aFinalLocation: ");
 	dbg_hexa((u32)aFinalLocation);
 	dbg_printf("\n");
 
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32* arm7Function =  (u32*) patches[9];
+	u32* patches = (u32*)cardEngineLocation[0];
+
+	u32* arm7Function = (u32*)patches[9];
 	u32 srcAddr;
 
-	u32* eepromProtect = (u32*) (JumpTableFunc + 0xE0);
-	u32* cardRead = (u32*) (JumpTableFunc + 0x108);
-	if((((*eepromProtect) & 0xFF000000) == 0xEB000000) 
-		&& (((*cardRead) & 0xFF000000) == 0xEB000000)) {
+	u32* eepromProtect = (u32*)(JumpTableFunc + 0xE0);
+	u32* cardRead      = (u32*)(JumpTableFunc + 0x108);
+	if ((*eepromProtect & 0xFF000000) == 0xEB000000 && (*cardRead & 0xFF000000) == 0xEB000000) {
 		dbg_printf("Eeprom protect:\t");
 		dbg_hexa((u32)eepromProtect);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0xE0 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchProtect = generateA7Instr(srcAddr,
-			arm7Function[0] );
-		*eepromProtect=patchProtect; 
+		srcAddr = JumpTableFunc + 0xE0 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchProtect = generateA7Instr(srcAddr, arm7Function[0]);
+		*eepromProtect = patchProtect;
 
-		u32* cardId = (u32*) (JumpTableFunc + 0xE8);
+		u32* cardId = (u32*)(JumpTableFunc + 0xE8);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0xE8 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchCardId = generateA7Instr(srcAddr,
-			arm7Function[7]);
-		*cardId=patchCardId;
+		srcAddr = JumpTableFunc + 0xE8 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchCardId = generateA7Instr(srcAddr, arm7Function[7]);
+		*cardId = patchCardId;
 
-		dbg_printf("Card  read:\t");
+		dbg_printf("Card read:\t");
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
-		srcAddr =  JumpTableFunc + 0x108 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchCardRead = generateA7Instr(srcAddr,
-			arm7Function[6]);
-		*cardRead=patchCardRead;
+		srcAddr = JumpTableFunc + 0x108 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchCardRead = generateA7Instr(srcAddr, arm7Function[6]);
+		*cardRead = patchCardRead;
 
 		u32* eepromRead = (u32*) (JumpTableFunc + 0x120);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x120  - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchRead = generateA7Instr(srcAddr,
-			arm7Function[5]);
-		*eepromRead=patchRead;
+		srcAddr = JumpTableFunc + 0x120 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchRead = generateA7Instr(srcAddr, arm7Function[5]);
+		*eepromRead = patchRead;
 
-		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x138);
+		u32* eepromPageWrite = (u32*)(JumpTableFunc + 0x138);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x138 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchWrite = generateA7Instr(srcAddr,
-			arm7Function[3]);
-		*eepromPageWrite=patchWrite;
+		srcAddr = JumpTableFunc + 0x138 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchWrite = generateA7Instr(srcAddr, arm7Function[3]);
+		*eepromPageWrite = patchWrite;
 
-		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x150);
+		u32* eepromPageProg = (u32*)(JumpTableFunc + 0x150);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x150 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchProg = generateA7Instr(srcAddr,
-			arm7Function[4]);
-		*eepromPageProg=patchProg;
+		srcAddr = JumpTableFunc + 0x150 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchProg = generateA7Instr(srcAddr, arm7Function[4]);
+		*eepromPageProg = patchProg;
 
-		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x168);
+		u32* eepromPageVerify = (u32*)(JumpTableFunc + 0x168);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
-		srcAddr =  JumpTableFunc + 0x168 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchVerify = generateA7Instr(srcAddr,
-			arm7Function[2]);
-		*eepromPageVerify=patchVerify;
-
+		srcAddr = JumpTableFunc + 0x168 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchVerify = generateA7Instr(srcAddr, arm7Function[2]);
+		*eepromPageVerify = patchVerify;
 
 		u32* eepromPageErase = (u32*) (JumpTableFunc + 0x178);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x178 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchErase = generateA7Instr(srcAddr,
-			arm7Function[1]);
-		*eepromPageErase=patchErase; 
+		srcAddr = JumpTableFunc + 0x178 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchErase = generateA7Instr(srcAddr, arm7Function[1]);
+		*eepromPageErase = patchErase;
 
 		arm7Function[8] = saveFileCluster;
 		arm7Function[9] = saveSize;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
-		cardRead = (u32*) (JumpTableFunc + 0x100);
 
-		if(((*cardRead) & 0xFF000000) != 0xEB000000) {
+		cardRead = (u32*)(JumpTableFunc + 0x100);
+		if ((*cardRead & 0xFF000000) != 0xEB000000) {
 			dbg_printf("[Error] CardRead not found:\n");
 			dbg_hexa((u32)cardRead);
 			dbg_printf("\n");
 			return 0;
 		}
 
-		u32* cardId = (u32*) (JumpTableFunc + 0xE0);
+		u32* cardId = (u32*)(JumpTableFunc + 0xE0);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0xE0 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchCardId = generateA7Instr(srcAddr,
-			arm7Function[7]);
-		*cardId=patchCardId;
+		srcAddr = JumpTableFunc + 0xE0 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchCardId = generateA7Instr(srcAddr, arm7Function[7]);
+		*cardId = patchCardId;
 
-		dbg_printf("Card  read:\t");
+		dbg_printf("Card read:\t");
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
-		srcAddr =  JumpTableFunc + 0x100 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchCardRead = generateA7Instr(srcAddr,
-			arm7Function[6]);
-		*cardRead=patchCardRead;
+		srcAddr = JumpTableFunc + 0x100 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchCardRead = generateA7Instr(srcAddr, arm7Function[6]);
+		*cardRead = patchCardRead;
 
-		u32* eepromRead = (u32*) (JumpTableFunc + 0x118);
+		u32* eepromRead = (u32*)(JumpTableFunc + 0x118);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x118  - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchRead = generateA7Instr(srcAddr,
-			arm7Function[5]);
-		*eepromRead=patchRead;
+		srcAddr = JumpTableFunc + 0x118 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchRead = generateA7Instr(srcAddr, arm7Function[5]);
+		*eepromRead = patchRead;
 
-		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x130);
+		u32* eepromPageWrite = (u32*)(JumpTableFunc + 0x130);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x130 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchWrite = generateA7Instr(srcAddr,
-			arm7Function[3]);
-		*eepromPageWrite=patchWrite;
+		srcAddr = JumpTableFunc + 0x130 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchWrite = generateA7Instr(srcAddr, arm7Function[3]);
+		*eepromPageWrite = patchWrite;
 
-		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x148);
+		u32* eepromPageProg = (u32*)(JumpTableFunc + 0x148);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x148 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchProg = generateA7Instr(srcAddr,
-			arm7Function[4]);
-		*eepromPageProg=patchProg;
+		srcAddr = JumpTableFunc + 0x148 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchProg = generateA7Instr(srcAddr, arm7Function[4]);
+		*eepromPageProg = patchProg;
 
-		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x160);
+		u32* eepromPageVerify = (u32*)(JumpTableFunc + 0x160);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
-		srcAddr =  JumpTableFunc + 0x160 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchVerify = generateA7Instr(srcAddr,
-			arm7Function[2]);
-		*eepromPageVerify=patchVerify;
+		srcAddr = JumpTableFunc + 0x160 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchVerify = generateA7Instr(srcAddr, arm7Function[2]);
+		*eepromPageVerify = patchVerify;
 
-
-		u32* eepromPageErase = (u32*) (JumpTableFunc + 0x170);
+		u32* eepromPageErase = (u32*)(JumpTableFunc + 0x170);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc + 0x170 - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		u32 patchErase = generateA7Instr(srcAddr,
-			arm7Function[1]);
-		*eepromPageErase=patchErase; 
+		srcAddr = JumpTableFunc + 0x170 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		u32 patchErase = generateA7Instr(srcAddr, arm7Function[1]);
+		*eepromPageErase = patchErase;
 
 		arm7Function[8] = saveFileCluster;
 		arm7Function[9] = saveSize;
@@ -1558,14 +1675,15 @@ u32 savePatchV2 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	return 1;
 }
 
-
-u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-
+u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
     dbg_printf("\nArm7 (patch v1.0)\n");
 
 	// Find the relocation signature
-    u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        relocateStartSignature, 1, 1);
+    u32 relocationStart = getOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+        relocateStartSignature, 1,
+		1
+	);
     if (!relocationStart) {
         dbg_printf("Relocation start not found\n");
 		return 0;
@@ -1573,54 +1691,46 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     
     // Validate the relocation signature
     u32 forwardedRelocStartAddr = relocationStart + 4;
-    if (!*(u32*)forwardedRelocStartAddr)
-        forwardedRelocStartAddr += 4;
-    u32 vAddrOfRelocSrc =
-        *(u32*)(forwardedRelocStartAddr + 8);
-    // sanity checks
-    u32 relocationCheck1 =
-        *(u32*)(forwardedRelocStartAddr + 0xC);
-    u32 relocationCheck2 =
-        *(u32*)(forwardedRelocStartAddr + 0x10);
-    if ( vAddrOfRelocSrc != relocationCheck1
-      || vAddrOfRelocSrc != relocationCheck2) {
+    if (!*(u32*)forwardedRelocStartAddr) {
+		forwardedRelocStartAddr += 4;
+	}
+    u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+
+    // Sanity checks
+    u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+    u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+    if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
         dbg_printf("Error in relocation checking method 1\n");
         
-        // found the beginning of the next function
-       u32 nextFunction = getOffset((u32*)relocationStart, ndsHeader->arm7binarySize,
-          nextFunctiontSignature, 1, 1);
+        // Found the beginning of the next function
+        u32 nextFunction = getOffset(
+			(u32*)relocationStart, ndsHeader->arm7binarySize,
+			nextFunctiontSignature, 1,
+			1
+		);
     
        	// Validate the relocation signature
-        forwardedRelocStartAddr = nextFunction  - 0x14;
+        forwardedRelocStartAddr = nextFunction - 0x14;
         
     	// Validate the relocation signature
-        vAddrOfRelocSrc =
-            *(u32*)(nextFunction - 0xC);
+        vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
         
-        // sanity checks
-        relocationCheck1 =
-            *(u32*)(forwardedRelocStartAddr + 0xC);
-        relocationCheck2 =
-            *(u32*)(forwardedRelocStartAddr + 0x10);
-        if ( vAddrOfRelocSrc != relocationCheck1
-          || vAddrOfRelocSrc != relocationCheck2) {
+        // Sanity checks
+        relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+        relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+        if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
             dbg_printf("Error in relocation checking method 2\n");
     		return 0;
         }
     }
 
-
     // Get the remaining details regarding relocation
-    u32 valueAtRelocStart =
-        *(u32*)forwardedRelocStartAddr;
-    u32 relocDestAtSharedMem =
-        *(u32*)valueAtRelocStart;
-    if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
+    u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
+    u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
+    if (relocDestAtSharedMem != 0x37F8000) { // Shared memory in RAM
         // Try again
-        vAddrOfRelocSrc +=
-            *(u32*)(valueAtRelocStart + 4);
-        relocDestAtSharedMem =
-            *(u32*)(valueAtRelocStart + 0xC);
+        vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
+        relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
         if (relocDestAtSharedMem != 0x37F8000) {
             dbg_printf("Error in finding shared memory relocation area\n");
 			return 0;
@@ -1635,38 +1745,40 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_printf("\n");
 
     // Find the card read
-    u32 cardReadEndAddr =
-        getOffset((u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2, 1);
+    u32 cardReadEndAddr = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00400000, 
+		a7cardReadSignature, 2,
+		1
+	);
     if (!cardReadEndAddr) {
-        dbg_printf("[Error!] Card read addr not found\n"); return 0;
+        dbg_printf("[Error!] Card read addr not found\n");
+		return 0;
     }
-
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
 	dbg_printf("\n");
 
-	// nonsense variable names below
+	// Nonsense variable names below
     u32 cardstructAddr = *(u32*)(cardReadEndAddr - 4);
-
 	dbg_printf("cardstructAddr: ");
 	dbg_hexa(cardstructAddr);
 	dbg_printf("\n");
 
-    u32 readCacheEnd =
-         getOffset((u32*)cardReadEndAddr,
-             0x18000 - cardReadEndAddr, &cardstructAddr, 1, 1);
-			 
+    u32 readCacheEnd = getOffset(
+		(u32*)cardReadEndAddr, 0x18000 - cardReadEndAddr,
+		&cardstructAddr, 1,
+		1
+	);
 	dbg_printf("readCacheEnd: ");
 	dbg_hexa(readCacheEnd);
 	dbg_printf("\n");
 
-    if (!readCacheEnd)
-    {
-        dbg_printf("[Error!] ___ addr not found\n"); return 0;
+    if (!readCacheEnd) {
+        dbg_printf("[Error!] ___ addr not found\n");
+		return 0;
     }
-    u32 JumpTableFunc = readCacheEnd + 4;
 
+    u32 JumpTableFunc = readCacheEnd + 4;
 	dbg_printf("JumpTableFunc: ");
 	dbg_hexa(JumpTableFunc);
 	dbg_printf("\n");
@@ -1679,9 +1791,11 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     // if out of specific ram range...
     if (specificWramAddr < 0x37F8000 || specificWramAddr > 0x380FFFF) {
 		dbg_printf("Retry the search\n");
-        JumpTableFunc =
-            getOffset((u32*)JumpTableFunc,
-              0x18000 - JumpTableFunc, &cardstructAddr, 1, 1) + 4;
+        JumpTableFunc = getOffset(
+			(u32*)JumpTableFunc, 0x18000 - JumpTableFunc,
+			&cardstructAddr, 1,
+			1
+		) + 4;
 		dbg_printf("JumpTableFunc: ");
 		dbg_hexa(JumpTableFunc);
 		dbg_printf("\n");	  
@@ -1695,64 +1809,67 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 	dbg_hexa(specificWramAddr);
 	dbg_printf("\n");
 
-    u32 someAddr_799C = getOffset((u32*)ndsHeader->arm7destination, 0x18000, a7something2Signature,
-        2, 1);
+    u32 someAddr_799C = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x18000,
+		a7something2Signature, 2,
+		1
+	);
     if (!someAddr_799C) {
-        dbg_printf("[Error!] ___ someOffset not found\n"); return 0;
+        dbg_printf("[Error!] ___ someOffset not found\n");
+		return 0;
     }
-
 	dbg_printf("someAddr_799C: ");
 	dbg_hexa(someAddr_799C);
 	dbg_printf("\n");
 
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32* arm7Function =  (u32*) patches[9];
+	u32* patches = (u32*)cardEngineLocation[0];
 
-	u32* eepromPageErase = (u32*) (JumpTableFunc + 0x10);
+	u32* arm7Function = (u32*)patches[9];
+
+	u32* eepromPageErase = (u32*)(JumpTableFunc + 0x10);
     dbg_printf("Eeprom page erase:\t");
 	dbg_hexa((u32)eepromPageErase);
 	dbg_printf("\n");
-	*eepromPageErase=arm7Function[1];
+	*eepromPageErase = arm7Function[1];
 
-	u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x2C);
+	u32* eepromPageVerify = (u32*)(JumpTableFunc + 0x2C);
 	dbg_printf("Eeprom verify:\t");
 	dbg_hexa((u32)eepromPageVerify);
 	dbg_printf("\n");
-	*eepromPageVerify=arm7Function[2];
+	*eepromPageVerify = arm7Function[2];
 
-	u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x48);
+	u32* eepromPageWrite = (u32*)(JumpTableFunc + 0x48);
 	dbg_printf("Eeprom page write:\t");
 	dbg_hexa((u32)eepromPageWrite);
 	dbg_printf("\n");
-	*eepromPageWrite=arm7Function[3];
+	*eepromPageWrite = arm7Function[3];
 
-	u32* eepromPageProg = (u32*) (JumpTableFunc + 0x64);
+	u32* eepromPageProg = (u32*)(JumpTableFunc + 0x64);
 	dbg_printf("Eeprom page prog:\t");
 	dbg_hexa((u32)eepromPageProg);
 	dbg_printf("\n");
-	*eepromPageProg=arm7Function[4];
+	*eepromPageProg = arm7Function[4];
 
-	u32* eepromRead = (u32*) (JumpTableFunc + 0x80);
+	u32* eepromRead = (u32*)(JumpTableFunc + 0x80);
 	dbg_printf("Eeprom read:\t");
 	dbg_hexa((u32)eepromRead);
 	dbg_printf("\n");
-	*eepromRead=arm7Function[5];
+	*eepromRead = arm7Function[5];
 
-	u32* cardRead = (u32*) (JumpTableFunc + 0xA0);
-	dbg_printf("Card  read:\t");
+	u32* cardRead = (u32*)(JumpTableFunc + 0xA0);
+	dbg_printf("Card read:\t");
 	dbg_hexa((u32)cardRead);
 	dbg_printf("\n");
-	*cardRead=arm7Function[6];
+	*cardRead = arm7Function[6];
 
 	// different patch for card id
-	u32* cardId = (u32*) (JumpTableFunc + 0xAC);
+	u32* cardId = (u32*)(JumpTableFunc + 0xAC);
 	dbg_printf("Card id:\t");
 	dbg_hexa((u32)cardId);
 	dbg_printf("\n");
-	u32 srcAddr = JumpTableFunc + 0xAC - vAddrOfRelocSrc + relocDestAtSharedMem ;
-	u32 patchCardID = generateA7Instr(srcAddr,
-        arm7Function[7]);
-	*cardId=patchCardID; 
+	u32 srcAddr = JumpTableFunc + 0xAC - vAddrOfRelocSrc + relocDestAtSharedMem;
+	u32 patchCardID = generateA7Instr(srcAddr, arm7Function[7]);
+	*cardId = patchCardID;
 
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
     if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
@@ -1760,8 +1877,7 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
         dbg_printf("???:\t\t\t");
 		dbg_hexa((u32)current);
 		dbg_printf("\n");
-
-		*current=arm7Function[0];
+		*current = arm7Function[0];
     }
 
 	arm7Function[8] = saveFileCluster;
@@ -1772,469 +1888,620 @@ u32 savePatchV1 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
     return 1;
 }
 
-void patchSwiHalt (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32 swiHaltOffset =   
-		getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-			  (u32*)j_HaltSignature1, 4, 1);
+void patchSwiHalt(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+	u32* patches = (u32*)cardEngineLocation[0];
+
+	//
+	// Find SWI HALT
+	//
+	u32 swiHaltOffset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+		(u32*)j_HaltSignature1, 4,
+		1
+	);
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt1, 4, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt1, 4,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 1 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt2, 4, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt2, 4,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 2 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt3, 4, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt3, 4,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 3 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt4, 4, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt4, 4,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 4 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt5, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt5, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 5 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt6, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt6, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 6 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt7, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt7, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 7 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt8, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt8, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 8 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt9, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt9, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 9 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature1Alt10, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature1Alt10, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK2 call alt 10 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt1, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt1, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 1 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt2, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt2, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 2 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt3, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt3, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 3 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt4, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt4, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 4 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt5, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt5, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 5 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt6, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt6, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 6 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt7, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt7, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 7 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt8, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt8, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 8 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt9, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt9, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 9 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt10, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt10, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 10 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature3Alt11, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature3Alt11, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK3 call alt 11 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt1, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt1, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 1 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt2, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt2, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 2 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt3, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt3, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 3 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt4, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt4, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 4 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt5, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt5, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 5 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt6, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt6, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 6 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt7, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt7, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 7 not found\n");
-		swiHaltOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00002000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_HaltSignature4Alt8, 3, 1);
+		swiHaltOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
+			(u32*)j_HaltSignature4Alt8, 3,
+			1
+		);
 	}
 	if (!swiHaltOffset) {
 		dbg_printf("swiHalt SDK4 call alt 8 not found\n");
-	}
-	if (swiHaltOffset>0) {
+		//return 0;
+	} else {
+		// Patch
 		dbg_printf("swiHalt call found\n");
-		u32* swiHaltPatch = (u32*) patches[11];
-		copyLoop ((u32*)swiHaltOffset, swiHaltPatch, 0xC);
+		u32* swiHaltPatch = (u32*)patches[11];
+		copyLoop((u32*)swiHaltOffset, swiHaltPatch, 0xC);
 	}
 }
 
-void fixForDsiBios (const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32 swi12Offset =   
-		getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-			  (u32*)swi12Signature, 1, 1);
+void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+	u32* patches = (u32*)cardEngineLocation[0];
+
+	//
+	// Find SWI 0x12 CALL
+	//
+	u32 swi12Offset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+		(u32*)swi12Signature, 1,
+		1
+	);
 	if (!swi12Offset) {
 		dbg_printf("swi 0x12 call not found\n");
+		//return 0;
 	} else {
 		// Patch to call swi 0x02 instead of 0x12
 		dbg_printf("swi 0x12 call found\n");
-		u32* swi12Patch = (u32*) patches[10];
-		copyLoop ((u32*)swi12Offset, swi12Patch, 0x4);
+		u32* swi12Patch = (u32*)patches[10];
+		copyLoop((u32*)swi12Offset, swi12Patch, 0x4);
 	}
 
 	bool sdk5 = false;
-	u32 swiGetPitchTableOffset =   
-		getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-			  (u32*)j_GetPitchTableSignature1, 4, 1);
+	//
+	// Find SWI GET PITCH TABLE
+	//
+	u32 swiGetPitchTableOffset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+		(u32*)j_GetPitchTableSignature1, 4,
+		1
+	);
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt1, 4, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt1, 4,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 1 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt2, 4, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt2, 4,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 2 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt3, 4, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt3, 4,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 3 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt4, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt4, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 4 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt5, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt5, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 5 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt6, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt6, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 6 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt7, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt7, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 7 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature1Alt8, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature1Alt8, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK2 call alt 8 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt1, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt1, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 1 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt2, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt2, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 2 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt3, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt3, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 3 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt4, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt4, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 4 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt5, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt5, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 5 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt6, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt6, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 6 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt7, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt7, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 7 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt8, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt8, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 8 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt9, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt9, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 9 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature3Alt10, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature3Alt10, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK3 call alt 10 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt1, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt1, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 1 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt2, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt2, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 2 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt3, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt3, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 3 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt4, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt4, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 4 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt5, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt5, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 5 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt6, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt6, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 6 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt7, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt7, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 7 not found\n");
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)j_GetPitchTableSignature4Alt8, 3, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)j_GetPitchTableSignature4Alt8, 3,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable SDK4 call alt 8 not found\n");
 		sdk5 = true;
-		swiGetPitchTableOffset =   
-			getOffset((u32*)ndsHeader->arm7destination, 0x00010000,//, ndsHeader->arm7binarySize,
-				  (u32*)swiGetPitchTableSignature5, 4, 1);
+		swiGetPitchTableOffset = getOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			(u32*)swiGetPitchTableSignature5, 4,
+			1
+		);
 	}
 	if (!swiGetPitchTableOffset) {
 		dbg_printf("swiGetPitchTable call SDK5 not found\n");
-	}
-	if (swiGetPitchTableOffset>0) {
+		//return 0;
+	} else {
+		// Patch
 		dbg_printf("swiGetPitchTable call found\n");
-		if (sdk5) {
-			u32* swiGetPitchTablePatch = (u32*) patches[13];
-			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-		} else {
-			u32* swiGetPitchTablePatch = (u32*) patches[12];
-			copyLoop ((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-		}
+		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12];
+		copyLoop((u32*)swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
 
-u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
 
-	if(REG_SCFG_ROM != 0x703) {
+	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, cardEngineLocation);
 	}
-	if (ROMinRAM == false) patchSwiHalt(ndsHeader, cardEngineLocation);
+	if (ROMinRAM == false) {
+		patchSwiHalt(ndsHeader, cardEngineLocation);
+	}
 
 	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
-	if(moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+	if (moduleParams->sdk_version >= 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature3;
 	}
 
-	if(moduleParams->sdk_version > 0x4000000) {
+	if (moduleParams->sdk_version >= 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
 	
 	bool usesThumb = false;
 
-	u32 sleepPatchOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-              (u32*)sleepPatch, 2, 1);
+	//
+	// Find SLEEP PATCH
+	//
+	u32 sleepPatchOffset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+        (u32*)sleepPatch, 2,
+		1
+	);
     if (!sleepPatchOffset) {
         dbg_printf("sleep patch not found. Trying thumb\n");
         //return 0;
 		usesThumb = true;
     } else {
 		dbg_printf("sleep patch found\n");
-		*(u32*)(sleepPatchOffset+8) = 0;
+		*(u32*)(sleepPatchOffset + 8) = 0;
 	}
 	if (usesThumb) {
-		sleepPatchOffset =   
-        getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-              (u16*)sleepPatchThumb, 2, 1);
+		sleepPatchOffset = getOffsetThumb(
+			(u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+            (u16*)sleepPatchThumb, 2,
+			1
+		);
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch not found. Trying alt\n");
-			sleepPatchOffset =   
-			getOffsetThumb((u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-				  (u16*)sleepPatchThumbAlt, 2, 1);
+			sleepPatchOffset = getOffsetThumb(
+				(u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+				(u16*)sleepPatchThumbAlt, 2,
+				1
+			);
 		}
 		if (!sleepPatchOffset) {
 			dbg_printf("Thumb sleep patch alt not found\n");
-		}
-		if (sleepPatchOffset>0) {
+			//return 0;
+		} else {
 			dbg_printf("Thumb sleep patch found\n");
 			*(u16*)(sleepPatchOffset+4) = 0;
 			*(u16*)(sleepPatchOffset+6) = 0;
 		}
 	}
 
-	u32 cardCheckPullOutOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-              (u32*)cardCheckPullOutSignature, 4, 1);
+	//
+	// Find CARD CHECK PULL OUT
+	//
+	u32 cardCheckPullOutOffset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00020000,//ndsHeader->arm9binarySize,
+        (u32*)cardCheckPullOutSignature, 4,
+		1
+	);
     if (!cardCheckPullOutOffset) {
         dbg_printf("Card check pull out not found\n");
         //return 0;
@@ -2243,9 +2510,14 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 		dbg_printf("Card check pull out found\n");
 	}
 
-	u32 cardIrqEnableOffset =   
-        getOffset((u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-              (u32*)irqEnableStartSignature, 4, 1);
+	//
+	// Find CARD IRQ ENABLE
+	//
+	u32 cardIrqEnableOffset = getOffset(
+		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+        (u32*)irqEnableStartSignature, 4,
+		1
+	);
     if (!cardIrqEnableOffset) {
         dbg_printf("irq enable not found\n");
 		return 0;
@@ -2255,20 +2527,26 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 
 	cardEngineLocation[3] = moduleParams->sdk_version;
 
-	u32* patches =  (u32*) cardEngineLocation[0];
-	u32* cardIrqEnablePatch = (u32*) patches[2];
-	u32* cardCheckPullOutPatch = (u32*) patches[1];
+	u32* patches = (u32*)cardEngineLocation[0];
 
-	if(cardCheckPullOutOffset>0)
-		copyLoop ((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+	u32* cardIrqEnablePatch    = (u32*)patches[2];
+	u32* cardCheckPullOutPatch = (u32*)patches[1];
 
-	copyLoop ((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	if (cardCheckPullOutOffset) { //cardCheckPullOutOffset > 0
+		copyLoop((u32*)cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+	}
+
+	copyLoop((u32*)cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
 	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
-	if(!saveResult) saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
-	if(!saveResult) saveResult = savePatchUniversal(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
-	if ((saveResult == 1) && ROMinRAM==false && (saveSize > 0) && (saveSize <= 0x00100000)) {
-		aFile saveFile = getFileFromCluster (saveFileCluster);
+	if (!saveResult) {
+		saveResult = savePatchV2(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	}
+	if (!saveResult) {
+		saveResult = savePatchUniversal(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	}
+	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
+		aFile saveFile = getFileFromCluster(saveFileCluster);
 		fileRead((char*)0x0C820000, saveFile, 0, saveSize, 3);
 	}
 
@@ -2276,24 +2554,30 @@ u32 patchCardNdsArm7 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, modu
 	return 0;
 }
 
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, 
-		u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize) {
-
-	//Debug stuff.
-
+u32 patchCardNds(
+	const tNDSHeader* ndsHeader,
+	u32* cardEngineLocationArm7,
+	u32* cardEngineLocationArm9,
+	module_params_t* moduleParams, 
+	u32 saveFileCluster,
+	u32 saveSize,
+	u32 patchMpuRegion,
+	u32 patchMpuSize) {
+	// Debug stuff
 	/*aFile myDebugFile = getBootFileCluster ("NDSBTSR2.LOG");
 	enableDebug(myDebugFile);*/
 
 	dbg_printf("patchCardNds");
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
+	
 	if (cardReadFound || ndsHeader->fatSize == 0) {
 		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;
-	} else {
-		dbg_printf("ERR_LOAD_OTHR");
-		return ERR_LOAD_OTHR;
 	}
+
+	dbg_printf("ERR_LOAD_OTHR");
+	return ERR_LOAD_OTHR;
 }
