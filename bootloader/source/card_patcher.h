@@ -61,7 +61,6 @@ typedef struct
 	u32 nitro_code_le;
 } module_params_t;
 
-
 u32 generateA7Instr(int arg1, int arg2);
 void generateA7InstrThumb(u16* instrs, int arg1, int arg2);
 void decompressLZ77Backwards(uint8_t* addr, size_t size);
