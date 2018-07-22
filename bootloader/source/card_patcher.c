@@ -162,7 +162,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 				break;
 		}
 
-		*(vu32*)(0x2800000) = (vu32)((u32*)mpuDataOffset); // TODO: Needed (u32*)?
+		*(vu32*)(0x2800000) = (vu32)(mpuDataOffset);
 		*(vu32*)(0x2800004) = (vu32)*(u32*)mpuDataOffset;
 
 		*(u32*)mpuDataOffset = mpuInitRegionNewData;
