@@ -79,4 +79,6 @@ struct IO_INTERFACE_STRUCT {
 
 typedef struct IO_INTERFACE_STRUCT IO_INTERFACE ;
 
+extern IO_INTERFACE __myio_dsisd ;
+
 #endif	// define _DISC_IO_H

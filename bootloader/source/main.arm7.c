@@ -57,9 +57,6 @@ Helpful information:
 extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
 
 void arm7clearRAM();
-int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, void *out);
-int sdmmc_sdcard_init();
-void sdmmc_controller_init();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
@@ -664,42 +661,8 @@ void startBinary_ARM7 (void) {
 	arm7code();
 }
 
-int sdmmc_sd_readsectors(u32 sector_no, u32 numsectors, void *out);
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Main function
-bool sdmmc_inserted() {
-	return true;
-}
-
-bool sdmmc_startup() {
-	sdmmc_controller_init();
-	return sdmmc_sdcard_init() == 0;
-}
-
-bool sdmmc_readsectors(u32 sector_no, u32 numsectors, void *out) {
-	return sdmmc_sdcard_readsectors(sector_no, numsectors, out) == 0;
-}
-
-/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
-	const int* dataChunk = (const int*) data;
-	int searchChunk = ((const int*)search)[0];
-	u32 i;
-	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
-
-	for ( i = 0; i < dataChunkEnd; i++) {
-		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
-				return -1;
-			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
-				return i*sizeof(int);
-			}
-		}
-	}
-
-	return -1;
-}*/
-
 void initMBK() {
 	// give all DSI WRAM to arm7 at boot
 	// this function have no effect with ARM7 SCFG locked
@@ -727,8 +690,6 @@ void initMBK() {
 	REG_MBK8=0x07403700; // same as dsiware
 }
 
-//static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-
 int arm7_main (void) {
 	nocashMessage("bootloader");
 
@@ -741,13 +702,6 @@ int arm7_main (void) {
 	nocashMessage("Get ARM7 to clear RAM");
 	debugOutput();	// 1 dot
 	resetMemory_ARM7();
-
-
-	if (dsiSD) {
-		_io_dldi.fn_readSectors = sdmmc_readsectors;
-		_io_dldi.fn_isInserted = sdmmc_inserted;
-		_io_dldi.fn_startup = sdmmc_startup;
-	}
 
 	// Init card
 	if(!FAT_InitFiles(initDisc, 3))
