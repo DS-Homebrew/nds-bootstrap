@@ -16,9 +16,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds.h>
-#include <nds/arm7/sdmmc.h>
 #include <nds/fifomessages.h>
+#include <nds/fifocommon.h>
+#include <nds/ipc.h>
+#include <nds/interrupts.h>
+#include <nds/system.h>
+#include <nds/input.h>
+#include <nds/arm7/audio.h>
+#include "sdmmc.h"
+#include "debugToFile.h"
+#include "sdmmcEngine.h"
+#include "fat.h"
+#include "i2c.h"
 
 void sendValue32(vu32* commandAddr, u32 value32) {
 	nocashMessage("sendValue32");
@@ -49,13 +58,13 @@ void sdmmcCustomValueHandler(vu32* commandAddr, u32 value) {
         if (sdmmc_read16(REG_SDSTATUS0) == 0) {
             result = 1;
         } else {
-            sdmmc_controller_init(true);
-            result = sdmmc_sdcard_init();
+            sdmmc_init();
+            result = SD_Init();
         }
         break;
 
     case SDMMC_SD_IS_INSERTED:
-        result = sdmmc_cardinserted();
+        result = 1;
         break;
 
     case SDMMC_SD_STOP:
@@ -82,13 +91,13 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
 		//siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = my_sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     case SDMMC_SD_WRITE_SECTORS:
 		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
 		//siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 		nocashMessage(buf);
-        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = my_sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     }
 
