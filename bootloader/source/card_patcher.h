@@ -23,6 +23,9 @@
 #include <nds/memory.h>
 #include <nds/ndstypes.h>
 #include "fat.h"
+#include "common.h"
+#include "cardengine_arm7_bin.h"
+#include "cardengine_arm9_bin.h"
 
 #define PAGE_4K		(0b01011 << 1)
 #define PAGE_8K		(0b01100 << 1)
@@ -62,13 +65,15 @@ typedef struct
 } module_params_t;
 
 u32 generateA7Instr(int arg1, int arg2);
-void generateA7InstrThumb(u16* instrs, int arg1, int arg2);
+u16* generateA7InstrThumb(int arg1, int arg2);
 void decompressLZ77Backwards(uint8_t* addr, size_t size);
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
 
 #endif // CARD_PATCHER_H

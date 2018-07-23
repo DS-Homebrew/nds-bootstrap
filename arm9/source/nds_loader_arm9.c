@@ -140,7 +140,7 @@ static void vramcpy (void* dst, const void* src, int len)
 	}
 }	
 
-static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
+/*static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	addr_t i;
@@ -158,7 +158,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	}
 
 	return -1;
-}
+}*/
 
 static inline void copyLoop (u32* dest, const u32* src, u32 size) {
 	size = (size +3) & ~3;
