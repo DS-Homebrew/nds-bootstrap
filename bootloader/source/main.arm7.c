@@ -48,6 +48,7 @@ Helpful information:
 //#include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"
+#include "card_finder.h"
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
 #include "hook.h"
