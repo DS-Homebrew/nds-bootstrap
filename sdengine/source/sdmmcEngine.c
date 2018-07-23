@@ -15,11 +15,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#include <nds.h> 
 #include <nds/fifomessages.h>
-#include <nds/arm7/sdmmc.h>
+#include <nds/fifocommon.h>
+#include <nds/ipc.h>
+#include <nds/interrupts.h>
+#include <nds/system.h>
+#include <nds/input.h>
+#include <nds/arm7/audio.h>
+#include "sdmmc.h"
 #include "debugToFile.h"
+#include "sdmmcEngine.h"
 #include "fat.h"
 #include "i2c.h"
 
@@ -56,8 +61,8 @@ void sdmmcCustomValueHandler(u32 value) {
         if (sdmmc_read16(REG_SDSTATUS0) == 0) {
             result = 1;
         } else {
-            sdmmc_controller_init(true);
-            result = sdmmc_sdcard_init();
+            sdmmc_init();
+            result = SD_Init();
         }
 		//FAT_InitFiles(false);
 		//u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
@@ -65,7 +70,7 @@ void sdmmcCustomValueHandler(u32 value) {
         break;
 
     case SDMMC_SD_IS_INSERTED:
-        result = sdmmc_cardinserted();
+        result = 1;
         break;
 
     case SDMMC_SD_STOP:
@@ -90,13 +95,13 @@ void sdmmcCustomMsgHandler(int bytes) {
 		dbg_printf("msg SDMMC_SD_READ_SECTORS received\n");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
-        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     case SDMMC_SD_WRITE_SECTORS:
 		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received\n");
 //		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
 //		nocashMessage(buf);
-        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     }    
 

@@ -26,18 +26,20 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
+ARCH	:=	-mthumb-interwork -march=armv4t
 
-CFLAGS	:=	-g -Wall -O2\
+COMMON	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7
+# ADD -DDEBUG here for logging/debug
+COMMON	+=	$(INCLUDE) -DARM7
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+CFLAGS	:=	$(COMMON) -std=gnu99
+CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:= 
