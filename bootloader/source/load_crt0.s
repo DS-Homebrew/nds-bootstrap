@@ -53,14 +53,14 @@ storedFileCluster:
 initDisc:
 	.word	0x00000001		@ init the disc by default
 wantToPatchDLDI:
-	.word	0x00000001		@ by default patch the DLDI section of the loaded NDS
+	.word	0x00000000		@ by default patch the DLDI section of the loaded NDS
 @ Used for passing arguments to the loaded app
 argStart:
 	.word	_end - _start
 argSize:
 	.word	0x00000000
 dldiOffset:
-	.word	_dldi_start - _start
+	.word	0x00000000
 dsiSD:
 	.word	0
 saveFileCluster:

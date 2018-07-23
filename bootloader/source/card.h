@@ -24,30 +24,30 @@
 #define CARD_H
 
 #include "disc_io.h"
-#include "io_dldi.h"
+#include "sdmmc.h"
 
 static inline bool CARD_StartUp (void) {
-	return _io_dldi.fn_startup();
+	return __myio_dsisd.fn_startup();
 }
 
 static inline bool CARD_IsInserted (void) {
-	return _io_dldi.fn_isInserted();
+	return __myio_dsisd.fn_isInserted();
 }
 
 static inline bool CARD_ReadSector (u32 sector, void *buffer, int ndmaSlot) {
-	return _io_dldi.fn_readSectors(sector, 1, buffer);
+	return __myio_dsisd.fn_readSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_ReadSectors (u32 sector, int count, void *buffer, int ndmaSlot) {
-	return _io_dldi.fn_readSectors(sector, count, buffer);
+	return __myio_dsisd.fn_readSectors(sector, count, buffer);
 }
 
 static inline bool CARD_WriteSector (u32 sector, void *buffer, int ndmaSlot) {
-	return _io_dldi.fn_writeSectors(sector, 1, buffer);
+	return __myio_dsisd.fn_writeSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_WriteSectors (u32 sector, int count, void *buffer, int ndmaSlot) {
-	return _io_dldi.fn_writeSectors(sector, count, buffer);
+	return __myio_dsisd.fn_writeSectors(sector, count, buffer);
 }
 
 #endif // CARD_H
