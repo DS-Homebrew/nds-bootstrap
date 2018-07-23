@@ -346,13 +346,16 @@ void NDSTouchscreenMode() {
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
-	
+	nocashMessage("main arm7");
+    	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
 	if(patchOffset == -1) {
 		nocashMessage("dldi not found");
 	}
 	wordCommandAddr = (u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80);
+    
+    nocashMessage("dldi found");
 	
 	irqInit();
 	fifoInit();
@@ -378,6 +381,10 @@ int main(void) {
 
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+    
+    nocashMessage("init completed");
+    
+    nocashMessage("wait for FIFO");
 
 	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
@@ -387,6 +394,7 @@ int main(void) {
 
 		*(u16*)(0x4000500) = 0x807F;
 	}
+    nocashMessage("fifoSendValue32(FIFO_USER_05, 1);");
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
 

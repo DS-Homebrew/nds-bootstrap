@@ -55,12 +55,14 @@ void sdmmcCustomValueHandler(vu32* commandAddr, u32 value) {
         break;
 
     case SDMMC_SD_START:
-        if (sdmmc_read16(REG_SDSTATUS0) == 0) {
+        nocashMessage("SDMMC_SD_START");
+        /*if (sdmmc_read16(REG_SDSTATUS0) == 0) {
             result = 1;
-        } else {
+        } else { */
+
             sdmmc_init();
             result = SD_Init();
-        }
+        //}
         break;
 
     case SDMMC_SD_IS_INSERTED:
@@ -108,7 +110,8 @@ void sdmmcCustomMsgHandler(vu32* commandAddr, int bytes) {
 
 void runSdMmcEngineCheck (vu32* commandAddr)
 {
-	//nocashMessage("runSdMmcEngineCheck");
+	int oldIME = enterCriticalSection();
+	nocashMessage("runSdMmcEngineCheck");
 	if(*commandAddr == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
@@ -118,4 +121,5 @@ void runSdMmcEngineCheck (vu32* commandAddr)
 		nocashMessage("sdmmc msg received");
 		sdmmcCustomMsgHandler(commandAddr, commandAddr[1]);
 	}
+    leaveCriticalSection(oldIME);
 }

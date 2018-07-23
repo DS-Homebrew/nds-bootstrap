@@ -31,7 +31,6 @@
 
 #define DEVICE_TYPE_DSI_SD ('i') | ('_' << 8) | ('S' << 16) | ('D' << 24)
 
-
 struct mmcdevice handleNAND;
 struct mmcdevice handleSD;
 

@@ -145,13 +145,16 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int main( int argc, char **argv) {
 
+	nocashMessage("main arm9");
+
 	bool ntrMode = false;
-	__NDSHeader->unitCode = 1;
+	__NDSHeader->unitCode = 0;
 	
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
 	
 	if (fatInitDefault()) {
+    	nocashMessage("fat inited");
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
 		ntrMode = bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE",1);
