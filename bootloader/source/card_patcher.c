@@ -134,7 +134,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 
 	// Card read dma
 	u32 cardReadDmaEndOffset = getCardReadDmaEndOffset(ndsHeader);
-	u32 cardReadDmaStartOffset = getCardReadCachedStartOffset(ndsHeader, moduleParams, cardReadDmaEndOffset);
+	u32 cardReadDmaStartOffset = getCardReadDmaStartOffset(ndsHeader, cardReadDmaEndOffset);
 
 	// Find the mpu unit
 	u32 mpuStartOffset = getMpuStartOffset(ndsHeader, patchMpuRegion);
