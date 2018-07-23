@@ -38,7 +38,7 @@
 #include <nds/dma.h>
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
-#include <nds/arm7/sdmmc.h>
+#include "sdmmc.h"
 
 extern vu32 word_command;
 extern vu32 word_params;
@@ -233,8 +233,8 @@ returns true if successful, otherwise returns false
 bool startup(void) {	
 	nocashMessage("startup");
 	if(isArm7()) {
-		sdmmc_controller_init(true);
-		return sdmmc_sdcard_init()==0;
+		sdmmc_init();
+		return SD_Init()==0;
 	} else {	
 		return sd_Startup();
 	}
