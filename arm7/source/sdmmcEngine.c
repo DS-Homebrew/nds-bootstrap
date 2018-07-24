@@ -112,14 +112,14 @@ void runSdMmcEngineCheck (vu32* commandAddr)
 {
 	int oldIME = enterCriticalSection();
 	nocashMessage("runSdMmcEngineCheck");
-	if(*commandAddr == (u32)0x027FEE04)
+	if(*((vu32*)myMemUncached(commandAddr)) == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
-		sdmmcCustomValueHandler(commandAddr, commandAddr[1]);
-	} else if(*commandAddr == (u32)0x027FEE05)
+		sdmmcCustomValueHandler((vu32*)myMemUncached(commandAddr), ((vu32*)myMemUncached(commandAddr))[1]);
+	} else if(*((vu32*)myMemUncached(commandAddr)) == (u32)0x027FEE05)
 	{
 		nocashMessage("sdmmc msg received");
-		sdmmcCustomMsgHandler(commandAddr, commandAddr[1]);
+		sdmmcCustomMsgHandler((vu32*)myMemUncached(commandAddr), ((vu32*)myMemUncached(commandAddr))[1]);
 	}
     leaveCriticalSection(oldIME);
 }

@@ -145,22 +145,30 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int main( int argc, char **argv) {
 
+    // REG_SCFG_CLK = 0x80;
+	//REG_SCFG_EXT = 0x03000000; // NAND/SD Access
+
 	nocashMessage("main arm9");
+    
+    consoleDemoInit();
 
 	bool ntrMode = false;
 	__NDSHeader->unitCode = 0;
 	
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
+
+    printf("fat init ...");    
 	
 	if (fatInitDefault()) {
     	nocashMessage("fat inited");
+        printf("fat inited");    
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
 		ntrMode = bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE",1);
 			
           // REG_SCFG_CLK = 0x80;
-		REG_SCFG_EXT = 0x83000000; // NAND/SD Access
+		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 		fifoSendValue32(FIFO_MAXMOD, 1);
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	

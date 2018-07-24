@@ -44,6 +44,39 @@ extern vu32 word_command;
 extern vu32 word_params;
 extern vu32 words_msg;
 
+static char hexbuffer [9];
+
+
+char* tohex(u32 n)
+{
+    unsigned size = 9;
+    char *buffer = hexbuffer;
+    unsigned index = size - 2;
+
+	for (int i=0; i<size; i++) {
+		buffer[i] = '0';
+	}
+
+    while (n > 0)
+    {
+        unsigned mod = n % 16;
+
+        if (mod >= 10)
+            buffer[index--] = (mod - 10) + 'A';
+        else
+            buffer[index--] = mod + '0';
+
+        n /= 16;
+    }
+    buffer[size - 1] = '\0';
+    return buffer;
+}
+
+void dbg_hexa(u32 n) {
+	nocashMessage(tohex(n));
+}
+
+
  // Use the dldi remaining space as temporary buffer : 28k usually available
 extern vu32* tmp_buf_addr;
 extern vu8 allocated_space;
@@ -67,6 +100,8 @@ void sendMsg(int size, u8* msg) {
 
 void waitValue32() {
 	nocashMessage("waitValue32");
+    dbg_hexa(&word_command);
+    dbg_hexa(myMemUncached(&word_command));
 	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
 }
 

@@ -347,6 +347,11 @@ void NDSTouchscreenMode() {
 int main(void) {
 //---------------------------------------------------------------------------------
 	nocashMessage("main arm7");
+    
+    //REG_SCFG_CLK = 0x0181;
+	//REG_SCFG_EXT = 0x93A40000; // NAND/SD Access
+    
+    __NDSHeader->unitCode = 0;
     	
 	// Find the DLDI reserved space in the file
 	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
@@ -362,11 +367,10 @@ int main(void) {
 
 	// read User Settings from firmware
 	readUserSettings();
-	irqInit();
+
 
 	// Start the RTC tracking IRQ
 	initClockIRQ();
-	fifoInit();
 	
 	SetYtrigger(80);
 
@@ -399,7 +403,7 @@ int main(void) {
 	fifoSendValue32(FIFO_USER_05, 1);
 
 
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);   
 
 	// Keep the ARM7 mostly idle
 	while (1) { swiIntrWait(0,IRQ_FIFO_NOT_EMPTY); fifocheck(); }
