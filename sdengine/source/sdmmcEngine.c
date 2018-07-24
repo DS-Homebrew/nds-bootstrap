@@ -23,9 +23,7 @@
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include "sdmmc.h"
-#include "debugToFile.h"
 #include "sdmmcEngine.h"
-#include "fat.h"
 #include "i2c.h"
 
 static bool initialized = false;
@@ -64,9 +62,6 @@ void sdmmcCustomValueHandler(u32 value) {
             sdmmc_init();
             result = SD_Init();
         }
-		//FAT_InitFiles(false);
-		//u32 myDebugFile = getBootFileCluster ("NDSBTSRP.LOG");
-		//enableDebug(myDebugFile);
         break;
 
     case SDMMC_SD_IS_INSERTED:
@@ -92,15 +87,9 @@ void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
-		dbg_printf("msg SDMMC_SD_READ_SECTORS received\n");
-//		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
-//		nocashMessage(buf);
         retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     case SDMMC_SD_WRITE_SECTORS:
-		dbg_printf("msg SDMMC_SD_WRITE_SECTORS received\n");
-//		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
-//		nocashMessage(buf);
         retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     }    
@@ -109,7 +98,6 @@ void sdmmcCustomMsgHandler(int bytes) {
 }
 
 void runSdMmcEngineCheck (void) {
-	//dbg_printf("runSdMmcEngineCheck\n");
 
 	if (ntrModeTouch) {
 		// Control volume with the - and + buttons.
@@ -221,11 +209,9 @@ void runSdMmcEngineCheck (void) {
 
 	if(*commandAddr == (vu32)0x027FEE04)
 	{
-		dbg_printf("sdmmc value received\n");
 		sdmmcCustomValueHandler(commandAddr[1]);
 	} else if(*commandAddr == (vu32)0x027FEE05)
 	{
-		dbg_printf("sdmmc msg received\n");
 		sdmmcCustomMsgHandler(commandAddr[1]);
 	}
 
@@ -252,7 +238,6 @@ static const u32 homebrewSigPatched[5] = {
 };
 
 static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	dbg_printf("restoreInterruptHandlerHomebrew\n");	
 	u32* end = addr + size/sizeof(u32);
 	
 	// Find the start of the handler
@@ -269,7 +254,6 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	}
 	
 	if (addr >= end) {
-		dbg_printf("addr >= end");	
 		return 0;
 	}
 	
@@ -280,8 +264,6 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 	addr[2] = homebrewSig[2];
 	addr[3] = homebrewSig[3];
 	addr[4] = homebrewSig[4];
-	
-	dbg_printf("restoreSuccessfull\n");	
 	
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
@@ -321,14 +303,12 @@ void checkIRQ_IPC_SYNC() {
 
 
 void myIrqHandler(void) {
-	//dbg_printf("myIrqHandler\n");	
 	
 	checkIRQ_IPC_SYNC();
 	runSdMmcEngineCheck();
 }
 
 void myIrqEnable(u32 irq) {	
-	dbg_printf("myIrqEnable\n");
 	int oldIME = enterCriticalSection();	
 	if (irq & IRQ_VBLANK)
 		REG_DISPSTAT |= DISP_VBLANK_IRQ ;
