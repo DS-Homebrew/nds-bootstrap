@@ -25,13 +25,31 @@ myMemCached:
 @---------------------------------------------------------------------------------
 myMemUncached:
 @---------------------------------------------------------------------------------
-	ldr	r1,=masks
+
+	ldr	r1,=0x4004008
+	ldr	r1,[r1]
+	tst	r1,#0x8000
+	bne	dsi_mode
+
+    ds_mode:
+    
+    ldr	r1,=masks
 	ldr	r1, [r1]
 	ldr	r2,[r1],#8
 	and	r0,r0,r2
 	ldr	r2,[r1]
 	orr	r0,r0,r2
 	bx	lr
+    
+    dsi_mode:
+    ldr	r1,=dsimasks
+	ldr	r2,[r1],#8
+	and	r0,r0,r2
+	ldr	r2,[r1]
+	orr	r0,r0,r2
+	bx	lr
+
+
 
 	.data
 	.align	2
@@ -43,4 +61,4 @@ debugmasks:
 dsimasks:
 	.word	0x00ffffff, 0x02000000, 0x0c000000
 
-masks:	.word	dsimasks
+masks:	.word	dsmasks
