@@ -49,13 +49,11 @@ myMemUncached:
 	orr	r0,r0,r2
 	bx	lr
 
-
-
 	.data
 	.align	2
 
 dsmasks:
-	.word	0x003fffff, 0x02000000, 0x02c00000
+	.word	0x00Cfffff, 0x02000000, 0x02400000
 debugmasks:
 	.word	0x007fffff, 0x02000000, 0x02800000
 dsimasks:

@@ -348,7 +348,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ntrMode, bool i
 
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;  
+	REG_SCFG_EXT = 0x03000000; // NAND/SD Access	
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
