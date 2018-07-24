@@ -82,14 +82,14 @@ extern vu32* tmp_buf_addr;
 extern vu8 allocated_space;
 
 void sendValue32(u32 value32) {
-	nocashMessage("sendValue32");
+	//nocashMessage("sendValue32");
 	*((vu32*)myMemUncached(&word_params)) = value32;
 	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
-	nocashMessage("sendMsg");
+	//nocashMessage("sendMsg");
 	*((vu32*)myMemUncached(&word_params)) = size;
 	for(int i=0;i<size;i++)  {
 		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
@@ -99,14 +99,14 @@ void sendMsg(int size, u8* msg) {
 }
 
 void waitValue32() {
-	nocashMessage("waitValue32");
-    dbg_hexa(&word_command);
-    dbg_hexa(myMemUncached(&word_command));
+	//nocashMessage("waitValue32");
+    //dbg_hexa(&word_command);
+    //dbg_hexa(myMemUncached(&word_command));
 	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
 }
 
 u32 getValue32() {
-	nocashMessage("getValue32");
+	//nocashMessage("getValue32");
 	return *((vu32*)myMemUncached(&word_params));
 }
 
@@ -122,7 +122,7 @@ void __custom_mpu_restore();
 //---------------------------------------------------------------------------------
 bool sd_Startup() {
 //---------------------------------------------------------------------------------
-	nocashMessage("sdio_Startup");
+	//nocashMessage("sdio_Startup");
 	//if (!isSDAcessible()) return false;
 	
 	//REG_SCFG_EXT &= 0xC000;
@@ -165,7 +165,7 @@ bool sd_IsInserted() {
 //---------------------------------------------------------------------------------
 bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
-	nocashMessage("sd_ReadSectors");
+	//nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;	
 	int result = 0;
@@ -204,7 +204,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
 bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 //---------------------------------------------------------------------------------
-	nocashMessage("sd_ReadSectors");
+	//nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;	
 	int result = 0;	
@@ -266,7 +266,7 @@ Initialize the interface, geting it into an idle, ready state
 returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
-	nocashMessage("startup");
+	//nocashMessage("startup");
 	if(isArm7()) {
 		sdmmc_init();
 		return SD_Init()==0;
@@ -281,7 +281,7 @@ Is a card inserted?
 return true if a card is inserted and usable
 -----------------------------------------------------------------*/
 bool isInserted (void) {
-	nocashMessage("isInserted");
+	//nocashMessage("isInserted");
 	return sd_IsInserted();
 }
 
@@ -292,7 +292,7 @@ Reset the card, clearing any status errors
 return true if the card is idle and ready
 -----------------------------------------------------------------*/
 bool clearStatus (void) {
-	nocashMessage("clearStatus");
+	//nocashMessage("clearStatus");
 	return sd_ClearStatus();
 }
 
@@ -305,7 +305,7 @@ The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
-	nocashMessage("readSectors");
+	//nocashMessage("readSectors");
 	if(isArm7()) {
 		return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
 	} else {	
@@ -323,7 +323,7 @@ The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
-	nocashMessage("writeSectors");
+	//nocashMessage("writeSectors");
 	if(isArm7()) {
 		return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
 	} else {	
@@ -339,6 +339,6 @@ it is merely for disabling the card.
 return true if the card is no longer active
 -----------------------------------------------------------------*/
 bool shutdown(void) {
-	nocashMessage("shutdown");
+	//nocashMessage("shutdown");
 	return sd_Shutdown();
 }

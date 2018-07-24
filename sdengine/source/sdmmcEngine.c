@@ -35,7 +35,7 @@ extern vu32* volatile commandAddr;
 extern u32 ntrModeTouch;
 
 void sendValue32(vu32 value32) {
-	nocashMessage("sendValue32");
+	//nocashMessage("sendValue32");
 	commandAddr[0] = (u32)0x027FEE08;
 	commandAddr[1] = value32;
 }
@@ -290,7 +290,7 @@ static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
 //---------------------------------------------------------------------------------
 void SyncHandler(void) {
 //---------------------------------------------------------------------------------
-	nocashMessage("SyncHandler");
+	//nocashMessage("SyncHandler");
 	runSdMmcEngineCheck();
 }
 
@@ -298,22 +298,22 @@ void SyncHandler(void) {
 void checkIRQ_IPC_SYNC() {
 //---------------------------------------------------------------------------------
 	if(!initialized) {	
-		nocashMessage("!initialized");	
+		//nocashMessage("!initialized");	
 		u32* current=irqHandler+1;
 		
 		while(*current!=IRQ_IPC_SYNC && *current!=0) {
 			current+=2;
 		}
-		if(current==IRQ_IPC_SYNC) {
+		/*if(current==IRQ_IPC_SYNC) {
 			nocashMessage("IRQ_IPC_SYNC slot found");	
 		} else {
 			nocashMessage("empty irqtable slot found");	
-		}		
+		}*/		
 		
 		*((IntFn*)current-1)	= SyncHandler;
 		*current				= IRQ_IPC_SYNC;
 	
-		nocashMessage("IRQ_IPC_SYNC setted");
+		//nocashMessage("IRQ_IPC_SYNC setted");
 	
 		initialized = true;
 	}	
@@ -339,7 +339,7 @@ void myIrqEnable(u32 irq) {
 		
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-	nocashMessage("IRQ_IPC_SYNC enabled");
+	//nocashMessage("IRQ_IPC_SYNC enabled");
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);

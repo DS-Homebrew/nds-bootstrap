@@ -145,8 +145,7 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int main( int argc, char **argv) {
 
-    // REG_SCFG_CLK = 0x80;
-	//REG_SCFG_EXT = 0x03000000; // NAND/SD Access
+    REG_SCFG_CLK = 0x85;
 
 	nocashMessage("main arm9");
     
