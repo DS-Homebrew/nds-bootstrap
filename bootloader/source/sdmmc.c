@@ -291,7 +291,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	u32 size = ctx->size;
 	const u16 blkSize = sdmmc_read16(REG_SDBLKLEN32);
 	u32 *rDataPtr32 = (u32*)ctx->rData;
-	u8  *rDataPtr8  = ctx->rData;
+	//u8  *rDataPtr8  = ctx->rData;
 	const u32 *tDataPtr32 = (u32*)ctx->tData;
 	const u8  *tDataPtr8  = ctx->tData;
 

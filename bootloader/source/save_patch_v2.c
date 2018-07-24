@@ -6,7 +6,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	dbg_printf("\nArm7 (patch v2.0)\n");
 
 	// Find the relocation signature
-	u32 relocationStart = getOffset(
+	u32 relocationStart = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		relocateStartSignature, 1,
 		1
@@ -30,7 +30,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 		dbg_printf("Error in relocation checking method 1\n");
 		
 		// Found the beginning of the next function
-		u32 nextFunction = getOffset(
+		u32 nextFunction = (u32)findOffset(
 			(u32*)relocationStart, ndsHeader->arm7binarySize,
 			  nextFunctiontSignature, 1,
 			1
@@ -72,7 +72,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	dbg_printf("\n");
 
 	// Find the card read
-	u32 cardReadEndAddr = getOffset(
+	u32 cardReadEndAddr = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, 0x00400000, 
 		a7cardReadSignature, 2,
 		1
@@ -91,7 +91,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	dbg_hexa(cardstructAddr);
 	dbg_printf("\n");
 
-	u32 readCacheEnd = getOffset(
+	u32 readCacheEnd = (u32)findOffset(
 		(u32*)cardReadEndAddr, 0x18000 - cardReadEndAddr,
 		&cardstructAddr, 1,
 		1
@@ -114,7 +114,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	// Here is where the differences in the retry begin
 	//
 
-	u32 returned_A0_with_MKDS = getOffset(
+	u32 returned_A0_with_MKDS = (u32)findOffset(
 		(u32*)JumpTableFunc, 0x100,
 		(void*)a7something1Signature, 2,
 		1
@@ -128,7 +128,7 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	dbg_hexa(returned_A0_with_MKDS);
 	dbg_printf("\n");
 
-	u32 addrOfSomething_85C0 = getOffset(
+	u32 addrOfSomething_85C0 = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, 0x18000,
 		(void*)a7something2Signature, 2,
 		1
@@ -162,9 +162,9 @@ u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 		+ 4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF)
 		+ 0x48
 		+ 4 * (*(u32*)((
-				4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF) + 0x48
-			   ) + JumpTableFunc) | 0xFF000000
-			 )
+					4 * (*(u32*)(JumpTableFunc + 0x38) & 0xFFFFFF) + 0x48
+				) + JumpTableFunc) | 0xFF000000
+			)
 		+ 8
 	);
 
