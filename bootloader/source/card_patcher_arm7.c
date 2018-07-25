@@ -1,13 +1,18 @@
+#include <string.h> // memcpy
 #include <nds/system.h>
 #include "card_patcher.h"
 #include "card_finder.h"
+#include "common.h"
+#include "cardengine_arm7_bin.h"
 #include "debugToFile.h"
+
+//#define memcpy __builtin_memcpy
 
 extern u32 ROMinRAM;
 
-u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -38,7 +43,7 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	if (swi12Offset) {
 		// Patch to call swi 0x02 instead of 0x12
 		u32* swi12Patch = (u32*)patches[10];
-		copyLoop(swi12Offset, swi12Patch, 0x4);
+		memcpy(swi12Offset, swi12Patch, 0x4);
 	}
 
 	//sdk5 = false;
@@ -47,9 +52,8 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		//u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12];
-		u32* swiGetPitchTablePatch = (u32*)patches[12];
-		copyLoop(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+		u32* swiGetPitchTablePatch = (u32*)patches[12]; //u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12];
+		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
 
@@ -60,11 +64,11 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 		// Patch
 		u32* patches = (u32*)cardEngineLocation[0];
 		u32* swiHaltPatch = (u32*)patches[11];
-		copyLoop(swiHaltOffset, swiHaltPatch, 0xC);
+		memcpy(swiHaltOffset, swiHaltPatch, 0xC);
 	}
 }
 
-u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
 
 	if (REG_SCFG_ROM != 0x703) {
@@ -113,10 +117,10 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 	u32* cardCheckPullOutPatch = (u32*)patches[1];
 
 	if (cardCheckPullOutOffset) {
-		copyLoop(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 
-	copyLoop(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
 	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	if (!saveResult) {

@@ -121,7 +121,7 @@ extern "C" {
 		u32 res;
 	} mmcdevice;
 
-	void sdmmc_init();
+	void sdmmc_init(void);
 	int sdmmc_sdcard_readsector(u32 sector_no, u8 *out);
 	int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
 	int sdmmc_sdcard_writesector(u32 sector_no, const u8 *in);
@@ -134,8 +134,8 @@ extern "C" {
 
 	mmcdevice *getMMCDevice(int drive);
 
-	int Nand_Init();
-	int SD_Init();
+	int Nand_Init(void);
+	int SD_Init(void);
 
 #ifdef __cplusplus
 };

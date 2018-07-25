@@ -27,45 +27,42 @@ redistribute it freely, subject to the following restrictions:
 	distribution.
 
 ---------------------------------------------------------------------------------*/
-#include <string.h>
 
+//#include <stdio.h>
 #include <nds.h>
-
 #include <nds/ndstypes.h>
-
 #include "fifocheck.h"
 
 //static vu32* wordCommandAddr;
 
 //---------------------------------------------------------------------------------
-void VcountHandler() {
+void VcountHandler(void) {
 //---------------------------------------------------------------------------------
 	inputGetAndSend();
 }
 
 
-void myFIFOValue32Handler(u32 value,void* data)
-{
-  nocashMessage("myFIFOValue32Handler");
+void myFIFOValue32Handler(u32 value, void* data) {
+	nocashMessage("myFIFOValue32Handler");
 
-  nocashMessage("default");
-  nocashMessage("fifoSendValue32");
-  fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));
+ 	nocashMessage("default");
+	nocashMessage("fifoSendValue32");
+	fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));
 
 }
 
-/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
-	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
+	u32 dataLen = (u32)(dataSize / sizeof(int));
 
-	for ( i = 0; i < dataChunkEnd; i++) {
+	for ( i = 0; i < dataLen; i++) {
 		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
+			if ((i*sizeof(int) + searchSize) > dataSize) {
 				return -1;
 			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+			if (memcmp (&data[i*sizeof(int)], search, searchSize) == 0) {
 				return i*sizeof(int);
 			}
 		}
@@ -76,20 +73,18 @@ void myFIFOValue32Handler(u32 value,void* data)
 
 //static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-static char hexbuffer [9];
+static char hexbuffer[9];
 
-char* tohex(u32 n)
-{
+char* tohex(u32 n) {
     unsigned size = 9;
     char *buffer = hexbuffer;
     unsigned index = size - 2;
 
-	for (int i=0; i<size; i++) {
+	for (int i = 0; i < size; i++) {
 		buffer[i] = '0';
 	}
 
-    while (n > 0)
-    {
+    while (n > 0) {
         unsigned mod = n % 16;
 
         if (mod >= 10)
@@ -124,23 +119,22 @@ int main(void) {
 
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT);
+	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
 
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power button for auto-reset
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// Have IRQ check for power button press
 	//i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 
-	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
+	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 	//
 	SCFGFifoCheck();
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
 
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);
+	fifoSetValue32Handler(FIFO_USER_01, myFIFOValue32Handler, 0);
 
 	// Keep the ARM7 mostly idle
 	while (1) {
-		swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
+		swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 	}
 }
-

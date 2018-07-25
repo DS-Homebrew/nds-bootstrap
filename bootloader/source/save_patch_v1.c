@@ -1,13 +1,12 @@
 #include "save_patch.h"
 
-u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	dbg_printf("\nArm7 (patch v1.0)\n");
 
 	// Find the relocation signature
 	u32 relocationStart = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		relocateStartSignature, 1,
-		1
+		relocateStartSignature, 1
 	);
 	if (!relocationStart) {
 		dbg_printf("Relocation start not found\n");
@@ -30,8 +29,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 		// Found the beginning of the next function
 		u32 nextFunction = (u32)findOffset(
 			(u32*)relocationStart, ndsHeader->arm7binarySize,
-			nextFunctiontSignature, 1,
-			1
+			nextFunctiontSignature, 1
 		);
 	
 		// Validate the relocation signature
@@ -72,8 +70,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 	// Find the card read
 	u32 cardReadEndAddr = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2,
-		1
+		a7cardReadSignature, 2
 	);
 	if (!cardReadEndAddr) {
 		dbg_printf("[Error!] Card read addr not found\n");
@@ -91,8 +88,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 
 	u32 readCacheEnd = (u32)findOffset(
 		(u32*)cardReadEndAddr, 0x18000 - cardReadEndAddr,
-		&cardstructAddr, 1,
-		1
+		&cardstructAddr, 1
 	);
 	dbg_printf("readCacheEnd: ");
 	dbg_hexa(readCacheEnd);
@@ -118,8 +114,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 		dbg_printf("Retry the search\n");
 		JumpTableFunc = (u32)findOffset(
 			(u32*)JumpTableFunc, 0x18000 - JumpTableFunc,
-			&cardstructAddr, 1,
-			1
+			&cardstructAddr, 1
 		) + 4;
 		dbg_printf("JumpTableFunc: ");
 		dbg_hexa(JumpTableFunc);
@@ -136,8 +131,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_par
 
 	u32 someAddr_799C = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, 0x18000,
-		a7something2Signature, 2,
-		1
+		a7something2Signature, 2
 	);
 	if (!someAddr_799C) {
 		dbg_printf("[Error!] ___ someOffset not found\n");

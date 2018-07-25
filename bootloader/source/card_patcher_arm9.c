@@ -1,12 +1,17 @@
+#include <string.h>
 #include "card_patcher.h"
 #include "card_finder.h"
+#include "common.h"
+#include "cardengine_arm9_bin.h"
 #include "debugToFile.h"
+
+//#define memcpy __builtin_memcpy // memcpy
 
 extern u32 ROM_TID;
 
 bool cardReadFound = false; // card_patcher_common.c
 
-void decompressLZ77Backwards(u8* addr, size_t size) {
+void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;
 
 	//byte[] Result = new byte[len];
@@ -55,7 +60,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 	moduleParams->compressed_static_end = 0;
 }
 
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32* debug = (u32*)0x037C6000;
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
@@ -110,7 +115,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 	}
 
 	// Force to power off
-	//u32 forceToPowerOffOffset = (u32)findForceToPowerOffOffset(ndsHeader);
+	//u32* forceToPowerOffOffset = findForceToPowerOffOffset(ndsHeader);
 
 	// Find the card id
 	u32* cardIdEndOffset;
@@ -195,9 +200,9 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 			patchSize = patchMpuSize;
 		}
 		mpuStartOffset = findOffset(
-			(u32*)((u32)mpuStartOffset + 4), patchSize,
-			mpuInitRegionSignature, 1,
-			1
+			//(u32*)((u32)mpuStartOffset + 4), patchSize,
+			mpuStartOffset + 1, patchSize,
+			mpuInitRegionSignature, 1
 		);
 		if (mpuStartOffset) {
 			dbg_printf("Mpu init :\t");
@@ -237,8 +242,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 
 		u32* arenaLow2Offset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00100000,//ndsHeader->arm9binarySize,
-			oldArenaLow, 1,
-			1
+			oldArenaLow, 1
 		);
 
 		// *arenaLow2Offset += 0x800; // shrink heap by 8 kb
@@ -255,7 +259,8 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 	{
 		u32* randomPatchOffset = findRandomPatchOffset(ndsHeader);
 		if (randomPatchOffset) {
-			*(u32*)((u32)randomPatchOffset + 0xC) = 0x0;
+			//*(u32*)((u32)randomPatchOffset + 0xC) = 0x0;
+			*(randomPatchOffset + 3) = 0x0;
 		}
 	}
 
@@ -272,23 +277,19 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 
 	debug[5] = (u32)patches;
 
-	u32* card_struct = cardReadEndOffset - 1;
-	//u32* cache_struct = cardIdStartOffset - 1;
+	u32** card_struct = (u32**)(cardReadEndOffset - 1);
+	//u32* cache_struct = (u32**)(cardIdStartOffset - 1);
 
-	debug[6] = *card_struct;
-	//debug[7] = *cache_struct;
+	debug[6] = (u32)*card_struct;
+	//debug[7] = (u32)*cache_struct;
 
-	cardEngineLocation[5] = (u32)((u32*)*card_struct + 6);
+	cardEngineLocation[5] = (u32)(*card_struct + 6);
+	*(u32*)patches[5] = (u32)(*card_struct + 6); // Cache management alternative
 	if (moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = (u32)((u32*)*card_struct + 7);
+		cardEngineLocation[5] = (u32)(*card_struct + 7);
+		*(u32*)patches[5] = (u32)(*card_struct + 7); // Cache management alternative
 	}
-	//cardEngineLocation[6] = *cache_struct;
-
-	// Cache management alternative
-	*(u32*)patches[5] = (u32)((u32*)*card_struct + 6);
-	if (moduleParams->sdk_version > 0x3000000) {
-		*(u32*)patches[5] = (u32)((u32*)*card_struct + 7);
-	}
+	//cardEngineLocation[6] = (u32)*cache_struct;
 
 	*(u32*)patches[7] = (u32)cardPullOutOffset + 4;
 
@@ -300,22 +301,22 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, modul
 
 	patches[10] = needFlushCache;
 
-	//copyLoop(oldArenaLow, cardReadPatch, 0xF0);
+	//memcpy(oldArenaLow, cardReadPatch, 0xF0); //copyLoop(oldArenaLow, cardReadPatch, 0xF0);
 
-	copyLoop(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0);
+	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0); //copyLoop(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0);
 
-	copyLoop(cardPullOutOffset, cardPullOutPatch, 0x4);
+	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4); //copyLoop(cardPullOutOffset, cardPullOutPatch, 0x4);
 
 	/*if (forceToPowerOffOffset) {
-		copyLoop((u32*)forceToPowerOffOffset, cardPullOutPatch, 0x4);
+		memcpy(forceToPowerOffOffset, cardPullOutPatch, 0x4); //copyLoop(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 	}*/
 
 	if (cardIdStartOffset) {
-		copyLoop(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8);
+		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8); //copyLoop(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8);
 	}
 
 	if (cardReadDmaStartOffset) {
-		copyLoop(cardReadDmaStartOffset, cardDmaPatch, usesThumb ? 0x4 : 0x8);
+		memcpy(cardReadDmaStartOffset, cardDmaPatch, usesThumb ? 0x4 : 0x8); //copyLoop(cardReadDmaStartOffset, cardDmaPatch, usesThumb ? 0x4 : 0x8);
 	}
 
 	dbg_printf("ERR_NONE");

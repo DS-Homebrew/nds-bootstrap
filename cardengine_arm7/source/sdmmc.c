@@ -22,7 +22,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <stddef.h>
+#include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
 #include "sdmmc.h"
@@ -558,7 +558,7 @@ static u32 sdmmc_calc_size(u8* csd, int type)
   return result;
 }
 
-void sdmmc_init()
+void sdmmc_init(void)
 {
 	//NAND
 	handleNAND.isSDHC = 0;
@@ -613,7 +613,7 @@ void sdmmc_init()
 	*(vu16*)0x10006008 = 0; //SDSTOP
 }
 
-int Nand_Init()
+int Nand_Init(void)
 {
 	// The eMMC is always on. Nothing special to do.
 	set_target(&handleNAND);
@@ -663,7 +663,7 @@ int Nand_Init()
 	return 0;
 }
 
-int SD_Init()
+int SD_Init(void)
 {
 	// We need to send at least 74 clock pulses.
 	set_target(&handleSD);

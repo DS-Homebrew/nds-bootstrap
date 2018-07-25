@@ -9,33 +9,34 @@
  Original source available at:
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
 
-License:
- Copyright (C) 2005  Michael "Chishm" Chisholm
+ License:
+    Copyright (C) 2005  Michael "Chishm" Chisholm
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation; either version 2
- of the License, or (at your option) any later version.
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation; either version 2
+    of the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- If you use this code, please give due credit and email me about your
- project at chishm@hotmail.com
+    If you use this code, please give due credit and email me about your
+    project at chishm@hotmail.com
  
-Helpful information:
- This code runs from VRAM bank C on ARM7
+    Helpful information:
+    This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
 #ifndef ARM7
 # define ARM7
 #endif
+#include <string.h> // memcpy
 #include <nds/ndstypes.h>
 #include <nds/dma.h>
 #include <nds/system.h>
@@ -54,9 +55,11 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 
-extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+//#define memcpy __builtin_memcpy
 
-void arm7clearRAM();
+extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
+
+void arm7clearRAM(void);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
@@ -89,13 +92,13 @@ extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
-static aFile * romFile = (aFile *)0x37D5000;
-static aFile * savFile = ((aFile *)0x37D5000)+1;
+static aFile* romFile = (aFile *)0x37D5000;
+static aFile* savFile = ((aFile *)0x37D5000)+1;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
-static void errorOutput (void) {
-	if(loadingScreen > 0) {
+static void errorOutput(void) {
+	if (loadingScreen > 0) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
@@ -105,8 +108,8 @@ static void errorOutput (void) {
 	while(1);
 }
 
-static void debugOutput (void) {
-	if(loadingScreen > 0) {
+static void debugOutput(void) {
+	if (loadingScreen > 0) {
 		// Wait until the ARM9 is ready
 		while (arm9_stateFlag != ARM9_READY);
 		// Set the error code, then tell ARM9 to display it
@@ -117,9 +120,9 @@ static void debugOutput (void) {
 	}
 }
 
-static void increaseLoadBarLength (void) {
+static void increaseLoadBarLength(void) {
 	arm9_loadBarLength++;
-	if(loadingScreen == 1) debugOutput();	// Let the loading bar finish before ROM starts
+	if (loadingScreen == 1) debugOutput();	// Let the loading bar finish before ROM starts
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -127,8 +130,8 @@ static void increaseLoadBarLength (void) {
 
 #define FW_READ        0x03
 
-void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
-  uint32 index;
+void boot_readFirmware (u32 address, u8 * buffer, u32 size) {
+  u32 index;
 
   // Read command
   while (REG_SPICNT & SPI_BUSY);
@@ -137,9 +140,9 @@ void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
   while (REG_SPICNT & SPI_BUSY);
 
   // Set the address
-  REG_SPIDATA =  (address>>16) & 0xFF;
+  REG_SPIDATA =  (address >> 16) & 0xFF;
   while (REG_SPICNT & SPI_BUSY);
-  REG_SPIDATA =  (address>>8) & 0xFF;
+  REG_SPIDATA =  (address >> 8) & 0xFF;
   while (REG_SPICNT & SPI_BUSY);
   REG_SPIDATA =  (address) & 0xFF;
   while (REG_SPICNT & SPI_BUSY);
@@ -164,7 +167,7 @@ Written by Darkain.
 Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
-void resetMemory_ARM7 (void)
+void resetMemory_ARM7(void)
 {
 	int i;
 	u8 settings1, settings2;
@@ -279,7 +282,7 @@ u32 writeTSCReg(u32 reg, u32 value) {
 
 
 //---------------------------------------------------------------------------------
-void NDSTouchscreenMode() {
+void NDSTouchscreenMode(void) {
 //---------------------------------------------------------------------------------
 	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
 	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
@@ -290,7 +293,7 @@ void NDSTouchscreenMode() {
 
 	u8 volLevel;
 	
-	//if(fifoCheckValue32(FIFO_MAXMOD)) {
+	//if (fifoCheckValue32(FIFO_MAXMOD)) {
 	//	// special setting (when found special gamecode)
 	//	volLevel = 0xAC;
 	//} else {
@@ -302,155 +305,147 @@ void NDSTouchscreenMode() {
 
 	// Touchscr
 	readTSCReg(0);
-	writeTSCReg(0,0);
-	writeTSCReg(0x3a,0);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x3A, 0);
 	readTSCReg(0x51);
-	writeTSCReg(3,0);
+	writeTSCReg(3, 0);
 	readTSCReg(2);
-	writeTSCReg(0,0);
-	readTSCReg(0x3f);
-	writeTSCReg(0,1);
+	writeTSCReg(0, 0);
+	readTSCReg(0x3F);
+	writeTSCReg(0, 1);
 	readTSCReg(0x38);
 	readTSCReg(0x2a);
 	readTSCReg(0x2E);
-	writeTSCReg(0,0);
-	writeTSCReg(0x52,0x80);
-	writeTSCReg(0x40,0xC);
-	writeTSCReg(0,1);
-	writeTSCReg(0x24,0xff);
-	writeTSCReg(0x25,0xff);
-	writeTSCReg(0x26,0x7f);
-	writeTSCReg(0x27,0x7f);
-	writeTSCReg(0x28,0x4a);
-	writeTSCReg(0x29,0x4a);
-	writeTSCReg(0x2a,0x10);
-	writeTSCReg(0x2b,0x10);
-	writeTSCReg(0,0);
-	writeTSCReg(0x51,0);
-	writeTSCReg(0,3);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x52, 0x80);
+	writeTSCReg(0x40, 0xC);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x24, 0xFF);
+	writeTSCReg(0x25, 0xFF);
+	writeTSCReg(0x26, 0x7F);
+	writeTSCReg(0x27, 0x7F);
+	writeTSCReg(0x28, 0x4A);
+	writeTSCReg(0x29, 0x4A);
+	writeTSCReg(0x2A, 0x10);
+	writeTSCReg(0x2B, 0x10);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x51, 0);
+	writeTSCReg(0, 3);
 	readTSCReg(2);
-	writeTSCReg(2,0x98);
-	writeTSCReg(0,1);
-	writeTSCReg(0x23,0);
-	writeTSCReg(0x1f,0x14);
-	writeTSCReg(0x20,0x14);
-	writeTSCReg(0,0);
-	writeTSCReg(0x3f,0);
-	readTSCReg(0x0b);
-	writeTSCReg(0x5,0);
-	writeTSCReg(0xb,0x1);
-	writeTSCReg(0xc,0x2);
-	writeTSCReg(0x12,0x1);
-	writeTSCReg(0x13,0x2);
-	writeTSCReg(0,1);
-  writeTSCReg(0x2E,0x00);
-  writeTSCReg(0,0);
-  writeTSCReg(0x3A,0x60);
-  writeTSCReg(0x01,01);
-  writeTSCReg(0x9,0x66);
-  writeTSCReg(0,1);
-  readTSCReg(0x20);
-  writeTSCReg(0x20,0x10);
-  writeTSCReg(0,0);
-  writeTSCReg( 04,00);
-  writeTSCReg( 0x12,0x81);
-  writeTSCReg( 0x13,0x82);
-  writeTSCReg( 0x51,0x82);
-  writeTSCReg( 0x51,0x00);
-  writeTSCReg( 0x04,0x03);
-  writeTSCReg( 0x05,0xA1);
-  writeTSCReg( 0x06,0x15);
-  writeTSCReg( 0x0B,0x87);
-  writeTSCReg( 0x0C,0x83);
-  writeTSCReg( 0x12,0x87);
-  writeTSCReg( 0x13,0x83);
-  writeTSCReg(0,3);
-  readTSCReg(0x10);
-  writeTSCReg(0x10,0x08);
-  writeTSCReg(0,4);
-  writeTSCReg(0x08,0x7F);
-  writeTSCReg(0x09,0xE1);
-  writeTSCReg(0xa,0x80);
-  writeTSCReg(0xb,0x1F);
-  writeTSCReg(0xc,0x7F);
-  writeTSCReg(0xd,0xC1);
-  writeTSCReg(0,0);
-  writeTSCReg( 0x41, 0x08);
-  writeTSCReg( 0x42, 0x08);
-  writeTSCReg( 0x3A, 0x00);
-  writeTSCReg(0,4);
-  writeTSCReg(0x08,0x7F);
-  writeTSCReg(0x09,0xE1);
-  writeTSCReg(0xa,0x80);
-  writeTSCReg(0xb,0x1F);
-  writeTSCReg(0xc,0x7F);
-  writeTSCReg(0xd,0xC1);
-  writeTSCReg(0,1);
-  writeTSCReg(0x2F, 0x2B);
-  writeTSCReg(0x30, 0x40);
-  writeTSCReg(0x31, 0x40);
-  writeTSCReg(0x32, 0x60);
-  writeTSCReg(0,0);
-  readTSCReg( 0x74);
-  writeTSCReg( 0x74, 0x02);
-  readTSCReg( 0x74);
-  writeTSCReg( 0x74, 0x10);
-  readTSCReg( 0x74);
-  writeTSCReg( 0x74, 0x40);
-  writeTSCReg(0,1);
-  writeTSCReg( 0x21, 0x20);
-  writeTSCReg( 0x22, 0xF0);
-  writeTSCReg(0,0);
-  readTSCReg( 0x51);
-  readTSCReg( 0x3f);
-  writeTSCReg( 0x3f, 0xd4);
-  writeTSCReg(0,1);
-  writeTSCReg(0x23,0x44);
-  writeTSCReg(0x1F,0xD4);
-  writeTSCReg(0x28,0x4e);
-  writeTSCReg(0x29,0x4e);
-  writeTSCReg(0x24,0x9e);
-  writeTSCReg(0x24,0x9e);
-  writeTSCReg(0x20,0xD4);
-  writeTSCReg(0x2a,0x14);
-  writeTSCReg(0x2b,0x14);
-  writeTSCReg(0x26,volLevel);
-  writeTSCReg(0x27,volLevel);
-  writeTSCReg(0,0);
-  writeTSCReg(0x40,0);
-  writeTSCReg(0x3a,0x60);
-  writeTSCReg(0,1);
-  writeTSCReg(0x26,volLevel);
-  writeTSCReg(0x27,volLevel);
-  writeTSCReg(0x2e,0x03);
-  writeTSCReg(0,3);
-  writeTSCReg(3,0);
-  writeTSCReg(0,1);
-  writeTSCReg(0x21,0x20);
-  writeTSCReg(0x22,0xF0);
-  readTSCReg(0x22);
-  writeTSCReg(0x22,0xF0);
-  writeTSCReg(0,0);
-  writeTSCReg(0x52,0x80);
-  writeTSCReg(0x51,0x00);
-  writeTSCReg(0,3);
-  readTSCReg(0x02);
-  writeTSCReg(2,0x98);
-  writeTSCReg(0,0xff);
-  writeTSCReg(5,0);
+	writeTSCReg(2, 0x98);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x23, 0);
+	writeTSCReg(0x1F, 0x14);
+	writeTSCReg(0x20, 0x14);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x3F, 0);
+	readTSCReg(0x0B);
+	writeTSCReg(0x5, 0);
+	writeTSCReg(0xB, 0x1);
+	writeTSCReg(0xC, 0x2);
+	writeTSCReg(0x12, 0x1);
+	writeTSCReg(0x13, 0x2);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x2E, 0x00);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x3A, 0x60);
+	writeTSCReg(0x01, 01);
+	writeTSCReg(0x9, 0x66);
+	writeTSCReg(0, 1);
+	readTSCReg(0x20);
+	writeTSCReg(0x20, 0x10);
+	writeTSCReg(0, 0);
+	writeTSCReg(04, 00);
+	writeTSCReg(0x12, 0x81);
+	writeTSCReg(0x13, 0x82);
+	writeTSCReg(0x51, 0x82);
+	writeTSCReg(0x51, 0x00);
+	writeTSCReg(0x04, 0x03);
+	writeTSCReg(0x05, 0xA1);
+	writeTSCReg(0x06, 0x15);
+	writeTSCReg(0x0B, 0x87);
+	writeTSCReg(0x0C, 0x83);
+	writeTSCReg(0x12, 0x87);
+	writeTSCReg(0x13, 0x83);
+	writeTSCReg(0, 3);
+	readTSCReg(0x10);
+	writeTSCReg(0x10, 0x08);
+	writeTSCReg(0, 4);
+	writeTSCReg(0x08, 0x7F);
+	writeTSCReg(0x09, 0xE1);
+	writeTSCReg(0xA, 0x80);
+	writeTSCReg(0xB, 0x1F);
+	writeTSCReg(0xC, 0x7F);
+	writeTSCReg(0xD, 0xC1);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x41, 0x08);
+	writeTSCReg(0x42, 0x08);
+	writeTSCReg(0x3A, 0x00);
+	writeTSCReg(0, 4);
+	writeTSCReg(0x08, 0x7F);
+	writeTSCReg(0x09, 0xE1);
+	writeTSCReg(0xA, 0x80);
+	writeTSCReg(0xB, 0x1F);
+	writeTSCReg(0xC, 0x7F);
+	writeTSCReg(0xD, 0xC1);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x2F, 0x2B);
+	writeTSCReg(0x30, 0x40);
+	writeTSCReg(0x31, 0x40);
+	writeTSCReg(0x32, 0x60);
+	writeTSCReg(0, 0);
+	readTSCReg(0x74);
+	writeTSCReg(0x74, 0x02);
+	readTSCReg(0x74);
+	writeTSCReg(0x74, 0x10);
+	readTSCReg(0x74);
+	writeTSCReg(0x74, 0x40);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x21, 0x20);
+	writeTSCReg(0x22, 0xF0);
+	writeTSCReg(0, 0);
+	readTSCReg(0x51);
+	readTSCReg(0x3F);
+	writeTSCReg(0x3F, 0xd4);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x23, 0x44);
+	writeTSCReg(0x1F, 0xD4);
+	writeTSCReg(0x28, 0x4E);
+	writeTSCReg(0x29, 0x4E);
+	writeTSCReg(0x24, 0x9E);
+	writeTSCReg(0x24, 0x9E);
+	writeTSCReg(0x20, 0xD4);
+	writeTSCReg(0x2A, 0x14);
+	writeTSCReg(0x2B, 0x14);
+	writeTSCReg(0x26, volLevel);
+	writeTSCReg(0x27, volLevel);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x40, 0);
+	writeTSCReg(0x3A, 0x60);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x26, volLevel);
+	writeTSCReg(0x27, volLevel);
+	writeTSCReg(0x2E, 0x03);
+	writeTSCReg(0, 3);
+	writeTSCReg(3, 0);
+	writeTSCReg(0, 1);
+	writeTSCReg(0x21, 0x20);
+	writeTSCReg(0x22, 0xF0);
+	readTSCReg(0x22);
+	writeTSCReg(0x22, 0xF0);
+	writeTSCReg(0, 0);
+	writeTSCReg(0x52, 0x80);
+	writeTSCReg(0x51, 0x00);
+	writeTSCReg(0, 3);
+	readTSCReg(0x02);
+	writeTSCReg(2, 0x98);
+	writeTSCReg(0, 0xFF);
+	writeTSCReg(5, 0);
 	
-	
-	
-	
-	
-	
-	
-	// Powerman
-	writePowerManagement(0x00,0x0D);
+	// Power management
+	writePowerManagement(0x00, 0x0D);
 	//*(unsigned char*)0x40001C2 = 0x80, 0x00;		// read PWR[0]   ;<-- also part of TSC !
 	//*(unsigned char*)0x40001C2 = 0x00, 0x0D;		// PWR[0]=0Dh    ;<-- also part of TSC !
-	
-
 }
 
 
@@ -462,28 +457,27 @@ u32 fatSize;
 u32 romSize;
 u32 romSizeNoArm9;
 
-void loadBinary_ARM7 (aFile file)
-{
-	u32 ndsHeader[0x170>>2];
+void loadBinary_ARM7 (aFile file) {
+	u32 ndsHeader[0x170 >> 2];
 
 	nocashMessage("loadBinary_ARM7");
 
-	// read NDS header
+	// Read NDS header
 	fileRead ((char*)ndsHeader, file, 0, 0x170, 3);
-	// read ARM9 info from NDS header
-	u32 ARM9_SRC = ndsHeader[0x020>>2];
-	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
-	ARM9_LEN = ndsHeader[0x02C>>2];
-	// read ARM7 info from NDS header
-	u32 ARM7_SRC = ndsHeader[0x030>>2];
-	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
-	u32 ARM7_LEN = ndsHeader[0x03C>>2];
+	// Read ARM9 info from NDS header
+	u32 ARM9_SRC = ndsHeader[0x020 >> 2];
+	char* ARM9_DST = (char*)ndsHeader[0x028 >> 2];
+	ARM9_LEN = ndsHeader[0x02C >> 2];
+	// Read ARM7 info from NDS header
+	u32 ARM7_SRC = ndsHeader[0x030 >> 2];
+	char* ARM7_DST = (char*)ndsHeader[0x038 >> 2];
+	u32 ARM7_LEN = ndsHeader[0x03C >> 2];
 
-	ROM_TID = ndsHeader[0x00C>>2];
-	fatSize = ndsHeader[0x04C>>2];
-	romSize = ndsHeader[0x080>>2];
-	romSizeNoArm9 = romSize-0x4000-ARM9_LEN;
-	ROM_HEADERCRC = ndsHeader[0x15C>>2];
+	ROM_TID = ndsHeader[0x00C >> 2];
+	fatSize = ndsHeader[0x04C >> 2];
+	romSize = ndsHeader[0x080 >> 2];
+	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
+	ROM_HEADERCRC = ndsHeader[0x15C >> 2];
 
 	if ((consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
 	|| (consoleModel == 0 && romSizeNoArm9 <= 0x007FC000)) {
@@ -491,16 +485,17 @@ void loadBinary_ARM7 (aFile file)
 		ROMinRAM = true;
 	}
 
-	//Fix Pokemon games needing header data.
+	// Fix Pokemon games needing header data.
 	fileRead ((char*)0x027FF000, file, 0, 0x170, 3);
 
-	if((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x414441	// Diamond
+	if ((*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x414441	// Diamond
 	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x415041	// Pearl
 	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x555043	// Platinum
 	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x4B5049	// HG
 	|| (*(u32*)(0x27FF00C) & 0x00FFFFFF) == 0x475049)	// SS
 	{
-		*(u32*)(0x27FF00C) = 0x4A414441;//Make the Pokemon game code ADAJ.
+		// Make the Pokemon game code ADAJ.
+		*(u32*)(0x27FF00C) = 0x4A414441;
 	}
 	
 	// Load binaries into memory
@@ -508,29 +503,29 @@ void loadBinary_ARM7 (aFile file)
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
 	
 	// The World Ends With You (USA) (Europe)
-	if(ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741){
+	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)(0x203E7B0) = 0;
 	}
 
 	// Subarashiki Kono Sekai - It's a Wonderful World (Japan)
-	if(ROM_TID == 0x4A4C5741){
+	if (ROM_TID == 0x4A4C5741) {
 		*(u32*)(0x203F114) = 0;
 	}
 
 	// Miami Nights - Singles in the City (USA)
-	if(ROM_TID == 0x45575641){
-		//fixes not enough memory error
+	if (ROM_TID == 0x45575641) {
+		// Fix not enough memory error
 		*(u32*)(0x0204cccc) = 0xe1a00000; //nop
 	}
 
 	// Miami Nights - Singles in the City (Europe)
-	if(ROM_TID == 0x50575641){
-		//fixes not enough memory error
+	if (ROM_TID == 0x50575641) {
+		// Fix not enough memory error
 		*(u32*)(0x0204cdbc) = 0xe1a00000; //nop
 	}
 	
 	// 0735 - Castlevania - Portrait of Ruin (USA)
-	if(ROM_TID == 0x45424341){
+	if (ROM_TID == 0x45424341) {
 		*(u32*)(0x02007910) = 0xeb02508e;
 		*(u32*)(0x02007918) = 0xea000004;
 		*(u32*)(0x02007a00) = 0xeb025052;
@@ -541,7 +536,7 @@ void loadBinary_ARM7 (aFile file)
 	}
 	
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	if(ROM_TID == 0x4a424341){
+	if (ROM_TID == 0x4a424341) {
 		*(u32*)(0x02007910) = 0xeb0250b0;
 		*(u32*)(0x02007918) = 0xea000004;
 		*(u32*)(0x02007a00) = 0xeb025074;
@@ -552,7 +547,7 @@ void loadBinary_ARM7 (aFile file)
 	}
 	
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
-	if(ROM_TID == 0x50424341){
+	if (ROM_TID == 0x50424341) {
 		*(u32*)(0x02007b00) = 0xeb025370;
 		*(u32*)(0x02007b08) = 0xea000004;
 		*(u32*)(0x02007bf0) = 0xeb025334;
@@ -562,52 +557,52 @@ void loadBinary_ARM7 (aFile file)
 		*(u32*)(0x02007c04) = 0xea000003;	
 	}
 
-	// "Chrono Trigger (Japan)"
-	if(ROM_TID == 0x4a555159){
-		decompressLZ77Backwards((uint8_t*)ARM9_DST, ARM9_LEN);
+	// Chrono Trigger (Japan)
+	if (ROM_TID == 0x4a555159) {
+		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)(0x0204e364) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e368) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e6c4) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e6c8) = 0xe12fff1e; //bx lr
 	}
 
-	// "Chrono Trigger (USA/Europe)"
-	if(ROM_TID == 0x45555159 || ROM_TID == 0x50555159){
-		decompressLZ77Backwards((uint8_t*)ARM9_DST, ARM9_LEN);
+	// Chrono Trigger (USA/Europe)
+	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
+		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)(0x0204e334) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e338) = 0xe12fff1e; //bx lr
 		*(u32*)(0x0204e694) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x0204e698) = 0xe12fff1e; //bx lr
 	}
 	
-	// "Dementium II (USA/EUR)"
-	if(ROM_TID == 0x45454442 || ROM_TID == 0x50454442){
+	// Dementium II (USA/EUR)
+	if (ROM_TID == 0x45454442 || ROM_TID == 0x50454442) {
 		*(u32*)(0x020e9120) = 0xe3a00002;
 		*(u32*)(0x020e9124) = 0xea000029;
 	}
 	
-	// "Dementium II: Tozasareta Byoutou (JPN)"
-	if(ROM_TID == 0x4a454442){
+	// Dementium II: Tozasareta Byoutou (JPN)
+	if (ROM_TID == 0x4a454442) {
 		*(u32*)(0x020d9f60) = 0xe3a00005;
 		*(u32*)(0x020d9f68) = 0xea000029;
 	}
 
-	// "Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)"
-	// "Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)"
-	if(ROM_TID == 0x45584759 || ROM_TID == 0x50584759){
+	// Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)
+	// Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)
+	if (ROM_TID == 0x45584759 || ROM_TID == 0x50584759) {
 		*(u16*)(0x02037a34) = 0x46c0;
 		*(u32*)(0x0216ac0c) = 0x0001fffb;
 	}
 
-	// "WarioWare: DIY (USA)"
-	if(ROM_TID == 0x45524F55){
+	// WarioWare: DIY (USA)
+	if (ROM_TID == 0x45524F55) {
 		*(u32*)(0x02003114) = 0xE12FFF1E; //mov r0, #0
 	}
 
-	// first copy the header to its proper location, excluding
+	// First copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
-	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
-	ndsHeader[0x024>>2] = 0;
+	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024 >> 2]; // Store for later
+	ndsHeader[0x024 >> 2] = 0;
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
@@ -619,7 +614,7 @@ u32 enableExceptionHandler = true;
 
 void setArm9Stuff(aFile file) {
 	// ExceptionHandler2 (red screen) blacklist
-	if((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
+	if ((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
 	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
 	|| (ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
 	|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
@@ -629,8 +624,9 @@ void setArm9Stuff(aFile file) {
 
 	if (ROMinRAM == true) {
 		// Load ROM into RAM
-		fileRead ((char*)ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
-		if(*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) == 0x4B434148){ //Primary fix for Mario's Holiday
+		fileRead((char*)ROM_LOCATION, file, 0x4000+ARM9_LEN, romSizeNoArm9, 0);
+		if (*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) == 0x4B434148){
+			// Primary fix for Mario's Holiday
 			*(u32*)((ROM_LOCATION-0x4000-ARM9_LEN)+0x003128AC) = 0xA00;
 		}
 	}
@@ -645,17 +641,17 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void startBinary_ARM7 (void) {
-	REG_IME=0;
-	while(REG_VCOUNT!=191);
-	while(REG_VCOUNT==191);
+void startBinary_ARM7(void) {
+	REG_IME = 0;
+	while(REG_VCOUNT != 191);
+	while(REG_VCOUNT == 191);
 	// copy NDS ARM9 start address into the header, starting ARM9
 	*((vu32*)0x027FFE24) = TEMP_ARM9_START_ADDRESS;
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
-	while(REG_VCOUNT!=191);
-	while(REG_VCOUNT==191);
+	while(REG_VCOUNT != 191);
+	while(REG_VCOUNT == 191);
 	// Start ARM7
 	VoidFn arm7code = *(VoidFn*)(0x27FFE34);
 	arm7code();
@@ -663,34 +659,34 @@ void startBinary_ARM7 (void) {
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void initMBK() {
-	// give all DSI WRAM to arm7 at boot
+void initMBK(void) {
+	// give all DSi WRAM to ARM7 at boot
 	// this function have no effect with ARM7 SCFG locked
 	
-	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9=0x3000000F;
+	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9 = 0x3000000F;
 	
-	// WRAM-A fully mapped to arm7
-	*((vu32*)REG_MBK1)=0x8185898D; // same as dsiware
+	// WRAM-A fully mapped to ARM7
+	*((vu32*)REG_MBK1) = 0x8185898D; // same as dsiware
 	
-	// WRAM-B fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK2)=0x9195999D;
-	*((vu32*)REG_MBK3)=0x8185898D;
+	// WRAM-B fully mapped to ARM7 // inverted order
+	*((vu32*)REG_MBK2) = 0x9195999D;
+	*((vu32*)REG_MBK3) = 0x8185898D;
 	
 	// WRAM-C fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK4)=0x9195999D;
-	*((vu32*)REG_MBK5)=0x8185898D;
+	*((vu32*)REG_MBK4) = 0x9195999D;
+	*((vu32*)REG_MBK5) = 0x8185898D;
 	
 	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
 	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-	REG_MBK6=0x080037C0; // same as dsiware
+	REG_MBK6 = 0x080037C0; // same as DSiWare
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7=0x07C03740; // same as dsiware
+	REG_MBK7 = 0x07C03740; // same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8=0x07403700; // same as dsiware
+	REG_MBK8 = 0x07403700; // same as DSiWare
 }
 
-int arm7_main (void) {
+int arm7_main(void) {
 	nocashMessage("bootloader");
 
 	initMBK(); 
@@ -704,20 +700,19 @@ int arm7_main (void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if(!FAT_InitFiles(initDisc, 3))
-	{
+	if (!FAT_InitFiles(initDisc, 3)) {
 		nocashMessage("!FAT_InitFiles");
 		return -1;
 	}
 
 	*romFile = getFileFromCluster (storedFileCluster);
 
-	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
-	{
+	// Invalid file cluster specified
+	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
 		*romFile = getBootFileCluster(bootName, 3);
 	}
-	if (romFile->firstCluster == CLUSTER_FREE)
-	{
+
+	if (romFile->firstCluster == CLUSTER_FREE) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
@@ -726,9 +721,8 @@ int arm7_main (void) {
     
     *savFile = getFileFromCluster(saveFileCluster);
     
-    if (savFile->firstCluster != CLUSTER_FREE)
-    {
-         buildFatTableCache(savFile, 3);
+    if (savFile->firstCluster != CLUSTER_FREE) {
+        buildFatTableCache(savFile, 3);
 	}
 
 	int errorCode;
@@ -741,50 +735,48 @@ int arm7_main (void) {
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(*romFile);
-	increaseLoadBarLength();	// 2 dots
+	increaseLoadBarLength(); // 2 dots
 
-	nocashMessage("try to patch card");
-	copyLoop ((u32*)ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-	increaseLoadBarLength();	// 3 dots
-	copyLoop ((u32*)ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-	increaseLoadBarLength();	// 4 dots
+	nocashMessage("Try to patch card");
+	memcpy((u32*)ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+	increaseLoadBarLength(); // 3 dots
 
-	module_params_t* params = findModuleParams((tNDSHeader*)NDS_HEAD, donorSdkVer);
-	if(params)
-	{
-		ensureArm9Decompressed((tNDSHeader*)NDS_HEAD, params);
+	memcpy((u32*)ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	increaseLoadBarLength(); // 4 dots
+
+	module_params_t* moduleParams = findModuleParams((tNDSHeader*)NDS_HEAD, donorSdkVer);
+	if (moduleParams) {
+		ensureArm9Decompressed((tNDSHeader*)NDS_HEAD, moduleParams);
 	}
-	increaseLoadBarLength();	// 5 dots
+	increaseLoadBarLength(); // 5 dots
 
-	errorCode = patchCardNds((tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, params, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
-	if(errorCode == ERR_NONE) {
-		nocashMessage("patch card Sucessfull");
+	errorCode = patchCardNds((tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	if (errorCode == ERR_NONE) {
+		nocashMessage("Card patch successful");
 	} else {
-		nocashMessage("game uses thumb");
+		nocashMessage("Error during card patch");
 		errorOutput();
 	}
-	increaseLoadBarLength();	// 6 dots
+	increaseLoadBarLength(); // 6 dots
 
 	errorCode = hookNdsRetail((tNDSHeader*)NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
-	if(errorCode == ERR_NONE) {
-		nocashMessage("card hook Sucessfull");
+	if (errorCode == ERR_NONE) {
+		nocashMessage("Card hook successful");
 	} else {
-		nocashMessage("error during card hook");
+		nocashMessage("Error during card hook");
 		errorOutput();
 	}
-	increaseLoadBarLength();	// 7 dots
- 
-
+	increaseLoadBarLength(); // 7 dots
 
 	setArm9Stuff(*romFile);
 
-	if(ROMinRAM == false) {
+	if (ROMinRAM == false) {
 		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
-			i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+			i2cWriteRegister(0x4A, 0x30, 0x12); // Turn WiFi LED off
 		}
 	}
 
-	increaseLoadBarLength();	// and finally, 8 dots
+	increaseLoadBarLength(); // Final 8 dots
 	fadeType = false;
 	while (screenBrightness != 31);	// Wait for screen to fade-out
 

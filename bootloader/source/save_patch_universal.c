@@ -17,7 +17,7 @@ u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
 u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
 u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
 
-u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	dbg_printf("\nArm7 (patch vAll)\n");
 	
 	bool usesThumb = false;
@@ -26,8 +26,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	// Find the relocation signature
 	u32 relocationStart = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		relocateStartSignature, 1,
-		1
+		relocateStartSignature, 1
 	);
 	if (!relocationStart) {
 		dbg_printf("Relocation start not found\n");
@@ -50,8 +49,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 		// Find the beginning of the next function
 		u32 nextFunction = (u32)findOffset(
 			(u32*)relocationStart, ndsHeader->arm7binarySize,
-			nextFunctiontSignature, 1,
-			1
+			nextFunctiontSignature, 1
 		);
 	
 		// Validate the relocation signature
@@ -92,8 +90,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	// Find the card read
 	/*u32 cardReadEndAddr = findOffset(
 		(u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2,
-		1
+		a7cardReadSignature, 2
 	);
 	if (!cardReadEndAddr) {
 		dbg_printf("[Error!] Card read addr not found\n");
@@ -112,74 +109,61 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	
 	JumpTableFunc = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal, 3,
-		1
+		a7JumpTableSignatureUniversal, 3
 	);
 	if (JumpTableFunc) {
 		EepromReadJump = (u32)findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal, 3,
-			1
+			a7JumpTableSignatureUniversal, 3
 		);
 		EepromWriteJump = (u32)findOffset(
 			(u32*)EepromReadJump + 4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_pt2, 3,
-			1
+			a7JumpTableSignatureUniversal_pt2, 3
 		);
 		EepromProgJump = (u32)findOffset(
 			(u32*)EepromWriteJump + 4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_pt2, 3,
-			1
+			a7JumpTableSignatureUniversal_pt2, 3
 		);
 		EepromVerifyJump = (u32)findOffset(
 			(u32*)EepromProgJump + 4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_pt2, 3,
-			1
+			a7JumpTableSignatureUniversal_pt2, 3
 		);
 		EepromEraseJump = (u32)findOffset(
 			(u32*)EepromVerifyJump + 4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_pt3, 2,
-			1
+			a7JumpTableSignatureUniversal_pt3, 2
 		);
 	} else {
 		JumpTableFunc = (u32)findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2, 3,
-			1
+			a7JumpTableSignatureUniversal_2, 3
 		);
 		if (JumpTableFunc) {
 			EepromReadJump = (u32)findOffset(
 				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversal_2, 3,
-				1
+				a7JumpTableSignatureUniversal_2, 3
 			);
 			EepromWriteJump = (u32)findOffset(
 				(u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversal_2_pt2, 3,
-				1
+				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromProgJump = (u32)findOffset(
 				(u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversal_2_pt2, 3,
-				1
+				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromVerifyJump = (u32)findOffset(
 				(u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversal_2_pt2, 3,
-				1
+				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromEraseJump = (u32)findOffset(
 				(u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversal_2_pt3, 2,
-				1
+				a7JumpTableSignatureUniversal_2_pt3, 2
 			);
 		} else {
 			usesThumb = true;
 
 			JumpTableFunc = (u32)findOffsetThumb(
 				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb, 3,
-				1
+				a7JumpTableSignatureUniversalThumb, 3
 			);
 
 			if (!JumpTableFunc) {
@@ -192,61 +176,51 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	
 			EepromReadJump = (u32)findOffsetThumb(
 				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb, 3,
-				1
+				a7JumpTableSignatureUniversalThumb, 3
 			);
 
 			EepromWriteJump = (u32)findOffsetThumb(
 				(u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb_pt2, 3,
-				1
+				a7JumpTableSignatureUniversalThumb_pt2, 3
 			);
 			if (EepromWriteJump) {
 				EepromProgJump = (u32)findOffsetThumb(
 					(u16*)EepromWriteJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 3,
-					1
+					a7JumpTableSignatureUniversalThumb_pt2, 3
 				);
 				EepromVerifyJump = (u32)findOffsetThumb(
 					(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 3,
-					1
+					a7JumpTableSignatureUniversalThumb_pt2, 3
 				);
 				EepromEraseJump = (u32)findOffsetThumb(
 					(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt3, 2,
-					1
+					a7JumpTableSignatureUniversalThumb_pt3, 2
 				);
 				if (!EepromEraseJump) {
 					EepromEraseJump = (u32)findOffsetThumb(
 						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
-						a7JumpTableSignatureUniversalThumb_pt3_alt, 2,
-						1
+						a7JumpTableSignatureUniversalThumb_pt3_alt, 2
 					);
 				}
 			} else {
 				// alternate v1 order
 				thumbType = 1;
 
-				EepromProgJump = (u32)findOffsetThumb(
+				EepromProgJump = (u32)findOffsetBackwardsThumb(
 					(u16*)JumpTableFunc, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromWriteJump = (u32)findOffsetThumb(
+				EepromWriteJump = (u32)findOffsetBackwardsThumb(
 					(u16*)EepromProgJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromVerifyJump = (u32)findOffsetThumb(
+				EepromVerifyJump = (u32)findOffsetBackwardsThumb(
 					(u16*)EepromWriteJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromEraseJump = (u32)findOffsetThumb(
+				EepromEraseJump = (u32)findOffsetBackwardsThumb(
 					(u16*)EepromVerifyJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt3_alt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
 				);
 			}
 		}

@@ -1,48 +1,68 @@
-//#include <string.h>
-//#include <stdlib.h>
-//#include <nds/system.h>
-//#include <nds/memory.h>
+#include <string.h> // memcmp
+#include <stddef.h> // NULL
+#include <limits.h>
 #include "card_finder.h"
-#include "debugToFile.h"
 
-// Look for @find and return the position of it.
-u32* findOffset(u32* addr, size_t size, u32* find, size_t lenofFind, int direction) {
-	u32* debug = (u32*)0x037D0000;
-	u32* end = addr + size/sizeof(u32);
-	debug[3] = (u32)end;
-	for (; addr != end; addr += direction) {
-		bool found = true;
+// (memcmp is slower)
+//#define memcmp __builtin_memcmp
 
-		for (int i = 0; i < lenofFind; i++) {
-			if (addr[i] != find[i]) {
-				found = false;
-				break;
-			}
-		}
+#define TABLE_SIZE (UCHAR_MAX + 1) // 256
 
-		if (found) {
-			return addr;
-		}
-	}
+extern inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen);
+extern inline u32* findOffsetBackwards(const u32* start, u32 dataSize, const u32* find, u32 findLen);
+extern inline u16* findOffsetThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen);
+extern inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen);
 
-	return NULL;
+/*
+*   Look for @find and return the position of it.
+*   Boyer-Moore Horspool algorithm
+*/
+u8* memsearch(const u8 *start, u32 dataSize, const u8 *find, u32 findSize) {
+    u32 table[TABLE_SIZE];
+
+    // Preprocessing
+    for (u32 i = 0; i < TABLE_SIZE; ++i) {
+        table[i] = findSize;
+    }
+    for (u32 i = 0; i < findSize - 1; ++i) {
+        table[find[i]] = findSize - i - 1;
+    }
+
+    // Searching
+    u32 j = 0;
+    while (j <= dataSize - findSize) {
+        u8 c = start[j + findSize - 1];
+        if (find[findSize - 1] == c && memcmp(find, start + j, findSize - 1) == 0) {
+            return (u8*)start + j;
+        }
+        j += table[c];
+    }
+
+    return NULL;
 }
 
-u16* findOffsetThumb(u16* addr, size_t size, u16* find, size_t lenofFind, int direction) {
-	for (u16* end = addr + size/sizeof(u16); addr != end; addr += direction) {
-		bool found = true;
+/*
+*   Quick Search algorithm
+*/
+/*u8* memsearch(const u8 *start, u32 dataSize, const u8 *find, u32 findSize) {
+    u32 table[TABLE_SIZE];
 
-		for (int i = 0; i < lenofFind; i++) {
-			if (addr[i] != find[i]) {
-				found = false;
-				break;
-			}
-		}
+    // Preprocessing
+    for (u32 i = 0; i < TABLE_SIZE; ++i) {
+        table[i] = findSize + 1;
+    }
+    for (u32 i = 0; i < findSize; ++i) {
+        table[find[i]] = findSize - i;
+    }
 
-		if (found) {
-			return addr;
-		}
-	}
+    // Searching
+    u32 j = 0;
+    while (j <= dataSize - findSize) {
+        if (memcmp(find, start + j, findSize) == 0) {
+            return (u8*)start + j;
+        }
+        j += table[start[j + findSize]];
+    }
 
-	return NULL;
-}
+    return NULL;
+}*/

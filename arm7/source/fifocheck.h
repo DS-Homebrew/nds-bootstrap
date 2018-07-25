@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void SCFGFifoCheck (void);
+void SCFGFifoCheck(void);
 
 #ifdef __cplusplus
 }

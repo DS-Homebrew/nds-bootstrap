@@ -19,6 +19,7 @@
 //#include <stddef.h>
 #include <nds/system.h>
 #include "card_patcher.h"
+#include "common.h"
 #include "debugToFile.h"
 
 extern bool cardReadFound; // card_patcher_arm9.c
@@ -27,7 +28,7 @@ u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
 	u32* cardEngineLocationArm7,
 	u32* cardEngineLocationArm9,
-	module_params_t* moduleParams, 
+	const module_params_t* moduleParams, 
 	u32 saveFileCluster,
 	u32 saveSize,
 	u32 patchMpuRegion,

@@ -16,14 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include <nds/system.h>
 
 #include "hook.h"
 #include "common.h"
-#include "cardengine_arm7_bin.h"
 #include "fat.h"
+#include "cardengine_arm7_bin.h"
 
-extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
 extern unsigned long language;
 extern unsigned long consoleModel;

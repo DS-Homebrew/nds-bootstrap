@@ -19,47 +19,66 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+//#include <stdlib.h>
 #include <nds/dma.h>
-#include <stdlib.h>
 
 #define resetCpu() \
 		__asm volatile("swi 0x000000")
 
-enum {	ERR_NONE=0x00, ERR_STS_CLR_MEM=0x01, ERR_STS_LOAD_BIN=0x02, ERR_STS_HOOK_BIN=0x03, ERR_STS_START=0x04,
+enum {
+	ERR_NONE         = 0x00,
+	ERR_STS_CLR_MEM  = 0x01,
+	ERR_STS_LOAD_BIN = 0x02,
+	ERR_STS_HOOK_BIN = 0x03,
+	ERR_STS_START    = 0x04,
 		// initCard error codes:
-		ERR_LOAD_NORM=0x11, ERR_LOAD_OTHR=0x12, ERR_SEC_NORM=0x13, ERR_SEC_OTHR=0x14, ERR_LOGO_CRC=0x15, ERR_HEAD_CRC=0x16,
+		ERR_LOAD_NORM = 0x11,
+		ERR_LOAD_OTHR = 0x12,
+		ERR_SEC_NORM  = 0x13,
+		ERR_SEC_OTHR  = 0x14,
+		ERR_LOGO_CRC  = 0x15,
+		ERR_HEAD_CRC  = 0x16,
+
 		// hookARM7Binary error codes:
-		ERR_NOCHEAT=0x21, ERR_HOOK=0x22,
+		ERR_NOCHEAT = 0x21,
+		ERR_HOOK    = 0x22
 	} ERROR_CODES;
 
-enum {ARM9_BOOT, ARM9_START, ARM9_MEMCLR, ARM9_READY, ARM9_BOOTBIN, ARM9_DISPERR} ARM9_STATE;
+enum {
+	ARM9_BOOT,
+	ARM9_START,
+	ARM9_MEMCLR,
+	ARM9_READY,
+	ARM9_BOOTBIN,
+	ARM9_DISPERR
+} ARM9_STATE;
+
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;
 extern volatile int arm9_loadBarLength;
-extern volatile bool arm9_animateLoadingCircle;
+//extern volatile bool arm9_animateLoadingCircle;
 extern volatile int screenBrightness;
 extern volatile bool fadeType;
 
-static inline void dmaFill(const void* src, void* dest, uint32 size) {
-	DMA_SRC(3)  = (uint32)src;
-	DMA_DEST(3) = (uint32)dest;
+static inline void dmaFill(const void* src, void* dest, u32 size) {
+	DMA_SRC(3)  = (u32)src;
+	DMA_DEST(3) = (u32)dest;
 	DMA_CR(3)   = DMA_COPY_WORDS | DMA_SRC_FIX | (size>>2);
-	while(DMA_CR(3) & DMA_BUSY);
+	while (DMA_CR(3) & DMA_BUSY);
 }
 
-/*static inline void copyLoop (u32* dest, const u32* src, size_t size) {
+/*static inline void copyLoop(u32* dest, const u32* src, size_t size) {
 	do {
 		*dest++ = *src++;
 	} while (size -= 4);
 }*/
 
-static inline void copyLoop (u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3;
+/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
+	size = (size +3) & ~3; // Bigger nearest multiple of 4
 	do {
 		*dest++ = *src++;
 	} while (size -= 4);
-}
+}*/
 
 #endif // _COMMON_H
-

@@ -33,4 +33,3 @@ uint32_t crc32(const char *buf, size_t size);
 #endif
 
 #endif // CRC_H
-
