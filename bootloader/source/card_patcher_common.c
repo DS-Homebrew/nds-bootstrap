@@ -24,9 +24,7 @@
 
 extern bool cardReadFound; // card_patcher_arm9.c
 
-//#ifndef DEBUGA
-//#define DEBUGA
-//#endif
+#define LOG
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
@@ -37,10 +35,10 @@ u32 patchCardNds(
 	u32 saveSize,
 	u32 patchMpuRegion,
 	u32 patchMpuSize) {
-	//#ifdef DEBUGA
-	aFile myDebugFile = getBootFileCluster("NDSBTSR2.LOG", 3);
+	#ifdef LOG
+	aFile myDebugFile = getBootFileCluster("NDSBTSRP2.LOG", 3);
 	enableDebug(myDebugFile);
-	//#endif
+	#endif
 
 	dbg_printf("patchCardNds\n\n");
 

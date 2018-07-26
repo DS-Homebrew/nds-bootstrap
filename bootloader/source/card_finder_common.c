@@ -17,7 +17,7 @@ extern inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataLen, const
 *   Look for @find and return the position of it.
 *   Brute Force algorithm
 */
-u32* memsearch(const u32* start, u32 dataSize, const u32* find, u32 findSize) {
+u32* memsearch32(const u32* start, u32 dataSize, const u32* find, u32 findSize) {
 	u32 dataLen = dataSize/sizeof(u32);
 	u32 findLen = findSize/sizeof(u32);
 
@@ -32,6 +32,25 @@ u32* memsearch(const u32* start, u32 dataSize, const u32* find, u32 findSize) {
 		}
 		if (found) {
 			return (u32*)addr;
+		}
+	}
+	return NULL;
+}
+u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize) {
+	u32 dataLen = dataSize/sizeof(u16);
+	u32 findLen = findSize/sizeof(u16);
+
+	const u16* end = start + dataLen;
+	for (u16* addr = (u16*)start; addr != end; ++addr) {
+		bool found = true;
+		for (u32 j = 0; j < findLen; ++j) {
+			if (addr[j] != find[j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			return (u16*)addr;
 		}
 	}
 	return NULL;

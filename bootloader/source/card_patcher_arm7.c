@@ -83,6 +83,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	// Sleep patch
 	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
 	if (!sleepPatchOffset) {
+		dbg_printf("Trying thumb...\n");
 		sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
 		usesThumb = true;
 	}
@@ -134,6 +135,6 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		fileRead((char*)0x0C820000, saveFile, 0, saveSize, 3);
 	}
 
-	dbg_printf("ERR_NONE");
+	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
 }

@@ -148,7 +148,6 @@ u32* findCardReadEndOffset0(const tNDSHeader* ndsHeader, const module_params_t* 
 }
 
 u32* findCardReadEndOffset1(const tNDSHeader* ndsHeader) {
-	dbg_printf("Trying alt...\n");
 	dbg_printf("findCardReadEndOffset1:\n");
 
 	u32* cardReadEndOffset = NULL;
@@ -176,7 +175,6 @@ u32* findCardReadEndOffset1(const tNDSHeader* ndsHeader) {
 }
 
 u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	dbg_printf("Trying thumb...\n");
 	dbg_printf("findCardReadEndOffsetThumb:\n");
 
 	//usesThumb = true;
@@ -255,7 +253,6 @@ u16* findCardReadStartOffsetThumb(const u16* cardReadEndOffset) {
 		return NULL;
 	}
 
-	dbg_printf("Trying thumb...\n");
 	dbg_printf("findCardReadStartOffsetThumb:\n");
 
 	u16* cardReadStartOffset = findOffsetBackwardsThumb(
@@ -606,9 +603,14 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader) {
 		cardReadDmaEndSignature, 2
 	);
 	if (cardReadDmaEndOffset) {
-		dbg_printf("Card read DMA end found\n");
+		dbg_printf("Card read DMA end found: ");
 	} else {
 		dbg_printf("Card read DMA end not found\n");
+	}
+
+	if (cardReadDmaEndOffset) {
+		dbg_hexa((u32)cardReadDmaEndOffset);
+		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
@@ -616,7 +618,6 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader) {
 }
 
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader) {
-	dbg_printf("Trying thumb alt...\n");
 	dbg_printf("findCardReadDmaEndOffsetThumb:\n");
 
 	//if (usesThumb) {
@@ -626,9 +627,14 @@ u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader) {
 		cardReadDmaEndSignatureThumbAlt, 4
 	);
 	if (cardReadDmaEndOffset) {
-		dbg_printf("Card read DMA end thumb alt found\n");
+		dbg_printf("Card read DMA end thumb alt found: ");
 	} else {
 		dbg_printf("Card read DMA end thumb alt not found\n");
+	}
+
+	if (cardReadDmaEndOffset) {
+		dbg_hexa((u32)cardReadDmaEndOffset);
+		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");

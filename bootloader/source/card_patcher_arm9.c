@@ -71,17 +71,19 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	// Card read
 	u32* cardReadEndOffset = findCardReadEndOffset0(ndsHeader, moduleParams);
 	if (!cardReadEndOffset) {
+		//dbg_printf("Trying alt...\n");
 		cardReadEndOffset = findCardReadEndOffset1(ndsHeader);
-		if (true || cardReadEndOffset) {
+		if (cardReadEndOffset) {
 			readType = 1;
-		}
-		if (*(u32*)((u32)cardReadEndOffset - 4) == 0xFFFFFE00) {
-			dbg_printf("Found thumb\n");
-			cardReadEndOffset = (u32*)((u32)cardReadEndOffset - 4);
-			usesThumb = true;
+			if (*(u32*)((u32)cardReadEndOffset - 4) == 0xFFFFFE00) {
+				dbg_printf("Found thumb\n\n");
+				cardReadEndOffset = (u32*)((u32)cardReadEndOffset - 4);
+				usesThumb = true;
+			}
 		}
 	}
 	if (!cardReadEndOffset) {
+		dbg_printf("Trying thumb...\n");
 		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader, moduleParams);
 		if (cardReadEndOffset) {
 			usesThumb = true;
@@ -93,14 +95,14 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	debug[1] = (u32)cardReadEndOffset;
 	cardReadFound = true;
 	u32* cardReadStartOffset;
-	if (usesThumb) {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
+	if (readType == 0) {
+		cardReadStartOffset = findCardReadStartOffset0(cardReadEndOffset);
 	} else {
-		if (readType == 0) {
-			cardReadStartOffset = findCardReadStartOffset0(cardReadEndOffset);
-		} else {
-			cardReadStartOffset = findCardReadStartOffset1(cardReadEndOffset);
-		}
+		cardReadStartOffset = findCardReadStartOffset1(cardReadEndOffset);
+	}
+	if (!cardReadStartOffset) {
+		dbg_printf("Trying thumb...\n");
+		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
 	}
 	if (!cardReadStartOffset) {
 		return 0;
@@ -137,13 +139,15 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	}
 
 	// Card read dma
-	u32* cardReadDmaEndOffset;
+	u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
 	u32* cardReadDmaStartOffset;
 	if (usesThumb) {
-		cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+		if (!cardReadDmaEndOffset) {
+			//dbg_printf("Trying thumb alt...\n");
+			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+		}
 		cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
 	} else {
-		cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
 		cardReadDmaStartOffset = findCardReadDmaStartOffset(cardReadDmaEndOffset);
 	}
 
