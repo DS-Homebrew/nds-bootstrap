@@ -1,53 +1,53 @@
 /*
-    NitroHax -- Cheat tool for the Nintendo DS
-    Copyright (C) 2008  Michael "Chishm" Chisholm
+	NitroHax -- Cheat tool for the Nintendo DS
+	Copyright (C) 2008  Michael "Chishm" Chisholm
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <nds.h> 
 #include <nds/fifomessages.h>
 #include "cardEngine.h"
 
-#define _32KB_READ_SIZE 0x8000
-#define _64KB_READ_SIZE 0x10000
+#define _32KB_READ_SIZE  0x8000
+#define _64KB_READ_SIZE  0x10000
 #define _128KB_READ_SIZE 0x20000
 #define _192KB_READ_SIZE 0x30000
 #define _256KB_READ_SIZE 0x40000
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
-#define _1MB_READ_SIZE 0x100000
+#define _1MB_READ_SIZE   0x100000
 
 #define ROM_LOCATION 0x0C804000
 
-#define CACHE_ADRESS_START 0x0C920000
+#define CACHE_ADRESS_START       0x0C920000
 #define retail_CACHE_ADRESS_SIZE 0x6E0000
-#define dev_CACHE_ADRESS_SIZE 0x16E0000
-#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
-#define retail_CACHE_SLOTS 0x37
-#define dev_CACHE_SLOTS 0xB7
-#define HGSS_CACHE_SLOTS 0xF
+#define dev_CACHE_ADRESS_SIZE    0x16E0000
+#define HGSS_CACHE_ADRESS_SIZE   0x1E0000
+#define retail_CACHE_SLOTS       0x37
+#define dev_CACHE_SLOTS          0xB7
+#define HGSS_CACHE_SLOTS         0xF
 
 extern vu32* volatile cardStruct;
 //extern vu32* volatile cacheStruct;
 extern u32 sdk_version;
 extern u32 needFlushDCCache;
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
-extern volatile int (*readCachedRef)(u32*); // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-static u32 cacheDescriptor [dev_CACHE_SLOTS] = {0xffffffff};
-static u32 cacheCounter [dev_CACHE_SLOTS];
+static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
+static u32 cacheCounter[dev_CACHE_SLOTS];
 static u32 accessCounter = 0;
 
 static u16 cacheSlots = retail_CACHE_SLOTS;
@@ -55,11 +55,11 @@ static u32 cacheReadSizeSubtract = 0;
 static u32 asyncReadSizeSubtract = 0;
 
 static u32 asyncSector = 0xFFFFFFFF;
-static u32 asyncQueue [10];
+static u32 asyncQueue[10];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
-static char hexbuffer [9];
+static char hexbuffer[9];
 
 static u32 readNum = 0;
 static bool alreadySetMpu = false;
@@ -74,42 +74,40 @@ extern u32 consoleModel;
 extern u32 asyncPrefetch;
 extern u32 enableExceptionHandler;
 
-char* tohex(u32 n)
-{
-    unsigned size = 9;
-    char *buffer = hexbuffer;
-    unsigned index = size - 2;
+char* tohex(u32 n) {
+	unsigned size = 9;
+	char *buffer = hexbuffer;
+	unsigned index = size - 2;
 
 	for (int i=0; i<size; i++) {
 		buffer[i] = '0';
 	}
 	
-    while (n > 0)
-    {
-        unsigned mod = n % 16;
+	while (n > 0) {
+		unsigned mod = n % 16;
 
-        if (mod >= 10)
-            buffer[index--] = (mod - 10) + 'A';
-        else
-            buffer[index--] = mod + '0';
+		if (mod >= 10)
+			buffer[index--] = (mod - 10) + 'A';
+		else
+			buffer[index--] = mod + '0';
 
-        n /= 16;
-    }
-    buffer[size - 1] = '\0';
-    return buffer;
+		n /= 16;
+	}
+	buffer[size - 1] = '\0';
+	return buffer;
 }
 
 void user_exception(void);
 
 //---------------------------------------------------------------------------------
-void setExceptionHandler2() {
+void setExceptionHandler2(void) {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)0x23EFFFC ;
-	EXCEPTION_VECTOR = enterException ;
+	exceptionStack = (u32)0x23EFFFC;
+	EXCEPTION_VECTOR = enterException;
 	*exceptionC = user_exception;
 }
 
-int allocateCacheSlot() {
+int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for(int i=0; i<cacheSlots; i++) {
@@ -141,7 +139,7 @@ void updateDescriptor(int slot, u32 sector) {
 	cacheCounter[slot] = accessCounter;
 }
 
-void waitForArm7() {
+void waitForArm7(void) {
 	while(sharedAddr[3] != (vu32)0);
 }
 
@@ -200,7 +198,7 @@ void triggerAsyncPrefetch(u32 sector) {
 			if(needFlushDCCache) DC_FlushRange((const void*)buffer, _128KB_READ_SIZE);
 
 			cacheDescriptor[slot] = sector;
-			cacheCounter[slot] = 0x0FFFFFFF ; // async marker
+			cacheCounter[slot] = 0x0FFFFFFF; // async marker
 			asyncSector = sector;		
 
 			// write the command
@@ -218,7 +216,7 @@ void triggerAsyncPrefetch(u32 sector) {
 	}
 }
 
-void processAsyncCommand() {
+void processAsyncCommand(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 processAsyncCommand\n");	
 	nocashMessage("\narm9 asyncSector\n");	
@@ -236,7 +234,7 @@ void processAsyncCommand() {
 	}
 }
 
-void getAsyncSector() {
+void getAsyncSector(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 getAsyncSector\n");	
 	nocashMessage("\narm9 asyncSector\n");	

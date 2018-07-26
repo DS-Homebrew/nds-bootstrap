@@ -192,7 +192,7 @@ bool CIniFile::LoadIniFile(const std::string& FileName)
 
   //check for utf8 bom.
   char bom[3];
-  if(fread(bom,3,1,f)==1&&bom[0]==0xef&&bom[1]==0xbb&&bom[2]==0xbf) ;
+  if(fread(bom,3,1,f)==1&&bom[0]==0xef&&bom[1]==0xbb&&bom[2]==0xbf);
   else fseek(f,0,SEEK_SET);
 
   std::string strline("");

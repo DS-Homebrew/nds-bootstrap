@@ -122,7 +122,7 @@ void cardParamCommand (u8 command, u32 parameter, u32 flags, u32 *destination, u
 //void cardReset();
 //
 //---------------------------------------------------------------------------------
-static inline void eepromWaitBusy() {
+static inline void eepromWaitBusy(void) {
 //---------------------------------------------------------------------------------
 	while (REG_AUXSPICNT & CARD_SPI_BUSY);
 }

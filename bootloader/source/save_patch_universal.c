@@ -24,10 +24,9 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	int thumbType = 0;
 
 	// Find the relocation signature
-	u32 relocationStart = getOffset(
+	u32 relocationStart = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		relocateStartSignature, 1,
-		1
+		relocateStartSignature, 1
 	);
 	if (!relocationStart) {
 		dbg_printf("Relocation start not found\n");
@@ -48,10 +47,9 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 		dbg_printf("Error in relocation checking method 1\n");
 		
 		// Find the beginning of the next function
-		   u32 nextFunction = getOffset(
+		u32 nextFunction = (u32)findOffset(
 			(u32*)relocationStart, ndsHeader->arm7binarySize,
-			nextFunctiontSignature, 1,
-			1
+			nextFunctiontSignature, 1
 		);
 	
 		// Validate the relocation signature
@@ -90,10 +88,9 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	dbg_printf("\n");
 
 	// Find the card read
-	/*u32 cardReadEndAddr = getOffset(
+	/*u32 cardReadEndAddr = findOffset(
 		(u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2,
-		1
+		a7cardReadSignature, 2
 	);
 	if (!cardReadEndAddr) {
 		dbg_printf("[Error!] Card read addr not found\n");
@@ -102,147 +99,138 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	dbg_printf("cardReadEndAddr: ");
 	dbg_hexa(cardReadEndAddr);
 	dbg_printf("\n");*/
+
+	u32* JumpTableFunc;
+	u32* EepromReadJump;
+	u32* EepromWriteJump;
+	u32* EepromProgJump;
+	u32* EepromVerifyJump;
+	u32* EepromEraseJump;
 	
-	u32 JumpTableFunc = getOffset(
+	JumpTableFunc = findOffset(
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal, 3,
-		1
+		a7JumpTableSignatureUniversal, 3
 	);
-	u32 EepromReadJump = getOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal, 3,
-		1
-	);
-	u32 EepromWriteJump = getOffset(
-		(u32*)EepromReadJump + 4, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal_pt2, 3,
-		1
-	);
-	u32 EepromProgJump = getOffset(
-		(u32*)EepromWriteJump + 4, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal_pt2, 3,
-		1
-	);
-	u32 EepromVerifyJump = getOffset(
-		(u32*)EepromProgJump + 4, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal_pt2, 3,
-		1
-	);
-	u32 EepromEraseJump = getOffset(
-		(u32*)EepromVerifyJump + 4, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal_pt3, 2,
-		1
-	);
-	if (!JumpTableFunc) {
-		JumpTableFunc = getOffset(
+	if (JumpTableFunc) {
+		EepromReadJump = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2, 3,
-			1
+			a7JumpTableSignatureUniversal, 3
 		);
-		EepromReadJump = getOffset(
+		EepromWriteJump = findOffset(
+			EepromReadJump + 4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_pt2, 3
+		);
+		EepromProgJump = findOffset(
+			EepromWriteJump + 4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_pt2, 3
+		);
+		EepromVerifyJump = findOffset(
+			EepromProgJump + 4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_pt2, 3
+		);
+		EepromEraseJump = findOffset(
+			EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_pt3, 2
+		);
+	} else {
+		JumpTableFunc = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2, 3,
-			1
+			a7JumpTableSignatureUniversal_2, 3
 		);
-		EepromWriteJump = getOffset(
-			(u32*)EepromReadJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3,
-			1
-		);
-		EepromProgJump = getOffset(
-			(u32*)EepromWriteJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3,
-			1
-		);
-		EepromVerifyJump = getOffset(
-			(u32*)EepromProgJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt2, 3,
-			1
-		);
-		EepromEraseJump = getOffset(
-			(u32*)EepromVerifyJump+4, ndsHeader->arm7binarySize,
-			a7JumpTableSignatureUniversal_2_pt3, 2,
-			1
-		);
-		if (!JumpTableFunc) {
-			usesThumb = true;
-			JumpTableFunc = getOffsetThumb(
-				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb, 3,
-				1
+		if (JumpTableFunc) {
+			EepromReadJump = findOffset(
+				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2, 3
 			);
+			EepromWriteJump = findOffset(
+				EepromReadJump + 4, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2_pt2, 3
+			);
+			EepromProgJump = findOffset(
+				EepromWriteJump + 4, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2_pt2, 3
+			);
+			EepromVerifyJump = findOffset(
+				EepromProgJump + 4, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2_pt2, 3
+			);
+			EepromEraseJump = findOffset(
+				EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2_pt3, 2
+			);
+		} else {
+			usesThumb = true;
+
+			JumpTableFunc = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversalThumb, 3
+			);
+
+			if (!JumpTableFunc) {
+				return 0;
+			}
 
 			dbg_printf("usesThumb");
 			dbg_printf("JumpTableFunc");
-			dbg_hexa(JumpTableFunc);
+			dbg_hexa((u32)JumpTableFunc);
 	
-			EepromReadJump = getOffsetThumb(
+			EepromReadJump = (u32*)findOffsetThumb(
 				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb, 3,
-				1
+				a7JumpTableSignatureUniversalThumb, 3
 			);
 
-			EepromWriteJump = getOffsetThumb(
-				(u16*)EepromReadJump+2, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb_pt2, 3,
-				1
+			EepromWriteJump = (u32*)findOffsetThumb(
+				(u16*)EepromReadJump + 2, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversalThumb_pt2, 3
 			);
-			if (!EepromWriteJump) {
+			if (EepromWriteJump) {
+				EepromProgJump = (u32*)findOffsetThumb(
+					(u16*)EepromWriteJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 3
+				);
+				EepromVerifyJump = (u32*)findOffsetThumb(
+					(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt2, 3
+				);
+				EepromEraseJump = (u32*)findOffsetThumb(
+					(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+					a7JumpTableSignatureUniversalThumb_pt3, 2
+				);
+				if (!EepromEraseJump) {
+					EepromEraseJump = (u32*)findOffsetThumb(
+						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+						a7JumpTableSignatureUniversalThumb_pt3_alt, 2
+					);
+				}
+			} else {
 				// alternate v1 order
 				thumbType = 1;
 
-				EepromProgJump = getOffsetThumb(
+				EepromProgJump = (u32*)findOffsetThumb(
 					(u16*)JumpTableFunc, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromWriteJump = getOffsetThumb(
+				EepromWriteJump = (u32*)findOffsetThumb(
 					(u16*)EepromProgJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromVerifyJump = getOffsetThumb(
+				EepromVerifyJump = (u32*)findOffsetThumb(
 					(u16*)EepromWriteJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt2, 2
 				);
-				EepromEraseJump = getOffsetThumb(
+				EepromEraseJump = (u32*)findOffsetThumb(
 					(u16*)EepromVerifyJump - 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt3_alt2, 2,
-					-1
+					a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
 				);
-			} else {
-				EepromProgJump = getOffsetThumb(
-					(u16*)EepromWriteJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 3,
-					1
-				);
-				EepromVerifyJump = getOffsetThumb(
-					(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt2, 3,
-					1
-				);
-				EepromEraseJump = getOffsetThumb(
-					(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
-					a7JumpTableSignatureUniversalThumb_pt3, 2,
-					1
-				);
-				if (!EepromEraseJump) {
-					EepromEraseJump = getOffsetThumb(
-						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
-						a7JumpTableSignatureUniversalThumb_pt3_alt, 2,
-						1
-					);
-				}
 			}
 		}
 	}
-	if (!JumpTableFunc) {
+	/*if (!JumpTableFunc) {
 		return 0;
-	}
+	}*/
 		
 	dbg_printf("JumpTableFunc: ");
-	dbg_hexa(JumpTableFunc);
+	dbg_hexa((u32)JumpTableFunc);
 	dbg_printf("\n");
 
 	u32* patches           = (u32*)cardEngineLocation[0];
@@ -251,122 +239,120 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 	u32 srcAddr;
 	
 	if (usesThumb) {
-		if (thumbType == 1) {
-			u32* eepromRead = (u32*)(EepromReadJump + 0xA);
+		if (thumbType == 0) {
+			u16* eepromRead = (u16*)((u32)EepromReadJump + 0x6);
+			dbg_printf("Eeprom read:\t");
+			dbg_hexa((u32)eepromRead);
+			dbg_printf("\n");
+			srcAddr = (u32)EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+			u16* patchRead = generateA7InstrThumb(srcAddr, arm7FunctionThumb[5]);
+			eepromRead[0] = patchRead[0];
+			eepromRead[1] = patchRead[1];
+		
+			u16* eepromPageWrite = (u16*)((u32)EepromWriteJump + 0x6);
+			dbg_printf("Eeprom page write:\t");
+			dbg_hexa((u32)eepromPageWrite);
+			dbg_printf("\n");
+			srcAddr = (u32)EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+			u16* patchWrite = generateA7InstrThumb(srcAddr, arm7FunctionThumb[3]);
+			eepromPageWrite[0] = patchWrite[0];
+			eepromPageWrite[1] = patchWrite[1];
+	
+			u16* eepromPageProg = (u16*)((u32)EepromProgJump + 0x6);
+			dbg_printf("Eeprom page prog:\t");
+			dbg_hexa((u32)eepromPageProg);
+			dbg_printf("\n");
+			srcAddr = (u32)EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+			u16* patchProg = generateA7InstrThumb(srcAddr, arm7FunctionThumb[4]);
+			eepromPageProg[0] = patchProg[0];
+			eepromPageProg[1] = patchProg[1];
+	
+			u16* eepromPageVerify = (u16*)((u32)EepromVerifyJump + 0x6);
+			dbg_printf("Eeprom verify:\t");
+			dbg_hexa((u32)eepromPageVerify);
+			dbg_printf("\n");
+			srcAddr = (u32)EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+			u16* patchVerify = generateA7InstrThumb(srcAddr, arm7FunctionThumb[2]);
+			eepromPageVerify[0] = patchVerify[0];
+			eepromPageVerify[1] = patchVerify[1];
+
+			u16* eepromPageErase = (u16*)((u32)EepromEraseJump + 0x4);
+			dbg_printf("Eeprom page erase:\t");
+			dbg_hexa((u32)eepromPageErase);
+			dbg_printf("\n");
+			srcAddr = (u32)EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
+			u16* patchErase = generateA7InstrThumb(srcAddr, arm7FunctionThumb[1]);
+			eepromPageErase[0] = patchErase[0];
+			eepromPageErase[1] = patchErase[1];
+		} else {
+			u32* eepromRead = (u32*)((u32)EepromReadJump + 0xA);
 			dbg_printf("Eeprom read:\t");
 			dbg_hexa((u32)eepromRead);
 			dbg_printf("\n");
 			*eepromRead = arm7FunctionThumb[5];
 			
-			u32* eepromPageWrite = (u32*)(EepromWriteJump + 0xA);
+			u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
 			dbg_printf("Eeprom page write:\t");
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
 			*eepromPageWrite = arm7FunctionThumb[3];
 			
-			u32* eepromPageProg = (u32*)(EepromProgJump + 0xA);
+			u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xA);
 			dbg_printf("Eeprom page prog:\t");
 			dbg_hexa((u32)eepromPageProg);
 			dbg_printf("\n");
 			*eepromPageProg = arm7FunctionThumb[4];
 
-			u32* eepromPageVerify = (u32*)(EepromVerifyJump + 0xA);
+			u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xA);
 			dbg_printf("Eeprom verify:\t");
 			dbg_hexa((u32)eepromPageVerify);
 			dbg_printf("\n");
 			*eepromPageVerify = arm7FunctionThumb[2];
 	
-			u32* eepromPageErase = (u32*)(EepromEraseJump + 0x8);
+			u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
 			dbg_printf("Eeprom page erase:\t");
 			dbg_hexa((u32)eepromPageErase);
 			dbg_printf("\n");
 			*eepromPageErase = arm7FunctionThumb[1];
-		} else {
-			u16 instrs[2];
-
-			u16* eepromRead = (u16*)(EepromReadJump + 0x6);
-			dbg_printf("Eeprom read:\t");
-			dbg_hexa((u32)eepromRead);
-			dbg_printf("\n");
-			srcAddr = EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[5]);
-			eepromRead[0] = instrs[0];
-			eepromRead[1] = instrs[1];
-		
-			u16* eepromPageWrite = (u16*)(EepromWriteJump + 0x6);
-			dbg_printf("Eeprom page write:\t");
-			dbg_hexa((u32)eepromPageWrite);
-			dbg_printf("\n");
-			srcAddr = EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[3]);
-			eepromPageWrite[0] = instrs[0];
-			eepromPageWrite[1] = instrs[1];
-	
-			u16* eepromPageProg = (u16*)(EepromProgJump + 0x6);
-			dbg_printf("Eeprom page prog:\t");
-			dbg_hexa((u32)eepromPageProg);
-			dbg_printf("\n");
-			srcAddr = EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[4]);
-			eepromPageProg[0] = instrs[0];
-			eepromPageProg[1] = instrs[1];
-	
-			u16* eepromPageVerify = (u16*)(EepromVerifyJump + 0x6);
-			dbg_printf("Eeprom verify:\t");
-			dbg_hexa((u32)eepromPageVerify);
-			dbg_printf("\n");
-			srcAddr = EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[2]);
-			eepromPageVerify[0] = instrs[0];
-			eepromPageVerify[1] = instrs[1];
-
-			u16* eepromPageErase = (u16*) (EepromEraseJump + 0x4);
-			dbg_printf("Eeprom page erase:\t");
-			dbg_hexa((u32)eepromPageErase);
-			dbg_printf("\n");
-			srcAddr = EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
-			generateA7InstrThumb(instrs, srcAddr, arm7FunctionThumb[1]);
-			eepromPageErase[0] = instrs[0];
-			eepromPageErase[1] = instrs[1];
 		}
 	} else {
-		u32* eepromRead = (u32*)(EepromReadJump + 0xC);
+		u32* eepromRead = (u32*)((u32)EepromReadJump + 0xC);
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
-		srcAddr = EepromReadJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+		srcAddr = (u32)EepromReadJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchRead = generateA7Instr(srcAddr, arm7Function[5]);
 		*eepromRead = patchRead;
 	
-		u32* eepromPageWrite = (u32*)(EepromWriteJump + 0xC);
+		u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xC);
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
-		srcAddr = EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+		srcAddr = (u32)EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchWrite = generateA7Instr(srcAddr, arm7Function[3]);
 		*eepromPageWrite = patchWrite;
 	
-		u32* eepromPageProg = (u32*)(EepromProgJump + 0xC);
+		u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xC);
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
-		srcAddr = EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+		srcAddr = (u32)EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchProg = generateA7Instr(srcAddr, arm7Function[4]);
 		*eepromPageProg = patchProg;
 	
-		u32* eepromPageVerify = (u32*)(EepromVerifyJump + 0xC);
+		u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xC);
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
-		srcAddr = EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
+		srcAddr = (u32)EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchVerify = generateA7Instr(srcAddr, arm7Function[2]);
 		*eepromPageVerify = patchVerify;
 	
-		u32* eepromPageErase = (u32*)(EepromEraseJump + 0x8);
+		u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
-		srcAddr = EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem;
+		srcAddr = (u32)EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchErase = generateA7Instr(srcAddr, arm7Function[1]);
 		*eepromPageErase = patchErase;
 	}

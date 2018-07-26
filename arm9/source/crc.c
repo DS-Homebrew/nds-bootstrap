@@ -99,18 +99,15 @@ static const uint32_t crc32tab[256] = {
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
 
-uint32_t crc32(const char *buf, size_t size)
-{
+uint32_t crc32(const char *buf, size_t size) {
 	uint32_t crc = (uint32_t)~0;
 	const char *p;
 	size_t len, nr;
 
 	len = 0;
 	nr=size;
-	for (len += nr, p = buf; nr--; ++p)
-	{
+	for (len += nr, p = buf; nr--; ++p) {
 		_CRC32_(crc, *p);
 	}
 	return ~crc;
 }
-

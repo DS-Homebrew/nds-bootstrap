@@ -16,14 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include <nds/system.h>
 
 #include "hook.h"
 #include "common.h"
-#include "cardengine_arm7_bin.h"
 #include "fat.h"
+#include "cardengine_arm7_bin.h"
 
-extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
 extern unsigned long language;
 extern unsigned long consoleModel;
@@ -61,6 +62,7 @@ static const u32 handlerEndSig[4] = {
 	0xe12fff10		// bx   r0
 };
 
+/*
 // interruptDispatcher.s jump_intr:
 static const u32 homebrewSig[5] = {
 	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
@@ -117,10 +119,11 @@ static const u32 homebrewAccelSig2010Patched[4] = {
 	0x22088819   , // ...
 	0x0412430A   , // ...
 };
+*/
 
 static const int MAX_HANDLER_SIZE = 50;
 
-static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
+/*static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 
 	// Find the start of the handler
@@ -208,7 +211,7 @@ static u32* hookAccelIPCHomebrew2010 (u32* addr, size_t size) {
 
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
-}
+}*/
 
 static u32* hookInterruptHandler (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);

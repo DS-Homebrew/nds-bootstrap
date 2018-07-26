@@ -19,43 +19,40 @@
 #include <string.h>
 #include "fat.h"
 
-extern int nocashMessage(char [119]); // 119 because max is 120, starts at 0
+extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
 static bool _debug = false;
 static aFile _debugFileCluster;
 static u32 _currentPos = 0;
-static char hexbuffer [9];
+static char hexbuffer[9];
 
 void enableDebug(aFile debugFileCluster) {
 	_debug = true;
 	_debugFileCluster = debugFileCluster;
 }
 
-u32 dbg_printf( char * message)
-{
+u32 dbg_printf(char * message) {
 	nocashMessage(message);
 
 	if(!_debug) return 0;
 
-	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message), 3);
+	u32 ret = fileWrite (message, _debugFileCluster, _currentPos, strlen(message), 3);
 
-	_currentPos+=strlen(message);
+	_currentPos += strlen(message);
 
 	return ret;
 }
 
-char* tohex(u32 n)
-{
+char* tohex(u32 n) {
     unsigned size = 9;
     char *buffer = hexbuffer;
     unsigned index = size - 2;
 
-	for (int i=0; i<size; i++) {
+	for (int i = 0; i < size; i++) {
 		buffer[i] = '0';
 	}
 
-    while (n > 0)
-    {
+    while (n > 0) {
         unsigned mod = n % 16;
 
         if (mod >= 10)

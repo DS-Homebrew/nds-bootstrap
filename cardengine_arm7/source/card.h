@@ -26,7 +26,7 @@
 #include "disc_io.h"
 
 // export interface
-extern IO_INTERFACE __myio_dsisd ;
+extern IO_INTERFACE __myio_dsisd;
 
 static inline bool CARD_StartUp (void) {
 	return __myio_dsisd.fn_startup();

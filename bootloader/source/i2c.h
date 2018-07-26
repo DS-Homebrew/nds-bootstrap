@@ -35,7 +35,7 @@
 #define REG_I2CDATA	(*(vu8 *)0x4004500)
 #define REG_I2CCNT	(*(vu8 *)0x4004501)
 
-static inline void i2cWaitBusy() {
+static inline void i2cWaitBusy(void) {
 	while(REG_I2CCNT & 0x80);
 }
 

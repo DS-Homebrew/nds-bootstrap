@@ -1,28 +1,28 @@
 /*
-    NitroHax -- Cheat tool for the Nintendo DS
-    Copyright (C) 2008  Michael "Chishm" Chisholm
+	NitroHax -- Cheat tool for the Nintendo DS
+	Copyright (C) 2008  Michael "Chishm" Chisholm
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef CARD_PATCHER_H
 #define CARD_PATCHER_H
 
-#include <stddef.h>
-#include <nds/memory.h>
+//#include <stddef.h>
 #include <nds/ndstypes.h>
-#include "fat.h"
+#include <nds/memory.h>
+//#include "fat.h"
 
 #define PAGE_4K		(0b01011 << 1)
 #define PAGE_8K		(0b01100 << 1)
@@ -62,13 +62,15 @@ typedef struct
 } module_params_t;
 
 u32 generateA7Instr(int arg1, int arg2);
-void generateA7InstrThumb(u16* instrs, int arg1, int arg2);
-void decompressLZ77Backwards(uint8_t* addr, size_t size);
+u16* generateA7InstrThumb(int arg1, int arg2);
+void decompressLZ77Backwards(u8* addr, u32 size);
 void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-u32 patchCardNds (const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 patchCardNds(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
 
 #endif // CARD_PATCHER_H
