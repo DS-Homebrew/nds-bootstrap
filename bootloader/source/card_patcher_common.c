@@ -24,7 +24,7 @@
 
 extern bool cardReadFound; // card_patcher_arm9.c
 
-#define LOG
+//#define LOG
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
