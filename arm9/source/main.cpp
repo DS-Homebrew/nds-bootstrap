@@ -45,14 +45,14 @@ static inline int dbg_printf(const char* format, ...) {
 	debugFile = fopen ("sd:/NDSBTSRP.LOG", "a");
 
 	va_list args;
-    va_start(args, format);
-    int ret = vprintf(format, args);
+	va_start(args, format);
+	int ret = vprintf(format, args);
 	ret = vfprintf(debugFile, format, args);
 	va_end(args);
 
 	fclose (debugFile);
 
-    return ret;
+	return ret;
 }
 
 //---------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ void runFile(string filename, string savPath, u32 saveSize, u32 language, u32 do
 							gameSoftReset, 
 							asyncPrefetch, 
 							argarray.size(), (const char **)&argarray[0], 
-                            cheat_data);
+							cheat_data);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 
@@ -189,15 +189,15 @@ void myFIFOValue32Handler(u32 value, void* data) {
 }
 
 off_t getSaveSize(const char* path) {
-    FILE* fp = fopen(path, "rb");
-    off_t fsize = 0;
-    if (fp) {
-        fseek(fp, 0, SEEK_END);
-        fsize = ftell(fp);
-        if (!fsize) fsize = 0;
-        fclose(fp);
-    }
-    return fsize;
+	FILE* fp = fopen(path, "rb");
+	off_t fsize = 0;
+	if (fp) {
+		fseek(fp, 0, SEEK_END);
+		fsize = ftell(fp);
+		if (!fsize) fsize = 0;
+		fclose(fp);
+	}
+	return fsize;
 }
 
 int main(int argc, char **argv) {
@@ -349,19 +349,19 @@ int main(int argc, char **argv) {
 		u32	patchMpuSize = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 
 		cheatData[0] = 0xCF000000;
-        std::vector<std::string> cheats;      
-        bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
-        if(cheats.size() > 0) {
-            dbg_printf("Cheat data present\n");
-            
-            if(cheats.size() < 256) {
-                 for (unsigned int i = 0; i < cheats.size(); i++) {
-                    dbg_printf(cheats[i].c_str());
-                    dbg_printf(" ");
-                    cheatData[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
-                }
-                cheatData[cheats.size()] = 0xCF000000;
-            } else {
+		std::vector<std::string> cheats;      
+		bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
+		if(cheats.size() > 0) {
+			dbg_printf("Cheat data present\n");
+			
+			if(cheats.size() < 256) {
+				 for (unsigned int i = 0; i < cheats.size(); i++) {
+					dbg_printf(cheats[i].c_str());
+					dbg_printf(" ");
+					cheatData[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
+				}
+				cheatData[cheats.size()] = 0xCF000000;
+			} else {
 				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
 			}
 		}

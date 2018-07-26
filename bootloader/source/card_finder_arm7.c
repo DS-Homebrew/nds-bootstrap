@@ -581,7 +581,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 }
 
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-    u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
+	u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
 	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature3;
 	}
@@ -599,7 +599,7 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 }
 
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-    u32* irqEnableStartSignature = irqEnableStartSignature1;
+	u32* irqEnableStartSignature = irqEnableStartSignature1;
 	if (moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}

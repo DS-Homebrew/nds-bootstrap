@@ -19,7 +19,7 @@ u32 generateA7Instr(int arg1, int arg2) {
 }
 
 u16* generateA7InstrThumb(int arg1, int arg2) {
-    static u16 instrs[2];
+	static u16 instrs[2];
 
 	// 23 bit offset
 	u32 offset = (u32)(arg2 - arg1 - 4);
@@ -32,7 +32,7 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 	// 2nd instruction contains the lower 11 bit of the offset
 	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 
-    return instrs;
+	return instrs;
 }
 
 void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {

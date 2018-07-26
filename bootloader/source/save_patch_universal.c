@@ -33,7 +33,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, con
 		return 0;
 	}
 
-    // Validate the relocation signature
+	// Validate the relocation signature
 	u32 forwardedRelocStartAddr = relocationStart + 4;
 	if (!*(u32*)forwardedRelocStartAddr) {
 		forwardedRelocStartAddr += 4;
