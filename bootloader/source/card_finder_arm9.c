@@ -58,7 +58,7 @@ u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
 // Card read DMA
 u32 cardReadDmaStartSignature[1]       = {0xE92D4FF8};
-u32 cardReadDmaStartSignatureAlt[1]    = {0xE92D47F0};
+u32 cardReadDmaStartSignatureAlt1[1]    = {0xE92D47F0};
 u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0};
 u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8};
@@ -663,7 +663,7 @@ u32* findCardReadDmaStartOffset(const u32* cardReadDmaEndOffset) {
 	if (!cardReadDmaStartOffset) {
 		cardReadDmaStartOffset = findOffsetBackwards(
 			(u32*)cardReadDmaEndOffset, 0x200,
-			cardReadDmaStartSignatureAlt, 1
+			cardReadDmaStartSignatureAlt1, 1
 		);
 		if (cardReadDmaStartOffset) {
 			dbg_printf("Card read DMA start alt 1 found: ");
