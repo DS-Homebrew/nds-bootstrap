@@ -90,10 +90,10 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	if (sleepPatchOffset) {
 		// Patch
 		if (usesThumb) {
-			*(u16*)((u32)sleepPatchOffset + 4) = 0;
-			*(u16*)((u32)sleepPatchOffset + 6) = 0;
+			*((u16*)sleepPatchOffset + 2) = 0;
+			*((u16*)sleepPatchOffset + 3) = 0;
 		} else {
-			*(u32*)((u32)sleepPatchOffset + 8) = 0;
+			*(sleepPatchOffset + 2) = 0;
 		}
 	}
 

@@ -75,9 +75,9 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		cardReadEndOffset = findCardReadEndOffset1(ndsHeader);
 		if (cardReadEndOffset) {
 			readType = 1;
-			if (*(u32*)((u32)cardReadEndOffset - 4) == 0xFFFFFE00) {
+			if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
 				dbg_printf("Found thumb\n\n");
-				cardReadEndOffset = (u32*)((u32)cardReadEndOffset - 4);
+				--cardReadEndOffset;
 				usesThumb = true;
 			}
 		}
