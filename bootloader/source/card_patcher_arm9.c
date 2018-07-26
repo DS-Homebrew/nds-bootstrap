@@ -72,8 +72,13 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	u32* cardReadEndOffset = findCardReadEndOffset0(ndsHeader, moduleParams);
 	if (!cardReadEndOffset) {
 		cardReadEndOffset = findCardReadEndOffset1(ndsHeader);
-		if (cardReadEndOffset) {
+		if (true || cardReadEndOffset) {
 			readType = 1;
+		}
+		if (*(u32*)((u32)cardReadEndOffset - 4) == 0xFFFFFE00) {
+			dbg_printf("Found thumb\n");
+			cardReadEndOffset = (u32*)((u32)cardReadEndOffset - 4);
+			usesThumb = true;
 		}
 	}
 	if (!cardReadEndOffset) {
@@ -190,7 +195,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	}
 
 	// Patch out all further mpu reconfiguration
-	dbg_printf("patchMpuSize :\t");
+	dbg_printf("patchMpuSize:\t");
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n");
 	u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
@@ -205,7 +210,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 			mpuInitRegionSignature, 1
 		);
 		if (mpuStartOffset) {
-			dbg_printf("Mpu init :\t");
+			dbg_printf("Mpu init:\t");
 			dbg_hexa((u32)mpuStartOffset);
 			dbg_printf("\n");
 
@@ -319,6 +324,6 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		memcpy(cardReadDmaStartOffset, cardDmaPatch, usesThumb ? 0x4 : 0x8); //copyLoop(cardReadDmaStartOffset, cardDmaPatch, usesThumb ? 0x4 : 0x8);
 	}
 
-	dbg_printf("ERR_NONE");
+	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
 }

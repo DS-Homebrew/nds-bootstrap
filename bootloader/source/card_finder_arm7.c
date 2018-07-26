@@ -91,10 +91,10 @@ u32* findSwi12Offset(const tNDSHeader* ndsHeader) {
 		(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
 		swi12Signature, 1
 	);
-	if (!swi12Offset) {
-		dbg_printf("swi 0x12 call not found\n");
-	} else {
+	if (swi12Offset) {
 		dbg_printf("swi 0x12 call found\n");
+	} else {
+		dbg_printf("swi 0x12 call not found\n");
 	}
 	return swi12Offset;
 }
@@ -551,10 +551,10 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
 		sleepPatch, 2
 	);
-	if (!sleepPatchOffset) {
-		dbg_printf("Sleep patch not found\n");
-	} else {
+	if (sleepPatchOffset) {
 		dbg_printf("Sleep patch found\n");
+	} else {
+		dbg_printf("Sleep patch not found\n");
 	}
 	return sleepPatchOffset;
 }
@@ -572,10 +572,10 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 			sleepPatchThumbAlt, 2
 		);
 	}
-	if (!sleepPatchOffset) {
-		dbg_printf("Thumb sleep patch alt not found\n");
-	} else {
+	if (sleepPatchOffset) {
 		dbg_printf("Thumb sleep patch found\n");
+	} else {
+		dbg_printf("Thumb sleep patch alt not found\n");
 	}
 	return sleepPatchOffset;
 }
@@ -590,10 +590,10 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 		(u32*)ndsHeader->arm7destination, 0x00020000,//ndsHeader->arm9binarySize,
 		cardCheckPullOutSignature, 4
 	);
-	if (!cardCheckPullOutOffset) {
-		dbg_printf("Card check pull out not found\n");
-	} else {
+	if (cardCheckPullOutOffset) {
 		dbg_printf("Card check pull out found\n");
+	} else {
+		dbg_printf("Card check pull out not found\n");
 	}
 	return cardCheckPullOutOffset;
 }
@@ -608,10 +608,10 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
 		irqEnableStartSignature, 4
 	);
-	if (!cardIrqEnableOffset) {
-		dbg_printf("irq enable not found\n");
-	} else {
+	if (cardIrqEnableOffset) {
 		dbg_printf("irq enable found\n");
+	} else {
+		dbg_printf("irq enable not found\n");
 	}
 	return cardIrqEnableOffset;
 }

@@ -38,6 +38,10 @@
 #define ROM_LOCATION	0x0C804000
 #define SAVE_LOCATION	0x0C820000
 
+#ifdef DEBUG
+extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
+#endif
+
 extern int tryLockMutex(int * addr);
 extern int lockMutex(int * addr);
 extern int unlockMutex(int * addr);
@@ -93,7 +97,7 @@ void initialize(void) {
 		}*/
 			
 		#ifdef DEBUG		
-		aFile myDebugFile = getBootFileCluster ("NDSBTSRP.LOG", 3);
+		aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
@@ -175,7 +179,7 @@ void asyncCardReadLED(bool on) {
 }
 
 void log_arm9(void) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -187,7 +191,7 @@ void log_arm9(void) {
 		dbg_printf("\ntriggered via IPC\n");
 	}
 	dbg_printf("\nstr : \n");
-	dbg_hexa(cardStruct);
+	dbg_hexa((u32)cardStruct);
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
@@ -205,9 +209,9 @@ void cardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	//u32 marker = *(vu32*)(sharedAddr+3);
-
 	#ifdef DEBUG
+	u32 marker = *(vu32*)(sharedAddr+3);
+
 	dbg_printf("\ncard read received v2\n");
 
 	if (calledViaIPC) {
@@ -215,7 +219,7 @@ void cardRead_arm9(void) {
 	}
 
 	dbg_printf("\nstr : \n");
-	dbg_hexa(cardStruct);
+	dbg_hexa((u32)cardStruct);
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
@@ -250,9 +254,9 @@ void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
-	//u32 marker = *(vu32*)(sharedAddr+3);
-
 	#ifdef DEBUG
+	u32 marker = *(vu32*)(sharedAddr+3);
+
 	dbg_printf("\nasync card read received\n");
 
 	if (calledViaIPC) {
@@ -260,7 +264,7 @@ void asyncCardRead_arm9(void) {
 	}
 
 	dbg_printf("\nstr : \n");
-	dbg_hexa(cardStruct);
+	dbg_hexa((u32)cardStruct);
 	dbg_printf("\nsrc : \n");
 	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
