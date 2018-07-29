@@ -26,8 +26,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#undef ARM7
 #define ARM9
+#undef ARM7
 #include <nds/memory.h>
 #include <nds/arm9/video.h>
 #include <nds/arm9/input.h>
@@ -74,19 +74,19 @@ void initMBKARM9(void) {
 	// Default DSiWare settings
 
 	// WRAM-B fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK2) = 0x9195999D;
-	*((vu32*)REG_MBK3) = 0x8185898D;
+	*((vu32*)REG_MBK2)=0x9195999D;
+	*((vu32*)REG_MBK3)=0x8185898D;
 	
 	// WRAM-C fully mapped to arm7 // inverted order
-	*((vu32*)REG_MBK4) = 0x9195999D;
-	*((vu32*)REG_MBK5) = 0x8185898D;
+	*((vu32*)REG_MBK4)=0x9195999D;
+	*((vu32*)REG_MBK5)=0x8185898D;
 		
 	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK6 = 0x00000000;
+	REG_MBK6=0x00000000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7 = 0x07C03740; // Same as DSiWare
+	REG_MBK7=0x07C03740; // Same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8 = 0x07403700; // Same as DSiWare
+	REG_MBK8=0x07403700; // Same as DSiWare
 }
 
 void SetBrightness(u8 screen, s8 bright) {

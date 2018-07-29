@@ -64,8 +64,8 @@ void arm7clearRAM(void);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
-//#define TEMP_MEM 0x02FFE000 --> __DSiHeader
-//#define NDS_HEAD 0x027FFE00 --> __NDSHeader
+//#define TEMP_MEM                0x02FFE000 //__DSiHeader
+#define NDS_HEAD                0x027FFE00
 #define TEMP_ARM9_START_ADDRESS (*(vu32*)0x027FFFF4)
 
 #define ENGINE_LOCATION_ARM7 0x037C0000
@@ -524,7 +524,7 @@ void loadBinary_ARM7(aFile file) {
 		*(u32*)0x02007a08 = 0xe59f1030;
 		*(u32*)0x02007a0c = 0xe59f0028;
 		*(u32*)0x02007a10 = 0xe0281097;
-		*(u32*)0x02007a14 = 0xea000003;	
+		*(u32*)0x02007a14 = 0xea000003;
 	}
 	
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
@@ -535,7 +535,7 @@ void loadBinary_ARM7(aFile file) {
 		*(u32*)0x02007a08 = 0xe59f1030;
 		*(u32*)0x02007a0c = 0xe59f0028;
 		*(u32*)0x02007a10 = 0xe0281097;
-		*(u32*)0x02007a14 = 0xea000003;	
+		*(u32*)0x02007a14 = 0xea000003;
 	}
 	
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
@@ -546,7 +546,7 @@ void loadBinary_ARM7(aFile file) {
 		*(u32*)0x02007bf8 = 0xe59f1030;
 		*(u32*)0x02007bfc = 0xe59f0028;
 		*(u32*)0x02007c00 = 0xe0281097;
-		*(u32*)0x02007c04 = 0xea000003;	
+		*(u32*)0x02007c04 = 0xea000003;
 	}
 
 	// Chrono Trigger (Japan)
@@ -596,7 +596,7 @@ void loadBinary_ARM7(aFile file) {
 	//TEMP_ARM9_START_ADDRESS = ndsHeader[0x024 >> 2];
 	TEMP_ARM9_START_ADDRESS = (vu32)ndsHeader.arm9executeAddress; // Store for later
 	ndsHeader.arm9executeAddress = 0;
-	dmaCopyWords(3, &ndsHeader, __NDSHeader, sizeof(ndsHeader)); //dmaCopyWords(3, &ndsHeader, (void*)NDS_HEAD, 0x170);
+	dmaCopyWords(3, &ndsHeader, (void*)NDS_HEAD, sizeof(ndsHeader)); //dmaCopyWords(3, &ndsHeader, (void*)NDS_HEAD, 0x170);
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 	nocashMessage("Switch to NTR mode BIOS");
