@@ -775,6 +775,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, *romFile, src, len, 2);
 		//ndmaUsed = true;
 		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+		unlockMutex(&saveMutex);
 	}
 	
 	return true;
