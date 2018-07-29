@@ -17,7 +17,8 @@ static const u32 a7something1Signature[2] = {0xE350000C, 0x908FF100};
 static const u32 a7something2Signature[2] = {0x0000A040, 0x040001A0};
 
 u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-	dbg_printf("\nArm7 (patch v2.0)\n");
+	//dbg_printf("\nArm7 (patch v2.0)\n");
+	dbg_printf("\nArm7 (patch v2)\n");
 
 	// Find the relocation signature
 	u32 relocationStart = (u32)findOffset(
