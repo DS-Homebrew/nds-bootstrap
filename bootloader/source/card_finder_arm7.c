@@ -123,9 +123,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 		swiGetPitchTableSignature1, 4
 	);
 	if (swiGetPitchTableOffset) {
-		dbg_printf("swiGetPitchTable SDK2 call found: ");
+		dbg_printf("swiGetPitchTable SDK <= 2 call found: ");
 	} else {
-		dbg_printf("swiGetPitchTable SDK2 call not found\n");
+		dbg_printf("swiGetPitchTable SDK <= 2 call not found\n");
 	}
 
 	if (!swiGetPitchTableOffset) {
@@ -134,9 +134,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt1, 4
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 1 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 1 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 1 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 1 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -145,9 +145,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt2, 4
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 2 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 2 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 2 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 2 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -156,9 +156,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt3, 4
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 3 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 3 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 3 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 3 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -167,9 +167,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt4, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 4 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 4 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 4 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 4 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -178,9 +178,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt5, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 5 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 5 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 5 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 5 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -189,9 +189,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 6 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 6 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 6 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 6 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -200,9 +200,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 7 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 7 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 7 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 7 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -211,9 +211,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature1Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK2 call alt 8 found: ");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 8 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK2 call alt 8 not found\n");
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 8 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -222,9 +222,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -233,9 +233,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt1, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 1 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 1 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 1 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 1 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -244,9 +244,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt2, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 2 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 2 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 2 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 2 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -255,9 +255,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt3, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 3 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 3 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 3 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 3 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -266,9 +266,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt4, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 4 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 4 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 4 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 4 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -277,9 +277,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt5, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 5 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 5 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 5 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 5 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -288,9 +288,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 6 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 6 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 6 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 6 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -299,9 +299,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 7 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 7 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 7 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 7 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -310,9 +310,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 8 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 8 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 8 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 8 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -321,9 +321,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt9, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 9 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 9 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 9 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 9 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -332,9 +332,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature3Alt10, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK3 call alt 10 found: ");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 10 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK3 call alt 10 not found\n");
+			dbg_printf("swiGetPitchTable SDK 3 call alt 10 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -343,9 +343,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -354,9 +354,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt1, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 1 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 1 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 1 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 1 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -365,9 +365,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt2, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 2 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 2 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 2 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 2 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -376,9 +376,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt3, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 3 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 3 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 3 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 3 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -387,9 +387,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt4, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 4 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 4 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 4 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 4 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -398,9 +398,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt5, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 5 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 5 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 5 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 5 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -409,9 +409,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 6 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 6 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 6 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 6 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -420,9 +420,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 7 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 7 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 7 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 7 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -431,9 +431,9 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader) {
 			swiGetPitchTableSignature4Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
-			dbg_printf("swiGetPitchTable SDK4 call alt 8 found: ");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 8 found: ");
 		} else {
-			dbg_printf("swiGetPitchTable SDK4 call alt 8 not found\n");
+			dbg_printf("swiGetPitchTable SDK 4 call alt 8 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
@@ -466,9 +466,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 		swiHaltSignature1, 4
 	);
 	if (swiHaltOffset) {
-		dbg_printf("swiHalt SDK2 call found: ");
+		dbg_printf("swiHalt SDK <= 2 call found: ");
 	} else {
-		dbg_printf("swiHalt SDK2 call not found\n");
+		dbg_printf("swiHalt SDK <= 2 call not found\n");
 	}
 
 	if (!swiHaltOffset) {
@@ -477,9 +477,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt1, 4
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 1 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 1 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 1 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 1 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -488,9 +488,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt2, 4
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 2 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 2 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 2 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 2 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -499,9 +499,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt3, 4
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 3 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 3 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 3 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 3 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -510,9 +510,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt4, 4
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 4 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 4 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 4 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 4 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -521,9 +521,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt5, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 5 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 5 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 5 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 5 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -532,9 +532,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt6, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 6 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 6 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 6 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 6 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -543,9 +543,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt7, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 7 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 7 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 7 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 7 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -554,9 +554,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt8, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 8 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 8 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 8 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 8 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -565,9 +565,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt9, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 9 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 9 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 9 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 9 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -576,9 +576,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature1Alt10, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK2 call alt 10 found: ");
+			dbg_printf("swiHalt SDK <= 2 call alt 10 found: ");
 		} else {
-			dbg_printf("swiHalt SDK2 call alt 10 not found\n");
+			dbg_printf("swiHalt SDK <= 2 call alt 10 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -587,9 +587,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call found: ");
+			dbg_printf("swiHalt SDK 3 call found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call not found\n");
+			dbg_printf("swiHalt SDK 3 call not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -598,9 +598,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt1, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 1 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 1 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 1 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 1 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -609,9 +609,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt2, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 2 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 2 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 2 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 2 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -620,9 +620,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt3, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 3 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 3 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 3 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 3 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -631,9 +631,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt4, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 4 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 4 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 4 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 4 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -642,9 +642,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt5, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 5 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 5 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 5 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 5 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -653,9 +653,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt6, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 6 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 6 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 6 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 6 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -664,9 +664,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt7, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 7 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 7 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 7 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 7 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -675,9 +675,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt8, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 8 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 8 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 8 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 8 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -686,9 +686,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt9, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 9 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 9 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 9 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 9 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -697,9 +697,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt10, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 10 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 10 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 10 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 10 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -708,9 +708,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature3Alt11, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK3 call alt 11 found: ");
+			dbg_printf("swiHalt SDK 3 call alt 11 found: ");
 		} else {
-			dbg_printf("swiHalt SDK3 call alt 11 not found\n");
+			dbg_printf("swiHalt SDK 3 call alt 11 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -719,9 +719,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call found: ");
+			dbg_printf("swiHalt SDK 4 call found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call not found\n");
+			dbg_printf("swiHalt SDK 4 call not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -730,9 +730,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt1, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 1 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 1 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 1 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 1 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -741,9 +741,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt2, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 2 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 2 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 2 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 2 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -752,9 +752,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt3, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 3 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 3 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 3 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 3 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -763,9 +763,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt4, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 4 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 4 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 4 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 4 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -774,9 +774,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt5, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 5 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 5 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 5 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 5 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -785,9 +785,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt6, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 6 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 6 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 6 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 6 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -796,9 +796,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt7, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 7 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 7 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 7 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 7 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
@@ -807,9 +807,9 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader) {
 			swiHaltSignature4Alt8, 3
 		);
 		if (swiHaltOffset) {
-			dbg_printf("swiHalt SDK4 call alt 8 found: ");
+			dbg_printf("swiHalt SDK 4 call alt 8 found: ");
 		} else {
-			dbg_printf("swiHalt SDK4 call alt 8 not found\n");
+			dbg_printf("swiHalt SDK 4 call alt 8 not found\n");
 		}
 	}
 	if (!swiHaltOffset) {
