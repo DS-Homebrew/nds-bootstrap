@@ -1,21 +1,36 @@
-#include "save_patch.h"
+#include <nds/ndstypes.h>
+#include "card_patcher.h"
+#include "card_finder.h"
+#include "debugToFile.h"
 
-u32 relocateStartSignature[1] = {0x027FFFFA};
-u32 nextFunctiontSignature[1] = {0xE92D4000};
-u32 a7cardReadSignature[2]    = {0x04100010, 0x040001A4};
-u32 a7something2Signature[2]  = {0x0000A040, 0x040001A0};
+//
+// Subroutine function signatures ARM7
+//
 
-u32 a7JumpTableSignatureUniversal[3]               = {0xE592000C, 0xE5921010, 0xE5922014};
-u32 a7JumpTableSignatureUniversal_pt2[3]           = {0xE5920010, 0xE592100C, 0xE5922014};
-u32 a7JumpTableSignatureUniversal_pt3[2]           = {0xE5920010, 0xE5921014};
-u32 a7JumpTableSignatureUniversal_2[3]             = {0xE593000C, 0xE5931010, 0xE5932014};
-u32 a7JumpTableSignatureUniversal_2_pt2[3]         = {0xE5930010, 0xE593100C, 0xE5932014};
-u32 a7JumpTableSignatureUniversal_2_pt3[2]         = {0xE5930010, 0xE5931014};
-u16 a7JumpTableSignatureUniversalThumb[3]          = {0x68D0, 0x6911, 0x6952};
-u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910, 0x68D1, 0x6952};
-u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
-u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
-u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
+static const u32 relocateStartSignature[1] = {0x027FFFFA};
+
+static const u32 nextFunctiontSignature[1] = {0xE92D4000};
+
+//static const u32 a7cardReadSignature[2] = {0x04100010, 0x040001A4};
+
+/*
+static const u32 a7JumpTableSignature[4]                        = {0xE5950024, 0xE3500000, 0x13A00001, 0x03A00000};
+static const u32 a7JumpTableSignatureV3_1[3]                    = {0xE92D4FF0, 0xE24DD004, 0xE59F91F8};
+static const u32 a7JumpTableSignatureV3_2[3]                    = {0xE92D4FF0, 0xE24DD004, 0xE59F91D4};
+static const u32 a7JumpTableSignatureV4_1[3]                    = {0xE92D41F0, 0xE59F4224, 0xE3A05000};
+static const u32 a7JumpTableSignatureV4_2[3]                    = {0xE92D41F0, 0xE59F4200, 0xE3A05000};
+*/
+static const u32 a7JumpTableSignatureUniversal[3]               = {0xE592000C, 0xE5921010, 0xE5922014};
+static const u32 a7JumpTableSignatureUniversal_pt2[3]           = {0xE5920010, 0xE592100C, 0xE5922014};
+static const u32 a7JumpTableSignatureUniversal_pt3[2]           = {0xE5920010, 0xE5921014};
+static const u32 a7JumpTableSignatureUniversal_2[3]             = {0xE593000C, 0xE5931010, 0xE5932014};
+static const u32 a7JumpTableSignatureUniversal_2_pt2[3]         = {0xE5930010, 0xE593100C, 0xE5932014};
+static const u32 a7JumpTableSignatureUniversal_2_pt3[2]         = {0xE5930010, 0xE5931014};
+static const u16 a7JumpTableSignatureUniversalThumb[3]          = {0x68D0, 0x6911, 0x6952};
+static const u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910, 0x68D1, 0x6952};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
 
 u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	dbg_printf("\nArm7 (patch vAll)\n");

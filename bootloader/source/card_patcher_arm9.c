@@ -67,6 +67,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 
 	bool usesThumb = false;
 	int readType = 0;
+	int sdk5ReadType = 0; // SDK 5
 
 	// Card read
 	u32* cardReadEndOffset = findCardReadEndOffset0(ndsHeader, moduleParams);
@@ -84,7 +85,20 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	}
 	if (!cardReadEndOffset) {
 		dbg_printf("Trying thumb...\n");
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader, moduleParams);
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+		if (!cardReadEndOffset) {
+			// SDK 5
+			dbg_printf("Trying SDK 5 thumb...\n");
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+		}
+		if (!cardReadEndOffset) {
+			// SDK 5
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+			if (cardReadEndOffset) {
+				usesThumb = true;
+				sdk5ReadType = 1;
+			}
+		}
 		if (cardReadEndOffset) {
 			usesThumb = true;
 		}
@@ -96,13 +110,27 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	cardReadFound = true;
 	u32* cardReadStartOffset;
 	if (readType == 0) {
-		cardReadStartOffset = findCardReadStartOffset0(cardReadEndOffset);
+		cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
 	} else {
-		cardReadStartOffset = findCardReadStartOffset1(cardReadEndOffset);
+		cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+	}
+	if (!cardReadStartOffset) {
+		// SDK 5
+		dbg_printf("Trying SDK 5...\n");
+		cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
 	}
 	if (!cardReadStartOffset) {
 		dbg_printf("Trying thumb...\n");
 		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
+		if (!cardReadStartOffset) {
+			// SDK 5
+			dbg_printf("Trying SDK 5 thumb...\n");
+			if (sdk5ReadType == 0) {
+				cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
+			} else {
+				cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
+			}
+		}
 	}
 	if (!cardReadStartOffset) {
 		return 0;
@@ -116,7 +144,16 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	// Card pull out
 	u32* cardPullOutOffset;
 	if (usesThumb) {
-		cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader, moduleParams);
+		cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader);
+		if (!cardPullOutOffset) {
+			// SDK 5
+			dbg_printf("Trying SDK 5 thumb...\n");
+			if (sdk5ReadType == 0) {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type0(ndsHeader, moduleParams);
+			} else {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type1(ndsHeader, moduleParams);
+			}
+		}
 	} else {
 		cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 	}
@@ -128,11 +165,11 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	u32* cardIdEndOffset;
 	u32* cardIdStartOffset;
 	if (usesThumb) {
-		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, (u16*)cardReadEndOffset);
-		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb((u16*)cardIdEndOffset);
+		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
+		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
 	} else {
-		cardIdEndOffset = findCardIdEndOffset(ndsHeader, cardReadEndOffset);
-		cardIdStartOffset = findCardIdStartOffset(cardIdEndOffset);
+		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
+		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
 	}
 	if (cardIdEndOffset) {
 		debug[1] = (u32)cardIdEndOffset;
@@ -148,7 +185,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		}
 		cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
 	} else {
-		cardReadDmaStartOffset = findCardReadDmaStartOffset(cardReadDmaEndOffset);
+		cardReadDmaStartOffset = findCardReadDmaStartOffset(moduleParams, cardReadDmaEndOffset);
 	}
 
 	// Find the mpu init
@@ -202,7 +239,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	dbg_printf("patchMpuSize:\t");
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n");
-	u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
+	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 	while (mpuStartOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
 		if (patchMpuSize > 1) {
@@ -273,6 +310,22 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		}
 	}
 
+	// SDK 5
+	u32* randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader, moduleParams);
+	if (randomPatchOffset5First) {
+		*randomPatchOffset5First = 0xE3A00000;
+		//*(u32*)((u32)randomPatchOffset5First + 4) = 0xE12FFF1E;
+		*(randomPatchOffset5First + 1) = 0xE12FFF1E;
+	}
+
+	// SDK 5
+	u32* randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader, moduleParams);
+	if (randomPatchOffset5Second) {
+		*randomPatchOffset5Second = 0xE3A00000;
+		//*(u32*)((u32)randomPatchOffset2 + 4) = 0xE12FFF1E;
+		*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
+	}
+
 	debug[2] = (u32)cardEngineLocation;
 
 	cardEngineLocation[3] = moduleParams->sdk_version;
@@ -292,11 +345,12 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	debug[6] = (u32)*card_struct;
 	//debug[7] = (u32)*cache_struct;
 
-	cardEngineLocation[5] = (u32)(*card_struct + 6);
-	*(u32*)patches[5] = (u32)(*card_struct + 6); // Cache management alternative
 	if (moduleParams->sdk_version > 0x3000000) {
 		cardEngineLocation[5] = (u32)(*card_struct + 7);
 		*(u32*)patches[5] = (u32)(*card_struct + 7); // Cache management alternative
+	} else {
+		cardEngineLocation[5] = (u32)(*card_struct + 6);
+		*(u32*)patches[5] = (u32)(*card_struct + 6); // Cache management alternative
 	}
 	//cardEngineLocation[6] = (u32)*cache_struct;
 

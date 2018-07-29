@@ -1,4 +1,19 @@
-#include "save_patch.h"
+#include <nds/ndstypes.h>
+#include "card_patcher.h"
+#include "card_finder.h"
+#include "debugToFile.h"
+
+//
+// Subroutine function signatures ARM7
+//
+
+static const u32 relocateStartSignature[1] = {0x027FFFFA};
+
+static const u32 nextFunctiontSignature[1] = {0xE92D4000};
+
+static const u32 a7cardReadSignature[2] = {0x04100010, 0x040001A4};
+
+static const u32 a7something2Signature[2] = {0x0000A040, 0x040001A0};
 
 u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	dbg_printf("\nArm7 (patch v1.0)\n");

@@ -206,8 +206,7 @@ int loadCheatData(u32* cheatData) {
 	return true;
 }
 
-int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheatData)
-{
+int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheatData) {
 	char* argStart;
 	u16* argData;
 	u16 argTempVal = 0;
@@ -238,23 +237,17 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	argData = (u16*)argStart;
 	argSize = 0;
 	
-	for (; argc > 0 && *argv; ++argv, --argc) 
-	{
-		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) 
-		{
-			if (argSize & 1) 
-			{
+	for (; argc > 0 && *argv; ++argv, --argc) {
+		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
+			if (argSize & 1) {
 				argTempVal |= (*argChar) << 8;
 				*argData = argTempVal;
 				++argData;
-			} 
-			else 
-			{
+			} else {
 				argTempVal = *argChar;
 			}
 		}
-		if (argSize & 1)
-		{
+		if (argSize & 1) {
 			*argData = argTempVal;
 			++argData;
 		}
@@ -307,7 +300,7 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* savename, int saveSize, int language, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int asyncPrefetch, int argc, const char** argv, u32* cheatData)  {
+int runNdsFile(const char* filename, const char* savename, int saveSize, int language, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int asyncPrefetch, int argc, const char** argv, u32* cheatData)  {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
@@ -316,21 +309,21 @@ int runNdsFile (const char* filename, const char* savename, int saveSize, int la
 	const char* args[1];
 
 	
-	if (stat (filename, &st) < 0) {
+	if (stat(filename, &st) < 0) {
 		return 1;
 	}
 	
-	if (stat (savename, &stSav) >= 0) {
+	if (stat(savename, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
 	}
 	
 	if (argc <= 0 || !argv) {
 		// Construct a command line if we weren't supplied with one
-		if (!getcwd (filePath, PATH_MAX)) {
+		if (!getcwd(filePath, PATH_MAX)) {
 			return 2;
 		}
-		pathLen = strlen (filePath);
-		strcpy (filePath + pathLen, filename);
+		pathLen = strlen(filePath);
+		strcpy(filePath + pathLen, filename);
 		args[0] = filePath;
 		argv = args;
 	}

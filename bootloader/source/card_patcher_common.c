@@ -22,9 +22,8 @@
 #include "common.h"
 #include "debugToFile.h"
 
+bool logging = false; //extern bool logging;
 extern bool cardReadFound; // card_patcher_arm9.c
-
-//#define DEBUG
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
@@ -35,10 +34,9 @@ u32 patchCardNds(
 	u32 saveSize,
 	u32 patchMpuRegion,
 	u32 patchMpuSize) {
-	#ifdef DEBUG
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
-	enableDebug(myDebugFile);
-	#endif
+	if (logging) {
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 3));
+	}
 
 	dbg_printf("patchCardNds\n\n");
 

@@ -10,9 +10,12 @@
 
 extern u32 ROMinRAM;
 
+//static bool sdk5 = false; // SDK 5
+
 u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV5(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -52,24 +55,59 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		u32* swiGetPitchTablePatch = (u32*)patches[12]; //u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12];
+		//u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12]; // SDK 5
+		u32* swiGetPitchTablePatch = (u32*)patches[12];
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
 
 void patchSwiHalt(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+	bool usesThumb = false;
+
 	// swi halt
 	u32* swiHaltOffset = findSwiHaltOffset(ndsHeader);
+	if (!swiHaltOffset) {
+		dbg_printf("Trying thumb...\n");
+		swiHaltOffset = (u32*)findSwiHaltOffsetThumb(ndsHeader);
+		if (swiHaltOffset) {
+			usesThumb = true;
+		}
+	}
 	if (swiHaltOffset) {
 		// Patch
 		u32* patches = (u32*)cardEngineLocation[0];
+		//u32* swiHaltPatch = (u32*)patches[sdk5 ? (usesThumb ? 11 : 12) : 11]; // SDK 5
 		u32* swiHaltPatch = (u32*)patches[11];
-		memcpy(swiHaltOffset, swiHaltPatch, 0xC);
+		if (usesThumb) {
+			/*
+            // Find the relocation signature
+            u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+                relocateStartSignature, 1, 1);
+            if (!relocationStart) {
+                dbg_printf("Relocation start not found\n");
+        		return 0;
+            }
+        
+        	// Validate the relocation signature
+            u32 vAddrOfRelocSrc = relocationStart + 0x8;
+        
+            dbg_hexa((u32)swiHaltOffset);
+            u32* arm7FunctionThumb =  (u32*) patches[14];
+            u16 instrs [2];
+		    generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000,
+			     arm7FunctionThumb[8]);
+            ((u16*)swiHaltOffset)[0]=instrs[0];
+            ((u16*)swiHaltOffset)[1]=instrs[1];*/
+		} else {
+			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
+		}
 	}
 }
 
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
+
+	//sdk5 = (moduleParams->sdk_version > 0x5000000); // SDK 5
 
 	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, cardEngineLocation);
@@ -130,8 +168,13 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	if (!saveResult) {
 		saveResult = savePatchUniversal(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
 	}
+	if (!saveResult) {
+		// SDK 5
+		saveResult = savePatchV5(ndsHeader, cardEngineLocation, moduleParams, saveFileCluster, saveSize);
+	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
+		//fileRead(sdk5 ? (char*)0x0CE00000 : (char*)0x0C820000, saveFile, 0, saveSize, 3); // SDK 5
 		fileRead((char*)0x0C820000, saveFile, 0, saveSize, 3);
 	}
 

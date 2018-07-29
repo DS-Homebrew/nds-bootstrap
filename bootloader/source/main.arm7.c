@@ -169,13 +169,12 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 void resetMemory_ARM7(void)
 {
-	int i;
 	u8 settings1, settings2;
 	u32 settingsOffset = 0;
 
 	REG_IME = 0;
 
-	for (i=0; i<16; i++) {
+	for (int i = 0; i < 16; i++) {
 		SCHANNEL_CR(i) = 0;
 		SCHANNEL_TIMER(i) = 0;
 		SCHANNEL_SOURCE(i) = 0;
@@ -184,8 +183,8 @@ void resetMemory_ARM7(void)
 
 	REG_SOUNDCNT = 0;
 
-	//clear out ARM7 DMA channels and timers
-	for (i=0; i<4; i++) {
+	// Clear out ARM7 DMA channels and timers
+	for (int i = 0; i < 4; i++) {
 		DMA_CR(i) = 0;
 		DMA_SRC(i) = 0;
 		DMA_DEST(i) = 0;
@@ -197,8 +196,8 @@ void resetMemory_ARM7(void)
 
 	REG_IE = 0;
 	REG_IF = ~0;
-	(*(vu32*)(0x04000000-4)) = 0;  //IRQ_HANDLER ARM7 version
-	(*(vu32*)(0x04000000-8)) = ~0; //VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	(*(vu32*)(0x04000000 - 4)) = 0;  //IRQ_HANDLER ARM7 version
+	(*(vu32*)(0x04000000 - 8)) = ~0; //VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  //turn off power to stuff
 
 	// Get settings location
@@ -209,7 +208,7 @@ void resetMemory_ARM7(void)
 	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
-	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
+	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
 		boot_readFirmware(settingsOffset + 0x000, (u8*)0x027FFC80, 0x70);
 	} else {
 		boot_readFirmware(settingsOffset + 0x100, (u8*)0x027FFC80, 0x70);
@@ -225,13 +224,13 @@ u32 readTSCReg(u32 reg) {
 //---------------------------------------------------------------------------------
  
 	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
-	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
  
-	while(REG_SPICNT & 0x80);
+	while (REG_SPICNT & 0x80);
  
 	REG_SPIDATA = 0;
  
-	while(REG_SPICNT & 0x80);
+	while (REG_SPICNT & 0x80);
 
 	REG_SPICNT = 0;
 
@@ -243,12 +242,12 @@ void readTSCRegArray(u32 reg, void *buffer, int size) {
 //---------------------------------------------------------------------------------
  
 	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
-	REG_SPIDATA = ((reg<<1) | 1) & 0xFF;
+	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
 
 	char *buf = (char*)buffer;
-	while(REG_SPICNT & 0x80);
+	while (REG_SPICNT & 0x80);
 	int count = 0;
-	while(count<size) {
+	while (count<size) {
 		REG_SPIDATA = 0;
  
 		while(REG_SPICNT & 0x80);
@@ -258,7 +257,6 @@ void readTSCRegArray(u32 reg, void *buffer, int size) {
 		
 	}
 	REG_SPICNT = 0;
-
 }
 
 
@@ -705,7 +703,7 @@ int arm7_main(void) {
 		return -1;
 	}
 
-	*romFile = getFileFromCluster (storedFileCluster);
+	*romFile = getFileFromCluster(storedFileCluster);
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
