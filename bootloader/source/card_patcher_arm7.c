@@ -38,7 +38,7 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocation) {
 	u32* patches = (u32*)cardEngineLocation[0];
 
 	// swi 0x12 call
@@ -52,7 +52,7 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	//sdk5 = false;
 
 	// swi get pitch table
-	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader);
+	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
 		//u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12]; // SDK 5
@@ -61,11 +61,11 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
 	}
 }
 
-void patchSwiHalt(const tNDSHeader* ndsHeader, u32* cardEngineLocation) {
+void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocation) {
 	bool usesThumb = false;
 
 	// swi halt
-	u32* swiHaltOffset = findSwiHaltOffset(ndsHeader);
+	u32* swiHaltOffset = findSwiHaltOffset(ndsHeader, moduleParams);
 	if (!swiHaltOffset) {
 		dbg_printf("Trying thumb...\n");
 		swiHaltOffset = (u32*)findSwiHaltOffsetThumb(ndsHeader);
@@ -110,10 +110,10 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	//sdk5 = (moduleParams->sdk_version > 0x5000000); // SDK 5
 
 	if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ndsHeader, cardEngineLocation);
+		fixForDsiBios(ndsHeader, moduleParams, cardEngineLocation);
 	}
 	if (ROMinRAM == false) {
-		patchSwiHalt(ndsHeader, cardEngineLocation);
+		patchSwiHalt(ndsHeader, moduleParams, cardEngineLocation);
 	}
 	
 	bool usesThumb = false;

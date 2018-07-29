@@ -74,8 +74,8 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_para
 
 // ARM7
 u32* findSwi12Offset(const tNDSHeader* ndsHeader);
-u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader);
-u32* findSwiHaltOffset(const tNDSHeader* ndsHeader);
+u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findSwiHaltOffsetThumb(const tNDSHeader* ndsHeader); // SDK 5
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
