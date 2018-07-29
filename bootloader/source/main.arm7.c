@@ -740,16 +740,16 @@ int arm7_main(void) {
 	memcpy((u32*)ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
-	//module_params_t* moduleParams = findModuleParams((tNDSHeader*)NDS_HEAD, donorSdkVer);
-	module_params_t* moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
+	//module_params_t* moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
+	module_params_t* moduleParams = findModuleParams((tNDSHeader*)NDS_HEAD, donorSdkVer);
 	if (moduleParams) {
-		//ensureArm9Decompressed((tNDSHeader*)NDS_HEAD, moduleParams);
-		ensureArm9Decompressed(__NDSHeader, moduleParams);
+		//ensureArm9Decompressed(__NDSHeader, moduleParams);
+		ensureArm9Decompressed((tNDSHeader*)NDS_HEAD, moduleParams);
 	}
 	increaseLoadBarLength(); // 5 dots
 
-	//errorCode = patchCardNds((tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
-	errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	//errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds((tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card patch successful");
 	} else {
@@ -758,8 +758,8 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 6 dots
 
-	//errorCode = hookNdsRetail((tNDSHeader*)NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
-	errorCode = hookNdsRetail(__NDSHeader, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	//errorCode = hookNdsRetail(__NDSHeader, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetail((tNDSHeader*)NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {
