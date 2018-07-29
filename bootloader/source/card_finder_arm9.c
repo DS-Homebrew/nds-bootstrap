@@ -141,8 +141,8 @@ module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer) 
 	return (module_params_t*)((u32)moduleparams - 0x1C);
 }
 
-u32* findCardReadEndOffset0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	dbg_printf("findCardReadEndOffset0:\n");
+u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findCardReadEndOffsetType0:\n");
 
 	u32* cardReadEndOffset = NULL;
 	if (ROM_TID != 0x45524F55 && moduleParams->sdk_version < 0x4000000) {
@@ -166,8 +166,8 @@ u32* findCardReadEndOffset0(const tNDSHeader* ndsHeader, const module_params_t* 
 	return cardReadEndOffset;
 }
 
-u32* findCardReadEndOffset1(const tNDSHeader* ndsHeader) {
-	dbg_printf("findCardReadEndOffset1:\n");
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
+	dbg_printf("findCardReadEndOffsetType1:\n");
 
 	u32* cardReadEndOffset = NULL;
 	if (ROM_TID == 0x45524F55) { // Start at 0x3800 for "WarioWare: DIY (USA)"

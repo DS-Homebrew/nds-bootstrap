@@ -70,10 +70,10 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	int sdk5ReadType = 0; // SDK 5
 
 	// Card read
-	u32* cardReadEndOffset = findCardReadEndOffset0(ndsHeader, moduleParams);
+	u32* cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
 	if (!cardReadEndOffset) {
 		//dbg_printf("Trying alt...\n");
-		cardReadEndOffset = findCardReadEndOffset1(ndsHeader);
+		cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
 		if (cardReadEndOffset) {
 			readType = 1;
 			if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
