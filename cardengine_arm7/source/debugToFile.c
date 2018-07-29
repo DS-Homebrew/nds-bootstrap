@@ -26,9 +26,9 @@ static aFile _debugFileCluster;
 static u32 _currentPos = 0;
 static char hexbuffer[9];
 
-void enableDebug(aFile _debugFileCluster) {
+void enableDebug(aFile debugFileCluster) {
 	_debug = true;
-	_debugFileCluster = _debugFileCluster;
+	_debugFileCluster = debugFileCluster;
 }
 
 u32 dbg_printf(char * message) {
