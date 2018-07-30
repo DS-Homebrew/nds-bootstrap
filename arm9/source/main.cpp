@@ -95,7 +95,7 @@ void runFile(std::string filename, std::string savPath, u32 saveSize, u32 langua
 
 	if (strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
 		FILE* argfile = fopen(filename.c_str(), "rb");
-		char str[PATH_MAX],* pstr;
+		char str[PATH_MAX], *pstr;
 		const char seps[] = "\n\r\t ";
 
 		while(fgets(str, PATH_MAX, argfile)) {
@@ -107,7 +107,7 @@ void runFile(std::string filename, std::string savPath, u32 saveSize, u32 langua
 			// Tokenize arguments
 			pstr = strtok(str, seps);
 
-			while(pstr != NULL) {
+			while (pstr != NULL) {
 				argarray.push_back(strdup(pstr));
 				pstr= strtok(NULL, seps);
 			}
@@ -118,7 +118,7 @@ void runFile(std::string filename, std::string savPath, u32 saveSize, u32 langua
 		argarray.push_back(strdup(filename.c_str()));
 	}
 
-	if (strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0) {
+	if (strcasecmp(filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0) {
 		dbg_printf("No NDS file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
@@ -153,7 +153,7 @@ void runFile(std::string filename, std::string savPath, u32 saveSize, u32 langua
 							romread_LED, 
 							gameSoftReset, 
 							asyncPrefetch, 
-							argarray.size(), (const char* *)&argarray[0], 
+							argarray.size(), (const char**)&argarray[0], 
 							cheat_data);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
@@ -202,7 +202,7 @@ off_t getSaveSize(const char* path) {
 	return fsize;
 }
 
-int main(int argc, char* *argv) {
+int main(int argc, char** argv) {
 	if (fatInitDefault()) {
 		nocashMessage("fatInitDefault");
 
@@ -255,7 +255,14 @@ int main(int argc, char* *argv) {
 		fread(game_TID, 1, 4, f_nds_file);
 		game_TID[4] = 0;
 		game_TID[3] = 0;
+		//game_TID[2] = 0; // SDK 5
+		//game_TID[1] = 0; // SDK 5
 		fclose(f_nds_file);
+
+		// SDK 5
+		//if (strcmp(game_TID, "I") != 0) {
+		//	fifoSendValue32(FIFO_USER_08, 1); // Disable Slot-1 access for games with no built-in infrared port
+		//}
 
 		if (strcmp(game_TID, "ABX") == 0	// NTR-ABXE Bomberman Land Touch!
 		 || strcmp(game_TID, "YO9") == 0	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
@@ -314,7 +321,7 @@ int main(int argc, char* *argv) {
 		 || strcmp(game_TID, "YNZ") == 0	// NTR-YNZE Petz - Dogz Fashion
 		)
 		{
-			fifoSendValue32(FIFO_MAXMOD, 1);	// special setting (when found special gamecode)
+			fifoSendValue32(FIFO_MAXMOD, 1); // Special setting (when found special gamecode)
 		}*/
 
 		if (bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0) == 1) {
@@ -395,4 +402,3 @@ int main(int argc, char* *argv) {
 
 	return 0;
 }
-

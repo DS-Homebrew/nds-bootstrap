@@ -51,6 +51,7 @@ void myFIFOValue32Handler(u32 value, void* data) {
 
 }
 
+// See: arm9/source/nds_loader_arm9.c
 /*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
@@ -123,7 +124,7 @@ int main(void) {
 
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power button for auto-reset
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// Have IRQ check for power button press
-	//i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+	i2cWriteRegister(0x4A, 0x70, 0x01);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
 
 	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 	//

@@ -152,18 +152,19 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	} while (size -= 2);
 }*/
 
-/*static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
-	const int* dataChunk = (const int*)data;
+// See: arm7/source/main.c
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
+	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
-	addr_t i;
-	addr_t dataChunkEnd = (addr_t)(dataLen / sizeof(int));
+	u32 i;
+	u32 dataLen = (u32)(dataSize / sizeof(int));
 
-	for ( i = 0; i < dataChunkEnd; i++) {
+	for ( i = 0; i < dataLen; i++) {
 		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
+			if ((i*sizeof(int) + searchSize) > dataSize) {
 				return -1;
 			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+			if (memcmp (&data[i*sizeof(int)], search, searchSize) == 0) {
 				return i*sizeof(int);
 			}
 		}
@@ -221,13 +222,16 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;	
 	// Load the loader/patcher into the correct address
-	memcpy((u16*)LCDC_BANK_C, (const u16*)loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
+	memcpy(LCDC_BANK_C, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Set the parameters for the loader
+	
 	// STORED_FILE_CLUSTER = cluster;
 	writeAddr((u8*)LCDC_BANK_C, STORED_FILE_CLUSTER_OFFSET, cluster);
+	
 	// INIT_DISC = initDisc;
 	writeAddr((u8*)LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
+	
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
 	writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
 

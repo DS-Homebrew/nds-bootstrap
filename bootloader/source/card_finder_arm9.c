@@ -1,5 +1,4 @@
-#include <string.h> // memset
-#include <stdlib.h> // malloc
+#include <stddef.h> // NULL
 #include "card_finder.h"
 #include "debugToFile.h"
 
@@ -104,41 +103,25 @@ const u32 mpuInitRegion3Data[1]      = {0x8000035};
 // Mpu cache init
 const u32 mpuInitCache[1] = {0xE3A00042};
 
-module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer) {
-	dbg_printf("Looking for moduleparams\n");
-	u32* moduleparams = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+u32* findModuleParamsOffset(const u32* src, u32 size) {
+	dbg_printf("findModuleParamsOffset:\n");
+
+	u32* moduleParamsOffset = findOffset(
+		src, size,//(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
 		moduleParamsSignature, 2
 	);
-	*(vu32*)(0x2800008) = ((u32)moduleparams - 0x8);
-	if (!moduleparams) {
-		dbg_printf("No moduleparams?\n");
-		*(vu32*)(0x2800010) = 1;
-		moduleparams = malloc(0x100);
-		memset(moduleparams, 0, 0x100);
-		((module_params_t*)((u32)moduleparams - 0x1C))->compressed_static_end = 0;
-		switch (donorSdkVer) {
-			case 0:
-			default:
-				break;
-			case 1:
-				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x1000500;
-				break;
-			case 2:
-				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x2001000;
-				break;
-			case 3:
-				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x3002001;
-				break;
-			case 4:
-				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x4002001;
-				break;
-			case 5:
-				((module_params_t*)(moduleparams - 0x1C))->sdk_version = 0x5003001;
-				break;
-		}
+	if (moduleParamsOffset) {
+		dbg_printf("Module params offset found: ");
+	} else {
+		dbg_printf("Module params offset not found\n");
 	}
-	return (module_params_t*)((u32)moduleparams - 0x1C);
+
+	if (moduleParamsOffset) {
+		dbg_hexa((u32)moduleParamsOffset);
+		dbg_printf("\n");
+	}
+
+	return moduleParamsOffset;
 }
 
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
