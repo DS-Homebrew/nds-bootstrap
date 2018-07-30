@@ -657,14 +657,10 @@ void loadBinary_ARM7(aFile file) {
 		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
 	}
 
+	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
+	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
+	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
 	if (sdk5) {
-		// SDK 5
-		if (consoleModel > 0 && romSizeNoArm9 <= 0x01000000) {
-			// Set to load ROM into RAM
-			ROMinRAM = true;
-		}
-	} else if ((consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
-	       || (consoleModel == 0 && romSizeNoArm9 <= 0x007FC000)) {
 		// Set to load ROM into RAM
 		ROMinRAM = true;
 	}
