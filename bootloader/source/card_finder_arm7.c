@@ -123,7 +123,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	if (!swiGetPitchTableOffset) {
 		if (moduleParams->sdk_version < 0x3000000) {
-			u32* swiGetPitchTableOffset = findOffset(
+			swiGetPitchTableOffset = findOffset(
 				(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
 				swiGetPitchTableSignature1, 4
 			);
@@ -530,7 +530,7 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* modul
 	
 	if (!swiHaltOffset) {
 		if (moduleParams->sdk_version < 0x3000000) {
-			u32* swiHaltOffset = findOffset(
+			swiHaltOffset = findOffset(
 				(u32*)ndsHeader->arm7destination, 0x00002000,//ndsHeader->arm7binarySize,
 				swiHaltSignature1, 4
 			);
