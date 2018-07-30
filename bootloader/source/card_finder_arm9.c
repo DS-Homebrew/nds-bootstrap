@@ -1231,7 +1231,7 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		randomPatchSignature, 4
 	);
-	if (!randomPatchOffset) {
+	if (randomPatchOffset) {
 		dbg_printf("Random patch found: ");
 	} else {
 		dbg_printf("Random patch not found\n");
