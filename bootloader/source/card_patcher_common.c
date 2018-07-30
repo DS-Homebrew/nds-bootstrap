@@ -25,6 +25,8 @@
 bool logging = false; //extern bool logging;
 extern bool cardReadFound; // card_patcher_arm9.c
 
+extern bool sdk5; // Debug
+
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
 	u32* cardEngineLocationArm7,
@@ -39,6 +41,10 @@ u32 patchCardNds(
 	}
 
 	dbg_printf("patchCardNds\n\n");
+
+	if (sdk5) {
+		dbg_printf("[SDK 5]\n\n");
+	}
 
 	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
 	
