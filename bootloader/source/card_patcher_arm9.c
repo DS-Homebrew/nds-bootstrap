@@ -235,9 +235,9 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	}
 
 	// Patch out all further mpu reconfiguration
-	dbg_printf("patchMpuSize:\t");
+	dbg_printf("patchMpuSize: ");
 	dbg_hexa(patchMpuSize);
-	dbg_printf("\n");
+	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 	while (mpuStartOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
@@ -250,9 +250,9 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 			mpuInitRegionSignature, 1
 		);
 		if (mpuStartOffset) {
-			dbg_printf("Mpu init:\t");
+			dbg_printf("Mpu init: ");
 			dbg_hexa((u32)mpuStartOffset);
-			dbg_printf("\n");
+			dbg_printf("\n\n");
 
 			*mpuStartOffset = 0xE1A00000; // nop
 
