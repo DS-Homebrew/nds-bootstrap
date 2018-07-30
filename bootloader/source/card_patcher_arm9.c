@@ -95,7 +95,6 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 			// SDK 5
 			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
 			if (cardReadEndOffset) {
-				usesThumb = true;
 				sdk5ReadType = 1;
 			}
 		}
