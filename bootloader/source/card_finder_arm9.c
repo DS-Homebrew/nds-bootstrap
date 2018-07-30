@@ -1258,7 +1258,7 @@ u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_param
 		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		randomPatchSignature5First, 4
 	);
-	if (!randomPatchOffset) {
+	if (randomPatchOffset) {
 		dbg_printf("Random patch SDK 5 first found: ");
 	} else {
 		dbg_printf("Random patch SDK 5 first not found\n");
@@ -1285,7 +1285,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_para
 		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
         randomPatchSignature5Second, 3
 	);
-	if (!randomPatchOffset) {
+	if (randomPatchOffset) {
 		dbg_printf("Random patch SDK 5 second found: ");
 	} else {
 		dbg_printf("Random patch SDK 5 second not found\n");
