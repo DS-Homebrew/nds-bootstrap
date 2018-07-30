@@ -36,7 +36,6 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 }
 
 // ARM9
-//module_params_t* findModuleParams(const tNDSHeader* ndsHeader, u32 donorSdkVer);
 u32* findModuleParamsOffset(const u32* src, u32 size);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader);

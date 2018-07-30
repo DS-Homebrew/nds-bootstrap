@@ -67,13 +67,13 @@ void arm7clearRAM(void);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
-//#define TEMP_MEM                     0x02FFE000 //__DSiHeader
+//#define TEMP_MEM 0x02FFE000 //__DSiHeader
 
 #define NDS_HEAD                     0x027FFE00
 #define NDS_HEAD_SDK5                0x02FFFE00 // SDK 5
 
-#define TEMP_ARM9_START_ADDRESS      (*(vu32*)0x027FFFF4)
-#define TEMP_ARM9_START_ADDRESS_SDK5 (*(vu32*)0x02FFFFF4) // SDK 5
+#define TEMP_ARM9_START_ADDRESS      0x027FFFF4
+#define TEMP_ARM9_START_ADDRESS_SDK5 0x02FFFFF4 // SDK 5
 
 #define ENGINE_LOCATION_ARM7 0x037C0000
 
@@ -115,9 +115,12 @@ u32 fatSize;
 u32 romSize;
 u32 romSizeNoArm9;
 
-static aFile* romFile = (aFile *)0x37D5000;
-static aFile* savFile = (aFile *)0x37D5000 + 1;
+static aFile* romFile = (aFile*)0x37D5000;
+static aFile* savFile = (aFile*)0x37D5000 + 1;
 static module_params_t* moduleParams = NULL;
+static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
+static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
+static u32* engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -649,6 +652,9 @@ void loadBinary_ARM7(aFile file) {
 	free(arm9binary);
 	if (moduleParams->sdk_version > 0x5000000) {
 		sdk5 = true;
+		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
+		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
+		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
 	}
 
 	if (sdk5) {
@@ -685,16 +691,10 @@ void loadBinary_ARM7(aFile file) {
 	// First copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
 	//TEMP_ARM9_START_ADDRESS = ndsHeader[0x024 >> 2];
-	// Store for later
-	if (sdk5) {
-		// SDK 5
-		TEMP_ARM9_START_ADDRESS_SDK5 = (vu32)dsiHeader.ndshdr.arm9executeAddress;
-	} else {
-		TEMP_ARM9_START_ADDRESS = (vu32)dsiHeader.ndshdr.arm9executeAddress;
-	}
+	*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress; // Store for later
 	dsiHeader.ndshdr.arm9executeAddress = 0; //ndsHeader[0x024>>2] = 0;
 	//dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
-	dmaCopyWords(3, &dsiHeader.ndshdr, sdk5 ? (void*)NDS_HEAD_SDK5 : (void*)NDS_HEAD, sizeof(dsiHeader.ndshdr));
+	dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 	nocashMessage("Switch to NTR mode BIOS");
@@ -724,7 +724,7 @@ void setArm9Stuff(aFile file) {
 		}
 	}
 
-	hookNdsRetail9(sdk5 ? (u32*)ENGINE_LOCATION_ARM9_SDK5 : (u32*)ENGINE_LOCATION_ARM9);
+	hookNdsRetail9(engineLocationArm9);
 }
 
 /*-------------------------------------------------------------------------
@@ -740,7 +740,8 @@ void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Copy NDS ARM9 start address into the header, starting ARM9
-	*(vu32*)(sdk5 ? 0x02FFFE24 : 0x027FFE24) = (sdk5 ? TEMP_ARM9_START_ADDRESS_SDK5 : TEMP_ARM9_START_ADDRESS);
+	//*(vu32*)(sdk5 ? 0x02FFFE24 : 0x027FFE24) = *tempArm9StartAddress;
+	ndsHead->arm9executeAddress = (void*)*tempArm9StartAddress;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -839,19 +840,20 @@ int arm7_main(void) {
 	memcpy((u32*)ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 	increaseLoadBarLength(); // 3 dots
 
-	memcpy(sdk5 ? (u32*)ENGINE_LOCATION_ARM9_SDK5 : (u32*)ENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	memcpy(engineLocationArm9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
 	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
-	//moduleParams = findModuleParams(sdk5 ? (tNDSHeader*)NDS_HEAD_SDK5 : (tNDSHeader*)NDS_HEAD, donorSdkVer);
+	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
+	moduleParams = getModuleParams(ndsHead->arm9destination);
 	if (moduleParams) {
 		//ensureArm9Decompressed(__NDSHeader, moduleParams);
-		ensureArm9Decompressed(sdk5 ? (tNDSHeader*)NDS_HEAD_SDK5 : (tNDSHeader*)NDS_HEAD, moduleParams);
+		ensureArm9Decompressed(ndsHead, moduleParams);
 	}
 	increaseLoadBarLength(); // 5 dots
 
 	//errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
-	errorCode = patchCardNds(sdk5 ? (tNDSHeader*)NDS_HEAD_SDK5 : (tNDSHeader*)NDS_HEAD, (u32*)ENGINE_LOCATION_ARM7, sdk5 ? (u32*)ENGINE_LOCATION_ARM9_SDK5 : (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds(ndsHead, (u32*)ENGINE_LOCATION_ARM7, engineLocationArm9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card patch successful");
 	} else {
@@ -861,7 +863,7 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 6 dots
 
 	//errorCode = hookNdsRetail(__NDSHeader, *romFile, (u32*)ENGINE_LOCATION_ARM7);
-	errorCode = hookNdsRetail(sdk5 ? (tNDSHeader*)NDS_HEAD_SDK5 : (tNDSHeader*)NDS_HEAD, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetail(ndsHead, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {
