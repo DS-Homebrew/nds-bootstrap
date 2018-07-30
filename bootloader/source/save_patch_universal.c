@@ -250,7 +250,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocation, mod
 
 	u32* patches           = (u32*)cardEngineLocation[0];
 	u32* arm7Function      = (u32*)patches[9];
-	u32* arm7FunctionThumb = (u32*)patches[14];
+	u32* arm7FunctionThumb = (u32*)patches[15];
 	u32 srcAddr;
 	
 	if (usesThumb) {
