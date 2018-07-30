@@ -86,7 +86,7 @@ card_engine_end:
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
-.word	0x0
+.word	card_read_arm9_sdk5
 .word	card_id_arm9
 .word	card_dma_arm9
 .word	cardStructArm9
@@ -108,6 +108,19 @@ thumbPatches:
 .word   cacheFlushRef
 .word   readCachedRef
 .word   0x0
+
+@---------------------------------------------------------------------------------
+card_read_arm9_sdk5:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r4-r6,lr}
+
+	ldr		r6, =cardRead
+	bl		_blx_r3_stub_card_read_sdk5	
+
+    ldmfd   sp!, {r4-r6,lr}
+    bx      lr
+_blx_r3_stub_card_read_sdk5:
+	bx	r6	
 
 @---------------------------------------------------------------------------------
 card_read_arm9:

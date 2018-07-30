@@ -428,7 +428,7 @@ int cardRead (u32* cacheStruct) {
 				} else {
 					if (asyncPrefetch == 1 && pAC) {
 						if (cacheCounter[slot] == 0x0FFFFFFF) {
-							// Prefetch successfull
+							// Prefetch successful
 							getAsyncSector();
 							
 							triggerAsyncPrefetch(nextSector);	

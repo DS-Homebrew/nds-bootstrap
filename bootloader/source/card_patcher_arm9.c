@@ -7,6 +7,7 @@
 
 //#define memcpy __builtin_memcpy // memcpy
 
+extern bool sdk5;
 extern u32 ROM_TID;
 
 bool cardReadFound = false; // card_patcher_common.c
@@ -64,6 +65,8 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	u32* debug = (u32*)0x037C6000;
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
+
+	//bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	bool usesThumb = false;
 	int readType = 0;
@@ -331,7 +334,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 
 	u32* patches = (u32*)cardEngineLocation[usesThumb ? 1 : 0];
 
-	u32* cardReadPatch    = (u32*)patches[0];
+	u32* cardReadPatch    = (u32*)patches[sdk5 && !usesThumb ? 2 : 0];
 	u32* cardPullOutPatch = (u32*)patches[6];
 	u32* cardIdPatch      = (u32*)patches[3];
 	u32* cardDmaPatch     = (u32*)patches[4];
@@ -356,16 +359,18 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	*(u32*)patches[7] = (u32)cardPullOutOffset + 4;
 
 	if ((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
-	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crosing: Wild World
+	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crossing: Wild World
 	{
 		*(u32*)patches[8] = (u32)cardReadCachedStartOffset;
 	}
 
-	patches[10] = needFlushCache;
+	if (!usesThumb) { // Based on: cardengine_arm9/source/card_engine_header.s
+		patches[10] = needFlushCache;
+	}
 
 	//memcpy(oldArenaLow, cardReadPatch, 0xF0); //copyLoop(oldArenaLow, cardReadPatch, 0xF0);
 
-	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0); //copyLoop(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0);
+	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (sdk5 ? 0xB0 : 0xA0) : 0xF0); //copyLoop(cardReadStartOffset, cardReadPatch, usesThumb ? 0xA0 : 0xF0);
 
 	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4); //copyLoop(cardPullOutOffset, cardPullOutPatch, 0x4);
 

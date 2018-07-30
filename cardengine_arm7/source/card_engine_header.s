@@ -137,6 +137,7 @@ patches:
 .word   readCachedRef
 .word   arm7Functions
 .word   swi02
+.word   jThumb_newSwiHalt
 .word   j_newSwiHalt
 .word   j_twlGetPitchTable
 .word   getPitchTableStub
@@ -247,6 +248,14 @@ swi02:
 @---------------------------------------------------------------------------------
 	swi	0x02
 	bx	lr
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+jThumb_newSwiHalt:
+@---------------------------------------------------------------------------------
+	ldr	r3, = newSwiHalt
+	bx	r3
+.pool
 @---------------------------------------------------------------------------------
 
 	.arm
@@ -395,6 +404,7 @@ arm7FunctionsThumb :
 .word    eepromReadThumbStub   
 .word    cardReadThumbStub  
 .word    cardIdThumbStub
+.word    swiHaltThumbStub
 
 .thumb
 _blx_r3_stubthumb:
@@ -471,6 +481,16 @@ cardIdThumbStub:
 	pop   	{r1-r4} 
 	pop  	{r3}
 	bx  r3
+
+swiHaltThumbStub:
+    push    {lr}
+	push	{r1-r4}
+	ldr	r3, =newSwiHalt
+	bl	_blx_r3_stubthumb
+    swi 0x6
+	pop   	{r1-r4} 
+	pop  	{r3}
+	bx       r3
 
     .pool
 

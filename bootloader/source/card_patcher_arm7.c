@@ -8,9 +8,10 @@
 
 //#define memcpy __builtin_memcpy
 
+extern bool sdk5;
 extern u32 ROMinRAM;
 
-//static bool sdk5 = false; // SDK 5
+//static bool sdk5 = false;
 
 u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
@@ -55,8 +56,8 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		//u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 13 : 12]; // SDK 5
-		u32* swiGetPitchTablePatch = (u32*)patches[12];
+		//u32* swiGetPitchTablePatch = (u32*)patches[12];
+		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 14 : 13]; // SDK 5
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -76,8 +77,8 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
 	if (swiHaltOffset) {
 		// Patch
 		u32* patches = (u32*)cardEngineLocation[0];
-		//u32* swiHaltPatch = (u32*)patches[sdk5 ? (usesThumb ? 11 : 12) : 11]; // SDK 5
-		u32* swiHaltPatch = (u32*)patches[11];
+		//u32* swiHaltPatch = (u32*)patches[11];
+		u32* swiHaltPatch = (u32*)patches[usesThumb ? 11 : 12]; // SDK 5
 		if (usesThumb) {
 			/*
             // Find the relocation signature
@@ -92,7 +93,7 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
-            u32* arm7FunctionThumb =  (u32*) patches[14];
+            u32* arm7FunctionThumb =  (u32*) patches[15];
             u16 instrs [2];
 		    generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000,
 			     arm7FunctionThumb[8]);
@@ -107,7 +108,7 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
 
-	//sdk5 = (moduleParams->sdk_version > 0x5000000); // SDK 5
+	//sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, moduleParams, cardEngineLocation);
