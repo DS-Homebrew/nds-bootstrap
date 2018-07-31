@@ -70,18 +70,18 @@ void arm7clearRAM(void);
 //#define TEMP_MEM 0x02FFE000 //__DSiHeader
 
 #define NDS_HEAD                     0x027FFE00
-#define NDS_HEAD_SDK5                0x02FFFE00 // SDK 5
+#define NDS_HEAD_SDK5                0x02FFFE00
 
 #define TEMP_ARM9_START_ADDRESS      0x027FFFF4
-#define TEMP_ARM9_START_ADDRESS_SDK5 0x02FFFFF4 // SDK 5
+#define TEMP_ARM9_START_ADDRESS_SDK5 0x02FFFFF4
 
 #define ENGINE_LOCATION_ARM7 0x037C0000
 
 #define ENGINE_LOCATION_ARM9      0x02400000
-#define ENGINE_LOCATION_ARM9_SDK5 0x0C800000 // SDK 5
+#define ENGINE_LOCATION_ARM9_SDK5 0x0C800000
 
 #define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000 // SDK 5
+#define ROM_LOCATION_SDK5 0x0D000000
 
 const char* bootName = "BOOT.NDS";
 
@@ -117,7 +117,7 @@ u32 romSizeNoArm9;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
-static module_params_t* moduleParams = NULL;
+//static module_params_t* moduleParams = NULL;
 static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
 static u32* engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
@@ -467,55 +467,49 @@ void NDSTouchscreenMode(void) {
 	//*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
+module_params_t* buildModuleParams() {
+	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
+	u32* moduleParamsOffset = malloc(0x100);
+
+	//memset(moduleParamsOffset, 0, sizeof(module_params_t));
+	memset(moduleParamsOffset, 0, 0x100);
+
+	module_params_t* localModuleParams = (module_params_t*)(moduleParamsOffset - 7);
+
+	localModuleParams->compressed_static_end = 0;
+	switch (donorSdkVer) {
+		case 0:
+		default:
+			break;
+		case 1:
+			localModuleParams->sdk_version = 0x1000500;
+			break;
+		case 2:
+			localModuleParams->sdk_version = 0x2001000;
+			break;
+		case 3:
+			localModuleParams->sdk_version = 0x3002001;
+			break;
+		case 4:
+			localModuleParams->sdk_version = 0x4002001;
+			break;
+		case 5:
+			localModuleParams->sdk_version = 0x5003001;
+			break;
+	}
+
+	return localModuleParams;
+}
+
 module_params_t* getModuleParams(char* arm9binary) {
 	nocashMessage("Looking for moduleparams...\n");
 
 	u32* moduleParamsOffset = findModuleParamsOffset((u32*)arm9binary, ARM9_LEN);
-	bool found = (bool)moduleParamsOffset;
 
-	if (found) {
-		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
-		*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
-	} else {
-		nocashMessage("No moduleparams?\n");
-		
-		*(vu32*)0x2800010 = 1;
+	//module_params_t* localModuleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
+	module_params_t* localModuleParams = (module_params_t*)(moduleParamsOffset - 7);
 
-		//moduleParamsOffset = malloc(sizeof(module_params_t));
-		moduleParamsOffset = malloc(0x100);
-
-		//memset(moduleParamsOffset, 0, sizeof(module_params_t));
-		memset(moduleParamsOffset, 0, 0x100);
-	}
-
-	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
-	module_params_t* moduleParams = (module_params_t*)(moduleParamsOffset - 7);
-
-	if (!found) {
-		moduleParams->compressed_static_end = 0;
-		switch (donorSdkVer) {
-			case 0:
-			default:
-				break;
-			case 1:
-				moduleParams->sdk_version = 0x1000500;
-				break;
-			case 2:
-				moduleParams->sdk_version = 0x2001000;
-				break;
-			case 3:
-				moduleParams->sdk_version = 0x3002001;
-				break;
-			case 4:
-				moduleParams->sdk_version = 0x4002001;
-				break;
-			case 5:
-				moduleParams->sdk_version = 0x5003001;
-				break;
-		}
-	}
-
-	return moduleParams;
+	return localModuleParams;
 }
 
 static inline void patchBinary(char* ARM9_DST) {
@@ -622,36 +616,35 @@ void loadBinary_ARM7(aFile file) {
 
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0>>2]; // SDK 5
-	//tNDSHeader ndsHeader;
-	tDSiHeader dsiHeader;
+	u32 ndsHeader[0x170 >> 2]; //tDSiHeader dsiHeader;
 
 	// Read DSi header (including NDS header)
 	//fileRead ((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead ((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)&dsiHeader, file, 0, sizeof(dsiHeader), 3);
+	fileRead ((char*)ndsHeader, file, 0, 0x170, 3); //fileRead((char*)&dsiHeader, file, 0, sizeof(dsiHeader), 3);
 
 	// Read ARM9 info from NDS header
-	u32 ARM9_SRC = dsiHeader.ndshdr.arm9romOffset; //ndsHeader[0x020 >> 2];
-	char* ARM9_DST = dsiHeader.ndshdr.arm9destination; //(char*)ndsHeader[0x028 >> 2];
-	ARM9_LEN = dsiHeader.ndshdr.arm9binarySize; //ndsHeader[0x02C >> 2];
+	u32 ARM9_SRC = ndsHeader[0x020 >> 2]; //dsiHeader.ndshdr.arm9romOffset;
+	char* ARM9_DST = (char*)ndsHeader[0x028 >> 2]; //dsiHeader.ndshdr.arm9destination;
+	ARM9_LEN = ndsHeader[0x02C >> 2]; //dsiHeader.ndshdr.arm9binarySize;
 
 	// Read ARM7 info from NDS header
-	u32 ARM7_SRC = dsiHeader.ndshdr.arm7romOffset; //ndsHeader[0x030 >> 2];
-	char* ARM7_DST = dsiHeader.ndshdr.arm7destination; //(char*)ndsHeader[0x038 >> 2];
-	ARM7_LEN = dsiHeader.ndshdr.arm7binarySize; //ndsHeader[0x03C >> 2];
+	u32 ARM7_SRC = ndsHeader[0x030 >> 2]; //dsiHeader.ndshdr.arm7romOffset;
+	char* ARM7_DST = (char*)ndsHeader[0x038 >> 2]; //dsiHeader.ndshdr.arm7destination;
+	ARM7_LEN = ndsHeader[0x03C >> 2]; //dsiHeader.ndshdr.arm7binarySize;
 
-	ROM_TID = (u32)dsiHeader.ndshdr.gameCode; //ndsHeader[0x00C >> 2];
-	fatSize = dsiHeader.ndshdr.fatSize; //ndsHeader[0x04C >> 2];
-	romSize = dsiHeader.ndshdr.romSize; //ndsHeader[0x080 >> 2];
+	ROM_TID = ndsHeader[0x00C >> 2]; //(u32)dsiHeader.ndshdr.gameCode;
+	fatSize = ndsHeader[0x04C >> 2]; //dsiHeader.ndshdr.fatSize;
+	romSize = ndsHeader[0x080 >> 2]; //dsiHeader.ndshdr.romSize;
 	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
-	ROM_HEADERCRC = dsiHeader.ndshdr.headerCRC16; //ndsHeader[0x15C >> 2];
+	ROM_HEADERCRC = ndsHeader[0x15C >> 2]; //dsiHeader.ndshdr.headerCRC16;
 	
 	char* arm9binary = malloc(ARM9_LEN);
 	fileRead(arm9binary, file, ARM9_SRC, ARM9_LEN, 3);
-	moduleParams = getModuleParams(arm9binary);
+	module_params_t moduleParams = *getModuleParams(arm9binary);
 	free(arm9binary);
-	if (moduleParams->sdk_version > 0x5000000) {
-		sdk5 = true;
+	sdk5 = (moduleParams.sdk_version > 0x5000000);
+	if (sdk5) {
 		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
 		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
@@ -666,7 +659,8 @@ void loadBinary_ARM7(aFile file) {
 	}
 
 	// Fix Pokemon games needing header data.
-	memcpy((void*)0x027FF000, &dsiHeader.ndshdr, sizeof(dsiHeader.ndshdr)); //fileRead((char*)0x027FF000, file, 0, 0x170, 3);
+	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
+	memcpy((void*)0x027FF000, (void*)ndsHeader, 0x170); //memcpy((void*)0x027FF000, &dsiHeader.ndshdr, sizeof(dsiHeader.ndshdr));
 
 	if ((*(u32*)0x27FF00C & 0x00FFFFFF) == 0x414441 // Diamond
 	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x415041  // Pearl
@@ -686,11 +680,16 @@ void loadBinary_ARM7(aFile file) {
 
 	// First copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
-	//TEMP_ARM9_START_ADDRESS = ndsHeader[0x024 >> 2];
-	*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress; // Store for later
-	dsiHeader.ndshdr.arm9executeAddress = 0; //ndsHeader[0x024>>2] = 0;
-	//dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
-	dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
+	
+	// Store for later
+	//*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress;
+	*tempArm9StartAddress = ndsHeader[0x024 >> 2];
+	
+	//dsiHeader.ndshdr.arm9executeAddress = 0;
+	ndsHeader[0x024 >> 2] = 0;
+	
+	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
+	dmaCopyWords(3, (void*)ndsHeader, (void*)ndsHead, 0x170);
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 	nocashMessage("Switch to NTR mode BIOS");
@@ -736,8 +735,7 @@ void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Copy NDS ARM9 start address into the header, starting ARM9
-	//*(vu32*)(sdk5 ? 0x02FFFE24 : 0x027FFE24) = *tempArm9StartAddress;
-	ndsHead->arm9executeAddress = (void*)*tempArm9StartAddress;
+	*(vu32*)(sdk5 ? 0x02FFFE24 : 0x027FFE24) = *tempArm9StartAddress; //ndsHead->arm9executeAddress = (void*)*tempArm9StartAddress;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -782,7 +780,7 @@ void initMBK(void) {
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
-	initMBK(); 
+	initMBK();
     
     // Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
@@ -841,10 +839,18 @@ int arm7_main(void) {
 
 	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
 	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
-	moduleParams = getModuleParams(ndsHead->arm9destination);
+	module_params_t* moduleParams = getModuleParams(ndsHead->arm9destination);
 	if (moduleParams) {
+		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
+		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
+		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
+
 		//ensureArm9Decompressed(__NDSHeader, moduleParams);
 		ensureArm9Decompressed(ndsHead, moduleParams);
+	} else {
+		nocashMessage("No moduleparams?\n");
+		*(vu32*)0x2800010 = 1;
+		moduleParams = buildModuleParams();
 	}
 	increaseLoadBarLength(); // 5 dots
 
