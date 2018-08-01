@@ -8,7 +8,7 @@
 .global card_engine_start
 .global card_engine_start_sync
 .global card_engine_end
-.global cardStruct
+.global cardStruct0
 .global cacheStruct
 .global patches_offset
 .global sdk_version
@@ -38,7 +38,7 @@ sdk_version:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
-cardStruct:
+cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
