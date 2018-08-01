@@ -474,31 +474,31 @@ module_params_t* buildModuleParams() {
 	//memset(moduleParamsOffset, 0, sizeof(module_params_t));
 	memset(moduleParamsOffset, 0, 0x100);
 
-	module_params_t* localModuleParams = (module_params_t*)(moduleParamsOffset - 7);
+	module_params_t* moduleParams = (module_params_t*)(moduleParamsOffset - 7);
 
-	localModuleParams->compressed_static_end = 0;
+	moduleParams->compressed_static_end = 0;
 	switch (donorSdkVer) {
 		case 0:
 		default:
 			break;
 		case 1:
-			localModuleParams->sdk_version = 0x1000500;
+			moduleParams->sdk_version = 0x1000500;
 			break;
 		case 2:
-			localModuleParams->sdk_version = 0x2001000;
+			moduleParams->sdk_version = 0x2001000;
 			break;
 		case 3:
-			localModuleParams->sdk_version = 0x3002001;
+			moduleParams->sdk_version = 0x3002001;
 			break;
 		case 4:
-			localModuleParams->sdk_version = 0x4002001;
+			moduleParams->sdk_version = 0x4002001;
 			break;
 		case 5:
-			localModuleParams->sdk_version = 0x5003001;
+			moduleParams->sdk_version = 0x5003001;
 			break;
 	}
 
-	return localModuleParams;
+	return moduleParams;
 }
 
 module_params_t* getModuleParams(char* arm9binary) {
@@ -506,10 +506,8 @@ module_params_t* getModuleParams(char* arm9binary) {
 
 	u32* moduleParamsOffset = findModuleParamsOffset((u32*)arm9binary, ARM9_LEN);
 
-	//module_params_t* localModuleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
-	module_params_t* localModuleParams = (module_params_t*)(moduleParamsOffset - 7);
-
-	return localModuleParams;
+	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
+	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
 static inline void patchBinary(char* ARM9_DST) {
@@ -616,32 +614,36 @@ void loadBinary_ARM7(aFile file) {
 
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0>>2]; // SDK 5
-	u32 ndsHeader[0x170 >> 2]; //tDSiHeader dsiHeader;
+	u32 dsiHeader[0x2F0 >> 2]; //tDSiHeader dsiHeader;
 
 	// Read DSi header (including NDS header)
-	//fileRead ((char*)ndsHeader, file, 0, 0x170, 3);
-	//fileRead ((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead ((char*)ndsHeader, file, 0, 0x170, 3); //fileRead((char*)&dsiHeader, file, 0, sizeof(dsiHeader), 3);
+	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
+	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
+	fileRead((char*)dsiHeader, file, 0, 0x2F0, 3); //fileRead((char*)&dsiHeader, file, 0, sizeof(dsiHeader), 3);
 
 	// Read ARM9 info from NDS header
-	u32 ARM9_SRC = ndsHeader[0x020 >> 2]; //dsiHeader.ndshdr.arm9romOffset;
-	char* ARM9_DST = (char*)ndsHeader[0x028 >> 2]; //dsiHeader.ndshdr.arm9destination;
-	ARM9_LEN = ndsHeader[0x02C >> 2]; //dsiHeader.ndshdr.arm9binarySize;
+	u32 ARM9_SRC = dsiHeader[0x020 >> 2]; //dsiHeader.ndshdr.arm9romOffset;
+	char* ARM9_DST = (char*)dsiHeader[0x028 >> 2]; //dsiHeader.ndshdr.arm9destination;
+	ARM9_LEN = dsiHeader[0x02C >> 2]; //dsiHeader.ndshdr.arm9binarySize;
 
 	// Read ARM7 info from NDS header
-	u32 ARM7_SRC = ndsHeader[0x030 >> 2]; //dsiHeader.ndshdr.arm7romOffset;
-	char* ARM7_DST = (char*)ndsHeader[0x038 >> 2]; //dsiHeader.ndshdr.arm7destination;
-	ARM7_LEN = ndsHeader[0x03C >> 2]; //dsiHeader.ndshdr.arm7binarySize;
+	u32 ARM7_SRC = dsiHeader[0x030 >> 2]; //dsiHeader.ndshdr.arm7romOffset;
+	char* ARM7_DST = (char*)dsiHeader[0x038 >> 2]; //dsiHeader.ndshdr.arm7destination;
+	ARM7_LEN = dsiHeader[0x03C >> 2]; //dsiHeader.ndshdr.arm7binarySize;
 
-	ROM_TID = ndsHeader[0x00C >> 2]; //(u32)dsiHeader.ndshdr.gameCode;
-	fatSize = ndsHeader[0x04C >> 2]; //dsiHeader.ndshdr.fatSize;
-	romSize = ndsHeader[0x080 >> 2]; //dsiHeader.ndshdr.romSize;
+	ROM_TID = dsiHeader[0x00C >> 2]; //(u32)dsiHeader.ndshdr.gameCode;
+	fatSize = dsiHeader[0x04C >> 2]; //dsiHeader.ndshdr.fatSize;
+	romSize = dsiHeader[0x080 >> 2]; //dsiHeader.ndshdr.romSize;
 	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
-	ROM_HEADERCRC = ndsHeader[0x15C >> 2]; //dsiHeader.ndshdr.headerCRC16;
+	ROM_HEADERCRC = dsiHeader[0x15C >> 2]; //dsiHeader.ndshdr.headerCRC16;
 	
 	char* arm9binary = malloc(ARM9_LEN);
 	fileRead(arm9binary, file, ARM9_SRC, ARM9_LEN, 3);
-	module_params_t moduleParams = *getModuleParams(arm9binary);
+	module_params_t* moduleParamsPtr = getModuleParams(arm9binary);
+	if (!moduleParamsPtr) {
+		moduleParamsPtr = buildModuleParams();
+	}
+	module_params_t moduleParams = *moduleParamsPtr;
 	free(arm9binary);
 	sdk5 = (moduleParams.sdk_version > 0x5000000);
 	if (sdk5) {
@@ -660,7 +662,7 @@ void loadBinary_ARM7(aFile file) {
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
-	memcpy((void*)0x027FF000, (void*)ndsHeader, 0x170); //memcpy((void*)0x027FF000, &dsiHeader.ndshdr, sizeof(dsiHeader.ndshdr));
+	memcpy((void*)0x027FF000, (void*)dsiHeader, 0x170); //memcpy((void*)0x027FF000, &dsiHeader.ndshdr, sizeof(dsiHeader.ndshdr));
 
 	if ((*(u32*)0x27FF00C & 0x00FFFFFF) == 0x414441 // Diamond
 	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x415041  // Pearl
@@ -683,13 +685,13 @@ void loadBinary_ARM7(aFile file) {
 	
 	// Store for later
 	//*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress;
-	*tempArm9StartAddress = ndsHeader[0x024 >> 2];
+	*tempArm9StartAddress = dsiHeader[0x024 >> 2];
 	
 	//dsiHeader.ndshdr.arm9executeAddress = 0;
-	ndsHeader[0x024 >> 2] = 0;
+	dsiHeader[0x024 >> 2] = 0;
 	
 	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
-	dmaCopyWords(3, (void*)ndsHeader, (void*)ndsHead, 0x170);
+	dmaCopyWords(3, (void*)dsiHeader, (void*)ndsHead, 0x170);
 
 	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 	nocashMessage("Switch to NTR mode BIOS");
