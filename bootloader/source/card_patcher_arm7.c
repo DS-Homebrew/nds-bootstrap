@@ -175,8 +175,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
-		//fileRead(sdk5 ? (char*)0x0CE00000 : (char*)0x0C820000, saveFile, 0, saveSize, 3); // SDK 5
-		fileRead((char*)0x0C820000, saveFile, 0, saveSize, 3);
+		fileRead(sdk5 ? (char*)0x0CE00000 : (char*)0x0C820000, saveFile, 0, saveSize, 3);
 	}
 
 	dbg_printf("ERR_NONE\n\n");
