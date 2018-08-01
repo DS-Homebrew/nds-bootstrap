@@ -335,7 +335,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 
 	u32* patches = (u32*)cardEngineLocation[usesThumb ? 1 : 0];
 
-	u32* cardReadPatch    = (u32*)patches[sdk5 && !usesThumb ? 2 : 0];
+	u32* cardReadPatch    = (u32*)patches[0];
 	u32* cardPullOutPatch = (u32*)patches[6];
 	u32* cardIdPatch      = (u32*)patches[3];
 	u32* cardDmaPatch     = (u32*)patches[4];
