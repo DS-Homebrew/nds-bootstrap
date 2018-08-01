@@ -32,7 +32,7 @@
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
 #include "sr_data_srllastran.h" // For rebooting the game
-//#include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
+#include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
 
 //#define memcpy __builtin_memcpy
 
@@ -57,6 +57,7 @@ extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 language;
 extern u32 gottenSCFGExt;
+static u32 dsiMode = false; //extern u32 dsiMode; // SDK 5
 extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
@@ -446,7 +447,7 @@ void myIrqHandlerVBlank(void) {
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
 	} else if (!gameSoftReset) {
 		if (lockMutex(&saveMutex)) {
-			memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+			memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot game
 			unlockMutex(&saveMutex);

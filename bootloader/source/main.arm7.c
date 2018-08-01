@@ -95,6 +95,7 @@ extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
 extern unsigned long saveSize;
 extern unsigned long language;
+static bool dsiMode = false; //extern unsigned long dsiMode; // SDK 5
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;
@@ -105,6 +106,7 @@ extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
 bool sdk5 = false;
+bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
 u32 ROM_TID;
@@ -233,7 +235,6 @@ void resetMemory_ARM7(void) {
 	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
-	// SDK 5
 	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
 		boot_readFirmware(settingsOffset + 0x000, sdk5 ? (u8*)0x02FFFC80 : (u8*)0x027FFC80, 0x70);
 	} else {
@@ -272,14 +273,12 @@ void readTSCRegArray(u32 reg, void *buffer, int size) {
 	char *buf = (char*)buffer;
 	while (REG_SPICNT & 0x80);
 	int count = 0;
-	while (count<size) {
+	while (count < size) {
 		REG_SPIDATA = 0;
  
-		while(REG_SPICNT & 0x80);
-
+		while (REG_SPICNT & 0x80);
 
 		buf[count++] = REG_SPIDATA;
-		
 	}
 	REG_SPICNT = 0;
 }
@@ -693,9 +692,28 @@ void loadBinary_ARM7(aFile file) {
 	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
 	dmaCopyWords(3, (void*)dsiHeader, (void*)ndsHead, 0x170);
 
-	// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
-	nocashMessage("Switch to NTR mode BIOS");
-	REG_SCFG_ROM = 0x703;
+	// SDK 5
+	if (dsiMode && (dsiHeader[0x10 >> 2] & BIT(16+1))) {
+		dsiModeConfirmed = true;
+
+		u32 ARM9i_SRC = dsiHeader[0x1C0 >> 2];
+		char* ARM9i_DST = (char*)dsiHeader[0x1C8 >> 2];
+		u32 ARM9i_LEN = dsiHeader[0x1CC >> 2];
+		u32 ARM7i_SRC = dsiHeader[0x1D0 >> 2];
+		char* ARM7i_DST = (char*)dsiHeader[0x1D8 >> 2];
+		u32 ARM7i_LEN = dsiHeader[0x1DC >> 2];
+
+		if (ARM9i_LEN) {
+			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 3);
+		}
+		if (ARM7i_LEN) {
+			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
+		}
+	} else {
+		// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
+		nocashMessage("Switch to NTR mode BIOS");
+		REG_SCFG_ROM = 0x703;
+	}
 }
 
 u32 enableExceptionHandler = true;
@@ -760,7 +778,7 @@ void initMBK(void) {
 	REG_MBK9 = 0x3000000F;
 	
 	// WRAM-A fully mapped to ARM7
-	*(vu32*)REG_MBK1 = 0x8185898D; // same as dsiware
+	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
 	
 	// WRAM-B fully mapped to ARM7 // inverted order
 	*(vu32*)REG_MBK2 = 0x9195999D;

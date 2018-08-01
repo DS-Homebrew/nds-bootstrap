@@ -43,6 +43,7 @@
 #define SAV_OFFSET                 32
 #define SAVSIZE_OFFSET             36
 #define LANGUAGE_OFFSET            40
+//#define DSIMODE_OFFSET             44 // SDK 5
 #define DONORSDK_OFFSET            44
 #define PUR_OFFSET                 48
 #define PUS_OFFSET                 52
@@ -197,7 +198,7 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	u32* cheatDataDest = (u32*)(((u32)LCDC_BANK_C) + cardengineArm7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardengineArm7Offset + cheatDataOffset);
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
@@ -207,7 +208,26 @@ int loadCheatData(u32* cheatData) {
 	return true;
 }
 
-int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheatData) {
+int runNds(
+	const void* loader,
+	u32 loaderSize,
+	u32 cluster,
+	u32 saveCluster,
+	u32 saveSize,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 donorSdkVer,
+	u32 patchMpuRegion,
+	u32 patchMpuSize,
+	u32 consoleModel,
+	u32 loadingScreen,
+	u32 romread_LED,
+	u32 gameSoftReset,
+	u32 asyncPrefetch,
+	bool initDisc,
+	bool dldiPatchNds,
+	int argc, const char** argv,
+	u32* cheatData) {
 	char* argStart;
 	u16* argData;
 	u16 argTempVal = 0;
@@ -266,6 +286,7 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	writeAddr((u8*)LCDC_BANK_C, SAV_OFFSET, saveCluster);
 	writeAddr((u8*)LCDC_BANK_C, SAVSIZE_OFFSET, saveSize);
 	writeAddr((u8*)LCDC_BANK_C, LANGUAGE_OFFSET, language);
+	//writeAddr((u8*)LCDC_BANK_C, DSIMODE_OFFSET, dsiMode); // SDK 5
 	writeAddr((u8*)LCDC_BANK_C, DONORSDK_OFFSET, donorSdkVer);
 	writeAddr((u8*)LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
 	writeAddr((u8*)LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
@@ -304,14 +325,29 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	return true;
 }
 
-int runNdsFile(const char* filename, const char* savename, int saveSize, int language, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int asyncPrefetch, int argc, const char** argv, u32* cheatData)  {
+int runNdsFile(
+	const char* filename,
+	const char* savename,
+	int saveSize,
+	int language,
+	int dsiMode, // SDK 5
+	int donorSdkVer,
+	int patchMpuRegion,
+	int patchMpuSize,
+	int consoleModel,
+	int loadingScreen,
+	int romread_LED,
+	int gameSoftReset,
+	int asyncPrefetch,
+	int argc,
+	const char** argv,
+	u32* cheatData)  {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
-
 	
 	if (stat(filename, &st) < 0) {
 		return 1;
@@ -333,9 +369,26 @@ int runNdsFile(const char* filename, const char* savename, int saveSize, int lan
 	}
 
 	//bool havedsiSD = false;
+	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	//if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
-
-	return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, saveSize, language, donorSdkVer, patchMpuRegion, patchMpuSize, consoleModel, loadingScreen, romread_LED, gameSoftReset, asyncPrefetch, true, true, argc, argv, cheatData);
+	return runNds(
+		load_bin,
+		load_bin_size,
+		st.st_ino,
+		clusterSav,
+		saveSize,
+		language,
+		dsiMode, // SDK 5
+		donorSdkVer,
+		patchMpuRegion,
+		patchMpuSize,
+		consoleModel,
+		loadingScreen,
+		romread_LED,
+		gameSoftReset,
+		asyncPrefetch,
+		true,
+		true,
+		argc, argv,
+		cheatData);
 }
-

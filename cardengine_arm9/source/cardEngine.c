@@ -91,9 +91,10 @@ extern u32 ROMinRAM;
 extern u32 ROM_TID;
 extern u32 ARM9_LEN;
 extern u32 romSize;
+static u32 dsiMode = false; //extern u32 dsiMode; // SDK 5
+extern u32 enableExceptionHandler;
 extern u32 consoleModel;
 extern u32 asyncPrefetch;
-extern u32 enableExceptionHandler;
 
 char* tohex(u32 n) {
 	unsigned size = 9;
@@ -330,6 +331,11 @@ int cardRead (u32* cacheStruct) {
 
 		if (!sdk5) {
 			romSize += 0x1000;
+		}
+
+		// SDK 5
+		if(dsiMode) {
+			REG_SCFG_EXT = 0x8307F100;
 		}
 
 		if (enableExceptionHandler) {

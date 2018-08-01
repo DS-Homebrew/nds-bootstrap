@@ -26,6 +26,8 @@
 
 extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
+//extern bool dsiModeConfirmed; // SDK 5
+
 extern unsigned long language;
 extern unsigned long consoleModel;
 extern unsigned long romread_LED;
@@ -34,7 +36,7 @@ extern unsigned long asyncPrefetch;
 
 extern u32 runViaIRQ;
 
-extern bool sdk5; // SDK 5
+extern bool sdk5;
 
 extern u32 ROMinRAM;
 extern u32 ROM_TID;
@@ -368,7 +370,7 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	cardEngineLocation[10] = romread_LED;
 	cardEngineLocation[11] = gameSoftReset;
 
-	u32* patches =  (u32*)cardEngineLocation[0];
+	u32* patches = (u32*)cardEngineLocation[0];
 
 	*vblankHandler = patches[3];
 	if (ROMinRAM == false) {
