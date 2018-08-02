@@ -39,6 +39,7 @@
 
 #include "common.h"
 
+volatile bool sdk5 = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 /*S*/volatile bool arm9_errorColor = false;

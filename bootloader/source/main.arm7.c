@@ -105,7 +105,6 @@ extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
-volatile bool sdk5 = false;
 bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
