@@ -95,7 +95,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, u32* cardEngineLocation, module_pa
 
 	u32* patches =  (u32*) cardEngineLocation[0];
 	u32* arm7Function =  (u32*) patches[9];
-    //u32* arm7FunctionThumb =  (u32*) patches[14];
+    //u32* arm7FunctionThumb =  (u32*) patches[14]; // SDK 5
 	u32* arm7FunctionThumb =  (u32*) patches[15];
 	u32 srcAddr;
 

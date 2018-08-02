@@ -57,7 +57,8 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 	if (swiGetPitchTableOffset) {
 		// Patch
 		//u32* swiGetPitchTablePatch = (u32*)patches[12];
-		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 14 : 13]; // SDK 5
+		//u32* swiGetPitchTablePatch = (u32*)patches[13]; // SDK 5
+		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 14 : 13];
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -93,6 +94,7 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
+			//u32* arm7FunctionThumb =  (u32*) patches[14]; // SDK 5
             u32* arm7FunctionThumb =  (u32*) patches[15];
             u16 instrs [2];
 		    generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000,
