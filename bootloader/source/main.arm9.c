@@ -114,7 +114,7 @@ Modified by Chishm:
 void arm9_main(void) {
  	register int i;
   
-	//set shared ram to ARM7
+	// Set shared ram to ARM7
 	WRAM_CR = 0x03;
 	REG_EXMEMCNT = 0xE880;
 
@@ -213,6 +213,10 @@ void arm9_main(void) {
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
+		// SDK 5
+		*(u32*)(0x23FFC40) = 01;
+		*(u32*)(0x2FFFC40) = 01;
+
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			displayScreen = true;
 			if (arm9_stateFlag == ARM9_DISPERR) {
@@ -250,8 +254,11 @@ void arm9_main(void) {
 	REG_EXMEMCNT = 0xE880;
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
-	VoidFn arm9code = *(VoidFn*)0x27FFE24;
+
+	// Start ARM9
+	VoidFn arm9code = *(VoidFn*)(sdk5 ? 0x2FFFE24 : 0x27FFE24);
 	arm9code();
+	
 	while (1);
 }
 

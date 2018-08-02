@@ -25,7 +25,7 @@
 bool logging = false; //extern bool logging;
 extern bool cardReadFound; // card_patcher_arm9.c
 
-extern bool sdk5; // Debug
+//extern bool sdk5; // Debug
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,

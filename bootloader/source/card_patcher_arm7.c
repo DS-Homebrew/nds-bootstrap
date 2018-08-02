@@ -8,7 +8,7 @@
 
 //#define memcpy __builtin_memcpy
 
-extern bool sdk5;
+//extern bool sdk5;
 extern u32 ROMinRAM;
 
 //static bool sdk5 = false;

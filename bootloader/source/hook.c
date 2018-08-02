@@ -36,7 +36,7 @@ extern unsigned long asyncPrefetch;
 
 extern u32 runViaIRQ;
 
-extern bool sdk5;
+//extern bool sdk5;
 
 extern u32 ROMinRAM;
 extern u32 ROM_TID;

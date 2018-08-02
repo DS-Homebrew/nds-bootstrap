@@ -105,7 +105,7 @@ extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
-bool sdk5 = false;
+volatile bool sdk5 = false;
 bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
@@ -654,7 +654,7 @@ void loadBinary_ARM7(aFile file) {
 	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
 	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
 	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
-	if (sdk5) {
+	{
 		// Set to load ROM into RAM
 		ROMinRAM = true;
 	}
