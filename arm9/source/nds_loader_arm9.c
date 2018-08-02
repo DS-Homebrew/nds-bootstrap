@@ -296,8 +296,8 @@ int runNds(
 	writeAddr((u8*)LCDC_BANK_C, ROMREADLED_OFFSET, romread_LED);
 	writeAddr((u8*)LCDC_BANK_C, GAMESOFTRESET_OFFSET, gameSoftReset);
 	writeAddr((u8*)LCDC_BANK_C, ASYNC_OFFSET, asyncPrefetch);
-    
-    loadCheatData(cheatData);
+
+	loadCheatData(cheatData);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 

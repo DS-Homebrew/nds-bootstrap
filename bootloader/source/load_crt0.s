@@ -89,9 +89,9 @@ gameSoftReset:
 asyncPrefetch:
 	.word	0x00000000
 cardengine_arm7_offset:
-    .word   cardengine_arm7_bin - _start
+	.word   cardengine_arm7_bin - _start
 cardengine_arm9_offset:
-    .word   cardengine_arm9_bin - _start		
+	.word   cardengine_arm9_bin - _start		
 
 startUp:
 	mov	r0, #0x04000000
@@ -193,7 +193,7 @@ CIDLoop:
 .type	fastCopy32 STT_FUNC
 @ r0 : src, r1 : dst, r2 : len
 fastCopy32:
-    stmfd   sp!, {r3-r11,lr}
+	stmfd   sp!, {r3-r11,lr}
 	@ copy 512 bytes
 	mov     r10, r0
 	mov     r9, r1
@@ -204,7 +204,7 @@ loop_fastCopy32:
 	subs    r8, r8, #32  @ 4*8 bytes
 	bgt     loop_fastCopy32
 	ldmfd   sp!, {r3-r11,lr}
-    bx      lr
+	bx      lr
 
 @---------------------------------------------------------------------------------
 	.align
