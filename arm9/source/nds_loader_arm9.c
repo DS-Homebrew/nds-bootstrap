@@ -58,12 +58,12 @@
 /*typedef signed int addr_t;  // s32
 typedef unsigned char data_t; // u8*/
 
-#define FIX_ALL  0x01
+/*#define FIX_ALL  0x01
 #define FIX_GLUE 0x02
 #define FIX_GOT  0x04
-#define FIX_BSS  0x08
+#define FIX_BSS  0x08*/
 
-enum DldiOffsets {
+/*enum DldiOffsets {
 	DO_magicString      = 0x00, // "\xED\xA5\x8D\xBF Chishm"
 	DO_magicToken       = 0x00, // 0xBF8DA5ED
 	DO_magicShortString = 0x04, // " Chishm"
@@ -93,7 +93,7 @@ enum DldiOffsets {
 	DO_clearStatus  = 0x78,
 	DO_shutdown     = 0x7C,
 	DO_code         = 0x80
-};
+};*/
 
 static char hexbuffer[9];
 
@@ -194,6 +194,7 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("cardengineArm7");
 	nocashMessage(tohex((u32)cardengineArm7));
 	
+	//u32 cheatDataOffset = cardengineArm7[13]; // SDK 5
 	u32 cheatDataOffset = cardengineArm7[12];
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
@@ -253,7 +254,7 @@ int runNds(
 	writeAddr((u8*)LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
 	
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
-	writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
+	//writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
 
 	// Give arguments to loader
 	argStart = (char*)LCDC_BANK_C + readAddr((u8*)LCDC_BANK_C, ARG_START_OFFSET);
@@ -339,8 +340,7 @@ int runNdsFile(
 	int romread_LED,
 	int gameSoftReset,
 	int asyncPrefetch,
-	int argc,
-	const char** argv,
+	int argc, const char** argv,
 	u32* cheatData)  {
 	struct stat st;
 	struct stat stSav;
