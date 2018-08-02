@@ -293,4 +293,4 @@ unLockMutex:
 	bx  lr
 
 mutex:
-.word    0x00000000  
+.word    0x00000000
