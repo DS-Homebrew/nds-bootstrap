@@ -34,10 +34,9 @@ extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
-extern u32 runViaIRQ;
+//extern u32 runViaIRQ;
 
 //extern bool sdk5;
-
 extern u32 ROMinRAM;
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
@@ -365,6 +364,8 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	cardEngineLocation[4] = file.firstCluster;
 	cardEngineLocation[6] = language;
 	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
+	//cardEngineLocation[8] = dsiModeConfirmed; // SDK 5
+	//cardEngineLocation[9] = ROMinRAM; // SDK 5
 	cardEngineLocation[8] = ROMinRAM;
 	cardEngineLocation[9] = consoleModel;
 	cardEngineLocation[10] = romread_LED;
@@ -387,6 +388,7 @@ void hookNdsRetail9(u32* cardEngineLocation9) {
 	cardEngineLocation9[9] = ROM_HEADERCRC;
 	cardEngineLocation9[10] = ARM9_LEN;
 	cardEngineLocation9[11] = romSize;
+	//cardEngineLocation9[12] = dsiModeConfirmed; // SDK 5
 	cardEngineLocation9[12] = enableExceptionHandler;
 	cardEngineLocation9[13] = consoleModel;
 	cardEngineLocation9[14] = asyncPrefetch;
