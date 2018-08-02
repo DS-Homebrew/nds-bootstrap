@@ -57,7 +57,7 @@ extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 language;
 extern u32 gottenSCFGExt;
-static u32 dsiMode = false; //extern u32 dsiMode; // SDK 5
+extern u32 dsiMode; // SDK 5
 extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;

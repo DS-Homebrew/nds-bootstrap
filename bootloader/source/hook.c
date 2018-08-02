@@ -26,7 +26,8 @@
 
 extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
-//extern bool dsiModeConfirmed; // SDK 5
+extern bool dsiModeConfirmed; // SDK 5
+extern u32 enableExceptionHandler;
 
 extern unsigned long language;
 extern unsigned long consoleModel;
@@ -43,8 +44,6 @@ extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
 extern u32 ARM7_LEN; // SDK 5
 extern u32 romSize;
-
-extern u32 enableExceptionHandler;
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
@@ -364,12 +363,11 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	cardEngineLocation[4] = file.firstCluster;
 	cardEngineLocation[6] = language;
 	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
-	//cardEngineLocation[8] = dsiModeConfirmed; // SDK 5
-	//cardEngineLocation[9] = ROMinRAM; // SDK 5
-	cardEngineLocation[8] = ROMinRAM;
-	cardEngineLocation[9] = consoleModel;
-	cardEngineLocation[10] = romread_LED;
-	cardEngineLocation[11] = gameSoftReset;
+	cardEngineLocation[8] = dsiModeConfirmed; // SDK 5
+	cardEngineLocation[9] = ROMinRAM;
+	cardEngineLocation[10] = consoleModel;
+	cardEngineLocation[11] = romread_LED;
+	cardEngineLocation[12] = gameSoftReset;
 
 	u32* patches = (u32*)cardEngineLocation[0];
 
@@ -388,8 +386,8 @@ void hookNdsRetail9(u32* cardEngineLocation9) {
 	cardEngineLocation9[9] = ROM_HEADERCRC;
 	cardEngineLocation9[10] = ARM9_LEN;
 	cardEngineLocation9[11] = romSize;
-	//cardEngineLocation9[12] = dsiModeConfirmed; // SDK 5
-	cardEngineLocation9[12] = enableExceptionHandler;
-	cardEngineLocation9[13] = consoleModel;
-	cardEngineLocation9[14] = asyncPrefetch;
+	cardEngineLocation9[12] = dsiModeConfirmed; // SDK 5
+	cardEngineLocation9[13] = enableExceptionHandler;
+	cardEngineLocation9[14] = consoleModel;
+	cardEngineLocation9[15] = asyncPrefetch;
 }

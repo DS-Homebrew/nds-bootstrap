@@ -43,17 +43,17 @@
 #define SAV_OFFSET                 32
 #define SAVSIZE_OFFSET             36
 #define LANGUAGE_OFFSET            40
-//#define DSIMODE_OFFSET             44 // SDK 5
-#define DONORSDK_OFFSET            44
-#define PUR_OFFSET                 48
-#define PUS_OFFSET                 52
-#define CONSOLEMODEL_OFFSET        56
-#define LOADSCR_OFFSET             60
-#define ROMREADLED_OFFSET          64
-#define GAMESOFTRESET_OFFSET       68
-#define ASYNC_OFFSET               72
-#define CARDENGINE_ARM7_OFFSET     76
-#define CARDENGINE_ARM9_OFFSET     80
+#define DSIMODE_OFFSET             44 // SDK 5
+#define DONORSDK_OFFSET            48
+#define PUR_OFFSET                 52
+#define PUS_OFFSET                 56
+#define CONSOLEMODEL_OFFSET        60
+#define LOADSCR_OFFSET             64
+#define ROMREADLED_OFFSET          68
+#define GAMESOFTRESET_OFFSET       72
+#define ASYNC_OFFSET               76
+#define CARDENGINE_ARM7_OFFSET     80
+#define CARDENGINE_ARM9_OFFSET     84
 
 /*typedef signed int addr_t;  // s32
 typedef unsigned char data_t; // u8*/
@@ -194,8 +194,8 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("cardengineArm7");
 	nocashMessage(tohex((u32)cardengineArm7));
 	
-	//u32 cheatDataOffset = cardengineArm7[13]; // SDK 5
-	u32 cheatDataOffset = cardengineArm7[12];
+	//u32 cheatDataOffset = cardengineArm7[12];
+	u32 cheatDataOffset = cardengineArm7[13];
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
@@ -246,7 +246,7 @@ int runNds(
 	memcpy(LCDC_BANK_C, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Set the parameters for the loader
-	
+
 	// STORED_FILE_CLUSTER = cluster;
 	writeAddr((u8*)LCDC_BANK_C, STORED_FILE_CLUSTER_OFFSET, cluster);
 	
@@ -287,7 +287,7 @@ int runNds(
 	writeAddr((u8*)LCDC_BANK_C, SAV_OFFSET, saveCluster);
 	writeAddr((u8*)LCDC_BANK_C, SAVSIZE_OFFSET, saveSize);
 	writeAddr((u8*)LCDC_BANK_C, LANGUAGE_OFFSET, language);
-	//writeAddr((u8*)LCDC_BANK_C, DSIMODE_OFFSET, dsiMode); // SDK 5
+	writeAddr((u8*)LCDC_BANK_C, DSIMODE_OFFSET, dsiMode); // SDK 5
 	writeAddr((u8*)LCDC_BANK_C, DONORSDK_OFFSET, donorSdkVer);
 	writeAddr((u8*)LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
 	writeAddr((u8*)LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
@@ -296,8 +296,8 @@ int runNds(
 	writeAddr((u8*)LCDC_BANK_C, ROMREADLED_OFFSET, romread_LED);
 	writeAddr((u8*)LCDC_BANK_C, GAMESOFTRESET_OFFSET, gameSoftReset);
 	writeAddr((u8*)LCDC_BANK_C, ASYNC_OFFSET, asyncPrefetch);
-	
-	loadCheatData(cheatData);
+    
+    loadCheatData(cheatData);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 
@@ -348,7 +348,7 @@ int runNdsFile(
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
-	
+
 	if (stat(filename, &st) < 0) {
 		return 1;
 	}

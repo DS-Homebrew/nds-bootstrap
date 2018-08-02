@@ -78,7 +78,7 @@ void arm7clearRAM(void);
 #define ENGINE_LOCATION_ARM7 0x037C0000
 
 #define ENGINE_LOCATION_ARM9      0x02400000
-#define ENGINE_LOCATION_ARM9_SDK5 0x02400000
+#define ENGINE_LOCATION_ARM9_SDK5 0x02400000 //0x0C800000
 
 #define ROM_LOCATION      0x0C804000
 #define ROM_LOCATION_SDK5 0x0D000000
@@ -95,7 +95,7 @@ extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
 extern unsigned long saveSize;
 extern unsigned long language;
-static bool dsiMode = false; //extern unsigned long dsiMode; // SDK 5
+extern unsigned long dsiMode; // SDK 5
 extern unsigned long donorSdkVer;
 extern unsigned long patchMpuRegion;
 extern unsigned long patchMpuSize;

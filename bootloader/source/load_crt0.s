@@ -32,6 +32,7 @@
 	.global saveFileCluster
 	.global saveSize
 	.global language
+	.global dsiMode
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
@@ -69,18 +70,20 @@ saveSize:
 	.word	0x00000000		@ .sav file sive
 language:
 	.word	0x00000000
+dsiMode:
+	.word	0x00000000
 donorSdkVer:
 	.word	0x00000000		@ donor SDK version
 patchMpuRegion:
-	.word	0x00000000		
+	.word	0x00000000
 patchMpuSize:
-	.word	0x00000000		
+	.word	0x00000000
 consoleModel:
-	.word	0x00000000		
+	.word	0x00000000
 loadingScreen:
-	.word	0x00000000		
+	.word	0x00000000
 romread_LED:
-	.word	0x00000000		
+	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
 asyncPrefetch:
@@ -185,7 +188,7 @@ CIDLoop:
 	subs	r3, r3, #4
 	bne	CIDLoop
 	bx	lr
-    
+
 .global fastCopy32
 .type	fastCopy32 STT_FUNC
 @ r0 : src, r1 : dst, r2 : len

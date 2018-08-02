@@ -92,7 +92,7 @@ extern u32 ROM_TID;
 //extern u32 ROM_HEADERCRC; // SDK 5
 extern u32 ARM9_LEN;
 extern u32 romSize;
-static u32 dsiMode = false; //extern u32 dsiMode; // SDK 5
+extern u32 dsiMode; // SDK 5
 extern u32 enableExceptionHandler;
 extern u32 consoleModel;
 extern u32 asyncPrefetch;
@@ -293,7 +293,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
 	}
 
-	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x0C807BC0 : cardStruct0);
+	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x0C807BC0 : cardStruct0);
+	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02407BC0 : cardStruct0); // engineLocationArm9 + 0x7BC0
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
