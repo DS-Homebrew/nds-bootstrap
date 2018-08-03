@@ -34,7 +34,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
 
-LIBS	:= 
+LIBS	:= -lnds7
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

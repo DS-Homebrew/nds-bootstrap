@@ -42,7 +42,7 @@ CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-LIBS	:= 
+LIBS	:= -lnds7
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
