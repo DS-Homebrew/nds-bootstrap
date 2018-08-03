@@ -53,10 +53,10 @@ extern u32 setDataBWlist_2[3];
 extern u32 setDataBWlist_3[3];
 extern u32 setDataBWlist_4[3];*/
 
-extern unsigned long cheat_engine_size;
+/*extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
-extern const u8 cheat_engine_start[]; 
+extern const u8 cheat_engine_start[];*/
 
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
