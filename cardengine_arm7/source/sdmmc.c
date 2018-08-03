@@ -874,7 +874,7 @@ bool shutdown(void) {
 }
 
 
-const IO_INTERFACE __myio_dsisd = {
+IO_INTERFACE __myio_dsisd = {
 	DEVICE_TYPE_DSI_SD,
 	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 	(FN_MEDIUM_STARTUP)&startup,
