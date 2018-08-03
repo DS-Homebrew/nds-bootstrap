@@ -14,8 +14,8 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	load
 BUILD		:=	build
-SOURCES		:=	source source/patches 
-INCLUDES	:=	build ../include
+SOURCES		:=	source source/patches ../source
+INCLUDES	:=	include build ../include
 DATA		:=	../data
 SPECS		:=  specs
  

@@ -18,9 +18,9 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET		:=	cardengine_arm7
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../include
 
 
 #---------------------------------------------------------------------------------
