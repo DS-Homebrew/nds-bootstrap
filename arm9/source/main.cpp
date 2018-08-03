@@ -26,7 +26,6 @@
 #include <nds/fifocommon.h>
 #include <fat.h>
 
-#include "stringtool.h"
 #include "nds_loader_arm9.h"
 #include "inifile.h"
 
