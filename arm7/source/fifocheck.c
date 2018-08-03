@@ -1,4 +1,5 @@
-#include <nds.h>
+#include <nds/fifocommon.h>
+#include <nds/system.h>
 
 void SCFGFifoCheck(void) {
 	if (fifoCheckValue32(FIFO_USER_06)) {

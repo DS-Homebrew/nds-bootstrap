@@ -19,12 +19,19 @@
 
 ------------------------------------------------------------------*/
 #include <string.h> // memcpy
-#include <nds.h>
-#include <nds/arm9/dldi.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
+#include <nds/interrupts.h>
+#include <nds/arm9/video.h>
+#include <nds/memory.h>
+#include <nds/system.h>
+#include <nds/bios.h>
+
+#include <nds/arm9/dldi.h>
+#include <nds/debug.h>
+#include <sys/stat.h>
 #include <fat.h>
+
 #include "hex.h"
 #include "nds_loader_arm9.h"
 

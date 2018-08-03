@@ -29,8 +29,14 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 
 //#include <stdio.h>
-#include <nds.h>
 #include <nds/ndstypes.h>
+#include <nds/arm7/input.h>
+#include <nds/fifocommon.h>
+#include <nds/system.h>
+#include <nds/arm7/clock.h>
+#include <nds/arm7/i2c.h>
+#include <nds/debug.h>
+
 #include "hex.h"
 #include "fifocheck.h"
 

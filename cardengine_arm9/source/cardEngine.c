@@ -16,7 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds.h> 
+#include <string.h>
+#include <nds/ndstypes.h>
+#include <nds/arm9/exceptions.h>
+#include <nds/arm9/cache.h>
+#include <nds/system.h>
 #include <nds/fifomessages.h>
 #include "hex.h"
 #include "cardEngine.h"
