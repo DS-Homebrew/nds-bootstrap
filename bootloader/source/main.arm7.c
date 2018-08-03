@@ -45,9 +45,9 @@
 #include <nds/timers.h>
 #include <nds/arm7/audio.h>
 #include <nds/memory.h> // tNDSHeader
+#include <nds/arm7/i2c.h>
 
 #include "fat.h"
-#include "i2c.h"
 //#include "dldi_patcher.h"
 #include "card.h"
 #include "card_patcher.h"

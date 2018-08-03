@@ -23,11 +23,11 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
+#include <nds/arm7/i2c.h>
 #include "sdmmc.h"
 #include "debugToFile.h"
 #include "cardEngine.h"
 #include "fat.h"
-#include "i2c.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
