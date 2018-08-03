@@ -46,6 +46,7 @@
 #include <nds/arm7/audio.h>
 #include <nds/memory.h> // tNDSHeader
 #include <nds/arm7/i2c.h>
+#include <nds/debug.h>
 
 #include "fat_alt.h"
 //#include "dldi_patcher.h"
@@ -59,8 +60,6 @@
 //#define memcpy __builtin_memcpy
 
 #define MIN(a,b) ((a) < (b) ? a : b)
-
-extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
 void arm7clearRAM(void);
 

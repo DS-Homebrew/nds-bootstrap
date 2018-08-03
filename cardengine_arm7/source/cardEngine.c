@@ -24,6 +24,8 @@
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
+#include <nds/debug.h>
+
 #include "sdmmc_alt.h"
 #include "debugToFile.h"
 #include "cardEngine.h"
@@ -41,10 +43,6 @@
 
 #define SAVE_LOCATION      0x0C820000
 #define SAVE_LOCATION_SDK5 0x0CE00000
-
-#ifdef DEBUG
-extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
-#endif
 
 extern int tryLockMutex(int * addr);
 extern int lockMutex(int * addr);
