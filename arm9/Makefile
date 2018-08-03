@@ -17,8 +17,8 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BUILD		:=	build
-SOURCES		:=	source
-INCLUDES	:=	include
+SOURCES		:=	source ../source
+INCLUDES	:=	include ../include
 DATA		:=	../data
 #GRAPHICS	:=  graphics
 IMAGES		:=	graphics

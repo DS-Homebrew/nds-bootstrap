@@ -21,7 +21,7 @@
 
 #include "hook.h"
 #include "common.h"
-#include "fat.h"
+#include "fat_alt.h"
 #include "cardengine_arm7_bin.h"
 
 extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0

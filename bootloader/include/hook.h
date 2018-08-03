@@ -18,7 +18,7 @@
 
 #include <nds/memory.h>
 #include <nds/ndstypes.h>
-#include "fat.h"
+#include "fat_alt.h"
 
 /*-------------------------------------------------------------------------
 arm7_hookGame

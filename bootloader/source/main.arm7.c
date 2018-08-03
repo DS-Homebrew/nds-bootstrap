@@ -47,7 +47,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/arm7/i2c.h>
 
-#include "fat.h"
+#include "fat_alt.h"
 //#include "dldi_patcher.h"
 #include "card_patcher.h"
 #include "card_finder.h"

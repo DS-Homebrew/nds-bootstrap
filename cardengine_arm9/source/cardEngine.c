@@ -18,6 +18,7 @@
 
 #include <nds.h> 
 #include <nds/fifomessages.h>
+#include "hex.h"
 #include "cardEngine.h"
 
 #define _32KB_READ_SIZE  0x8000
@@ -78,7 +79,6 @@ static u32 asyncQueue[10];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
-static char hexbuffer[9];
 
 /*static u32 readNum = 0;
 static bool alreadySetMpu = false;*/
@@ -97,28 +97,6 @@ extern u32 enableExceptionHandler;
 extern u32 consoleModel;
 extern u32 asyncPrefetch;
 
-char* tohex(u32 n) {
-    unsigned size = 9;
-    char *buffer = hexbuffer;
-    unsigned index = size - 2;
-
-	for (int i=0; i<size; i++) {
-		buffer[i] = '0';
-	}
-	
-    while (n > 0) {
-        unsigned mod = n % 16;
-
-        if (mod >= 10)
-            buffer[index--] = (mod - 10) + 'A';
-        else
-            buffer[index--] = mod + '0';
-
-        n /= 16;
-    }
-    buffer[size - 1] = '\0';
-    return buffer;
-}
 
 void user_exception(void);
 

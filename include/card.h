@@ -24,7 +24,7 @@
 #define CARD_H
 
 #include "disc_io.h"
-#include "sdmmc.h"
+#include "sdmmc_alt.h"
 
 // export interface
 extern IO_INTERFACE __myio_dsisd;

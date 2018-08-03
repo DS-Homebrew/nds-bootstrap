@@ -25,8 +25,10 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fat.h>
-#include "load_bin.h"
+#include "hex.h"
 #include "nds_loader_arm9.h"
+
+#include "load_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -95,30 +97,6 @@ typedef unsigned char data_t; // u8*/
 	DO_code         = 0x80
 };*/
 
-static char hexbuffer[9];
-
-char* tohex(u32 n) {
-	unsigned size = 9;
-	char *buffer = hexbuffer;
-	unsigned index = size - 2;
-
-	for (int i = 0; i < size; i++) {
-		buffer[i] = '0';
-	}
-
-	while (n > 0) {
-		unsigned mod = n % 16;
-
-		if (mod >= 10)
-			buffer[index--] = (mod - 10) + 'A';
-		else
-			buffer[index--] = mod + '0';
-
-		n /= 16;
-	}
-	buffer[size - 1] = '\0';
-	return buffer;
-}
 
 /*static inline addr_t readAddr(data_t *mem, addr_t offset) {
 	return ((addr_t*)mem)[offset/sizeof(addr_t)];

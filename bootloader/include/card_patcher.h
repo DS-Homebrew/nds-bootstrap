@@ -22,7 +22,7 @@
 //#include <stddef.h>
 #include <nds/ndstypes.h>
 #include <nds/memory.h>
-//#include "fat.h"
+//#include "fat_alt.h"
 
 #define PAGE_4K		(0b01011 << 1)
 #define PAGE_8K		(0b01100 << 1)

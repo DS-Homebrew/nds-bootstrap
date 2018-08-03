@@ -30,7 +30,7 @@
 ------------------------------------------------------------------*/
    
 #include <string.h> // memcpy
-#include "fat.h"
+#include "fat_alt.h"
 #include "card.h"
 #include "debugToFile.h"
 

@@ -17,14 +17,13 @@
 */
 
 #include <string.h>
-#include "fat.h"
-
-extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
+#include <nds/debug.h>
+#include "fat_alt.h"
+#include "hex.h"
 
 static bool _debug = false;
 static aFile _debugFileCluster;
 static u32 _currentPos = 0;
-static char hexbuffer[9];
 
 void enableDebug(aFile debugFileCluster) {
 	_debug = true;
@@ -43,29 +42,6 @@ u32 dbg_printf(char * message) {
 	_currentPos += strlen(message);
 
 	return ret;
-}
-
-char* tohex(u32 n) {
-    unsigned size = 9;
-    char *buffer = hexbuffer;
-    unsigned index = size - 2;
-
-	for (int i = 0; i < size; i++) {
-		buffer[i] = '0';
-	}
-
-    while (n > 0) {
-        unsigned mod = n % 16;
-
-        if (mod >= 10)
-            buffer[index--] = (mod - 10) + 'A';
-        else
-            buffer[index--] = mod + '0';
-
-        n /= 16;
-    }
-    buffer[size - 1] = '\0';
-    return buffer;
 }
 
 u32 dbg_hexa(u32 n) {
