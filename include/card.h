@@ -23,7 +23,7 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include "disc_io.h"
+#include "disc_io_alt.h"
 #include "sdmmc_alt.h"
 
 // export interface
