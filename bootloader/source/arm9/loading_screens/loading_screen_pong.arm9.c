@@ -4,14 +4,10 @@ Loading pong
 
 #define ARM9
 #undef ARM7
-#include <nds/memory.h>
-#include <nds/arm9/video.h>
-#include <nds/arm9/input.h>
-#include <nds/interrupts.h>
-#include <nds/dma.h>
-#include <nds/timers.h>
+
 #include <nds/system.h>
-#include <nds/ipc.h>
+#include <nds/arm9/video.h>
+#include <nds/input.h>
 
 #include "common.h"
 #include "loading.h"

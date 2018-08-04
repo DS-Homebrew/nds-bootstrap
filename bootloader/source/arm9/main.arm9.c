@@ -28,49 +28,30 @@
 
 #define ARM9
 #undef ARM7
+
 #include <nds/memory.h>
 #include <nds/arm9/video.h>
-#include <nds/arm9/input.h>
 #include <nds/interrupts.h>
-#include <nds/dma.h>
 #include <nds/timers.h>
-#include <nds/system.h>
 #include <nds/ipc.h>
+#include <nds/system.h>
 
 #include "common.h"
 #include "loading.h"
 
+extern void arm9_clearCache(void);
+
 volatile bool sdk5 = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
-/*S*/volatile bool arm9_errorColor = false;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-/*S*/volatile int arm9_loadBarLength = 0;
-/*S*/volatile bool arm9_animateLoadingCircle = false;
 volatile int screenBrightness = 31;
 volatile bool fadeType = true;
-/*S*///extern bool displayScreen;
-bool displayScreen = false; //static bool displayScreen = false;
 
-/*S*////bool drawnStuff = false;
-
-/*-------------------------------------------------------------------------
-External functions
---------------------------------------------------------------------------*/
-extern void arm9_clearCache(void);
-
-
-/*-------------------------------------------------------------------------
-Declarations of loading screen functions
---------------------------------------------------------------------------*/
-void arm9_regularLoadingScreen(void);
-void arm9_loadingCircle(void);
-void arm9_errorText(void);
-
-void arm9_pong(void);
-
-void arm9_ttt(void);
-
+volatile bool arm9_errorColor = false;
+volatile int arm9_loadBarLength = 0;
+volatile bool arm9_animateLoadingCircle = false;
+bool displayScreen = false;
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
