@@ -19,7 +19,7 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source #../source --> conflict between nds/sdmmc.h and sdmmc_alt.h
 INCLUDES	:=	include build ../include
 
 #---------------------------------------------------------------------------------
@@ -127,9 +127,16 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBNDS)/lib/libnds7.a
+$(OUTPUT).elf	:	$(OFILES)
 
 -include $(DEPENDS)
+
+
+#---------------------------------------------------------------------------------
+%.bin: %.elf
+#---------------------------------------------------------------------------------
+	@$(OBJCOPY) -O binary $< $@
+	@echo built ... $(notdir $@)
 
 #---------------------------------------------------------------------------------------
 endif

@@ -68,7 +68,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
@@ -118,20 +118,21 @@ export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 export GAME_TITLE := $(TARGET)
 
-.PHONY: cardengine/arm7 cardengine/arm9 bootloader BootStrap clean
+#.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
+.PHONY: all dist bootloader cardengine_arm7 cardengine_arm9 clean
 
-all:	cardengine/arm7 cardengine/arm9 bootloader $(BIN)/$(TARGET).nds
+all:	$(OUTPUT).nds
 
 dist:	all
-	#@rm	-fr	hbmenu
-	#@mkdir hbmenu
-	#@cp hbmenu.nds hbmenu/BOOT.NDS
-	#@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
-	#@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
-	
-$(BIN)/$(TARGET).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
+#	@rm	-fr	hbmenu
+#	@mkdir hbmenu
+#	@cp hbmenu.nds hbmenu/BOOT.NDS
+#	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
+#	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
+
+$(OUTPUT).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 	ndstool	-c $(BIN)/$(TARGET).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
-			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
+			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;Made by Ahezard" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
@@ -139,25 +140,25 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:
+arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-cardengine/arm7: $(DATA)
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9
+	@$(MAKE) -C bootloader
+
+#---------------------------------------------------------------------------------		
+cardengine_arm7: $(DATA)
 	@$(MAKE) -C cardengine/arm7
 
 #---------------------------------------------------------------------------------		
-cardengine/arm9: $(DATA)
+cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
-
-#---------------------------------------------------------------------------------		
-bootloader: $(DATA)
-	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
-	#@[ -d $@ ] || mkdir -p $@
-	#@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+#	@[ -d $@ ] || mkdir -p $@
+#	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:

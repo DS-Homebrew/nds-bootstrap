@@ -16,11 +16,11 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET		:=	cardengine_arm9
-BUILD		:=	build
-SOURCES		:=	source
-DATA		:=	data
-INCLUDES	:=	include ../../include
+export TARGET	:=	cardengine_arm9
+BUILD			:=	build
+SOURCES			:=	source ../../source
+DATA			:=	data
+INCLUDES		:=	include ../../include
 
 
 #---------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE) 
 LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-LIBS	:= 
+LIBS	:=	-lnds9
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
