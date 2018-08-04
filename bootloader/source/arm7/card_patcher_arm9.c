@@ -3,7 +3,7 @@
 #include "card_finder.h"
 #include "common.h"
 #include "cardengine_arm9_bin.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 
 //#define memcpy __builtin_memcpy // memcpy
 

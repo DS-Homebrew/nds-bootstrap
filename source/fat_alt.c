@@ -32,7 +32,7 @@
 #include <string.h> // memcpy
 #include "fat_alt.h"
 #include "card.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 
 //#define memcpy __builtin_memcpy
 

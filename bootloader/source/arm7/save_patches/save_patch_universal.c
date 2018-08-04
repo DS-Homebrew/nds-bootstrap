@@ -1,7 +1,7 @@
 #include <nds/ndstypes.h>
 #include "card_patcher.h"
 #include "card_finder.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 
 //
 // Subroutine function signatures ARM7

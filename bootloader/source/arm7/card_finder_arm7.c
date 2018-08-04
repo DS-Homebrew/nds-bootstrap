@@ -1,6 +1,6 @@
 #include <stddef.h> // NULL
 #include "card_finder.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 
 //
 // Subroutine function signatures ARM7

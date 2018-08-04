@@ -27,7 +27,7 @@
 #include <nds/debug.h>
 
 #include "sdmmc_alt.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 #include "cardengine.h"
 #include "fat_alt.h"
 

@@ -20,7 +20,7 @@
 #include <nds/system.h>
 #include "card_patcher.h"
 #include "common.h"
-#include "debugToFile.h"
+#include "debug_file.h"
 
 bool logging = false; //extern bool logging;
 extern bool cardReadFound; // card_patcher_arm9.c
