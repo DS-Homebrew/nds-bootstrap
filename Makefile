@@ -24,11 +24,13 @@ VERSION	:=	$(HBMENU_MAJOR).$(HBMENU_MINOR).$(HBMENU_PATCH)
 # GRAPHICS is a list of directories containing image files to be converted with grit
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
+BIN			:=	bin
 BUILD		:=	build
 SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=	data
-GRAPHICS	:=  gfx
+ASSETS		:=	assets
+GRAPHICS	:=  $(ASSETS)/gfx
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -104,39 +106,33 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-icons := $(wildcard *.bmp)
-
-ifneq (,$(findstring $(TARGET).bmp,$(icons)))
-	export GAME_ICON := $(CURDIR)/$(TARGET).bmp
-else
-	ifneq (,$(findstring icon.bmp,$(icons)))
-		export GAME_ICON := $(CURDIR)/icon.bmp
-	endif
-endif
+#icons := $(wildcard *.bmp)
+#ifneq (,$(findstring $(TARGET).bmp,$(icons)))
+#	export GAME_ICON := $(CURDIR)/$(TARGET).bmp
+#else
+#	ifneq (,$(findstring icon.bmp,$(icons)))
+#		export GAME_ICON := $(CURDIR)/icon.bmp
+#	endif
+#endif
+export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 export GAME_TITLE := $(TARGET)
 
 .PHONY: cardengine/arm7 cardengine/arm9 bootloader BootStrap clean
 
-all:	cardengine/arm7 cardengine/arm9 bootloader $(TARGET).nds
+all:	cardengine/arm7 cardengine/arm9 bootloader $(BIN)/$(TARGET).nds
 
 dist:	all
-	@rm	-fr	hbmenu
-	@mkdir hbmenu
-	@cp hbmenu.nds hbmenu/BOOT.NDS
-	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
-	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
+	#@rm	-fr	hbmenu
+	#@mkdir hbmenu
+	#@cp hbmenu.nds hbmenu/BOOT.NDS
+	#@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
+	#@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 	
-$(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9
-	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf \
-			-b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
-			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001 
-
-$(TARGET).arm7: arm7/$(TARGET).elf
-	cp arm7/$(TARGET).elf $(TARGET).arm7.elf
-
-$(TARGET).arm9: arm9/$(TARGET).elf
-	cp arm9/$(TARGET).elf $(TARGET).arm9.elf
+$(BIN)/$(TARGET).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
+	ndstool	-c $(BIN)/$(TARGET).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
+			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
+			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
 arm7/$(TARGET).elf:
@@ -147,12 +143,16 @@ arm9/$(TARGET).elf:
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-cardengine/arm7: data
+cardengine/arm7: $(DATA)
 	@$(MAKE) -C cardengine/arm7
 
 #---------------------------------------------------------------------------------		
-cardengine/arm9: data
+cardengine/arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
+
+#---------------------------------------------------------------------------------		
+bootloader: $(DATA)
+	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
@@ -162,20 +162,18 @@ cardengine/arm9: data
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 data
-	@rm -fr nds-bootstrap.arm7.elf
-	@rm -fr nds-bootstrap.arm9.elf
-	@$(MAKE) -C bootloader clean
-	@$(MAKE) -C arm9 clean
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(DATA) $(BIN)
 	@$(MAKE) -C arm7 clean
+	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
+	@$(MAKE) -C bootloader clean
 		
-data:
-	@mkdir -p data
+$(DATA):
+	@mkdir -p $(DATA)
 
-bootloader: data
-	@$(MAKE) -C bootloader
+$(BIN):
+	@mkdir -p $(BIN)
 
 #---------------------------------------------------------------------------------
 else
