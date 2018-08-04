@@ -1,0 +1,673 @@
+Archive member included to satisfy reference by file (symbol)
+
+/opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                              cardEngine.o (i2cWriteRegister)
+/opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+                              debugToFile.o (nocashMessage)
+/opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                              sdmmc_alt.o (swiDelay)
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o)
+                              fat_alt.o (__aeabi_uidiv)
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_divsi3.o)
+                              fat_alt.o (__aeabi_idiv)
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_dvmd_tls.o)
+                              /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+                              cardEngine.o (memcpy)
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+                              debugToFile.o (strlen)
+
+Allocating common symbols
+Common symbol       size              file
+
+discFileSystem      0x1               fat_alt.o
+discBytePerClus     0x4               fat_alt.o
+handleSD            0x40              sdmmc_alt.o
+discData            0x4               fat_alt.o
+discRootDir         0x4               fat_alt.o
+handleNAND          0x40              sdmmc_alt.o
+discRootDirClus     0x4               fat_alt.o
+discBytePerSec      0x4               fat_alt.o
+discSecPerFAT       0x4               fat_alt.o
+discFAT             0x4               fat_alt.o
+globalBuffer        0x200             fat_alt.o
+discSecPerClus      0x4               fat_alt.o
+discNumSec          0x4               fat_alt.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+vram             0x00000000037c0000 0x0000000000006000
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD cardEngine.o
+LOAD debugToFile.o
+LOAD fat_alt.o
+LOAD hex.o
+LOAD sdmmc_alt.o
+LOAD card_engine_header.o
+LOAD cheat_engine.o
+LOAD /opt/devkitpro/libnds/lib/libnds7.a
+START GROUP
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libc.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libsysbase.a
+END GROUP
+                0x00000000037c0000                __vram_start = ORIGIN (vram)
+                0x00000000037c6000                __vram_top = (ORIGIN (vram) + LENGTH (vram))
+                0x00000000037c5fa0                __sp_irq = (__vram_top - 0x60)
+                0x00000000037c5ea0                __sp_svc = (__sp_irq - 0x100)
+                0x00000000037c5da0                __sp_usr = (__sp_svc - 0x100)
+                0x00000000037c5ff8                __irq_flags = (__vram_top - 0x8)
+                0x00000000037c5ffc                __irq_vector = (__vram_top - 0x4)
+
+.init           0x00000000037c0000      0x424
+                0x00000000037c0000                __text_start = .
+ *(.init)
+ .init          0x00000000037c0000      0x424 card_engine_header.o
+                0x00000000037c0000                patches_offset
+                0x00000000037c000c                sdk_version
+                0x00000000037c0010                fileCluster
+                0x00000000037c0014                cardStruct
+                0x00000000037c0018                language
+                0x00000000037c001c                gottenSCFGExt
+                0x00000000037c0020                dsiMode
+                0x00000000037c0024                ROMinRAM
+                0x00000000037c0028                consoleModel
+                0x00000000037c002c                romread_LED
+                0x00000000037c0030                gameSoftReset
+                0x00000000037c003c                card_engine_start
+                0x00000000037c0094                fastCopy32
+                0x00000000037c00bc                card_engine_end
+                0x00000000037c02f4                saveCluster
+                0x00000000037c02f8                saveSize
+                0x00000000037c03d8                tryLockMutex
+                0x00000000037c03fc                lockMutex
+                0x00000000037c0418                unlockMutex
+                0x00000000037c0424                . = ALIGN (0x4)
+
+.plt
+ *(.plt)
+
+.text           0x00000000037c0430     0x3e20
+ *(.text*)
+ .text          0x00000000037c0430      0xad0 cardEngine.o
+                0x00000000037c04a8                initialize
+                0x00000000037c052c                cardReadLED
+                0x00000000037c05a4                asyncCardReadLED
+                0x00000000037c0634                log_arm9
+                0x00000000037c0638                cardRead_arm9
+                0x00000000037c06c4                asyncCardRead_arm9
+                0x00000000037c0734                runCardEngineCheck
+                0x00000000037c0824                runCardEngineCheckHalt
+                0x00000000037c08c8                myIrqHandlerFIFO
+                0x00000000037c08cc                mySwiHalt
+                0x00000000037c08d0                myIrqHandlerVBlank
+                0x00000000037c0b94                myIrqEnable
+                0x00000000037c0be0                irqIPCSYNCEnable
+                0x00000000037c0c44                eepromProtect
+                0x00000000037c0c4c                eepromRead
+                0x00000000037c0d24                eepromPageWrite
+                0x00000000037c0e14                eepromPageProg
+                0x00000000037c0e18                eepromPageVerify
+                0x00000000037c0e20                eepromPageErase
+                0x00000000037c0e28                cardId
+                0x00000000037c0e30                cardRead
+ .text          0x00000000037c0f00      0x108 debugToFile.o
+                0x00000000037c0f74                enableDebug
+                0x00000000037c0fb8                dbg_printf
+                0x00000000037c0fd8                dbg_hexa
+ .text          0x00000000037c1008     0x1110 fat_alt.o
+                0x00000000037c1008                FAT_ClustToSect
+                0x00000000037c102c                FAT_NextCluster
+                0x00000000037c11a8                ucase
+                0x00000000037c11bc                FAT_InitFiles
+                0x00000000037c14e8                getBootFileCluster
+                0x00000000037c1808                getFileFromCluster
+                0x00000000037c181c                fileRead
+                0x00000000037c1ca8                fileWrite
+                0x00000000037c2050                buildFatTableCache
+ .text          0x00000000037c2118       0x58 hex.o
+                0x00000000037c2118                tohex
+ .text          0x00000000037c2170     0x1210 sdmmc_alt.o
+                0x00000000037c2524                isInserted
+                0x00000000037c2994                shutdown
+                0x00000000037c299c                clearStatus
+                0x00000000037c29a4                getMMCDevice
+                0x00000000037c29c4                sdmmc_sdcard_writesectors
+                0x00000000037c2a74                writeSectors
+                0x00000000037c2a8c                sdmmc_sdcard_readsectors
+                0x00000000037c2b3c                readSectors
+                0x00000000037c2b54                sdmmc_nand_readsectors
+                0x00000000037c2be4                sdmmc_nand_writesectors
+                0x00000000037c2c74                sdmmc_init
+                0x00000000037c2de0                Nand_Init
+                0x00000000037c2fb4                SD_Init
+                0x00000000037c32d8                startup
+                0x00000000037c32f4                sdmmc_get_cid
+ .text          0x00000000037c3380        0x0 card_engine_header.o
+ .text          0x00000000037c3380        0x4 cheat_engine.o
+                0x00000000037c3380                cheat_engine_size
+ .text.cheat_engine_start
+                0x00000000037c3384      0x7e8 cheat_engine.o
+                0x00000000037c3384                cheat_engine_start
+                0x00000000037c374c                cheat_data
+                0x00000000037c374c                cheat_engine_end
+ .text          0x00000000037c3b6c        0x0 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .text.i2cWaitBusy
+                0x00000000037c3b6c       0x10 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .text.i2cDelay
+                0x00000000037c3b7c       0x18 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3b7c                i2cDelay
+ .text.i2cStop  0x00000000037c3b94       0x40 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3b94                i2cStop
+ .text.i2cGetResult
+                0x00000000037c3bd4       0x18 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3bd4                i2cGetResult
+ .text.i2cGetData
+                0x00000000037c3bec       0x14 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3bec                i2cGetData
+ .text.i2cSetDelay
+                0x00000000037c3c00       0x14 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3c00                i2cSetDelay
+ .text.i2cSelectDevice
+                0x00000000037c3c14       0x24 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3c14                i2cSelectDevice
+ .text.i2cSelectRegister
+                0x00000000037c3c38       0x24 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3c38                i2cSelectRegister
+ .text.i2cWriteRegister
+                0x00000000037c3c5c       0x5c /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3c5c                i2cWriteRegister
+ .text.i2cReadRegister
+                0x00000000037c3cb8       0x64 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                0x00000000037c3cb8                i2cReadRegister
+ .text          0x00000000037c3d1c       0xa4 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+                0x00000000037c3d1c                nocashWrite
+                0x00000000037c3d1e                nocashMessage
+ .text          0x00000000037c3dc0        0x0 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+ .text.swiDelay
+                0x00000000037c3dc0        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dc0                swiDelay
+ .text.swiSleep
+                0x00000000037c3dc4        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dc4                swiSleep
+ .text.swiChangeSoundBias
+                0x00000000037c3dc8        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dc8                swiChangeSoundBias
+ .text.swiDivide
+                0x00000000037c3dcc        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dcc                swiDivide
+ .text.swiRemainder
+                0x00000000037c3dd0        0x8 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dd0                swiRemainder
+ .text.swiDivMod
+                0x00000000037c3dd8        0xc /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dd8                swiDivMod
+ .text.swiCopy  0x00000000037c3de4        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3de4                swiCopy
+ .text.swiFastCopy
+                0x00000000037c3de8        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3de8                swiFastCopy
+ .text.swiSqrt  0x00000000037c3dec        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dec                swiSqrt
+ .text.swiCRC16
+                0x00000000037c3df0        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3df0                swiCRC16
+ .text.swiIsDebugger
+                0x00000000037c3df4        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3df4                swiIsDebugger
+ .text.swiUnpackBits
+                0x00000000037c3df8        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3df8                swiUnpackBits
+ .text.swiDecompressLZSSWram
+                0x00000000037c3dfc        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3dfc                swiDecompressLZSSWram
+ .text.swiDecompressLZSSVramNTR
+                0x00000000037c3e00        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e00                swiDecompressLZSSVramNTR
+ .text.swiDecompressLZSSVramTWL
+                0x00000000037c3e04        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e04                swiDecompressLZSSVramTWL
+ .text.swiDecompressHuffman
+                0x00000000037c3e08        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e08                swiDecompressHuffman
+ .text.swiDecompressRLEWram
+                0x00000000037c3e0c        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e0c                swiDecompressRLEWram
+ .text.swiDecompressRLEVram
+                0x00000000037c3e10        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e10                swiDecompressRLEVram
+ .text.swiHalt  0x00000000037c3e14        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e14                swiHalt
+ .text.swiGetSineTable
+                0x00000000037c3e18        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e18                swiGetSineTable
+ .text.swiGetPitchTable
+                0x00000000037c3e1c        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e1c                swiGetPitchTable
+ .text.swiGetVolumeTable
+                0x00000000037c3e20        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e20                swiGetVolumeTable
+ .text.swiSwitchToGBAMode
+                0x00000000037c3e24        0x4 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e24                swiSwitchToGBAMode
+ .text.swiSetHaltCR
+                0x00000000037c3e28        0x8 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                0x00000000037c3e28                swiSetHaltCR
+ .text          0x00000000037c3e30      0x114 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o)
+                0x00000000037c3e30                __udivsi3
+                0x00000000037c3e30                __aeabi_uidiv
+                0x00000000037c3f24                __aeabi_uidivmod
+ .text          0x00000000037c3f44      0x148 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_divsi3.o)
+                0x00000000037c3f44                __aeabi_idiv
+                0x00000000037c3f44                __divsi3
+                0x00000000037c406c                __aeabi_idivmod
+ .text          0x00000000037c408c        0x4 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_dvmd_tls.o)
+                0x00000000037c408c                __aeabi_ldiv0
+                0x00000000037c408c                __aeabi_idiv0
+ .text          0x00000000037c4090        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+ .text.memcpy   0x00000000037c4090      0x11c /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+                0x00000000037c4090                memcpy
+ .text          0x00000000037c41ac        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+ .text.strlen   0x00000000037c41ac       0x60 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+                0x00000000037c41ac                strlen
+ *fill*         0x00000000037c420c        0x4 ff
+ .text.strlen.__stub
+                0x00000000037c4210       0x30 linker stubs
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7)
+ .glue_7        0x00000000037c4250        0x0 linker stubs
+ *(.glue_7t)
+ .glue_7t       0x00000000037c4250        0x0 linker stubs
+                0x00000000037c4250                . = ALIGN (0x4)
+
+.vfp11_veneer   0x00000000037c4250        0x0
+ .vfp11_veneer  0x00000000037c4250        0x0 linker stubs
+
+.v4_bx          0x00000000037c4250        0x0
+ .v4_bx         0x00000000037c4250        0x0 linker stubs
+
+.iplt           0x00000000037c4250        0x0
+ .iplt          0x00000000037c4250        0x0 cardEngine.o
+
+.fini
+ *(.fini)
+                0x00000000037c4250                __text_end = .
+
+.rodata         0x00000000037c4250       0x40
+ *(.rodata)
+ .rodata        0x00000000037c4250       0x3e cardEngine.o
+ *all.rodata*(*)
+ *(.roda)
+ *(.rodata.*)
+ *(.gnu.linkonce.r*)
+                0x00000000037c4290                . = ALIGN (0x4)
+ *fill*         0x00000000037c428e        0x2 ff
+
+.rel.dyn        0x00000000037c4290        0x0
+ .rel.iplt      0x00000000037c4290        0x0 cardEngine.o
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+                0x00000000037c4290                __exidx_start = .
+
+.ARM.exidx
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0x00000000037c4290                __exidx_end = .
+                0x00000000037c4290                . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+
+.preinit_array
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+                [!provide]                        PROVIDE (__init_array_start = .)
+
+.init_array
+ *(.init_array)
+                [!provide]                        PROVIDE (__init_array_end = .)
+                [!provide]                        PROVIDE (__fini_array_start = .)
+
+.fini_array
+ *(.fini_array)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors          0x00000000037c4290        0x0
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+                0x00000000037c4290                . = ALIGN (0x4)
+
+.dtors          0x00000000037c4290        0x0
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+                0x00000000037c4290                . = ALIGN (0x4)
+
+.eh_frame       0x00000000037c4290        0x0
+ *(.eh_frame)
+                0x00000000037c4290                . = ALIGN (0x4)
+
+.gcc_except_table
+                0x00000000037c4290        0x0
+ *(.gcc_except_table)
+                0x00000000037c4290                . = ALIGN (0x4)
+
+.jcr
+ *(.jcr)
+
+.got
+ *(.got.plt)
+ *(.got)
+
+.vram           0x00000000037c4290        0x0
+                0x00000000037c4290                __vram_start = ABSOLUTE (.)
+ *(.vram)
+ *vram.*(.text)
+                0x00000000037c4290                . = ALIGN (0x4)
+                0x00000000037c4290                __vram_end = ABSOLUTE (.)
+
+.data           0x00000000037c4290       0xc4
+                0x00000000037c4290                __data_start = ABSOLUTE (.)
+ *(.data)
+ .data          0x00000000037c4290       0xa0 cardEngine.o
+                0x00000000037c4298                sharedAddr
+                0x00000000037c429c                numberToActivateRunViaHalt
+                0x00000000037c42a0                sr_data_srllastran_twltouch
+                0x00000000037c42c0                sr_data_srllastran
+                0x00000000037c42e0                sr_data_srloader
+                0x00000000037c4300                sr_data_srllastran_twltouch_len
+                0x00000000037c4304                sr_data_srllastran_len
+                0x00000000037c4308                sr_data_srloader_len
+                0x00000000037c430c                sr_data_error_len
+                0x00000000037c4310                sr_data_error
+ .data          0x00000000037c4330        0x0 debugToFile.o
+ .data          0x00000000037c4330        0x4 fat_alt.o
+ .data          0x00000000037c4334        0x0 hex.o
+ .data          0x00000000037c4334       0x20 sdmmc_alt.o
+                0x00000000037c4334                __myio_dsisd
+ .data          0x00000000037c4354        0x0 card_engine_header.o
+ .data          0x00000000037c4354        0x0 cheat_engine.o
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_divsi3.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_dvmd_tls.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+ .data          0x00000000037c4354        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0x00000000037c4354                . = ALIGN (0x4)
+                0x00000000037c4354                __data_end = ABSOLUTE (.)
+
+.igot.plt       0x00000000037c4354        0x0
+ .igot.plt      0x00000000037c4354        0x0 cardEngine.o
+
+.bss            0x00000000037c4354      0x2f8
+                0x00000000037c4354                __bss_start = ABSOLUTE (.)
+                0x00000000037c4354                __bss_start__ = ABSOLUTE (.)
+ *(.dynbss)
+ *(.gnu.linkonce.b*)
+ *(.bss*)
+ .bss           0x00000000037c4354       0x1e cardEngine.o
+                0x00000000037c4355                sdk5
+                0x00000000037c4371                ndmaUsed
+ *fill*         0x00000000037c4372        0x2 
+ .bss           0x00000000037c4374       0x1d debugToFile.o
+ .bss           0x00000000037c4391        0x0 fat_alt.o
+ *fill*         0x00000000037c4391        0x3 
+ .bss           0x00000000037c4394        0x9 hex.o
+ .bss           0x00000000037c439d        0x0 sdmmc_alt.o
+ .bss           0x00000000037c439d        0x0 card_engine_header.o
+ .bss           0x00000000037c439d        0x0 cheat_engine.o
+ .bss           0x00000000037c439d        0x0 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ *fill*         0x00000000037c439d        0x3 
+ .bss.i2cCurrentDelay
+                0x00000000037c43a0        0x4 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_divsi3.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_dvmd_tls.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+ .bss           0x00000000037c43a4        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+ *(COMMON)
+ COMMON         0x00000000037c43a4      0x228 fat_alt.o
+                0x00000000037c43a4                discFileSystem
+                0x00000000037c43a8                discBytePerClus
+                0x00000000037c43ac                discData
+                0x00000000037c43b0                discRootDir
+                0x00000000037c43b4                discRootDirClus
+                0x00000000037c43b8                discBytePerSec
+                0x00000000037c43bc                discSecPerFAT
+                0x00000000037c43c0                discFAT
+                0x00000000037c43c4                globalBuffer
+                0x00000000037c45c4                discSecPerClus
+                0x00000000037c45c8                discNumSec
+ COMMON         0x00000000037c45cc       0x80 sdmmc_alt.o
+                0x00000000037c45cc                handleSD
+                0x00000000037c460c                handleNAND
+                0x00000000037c464c                . = ALIGN (0x4)
+                0x00000000037c464c                __bss_end = .
+                0x00000000037c464c                __bss_end__ = .
+                0x00000000037c464c                _end = .
+                0x00000000037c464c                __end__ = .
+                [!provide]                        PROVIDE (end = _end)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x22
+ *(.comment)
+ .comment       0x0000000000000000       0x22 cardEngine.o
+                                         0x23 (size before relaxing)
+ .comment       0x0000000000000022       0x23 debugToFile.o
+ .comment       0x0000000000000022       0x23 fat_alt.o
+ .comment       0x0000000000000022       0x23 hex.o
+ .comment       0x0000000000000022       0x23 sdmmc_alt.o
+ .comment       0x0000000000000022       0x23 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .comment       0x0000000000000022       0x23 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+ .comment       0x0000000000000022       0x23 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+
+.ARM.attributes
+                0x0000000000000000       0x28
+ .ARM.attributes
+                0x0000000000000000       0x26 cardEngine.o
+ .ARM.attributes
+                0x0000000000000026       0x26 debugToFile.o
+ .ARM.attributes
+                0x000000000000004c       0x26 fat_alt.o
+ .ARM.attributes
+                0x0000000000000072       0x26 hex.o
+ .ARM.attributes
+                0x0000000000000098       0x26 sdmmc_alt.o
+ .ARM.attributes
+                0x00000000000000be       0x1a card_engine_header.o
+ .ARM.attributes
+                0x00000000000000d8       0x1a cheat_engine.o
+ .ARM.attributes
+                0x00000000000000f2       0x26 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .ARM.attributes
+                0x0000000000000118       0x1a /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .ARM.attributes
+                0x0000000000000132       0x1a /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+ .ARM.attributes
+                0x000000000000014c       0x1c /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x0000000000000168       0x1c /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_divsi3.o)
+ .ARM.attributes
+                0x0000000000000184       0x1c /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x00000000000001a0       0x2a /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-memcpy-stub.o)
+ .ARM.attributes
+                0x00000000000001ca       0x2a /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/libg.a(lib_a-strlen-stub.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000      0x240
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000       0x20 cardEngine.o
+ .debug_aranges
+                0x0000000000000020       0x20 debugToFile.o
+ .debug_aranges
+                0x0000000000000040       0x20 fat_alt.o
+ .debug_aranges
+                0x0000000000000060       0x20 hex.o
+ .debug_aranges
+                0x0000000000000080       0x20 sdmmc_alt.o
+ .debug_aranges
+                0x00000000000000a0       0x20 card_engine_header.o
+ .debug_aranges
+                0x00000000000000c0       0x20 cheat_engine.o
+ .debug_aranges
+                0x00000000000000e0       0x68 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .debug_aranges
+                0x0000000000000148       0x20 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .debug_aranges
+                0x0000000000000168       0xd8 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x0000000000000000     0x7bfa
+ *(.debug_info)
+ .debug_info    0x0000000000000000     0x1b61 cardEngine.o
+ .debug_info    0x0000000000001b61      0xc01 debugToFile.o
+ .debug_info    0x0000000000002762     0x20b8 fat_alt.o
+ .debug_info    0x000000000000481a      0x168 hex.o
+ .debug_info    0x0000000000004982     0x2d79 sdmmc_alt.o
+ .debug_info    0x00000000000076fb       0x26 card_engine_header.o
+ .debug_info    0x0000000000007721       0x26 cheat_engine.o
+ .debug_info    0x0000000000007747      0x46b /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .debug_info    0x0000000000007bb2       0x26 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .debug_info    0x0000000000007bd8       0x22 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+
+.debug_abbrev   0x0000000000000000     0x14f2
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000      0x513 cardEngine.o
+ .debug_abbrev  0x0000000000000513      0x2e9 debugToFile.o
+ .debug_abbrev  0x00000000000007fc      0x4cd fat_alt.o
+ .debug_abbrev  0x0000000000000cc9       0xf1 hex.o
+ .debug_abbrev  0x0000000000000dba      0x4d8 sdmmc_alt.o
+ .debug_abbrev  0x0000000000001292       0x14 card_engine_header.o
+ .debug_abbrev  0x00000000000012a6       0x14 cheat_engine.o
+ .debug_abbrev  0x00000000000012ba      0x212 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .debug_abbrev  0x00000000000014cc       0x14 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .debug_abbrev  0x00000000000014e0       0x12 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+
+.debug_line     0x0000000000000000     0x4630
+ *(.debug_line)
+ .debug_line    0x0000000000000000      0xa8e cardEngine.o
+ .debug_line    0x0000000000000a8e      0x310 debugToFile.o
+ .debug_line    0x0000000000000d9e     0x1208 fat_alt.o
+ .debug_line    0x0000000000001fa6      0x1a7 hex.o
+ .debug_line    0x000000000000214d     0x1aad sdmmc_alt.o
+ .debug_line    0x0000000000003bfa      0x1bb card_engine_header.o
+ .debug_line    0x0000000000003db5      0x180 cheat_engine.o
+ .debug_line    0x0000000000003f35      0x442 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .debug_line    0x0000000000004377       0xa4 /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+ .debug_line    0x000000000000441b      0x215 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+
+.debug_frame    0x0000000000000000      0x984
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000      0x338 cardEngine.o
+ .debug_frame   0x0000000000000338       0x94 debugToFile.o
+ .debug_frame   0x00000000000003cc      0x1f0 fat_alt.o
+ .debug_frame   0x00000000000005bc       0x20 hex.o
+ .debug_frame   0x00000000000005dc      0x2a4 sdmmc_alt.o
+ .debug_frame   0x0000000000000880      0x104 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+
+.debug_str      0x0000000000000000     0x19ae
+ *(.debug_str)
+ .debug_str     0x0000000000000000      0xc7e cardEngine.o
+                                        0xd15 (size before relaxing)
+ .debug_str     0x0000000000000c7e       0xcb debugToFile.o
+                                        0x709 (size before relaxing)
+ .debug_str     0x0000000000000d49      0x5ce fat_alt.o
+                                        0xc72 (size before relaxing)
+ .debug_str     0x0000000000001317       0x6b hex.o
+                                        0x1fb (size before relaxing)
+ .debug_str     0x0000000000001382      0x2a5 sdmmc_alt.o
+                                        0x614 (size before relaxing)
+ .debug_str     0x0000000000001627       0x70 card_engine_header.o
+                                         0xbe (size before relaxing)
+ .debug_str     0x0000000000001697       0x5e cheat_engine.o
+                                         0xb8 (size before relaxing)
+ .debug_str     0x00000000000016f5      0x200 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+                                        0x2ed (size before relaxing)
+ .debug_str     0x00000000000018f5       0x5d /opt/devkitpro/libnds/lib/libnds7.a(debugprint.o)
+                                         0xb0 (size before relaxing)
+ .debug_str     0x0000000000001952       0x5c /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)
+                                         0xaf (size before relaxing)
+
+.debug_loc      0x0000000000000000     0x52d6
+ *(.debug_loc)
+ .debug_loc     0x0000000000000000      0x7af cardEngine.o
+ .debug_loc     0x00000000000007af       0xea debugToFile.o
+ .debug_loc     0x0000000000000899     0x2154 fat_alt.o
+ .debug_loc     0x00000000000029ed      0x163 hex.o
+ .debug_loc     0x0000000000002b50     0x25cc sdmmc_alt.o
+ .debug_loc     0x000000000000511c      0x1ba /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x0000000000080000        0x0
+                0x0000000000080000                _stack = .
+ *(.stack)
+OUTPUT(/Users/damianoamatruda/Documents/Projects/nds-bootstrap/cardengine/arm7/../../data/cardengine_arm7.elf elf32-littlearm)
+
+.debug_ranges   0x0000000000000000      0xfb0
+ .debug_ranges  0x0000000000000000       0x48 cardEngine.o
+ .debug_ranges  0x0000000000000048       0x18 debugToFile.o
+ .debug_ranges  0x0000000000000060      0x378 fat_alt.o
+ .debug_ranges  0x00000000000003d8       0x28 hex.o
+ .debug_ranges  0x0000000000000400      0xa88 sdmmc_alt.o
+ .debug_ranges  0x0000000000000e88       0x58 /opt/devkitpro/libnds/lib/libnds7.a(i2c.twl.o)
+ .debug_ranges  0x0000000000000ee0       0xd0 /opt/devkitpro/libnds/lib/libnds7.a(biosCalls.o)

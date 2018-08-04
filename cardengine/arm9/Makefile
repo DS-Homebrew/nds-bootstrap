@@ -20,7 +20,7 @@ export TARGET		:=	cardengine_arm9
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include ../include
+INCLUDES	:=	include ../../include
 
 
 #---------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
-export OUTPUT	:=	$(CURDIR)/../data/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))

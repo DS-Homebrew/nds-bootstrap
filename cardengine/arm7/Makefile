@@ -16,11 +16,11 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET		:=	cardengine_arm7
-BUILD		:=	build
-SOURCES		:=	source ../source
-DATA		:=	data
-INCLUDES	:=	include ../include
+export TARGET	:=	cardengine_arm7
+BUILD			:=	build
+SOURCES			:=	source ../../source
+DATA			:=	data
+INCLUDES		:=	include ../../include
 
 
 #---------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
-export OUTPUT	:=	$(CURDIR)/../data/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))

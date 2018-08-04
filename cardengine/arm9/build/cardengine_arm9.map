@@ -1,0 +1,358 @@
+Archive member included to satisfy reference by file (symbol)
+
+/opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+                              cardEngine.o (memcpy)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+vram             0x0000000002400000 0x0000000000003000
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD cardEngine.o
+LOAD card_engine_header.o
+LOAD exceptionHandler.o
+LOAD user_exception.o
+START GROUP
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/thumb/libgcc.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libc.a
+LOAD /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libsysbase.a
+END GROUP
+                0x0000000002400000                __vram_start = ORIGIN (vram)
+                0x0000000002403000                __vram_top = (ORIGIN (vram) + LENGTH (vram))
+                0x0000000002402fa0                __sp_irq = (__vram_top - 0x60)
+                0x0000000002402ea0                __sp_svc = (__sp_irq - 0x100)
+                0x0000000002402da0                __sp_usr = (__sp_svc - 0x100)
+                0x0000000002402ff8                __irq_flags = (__vram_top - 0x8)
+                0x0000000002402ffc                __irq_vector = (__vram_top - 0x4)
+
+.init           0x0000000002400000      0x1dc
+                0x0000000002400000                __text_start = .
+ *(.init)
+ .init          0x0000000002400000      0x1dc card_engine_header.o
+                0x0000000002400000                patches_offset
+                0x000000000240000c                sdk_version
+                0x0000000002400010                fileCluster
+                0x0000000002400014                cardStruct0
+                0x0000000002400018                cacheStruct
+                0x000000000240001c                ROMinRAM
+                0x0000000002400020                ROM_TID
+                0x0000000002400024                ROM_HEADERCRC
+                0x0000000002400028                ARM9_LEN
+                0x000000000240002c                romSize
+                0x0000000002400030                dsiMode
+                0x0000000002400034                enableExceptionHandler
+                0x0000000002400038                consoleModel
+                0x000000000240003c                asyncPrefetch
+                0x0000000002400040                fastCopy32
+                0x0000000002400040                card_engine_start
+                0x0000000002400068                card_engine_end
+                0x0000000002400090                needFlushDCCache
+                0x00000000024000e0                readCachedRef
+                0x0000000002400120                cacheFlush
+                0x0000000002400178                DC_FlushRange
+                0x000000000240019c                tryLockMutex
+                0x00000000024001c8                unLockMutex
+                0x00000000024001dc                . = ALIGN (0x4)
+
+.plt
+ *(.plt)
+
+.text           0x00000000024001e0      0xaf0
+ *(.text*)
+ .text          0x00000000024001e0      0x8c8 cardEngine.o
+                0x00000000024001e0                setExceptionHandler2
+                0x0000000002400228                allocateCacheSlot
+                0x0000000002400270                getSlotForSector
+                0x00000000024002b0                getCacheAddress
+                0x00000000024002c0                updateDescriptor
+                0x00000000024002e4                waitForArm7
+                0x0000000002400300                addToAsyncQueue
+                0x0000000002400340                triggerAsyncPrefetch
+                0x0000000002400440                processAsyncCommand
+                0x0000000002400498                getAsyncSector
+                0x00000000024004e0                cardRead
+ .text          0x0000000002400aa8        0x0 card_engine_header.o
+ .text          0x0000000002400aa8        0x0 exceptionHandler.o
+ .text.getCPSR  0x0000000002400aa8        0x8 exceptionHandler.o
+                0x0000000002400aa8                getCPSR
+ .text.enterException
+                0x0000000002400ab0       0xd4 exceptionHandler.o
+                0x0000000002400ab0                enterException
+                0x0000000002400b24                exceptionC
+                0x0000000002400b28                exceptionStack
+                0x0000000002400b2c                exceptionRegisters
+ .text          0x0000000002400b84        0x0 user_exception.o
+ .text.user_exception
+                0x0000000002400b84       0xa0 user_exception.o
+                0x0000000002400b84                user_exception
+ .text          0x0000000002400c24        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+ .text.memcpy   0x0000000002400c24       0x9c /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+                0x0000000002400c24                memcpy
+ .text.memcpy.__stub
+                0x0000000002400cc0       0x10 linker stubs
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7)
+ .glue_7        0x0000000002400cd0        0x0 linker stubs
+ *(.glue_7t)
+ .glue_7t       0x0000000002400cd0        0x0 linker stubs
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.vfp11_veneer   0x0000000002400cd0        0x0
+ .vfp11_veneer  0x0000000002400cd0        0x0 linker stubs
+
+.v4_bx          0x0000000002400cd0        0x0
+ .v4_bx         0x0000000002400cd0        0x0 linker stubs
+
+.iplt           0x0000000002400cd0        0x0
+ .iplt          0x0000000002400cd0        0x0 cardEngine.o
+
+.rel.dyn        0x0000000002400cd0        0x0
+ .rel.iplt      0x0000000002400cd0        0x0 cardEngine.o
+ .rel.got       0x0000000002400cd0        0x0 cardEngine.o
+
+.fini
+ *(.fini)
+                0x0000000002400cd0                __text_end = .
+
+.rodata         0x0000000002400cd0        0x0
+ *(.rodata)
+ *all.rodata*(*)
+ *(.roda)
+ *(.rodata.*)
+ *(.gnu.linkonce.r*)
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+                0x0000000002400cd0                __exidx_start = .
+
+.ARM.exidx
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0x0000000002400cd0                __exidx_end = .
+                0x0000000002400cd0                . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+
+.preinit_array
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+                [!provide]                        PROVIDE (__init_array_start = .)
+
+.init_array
+ *(.init_array)
+                [!provide]                        PROVIDE (__init_array_end = .)
+                [!provide]                        PROVIDE (__fini_array_start = .)
+
+.fini_array
+ *(.fini_array)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors          0x0000000002400cd0        0x0
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.dtors          0x0000000002400cd0        0x0
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.eh_frame       0x0000000002400cd0        0x0
+ *(.eh_frame)
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.gcc_except_table
+                0x0000000002400cd0        0x0
+ *(.gcc_except_table)
+                0x0000000002400cd0                . = ALIGN (0x4)
+
+.jcr
+ *(.jcr)
+
+.got            0x0000000002400cd0       0x54
+ *(.got.plt)
+ .got.plt       0x0000000002400cd0        0xc cardEngine.o
+                0x0000000002400cd0                _GLOBAL_OFFSET_TABLE_
+ *(.got)
+ .got           0x0000000002400cdc       0x48 cardEngine.o
+
+.vram           0x0000000002400d24        0x0
+                0x0000000002400d24                __vram_start = ABSOLUTE (.)
+ *(.vram)
+ *vram.*(.text)
+                0x0000000002400d24                . = ALIGN (0x4)
+                0x0000000002400d24                __vram_end = ABSOLUTE (.)
+
+.data           0x0000000002400d24      0x2f0
+                0x0000000002400d24                __data_start = ABSOLUTE (.)
+ *(.data)
+ .data          0x0000000002400d24      0x2f0 cardEngine.o
+                0x0000000002401010                sharedAddr
+ .data          0x0000000002401014        0x0 card_engine_header.o
+ .data          0x0000000002401014        0x0 exceptionHandler.o
+ .data          0x0000000002401014        0x0 user_exception.o
+ .data          0x0000000002401014        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0x0000000002401014                . = ALIGN (0x4)
+                0x0000000002401014                __data_end = ABSOLUTE (.)
+
+.igot.plt       0x0000000002401014        0x0
+ .igot.plt      0x0000000002401014        0x0 cardEngine.o
+
+.bss            0x0000000002401014      0x324
+                0x0000000002401014                __bss_start = ABSOLUTE (.)
+                0x0000000002401014                __bss_start__ = ABSOLUTE (.)
+ *(.dynbss)
+ *(.gnu.linkonce.b*)
+ *(.bss*)
+ .bss           0x0000000002401014      0x321 cardEngine.o
+                0x0000000002401334                sdk5
+ .bss           0x0000000002401335        0x0 card_engine_header.o
+ .bss           0x0000000002401335        0x0 exceptionHandler.o
+ .bss           0x0000000002401335        0x0 user_exception.o
+ .bss           0x0000000002401335        0x0 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+ *(COMMON)
+                0x0000000002401338                . = ALIGN (0x4)
+ *fill*         0x0000000002401335        0x3 
+                0x0000000002401338                __bss_end = .
+                0x0000000002401338                __bss_end__ = .
+                0x0000000002401338                _end = .
+                0x0000000002401338                __end__ = .
+                [!provide]                        PROVIDE (end = _end)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x22
+ *(.comment)
+ .comment       0x0000000000000000       0x22 cardEngine.o
+                                         0x23 (size before relaxing)
+ .comment       0x0000000000000022       0x23 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+
+.ARM.attributes
+                0x0000000000000000       0x29
+ .ARM.attributes
+                0x0000000000000000       0x27 cardEngine.o
+ .ARM.attributes
+                0x0000000000000027       0x1b card_engine_header.o
+ .ARM.attributes
+                0x0000000000000042       0x1b exceptionHandler.o
+ .ARM.attributes
+                0x000000000000005d       0x1b user_exception.o
+ .ARM.attributes
+                0x0000000000000078       0x2a /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000       0x88
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000       0x20 cardEngine.o
+ .debug_aranges
+                0x0000000000000020       0x20 card_engine_header.o
+ .debug_aranges
+                0x0000000000000040       0x28 exceptionHandler.o
+ .debug_aranges
+                0x0000000000000068       0x20 user_exception.o
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x0000000000000000     0x14be
+ *(.debug_info)
+ .debug_info    0x0000000000000000     0x1450 cardEngine.o
+ .debug_info    0x0000000000001450       0x26 card_engine_header.o
+ .debug_info    0x0000000000001476       0x22 exceptionHandler.o
+ .debug_info    0x0000000000001498       0x26 user_exception.o
+
+.debug_abbrev   0x0000000000000000      0x484
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000      0x44a cardEngine.o
+ .debug_abbrev  0x000000000000044a       0x14 card_engine_header.o
+ .debug_abbrev  0x000000000000045e       0x12 exceptionHandler.o
+ .debug_abbrev  0x0000000000000470       0x14 user_exception.o
+
+.debug_line     0x0000000000000000      0xe94
+ *(.debug_line)
+ .debug_line    0x0000000000000000      0xc1d cardEngine.o
+ .debug_line    0x0000000000000c1d       0xf5 card_engine_header.o
+ .debug_line    0x0000000000000d12       0xca exceptionHandler.o
+ .debug_line    0x0000000000000ddc       0xb8 user_exception.o
+
+.debug_frame    0x0000000000000000      0x11c
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000      0x11c cardEngine.o
+
+.debug_str      0x0000000000000000      0xa2a
+ *(.debug_str)
+ .debug_str     0x0000000000000000      0x8f8 cardEngine.o
+                                        0x978 (size before relaxing)
+ .debug_str     0x00000000000008f8       0x70 card_engine_header.o
+                                         0xbe (size before relaxing)
+ .debug_str     0x0000000000000968       0x62 exceptionHandler.o
+                                         0xbc (size before relaxing)
+ .debug_str     0x00000000000009ca       0x60 user_exception.o
+                                         0xba (size before relaxing)
+
+.debug_loc      0x0000000000000000      0xa6b
+ *(.debug_loc)
+ .debug_loc     0x0000000000000000      0xa6b cardEngine.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x0000000000080000        0x0
+                0x0000000000080000                _stack = .
+ *(.stack)
+OUTPUT(/Users/damianoamatruda/Documents/Projects/nds-bootstrap/cardengine/arm9/../../data/cardengine_arm9.elf elf32-littlearm)
+
+.debug_ranges   0x0000000000000000       0xd8
+ .debug_ranges  0x0000000000000000       0xb8 cardEngine.o
+ .debug_ranges  0x00000000000000b8       0x20 exceptionHandler.o
