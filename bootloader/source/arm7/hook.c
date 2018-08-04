@@ -24,8 +24,6 @@
 #include "hook.h"
 #include "common.h"
 
-#include "cardengine_arm7_bin.h"
-
 extern bool dsiModeConfirmed; // SDK 5
 extern u32 enableExceptionHandler;
 
