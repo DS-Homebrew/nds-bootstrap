@@ -67,6 +67,8 @@ static aFile * savFile = ((aFile *)0x37D5000)+1;
 //static int accessCounter = 0;
 
 static int softResetTimer = 0;
+static int volumeAdjustDelay = 0;
+static bool volumeAdjustActivated = false;
 
 bool ndmaUsed = false;
 
@@ -589,6 +591,35 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 		REG_MASTER_VOLUME = volLevel;
+	}
+
+	if (consoleModel < 2) {
+		// Precise volume adjustment (for DSi)
+		if (volumeAdjustActivated) {
+			volumeAdjustDelay++;
+			if (volumeAdjustDelay == 30) {
+				volumeAdjustDelay = 0;
+				volumeAdjustActivated = false;
+			}
+		} else {
+			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
+			u8 i2cNewVolLevel = i2cVolLevel;
+			if (REG_KEYINPUT & (KEY_SELECT | KEY_UP)) {} else {
+				i2cNewVolLevel++;
+			}
+			if (REG_KEYINPUT & (KEY_SELECT | KEY_DOWN)) {} else {
+				i2cNewVolLevel--;
+			}
+			if (i2cNewVolLevel == 0xFF) {
+				i2cNewVolLevel = 0;
+			} else if (i2cNewVolLevel > 0x1F) {
+				i2cNewVolLevel = 0x1F;
+			}
+			if (i2cNewVolLevel != i2cVolLevel) {
+				i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
+				volumeAdjustActivated = true;
+			}
+		}
 	}
 
 	#ifdef DEBUG
