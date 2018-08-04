@@ -539,14 +539,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				len2 -= len2 % 32;
 			}
 
-			if (sdk5 || readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+			if (sdk5 || readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 				#ifdef DEBUG
 				// Send a log command for debug purpose
 				// -------------------------------------
 				commandRead = 0x026ff800;
 
 				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
+				sharedAddr[1] = len;
 				sharedAddr[2] = (sdk5 ? cacheAddress : romLocation)-0x4000-ARM9_LEN)+src;
 				sharedAddr[2] = (romLocation-0x4000-ARM9_LEN)+src;
 				sharedAddr[3] = commandRead;
@@ -558,12 +558,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Copy directly
-				memcpy(dst,(void*)(((sdk5 ? cacheAddress : romLocation)-0x4000-ARM9_LEN)+src),len2);
+				memcpy(dst,(void*)(((sdk5 ? cacheAddress : romLocation)-0x4000-ARM9_LEN)+src),len);
 
 				// Update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = (vu32)(dst + len2);
-				cardStruct[2] = len - len2;
+				cardStruct[0] = src + len;
+				cardStruct[1] = (vu32)(dst + len);
+				cardStruct[2] = len - len;
 			} else {
 				#ifdef DEBUG
 				// Send a log command for debug purpose
