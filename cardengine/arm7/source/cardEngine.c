@@ -28,7 +28,7 @@
 
 #include "sdmmc_alt.h"
 #include "debugToFile.h"
-#include "cardEngine.h"
+#include "cardengine.h"
 #include "fat_alt.h"
 
 #include "sr_data_error.h"      // For showing an error screen

@@ -23,7 +23,7 @@
 #include <nds/system.h>
 #include <nds/fifomessages.h>
 #include "hex.h"
-#include "cardEngine.h"
+#include "cardengine.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000

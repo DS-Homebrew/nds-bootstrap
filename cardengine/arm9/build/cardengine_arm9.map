@@ -1,7 +1,7 @@
 Archive member included to satisfy reference by file (symbol)
 
 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
-                              cardEngine.o (memcpy)
+                              cardengine.o (memcpy)
 
 Memory Configuration
 
@@ -11,7 +11,7 @@ vram             0x0000000002400000 0x0000000000003000
 
 Linker script and memory map
 
-LOAD cardEngine.o
+LOAD cardengine.o
 LOAD card_engine_header.o
 LOAD exceptionHandler.o
 LOAD user_exception.o
@@ -63,7 +63,7 @@ END GROUP
 
 .text           0x00000000024001e0      0xaf0
  *(.text*)
- .text          0x00000000024001e0      0x8c8 cardEngine.o
+ .text          0x00000000024001e0      0x8c8 cardengine.o
                 0x00000000024001e0                setExceptionHandler2
                 0x0000000002400228                allocateCacheSlot
                 0x0000000002400270                getSlotForSector
@@ -110,11 +110,11 @@ END GROUP
  .v4_bx         0x0000000002400cd0        0x0 linker stubs
 
 .iplt           0x0000000002400cd0        0x0
- .iplt          0x0000000002400cd0        0x0 cardEngine.o
+ .iplt          0x0000000002400cd0        0x0 cardengine.o
 
 .rel.dyn        0x0000000002400cd0        0x0
- .rel.iplt      0x0000000002400cd0        0x0 cardEngine.o
- .rel.got       0x0000000002400cd0        0x0 cardEngine.o
+ .rel.iplt      0x0000000002400cd0        0x0 cardengine.o
+ .rel.got       0x0000000002400cd0        0x0 cardengine.o
 
 .fini
  *(.fini)
@@ -180,10 +180,10 @@ END GROUP
 
 .got            0x0000000002400cd0       0x54
  *(.got.plt)
- .got.plt       0x0000000002400cd0        0xc cardEngine.o
+ .got.plt       0x0000000002400cd0        0xc cardengine.o
                 0x0000000002400cd0                _GLOBAL_OFFSET_TABLE_
  *(.got)
- .got           0x0000000002400cdc       0x48 cardEngine.o
+ .got           0x0000000002400cdc       0x48 cardengine.o
 
 .vram           0x0000000002400d24        0x0
                 0x0000000002400d24                __vram_start = ABSOLUTE (.)
@@ -195,7 +195,7 @@ END GROUP
 .data           0x0000000002400d24      0x2f0
                 0x0000000002400d24                __data_start = ABSOLUTE (.)
  *(.data)
- .data          0x0000000002400d24      0x2f0 cardEngine.o
+ .data          0x0000000002400d24      0x2f0 cardengine.o
                 0x0000000002401010                sharedAddr
  .data          0x0000000002401014        0x0 card_engine_header.o
  .data          0x0000000002401014        0x0 exceptionHandler.o
@@ -207,7 +207,7 @@ END GROUP
                 0x0000000002401014                __data_end = ABSOLUTE (.)
 
 .igot.plt       0x0000000002401014        0x0
- .igot.plt      0x0000000002401014        0x0 cardEngine.o
+ .igot.plt      0x0000000002401014        0x0 cardengine.o
 
 .bss            0x0000000002401014      0x324
                 0x0000000002401014                __bss_start = ABSOLUTE (.)
@@ -215,7 +215,7 @@ END GROUP
  *(.dynbss)
  *(.gnu.linkonce.b*)
  *(.bss*)
- .bss           0x0000000002401014      0x321 cardEngine.o
+ .bss           0x0000000002401014      0x321 cardengine.o
                 0x0000000002401334                sdk5
  .bss           0x0000000002401335        0x0 card_engine_header.o
  .bss           0x0000000002401335        0x0 exceptionHandler.o
@@ -250,14 +250,14 @@ END GROUP
 
 .comment        0x0000000000000000       0x22
  *(.comment)
- .comment       0x0000000000000000       0x22 cardEngine.o
+ .comment       0x0000000000000000       0x22 cardengine.o
                                          0x23 (size before relaxing)
  .comment       0x0000000000000022       0x23 /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/8.1.0/../../../../arm-none-eabi/lib/thumb/libg.a(lib_a-memcpy-stub.o)
 
 .ARM.attributes
                 0x0000000000000000       0x29
  .ARM.attributes
-                0x0000000000000000       0x27 cardEngine.o
+                0x0000000000000000       0x27 cardengine.o
  .ARM.attributes
                 0x0000000000000027       0x1b card_engine_header.o
  .ARM.attributes
@@ -282,7 +282,7 @@ END GROUP
 .debug_aranges  0x0000000000000000       0x88
  *(.debug_aranges)
  .debug_aranges
-                0x0000000000000000       0x20 cardEngine.o
+                0x0000000000000000       0x20 cardengine.o
  .debug_aranges
                 0x0000000000000020       0x20 card_engine_header.o
  .debug_aranges
@@ -295,32 +295,32 @@ END GROUP
 
 .debug_info     0x0000000000000000     0x14be
  *(.debug_info)
- .debug_info    0x0000000000000000     0x1450 cardEngine.o
+ .debug_info    0x0000000000000000     0x1450 cardengine.o
  .debug_info    0x0000000000001450       0x26 card_engine_header.o
  .debug_info    0x0000000000001476       0x22 exceptionHandler.o
  .debug_info    0x0000000000001498       0x26 user_exception.o
 
 .debug_abbrev   0x0000000000000000      0x484
  *(.debug_abbrev)
- .debug_abbrev  0x0000000000000000      0x44a cardEngine.o
+ .debug_abbrev  0x0000000000000000      0x44a cardengine.o
  .debug_abbrev  0x000000000000044a       0x14 card_engine_header.o
  .debug_abbrev  0x000000000000045e       0x12 exceptionHandler.o
  .debug_abbrev  0x0000000000000470       0x14 user_exception.o
 
 .debug_line     0x0000000000000000      0xe94
  *(.debug_line)
- .debug_line    0x0000000000000000      0xc1d cardEngine.o
+ .debug_line    0x0000000000000000      0xc1d cardengine.o
  .debug_line    0x0000000000000c1d       0xf5 card_engine_header.o
  .debug_line    0x0000000000000d12       0xca exceptionHandler.o
  .debug_line    0x0000000000000ddc       0xb8 user_exception.o
 
 .debug_frame    0x0000000000000000      0x11c
  *(.debug_frame)
- .debug_frame   0x0000000000000000      0x11c cardEngine.o
+ .debug_frame   0x0000000000000000      0x11c cardengine.o
 
 .debug_str      0x0000000000000000      0xa2a
  *(.debug_str)
- .debug_str     0x0000000000000000      0x8f8 cardEngine.o
+ .debug_str     0x0000000000000000      0x8f8 cardengine.o
                                         0x978 (size before relaxing)
  .debug_str     0x00000000000008f8       0x70 card_engine_header.o
                                          0xbe (size before relaxing)
@@ -331,7 +331,7 @@ END GROUP
 
 .debug_loc      0x0000000000000000      0xa6b
  *(.debug_loc)
- .debug_loc     0x0000000000000000      0xa6b cardEngine.o
+ .debug_loc     0x0000000000000000      0xa6b cardengine.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -354,5 +354,5 @@ END GROUP
 OUTPUT(/Users/damianoamatruda/Documents/Projects/nds-bootstrap/cardengine/arm9/../../data/cardengine_arm9.elf elf32-littlearm)
 
 .debug_ranges   0x0000000000000000       0xd8
- .debug_ranges  0x0000000000000000       0xb8 cardEngine.o
+ .debug_ranges  0x0000000000000000       0xb8 cardengine.o
  .debug_ranges  0x00000000000000b8       0x20 exceptionHandler.o

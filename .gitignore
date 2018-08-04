@@ -90,8 +90,8 @@ release/_nds/nds-bootstrap.ini
 data
 arm7/build
 arm9/build
-cardEngine_arm7/build
-cardEngine_arm9/build
+cardengine/arm7/build
+cardengine/arm9/build
 bootloader/build
 
 # =========================
