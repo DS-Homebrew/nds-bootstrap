@@ -16,8 +16,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CARD_ENGINE_ARM7_H
-#define CARD_ENGINE_ARM7_H
+#ifndef CARDENGINE_ARM7_H
+#define CARDENGINE_ARM7_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,4 +48,4 @@ bool cardRead(u32 dma,  u32 src, void *dst, u32 len);
 }
 #endif
 
-#endif // CARD_ENGINE_ARM7_H
+#endif // CARDENGINE_ARM7_H

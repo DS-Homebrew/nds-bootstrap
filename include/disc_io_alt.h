@@ -33,8 +33,8 @@
 		* Renamed _CF_ALLOW_UNALIGNED to _IO_ALLOW_UNALIGNED
 */
 
-#ifndef _DISC_IO_H
-#define _DISC_IO_H
+#ifndef DISC_IO_H
+#define DISC_IO_H
 
 #include <nds/ndstypes.h>
 #define BYTES_PER_SECTOR 512
@@ -81,4 +81,4 @@ typedef struct IO_INTERFACE_STRUCT IO_INTERFACE;
 
 extern IO_INTERFACE __myio_dsisd;
 
-#endif	// define _DISC_IO_H
+#endif // DISC_IO_H

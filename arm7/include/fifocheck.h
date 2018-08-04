@@ -11,4 +11,4 @@ void SCFGFifoCheck(void);
 }
 #endif
 
-#endif
+#endif // FIFOCHECK_H

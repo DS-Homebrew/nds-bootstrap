@@ -1,5 +1,5 @@
-#ifndef _LOADING_H
-#define _LOADING_H
+#ifndef LOADING_H
+#define LOADING_H
 
 extern volatile bool arm9_animateLoadingCircle;
 
@@ -8,7 +8,7 @@ extern volatile int arm9_loadBarLength;
 extern volatile bool arm9_animateLoadingCircle;
 extern bool displayScreen; //extern static bool displayScreen;
 
-// Pong & TTT
+// Pong & Tic-Tac-Toe
 extern volatile bool arm9_errorColor;
 
-#endif // _LOADING_H
+#endif // LOADING_H

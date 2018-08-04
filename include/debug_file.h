@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DEBUG_TO_FILE_H
-#define DEBUG_TO_FILE_H
+#ifndef DEBUG_FILE_H
+#define DEBUG_FILE_H
 
 #include "fat_alt.h"
 
@@ -33,4 +33,4 @@ void enableDebug(aFile debugFileCluster);
 }
 #endif
 
-#endif // DEBUG_TO_FILE_H
+#endif // DEBUG_FILE_H

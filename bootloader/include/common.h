@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _COMMON_H
-#define _COMMON_H
+#ifndef COMMON_H
+#define COMMON_H
 
 //#include <stdlib.h>
 #include <nds/dma.h>
@@ -42,7 +42,7 @@ enum {
 		// hookARM7Binary error codes:
 		ERR_NOCHEAT = 0x21,
 		ERR_HOOK    = 0x22
-	} ERROR_CODES;
+} ERROR_CODES;
 
 enum {
 	ARM9_BOOT,
@@ -82,4 +82,4 @@ static inline void dmaFill(const void* src, void* dest, u32 size) {
 	} while (size -= 4);
 }*/
 
-#endif // _COMMON_H
+#endif // COMMON_H

@@ -16,8 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CARD_ENGINE_ARM9_H
-#define CARD_ENGINE_ARM9_H
+#ifndef CARDENGINE_ARM9_H
+#define CARDENGINE_ARM9_H
+
+#include <nds/ndstypes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +36,4 @@ void cacheFlush(void);
 }
 #endif
 
-#endif // CARD_ENGINE_ARM9_H
+#endif // CARDENGINE_ARM9_H

@@ -16,18 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _HOOK_H
-#define _HOOK_H
+#ifndef HOOK_H
+#define HOOK_H
 
 #include <nds/memory.h>
 #include <nds/ndstypes.h>
 #include "fat_alt.h"
 
 /*-------------------------------------------------------------------------
-arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
 int hookNdsRetail(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation);
 void hookNdsRetail9(u32* cardEngineLocation9);
 
-#endif // _HOOK_H
+#endif // HOOK_H

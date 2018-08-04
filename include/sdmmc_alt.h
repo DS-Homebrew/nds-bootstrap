@@ -1,5 +1,5 @@
-#ifndef __SDMMC_H__
-#define __SDMMC_H__
+#ifndef SDMMC_H
+#define SDMMC_H
 
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -180,4 +180,4 @@ static inline void setckl(u32 data)
 	sdmmc_write16(REG_SDCLKCTL, 1u<<8 | (data & 0x2FF));
 }
 
-#endif
+#endif // SDMMC_H
