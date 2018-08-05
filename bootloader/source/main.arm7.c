@@ -118,7 +118,7 @@ u32 romSizeNoArm9;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
-//static module_params_t* moduleParams = NULL;
+static module_params_t* moduleParams = NULL;
 static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
 static u32* engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
@@ -662,14 +662,46 @@ void loadBinary_ARM7(aFile file) {
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
+
+	// SDK 5
+	if (dsiMode && (dsiHeader[0x10 >> 2] & BIT(16+1))) {
+		dsiModeConfirmed = true;
+
+		u32 ARM9i_SRC = dsiHeader[0x1C0 >> 2];
+		char* ARM9i_DST = (char*)dsiHeader[0x1C8 >> 2];
+		u32 ARM9i_LEN = dsiHeader[0x1CC >> 2];
+		u32 ARM7i_SRC = dsiHeader[0x1D0 >> 2];
+		char* ARM7i_DST = (char*)dsiHeader[0x1D8 >> 2];
+		u32 ARM7i_LEN = dsiHeader[0x1DC >> 2];
+
+		if (ARM9i_LEN) {
+			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 3);
+		}
+		if (ARM7i_LEN) {
+			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
+		}
+	}
 	
 	decompressBinary(ARM9_DST);
 	patchBinary();
 	
-	module_params_t* moduleParams = getModuleParams(ARM9_DST);
-	if (!moduleParams) {
+	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
+	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
+	moduleParams = getModuleParams(ARM9_DST);
+	if (moduleParams) {
+		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
+		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
+		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
+
+		//ensureArm9Decompressed(__NDSHeader, moduleParams);
+		//ensureArm9Decompressed(ndsHead, moduleParams);
+		ensureArm9Decompressed(ARM9_DST, ARM9_LEN, moduleParams);
+	} else {
+		nocashMessage("No moduleparams?\n");
+		*(vu32*)0x2800010 = 1;
 		moduleParams = buildModuleParams();
 	}
+
 	sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
@@ -698,24 +730,7 @@ void loadBinary_ARM7(aFile file) {
 	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
 	dmaCopyWords(3, (void*)dsiHeader, (void*)ndsHead, 0x170);
 
-	// SDK 5
-	if (dsiMode && (dsiHeader[0x10 >> 2] & BIT(16+1))) {
-		dsiModeConfirmed = true;
-
-		u32 ARM9i_SRC = dsiHeader[0x1C0 >> 2];
-		char* ARM9i_DST = (char*)dsiHeader[0x1C8 >> 2];
-		u32 ARM9i_LEN = dsiHeader[0x1CC >> 2];
-		u32 ARM7i_SRC = dsiHeader[0x1D0 >> 2];
-		char* ARM7i_DST = (char*)dsiHeader[0x1D8 >> 2];
-		u32 ARM7i_LEN = dsiHeader[0x1DC >> 2];
-
-		if (ARM9i_LEN) {
-			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 3);
-		}
-		if (ARM7i_LEN) {
-			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
-		}
-	} else {
+	if (!dsiModeConfirmed) {
 		// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 		nocashMessage("Switch to NTR mode BIOS");
 		REG_SCFG_ROM = 0x703;
@@ -863,21 +878,7 @@ int arm7_main(void) {
 	memcpy(engineLocationArm9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
-	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
-	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
-	module_params_t* moduleParams = getModuleParams(ndsHead->arm9destination);
-	if (moduleParams) {
-		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
-		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
-		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-
-		//ensureArm9Decompressed(__NDSHeader, moduleParams);
-		ensureArm9Decompressed(ndsHead, moduleParams);
-	} else {
-		nocashMessage("No moduleparams?\n");
-		*(vu32*)0x2800010 = 1;
-		moduleParams = buildModuleParams();
-	}
+	// module params
 	increaseLoadBarLength(); // 5 dots
 
 	//errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
