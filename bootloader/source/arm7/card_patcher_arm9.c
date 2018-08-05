@@ -61,7 +61,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 	moduleParams->compressed_static_end = 0;
 }
 
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32* debug = (u32*)0x037C6000;
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
@@ -329,11 +329,11 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 	}
 
-	debug[2] = (u32)cardEngineLocation;
+	debug[2] = (u32)cardEngineLocationArm9;
 
-	cardEngineLocation[3] = moduleParams->sdk_version;
+	cardEngineLocationArm9[3] = moduleParams->sdk_version;
 
-	u32* patches = (u32*)cardEngineLocation[usesThumb ? 1 : 0];
+	u32* patches = (u32*)cardEngineLocationArm9[usesThumb ? 1 : 0];
 
 	u32* cardReadPatch    = (u32*)patches[0];
 	u32* cardPullOutPatch = (u32*)patches[6];
@@ -349,13 +349,13 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 	//debug[7] = (u32)*cache_struct;
 
 	if (moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = (u32)(*card_struct + 7);
+		cardEngineLocationArm9[5] = (u32)(*card_struct + 7);
 		*(u32*)patches[5] = (u32)(*card_struct + 7); // Cache management alternative
 	} else {
-		cardEngineLocation[5] = (u32)(*card_struct + 6);
+		cardEngineLocationArm9[5] = (u32)(*card_struct + 6);
 		*(u32*)patches[5] = (u32)(*card_struct + 6); // Cache management alternative
 	}
-	//cardEngineLocation[6] = (u32)*cache_struct;
+	//cardEngineLocationArm9[6] = (u32)*cache_struct;
 
 	*(u32*)patches[7] = (u32)cardPullOutOffset + 4;
 

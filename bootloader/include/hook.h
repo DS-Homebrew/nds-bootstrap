@@ -26,7 +26,7 @@
 /*-------------------------------------------------------------------------
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNdsRetail(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation);
-void hookNdsRetail9(u32* cardEngineLocation9);
+int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocationArm7);
+void hookNdsRetailArm9(u32* cardEngineLocationArm9);
 
 #endif // HOOK_H

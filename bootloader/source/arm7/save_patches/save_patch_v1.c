@@ -15,7 +15,7 @@ static const u32 a7cardReadSignature[2] = {0x04100010, 0x040001A4};
 
 static const u32 a7something2Signature[2] = {0x0000A040, 0x040001A0};
 
-u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	//dbg_printf("\nArm7 (patch v1.0)\n");
 	dbg_printf("\nArm7 (patch v1)\n");
 
@@ -157,7 +157,7 @@ u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const modu
 	dbg_hexa(someAddr_799C);
 	dbg_printf("\n");
 
-	u32* patches = (u32*)cardEngineLocation[0];
+	u32* patches = (u32*)cardEngineLocationArm7[0];
 
 	u32* arm7Function = (u32*)patches[9];
 

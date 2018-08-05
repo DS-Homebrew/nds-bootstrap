@@ -119,7 +119,7 @@ static aFile* savFile = (aFile*)0x37D5000 + 1;
 //static module_params_t* moduleParams = NULL;
 static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
-static u32* engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
+static u32* cardEngineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -645,7 +645,7 @@ void loadBinary_ARM7(aFile file) {
 	if (sdk5) {
 		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
-		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
+		cardEngineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
 	}
 
 	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
@@ -736,7 +736,7 @@ void setArm9Stuff(aFile file) {
 		}
 	}
 
-	hookNdsRetail9(engineLocationArm9);
+	hookNdsRetailArm9(cardEngineLocationArm9);
 }
 
 /*-------------------------------------------------------------------------
@@ -851,7 +851,7 @@ int arm7_main(void) {
 	memcpy((u32*)ENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 	increaseLoadBarLength(); // 3 dots
 
-	memcpy(engineLocationArm9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	memcpy(cardEngineLocationArm9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
 	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
@@ -872,7 +872,7 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 5 dots
 
 	//errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
-	errorCode = patchCardNds(ndsHead, (u32*)ENGINE_LOCATION_ARM7, engineLocationArm9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds(ndsHead, (u32*)ENGINE_LOCATION_ARM7, cardEngineLocationArm9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card patch successful");
 	} else {
@@ -881,8 +881,8 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 6 dots
 
-	//errorCode = hookNdsRetail(__NDSHeader, *romFile, (u32*)ENGINE_LOCATION_ARM7);
-	errorCode = hookNdsRetail(ndsHead, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	//errorCode = hookNdsRetailArm7(__NDSHeader, *romFile, (u32*)ENGINE_LOCATION_ARM7);
+	errorCode = hookNdsRetailArm7(ndsHead, *romFile, (u32*)ENGINE_LOCATION_ARM7);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {
