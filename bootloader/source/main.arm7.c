@@ -499,7 +499,7 @@ module_params_t* buildModuleParams() {
 	return moduleParams;
 }
 
-module_params_t* getModuleParams(char* arm9binary) {
+module_params_t* getModuleParams(const void* arm9binary) {
 	nocashMessage("Looking for moduleparams...\n");
 
 	u32* moduleParamsOffset = findModuleParamsOffset((u32*)arm9binary, ARM9_LEN);
@@ -508,7 +508,7 @@ module_params_t* getModuleParams(char* arm9binary) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void patchBinary(char* ARM9_DST) {
+static inline void patchBinary(void* ARM9_DST) {
 	// The World Ends With You (USA) (Europe)
 	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)0x203E7B0 = 0;
@@ -634,29 +634,6 @@ void loadBinary_ARM7(aFile file) {
 	romSize = dsiHeader[0x080 >> 2]; //dsiHeader.ndshdr.romSize;
 	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
 	ROM_HEADERCRC = dsiHeader[0x15C >> 2]; //dsiHeader.ndshdr.headerCRC16;
-	
-	char* arm9binary = malloc(ARM9_LEN);
-	fileRead(arm9binary, file, ARM9_SRC, ARM9_LEN, 3);
-	module_params_t* moduleParamsPtr = getModuleParams(arm9binary);
-	if (!moduleParamsPtr) {
-		moduleParamsPtr = buildModuleParams();
-	}
-	module_params_t moduleParams = *moduleParamsPtr;
-	free(arm9binary);
-	sdk5 = (moduleParams.sdk_version > 0x5000000);
-	if (sdk5) {
-		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
-		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
-		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
-	}
-
-	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
-	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
-	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
-	{
-		// Set to load ROM into RAM
-		ROMinRAM = true;
-	}
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -671,12 +648,31 @@ void loadBinary_ARM7(aFile file) {
 		// Make the Pokemon game code ADAJ.
 		*(u32*)0x27FF00C = 0x4A414441;
 	}
-	
+
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
 	
 	patchBinary(ARM9_DST);
+	
+	module_params_t* moduleParams = getModuleParams(ARM9_DST);
+	if (!moduleParams) {
+		moduleParams = buildModuleParams();
+	}
+	sdk5 = (moduleParams->sdk_version > 0x5000000);
+	if (sdk5) {
+		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
+		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
+		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
+	}
+
+	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
+	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
+	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
+	{
+		// Set to load ROM into RAM
+		ROMinRAM = true;
+	}
 
 	// First copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
