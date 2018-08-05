@@ -1,6 +1,6 @@
 #include <string.h>
-#include "card_patcher.h"
-#include "card_finder.h"
+#include "patch.h"
+#include "find.h"
 #include "common.h"
 #include "cardengine_arm9_bin.h"
 #include "debug_file.h"

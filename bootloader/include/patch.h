@@ -61,6 +61,8 @@ typedef struct
 	u32 nitro_code_le;
 } module_params_t;
 
+extern bool cardReadFound; // card_patcher_arm9.c
+
 u32 generateA7Instr(int arg1, int arg2);
 u16* generateA7InstrThumb(int arg1, int arg2);
 void decompressLZ77Backwards(u8* addr, u32 size);

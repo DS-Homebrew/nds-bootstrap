@@ -2,7 +2,7 @@
 #define CARD_FINDER_H
 
 #include <nds/ndstypes.h>
-#include "card_patcher.h"
+#include "patch.h"
 
 //extern bool sdk5;
 //extern int readType;

@@ -50,8 +50,8 @@
 
 #include "fat_alt.h"
 //#include "dldi_patcher.h"
-#include "card_patcher.h"
-#include "card_finder.h"
+#include "patch.h"
+#include "find.h"
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
 #include "hook.h"

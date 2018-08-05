@@ -1,6 +1,6 @@
 #include <nds/ndstypes.h>
-#include "card_patcher.h"
-#include "card_finder.h"
+#include "patch.h"
+#include "find.h"
 #include "debug_file.h"
 
 //

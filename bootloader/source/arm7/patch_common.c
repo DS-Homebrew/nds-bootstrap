@@ -18,12 +18,11 @@
 
 //#include <stddef.h>
 #include <nds/system.h>
-#include "card_patcher.h"
+#include "patch.h"
 #include "common.h"
 #include "debug_file.h"
 
 bool logging = false; //extern bool logging;
-extern bool cardReadFound; // card_patcher_arm9.c
 
 //extern bool sdk5; // Debug
 

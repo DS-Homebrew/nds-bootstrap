@@ -1,7 +1,7 @@
 //#include <string.h> // memcmp
 #include <stddef.h> // NULL
 #include <limits.h>
-#include "card_finder.h"
+#include "find.h"
 
 // (memcmp is slower)
 //#define memcmp __builtin_memcmp

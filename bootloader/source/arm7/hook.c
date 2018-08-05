@@ -23,7 +23,7 @@
 #include "fat_alt.h"
 #include "hook.h"
 #include "common.h"
-#include "card_finder.h"
+#include "find.h"
 
 extern bool dsiModeConfirmed; // SDK 5
 extern u32 enableExceptionHandler;

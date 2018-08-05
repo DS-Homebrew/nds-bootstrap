@@ -1,7 +1,7 @@
 #include <string.h> // memcpy
 #include <nds/system.h>
-#include "card_patcher.h"
-#include "card_finder.h"
+#include "patch.h"
+#include "find.h"
 #include "common.h"
 #include "cardengine_arm7_bin.h"
 #include "debug_file.h"
