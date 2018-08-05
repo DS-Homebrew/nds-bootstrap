@@ -165,21 +165,23 @@ void runFile(
 				powerOff(PM_BACKLIGHT_BOTTOM);
 				break;
 		}
-		int err = runNdsFile(argarray[0],
-							strdup(savPath.c_str()),
-							saveSize,
-							language,
-							dsiMode, // SDK 5
-							donorSdkVer,
-							patchMpuRegion,
-							patchMpuSize,
-							consoleModel,
-							loadingScreen,
-							romread_LED,
-							gameSoftReset,
-							asyncPrefetch,
-							argarray.size(), (const char**)&argarray[0], 
-							cheat_data);
+		int err = runNdsFile(
+			argarray[0],
+			strdup(savPath.c_str()),
+			saveSize,
+			language,
+			dsiMode, // SDK 5
+			donorSdkVer,
+			patchMpuRegion,
+			patchMpuSize,
+			consoleModel,
+			loadingScreen,
+			romread_LED,
+			gameSoftReset,
+			asyncPrefetch,
+			argarray.size(), (const char**)&argarray[0], 
+			cheat_data
+		);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 	}
@@ -404,21 +406,23 @@ int main(int argc, char** argv) {
 		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(),
-				savPath.c_str(),
-				getSaveSize(savPath.c_str()),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0), // SDK 5
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
-				patchMpuRegion,
-				patchMpuSize,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "LOADING_SCREEN", 1),
-				romread_LED,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0),
-				(u32*)cheatData,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0));	
+		runFile(
+			ndsPath.c_str(),
+			savPath.c_str(),
+			getSaveSize(savPath.c_str()),
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1),
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0), // SDK 5
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
+			patchMpuRegion,
+			patchMpuSize,
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0),
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "LOADING_SCREEN", 1),
+			romread_LED,
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0),
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0),
+			(u32*)cheatData,
+			bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0)
+		);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
