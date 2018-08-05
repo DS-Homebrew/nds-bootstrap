@@ -358,15 +358,3 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLo
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
-
-void hookNdsRetailArm9(u32* cardEngineLocationArm9) {
-	cardEngineLocationArm9[7]  = ROMinRAM;
-	cardEngineLocationArm9[8]  = ROM_TID;
-	cardEngineLocationArm9[9]  = ROM_HEADERCRC;
-	cardEngineLocationArm9[10] = ARM9_LEN;
-	cardEngineLocationArm9[11] = romSize;
-	cardEngineLocationArm9[12] = dsiModeConfirmed; // SDK 5
-	cardEngineLocationArm9[13] = enableExceptionHandler;
-	cardEngineLocationArm9[14] = consoleModel;
-	cardEngineLocationArm9[15] = asyncPrefetch;
-}
