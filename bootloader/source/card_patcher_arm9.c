@@ -51,7 +51,6 @@ void decompressLZ77Backwards(u8* addr, u32 size) {
 }
 
 void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams) {
-	*(vu32*)(0x280000C) = moduleParams->compressed_static_end;
 	if (!moduleParams->compressed_static_end) {
 		dbg_printf("This rom is not compressed\n");
 		return; // Not compressed
