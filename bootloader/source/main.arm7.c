@@ -508,7 +508,19 @@ module_params_t* getModuleParams(const void* arm9binary) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void patchBinary(void* ARM9_DST) {
+static inline void decompressBinary(void* arm9binary) {
+	// Chrono Trigger (Japan)
+	if (ROM_TID == 0x4a555159) {
+		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+	}
+
+	// Chrono Trigger (USA/Europe)
+	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
+		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+	}
+}
+
+static inline void patchBinary() {
 	// The World Ends With You (USA) (Europe)
 	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)0x203E7B0 = 0;
@@ -566,7 +578,6 @@ static inline void patchBinary(void* ARM9_DST) {
 
 	// Chrono Trigger (Japan)
 	if (ROM_TID == 0x4a555159) {
-		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)0x0204e364 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e368 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e6c4 = 0xe3a00000; //mov r0, #0
@@ -575,7 +586,6 @@ static inline void patchBinary(void* ARM9_DST) {
 
 	// Chrono Trigger (USA/Europe)
 	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
-		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)0x0204e334 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e338 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e694 = 0xe3a00000; //mov r0, #0
@@ -653,7 +663,8 @@ void loadBinary_ARM7(aFile file) {
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
 	
-	patchBinary(ARM9_DST);
+	decompressBinary(ARM9_DST);
+	patchBinary();
 	
 	module_params_t* moduleParams = getModuleParams(ARM9_DST);
 	if (!moduleParams) {
