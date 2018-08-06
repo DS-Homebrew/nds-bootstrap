@@ -5,8 +5,6 @@
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
 
-#include "cardengine_arm9_bin.h"
-
 //#define memcpy __builtin_memcpy // memcpy
 
 //extern bool sdk5;

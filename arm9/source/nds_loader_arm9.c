@@ -35,14 +35,13 @@
 #include "hex.h"
 #include "nds_loader_arm9.h"
 #include "load_crt0.h"
+#include "cardengine_header_arm7.h"
 
 #include "load_bin.h"
 
 //#define memcpy __builtin_memcpy
 
-//#define LCDC_BANK_C        (u16*)0x06840000
-
-#define CARDENGINE_ARM7_CHEAT_DATA_OFFSET 13
+//#define LCDC_BANK_C (u16*)0x06840000
 
 u32* loadCrt0 = (u32*)LOAD_CRT0_LOCATION;
 
@@ -187,22 +186,22 @@ int loadArgs(int argc, const char** argv) {
 int loadCheatData(u32* cheatData) {
 	nocashMessage("loadCheatData");
 			
-	//u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	u32 cardengineArm7Offset = loadCrt0[LC0_CARDENGINE_ARM7_OFFSET];
-	nocashMessage("cardengineArm7Offset");
-	nocashMessage(tohex(cardengineArm7Offset));
+	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+	u32 cardEngineArm7Offset = loadCrt0[LC0_CARDENGINE_ARM7_OFFSET];
+	nocashMessage("cardEngineArm7Offset");
+	nocashMessage(tohex(cardEngineArm7Offset));
 	
-	//u32* cardengineArm7 = (u32*)(load_bin + cardengineArm7Offset);
-	u32* cardengineArm7 = (u32*)loadCrt0[cardengineArm7Offset];
-	nocashMessage("cardengineArm7");
-	nocashMessage(tohex((u32)cardengineArm7));
+	//u32* cardEngineArm7 = (u32*)(load_bin + cardEngineArm7Offset);
+	u32* cardEngineArm7 = (u32*)loadCrt0[cardEngineArm7Offset];
+	nocashMessage("cardEngineArm7");
+	nocashMessage(tohex((u32)cardEngineArm7));
 	
-	u32 cheatDataOffset = cardengineArm7[CARDENGINE_ARM7_CHEAT_DATA_OFFSET];
+	u32 cheatDataOffset = cardEngineArm7[CE7_CHEAT_DATA_OFFSET];
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardengineArm7Offset + cheatDataOffset);
-	u32* cheatDataDest = (u32*)cardengineArm7[cheatDataOffset];
+	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardEngineArm7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)cardEngineArm7[cheatDataOffset];
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	

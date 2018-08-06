@@ -24,6 +24,7 @@
 #include <nds/fifomessages.h>
 #include "hex.h"
 #include "cardengine.h"
+#include "locations.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -33,30 +34,6 @@
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
-
-#define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000
-
-#define CACHE_ADRESS_START             0x0C920000
-#define retail_CACHE_ADRESS_START_SDK5 0x0C480000
-
-//#define retail_CACHE_ADRESS_SIZE      0x6E0000
-//#define retail_CACHE_ADRESS_SIZE_SDK5 0x280000
-
-#define retail_CACHE_SLOTS      0x37
-#define retail_CACHE_SLOTS_SDK5 0x14
-
-#define dev_CACHE_ADRESS_START_SDK5 0x0D000000
-
-//#define dev_CACHE_ADRESS_SIZE      0x16E0000
-//#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
-
-#define dev_CACHE_SLOTS      0xB7
-#define dev_CACHE_SLOTS_SDK5 0x80
-
-//#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
-
-#define HGSS_CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;

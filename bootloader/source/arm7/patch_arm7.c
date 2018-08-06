@@ -6,8 +6,6 @@
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
-#include "cardengine_arm7_bin.h"
-
 //#define memcpy __builtin_memcpy
 
 extern u32 ROMinRAM;
@@ -40,7 +38,7 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
+static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
 	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
 
 	// swi 0x12 call
@@ -60,7 +58,7 @@ void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 	}
 }
 
-void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
+static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
 	bool usesThumb = false;
 
 	// swi halt
