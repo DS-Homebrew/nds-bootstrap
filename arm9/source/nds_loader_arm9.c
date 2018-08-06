@@ -43,26 +43,27 @@
 #define SAV_OFFSET                 32
 #define SAVSIZE_OFFSET             36
 #define LANGUAGE_OFFSET            40
-#define DONORSDK_OFFSET            44
-#define PUR_OFFSET                 48
-#define PUS_OFFSET                 52
-#define CONSOLEMODEL_OFFSET        56
-#define LOADSCR_OFFSET             60
-#define ROMREADLED_OFFSET          64
-#define GAMESOFTRESET_OFFSET       68
-#define ASYNC_OFFSET               72
-#define CARDENGINE_ARM7_OFFSET     76
-#define CARDENGINE_ARM9_OFFSET     80
+#define DSIMODE_OFFSET             44 // SDK 5
+#define DONORSDK_OFFSET            48
+#define PUR_OFFSET                 52
+#define PUS_OFFSET                 56
+#define CONSOLEMODEL_OFFSET        60
+#define LOADSCR_OFFSET             64
+#define ROMREADLED_OFFSET          68
+#define GAMESOFTRESET_OFFSET       72
+#define ASYNC_OFFSET               76
+#define CARDENGINE_ARM7_OFFSET     80
+#define CARDENGINE_ARM9_OFFSET     84
 
 /*typedef signed int addr_t;  // s32
 typedef unsigned char data_t; // u8*/
 
-#define FIX_ALL  0x01
+/*#define FIX_ALL  0x01
 #define FIX_GLUE 0x02
 #define FIX_GOT  0x04
-#define FIX_BSS  0x08
+#define FIX_BSS  0x08*/
 
-enum DldiOffsets {
+/*enum DldiOffsets {
 	DO_magicString      = 0x00, // "\xED\xA5\x8D\xBF Chishm"
 	DO_magicToken       = 0x00, // 0xBF8DA5ED
 	DO_magicShortString = 0x04, // " Chishm"
@@ -92,7 +93,7 @@ enum DldiOffsets {
 	DO_clearStatus  = 0x78,
 	DO_shutdown     = 0x7C,
 	DO_code         = 0x80
-};
+};*/
 
 static char hexbuffer[9];
 
@@ -152,18 +153,19 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	} while (size -= 2);
 }*/
 
-/*static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
-	const int* dataChunk = (const int*)data;
+// See: arm7/source/main.c
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
+	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
-	addr_t i;
-	addr_t dataChunkEnd = (addr_t)(dataLen / sizeof(int));
+	u32 i;
+	u32 dataLen = (u32)(dataSize / sizeof(int));
 
-	for ( i = 0; i < dataChunkEnd; i++) {
+	for ( i = 0; i < dataLen; i++) {
 		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
+			if ((i*sizeof(int) + searchSize) > dataSize) {
 				return -1;
 			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
+			if (memcmp (&data[i*sizeof(int)], search, searchSize) == 0) {
 				return i*sizeof(int);
 			}
 		}
@@ -192,11 +194,12 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("cardengineArm7");
 	nocashMessage(tohex((u32)cardengineArm7));
 	
-	u32 cheatDataOffset = cardengineArm7[12];
+	//u32 cheatDataOffset = cardengineArm7[12];
+	u32 cheatDataOffset = cardengineArm7[13];
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	u32* cheatDataDest = (u32*)(((u32)LCDC_BANK_C) + cardengineArm7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardengineArm7Offset + cheatDataOffset);
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
@@ -206,8 +209,26 @@ int loadCheatData(u32* cheatData) {
 	return true;
 }
 
-int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 saveSize, u32 language, u32 donorSdkVer, u32 patchMpuRegion, u32 patchMpuSize, u32 consoleModel, u32 loadingScreen, u32 romread_LED, u32 gameSoftReset, u32 asyncPrefetch, bool initDisc, bool dldiPatchNds, int argc, const char** argv, u32* cheatData)
-{
+int runNds(
+	const void* loader,
+	u32 loaderSize,
+	u32 cluster,
+	u32 saveCluster,
+	u32 saveSize,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 donorSdkVer,
+	u32 patchMpuRegion,
+	u32 patchMpuSize,
+	u32 consoleModel,
+	u32 loadingScreen,
+	u32 romread_LED,
+	u32 gameSoftReset,
+	u32 asyncPrefetch,
+	bool initDisc,
+	bool dldiPatchNds,
+	int argc, const char** argv,
+	u32* cheatData) {
 	char* argStart;
 	u16* argData;
 	u16 argTempVal = 0;
@@ -222,15 +243,18 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;	
 	// Load the loader/patcher into the correct address
-	memcpy((u16*)LCDC_BANK_C, (const u16*)loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
+	memcpy(LCDC_BANK_C, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Set the parameters for the loader
+
 	// STORED_FILE_CLUSTER = cluster;
 	writeAddr((u8*)LCDC_BANK_C, STORED_FILE_CLUSTER_OFFSET, cluster);
+	
 	// INIT_DISC = initDisc;
 	writeAddr((u8*)LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
+	
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
-	writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
+	//writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
 
 	// Give arguments to loader
 	argStart = (char*)LCDC_BANK_C + readAddr((u8*)LCDC_BANK_C, ARG_START_OFFSET);
@@ -238,23 +262,17 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	argData = (u16*)argStart;
 	argSize = 0;
 	
-	for (; argc > 0 && *argv; ++argv, --argc) 
-	{
-		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) 
-		{
-			if (argSize & 1) 
-			{
+	for (; argc > 0 && *argv; ++argv, --argc) {
+		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
+			if (argSize & 1) {
 				argTempVal |= (*argChar) << 8;
 				*argData = argTempVal;
 				++argData;
-			} 
-			else 
-			{
+			} else {
 				argTempVal = *argChar;
 			}
 		}
-		if (argSize & 1)
-		{
+		if (argSize & 1) {
 			*argData = argTempVal;
 			++argData;
 		}
@@ -269,6 +287,7 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	writeAddr((u8*)LCDC_BANK_C, SAV_OFFSET, saveCluster);
 	writeAddr((u8*)LCDC_BANK_C, SAVSIZE_OFFSET, saveSize);
 	writeAddr((u8*)LCDC_BANK_C, LANGUAGE_OFFSET, language);
+	writeAddr((u8*)LCDC_BANK_C, DSIMODE_OFFSET, dsiMode); // SDK 5
 	writeAddr((u8*)LCDC_BANK_C, DONORSDK_OFFSET, donorSdkVer);
 	writeAddr((u8*)LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
 	writeAddr((u8*)LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
@@ -277,7 +296,7 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	writeAddr((u8*)LCDC_BANK_C, ROMREADLED_OFFSET, romread_LED);
 	writeAddr((u8*)LCDC_BANK_C, GAMESOFTRESET_OFFSET, gameSoftReset);
 	writeAddr((u8*)LCDC_BANK_C, ASYNC_OFFSET, asyncPrefetch);
-	
+
 	loadCheatData(cheatData);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
@@ -307,7 +326,22 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* savename, int saveSize, int language, int donorSdkVer, int patchMpuRegion, int patchMpuSize, int consoleModel, int loadingScreen, int romread_LED, int gameSoftReset, int asyncPrefetch, int argc, const char** argv, u32* cheatData)  {
+int runNdsFile(
+	const char* filename,
+	const char* savename,
+	int saveSize,
+	int language,
+	int dsiMode, // SDK 5
+	int donorSdkVer,
+	int patchMpuRegion,
+	int patchMpuSize,
+	int consoleModel,
+	int loadingScreen,
+	int romread_LED,
+	int gameSoftReset,
+	int asyncPrefetch,
+	int argc, const char** argv,
+	u32* cheatData)  {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
@@ -315,30 +349,46 @@ int runNdsFile (const char* filename, const char* savename, int saveSize, int la
 	int pathLen;
 	const char* args[1];
 
-	
-	if (stat (filename, &st) < 0) {
+	if (stat(filename, &st) < 0) {
 		return 1;
 	}
 	
-	if (stat (savename, &stSav) >= 0) {
+	if (stat(savename, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
 	}
 	
 	if (argc <= 0 || !argv) {
 		// Construct a command line if we weren't supplied with one
-		if (!getcwd (filePath, PATH_MAX)) {
+		if (!getcwd(filePath, PATH_MAX)) {
 			return 2;
 		}
-		pathLen = strlen (filePath);
-		strcpy (filePath + pathLen, filename);
+		pathLen = strlen(filePath);
+		strcpy(filePath + pathLen, filename);
 		args[0] = filePath;
 		argv = args;
 	}
 
 	//bool havedsiSD = false;
+	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	//if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
-
-	return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, saveSize, language, donorSdkVer, patchMpuRegion, patchMpuSize, consoleModel, loadingScreen, romread_LED, gameSoftReset, asyncPrefetch, true, true, argc, argv, cheatData);
+	return runNds(
+		load_bin,
+		load_bin_size,
+		st.st_ino,
+		clusterSav,
+		saveSize,
+		language,
+		dsiMode, // SDK 5
+		donorSdkVer,
+		patchMpuRegion,
+		patchMpuSize,
+		consoleModel,
+		loadingScreen,
+		romread_LED,
+		gameSoftReset,
+		asyncPrefetch,
+		true,
+		true,
+		argc, argv,
+		cheatData);
 }
-

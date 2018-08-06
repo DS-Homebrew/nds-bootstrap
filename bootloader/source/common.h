@@ -53,6 +53,7 @@ enum {
 	ARM9_DISPERR
 } ARM9_STATE;
 
+extern volatile bool sdk5;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

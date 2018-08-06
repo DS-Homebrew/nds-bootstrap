@@ -32,6 +32,7 @@
 	.global saveFileCluster
 	.global saveSize
 	.global language
+	.global dsiMode
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
@@ -69,26 +70,28 @@ saveSize:
 	.word	0x00000000		@ .sav file sive
 language:
 	.word	0x00000000
+dsiMode:
+	.word	0x00000000
 donorSdkVer:
 	.word	0x00000000		@ donor SDK version
 patchMpuRegion:
-	.word	0x00000000		
+	.word	0x00000000
 patchMpuSize:
-	.word	0x00000000		
+	.word	0x00000000
 consoleModel:
-	.word	0x00000000		
+	.word	0x00000000
 loadingScreen:
-	.word	0x00000000		
+	.word	0x00000000
 romread_LED:
-	.word	0x00000000		
+	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
 asyncPrefetch:
 	.word	0x00000000
 cardengine_arm7_offset:
-    .word   cardengine_arm7_bin - _start
+	.word   cardengine_arm7_bin - _start
 cardengine_arm9_offset:
-    .word   cardengine_arm9_bin - _start		
+	.word   cardengine_arm9_bin - _start		
 
 startUp:
 	mov	r0, #0x04000000
@@ -185,12 +188,12 @@ CIDLoop:
 	subs	r3, r3, #4
 	bne	CIDLoop
 	bx	lr
-    
+
 .global fastCopy32
 .type	fastCopy32 STT_FUNC
 @ r0 : src, r1 : dst, r2 : len
 fastCopy32:
-    stmfd   sp!, {r3-r11,lr}
+	stmfd   sp!, {r3-r11,lr}
 	@ copy 512 bytes
 	mov     r10, r0
 	mov     r9, r1
@@ -201,7 +204,7 @@ loop_fastCopy32:
 	subs    r8, r8, #32  @ 4*8 bytes
 	bgt     loop_fastCopy32
 	ldmfd   sp!, {r3-r11,lr}
-    bx      lr
+	bx      lr
 
 @---------------------------------------------------------------------------------
 	.align

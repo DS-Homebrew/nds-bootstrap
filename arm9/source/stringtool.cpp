@@ -24,29 +24,20 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------------*/
 
-
-
-
-
-
-
-
-
 #include "stringtool.h"
 #include <cstdarg>
 #include <cstdio>
 #include <malloc.h>
 
-std::string formatString( const char* fmt, ... )
-{
-    const char * f = fmt;
+std::string formatString(const char* fmt, ...) {
+    const char* f = fmt;
     va_list argList;
     va_start(argList, fmt);
-    char * ptempStr = NULL;
-    size_t max_len = vasiprintf( &ptempStr, f, argList);
-    std::string str( ptempStr );
-    str.resize( max_len );
-    free( ptempStr );
+    char* ptempStr = NULL;
+    size_t max_len = vasiprintf(&ptempStr, f, argList);
+    std::string str(ptempStr);
+    str.resize(max_len);
+    free(ptempStr);
     va_end(argList);
     return str;
 }

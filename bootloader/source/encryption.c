@@ -1,6 +1,6 @@
 /*
     NitroHax -- Cheat tool for the Nintendo DS
-    Copyright(C) 2008  Michael "Chishm" Chisholm
+    Copyright (C) 2008  Michael "Chishm" Chisholm
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ void crypt_64bit_up(u32* ptr) {
 	u32 z;
 	int i;
 
-	for(i = 0; i < 0x10; i++) {
+	for (i = 0; i < 0x10; i++) {
 		z = keybuf[i] ^ x;
-		x = keybuf[0x012 +((z>>24)&0xff)];
-		x = keybuf[0x112 +((z>>16)&0xff)] + x;
-		x = keybuf[0x212 +((z>> 8)&0xff)] ^ x;
-		x = keybuf[0x312 +((z>> 0)&0xff)] + x;
+		x = keybuf[0x012 + ((z>>24)&0xff)];
+		x = keybuf[0x112 + ((z>>16)&0xff)] + x;
+		x = keybuf[0x212 + ((z>> 8)&0xff)] ^ x;
+		x = keybuf[0x312 + ((z>> 0)&0xff)] + x;
 		x = y ^ x;
 		y = z;
 	}
@@ -53,12 +53,12 @@ void crypt_64bit_down(u32* ptr) {
 	u32 z;
 	int i;
 
-	for(i = 0x11; i > 0x01; i--) {
+	for (i = 0x11; i > 0x01; i--) {
 		z = keybuf[i] ^ x;
-		x = keybuf[0x012 +((z>>24)&0xff)];
-		x = keybuf[0x112 +((z>>16)&0xff)] + x;
-		x = keybuf[0x212 +((z>> 8)&0xff)] ^ x;
-		x = keybuf[0x312 +((z>> 0)&0xff)] + x;
+		x = keybuf[0x012 + ((z>>24)&0xff)];
+		x = keybuf[0x112 + ((z>>16)&0xff)] + x;
+		x = keybuf[0x212 + ((z>> 8)&0xff)] ^ x;
+		x = keybuf[0x312 + ((z>> 0)&0xff)] + x;
 		x = y ^ x;
 		y = z;
 	}
@@ -69,12 +69,12 @@ void crypt_64bit_down(u32* ptr) {
 
 static u32 bswap_32bit(u32 in) {
 	u8 a,b,c,d;
-	a =(u8)((in >>  0) & 0xff);
-	b =(u8)((in >>  8) & 0xff);
-	c =(u8)((in >> 16) & 0xff);
-	d =(u8)((in >> 24) & 0xff);
+	a = (u8)((in >>  0) & 0xff);
+	b = (u8)((in >>  8) & 0xff);
+	c = (u8)((in >> 16) & 0xff);
+	d = (u8)((in >> 24) & 0xff);
 
-	u32 out =(a << 24) |(b << 16) |(c << 8) |(d << 0);
+	u32 out = (a << 24) | (b << 16) | (c << 8) | (d << 0);
 
 	return out;
 }
@@ -88,10 +88,10 @@ void apply_keycode(u32 modulo) {
 	crypt_64bit_up(&keycode[0]);
 	memset(scratch, 0, 8);
 
-	for(i = 0; i < 0x12; i+=1) {
+	for (i = 0; i < 0x12; i+=1) {
 		keybuf[i] = keybuf[i] ^ bswap_32bit(keycode[i % modulo]);
 	}
-	for(i = 0; i < 0x412; i+=2) {
+	for (i = 0; i < 0x412; i+=2) {
 		crypt_64bit_up(scratch);
 		keybuf[i]   = scratch[1];
 		keybuf[i+1] = scratch[0];
@@ -104,9 +104,9 @@ void init_keycode(u32 idcode, u32 level, u32 modulo) {
 	keycode[1] = idcode/2;
 	keycode[2] = idcode*2;
 
-	if(level >= 1) apply_keycode(modulo);	// first apply(always)
-	if(level >= 2) apply_keycode(modulo);	// second apply(optional)
+	if (level >= 1) apply_keycode(modulo);	// first apply(always)
+	if (level >= 2) apply_keycode(modulo);	// second apply(optional)
 	keycode[1] = keycode[1] * 2;
 	keycode[2] = keycode[2] / 2;
-	if(level >= 3) apply_keycode(modulo);	// third apply(optional)
+	if (level >= 3) apply_keycode(modulo);	// third apply(optional)
 }

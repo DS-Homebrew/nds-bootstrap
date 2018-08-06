@@ -26,21 +26,32 @@
 
 extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
 
+extern bool dsiModeConfirmed; // SDK 5
+extern u32 enableExceptionHandler;
+
 extern unsigned long language;
 extern unsigned long consoleModel;
 extern unsigned long romread_LED;
 extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 
-extern u32 runViaIRQ;
+//extern u32 runViaIRQ;
 
+//extern bool sdk5;
 extern u32 ROMinRAM;
 extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
+extern u32 ARM7_LEN; // SDK 5
 extern u32 romSize;
 
-extern u32 enableExceptionHandler;
+// SDK 5
+/*extern u32 setDataMobicliplist[3];
+extern u32 setDataBWlist[7];
+extern u32 setDataBWlist_1[3];
+extern u32 setDataBWlist_2[3];
+extern u32 setDataBWlist_3[3];
+extern u32 setDataBWlist_4[3];*/
 
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
@@ -123,7 +134,7 @@ static const u32 homebrewAccelSig2010Patched[4] = {
 
 static const int MAX_HANDLER_SIZE = 50;
 
-/*static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
+/*static u32* hookInterruptHandlerHomebrew(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 
 	// Find the start of the handler
@@ -154,7 +165,7 @@ static const int MAX_HANDLER_SIZE = 50;
 	return addr;
 }
 
-static u32* hookAccelIPCHomebrew2007 (u32* addr, size_t size) {
+static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 
 	// Find the start of the handler
@@ -184,7 +195,7 @@ static u32* hookAccelIPCHomebrew2007 (u32* addr, size_t size) {
 }
 
 
-static u32* hookAccelIPCHomebrew2010 (u32* addr, size_t size) {
+static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 
 	// Find the start of the handler
@@ -213,7 +224,7 @@ static u32* hookAccelIPCHomebrew2010 (u32* addr, size_t size) {
 	return addr;
 }*/
 
-static u32* hookInterruptHandler (u32* addr, size_t size) {
+static u32* hookInterruptHandler(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 	int i;
 
@@ -264,7 +275,6 @@ static u32* hookInterruptHandler (u32* addr, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-
 int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation) {
 	u32* hookLocation = NULL;
 	//u32* hookAccel = NULL;
@@ -276,13 +286,59 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
 
+	// SDK 5
+	if (!hookLocation && sdk5) {
+		switch (ARM7_LEN) {
+			case 0x00022B40:
+				hookLocation = (u32*)0x238DED8;
+				break;
+
+			case 0x00022BCC:
+				hookLocation = (u32*)0x238DF60;
+				break;
+
+			case 0x00028F84:
+				hookLocation = (u32*)0x2391918;
+				break;
+
+			case 0x0002909C:
+				hookLocation = (u32*)0x2391A30;
+				break;
+
+			case 0x0002914C:
+			case 0x00029164:
+				hookLocation = (u32*)0x2391ADC;
+				break;
+
+			case 0x00029EE8:
+				hookLocation = (u32*)0x2391F70;
+				break;
+
+			case 0x0002A2EC:
+				hookLocation = (u32*)0x23921BC;
+				break;
+
+			case 0x0002A318:
+				hookLocation = (u32*)0x23921D8;
+				break;
+
+			case 0x0002AF18:
+				hookLocation = (u32*)0x239227C;
+				break;
+
+			case 0x0002C5B4:
+				hookLocation = (u32*)0x2392E74;
+				break;
+		}
+	}
+
 	if (!hookLocation) {
 		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
 	}
 
 	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation+16;
+	u32* ipcSyncHandler = hookLocation + 16;
 
 	debug[9] = (u32)hookLocation;
 
@@ -307,27 +363,31 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 	cardEngineLocation[4] = file.firstCluster;
 	cardEngineLocation[6] = language;
 	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
-	cardEngineLocation[8] = ROMinRAM;
-	cardEngineLocation[9] = consoleModel;
-	cardEngineLocation[10] = romread_LED;
-	cardEngineLocation[11] = gameSoftReset;
+	cardEngineLocation[8] = dsiModeConfirmed; // SDK 5
+	cardEngineLocation[9] = ROMinRAM;
+	cardEngineLocation[10] = consoleModel;
+	cardEngineLocation[11] = romread_LED;
+	cardEngineLocation[12] = gameSoftReset;
 
-	u32* patches =  (u32*) cardEngineLocation[0];
+	u32* patches = (u32*)cardEngineLocation[0];
 
 	*vblankHandler = patches[3];
-	if (ROMinRAM == false) *ipcSyncHandler = patches[4];
+	if (ROMinRAM == false) {
+		*ipcSyncHandler = patches[4];
+	}
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
 
-void hookNdsRetail9 (u32* cardEngineLocation9) {
+void hookNdsRetail9(u32* cardEngineLocation9) {
 	cardEngineLocation9[7] = ROMinRAM;
 	cardEngineLocation9[8] = ROM_TID;
 	cardEngineLocation9[9] = ROM_HEADERCRC;
 	cardEngineLocation9[10] = ARM9_LEN;
 	cardEngineLocation9[11] = romSize;
-	cardEngineLocation9[12] = enableExceptionHandler;
-	cardEngineLocation9[13] = consoleModel;
-	cardEngineLocation9[14] = asyncPrefetch;
+	cardEngineLocation9[12] = dsiModeConfirmed; // SDK 5
+	cardEngineLocation9[13] = enableExceptionHandler;
+	cardEngineLocation9[14] = consoleModel;
+	cardEngineLocation9[15] = asyncPrefetch;
 }

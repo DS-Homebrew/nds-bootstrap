@@ -8,7 +8,7 @@
 .global card_engine_start
 .global card_engine_start_sync
 .global card_engine_end
-.global cardStruct
+.global cardStruct0
 .global cacheStruct
 .global patches_offset
 .global sdk_version
@@ -19,6 +19,7 @@
 .global ROM_HEADERCRC
 .global ARM9_LEN
 .global romSize
+.global dsiMode
 .global enableExceptionHandler
 .global consoleModel
 .global asyncPrefetch
@@ -38,7 +39,7 @@ sdk_version:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
-cardStruct:
+cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
@@ -51,6 +52,8 @@ ROM_HEADERCRC:
 ARM9_LEN:
 	.word	0x00000000
 romSize:
+	.word	0x00000000
+dsiMode:
 	.word	0x00000000
 enableExceptionHandler:
 	.word	0x00000000
@@ -67,7 +70,7 @@ card_engine_start:
 .type	fastCopy32 STT_FUNC
 @ r0 : src, r1 : dst, r2 : len
 fastCopy32:
-    stmfd   sp!, {r3-r11,lr}
+	stmfd   sp!, {r3-r11,lr}
 	@ copy r2 bytes
 	mov     r10, r0
 	mov     r9, r1
@@ -78,7 +81,7 @@ loop_fastCopy32:
 	subs    r8, r8, #32  @ 4*8 bytes
 	bgt     loop_fastCopy32
 	ldmfd   sp!, {r3-r11,lr}
-    bx      lr
+	bx      lr
 
 card_engine_end:
 
@@ -112,15 +115,15 @@ thumbPatches:
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r4-r6,lr}
+	stmfd   sp!, {r4-r6,lr}
 
-	ldr		r3, =cardRead
+	ldr		r6, =cardRead
 	bl		_blx_r3_stub_card_read
 
-    ldmfd   sp!, {r4-r6,lr}
-    bx      lr
+	ldmfd   sp!, {r4-r6,lr}
+	bx      lr
 _blx_r3_stub_card_read:
-	bx	r3
+	bx	r6
 .pool
 cardStructArm9:
 .word    0x00000000     
@@ -134,14 +137,14 @@ cacheRef:
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
-    push	{r3-r7, lr}
+	push	{r3-r7, lr}
 
 	ldr		r6, =cardRead
 
 	bl		_blx_r3_stub_thumb_card_read	
 
-    pop	{r3-r7, pc}
-    bx      lr
+	pop	{r3-r7, pc}
+	bx      lr
 _blx_r3_stub_thumb_card_read:
 	bx	r6	
 .pool	
@@ -151,14 +154,14 @@ _blx_r3_stub_thumb_card_read:
 @---------------------------------------------------------------------------------
 card_id_arm9:
 @---------------------------------------------------------------------------------
-    mov r0, #1
+	mov r0, #1
 	bx      lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-    mov r0, #0
+	mov r0, #0
 	bx      lr
 @---------------------------------------------------------------------------------
 
@@ -171,19 +174,19 @@ card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 card_pull:
 @---------------------------------------------------------------------------------
-    bx      lr
+	bx      lr
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
 @---------------------------------------------------------------------------------
-    mov r0, #1
+	mov r0, #1
 	bx      lr		
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-    mov r0, #0
+	mov r0, #0
 	bx      lr		
 @---------------------------------------------------------------------------------
 
@@ -196,12 +199,12 @@ thumb_card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 thumb_card_pull:
 @---------------------------------------------------------------------------------
-    bx      lr
+	bx      lr
 	.arm
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:
-    stmfd   sp!, {r0-r11,lr}
+	stmfd   sp!, {r0-r11,lr}
 
 	@disable interrupt
 	ldr r8,= 0x4000208
@@ -238,13 +241,13 @@ inner_loop:
 //---------------------------------------------------------------------------------
 DC_WaitWriteBufferEmpty:
 //---------------------------------------------------------------------------------               
-    MCR     p15, 0, R7,c7,c10, 4
+	MCR     p15, 0, R7,c7,c10, 4
 
 	@restore interrupt
 	str r11, [r8]
 
-    ldmfd   sp!, {r0-r11,lr}
-    bx      lr
+	ldmfd   sp!, {r0-r11,lr}
+	bx      lr
 	.pool
 
 .global DC_FlushRange
@@ -267,13 +270,13 @@ tryLockMutex:
 adr     r1, mutex    
 mov r2, #1
 mutex_loop:
-    swp r0,r2, [r1]
-    cmp r0, #1
-    beq mutex_fail
+	swp r0,r2, [r1]
+	cmp r0, #1
+	beq mutex_fail
 
 mutex_success:
 	mov r2, #1
-    str r2, [r1]
+	str r2, [r1]
 	mov r0, #1
 	b mutex_exit
 
@@ -293,4 +296,4 @@ unLockMutex:
 	bx  lr
 
 mutex:
-.word    0x00000000  
+.word    0x00000000

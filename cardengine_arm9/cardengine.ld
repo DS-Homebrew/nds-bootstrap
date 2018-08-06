@@ -1,10 +1,10 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_start)
+/*ENTRY(_start)*/
 
 MEMORY {
 
-	vram	: ORIGIN = 0x02400000, LENGTH = 12K /* Main RAM */
+	vram	: ORIGIN = 0x02700000, LENGTH = 16K /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

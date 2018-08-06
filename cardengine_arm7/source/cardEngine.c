@@ -32,11 +32,15 @@
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
 #include "sr_data_srllastran.h" // For rebooting the game
+#include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
 
 //#define memcpy __builtin_memcpy
 
-#define ROM_LOCATION	0x0C804000
-#define SAVE_LOCATION	0x0C820000
+#define ROM_LOCATION      0x0C804000
+#define ROM_LOCATION_SDK5 0x0D000000
+
+#define SAVE_LOCATION      0x0C820000
+#define SAVE_LOCATION_SDK5 0x0CE00000
 
 #ifdef DEBUG
 extern int nocashMessage(char[119]); // 119 because max is 120, starts at 0
@@ -46,9 +50,6 @@ extern int tryLockMutex(int * addr);
 extern int lockMutex(int * addr);
 extern int unlockMutex(int * addr);
 
-static bool initialized = false;
-static bool initializedIRQ = false;
-static bool calledViaIPC = false;
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
@@ -56,15 +57,26 @@ extern u32 saveSize;
 extern u32 sdk_version;
 extern u32 language;
 extern u32 gottenSCFGExt;
+extern u32 dsiMode; // SDK 5
 extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
-static aFile * romFile = (aFile *)0x37D5000;
-static aFile * savFile = ((aFile *)0x37D5000)+1;
 
-//static int accessCounter = 0;
+bool sdk5 = false;
+
+u32 numberToActivateRunViaHalt = 10; // SDK 5
+vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+
+static bool initialized = false;
+static bool initializedIRQ = false;
+static bool calledViaIPC = false;
+
+static aFile* romFile = (aFile*)0x37D5000;
+static aFile* savFile = (aFile*)0x37D5000 + 1;
+
+static bool runViaHalt = false; // SDK 5
+static int accessCounter = 0;   // SDK 5
 
 static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -74,6 +86,9 @@ bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
+
+static void* romLocation = (void*)ROM_LOCATION;
+static void* saveLocation = (void*)SAVE_LOCATION;
 
 void initialize(void) {
 	if (!initialized) {
@@ -115,7 +130,12 @@ void initialize(void) {
 					
 		initialized = true;
 	}
-	
+
+	sdk5 = (sdk_version > 0x5000000);
+	if (sdk5) {
+		romLocation = (void*)ROM_LOCATION_SDK5;
+		saveLocation = (void*)SAVE_LOCATION_SDK5;
+	}
 }
 
 void cardReadLED(bool on) {
@@ -208,11 +228,11 @@ void log_arm9(void) {
 }
 
 void cardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr+2);
+	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr+1);
+	u32 len = *(vu32*)(sharedAddr + 1);
 	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr+3);
+	u32 marker = *(vu32*)(sharedAddr + 3);
 
 	dbg_printf("\ncard read received v2\n");
 
@@ -237,9 +257,12 @@ void cardRead_arm9(void) {
 	nocashMessage("fileRead romFile");
 	#endif
 	fileRead((char*)dst, *romFile, src, len, 0);
-	if (*(u32*)(0x0C9328ac) == 0x4B434148){ //Primary fix for Mario's Holiday
-		*(u32*)(0x0C9328ac) = 0xA00;
+
+	// Primary fix for Mario's Holiday
+	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
+		*(u32*)(0x0C9328AC) = 0xA00;
 	}
+
 	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	#ifdef DEBUG
@@ -253,11 +276,11 @@ void cardRead_arm9(void) {
 }
 
 void asyncCardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr+2);
+	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr+1);
+	u32 len = *(vu32*)(sharedAddr + 1);
 	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr+3);
+	u32 marker = *(vu32*)(sharedAddr + 3);
 
 	dbg_printf("\nasync card read received\n");
 
@@ -304,19 +327,30 @@ void runCardEngineCheck(void) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026ff800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
+		if (*(vu32*)(0x027FFB14) != 0) {
+			// SDK 5
+			if (accessCounter > numberToActivateRunViaHalt - 1) {
+				accessCounter = numberToActivateRunViaHalt;
+				runViaHalt = true;
+			}
+			
+			if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+				log_arm9();
+				*(vu32*)(0x027FFB14) = 0;
+			}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020ff800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
+			if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+				cardRead_arm9();
+				*(vu32*)(0x027FFB14) = 0;
+				accessCounter++;
+			}
+
+			if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+				asyncCardRead_arm9();
+				*(vu32*)(0x027FFB14) = 0;
+				accessCounter++;
+			}
 		}
 		unlockMutex(&cardEgnineCommandMutex);
 	}
@@ -334,7 +368,7 @@ void runCardEngineCheckHalt(void) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026ff800)
+		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800)
 		{
 			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
@@ -346,7 +380,7 @@ void runCardEngineCheckHalt(void) {
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020ff800)
+		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800)
 		{
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
@@ -377,7 +411,7 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	//if (!runViaIRQ) {
+	//if (!runViaIRQ) { // SDK 5 --> if (runViaHalt) {
 	runCardEngineCheckHalt();
 }
 
@@ -390,7 +424,8 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 
 	if (language >= 0 && language < 6) {
-		*(u8*)(0x027FFCE4) = language;	// Change language
+		// Change language
+		*(u8*)(sdk5 ? 0x02FFFCE4 : 0x027FFCE4) = language;
 	}
 
 	if (ROMinRAM == false) {
@@ -400,11 +435,11 @@ void myIrqHandlerVBlank(void) {
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
 		softResetTimer = 0;
 	} else { 
-		if (softResetTimer == 60*2) {
+		if (softResetTimer == 60 * 2) {
 			if (lockMutex(&saveMutex)) {
 				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
-				i2cWriteRegister(0x4a, 0x70, 0x01);
-				i2cWriteRegister(0x4a, 0x11, 0x01);	// Reboot into DSiMenu++
+				i2cWriteRegister(0x4A, 0x70, 0x01);
+				i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot into DSiMenu++
 				unlockMutex(&saveMutex);
 			}
 		}
@@ -414,9 +449,9 @@ void myIrqHandlerVBlank(void) {
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
 	} else if (!gameSoftReset) {
 		if (lockMutex(&saveMutex)) {
-			memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-			i2cWriteRegister(0x4a, 0x70, 0x01);
-			i2cWriteRegister(0x4a, 0x11, 0x01);	// Reboot game
+			memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot game
 			unlockMutex(&saveMutex);
 		}
 	}
@@ -687,7 +722,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
 	if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
-		memcpy(dst, (void*)(SAVE_LOCATION + src), len);
+		memcpy(dst, saveLocation + src, len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst, *savFile, src, len, -1);
@@ -712,7 +747,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy((void*)(SAVE_LOCATION + dst), (void*)src, len);
+			memcpy(saveLocation + dst, (void*)src, len);
 		}
 		fileWrite((void*)src, *savFile, dst, len, -1);
 		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
@@ -737,7 +772,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
 		if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy((void*)SAVE_LOCATION + dst, (void*)src, len);
+			memcpy(saveLocation + dst, (void*)src, len);
 		}
 		fileWrite((void*)src, *savFile, dst, len, -1);
 		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
@@ -759,7 +794,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src, savFile, dst, len, 1);
+	//fileWrite(src, savFile, dst, len, -1);
 	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
@@ -769,6 +804,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
+	// TODO: this should be implemented?
 	return true;
 }
 
@@ -795,7 +831,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	#endif	
 	
 	if (ROMinRAM == true) {
-		memcpy(dst, (void*)(ROM_LOCATION + src), len);
+		memcpy(dst, romLocation + src, len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
@@ -806,6 +842,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, *romFile, src, len, 2);
 		//ndmaUsed = true;
 		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+		unlockMutex(&saveMutex);
 	}
 	
 	return true;

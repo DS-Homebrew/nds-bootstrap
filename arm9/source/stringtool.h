@@ -24,21 +24,11 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------------*/
 
-
-
-
-
-
-
-
-
 #ifndef _STRINGTOOL_H_
 #define _STRINGTOOL_H_
 
 #include <string>
 
-std::string formatString( const char* fmt, ... );
-
-
+std::string formatString(const char* fmt, ...);
 
 #endif//_STRINGTOOL_H_

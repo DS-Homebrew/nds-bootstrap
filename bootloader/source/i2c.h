@@ -23,6 +23,7 @@
 		distribution.
 
 ---------------------------------------------------------------------------------*/
+
 #ifndef I2C_ARM7_INCLUDE
 #define I2C_ARM7_INCLUDE
 
@@ -36,7 +37,7 @@
 #define REG_I2CCNT	(*(vu8 *)0x4004501)
 
 static inline void i2cWaitBusy(void) {
-	while(REG_I2CCNT & 0x80);
+	while (REG_I2CCNT & 0x80);
 }
 
 enum i2cDevices {

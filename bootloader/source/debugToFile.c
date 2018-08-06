@@ -32,11 +32,13 @@ void enableDebug(aFile debugFileCluster) {
 }
 
 u32 dbg_printf(char * message) {
-	nocashMessage(message);
+	if(!_debug) {
+        return 0;
+    }
 
-	if(!_debug) return 0;
+    nocashMessage(message);
 
-	u32 ret = fileWrite (message, _debugFileCluster, _currentPos, strlen(message), 3);
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 3);
 
 	_currentPos += strlen(message);
 
