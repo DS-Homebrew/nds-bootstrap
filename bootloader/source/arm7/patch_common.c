@@ -22,9 +22,7 @@
 #include "common.h"
 #include "debug_file.h"
 
-bool logging = false; //extern bool logging;
-
-//extern bool sdk5; // Debug
+extern bool logging;
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,

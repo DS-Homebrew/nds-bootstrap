@@ -63,6 +63,7 @@
 #define ASYNC_OFFSET               19
 #define CARDENGINE_ARM7_OFFSET     20
 #define CARDENGINE_ARM9_OFFSET     21
+#define LOGGING_OFFSET             22
 
 #define CARDENGINE_ARM7_CHEAT_DATA_OFFSET 13
 
@@ -249,6 +250,7 @@ int runNds(
 	u32 romread_LED,
 	u32 gameSoftReset,
 	u32 asyncPrefetch,
+	u32 logging,
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
@@ -284,6 +286,7 @@ int runNds(
 	loadCrt0[ROMREADLED_OFFSET]    = romread_LED;
 	loadCrt0[GAMESOFTRESET_OFFSET] = gameSoftReset;
 	loadCrt0[ASYNC_OFFSET]         = asyncPrefetch;
+	loadCrt0[LOGGING_OFFSET]       = logging;
 
 	loadCheatData(cheatData);
 
@@ -328,6 +331,7 @@ int runNdsFile(
 	int romread_LED,
 	int gameSoftReset,
 	int asyncPrefetch,
+	int logging,
 	int argc, const char** argv,
 	u32* cheatData)  {
 	struct stat st;
@@ -375,6 +379,7 @@ int runNdsFile(
 		romread_LED,
 		gameSoftReset,
 		asyncPrefetch,
+		logging,
 		true,
 		true,
 		argc, argv,

@@ -107,6 +107,7 @@ void runFile(
 	u32 romread_LED,
 	u32 gameSoftReset,
 	u32 asyncPrefetch,
+	u32 logging,
 	u32* cheat_data,
 	u32 backlightMode) {
 	std::vector<char*> argarray;
@@ -179,6 +180,7 @@ void runFile(
 			romread_LED,
 			gameSoftReset,
 			asyncPrefetch,
+			logging,
 			argarray.size(), (const char**)&argarray[0], 
 			cheat_data
 		);
@@ -257,12 +259,12 @@ int main(int argc, char** argv) {
 		int romread_LED     = bootstrapini.GetInt("NDS-BOOTSTRAP", "ROMREAD_LED", 1);
 		u32 gameSoftReset   = bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0);
 		u32 asyncPrefetch   = bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
+		bool logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
 
 		std::vector<std::string> cheats;      
 		bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
 
 		u32 backlightMode   = bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
-		bool logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
 
 		bool boostCpu       = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0);
 
@@ -433,6 +435,7 @@ int main(int argc, char** argv) {
 			romread_LED,
 			gameSoftReset,
 			asyncPrefetch,
+			logging,
 			(u32*)cheatData,
 			backlightMode
 		);	
