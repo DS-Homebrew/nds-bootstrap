@@ -53,14 +53,14 @@
 #define SAV_SIZE_OFFSET            9
 #define LANGUAGE_OFFSET            10
 #define DSIMODE_OFFSET             11 // SDK 5
-#define DONORSDK_OFFSET            12
-#define PUR_OFFSET                 13
-#define PUS_OFFSET                 14
+#define DONOR_SDK_VER_OFFSET       12
+#define PATCH_MPU_REGION_OFFSET    13
+#define PATCH_MPU_SIZE_OFFEST      14
 #define CONSOLE_MODEL_OFFSET       15
-#define LOADSCR_OFFSET             16
-#define ROMREADLED_OFFSET          17
-#define GAMESOFTRESET_OFFSET       18
-#define ASYNC_OFFSET               19
+#define LOADING_SCREEN_OFFSET      16
+#define ROMREAD_LED_OFFSET         17
+#define GAME_SOFT_RESET_OFFSET     18
+#define ASYNC_PREFETCH_OFFSET      19
 #define CARDENGINE_ARM7_OFFSET     20
 #define CARDENGINE_ARM9_OFFSET     21
 #define LOGGING_OFFSET             22
@@ -274,19 +274,19 @@ int runNds(
 
 	loadArgs(argc, argv);
 
-	loadCrt0[SAV_OFFSET]           = saveCluster;
-	loadCrt0[SAV_SIZE_OFFSET]      = saveSize;
-	loadCrt0[LANGUAGE_OFFSET]      = language;
-	loadCrt0[DSIMODE_OFFSET]       = dsiMode; // SDK 5
-	loadCrt0[DONORSDK_OFFSET]      = donorSdkVer;
-	loadCrt0[PUR_OFFSET]           = patchMpuRegion;
-	loadCrt0[PUS_OFFSET]           = patchMpuSize;
-	loadCrt0[CONSOLE_MODEL_OFFSET] = consoleModel;
-	loadCrt0[LOADSCR_OFFSET]       = loadingScreen;
-	loadCrt0[ROMREADLED_OFFSET]    = romread_LED;
-	loadCrt0[GAMESOFTRESET_OFFSET] = gameSoftReset;
-	loadCrt0[ASYNC_OFFSET]         = asyncPrefetch;
-	loadCrt0[LOGGING_OFFSET]       = logging;
+	loadCrt0[SAV_OFFSET]              = saveCluster;
+	loadCrt0[SAV_SIZE_OFFSET]         = saveSize;
+	loadCrt0[LANGUAGE_OFFSET]         = language;
+	loadCrt0[DSIMODE_OFFSET]          = dsiMode; // SDK 5
+	loadCrt0[DONOR_SDK_VER_OFFSET]    = donorSdkVer;
+	loadCrt0[PATCH_MPU_REGION_OFFSET] = patchMpuRegion;
+	loadCrt0[PATCH_MPU_SIZE_OFFEST]   = patchMpuSize;
+	loadCrt0[CONSOLE_MODEL_OFFSET]    = consoleModel;
+	loadCrt0[LOADING_SCREEN_OFFSET]   = loadingScreen;
+	loadCrt0[ROMREAD_LED_OFFSET]      = romread_LED;
+	loadCrt0[GAME_SOFT_RESET_OFFSET]  = gameSoftReset;
+	loadCrt0[ASYNC_PREFETCH_OFFSET]   = asyncPrefetch;
+	loadCrt0[LOGGING_OFFSET]          = logging;
 
 	loadCheatData(cheatData);
 
