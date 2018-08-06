@@ -1,6 +1,6 @@
 //#include <string.h> // memcmp
 #include <stddef.h> // NULL
-#include <limits.h>
+//#include <limits.h>
 #include "find.h"
 
 // (memcmp is slower)

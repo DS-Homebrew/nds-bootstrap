@@ -34,36 +34,13 @@
 
 #include "hex.h"
 #include "nds_loader_arm9.h"
+#include "load_crt0.h"
 
 #include "load_bin.h"
 
 //#define memcpy __builtin_memcpy
 
 //#define LCDC_BANK_C        (u16*)0x06840000
-#define LOAD_CRT0_LOCATION 0x06840000
-
-#define STORED_FILE_CLUSTER_OFFSET 1
-#define INIT_DISC_OFFSET           2
-#define WANT_TO_PATCH_DLDI_OFFSET  3
-#define ARG_START_OFFSET           4
-#define ARG_SIZE_OFFSET            5
-#define DLDI_OFFSET                6
-#define HAVE_DSISD_OFFSET          7
-#define SAV_OFFSET                 8
-#define SAV_SIZE_OFFSET            9
-#define LANGUAGE_OFFSET            10
-#define DSIMODE_OFFSET             11 // SDK 5
-#define DONOR_SDK_VER_OFFSET       12
-#define PATCH_MPU_REGION_OFFSET    13
-#define PATCH_MPU_SIZE_OFFEST      14
-#define CONSOLE_MODEL_OFFSET       15
-#define LOADING_SCREEN_OFFSET      16
-#define ROMREAD_LED_OFFSET         17
-#define GAME_SOFT_RESET_OFFSET     18
-#define ASYNC_PREFETCH_OFFSET      19
-#define CARDENGINE_ARM7_OFFSET     20
-#define CARDENGINE_ARM9_OFFSET     21
-#define LOGGING_OFFSET             22
 
 #define CARDENGINE_ARM7_CHEAT_DATA_OFFSET 13
 
@@ -176,7 +153,7 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 int loadArgs(int argc, const char** argv) {
 	// Give arguments to loader
 
-	char* argStart = (char*)loadCrt0 + loadCrt0[ARG_START_OFFSET];
+	char* argStart = (char*)loadCrt0 + loadCrt0[LC0_ARG_START_OFFSET];
 	argStart = (char*)(((int)argStart + 3) & ~3); // Align to word
 	u16* argData = (u16*)argStart;
 	int argSize = 0;
@@ -201,8 +178,8 @@ int loadArgs(int argc, const char** argv) {
 	}
 	*argData = argTempVal;
 
-	loadCrt0[ARG_START_OFFSET] = (u32)argStart - (u32)loadCrt0;
-	loadCrt0[ARG_SIZE_OFFSET]  = argSize;
+	loadCrt0[LC0_ARG_START_OFFSET] = (u32)argStart - (u32)loadCrt0;
+	loadCrt0[LC0_ARG_SIZE_OFFSET]  = argSize;
 
 	return true;
 }
@@ -211,7 +188,7 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("loadCheatData");
 			
 	//u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	u32 cardengineArm7Offset = loadCrt0[CARDENGINE_ARM7_OFFSET];
+	u32 cardengineArm7Offset = loadCrt0[LC0_CARDENGINE_ARM7_OFFSET];
 	nocashMessage("cardengineArm7Offset");
 	nocashMessage(tohex(cardengineArm7Offset));
 	
@@ -268,25 +245,25 @@ int runNds(
 
 	// Set the parameters for the loader
 
-	loadCrt0[STORED_FILE_CLUSTER_OFFSET] = cluster;
-	loadCrt0[INIT_DISC_OFFSET]           = initDisc;
-	loadCrt0[WANT_TO_PATCH_DLDI_OFFSET]  = dldiPatchNds;
+	loadCrt0[LC0_STORED_FILE_CLUSTER_OFFSET] = cluster;
+	loadCrt0[LC0_INIT_DISC_OFFSET]           = initDisc;
+	loadCrt0[LC0_WANT_TO_PATCH_DLDI_OFFSET]  = dldiPatchNds;
 
 	loadArgs(argc, argv);
 
-	loadCrt0[SAV_OFFSET]              = saveCluster;
-	loadCrt0[SAV_SIZE_OFFSET]         = saveSize;
-	loadCrt0[LANGUAGE_OFFSET]         = language;
-	loadCrt0[DSIMODE_OFFSET]          = dsiMode; // SDK 5
-	loadCrt0[DONOR_SDK_VER_OFFSET]    = donorSdkVer;
-	loadCrt0[PATCH_MPU_REGION_OFFSET] = patchMpuRegion;
-	loadCrt0[PATCH_MPU_SIZE_OFFEST]   = patchMpuSize;
-	loadCrt0[CONSOLE_MODEL_OFFSET]    = consoleModel;
-	loadCrt0[LOADING_SCREEN_OFFSET]   = loadingScreen;
-	loadCrt0[ROMREAD_LED_OFFSET]      = romread_LED;
-	loadCrt0[GAME_SOFT_RESET_OFFSET]  = gameSoftReset;
-	loadCrt0[ASYNC_PREFETCH_OFFSET]   = asyncPrefetch;
-	loadCrt0[LOGGING_OFFSET]          = logging;
+	loadCrt0[LC0_SAV_OFFSET]              = saveCluster;
+	loadCrt0[LC0_SAV_SIZE_OFFSET]         = saveSize;
+	loadCrt0[LC0_LANGUAGE_OFFSET]         = language;
+	loadCrt0[LC0_DSIMODE_OFFSET]          = dsiMode; // SDK 5
+	loadCrt0[LC0_DONOR_SDK_VER_OFFSET]    = donorSdkVer;
+	loadCrt0[LC0_PATCH_MPU_REGION_OFFSET] = patchMpuRegion;
+	loadCrt0[LC0_PATCH_MPU_SIZE_OFFSET]   = patchMpuSize;
+	loadCrt0[LC0_CONSOLE_MODEL_OFFSET]    = consoleModel;
+	loadCrt0[LC0_LOADING_SCREEN_OFFSET]   = loadingScreen;
+	loadCrt0[LC0_ROMREAD_LED_OFFSET]      = romread_LED;
+	loadCrt0[LC0_GAME_SOFT_RESET_OFFSET]  = gameSoftReset;
+	loadCrt0[LC0_ASYNC_PREFETCH_OFFSET]   = asyncPrefetch;
+	loadCrt0[LC0_LOGGING_OFFSET]          = logging;
 
 	loadCheatData(cheatData);
 

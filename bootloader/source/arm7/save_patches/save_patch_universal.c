@@ -1,6 +1,7 @@
 #include <nds/ndstypes.h>
 #include "patch.h"
 #include "find.h"
+#include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
 //
@@ -248,9 +249,9 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 	dbg_hexa((u32)JumpTableFunc);
 	dbg_printf("\n");
 
-	u32* patches           = (u32*)cardEngineLocationArm7[0];
-	u32* arm7Function      = (u32*)patches[9];
-	u32* arm7FunctionThumb = (u32*)patches[15];
+	u32* patches           = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
+	u32* arm7Function      = (u32*)patches[CE7_P_ARM7_FUNCTIONS_OFFSET];
+	u32* arm7FunctionThumb = (u32*)patches[CE7_P_ARM7_FUNCTIONS_THUMB_OFFSET];
 	u32 srcAddr;
 	
 	if (usesThumb) {
@@ -260,7 +261,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_hexa((u32)eepromRead);
 			dbg_printf("\n");
 			srcAddr = (u32)EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			u16* patchRead = generateA7InstrThumb(srcAddr, arm7FunctionThumb[5]);
+			u16* patchRead = generateA7InstrThumb(srcAddr, arm7FunctionThumb[CE7_P_A7FT_EEPROM_READ_OFFSET]);
 			eepromRead[0] = patchRead[0];
 			eepromRead[1] = patchRead[1];
 		
@@ -269,7 +270,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
 			srcAddr = (u32)EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			u16* patchWrite = generateA7InstrThumb(srcAddr, arm7FunctionThumb[3]);
+			u16* patchWrite = generateA7InstrThumb(srcAddr, arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_WRITE_OFFSET]);
 			eepromPageWrite[0] = patchWrite[0];
 			eepromPageWrite[1] = patchWrite[1];
 	
@@ -278,7 +279,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_hexa((u32)eepromPageProg);
 			dbg_printf("\n");
 			srcAddr = (u32)EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			u16* patchProg = generateA7InstrThumb(srcAddr, arm7FunctionThumb[4]);
+			u16* patchProg = generateA7InstrThumb(srcAddr, arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_PROG_OFFSET]);
 			eepromPageProg[0] = patchProg[0];
 			eepromPageProg[1] = patchProg[1];
 	
@@ -287,7 +288,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_hexa((u32)eepromPageVerify);
 			dbg_printf("\n");
 			srcAddr = (u32)EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
-			u16* patchVerify = generateA7InstrThumb(srcAddr, arm7FunctionThumb[2]);
+			u16* patchVerify = generateA7InstrThumb(srcAddr, arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_VERIFY_OFFSET]);
 			eepromPageVerify[0] = patchVerify[0];
 			eepromPageVerify[1] = patchVerify[1];
 
@@ -296,7 +297,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_hexa((u32)eepromPageErase);
 			dbg_printf("\n");
 			srcAddr = (u32)EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
-			u16* patchErase = generateA7InstrThumb(srcAddr, arm7FunctionThumb[1]);
+			u16* patchErase = generateA7InstrThumb(srcAddr, arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_ERASE_OFFSET]);
 			eepromPageErase[0] = patchErase[0];
 			eepromPageErase[1] = patchErase[1];
 		} else {
@@ -304,31 +305,31 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 			dbg_printf("Eeprom read:\t");
 			dbg_hexa((u32)eepromRead);
 			dbg_printf("\n");
-			*eepromRead = arm7FunctionThumb[5];
+			*eepromRead = arm7FunctionThumb[CE7_P_A7FT_EEPROM_READ_OFFSET];
 			
 			u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
 			dbg_printf("Eeprom page write:\t");
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
-			*eepromPageWrite = arm7FunctionThumb[3];
+			*eepromPageWrite = arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_WRITE_OFFSET];
 			
 			u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xA);
 			dbg_printf("Eeprom page prog:\t");
 			dbg_hexa((u32)eepromPageProg);
 			dbg_printf("\n");
-			*eepromPageProg = arm7FunctionThumb[4];
+			*eepromPageProg = arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_PROG_OFFSET];
 
 			u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xA);
 			dbg_printf("Eeprom verify:\t");
 			dbg_hexa((u32)eepromPageVerify);
 			dbg_printf("\n");
-			*eepromPageVerify = arm7FunctionThumb[2];
+			*eepromPageVerify = arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_VERIFY_OFFSET];
 	
 			u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
 			dbg_printf("Eeprom page erase:\t");
 			dbg_hexa((u32)eepromPageErase);
 			dbg_printf("\n");
-			*eepromPageErase = arm7FunctionThumb[1];
+			*eepromPageErase = arm7FunctionThumb[CE7_P_A7FT_EEPROM_PAGE_ERASE_OFFSET];
 		}
 	} else {
 		u32* eepromRead = (u32*)((u32)EepromReadJump + 0xC);
@@ -336,7 +337,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
 		srcAddr = (u32)EepromReadJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
-		u32 patchRead = generateA7Instr(srcAddr, arm7Function[5]);
+		u32 patchRead = generateA7Instr(srcAddr, arm7Function[CE7_P_A7F_EEPROM_READ_OFFSET]);
 		*eepromRead = patchRead;
 	
 		u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xC);
@@ -344,7 +345,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
 		srcAddr = (u32)EepromWriteJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
-		u32 patchWrite = generateA7Instr(srcAddr, arm7Function[3]);
+		u32 patchWrite = generateA7Instr(srcAddr, arm7Function[CE7_P_A7F_EEPROM_PAGE_WRITE_OFFSET]);
 		*eepromPageWrite = patchWrite;
 	
 		u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xC);
@@ -352,7 +353,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
 		srcAddr = (u32)EepromProgJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
-		u32 patchProg = generateA7Instr(srcAddr, arm7Function[4]);
+		u32 patchProg = generateA7Instr(srcAddr, arm7Function[CE7_P_A7F_EEPROM_PAGE_PROG_OFFSET]);
 		*eepromPageProg = patchProg;
 	
 		u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xC);
@@ -360,7 +361,7 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
 		srcAddr = (u32)EepromVerifyJump + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem;
-		u32 patchVerify = generateA7Instr(srcAddr, arm7Function[2]);
+		u32 patchVerify = generateA7Instr(srcAddr, arm7Function[CE7_P_A7F_EEPROM_PAGE_VERIFY_OFFSET]);
 		*eepromPageVerify = patchVerify;
 	
 		u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
@@ -368,12 +369,12 @@ u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7,
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
 		srcAddr = (u32)EepromEraseJump + 0x8 - vAddrOfRelocSrc + relocDestAtSharedMem;
-		u32 patchErase = generateA7Instr(srcAddr, arm7Function[1]);
+		u32 patchErase = generateA7Instr(srcAddr, arm7Function[CE7_P_A7F_EEPROM_PAGE_ERASE_OFFSET]);
 		*eepromPageErase = patchErase;
 	}
 
-	arm7Function[8] = saveFileCluster;
-	arm7Function[9] = saveSize;
+	arm7Function[CE7_P_A7F_SAVE_CLUSTER_OFFSET] = saveFileCluster;
+	arm7Function[CE7_P_A7F_SAVE_SIZE_OFFSET] = saveSize;
 
 	return 1;
 }

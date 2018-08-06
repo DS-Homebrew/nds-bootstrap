@@ -1,0 +1,73 @@
+#ifndef CARDENGINE_HEADER_ARM7_H
+#define CARDENGINE_HEADER_ARM7_H
+
+//
+// ARM7 cardengine
+//
+#define CE7_PATCHES_OFFSET                 0
+#define CE7_INTR_VBLANK_ORIG_RETURN_OFFSET 1
+#define CE7_INTR_FIFO_ORIG_RETURN_OFFSET   2
+#define CE7_SDK_VERSION_OFFSET             3
+#define CE7_FILE_CLUSTER_OFFSET            4
+#define CE7_CARD_STRUCT_OFFSET             5
+#define CE7_LANGUAGE_OFFSET                6
+#define CE7_GOTTEN_SCFG_EXT_OFFSET         7
+#define CE7_DSI_MODE_OFFSET                8
+#define CE7_ROM_IN_RAM_OFFSET              9
+#define CE7_CONSOLE_MODEL_OFFSET           10
+#define CE7_ROMREAD_LED_OFFSET             11
+#define CE7_GAME_SOFT_RESET_OFFSET         12
+#define CE7_CHEAT_DATA_OFFSET              13
+#define CE7_ROM_FILE_OFFSET                14
+
+
+//
+// ARM7 cardengine patches
+//
+#define CE7_P_CARD_READ_ARM9_OFFSET        0
+#define CE7_P_CARD_PULL_OUT_ARM9_OFFSET    1
+#define CE7_P_CARD_IRQ_ENABLE_ARM7_OFFSET  2
+#define CE7_P_VBLANK_HANDLER_OFFSET        3
+#define CE7_P_FIFO_HANDLER_OFFSET          4
+#define CE7_P_CARD_STRUCT_ARM9_OFFSET      5
+#define CE7_P_CARD_PULL_OFFSET             6
+#define CE7_P_CACHE_FLUSH_REF_OFFSET       7
+#define CE7_P_READ_CACHED_REF_OFFSET       8
+#define CE7_P_ARM7_FUNCTIONS_OFFSET        9
+#define CE7_P_SWI02_OFFSET                 10
+#define CE7_P_J_THUMB_NEW_SWI_HALT_OFFSET  11
+#define CE7_P_J_NEW_SWI_HALT_OFFSET        12
+#define CE7_P_J_TWL_GET_PITCH_TABLE_OFFSET 13
+#define CE7_P_GET_PITCH_TABLE_STUB_OFFSET  14
+#define CE7_P_ARM7_FUNCTIONS_THUMB_OFFSET  15
+
+
+//
+// ARM7 cardengine patches of ARM7 functions
+//
+#define CE7_P_A7F_EEPROM_PROTECT_OFFSET     0
+#define CE7_P_A7F_EEPROM_PAGE_ERASE_OFFSET  1
+#define CE7_P_A7F_EEPROM_PAGE_VERIFY_OFFSET 2
+#define CE7_P_A7F_EEPROM_PAGE_WRITE_OFFSET  3
+#define CE7_P_A7F_EEPROM_PAGE_PROG_OFFSET   4
+#define CE7_P_A7F_EEPROM_READ_OFFSET        5
+#define CE7_P_A7F_CARD_READ_OFFSET          6
+#define CE7_P_A7F_CARD_ID_OFFSET            7
+#define CE7_P_A7F_SAVE_CLUSTER_OFFSET       8
+#define CE7_P_A7F_SAVE_SIZE_OFFSET          9
+
+
+//
+// ARM7 cardengine patches of ARM7 thumb functions
+//
+#define CE7_P_A7FT_EEPROM_PROTECT_OFFSET     0
+#define CE7_P_A7FT_EEPROM_PAGE_ERASE_OFFSET  1
+#define CE7_P_A7FT_EEPROM_PAGE_VERIFY_OFFSET 2
+#define CE7_P_A7FT_EEPROM_PAGE_WRITE_OFFSET  3
+#define CE7_P_A7FT_EEPROM_PAGE_PROG_OFFSET   4
+#define CE7_P_A7FT_EEPROM_READ_OFFSET        5
+#define CE7_P_A7FT_CARD_READ_OFFSET          6
+#define CE7_P_A7FT_CARD_ID_OFFSET            7
+#define CE7_P_A7FT_SWI_HALT_OFFSET           8
+
+#endif // CARDENGINE_HEADER_ARM7_H

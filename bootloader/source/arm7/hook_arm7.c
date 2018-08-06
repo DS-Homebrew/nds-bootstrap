@@ -24,6 +24,7 @@
 #include "hook.h"
 #include "common.h"
 #include "find.h"
+#include "cardengine_header_arm7.h"
 
 extern bool dsiModeConfirmed; // SDK 5
 extern u32 enableExceptionHandler;
@@ -38,11 +39,7 @@ extern unsigned long asyncPrefetch;
 
 //extern bool sdk5;
 extern u32 ROMinRAM;
-extern u32 ROM_TID;
-extern u32 ROM_HEADERCRC;
-extern u32 ARM9_LEN;
 extern u32 ARM7_LEN; // SDK 5
-extern u32 romSize;
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
@@ -337,22 +334,22 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLo
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
 
-	cardEngineLocationArm7[1]  = *vblankHandler;
-	cardEngineLocationArm7[2]  = *ipcSyncHandler;
-	cardEngineLocationArm7[4]  = file.firstCluster;
-	cardEngineLocationArm7[6]  = language;
-	cardEngineLocationArm7[7]  = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
-	cardEngineLocationArm7[8]  = dsiModeConfirmed; // SDK 5
-	cardEngineLocationArm7[9]  = ROMinRAM;
-	cardEngineLocationArm7[10] = consoleModel;
-	cardEngineLocationArm7[11] = romread_LED;
-	cardEngineLocationArm7[12] = gameSoftReset;
+	cardEngineLocationArm7[CE7_INTR_VBLANK_ORIG_RETURN_OFFSET] = *vblankHandler;
+	cardEngineLocationArm7[CE7_INTR_FIFO_ORIG_RETURN_OFFSET]   = *ipcSyncHandler;
+	cardEngineLocationArm7[CE7_FILE_CLUSTER_OFFSET]            = file.firstCluster;
+	cardEngineLocationArm7[CE7_LANGUAGE_OFFSET]                = language;
+	cardEngineLocationArm7[CE7_GOTTEN_SCFG_EXT_OFFSET]         = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
+	cardEngineLocationArm7[CE7_DSI_MODE_OFFSET]                = dsiModeConfirmed; // SDK 5
+	cardEngineLocationArm7[CE7_ROM_IN_RAM_OFFSET]              = ROMinRAM;
+	cardEngineLocationArm7[CE7_CONSOLE_MODEL_OFFSET]           = consoleModel;
+	cardEngineLocationArm7[CE7_ROMREAD_LED_OFFSET]             = romread_LED;
+	cardEngineLocationArm7[CE7_GAME_SOFT_RESET_OFFSET]         = gameSoftReset;
 
-	u32* patches = (u32*)cardEngineLocationArm7[0];
+	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
 
-	*vblankHandler = patches[3];
+	*vblankHandler = patches[CE7_P_VBLANK_HANDLER_OFFSET];
 	if (ROMinRAM == false) {
-		*ipcSyncHandler = patches[4];
+		*ipcSyncHandler = patches[CE7_P_FIFO_HANDLER_OFFSET];
 	}
 
 	nocashMessage("ERR_NONE");

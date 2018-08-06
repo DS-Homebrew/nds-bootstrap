@@ -3,12 +3,13 @@
 #include "patch.h"
 #include "find.h"
 #include "common.h"
-#include "cardengine_arm7_bin.h"
+#include "cardengine_header_arm7.h"
 #include "debug_file.h"
+
+#include "cardengine_arm7_bin.h"
 
 //#define memcpy __builtin_memcpy
 
-//extern bool sdk5;
 extern u32 ROMinRAM;
 
 //static bool sdk5 = false;
@@ -40,25 +41,21 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 }
 
 void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
-	u32* patches = (u32*)cardEngineLocationArm7[0];
+	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
 
 	// swi 0x12 call
 	u32* swi12Offset = findSwi12Offset(ndsHeader);
 	if (swi12Offset) {
 		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = (u32*)patches[10];
+		u32* swi12Patch = (u32*)patches[CE7_P_SWI02_OFFSET];
 		memcpy(swi12Offset, swi12Patch, 0x4);
 	}
-
-	//sdk5 = false;
 
 	// swi get pitch table
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		//u32* swiGetPitchTablePatch = (u32*)patches[12];
-		//u32* swiGetPitchTablePatch = (u32*)patches[13]; // SDK 5
-		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? 14 : 13];
+		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? CE7_P_GET_PITCH_TABLE_STUB_OFFSET : CE7_P_J_TWL_GET_PITCH_TABLE_OFFSET];
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -77,9 +74,8 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
 	}
 	if (swiHaltOffset) {
 		// Patch
-		u32* patches = (u32*)cardEngineLocationArm7[0];
-		//u32* swiHaltPatch = (u32*)patches[11];
-		u32* swiHaltPatch = (u32*)patches[usesThumb ? 11 : 12]; // SDK 5
+		u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
+		u32* swiHaltPatch = (u32*)patches[usesThumb ? CE7_P_J_THUMB_NEW_SWI_HALT_OFFSET : CE7_P_J_NEW_SWI_HALT_OFFSET]; // SDK 5
 		if (usesThumb) {
 			/*
             // Find the relocation signature
@@ -94,13 +90,10 @@ void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* modulePara
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
-			//u32* arm7FunctionThumb =  (u32*) patches[14]; // SDK 5
-            u32* arm7FunctionThumb =  (u32*) patches[15];
-            u16 instrs [2];
-		    generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000,
-			     arm7FunctionThumb[8]);
-            ((u16*)swiHaltOffset)[0]=instrs[0];
-            ((u16*)swiHaltOffset)[1]=instrs[1];*/
+			u32* arm7FunctionThumb = (u32*)patches[CE7_P_ARM7_FUNCTIONS_THUMB_OFFSET];
+            u16* patchSwiHalt = generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, arm7FunctionThumb[CE7_P_A7FT_SWI_HALT_OFFSET]);
+            ((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
+            ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
 		} else {
 			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
 		}
@@ -151,12 +144,12 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, c
 	}
 	debug[0] = (u32)cardIrqEnableOffset;
 
-	cardEngineLocationArm7[3] = moduleParams->sdk_version;
+	cardEngineLocationArm7[CE7_SDK_VERSION_OFFSET] = moduleParams->sdk_version;
 
-	u32* patches = (u32*)cardEngineLocationArm7[0];
+	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
 
-	u32* cardIrqEnablePatch    = (u32*)patches[2];
-	u32* cardCheckPullOutPatch = (u32*)patches[1];
+	u32* cardIrqEnablePatch    = (u32*)patches[CE7_P_CARD_IRQ_ENABLE_ARM7_OFFSET];
+	u32* cardCheckPullOutPatch = (u32*)patches[CE7_P_CARD_PULL_OUT_ARM9_OFFSET];
 
 	if (cardCheckPullOutOffset) {
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
