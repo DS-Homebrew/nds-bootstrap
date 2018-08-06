@@ -39,30 +39,34 @@
 
 //#define memcpy __builtin_memcpy
 
-#define LCDC_BANK_C (u16*)0x06840000
-#define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_C) + 1))
-#define INIT_DISC (*(((u32*)LCDC_BANK_C) + 2))
+//#define LCDC_BANK_C        (u16*)0x06840000
+#define LOAD_CRT0_LOCATION 0x06840000
 
-#define STORED_FILE_CLUSTER_OFFSET 4 
-#define INIT_DISC_OFFSET           8
-#define WANT_TO_PATCH_DLDI_OFFSET  12
-#define ARG_START_OFFSET           16
-#define ARG_SIZE_OFFSET            20
-#define HAVE_DSISD_OFFSET          28
-#define SAV_OFFSET                 32
-#define SAVSIZE_OFFSET             36
-#define LANGUAGE_OFFSET            40
-#define DSIMODE_OFFSET             44 // SDK 5
-#define DONORSDK_OFFSET            48
-#define PUR_OFFSET                 52
-#define PUS_OFFSET                 56
-#define CONSOLEMODEL_OFFSET        60
-#define LOADSCR_OFFSET             64
-#define ROMREADLED_OFFSET          68
-#define GAMESOFTRESET_OFFSET       72
-#define ASYNC_OFFSET               76
-#define CARDENGINE_ARM7_OFFSET     80
-#define CARDENGINE_ARM9_OFFSET     84
+#define STORED_FILE_CLUSTER_OFFSET 1
+#define INIT_DISC_OFFSET           2
+#define WANT_TO_PATCH_DLDI_OFFSET  3
+#define ARG_START_OFFSET           4
+#define ARG_SIZE_OFFSET            5
+#define DLDI_OFFSET                6
+#define HAVE_DSISD_OFFSET          7
+#define SAV_OFFSET                 8
+#define SAV_SIZE_OFFSET            9
+#define LANGUAGE_OFFSET            10
+#define DSIMODE_OFFSET             11 // SDK 5
+#define DONORSDK_OFFSET            12
+#define PUR_OFFSET                 13
+#define PUS_OFFSET                 14
+#define CONSOLE_MODEL_OFFSET       15
+#define LOADSCR_OFFSET             16
+#define ROMREADLED_OFFSET          17
+#define GAMESOFTRESET_OFFSET       18
+#define ASYNC_OFFSET               19
+#define CARDENGINE_ARM7_OFFSET     20
+#define CARDENGINE_ARM9_OFFSET     21
+
+#define CARDENGINE_ARM7_CHEAT_DATA_OFFSET 13
+
+u32* loadCrt0 = (u32*)LOAD_CRT0_LOCATION;
 
 /*typedef signed int addr_t;  // s32
 typedef unsigned char data_t; // u8*/
@@ -113,13 +117,13 @@ static inline void writeAddr(data_t *mem, addr_t offset, addr_t value) {
 	((addr_t*)mem)[offset/sizeof(addr_t)] = value;
 }*/
 
-static inline u32 readAddr(const u8* mem, u32 offset) {
+/*static inline u32 readAddr(const u8* mem, u32 offset) {
 	return ((u32*)mem)[offset/sizeof(u32)];
 }
 
 static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	((u32*)mem)[offset/sizeof(u32)] = value;
-}
+}*/
 
 /*static inline void vramcpy(void* dst, const void* src, int len) {
 	u16* dst16 = (u16*)dst;
@@ -168,28 +172,63 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	} while (size -= 4);
 }*/
 
+int loadArgs(int argc, const char** argv) {
+	// Give arguments to loader
+
+	char* argStart = (char*)loadCrt0 + loadCrt0[ARG_START_OFFSET];
+	argStart = (char*)(((int)argStart + 3) & ~3); // Align to word
+	u16* argData = (u16*)argStart;
+	int argSize = 0;
+	u16 argTempVal = 0;
+	
+	for (; argc > 0 && *argv; ++argv, --argc) {
+		for (const char* argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
+			if (argSize & 1) {
+				argTempVal |= (*argChar) << 8;
+				*argData = argTempVal;
+				++argData;
+			} else {
+				argTempVal = *argChar;
+			}
+		}
+		if (argSize & 1) {
+			*argData = argTempVal;
+			++argData;
+		}
+		argTempVal = 0;
+		++argSize;
+	}
+	*argData = argTempVal;
+
+	loadCrt0[ARG_START_OFFSET] = (u32)argStart - (u32)loadCrt0;
+	loadCrt0[ARG_SIZE_OFFSET]  = argSize;
+
+	return true;
+}
+
 int loadCheatData(u32* cheatData) {
 	nocashMessage("loadCheatData");
 			
-	u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+	//u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+	u32 cardengineArm7Offset = loadCrt0[CARDENGINE_ARM7_OFFSET];
 	nocashMessage("cardengineArm7Offset");
 	nocashMessage(tohex(cardengineArm7Offset));
 	
-	u32* cardengineArm7 = (u32*)(load_bin + cardengineArm7Offset);
+	//u32* cardengineArm7 = (u32*)(load_bin + cardengineArm7Offset);
+	u32* cardengineArm7 = (u32*)loadCrt0[cardengineArm7Offset];
 	nocashMessage("cardengineArm7");
 	nocashMessage(tohex((u32)cardengineArm7));
 	
-	//u32 cheatDataOffset = cardengineArm7[12];
-	u32 cheatDataOffset = cardengineArm7[13];
+	u32 cheatDataOffset = cardengineArm7[CARDENGINE_ARM7_CHEAT_DATA_OFFSET];
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardengineArm7Offset + cheatDataOffset);
+	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardengineArm7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)cardengineArm7[cheatDataOffset];
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
-	//copyLoop(cheatDataDest, cheatData, 1024);
-	memcpy(cheatDataDest, cheatData, 1024);
+	memcpy(cheatDataDest, cheatData, 1024); //copyLoop(cheatDataDest, cheatData, 1024);
 	
 	return true;
 }
@@ -214,100 +253,64 @@ int runNds(
 	bool dldiPatchNds,
 	int argc, const char** argv,
 	u32* cheatData) {
-	char* argStart;
-	u16* argData;
-	u16 argTempVal = 0;
-	int argSize;
-	const char* argChar;
-	
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
 
 	// Direct CPU access to VRAM bank C
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;	
-	// Load the loader/patcher into the correct address
-	memcpy(LCDC_BANK_C, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
+
+	// Load the loader into the correct address
+	memcpy(loadCrt0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Set the parameters for the loader
 
-	// STORED_FILE_CLUSTER = cluster;
-	writeAddr((u8*)LCDC_BANK_C, STORED_FILE_CLUSTER_OFFSET, cluster);
-	
-	// INIT_DISC = initDisc;
-	writeAddr((u8*)LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
-	
-	// WANT_TO_PATCH_DLDI = dldiPatchNds;
-	//writeAddr((u8*)LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
+	loadCrt0[STORED_FILE_CLUSTER_OFFSET] = cluster;
+	loadCrt0[INIT_DISC_OFFSET]           = initDisc;
+	loadCrt0[WANT_TO_PATCH_DLDI_OFFSET]  = dldiPatchNds;
 
-	// Give arguments to loader
-	argStart = (char*)LCDC_BANK_C + readAddr((u8*)LCDC_BANK_C, ARG_START_OFFSET);
-	argStart = (char*)(((int)argStart + 3) & ~3);	// Align to word
-	argData = (u16*)argStart;
-	argSize = 0;
-	
-	for (; argc > 0 && *argv; ++argv, --argc) {
-		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
-			if (argSize & 1) {
-				argTempVal |= (*argChar) << 8;
-				*argData = argTempVal;
-				++argData;
-			} else {
-				argTempVal = *argChar;
-			}
-		}
-		if (argSize & 1) {
-			*argData = argTempVal;
-			++argData;
-		}
-		argTempVal = 0;
-		++argSize;
-	}
-	*argData = argTempVal;
-	
-	writeAddr((u8*)LCDC_BANK_C, ARG_START_OFFSET, (u32)argStart - (u32)LCDC_BANK_C);
-	writeAddr((u8*)LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
-	
-	writeAddr((u8*)LCDC_BANK_C, SAV_OFFSET, saveCluster);
-	writeAddr((u8*)LCDC_BANK_C, SAVSIZE_OFFSET, saveSize);
-	writeAddr((u8*)LCDC_BANK_C, LANGUAGE_OFFSET, language);
-	writeAddr((u8*)LCDC_BANK_C, DSIMODE_OFFSET, dsiMode); // SDK 5
-	writeAddr((u8*)LCDC_BANK_C, DONORSDK_OFFSET, donorSdkVer);
-	writeAddr((u8*)LCDC_BANK_C, PUR_OFFSET, patchMpuRegion);
-	writeAddr((u8*)LCDC_BANK_C, PUS_OFFSET, patchMpuSize);
-	writeAddr((u8*)LCDC_BANK_C, CONSOLEMODEL_OFFSET, consoleModel);
-	writeAddr((u8*)LCDC_BANK_C, LOADSCR_OFFSET, loadingScreen);
-	writeAddr((u8*)LCDC_BANK_C, ROMREADLED_OFFSET, romread_LED);
-	writeAddr((u8*)LCDC_BANK_C, GAMESOFTRESET_OFFSET, gameSoftReset);
-	writeAddr((u8*)LCDC_BANK_C, ASYNC_OFFSET, asyncPrefetch);
+	loadArgs(argc, argv);
+
+	loadCrt0[SAV_OFFSET]           = saveCluster;
+	loadCrt0[SAV_SIZE_OFFSET]      = saveSize;
+	loadCrt0[LANGUAGE_OFFSET]      = language;
+	loadCrt0[DSIMODE_OFFSET]       = dsiMode; // SDK 5
+	loadCrt0[DONORSDK_OFFSET]      = donorSdkVer;
+	loadCrt0[PUR_OFFSET]           = patchMpuRegion;
+	loadCrt0[PUS_OFFSET]           = patchMpuSize;
+	loadCrt0[CONSOLE_MODEL_OFFSET] = consoleModel;
+	loadCrt0[LOADSCR_OFFSET]       = loadingScreen;
+	loadCrt0[ROMREADLED_OFFSET]    = romread_LED;
+	loadCrt0[GAMESOFTRESET_OFFSET] = gameSoftReset;
+	loadCrt0[ASYNC_OFFSET]         = asyncPrefetch;
 
 	loadCheatData(cheatData);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
-
 	irqDisable(IRQ_ALL);
 
-	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
+	nocashMessage("Give the VRAM to the ARM7");
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;		
 	
-	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
+	nocashMessage("Reset into a passme loop");
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
 	
-	*((vu32*)0x02FFFFFC) = 0;
-	*((vu32*)0x02FFFE04) = (u32)0xE59FF018;
-	*((vu32*)0x02FFFE24) = (u32)0x02FFFE04;
+	*(vu32*)0x02FFFFFC = 0;
+	*(vu32*)0x02FFFE04 = (u32)0xE59FF018;
+	*(vu32*)0x02FFFE24 = (u32)0x02FFFE04;
 	
+	// Reset ARM7
 	nocashMessage("resetARM7");
-
 	resetARM7(0x06000000);	
 
+	// swi soft reset
 	nocashMessage("swiSoftReset");
+	swiSoftReset();
 
-	swiSoftReset(); 
 	return true;
 }
 
@@ -375,5 +378,6 @@ int runNdsFile(
 		true,
 		true,
 		argc, argv,
-		cheatData);
+		cheatData
+	);
 }
