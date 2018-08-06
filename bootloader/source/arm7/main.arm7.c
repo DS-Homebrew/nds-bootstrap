@@ -65,13 +65,13 @@ extern void arm7clearRAM(void);
 
 const char* bootName = "BOOT.NDS";
 
-extern unsigned long _start;
+//extern unsigned long _start;
 extern unsigned long storedFileCluster;
 extern unsigned long initDisc;
-extern unsigned long wantToPatchDLDI;
-extern unsigned long argStart;
-extern unsigned long argSize;
-extern unsigned long dsiSD;
+//extern unsigned long wantToPatchDLDI;
+//extern unsigned long argStart;
+//extern unsigned long argSize;
+//extern unsigned long dsiSD;
 extern unsigned long saveFileCluster;
 extern unsigned long saveSize;
 extern unsigned long language;
@@ -82,8 +82,9 @@ extern unsigned long patchMpuSize;
 extern unsigned long consoleModel;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
-extern unsigned long gameSoftReset;
+//extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
+//extern unsigned long logging;
 
 bool dsiModeConfirmed = false; // SDK 5
 

@@ -78,8 +78,7 @@ extern u32 enableExceptionHandler;
 extern u32 consoleModel;
 extern u32 asyncPrefetch;
 
-
-void user_exception(void);
+extern void user_exception(void);
 
 //---------------------------------------------------------------------------------
 void setExceptionHandler2(void) {
