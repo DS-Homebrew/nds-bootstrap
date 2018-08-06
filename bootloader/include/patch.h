@@ -66,7 +66,7 @@ extern bool cardReadFound; // card_patcher_arm9.c
 u32 generateA7Instr(int arg1, int arg2);
 u16* generateA7InstrThumb(int arg1, int arg2);
 void decompressLZ77Backwards(u8* addr, u32 size);
-void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams);
+void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams);
 /*-------------------------------------------------------------------------
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
