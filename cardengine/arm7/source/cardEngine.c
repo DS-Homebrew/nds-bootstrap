@@ -418,8 +418,10 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 
 	if (language >= 0 && language < 6) {
+		u32 ndsHead = (sdk5 ? NDS_HEAD_SDK5 : NDS_HEAD);
+		
 		// Change language
-		*(u8*)(sdk5 ? 0x02FFFCE4 : 0x027FFCE4) = language;
+		*(u8*)(ndsHead - 0x11C) = language;
 	}
 
 	if (ROMinRAM == false) {

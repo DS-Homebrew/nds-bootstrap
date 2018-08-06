@@ -36,6 +36,7 @@
 #include <nds/ipc.h>
 #include <nds/system.h>
 
+#include "locations.h"
 #include "common.h"
 #include "loading.h"
 
@@ -239,7 +240,8 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = *(VoidFn*)(sdk5 ? 0x2FFFE24 : 0x27FFE24);
+	u32 ndsHead = (sdk5 ? NDS_HEAD_SDK5 : NDS_HEAD);
+	VoidFn arm9code = *(VoidFn*)(ndsHead + 0x24);
 	arm9code();
 	
 	while (1);

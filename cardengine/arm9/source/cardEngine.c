@@ -252,9 +252,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
 	}
 
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x0C807BC0 : cardStruct0);
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02407BC0 : cardStruct0);
-	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02707BC0 : cardStruct0); // engineLocationArm9 + 0x7BC0
+	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)(CARDENGINE_LOCATION_ARM9 + 0x7BC0) : cardStruct0);
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
@@ -301,7 +299,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS;
+			cacheSlots = (sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
 
 		// SDK 5

@@ -101,6 +101,7 @@ static aFile* savFile = (aFile*)0x37D5000 + 1;
 static module_params_t* moduleParams = NULL;
 static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
+static char* romLocation = (char*)ROM_LOCATION;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Used for debugging purposes
@@ -214,13 +215,13 @@ void resetMemory_ARM7(void) {
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
 	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, sdk5 ? (u8*)0x02FFFC80 : (u8*)0x027FFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHead - 0x180), 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, sdk5 ? (u8*)0x02FFFC80 : (u8*)0x027FFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHead - 0x180), 0x70);
 	}
 	if (language >= 0 && language < 6) {
 		// Change language
-		*(u8*)(sdk5 ? 0x02FFFCE4 : 0x027FFCE4) = language;
+		*(u8*)((u32)ndsHead - 0x11C) = language;
 	}
 }
 
@@ -686,6 +687,7 @@ void loadBinary_ARM7(aFile file) {
 	if (sdk5) {
 		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
+		romLocation = (char*)ROM_LOCATION_SDK5;
 	}
 
 	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
@@ -729,9 +731,8 @@ void setArm9Stuff(aFile file) {
 	}
 
 	if (ROMinRAM == true) {
-		u32 romLocation = sdk5 ? ROM_LOCATION_SDK5 : ROM_LOCATION;
 		// Load ROM into RAM
-		fileRead((char*)romLocation, file, 0x4000 + ARM9_LEN, romSizeNoArm9, 0);
+		fileRead(romLocation, file, 0x4000 + ARM9_LEN, romSizeNoArm9, 0);
 
 		// Primary fix for Mario's Holiday
 		if (*(u32*)((romLocation - 0x4000 - ARM9_LEN) + 0x003128AC) == 0x4B434148){
@@ -755,7 +756,7 @@ void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Copy NDS ARM9 start address into the header, starting ARM9
-	*(vu32*)(sdk5 ? 0x02FFFE24 : 0x027FFE24) = *tempArm9StartAddress; //ndsHead->arm9executeAddress = (void*)*tempArm9StartAddress;
+	*(vu32*)((u32)ndsHead + 0x24) = *tempArm9StartAddress; //ndsHead->arm9executeAddress = (void*)*tempArm9StartAddress;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -764,7 +765,7 @@ void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(sdk5 ? 0x2FFFE34 : 0x27FFE34);
+	VoidFn arm7code = *(VoidFn*)((u32)ndsHead + 0x34);
 	arm7code();
 }
 
