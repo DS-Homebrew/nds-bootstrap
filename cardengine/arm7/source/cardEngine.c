@@ -17,6 +17,7 @@
 */
 
 #include <string.h> // memcpy
+#include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
 #include <nds/ipc.h>
 #include <nds/interrupts.h>
