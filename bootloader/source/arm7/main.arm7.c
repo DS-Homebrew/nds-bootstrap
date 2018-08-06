@@ -705,7 +705,7 @@ void loadBinary_ARM7(aFile file) {
 	if (sdk5) {
 		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
-		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
+		cardEngineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
 	}
 
 	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
