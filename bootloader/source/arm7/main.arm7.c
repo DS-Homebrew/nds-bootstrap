@@ -75,8 +75,8 @@ void arm7clearRAM(void);
 
 #define ENGINE_LOCATION_ARM7 0x037C0000
 
-#define ENGINE_LOCATION_ARM9      0x02400000
-#define ENGINE_LOCATION_ARM9_SDK5 0x02400000 //0x0C800000
+#define ENGINE_LOCATION_ARM9      0x02700000 //0x02400000
+#define ENGINE_LOCATION_ARM9_SDK5 0x02700000 //0x0C800000
 
 #define ROM_LOCATION      0x0C804000
 #define ROM_LOCATION_SDK5 0x0D000000
@@ -116,7 +116,7 @@ u32 romSizeNoArm9;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
-//static module_params_t* moduleParams = NULL;
+static module_params_t* moduleParams = NULL;
 static tNDSHeader* ndsHead = (tNDSHeader*)NDS_HEAD;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
 static u32* engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9;
@@ -497,7 +497,7 @@ module_params_t* buildModuleParams() {
 	return moduleParams;
 }
 
-module_params_t* getModuleParams(char* arm9binary) {
+module_params_t* getModuleParams(const void* arm9binary) {
 	nocashMessage("Looking for moduleparams...\n");
 
 	u32* moduleParamsOffset = findModuleParamsOffset((u32*)arm9binary, ARM9_LEN);
@@ -506,7 +506,19 @@ module_params_t* getModuleParams(char* arm9binary) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void patchBinary(char* ARM9_DST) {
+static inline void decompressBinary(void* arm9binary) {
+	// Chrono Trigger (Japan)
+	if (ROM_TID == 0x4a555159) {
+		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+	}
+
+	// Chrono Trigger (USA/Europe)
+	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
+		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+	}
+}
+
+static inline void patchBinary() {
 	// The World Ends With You (USA) (Europe)
 	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)0x203E7B0 = 0;
@@ -564,7 +576,6 @@ static inline void patchBinary(char* ARM9_DST) {
 
 	// Chrono Trigger (Japan)
 	if (ROM_TID == 0x4a555159) {
-		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)0x0204e364 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e368 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e6c4 = 0xe3a00000; //mov r0, #0
@@ -573,7 +584,6 @@ static inline void patchBinary(char* ARM9_DST) {
 
 	// Chrono Trigger (USA/Europe)
 	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
-		decompressLZ77Backwards((u8*)ARM9_DST, ARM9_LEN);
 		*(u32*)0x0204e334 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e338 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e694 = 0xe3a00000; //mov r0, #0
@@ -632,29 +642,6 @@ void loadBinary_ARM7(aFile file) {
 	romSize = dsiHeader[0x080 >> 2]; //dsiHeader.ndshdr.romSize;
 	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
 	ROM_HEADERCRC = dsiHeader[0x15C >> 2]; //dsiHeader.ndshdr.headerCRC16;
-	
-	char* arm9binary = malloc(ARM9_LEN);
-	fileRead(arm9binary, file, ARM9_SRC, ARM9_LEN, 3);
-	module_params_t* moduleParamsPtr = getModuleParams(arm9binary);
-	if (!moduleParamsPtr) {
-		moduleParamsPtr = buildModuleParams();
-	}
-	module_params_t moduleParams = *moduleParamsPtr;
-	free(arm9binary);
-	sdk5 = (moduleParams.sdk_version > 0x5000000);
-	if (sdk5) {
-		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
-		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
-		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
-	}
-
-	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
-	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
-	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
-	{
-		// Set to load ROM into RAM
-		ROMinRAM = true;
-	}
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -669,25 +656,10 @@ void loadBinary_ARM7(aFile file) {
 		// Make the Pokemon game code ADAJ.
 		*(u32*)0x27FF00C = 0x4A414441;
 	}
-	
+
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
-	
-	patchBinary(ARM9_DST);
-
-	// First copy the header to its proper location, excluding
-	// the ARM9 start address, so as not to start it
-	
-	// Store for later
-	//*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress;
-	*tempArm9StartAddress = dsiHeader[0x024 >> 2];
-	
-	//dsiHeader.ndshdr.arm9executeAddress = 0;
-	dsiHeader[0x024 >> 2] = 0;
-	
-	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
-	dmaCopyWords(3, (void*)dsiHeader, (void*)ndsHead, 0x170);
 
 	// SDK 5
 	if (dsiMode && (dsiHeader[0x10 >> 2] & BIT(16+1))) {
@@ -706,7 +678,58 @@ void loadBinary_ARM7(aFile file) {
 		if (ARM7i_LEN) {
 			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
 		}
+	}
+	
+	decompressBinary(ARM9_DST);
+	patchBinary();
+	
+	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
+	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
+	moduleParams = getModuleParams(ARM9_DST);
+	if (moduleParams) {
+		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
+		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
+		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
+
+		*(vu32*)0x280000C = moduleParams->compressed_static_end; // from 'ensureArm9Decompressed'
+		//ensureArm9Decompressed(__NDSHeader, moduleParams);
+		//ensureArm9Decompressed(ndsHead, moduleParams);
+		ensureArm9Decompressed(ARM9_DST, ARM9_LEN, moduleParams);
 	} else {
+		nocashMessage("No moduleparams?\n");
+		*(vu32*)0x2800010 = 1;
+		moduleParams = buildModuleParams();
+	}
+
+	sdk5 = (moduleParams->sdk_version > 0x5000000);
+	if (sdk5) {
+		ndsHead = (tNDSHeader*)NDS_HEAD_SDK5;
+		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5;
+		engineLocationArm9 = (u32*)ENGINE_LOCATION_ARM9_SDK5;
+	}
+
+	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
+	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
+	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
+	{
+		// Set to load ROM into RAM
+		ROMinRAM = true;
+	}
+
+	// First copy the header to its proper location, excluding
+	// the ARM9 start address, so as not to start it
+	
+	// Store for later
+	//*tempArm9StartAddress = (vu32)dsiHeader.ndshdr.arm9executeAddress;
+	*tempArm9StartAddress = dsiHeader[0x024 >> 2];
+	
+	//dsiHeader.ndshdr.arm9executeAddress = 0;
+	dsiHeader[0x024 >> 2] = 0;
+	
+	//dmaCopyWords(3, &dsiHeader.ndshdr, (void*)ndsHead, sizeof(dsiHeader.ndshdr));
+	dmaCopyWords(3, (void*)dsiHeader, (void*)ndsHead, 0x170);
+
+	if (!dsiModeConfirmed) {
 		// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
 		nocashMessage("Switch to NTR mode BIOS");
 		REG_SCFG_ROM = 0x703;
@@ -854,21 +877,7 @@ int arm7_main(void) {
 	memcpy(engineLocationArm9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
-	//moduleParams = findModuleParams(__NDSHeader, donorSdkVer);
-	//moduleParams = findModuleParams(ndsHead, donorSdkVer);
-	module_params_t* moduleParams = getModuleParams(ndsHead->arm9destination);
-	if (moduleParams) {
-		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
-		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
-		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-
-		//ensureArm9Decompressed(__NDSHeader, moduleParams);
-		ensureArm9Decompressed(ndsHead, moduleParams);
-	} else {
-		nocashMessage("No moduleparams?\n");
-		*(vu32*)0x2800010 = 1;
-		moduleParams = buildModuleParams();
-	}
+	// module params
 	increaseLoadBarLength(); // 5 dots
 
 	//errorCode = patchCardNds(__NDSHeader, (u32*)ENGINE_LOCATION_ARM7, (u32*)ENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
