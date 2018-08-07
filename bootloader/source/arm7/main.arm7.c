@@ -176,9 +176,6 @@ Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
 void resetMemory_ARM7(void) {
-	u8 settings1, settings2;
-	u32 settingsOffset = 0;
-
 	REG_IME = 0;
 
 	for (int i = 0; i < 16; i++) {
@@ -206,6 +203,11 @@ void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
+}
+
+void reloadFirmwareSettings(void) {
+	u8 settings1, settings2;
+	u32 settingsOffset = 0;
 
 	// Get settings location
 	boot_readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
@@ -808,7 +810,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
-	nocashMessage("Get ARM7 to clear RAM");
+	nocashMessage("Getting ARM7 to clear RAM...\n");
 	debugOutput(); // 1 dot
 	resetMemory_ARM7();
 
@@ -847,19 +849,20 @@ int arm7_main(void) {
 
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
-
 	loadBinary_ARM7(*romFile);
 	increaseLoadBarLength(); // 2 dots
+
+	// Reload DS Firmware settings
+	nocashMessage("Reloading DS Firmware settings...\n");
+	reloadFirmwareSettings(); // After 'sdk5' is set
+	increaseLoadBarLength(); // 3 dots
 
 	nocashMessage("Trying to patch the card...\n");
 
 	memcpy((u32*)CARDENGINE_LOCATION_ARM7, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-	increaseLoadBarLength(); // 3 dots
-
-	memcpy((u32*)CARDENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 4 dots
 
-	// module params
+	memcpy((u32*)CARDENGINE_LOCATION_ARM9, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 5 dots
 
 	//errorCode = patchCardNds(__NDSHeader, (u32*)CARDENGINE_LOCATION_ARM7, (u32*)CARDENGINE_LOCATION_ARM9, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
@@ -883,19 +886,18 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 7 dots
 
 	setArm9Stuff(*romFile);
-
 	if (ROMinRAM == false) {
 		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
 	}
-
 	increaseLoadBarLength(); // Final 8 dots
+
 	fadeType = false;
 	while (screenBrightness != 31);	// Wait for screen to fade out
 
-    // lock SCFG
+    // Lock SCFG
     REG_SCFG_EXT &= ~(1UL << 31);
 
 	nocashMessage("Starting the NDS file...");
