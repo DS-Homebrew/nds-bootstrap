@@ -503,7 +503,7 @@ static inline void decompressBinary(void* arm9binary) {
 	}
 }
 
-static inline void patchBinary() {
+static inline void patchBinary(void) {
 	// The World Ends With You (USA) (Europe)
 	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)0x203E7B0 = 0;
