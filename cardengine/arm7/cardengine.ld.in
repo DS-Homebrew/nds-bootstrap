@@ -1,10 +1,12 @@
+#include "locations.h"
+
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 /*ENTRY(_start)*/
 
 MEMORY {
 
-	vram	: ORIGIN = 0x037C0000, LENGTH = 24K /* WRAM A  */
+	vram	: ORIGIN = CARDENGINE_LOCATION_ARM7, LENGTH = 24K /* WRAM A  */
 }
 
 __vram_start	=	ORIGIN(vram);
