@@ -80,16 +80,32 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-*.nds
-*.cia
-*.d
-release/nds-bootstrap.zip
-release/_nds/nds-bootstrap.ini
+
+#*.nds
+#*.cia
+#*.d
 
 # Build folders
 data
+bin
 arm7/build
 arm9/build
-cardEngine_arm7/build
-cardEngine_arm9/build
+cardengine/arm7/build
+cardengine/arm9/build
 bootloader/build
+
+# =========================
+# Project Files
+# =========================
+
+# Notepad++
+*.pnproj
+*.pnps
+*.bak
+
+# Visual Studio Code
+.vscode/*
+#!.vscode/settings.json
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json

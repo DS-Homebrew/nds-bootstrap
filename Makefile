@@ -24,11 +24,13 @@ VERSION	:=	$(HBMENU_MAJOR).$(HBMENU_MINOR).$(HBMENU_PATCH)
 # GRAPHICS is a list of directories containing image files to be converted with grit
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
+BIN			:=	bin
 BUILD		:=	build
 SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=	data
-GRAPHICS	:=  gfx
+ASSETS		:=	assets
+GRAPHICS	:=  $(ASSETS)/gfx
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -66,7 +68,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
@@ -104,78 +106,81 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-icons := $(wildcard *.bmp)
-
-ifneq (,$(findstring $(TARGET).bmp,$(icons)))
-	export GAME_ICON := $(CURDIR)/$(TARGET).bmp
-else
-	ifneq (,$(findstring icon.bmp,$(icons)))
-		export GAME_ICON := $(CURDIR)/icon.bmp
-	endif
-endif
+#icons := $(wildcard *.bmp)
+#ifneq (,$(findstring $(TARGET).bmp,$(icons)))
+#	export GAME_ICON := $(CURDIR)/$(TARGET).bmp
+#else
+#	ifneq (,$(findstring icon.bmp,$(icons)))
+#		export GAME_ICON := $(CURDIR)/icon.bmp
+#	endif
+#endif
+export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 export GAME_TITLE := $(TARGET)
 
-.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
+#.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
+.PHONY: all dist nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
-all:	cardengine_arm7 cardengine_arm9 bootloader $(TARGET).nds
+all:	$(OUTPUT).nds
 
 dist:	all
-	@rm	-fr	hbmenu
-	@mkdir hbmenu
-	@cp hbmenu.nds hbmenu/BOOT.NDS
-	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
-	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
-	
-$(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9
-	ndstool	-c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf \
-			-b icon.bmp "NDS BOOTSTRAP;Runs an .nds file;made by Ahezard" \
-			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001 
+#	@rm	-fr	hbmenu
+#	@mkdir hbmenu
+#	@cp hbmenu.nds hbmenu/BOOT.NDS
+#	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
+#	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 
-$(TARGET).arm7: arm7/$(TARGET).elf
-	cp arm7/$(TARGET).elf $(TARGET).arm7.elf
+nightly:	$(OUTPUT).nds
+	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap.nds
+	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
+	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap.nds
+	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
 
-$(TARGET).arm9: arm9/$(TARGET).elf
-	cp arm9/$(TARGET).elf $(TARGET).arm9.elf
+$(OUTPUT).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
+	ndstool	-c $(OUTPUT).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
+			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;Made by Ahezard" \
+			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
 arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:
+arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-cardengine_arm7: data
-	@$(MAKE) -C cardengine_arm7
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9
+	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9: data
-	@$(MAKE) -C cardengine_arm9
+cardengine_arm7: $(DATA)
+	@$(MAKE) -C cardengine/arm7
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9: $(DATA)
+	@$(MAKE) -C cardengine/arm9
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
-	#@[ -d $@ ] || mkdir -p $@
-	#@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+#	@[ -d $@ ] || mkdir -p $@
+#	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 data
-	@rm -fr nds-bootstrap.arm7.elf
-	@rm -fr nds-bootstrap.arm9.elf
-	@$(MAKE) -C bootloader clean
-	@$(MAKE) -C arm9 clean
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(DATA) $(BIN)
 	@$(MAKE) -C arm7 clean
-	@$(MAKE) -C cardengine_arm7 clean
-	@$(MAKE) -C cardengine_arm9 clean
+	@$(MAKE) -C arm9 clean
+	@$(MAKE) -C cardengine/arm7 clean
+	@$(MAKE) -C cardengine/arm9 clean
+	@$(MAKE) -C bootloader clean
 		
-data:
-	@mkdir -p data
+$(DATA):
+	@mkdir -p $(DATA)
 
-bootloader: data
-	@$(MAKE) -C bootloader
+$(BIN):
+	@mkdir -p $(BIN)
 
 #---------------------------------------------------------------------------------
 else

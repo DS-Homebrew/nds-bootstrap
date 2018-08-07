@@ -29,8 +29,15 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 
 //#include <stdio.h>
-#include <nds.h>
 #include <nds/ndstypes.h>
+#include <nds/arm7/input.h>
+#include <nds/fifocommon.h>
+#include <nds/system.h>
+#include <nds/arm7/clock.h>
+#include <nds/arm7/i2c.h>
+#include <nds/debug.h>
+
+#include "hex.h"
 #include "fifocheck.h"
 
 //static vu32* wordCommandAddr;
@@ -74,30 +81,6 @@ void myFIFOValue32Handler(u32 value, void* data) {
 
 //static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
-static char hexbuffer[9];
-
-char* tohex(u32 n) {
-	unsigned size = 9;
-	char *buffer = hexbuffer;
-	unsigned index = size - 2;
-
-	for (int i = 0; i < size; i++) {
-		buffer[i] = '0';
-	}
-
-	while (n > 0) {
-		unsigned mod = n % 16;
-
-		if (mod >= 10)
-			buffer[index--] = (mod - 10) + 'A';
-		else
-			buffer[index--] = mod + '0';
-
-		n /= 16;
-	}
-	buffer[size - 1] = '\0';
-	return buffer;
-}
 
 
 //---------------------------------------------------------------------------------
