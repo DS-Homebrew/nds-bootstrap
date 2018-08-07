@@ -3,13 +3,13 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
-//#define TEMP_MEM 0x02FFE000 //__DSiHeader
+//#define TEMP_MEM 0x02FFE000 // __DSiHeader
 
-#define NDS_HEAD      0x027FFE00
-#define NDS_HEAD_SDK5 0x02FFFE00
+#define NDS_HEADER      0x027FFE00
+#define NDS_HEADER_SDK5 0x02FFFE00
 
-#define TEMP_ARM9_START_ADDRESS      (NDS_HEAD + 0x1F4) //0x027FFFF4
-#define TEMP_ARM9_START_ADDRESS_SDK5 (NDS_HEAD_SDK5 + 0x1F4) //0x02FFFFF4
+#define TEMP_ARM9_START_ADDRESS      (NDS_HEADER + 0x1F4) //0x027FFFF4
+#define TEMP_ARM9_START_ADDRESS_SDK5 (NDS_HEADER_SDK5 + 0x1F4) //0x02FFFFF4
 
 #define LOAD_CRT0_LOCATION 0x06840000 // LCDC_BANK_C
 

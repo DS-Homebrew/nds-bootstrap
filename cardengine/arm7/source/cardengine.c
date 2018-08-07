@@ -25,6 +25,7 @@
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
+#include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
 #include "sdmmc_alt.h"
@@ -418,10 +419,10 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 
 	if (language >= 0 && language < 6) {
-		u32 ndsHead = (sdk5 ? NDS_HEAD_SDK5 : NDS_HEAD);
+		tNDSHeader* ndsHeader = (sdk5 ? (tNDSHeader*)NDS_HEADER_SDK5 : (tNDSHeader*)NDS_HEADER);
 		
 		// Change language
-		*(u8*)(ndsHead - 0x11C) = language;
+		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
 	if (ROMinRAM == false) {

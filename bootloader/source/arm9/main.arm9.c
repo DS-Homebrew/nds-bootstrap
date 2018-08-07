@@ -240,8 +240,8 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	u32 ndsHead = (sdk5 ? NDS_HEAD_SDK5 : NDS_HEAD);
-	VoidFn arm9code = *(VoidFn*)(ndsHead + 0x24);
+	tNDSHeader* ndsHeader = (sdk5 ? (tNDSHeader*)NDS_HEADER_SDK5 : (tNDSHeader*)NDS_HEADER);
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
 	arm9code();
 	
 	while (1);
