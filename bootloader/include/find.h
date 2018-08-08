@@ -1,5 +1,5 @@
-#ifndef CARD_FINDER_H
-#define CARD_FINDER_H
+#ifndef FIND_H
+#define FIND_H
 
 #include <nds/ndstypes.h>
 #include "patch.h"
@@ -82,4 +82,4 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
-#endif // CARD_FINDER_H
+#endif // FIND_H
