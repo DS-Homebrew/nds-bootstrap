@@ -97,12 +97,12 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 	u32 srcAddr;
 
 	if (usesThumb) {
-        /* u32* cardRead = (u32*) (JumpTableFunc - 0xE);
+		/* u32* cardRead = (u32*) (JumpTableFunc - 0xE);
 		dbg_printf("card read:\t");
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc - 0xE  - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchCardRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb[CE7_P_A7FT_CARD_READ_OFFSET]);
+		u16* patchCardRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->card_read);
 		cardRead[0] = patchCardRead[0];
         cardRead[1] = patchCardRead[1]; */
 

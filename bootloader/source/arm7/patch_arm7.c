@@ -87,9 +87,8 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
-			u32* arm7FunctionThumb = (u32*)patches[CE7_P_ARM7_FUNCTIONS_THUMB_OFFSET];
-            u16* patchSwiHalt = generateA7InstrThumb(instrs, swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, arm7FunctionThumb[CE7_P_A7FT_SWI_HALT_OFFSET]);
-            ((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
+			u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7_functions_thumb->swi_halt);
+			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
             ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
 		} else {
 			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
