@@ -74,7 +74,7 @@ typedef struct cardengineArm7 {
     u32 console_model;
     u32 romread_led;
     u32 game_soft_reset;
-    u32 cheat_data_offset; //u32* cheat_data;
+    u32* cheat_data;
     u32 rom_file;
 
 } __attribute__ ((__packed__)) cardengineArm7;

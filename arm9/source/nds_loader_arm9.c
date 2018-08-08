@@ -188,21 +188,21 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("loadCheatData");
 			
 	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	u32 cardEngineArm7Offset = lc0->cardengine_arm7_offset;
+	/*u32 cardEngineArm7Offset = (u32)lc0->cardengine_arm7;
 	nocashMessage("cardEngineArm7Offset");
-	nocashMessage(tohex(cardEngineArm7Offset));
+	nocashMessage(tohex(cardEngineArm7Offset));*/
 	
 	//u32* cardEngineArm7 = (u32*)(load_bin + cardEngineArm7Offset);
-	const cardengineArm7* cardEngineArm7 = (const cardengineArm7*)((u32)lc0 + cardEngineArm7Offset);
+	const cardengineArm7* cardEngineArm7 = lc0->cardengine_arm7;
 	nocashMessage("cardEngineArm7");
 	nocashMessage(tohex((u32)cardEngineArm7));
 	
-	u32 cheatDataOffset = cardEngineArm7->cheat_data_offset;
+	/*u32 cheatDataOffset = (u32)cardEngineArm7->cheat_data - (u32)cardEngineArm7;
 	nocashMessage("cheatDataOffset");
-	nocashMessage(tohex(cheatDataOffset));
+	nocashMessage(tohex(cheatDataOffset));*/
 	
 	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardEngineArm7Offset + cheatDataOffset);
-	u32* cheatDataDest = (u32*)((u32)cardEngineArm7 + cheatDataOffset);
+	u32* cheatDataDest = cardEngineArm7->cheat_data;
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	

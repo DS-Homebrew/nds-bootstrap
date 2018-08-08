@@ -2,11 +2,11 @@
 #define LOAD_CRT0_H
 
 #include <nds/ndstypes.h>
-//#include "cardengine_header_arm7.h"
-//#include "cardengine_header_arm9.h"
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 typedef struct loadCrt0 {
-    u32 start;
+    u32 _start;
     u32 stored_file_cluster;
     u32 init_disc;
     u32 want_to_patch_dldi;
@@ -26,8 +26,8 @@ typedef struct loadCrt0 {
     u32 romread_led;
     u32 game_soft_reset;
     u32 async_prefetch;
-    u32 cardengine_arm7_offset; //cardengineArm7* cardengine_arm7;
-    u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
+    cardengineArm7* cardengine_arm7;
+    cardengineArm9* cardengine_arm9;
     u32 logging;
 } __attribute__ ((__packed__)) loadCrt0;
 
