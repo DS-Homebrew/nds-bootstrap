@@ -61,10 +61,8 @@ void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_p
 	moduleParams->compressed_static_end = 0;
 }
 
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32* debug = (u32*)0x037C6000;
-
-	cardengineArm9* ce9 = (cardengineArm9*)cardEngineLocationArm9;
 
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
@@ -332,7 +330,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, c
 		*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 	}
 
-	debug[2] = (u32)cardEngineLocationArm9;
+	debug[2] = (u32)ce9;
 
 	ce9->sdk_version = moduleParams->sdk_version;
 

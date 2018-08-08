@@ -14,9 +14,7 @@ extern u32 enableExceptionHandler;
 extern unsigned long consoleModel;
 extern unsigned long asyncPrefetch;
 
-void hookNdsRetailArm9(u32* cardEngineLocationArm9) {
-	cardengineArm9* ce9 = (cardengineArm9*)cardEngineLocationArm9;
-
+void hookNdsRetailArm9(cardengineArm9* ce9) {
 	ce9->rom_in_ram               = ROMinRAM;
 	ce9->rom_tid                  = ROM_TID;
 	ce9->rom_headercrc            = ROM_HEADERCRC;

@@ -19,14 +19,16 @@
 #ifndef HOOK_H
 #define HOOK_H
 
-#include <nds/memory.h>
-#include <nds/ndstypes.h>
+//#include <nds/ndstypes.h>
+#include <nds/memory.h> // tNDSHeader
 #include "fat_alt.h"
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 /*-------------------------------------------------------------------------
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocationArm7);
-void hookNdsRetailArm9(u32* cardEngineLocationArm9);
+int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* ce7);
+void hookNdsRetailArm9(cardengineArm9* ce9);
 
 #endif // HOOK_H

@@ -254,7 +254,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocationArm7) {
+int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* ce7) {
 	u32* debug = (u32*)0x037C6000;
 
 	nocashMessage("hookNdsRetail");
@@ -333,8 +333,6 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLo
 	} else {
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
-
-	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;

@@ -18,6 +18,8 @@
 
 //#include <stddef.h>
 #include <nds/system.h>
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
 #include "debug_file.h"
@@ -26,8 +28,8 @@ extern bool logging;
 
 u32 patchCardNds(
 	const tNDSHeader* ndsHeader,
-	u32* cardEngineLocationArm7,
-	u32* cardEngineLocationArm9,
+	cardengineArm7* ce7,
+	cardengineArm9* ce9,
 	const module_params_t* moduleParams, 
 	u32 saveFileCluster,
 	u32 saveSize,
@@ -43,10 +45,10 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	patchCardNdsArm9(ndsHeader, cardEngineLocationArm9, moduleParams, patchMpuRegion, patchMpuSize);
+	patchCardNdsArm9(ndsHeader, ce9, moduleParams, patchMpuRegion, patchMpuSize);
 	
 	if (cardReadFound || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
+		patchCardNdsArm7(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

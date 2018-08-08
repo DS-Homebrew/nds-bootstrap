@@ -22,6 +22,8 @@
 //#include <stddef.h>
 #include <nds/ndstypes.h>
 #include <nds/memory.h>
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 #define PAGE_4K		(0b01011 << 1)
 #define PAGE_8K		(0b01100 << 1)
@@ -63,8 +65,8 @@ u32 generateA7Instr(int arg1, int arg2);
 u16* generateA7InstrThumb(int arg1, int arg2);
 void decompressLZ77Backwards(u8* addr, u32 size);
 void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams);
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
-u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 patchCardNds(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 patchCardNds(const tNDSHeader* ndsHeader, cardengineArm7* ce7, cardengineArm9* ce9, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
 
 #endif // PATCH_H

@@ -13,10 +13,10 @@ extern u32 ROMinRAM;
 
 //static bool sdk5 = false;
 
-u32 savePatchV1(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchV2(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchUniversal(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchV5(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize); // SDK 5
+u32 savePatchV1(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV2(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchUniversal(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV5(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -39,9 +39,7 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
-	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
-
+static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7) {
 	// swi 0x12 call
 	u32* swi12Offset = findSwi12Offset(ndsHeader);
 	if (swi12Offset) {
@@ -59,7 +57,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 }
 
-static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
+static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7) {
 	bool usesThumb = false;
 
 	// swi halt
@@ -73,8 +71,6 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 	}
 	if (swiHaltOffset) {
 		// Patch
-		cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
-
 		u32* swiHaltPatch = (usesThumb ? ce7->patches->j_thumb_new_swi_halt : ce7->patches->j_new_swi_halt); // SDK 5
 		if (usesThumb) {
 			/*
@@ -100,18 +96,16 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 	}
 }
 
-u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
-
-	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
 
 	//sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ndsHeader, moduleParams, cardEngineLocationArm7);
+		fixForDsiBios(ndsHeader, moduleParams, ce7);
 	}
 	if (ROMinRAM == false) {
-		patchSwiHalt(ndsHeader, moduleParams, cardEngineLocationArm7);
+		patchSwiHalt(ndsHeader, moduleParams, ce7);
 	}
 	
 	bool usesThumb = false;
@@ -157,16 +151,16 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, c
 
 	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 
-	u32 saveResult = savePatchV1(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
+	u32 saveResult = savePatchV1(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
 	if (!saveResult) {
-		saveResult = savePatchV2(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
+		saveResult = savePatchV2(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
 	}
 	if (!saveResult) {
-		saveResult = savePatchUniversal(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
+		saveResult = savePatchUniversal(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
 	}
 	if (!saveResult) {
 		// SDK 5
-		saveResult = savePatchV5(ndsHeader, cardEngineLocationArm7, moduleParams, saveFileCluster, saveSize);
+		saveResult = savePatchV5(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
 	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
