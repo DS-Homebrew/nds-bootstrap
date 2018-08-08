@@ -14,10 +14,10 @@ extern u32 ROMinRAM;
 //static bool sdk5 = false;
 static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
 
-u32 savePatchV1(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchV2(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchUniversal(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 savePatchV5(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize); // SDK 5
+u32 savePatchV1(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV2(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchUniversal(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 savePatchV5(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -40,7 +40,7 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7) {
+static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const cardengineArm7* ce7) {
 	// swi 0x12 call
 	u32* swi12Offset = findSwi12Offset(ndsHeader);
 	if (swi12Offset) {
@@ -58,7 +58,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 }
 
-static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7) {
+static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const cardengineArm7* ce7) {
 	bool usesThumb = false;
 
 	// swi halt
