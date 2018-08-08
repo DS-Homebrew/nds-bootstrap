@@ -63,6 +63,9 @@ void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_p
 
 u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32* debug = (u32*)0x037C6000;
+
+	cardengineArm9* ce9 = (cardengineArm9*)cardEngineLocationArm9;
+
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
@@ -331,17 +334,14 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, c
 
 	debug[2] = (u32)cardEngineLocationArm9;
 
-	cardEngineLocationArm9[CE9_SDK_VERSION_OFFSET] = moduleParams->sdk_version;
+	ce9->sdk_version = moduleParams->sdk_version;
 
-	u32* patches      = (u32*)cardEngineLocationArm9[CE9_PATCHES_OFFSET];
-	u32* thumbPatches = (u32*)cardEngineLocationArm9[CE9_THUMB_PATCHES_OFFSET];
+	u32* cardReadPatch    = (usesThumb ? ce9->thumb_patches->card_read_arm9 : ce9->patches->card_read_arm9);
+	u32* cardPullOutPatch = (usesThumb ? ce9->thumb_patches->card_pull      : ce9->patches->card_pull);
+	u32* cardIdPatch      = (usesThumb ? ce9->thumb_patches->card_id_arm9   : ce9->patches->card_id_arm9);
+	u32* cardDmaPatch     = (usesThumb ? ce9->thumb_patches->card_dma_arm9  : ce9->patches->card_dma_arm9);
 
-	u32* cardReadPatch    = usesThumb ? (u32*)thumbPatches[CE9_TP_CARD_READ_ARM9_OFFSET] : (u32*)patches[CE9_P_CARD_READ_ARM9_OFFSET];
-	u32* cardPullOutPatch = usesThumb ? (u32*)thumbPatches[CE9_TP_CARD_PULL_OFFSET] : (u32*)patches[CE9_P_CARD_PULL_OFFSET];
-	u32* cardIdPatch      = usesThumb ? (u32*)thumbPatches[CE9_TP_CARD_ID_ARM9_OFFSET] : (u32*)patches[CE9_P_CARD_ID_ARM9_OFFSET];
-	u32* cardDmaPatch     = usesThumb ? (u32*)thumbPatches[CE9_TP_CARD_DMA_ARM9_OFFSET] : (u32*)patches[CE9_P_CARD_DMA_ARM9_OFFSET];
-
-	debug[5] = (u32)patches;
+	debug[5] = (u32)ce9->patches;
 
 	u32** card_struct = (u32**)(cardReadEndOffset - 1);
 	//u32* cache_struct = (u32**)(cardIdStartOffset - 1);
@@ -349,28 +349,28 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm9, c
 	debug[6] = (u32)*card_struct;
 	//debug[7] = (u32)*cache_struct;
 
-	u32* patches_card_struct = usesThumb ? (u32*)thumbPatches[CE9_TP_CARD_STRUCT_ARM9_OFFSET] : (u32*)patches[CE9_P_CARD_STRUCT_ARM9_OFFSET];
+	u32* cardStructPatch = (usesThumb ? ce9->thumb_patches->card_struct_arm9 : ce9->patches->card_struct_arm9);
 	if (moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocationArm9[CE9_CARD_STRUCT0_OFFSET] = (u32)(*card_struct + 7);
-		*patches_card_struct = (u32)(*card_struct + 7); // Cache management alternative
+		ce9->card_struct0 = (u32)(*card_struct + 7);
+		*cardStructPatch = (u32)(*card_struct + 7); // Cache management alternative
 	} else {
-		cardEngineLocationArm9[CE9_CARD_STRUCT0_OFFSET] = (u32)(*card_struct + 6);
-		*patches_card_struct = (u32)(*card_struct + 6); // Cache management alternative
+		ce9->card_struct0 = (u32)(*card_struct + 6);
+		*cardStructPatch = (u32)(*card_struct + 6); // Cache management alternative
 	}
-	//cardEngineLocationArm9[CE9_CACHE_STRUCT_OFFSET] = (u32)*cache_struct;
+	//ce9->cache_struct = (u32)*cache_struct;
 
-	u32* patches_cache_flush = usesThumb ? (u32*)thumbPatches[CE9_TP_CACHE_FLUSH_REF_OFFSET] : (u32*)patches[CE9_P_CACHE_FLUSH_REF_OFFSET];
-	*patches_cache_flush = (u32)cardPullOutOffset + 4;
+	u32* cacheFlushPatch = (usesThumb ? ce9->thumb_patches->cache_flush_ref : ce9->patches->cache_flush_ref);
+	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
 
-	u32* patches_read_cached = usesThumb ? (u32*)thumbPatches[CE9_TP_READ_CACHED_REF_OFFSET] : (u32*)patches[CE9_P_READ_CACHED_REF_OFFSET];
+	u32* readCachedPatch = (usesThumb ? ce9->thumb_patches->read_cached_ref : ce9->patches->read_cached_ref);
 	if ((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
 	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crossing: Wild World
 	{
-		*patches_read_cached = (u32)cardReadCachedStartOffset;
+		*readCachedPatch = (u32)cardReadCachedStartOffset;
 	}
 
 	if (!usesThumb) { // Based on: cardengine_arm9/source/card_engine_header.s
-		patches[CE9_P_NEED_FLUSH_DC_CACHE_OFFSET] = needFlushCache;
+		ce9->patches->need_flush_dc_cache = needFlushCache;
 	}
 
 	//memcpy(oldArenaLow, cardReadPatch, 0xF0); //copyLoop(oldArenaLow, cardReadPatch, 0xF0);

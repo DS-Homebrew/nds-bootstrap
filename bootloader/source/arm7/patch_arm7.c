@@ -40,13 +40,13 @@ u16* generateA7InstrThumb(int arg1, int arg2) {
 }
 
 static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardEngineLocationArm7) {
-	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
+	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
 
 	// swi 0x12 call
 	u32* swi12Offset = findSwi12Offset(ndsHeader);
 	if (swi12Offset) {
 		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = (u32*)patches[CE7_P_SWI02_OFFSET];
+		u32* swi12Patch = ce7->patches->swi02;
 		memcpy(swi12Offset, swi12Patch, 0x4);
 	}
 
@@ -54,7 +54,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		u32* swiGetPitchTablePatch = (u32*)patches[sdk5 ? CE7_P_GET_PITCH_TABLE_STUB_OFFSET : CE7_P_J_TWL_GET_PITCH_TABLE_OFFSET];
+		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->get_pitch_table_stub : ce7->patches->j_twl_get_pitch_table);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -73,8 +73,9 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 	}
 	if (swiHaltOffset) {
 		// Patch
-		u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
-		u32* swiHaltPatch = (u32*)patches[usesThumb ? CE7_P_J_THUMB_NEW_SWI_HALT_OFFSET : CE7_P_J_NEW_SWI_HALT_OFFSET]; // SDK 5
+		cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
+
+		u32* swiHaltPatch = (usesThumb ? ce7->patches->j_thumb_new_swi_halt : ce7->patches->j_new_swi_halt); // SDK 5
 		if (usesThumb) {
 			/*
             // Find the relocation signature
@@ -101,6 +102,8 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
 	u32* debug = (u32*)0x037C6000;
+
+	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
 
 	//sdk5 = (moduleParams->sdk_version > 0x5000000);
 
@@ -143,12 +146,10 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, c
 	}
 	debug[0] = (u32)cardIrqEnableOffset;
 
-	cardEngineLocationArm7[CE7_SDK_VERSION_OFFSET] = moduleParams->sdk_version;
+	ce7->sdk_version = moduleParams->sdk_version;
 
-	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
-
-	u32* cardIrqEnablePatch    = (u32*)patches[CE7_P_CARD_IRQ_ENABLE_ARM7_OFFSET];
-	u32* cardCheckPullOutPatch = (u32*)patches[CE7_P_CARD_PULL_OUT_ARM9_OFFSET];
+	u32* cardIrqEnablePatch    = ce7->patches->card_irq_enable_arm7;
+	u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 
 	if (cardCheckPullOutOffset) {
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);

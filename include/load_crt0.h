@@ -1,30 +1,33 @@
 #ifndef LOAD_CRT0_H
 #define LOAD_CRT0_H
 
-#define LOAD_CRT0_LOCATION 0x06840000 // LCDC_BANK_C
+//#include "cardengine_header_arm7.h"
+//#include "cardengine_header_arm9.h"
 
-#define LC0_START_OFFSET               0
-#define LC0_STORED_FILE_CLUSTER_OFFSET 1
-#define LC0_INIT_DISC_OFFSET           2
-#define LC0_WANT_TO_PATCH_DLDI_OFFSET  3
-#define LC0_ARG_START_OFFSET           4
-#define LC0_ARG_SIZE_OFFSET            5
-#define LC0_DLDI_OFFSET                6
-#define LC0_HAVE_DSISD_OFFSET          7
-#define LC0_SAV_OFFSET                 8
-#define LC0_SAV_SIZE_OFFSET            9
-#define LC0_LANGUAGE_OFFSET            10
-#define LC0_DSIMODE_OFFSET             11 // SDK 5
-#define LC0_DONOR_SDK_VER_OFFSET       12
-#define LC0_PATCH_MPU_REGION_OFFSET    13
-#define LC0_PATCH_MPU_SIZE_OFFSET      14
-#define LC0_CONSOLE_MODEL_OFFSET       15
-#define LC0_LOADING_SCREEN_OFFSET      16
-#define LC0_ROMREAD_LED_OFFSET         17
-#define LC0_GAME_SOFT_RESET_OFFSET     18
-#define LC0_ASYNC_PREFETCH_OFFSET      19
-#define LC0_CARDENGINE_ARM7_OFFSET     20
-#define LC0_CARDENGINE_ARM9_OFFSET     21
-#define LC0_LOGGING_OFFSET             22
+typedef struct loadCrt0 {
+    u32 start;
+    u32 stored_file_cluster;
+    u32 init_disc;
+    u32 want_to_patch_dldi;
+    u32 arg_start;
+    u32 arg_size;
+    u32 dldi;
+    u32 have_dsisd;
+    u32 sav;
+    u32 sav_size;
+    u32 language;
+    u32 dsimode; // SDK 5
+    u32 donor_sdk_ver;
+    u32 patch_mpu_region;
+    u32 patch_mpu_size;
+    u32 console_model;
+    u32 loading_screen;
+    u32 romread_led;
+    u32 game_soft_reset;
+    u32 async_prefetch;
+    u32 cardengine_arm7_offset; //cardengineArm7* cardengine_arm7;
+    u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
+    u32 logging;
+} __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H

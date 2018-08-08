@@ -15,13 +15,15 @@ extern unsigned long consoleModel;
 extern unsigned long asyncPrefetch;
 
 void hookNdsRetailArm9(u32* cardEngineLocationArm9) {
-	cardEngineLocationArm9[CE9_ROM_IN_RAM_OFFSET]               = ROMinRAM;
-	cardEngineLocationArm9[CE9_ROM_TID_OFFSET]                  = ROM_TID;
-	cardEngineLocationArm9[CE9_ROM_HEADERCRC_OFFSET]            = ROM_HEADERCRC;
-	cardEngineLocationArm9[CE9_ARM9_LEN_OFFSET]                 = ARM9_LEN;
-	cardEngineLocationArm9[CE9_ROM_SIZE_OFFSET]                 = romSize;
-	cardEngineLocationArm9[CE9_DSI_MODE_OFFSET]                 = dsiModeConfirmed; // SDK 5
-	cardEngineLocationArm9[CE9_ENABLE_EXCEPTION_HANDLER_OFFSET] = enableExceptionHandler;
-	cardEngineLocationArm9[CE9_CONSOLE_MODEL_OFFSET]            = consoleModel;
-	cardEngineLocationArm9[CE9_ASYNC_PREFETCH_OFFSET]           = asyncPrefetch;
+	cardengineArm9* ce9 = (cardengineArm9*)cardEngineLocationArm9;
+
+	ce9->rom_in_ram               = ROMinRAM;
+	ce9->rom_tid                  = ROM_TID;
+	ce9->rom_headercrc            = ROM_HEADERCRC;
+	ce9->arm9_len                 = ARM9_LEN;
+	ce9->rom_size                 = romSize;
+	ce9->dsi_mode                 = dsiModeConfirmed; // SDK 5
+	ce9->enable_exception_handler = enableExceptionHandler;
+	ce9->console_model            = consoleModel;
+	ce9->async_prefetch           = asyncPrefetch;
 }

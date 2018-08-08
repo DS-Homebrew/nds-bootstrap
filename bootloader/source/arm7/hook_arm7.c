@@ -334,22 +334,22 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLo
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
 
-	cardEngineLocationArm7[CE7_INTR_VBLANK_ORIG_RETURN_OFFSET] = *vblankHandler;
-	cardEngineLocationArm7[CE7_INTR_FIFO_ORIG_RETURN_OFFSET]   = *ipcSyncHandler;
-	cardEngineLocationArm7[CE7_FILE_CLUSTER_OFFSET]            = file.firstCluster;
-	cardEngineLocationArm7[CE7_LANGUAGE_OFFSET]                = language;
-	cardEngineLocationArm7[CE7_GOTTEN_SCFG_EXT_OFFSET]         = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
-	cardEngineLocationArm7[CE7_DSI_MODE_OFFSET]                = dsiModeConfirmed; // SDK 5
-	cardEngineLocationArm7[CE7_ROM_IN_RAM_OFFSET]              = ROMinRAM;
-	cardEngineLocationArm7[CE7_CONSOLE_MODEL_OFFSET]           = consoleModel;
-	cardEngineLocationArm7[CE7_ROMREAD_LED_OFFSET]             = romread_LED;
-	cardEngineLocationArm7[CE7_GAME_SOFT_RESET_OFFSET]         = gameSoftReset;
+	cardengineArm7* ce7 = (cardengineArm7*)cardEngineLocationArm7;
 
-	u32* patches = (u32*)cardEngineLocationArm7[CE7_PATCHES_OFFSET];
+	ce7->intr_vblank_orig_return = *vblankHandler;
+	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->file_cluster            = file.firstCluster;
+	ce7->language                = language;
+	ce7->gotten_scfg_ext         = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
+	ce7->dsi_mode                = dsiModeConfirmed; // SDK 5
+	ce7->rom_in_ram              = ROMinRAM;
+	ce7->console_model           = consoleModel;
+	ce7->romread_led             = romread_LED;
+	ce7->game_soft_reset         = gameSoftReset;
 
-	*vblankHandler = patches[CE7_P_VBLANK_HANDLER_OFFSET];
+	*vblankHandler = ce7->patches->vblank_handler;
 	if (ROMinRAM == false) {
-		*ipcSyncHandler = patches[CE7_P_FIFO_HANDLER_OFFSET];
+		*ipcSyncHandler = ce7->patches->fifo_handler;
 	}
 
 	nocashMessage("ERR_NONE");
