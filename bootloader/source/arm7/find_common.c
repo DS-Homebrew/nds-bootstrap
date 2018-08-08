@@ -1,5 +1,6 @@
 //#include <string.h> // memcmp
 #include <stddef.h> // NULL
+#include <nds/ndstypes.h>
 //#include <limits.h>
 #include "find.h"
 

@@ -12,6 +12,8 @@ extern u32 ROM_TID;
 
 bool cardReadFound = false; // card_patcher_common.c
 
+static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
+
 void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;
 
@@ -62,8 +64,6 @@ void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_p
 }
 
 u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	u32* debug = (u32*)0x037C6000;
-
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 

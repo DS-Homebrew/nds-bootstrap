@@ -54,6 +54,8 @@ extern unsigned long intr_orig_return_offset;
 
 extern const u8 cheat_engine_start[];*/
 
+static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
+
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
 	0xe3a0c301, 	// mov  ip, #0x4000000
@@ -255,8 +257,6 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 }
 
 int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* ce7) {
-	u32* debug = (u32*)0x037C6000;
-
 	nocashMessage("hookNdsRetail");
 
 	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);

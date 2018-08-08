@@ -1,6 +1,8 @@
 #ifndef CARDENGINE_HEADER_ARM7_H
 #define CARDENGINE_HEADER_ARM7_H
 
+#include <nds/ndstypes.h>
+
 //
 // ARM7 cardengine patches of ARM7 functions
 //

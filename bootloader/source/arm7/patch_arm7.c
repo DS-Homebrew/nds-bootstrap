@@ -12,6 +12,7 @@
 extern u32 ROMinRAM;
 
 //static bool sdk5 = false;
+static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
 
 u32 savePatchV1(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 savePatchV2(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
@@ -97,8 +98,6 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 }
 
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-	u32* debug = (u32*)0x037C6000;
-
 	//sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	if (REG_SCFG_ROM != 0x703) {

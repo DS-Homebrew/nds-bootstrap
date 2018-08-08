@@ -1,6 +1,7 @@
 #ifndef LOAD_CRT0_H
 #define LOAD_CRT0_H
 
+#include <nds/ndstypes.h>
 //#include "cardengine_header_arm7.h"
 //#include "cardengine_header_arm9.h"
 

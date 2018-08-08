@@ -1,6 +1,8 @@
 #ifndef CARDENGINE_HEADER_ARM9_H
 #define CARDENGINE_HEADER_ARM9_H
 
+#include <nds/ndstypes.h>
+
 //
 // ARM9 cardengine thumb patches
 //
