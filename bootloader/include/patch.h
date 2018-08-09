@@ -16,13 +16,14 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CARD_PATCHER_H
-#define CARD_PATCHER_H
+#ifndef PATCH_H
+#define PATCH_H
 
 //#include <stddef.h>
 #include <nds/ndstypes.h>
 #include <nds/memory.h>
-//#include "fat_alt.h"
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 #define PAGE_4K		(0b01011 << 1)
 #define PAGE_8K		(0b01100 << 1)
@@ -46,10 +47,7 @@
 #define PAGE_2G		(0b11110 << 1)
 #define PAGE_4G		(0b11111 << 1)
 
-//#define NDS_HEAD ((u32*)0x02FFFE00)
-
-typedef struct 
-{
+typedef struct {
 	u32 auto_load_list_offset;
 	u32 auto_load_list_end;
 	u32 auto_load_start;
@@ -61,16 +59,14 @@ typedef struct
 	u32 nitro_code_le;
 } module_params_t;
 
+extern bool cardReadFound; // card_patcher_arm9.c
+
 u32 generateA7Instr(int arg1, int arg2);
 u16* generateA7InstrThumb(int arg1, int arg2);
 void decompressLZ77Backwards(u8* addr, u32 size);
 void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams);
-/*-------------------------------------------------------------------------
-arm7_hookGame
-Adds a hook in the game's ARM7 binary to our own code
--------------------------------------------------------------------------*/
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
-u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
-u32 patchCardNds(const tNDSHeader* ndsHeader, u32* cardEngineLocationArm7, u32* cardEngineLocationArm9, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
+u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
+u32 patchCardNds(const tNDSHeader* ndsHeader, cardengineArm7* ce7, cardengineArm9* ce9, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize, u32 patchMpuRegion, u32 patchMpuSize);
 
-#endif // CARD_PATCHER_H
+#endif // PATCH_H

@@ -1,8 +1,9 @@
-#ifndef CARD_FINDER_H
-#define CARD_FINDER_H
+#ifndef FIND_H
+#define FIND_H
 
 #include <nds/ndstypes.h>
-#include "card_patcher.h"
+#include "locations.h"
+#include "patch.h"
 
 //extern bool sdk5;
 //extern int readType;
@@ -13,8 +14,9 @@ u32* memsearch32(const u32* start, u32 dataSize, const u32* find, u32 findSize, 
 u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, bool forward);
 
 inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
-	u32* debug = (u32*)0x037D0000;
+	u32* debug = (u32*)DEBUG_LOCATION_FIND;
 	debug[3] = (u32)(start + dataSize);
+	
 	//return (u32*)memsearch((u8*)start, dataSize, (u8*)find, findLen*sizeof(u32));
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), true);
 }
@@ -82,4 +84,4 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
-#endif // CARD_FINDER_H
+#endif // FIND_H

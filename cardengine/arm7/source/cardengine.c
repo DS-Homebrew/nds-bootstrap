@@ -17,6 +17,7 @@
 */
 
 #include <string.h> // memcpy
+#include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
 #include <nds/ipc.h>
 #include <nds/interrupts.h>
@@ -24,12 +25,14 @@
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
+#include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
 #include "sdmmc_alt.h"
+#include "fat_alt.h"
 #include "debug_file.h"
 #include "cardengine.h"
-#include "fat_alt.h"
+#include "locations.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
@@ -37,12 +40,6 @@
 #include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
 
 //#define memcpy __builtin_memcpy
-
-#define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000
-
-#define SAVE_LOCATION      0x0C820000
-#define SAVE_LOCATION_SDK5 0x0CE00000
 
 extern int tryLockMutex(int * addr);
 extern int lockMutex(int * addr);
@@ -422,8 +419,10 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 
 	if (language >= 0 && language < 6) {
+		tNDSHeader* ndsHeader = (sdk5 ? (tNDSHeader*)NDS_HEADER_SDK5 : (tNDSHeader*)NDS_HEADER);
+		
 		// Change language
-		*(u8*)(sdk5 ? 0x02FFFCE4 : 0x027FFCE4) = language;
+		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
 	if (ROMinRAM == false) {

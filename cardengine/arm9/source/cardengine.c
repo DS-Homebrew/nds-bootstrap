@@ -24,6 +24,7 @@
 #include <nds/fifomessages.h>
 #include "hex.h"
 #include "cardengine.h"
+#include "locations.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -33,30 +34,6 @@
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
-
-#define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000
-
-#define CACHE_ADRESS_START             0x0C920000
-#define retail_CACHE_ADRESS_START_SDK5 0x0C480000
-
-//#define retail_CACHE_ADRESS_SIZE      0x6E0000
-//#define retail_CACHE_ADRESS_SIZE_SDK5 0x280000
-
-#define retail_CACHE_SLOTS      0x37
-#define retail_CACHE_SLOTS_SDK5 0x14
-
-#define dev_CACHE_ADRESS_START_SDK5 0x0D000000
-
-//#define dev_CACHE_ADRESS_SIZE      0x16E0000
-//#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
-
-#define dev_CACHE_SLOTS      0xB7
-#define dev_CACHE_SLOTS_SDK5 0x80
-
-//#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
-
-#define HGSS_CACHE_SLOTS 0xF
 
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
@@ -101,8 +78,7 @@ extern u32 enableExceptionHandler;
 extern u32 consoleModel;
 extern u32 asyncPrefetch;
 
-
-void user_exception(void);
+extern void user_exception(void);
 
 //---------------------------------------------------------------------------------
 void setExceptionHandler2(void) {
@@ -275,9 +251,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
 	}
 
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x0C807BC0 : cardStruct0);
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02407BC0 : cardStruct0);
-	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02707BC0 : cardStruct0); // engineLocationArm9 + 0x7BC0
+	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)(CARDENGINE_LOCATION_ARM9 + 0x7BC0) : cardStruct0);
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
@@ -324,7 +298,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS;
+			cacheSlots = (sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
 
 		// SDK 5

@@ -1,5 +1,5 @@
 #include <stddef.h> // NULL
-#include "card_finder.h"
+#include "find.h"
 #include "debug_file.h"
 
 //#define memset __builtin_memset
@@ -11,97 +11,97 @@ extern u32 ROM_TID;
 //
 
 // Module params
-const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
+static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
 // Card read
-const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
-const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
-const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
-const u16 cardReadEndSignatureThumb5[8]      = {0xFE00, 0xFFFF, 0xE120, 0x0213, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
-const u16 cardReadEndSignatureThumb5Alt1[8]  = {0xFE00, 0xFFFF, 0x9940, 0x0214, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
-const u16 cardReadEndSignatureThumb5Alt2[4]  = {0x01A4, 0x0400, 0xFE00, 0xFFFF};                                 // SDK 5
-const u32 cardReadStartSignature[1]          = {0xE92D4FF0};
-const u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
-const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
-const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
-const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
-const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
-const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                                                         // SDK 5
+static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
+static const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
+static const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
+static const u16 cardReadEndSignatureThumb5[8]      = {0xFE00, 0xFFFF, 0xE120, 0x0213, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
+static const u16 cardReadEndSignatureThumb5Alt1[8]  = {0xFE00, 0xFFFF, 0x9940, 0x0214, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
+static const u16 cardReadEndSignatureThumb5Alt2[4]  = {0x01A4, 0x0400, 0xFE00, 0xFFFF};                                 // SDK 5
+static const u32 cardReadStartSignature[1]          = {0xE92D4FF0};
+static const u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
+static const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
+static const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
+static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
+static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
+static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                                                         // SDK 5
 
 // Card read cached
-const u32 cardReadCachedEndSignature1[4]   = {0xE5950020, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK <= 2
-const u32 cardReadCachedStartSignature1[2] = {0xE92D4030, 0xE24DD004};
-const u32 cardReadCachedEndSignature3[4]   = {0xE5950024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK 3
-//        cardReadCachedStartSignature3
-const u32 cardReadCachedEndSignature4[4]   = {0xE5940024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK >= 4
-const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; // SDK >= 4
+static const u32 cardReadCachedEndSignature1[4]   = {0xE5950020, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK <= 2
+static const u32 cardReadCachedStartSignature1[2] = {0xE92D4030, 0xE24DD004};
+static const u32 cardReadCachedEndSignature3[4]   = {0xE5950024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK 3
+//               cardReadCachedStartSignature3
+static const u32 cardReadCachedEndSignature4[4]   = {0xE5940024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK >= 4
+static const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; // SDK >= 4
   
-//const u32 instructionBHI[1] = {0x8A000001};
+//static const u32 instructionBHI[1] = {0x8A000001};
 
 // Card pull out
-const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
-const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
-const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
-const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
-const u16 cardPullOutSignatureThumb[4]     = {0xB508, 0x203F, 0x4008, 0x2811};
-const u16 cardPullOutSignatureThumbAlt[4]  = {0xB500, 0xB081, 0x203F, 0x4001};
-const u16 cardPullOutSignatureThumb5[4]    = {0xB510, 0x203F, 0x4008, 0x2811};                 // SDK 5
-const u16 cardPullOutSignatureThumb5Alt[4] = {0xB538, 0x203F, 0x4008, 0x2811};                 // SDK 5
+static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
+static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
+static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
+static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
+static const u16 cardPullOutSignatureThumb[4]     = {0xB508, 0x203F, 0x4008, 0x2811};
+static const u16 cardPullOutSignatureThumbAlt[4]  = {0xB500, 0xB081, 0x203F, 0x4001};
+static const u16 cardPullOutSignatureThumb5[4]    = {0xB510, 0x203F, 0x4008, 0x2811};                 // SDK 5
+static const u16 cardPullOutSignatureThumb5Alt[4] = {0xB538, 0x203F, 0x4008, 0x2811};                 // SDK 5
 
-//const u32 cardSendSignature[7] = {0xE92D40F0, 0xE24DD004, 0xE1A07000, 0xE1A06001, 0xE1A01007, 0xE3A0000E, 0xE3A02000};
+//static const u32 cardSendSignature[7] = {0xE92D40F0, 0xE24DD004, 0xE1A07000, 0xE1A06001, 0xE1A01007, 0xE3A0000E, 0xE3A02000};
 
 // Force to power off
-//const u32 forceToPowerOffSignature[4] = {0xE92D4000, 0xE24DD004, 0xE59F0028, 0xE28D1000};
+//static const u32 forceToPowerOffSignature[4] = {0xE92D4000, 0xE24DD004, 0xE59F0028, 0xE28D1000};
 
 // Card id
-const u32 cardIdEndSignature[2]            = {0x040001A4, 0x04100010};
-const u32 cardIdEndSignature5[4]           = {0xE8BD8010, 0x02FFFAE0, 0x040001A4, 0x04100010}; // SDK 5
-const u32 cardIdEndSignature5Alt[3]        = {0x02FFFAE0, 0x040001A4, 0x04100010};             // SDK 5
-const u16 cardIdEndSignatureThumb[6]       = {0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410};
-const u16 cardIdEndSignatureThumb5[8]      = {0xFAE0, 0x02FF, 0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
-const u32 cardIdStartSignature[1]          = {0xE92D4000};
-const u32 cardIdStartSignatureAlt1[1]      = {0xE92D4008};
-const u32 cardIdStartSignatureAlt2[1]      = {0xE92D4010};
-const u32 cardIdStartSignature5[2]         = {0xE92D4010, 0xE3A050B8}; // SDK 5
-const u32 cardIdStartSignature5Alt[1]      = {0xE92D4038};             // SDK 5
-const u16 cardIdStartSignatureThumb[2]     = {0xB500, 0xB081};
-const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
-const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
-const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
+static const u32 cardIdEndSignature[2]            = {0x040001A4, 0x04100010};
+static const u32 cardIdEndSignature5[4]           = {0xE8BD8010, 0x02FFFAE0, 0x040001A4, 0x04100010}; // SDK 5
+static const u32 cardIdEndSignature5Alt[3]        = {0x02FFFAE0, 0x040001A4, 0x04100010};             // SDK 5
+static const u16 cardIdEndSignatureThumb[6]       = {0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410};
+static const u16 cardIdEndSignatureThumb5[8]      = {0xFAE0, 0x02FF, 0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
+static const u32 cardIdStartSignature[1]          = {0xE92D4000};
+static const u32 cardIdStartSignatureAlt1[1]      = {0xE92D4008};
+static const u32 cardIdStartSignatureAlt2[1]      = {0xE92D4010};
+static const u32 cardIdStartSignature5[2]         = {0xE92D4010, 0xE3A050B8}; // SDK 5
+static const u32 cardIdStartSignature5Alt[1]      = {0xE92D4038};             // SDK 5
+static const u16 cardIdStartSignatureThumb[2]     = {0xB500, 0xB081};
+static const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
+static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
+static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
 // Card read DMA
-const u32 cardReadDmaEndSignature[2]         = {0x01FF8000, 0x000001FF};
-const u16 cardReadDmaEndSignatureThumbAlt[4] = {0x8000, 0x01FF, 0x0000, 0x0200};
-const u32 cardReadDmaStartSignature[1]       = {0xE92D4FF8};
-const u32 cardReadDmaStartSignatureAlt1[1]   = {0xE92D47F0};
-const u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
-const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
-const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
-const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
+static const u32 cardReadDmaEndSignature[2]         = {0x01FF8000, 0x000001FF};
+static const u16 cardReadDmaEndSignatureThumbAlt[4] = {0x8000, 0x01FF, 0x0000, 0x0200};
+static const u32 cardReadDmaStartSignature[1]       = {0xE92D4FF8};
+static const u32 cardReadDmaStartSignatureAlt1[1]   = {0xE92D47F0};
+static const u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
+static const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
+static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
+static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
 // Arena low
-//const u32 arenaLowSignature[4] = {0xE1A00100, 0xE2800627, 0xE2800AFF, 0xE5801DA0};
+//static const u32 arenaLowSignature[4] = {0xE1A00100, 0xE2800627, 0xE2800AFF, 0xE5801DA0};
 
 // Random patch
-const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
-const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
-const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
+static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
+static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
+static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // Mpu cache
-const u32 mpuInitRegion0Signature[1] = {0xEE060F10};
-const u32 mpuInitRegion0Data[1]      = {0x4000033};
-const u32 mpuInitRegion1Signature[1] = {0xEE060F11};
-const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 3
-const u32 mpuInitRegion1Data4[1]     = {0x200002D}; // SDK >= 4
-const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
-const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
-const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK != 3 (Previously: SDK <= 2)
-const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK 3 (Previously: SDK >= 3)
-const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
-const u32 mpuInitRegion3Data[1]      = {0x8000035};
+static const u32 mpuInitRegion0Signature[1] = {0xEE060F10};
+static const u32 mpuInitRegion0Data[1]      = {0x4000033};
+static const u32 mpuInitRegion1Signature[1] = {0xEE060F11};
+static const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 3
+static const u32 mpuInitRegion1Data4[1]     = {0x200002D}; // SDK >= 4
+//static const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
+static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
+static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK != 3 (Previously: SDK <= 2)
+static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK 3 (Previously: SDK >= 3)
+static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
+static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 
 // Mpu cache init
-const u32 mpuInitCache[1] = {0xE3A00042};
+static const u32 mpuInitCache[1] = {0xE3A00042};
 
 u32* findModuleParamsOffset(const u32* src, u32 size) {
 	dbg_printf("findModuleParamsOffset:\n");
