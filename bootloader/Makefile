@@ -14,8 +14,8 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	load
 BUILD		:=	build
-SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../source
-INCLUDES	:=	include build ../include
+SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../common/source
+INCLUDES	:=	include build ../common/include
 DATA		:=	../data
 SPECS		:=  specs
  

@@ -19,8 +19,8 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BUILD		:=	build
-SOURCES		:=	source #../source --> conflict between nds/sdmmc.h and sdmmc_alt.h
-INCLUDES	:=	include build ../include
+SOURCES		:=	source #../common/source --> conflict between nds/sdmmc.h and sdmmc_alt.h
+INCLUDES	:=	include build ../common/include
 
 #---------------------------------------------------------------------------------
 # options for code generation

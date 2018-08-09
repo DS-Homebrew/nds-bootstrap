@@ -365,7 +365,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		*(u32*)patches[8] = (u32)cardReadCachedStartOffset;
 	}
 
-	//if (!usesThumb) { // Based on: cardengine_arm9/source/card_engine_header.s
+	//if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
 		patches[10] = needFlushCache;
 	//}
 
