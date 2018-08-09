@@ -54,8 +54,8 @@ enum {
 	ARM9_DISPERR
 } ARM9_STATE;
 
-extern volatile tNDSHeader* ndsHeader;
-extern volatile bool sdk5;
+extern tNDSHeader* ndsHeader;
+extern bool sdk5;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;
