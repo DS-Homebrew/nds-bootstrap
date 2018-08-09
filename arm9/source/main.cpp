@@ -19,16 +19,25 @@
 ------------------------------------------------------------------*/
 
 //#include <stdio.h>
-#include <stdarg.h>
-#include <limits.h>
-
-#include <nds.h>
+//#include <nds.h>
+#include <cstring>
+#include <cstdarg>
+#include <climits>
+#include <unistd.h>
+#include <nds/ndstypes.h>
+#include <nds/arm9/input.h>
 #include <nds/fifocommon.h>
+#include <nds/arm9/console.h>
+
+extern "C" {
+#include <nds/system.h>
+#include <nds/debug.h>
+}
+
 #include <fat.h>
 
-#include "stringtool.h"
-#include "nds_loader_arm9.h"
 #include "inifile.h"
+#include "nds_loader_arm9.h"
 
 //using namespace std;
 

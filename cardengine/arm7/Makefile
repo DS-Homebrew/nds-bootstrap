@@ -12,74 +12,64 @@ include $(DEVKITARM)/ds_rules
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-# MAXMOD_SOUNDBANK contains a directory of music and sound effect files
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+# SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-TARGET		:=	nds-bootstrap
-BUILD		:=	build
-SOURCES		:=	source ../source
-INCLUDES	:=	include ../include
-DATA		:=	../data
-#GRAPHICS	:=  graphics
-IMAGES		:=	graphics
-MUSIC       :=  music
+export TARGET	:=	cardengine_arm7
+BUILD			:=	build
+SOURCES			:=	source ../../source
+DATA			:=	data
+INCLUDES		:=	include ../../include
+
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork
+ARCH	:=	-mthumb-interwork -march=armv4t
 
 COMMON	:=	-g -Wall -O2\
- 		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-		-ffast-math \
-		$(ARCH)
+			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
+			-ffast-math \
+			$(ARCH)
 
-COMMON	+=	$(INCLUDE) -DARM9
+# ADD -DDEBUG here for logging/debug
+COMMON	+=	$(INCLUDE) -DARM7
+
 CFLAGS	:=	$(COMMON) -std=gnu99
-CXXFLAGS	:= $(COMMON) -fno-exceptions
+CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project (order is important)
-#---------------------------------------------------------------------------------
-LIBS	:=	-lfat -lnds9
- 
- 
+LIBS	:= -lnds7
+
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(LIBNDS)
  
+  
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
-
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-
-#export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-#					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
-#					$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
-
-export AUDIOFILES	:=	$(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
+ 
+export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-#PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
- 
-BMPFILES	:=	$(foreach dir,$(IMAGES),$(notdir $(wildcard $(dir)/*.bmp)))
+
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
@@ -95,20 +85,19 @@ endif
 #---------------------------------------------------------------------------------
 
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-					$(BMPFILES:.bmp=.o) \
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
- 
+			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 			-I$(CURDIR)/$(BUILD)
- 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
- 
-.PHONY: $(BUILD) clean
 
-all : $(BUILD)
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+.PHONY: $(BUILD) clean all
  
 #---------------------------------------------------------------------------------
+all: $(BUILD)
+
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
@@ -116,46 +105,30 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds *.bin 
-
+	@rm -fr $(BUILD) $(TARGET).bin $(TARGET).elf
+ 
+ 
 #---------------------------------------------------------------------------------
 else
  
 DEPENDS	:=	$(OFILES:.o=.d)
-
+ 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).elf	:	$(OFILES)
+$(OUTPUT).bin			:	$(CURDIR)/$(TARGET).elf
+$(CURDIR)/$(TARGET).elf	:	$(OFILES)
+
 
 #---------------------------------------------------------------------------------
 %.bin: %.elf
-#---------------------------------------------------------------------------------
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
-
-#---------------------------------------------------------------------------------
-%.bin.o	:	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	$(bin2o)
-
-#---------------------------------------------------------------------------------
-# graphics
-#---------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------
-# This rule creates assembly source files using grit
-# grit takes an image file and a .grit describing how the file is to be processed
-# add additional rules like this for each image extension
-# you use in the graphics folders
-#---------------------------------------------------------------------------------
-#%.s %.h   : %.png %.grit
-#---------------------------------------------------------------------------------
-#	grit $< -fts -o$*
  
-#-include $(DEPSDIR)/*.d
 
+-include $(DEPENDS)
+
+ 
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

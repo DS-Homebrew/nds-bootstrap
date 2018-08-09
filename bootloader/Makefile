@@ -14,8 +14,8 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	load
 BUILD		:=	build
-SOURCES		:=	source source/patches 
-INCLUDES	:=	build ../include
+SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../source
+INCLUDES	:=	include build ../include
 DATA		:=	../data
 SPECS		:=  specs
  
@@ -34,7 +34,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
 
-LIBS	:= 
+LIBS	:= -lnds7
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -65,7 +65,8 @@ export OBJCOPY	:=	$(PREFIX)objcopy
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
+#BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
+BINFILES	:=	cardengine_arm7.bin cardengine_arm9.bin
  
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
@@ -103,8 +104,6 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 $(LOADBIN)	:	$(LOADELF)
-	@$(OBJCOPY) -O binary $< $@
-	@echo built ... $(notdir $@)
 
 
 $(LOADELF)	:	$(OFILES)
@@ -131,11 +130,17 @@ cardengine_arm9.bin:
 
 
 #---------------------------------------------------------------------------------
-%.bin.o	:	%.bin
+%.bin: %.elf
+#---------------------------------------------------------------------------------
+	@$(OBJCOPY) -O binary $< $@
+	@echo built ... $(notdir $@)
+
+#---------------------------------------------------------------------------------
+%.bin.o: %.bin
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(bin2o)
-	
+
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------
