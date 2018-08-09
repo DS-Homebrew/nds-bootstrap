@@ -42,6 +42,7 @@
 
 extern void arm9_clearCache(void);
 
+volatile tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 volatile bool sdk5 = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
@@ -240,7 +241,6 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	tNDSHeader* ndsHeader = (sdk5 ? (tNDSHeader*)NDS_HEADER_SDK5 : (tNDSHeader*)NDS_HEADER);
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
 	arm9code();
 	

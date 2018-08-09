@@ -100,7 +100,6 @@ u32 romSizeNoArm9;
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
 static module_params_t* moduleParams = NULL;
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS;
 static char* romLocation = (char*)ROM_LOCATION;
 

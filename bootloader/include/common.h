@@ -21,6 +21,7 @@
 
 //#include <stdlib.h>
 #include <nds/dma.h>
+#include <nds/memory.h> // tNDSHeader
 
 #define resetCpu() \
 		__asm volatile("swi 0x000000")
@@ -53,6 +54,7 @@ enum {
 	ARM9_DISPERR
 } ARM9_STATE;
 
+extern volatile tNDSHeader* ndsHeader;
 extern volatile bool sdk5;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
