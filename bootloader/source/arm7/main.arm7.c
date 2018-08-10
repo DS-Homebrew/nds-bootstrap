@@ -316,25 +316,27 @@ void NDSTouchscreenMode(void) {
 		volLevel = 0xA7;
 	//}
 
-	volLevel += 0x13;
+	if (REG_SCFG_EXT == 0) {
+		volLevel += 0x13;
+	}
 
 	// Touchscreen
 	readTSCReg(0);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x3A, 0);
 	readTSCReg(0x51);
-	writeTSCReg(3, 0);
+	writeTSCReg(0, 3);				// bank3
 	readTSCReg(2);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	readTSCReg(0x3F);
-	writeTSCReg(0, 1);
-	readTSCReg(0x38);
-	readTSCReg(0x2a);
+	writeTSCReg(0, 1);				// bank1
+	readTSCReg(0x28);
+	readTSCReg(0x2A);
 	readTSCReg(0x2E);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x52, 0x80);
 	writeTSCReg(0x40, 0xC);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x24, 0xFF);
 	writeTSCReg(0x25, 0xFF);
 	writeTSCReg(0x26, 0x7F);
@@ -343,16 +345,16 @@ void NDSTouchscreenMode(void) {
 	writeTSCReg(0x29, 0x4A);
 	writeTSCReg(0x2A, 0x10);
 	writeTSCReg(0x2B, 0x10);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x51, 0);
-	writeTSCReg(0, 3);
+	writeTSCReg(0, 3);				// bank3
 	readTSCReg(2);
 	writeTSCReg(2, 0x98);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x23, 0);
 	writeTSCReg(0x1F, 0x14);
 	writeTSCReg(0x20, 0x14);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x3F, 0);
 	readTSCReg(0x0B);
 	writeTSCReg(0x5, 0);
@@ -360,17 +362,17 @@ void NDSTouchscreenMode(void) {
 	writeTSCReg(0xC, 0x2);
 	writeTSCReg(0x12, 0x1);
 	writeTSCReg(0x13, 0x2);
-	writeTSCReg(0, 1);
-	writeTSCReg(0x2E, 0x00);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 1);				// bank1
+	writeTSCReg(0x2E, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x3A, 0x60);
-	writeTSCReg(0x01, 01);
-	writeTSCReg(0x9, 0x66);
-	writeTSCReg(0, 1);
+	writeTSCReg(0x01, 0x01);
+	writeTSCReg(0x39, 0x66);
+	writeTSCReg(0, 1);				// bank1
 	readTSCReg(0x20);
 	writeTSCReg(0x20, 0x10);
-	writeTSCReg(0, 0);
-	writeTSCReg(04, 00);
+	writeTSCReg(0, 0);				// bank0
+	writeTSCReg(0x04, 0);
 	writeTSCReg(0x12, 0x81);
 	writeTSCReg(0x13, 0x82);
 	writeTSCReg(0x51, 0x82);
@@ -382,47 +384,47 @@ void NDSTouchscreenMode(void) {
 	writeTSCReg(0x0C, 0x83);
 	writeTSCReg(0x12, 0x87);
 	writeTSCReg(0x13, 0x83);
-	writeTSCReg(0, 3);
+	writeTSCReg(0, 3);				// bank3
 	readTSCReg(0x10);
 	writeTSCReg(0x10, 0x08);
-	writeTSCReg(0, 4);
+	writeTSCReg(0, 4);				// bank4
 	writeTSCReg(0x08, 0x7F);
 	writeTSCReg(0x09, 0xE1);
 	writeTSCReg(0xA, 0x80);
 	writeTSCReg(0xB, 0x1F);
 	writeTSCReg(0xC, 0x7F);
 	writeTSCReg(0xD, 0xC1);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x41, 0x08);
 	writeTSCReg(0x42, 0x08);
 	writeTSCReg(0x3A, 0x00);
-	writeTSCReg(0, 4);
+	writeTSCReg(0, 4);				// bank4
 	writeTSCReg(0x08, 0x7F);
 	writeTSCReg(0x09, 0xE1);
 	writeTSCReg(0xA, 0x80);
 	writeTSCReg(0xB, 0x1F);
 	writeTSCReg(0xC, 0x7F);
 	writeTSCReg(0xD, 0xC1);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x2F, 0x2B);
 	writeTSCReg(0x30, 0x40);
 	writeTSCReg(0x31, 0x40);
 	writeTSCReg(0x32, 0x60);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	readTSCReg(0x74);
 	writeTSCReg(0x74, 0x02);
 	readTSCReg(0x74);
 	writeTSCReg(0x74, 0x10);
 	readTSCReg(0x74);
 	writeTSCReg(0x74, 0x40);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x21, 0x20);
 	writeTSCReg(0x22, 0xF0);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	readTSCReg(0x51);
 	readTSCReg(0x3F);
-	writeTSCReg(0x3F, 0xd4);
-	writeTSCReg(0, 1);
+	writeTSCReg(0x3F, 0xD4);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x23, 0x44);
 	writeTSCReg(0x1F, 0xD4);
 	writeTSCReg(0x28, 0x4E);
@@ -432,32 +434,33 @@ void NDSTouchscreenMode(void) {
 	writeTSCReg(0x20, 0xD4);
 	writeTSCReg(0x2A, 0x14);
 	writeTSCReg(0x2B, 0x14);
-	writeTSCReg(0x26, volLevel);
-	writeTSCReg(0x27, volLevel);
-	writeTSCReg(0, 0);
+	writeTSCReg(0x26, 0xA7);
+	writeTSCReg(0x27, 0xA7);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x40, 0);
 	writeTSCReg(0x3A, 0x60);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x26, volLevel);
 	writeTSCReg(0x27, volLevel);
 	writeTSCReg(0x2E, 0x03);
-	writeTSCReg(0, 3);
+	writeTSCReg(0, 3);				// bank3
 	writeTSCReg(3, 0);
-	writeTSCReg(0, 1);
+	writeTSCReg(0, 1);				// bank1
 	writeTSCReg(0x21, 0x20);
 	writeTSCReg(0x22, 0xF0);
 	readTSCReg(0x22);
 	writeTSCReg(0x22, 0xF0);
-	writeTSCReg(0, 0);
+	writeTSCReg(0, 0);				// bank0
 	writeTSCReg(0x52, 0x80);
 	writeTSCReg(0x51, 0x00);
-	writeTSCReg(0, 3);
+	writeTSCReg(0, 3);				// bank3
 	readTSCReg(0x02);
 	writeTSCReg(2, 0x98);
-	writeTSCReg(0, 0xFF);
+	writeTSCReg(0, 0xFF);			// bankFF
 	writeTSCReg(5, 0);
 	
 	// Power management
+	writePowerManagement(0x80, 0x00);
 	writePowerManagement(0x00, 0x0D);
 	//*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
 	//*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
@@ -858,10 +861,8 @@ int arm7_main(void) {
 
 	int errorCode;
 
-	if (REG_SCFG_EXT == 0) {
-		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
-	}
+	NDSTouchscreenMode();
+	*(u16*)0x4000500 = 0x807F;
 
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
