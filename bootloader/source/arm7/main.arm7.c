@@ -861,8 +861,10 @@ int arm7_main(void) {
 
 	int errorCode;
 
-	NDSTouchscreenMode();
-	*(u16*)0x4000500 = 0x807F;
+	if (REG_SCFG_EXT == 0 || consoleModel < 2) {
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+	}
 
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
