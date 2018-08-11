@@ -50,7 +50,6 @@ typedef struct cardengineArm9 {
     u32 card_struct0;
     u32 cache_struct;
     u32 rom_in_ram;
-    u32 rom_tid;
     u32 rom_headercrc;
     u32 arm9_len;
     u32 rom_size;

@@ -4,8 +4,6 @@
 
 //#define memset __builtin_memset
 
-//extern u32 ROM_TID;
-
 //
 // Subroutine function signatures ARM9
 //

@@ -89,7 +89,6 @@ extern unsigned long asyncPrefetch;
 bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
-//u32 ROM_TID;
 //u32 ROM_HEADERCRC;
 //u32 ARM9_LEN;
 //u32 ARM7_LEN; // SDK 5
@@ -632,7 +631,6 @@ void loadBinary_ARM7(aFile file) {
 	char* ARM7_DST = (char*)dsiHeaderTemp.ndshdr.arm7destination;
 	//ARM7_LEN       = dsiHeaderTemp.ndshdr.arm7binarySize;
 
-	//ROM_TID       = *(u32*)dsiHeaderTemp.ndshdr.gameCode;
 	//fatSize       = dsiHeaderTemp.ndshdr.fatSize;
 	//romSize       = dsiHeaderTemp.ndshdr.romSize;
 	//romSizeNoArm9 = dsiHeaderTemp.ndshdr.romSize - 0x4000 - dsiHeaderTemp.ndshdr.arm9binarySize;
