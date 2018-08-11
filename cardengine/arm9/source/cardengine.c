@@ -43,7 +43,6 @@ extern vu32* volatile cardStruct0;
 
 extern u32 sdk_version;
 extern u32 ROMinRAM;
-//extern u32 romSize;
 extern u32 dsiMode; // SDK 5
 extern u32 enableExceptionHandler;
 extern u32 consoleModel;

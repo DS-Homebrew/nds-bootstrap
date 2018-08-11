@@ -15,7 +15,6 @@
 .global fileCluster
 .global saveCluster
 .global ROMinRAM
-.global romSize
 .global dsiMode
 .global enableExceptionHandler
 .global consoleModel
@@ -41,8 +40,6 @@ cardStruct0:
 cacheStruct:
 	.word	0x00000000
 ROMinRAM:
-	.word	0x00000000
-romSize:
 	.word	0x00000000
 dsiMode:
 	.word	0x00000000
