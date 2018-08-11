@@ -92,7 +92,7 @@ u32 ROMinRAM = false;
 //u32 ROM_TID;
 u32 ROM_HEADERCRC;
 //u32 ARM9_LEN;
-u32 ARM7_LEN; // SDK 5
+//u32 ARM7_LEN; // SDK 5
 u32 fatSize;
 u32 romSize;
 u32 romSizeNoArm9;
@@ -626,7 +626,7 @@ void loadBinary_ARM7(aFile file) {
 	// Read ARM7 info from NDS header
 	u32 ARM7_SRC   = dsiHeaderTemp.ndshdr.arm7romOffset;
 	char* ARM7_DST = (char*)dsiHeaderTemp.ndshdr.arm7destination;
-	ARM7_LEN       = dsiHeaderTemp.ndshdr.arm7binarySize;
+	//ARM7_LEN       = dsiHeaderTemp.ndshdr.arm7binarySize;
 
 	//ROM_TID       = *(u32*)dsiHeaderTemp.ndshdr.gameCode;
 	fatSize       = dsiHeaderTemp.ndshdr.fatSize;
@@ -651,7 +651,7 @@ void loadBinary_ARM7(aFile file) {
 
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, dsiHeaderTemp.ndshdr.arm9binarySize, 3);
-	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
+	fileRead(ARM7_DST, file, ARM7_SRC, dsiHeaderTemp.ndshdr.arm7binarySize, 3);
 
 	// SDK 5
 	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp[0x10 >> 2] & BIT(16+1));

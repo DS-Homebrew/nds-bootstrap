@@ -39,7 +39,7 @@ extern unsigned long asyncPrefetch;
 
 //extern bool sdk5;
 extern u32 ROMinRAM;
-extern u32 ARM7_LEN; // SDK 5
+//extern u32 ARM7_LEN; // SDK 5
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
