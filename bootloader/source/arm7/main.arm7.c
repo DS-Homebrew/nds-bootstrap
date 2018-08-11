@@ -89,7 +89,6 @@ extern unsigned long asyncPrefetch;
 bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
-//u32 romSizeNoArm9;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
@@ -623,8 +622,6 @@ void loadBinary_ARM7(aFile file) {
 	// Read ARM7 info from NDS header
 	u32 ARM7_SRC   = dsiHeaderTemp.ndshdr.arm7romOffset;
 	char* ARM7_DST = (char*)dsiHeaderTemp.ndshdr.arm7destination;
-
-	//romSizeNoArm9 = dsiHeaderTemp.ndshdr.romSize - 0x4000 - dsiHeaderTemp.ndshdr.arm9binarySize;
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
