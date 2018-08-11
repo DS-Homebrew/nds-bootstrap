@@ -7,7 +7,7 @@
 extern u32 ROMinRAM;
 u32 ROM_TID = 0; //extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
-extern u32 ARM9_LEN;
+u32 ARM9_LEN = 0; //extern u32 ARM9_LEN;
 extern u32 romSize;
 extern bool dsiModeConfirmed; // SDK 5
 extern u32 enableExceptionHandler;

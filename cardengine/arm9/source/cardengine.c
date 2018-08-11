@@ -45,7 +45,7 @@ extern u32 sdk_version;
 extern u32 ROMinRAM;
 //extern u32 ROM_TID;
 //extern u32 ROM_HEADERCRC; // SDK 5
-extern u32 ARM9_LEN;
+//extern u32 ARM9_LEN;
 extern u32 romSize;
 extern u32 dsiMode; // SDK 5
 extern u32 enableExceptionHandler;

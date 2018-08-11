@@ -91,7 +91,7 @@ bool dsiModeConfirmed = false; // SDK 5
 u32 ROMinRAM = false;
 //u32 ROM_TID;
 u32 ROM_HEADERCRC;
-u32 ARM9_LEN;
+//u32 ARM9_LEN;
 u32 ARM7_LEN; // SDK 5
 u32 fatSize;
 u32 romSize;
@@ -621,7 +621,7 @@ void loadBinary_ARM7(aFile file) {
 	// Read ARM9 info from NDS header
 	u32 ARM9_SRC   = dsiHeaderTemp.ndshdr.arm9romOffset;
 	char* ARM9_DST = (char*)dsiHeaderTemp.ndshdr.arm9destination;
-	ARM9_LEN       = dsiHeaderTemp.ndshdr.arm9binarySize;
+	//ARM9_LEN       = dsiHeaderTemp.ndshdr.arm9binarySize;
 
 	// Read ARM7 info from NDS header
 	u32 ARM7_SRC   = dsiHeaderTemp.ndshdr.arm7romOffset;
@@ -631,7 +631,7 @@ void loadBinary_ARM7(aFile file) {
 	//ROM_TID       = *(u32*)dsiHeaderTemp.ndshdr.gameCode;
 	fatSize       = dsiHeaderTemp.ndshdr.fatSize;
 	romSize       = dsiHeaderTemp.ndshdr.romSize;
-	romSizeNoArm9 = romSize - 0x4000 - ARM9_LEN;
+	romSizeNoArm9 = romSize - 0x4000 - dsiHeaderTemp.ndshdr.arm9binarySize;
 	ROM_HEADERCRC = dsiHeaderTemp.ndshdr.headerCRC16;
 
 	// Fix Pokemon games needing header data.
@@ -650,7 +650,7 @@ void loadBinary_ARM7(aFile file) {
 	}
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 3);
+	fileRead(ARM9_DST, file, ARM9_SRC, dsiHeaderTemp.ndshdr.arm9binarySize, 3);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 3);
 
 	// SDK 5
