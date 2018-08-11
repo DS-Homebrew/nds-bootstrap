@@ -103,11 +103,11 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 // Mpu cache init
 static const u32 mpuInitCache[1] = {0xE3A00042};
 
-u32* findModuleParamsOffset(const u32* src, u32 size) {
+u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
 	u32* moduleParamsOffset = findOffset(
-		src, size,//(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
 		moduleParamsSignature, 2
 	);
 	if (moduleParamsOffset) {

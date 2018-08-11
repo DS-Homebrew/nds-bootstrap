@@ -484,26 +484,26 @@ module_params_t* buildModuleParams() {
 	return moduleParams;
 }
 
-module_params_t* getModuleParams(const void* arm9binary) {
+module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	nocashMessage("Looking for moduleparams...\n");
 
-	u32* moduleParamsOffset = findModuleParamsOffset((u32*)arm9binary, ARM9_LEN);
+	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
 
 	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void decompressBinary(const tNDSHeader* ndsHeader, void* arm9binary) {
+static inline void decompressBinary(const tNDSHeader* ndsHeader) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
 
 	// Chrono Trigger (Japan)
 	if (ROM_TID == 0x4a555159) {
-		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 
 	// Chrono Trigger (USA/Europe)
 	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
-		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
+		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 }
 
@@ -672,19 +672,18 @@ void loadBinary_ARM7(aFile file) {
 		}
 	}
 	
-	decompressBinary(&dsiHeaderTemp.ndshdr, ARM9_DST);
+	decompressBinary(&dsiHeaderTemp.ndshdr);
 	patchBinary(&dsiHeaderTemp.ndshdr);
 	
 	//moduleParams = findModuleParams(ndsHeader, donorSdkVer);
-	moduleParams = getModuleParams(ARM9_DST);
+	moduleParams = getModuleParams(ndsHeader);
 	if (moduleParams) {
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
 
 		*(vu32*)0x280000C = moduleParams->compressed_static_end; // from 'ensureArm9Decompressed'
-		//ensureArm9Decompressed(ndsHeader, moduleParams);
-		ensureArm9Decompressed(ARM9_DST, ARM9_LEN, moduleParams);
+		ensureArm9Decompressed(ndsHeader, moduleParams);
 	} else {
 		nocashMessage("No moduleparams?\n");
 		*(vu32*)0x2800010 = 1;
@@ -746,11 +745,11 @@ void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 
 	if (ROMinRAM == true) {
 		// Load ROM into RAM
-		fileRead(romLocation, file, 0x4000 + ARM9_LEN, romSizeNoArm9, 0);
+		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, romSizeNoArm9, 0);
 
 		// Primary fix for Mario's Holiday
-		if (*(u32*)((romLocation - 0x4000 - ARM9_LEN) + 0x003128AC) == 0x4B434148){
-			*(u32*)((romLocation - 0x4000 - ARM9_LEN) + 0x003128AC) = 0xA00;
+		if (*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) == 0x4B434148){
+			*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) = 0xA00;
 		}
 	}
 

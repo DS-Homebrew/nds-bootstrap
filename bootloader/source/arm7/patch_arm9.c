@@ -52,14 +52,14 @@ void decompressLZ77Backwards(u8* addr, u32 size) {
 	}
 }
 
-void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams) {
+void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
 	if (!moduleParams->compressed_static_end) {
+		// Not compressed
 		dbg_printf("This rom is not compressed\n");
-		return; // Not compressed
+		return;
 	}
 	dbg_printf("This rom is compressed\n");
-	//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-	decompressLZ77Backwards((u8*)arm9binary, arm9binarySize);
+	decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	moduleParams->compressed_static_end = 0;
 }
 

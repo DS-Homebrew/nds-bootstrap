@@ -529,7 +529,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 				sharedAddr[0] = dst;
 				sharedAddr[1] = len;
-				sharedAddr[2] = ((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ARM9_LEN)+src;
+				sharedAddr[2] = ((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
 				sharedAddr[3] = commandRead;
 
 				//IPC_SendSync(0xEE24);
@@ -539,7 +539,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Copy directly
-				memcpy(dst, (void*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ARM9_LEN)+src),len);
+				memcpy(dst, (void*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 				// Update cardi common
 				cardStruct[0] = src + len;
@@ -553,7 +553,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 				sharedAddr[0] = page;
 				sharedAddr[1] = len2;
-				sharedAddr[2] = (romLocation-0x4000-ARM9_LEN)+page;
+				sharedAddr[2] = (romLocation-0x4000-ndsHeader->arm9binarySize)+page;
 				sharedAddr[3] = commandRead;
 
 				//IPC_SendSync(0xEE24);
@@ -563,7 +563,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Read via the 512b ram cache
-				memcpy(cacheBuffer, (void*)((romLocation - 0x4000 - ARM9_LEN) + page), 512);
+				memcpy(cacheBuffer, (void*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
 			}
