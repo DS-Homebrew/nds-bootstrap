@@ -8,7 +8,7 @@
 //#define memcpy __builtin_memcpy // memcpy
 
 //extern bool sdk5;
-extern u32 ROM_TID;
+//extern u32 ROM_TID;
 
 bool cardReadFound = false; // card_patcher_common.c
 

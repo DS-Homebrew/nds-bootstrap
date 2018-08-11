@@ -5,7 +5,7 @@
 //extern bool sdk5;
 
 extern u32 ROMinRAM;
-extern u32 ROM_TID;
+u32 ROM_TID = 0; //extern u32 ROM_TID;
 extern u32 ROM_HEADERCRC;
 extern u32 ARM9_LEN;
 extern u32 romSize;
