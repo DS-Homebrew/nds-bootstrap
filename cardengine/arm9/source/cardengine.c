@@ -246,12 +246,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	sdk5 = (sdk_version > 0x5000000);
 	if (sdk5) {
-		romLocation = ROM_LOCATION_SDK5;
+		romLocation = ROM_SDK5_LOCATION;
 		cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
 	}
 
-	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)(CARDENGINE_LOCATION_ARM9 + 0x7BC0) : cardStruct0);
+	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)(CARDENGINE_ARM9_LOCATION + 0x7BC0) : cardStruct0);
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;

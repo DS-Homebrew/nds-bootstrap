@@ -128,8 +128,8 @@ void initialize(void) {
 
 	sdk5 = (sdk_version > 0x5000000);
 	if (sdk5) {
-		romLocation = (void*)ROM_LOCATION_SDK5;
-		saveLocation = (void*)SAVE_LOCATION_SDK5;
+		romLocation = (void*)ROM_SDK5_LOCATION;
+		saveLocation = (void*)SAVE_SDK5_LOCATION;
 	}
 }
 

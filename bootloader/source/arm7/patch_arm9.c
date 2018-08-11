@@ -12,7 +12,7 @@ extern u32 ROM_TID;
 
 bool cardReadFound = false; // card_patcher_common.c
 
-static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
+static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;

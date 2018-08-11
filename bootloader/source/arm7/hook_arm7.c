@@ -54,7 +54,7 @@ extern unsigned long intr_orig_return_offset;
 
 extern const u8 cheat_engine_start[];*/
 
-static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
+static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}

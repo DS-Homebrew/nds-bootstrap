@@ -12,7 +12,7 @@
 extern u32 ROMinRAM;
 
 //static bool sdk5 = false;
-static u32* debug = (u32*)DEBUG_LOCATION_PATCH;
+static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 u32 savePatchV1(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
 u32 savePatchV2(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
@@ -162,7 +162,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
-		char* saveLocation = (sdk5 ? (char*)SAVE_LOCATION_SDK5 : (char*)SAVE_LOCATION);
+		char* saveLocation = (sdk5 ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
 		fileRead(saveLocation, saveFile, 0, saveSize, 3);
 	}
 
