@@ -493,7 +493,9 @@ module_params_t* getModuleParams(const void* arm9binary) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void decompressBinary(void* arm9binary) {
+static inline void decompressBinary(const tNDSHeader* ndsHeader, void* arm9binary) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+
 	// Chrono Trigger (Japan)
 	if (ROM_TID == 0x4a555159) {
 		decompressLZ77Backwards((u8*)arm9binary, ARM9_LEN);
@@ -505,7 +507,9 @@ static inline void decompressBinary(void* arm9binary) {
 	}
 }
 
-static inline void patchBinary(void) {
+static inline void patchBinary(const tNDSHeader* ndsHeader) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+
 	// The World Ends With You (USA) (Europe)
 	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
 		*(u32*)0x203E7B0 = 0;
@@ -668,8 +672,8 @@ void loadBinary_ARM7(aFile file) {
 		}
 	}
 	
-	decompressBinary(ARM9_DST);
-	patchBinary();
+	decompressBinary(&dsiHeaderTemp.ndshdr, ARM9_DST);
+	patchBinary(&dsiHeaderTemp.ndshdr);
 	
 	//moduleParams = findModuleParams(ndsHeader, donorSdkVer);
 	moduleParams = getModuleParams(ARM9_DST);
@@ -728,7 +732,9 @@ void loadBinary_ARM7(aFile file) {
 
 u32 enableExceptionHandler = true;
 
-void setArm9Stuff(aFile file) {
+void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+
 	// ExceptionHandler2 (red screen) blacklist
 	if ((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
 	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
@@ -888,7 +894,7 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 7 dots
 
-	setArm9Stuff(*romFile);
+	setArm9Stuff(ndsHeader, *romFile);
 	if (ROMinRAM == false) {
 		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
 			// Turn WiFi LED off

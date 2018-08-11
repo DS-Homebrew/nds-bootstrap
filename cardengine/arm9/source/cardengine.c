@@ -22,6 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 #include <nds/fifomessages.h>
+#include <nds/memory.h> // tNDSHeader
 #include "hex.h"
 #include "cardengine.h"
 #include "locations.h"
@@ -35,13 +36,28 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
+extern void user_exception(void);
+
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
+
 extern u32 sdk_version;
+extern u32 ROMinRAM;
+extern u32 ROM_TID;
+//extern u32 ROM_HEADERCRC; // SDK 5
+extern u32 ARM9_LEN;
+extern u32 romSize;
+extern u32 dsiMode; // SDK 5
+extern u32 enableExceptionHandler;
+extern u32 consoleModel;
+extern u32 asyncPrefetch;
+
 extern u32 needFlushDCCache;
+
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 bool sdk5 = false;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
@@ -66,19 +82,6 @@ static bool alreadySetMpu = false;*/
 
 static bool flagsSet = false;
 static bool hgssFix = false;
-
-extern u32 sdk_version;
-extern u32 ROMinRAM;
-extern u32 ROM_TID;
-//extern u32 ROM_HEADERCRC; // SDK 5
-extern u32 ARM9_LEN;
-extern u32 romSize;
-extern u32 dsiMode; // SDK 5
-extern u32 enableExceptionHandler;
-extern u32 consoleModel;
-extern u32 asyncPrefetch;
-
-extern void user_exception(void);
 
 //---------------------------------------------------------------------------------
 void setExceptionHandler2(void) {
@@ -241,11 +244,18 @@ void getAsyncSector(void) {
 	}
 }
 
+static inline bool isHGSS(const tNDSHeader* ndsHeader) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	return ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049); // Pokemon SoulSilver
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
 	sdk5 = (sdk_version > 0x5000000);
 	if (sdk5) {
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = ROM_SDK5_LOCATION;
 		cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
@@ -287,13 +297,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}*/
 
 	if (!flagsSet) {
-		if ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049) // Pokemon SoulSilver
-		{
+		if (isHGSS(ndsHeader)) {
 			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
 			hgssFix = true;
-		}
-		else if (consoleModel > 0) {
+		} else if (consoleModel > 0) {
 			if (sdk5) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;

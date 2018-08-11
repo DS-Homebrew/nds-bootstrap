@@ -57,13 +57,15 @@ void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_p
 		dbg_printf("This rom is not compressed\n");
 		return; // Not compressed
 	}
-	dbg_printf("This rom is compressed;)\n");
+	dbg_printf("This rom is compressed\n");
 	//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	decompressLZ77Backwards((u8*)arm9binary, arm9binarySize);
 	moduleParams->compressed_static_end = 0;
 }
 
 u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
 
