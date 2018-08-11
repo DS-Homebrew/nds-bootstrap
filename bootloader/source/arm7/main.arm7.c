@@ -95,7 +95,7 @@ u32 ROMinRAM = false;
 //u32 ARM7_LEN; // SDK 5
 //u32 fatSize;
 //u32 romSize;
-u32 romSizeNoArm9;
+//u32 romSizeNoArm9;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
@@ -606,6 +606,10 @@ static inline void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 }
 
+static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
+	return ndsHeader->romSize - 0x4000 - ndsHeader->arm9binarySize;
+}
+
 void loadBinary_ARM7(aFile file) {
 	nocashMessage("loadBinary_ARM7");
 
@@ -631,7 +635,7 @@ void loadBinary_ARM7(aFile file) {
 	//ROM_TID       = *(u32*)dsiHeaderTemp.ndshdr.gameCode;
 	//fatSize       = dsiHeaderTemp.ndshdr.fatSize;
 	//romSize       = dsiHeaderTemp.ndshdr.romSize;
-	romSizeNoArm9 = dsiHeaderTemp.ndshdr.romSize - 0x4000 - dsiHeaderTemp.ndshdr.arm9binarySize;
+	//romSizeNoArm9 = dsiHeaderTemp.ndshdr.romSize - 0x4000 - dsiHeaderTemp.ndshdr.arm9binarySize;
 	//ROM_HEADERCRC = dsiHeaderTemp.ndshdr.headerCRC16;
 
 	// Fix Pokemon games needing header data.
@@ -697,9 +701,9 @@ void loadBinary_ARM7(aFile file) {
 		romLocation          = (char*)ROM_SDK5_LOCATION;
 	}
 
-	if ((sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x01000000)
-	|| (!sdk5 && consoleModel > 0 && romSizeNoArm9 <= 0x017FC000)
-	|| (!sdk5 && consoleModel == 0 && romSizeNoArm9 <= 0x007FC000))
+	if ((sdk5 && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
+	|| (!sdk5 && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x017FC000)
+	|| (!sdk5 && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x007FC000))
 	{
 		// Set to load ROM into RAM
 		ROMinRAM = true;
@@ -745,7 +749,7 @@ void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 
 	if (ROMinRAM == true) {
 		// Load ROM into RAM
-		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, romSizeNoArm9, 0);
+		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
 		// Primary fix for Mario's Holiday
 		if (*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) == 0x4B434148){
