@@ -162,13 +162,13 @@ void triggerAsyncPrefetch(u32 sector) {
 	
 	asyncReadSizeSubtract = 0;
 	if (asyncSector == 0xFFFFFFFF) {
-		if (romSize > 0) {
-			if (sector > romSize) {
+		if (ndsHeader->romSize > 0) {
+			if (sector > ndsHeader->romSize) {
 				sector = 0;
-			} else if ((sector+_128KB_READ_SIZE) > romSize) {
+			} else if ((sector+_128KB_READ_SIZE) > ndsHeader->romSize) {
 				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 					asyncReadSizeSubtract++;
-					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == romSize) {
+					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == ndsHeader->romSize) {
 						break;
 					}
 				}
@@ -313,7 +313,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			REG_SCFG_EXT = 0x8307F100;
 		}
 
-		romSize += 0x1000;
+		ndsHeader->romSize += 0x1000;
 
 		if (enableExceptionHandler) {
 			setExceptionHandler2();
@@ -341,10 +341,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ROMinRAM == false) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;
-		if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
+		if ((ndsHeader->romSize > 0) && ((sector+_128KB_READ_SIZE) > ndsHeader->romSize)) {
 			for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 				cacheReadSizeSubtract++;
-				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
+				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == ndsHeader->romSize) break;
 			}
 		}
 
@@ -501,10 +501,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					page = (src / 512) * 512;
 					sector = (src / _128KB_READ_SIZE) * _128KB_READ_SIZE;
 					cacheReadSizeSubtract = 0;
-					if (romSize > 0 && (sector+_128KB_READ_SIZE) > romSize) {
+					if (ndsHeader->romSize > 0 && (sector+_128KB_READ_SIZE) > ndsHeader->romSize) {
 						for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 							cacheReadSizeSubtract++;
-							if ((sector+_128KB_READ_SIZE) - cacheReadSizeSubtract == romSize) {
+							if ((sector+_128KB_READ_SIZE) - cacheReadSizeSubtract == ndsHeader->romSize) {
 								break;
 							}
 						}
