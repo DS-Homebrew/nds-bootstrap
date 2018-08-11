@@ -264,7 +264,7 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* c
 
 	// SDK 5
 	if (!hookLocation && sdk5) {
-		switch (ARM7_LEN) {
+		switch (ndsHeader->arm7binarySize) {
 			case 0x00022B40:
 				hookLocation = (u32*)0x238DED8;
 				break;
