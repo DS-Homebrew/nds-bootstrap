@@ -89,7 +89,6 @@ extern unsigned long asyncPrefetch;
 bool dsiModeConfirmed = false; // SDK 5
 
 u32 ROMinRAM = false;
-//u32 ARM9_LEN;
 //u32 ARM7_LEN; // SDK 5
 //u32 fatSize;
 //u32 romSize;
@@ -623,7 +622,6 @@ void loadBinary_ARM7(aFile file) {
 	// Read ARM9 info from NDS header
 	u32 ARM9_SRC   = dsiHeaderTemp.ndshdr.arm9romOffset;
 	char* ARM9_DST = (char*)dsiHeaderTemp.ndshdr.arm9destination;
-	//ARM9_LEN       = dsiHeaderTemp.ndshdr.arm9binarySize;
 
 	// Read ARM7 info from NDS header
 	u32 ARM7_SRC   = dsiHeaderTemp.ndshdr.arm7romOffset;

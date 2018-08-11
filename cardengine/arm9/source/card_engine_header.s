@@ -15,7 +15,6 @@
 .global fileCluster
 .global saveCluster
 .global ROMinRAM
-.global ARM9_LEN
 .global romSize
 .global dsiMode
 .global enableExceptionHandler
@@ -42,8 +41,6 @@ cardStruct0:
 cacheStruct:
 	.word	0x00000000
 ROMinRAM:
-	.word	0x00000000
-ARM9_LEN:
 	.word	0x00000000
 romSize:
 	.word	0x00000000
