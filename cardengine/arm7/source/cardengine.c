@@ -58,7 +58,7 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 
-bool sdk5 = false;
+static bool sdk5 = false;
 
 u32 numberToActivateRunViaHalt = 10; // SDK 5
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;

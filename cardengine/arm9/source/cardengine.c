@@ -54,7 +54,7 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-bool sdk5 = false;
+static bool sdk5 = false;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS];
