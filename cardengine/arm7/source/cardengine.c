@@ -59,8 +59,6 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 
-static bool sdk5 = false;
-
 u32 numberToActivateRunViaHalt = 10; // SDK 5
 vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 
@@ -83,6 +81,7 @@ bool ndmaUsed = false;
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static void* romLocation = (void*)ROM_LOCATION;
 static void* saveLocation = (void*)SAVE_LOCATION;
 
@@ -127,8 +126,9 @@ void initialize(void) {
 		initialized = true;
 	}
 
-	sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = (void*)ROM_SDK5_LOCATION;
 		saveLocation = (void*)SAVE_SDK5_LOCATION;
 	}
@@ -420,8 +420,6 @@ void myIrqHandlerVBlank(void) {
 	calledViaIPC = false;
 
 	if (language >= 0 && language < 6) {
-		tNDSHeader* ndsHeader = (sdk5 ? (tNDSHeader*)NDS_HEADER_SDK5 : (tNDSHeader*)NDS_HEADER);
-		
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}

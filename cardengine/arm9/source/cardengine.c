@@ -55,7 +55,6 @@ vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-static bool sdk5 = false;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS];
@@ -250,7 +249,7 @@ static inline bool isHGSS(const tNDSHeader* ndsHeader) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = ROM_SDK5_LOCATION;
