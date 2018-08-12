@@ -7,8 +7,6 @@
 
 //#define memcpy __builtin_memcpy // memcpy
 
-//extern bool sdk5;
-
 bool cardReadFound = false; // card_patcher_common.c
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
@@ -68,8 +66,6 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const mod
 	
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
-
-	//bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	bool usesThumb = false;
 	int readType = 0;

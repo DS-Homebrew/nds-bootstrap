@@ -11,7 +11,6 @@
 
 extern u32 ROMinRAM;
 
-//static bool sdk5 = false;
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 u32 savePatchV1(const tNDSHeader* ndsHeader, const cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
@@ -98,7 +97,8 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 }
 
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-	//sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool usesThumb = false;
 
 	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ndsHeader, moduleParams, ce7);
@@ -106,8 +106,6 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	if (ROMinRAM == false) {
 		patchSwiHalt(ndsHeader, moduleParams, ce7);
 	}
-	
-	bool usesThumb = false;
 
 	// Sleep patch
 	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
@@ -163,7 +161,6 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
-		bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 		char* saveLocation = (sdk5 ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
 		fileRead(saveLocation, saveFile, 0, saveSize, 3);
 	}

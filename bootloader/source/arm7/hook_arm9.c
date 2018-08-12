@@ -2,8 +2,6 @@
 #include "hook.h"
 #include "cardengine_header_arm9.h"
 
-//extern bool sdk5;
-
 extern u32 ROMinRAM;
 extern bool dsiModeConfirmed; // SDK 5
 extern u32 enableExceptionHandler;
