@@ -42,9 +42,9 @@
 
 //#define memcpy __builtin_memcpy
 
-extern int tryLockMutex(int * addr);
-extern int lockMutex(int * addr);
-extern int unlockMutex(int * addr);
+extern int tryLockMutex(int* addr);
+extern int lockMutex(int* addr);
+extern int unlockMutex(int* addr);
 
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
