@@ -22,7 +22,7 @@
 //#include <nds/ndstypes.h>
 #include <nds/memory.h> // tNDSHeader
 #include "fat_alt.h"
-#include "patch.h" // module_params_t
+#include "module_params.h"
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
 

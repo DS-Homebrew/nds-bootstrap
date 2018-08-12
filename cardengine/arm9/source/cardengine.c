@@ -24,6 +24,7 @@
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
+#include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
 
@@ -41,7 +42,7 @@ extern void user_exception(void);
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
 
-extern u32 sdk_version;
+extern module_params_t* moduleParams;
 extern u32 ROMinRAM;
 extern u32 dsiMode; // SDK 5
 extern u32 enableExceptionHandler;
@@ -249,7 +250,7 @@ static inline bool isHGSS(const tNDSHeader* ndsHeader) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	sdk5 = (sdk_version > 0x5000000);
+	sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = ROM_SDK5_LOCATION;

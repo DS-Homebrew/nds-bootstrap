@@ -2,6 +2,7 @@
 #define CARDENGINE_HEADER_ARM9_H
 
 #include <nds/ndstypes.h>
+#include "module_params.h"
 
 //
 // ARM9 cardengine thumb patches
@@ -45,7 +46,7 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumb_patches;
     u32 intr_fifo_orig_return;
-    u32 sdk_version;
+    module_params_t* moduleParams;
     u32 file_cluster;
     u32 card_struct0;
     u32 cache_struct;

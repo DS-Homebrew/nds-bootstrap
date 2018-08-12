@@ -50,7 +50,8 @@
 
 #include "fat_alt.h"
 //#include "dldi_patcher.h"
-#include "patch.h"
+#include "module_params.h"
+#include "patch.h" // decompressLZ77Backwards
 #include "find.h"
 #include "hook.h"
 #include "common.h"

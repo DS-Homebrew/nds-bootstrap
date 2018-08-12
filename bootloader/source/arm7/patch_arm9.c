@@ -1,4 +1,5 @@
 #include <string.h>
+#include "module_params.h"
 #include "patch.h"
 #include "find.h"
 #include "common.h"
@@ -330,7 +331,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const mod
 
 	debug[2] = (u32)ce9;
 
-	ce9->sdk_version = moduleParams->sdk_version;
+	ce9->moduleParams = moduleParams; //ce9->sdk_version = moduleParams->sdk_version;
 
 	u32* cardReadPatch    = (usesThumb ? ce9->thumb_patches->card_read_arm9 : ce9->patches->card_read_arm9);
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumb_patches->card_pull      : ce9->patches->card_pull);

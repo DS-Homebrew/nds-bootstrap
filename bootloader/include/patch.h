@@ -21,7 +21,8 @@
 
 //#include <stddef.h>
 #include <nds/ndstypes.h>
-#include <nds/memory.h>
+#include <nds/memory.h> // tNDSHeader
+#include "module_params.h"
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
 
@@ -46,18 +47,6 @@
 #define PAGE_1G		(0b11101 << 1)
 #define PAGE_2G		(0b11110 << 1)
 #define PAGE_4G		(0b11111 << 1)
-
-typedef struct {
-	u32 auto_load_list_offset;
-	u32 auto_load_list_end;
-	u32 auto_load_start;
-	u32 static_bss_start;
-	u32 static_bss_end;
-	u32 compressed_static_end;
-	u32 sdk_version;
-	u32 nitro_code_be;
-	u32 nitro_code_le;
-} module_params_t;
 
 extern bool cardReadFound; // card_patcher_arm9.c
 

@@ -1,4 +1,5 @@
 #include <nds/ndstypes.h>
+#include "module_params.h"
 #include "patch.h"
 #include "find.h"
 #include "cardengine_header_arm7.h"

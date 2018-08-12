@@ -18,11 +18,12 @@
 
 //#include <stddef.h>
 #include <nds/system.h>
-#include "cardengine_header_arm7.h"
-#include "cardengine_header_arm9.h"
+#include "module_params.h"
 #include "patch.h"
 #include "common.h"
 #include "debug_file.h"
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 extern bool logging;
 

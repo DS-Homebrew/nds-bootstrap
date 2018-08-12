@@ -1,5 +1,6 @@
 #include <string.h> // memcpy
 #include <nds/system.h>
+#include "module_params.h"
 #include "patch.h"
 #include "find.h"
 #include "common.h"
@@ -137,7 +138,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	}
 	debug[0] = (u32)cardIrqEnableOffset;
 
-	ce7->sdk_version = moduleParams->sdk_version;
+	ce7->moduleParams = moduleParams; //ce7->sdk_version = moduleParams->sdk_version;
 
 	u32* cardIrqEnablePatch    = ce7->patches->card_irq_enable_arm7;
 	u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;

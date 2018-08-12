@@ -1,8 +1,9 @@
 #include <nds/ndstypes.h>
+#include "module_params.h"
 #include "patch.h"
 #include "find.h"
-#include "cardengine_header_arm7.h"
 #include "debug_file.h"
+#include "cardengine_header_arm7.h"
 
 //
 // Subroutine function signatures ARM7

@@ -10,7 +10,7 @@
 .global card_engine_end
 .global cardStruct
 .global patches_offset
-.global sdk_version
+.global moduleParams
 .global fileCluster
 .global saveCluster
 .global saveSize
@@ -33,7 +33,7 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-sdk_version:
+moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000

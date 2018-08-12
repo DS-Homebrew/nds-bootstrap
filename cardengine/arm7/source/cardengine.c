@@ -30,9 +30,10 @@
 
 #include "sdmmc_alt.h"
 #include "fat_alt.h"
+#include "locations.h"
+#include "module_params.h"
 #include "debug_file.h"
 #include "cardengine.h"
-#include "locations.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
@@ -49,7 +50,7 @@ extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
-extern u32 sdk_version;
+extern module_params_t* moduleParams;
 extern u32 language;
 extern u32 gottenSCFGExt;
 extern u32 dsiMode; // SDK 5
@@ -113,7 +114,7 @@ void initialize(void) {
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
-		dbg_hexa(sdk_version);		
+		dbg_hexa(moduleParams->sdk_version);		
 		dbg_printf("\n");	
 		dbg_printf("rom file :");
 		dbg_hexa(fileCluster);	
@@ -126,7 +127,7 @@ void initialize(void) {
 		initialized = true;
 	}
 
-	sdk5 = (sdk_version > 0x5000000);
+	sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		romLocation = (void*)ROM_SDK5_LOCATION;
 		saveLocation = (void*)SAVE_SDK5_LOCATION;

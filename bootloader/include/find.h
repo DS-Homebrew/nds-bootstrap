@@ -2,10 +2,10 @@
 #define FIND_H
 
 #include <nds/ndstypes.h>
+#include <nds/memory.h> // tNDSHeader
 #include "locations.h"
-#include "patch.h"
+#include "module_params.h"
 
-//extern bool sdk5;
 //extern int readType;
 
 // COMMON
