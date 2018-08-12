@@ -665,14 +665,14 @@ void loadBinary_ARM7(aFile file) {
 	patchBinary(&dsiHeaderTemp.ndshdr);
 	
 	//moduleParams = findModuleParams(ndsHeader, donorSdkVer);
-	moduleParams = getModuleParams(ndsHeader);
+	moduleParams = getModuleParams(&dsiHeaderTemp.ndshdr);
 	if (moduleParams) {
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
 
 		*(vu32*)0x280000C = moduleParams->compressed_static_end; // from 'ensureArm9Decompressed'
-		ensureArm9Decompressed(ndsHeader, moduleParams);
+		ensureArm9Decompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	} else {
 		nocashMessage("No moduleparams?\n");
 		*(vu32*)0x2800010 = 1;
