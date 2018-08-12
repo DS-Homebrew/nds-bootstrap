@@ -55,7 +55,6 @@ enum {
 } ARM9_STATE;
 
 extern tNDSHeader* ndsHeader;
-extern bool sdk5;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

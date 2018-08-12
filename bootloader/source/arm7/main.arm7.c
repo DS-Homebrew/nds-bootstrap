@@ -679,7 +679,7 @@ void loadBinary_ARM7(aFile file) {
 		moduleParams = buildModuleParams();
 	}
 
-	sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		ndsHeader            = (tNDSHeader*)NDS_HEADER_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5_LOCATION;
@@ -873,7 +873,7 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 6 dots
 
-	errorCode = hookNdsRetailArm7(ndsHeader, *romFile, (cardengineArm7*)CARDENGINE_ARM7_LOCATION);
+	errorCode = hookNdsRetailArm7(ndsHeader, moduleParams, (cardengineArm7*)CARDENGINE_ARM7_LOCATION, *romFile);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {

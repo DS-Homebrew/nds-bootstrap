@@ -43,7 +43,6 @@
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-bool sdk5 = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe

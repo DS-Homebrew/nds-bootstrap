@@ -53,6 +53,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
+		bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->get_pitch_table_stub : ce7->patches->j_twl_get_pitch_table);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
@@ -162,6 +163,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	}
 	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
+		bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 		char* saveLocation = (sdk5 ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
 		fileRead(saveLocation, saveFile, 0, saveSize, 3);
 	}

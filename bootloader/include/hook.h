@@ -22,13 +22,14 @@
 //#include <nds/ndstypes.h>
 #include <nds/memory.h> // tNDSHeader
 #include "fat_alt.h"
+#include "patch.h" // module_params_t
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
 
 /*-------------------------------------------------------------------------
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* ce7);
+int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7, aFile file);
 void hookNdsRetailArm9(cardengineArm9* ce9);
 
 #endif // HOOK_H

@@ -255,13 +255,14 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, aFile file, cardengineArm7* ce7) {
+int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7, aFile file) {
 	nocashMessage("hookNdsRetail");
 
 	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	//u32* hookAccel = NULL;
 
 	// SDK 5
+	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (!hookLocation && sdk5) {
 		switch (ndsHeader->arm7binarySize) {
 			case 0x00022B40:
