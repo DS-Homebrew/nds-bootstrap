@@ -41,7 +41,7 @@ int hookNdsRetailArm7(
 	u32 romread_LED,
 	u32 gameSoftReset
 );
-void hookNdsRetailArm9(
+int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,

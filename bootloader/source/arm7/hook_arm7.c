@@ -20,7 +20,7 @@
 #include <nds/system.h>
 #include <nds/debug.h>
 
-#include "fat_alt.h"
+//#include "fat_alt.h"
 #include "hook.h"
 #include "common.h"
 #include "find.h"
