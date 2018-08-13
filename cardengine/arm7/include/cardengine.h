@@ -34,7 +34,7 @@ void cheat_engine_start(void);
 
 u32 myIrqEnable(u32 irq);
 
-/*void runCardEngineCheck (void);*/
+//void runCardEngineCheck(void);
 
 bool eepromProtect(void);
 bool eepromRead(u32 src, void *dst, u32 len);

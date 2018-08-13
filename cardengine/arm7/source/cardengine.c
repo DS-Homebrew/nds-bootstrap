@@ -60,10 +60,10 @@ extern u32 romread_LED;
 extern u32 gameSoftReset;
 
 u32 numberToActivateRunViaHalt = 10; // SDK 5
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
-static bool initializedIRQ = false;
+//static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 
 static aFile* romFile = (aFile*)0x37D5000;
@@ -76,7 +76,7 @@ static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
-bool ndmaUsed = false;
+//static bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
@@ -85,7 +85,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static void* romLocation = (void*)ROM_LOCATION;
 static void* saveLocation = (void*)SAVE_LOCATION;
 
-void initialize(void) {
+static void initialize(void) {
 	if (!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
@@ -134,7 +134,7 @@ void initialize(void) {
 	}
 }
 
-void cardReadLED(bool on) {
+static void cardReadLED(bool on) {
 	if (on) {
 		switch(romread_LED) {
 			case 0:
@@ -168,7 +168,7 @@ void cardReadLED(bool on) {
 	}
 }
 
-void asyncCardReadLED(bool on) {
+static void asyncCardReadLED(bool on) {
 	if (on) {
 		switch(romread_LED) {
 			case 0:
@@ -196,7 +196,7 @@ void asyncCardReadLED(bool on) {
 	}
 }
 
-void log_arm9(void) {
+static void log_arm9(void) {
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
@@ -223,7 +223,7 @@ void log_arm9(void) {
 	#endif
 }
 
-void cardRead_arm9(void) {
+static void cardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -271,7 +271,7 @@ void cardRead_arm9(void) {
 	#endif
 }
 
-void asyncCardRead_arm9(void) {
+static void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -313,7 +313,7 @@ void asyncCardRead_arm9(void) {
 	#endif
 }
 
-void runCardEngineCheck(void) {
+static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
@@ -352,7 +352,7 @@ void runCardEngineCheck(void) {
 	}
 }
 
-void runCardEngineCheckHalt(void) {
+static void runCardEngineCheckHalt(void) {
 	//dbg_printf("runCardEngineCheckHalt\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheckHalt");
@@ -676,7 +676,7 @@ u32 myIrqEnable(u32 irq) {
 	return irq_before;
 }
 
-void irqIPCSYNCEnable(void) {	
+/*static void irqIPCSYNCEnable(void) {	
 	if (!initializedIRQ) {
 		int oldIME = enterCriticalSection();	
 		initialize();	
@@ -691,7 +691,7 @@ void irqIPCSYNCEnable(void) {
 		leaveCriticalSection(oldIME);
 		initializedIRQ = true;
 	}
-}
+}*/
 
 //
 // ARM7 Redirected functions

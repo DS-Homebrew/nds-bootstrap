@@ -51,15 +51,14 @@ extern u32 asyncPrefetch;
 
 extern u32 needFlushDCCache;
 
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
 extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-
-tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS];
 static u32 accessCounter = 0;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
 static u32 cacheAddress = CACHE_ADRESS_START; // SDK 5
 static u16 cacheSlots = retail_CACHE_SLOTS;
@@ -87,7 +86,7 @@ void setExceptionHandler2(void) {
 	*exceptionC = user_exception;
 }
 
-int allocateCacheSlot(void) {
+static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for (int i = 0; i < cacheSlots; i++) {
@@ -102,7 +101,7 @@ int allocateCacheSlot(void) {
 	return slot;
 }
 
-int getSlotForSector(u32 sector) {
+static int getSlotForSector(u32 sector) {
 	for (int i = 0; i < cacheSlots; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
@@ -111,21 +110,21 @@ int getSlotForSector(u32 sector) {
 	return -1;
 }
 
-vu8* getCacheAddress(int slot) {
+static vu8* getCacheAddress(int slot) {
 	//return (vu32*)(cacheAddress + slot*_128KB_READ_SIZE);
 	return (vu8*)(cacheAddress + slot*_128KB_READ_SIZE);
 }
 
-void updateDescriptor(int slot, u32 sector) {
+static void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
 }
 
-void waitForArm7(void) {
+static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0);
 }
 
-void addToAsyncQueue(u32 sector) {
+static void addToAsyncQueue(u32 sector) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 addToAsyncQueue\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -147,7 +146,7 @@ void addToAsyncQueue(u32 sector) {
 	}
 }
 
-void triggerAsyncPrefetch(u32 sector) {	
+static void triggerAsyncPrefetch(u32 sector) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -204,7 +203,7 @@ void triggerAsyncPrefetch(u32 sector) {
 	}
 }
 
-void processAsyncCommand(void) {
+static void processAsyncCommand(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 processAsyncCommand\n");	
 	nocashMessage("\narm9 asyncSector\n");	
@@ -222,7 +221,7 @@ void processAsyncCommand(void) {
 	}
 }
 
-void getAsyncSector(void) {
+static void getAsyncSector(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 getAsyncSector\n");	
 	nocashMessage("\narm9 asyncSector\n");	
