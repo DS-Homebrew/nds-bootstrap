@@ -64,8 +64,6 @@
 
 extern void arm7clearRAM(void);
 
-const char* bootName = "BOOT.NDS";
-
 //extern unsigned long _start;
 extern unsigned long storedFileCluster;
 extern unsigned long initDisc;
@@ -88,12 +86,14 @@ extern unsigned long asyncPrefetch;
 //extern unsigned long logging;
 
 bool dsiModeConfirmed = false; // SDK 5
-
 u32 ROMinRAM = false;
+u32 enableExceptionHandler = true;
 
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
+static const char* bootName = "BOOT.NDS";
 static module_params_t* moduleParams = NULL;
+static bool foundModuleParams = false;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_LOCATION;
 static char* romLocation = (char*)ROM_LOCATION;
 
@@ -134,7 +134,7 @@ static void increaseLoadBarLength(void) {
 
 #define FW_READ 0x03
 
-void boot_readFirmware(u32 address, u8* buffer, u32 size) {
+static void boot_readFirmware(u32 address, u8* buffer, u32 size) {
 	u32 index;
 
 	// Read command
@@ -168,7 +168,7 @@ Written by Darkain.
 Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
-void resetMemory_ARM7(void) {
+static void resetMemory_ARM7(void) {
 	REG_IME = 0;
 
 	for (int i = 0; i < 16; i++) {
@@ -198,7 +198,7 @@ void resetMemory_ARM7(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 }
 
-void reloadFirmwareSettings(void) {
+static void reloadFirmwareSettings(void) {
 	u8 settings1, settings2;
 	u32 settingsOffset = 0;
 
@@ -223,7 +223,7 @@ void reloadFirmwareSettings(void) {
 
 // The following 3 functions are not in devkitARM r47
 //---------------------------------------------------------------------------------
-u32 readTSCReg(u32 reg) {
+static u32 readTSCReg(u32 reg) {
 //---------------------------------------------------------------------------------
 	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
 	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
@@ -240,7 +240,7 @@ u32 readTSCReg(u32 reg) {
 }
 
 //---------------------------------------------------------------------------------
-void readTSCRegArray(u32 reg, void *buffer, int size) {
+/*static void readTSCRegArray(u32 reg, void *buffer, int size) {
 //---------------------------------------------------------------------------------
 	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
 	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
@@ -256,10 +256,10 @@ void readTSCRegArray(u32 reg, void *buffer, int size) {
 		buf[count++] = REG_SPIDATA;
 	}
 	REG_SPICNT = 0;
-}
+}*/
 
 //---------------------------------------------------------------------------------
-u32 writeTSCReg(u32 reg, u32 value) {
+static u32 writeTSCReg(u32 reg, u32 value) {
 //---------------------------------------------------------------------------------
 	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
 	REG_SPIDATA = (reg << 1) & 0xFF;
@@ -276,7 +276,7 @@ u32 writeTSCReg(u32 reg, u32 value) {
 }
 
 //---------------------------------------------------------------------------------
-void NDSTouchscreenMode(void) {
+static void NDSTouchscreenMode(void) {
 //---------------------------------------------------------------------------------
 	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
 	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
@@ -444,7 +444,7 @@ void NDSTouchscreenMode(void) {
 	//*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
-module_params_t* buildModuleParams() {
+static module_params_t* buildModuleParams(u32 donorSdkVer) {
 	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
 	u32* moduleParamsOffset = malloc(0x100);
 
@@ -478,7 +478,7 @@ module_params_t* buildModuleParams() {
 	return moduleParams;
 }
 
-module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
+static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	nocashMessage("Looking for moduleparams...\n");
 
 	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
@@ -487,7 +487,7 @@ module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline void decompressBinary(const tNDSHeader* ndsHeader) {
+static inline void decompressBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
 
 	// Chrono Trigger (Japan)
@@ -498,6 +498,11 @@ static inline void decompressBinary(const tNDSHeader* ndsHeader) {
 	// Chrono Trigger (USA/Europe)
 	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
 		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+	}
+
+	if (foundModuleParams) {
+		*(vu32*)0x280000C = moduleParams->compressed_static_end; // from 'ensureArm9Decompressed'
+		ensureArm9Decompressed(ndsHeader, moduleParams);
 	}
 }
 
@@ -604,30 +609,30 @@ static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - 0x4000 - ndsHeader->arm9binarySize;
 }
 
-void loadBinary_ARM7(aFile file) {
+static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
-	tDSiHeader dsiHeaderTemp;
+	//tDSiHeader dsiHeaderTemp;
 
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)&dsiHeaderTemp, file, 0, sizeof(dsiHeaderTemp), 3);
+	fileRead((void*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
 
 	// Read ARM9 info from NDS header
-	u32 ARM9_SRC   = dsiHeaderTemp.ndshdr.arm9romOffset;
-	char* ARM9_DST = (char*)dsiHeaderTemp.ndshdr.arm9destination;
+	u32 ARM9_SRC   = dsiHeaderTemp->ndshdr.arm9romOffset;
+	char* ARM9_DST = (char*)dsiHeaderTemp->ndshdr.arm9destination;
 
 	// Read ARM7 info from NDS header
-	u32 ARM7_SRC   = dsiHeaderTemp.ndshdr.arm7romOffset;
-	char* ARM7_DST = (char*)dsiHeaderTemp.ndshdr.arm7destination;
+	u32 ARM7_SRC   = dsiHeaderTemp->ndshdr.arm7romOffset;
+	char* ARM7_DST = (char*)dsiHeaderTemp->ndshdr.arm7destination;
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
 	//memcpy((void*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
-	*(tNDSHeader*)0x027FF000 = dsiHeaderTemp.ndshdr;
+	*(tNDSHeader*)0x027FF000 = dsiHeaderTemp->ndshdr;
 
 	if ((*(u32*)0x27FF00C & 0x00FFFFFF) == 0x414441 // Diamond
 	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x415041  // Pearl
@@ -640,19 +645,20 @@ void loadBinary_ARM7(aFile file) {
 	}
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, dsiHeaderTemp.ndshdr.arm9binarySize, 3);
-	fileRead(ARM7_DST, file, ARM7_SRC, dsiHeaderTemp.ndshdr.arm7binarySize, 3);
+	fileRead(ARM9_DST, file, ARM9_SRC, dsiHeaderTemp->ndshdr.arm9binarySize, 3);
+	fileRead(ARM7_DST, file, ARM7_SRC, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
 
 	// SDK 5
 	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp[0x10 >> 2] & BIT(16+1));
-	dsiModeConfirmed = (dsiMode && (dsiHeaderTemp.ndshdr.deviceSize & BIT(16+1)));
+	dsiModeConfirmed = (dsiMode && (dsiHeaderTemp->ndshdr.deviceSize & BIT(16+1)));
 	if (dsiModeConfirmed) {
-		u32 ARM9i_SRC   = (u32)dsiHeaderTemp.arm9iromOffset;
-		char* ARM9i_DST = (char*)dsiHeaderTemp.arm9idestination;
-		u32 ARM9i_LEN   = dsiHeaderTemp.arm9ibinarySize;
-		u32 ARM7i_SRC   = (u32)dsiHeaderTemp.arm7iromOffset;
-		char* ARM7i_DST = (char*)dsiHeaderTemp.arm7idestination;
-		u32 ARM7i_LEN   = dsiHeaderTemp.arm7ibinarySize;
+		u32 ARM9i_SRC   = (u32)dsiHeaderTemp->arm9iromOffset;
+		char* ARM9i_DST = (char*)dsiHeaderTemp->arm9idestination;
+		u32 ARM9i_LEN   = dsiHeaderTemp->arm9ibinarySize;
+
+		u32 ARM7i_SRC   = (u32)dsiHeaderTemp->arm7iromOffset;
+		char* ARM7i_DST = (char*)dsiHeaderTemp->arm7idestination;
+		u32 ARM7i_LEN   = dsiHeaderTemp->arm7ibinarySize;
 
 		if (ARM9i_LEN) {
 			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 3);
@@ -661,25 +667,29 @@ void loadBinary_ARM7(aFile file) {
 			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
 		}
 	}
-	
-	decompressBinary(&dsiHeaderTemp.ndshdr);
-	patchBinary(&dsiHeaderTemp.ndshdr);
-	
-	//moduleParams = findModuleParams(ndsHeader, donorSdkVer);
-	moduleParams = getModuleParams(&dsiHeaderTemp.ndshdr);
+}
+
+static void findModuleParams(const tNDSHeader* ndsHeader) {
+	moduleParams = getModuleParams(ndsHeader);
 	if (moduleParams) {
+		foundModuleParams = true;
+
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-
-		*(vu32*)0x280000C = moduleParams->compressed_static_end; // from 'ensureArm9Decompressed'
-		ensureArm9Decompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	} else {
 		nocashMessage("No moduleparams?\n");
 		*(vu32*)0x2800010 = 1;
-		moduleParams = buildModuleParams();
+		moduleParams = buildModuleParams(donorSdkVer);
 	}
+}
 
+static void fixBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
+	decompressBinary(ndsHeader, moduleParams);
+	patchBinary(ndsHeader);
+}
+
+static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
 	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 	if (sdk5) {
 		ndsHeader            = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -699,29 +709,27 @@ void loadBinary_ARM7(aFile file) {
 	// the ARM9 start address, so as not to start it
 	
 	// Store for later
-	*tempArm9StartAddress = (vu32)dsiHeaderTemp.ndshdr.arm9executeAddress;
+	*tempArm9StartAddress = (vu32)dsiHeaderTemp->ndshdr.arm9executeAddress;
 	
-	dsiHeaderTemp.ndshdr.arm9executeAddress = 0;
+	dsiHeaderTemp->ndshdr.arm9executeAddress = 0;
 	
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (void*)ndsHeader, 0x170);
 	if (dsiModeConfirmed) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
-		*(tDSiHeader*)ndsHeader = dsiHeaderTemp;
+		*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
 	} else {
 		//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
-		*ndsHeader = dsiHeaderTemp.ndshdr;
+		*ndsHeader = dsiHeaderTemp->ndshdr;
 	}
 
 	if (!dsiModeConfirmed) {
-		// Switch to NTR mode BIOS (no effect with locked arm7 SCFG)
+		// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
 		nocashMessage("Switch to NTR mode BIOS");
 		REG_SCFG_ROM = 0x703;
 	}
 }
 
-u32 enableExceptionHandler = true;
-
-void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
+static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
 
 	// ExceptionHandler2 (red screen) blacklist
@@ -753,7 +761,7 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void startBinary_ARM7(void) {
+static void startBinary_ARM7(void) {
 	REG_IME = 0;
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
@@ -774,7 +782,7 @@ void startBinary_ARM7(void) {
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void initMBK(void) {
+static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
 	
@@ -847,14 +855,18 @@ int arm7_main(void) {
 		*(u16*)0x4000500 = 0x807F;
 	}
 
+	tDSiHeader dsiHeaderTemp;
+
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
-	loadBinary_ARM7(*romFile);
+	loadBinary_ARM7(*romFile, &dsiHeaderTemp);
 	increaseLoadBarLength(); // 2 dots
 
-	// Reload DS Firmware settings
-	nocashMessage("Reloading DS Firmware settings...\n");
-	reloadFirmwareSettings(); // After 'sdk5' is set
+	nocashMessage("Loading the header...\n");
+	findModuleParams(&dsiHeaderTemp.ndshdr);
+	fixBinary(&dsiHeaderTemp.ndshdr, moduleParams);
+	loadHeader(&dsiHeaderTemp, moduleParams);
+	reloadFirmwareSettings(); // After "ndsHeader" is set
 	increaseLoadBarLength(); // 3 dots
 
 	nocashMessage("Trying to patch the card...\n");

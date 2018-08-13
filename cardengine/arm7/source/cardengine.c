@@ -364,20 +364,17 @@ static void runCardEngineCheckHalt(void) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
 			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
