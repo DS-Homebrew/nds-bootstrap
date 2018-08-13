@@ -298,18 +298,18 @@ int runNds(
 int runNdsFile(
 	const char* filename,
 	const char* savename,
-	int saveSize,
-	int language,
-	int dsiMode, // SDK 5
-	int donorSdkVer,
-	int patchMpuRegion,
-	int patchMpuSize,
-	int consoleModel,
-	int loadingScreen,
-	int romread_LED,
-	int gameSoftReset,
-	int asyncPrefetch,
-	int logging,
+	u32 saveSize,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 donorSdkVer,
+	u32 patchMpuRegion,
+	u32 patchMpuSize,
+	u32 consoleModel,
+	u32 loadingScreen,
+	u32 romread_LED,
+	u32 gameSoftReset,
+	u32 asyncPrefetch,
+	u32 logging,
 	int argc, const char** argv,
 	u32* cheatData
 ) {

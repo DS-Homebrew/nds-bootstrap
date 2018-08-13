@@ -26,19 +26,6 @@
 #include "find.h"
 #include "cardengine_header_arm7.h"
 
-//extern unsigned long language;
-//extern unsigned long consoleModel;
-//extern unsigned long romread_LED;
-//extern unsigned long gameSoftReset;
-
-//extern unsigned long asyncPrefetch;
-
-//extern bool dsiModeConfirmed; // SDK 5
-//extern u32 ROMinRAM;
-//extern u32 enableExceptionHandler;
-
-//extern u32 runViaIRQ;
-
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
 extern u32 setDataBWlist[7];

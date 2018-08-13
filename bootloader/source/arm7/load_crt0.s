@@ -89,12 +89,12 @@ gameSoftReset:
 	.word	0x00000000
 asyncPrefetch:
 	.word	0x00000000
+logging:
+	.word	0x00000000
 cardengine_arm7_offset:
 	.word   cardengine_arm7_bin
 cardengine_arm9_offset:
 	.word   cardengine_arm9_bin
-logging:
-	.word	0x00000000
 
 startUp:
 	mov	r0, #0x04000000

@@ -1,13 +1,8 @@
 #include <nds/ndstypes.h>
+#include <nds/debug.h>
 #include "hook.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
-
-//extern u32 ROMinRAM;
-//extern bool dsiModeConfirmed; // SDK 5
-//extern u32 enableExceptionHandler;
-//extern unsigned long consoleModel;
-//extern unsigned long asyncPrefetch;
 
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
