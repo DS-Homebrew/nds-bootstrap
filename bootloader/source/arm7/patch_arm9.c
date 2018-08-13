@@ -333,33 +333,33 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const mod
 
 	ce9->moduleParams = (module_params_t*)moduleParams; //ce9->sdk_version = moduleParams->sdk_version;
 
-	u32* cardReadPatch    = (usesThumb ? ce9->thumb_patches->card_read_arm9 : ce9->patches->card_read_arm9);
-	u32* cardPullOutPatch = (usesThumb ? ce9->thumb_patches->card_pull      : ce9->patches->card_pull);
-	u32* cardIdPatch      = (usesThumb ? ce9->thumb_patches->card_id_arm9   : ce9->patches->card_id_arm9);
-	u32* cardDmaPatch     = (usesThumb ? ce9->thumb_patches->card_dma_arm9  : ce9->patches->card_dma_arm9);
+	u32* cardReadPatch    = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
+	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull      : ce9->patches->card_pull);
+	u32* cardIdPatch      = (usesThumb ? ce9->thumbPatches->card_id_arm9   : ce9->patches->card_id_arm9);
+	u32* cardDmaPatch     = (usesThumb ? ce9->thumbPatches->card_dma_arm9  : ce9->patches->card_dma_arm9);
 
 	debug[5] = (u32)ce9->patches;
 
-	u32** card_struct = (u32**)(cardReadEndOffset - 1);
-	//u32* cache_struct = (u32**)(cardIdStartOffset - 1);
+	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
+	//u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
 
-	debug[6] = (u32)*card_struct;
-	//debug[7] = (u32)*cache_struct;
+	debug[6] = (u32)*cardStruct;
+	//debug[7] = (u32)*cacheStruct;
 
-	u32* cardStructPatch = (usesThumb ? ce9->thumb_patches->card_struct_arm9 : ce9->patches->card_struct_arm9);
+	u32* cardStructPatch = (usesThumb ? ce9->thumbPatches->cardStructArm9 : ce9->patches->cardStructArm9);
 	if (moduleParams->sdk_version > 0x3000000) {
-		ce9->card_struct0 = (u32)(*card_struct + 7);
-		*cardStructPatch = (u32)(*card_struct + 7); // Cache management alternative
+		ce9->cardStruct0 = (u32)(*cardStruct + 7);
+		*cardStructPatch = (u32)(*cardStruct + 7); // Cache management alternative
 	} else {
-		ce9->card_struct0 = (u32)(*card_struct + 6);
-		*cardStructPatch = (u32)(*card_struct + 6); // Cache management alternative
+		ce9->cardStruct0 = (u32)(*cardStruct + 6);
+		*cardStructPatch = (u32)(*cardStruct + 6); // Cache management alternative
 	}
-	//ce9->cache_struct = (u32)*cache_struct;
+	//ce9->cacheStruct = (u32)*cacheStruct;
 
-	u32* cacheFlushPatch = (usesThumb ? ce9->thumb_patches->cache_flush_ref : ce9->patches->cache_flush_ref);
+	u32* cacheFlushPatch = (usesThumb ? ce9->thumbPatches->cacheFlushRef : ce9->patches->cacheFlushRef);
 	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
 
-	u32* readCachedPatch = (usesThumb ? ce9->thumb_patches->read_cached_ref : ce9->patches->read_cached_ref);
+	u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
 	if ((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
 	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crossing: Wild World
 	{
@@ -367,7 +367,7 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const mod
 	}
 
 	if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
-		ce9->patches->need_flush_dc_cache = needFlushCache;
+		ce9->patches->needFlushDCCache = needFlushCache;
 	}
 
 	//memcpy(oldArenaLow, cardReadPatch, 0xF0); //copyLoop(oldArenaLow, cardReadPatch, 0xF0);

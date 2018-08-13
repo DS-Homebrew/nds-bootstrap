@@ -9,9 +9,9 @@ extern unsigned long consoleModel;
 extern unsigned long asyncPrefetch;
 
 void hookNdsRetailArm9(cardengineArm9* ce9) {
-	ce9->rom_in_ram               = ROMinRAM;
-	ce9->dsi_mode                 = dsiModeConfirmed; // SDK 5
-	ce9->enable_exception_handler = enableExceptionHandler;
-	ce9->console_model            = consoleModel;
-	ce9->async_prefetch           = asyncPrefetch;
+	ce9->ROMinRAM                 = ROMinRAM;
+	ce9->dsiMode                  = dsiModeConfirmed; // SDK 5
+	ce9->enableExceptionHandler = enableExceptionHandler;
+	ce9->consoleModel             = consoleModel;
+	ce9->asyncPrefetch           = asyncPrefetch;
 }

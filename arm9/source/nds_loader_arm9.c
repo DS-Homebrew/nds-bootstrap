@@ -153,7 +153,7 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 int loadArgs(int argc, const char** argv) {
 	// Give arguments to loader
 
-	char* argStart = (char*)lc0 + lc0->arg_start;
+	char* argStart = (char*)lc0 + lc0->argStart;
 	argStart = (char*)(((int)argStart + 3) & ~3); // Align to word
 	u16* argData = (u16*)argStart;
 	int argSize = 0;
@@ -178,8 +178,8 @@ int loadArgs(int argc, const char** argv) {
 	}
 	*argData = argTempVal;
 
-	lc0->arg_start = (u32)argStart - (u32)lc0;
-	lc0->arg_size  = argSize;
+	lc0->argStart = (u32)argStart - (u32)lc0;
+	lc0->argSize  = argSize;
 
 	return true;
 }
@@ -245,24 +245,24 @@ int runNds(
 
 	// Set the parameters for the loader
 
-	lc0->stored_file_cluster = cluster;
-	lc0->init_disc = initDisc;
-	lc0->want_to_patch_dldi = dldiPatchNds;
+	lc0->storedFileCluster = cluster;
+	lc0->initDisc = initDisc;
+	lc0->wantToPatchDLDI = dldiPatchNds;
 
 	loadArgs(argc, argv);
 
-	lc0->sav              = saveCluster;
-	lc0->sav_size         = saveSize;
+	lc0->saveFileCluster              = saveCluster;
+	lc0->saveSize         = saveSize;
 	lc0->language         = language;
-	lc0->dsimode          = dsiMode; // SDK 5
-	lc0->donor_sdk_ver    = donorSdkVer;
-	lc0->patch_mpu_region = patchMpuRegion;
-	lc0->patch_mpu_size   = patchMpuSize;
-	lc0->console_model    = consoleModel;
-	lc0->loading_screen   = loadingScreen;
-	lc0->romread_led      = romread_LED;
-	lc0->game_soft_reset  = gameSoftReset;
-	lc0->async_prefetch   = asyncPrefetch;
+	lc0->dsiMode          = dsiMode; // SDK 5
+	lc0->donorSdkVer    = donorSdkVer;
+	lc0->patchMpuRegion = patchMpuRegion;
+	lc0->patchMpuSize   = patchMpuSize;
+	lc0->consoleModel     = consoleModel;
+	lc0->loadingScreen   = loadingScreen;
+	lc0->romread_LED      = romread_LED;
+	lc0->gameSoftReset    = gameSoftReset;
+	lc0->asyncPrefetch   = asyncPrefetch;
 	lc0->logging          = logging;
 
 	loadCheatData(cheatData);

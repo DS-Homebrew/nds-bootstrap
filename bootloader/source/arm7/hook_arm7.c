@@ -335,18 +335,18 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* module
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
-	ce7->file_cluster            = file.firstCluster;
+	ce7->fileCluster            = file.firstCluster;
 	ce7->language                = language;
-	ce7->gotten_scfg_ext         = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
-	ce7->dsi_mode                = dsiModeConfirmed; // SDK 5
-	ce7->rom_in_ram              = ROMinRAM;
-	ce7->console_model           = consoleModel;
-	ce7->romread_led             = romread_LED;
-	ce7->game_soft_reset         = gameSoftReset;
+	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
+	ce7->dsiMode                 = dsiModeConfirmed; // SDK 5
+	ce7->ROMinRAM                = ROMinRAM;
+	ce7->consoleModel            = consoleModel;
+	ce7->romread_LED             = romread_LED;
+	ce7->gameSoftReset           = gameSoftReset;
 
-	*vblankHandler = ce7->patches->vblank_handler;
+	*vblankHandler = ce7->patches->vblankHandler;
 	if (ROMinRAM == false) {
-		*ipcSyncHandler = ce7->patches->fifo_handler;
+		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 
 	nocashMessage("ERR_NONE");

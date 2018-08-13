@@ -7,25 +7,25 @@
 
 typedef struct loadCrt0 {
     u32 _start;
-    u32 stored_file_cluster;
-    u32 init_disc;
-    u32 want_to_patch_dldi;
-    u32 arg_start;
-    u32 arg_size;
-    u32 dldi;
-    u32 have_dsisd;
-    u32 sav;
-    u32 sav_size;
+    u32 storedFileCluster;
+    u32 initDisc;
+    u32 wantToPatchDLDI;
+    u32 argStart;
+    u32 argSize;
+    u32 dldiOffset;
+    u32 dsiSD;
+    u32 saveFileCluster;
+    u32 saveSize;
     u32 language;
-    u32 dsimode; // SDK 5
-    u32 donor_sdk_ver;
-    u32 patch_mpu_region;
-    u32 patch_mpu_size;
-    u32 console_model;
-    u32 loading_screen;
-    u32 romread_led;
-    u32 game_soft_reset;
-    u32 async_prefetch;
+    u32 dsiMode; // SDK 5
+    u32 donorSdkVer;
+    u32 patchMpuRegion;
+    u32 patchMpuSize;
+    u32 consoleModel;
+    u32 loadingScreen;
+    u32 romread_LED;
+    u32 gameSoftReset;
+    u32 asyncPrefetch;
     cardengineArm7* cardengine_arm7;
     cardengineArm9* cardengine_arm9;
     u32 logging;

@@ -54,7 +54,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	if (swiGetPitchTableOffset) {
 		// Patch
 		bool sdk5 = isSdk5(moduleParams);
-		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->get_pitch_table_stub : ce7->patches->j_twl_get_pitch_table);
+		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -73,7 +73,7 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 	}
 	if (swiHaltOffset) {
 		// Patch
-		u32* swiHaltPatch = (usesThumb ? ce7->patches->j_thumb_new_swi_halt : ce7->patches->j_new_swi_halt); // SDK 5
+		u32* swiHaltPatch = (usesThumb ? ce7->patches->jThumb_newSwiHalt : ce7->patches->j_newSwiHalt); // SDK 5
 		//if (usesThumb) {
 			/*
             // Find the relocation signature
@@ -88,7 +88,7 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
-			u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7_functions_thumb->swi_halt);
+			u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
 			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
             ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
 		//} else {

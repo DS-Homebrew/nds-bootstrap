@@ -103,7 +103,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc - 0xE  - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchCardRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->card_read);
+		u16* patchCardRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->cardRead);
 		cardRead[0] = patchCardRead[0];
         cardRead[1] = patchCardRead[1]; */
 
@@ -112,7 +112,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x8  - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->eeprom_read);
+		u16* patchRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromRead);
 		eepromRead[0] = patchRead[0];
 		eepromRead[1] = patchRead[1];
 		
@@ -121,7 +121,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x16 - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchWrite = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->eeprom_page_write);
+		u16* patchWrite = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageWrite);
         eepromPageWrite[0] = patchWrite[0];
 		eepromPageWrite[1] = patchWrite[1];
 
@@ -130,7 +130,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x24 - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchProg = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->eeprom_page_prog);
+		u16* patchProg = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageProg);
         eepromPageProg[0] = patchProg[0];
 		eepromPageProg[1] = patchProg[1];
 
@@ -139,7 +139,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
 		srcAddr =  JumpTableFunc + 0x32 - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchVerify = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->eeprom_page_verify);
+		u16* patchVerify = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageVerify);
         eepromPageVerify[0] = patchVerify[0];
 		eepromPageVerify[1] = patchVerify[1];
 
@@ -149,7 +149,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x3E - vAddrOfRelocSrc + 0x37F8000 ;
-		u16* patchErase = generateA7InstrThumb(srcAddr, ce7->patches->arm7_functions_thumb->eeprom_page_erase);        
+		u16* patchErase = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageErase);        
         eepromPageErase[0] = patchErase[0];
 		eepromPageErase[1] = patchErase[1];
 
@@ -159,7 +159,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)cardRead);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc - 0x18  - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchCardRead = generateA7Instr(srcAddr, ce7->patches->arm7_functions->card_read);
+		u32 patchCardRead = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardRead);
 		*cardRead=patchCardRead;
 
 		u32* eepromRead = (u32*) (JumpTableFunc + 0xC);
@@ -167,7 +167,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0xC  - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchRead = generateA7Instr(srcAddr, ce7->patches->arm7_functions->eeprom_read);
+		u32 patchRead = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromRead);
 		*eepromRead=patchRead;
 
 		u32* eepromPageWrite = (u32*) (JumpTableFunc + 0x24);
@@ -175,7 +175,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x24 - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchWrite = generateA7Instr(srcAddr, ce7->patches->arm7_functions->eeprom_page_write);
+		u32 patchWrite = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageWrite);
 		*eepromPageWrite=patchWrite;
 
 		u32* eepromPageProg = (u32*) (JumpTableFunc + 0x3C);
@@ -183,7 +183,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x3C - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchProg = generateA7Instr(srcAddr, ce7->patches->arm7_functions->eeprom_page_prog);
+		u32 patchProg = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageProg);
 		*eepromPageProg=patchProg;
 
 		u32* eepromPageVerify = (u32*) (JumpTableFunc + 0x54);
@@ -191,7 +191,7 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
 		srcAddr =  JumpTableFunc + 0x54 - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchVerify = generateA7Instr(srcAddr, ce7->patches->arm7_functions->eeprom_page_verify);
+		u32 patchVerify = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageVerify);
 		*eepromPageVerify=patchVerify;
 
 
@@ -200,12 +200,12 @@ u32 savePatchV5 (const tNDSHeader* ndsHeader, const cardengineArm7* ce7, module_
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc + 0x68 - vAddrOfRelocSrc + 0x37F8000 ;
-		u32 patchErase = generateA7Instr(srcAddr, ce7->patches->arm7_functions->eeprom_page_erase);
+		u32 patchErase = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageErase);
 		*eepromPageErase=patchErase; 
 
 	}
-	ce7->patches->arm7_functions->save_cluster = saveFileCluster;
-	ce7->patches->arm7_functions->save_size    = saveSize;
+	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
+	ce7->patches->arm7Functions->saveSize    = saveSize;
 
 	return 1;
 }

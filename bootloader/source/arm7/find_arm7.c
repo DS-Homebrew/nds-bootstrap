@@ -92,7 +92,7 @@ static const u32 irqEnableStartSignature1[4]    = {0xE59FC028, 0xE1DC30B0, 0xE3A
 static const u32 irqEnableStartSignature4[4]    = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
 static const u32 irqEnableStartSignature4Alt[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
 
-//bool sdk5 = false;
+//static bool sdk5 = false;
 
 u32* findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
