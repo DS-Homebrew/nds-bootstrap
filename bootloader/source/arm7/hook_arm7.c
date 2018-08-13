@@ -255,9 +255,9 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 }
 
 int hookNdsRetailArm7(
+	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	cardengineArm7* ce7,
 	u32 fileCluster,
 	u32 language,
 	u32 dsiMode, // SDK 5
@@ -346,6 +346,7 @@ int hookNdsRetailArm7(
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->moduleParams            = moduleParams;
 	ce7->fileCluster             = fileCluster;
 	ce7->language                = language;
 	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it

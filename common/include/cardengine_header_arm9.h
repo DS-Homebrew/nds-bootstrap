@@ -46,7 +46,7 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_fifo_orig_return;
-    module_params_t* moduleParams;
+    const module_params_t* moduleParams;
     u32 fileCluster;
     u32 cardStruct0;
     u32 cacheStruct;

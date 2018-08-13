@@ -138,7 +138,7 @@ u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const mod
 	}
 	debug[0] = (u32)cardIrqEnableOffset;
 
-	ce7->moduleParams = (module_params_t*)moduleParams; //ce7->sdk_version = moduleParams->sdk_version;
+	//ce7->sdk_version = moduleParams->sdk_version;
 
 	u32* cardIrqEnablePatch    = ce7->patches->card_irq_enable_arm7;
 	u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;

@@ -65,7 +65,7 @@ typedef struct cardengineArm7 {
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
     u32 intr_fifo_orig_return;
-    module_params_t* moduleParams;
+    const module_params_t* moduleParams;
     u32 fileCluster;
     u32 cardStruct;
     u32 language;

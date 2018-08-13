@@ -753,6 +753,7 @@ static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 
 	hookNdsRetailArm9(
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		moduleParams,
 		ROMinRAM,
 		dsiModeConfirmed,
 		enableExceptionHandler,
@@ -903,9 +904,9 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 6 dots
 
 	errorCode = hookNdsRetailArm7(
+		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		ndsHeader,
 		moduleParams,
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		romFile->firstCluster,
 		language,
 		dsiModeConfirmed,
