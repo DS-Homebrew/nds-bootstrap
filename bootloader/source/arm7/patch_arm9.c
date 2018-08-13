@@ -63,7 +63,7 @@ void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* module
 
 u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;

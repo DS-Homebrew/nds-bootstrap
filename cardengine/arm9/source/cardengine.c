@@ -248,7 +248,7 @@ static inline bool isHGSS(const tNDSHeader* ndsHeader) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = ROM_SDK5_LOCATION;

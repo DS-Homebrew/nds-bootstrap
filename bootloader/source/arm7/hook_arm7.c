@@ -261,7 +261,7 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* module
 	//u32* hookAccel = NULL;
 
 	// SDK 5
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (!hookLocation && sdk5) {
 		switch (ndsHeader->arm7binarySize) {
 			case 0x00022B40:

@@ -53,7 +53,7 @@ static void fixForDsiBios(const tNDSHeader* ndsHeader, const module_params_t* mo
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+		bool sdk5 = isSdk5(moduleParams);
 		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->get_pitch_table_stub : ce7->patches->j_twl_get_pitch_table);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
@@ -98,7 +98,7 @@ static void patchSwiHalt(const tNDSHeader* ndsHeader, const module_params_t* mod
 }
 
 u32 patchCardNdsArm7(const tNDSHeader* ndsHeader, cardengineArm7* ce7, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	bool usesThumb = false;
 
 	if (REG_SCFG_ROM != 0x703) {

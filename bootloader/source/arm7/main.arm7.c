@@ -690,7 +690,7 @@ static void fixBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams
 }
 
 static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
 		ndsHeader            = (tNDSHeader*)NDS_HEADER_SDK5;
 		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5_LOCATION;

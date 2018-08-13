@@ -42,7 +42,7 @@ u32 patchCardNds(
 
 	dbg_printf("patchCardNds\n\n");
 
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
 		dbg_printf("[SDK 5]\n\n");
 	}

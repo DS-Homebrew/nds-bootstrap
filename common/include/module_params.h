@@ -15,4 +15,8 @@ typedef struct {
 	u32 nitro_code_le;
 } module_params_t;
 
+inline bool isSdk5(const module_params_t* moduleParams) {
+	return (moduleParams->sdk_version > 0x5000000);
+}
+
 #endif // MODULE_PARAMS_H

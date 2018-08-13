@@ -126,7 +126,7 @@ static void initialize(void) {
 		initialized = true;
 	}
 
-	bool sdk5 = (moduleParams->sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		romLocation = (void*)ROM_SDK5_LOCATION;
