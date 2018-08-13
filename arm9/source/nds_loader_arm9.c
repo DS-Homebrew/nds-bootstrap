@@ -231,7 +231,8 @@ int runNds(
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
-	u32* cheatData) {
+	u32* cheatData
+) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -310,7 +311,8 @@ int runNdsFile(
 	int asyncPrefetch,
 	int logging,
 	int argc, const char** argv,
-	u32* cheatData)  {
+	u32* cheatData
+) {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;

@@ -29,7 +29,25 @@
 /*-------------------------------------------------------------------------
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7, aFile file);
-void hookNdsRetailArm9(cardengineArm9* ce9);
+int hookNdsRetailArm7(
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams,
+	cardengineArm7* ce7,
+	u32 fileCluster,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 ROMinRAM,
+	u32 consoleModel,
+	u32 romread_LED,
+	u32 gameSoftReset
+);
+void hookNdsRetailArm9(
+	cardengineArm9* ce9,
+	u32 ROMinRAM,
+	u32 dsiMode,
+	u32 enableExceptionHandler,
+	u32 consoleModel,
+	u32 asyncPrefetch
+);
 
 #endif // HOOK_H

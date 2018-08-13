@@ -81,7 +81,7 @@ extern unsigned long patchMpuSize;
 extern unsigned long consoleModel;
 extern unsigned long loadingScreen;
 extern unsigned long romread_LED;
-//extern unsigned long gameSoftReset;
+extern unsigned long gameSoftReset;
 extern unsigned long asyncPrefetch;
 //extern unsigned long logging;
 
@@ -751,7 +751,14 @@ static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 		}
 	}
 
-	hookNdsRetailArm9((cardengineArm9*)CARDENGINE_ARM9_LOCATION);
+	hookNdsRetailArm9(
+		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		ROMinRAM,
+		dsiModeConfirmed,
+		enableExceptionHandler,
+		consoleModel,
+		asyncPrefetch
+	);
 }
 
 /*-------------------------------------------------------------------------
@@ -877,7 +884,16 @@ int arm7_main(void) {
 	memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 	increaseLoadBarLength(); // 5 dots
 
-	errorCode = patchCardNds(ndsHeader, (cardengineArm7*)CARDENGINE_ARM7_LOCATION, (cardengineArm9*)CARDENGINE_ARM9_LOCATION, moduleParams, saveFileCluster, saveSize, patchMpuRegion, patchMpuSize);
+	errorCode = patchCardNds(
+		ndsHeader,
+		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		moduleParams,
+		saveFileCluster,
+		saveSize,
+		patchMpuRegion,
+		patchMpuSize
+	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card patch successful");
 	} else {
@@ -886,7 +902,18 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 6 dots
 
-	errorCode = hookNdsRetailArm7(ndsHeader, moduleParams, (cardengineArm7*)CARDENGINE_ARM7_LOCATION, *romFile);
+	errorCode = hookNdsRetailArm7(
+		ndsHeader,
+		moduleParams,
+		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+		romFile->firstCluster,
+		language,
+		dsiModeConfirmed,
+		ROMinRAM,
+		consoleModel,
+		romread_LED,
+		gameSoftReset
+	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {

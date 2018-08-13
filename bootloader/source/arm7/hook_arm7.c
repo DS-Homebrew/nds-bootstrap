@@ -26,18 +26,18 @@
 #include "find.h"
 #include "cardengine_header_arm7.h"
 
-extern bool dsiModeConfirmed; // SDK 5
-extern u32 enableExceptionHandler;
+//extern unsigned long language;
+//extern unsigned long consoleModel;
+//extern unsigned long romread_LED;
+//extern unsigned long gameSoftReset;
 
-extern unsigned long language;
-extern unsigned long consoleModel;
-extern unsigned long romread_LED;
-extern unsigned long gameSoftReset;
-extern unsigned long asyncPrefetch;
+//extern unsigned long asyncPrefetch;
+
+//extern bool dsiModeConfirmed; // SDK 5
+//extern u32 ROMinRAM;
+//extern u32 enableExceptionHandler;
 
 //extern u32 runViaIRQ;
-
-extern u32 ROMinRAM;
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
@@ -254,7 +254,18 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, cardengineArm7* ce7, aFile file) {
+int hookNdsRetailArm7(
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams,
+	cardengineArm7* ce7,
+	u32 fileCluster,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 ROMinRAM,
+	u32 consoleModel,
+	u32 romread_LED,
+	u32 gameSoftReset
+) {
 	nocashMessage("hookNdsRetail");
 
 	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
@@ -335,10 +346,10 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* module
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
-	ce7->fileCluster             = file.firstCluster;
+	ce7->fileCluster             = fileCluster;
 	ce7->language                = language;
 	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
-	ce7->dsiMode                 = dsiModeConfirmed; // SDK 5
+	ce7->dsiMode                 = dsiMode; // SDK 5
 	ce7->ROMinRAM                = ROMinRAM;
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
