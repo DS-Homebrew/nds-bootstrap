@@ -251,19 +251,19 @@ int runNds(
 
 	loadArgs(argc, argv);
 
-	lc0->saveFileCluster              = saveCluster;
-	lc0->saveSize         = saveSize;
-	lc0->language         = language;
-	lc0->dsiMode          = dsiMode; // SDK 5
-	lc0->donorSdkVer    = donorSdkVer;
-	lc0->patchMpuRegion = patchMpuRegion;
-	lc0->patchMpuSize   = patchMpuSize;
-	lc0->consoleModel     = consoleModel;
+	lc0->saveFileCluster = saveCluster;
+	lc0->saveSize        = saveSize;
+	lc0->language        = language;
+	lc0->dsiMode         = dsiMode; // SDK 5
+	lc0->donorSdkVer     = donorSdkVer;
+	lc0->patchMpuRegion  = patchMpuRegion;
+	lc0->patchMpuSize    = patchMpuSize;
+	lc0->consoleModel    = consoleModel;
 	lc0->loadingScreen   = loadingScreen;
-	lc0->romread_LED      = romread_LED;
-	lc0->gameSoftReset    = gameSoftReset;
+	lc0->romread_LED     = romread_LED;
+	lc0->gameSoftReset   = gameSoftReset;
 	lc0->asyncPrefetch   = asyncPrefetch;
-	lc0->logging          = logging;
+	lc0->logging         = logging;
 
 	loadCheatData(cheatData);
 

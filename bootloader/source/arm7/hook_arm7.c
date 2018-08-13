@@ -335,7 +335,7 @@ int hookNdsRetailArm7(const tNDSHeader* ndsHeader, const module_params_t* module
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
-	ce7->fileCluster            = file.firstCluster;
+	ce7->fileCluster             = file.firstCluster;
 	ce7->language                = language;
 	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
 	ce7->dsiMode                 = dsiModeConfirmed; // SDK 5
