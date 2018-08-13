@@ -184,7 +184,7 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
-int loadCheatData(u32* cheatData) {
+int loadCheatData(u32* cheat_data) {
 	nocashMessage("loadCheatData");
 			
 	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
@@ -206,7 +206,7 @@ int loadCheatData(u32* cheatData) {
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
-	memcpy(cheatDataDest, cheatData, 1024); //copyLoop(cheatDataDest, cheatData, 1024);
+	memcpy(cheatDataDest, cheat_data, 1024); //copyLoop(cheatDataDest, cheat_data, 1024);
 	
 	return true;
 }
@@ -218,20 +218,20 @@ int runNds(
 	u32 saveCluster,
 	u32 saveSize,
 	u32 language,
-	u32 dsiMode, // SDK 5
+	bool dsiMode,
 	u32 donorSdkVer,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
 	u32 consoleModel,
 	u32 loadingScreen,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 asyncPrefetch,
-	u32 logging,
+	bool gameSoftReset,
+	bool asyncPrefetch,
+	bool logging,
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
-	u32* cheatData
+	u32* cheat_data
 ) {
 	nocashMessage("runNds");
 
@@ -266,7 +266,7 @@ int runNds(
 	lc0->asyncPrefetch   = asyncPrefetch;
 	lc0->logging         = logging;
 
-	loadCheatData(cheatData);
+	loadCheatData(cheat_data);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);
@@ -300,18 +300,18 @@ int runNdsFile(
 	const char* savename,
 	u32 saveSize,
 	u32 language,
-	u32 dsiMode, // SDK 5
+	bool dsiMode, // SDK 5
 	u32 donorSdkVer,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
 	u32 consoleModel,
 	u32 loadingScreen,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 asyncPrefetch,
-	u32 logging,
+	bool gameSoftReset,
+	bool asyncPrefetch,
+	bool logging,
 	int argc, const char** argv,
-	u32* cheatData
+	u32* cheat_data
 ) {
 	struct stat st;
 	struct stat stSav;
@@ -362,6 +362,6 @@ int runNdsFile(
 		true,
 		true,
 		argc, argv,
-		cheatData
+		cheat_data
 	);
 }

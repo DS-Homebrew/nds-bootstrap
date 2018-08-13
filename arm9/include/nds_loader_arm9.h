@@ -35,16 +35,16 @@ int runNds(
 	u32 saveCluster,
 	u32 saveSize,
 	u32 language,
-	u32 dsiMode,
+	bool dsiMode,
 	u32 donorSdkVer,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
 	u32 consoleModel,
 	u32 loadingScreen,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 asyncPrefetch,
-	u32 logging,
+	bool gameSoftReset,
+	bool asyncPrefetch,
+	bool logging,
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
@@ -55,18 +55,18 @@ int runNdsFile(
 	const char* savename,
 	u32 saveSize,
 	u32 language,
-	u32 dsiMode, // SDK 5
+	bool dsiMode, // SDK 5
 	u32 donorSdkVer,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
 	u32 consoleModel,
 	u32 loadingScreen,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 asyncPrefetch,
-	u32 logging,
+	bool gameSoftReset,
+	bool asyncPrefetch,
+	bool logging,
 	int argc, const char** argv,
-	u32* cheatData
+	u32* cheat_data
 );
 
 #ifdef __cplusplus

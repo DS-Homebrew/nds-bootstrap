@@ -64,26 +64,26 @@
 
 extern void arm7clearRAM(void);
 
-//extern unsigned long _start;
-extern unsigned long storedFileCluster;
-extern unsigned long initDisc;
-//extern unsigned long wantToPatchDLDI;
-//extern unsigned long argStart;
-//extern unsigned long argSize;
-//extern unsigned long dsiSD;
-extern unsigned long saveFileCluster;
-extern unsigned long saveSize;
-extern unsigned long language;
-extern unsigned long dsiMode; // SDK 5
-extern unsigned long donorSdkVer;
-extern unsigned long patchMpuRegion;
-extern unsigned long patchMpuSize;
-extern unsigned long consoleModel;
-extern unsigned long loadingScreen;
-extern unsigned long romread_LED;
-extern unsigned long gameSoftReset;
-extern unsigned long asyncPrefetch;
-//extern unsigned long logging;
+//extern u32 _start;
+extern u32 storedFileCluster;
+extern u32 initDisc;
+//extern u32 wantToPatchDLDI;
+//extern u32 argStart;
+//extern u32 argSize;
+//extern u32 dsiSD;
+extern u32 saveFileCluster;
+extern u32 saveSize;
+extern u32 language;
+extern u32 dsiMode; // SDK 5
+extern u32 donorSdkVer;
+extern u32 patchMpuRegion;
+extern u32 patchMpuSize;
+extern u32 consoleModel;
+extern u32 loadingScreen;
+extern u32 romread_LED;
+extern u32 gameSoftReset;
+extern u32 asyncPrefetch;
+//extern u32 logging;
 
 bool dsiModeConfirmed = false; // SDK 5
 u32 ROMinRAM = false;

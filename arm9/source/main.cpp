@@ -51,7 +51,7 @@ typedef struct {
 
 static bool debug = false;
 
-static u32 cheatData[256];
+static u32 cheat_data[256];
 
 static int dbg_printf(const char* format, ...) {
 	if (!debug) {
@@ -250,15 +250,15 @@ int main(int argc, char** argv) {
 		std::string ndsPath = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
 		std::string savPath = bootstrapini.GetString("NDS-BOOTSTRAP", "SAV_PATH", "");
 		u32 language        = bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1);
-		u32 dsiMode         = bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0); // SDK 5
+		bool dsiMode        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0); // SDK 5
 		u32 donorSdkVer     = bootstrapini.GetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", 0);
 		u32	patchMpuRegion  = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 		u32	patchMpuSize    = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
 		u32 consoleModel    = bootstrapini.GetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0);
 		u32 loadingScreen   = bootstrapini.GetInt("NDS-BOOTSTRAP", "LOADING_SCREEN", 1);
-		int romread_LED     = bootstrapini.GetInt("NDS-BOOTSTRAP", "ROMREAD_LED", 1);
-		u32 gameSoftReset   = bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0);
-		u32 asyncPrefetch   = bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
+		u32 romread_LED     = bootstrapini.GetInt("NDS-BOOTSTRAP", "ROMREAD_LED", 1);
+		bool gameSoftReset  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0);
+		bool asyncPrefetch  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
 		bool logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
 
 		std::vector<std::string> cheats;      
@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
 		}
 
 		// Cheat data
-		cheatData[0] = 0xCF000000;
+		cheat_data[0] = 0xCF000000;
 		if (cheats.size() > 0) {
 			dbg_printf("Cheat data present\n");
 			
@@ -412,9 +412,9 @@ int main(int argc, char** argv) {
 				 for (unsigned int i = 0; i < cheats.size(); i++) {
 					dbg_printf(cheats[i].c_str());
 					dbg_printf(" ");
-					cheatData[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
+					cheat_data[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
 				}
-				cheatData[cheats.size()] = 0xCF000000;
+				cheat_data[cheats.size()] = 0xCF000000;
 			} else {
 				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
 			}
@@ -436,7 +436,7 @@ int main(int argc, char** argv) {
 			gameSoftReset,
 			asyncPrefetch,
 			logging,
-			(u32*)cheatData,
+			(u32*)cheat_data,
 			backlightMode
 		);	
 	} else {
