@@ -18,6 +18,8 @@ int hookNdsRetailArm9(
 	u32 consoleModel,
 	u32 asyncPrefetch
 ) {
+	nocashMessage("hookNdsRetailArm9");
+
 	ce9->moduleParams           = moduleParams;
 	ce9->ROMinRAM               = ROMinRAM;
 	ce9->dsiMode                = dsiMode; // SDK 5
@@ -25,5 +27,6 @@ int hookNdsRetailArm9(
 	ce9->consoleModel           = consoleModel;
 	ce9->asyncPrefetch          = asyncPrefetch;
 
+	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
