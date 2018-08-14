@@ -41,10 +41,10 @@ extern "C" {
 
 //using namespace std;
 
-typedef struct {
+/* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
 	char gameCode[4];			//!< 4 characters for the game code.
-} sNDSHeaderTitleCodeOnly;
+} sNDSHeaderTitleCodeOnly; */
 
 //extern bool logging;
 //bool logging = false;
