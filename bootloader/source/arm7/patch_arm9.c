@@ -12,55 +12,6 @@ bool cardReadFound = false; // card_patcher_common.c
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
-void decompressLZ77Backwards(u8* addr, u32 size) {
-	u32 len = *(u32*)(addr + size - 4) + size;
-
-	//byte[] Result = new byte[len];
-	//Array.Copy(Data, Result, Data.Length);
-
-	u32 end = *(u32*)(addr + size - 8) & 0xFFFFFF;
-
-	u8* result = addr;
-
-	int Offs = (int)(size - (*(u32*)(addr + size - 8) >> 24));
-	int dstoffs = (int)len;
-	while (true) {
-		u8 header = result[--Offs];
-		for (int i = 0; i < 8; i++) {
-			if ((header & 0x80) == 0) {
-				result[--dstoffs] = result[--Offs];
-			} else {
-				u8 a = result[--Offs];
-				u8 b = result[--Offs];
-				int offs = (((a & 0xF) << 8) | b) + 2;//+ 1;
-				int length = (a >> 4) + 2;
-				do {
-					result[dstoffs - 1] = result[dstoffs + offs];
-					dstoffs--;
-					length--;
-				} while (length >= 0);
-			}
-
-			if (Offs <= size - end) {
-				return;
-			}
-
-			header <<= 1;
-		}
-	}
-}
-
-void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
-	if (!moduleParams->compressed_static_end) {
-		// Not compressed
-		dbg_printf("This rom is not compressed\n");
-		return;
-	}
-	dbg_printf("This rom is compressed\n");
-	decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-	moduleParams->compressed_static_end = 0;
-}
-
 u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
 	bool sdk5 = isSdk5(moduleParams);
