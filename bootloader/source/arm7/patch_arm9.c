@@ -12,7 +12,7 @@ bool cardReadFound = false; // card_patcher_common.c
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
 	bool sdk5 = isSdk5(moduleParams);
 	

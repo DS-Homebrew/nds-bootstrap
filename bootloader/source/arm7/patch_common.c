@@ -127,9 +127,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 }
 
 u32 patchCardNds(
-	const tNDSHeader* ndsHeader,
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams, 
 	u32 saveFileCluster,
 	u32 saveSize,
@@ -146,10 +146,10 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	patchCardNdsArm9(ndsHeader, ce9, moduleParams, patchMpuRegion, patchMpuSize);
+	patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	
 	if (cardReadFound || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ndsHeader, ce7, moduleParams, saveFileCluster, saveSize);
+		patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

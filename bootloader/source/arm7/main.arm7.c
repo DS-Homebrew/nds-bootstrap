@@ -10,27 +10,27 @@
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
 
  License:
-    Copyright (C) 2005  Michael "Chishm" Chisholm
+	Copyright (C) 2005  Michael "Chishm" Chisholm
 
-    This program is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public License
-    as published by the Free Software Foundation; either version 2
-    of the License, or (at your option) any later version.
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-    If you use this code, please give due credit and email me about your
-    project at chishm@hotmail.com
+	If you use this code, please give due credit and email me about your
+	project at chishm@hotmail.com
  
-    Helpful information:
-    This code runs from VRAM bank C on ARM7
+	Helpful information:
+	This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
 #ifndef ARM7
@@ -699,8 +699,8 @@ int arm7_main(void) {
 	nocashMessage("bootloader");
 
 	initMBK();
-    
-    // Wait for ARM9 to at least start
+	
+	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
@@ -725,13 +725,13 @@ int arm7_main(void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
-    
-    buildFatTableCache(romFile, 3);
-    
-    *savFile = getFileFromCluster(saveFileCluster);
-    
-    if (savFile->firstCluster != CLUSTER_FREE) {
-        buildFatTableCache(savFile, 3);
+	
+	buildFatTableCache(romFile, 3);
+	
+	*savFile = getFileFromCluster(saveFileCluster);
+	
+	if (savFile->firstCluster != CLUSTER_FREE) {
+		buildFatTableCache(savFile, 3);
 	}
 
 	int errorCode;
@@ -765,9 +765,9 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 5 dots
 
 	errorCode = patchCardNds(
-		ndsHeader,
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		ndsHeader,
 		moduleParams,
 		saveFileCluster,
 		saveSize,
@@ -814,8 +814,8 @@ int arm7_main(void) {
 	fadeType = false;
 	while (screenBrightness != 31);	// Wait for screen to fade out
 
-    // Lock SCFG
-    REG_SCFG_EXT &= ~(1UL << 31);
+	// Lock SCFG
+	REG_SCFG_EXT &= ~(1UL << 31);
 
 	nocashMessage("Starting the NDS file...");
 	startBinary_ARM7();
