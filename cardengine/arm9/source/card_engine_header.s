@@ -11,14 +11,10 @@
 .global cardStruct0
 .global cacheStruct
 .global patches_offset
-.global sdk_version
+.global moduleParams
 .global fileCluster
 .global saveCluster
 .global ROMinRAM
-.global ROM_TID
-.global ROM_HEADERCRC
-.global ARM9_LEN
-.global romSize
 .global dsiMode
 .global enableExceptionHandler
 .global consoleModel
@@ -35,7 +31,7 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_fifo_orig_return:
 	.word	0x00000000
-sdk_version:
+moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
@@ -44,14 +40,6 @@ cardStruct0:
 cacheStruct:
 	.word	0x00000000
 ROMinRAM:
-	.word	0x00000000
-ROM_TID:
-	.word	0x00000000
-ROM_HEADERCRC:
-	.word	0x00000000
-ARM9_LEN:
-	.word	0x00000000
-romSize:
 	.word	0x00000000
 dsiMode:
 	.word	0x00000000

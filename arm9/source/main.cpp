@@ -41,17 +41,17 @@ extern "C" {
 
 //using namespace std;
 
-typedef struct {
+/* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
 	char gameCode[4];			//!< 4 characters for the game code.
-} sNDSHeaderTitleCodeOnly;
+} sNDSHeaderTitleCodeOnly; */
 
 //extern bool logging;
 //bool logging = false;
 
 static bool debug = false;
 
-static u32 cheatData[256];
+static u32 cheat_data[256];
 
 static int dbg_printf(const char* format, ...) {
 	if (!debug) {
@@ -107,6 +107,7 @@ void runFile(
 	u32 romread_LED,
 	u32 gameSoftReset,
 	u32 asyncPrefetch,
+	u32 logging,
 	u32* cheat_data,
 	u32 backlightMode) {
 	std::vector<char*> argarray;
@@ -165,21 +166,24 @@ void runFile(
 				powerOff(PM_BACKLIGHT_BOTTOM);
 				break;
 		}
-		int err = runNdsFile(argarray[0],
-							strdup(savPath.c_str()),
-							saveSize,
-							language,
-							dsiMode, // SDK 5
-							donorSdkVer,
-							patchMpuRegion,
-							patchMpuSize,
-							consoleModel,
-							loadingScreen,
-							romread_LED,
-							gameSoftReset,
-							asyncPrefetch,
-							argarray.size(), (const char**)&argarray[0], 
-							cheat_data);
+		int err = runNdsFile(
+			argarray[0],
+			strdup(savPath.c_str()),
+			saveSize,
+			language,
+			dsiMode, // SDK 5
+			donorSdkVer,
+			patchMpuRegion,
+			patchMpuSize,
+			consoleModel,
+			loadingScreen,
+			romread_LED,
+			gameSoftReset,
+			asyncPrefetch,
+			logging,
+			argarray.size(), (const char**)&argarray[0], 
+			cheat_data
+		);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 	}
@@ -241,9 +245,31 @@ int main(int argc, char** argv) {
 
 		CIniFile bootstrapini("sd:/_nds/nds-bootstrap.ini");
 
-		if (bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0) == 1) {
-			debug = true;
+		debug               = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0);
 
+		std::string ndsPath = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
+		std::string savPath = bootstrapini.GetString("NDS-BOOTSTRAP", "SAV_PATH", "");
+		u32 language        = bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1);
+		bool dsiMode        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0); // SDK 5
+		u32 donorSdkVer     = bootstrapini.GetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", 0);
+		u32	patchMpuRegion  = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
+		u32	patchMpuSize    = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
+		u32 consoleModel    = bootstrapini.GetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0);
+		u32 loadingScreen   = bootstrapini.GetInt("NDS-BOOTSTRAP", "LOADING_SCREEN", 1);
+		u32 romread_LED     = bootstrapini.GetInt("NDS-BOOTSTRAP", "ROMREAD_LED", 1);
+		bool gameSoftReset  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0);
+		bool asyncPrefetch  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
+		bool logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
+
+		std::vector<std::string> cheats;      
+		bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
+
+		u32 backlightMode   = bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
+
+		bool boostCpu       = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0);
+
+		// Debug
+		if (debug) {
 			powerOff(PM_BACKLIGHT_TOP);
 			consoleDemoInit();
 
@@ -253,7 +279,7 @@ int main(int argc, char** argv) {
 			getSFCG_ARM7();
 		}
 
-		int romread_LED = bootstrapini.GetInt("NDS-BOOTSTRAP", "ROMREAD_LED", 1);
+		// ROM read LED
 		switch(romread_LED) {
 			case 0:
 			default:
@@ -269,11 +295,9 @@ int main(int argc, char** argv) {
 				break;
 		}
 
-		std::string	ndsPath = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
-
 		// adjust TSC[1:26h] and TSC[1:27h]
 		// for certain gamecodes
-		/*FILE* f_nds_file = fopen(ndsPath.c_str(), "rb");
+		/*FILE* f_nds_file = fopen(ndsPath, "rb");
 
 		char game_TID[5];
 		fseek(f_nds_file, offsetof(sNDSHeaderTitleCodeOnly, gameCode), SEEK_SET);
@@ -349,7 +373,8 @@ int main(int argc, char** argv) {
 			fifoSendValue32(FIFO_MAXMOD, 1); // Special setting (when found special gamecode)
 		}*/
 
-		if (bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0) == 1) {
+		// Boost CPU
+		if (boostCpu) {
 			dbg_printf("CPU boosted\n");
 			// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
 		} else {
@@ -360,34 +385,26 @@ int main(int argc, char** argv) {
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 
-		if (bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0) == 1) {
-			static FILE* debugFile;
-			debugFile = fopen("sd:/NDSBTSRP.LOG", "w");
-			fprintf(debugFile, "DEBUG MODE\n");
-			fclose(debugFile);
+		// Logging
+		if (logging) {
+			static FILE* loggingFile;
+			loggingFile = fopen("sd:/NDSBTSRP.LOG", "w");
+			fprintf(loggingFile, "LOGGING MODE\n");
+			fclose(loggingFile);
 
 			// Create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen("sd:/NDSBTSRP.LOG", "a");
+			loggingFile = fopen("sd:/NDSBTSRP.LOG", "a");
 			for (int i = 0; i < 1000; i++) {
-				fprintf(debugFile, "                                                                                                                                          \n");
+				fprintf(loggingFile, "                                                                                                                                          \n");
 			}
 
-			fclose(debugFile);
-
-			//logging = true;
+			fclose(loggingFile);
 		} else {
 			remove("sd:/NDSBTSRP.LOG");
 		}
 
-		std::string	savPath = bootstrapini.GetString("NDS-BOOTSTRAP", "SAV_PATH", "");
-
-		u32	patchMpuRegion = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
-
-		u32	patchMpuSize = bootstrapini.GetInt("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
-
-		cheatData[0] = 0xCF000000;
-		std::vector<std::string> cheats;      
-		bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
+		// Cheat data
+		cheat_data[0] = 0xCF000000;
 		if (cheats.size() > 0) {
 			dbg_printf("Cheat data present\n");
 			
@@ -395,30 +412,33 @@ int main(int argc, char** argv) {
 				 for (unsigned int i = 0; i < cheats.size(); i++) {
 					dbg_printf(cheats[i].c_str());
 					dbg_printf(" ");
-					cheatData[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
+					cheat_data[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
 				}
-				cheatData[cheats.size()] = 0xCF000000;
+				cheat_data[cheats.size()] = 0xCF000000;
 			} else {
 				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
 			}
 		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(),
-				savPath.c_str(),
-				getSaveSize(savPath.c_str()),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", 0), // SDK 5
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", 0),
-				patchMpuRegion,
-				patchMpuSize,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "LOADING_SCREEN", 1),
-				romread_LED,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "GAME_SOFT_RESET", 0),
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0),
-				(u32*)cheatData,
-				bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0));	
+		runFile(
+			ndsPath.c_str(),
+			savPath.c_str(),
+			getSaveSize(savPath.c_str()),
+			language,
+			dsiMode, // SDK 5
+			donorSdkVer,
+			patchMpuRegion,
+			patchMpuSize,
+			consoleModel,
+			loadingScreen,
+			romread_LED,
+			gameSoftReset,
+			asyncPrefetch,
+			logging,
+			(u32*)cheat_data,
+			backlightMode
+		);	
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

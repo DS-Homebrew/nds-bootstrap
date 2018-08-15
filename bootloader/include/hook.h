@@ -19,14 +19,36 @@
 #ifndef HOOK_H
 #define HOOK_H
 
-#include <nds/memory.h>
-#include <nds/ndstypes.h>
+//#include <nds/ndstypes.h>
+#include <nds/memory.h> // tNDSHeader
 #include "fat_alt.h"
+#include "module_params.h"
+#include "cardengine_header_arm7.h"
+#include "cardengine_header_arm9.h"
 
 /*-------------------------------------------------------------------------
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNdsRetail(const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation);
-void hookNdsRetail9(u32* cardEngineLocation9);
+int hookNdsRetailArm7(
+	cardengineArm7* ce7,
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams,
+	u32 fileCluster,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 ROMinRAM,
+	u32 consoleModel,
+	u32 romread_LED,
+	u32 gameSoftReset
+);
+int hookNdsRetailArm9(
+	cardengineArm9* ce9,
+	const module_params_t* moduleParams,
+	u32 ROMinRAM,
+	u32 dsiMode, // SDK 5
+	u32 enableExceptionHandler,
+	u32 consoleModel,
+	u32 asyncPrefetch
+);
 
 #endif // HOOK_H

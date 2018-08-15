@@ -20,28 +20,11 @@
 #include <nds/system.h>
 #include <nds/debug.h>
 
-#include "fat_alt.h"
+//#include "fat_alt.h"
 #include "hook.h"
 #include "common.h"
-
-extern bool dsiModeConfirmed; // SDK 5
-extern u32 enableExceptionHandler;
-
-extern unsigned long language;
-extern unsigned long consoleModel;
-extern unsigned long romread_LED;
-extern unsigned long gameSoftReset;
-extern unsigned long asyncPrefetch;
-
-//extern u32 runViaIRQ;
-
-//extern bool sdk5;
-extern u32 ROMinRAM;
-extern u32 ROM_TID;
-extern u32 ROM_HEADERCRC;
-extern u32 ARM9_LEN;
-extern u32 ARM7_LEN; // SDK 5
-extern u32 romSize;
+#include "find.h"
+#include "cardengine_header_arm7.h"
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
@@ -55,6 +38,8 @@ extern u32 setDataBWlist_4[3];*/
 extern unsigned long intr_orig_return_offset;
 
 extern const u8 cheat_engine_start[];*/
+
+static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
@@ -82,7 +67,7 @@ static const u32 homebrewSig[5] = {
 };
 
 // interruptDispatcher.s jump_intr:
-//patch
+// Patch
 static const u32 homebrewSigPatched[5] = {
 	0xE59F1008, // ldr    r1, =0x3900010   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
@@ -91,7 +76,7 @@ static const u32 homebrewSigPatched[5] = {
 	0x03780010  // DCD 	  0x03780010       
 };
  
-// accelerator patch for IPC_SYNC v2007
+// Accelerator patch for IPC_SYNC v2007
 static const u32 homebrewAccelSig2007[4] = {
 	0x2401B510   , // .
 	               // MOVS    R4, #1
@@ -110,7 +95,7 @@ static const u32 homebrewAccelSig2007Patched[4] = {
 	0x430A2108   , // ...
 };
 
-// accelerator patch for IPC_SYNC v2010 (libnds 1.4.8)
+// Accelerator patch for IPC_SYNC v2010 (libnds 1.4.8)
 static const u32 homebrewAccelSig2010[4] = {
 	0x07C3B500   , // .
 	               // MOVS    R4, #1
@@ -130,7 +115,7 @@ static const u32 homebrewAccelSig2010Patched[4] = {
 };
 */
 
-static const int MAX_HANDLER_SIZE = 50;
+static const int MAX_HANDLER_LEN = 50;
 
 /*static u32* hookInterruptHandlerHomebrew(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
@@ -222,45 +207,28 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	return addr;
 }*/
 
-static u32* hookInterruptHandler(u32* addr, size_t size) {
-	u32* end = addr + size/sizeof(u32);
-	int i;
-
+static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == handlerStartSig[0]) && 
-			(addr[1] == handlerStartSig[1]) && 
-			(addr[2] == handlerStartSig[2]) && 
-			(addr[3] == handlerStartSig[3]) && 
-			(addr[4] == handlerStartSig[4])) 
-		{
-			break;
-		}
-		addr++;
-	}
-
-	if (addr >= end) {
+	u32* addr = findOffset(
+		start, size,
+		handlerStartSig, 5
+	);
+	if (!addr) {
 		return NULL;
 	}
 
 	// Find the end of the handler
-	for (i = 0; i < MAX_HANDLER_SIZE; i++) {
-		if ((addr[i+0] == handlerEndSig[0]) && 
-			(addr[i+1] == handlerEndSig[1]) && 
-			(addr[i+2] == handlerEndSig[2]) && 
-			(addr[i+3] == handlerEndSig[3])) 
-		{
-			break;
-		}
-	}
-
-	if (i >= MAX_HANDLER_SIZE) {
+	addr = findOffset(
+		addr, MAX_HANDLER_LEN*sizeof(u32),
+		handlerEndSig, 4
+	);
+	if (!addr) {
 		return NULL;
 	}
 
 	// Now find the IRQ vector table
 	// Make addr point to the vector table address pointer within the IRQ handler
-	addr = addr + i + sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
+	addr += sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
 
 	// Use relative and absolute addresses to find the location of the table in RAM
 	u32 tableAddr = addr[0];
@@ -273,20 +241,27 @@ static u32* hookInterruptHandler(u32* addr, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocation) {
-	u32* hookLocation = NULL;
+int hookNdsRetailArm7(
+	cardengineArm7* ce7,
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams,
+	u32 fileCluster,
+	u32 language,
+	u32 dsiMode, // SDK 5
+	u32 ROMinRAM,
+	u32 consoleModel,
+	u32 romread_LED,
+	u32 gameSoftReset
+) {
+	nocashMessage("hookNdsRetailArm7");
+
+	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	//u32* hookAccel = NULL;
-	u32* debug = (u32*)0x037C6000;
-
-	nocashMessage("hookNdsRetail");
-
-	if (!hookLocation) {
-		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	}
 
 	// SDK 5
+	bool sdk5 = isSdk5(moduleParams);
 	if (!hookLocation && sdk5) {
-		switch (ARM7_LEN) {
+		switch (ndsHeader->arm7binarySize) {
 			case 0x00022B40:
 				hookLocation = (u32*)0x238DED8;
 				break;
@@ -356,36 +331,23 @@ int hookNdsRetail (const tNDSHeader* ndsHeader, aFile file, u32* cardEngineLocat
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
 
-	cardEngineLocation[1] = *vblankHandler;
-	cardEngineLocation[2] = *ipcSyncHandler;
-	cardEngineLocation[4] = file.firstCluster;
-	cardEngineLocation[6] = language;
-	cardEngineLocation[7] = REG_SCFG_EXT;	// Pass unlocked SCFG before locking it
-	cardEngineLocation[8] = dsiModeConfirmed; // SDK 5
-	cardEngineLocation[9] = ROMinRAM;
-	cardEngineLocation[10] = consoleModel;
-	cardEngineLocation[11] = romread_LED;
-	cardEngineLocation[12] = gameSoftReset;
+	ce7->intr_vblank_orig_return = *vblankHandler;
+	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->moduleParams            = moduleParams;
+	ce7->fileCluster             = fileCluster;
+	ce7->language                = language;
+	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
+	ce7->dsiMode                 = dsiMode; // SDK 5
+	ce7->ROMinRAM                = ROMinRAM;
+	ce7->consoleModel            = consoleModel;
+	ce7->romread_LED             = romread_LED;
+	ce7->gameSoftReset           = gameSoftReset;
 
-	u32* patches = (u32*)cardEngineLocation[0];
-
-	*vblankHandler = patches[3];
+	*vblankHandler = ce7->patches->vblankHandler;
 	if (ROMinRAM == false) {
-		*ipcSyncHandler = patches[4];
+		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
-}
-
-void hookNdsRetail9(u32* cardEngineLocation9) {
-	cardEngineLocation9[7] = ROMinRAM;
-	cardEngineLocation9[8] = ROM_TID;
-	cardEngineLocation9[9] = ROM_HEADERCRC;
-	cardEngineLocation9[10] = ARM9_LEN;
-	cardEngineLocation9[11] = romSize;
-	cardEngineLocation9[12] = dsiModeConfirmed; // SDK 5
-	cardEngineLocation9[13] = enableExceptionHandler;
-	cardEngineLocation9[14] = consoleModel;
-	cardEngineLocation9[15] = asyncPrefetch;
 }

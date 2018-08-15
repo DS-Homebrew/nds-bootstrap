@@ -22,8 +22,11 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 #include <nds/fifomessages.h>
+#include <nds/memory.h> // tNDSHeader
 #include "hex.h"
+#include "module_params.h"
 #include "cardengine.h"
+#include "locations.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -34,43 +37,28 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-#define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000
-
-#define CACHE_ADRESS_START             0x0C920000
-#define retail_CACHE_ADRESS_START_SDK5 0x0C480000
-
-//#define retail_CACHE_ADRESS_SIZE      0x6E0000
-//#define retail_CACHE_ADRESS_SIZE_SDK5 0x280000
-
-#define retail_CACHE_SLOTS      0x37
-#define retail_CACHE_SLOTS_SDK5 0x14
-
-#define dev_CACHE_ADRESS_START_SDK5 0x0D000000
-
-//#define dev_CACHE_ADRESS_SIZE      0x16E0000
-//#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
-
-#define dev_CACHE_SLOTS      0xB7
-#define dev_CACHE_SLOTS_SDK5 0x80
-
-//#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
-
-#define HGSS_CACHE_SLOTS 0xF
+extern void user_exception(void);
 
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
-extern u32 sdk_version;
-extern u32 needFlushDCCache;
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
-extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
-bool sdk5 = false;
+extern module_params_t* moduleParams;
+extern u32 ROMinRAM;
+extern u32 dsiMode; // SDK 5
+extern u32 enableExceptionHandler;
+extern u32 consoleModel;
+extern u32 asyncPrefetch;
+
+extern u32 needFlushDCCache;
+
+extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS];
 static u32 accessCounter = 0;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
 static u32 cacheAddress = CACHE_ADRESS_START; // SDK 5
 static u16 cacheSlots = retail_CACHE_SLOTS;
@@ -90,20 +78,6 @@ static bool alreadySetMpu = false;*/
 static bool flagsSet = false;
 static bool hgssFix = false;
 
-extern u32 sdk_version;
-extern u32 ROMinRAM;
-extern u32 ROM_TID;
-//extern u32 ROM_HEADERCRC; // SDK 5
-extern u32 ARM9_LEN;
-extern u32 romSize;
-extern u32 dsiMode; // SDK 5
-extern u32 enableExceptionHandler;
-extern u32 consoleModel;
-extern u32 asyncPrefetch;
-
-
-void user_exception(void);
-
 //---------------------------------------------------------------------------------
 void setExceptionHandler2(void) {
 //---------------------------------------------------------------------------------
@@ -112,7 +86,7 @@ void setExceptionHandler2(void) {
 	*exceptionC = user_exception;
 }
 
-int allocateCacheSlot(void) {
+static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for (int i = 0; i < cacheSlots; i++) {
@@ -127,7 +101,7 @@ int allocateCacheSlot(void) {
 	return slot;
 }
 
-int getSlotForSector(u32 sector) {
+static int getSlotForSector(u32 sector) {
 	for (int i = 0; i < cacheSlots; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
@@ -136,21 +110,21 @@ int getSlotForSector(u32 sector) {
 	return -1;
 }
 
-vu8* getCacheAddress(int slot) {
+static vu8* getCacheAddress(int slot) {
 	//return (vu32*)(cacheAddress + slot*_128KB_READ_SIZE);
 	return (vu8*)(cacheAddress + slot*_128KB_READ_SIZE);
 }
 
-void updateDescriptor(int slot, u32 sector) {
+static void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
 }
 
-void waitForArm7(void) {
+static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0);
 }
 
-void addToAsyncQueue(u32 sector) {
+static void addToAsyncQueue(u32 sector) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 addToAsyncQueue\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -172,7 +146,7 @@ void addToAsyncQueue(u32 sector) {
 	}
 }
 
-void triggerAsyncPrefetch(u32 sector) {	
+static void triggerAsyncPrefetch(u32 sector) {	
 	#ifdef DEBUG
 	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -183,13 +157,13 @@ void triggerAsyncPrefetch(u32 sector) {
 	
 	asyncReadSizeSubtract = 0;
 	if (asyncSector == 0xFFFFFFFF) {
-		if (romSize > 0) {
-			if (sector > romSize) {
+		if (ndsHeader->romSize > 0) {
+			if (sector > ndsHeader->romSize) {
 				sector = 0;
-			} else if ((sector+_128KB_READ_SIZE) > romSize) {
+			} else if ((sector+_128KB_READ_SIZE) > ndsHeader->romSize) {
 				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 					asyncReadSizeSubtract++;
-					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == romSize) {
+					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == ndsHeader->romSize) {
 						break;
 					}
 				}
@@ -229,7 +203,7 @@ void triggerAsyncPrefetch(u32 sector) {
 	}
 }
 
-void processAsyncCommand(void) {
+static void processAsyncCommand(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 processAsyncCommand\n");	
 	nocashMessage("\narm9 asyncSector\n");	
@@ -247,7 +221,7 @@ void processAsyncCommand(void) {
 	}
 }
 
-void getAsyncSector(void) {
+static void getAsyncSector(void) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 getAsyncSector\n");	
 	nocashMessage("\narm9 asyncSector\n");	
@@ -265,19 +239,24 @@ void getAsyncSector(void) {
 	}
 }
 
+static inline bool isHGSS(const tNDSHeader* ndsHeader) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	return ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
+		|| (ROM_TID & 0x00FFFFFF) == 0x475049); // Pokemon SoulSilver
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	sdk5 = (sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
-		romLocation = ROM_LOCATION_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		romLocation = ROM_SDK5_LOCATION;
 		cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 		cacheSlots = retail_CACHE_SLOTS_SDK5;
 	}
 
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x0C807BC0 : cardStruct0);
-	//vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02407BC0 : cardStruct0);
-	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)0x02707BC0 : cardStruct0); // engineLocationArm9 + 0x7BC0
+	vu32* volatile cardStruct = (sdk5 ? (vu32* volatile)(CARDENGINE_ARM9_LOCATION + 0x7BC0) : cardStruct0);
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
@@ -313,18 +292,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}*/
 
 	if (!flagsSet) {
-		if ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049) // Pokemon SoulSilver
-		{
+		if (isHGSS(ndsHeader)) {
 			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
 			hgssFix = true;
-		}
-		else if (consoleModel > 0) {
+		} else if (consoleModel > 0) {
 			if (sdk5) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS;
+			cacheSlots = (sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
 
 		// SDK 5
@@ -332,7 +308,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			REG_SCFG_EXT = 0x8307F100;
 		}
 
-		romSize += 0x1000;
+		ndsHeader->romSize += 0x1000;
 
 		if (enableExceptionHandler) {
 			setExceptionHandler2();
@@ -360,10 +336,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ROMinRAM == false) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;
-		if ((romSize > 0) && ((sector+_128KB_READ_SIZE) > romSize)) {
+		if ((ndsHeader->romSize > 0) && ((sector+_128KB_READ_SIZE) > ndsHeader->romSize)) {
 			for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 				cacheReadSizeSubtract++;
-				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == romSize) break;
+				if (((sector+_128KB_READ_SIZE)-cacheReadSizeSubtract) == ndsHeader->romSize) break;
 			}
 		}
 
@@ -520,10 +496,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					page = (src / 512) * 512;
 					sector = (src / _128KB_READ_SIZE) * _128KB_READ_SIZE;
 					cacheReadSizeSubtract = 0;
-					if (romSize > 0 && (sector+_128KB_READ_SIZE) > romSize) {
+					if (ndsHeader->romSize > 0 && (sector+_128KB_READ_SIZE) > ndsHeader->romSize) {
 						for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
 							cacheReadSizeSubtract++;
-							if ((sector+_128KB_READ_SIZE) - cacheReadSizeSubtract == romSize) {
+							if ((sector+_128KB_READ_SIZE) - cacheReadSizeSubtract == ndsHeader->romSize) {
 								break;
 							}
 						}
@@ -548,7 +524,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 				sharedAddr[0] = dst;
 				sharedAddr[1] = len;
-				sharedAddr[2] = ((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ARM9_LEN)+src;
+				sharedAddr[2] = ((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
 				sharedAddr[3] = commandRead;
 
 				//IPC_SendSync(0xEE24);
@@ -558,7 +534,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Copy directly
-				memcpy(dst, (void*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ARM9_LEN)+src),len);
+				memcpy(dst, (void*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 				// Update cardi common
 				cardStruct[0] = src + len;
@@ -572,7 +548,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 				sharedAddr[0] = page;
 				sharedAddr[1] = len2;
-				sharedAddr[2] = (romLocation-0x4000-ARM9_LEN)+page;
+				sharedAddr[2] = (romLocation-0x4000-ndsHeader->arm9binarySize)+page;
 				sharedAddr[3] = commandRead;
 
 				//IPC_SendSync(0xEE24);
@@ -582,7 +558,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Read via the 512b ram cache
-				memcpy(cacheBuffer, (void*)((romLocation - 0x4000 - ARM9_LEN) + page), 512);
+				memcpy(cacheBuffer, (void*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
 			}

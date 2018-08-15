@@ -17,6 +17,7 @@
 */
 
 #include <string.h> // memcpy
+#include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
 #include <nds/ipc.h>
 #include <nds/interrupts.h>
@@ -24,12 +25,15 @@
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
+#include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
 #include "sdmmc_alt.h"
+#include "fat_alt.h"
+#include "locations.h"
+#include "module_params.h"
 #include "debug_file.h"
 #include "cardengine.h"
-#include "fat_alt.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into DSiMenu++
@@ -38,21 +42,15 @@
 
 //#define memcpy __builtin_memcpy
 
-#define ROM_LOCATION      0x0C804000
-#define ROM_LOCATION_SDK5 0x0D000000
-
-#define SAVE_LOCATION      0x0C820000
-#define SAVE_LOCATION_SDK5 0x0CE00000
-
-extern int tryLockMutex(int * addr);
-extern int lockMutex(int * addr);
-extern int unlockMutex(int * addr);
+extern int tryLockMutex(int* addr);
+extern int lockMutex(int* addr);
+extern int unlockMutex(int* addr);
 
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
-extern u32 sdk_version;
+extern module_params_t* moduleParams;
 extern u32 language;
 extern u32 gottenSCFGExt;
 extern u32 dsiMode; // SDK 5
@@ -61,13 +59,11 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 
-bool sdk5 = false;
-
 u32 numberToActivateRunViaHalt = 10; // SDK 5
-vu32* volatile sharedAddr = (vu32*)0x027FFB08;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
-static bool initializedIRQ = false;
+//static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 
 static aFile* romFile = (aFile*)0x37D5000;
@@ -80,15 +76,16 @@ static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
-bool ndmaUsed = false;
+//static bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static void* romLocation = (void*)ROM_LOCATION;
 static void* saveLocation = (void*)SAVE_LOCATION;
 
-void initialize(void) {
+static void initialize(void) {
 	if (!initialized) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
@@ -116,7 +113,7 @@ void initialize(void) {
 		enableDebug(myDebugFile);
 		dbg_printf("logging initialized\n");		
 		dbg_printf("sdk version :");
-		dbg_hexa(sdk_version);		
+		dbg_hexa(moduleParams->sdk_version);		
 		dbg_printf("\n");	
 		dbg_printf("rom file :");
 		dbg_hexa(fileCluster);	
@@ -129,14 +126,15 @@ void initialize(void) {
 		initialized = true;
 	}
 
-	sdk5 = (sdk_version > 0x5000000);
+	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {
-		romLocation = (void*)ROM_LOCATION_SDK5;
-		saveLocation = (void*)SAVE_LOCATION_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		romLocation = (void*)ROM_SDK5_LOCATION;
+		saveLocation = (void*)SAVE_SDK5_LOCATION;
 	}
 }
 
-void cardReadLED(bool on) {
+static void cardReadLED(bool on) {
 	if (on) {
 		switch(romread_LED) {
 			case 0:
@@ -170,7 +168,7 @@ void cardReadLED(bool on) {
 	}
 }
 
-void asyncCardReadLED(bool on) {
+static void asyncCardReadLED(bool on) {
 	if (on) {
 		switch(romread_LED) {
 			case 0:
@@ -198,7 +196,7 @@ void asyncCardReadLED(bool on) {
 	}
 }
 
-void log_arm9(void) {
+static void log_arm9(void) {
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
@@ -225,7 +223,7 @@ void log_arm9(void) {
 	#endif
 }
 
-void cardRead_arm9(void) {
+static void cardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -273,7 +271,7 @@ void cardRead_arm9(void) {
 	#endif
 }
 
-void asyncCardRead_arm9(void) {
+static void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -315,7 +313,7 @@ void asyncCardRead_arm9(void) {
 	#endif
 }
 
-void runCardEngineCheck(void) {
+static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
@@ -354,7 +352,7 @@ void runCardEngineCheck(void) {
 	}
 }
 
-void runCardEngineCheckHalt(void) {
+static void runCardEngineCheckHalt(void) {
 	//dbg_printf("runCardEngineCheckHalt\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheckHalt");
@@ -366,20 +364,17 @@ void runCardEngineCheckHalt(void) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
 			log_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
 			cardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800)
-		{
+		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
 		}
@@ -423,7 +418,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (language >= 0 && language < 6) {
 		// Change language
-		*(u8*)(sdk5 ? 0x02FFFCE4 : 0x027FFCE4) = language;
+		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
 	if (ROMinRAM == false) {
@@ -678,7 +673,7 @@ u32 myIrqEnable(u32 irq) {
 	return irq_before;
 }
 
-void irqIPCSYNCEnable(void) {	
+/*static void irqIPCSYNCEnable(void) {	
 	if (!initializedIRQ) {
 		int oldIME = enterCriticalSection();	
 		initialize();	
@@ -693,7 +688,7 @@ void irqIPCSYNCEnable(void) {
 		leaveCriticalSection(oldIME);
 		initializedIRQ = true;
 	}
-}
+}*/
 
 //
 // ARM7 Redirected functions

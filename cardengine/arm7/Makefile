@@ -40,7 +40,7 @@ CFLAGS	:=	$(COMMON) -std=gnu99
 CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -T ../cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:= -lnds7
 
@@ -116,8 +116,11 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).bin			:	$(CURDIR)/$(TARGET).elf
-$(CURDIR)/$(TARGET).elf	:	$(OFILES)
+$(OUTPUT).bin:	$(TARGET).elf
+$(TARGET).elf:	cardengine.ld $(OFILES)
+
+cardengine.ld:	$(CURDIR)/../cardengine.ld.in
+	arm-none-eabi-cpp -P $(INCLUDE) $< $@
 
 
 #---------------------------------------------------------------------------------

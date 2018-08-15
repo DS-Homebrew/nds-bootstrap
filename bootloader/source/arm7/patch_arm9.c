@@ -1,72 +1,23 @@
 #include <string.h>
-#include "card_patcher.h"
-#include "card_finder.h"
+#include "module_params.h"
+#include "patch.h"
+#include "find.h"
 #include "common.h"
-#include "cardengine_arm9_bin.h"
+#include "cardengine_header_arm9.h"
 #include "debug_file.h"
 
 //#define memcpy __builtin_memcpy // memcpy
 
-//extern bool sdk5;
-extern u32 ROM_TID;
-
 bool cardReadFound = false; // card_patcher_common.c
 
-void decompressLZ77Backwards(u8* addr, u32 size) {
-	u32 len = *(u32*)(addr + size - 4) + size;
+static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
-	//byte[] Result = new byte[len];
-	//Array.Copy(Data, Result, Data.Length);
-
-	u32 end = *(u32*)(addr + size - 8) & 0xFFFFFF;
-
-	u8* result = addr;
-
-	int Offs = (int)(size - (*(u32*)(addr + size - 8) >> 24));
-	int dstoffs = (int)len;
-	while (true) {
-		u8 header = result[--Offs];
-		for (int i = 0; i < 8; i++) {
-			if ((header & 0x80) == 0) {
-				result[--dstoffs] = result[--Offs];
-			} else {
-				u8 a = result[--Offs];
-				u8 b = result[--Offs];
-				int offs = (((a & 0xF) << 8) | b) + 2;//+ 1;
-				int length = (a >> 4) + 2;
-				do {
-					result[dstoffs - 1] = result[dstoffs + offs];
-					dstoffs--;
-					length--;
-				} while (length >= 0);
-			}
-
-			if (Offs <= size - end) {
-				return;
-			}
-
-			header <<= 1;
-		}
-	}
-}
-
-void ensureArm9Decompressed(const void* arm9binary, u32 arm9binarySize, module_params_t* moduleParams) {
-	if (!moduleParams->compressed_static_end) {
-		dbg_printf("This rom is not compressed\n");
-		return; // Not compressed
-	}
-	dbg_printf("This rom is compressed;)\n");
-	//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-	decompressLZ77Backwards((u8*)arm9binary, arm9binarySize);
-	moduleParams->compressed_static_end = 0;
-}
-
-u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	u32* debug = (u32*)0x037C6000;
+u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, cardengineArm9* ce9, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	bool sdk5 = isSdk5(moduleParams);
+	
 	debug[4] = (u32)ndsHeader->arm9destination;
 	debug[8] = moduleParams->sdk_version;
-
-	//bool sdk5 = (moduleParams->sdk_version > 0x5000000);
 
 	bool usesThumb = false;
 	int readType = 0;
@@ -217,8 +168,8 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 				break;
 		}
 
-		*(vu32*)(sdk5 ? 0x3000000 : 0x2800000) = (vu32)mpuDataOffset; // ndsHead + 0x200
-		*(vu32*)(sdk5 ? 0x3000004 : 0x2800004) = (vu32)*mpuDataOffset;
+		*(vu32*)((u32)ndsHeader + 0x200) = (vu32)mpuDataOffset;
+		*(vu32*)((u32)ndsHeader + 0x204) = (vu32)*mpuDataOffset;
 
 		*mpuDataOffset = mpuInitRegionNewData;
 
@@ -329,45 +280,46 @@ u32 patchCardNdsArm9(const tNDSHeader* ndsHeader, u32* cardEngineLocation, const
 		*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 	}
 
-	debug[2] = (u32)cardEngineLocation;
+	debug[2] = (u32)ce9;
 
-	cardEngineLocation[3] = moduleParams->sdk_version;
+	//ce9->sdk_version = moduleParams->sdk_version;
 
-	u32* patches = (u32*)cardEngineLocation[usesThumb ? 1 : 0];
+	u32* cardReadPatch    = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
+	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull      : ce9->patches->card_pull);
+	u32* cardIdPatch      = (usesThumb ? ce9->thumbPatches->card_id_arm9   : ce9->patches->card_id_arm9);
+	u32* cardDmaPatch     = (usesThumb ? ce9->thumbPatches->card_dma_arm9  : ce9->patches->card_dma_arm9);
 
-	u32* cardReadPatch    = (u32*)patches[0];
-	u32* cardPullOutPatch = (u32*)patches[6];
-	u32* cardIdPatch      = (u32*)patches[3];
-	u32* cardDmaPatch     = (u32*)patches[4];
+	debug[5] = (u32)ce9->patches;
 
-	debug[5] = (u32)patches;
+	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
+	//u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
 
-	u32** card_struct = (u32**)(cardReadEndOffset - 1);
-	//u32* cache_struct = (u32**)(cardIdStartOffset - 1);
+	debug[6] = (u32)*cardStruct;
+	//debug[7] = (u32)*cacheStruct;
 
-	debug[6] = (u32)*card_struct;
-	//debug[7] = (u32)*cache_struct;
-
+	u32* cardStructPatch = (usesThumb ? ce9->thumbPatches->cardStructArm9 : ce9->patches->cardStructArm9);
 	if (moduleParams->sdk_version > 0x3000000) {
-		cardEngineLocation[5] = (u32)(*card_struct + 7);
-		*(u32*)patches[5] = (u32)(*card_struct + 7); // Cache management alternative
+		ce9->cardStruct0 = (u32)(*cardStruct + 7);
+		*cardStructPatch = (u32)(*cardStruct + 7); // Cache management alternative
 	} else {
-		cardEngineLocation[5] = (u32)(*card_struct + 6);
-		*(u32*)patches[5] = (u32)(*card_struct + 6); // Cache management alternative
+		ce9->cardStruct0 = (u32)(*cardStruct + 6);
+		*cardStructPatch = (u32)(*cardStruct + 6); // Cache management alternative
 	}
-	//cardEngineLocation[6] = (u32)*cache_struct;
+	//ce9->cacheStruct = (u32)*cacheStruct;
 
-	*(u32*)patches[7] = (u32)cardPullOutOffset + 4;
+	u32* cacheFlushPatch = (usesThumb ? ce9->thumbPatches->cacheFlushRef : ce9->patches->cacheFlushRef);
+	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
 
+	u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
 	if ((ROM_TID & 0x00FFFFFF) != 0x443241	// New Super Mario Bros
 	&& (ROM_TID & 0x00FFFFFF) != 0x4D4441)	// Animal Crossing: Wild World
 	{
-		*(u32*)patches[8] = (u32)cardReadCachedStartOffset;
+		*readCachedPatch = (u32)cardReadCachedStartOffset;
 	}
 
-	//if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
-		patches[10] = needFlushCache;
-	//}
+	if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
+		ce9->patches->needFlushDCCache = needFlushCache;
+	}
 
 	//memcpy(oldArenaLow, cardReadPatch, 0xF0); //copyLoop(oldArenaLow, cardReadPatch, 0xF0);
 

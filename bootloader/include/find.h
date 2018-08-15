@@ -1,10 +1,11 @@
-#ifndef CARD_FINDER_H
-#define CARD_FINDER_H
+#ifndef FIND_H
+#define FIND_H
 
 #include <nds/ndstypes.h>
-#include "card_patcher.h"
+#include <nds/memory.h> // tNDSHeader
+#include "locations.h"
+#include "module_params.h"
 
-//extern bool sdk5;
 //extern int readType;
 
 // COMMON
@@ -13,8 +14,9 @@ u32* memsearch32(const u32* start, u32 dataSize, const u32* find, u32 findSize, 
 u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, bool forward);
 
 inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
-	u32* debug = (u32*)0x037D0000;
+	u32* debug = (u32*)DEBUG_FIND_LOCATION;
 	debug[3] = (u32)(start + dataSize);
+	
 	//return (u32*)memsearch((u8*)start, dataSize, (u8*)find, findLen*sizeof(u32));
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), true);
 }
@@ -36,7 +38,7 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 }
 
 // ARM9
-u32* findModuleParamsOffset(const u32* src, u32 size);
+u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader);
 u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader);
@@ -82,4 +84,4 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
-#endif // CARD_FINDER_H
+#endif // FIND_H

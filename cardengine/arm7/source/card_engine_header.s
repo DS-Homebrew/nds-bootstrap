@@ -10,7 +10,7 @@
 .global card_engine_end
 .global cardStruct
 .global patches_offset
-.global sdk_version
+.global moduleParams
 .global fileCluster
 .global saveCluster
 .global saveSize
@@ -33,7 +33,7 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-sdk_version:
+moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
@@ -54,7 +54,7 @@ romread_LED:
 gameSoftReset:
 	.word	0x00000000
 cheat_data_offset:    
-	.word	cheat_data - patches_offset
+	.word	cheat_data
 romFileOffset:    
 	.word	0x37D5000
 
@@ -490,7 +490,7 @@ swiHaltThumbStub:
 	push	{r1-r4}
 	ldr	r3, =newSwiHalt
 	bl	_blx_r3_stubthumb
-	swi 0x6
+	swi #0x6
 	pop   	{r1-r4} 
 	pop  	{r3}
 	bx       r3
