@@ -94,7 +94,6 @@ static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
 static const char* bootName = "BOOT.NDS";
 static module_params_t* moduleParams = NULL;
-static bool foundModuleParams = false;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_LOCATION;
 static char* romLocation = (char*)ROM_LOCATION;
 
@@ -552,19 +551,19 @@ static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
 	}
 }
 
-static void findModuleParams(const tNDSHeader* ndsHeader) {
+static bool loadModuleParams(const tNDSHeader* ndsHeader) {
 	moduleParams = getModuleParams(ndsHeader);
 	if (moduleParams) {
-		foundModuleParams = true;
-
+		// Found module params
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-	} else {
-		nocashMessage("No moduleparams?\n");
-		*(vu32*)0x2800010 = 1;
-		moduleParams = buildModuleParams(donorSdkVer);
+		return true;
 	}
+	nocashMessage("No moduleparams?\n");
+	*(vu32*)0x2800010 = 1;
+	moduleParams = buildModuleParams(donorSdkVer);
+	return false;
 }
 
 static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
@@ -749,7 +748,7 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 2 dots
 
 	nocashMessage("Loading the header...\n");
-	findModuleParams(&dsiHeaderTemp.ndshdr);
+	bool foundModuleParams = loadModuleParams(&dsiHeaderTemp.ndshdr);
 	decompressBinary(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	patchBinary(&dsiHeaderTemp.ndshdr);
 	loadHeader(&dsiHeaderTemp, moduleParams);
