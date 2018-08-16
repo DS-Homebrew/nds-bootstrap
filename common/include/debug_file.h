@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-u32 dbg_printf(char * message);
+u32 dbg_printf(const char* message);
 u32 dbg_hexa(u32 n);
 void enableDebug(aFile debugFileCluster);
 

@@ -30,7 +30,7 @@ void enableDebug(aFile debugFileCluster) {
 	_debugFileCluster = debugFileCluster;
 }
 
-u32 dbg_printf(char * message) {
+u32 dbg_printf(const char* message) {
 	if(!_debug) {
         return 0;
     }
