@@ -73,7 +73,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET).nds
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
@@ -130,7 +130,7 @@ export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
 .PHONY: all dist nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
-all:	$(OUTPUT).nds
+all:	$(OUTPUT)
 
 dist:	all
 #	@rm	-fr	hbmenu
@@ -139,14 +139,14 @@ dist:	all
 #	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
 #	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 
-nightly:	$(OUTPUT).nds
+nightly:	$(OUTPUT)
 	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap.nds
 	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
-	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap.nds
-	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/nightly-bootstrap.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
 
-$(OUTPUT).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
-	ndstool	-c $(OUTPUT).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
+$(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
+	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
 			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
@@ -197,8 +197,8 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-#$(OUTPUT).nds	: 	$(OUTPUT).elf
-#$(OUTPUT).elf	:	$(OFILES)
+#$(OUTPUT)		: 	$(TARGET).elf
+#$(TARGET).elf	:	$(OFILES)
 
 #---------------------------------------------------------------------------------
 %.bin.o	:	%.bin
