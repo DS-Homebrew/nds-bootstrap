@@ -14,12 +14,12 @@ GAME_SUBTITLE2 := Made by Ahezard
 
 include $(DEVKITARM)/ds_rules
 
-export HBMENU_MAJOR	:= 0
-export HBMENU_MINOR	:= 5
-export HBMENU_PATCH	:= 0
+export VERSION_MAJOR	:= 0
+export VERSION_MINOR	:= 5
+export VERSION_PATCH	:= 0
 
 
-VERSION	:=	$(HBMENU_MAJOR).$(HBMENU_MINOR).$(HBMENU_PATCH)
+VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
