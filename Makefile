@@ -140,10 +140,8 @@ dist:	all
 #	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 
 nightly:	$(OUTPUT)
-	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap.nds
-	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
-	@cp $(OUTPUT) $(CURDIR)/$(BIN)/nightly-bootstrap.nds
-	@cp $(OUTPUT) $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
+	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
 
 $(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
