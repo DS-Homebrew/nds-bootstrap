@@ -30,8 +30,8 @@
 ------------------------------------------------------------------*/
    
 #include <string.h> // memcpy
-#include "fat_alt.h"
-#include "card_alt.h"
+#include "my_fat.h"
+#include "card.h"
 #include "debug_file.h"
 
 //#define memcpy __builtin_memcpy

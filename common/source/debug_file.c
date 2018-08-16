@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include <nds/debug.h>
-#include "fat_alt.h"
+#include "my_fat.h"
 #include "hex.h"
 
 static bool _debug = false;

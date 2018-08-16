@@ -19,7 +19,7 @@
 #ifndef DEBUG_FILE_H
 #define DEBUG_FILE_H
 
-#include "fat_alt.h"
+#include "my_fat.h"
 
 #ifdef __cplusplus
 extern "C" {

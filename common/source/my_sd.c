@@ -1,5 +1,5 @@
-#include "disc_io_alt.h"
-#include "sdmmc_alt.h"
+#include "my_disc_io.h"
+#include "my_sdmmc.h"
 
 /*-----------------------------------------------------------------
 startUp

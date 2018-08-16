@@ -28,8 +28,8 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
-#include "sdmmc_alt.h"
-#include "fat_alt.h"
+#include "my_sdmmc.h"
+#include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
 #include "debug_file.h"

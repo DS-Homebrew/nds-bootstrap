@@ -25,8 +25,8 @@
 #include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
-#include "sdmmc_alt.h"
-#include "disc_io_alt.h"
+#include "my_sdmmc.h"
+#include "my_disc_io.h"
 
 #define DATA32_SUPPORT
 

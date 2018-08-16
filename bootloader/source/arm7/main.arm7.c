@@ -48,7 +48,7 @@
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
-#include "fat_alt.h"
+#include "my_fat.h"
 //#include "dldi_patcher.h"
 #include "module_params.h"
 #include "decompress.h"
