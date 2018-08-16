@@ -452,7 +452,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48004000;
 }
 
-int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
+int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -472,7 +472,7 @@ int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int n
 	return get_error(&handleSD);
 }
 
-int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
+int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -494,7 +494,7 @@ int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlo
 
 
 
-int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
+int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 {
 	if(handleNAND.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleNAND);
@@ -510,7 +510,7 @@ int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 	return get_error(&handleNAND);
 }
 
-int sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
+int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
 {
 	if(handleNAND.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleNAND);
@@ -749,7 +749,7 @@ int SD_Init(void)
 	return 0;
 }
 
-int sdmmc_get_cid(bool isNand, u32 *info)
+int my_sdmmc_get_cid(bool isNand, u32 *info)
 {
 	struct mmcdevice *device;
 	if(isNand)

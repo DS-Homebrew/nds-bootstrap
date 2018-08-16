@@ -37,7 +37,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	#ifdef DEBUG
 	nocashMessage("readSectors internal");
 	#endif
-	return sdmmc_sdcard_readsectors(sector, numSectors, buffer, ndmaSlot) == 0;
+	return my_sdmmc_sdcard_readsectors(sector, numSectors, buffer, ndmaSlot) == 0;
 }
 
 /*-----------------------------------------------------------------
@@ -51,7 +51,7 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	#ifdef DEBUG
 	nocashMessage("writeSectors internal");
 	#endif
-	return sdmmc_sdcard_writesectors(sector, numSectors, buffer, ndmaSlot) == 0;
+	return my_sdmmc_sdcard_writesectors(sector, numSectors, buffer, ndmaSlot) == 0;
 }
 
 
