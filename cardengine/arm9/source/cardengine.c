@@ -24,6 +24,7 @@
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
+#include "nds_header.h"
 #include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
@@ -240,9 +241,9 @@ static void getAsyncSector(void) {
 }
 
 static inline bool isHGSS(const tNDSHeader* ndsHeader) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
-	return ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049); // Pokemon SoulSilver
+	const char* ROM_TID = getRomTid(ndsHeader);
+	return (strncmp(ROM_TID, "IPK", 3) == 0  // Pokemon HeartGold
+		|| strncmp(ROM_TID, "IPG", 3) == 0); // Pokemon SoulSilver
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {

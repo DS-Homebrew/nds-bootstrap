@@ -49,9 +49,10 @@
 #include <nds/debug.h>
 
 #include "my_fat.h"
-//#include "dldi_patcher.h"
+#include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
+//#include "dldi_patcher.h"
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
@@ -577,13 +578,13 @@ static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleP
 }
 
 static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	const char* ROM_TID = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
-	if ((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
-	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
-	|| (ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
-	|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
+	if (strncmp(ROM_TID, "ASM", 3) == 0	// SM64DS
+	|| strncmp(ROM_TID, "SMS", 3) == 0	// SMSW
+	|| strncmp(ROM_TID, "A2D", 3) == 0	// NSMB
+	|| strncmp(ROM_TID, "ADM", 3) == 0)	// AC:WW
 	{
 		enableExceptionHandler = false;
 	}

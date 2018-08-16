@@ -18,6 +18,7 @@
 
 //#include <stddef.h>
 #include <nds/system.h>
+#include "nds_header.h"
 #include "module_params.h"
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
@@ -28,32 +29,32 @@
 extern bool logging;
 
 void patchBinary(const tNDSHeader* ndsHeader) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	const char* ROM_TID = getRomTid(ndsHeader);
 
-	// The World Ends With You (USA) (Europe)
-	if (ROM_TID == 0x454C5741 || ROM_TID == 0x504C5741) {
+	// The World Ends With You (USA/Europe)
+	if (strcmp(ROM_TID, "AWLE") == 0 || strcmp(ROM_TID, "AWLP") == 0) {
 		*(u32*)0x203E7B0 = 0;
 	}
 
 	// Subarashiki Kono Sekai - It's a Wonderful World (Japan)
-	if (ROM_TID == 0x4A4C5741) {
+	if (strcmp(ROM_TID, "AWLJ") == 0) {
 		*(u32*)0x203F114 = 0;
 	}
 
 	// Miami Nights - Singles in the City (USA)
-	if (ROM_TID == 0x45575641) {
+	if (strcmp(ROM_TID, "AVWE") == 0) {
 		// Fix not enough memory error
 		*(u32*)0x0204CCCC = 0xe1a00000; //nop
 	}
 
 	// Miami Nights - Singles in the City (Europe)
-	if (ROM_TID == 0x50575641) {
+	if (strcmp(ROM_TID, "AVWP") == 0) {
 		// Fix not enough memory error
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
 	
 	// 0735 - Castlevania - Portrait of Ruin (USA)
-	if (ROM_TID == 0x45424341) {
+	if (strcmp(ROM_TID, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
 		*(u32*)0x02007918 = 0xea000004;
 		*(u32*)0x02007a00 = 0xeb025052;
@@ -64,7 +65,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	if (ROM_TID == 0x4a424341) {
+	if (strcmp(ROM_TID, "ACBJ") == 0) {
 		*(u32*)0x02007910 = 0xeb0250b0;
 		*(u32*)0x02007918 = 0xea000004;
 		*(u32*)0x02007a00 = 0xeb025074;
@@ -75,7 +76,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
-	if (ROM_TID == 0x50424341) {
+	if (strcmp(ROM_TID, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
 		*(u32*)0x02007b08 = 0xea000004;
 		*(u32*)0x02007bf0 = 0xeb025334;
@@ -86,7 +87,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Chrono Trigger (Japan)
-	if (ROM_TID == 0x4a555159) {
+	if (strcmp(ROM_TID, "YQUJ") == 0) {
 		*(u32*)0x0204e364 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e368 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e6c4 = 0xe3a00000; //mov r0, #0
@@ -94,7 +95,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Chrono Trigger (USA/Europe)
-	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
+	if (strcmp(ROM_TID, "YQUE") == 0 || strcmp(ROM_TID, "YQUP") == 0) {
 		*(u32*)0x0204e334 = 0xe3a00000; //mov r0, #0
 		*(u32*)0x0204e338 = 0xe12fff1e; //bx lr
 		*(u32*)0x0204e694 = 0xe3a00000; //mov r0, #0
@@ -102,26 +103,25 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// Dementium II (USA/EUR)
-	if (ROM_TID == 0x45454442 || ROM_TID == 0x50454442) {
+	if (strcmp(ROM_TID, "BDEE") == 0 || strcmp(ROM_TID, "BDEP") == 0) {
 		*(u32*)0x020e9120 = 0xe3a00002;
 		*(u32*)0x020e9124 = 0xea000029;
 	}
 	
 	// Dementium II: Tozasareta Byoutou (JPN)
-	if (ROM_TID == 0x4a454442) {
+	if (strcmp(ROM_TID, "BDEJ") == 0) {
 		*(u32*)0x020d9f60 = 0xe3a00005;
 		*(u32*)0x020d9f68 = 0xea000029;
 	}
 
-	// Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)
-	// Grand Theft Auto - Chinatown Wars (Europe) (En,Fr,De,Es,It)
-	if (ROM_TID == 0x45584759 || ROM_TID == 0x50584759) {
+	// Grand Theft Auto - Chinatown Wars (USA/Europe) (En,Fr,De,Es,It)
+	if (strcmp(ROM_TID, "YGXE") == 0 || strcmp(ROM_TID, "YGXP") == 0) {
 		*(u16*)0x02037a34 = 0x46c0;
 		*(u32*)0x0216ac0c = 0x0001fffb;
 	}
 
 	// WarioWare: DIY (USA)
-	if (ROM_TID == 0x45524F55) {
+	if (strcmp(ROM_TID, "UORE") == 0) {
 		*(u32*)0x02003114 = 0xE12FFF1E; //mov r0, #0
 	}
 }
