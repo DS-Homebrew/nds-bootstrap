@@ -120,7 +120,7 @@ $(OUTPUT).bin:	$(TARGET).elf
 $(TARGET).elf:	cardengine.ld $(OFILES)
 
 cardengine.ld:	$(CURDIR)/../cardengine.ld.in
-	arm-none-eabi-cpp -P $(INCLUDE) $< $@
+	$(CPP) -P $(INCLUDE) $< $@
 
 
 #---------------------------------------------------------------------------------
