@@ -7,6 +7,11 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+# These set the information text in the nds file
+GAME_TITLE     := NDS BOOTSTRAP
+GAME_SUBTITLE1 := Runs an .nds file
+GAME_SUBTITLE2 := Made by Ahezard
+
 include $(DEVKITARM)/ds_rules
 
 export HBMENU_MAJOR	:= 0
@@ -122,8 +127,6 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #endif
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
-export GAME_TITLE := $(TARGET)
-
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
 .PHONY: all dist nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
@@ -144,7 +147,7 @@ nightly:	$(OUTPUT).nds
 
 $(OUTPUT).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 	ndstool	-c $(OUTPUT).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
-			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;Made by Ahezard" \
+			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
