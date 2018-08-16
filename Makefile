@@ -15,7 +15,7 @@ GAME_SUBTITLE2 := Made by Ahezard
 include $(DEVKITARM)/ds_rules
 
 export VERSION_MAJOR	:= 0
-export VERSION_MINOR	:= 5
+export VERSION_MINOR	:= 11
 export VERSION_PATCH	:= 0
 
 
