@@ -128,7 +128,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist nightly bootloader cardengine_arm7 cardengine_arm9 clean
+.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
 all:	$(OUTPUT)
 
@@ -138,6 +138,10 @@ dist:	all
 #	@cp hbmenu.nds hbmenu/BOOT.NDS
 #	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
 #	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
+
+release:	$(OUTPUT)
+	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-release.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-release.nds
 
 nightly:	$(OUTPUT)
 	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
