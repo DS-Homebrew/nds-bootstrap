@@ -15,6 +15,7 @@ __sp_svc	=	__sp_irq - 0x100;
 __sp_usr	=	__sp_svc - 0x100;
 
 __irq_flags	=	__vram_top - 8;
+__irq_flagsaux	=	__vram_top - 0x40; /*__irq_flagsaux	=	0x04000000 - 0x40;*/
 __irq_vector	=	__vram_top - 4;
 
 

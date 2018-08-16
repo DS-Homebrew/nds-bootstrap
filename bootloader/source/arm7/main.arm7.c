@@ -63,6 +63,8 @@
 
 //#define memcpy __builtin_memcpy
 
+//#define resetCpu() __asm volatile("\tswi 0x000000\n");
+
 extern void arm7clearRAM(void);
 
 //extern u32 _start;
@@ -129,38 +131,6 @@ static void increaseLoadBarLength(void) {
 	}
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Firmware stuff
-
-#define FW_READ 0x03
-
-static void boot_readFirmware(u32 address, u8* buffer, u32 size) {
-	u32 index;
-
-	// Read command
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPICNT = SPI_ENABLE | SPI_CONTINUOUS | SPI_DEVICE_NVRAM;
-	REG_SPIDATA = FW_READ;
-	while (REG_SPICNT & SPI_BUSY);
-
-	// Set the address
-	REG_SPIDATA = (address >> 16) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPIDATA = (address >> 8) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPIDATA = (address) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-
-	for (index = 0; index < size; index++) {
-		REG_SPIDATA = 0;
-		while (REG_SPICNT & SPI_BUSY);
-		buffer[index] = REG_SPIDATA & 0xFF;
-	}
-	REG_SPICNT = 0;
-}
-
-//#define resetCpu() __asm volatile("\tswi 0x000000\n");
-
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
 Clears all of the NDS's RAM that is visible to the ARM7
@@ -203,17 +173,17 @@ static void reloadFirmwareSettings(void) {
 	u32 settingsOffset = 0;
 
 	// Get settings location
-	boot_readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
+	readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
 	settingsOffset *= 8;
 
 	// Reload DS Firmware settings
-	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
-	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
+	readFirmware(settingsOffset + 0x070, &settings1, 0x1);
+	readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
 	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
+		readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
+		readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
 	}
 	if (language >= 0 && language < 6) {
 		// Change language
