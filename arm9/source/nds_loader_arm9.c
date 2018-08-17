@@ -97,11 +97,11 @@ static inline void writeAddr(data_t *mem, addr_t offset, addr_t value) {
 
 /*static inline u32 readAddr(const u8* mem, u32 offset) {
 	return ((u32*)mem)[offset/sizeof(u32)];
-}
+}*/
 
 static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	((u32*)mem)[offset/sizeof(u32)] = value;
-}*/
+}
 
 /*static inline void vramcpy(void* dst, const void* src, int len) {
 	u16* dst16 = (u16*)dst;
@@ -141,14 +141,14 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	return -1;
 }*/
 
-/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
+static inline void copyLoop(u32* dest, const u32* src, u32 size) {
 	size = (size +3) & ~3; // Bigger nearest multiple of 4
 	do {
 		writeAddr((u8*)dest, 0, *src);
 		dest++;
 		src++;
 	} while (size -= 4);
-}*/
+}
 
 int loadArgs(int argc, const char** argv) {
 	// Give arguments to loader
@@ -185,23 +185,6 @@ int loadArgs(int argc, const char** argv) {
 }
 
 #define CARDENGINE_ARM7_OFFSET 21
-
-typedef signed int addr_t;
-typedef unsigned char data_t;
-
-static void writeAddr (data_t *mem, addr_t offset, addr_t value) {
-	((addr_t*)mem)[offset/sizeof(addr_t)] = value;
-}
-
-
-static inline void copyLoop (u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3;
-	do {
-        writeAddr ((data_t*) dest, 0, *src);
-		dest++;
-        src++;
-	} while (size -= 4);
-}
 
 int loadCheatData(u32* cheat_data) {
 	nocashMessage("loadCheatData");
