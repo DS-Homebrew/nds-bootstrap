@@ -104,7 +104,7 @@ u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mod
 	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ce7, ndsHeader, moduleParams);
 	}
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		patchSwiHalt(ce7, ndsHeader, moduleParams);
 	}
 
@@ -160,7 +160,7 @@ u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mod
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 	}
-	if (saveResult == 1 && ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
+	if (saveResult == 1 && !ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
 		char* saveLocation = (sdk5 ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
 		fileRead(saveLocation, saveFile, 0, saveSize, 3);

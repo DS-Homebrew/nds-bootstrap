@@ -421,7 +421,7 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		runCardEngineCheck();
 	}
 
@@ -714,7 +714,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
+	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 		memcpy(dst, saveLocation + src, len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();
@@ -739,7 +739,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	if (lockMutex(&saveMutex)) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
+		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 			memcpy(saveLocation + dst, (void*)src, len);
 		}
 		fileWrite((void*)src, *savFile, dst, len, -1);
@@ -764,7 +764,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	if (lockMutex(&saveMutex)) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
-		if (ROMinRAM == false && saveSize > 0 && saveSize <= 0x00100000) {
+		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 			memcpy(saveLocation + dst, (void*)src, len);
 		}
 		fileWrite((void*)src, *savFile, dst, len, -1);
@@ -823,7 +823,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (ROMinRAM == true) {
+	if (ROMinRAM) {
 		memcpy(dst, romLocation + src, len);
 	} else if (lockMutex(&saveMutex)) {
 		initialize();

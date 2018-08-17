@@ -337,7 +337,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 	
 
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;
 		if ((ndsHeader->romSize > 0) && ((sector+_128KB_READ_SIZE) > ndsHeader->romSize)) {
@@ -351,12 +351,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		bool pAC = ((sdk5 && consoleModel > 0) || (!sdk5 && !hgssFix));
 
-		if (asyncPrefetch == 1 && pAC) {
+		if (asyncPrefetch && pAC) {
 			processAsyncCommand();
 		}
 
 		if (page == src && len > _128KB_READ_SIZE && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-			if (asyncPrefetch == 1 && pAC) {
+			if (asyncPrefetch && pAC) {
 				getAsyncSector();
 			}
 
@@ -382,7 +382,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				u32 nextSector = sector+_128KB_READ_SIZE;	
 				// Read max CACHE_READ_SIZE via the main RAM cache
 				if (slot == -1) {
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						getAsyncSector();
 					}
 
@@ -409,11 +409,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 					updateDescriptor(slot, sector);	
 		
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						triggerAsyncPrefetch(nextSector);
 					}
 				} else {
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						if (cacheCounter[slot] == 0x0FFFFFFF) {
 							// Prefetch successful
 							getAsyncSector();

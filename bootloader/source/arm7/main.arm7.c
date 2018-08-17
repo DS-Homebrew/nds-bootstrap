@@ -589,7 +589,7 @@ static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 		enableExceptionHandler = false;
 	}
 
-	if (ROMinRAM == true) {
+	if (ROMinRAM) {
 		// Load ROM into RAM
 		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
@@ -773,8 +773,8 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 7 dots
 
 	setArm9Stuff(ndsHeader, *romFile);
-	if (ROMinRAM == false) {
-		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
+	if (!ROMinRAM) {
+		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}

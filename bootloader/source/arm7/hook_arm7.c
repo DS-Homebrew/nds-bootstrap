@@ -344,7 +344,7 @@ int hookNdsRetailArm7(
 	ce7->gameSoftReset           = gameSoftReset;
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 
