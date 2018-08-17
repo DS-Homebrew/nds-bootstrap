@@ -184,29 +184,48 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
+#define CARDENGINE_ARM7_OFFSET 21
+
+typedef signed int addr_t;
+typedef unsigned char data_t;
+
+static void writeAddr (data_t *mem, addr_t offset, addr_t value) {
+	((addr_t*)mem)[offset/sizeof(addr_t)] = value;
+}
+
+
+static inline void copyLoop (u32* dest, const u32* src, u32 size) {
+	size = (size +3) & ~3;
+	do {
+        writeAddr ((data_t*) dest, 0, *src);
+		dest++;
+        src++;
+	} while (size -= 4);
+}
+
 int loadCheatData(u32* cheat_data) {
 	nocashMessage("loadCheatData");
+    
+    nocashMessage("load_bin");
+    nocashMessage(tohex(load_bin));
 			
-	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	/*u32 cardEngineArm7Offset = (u32)lc0->cardengine_arm7;
-	nocashMessage("cardEngineArm7Offset");
-	nocashMessage(tohex(cardEngineArm7Offset));*/
-	
-	//u32* cardEngineArm7 = (u32*)(load_bin + cardEngineArm7Offset);
-	const cardengineArm7* cardEngineArm7 = lc0->cardengine_arm7;
-	nocashMessage("cardEngineArm7");
-	nocashMessage(tohex((u32)cardEngineArm7));
-	
-	/*u32 cheatDataOffset = (u32)cardEngineArm7->cheat_data - (u32)cardEngineArm7;
-	nocashMessage("cheatDataOffset");
-	nocashMessage(tohex(cheatDataOffset));*/
-	
-	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardEngineArm7Offset + cheatDataOffset);
-	u32* cheatDataDest = cardEngineArm7->cheat_data;
-	nocashMessage("cheatDataDest");
-	nocashMessage(tohex((u32)cheatDataDest));
-	
-	memcpy(cheatDataDest, cheat_data, 1024); //copyLoop(cheatDataDest, cheat_data, 1024);
+    u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET] - VRAM_C_ARM7_0x06000000;
+    nocashMessage("cardengineArm7Offset");
+    nocashMessage(tohex(cardengineArm7Offset));
+    
+    u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
+    nocashMessage("cardengineArm7");
+    nocashMessage(tohex(cardengineArm7));
+    
+    u32 cheatDataOffset = cardengineArm7[13] - CARDENGINE_ARM7_LOCATION ;
+    nocashMessage("cheatDataOffset");
+    nocashMessage(tohex(cheatDataOffset));
+    
+    u32* cheatDataDest = (u32*) (((u32)LOAD_CRT0_LOCATION ) + cardengineArm7Offset + cheatDataOffset);
+    nocashMessage("cheatDataDest");
+    nocashMessage(tohex(cheatDataDest));
+    
+    copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
 	
 	return true;
 }
