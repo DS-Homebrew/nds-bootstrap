@@ -106,20 +106,17 @@ $(LOADELF)	:	$(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
 	
-#dldiengine.bin.o : dldiengine.bin
-
-#dldiengine.bin:
-#	cp $(CURDIR)/../../data/dldiengine.bin dldiengine.bin
+#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
 	
-cardengine_arm7.bin.o : cardengine_arm7.bin
+cardengine_arm7.bin.o : $(CURDIR)/../../data/cardengine_arm7.bin
+	@echo $(notdir $<)
+	$(bin2o)
 
-cardengine_arm7.bin:
-	cp $(CURDIR)/../../data/cardengine_arm7.bin cardengine_arm7.bin
-	
-cardengine_arm9.bin.o : cardengine_arm9.bin
-
-cardengine_arm9.bin:
-	cp $(CURDIR)/../../data/cardengine_arm9.bin cardengine_arm9.bin
+cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
+	@echo $(notdir $<)
+	$(bin2o)
 
 -include $(DEPENDS)
 
