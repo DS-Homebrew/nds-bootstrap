@@ -32,6 +32,7 @@
 extern "C" {
 #include <nds/system.h>
 #include <nds/debug.h>
+#include "hex.h"
 }
 
 #include <fat.h>
@@ -411,8 +412,11 @@ int main(int argc, char** argv) {
 			if (cheats.size() < 255) {
 				 for (unsigned int i = 0; i < cheats.size(); i++) {
 					dbg_printf(cheats[i].c_str());
-					dbg_printf(" ");
-					cheat_data[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
+                    nocashMessage(cheats[i].c_str());
+					dbg_printf(" ");                    
+					cheat_data[i] = strtoul(("0x"+cheats[i]).c_str(), NULL, 16);
+                    nocashMessage(tohex(cheat_data[i]));
+                    dbg_printf(" "); 
 				}
 				cheat_data[cheats.size()] = 0xCF000000;
                 cheat_data[cheats.size()+1] = 0;
