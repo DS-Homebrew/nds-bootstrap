@@ -53,8 +53,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 	if (swiGetPitchTableOffset) {
 		// Patch
-		bool sdk5 = isSdk5(moduleParams);
-		u32* swiGetPitchTablePatch = (sdk5 ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+		u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 	}
 }
@@ -97,18 +96,10 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	}
 }
 
-u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
-	bool sdk5 = isSdk5(moduleParams);
+static void patchSleep(const tNDSHeader* ndsHeader) {
 	bool usesThumb = false;
 
-	if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ce7, ndsHeader, moduleParams);
-	}
-	if (!ROMinRAM) {
-		patchSwiHalt(ce7, ndsHeader, moduleParams);
-	}
-
-	// Sleep patch
+	// Sleep
 	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
 	if (!sleepPatchOffset) {
 		dbg_printf("Trying thumb...\n");
@@ -124,30 +115,45 @@ u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mod
 			*(sleepPatchOffset + 2) = 0;
 		}
 	}
+}
 
+static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	// Card irq enable
+	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
+	if (!cardIrqEnableOffset) {
+		return false;
+	}
+	debug[0] = (u32)cardIrqEnableOffset;
+	u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
+	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	return true;
+}
+
+static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card check pull out
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
 		debug[0] = (u32)cardCheckPullOutOffset;
-	}
-
-	// Card irq enable
-	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
-	if (!cardIrqEnableOffset) {
-		return 0;
-	}
-	debug[0] = (u32)cardIrqEnableOffset;
-
-	//ce7->sdk_version = moduleParams->sdk_version;
-
-	u32* cardIrqEnablePatch    = ce7->patches->card_irq_enable_arm7;
-	u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-
-	if (cardCheckPullOutOffset) {
+		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
+}
 
-	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+	if (REG_SCFG_ROM != 0x703) {
+		fixForDsiBios(ce7, ndsHeader, moduleParams);
+	}
+	if (!ROMinRAM) {
+		patchSwiHalt(ce7, ndsHeader, moduleParams);
+	}
+
+	patchSleep(ndsHeader);
+
+	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+		return 0;
+	}
+
+	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
 	u32 saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 	if (!saveResult) {
@@ -162,7 +168,7 @@ u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mod
 	}
 	if (saveResult == 1 && !ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
-		char* saveLocation = (sdk5 ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
+		char* saveLocation = (isSdk5(moduleParams) ? (char*)SAVE_SDK5_LOCATION : (char*)SAVE_LOCATION);
 		fileRead(saveLocation, saveFile, 0, saveSize, 3);
 	}
 
