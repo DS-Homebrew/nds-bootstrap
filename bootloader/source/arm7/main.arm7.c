@@ -578,13 +578,13 @@ static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleP
 }
 
 static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
-	const char* ROM_TID = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
-	if (strncmp(ROM_TID, "ASM", 3) == 0	// SM64DS
-	|| strncmp(ROM_TID, "SMS", 3) == 0	// SMSW
-	|| strncmp(ROM_TID, "A2D", 3) == 0	// NSMB
-	|| strncmp(ROM_TID, "ADM", 3) == 0)	// AC:WW
+	if (strncmp(romTid, "ASM", 3) == 0	// SM64DS
+	|| strncmp(romTid, "SMS", 3) == 0	// SMSW
+	|| strncmp(romTid, "A2D", 3) == 0	// NSMB
+	|| strncmp(romTid, "ADM", 3) == 0)	// AC:WW
 	{
 		enableExceptionHandler = false;
 	}

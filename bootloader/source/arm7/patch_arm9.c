@@ -14,7 +14,7 @@
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	const char* ROM_TID = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 	bool sdk5 = isSdk5(moduleParams);
 	
 	debug[4] = (u32)ndsHeader->arm9destination;
@@ -253,10 +253,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	
 	// Random patch
 	if (moduleParams->sdk_version > 0x3000000
-	&& strncmp(ROM_TID, "AKT", 3) != 0  // Doctor Tendo
-	&& strncmp(ROM_TID, "ACZ", 3) != 0  // Cars
-	&& strncmp(ROM_TID, "ABC", 3) != 0  // Harvest Moon DS
-	&& strncmp(ROM_TID, "AWL", 3) != 0) // TWEWY
+	&& strncmp(romTid, "AKT", 3) != 0  // Doctor Tendo
+	&& strncmp(romTid, "ACZ", 3) != 0  // Cars
+	&& strncmp(romTid, "ABC", 3) != 0  // Harvest Moon DS
+	&& strncmp(romTid, "AWL", 3) != 0) // TWEWY
 	{
 		u32* randomPatchOffset = findRandomPatchOffset(ndsHeader);
 		if (randomPatchOffset) {
@@ -312,8 +312,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
 
 	u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
-	if (strncmp(ROM_TID, "A2D", 3) != 0	// New Super Mario Bros
-	&& strncmp(ROM_TID, "ADM", 3) != 0)	// Animal Crossing: Wild World
+	if (strncmp(romTid, "A2D", 3) != 0	// New Super Mario Bros
+	&& strncmp(romTid, "ADM", 3) != 0)	// Animal Crossing: Wild World
 	{
 		*readCachedPatch = (u32)cardReadCachedStartOffset;
 	}

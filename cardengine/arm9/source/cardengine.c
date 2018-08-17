@@ -241,9 +241,9 @@ static void getAsyncSector(void) {
 }
 
 static inline bool isHGSS(const tNDSHeader* ndsHeader) {
-	const char* ROM_TID = getRomTid(ndsHeader);
-	return (strncmp(ROM_TID, "IPK", 3) == 0  // Pokemon HeartGold
-		|| strncmp(ROM_TID, "IPG", 3) == 0); // Pokemon SoulSilver
+	const char* romTid = getRomTid(ndsHeader);
+	return (strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold
+		|| strncmp(romTid, "IPG", 3) == 0); // Pokemon SoulSilver
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {

@@ -55,11 +55,11 @@ static void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t*
 }
 
 void decompressBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
-	const char* ROM_TID = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 
-	if (strcmp(ROM_TID, "YQUJ") == 0 // Chrono Trigger (Japan)
-	|| strcmp(ROM_TID, "YQUE") == 0  // Chrono Trigger (USA)
-	|| strcmp(ROM_TID, "YQUP") == 0) // Chrono Trigger (Europe)
+	if (strcmp(romTid, "YQUJ") == 0 // Chrono Trigger (Japan)
+	|| strcmp(romTid, "YQUE") == 0  // Chrono Trigger (USA)
+	|| strcmp(romTid, "YQUP") == 0) // Chrono Trigger (Europe)
 	{
 		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
