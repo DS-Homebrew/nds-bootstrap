@@ -13,6 +13,84 @@
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
+static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
+	bool usesThumb = false;
+	int readType = 0;
+	int sdk5ReadType = 0; // SDK 5
+
+	// Card read
+	// SDK 5
+	//dbg_printf("Trying SDK 5 thumb...\n");
+	u32* cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+	if (!cardReadEndOffset) {
+		// SDK 5
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+		if (cardReadEndOffset) {
+			sdk5ReadType = 1;
+		}
+	}
+	if (!cardReadEndOffset) {
+		//dbg_printf("Trying thumb...\n");
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+	}
+	if (cardReadEndOffset) {
+		usesThumb = true;
+	} else {
+		cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+		if (!cardReadEndOffset) {
+			//dbg_printf("Trying alt...\n");
+			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
+			if (cardReadEndOffset) {
+				readType = 1;
+				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
+					dbg_printf("Found thumb\n\n");
+					--cardReadEndOffset;
+					usesThumb = true;
+				}
+			}
+		}
+	}
+	*usesThumbPtr = usesThumb;
+	*readTypePtr = readType;
+	*sdk5ReadTypePtr = sdk5ReadType; // SDK 5
+	*cardReadEndOffsetPtr = cardReadEndOffset;
+	if (!cardReadEndOffset) { // Not necessarily needed
+		return false;
+	}
+	debug[1] = (u32)cardReadEndOffset;
+	u32* cardReadStartOffset;
+	// SDK 5
+	//dbg_printf("Trying SDK 5 thumb...\n");
+	if (sdk5ReadType == 0) {
+		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
+	} else {
+		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
+	}
+	if (!cardReadStartOffset) {
+		//dbg_printf("Trying thumb...\n");
+		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
+	}
+	if (!cardReadStartOffset) {
+		//dbg_printf("Trying SDK 5...\n");
+		cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
+	}
+	if (!cardReadStartOffset) {
+		if (readType == 0) {
+			cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+		} else {
+			cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+		}
+	}
+	if (!cardReadStartOffset) {
+		return false;
+	}
+	//cardReadFound = true;
+	// Patch
+	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
+	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xF0);
+	return true;
+}
+
 static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Card read cached
 	u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
@@ -69,6 +147,27 @@ static void patchCardPullOutAndCacheFlush(cardengineArm9* ce9, const tNDSHeader*
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
 	memcpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 }*/
+
+static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+	// Card ID
+	u32* cardIdEndOffset;
+	u32* cardIdStartOffset;
+	if (usesThumb) {
+		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
+		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
+	} else {
+		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
+		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
+	}
+	if (cardIdEndOffset) {
+		debug[1] = (u32)cardIdEndOffset;
+	}
+	if (cardIdStartOffset) {
+		// Patch
+		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
+		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8);
+	}
+}
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Card read dma
@@ -255,6 +354,34 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
+static void patchCardStruct(cardengineArm9* ce9, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+	// Card struct
+	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
+
+	debug[6] = (u32)*cardStruct;
+
+	u32* cardStructPatch = (usesThumb ? ce9->thumbPatches->cardStructArm9 : ce9->patches->cardStructArm9);
+	if (moduleParams->sdk_version > 0x3000000) {
+		// Patch
+		ce9->cardStruct0 = (u32)(*cardStruct + 7);
+		*cardStructPatch = (u32)(*cardStruct + 7); // Cache management alternative
+	} else {
+		// Patch
+		ce9->cardStruct0 = (u32)(*cardStruct + 6);
+		*cardStructPatch = (u32)(*cardStruct + 6); // Cache management alternative
+	}
+}
+
+/*static void patchCacheStruct(cardengineArm9* ce9, u32* cardIdStartOffset) {
+	// Cache struct
+	u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
+
+	debug[7] = (u32)*cacheStruct;
+
+	// Patch
+	ce9->cacheStruct = (u32)*cacheStruct;
+}*/
+
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
 		ce9->patches->needFlushDCCache = (patchMpuRegion == 1 ? 1 : 0);
@@ -267,76 +394,15 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	debug[5] = (u32)ce9->patches;
 	debug[8] = moduleParams->sdk_version;
 
-	bool usesThumb = false;
-	int readType = 0;
-	int sdk5ReadType = 0; // SDK 5
+	bool usesThumb;
+	int readType;
+	int sdk5ReadType; // SDK 5
+	u32* cardReadEndOffset;
 
-	// Card read
-	// SDK 5
-	//dbg_printf("Trying SDK 5 thumb...\n");
-	u32* cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
-	if (!cardReadEndOffset) {
-		// SDK 5
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
-		if (cardReadEndOffset) {
-			sdk5ReadType = 1;
-		}
-	}
-	if (!cardReadEndOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
-	}
-	if (cardReadEndOffset) {
-		usesThumb = true;
-	} else {
-		cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
-		if (!cardReadEndOffset) {
-			//dbg_printf("Trying alt...\n");
-			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
-			if (cardReadEndOffset) {
-				readType = 1;
-				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
-					dbg_printf("Found thumb\n\n");
-					--cardReadEndOffset;
-					usesThumb = true;
-				}
-			}
-		}
-	}
-	if (!cardReadEndOffset) { // Not necessarily needed
+	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
+		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
-	debug[1] = (u32)cardReadEndOffset;
-	u32* cardReadStartOffset;
-	// SDK 5
-	//dbg_printf("Trying SDK 5 thumb...\n");
-	if (sdk5ReadType == 0) {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
-	} else {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying SDK 5...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		if (readType == 0) {
-			cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
-		} else {
-			cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
-		}
-	}
-	if (!cardReadStartOffset) {
-		return ERR_LOAD_OTHR;
-	}
-	//cardReadFound = true;
-	// Patch
-	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xF0);
 
 	patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
@@ -344,24 +410,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
-	// Card ID
-	u32* cardIdEndOffset;
-	u32* cardIdStartOffset;
-	if (usesThumb) {
-		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
-		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
-	} else {
-		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
-		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
-	}
-	if (cardIdEndOffset) {
-		debug[1] = (u32)cardIdEndOffset;
-	}
-	if (cardIdStartOffset) {
-		// Patch
-		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
-		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8);
-	}
+	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
@@ -370,27 +419,14 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchArenaLow(ce9, ndsHeader, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
+
 	randomPatch5First(ndsHeader, moduleParams);
+	
 	randomPatch5Second(ndsHeader, moduleParams);
 
-	// Card struct
-	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
-	//u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
+	patchCardStruct(ce9, moduleParams, usesThumb, cardReadEndOffset);
 
-	debug[6] = (u32)*cardStruct;
-	//debug[7] = (u32)*cacheStruct;
-
-	u32* cardStructPatch = (usesThumb ? ce9->thumbPatches->cardStructArm9 : ce9->patches->cardStructArm9);
-	if (moduleParams->sdk_version > 0x3000000) {
-		// Patch
-		ce9->cardStruct0 = (u32)(*cardStruct + 7);
-		*cardStructPatch = (u32)(*cardStruct + 7); // Cache management alternative
-	} else {
-		// Patch
-		ce9->cardStruct0 = (u32)(*cardStruct + 6);
-		*cardStructPatch = (u32)(*cardStruct + 6); // Cache management alternative
-	}
-	//ce9->cacheStruct = (u32)*cacheStruct;
+	//patchCacheStruct(ce9, cardIdEndOffset);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
