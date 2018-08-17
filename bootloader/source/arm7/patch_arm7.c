@@ -23,7 +23,7 @@ u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-u16* generateA7InstrThumb(int arg1, int arg2) {
+const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
 	// 23 bit offset
@@ -87,7 +87,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
             u32 vAddrOfRelocSrc = relocationStart + 0x8;
         
             dbg_hexa((u32)swiHaltOffset);
-			u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
+			const u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
 			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
             ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
 		//} else {

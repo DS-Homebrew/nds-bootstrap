@@ -51,7 +51,7 @@
 extern bool cardReadFound; // card_patcher_arm9.c
 
 u32 generateA7Instr(int arg1, int arg2);
-u16* generateA7InstrThumb(int arg1, int arg2);
+const u16* generateA7InstrThumb(int arg1, int arg2);
 void patchBinary(const tNDSHeader* ndsHeader);
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize);
 u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize);
