@@ -198,8 +198,8 @@ void arm9_main(void) {
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
 		// SDK 5
-		*(u32*)(0x23FFC40) = 01;
-		*(u32*)(0x2FFFC40) = 01;
+		*(u32*)0x23FFC40 = 01;
+		*(u32*)0x2FFFC40 = 01;
 
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			displayScreen = true;
@@ -208,7 +208,7 @@ void arm9_main(void) {
 			}
 		}
 		if (displayScreen) {
-			if (fadeType == true) {
+			if (fadeType) {
 				screenBrightness--;
 				if (screenBrightness < 0) screenBrightness = 0;
 			} else {
@@ -218,18 +218,25 @@ void arm9_main(void) {
 			SetBrightness(0, screenBrightness);
 			SetBrightness(1, screenBrightness);
 
-			if (arm9_screenMode == 2) {
-				arm9_ttt();
-			} else if (arm9_screenMode == 1) {
-				arm9_pong();
-			} else {
-				arm9_regularLoadingScreen();
-				if (arm9_errorColor) {
-					arm9_errorText();
-				}
-				if (arm9_animateLoadingCircle) {
-					arm9_loadingCircle();
-				}
+			switch (arm9_screenMode) {
+				case 0:
+				default:
+					arm9_regularLoadingScreen();
+					if (arm9_errorColor) {
+						arm9_errorText();
+					}
+					if (arm9_animateLoadingCircle) {
+						arm9_loadingCircle();
+					}
+					break;
+
+				case 1:
+					arm9_pong();
+					break;
+					
+				case 2:
+					arm9_ttt();
+					break;
 			}
 		}
 	}
