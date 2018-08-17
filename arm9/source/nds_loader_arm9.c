@@ -184,31 +184,34 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
-#define CARDENGINE_ARM7_OFFSET 21
+//#define CARDENGINE_ARM7_OFFSET 21
 
 int loadCheatData(u32* cheat_data) {
 	nocashMessage("loadCheatData");
     
     nocashMessage("load_bin");
-    nocashMessage(tohex(load_bin));
+    nocashMessage(tohex((u32)load_bin));
 			
-    u32 cardengineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET] - VRAM_C_ARM7_0x06000000;
-    nocashMessage("cardengineArm7Offset");
-    nocashMessage(tohex(cardengineArm7Offset));
-    
-    u32* cardengineArm7 = (u32*) (load_bin + cardengineArm7Offset);
-    nocashMessage("cardengineArm7");
-    nocashMessage(tohex(cardengineArm7));
-    
-    u32 cheatDataOffset = cardengineArm7[13] - CARDENGINE_ARM7_LOCATION ;
-    nocashMessage("cheatDataOffset");
-    nocashMessage(tohex(cheatDataOffset));
-    
-    u32* cheatDataDest = (u32*) (((u32)LOAD_CRT0_LOCATION ) + cardengineArm7Offset + cheatDataOffset);
-    nocashMessage("cheatDataDest");
-    nocashMessage(tohex(cheatDataDest));
-    
-    copyLoop (cheatDataDest, (u32*)cheat_data, 1024);
+	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+	u32 cardEngineArm7Offset = lc0->cardengine_arm7_offset;
+	nocashMessage("cardEngineArm7Offset");
+	nocashMessage(tohex(cardEngineArm7Offset));
+	
+	//u32* cardEngineArm7 = (u32*)(load_bin + cardEngineArm7Offset);
+	const cardengineArm7* cardEngineArm7 = (const cardengineArm7*)((u32)lc0 + cardEngineArm7Offset);
+	nocashMessage("cardEngineArm7");
+	nocashMessage(tohex((u32)cardEngineArm7));
+	
+	u32 cheatDataOffset = cardEngineArm7->cheat_data_offset;
+	nocashMessage("cheatDataOffset");
+	nocashMessage(tohex(cheatDataOffset));
+	
+	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardEngineArm7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)((u32)cardEngineArm7 + cheatDataOffset);
+	nocashMessage("cheatDataDest");
+	nocashMessage(tohex((u32)cheatDataDest));
+	
+	copyLoop(cheatDataDest, cheat_data, 1024); //memcpy(cheatDataDest, cheat_data, 1024);
 	
 	return true;
 }

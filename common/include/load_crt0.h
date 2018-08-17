@@ -27,8 +27,8 @@ typedef struct loadCrt0 {
     u32 gameSoftReset;
     u32 asyncPrefetch;
     u32 logging;
-    cardengineArm7* cardengine_arm7;
-    cardengineArm9* cardengine_arm9;
+    u32 cardengine_arm7_offset; //cardengineArm7* cardengine_arm7;
+    u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
 } __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H
