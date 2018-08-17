@@ -85,6 +85,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		return false;
 	}
 	//cardReadFound = true;
+
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
 	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xF0);
@@ -108,7 +109,7 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
-static void patchCardPullOutAndCacheFlush(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType) {
+static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
 	u32* cardPullOutOffset;
 	if (usesThumb) {
@@ -125,12 +126,20 @@ static void patchCardPullOutAndCacheFlush(cardengineArm9* ce9, const tNDSHeader*
 	} else {
 		cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 	}
+	*cardPullOutOffsetPtr = cardPullOutOffset;
 	if (!cardPullOutOffset) {
 		return;
 	}
+
 	// Patch card pull out
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
 	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4);
+}
+
+static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
+	if (!cardPullOutOffset) {
+		return;
+	}
 
 	// Patch cache flush
 	u32* cacheFlushPatch = (usesThumb ? ce9->thumbPatches->cacheFlushRef : ce9->patches->cacheFlushRef);
@@ -149,6 +158,10 @@ static void patchCardPullOutAndCacheFlush(cardengineArm9* ce9, const tNDSHeader*
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+	if (!cardReadEndOffset) {
+		return;
+	}
+
 	// Card ID
 	u32* cardIdEndOffset;
 	u32* cardIdStartOffset;
@@ -355,6 +368,10 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 }
 
 static void patchCardStruct(cardengineArm9* ce9, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+	if (!cardReadEndOffset) {
+		return;
+	}
+
 	// Card struct
 	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
 
@@ -373,6 +390,10 @@ static void patchCardStruct(cardengineArm9* ce9, const module_params_t* modulePa
 }
 
 /*static void patchCacheStruct(cardengineArm9* ce9, u32* cardIdStartOffset) {
+	if (!cardIdStartOffset) {
+		return;
+	}
+
 	// Cache struct
 	u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
 
@@ -384,7 +405,7 @@ static void patchCardStruct(cardengineArm9* ce9, const module_params_t* modulePa
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
-		ce9->patches->needFlushDCCache = (patchMpuRegion == 1 ? 1 : 0);
+		ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 	}
 }
 
@@ -398,6 +419,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	int readType;
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
+	u32* cardPullOutOffset;
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
@@ -406,7 +428,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
-	patchCardPullOutAndCacheFlush(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType);
+	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
+
+	patchCacheFlush(ce9, usesThumb, cardPullOutOffset);
 
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
