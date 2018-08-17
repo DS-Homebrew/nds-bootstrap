@@ -408,13 +408,14 @@ int main(int argc, char** argv) {
 		if (cheats.size() > 0) {
 			dbg_printf("Cheat data present\n");
 			
-			if (cheats.size() < 256) {
+			if (cheats.size() < 255) {
 				 for (unsigned int i = 0; i < cheats.size(); i++) {
 					dbg_printf(cheats[i].c_str());
 					dbg_printf(" ");
 					cheat_data[i] = strtol(("0x"+cheats[i]).c_str(), NULL, 16); 
 				}
 				cheat_data[cheats.size()] = 0xCF000000;
+                cheat_data[cheats.size()+1] = 0;
 			} else {
 				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
 			}
