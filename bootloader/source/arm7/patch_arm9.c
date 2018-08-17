@@ -9,7 +9,7 @@
 
 //#define memcpy __builtin_memcpy // memcpy
 
-bool cardReadFound = false; // card_patcher_common.c
+//bool cardReadFound = false; // patch_common.c
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
@@ -57,7 +57,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 	if (!cardReadEndOffset) {
-		return 0;
+		return ERR_LOAD_OTHR;
 	}
 	debug[1] = (u32)cardReadEndOffset;
 	u32* cardReadStartOffset;
@@ -84,9 +84,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 	if (!cardReadStartOffset) {
-		return 0;
+		return ERR_LOAD_OTHR;
 	}
-	cardReadFound = true;
+	//cardReadFound = true;
 
 	// Card read cached
 	u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);

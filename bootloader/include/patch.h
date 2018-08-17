@@ -48,7 +48,7 @@
 #define PAGE_2G		(0b11110 << 1)
 #define PAGE_4G		(0b11111 << 1)
 
-extern bool cardReadFound; // card_patcher_arm9.c
+//extern bool cardReadFound; // patch_arm9.c
 
 u32 generateA7Instr(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
