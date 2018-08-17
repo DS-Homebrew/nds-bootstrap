@@ -1,5 +1,6 @@
 #include <nds/ndstypes.h>
 #include <nds/memory.h> // tNDSHeader
+#include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
 #include "debug_file.h"
@@ -54,15 +55,12 @@ static void ensureArm9Decompressed(const tNDSHeader* ndsHeader, module_params_t*
 }
 
 void decompressBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	const char* romTid = getRomTid(ndsHeader);
 
-	// Chrono Trigger (Japan)
-	if (ROM_TID == 0x4a555159) {
-		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-	}
-
-	// Chrono Trigger (USA/Europe)
-	if (ROM_TID == 0x45555159 || ROM_TID == 0x50555159) {
+	if (strcmp(romTid, "YQUJ") == 0 // Chrono Trigger (Japan)
+	|| strcmp(romTid, "YQUE") == 0  // Chrono Trigger (USA)
+	|| strcmp(romTid, "YQUP") == 0) // Chrono Trigger (Europe)
+	{
 		decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 

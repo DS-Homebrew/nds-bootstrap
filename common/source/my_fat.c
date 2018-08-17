@@ -30,8 +30,8 @@
 ------------------------------------------------------------------*/
    
 #include <string.h> // memcpy
-#include "fat_alt.h"
-#include "card_alt.h"
+#include "my_fat.h"
+#include "card.h"
 #include "debug_file.h"
 
 //#define memcpy __builtin_memcpy
@@ -771,7 +771,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 /*-----------------------------------------------------------------
 fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
-u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
+u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
 {
 	#ifdef DEBUG
 	nocashMessage("fileWrite");

@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include <nds/debug.h>
-#include "fat_alt.h"
+#include "my_fat.h"
 #include "hex.h"
 
 static bool _debug = false;
@@ -30,7 +30,7 @@ void enableDebug(aFile debugFileCluster) {
 	_debugFileCluster = debugFileCluster;
 }
 
-u32 dbg_printf(char * message) {
+u32 dbg_printf(const char* message) {
 	if(!_debug) {
         return 0;
     }

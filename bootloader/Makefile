@@ -57,11 +57,6 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
  
-export CC		:=	$(PREFIX)gcc
-export CXX		:=	$(PREFIX)g++
-export AR		:=	$(PREFIX)ar
-export OBJCOPY	:=	$(PREFIX)objcopy
- 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
@@ -111,20 +106,17 @@ $(LOADELF)	:	$(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
 	
-dldiengine.bin.o : dldiengine.bin
-
-dldiengine.bin:
-	cp $(CURDIR)/../../data/dldiengine.bin dldiengine.bin
+#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
 	
-cardengine_arm7.bin.o : cardengine_arm7.bin
+cardengine_arm7.bin.o : $(CURDIR)/../../data/cardengine_arm7.bin
+	@echo $(notdir $<)
+	$(bin2o)
 
-cardengine_arm7.bin:
-	cp $(CURDIR)/../../data/cardengine_arm7.bin cardengine_arm7.bin
-	
-cardengine_arm9.bin.o : cardengine_arm9.bin
-
-cardengine_arm9.bin:
-	cp $(CURDIR)/../../data/cardengine_arm9.bin cardengine_arm9.bin
+cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
+	@echo $(notdir $<)
+	$(bin2o)
 
 -include $(DEPENDS)
 

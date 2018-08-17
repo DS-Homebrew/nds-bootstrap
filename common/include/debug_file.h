@@ -19,13 +19,13 @@
 #ifndef DEBUG_FILE_H
 #define DEBUG_FILE_H
 
-#include "fat_alt.h"
+#include "my_fat.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-u32 dbg_printf(char * message);
+u32 dbg_printf(const char* message);
 u32 dbg_hexa(u32 n);
 void enableDebug(aFile debugFileCluster);
 

@@ -20,7 +20,7 @@
 #include <nds/system.h>
 #include <nds/debug.h>
 
-//#include "fat_alt.h"
+//#include "my_fat.h"
 #include "hook.h"
 #include "common.h"
 #include "find.h"
@@ -344,7 +344,7 @@ int hookNdsRetailArm7(
 	ce7->gameSoftReset           = gameSoftReset;
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 

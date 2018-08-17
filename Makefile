@@ -7,14 +7,19 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+# These set the information text in the nds file
+GAME_TITLE     := NDS BOOTSTRAP
+GAME_SUBTITLE1 := Runs an .nds file
+GAME_SUBTITLE2 := Made by Ahezard
+
 include $(DEVKITARM)/ds_rules
 
-export HBMENU_MAJOR	:= 0
-export HBMENU_MINOR	:= 5
-export HBMENU_PATCH	:= 0
+export VERSION_MAJOR	:= 0
+export VERSION_MINOR	:= 11
+export VERSION_PATCH	:= 0
 
 
-VERSION	:=	$(HBMENU_MAJOR).$(HBMENU_MINOR).$(HBMENU_PATCH)
+VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
@@ -68,13 +73,19 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET).nds
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+export CC		:=	$(PREFIX)gcc
+export CXX		:=	$(PREFIX)g++
+export AR		:=	$(PREFIX)ar
+export OBJCOPY	:=	$(PREFIX)objcopy
+export CPP		:=	$(PREFIX)cpp
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
@@ -116,12 +127,10 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #endif
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
-export GAME_TITLE := $(TARGET)
-
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist nightly bootloader cardengine_arm7 cardengine_arm9 clean
+.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
-all:	$(OUTPUT).nds
+all:	$(OUTPUT)
 
 dist:	all
 #	@rm	-fr	hbmenu
@@ -130,15 +139,17 @@ dist:	all
 #	@cp BootStrap/_BOOT_MP.NDS BootStrap/TTMENU.DAT BootStrap/_DS_MENU.DAT BootStrap/ez5sys.bin BootStrap/akmenu4.nds hbmenu
 #	@tar -cvjf hbmenu-$(VERSION).tar.bz2 hbmenu testfiles README.md COPYING -X exclude.lst
 
-nightly:	$(OUTPUT).nds
-	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap.nds
-	@rm -f $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
-	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap.nds
-	@cp $(OUTPUT).nds $(CURDIR)/$(BIN)/nightly-bootstrap-sdk5.nds
+release:	$(OUTPUT)
+	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-release.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-release.nds
 
-$(OUTPUT).nds:	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
-	ndstool	-c $(OUTPUT).nds -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
-			-b $(GAME_ICON) "NDS BOOTSTRAP;Runs an .nds file;Made by Ahezard" \
+nightly:	$(OUTPUT)
+	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
+	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
+
+$(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
+	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
+			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
@@ -188,8 +199,8 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-#$(OUTPUT).nds	: 	$(OUTPUT).elf
-#$(OUTPUT).elf	:	$(OFILES)
+#$(OUTPUT)		: 	$(TARGET).elf
+#$(TARGET).elf	:	$(OFILES)
 
 #---------------------------------------------------------------------------------
 %.bin.o	:	%.bin

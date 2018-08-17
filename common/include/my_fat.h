@@ -49,13 +49,13 @@ typedef	struct
 	u32 fatTableCacheSize;
 } aFile;
 
-bool FAT_InitFiles (bool initCard, int ndmaSlot);
-aFile getBootFileCluster (const char* bootName, int ndmaSlot);
-aFile getFileFromCluster (u32 cluster);
-u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
-u32 fileWrite (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
-u32 FAT_ClustToSect (u32 cluster);
-void buildFatTableCache (aFile * file, int ndmaSlot);
+bool FAT_InitFiles(bool initCard, int ndmaSlot);
+aFile getBootFileCluster(const char* bootName, int ndmaSlot);
+aFile getFileFromCluster(u32 cluster);
+u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+u32 FAT_ClustToSect(u32 cluster);
+void buildFatTableCache(aFile* file, int ndmaSlot);
 
 /* ROM Header Region Information Structure */
 

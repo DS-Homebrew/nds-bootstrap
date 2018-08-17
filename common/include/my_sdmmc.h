@@ -123,14 +123,14 @@ extern "C" {
 
 	void sdmmc_init();
 	int sdmmc_sdcard_readsector(u32 sector_no, u8 *out);
-	int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
+	int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
 	int sdmmc_sdcard_writesector(u32 sector_no, const u8 *in);
-	int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot);
+	int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot);
 
-	int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
-	int sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
+	int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
+	int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
 
-	int sdmmc_get_cid(bool isNand, u32 *info);
+	int my_sdmmc_get_cid(bool isNand, u32 *info);
 
 	mmcdevice *getMMCDevice(int drive);
 

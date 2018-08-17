@@ -10,27 +10,27 @@
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
 
  License:
-    Copyright (C) 2005  Michael "Chishm" Chisholm
+	Copyright (C) 2005  Michael "Chishm" Chisholm
 
-    This program is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public License
-    as published by the Free Software Foundation; either version 2
-    of the License, or (at your option) any later version.
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-    If you use this code, please give due credit and email me about your
-    project at chishm@hotmail.com
+	If you use this code, please give due credit and email me about your
+	project at chishm@hotmail.com
  
-    Helpful information:
-    This code runs from VRAM bank C on ARM7
+	Helpful information:
+	This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
 #ifndef ARM7
@@ -48,10 +48,11 @@
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
-#include "fat_alt.h"
-//#include "dldi_patcher.h"
+#include "my_fat.h"
+#include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
+//#include "dldi_patcher.h"
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
@@ -62,6 +63,8 @@
 #include "cardengine_arm9_bin.h"
 
 //#define memcpy __builtin_memcpy
+
+//#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 extern void arm7clearRAM(void);
 
@@ -94,7 +97,6 @@ static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
 static const char* bootName = "BOOT.NDS";
 static module_params_t* moduleParams = NULL;
-static bool foundModuleParams = false;
 static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_LOCATION;
 static char* romLocation = (char*)ROM_LOCATION;
 
@@ -129,38 +131,6 @@ static void increaseLoadBarLength(void) {
 		debugOutput(); // Let the loading bar finish before ROM starts
 	}
 }
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Firmware stuff
-
-#define FW_READ 0x03
-
-static void boot_readFirmware(u32 address, u8* buffer, u32 size) {
-	u32 index;
-
-	// Read command
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPICNT = SPI_ENABLE | SPI_CONTINUOUS | SPI_DEVICE_NVRAM;
-	REG_SPIDATA = FW_READ;
-	while (REG_SPICNT & SPI_BUSY);
-
-	// Set the address
-	REG_SPIDATA = (address >> 16) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPIDATA = (address >> 8) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-	REG_SPIDATA = (address) & 0xFF;
-	while (REG_SPICNT & SPI_BUSY);
-
-	for (index = 0; index < size; index++) {
-		REG_SPIDATA = 0;
-		while (REG_SPICNT & SPI_BUSY);
-		buffer[index] = REG_SPIDATA & 0xFF;
-	}
-	REG_SPICNT = 0;
-}
-
-//#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
@@ -204,17 +174,17 @@ static void reloadFirmwareSettings(void) {
 	u32 settingsOffset = 0;
 
 	// Get settings location
-	boot_readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
+	readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
 	settingsOffset *= 8;
 
 	// Reload DS Firmware settings
-	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
-	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
+	readFirmware(settingsOffset + 0x070, &settings1, 0x1);
+	readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 
 	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
+		readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
+		readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
 	}
 	if (language >= 0 && language < 6) {
 		// Change language
@@ -552,19 +522,19 @@ static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
 	}
 }
 
-static void findModuleParams(const tNDSHeader* ndsHeader) {
+static bool loadModuleParams(const tNDSHeader* ndsHeader) {
 	moduleParams = getModuleParams(ndsHeader);
 	if (moduleParams) {
-		foundModuleParams = true;
-
+		// Found module params
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-	} else {
-		nocashMessage("No moduleparams?\n");
-		*(vu32*)0x2800010 = 1;
-		moduleParams = buildModuleParams(donorSdkVer);
+		return true;
 	}
+	nocashMessage("No moduleparams?\n");
+	*(vu32*)0x2800010 = 1;
+	moduleParams = buildModuleParams(donorSdkVer);
+	return false;
 }
 
 static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
@@ -608,18 +578,18 @@ static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleP
 }
 
 static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
+	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
-	if ((ROM_TID & 0x00FFFFFF) == 0x4D5341	// SM64DS
-	|| (ROM_TID & 0x00FFFFFF) == 0x534D53	// SMSW
-	|| (ROM_TID & 0x00FFFFFF) == 0x443241	// NSMB
-	|| (ROM_TID & 0x00FFFFFF) == 0x4D4441)	// AC:WW
+	if (strncmp(romTid, "ASM", 3) == 0	// SM64DS
+	|| strncmp(romTid, "SMS", 3) == 0	// SMSW
+	|| strncmp(romTid, "A2D", 3) == 0	// NSMB
+	|| strncmp(romTid, "ADM", 3) == 0)	// AC:WW
 	{
 		enableExceptionHandler = false;
 	}
 
-	if (ROMinRAM == true) {
+	if (ROMinRAM) {
 		// Load ROM into RAM
 		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
@@ -699,8 +669,8 @@ int arm7_main(void) {
 	nocashMessage("bootloader");
 
 	initMBK();
-    
-    // Wait for ARM9 to at least start
+	
+	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
@@ -725,13 +695,13 @@ int arm7_main(void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
-    
-    buildFatTableCache(romFile, 3);
-    
-    *savFile = getFileFromCluster(saveFileCluster);
-    
-    if (savFile->firstCluster != CLUSTER_FREE) {
-        buildFatTableCache(savFile, 3);
+	
+	buildFatTableCache(romFile, 3);
+	
+	*savFile = getFileFromCluster(saveFileCluster);
+	
+	if (savFile->firstCluster != CLUSTER_FREE) {
+		buildFatTableCache(savFile, 3);
 	}
 
 	int errorCode;
@@ -749,7 +719,7 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 2 dots
 
 	nocashMessage("Loading the header...\n");
-	findModuleParams(&dsiHeaderTemp.ndshdr);
+	bool foundModuleParams = loadModuleParams(&dsiHeaderTemp.ndshdr);
 	decompressBinary(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	patchBinary(&dsiHeaderTemp.ndshdr);
 	loadHeader(&dsiHeaderTemp, moduleParams);
@@ -765,9 +735,9 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 5 dots
 
 	errorCode = patchCardNds(
-		ndsHeader,
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		ndsHeader,
 		moduleParams,
 		saveFileCluster,
 		saveSize,
@@ -803,8 +773,8 @@ int arm7_main(void) {
 	increaseLoadBarLength(); // 7 dots
 
 	setArm9Stuff(ndsHeader, *romFile);
-	if (ROMinRAM == false) {
-		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch == 1)) {
+	if (!ROMinRAM) {
+		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
@@ -814,8 +784,8 @@ int arm7_main(void) {
 	fadeType = false;
 	while (screenBrightness != 31);	// Wait for screen to fade out
 
-    // Lock SCFG
-    REG_SCFG_EXT &= ~(1UL << 31);
+	// Lock SCFG
+	REG_SCFG_EXT &= ~(1UL << 31);
 
 	nocashMessage("Starting the NDS file...");
 	startBinary_ARM7();

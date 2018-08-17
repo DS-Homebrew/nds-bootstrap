@@ -24,6 +24,7 @@
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
+#include "nds_header.h"
 #include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
@@ -240,9 +241,9 @@ static void getAsyncSector(void) {
 }
 
 static inline bool isHGSS(const tNDSHeader* ndsHeader) {
-	u32 ROM_TID = *(u32*)ndsHeader->gameCode;
-	return ((ROM_TID & 0x00FFFFFF) == 0x4B5049 // Pokemon HeartGold
-		|| (ROM_TID & 0x00FFFFFF) == 0x475049); // Pokemon SoulSilver
+	const char* romTid = getRomTid(ndsHeader);
+	return (strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold
+		|| strncmp(romTid, "IPG", 3) == 0); // Pokemon SoulSilver
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -266,6 +267,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardStruct[0] = src;
 	}
 
+	if(src <= 0x8000){
+		src = 0x8000+(src & 0x1FF);	// Fix reads below 0x8000
+	}
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
 		return 0;
@@ -333,7 +337,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 	
 
-	if (ROMinRAM == false) {
+	if (!ROMinRAM) {
 		u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
 		cacheReadSizeSubtract = 0;
 		if ((ndsHeader->romSize > 0) && ((sector+_128KB_READ_SIZE) > ndsHeader->romSize)) {
@@ -347,12 +351,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		bool pAC = ((sdk5 && consoleModel > 0) || (!sdk5 && !hgssFix));
 
-		if (asyncPrefetch == 1 && pAC) {
+		if (asyncPrefetch && pAC) {
 			processAsyncCommand();
 		}
 
 		if (page == src && len > _128KB_READ_SIZE && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-			if (asyncPrefetch == 1 && pAC) {
+			if (asyncPrefetch && pAC) {
 				getAsyncSector();
 			}
 
@@ -378,7 +382,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				u32 nextSector = sector+_128KB_READ_SIZE;	
 				// Read max CACHE_READ_SIZE via the main RAM cache
 				if (slot == -1) {
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						getAsyncSector();
 					}
 
@@ -405,11 +409,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 					updateDescriptor(slot, sector);	
 		
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						triggerAsyncPrefetch(nextSector);
 					}
 				} else {
-					if (asyncPrefetch == 1 && pAC) {
+					if (asyncPrefetch && pAC) {
 						if (cacheCounter[slot] == 0x0FFFFFFF) {
 							// Prefetch successful
 							getAsyncSector();

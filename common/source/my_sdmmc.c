@@ -25,12 +25,10 @@
 #include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
-#include "sdmmc_alt.h"
-#include "disc_io_alt.h"
+#include "my_sdmmc.h"
+#include "my_disc_io.h"
 
 #define DATA32_SUPPORT
-
-#define DEVICE_TYPE_DSI_SD ('i') | ('_' << 8) | ('S' << 16) | ('D' << 24)
 
 
 struct mmcdevice handleNAND;
@@ -454,7 +452,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48004000;
 }
 
-int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
+int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -474,7 +472,7 @@ int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int n
 	return get_error(&handleSD);
 }
 
-int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
+int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -496,7 +494,7 @@ int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlo
 
 
 
-int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
+int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 {
 	if(handleNAND.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleNAND);
@@ -512,7 +510,7 @@ int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 	return get_error(&handleNAND);
 }
 
-int sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
+int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
 {
 	if(handleNAND.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleNAND);
@@ -751,7 +749,7 @@ int SD_Init(void)
 	return 0;
 }
 
-int sdmmc_get_cid(bool isNand, u32 *info)
+int my_sdmmc_get_cid(bool isNand, u32 *info)
 {
 	struct mmcdevice *device;
 	if(isNand)
@@ -787,101 +785,3 @@ int sdmmc_get_cid(bool isNand, u32 *info)
 
 	return 0;
 }
-
-/*-----------------------------------------------------------------
-startUp
-Initialize the interface, geting it into an idle, ready state
-returns true if successful, otherwise returns false
------------------------------------------------------------------*/
-bool startup(void) {	
-	#ifdef DEBUG
-	nocashMessage("startup internal");
-	#endif
-	sdmmc_init();
-	return SD_Init() == 0;
-}
-
-/*-----------------------------------------------------------------
-isInserted
-Is a card inserted?
-return true if a card is inserted and usable
------------------------------------------------------------------*/
-bool isInserted (void) {
-	#ifdef DEBUG
-	nocashMessage("isInserted internal");
-	#endif
-	return true;
-}
-
-
-/*-----------------------------------------------------------------
-clearStatus
-Reset the card, clearing any status errors
-return true if the card is idle and ready
------------------------------------------------------------------*/
-bool clearStatus (void) {
-	#ifdef DEBUG
-	nocashMessage("clearStatus internal");
-	#endif	
-	return true;
-}
-
-
-/*-----------------------------------------------------------------
-readSectors
-Read "numSectors" 512-byte sized sectors from the card into "buffer", 
-starting at "sector". 
-The buffer may be unaligned, and the driver must deal with this correctly.
-return true if it was successful, false if it failed for any reason
------------------------------------------------------------------*/
-bool readSectors (u32 sector, u32 numSectors, void* buffer, int ndmaSlot) {
-	#ifdef DEBUG
-	nocashMessage("readSectors internal");
-	#endif	
-	//dbg_printf("readSectors internal");
-	return sdmmc_sdcard_readsectors(sector,numSectors,buffer,ndmaSlot)==0;
-}
-
-
-
-/*-----------------------------------------------------------------
-writeSectors
-Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
-starting at "sector".
-The buffer may be unaligned, and the driver must deal with this correctly.
-return true if it was successful, false if it failed for any reason
------------------------------------------------------------------*/
-bool writeSectors (u32 sector, u32 numSectors, void* buffer, int ndmaSlot) {
-	#ifdef DEBUG
-	nocashMessage("writeSectors internal");
-	#endif	
-	//dbg_printf("writeSectors internal");
-	return sdmmc_sdcard_writesectors(sector,numSectors,buffer,ndmaSlot)==0;
-}
-
-
-/*-----------------------------------------------------------------
-shutdown
-shutdown the card, performing any needed cleanup operations
-Don't expect this function to be called before power off, 
-it is merely for disabling the card.
-return true if the card is no longer active
------------------------------------------------------------------*/
-bool shutdown(void) {
-	#ifdef DEBUG	
-	nocashMessage("shutdown internal");
-	#endif	
-	return true;
-}
-
-
-IO_INTERFACE __myio_dsisd = {
-	DEVICE_TYPE_DSI_SD,
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
-	(FN_MEDIUM_STARTUP)&startup,
-	(FN_MEDIUM_ISINSERTED)&isInserted,
-	(FN_MEDIUM_READSECTORS)&readSectors,
-	(FN_MEDIUM_WRITESECTORS)&writeSectors,
-	(FN_MEDIUM_CLEARSTATUS)&clearStatus,
-	(FN_MEDIUM_SHUTDOWN)&shutdown
-};
