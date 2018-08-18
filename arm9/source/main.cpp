@@ -40,6 +40,9 @@ extern "C" {
 #include "inifile.h"
 #include "nds_loader_arm9.h"
 
+#define CHEAT_DATA_MAX_SIZE (32 * 1024)	// 32KiB
+#define CHEAT_DATA_MAX_LEN  (CHEAT_DATA_MAX_SIZE / sizeof(u32))
+
 //using namespace std;
 
 /* typedef struct {
@@ -51,8 +54,6 @@ extern "C" {
 //bool logging = false;
 
 static bool debug = false;
-
-static u32 cheat_data[8192];
 
 static int dbg_printf(const char* format, ...) {
 	if (!debug) {
@@ -405,25 +406,29 @@ int main(int argc, char** argv) {
 		}
 
 		// Cheat data
-		cheat_data[0] = 0xCF000000;
-		if (cheats.size() > 0) {
+		static u32 cheat_data[CHEAT_DATA_MAX_LEN];
+		size_t cheat_data_len = cheats.size();
+		if (cheat_data_len > 0) {
 			dbg_printf("Cheat data present\n");
 			
-			if (cheats.size() < 8190) {
-				 for (unsigned int i = 0; i < cheats.size(); i++) {
-					dbg_printf(cheats[i].c_str());
-                    nocashMessage(cheats[i].c_str());
-					dbg_printf(" ");                    
-					cheat_data[i] = strtoul(cheats[i].c_str(), NULL, 16);
-                    nocashMessage(tohex(cheat_data[i]));
-                    dbg_printf(" "); 
-				}
-				cheat_data[cheats.size()] = 0xCF000000;
-                cheat_data[cheats.size()+1] = 0;
-			} else {
-				printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
+			if (cheat_data_len >= CHEAT_DATA_MAX_LEN - 2) {
+				dbg_printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
+				//cheats.clear();
+				cheat_data_len = 0;
+			}
+			
+			for (size_t i = 0; i < cheat_data_len; i++) {
+				const char* cheat = cheats[i].c_str();
+				dbg_printf(cheat);
+				nocashMessage(cheat);
+				dbg_printf(" ");                    
+				cheat_data[i] = strtoul(cheat, NULL, 16);
+				nocashMessage(tohex(cheat_data[i]));
+				dbg_printf(" "); 
 			}
 		}
+		cheat_data[cheat_data_len] = 0xCF000000;
+        cheat_data[cheat_data_len + 1] = 0;
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(
