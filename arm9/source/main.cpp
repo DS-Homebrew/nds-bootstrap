@@ -425,8 +425,7 @@ int main(int argc, char** argv) {
 				dbg_printf(" "); 
 			}
 		}
-		cheat_data[cheat_data_len] = 0xCF000000;
-		cheat_data[cheat_data_len + 1] = 0;
+		endCheatData(cheat_data, cheat_data_len);
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		runFile(
