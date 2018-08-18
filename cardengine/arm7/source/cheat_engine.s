@@ -476,11 +476,8 @@ cheat_engine_end:
 
 @ Cheat data goes here
 
-	.word 0xCF000000, 0x00000000
-	.word 0x00000000, 0x00000000
-	.word 0x00000000, 0x00000000
-	.word 0x00000000, 0x00000000
+.word 0xCF000000
     
-.space 1024
+.space 32768
 
 

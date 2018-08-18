@@ -52,7 +52,7 @@ extern "C" {
 
 static bool debug = false;
 
-static u32 cheat_data[256];
+static u32 cheat_data[8192];
 
 static int dbg_printf(const char* format, ...) {
 	if (!debug) {
@@ -409,7 +409,7 @@ int main(int argc, char** argv) {
 		if (cheats.size() > 0) {
 			dbg_printf("Cheat data present\n");
 			
-			if (cheats.size() < 255) {
+			if (cheats.size() < 8190) {
 				 for (unsigned int i = 0; i < cheats.size(); i++) {
 					dbg_printf(cheats[i].c_str());
                     nocashMessage(cheats[i].c_str());

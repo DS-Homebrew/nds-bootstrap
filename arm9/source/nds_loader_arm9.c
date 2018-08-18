@@ -211,7 +211,7 @@ int loadCheatData(u32* cheat_data) {
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
-	copyLoop(cheatDataDest, cheat_data, 1024); //memcpy(cheatDataDest, cheat_data, 1024);
+	copyLoop(cheatDataDest, cheat_data, 32768); //memcpy(cheatDataDest, cheat_data, 1024);
 	
 	return true;
 }
