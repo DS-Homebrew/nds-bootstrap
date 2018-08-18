@@ -192,28 +192,31 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
     nocashMessage("load_bin");
     nocashMessage(tohex((u32)load_bin));
 			
-	//u32 cardEngineArm7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	u32 cardEngineArm7Offset = lc0->cardengine_arm7_offset;
-	nocashMessage("cardEngineArm7Offset");
-	nocashMessage(tohex(cardEngineArm7Offset));
+	//u32 ce7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
+	u32 ce7Offset = lc0->cardengine_arm7_offset;
+	nocashMessage("ce7Offset");
+	nocashMessage(tohex(ce7Offset));
 	
-	//u32* cardEngineArm7 = (u32*)(load_bin + cardEngineArm7Offset);
-	const cardengineArm7* cardEngineArm7 = (const cardengineArm7*)((u32)lc0 + cardEngineArm7Offset);
-	nocashMessage("cardEngineArm7");
-	nocashMessage(tohex((u32)cardEngineArm7));
+	//u32* ce7 = (u32*)(load_bin + ce7Offset);
+	cardengineArm7* ce7 = (cardengineArm7*)((u32)lc0 + ce7Offset);
+	nocashMessage("ce7");
+	nocashMessage(tohex((u32)ce7));
 	
-	u32 cheatDataOffset = cardEngineArm7->cheat_data_offset;
+	u32 cheatDataOffset = ce7->cheat_data_offset;
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + cardEngineArm7Offset + cheatDataOffset);
-	u32* cheatDataDest = (u32*)((u32)cardEngineArm7 + cheatDataOffset);
+	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + ce7Offset + cheatDataOffset);
+	u32* cheatDataDest = (u32*)((u32)ce7 + cheatDataOffset);
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
 	//memcpy(cheatDataDest, cheat_data, 1024);
 	//copyLoop(cheatDataDest, cheat_data, 32768);
-	copyLoop(cheatDataDest, cheat_data, (cheat_data_len + 2) * sizeof(u32));
+	//copyLoop(cheatDataDest, cheat_data, (cheat_data_len + 2) * sizeof(u32));
+	copyLoop(cheatDataDest, cheat_data, cheat_data_len*sizeof(u32));
+
+	ce7->cheat_data_len = cheat_data_len;
 	
 	return true;
 }
