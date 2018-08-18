@@ -414,7 +414,7 @@ int main(int argc, char** argv) {
 					dbg_printf(cheats[i].c_str());
                     nocashMessage(cheats[i].c_str());
 					dbg_printf(" ");                    
-					cheat_data[i] = strtoul(("0x"+cheats[i]).c_str(), NULL, 16);
+					cheat_data[i] = strtoul(cheats[i].c_str(), NULL, 16);
                     nocashMessage(tohex(cheat_data[i]));
                     dbg_printf(" "); 
 				}
