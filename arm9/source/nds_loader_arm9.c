@@ -184,30 +184,14 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
-//#define CARDENGINE_ARM7_OFFSET 21
-
 int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("loadCheatData");
-    
-    nocashMessage("load_bin");
-    nocashMessage(tohex((u32)load_bin));
 			
-	//u32 ce7Offset = ((u32*)load_bin)[CARDENGINE_ARM7_OFFSET/4];
-	u32 ce7Offset = lc0->cardengine_arm7_offset;
-	nocashMessage("ce7Offset");
-	nocashMessage(tohex(ce7Offset));
-	
-	//u32* ce7 = (u32*)(load_bin + ce7Offset);
-	cardengineArm7* ce7 = (cardengineArm7*)((u32)lc0 + ce7Offset);
+	cardengineArm7* ce7 = getCardengineArm7(lc0);
 	nocashMessage("ce7");
 	nocashMessage(tohex((u32)ce7));
-	
-	u32 cheatDataOffset = ce7->cheat_data_offset;
-	nocashMessage("cheatDataOffset");
-	nocashMessage(tohex(cheatDataOffset));
-	
-	//u32* ce7_cheat_data = (u32*)((u32)LCDC_BANK_C + ce7Offset + cheatDataOffset);
-	u32* ce7_cheat_data = (u32*)((u32)ce7 + cheatDataOffset);
+
+	u32* ce7_cheat_data = getCheatData(ce7);
 	nocashMessage("ce7_cheat_data");
 	nocashMessage(tohex((u32)ce7_cheat_data));
 	

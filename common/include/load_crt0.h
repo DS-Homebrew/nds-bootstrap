@@ -31,4 +31,8 @@ typedef struct loadCrt0 {
     u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
 } __attribute__ ((__packed__)) loadCrt0;
 
+inline cardengineArm7* getCardengineArm7(const loadCrt0* lc0) {
+    return (cardengineArm7*)((u32)lc0 + lc0->cardengine_arm7_offset);
+}
+
 #endif // LOAD_CRT0_H

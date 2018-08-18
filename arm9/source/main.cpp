@@ -409,18 +409,21 @@ int main(int argc, char** argv) {
 		if (cheat_data_len > 0) {
 			dbg_printf("Cheat data present\n");
 			
-			if (cheat_data_len > CHEAT_DATA_MAX_LEN - 2) {
-				dbg_printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
+			if (!checkCheatDataLen(cheat_data_len)) {
+				dbg_printf("Cheat data size limit reached, the cheats are ignored!\n");
 				//cheats.clear();
 				cheat_data_len = 0;
 			}
 			
 			for (size_t i = 0; i < cheat_data_len; i++) {
 				const char* cheat = cheats[i].c_str();
+				
 				dbg_printf(cheat);
 				nocashMessage(cheat);
-				dbg_printf(" ");                    
+				dbg_printf(" ");
+
 				cheat_data[i] = strtoul(cheat, NULL, 16);
+				
 				nocashMessage(tohex(cheat_data[i]));
 				dbg_printf(" "); 
 			}
