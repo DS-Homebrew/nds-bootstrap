@@ -243,15 +243,6 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3; // Bigger nearest multiple of 4
-	do {
-		*dest = *src; //writeAddr((u8*)dest, 0, *src);
-		dest++;
-		src++;
-	} while (size -= 4);
-}*/
-
 int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
