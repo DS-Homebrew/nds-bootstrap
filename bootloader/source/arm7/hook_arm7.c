@@ -346,8 +346,7 @@ int hookNdsRetailArm7(
 	ce7->gameSoftReset           = gameSoftReset;
 
 	u32* ce7_cheat_data = getCheatData(ce7);
-	endCheatData(ce7_cheat_data, ce7->cheat_data_len);
-	ce7->cheat_data_len += 2;
+	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);
 
 	*vblankHandler = ce7->patches->vblankHandler;
 	if (!ROMinRAM) {
