@@ -186,7 +186,7 @@ int loadArgs(int argc, const char** argv) {
 
 //#define CARDENGINE_ARM7_OFFSET 21
 
-int loadCheatData(u32* cheat_data) {
+int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("loadCheatData");
     
     nocashMessage("load_bin");
@@ -211,7 +211,9 @@ int loadCheatData(u32* cheat_data) {
 	nocashMessage("cheatDataDest");
 	nocashMessage(tohex((u32)cheatDataDest));
 	
-	copyLoop(cheatDataDest, cheat_data, 32768); //memcpy(cheatDataDest, cheat_data, 1024);
+	//memcpy(cheatDataDest, cheat_data, 1024);
+	//copyLoop(cheatDataDest, cheat_data, 32768);
+	copyLoop(cheatDataDest, cheat_data, (cheat_data_len + 2) * sizeof(u32));
 	
 	return true;
 }
@@ -236,7 +238,7 @@ int runNds(
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
-	u32* cheat_data
+	u32* cheat_data, u32 cheat_data_len
 ) {
 	nocashMessage("runNds");
 
@@ -271,7 +273,7 @@ int runNds(
 	lc0->asyncPrefetch   = asyncPrefetch;
 	lc0->logging         = logging;
 
-	loadCheatData(cheat_data);
+	loadCheatData(cheat_data, cheat_data_len);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);
@@ -316,7 +318,7 @@ int runNdsFile(
 	bool asyncPrefetch,
 	bool logging,
 	int argc, const char** argv,
-	u32* cheat_data
+	u32* cheat_data, u32 cheat_data_len
 ) {
 	struct stat st;
 	struct stat stSav;
@@ -367,6 +369,6 @@ int runNdsFile(
 		true,
 		true,
 		argc, argv,
-		cheat_data
+		cheat_data, cheat_data_len
 	);
 }

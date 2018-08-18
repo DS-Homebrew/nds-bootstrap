@@ -48,7 +48,7 @@ int runNds(
 	bool initDisc,
 	bool dldiPatchNds,
 	int argc, const char** argv,
-	u32* cheat_data
+	u32* cheat_data, u32 cheat_data_len
 );
 int runNdsFile(
 	const char* filename,
@@ -66,7 +66,7 @@ int runNdsFile(
 	bool asyncPrefetch,
 	bool logging,
 	int argc, const char** argv,
-	u32* cheat_data
+	u32* cheat_data, u32 cheat_data_len
 );
 
 #ifdef __cplusplus

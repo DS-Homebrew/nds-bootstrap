@@ -110,7 +110,7 @@ void runFile(
 	u32 gameSoftReset,
 	u32 asyncPrefetch,
 	u32 logging,
-	u32* cheat_data,
+	u32* cheat_data, u32 cheat_data_len,
 	u32 backlightMode) {
 	std::vector<char*> argarray;
 
@@ -184,7 +184,7 @@ void runFile(
 			asyncPrefetch,
 			logging,
 			argarray.size(), (const char**)&argarray[0], 
-			cheat_data
+			cheat_data, cheat_data_len
 		);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
 			gameSoftReset,
 			asyncPrefetch,
 			logging,
-			(u32*)cheat_data,
+			cheat_data, cheat_data_len,
 			backlightMode
 		);	
 	} else {
