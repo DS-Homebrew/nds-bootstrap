@@ -141,14 +141,14 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	return -1;
 }*/
 
-static inline void copyLoop(u32* dest, const u32* src, u32 size) {
+/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
 	size = (size +3) & ~3; // Bigger nearest multiple of 4
 	do {
 		*dest = *src; //writeAddr((u8*)dest, 0, *src);
 		dest++;
 		src++;
 	} while (size -= 4);
-}
+}*/
 
 int loadArgs(int argc, const char** argv) {
 	// Give arguments to loader
@@ -211,10 +211,9 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("ce7_cheat_data");
 	nocashMessage(tohex((u32)ce7_cheat_data));
 	
-	//memcpy(ce7_cheat_data, cheat_data, 1024);
 	//copyLoop(ce7_cheat_data, cheat_data, 32768);
-	//copyLoop(ce7_cheat_data, cheat_data, (cheat_data_len + 2) * sizeof(u32));
-	copyLoop(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
+	//copyLoop(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
+	memcpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
 
 	ce7->cheat_data_len = cheat_data_len;
 	
