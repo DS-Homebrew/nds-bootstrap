@@ -141,11 +141,11 @@ dist:	all
 
 release:	$(OUTPUT)
 	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-release.nds
-	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-release.nds
+	@mv $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-release.nds
 
 nightly:	$(OUTPUT)
 	@rm -f $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
-	@cp $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
+	@mv $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
 
 $(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
