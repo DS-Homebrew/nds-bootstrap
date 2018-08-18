@@ -206,15 +206,15 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("cheatDataOffset");
 	nocashMessage(tohex(cheatDataOffset));
 	
-	//u32* cheatDataDest = (u32*)((u32)LCDC_BANK_C + ce7Offset + cheatDataOffset);
-	u32* cheatDataDest = (u32*)((u32)ce7 + cheatDataOffset);
-	nocashMessage("cheatDataDest");
-	nocashMessage(tohex((u32)cheatDataDest));
+	//u32* ce7_cheat_data = (u32*)((u32)LCDC_BANK_C + ce7Offset + cheatDataOffset);
+	u32* ce7_cheat_data = (u32*)((u32)ce7 + cheatDataOffset);
+	nocashMessage("ce7_cheat_data");
+	nocashMessage(tohex((u32)ce7_cheat_data));
 	
-	//memcpy(cheatDataDest, cheat_data, 1024);
-	//copyLoop(cheatDataDest, cheat_data, 32768);
-	//copyLoop(cheatDataDest, cheat_data, (cheat_data_len + 2) * sizeof(u32));
-	copyLoop(cheatDataDest, cheat_data, cheat_data_len*sizeof(u32));
+	//memcpy(ce7_cheat_data, cheat_data, 1024);
+	//copyLoop(ce7_cheat_data, cheat_data, 32768);
+	//copyLoop(ce7_cheat_data, cheat_data, (cheat_data_len + 2) * sizeof(u32));
+	copyLoop(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
 
 	ce7->cheat_data_len = cheat_data_len;
 	
