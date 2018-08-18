@@ -16,15 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
 #include <nds/debug.h>
 
 //#include "my_fat.h"
-#include "hook.h"
+#include "cardengine_header_arm7.h"
+#include "cheat_engine.h"
 #include "common.h"
 #include "find.h"
-#include "cardengine_header_arm7.h"
+#include "hook.h"
 
 // SDK 5
 /*extern u32 setDataMobicliplist[3];
@@ -241,6 +243,15 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
+/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
+	size = (size +3) & ~3; // Bigger nearest multiple of 4
+	do {
+		*dest = *src; //writeAddr((u8*)dest, 0, *src);
+		dest++;
+		src++;
+	} while (size -= 4);
+}*/
+
 int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
@@ -342,6 +353,10 @@ int hookNdsRetailArm7(
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
+
+	u32* ce7_cheat_data = getCheatData(ce7);
+	endCheatData(ce7_cheat_data, ce7->cheat_data_len);
+	ce7->cheat_data_len += 2;
 
 	*vblankHandler = ce7->patches->vblankHandler;
 	if (!ROMinRAM) {

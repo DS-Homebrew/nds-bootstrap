@@ -211,8 +211,7 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("ce7_cheat_data");
 	nocashMessage(tohex((u32)ce7_cheat_data));
 	
-	//copyLoop(ce7_cheat_data, cheat_data, 32768);
-	//copyLoop(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
+	//memcpy(ce7_cheat_data, cheat_data, 32768);
 	memcpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
 
 	ce7->cheat_data_len = cheat_data_len;

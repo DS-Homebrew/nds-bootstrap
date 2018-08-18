@@ -81,4 +81,8 @@ typedef struct cardengineArm7 {
 
 } __attribute__ ((__packed__)) cardengineArm7;
 
+inline u32* getCheatData(const cardengineArm7* ce7) {
+    return (u32*)((u32)ce7 + ce7->cheat_data_offset);
+}
+
 #endif // CARDENGINE_HEADER_ARM7_H

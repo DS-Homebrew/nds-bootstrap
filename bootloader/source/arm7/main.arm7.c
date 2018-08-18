@@ -55,6 +55,7 @@
 //#include "dldi_patcher.h"
 #include "patch.h"
 #include "find.h"
+#include "cheat_patch.h"
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
@@ -752,6 +753,7 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength(); // 6 dots
 
+	cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		ndsHeader,
