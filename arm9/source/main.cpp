@@ -409,7 +409,7 @@ int main(int argc, char** argv) {
 		if (cheat_data_len > 0) {
 			dbg_printf("Cheat data present\n");
 			
-			if (cheat_data_len >= CHEAT_DATA_MAX_LEN - 2) {
+			if (cheat_data_len > CHEAT_DATA_MAX_LEN - 2) {
 				dbg_printf("1024 bytes CHEAT_DATA size limit reached, the cheats are ignored!\n");
 				//cheats.clear();
 				cheat_data_len = 0;
