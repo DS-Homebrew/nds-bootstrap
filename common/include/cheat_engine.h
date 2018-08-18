@@ -1,0 +1,7 @@
+#ifndef CHEAT_ENGINE_H
+#define CHEAT_ENGINE_H
+
+#define CHEAT_DATA_MAX_SIZE (32 * 1024)	// 32KiB
+#define CHEAT_DATA_MAX_LEN  (CHEAT_DATA_MAX_SIZE / sizeof(u32))
+
+#endif // CHEAT_ENGINE_H
