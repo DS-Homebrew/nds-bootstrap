@@ -39,6 +39,7 @@
 #include <string.h> // memcpy & memset
 #include <stdlib.h> // malloc
 #include <nds/ndstypes.h>
+#include <nds/arm7/codec.h>
 #include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
@@ -157,60 +158,6 @@ static void resetMemory_ARM7(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 }
 
-// The following 3 functions are not in devkitARM r47
-//---------------------------------------------------------------------------------
-static u32 readTSCReg(u32 reg) {
-//---------------------------------------------------------------------------------
-	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
-	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
- 
-	while (REG_SPICNT & 0x80);
- 
-	REG_SPIDATA = 0;
- 
-	while (REG_SPICNT & 0x80);
-
-	REG_SPICNT = 0;
-
-	return REG_SPIDATA;
-}
-
-//---------------------------------------------------------------------------------
-/*static void readTSCRegArray(u32 reg, void *buffer, int size) {
-//---------------------------------------------------------------------------------
-	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
-	REG_SPIDATA = ((reg << 1) | 1) & 0xFF;
-
-	char *buf = (char*)buffer;
-	while (REG_SPICNT & 0x80);
-	int count = 0;
-	while (count < size) {
-		REG_SPIDATA = 0;
- 
-		while (REG_SPICNT & 0x80);
-
-		buf[count++] = REG_SPIDATA;
-	}
-	REG_SPICNT = 0;
-}*/
-
-//---------------------------------------------------------------------------------
-static u32 writeTSCReg(u32 reg, u32 value) {
-//---------------------------------------------------------------------------------
-	REG_SPICNT = SPI_ENABLE | SPI_BAUD_4MHz | SPI_DEVICE_TOUCH | SPI_CONTINUOUS;
-	REG_SPIDATA = (reg << 1) & 0xFF;
- 
-	while (REG_SPICNT & 0x80);
- 
-	REG_SPIDATA = value;
- 
-	while (REG_SPICNT & 0x80);
-
-	REG_SPICNT = 0;
-
-	return REG_SPIDATA;
-}
-
 //---------------------------------------------------------------------------------
 static void NDSTouchscreenMode(void) {
 //---------------------------------------------------------------------------------
@@ -235,143 +182,113 @@ static void NDSTouchscreenMode(void) {
 	}
 
 	// Touchscreen
-	readTSCReg(0);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x3A, 0);
-	readTSCReg(0x51);
-	writeTSCReg(0, 3);				// bank3
-	readTSCReg(2);
-	writeTSCReg(0, 0);				// bank0
-	readTSCReg(0x3F);
-	writeTSCReg(0, 1);				// bank1
-	readTSCReg(0x28);
-	readTSCReg(0x2A);
-	readTSCReg(0x2E);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x52, 0x80);
-	writeTSCReg(0x40, 0xC);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x24, 0xFF);
-	writeTSCReg(0x25, 0xFF);
-	writeTSCReg(0x26, 0x7F);
-	writeTSCReg(0x27, 0x7F);
-	writeTSCReg(0x28, 0x4A);
-	writeTSCReg(0x29, 0x4A);
-	writeTSCReg(0x2A, 0x10);
-	writeTSCReg(0x2B, 0x10);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x51, 0);
-	writeTSCReg(0, 3);				// bank3
-	readTSCReg(2);
-	writeTSCReg(2, 0x98);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x23, 0);
-	writeTSCReg(0x1F, 0x14);
-	writeTSCReg(0x20, 0x14);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x3F, 0);
-	readTSCReg(0x0B);
-	writeTSCReg(0x5, 0);
-	writeTSCReg(0xB, 0x1);
-	writeTSCReg(0xC, 0x2);
-	writeTSCReg(0x12, 0x1);
-	writeTSCReg(0x13, 0x2);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x2E, 0);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x3A, 0x60);
-	writeTSCReg(0x01, 0x01);
-	writeTSCReg(0x39, 0x66);
-	writeTSCReg(0, 1);				// bank1
-	readTSCReg(0x20);
-	writeTSCReg(0x20, 0x10);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x04, 0);
-	writeTSCReg(0x12, 0x81);
-	writeTSCReg(0x13, 0x82);
-	writeTSCReg(0x51, 0x82);
-	writeTSCReg(0x51, 0x00);
-	writeTSCReg(0x04, 0x03);
-	writeTSCReg(0x05, 0xA1);
-	writeTSCReg(0x06, 0x15);
-	writeTSCReg(0x0B, 0x87);
-	writeTSCReg(0x0C, 0x83);
-	writeTSCReg(0x12, 0x87);
-	writeTSCReg(0x13, 0x83);
-	writeTSCReg(0, 3);				// bank3
-	readTSCReg(0x10);
-	writeTSCReg(0x10, 0x08);
-	writeTSCReg(0, 4);				// bank4
-	writeTSCReg(0x08, 0x7F);
-	writeTSCReg(0x09, 0xE1);
-	writeTSCReg(0xA, 0x80);
-	writeTSCReg(0xB, 0x1F);
-	writeTSCReg(0xC, 0x7F);
-	writeTSCReg(0xD, 0xC1);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x41, 0x08);
-	writeTSCReg(0x42, 0x08);
-	writeTSCReg(0x3A, 0x00);
-	writeTSCReg(0, 4);				// bank4
-	writeTSCReg(0x08, 0x7F);
-	writeTSCReg(0x09, 0xE1);
-	writeTSCReg(0xA, 0x80);
-	writeTSCReg(0xB, 0x1F);
-	writeTSCReg(0xC, 0x7F);
-	writeTSCReg(0xD, 0xC1);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x2F, 0x2B);
-	writeTSCReg(0x30, 0x40);
-	writeTSCReg(0x31, 0x40);
-	writeTSCReg(0x32, 0x60);
-	writeTSCReg(0, 0);				// bank0
-	readTSCReg(0x74);
-	writeTSCReg(0x74, 0x02);
-	readTSCReg(0x74);
-	writeTSCReg(0x74, 0x10);
-	readTSCReg(0x74);
-	writeTSCReg(0x74, 0x40);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x21, 0x20);
-	writeTSCReg(0x22, 0xF0);
-	writeTSCReg(0, 0);				// bank0
-	readTSCReg(0x51);
-	readTSCReg(0x3F);
-	writeTSCReg(0x3F, 0xD4);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x23, 0x44);
-	writeTSCReg(0x1F, 0xD4);
-	writeTSCReg(0x28, 0x4E);
-	writeTSCReg(0x29, 0x4E);
-	writeTSCReg(0x24, 0x9E);
-	writeTSCReg(0x24, 0x9E);
-	writeTSCReg(0x20, 0xD4);
-	writeTSCReg(0x2A, 0x14);
-	writeTSCReg(0x2B, 0x14);
-	writeTSCReg(0x26, 0xA7);
-	writeTSCReg(0x27, 0xA7);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x40, 0);
-	writeTSCReg(0x3A, 0x60);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x26, volLevel);
-	writeTSCReg(0x27, volLevel);
-	writeTSCReg(0x2E, 0x03);
-	writeTSCReg(0, 3);				// bank3
-	writeTSCReg(3, 0);
-	writeTSCReg(0, 1);				// bank1
-	writeTSCReg(0x21, 0x20);
-	writeTSCReg(0x22, 0xF0);
-	readTSCReg(0x22);
-	writeTSCReg(0x22, 0xF0);
-	writeTSCReg(0, 0);				// bank0
-	writeTSCReg(0x52, 0x80);
-	writeTSCReg(0x51, 0x00);
-	writeTSCReg(0, 3);				// bank3
-	readTSCReg(0x02);
-	writeTSCReg(2, 0x98);
-	writeTSCReg(0, 0xFF);			// bankFF
-	writeTSCReg(5, 0);
+	cdcReadReg (0x63, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcReadReg (CDC_SOUND, 0x28);
+	cdcReadReg (CDC_SOUND, 0x2A);
+	cdcReadReg (CDC_SOUND, 0x2E);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x0C);
+	cdcWriteReg(CDC_SOUND, 0x24, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x25, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x26, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x27, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x10);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x14);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x0B);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x02);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_CONTROL, 0x01, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x39, 0x66);
+	cdcReadReg (CDC_SOUND, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x81);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0xA1);
+	cdcWriteReg(CDC_CONTROL, 0x06, 0x15);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x83);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x83);
+	cdcReadReg (CDC_TOUCHCNT, 0x10);
+	cdcWriteReg(CDC_TOUCHCNT, 0x10, 0x08);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_CONTROL, 0x41, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x42, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_SOUND, 0x2F, 0x2B);
+	cdcWriteReg(CDC_SOUND, 0x30, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x31, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x32, 0x60);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x10);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x44);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
+	cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_SOUND, 0x26, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x27, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x03);
+	cdcWriteReg(CDC_TOUCHCNT, 0x03, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_SOUND, 0x22);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
 	
 	// Power management
 	writePowerManagement(0x80, 0x00);
