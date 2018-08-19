@@ -155,14 +155,16 @@ u32 patchCardNdsArm7(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mod
 
 	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
-	u32 saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
-	if (!saveResult) {
-		saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
-	}
-	if (!saveResult) {
-		saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
-	}
-	if (!saveResult) {
+	u32 saveResult = 0;
+	if (moduleParams->sdk_version < 0x5000000) {
+		saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
+		if (!saveResult) {
+			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
+		}
+		if (!saveResult) {
+			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
+		}
+	} else {
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 	}
