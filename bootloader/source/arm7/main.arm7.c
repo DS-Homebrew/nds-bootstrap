@@ -356,11 +356,11 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((void*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
+	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
-	//memcpy((void*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
+	//memcpy((char*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
 	tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
 	*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
 
@@ -427,7 +427,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
 	// Copy the header to its proper location
-	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (void*)ndsHeader, 0x170);
+	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
 	if (dsiMode) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;

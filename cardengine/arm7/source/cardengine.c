@@ -81,9 +81,9 @@ static bool volumeAdjustActivated = false;
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-static void* romLocation = (void*)ROM_LOCATION;
-static void* saveLocation = (void*)SAVE_LOCATION;
+static const tNDSHeader* ndsHeader = NULL;
+static const char* romLocation = NULL;
+static char* saveLocation = NULL;
 
 static void initialize(void) {
 	if (!initialized) {
@@ -126,12 +126,9 @@ static void initialize(void) {
 		initialized = true;
 	}
 
-	bool sdk5 = isSdk5(moduleParams);
-	if (sdk5) {
-		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		romLocation = (void*)ROM_SDK5_LOCATION;
-		saveLocation = (void*)SAVE_SDK5_LOCATION;
-	}
+	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
+	romLocation = (char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	saveLocation = (char*)(isSdk5(moduleParams) ? SAVE_SDK5_LOCATION : SAVE_LOCATION);
 }
 
 static void cardReadLED(bool on) {
@@ -740,9 +737,9 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy(saveLocation + dst, (void*)src, len);
+			memcpy(saveLocation + dst, src, len);
 		}
-		fileWrite((void*)src, *savFile, dst, len, -1);
+		fileWrite(src, *savFile, dst, len, -1);
 		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 		unlockMutex(&saveMutex);
 	}
@@ -765,9 +762,9 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		initialize();
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
 		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy(saveLocation + dst, (void*)src, len);
+			memcpy(saveLocation + dst, src, len);
 		}
-		fileWrite((void*)src, *savFile, dst, len, -1);
+		fileWrite(src, *savFile, dst, len, -1);
 		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 		unlockMutex(&saveMutex);
 	}

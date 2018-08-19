@@ -588,7 +588,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	if(file.oneClusterCached && length == 512 && ((startOffset / discBytePerClus) * discBytePerClus) == file.currentOffset) {
 		// read from cache
 		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,(void*)(ONE_CACHE+curByte),length);
+		memcpy(buffer,(char*)(ONE_CACHE+curByte),length);
 		return length;
 	}
 
@@ -618,10 +618,10 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 
 	if(file.oneClusterCached && length == 512) {
 		// fill the cache
-		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, (void*)ONE_CACHE, ndmaSlot);
+		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, (char*)ONE_CACHE, ndmaSlot);
 		// read from cache
 		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,(void*)(ONE_CACHE+curByte),length);
+		memcpy(buffer,(char*)(ONE_CACHE+curByte),length);
 		return length;
 
 	} else {

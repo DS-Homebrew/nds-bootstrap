@@ -152,12 +152,12 @@ void arm9_main(void) {
 	VRAM_H_CR = 0x80;
 	VRAM_I_CR = 0x80;
 	BG_PALETTE[0] = 0xFFFF;
-	dmaFill((void*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
-	dmaFill((void*)&arm9_BLANK_RAM, OAM, 2*1024);
-	dmaFill((void*)&arm9_BLANK_RAM, (void*)0x04000000, 0x56);  // Clear main display registers
-	dmaFill((void*)&arm9_BLANK_RAM, (void*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((void*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
-	dmaFill((void*)&arm9_BLANK_RAM, VRAM_E, 272*1024);		// Banks E, F, G, H, I
+	dmaFill((u16*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
+	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_E, 272*1024);		// Banks E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 

@@ -182,7 +182,7 @@ static void triggerAsyncPrefetch(u32 sector) {
 			vu8* buffer = getCacheAddress(slot);
 
 			if (needFlushDCCache) {
-				DC_FlushRange((void*)buffer, _128KB_READ_SIZE);
+				DC_FlushRange((u8*)buffer, _128KB_READ_SIZE);
 			}
 
 			cacheDescriptor[slot] = sector;
@@ -394,7 +394,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					buffer = getCacheAddress(slot);
 
 					if (needFlushDCCache) {
-						DC_FlushRange((void*)buffer, _128KB_READ_SIZE);
+						DC_FlushRange((u8*)buffer, _128KB_READ_SIZE);
 					}
 
 					// Write the command
@@ -460,7 +460,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					#endif
 
 					// Copy directly
-					memcpy(dst, (void*)(buffer+(src-sector)), len2);
+					memcpy(dst, (u8*)buffer+(src-sector), len2);
 
 					// Update cardi common
 					cardStruct[0] = src + len2;
@@ -489,7 +489,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					//cardStruct[1] = dst + len2;
 					//cardStruct[2] = len - len2;
 					//(*readCachedRef)(cacheStruct);
-					memcpy(cacheBuffer, (void*)(buffer+(page-sector)), 512);
+					memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
 					*cachePage = page;
 					(*readCachedRef)(cacheStruct);
 				}
@@ -538,7 +538,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Copy directly
-				memcpy(dst, (void*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+				memcpy(dst, (u8*)(((sdk5 ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 				// Update cardi common
 				cardStruct[0] = src + len;
@@ -562,7 +562,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				#endif
 
 				// Read via the 512b ram cache
-				memcpy(cacheBuffer, (void*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+				memcpy(cacheBuffer, (u8*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 				*cachePage = page;
 				(*readCachedRef)(cacheStruct);
 			}

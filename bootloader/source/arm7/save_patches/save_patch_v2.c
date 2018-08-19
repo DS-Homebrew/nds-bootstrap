@@ -129,7 +129,7 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	u32 returned_A0_with_MKDS = (u32)findOffset(
 		(u32*)JumpTableFunc, 0x100,
-		(void*)a7something1Signature, 2
+		a7something1Signature, 2
 	);
 	if (!returned_A0_with_MKDS) {
 		dbg_printf("[Error!]...\n");
@@ -142,7 +142,7 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	u32 addrOfSomething_85C0 = (u32)findOffset(
 		(u32*)ndsHeader->arm7destination, 0x18000,
-		(void*)a7something2Signature, 2
+		a7something2Signature, 2
 	);
 	if (!addrOfSomething_85C0) {
 		dbg_printf("[Error!] ...\n");
