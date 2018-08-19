@@ -451,10 +451,6 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	} else {
 		//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
 		*ndsHeader = dsiHeaderTemp->ndshdr;
-
-		// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
-		nocashMessage("Switch to NTR mode BIOS");
-		REG_SCFG_ROM = 0x703;
 	}
 
 	return ndsHeader;
@@ -481,6 +477,12 @@ static void reloadFirmwareSettings(const tNDSHeader* ndsHeader) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
+}
+
+static void NTR_BIOS() {
+	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
+	nocashMessage("Switch to NTR mode BIOS");
+	REG_SCFG_ROM = 0x703;
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
@@ -592,8 +594,10 @@ int arm7_main(void) {
 
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
+
 	bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
+	
 	increaseLoadBarLength();
 
 	//
@@ -614,6 +618,11 @@ int arm7_main(void) {
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
 	reloadFirmwareSettings(ndsHeader); // Header has to be loaded first
+
+	if (!dsiModeConfirmed) {
+		NTR_BIOS();
+	}
+
 	increaseLoadBarLength();
 
 	//
