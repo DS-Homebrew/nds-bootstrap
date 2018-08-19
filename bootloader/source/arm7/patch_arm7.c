@@ -163,7 +163,10 @@ u32 patchCardNdsArm7(
 	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
 	u32 saveResult = 0;
-	if (moduleParams->sdk_version < 0x5000000) {
+	if (isSdk5(moduleParams)) {
+		// SDK 5
+		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
+	} else {
 		saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 		if (!saveResult) {
 			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
@@ -171,9 +174,6 @@ u32 patchCardNdsArm7(
 		if (!saveResult) {
 			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 		}
-	} else {
-		// SDK 5
-		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 	}
 	if (saveResult == 1 && !ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 		aFile saveFile = getFileFromCluster(saveFileCluster);
