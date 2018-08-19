@@ -490,11 +490,6 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	// Load ROM into RAM
 	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
-
-	// Primary fix for Mario's Holiday
-	if (*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) == 0x4B434148){
-		*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) = 0xA00;
-	}
 }
 
 static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
