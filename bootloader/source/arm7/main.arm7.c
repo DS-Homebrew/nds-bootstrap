@@ -93,7 +93,6 @@ extern u32 asyncPrefetch;
 //extern u32 logging;
 
 bool dsiModeConfirmed = false; // SDK 5
-u32 enableExceptionHandler = true;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -498,17 +497,14 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 }
 
-static void setArm9Stuff(const tNDSHeader* ndsHeader) {
+static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
-	if (strncmp(romTid, "ASM", 3) == 0	// SM64DS
-	|| strncmp(romTid, "SMS", 3) == 0	// SMSW
-	|| strncmp(romTid, "A2D", 3) == 0	// NSMB
-	|| strncmp(romTid, "ADM", 3) == 0)	// AC:WW
-	{
-		enableExceptionHandler = false;
-	}
+	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
+	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
+	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
+	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
 }
 
 /*-------------------------------------------------------------------------
@@ -690,13 +686,12 @@ int arm7_main(void) {
 	// 7 dots
 	//
 
-	setArm9Stuff(ndsHeader);
 	hookNdsRetailArm9(
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
 		moduleParams,
 		ROMinRAM,
 		dsiModeConfirmed,
-		enableExceptionHandler,
+		supportsExceptionHandler(ndsHeader),
 		consoleModel,
 		asyncPrefetch
 	);
