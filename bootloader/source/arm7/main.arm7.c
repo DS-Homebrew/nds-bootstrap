@@ -92,8 +92,6 @@ extern u32 gameSoftReset;
 extern u32 asyncPrefetch;
 //extern u32 logging;
 
-bool dsiModeConfirmed = false; // SDK 5
-
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
