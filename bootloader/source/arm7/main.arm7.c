@@ -352,57 +352,40 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
-	//tDSiHeader dsiHeaderTemp;
 
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
 	fileRead((void*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
 
-	// Read ARM9 info from NDS header
-	u32 ARM9_SRC   = dsiHeaderTemp->ndshdr.arm9romOffset;
-	char* ARM9_DST = (char*)dsiHeaderTemp->ndshdr.arm9destination;
-
-	// Read ARM7 info from NDS header
-	u32 ARM7_SRC   = dsiHeaderTemp->ndshdr.arm7romOffset;
-	char* ARM7_DST = (char*)dsiHeaderTemp->ndshdr.arm7destination;
-
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
 	//memcpy((void*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
-	*(tNDSHeader*)0x027FF000 = dsiHeaderTemp->ndshdr;
+	tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
+	*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
 
-	if ((*(u32*)0x27FF00C & 0x00FFFFFF) == 0x414441 // Diamond
-	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x415041  // Pearl
-	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x555043  // Platinum
-	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x4B5049  // HG
-	|| (*(u32*)0x27FF00C & 0x00FFFFFF) == 0x475049) // SS
-	{
+	const char* romTid = getRomTid(&dsiHeaderTemp->ndshdr);
+	if (
+		strncmp(romTid, "ADA", 3) == 0    // Diamond
+		|| strncmp(romTid, "APA", 3) == 0 // Pearl
+		|| strncmp(romTid, "CPU", 3) == 0 // Platinum
+		|| strncmp(romTid, "IPK", 3) == 0 // HG
+		|| strncmp(romTid, "IPG", 3) == 0 // SS
+	) {
 		// Make the Pokemon game code ADAJ.
-		*(u32*)0x27FF00C = 0x4A414441;
+		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
+		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, dsiHeaderTemp->ndshdr.arm9binarySize, 3);
-	fileRead(ARM7_DST, file, ARM7_SRC, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 3);
+	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
 
 	// SDK 5
 	*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
 	if (*dsiModeConfirmedPtr) {
-		u32 ARM9i_SRC   = (u32)dsiHeaderTemp->arm9iromOffset;
-		char* ARM9i_DST = (char*)dsiHeaderTemp->arm9idestination;
-		u32 ARM9i_LEN   = dsiHeaderTemp->arm9ibinarySize;
-
-		u32 ARM7i_SRC   = (u32)dsiHeaderTemp->arm7iromOffset;
-		char* ARM7i_DST = (char*)dsiHeaderTemp->arm7idestination;
-		u32 ARM7i_LEN   = dsiHeaderTemp->arm7ibinarySize;
-
-		if (ARM9i_LEN) {
-			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 3);
-		}
-		if (ARM7i_LEN) {
-			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 3);
-		}
+		fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 3);
+		fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 3);
 	}
 }
 
