@@ -516,7 +516,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 }
 
 static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? TEMP_ARM9_START_ADDRESS_SDK5_LOCATION : TEMP_ARM9_START_ADDRESS_LOCATION);
+	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? ARM9_START_ADDRESS_SDK5_LOCATION : ARM9_START_ADDRESS_LOCATION);
 
 	// Store for later
 	*arm9StartAddress = (vu32)ndsHeader->arm9executeAddress;
