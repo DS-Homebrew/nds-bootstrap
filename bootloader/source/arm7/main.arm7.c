@@ -60,6 +60,7 @@
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "loading_screen.h"
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
@@ -85,7 +86,7 @@ extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 consoleModel;
-extern u32 loadingScreen;
+//extern u32 loadingScreen;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 extern u32 asyncPrefetch;
@@ -158,9 +159,7 @@ static void resetMemory_ARM7(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 }
 
-//---------------------------------------------------------------------------------
 static void NDSTouchscreenMode(void) {
-//---------------------------------------------------------------------------------
 	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
 	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
 	//unsigned char * *(unsigned char*)0x40001C2=	(unsigned char*)0x40001C2;
@@ -536,43 +535,6 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Used for debugging purposes
-static void errorOutput(void) {
-	if (loadingScreen > 0) {
-		// Wait until the ARM9 is ready
-		while (arm9_stateFlag != ARM9_READY);
-		// Set the error code, then tell ARM9 to display it
-		arm9_errorColor = true;
-	}
-	// Stop
-	while (1);
-}
-
-static void debugOutput(void) {
-	if (loadingScreen > 0) {
-		// Wait until the ARM9 is ready
-		while (arm9_stateFlag != ARM9_READY);
-		// Set the error code, then tell ARM9 to display it
-		arm9_screenMode = loadingScreen - 1;
-		arm9_stateFlag = ARM9_DISPERR;
-		// Wait for completion
-		while (arm9_stateFlag != ARM9_READY);
-	}
-}
-
-static void increaseLoadBarLength(void) {
-	arm9_loadBarLength++;
-	if (loadingScreen == 1) {
-		debugOutput(); // Let the loading bar finish before ROM starts
-	}
-}
-
-static void fadeOut(void) {
-	fadeType = false;
-	while (screenBrightness != 31);	// Wait for screen to fade out
 }
 
 int arm7_main(void) {
