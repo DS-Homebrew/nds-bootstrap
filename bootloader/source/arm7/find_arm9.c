@@ -531,45 +531,21 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	//if (!usesThumb) {
 	
-	u32* cardPullOutOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardPullOutSignature1, 4
-	);
-	if (cardPullOutOffset) {
-		dbg_printf("Card pull out handler found: ");
-	} else {
-		dbg_printf("Card pull out handler not found\n");
-	}
-
-	if (!cardPullOutOffset) {
-		// SDK 4
-		u32* cardPullOutOffset = findOffset(
+	u32* cardPullOutOffset = 0;
+	if (moduleParams->sdk_version > 0x5000000) {
+		// SDK 5
+		cardPullOutOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			cardPullOutSignature4, 4
+			cardPullOutSignature5, 4
 		);
 		if (cardPullOutOffset) {
-			dbg_printf("Card pull out handler SDK 4 found: ");
+			dbg_printf("Card pull out handler SDK 5 found: ");
 		} else {
-			dbg_printf("Card pull out handler SDK 4 not found\n");
+			dbg_printf("Card pull out handler SDK 5 not found\n");
 		}
-	}
-	if (!cardPullOutOffset) {
-		// SDK 5
-		if (moduleParams->sdk_version > 0x5000000) {
-			u32* cardPullOutOffset = findOffset(
-				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-				cardPullOutSignature5, 4
-			);
-			if (cardPullOutOffset) {
-				dbg_printf("Card pull out handler SDK 5 found: ");
-			} else {
-				dbg_printf("Card pull out handler SDK 5 not found\n");
-			}
-		}
-	}
-	if (!cardPullOutOffset) {
-		// SDK 5
-		if (moduleParams->sdk_version > 0x5000000) {
+
+		if (!cardPullOutOffset) {
+			// SDK 5
 			cardPullOutOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				cardPullOutSignature5Alt, 4
@@ -578,6 +554,31 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 				dbg_printf("Card pull out handler SDK 5 alt found: ");
 			} else {
 				dbg_printf("Card pull out handler SDK 5 alt not found\n");
+			}
+		}
+	} else {
+		if (moduleParams->sdk_version < 0x4000000) {
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				cardPullOutSignature1, 4
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler found: ");
+			} else {
+				dbg_printf("Card pull out handler not found\n");
+			}
+		}
+
+		if (!cardPullOutOffset) {
+			// SDK 4
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				cardPullOutSignature4, 4
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler SDK 4 found: ");
+			} else {
+				dbg_printf("Card pull out handler SDK 4 not found\n");
 			}
 		}
 	}
