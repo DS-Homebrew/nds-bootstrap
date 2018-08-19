@@ -130,11 +130,13 @@ u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,
-	const module_params_t* moduleParams, 
-	u32 saveFileCluster,
-	u32 saveSize,
+	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize) {
+	u32 patchMpuSize,
+	u32 ROMinRAM,
+	u32 saveFileCluster,
+	u32 saveSize
+) {
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 3));
 	}
@@ -150,7 +152,7 @@ u32 patchCardNds(
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
+		patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster, saveSize);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

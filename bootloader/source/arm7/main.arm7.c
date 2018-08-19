@@ -91,46 +91,33 @@ extern u32 asyncPrefetch;
 //extern u32 logging;
 
 bool dsiModeConfirmed = false; // SDK 5
-u32 ROMinRAM = false;
 u32 enableExceptionHandler = true;
 
-static aFile* romFile = (aFile*)0x37D5000;
-static aFile* savFile = (aFile*)0x37D5000 + 1;
-static const char* bootName = "BOOT.NDS";
-static module_params_t* moduleParams = NULL;
-static vu32* tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_LOCATION;
-static char* romLocation = (char*)ROM_LOCATION;
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Used for debugging purposes
-static void errorOutput(void) {
-	if (loadingScreen > 0) {
-		// Wait until the ARM9 is ready
-		while (arm9_stateFlag != ARM9_READY);
-		// Set the error code, then tell ARM9 to display it
-		arm9_errorColor = true;
-	}
-	// Stop
-	while (1);
-}
-
-static void debugOutput(void) {
-	if (loadingScreen > 0) {
-		// Wait until the ARM9 is ready
-		while (arm9_stateFlag != ARM9_READY);
-		// Set the error code, then tell ARM9 to display it
-		arm9_screenMode = loadingScreen - 1;
-		arm9_stateFlag = ARM9_DISPERR;
-		// Wait for completion
-		while (arm9_stateFlag != ARM9_READY);
-	}
-}
-
-static void increaseLoadBarLength(void) {
-	arm9_loadBarLength++;
-	if (loadingScreen == 1) {
-		debugOutput(); // Let the loading bar finish before ROM starts
-	}
+static void initMBK(void) {
+	// Give all DSi WRAM to ARM7 at boot
+	// This function has no effect with ARM7 SCFG locked
+	
+	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9 = 0x3000000F;
+	
+	// WRAM-A fully mapped to ARM7
+	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
+	
+	// WRAM-B fully mapped to ARM7 // inverted order
+	*(vu32*)REG_MBK2 = 0x9195999D;
+	*(vu32*)REG_MBK3 = 0x8185898D;
+	
+	// WRAM-C fully mapped to arm7 // inverted order
+	*(vu32*)REG_MBK4 = 0x9195999D;
+	*(vu32*)REG_MBK5 = 0x8185898D;
+	
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+	REG_MBK6 = 0x080037C0; // same as DSiWare
+	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
+	REG_MBK7 = 0x07C03740; // same as DSiWare
+	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
+	REG_MBK8 = 0x07403700; // same as DSiWare
 }
 
 /*-------------------------------------------------------------------------
@@ -168,29 +155,6 @@ static void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
-}
-
-static void reloadFirmwareSettings(void) {
-	u8 settings1, settings2;
-	u32 settingsOffset = 0;
-
-	// Get settings location
-	readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
-	settingsOffset *= 8;
-
-	// Reload DS Firmware settings
-	readFirmware(settingsOffset + 0x070, &settings1, 0x1);
-	readFirmware(settingsOffset + 0x170, &settings2, 0x1);
-
-	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
-		readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
-	} else {
-		readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
-	}
-	if (language >= 0 && language < 6) {
-		// Change language
-		*(u8*)((u32)ndsHeader - 0x11C) = language;
-	}
 }
 
 // The following 3 functions are not in devkitARM r47
@@ -463,7 +427,14 @@ static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - 0x4000 - ndsHeader->arm9binarySize;
 }
 
-static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
+// SDK 5
+static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
+	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp[0x10 >> 2] & BIT(16+1));
+	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp->ndshdr.deviceSize & BIT(16+1)));
+	return (ndsHeader->deviceSize & BIT(16+1));
+}
+
+static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool dsiMode, bool* dsiModeConfirmedPtr) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
@@ -503,9 +474,8 @@ static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
 	fileRead(ARM7_DST, file, ARM7_SRC, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
 
 	// SDK 5
-	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp[0x10 >> 2] & BIT(16+1));
-	dsiModeConfirmed = (dsiMode && (dsiHeaderTemp->ndshdr.deviceSize & BIT(16+1)));
-	if (dsiModeConfirmed) {
+	*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
+	if (*dsiModeConfirmedPtr) {
 		u32 ARM9i_SRC   = (u32)dsiHeaderTemp->arm9iromOffset;
 		char* ARM9i_DST = (char*)dsiHeaderTemp->arm9idestination;
 		u32 ARM9i_LEN   = dsiHeaderTemp->arm9ibinarySize;
@@ -523,62 +493,96 @@ static void loadBinary_ARM7(aFile file, tDSiHeader* dsiHeaderTemp) {
 	}
 }
 
-static bool loadModuleParams(const tNDSHeader* ndsHeader) {
-	moduleParams = getModuleParams(ndsHeader);
-	if (moduleParams) {
+static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
+	module_params_t* moduleParams = getModuleParams(ndsHeader);
+	*foundPtr = (bool)moduleParams;
+	if (*foundPtr) {
 		// Found module params
 		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
 		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
 		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
-		return true;
+	} else {
+		nocashMessage("No moduleparams?\n");
+		moduleParams = buildModuleParams(donorSdkVer);
+		*(vu32*)0x2800010 = 1;
 	}
-	nocashMessage("No moduleparams?\n");
-	*(vu32*)0x2800010 = 1;
-	moduleParams = buildModuleParams(donorSdkVer);
-	return false;
+	return moduleParams;
 }
 
-static void loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
-	bool sdk5 = isSdk5(moduleParams);
-	if (sdk5) {
-		ndsHeader            = (tNDSHeader*)NDS_HEADER_SDK5;
-		tempArm9StartAddress = (vu32*)TEMP_ARM9_START_ADDRESS_SDK5_LOCATION;
-		romLocation          = (char*)ROM_SDK5_LOCATION;
-	}
+static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+	return ((isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
+		|| (!isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x017FC000)
+		|| (!isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x007FC000));
+}
 
-	if ((sdk5 && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
-	|| (!sdk5 && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x017FC000)
-	|| (!sdk5 && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x007FC000))
-	{
-		// Set to load ROM into RAM
-		ROMinRAM = true;
-	}
+static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? TEMP_ARM9_START_ADDRESS_SDK5_LOCATION : TEMP_ARM9_START_ADDRESS_LOCATION);
 
-	// First copy the header to its proper location, excluding
-	// the ARM9 start address, so as not to start it
-	
 	// Store for later
-	*tempArm9StartAddress = (vu32)dsiHeaderTemp->ndshdr.arm9executeAddress;
+	*arm9StartAddress = (vu32)ndsHeader->arm9executeAddress;
 	
-	dsiHeaderTemp->ndshdr.arm9executeAddress = 0;
+	// Exclude the ARM9 start address, so as not to start it
+	ndsHeader->arm9executeAddress = NULL; // 0
 	
+	return arm9StartAddress;
+}
+
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, bool dsiMode) {
+	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
+
+	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (void*)ndsHeader, 0x170);
-	if (dsiModeConfirmed) {
+	if (dsiMode) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
 	} else {
 		//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
 		*ndsHeader = dsiHeaderTemp->ndshdr;
-	}
 
-	if (!dsiModeConfirmed) {
 		// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
 		nocashMessage("Switch to NTR mode BIOS");
 		REG_SCFG_ROM = 0x703;
 	}
+
+	return ndsHeader;
 }
 
-static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
+static void reloadFirmwareSettings(const tNDSHeader* ndsHeader) {
+	u8 settings1, settings2;
+	u32 settingsOffset = 0;
+
+	// Get settings location
+	readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
+	settingsOffset *= 8;
+
+	// Reload DS Firmware settings
+	readFirmware(settingsOffset + 0x070, &settings1, 0x1);
+	readFirmware(settingsOffset + 0x170, &settings2, 0x1);
+
+	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
+		readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
+	} else {
+		readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
+	}
+	if (language >= 0 && language < 6) {
+		// Change language
+		*(u8*)((u32)ndsHeader - 0x11C) = language;
+	}
+}
+
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+	char* romLocation = (char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+
+	// Load ROM into RAM
+	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+
+	// Primary fix for Mario's Holiday
+	if (*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) == 0x4B434148){
+		*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) = 0xA00;
+	}
+}
+
+static void setArm9Stuff(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
@@ -589,26 +593,6 @@ static void setArm9Stuff(const tNDSHeader* ndsHeader, aFile file) {
 	{
 		enableExceptionHandler = false;
 	}
-
-	if (ROMinRAM) {
-		// Load ROM into RAM
-		fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
-
-		// Primary fix for Mario's Holiday
-		if (*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) == 0x4B434148){
-			*(u32*)((romLocation - 0x4000 - ndsHeader->arm9binarySize) + 0x003128AC) = 0xA00;
-		}
-	}
-
-	hookNdsRetailArm9(
-		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
-		moduleParams,
-		ROMinRAM,
-		dsiModeConfirmed,
-		enableExceptionHandler,
-		consoleModel,
-		asyncPrefetch
-	);
 }
 
 /*-------------------------------------------------------------------------
@@ -618,7 +602,7 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-static void startBinary_ARM7(void) {
+static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	REG_IME = 0;
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
@@ -637,33 +621,41 @@ static void startBinary_ARM7(void) {
 	arm7code();
 }
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Used for debugging purposes
+static void errorOutput(void) {
+	if (loadingScreen > 0) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_errorColor = true;
+	}
+	// Stop
+	while (1);
+}
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-static void initMBK(void) {
-	// Give all DSi WRAM to ARM7 at boot
-	// This function has no effect with ARM7 SCFG locked
-	
-	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9 = 0x3000000F;
-	
-	// WRAM-A fully mapped to ARM7
-	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-	
-	// WRAM-B fully mapped to ARM7 // inverted order
-	*(vu32*)REG_MBK2 = 0x9195999D;
-	*(vu32*)REG_MBK3 = 0x8185898D;
-	
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x9195999D;
-	*(vu32*)REG_MBK5 = 0x8185898D;
-	
-	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
-	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-	REG_MBK6 = 0x080037C0; // same as DSiWare
-	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7 = 0x07C03740; // same as DSiWare
-	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8 = 0x07403700; // same as DSiWare
+static void debugOutput(void) {
+	if (loadingScreen > 0) {
+		// Wait until the ARM9 is ready
+		while (arm9_stateFlag != ARM9_READY);
+		// Set the error code, then tell ARM9 to display it
+		arm9_screenMode = loadingScreen - 1;
+		arm9_stateFlag = ARM9_DISPERR;
+		// Wait for completion
+		while (arm9_stateFlag != ARM9_READY);
+	}
+}
+
+static void increaseLoadBarLength(void) {
+	arm9_loadBarLength++;
+	if (loadingScreen == 1) {
+		debugOutput(); // Let the loading bar finish before ROM starts
+	}
+}
+
+static void fadeOut(void) {
+	fadeType = false;
+	while (screenBrightness != 31);	// Wait for screen to fade out
 }
 
 int arm7_main(void) {
@@ -676,7 +668,12 @@ int arm7_main(void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-	debugOutput(); // 1 dot
+	debugOutput();
+
+	//
+	// 1 dot
+	//
+
 	resetMemory_ARM7();
 
 	// Init card
@@ -685,7 +682,11 @@ int arm7_main(void) {
 		return -1;
 	}
 
+	// ROM file
+	aFile* romFile = (aFile*)0x37D5000;
 	*romFile = getFileFromCluster(storedFileCluster);
+
+	const char* bootName = "BOOT.NDS";
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
@@ -698,7 +699,9 @@ int arm7_main(void) {
 	}
 	
 	buildFatTableCache(romFile, 3);
-	
+
+	// Sav file
+	aFile* savFile = romFile + 1; //aFile* savFile = (aFile*)0x37D5000 + 1;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
 	if (savFile->firstCluster != CLUSTER_FREE) {
@@ -716,34 +719,60 @@ int arm7_main(void) {
 
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
-	loadBinary_ARM7(*romFile, &dsiHeaderTemp);
-	increaseLoadBarLength(); // 2 dots
+	bool dsiModeConfirmed;
+	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
+	increaseLoadBarLength();
+
+	//
+	// 2 dots
+	//
 
 	nocashMessage("Loading the header...\n");
-	bool foundModuleParams = loadModuleParams(&dsiHeaderTemp.ndshdr);
+
+	bool foundModuleParams;
+	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+
 	decompressBinary(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
-	patchBinary(&dsiHeaderTemp.ndshdr);
-	loadHeader(&dsiHeaderTemp, moduleParams);
-	reloadFirmwareSettings(); // After "ndsHeader" is set
-	increaseLoadBarLength(); // 3 dots
+
+	// If possible, set to load ROM into RAM
+	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, moduleParams, consoleModel);
+
+	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+
+	reloadFirmwareSettings(ndsHeader); // Header has to be loaded first
+	increaseLoadBarLength();
+
+	//
+	// 3 dots
+	//
 
 	nocashMessage("Trying to patch the card...\n");
 
 	memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-	increaseLoadBarLength(); // 4 dots
+	increaseLoadBarLength();
+
+	//
+	// 4 dots
+	//
 
 	memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-	increaseLoadBarLength(); // 5 dots
+	increaseLoadBarLength();
 
+	//
+	// 5 dots
+	//
+	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
 		ndsHeader,
 		moduleParams,
-		saveFileCluster,
-		saveSize,
 		patchMpuRegion,
-		patchMpuSize
+		patchMpuSize,
+		ROMinRAM,
+		saveFileCluster,
+		saveSize
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card patch successful");
@@ -751,7 +780,11 @@ int arm7_main(void) {
 		nocashMessage("Card patch failed");
 		errorOutput();
 	}
-	increaseLoadBarLength(); // 6 dots
+	increaseLoadBarLength();
+
+	//
+	// 6 dots
+	//
 
 	cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 	errorCode = hookNdsRetailArm7(
@@ -772,25 +805,42 @@ int arm7_main(void) {
 		nocashMessage("Card hook failed");
 		errorOutput();
 	}
-	increaseLoadBarLength(); // 7 dots
+	increaseLoadBarLength();
 
-	setArm9Stuff(ndsHeader, *romFile);
-	if (!ROMinRAM) {
+	//
+	// 7 dots
+	//
+
+	setArm9Stuff(ndsHeader);
+	hookNdsRetailArm9(
+		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		moduleParams,
+		ROMinRAM,
+		dsiModeConfirmed,
+		enableExceptionHandler,
+		consoleModel,
+		asyncPrefetch
+	);
+	if (ROMinRAM) {
+		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
+	} else {
 		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
 	}
-	increaseLoadBarLength(); // Final 8 dots
+	increaseLoadBarLength();
 
-	fadeType = false;
-	while (screenBrightness != 31);	// Wait for screen to fade out
+	//
+	// Final 8 dots
+	//
 
-	// Lock SCFG
-	REG_SCFG_EXT &= ~(1UL << 31);
+	fadeOut();
+
+	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
 	nocashMessage("Starting the NDS file...");
-	startBinary_ARM7();
+	startBinary_ARM7(arm9StartAddress);
 
 	return 0;
 }
