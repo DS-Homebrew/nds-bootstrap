@@ -53,7 +53,7 @@ extern "C" {
 //extern bool logging;
 //bool logging = false;
 
-bool debug = false; //static bool debug = false;
+static bool debug = false;
 
 int dbg_printf(const char* format, ...) { // static int...
 	if (!debug) {
@@ -122,6 +122,7 @@ void myFIFOValue32Handler(u32 value, void* data) {
 }
 
 void runFile(
+	bool debug_local,
 	std::string filename,
 	std::string savPath,
 	u32 saveSize,
@@ -141,6 +142,7 @@ void runFile(
 	u32 backlightMode
 ) {
 	// Debug
+	debug = debug_local;
 	if (debug) {
 		powerOff(PM_BACKLIGHT_TOP);
 		consoleDemoInit();

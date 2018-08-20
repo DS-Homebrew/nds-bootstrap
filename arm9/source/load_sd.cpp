@@ -22,8 +22,6 @@ extern "C" {
 #include "nds_loader_arm9.h"
 #include "load_sd.h"
 
-extern bool debug;
-
 int dbg_printf(const char* format, ...);
 
 off_t getSaveSize(const char* path) {
@@ -39,6 +37,7 @@ off_t getSaveSize(const char* path) {
 }
 
 void runFile(
+	bool debug_local,
 	std::string filename,
 	std::string savPath,
 	u32 saveSize,
@@ -72,8 +71,7 @@ void loadFromSD() {
 
 		CIniFile bootstrapini("sd:/_nds/nds-bootstrap.ini");
 
-		debug               = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0);
-
+		bool debug          = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0);
 		std::string ndsPath = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
 		std::string savPath = bootstrapini.GetString("NDS-BOOTSTRAP", "SAV_PATH", "");
 		u32 language        = bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", -1);
@@ -120,6 +118,7 @@ void loadFromSD() {
 		bool boostCpu       = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0);
 
 		runFile(
+			debug,
 			ndsPath.c_str(),
 			savPath.c_str(),
 			getSaveSize(savPath.c_str()),
