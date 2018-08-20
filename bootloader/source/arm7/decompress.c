@@ -7,7 +7,13 @@
 
 static void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;
-
+	
+	if(len == size) {
+		size -= 12;
+	}
+		
+	len = *(u32*)(addr + size - 4) + size;
+	
 	//byte[] Result = new byte[len];
 	//Array.Copy(Data, Result, Data.Length);
 
