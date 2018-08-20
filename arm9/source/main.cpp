@@ -299,75 +299,75 @@ int main(int argc, char** argv) {
 		// for certain gamecodes
 		/*FILE* f_nds_file = fopen(ndsPath, "rb");
 
-		char game_TID[5];
+		char romTid[5];
 		fseek(f_nds_file, offsetof(sNDSHeaderTitleCodeOnly, gameCode), SEEK_SET);
-		fread(game_TID, 1, 4, f_nds_file);
-		game_TID[4] = 0;
-		game_TID[3] = 0;
-		//game_TID[2] = 0; // SDK 5
-		//game_TID[1] = 0; // SDK 5
+		fread(romTid, 1, 4, f_nds_file);
+		romTid[4] = 0;
+		romTid[3] = 0;
+		//romTid[2] = 0; // SDK 5
+		//romTid[1] = 0; // SDK 5
 		fclose(f_nds_file);
 
 		// SDK 5
-		//if (strcmp(game_TID, "I") != 0) {
+		//if (strcmp(romTid, "I") != 0) {
 		//	fifoSendValue32(FIFO_USER_08, 1); // Disable Slot-1 access for games with no built-in infrared port
 		//}
 
-		if (strcmp(game_TID, "ABX") == 0	// NTR-ABXE Bomberman Land Touch!
-		 || strcmp(game_TID, "YO9") == 0	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
-		 || strcmp(game_TID, "ALH") == 0	// NTR-ALHE Flushed Away
-		 || strcmp(game_TID, "ACC") == 0	// NTR-ACCE Cooking Mama
-		 || strcmp(game_TID, "YCQ") == 0	// NTR-YCQE Cooking Mama 2 - Dinner with Friends
-		 || strcmp(game_TID, "YYK") == 0	// NTR-YYKE Trauma Center - Under the Knife 2
-		 || strcmp(game_TID, "AZW") == 0	// NTR-AZWE WarioWare - Touched!
-		 || strcmp(game_TID, "AKA") == 0	// NTR-AKAE Rub Rabbits!, The
-		 || strcmp(game_TID, "AN9") == 0	// NTR-AN9E Little Mermaid - Ariel's Undersea Adventure, The
-		 || strcmp(game_TID, "AKE") == 0	// NTR-AKEJ Keroro Gunsou - Enshuu da Yo! Zenin Shuugou Part 2
-		 || strcmp(game_TID, "YFS") == 0	// NTR-YFSJ Frogman Show - DS Datte, Shouganaijanai, The
-		 || strcmp(game_TID, "YG8") == 0	// NTR-YG8E Yu-Gi-Oh! World Championship 2008
-		 || strcmp(game_TID, "AY7") == 0	// NTR-AY7E Yu-Gi-Oh! World Championship 2007
-		 || strcmp(game_TID, "YON") == 0	// NTR-YONJ Minna no DS Seminar - Kantan Ongakuryoku
-		 || strcmp(game_TID, "A5H") == 0	// NTR-A5HE Interactive Storybook DS - Series 2
-		 || strcmp(game_TID, "A5I") == 0	// NTR-A5IE Interactive Storybook DS - Series 3
-		 || strcmp(game_TID, "AMH") == 0	// NTR-AMHE Metroid Prime Hunters
-		 || strcmp(game_TID, "A3T") == 0	// NTR-A3TE Tak - The Great Juju Challenge
-		 || strcmp(game_TID, "YBO") == 0	// NTR-YBOE Boogie
-		 || strcmp(game_TID, "ADA") == 0	// NTR-ADAE PKMN Diamond
-		 || strcmp(game_TID, "APA") == 0	// NTR-APAE PKMN Pearl
-		 || strcmp(game_TID, "CPU") == 0	// NTR-CPUE PKMN Platinum
-		 || strcmp(game_TID, "APY") == 0	// NTR-APYE Puyo Pop Fever
-		 || strcmp(game_TID, "AWH") == 0	// NTR-AWHE Bubble Bobble Double Shot
-		 || strcmp(game_TID, "AXB") == 0	// NTR-AXBJ Daigassou! Band Brothers DX
-		 || strcmp(game_TID, "A4U") == 0	// NTR-A4UJ Wi-Fi Taiou - Morita Shogi
-		 || strcmp(game_TID, "A8N") == 0	// NTR-A8NE Planet Puzzle League
-		 || strcmp(game_TID, "ABJ") == 0	// NTR-ABJE Harvest Moon DS - Island of Happiness
-		 || strcmp(game_TID, "ABN") == 0	// NTR-ABNE Bomberman Story DS
-		 || strcmp(game_TID, "ACL") == 0	// NTR-ACLE Custom Robo Arena
-		 || strcmp(game_TID, "ART") == 0	// NTR-ARTJ Shin Lucky Star Moe Drill - Tabidachi
-		 || strcmp(game_TID, "AVT") == 0	// NTR-AVTJ Kou Rate Ura Mahjong Retsuden Mukoubuchi - Goburei, Shuuryou desu ne
-		 || strcmp(game_TID, "AWY") == 0	// NTR-AWYJ Wi-Fi Taiou - Gensen Table Game DS
-		 || strcmp(game_TID, "AXJ") == 0	// NTR-AXJE Dungeon Explorer - Warriors of Ancient Arts
-		 || strcmp(game_TID, "AYK") == 0	// NTR-AYKJ Wi-Fi Taiou - Yakuman DS
-		 || strcmp(game_TID, "YB2") == 0	// NTR-YB2E Bomberman Land Touch! 2
-		 || strcmp(game_TID, "YB3") == 0	// NTR-YB3E Harvest Moon DS - Sunshine Islands
-		 || strcmp(game_TID, "YCH") == 0	// NTR-YCHJ Kousoku Card Battle - Card Hero
-		 || strcmp(game_TID, "YFE") == 0	// NTR-YFEE Fire Emblem - Shadow Dragon
-		 || strcmp(game_TID, "YGD") == 0	// NTR-YGDE Diary Girl
-		 || strcmp(game_TID, "YKR") == 0	// NTR-YKRJ Culdcept DS
-		 || strcmp(game_TID, "YRM") == 0	// NTR-YRME My Secret World by Imagine
-		 || strcmp(game_TID, "YW2") == 0	// NTR-YW2E Advance Wars - Days of Ruin
-		 || strcmp(game_TID, "AJU") == 0	// NTR-AJUJ Jump! Ultimate Stars
-		 || strcmp(game_TID, "ACZ") == 0	// NTR-ACZE Cars
-		 || strcmp(game_TID, "AHD") == 0	// NTR-AHDE Jam Sessions
-		 || strcmp(game_TID, "ANR") == 0	// NTR-ANRE Naruto - Saikyou Ninja Daikesshu 3
-		 || strcmp(game_TID, "YT3") == 0	// NTR-YT3E Tamagotchi Connection - Corner Shop 3
-		 || strcmp(game_TID, "AVI") == 0	// NTR-AVIJ Kodomo no Tame no Yomi Kikase - Ehon de Asobou 1-Kan
-		 || strcmp(game_TID, "AV2") == 0	// NTR-AV2J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 2-Kan
-		 || strcmp(game_TID, "AV3") == 0	// NTR-AV3J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 3-Kan
-		 || strcmp(game_TID, "AV4") == 0	// NTR-AV4J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 4-Kan
-		 || strcmp(game_TID, "AV5") == 0	// NTR-AV5J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 5-Kan
-		 || strcmp(game_TID, "AV6") == 0	// NTR-AV6J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 6-Kan
-		 || strcmp(game_TID, "YNZ") == 0	// NTR-YNZE Petz - Dogz Fashion
+		if (strcmp(romTid, "ABX") == 0	// NTR-ABXE Bomberman Land Touch!
+		 || strcmp(romTid, "YO9") == 0	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
+		 || strcmp(romTid, "ALH") == 0	// NTR-ALHE Flushed Away
+		 || strcmp(romTid, "ACC") == 0	// NTR-ACCE Cooking Mama
+		 || strcmp(romTid, "YCQ") == 0	// NTR-YCQE Cooking Mama 2 - Dinner with Friends
+		 || strcmp(romTid, "YYK") == 0	// NTR-YYKE Trauma Center - Under the Knife 2
+		 || strcmp(romTid, "AZW") == 0	// NTR-AZWE WarioWare - Touched!
+		 || strcmp(romTid, "AKA") == 0	// NTR-AKAE Rub Rabbits!, The
+		 || strcmp(romTid, "AN9") == 0	// NTR-AN9E Little Mermaid - Ariel's Undersea Adventure, The
+		 || strcmp(romTid, "AKE") == 0	// NTR-AKEJ Keroro Gunsou - Enshuu da Yo! Zenin Shuugou Part 2
+		 || strcmp(romTid, "YFS") == 0	// NTR-YFSJ Frogman Show - DS Datte, Shouganaijanai, The
+		 || strcmp(romTid, "YG8") == 0	// NTR-YG8E Yu-Gi-Oh! World Championship 2008
+		 || strcmp(romTid, "AY7") == 0	// NTR-AY7E Yu-Gi-Oh! World Championship 2007
+		 || strcmp(romTid, "YON") == 0	// NTR-YONJ Minna no DS Seminar - Kantan Ongakuryoku
+		 || strcmp(romTid, "A5H") == 0	// NTR-A5HE Interactive Storybook DS - Series 2
+		 || strcmp(romTid, "A5I") == 0	// NTR-A5IE Interactive Storybook DS - Series 3
+		 || strcmp(romTid, "AMH") == 0	// NTR-AMHE Metroid Prime Hunters
+		 || strcmp(romTid, "A3T") == 0	// NTR-A3TE Tak - The Great Juju Challenge
+		 || strcmp(romTid, "YBO") == 0	// NTR-YBOE Boogie
+		 || strcmp(romTid, "ADA") == 0	// NTR-ADAE PKMN Diamond
+		 || strcmp(romTid, "APA") == 0	// NTR-APAE PKMN Pearl
+		 || strcmp(romTid, "CPU") == 0	// NTR-CPUE PKMN Platinum
+		 || strcmp(romTid, "APY") == 0	// NTR-APYE Puyo Pop Fever
+		 || strcmp(romTid, "AWH") == 0	// NTR-AWHE Bubble Bobble Double Shot
+		 || strcmp(romTid, "AXB") == 0	// NTR-AXBJ Daigassou! Band Brothers DX
+		 || strcmp(romTid, "A4U") == 0	// NTR-A4UJ Wi-Fi Taiou - Morita Shogi
+		 || strcmp(romTid, "A8N") == 0	// NTR-A8NE Planet Puzzle League
+		 || strcmp(romTid, "ABJ") == 0	// NTR-ABJE Harvest Moon DS - Island of Happiness
+		 || strcmp(romTid, "ABN") == 0	// NTR-ABNE Bomberman Story DS
+		 || strcmp(romTid, "ACL") == 0	// NTR-ACLE Custom Robo Arena
+		 || strcmp(romTid, "ART") == 0	// NTR-ARTJ Shin Lucky Star Moe Drill - Tabidachi
+		 || strcmp(romTid, "AVT") == 0	// NTR-AVTJ Kou Rate Ura Mahjong Retsuden Mukoubuchi - Goburei, Shuuryou desu ne
+		 || strcmp(romTid, "AWY") == 0	// NTR-AWYJ Wi-Fi Taiou - Gensen Table Game DS
+		 || strcmp(romTid, "AXJ") == 0	// NTR-AXJE Dungeon Explorer - Warriors of Ancient Arts
+		 || strcmp(romTid, "AYK") == 0	// NTR-AYKJ Wi-Fi Taiou - Yakuman DS
+		 || strcmp(romTid, "YB2") == 0	// NTR-YB2E Bomberman Land Touch! 2
+		 || strcmp(romTid, "YB3") == 0	// NTR-YB3E Harvest Moon DS - Sunshine Islands
+		 || strcmp(romTid, "YCH") == 0	// NTR-YCHJ Kousoku Card Battle - Card Hero
+		 || strcmp(romTid, "YFE") == 0	// NTR-YFEE Fire Emblem - Shadow Dragon
+		 || strcmp(romTid, "YGD") == 0	// NTR-YGDE Diary Girl
+		 || strcmp(romTid, "YKR") == 0	// NTR-YKRJ Culdcept DS
+		 || strcmp(romTid, "YRM") == 0	// NTR-YRME My Secret World by Imagine
+		 || strcmp(romTid, "YW2") == 0	// NTR-YW2E Advance Wars - Days of Ruin
+		 || strcmp(romTid, "AJU") == 0	// NTR-AJUJ Jump! Ultimate Stars
+		 || strcmp(romTid, "ACZ") == 0	// NTR-ACZE Cars
+		 || strcmp(romTid, "AHD") == 0	// NTR-AHDE Jam Sessions
+		 || strcmp(romTid, "ANR") == 0	// NTR-ANRE Naruto - Saikyou Ninja Daikesshu 3
+		 || strcmp(romTid, "YT3") == 0	// NTR-YT3E Tamagotchi Connection - Corner Shop 3
+		 || strcmp(romTid, "AVI") == 0	// NTR-AVIJ Kodomo no Tame no Yomi Kikase - Ehon de Asobou 1-Kan
+		 || strcmp(romTid, "AV2") == 0	// NTR-AV2J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 2-Kan
+		 || strcmp(romTid, "AV3") == 0	// NTR-AV3J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 3-Kan
+		 || strcmp(romTid, "AV4") == 0	// NTR-AV4J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 4-Kan
+		 || strcmp(romTid, "AV5") == 0	// NTR-AV5J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 5-Kan
+		 || strcmp(romTid, "AV6") == 0	// NTR-AV6J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 6-Kan
+		 || strcmp(romTid, "YNZ") == 0	// NTR-YNZE Petz - Dogz Fashion
 		)
 		{
 			fifoSendValue32(FIFO_MAXMOD, 1); // Special setting (when found special gamecode)
