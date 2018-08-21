@@ -156,7 +156,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
-int runFile(configuration* conf) {
+int runNdsFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
@@ -372,7 +372,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (conf->status == 0) {
-		int err = runFile(conf);
+		int err = runNdsFile(conf);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 	} else {
