@@ -21,10 +21,6 @@
 
 #include <nds/ndstypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define is_aligned(POINTER, BYTE_COUNT) \
 	(((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
@@ -45,9 +41,5 @@ bool eepromPageErase(u32 dst);
 
 u32 cardId(void);
 bool cardRead(u32 dma, u32 src, void *dst, u32 len);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // CARDENGINE_ARM7_H

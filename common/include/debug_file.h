@@ -21,16 +21,8 @@
 
 #include "my_fat.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 u32 dbg_printf(const char* message);
 u32 dbg_hexa(u32 n);
 void enableDebug(aFile debugFileCluster);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // DEBUG_FILE_H

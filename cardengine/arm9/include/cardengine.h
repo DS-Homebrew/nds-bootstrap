@@ -21,19 +21,11 @@
 
 #include <nds/ndstypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*#define is_aligned(POINTER, BYTE_COUNT) \
     (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)*/
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0);
 
 void cacheFlush(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // CARDENGINE_ARM9_H

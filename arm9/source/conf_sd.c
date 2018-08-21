@@ -1,20 +1,15 @@
 #include <stdlib.h> // strtol
 //#include <stdio.h>
 //#include <nds.h>
-#include <cstring>
-#include <climits> // PATH_MAX
+#include <string.h>
+#include <limits.h> // PATH_MAX
 #include <nds/ndstypes.h>
 #include <nds/fifocommon.h>
 #include <nds/arm9/console.h>
-
-extern "C" {
 #include <nds/debug.h>
-#include "hex.h"
-}
-
 #include <fat.h>
-
 #include "minIni.h"
+#include "hex.h"
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "conf_sd.h"
@@ -44,12 +39,12 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "NDS_PATH")) {
 		// NDS path
-		conf->ndsPath = new char[strlen(value) + 1];
+		conf->ndsPath = (char*)malloc((strlen(value) + 1)*sizeof(char));
 		strcpy(conf->ndsPath, value);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "SAV_PATH")) {
 		// SAV path
-		conf->savPath = new char[strlen(value) + 1];
+		conf->savPath = (char*)malloc((strlen(value) + 1)*sizeof(char));
 		strcpy(conf->savPath, value);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LANGUAGE")) {
@@ -98,8 +93,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CHEAT_DATA")) {
 		// Cheat data
-		//std::vector<std::string> cheats;
-		//static std::vector<u32> cheat_data;
 		conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
 		conf->cheat_data_len = 0;
 		char* str = strdup(value);
@@ -119,7 +112,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 			printf(" ");
 
 			conf->cheat_data[conf->cheat_data_len] = strtoul(cheat, NULL, 16);
-			//cheat_data.push_back(strtoul(cheat, NULL, 16));
 
 			nocashMessage(tohex(conf->cheat_data[conf->cheat_data_len]));
 			printf(" ");
@@ -129,7 +121,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 			cheat = strtok(NULL, " ");
 		}
 		realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
-		//conf->cheat_data = (u32*)&cheat_data[0];
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BACKLIGHT_MODE")) {
 		// Backlight mode
@@ -161,7 +152,6 @@ int loadFromSD(configuration* conf) {
 
 	conf->argc = 0;
 	conf->argv = (const char**)malloc(ARG_MAX);
-	//std::vector<char*> argv;
 	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
 		FILE* argfile = fopen(conf->ndsPath, "rb");
 		char str[PATH_MAX];
@@ -180,22 +170,17 @@ int loadFromSD(configuration* conf) {
 			while (pstr != NULL) {
 				conf->argv[conf->argc] = strdup(pstr); //strcpy(conf->argv[conf->argc], pstr);
 				++conf->argc;
-				//argv.push_back(strdup(pstr));
 
 				pstr = strtok(NULL, seps);
 			}
 		}
 		fclose(argfile);
 		conf->ndsPath = strdup(conf->argv[0]);
-		//conf->ndsPath = argv.at(0);
 	} else {
 		conf->argv[0] = strdup(conf->ndsPath); //strcpy(conf->argv[0], conf->ndsPath);
 		conf->argc = 1; //++conf->argc;
-		//argv.push_back(strdup(conf->ndsPath));
 	}
 	realloc(conf->argv, conf->argc*sizeof(const char*));
-	//conf->argc = argv.size();
-	//conf->argv = (const char**)&argv[0];
 
 	return 0;
 }
