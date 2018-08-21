@@ -358,7 +358,14 @@ void runFile(
 }
 
 int main(int argc, char** argv) {
-	loadFromSD();
+	if (access("fat:/", F_OK) == 0) {
+		consoleDemoInit();
+		printf("This edition of nds-bootstrap\n");
+		printf("can only be used on the\n");
+		printf("SD card.\n");
+	} else {
+		loadFromSD();
+	}
 
 	stop();
 

@@ -65,14 +65,6 @@ void loadFromSD() {
 	}
 	nocashMessage("fatInitDefault");
 
-	if (access("fat:/", F_OK) == 0) {
-		consoleDemoInit();
-		printf("This edition of nds-bootstrap\n");
-		printf("can only be used on the\n");
-		printf("SD card.\n");
-		return; //stop();
-	}
-
 	CIniFile bootstrapini("sd:/_nds/nds-bootstrap.ini");
 
 	bool debug          = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0);
