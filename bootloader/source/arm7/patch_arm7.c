@@ -73,7 +73,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (swiHaltOffset) {
 		// Patch
 		u32* swiHaltPatch = (usesThumb ? ce7->patches->jThumb_newSwiHalt : ce7->patches->j_newSwiHalt); // SDK 5
-		//if (usesThumb) {
+		if (usesThumb) {
 			/*
             // Find the relocation signature
             u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
@@ -90,9 +90,9 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			const u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
 			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
             ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
-		//} else {
+		} else {
 			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
-		//}
+		}
 	}
 }
 
