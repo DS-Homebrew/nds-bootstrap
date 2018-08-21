@@ -18,30 +18,25 @@
 
 ------------------------------------------------------------------*/
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdarg>
-#include <climits> // PATH_MAX
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <limits.h> // PATH_MAX
 #include <unistd.h>
 #include <sys/stat.h>
 #include <nds/ndstypes.h>
 #include <nds/arm9/input.h>
 #include <nds/fifocommon.h>
 #include <nds/arm9/console.h>
-
-extern "C" {
 #include <nds/system.h>
 #include <nds/debug.h>
-}
 
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
 
 #include "load_bin.h"
-
-//using namespace std;
 
 /* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
