@@ -7,7 +7,7 @@
 
 typedef struct configuration {
     bool debug;
-	char* filename; // ndsPath
+	char* ndsPath;
 	char* savPath;
 	u32 saveSize;
 	u32 language;

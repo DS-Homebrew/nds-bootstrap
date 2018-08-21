@@ -120,7 +120,7 @@ static void myFIFOValue32Handler(u32 value, void* data) {
 
 static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
-	dbg_printf("filename: %s\n", conf->filename);
+	dbg_printf("ndsPath: %s\n", conf->ndsPath);
 	dbg_printf("savPath: %s\n", conf->savPath);
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %lX\n", conf->language);
@@ -179,7 +179,7 @@ static int runNdsFile(configuration* conf) {
 
 	// adjust TSC[1:26h] and TSC[1:27h]
 	// for certain gamecodes
-	/*FILE* f_nds_file = fopen(filename, "rb");
+	/*FILE* f_nds_file = fopen(conf->ndsPath, "rb");
 
 	char romTid[5];
 	fseek(f_nds_file, offsetof(sNDSHeaderTitleCodeOnly, gameCode), SEEK_SET);
@@ -287,12 +287,12 @@ static int runNdsFile(configuration* conf) {
 
 	debugConf(conf);
 
-	if (strcasecmp(conf->filename + strlen(conf->filename) - 4, ".nds") != 0 || conf->argc == 0) {
+	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0 || conf->argc == 0) {
 		dbg_printf("No NDS file specified\n");
 		return -1;
 	}
 
-	dbg_printf("Running %s with %d parameters\n", conf->filename, conf->argc);
+	dbg_printf("Running %s with %d parameters\n", conf->ndsPath, conf->argc);
 	switch(conf->backlightMode) {
 		case 0:
 		default:
@@ -320,7 +320,7 @@ static int runNdsFile(configuration* conf) {
 	int pathLen;
 	//const char* args[1];
 
-	if (stat(conf->filename, &st) < 0) {
+	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
 	}
 	
@@ -334,7 +334,7 @@ static int runNdsFile(configuration* conf) {
 			return -3;
 		}
 		pathLen = strlen(filePath);
-		strcpy(filePath + pathLen, conf->filename);
+		strcpy(filePath + pathLen, conf->ndsPath);
 		//args[0] = filePath;
 		//conf->argv = args;
 		memset(conf->argv, 0, conf->argc*sizeof(const char*));

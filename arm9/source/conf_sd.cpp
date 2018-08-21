@@ -42,9 +42,9 @@ int loadFromSD(configuration* conf) {
 
 	conf->debug          = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "DEBUG", 0);
 
-	std::string filenameStr = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
-	conf->filename = new char[filenameStr.length() + 1];
-	std::strcpy(conf->filename, filenameStr.c_str());
+	std::string ndsPathStr = bootstrapini.GetString("NDS-BOOTSTRAP", "NDS_PATH", "");
+	conf->ndsPath = new char[ndsPathStr.length() + 1];
+	std::strcpy(conf->ndsPath, ndsPathStr.c_str());
 
 	std::string savPathStr = bootstrapini.GetString("NDS-BOOTSTRAP", "SAV_PATH", "");
 	conf->savPath = new char[savPathStr.length() + 1];
@@ -67,8 +67,8 @@ int loadFromSD(configuration* conf) {
 	//conf->argv = (const char**)malloc(ARG_MAX*sizeof(const char*));
 	conf->argv = (const char**)malloc(256*sizeof(const char*));
 	//std::vector<char*> argv;
-	if (strcasecmp(conf->filename + strlen(conf->filename) - 5, ".argv") == 0) {
-		FILE* argfile = fopen(conf->filename, "rb");
+	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
+		FILE* argfile = fopen(conf->ndsPath, "rb");
 		char str[PATH_MAX];
 		char* pstr;
 		const char* seps = "\n\r\t ";
@@ -91,12 +91,12 @@ int loadFromSD(configuration* conf) {
 			}
 		}
 		fclose(argfile);
-		//conf->filename = strdup(conf->argv[0]);
-		//conf->filename = argv.at(0);
+		//conf->ndsPath = strdup(conf->argv[0]);
+		//conf->ndsPath = argv.at(0);
 	} else {
-		conf->argv[0] = strdup(conf->filename); //strcpy(conf->argv[0], conf->filename);
+		conf->argv[0] = strdup(conf->ndsPath); //strcpy(conf->argv[0], conf->ndsPath);
 		conf->argc = 1; //++conf->argc;
-		//argv.push_back(strdup(conf->filename));
+		//argv.push_back(strdup(conf->ndsPath));
 	}
 	realloc(conf->argv, conf->argc*sizeof(const char*));
 	//conf->argc = argv.size();
