@@ -63,9 +63,8 @@ int loadFromSD(configuration* conf) {
 	conf->asyncPrefetch  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
 	conf->logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
 
-	//conf->argc = 0;
-	//conf->argv = (const char**)malloc(ARG_MAX*sizeof(const char*));
-	conf->argv = (const char**)malloc(256*sizeof(const char*));
+	conf->argc = 0;
+	conf->argv = (const char**)malloc(ARG_MAX);
 	//std::vector<char*> argv;
 	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
 		FILE* argfile = fopen(conf->ndsPath, "rb");
