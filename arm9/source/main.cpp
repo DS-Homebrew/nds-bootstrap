@@ -57,7 +57,7 @@ static inline const char* btoa(bool x) {
 	return x ? "true" : "false";
 }
 
-int dbg_printf(const char* format, ...) { // static int...
+static int dbg_printf(const char* format, ...) { // static int...
 	if (!debug) {
 		return 0;
 	}
@@ -76,13 +76,13 @@ int dbg_printf(const char* format, ...) { // static int...
 	return ret;
 }
 
-void stop(void) {
+static void stop(void) {
 	while (1) {
 		swiWaitForVBlank();
 	}
 }
 
-void dopause() {
+static void dopause() {
 	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
@@ -93,13 +93,13 @@ void dopause() {
 	scanKeys();
 }
 
-void getSFCG_ARM9() {
+static void getSFCG_ARM9() {
 	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
 	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
 	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
-void getSFCG_ARM7() {
+static void getSFCG_ARM7() {
 	//iprintf("SCFG_ROM ARM7\n");
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_ROM);\n");
@@ -118,7 +118,7 @@ void getSFCG_ARM7() {
 	fifoSendValue32(FIFO_USER_01, (long unsigned int)&REG_SCFG_EXT);
 }
 
-void myFIFOValue32Handler(u32 value, void* data) {
+static void myFIFOValue32Handler(u32 value, void* data) {
 	nocashMessage("myFIFOValue32Handler\n");
 	iprintf("ARM7 data %lX\n", value);
 }
@@ -150,7 +150,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
-int runNdsFile(configuration* conf) {
+static int runNdsFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
