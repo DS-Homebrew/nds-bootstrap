@@ -18,8 +18,6 @@ extern "C" {
 #include "configuration.h"
 #include "conf_sd.h"
 
-int dbg_printf(const char* format, ...);
-
 off_t getSaveSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
@@ -99,10 +97,10 @@ void loadFromSD(configuration* conf) {
 	bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
 	conf->cheat_data_len = cheats.size();
 	if (conf->cheat_data_len > 0) {
-		dbg_printf("Cheat data present\n");
+		printf("Cheat data present\n");
 		
 		if (!checkCheatDataLen(conf->cheat_data_len)) {
-			dbg_printf("Cheat data size limit reached, the cheats are ignored!\n");
+			printf("Cheat data size limit reached, the cheats are ignored!\n");
 			//cheats.clear();
 			conf->cheat_data_len = 0;
 		}
@@ -110,14 +108,14 @@ void loadFromSD(configuration* conf) {
 		for (size_t i = 0; i < conf->cheat_data_len; i++) {
 			const char* cheat = cheats[i].c_str();
 			
-			dbg_printf(cheat);
+			printf(cheat);
 			nocashMessage(cheat);
-			dbg_printf(" ");
+			printf(" ");
 
 			conf->cheat_data[i] = strtoul(cheat, NULL, 16);
 			
 			nocashMessage(tohex(conf->cheat_data[i]));
-			dbg_printf(" "); 
+			printf(" "); 
 		}
 	}
 
