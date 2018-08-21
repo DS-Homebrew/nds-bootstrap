@@ -30,15 +30,13 @@ off_t getSaveSize(const char* path) {
 	return fsize;
 }
 
-void loadFromSD(configuration* conf) {
+int loadFromSD(configuration* conf) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
 		printf("SD init failed!\n");
-		return;
+		return -1;
 	}
 	nocashMessage("fatInitDefault");
-
-	conf->status = 0;
 
 	CIniFile bootstrapini("sd:/_nds/nds-bootstrap.ini");
 
@@ -121,4 +119,6 @@ void loadFromSD(configuration* conf) {
 
 	conf->backlightMode = bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
 	conf->boostCpu      = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0);
+
+	return 0;
 }

@@ -124,7 +124,6 @@ static void myFIFOValue32Handler(u32 value, void* data) {
 }
 
 static inline void debugConf(configuration* conf) {
-	dbg_printf("status: %lX\n", conf->status);
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("filename: %s\n", conf->filename);
 	dbg_printf("savPath: %s\n", conf->savPath);
@@ -355,23 +354,30 @@ static int runNdsFile(configuration* conf) {
 
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
-	conf->status = -1;
 	conf->initDisc = true;
 	conf->dldiPatchNds = true;
+
+	int status = 0;
+
 	if (access("fat:/", F_OK) == 0) {
 		consoleDemoInit();
 		printf("This edition of nds-bootstrap\n");
 		printf("can only be used on the\n");
 		printf("SD card.\n");
+		status = -1;
 	} else {
-		loadFromSD(conf);
+		status = loadFromSD(conf);
 	}
 
-	if (conf->status == 0) {
-		int err = runNdsFile(conf);
-		powerOff(PM_BACKLIGHT_TOP);
-		dbg_printf("Start failed. Error %i\n", err);
-	} else {
+	if (status == 0) {
+		status = runNdsFile(conf);
+		if (status != 0) {
+			powerOff(PM_BACKLIGHT_TOP);
+			dbg_printf("Start failed. Error %i\n", status);
+		}
+	}
+
+	if (status != 0) {
 		stop();
 	}
 

@@ -5,8 +5,7 @@
 #include "cheat_engine.h"
 
 typedef struct configuration {
-    u32 status;
-	bool debug;
+    bool debug;
 	char* filename; // ndsPath
 	char* savPath;
 	u32 saveSize;
