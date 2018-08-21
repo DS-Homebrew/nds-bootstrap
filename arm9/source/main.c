@@ -376,6 +376,12 @@ int main(int argc, char** argv) {
 	}
 
 	if (status != 0) {
+		free(conf->ndsPath);
+		free(conf->savPath);
+		free(conf->argv);
+		free(conf->cheat_data);
+		free(conf);
+		
 		stop();
 	}
 
