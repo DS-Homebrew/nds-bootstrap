@@ -22,52 +22,16 @@
 #ifndef NDS_LOADER_ARM9_H
 #define NDS_LOADER_ARM9_H
 
+#include "configuration.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define LOAD_DEFAULT_NDS 0
 
-int runNds(
-	const void* loader,
-	u32 loaderSize,
-	u32 cluster,
-	u32 saveCluster,
-	u32 saveSize,
-	u32 language,
-	bool dsiMode,
-	u32 donorSdkVer,
-	u32 patchMpuRegion,
-	u32 patchMpuSize,
-	u32 consoleModel,
-	u32 loadingScreen,
-	u32 romread_LED,
-	bool gameSoftReset,
-	bool asyncPrefetch,
-	bool logging,
-	bool initDisc,
-	bool dldiPatchNds,
-	int argc, const char** argv,
-	u32* cheat_data, u32 cheat_data_len
-);
-int runNdsFile(
-	const char* filename,
-	const char* savename,
-	u32 saveSize,
-	u32 language,
-	bool dsiMode, // SDK 5
-	u32 donorSdkVer,
-	u32 patchMpuRegion,
-	u32 patchMpuSize,
-	u32 consoleModel,
-	u32 loadingScreen,
-	u32 romread_LED,
-	bool gameSoftReset,
-	bool asyncPrefetch,
-	bool logging,
-	int argc, const char** argv,
-	u32* cheat_data, u32 cheat_data_len
-);
+int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
+int runNdsFile(configuration* conf);
 
 #ifdef __cplusplus
 }

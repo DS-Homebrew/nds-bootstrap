@@ -40,6 +40,7 @@ extern "C" {
 #include <fat.h>
 
 #include "cheat_engine.h"
+#include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "load_sd.h"
 
@@ -54,6 +55,10 @@ extern "C" {
 //bool logging = false;
 
 static bool debug = false;
+
+static inline const char* btoa(bool x) {
+	return x ? "true" : "false";
+}
 
 int dbg_printf(const char* format, ...) { // static int...
 	if (!debug) {
@@ -92,9 +97,9 @@ void dopause() {
 }
 
 void getSFCG_ARM9() {
-	iprintf("SCFG_ROM ARM9 %x\n", REG_SCFG_ROM); 
-	iprintf("SCFG_CLK ARM9 %x\n", REG_SCFG_CLK); 
-	//iprintf("SCFG_EXT ARM9 %x\n", REG_SCFG_EXT); 
+	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
+	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
+	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
 void getSFCG_ARM7() {
@@ -118,31 +123,12 @@ void getSFCG_ARM7() {
 
 void myFIFOValue32Handler(u32 value, void* data) {
 	nocashMessage("myFIFOValue32Handler\n");
-	iprintf("ARM7 data %lx\n", value);
+	iprintf("ARM7 data %lX\n", value);
 }
 
-void runFile(
-	bool debug_local,
-	std::string filename,
-	std::string savPath,
-	u32 saveSize,
-	u32 language,
-	bool dsiMode, // SDK 5
-	u32 donorSdkVer,
-	u32 patchMpuRegion,
-	u32 patchMpuSize,
-	u32 consoleModel,
-	u32 loadingScreen,
-	u32 romread_LED,
-	bool boostCpu,
-	bool gameSoftReset,
-	bool asyncPrefetch,
-	bool logging,
-	u32* cheat_data, u32 cheat_data_len,
-	u32 backlightMode
-) {
+void runFile(configuration* conf) {
 	// Debug
-	debug = debug_local;
+	debug = conf->debug;
 	if (debug) {
 		powerOff(PM_BACKLIGHT_TOP);
 		consoleDemoInit();
@@ -158,7 +144,7 @@ void runFile(
 	}
 
 	// ROM read LED
-	switch(romread_LED) {
+	switch(conf->romread_LED) {
 		case 0:
 		default:
 			break;
@@ -252,7 +238,7 @@ void runFile(
 	}*/
 
 	// Boost CPU
-	if (boostCpu) {
+	if (conf->boostCpu) {
 		dbg_printf("CPU boosted\n");
 		// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
 	} else {
@@ -264,7 +250,7 @@ void runFile(
 	fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
-	if (logging) {
+	if (conf->logging) {
 		static FILE* loggingFile;
 		loggingFile = fopen("sd:/NDSBTSRP.LOG", "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
@@ -281,41 +267,36 @@ void runFile(
 		remove("sd:/NDSBTSRP.LOG");
 	}
 
-	dbg_printf("Running %s\n", filename.c_str());
+	dbg_printf("status: %lX\n", conf->status);
+	dbg_printf("debug: %s\n", btoa(conf->debug));
+	dbg_printf("filename: %s\n", conf->filename);
+	dbg_printf("savPath: %s\n", conf->savPath);
+	dbg_printf("saveSize: %lX\n", conf->saveSize);
+	dbg_printf("language: %lX\n", conf->language);
+	dbg_printf("dsiMode: %s\n", btoa(conf->dsiMode));
+	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
+	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
+	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
+	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
+	dbg_printf("loadingScreen: %lX\n", conf->loadingScreen);
+	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
+	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
+	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
+	dbg_printf("asyncPrefetch: %s\n", btoa(conf->asyncPrefetch));
+	dbg_printf("logging: %s\n", btoa(conf->logging));
+	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
+	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
+	dbg_printf("argc: %lX\n", conf->argc);
+	//const char** argv;
+	//u32 cheat_data[CHEAT_DATA_MAX_LEN];
+	dbg_printf("cheat_data_len: %lX\n", conf->cheat_data_len);
+	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 
-
-	std::vector<char*> argarray;
-
-	if (strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
-		FILE* argfile = fopen(filename.c_str(), "rb");
-		char str[PATH_MAX], *pstr;
-		const char seps[] = "\n\r\t ";
-
-		while (fgets(str, PATH_MAX, argfile)) {
-			// Find comment and end string there
-			if ((pstr = strchr(str, '#'))) {
-				*pstr = '\0';
-			}
-
-			// Tokenize arguments
-			pstr = strtok(str, seps);
-
-			while (pstr != NULL) {
-				argarray.push_back(strdup(pstr));
-				pstr= strtok(NULL, seps);
-			}
-		}
-		fclose(argfile);
-		filename = argarray.at(0);
-	} else {
-		argarray.push_back(strdup(filename.c_str()));
-	}
-
-	if (strcasecmp(filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0) {
+	if (strcasecmp(conf->filename + strlen(conf->filename) - 4, ".nds") != 0 || conf->argc == 0) {
 		dbg_printf("No NDS file specified\n");
 	} else {
-		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		switch(backlightMode) {
+		dbg_printf("Running %s with %d parameters\n", conf->filename, conf->argc);
+		switch(conf->backlightMode) {
 			case 0:
 			default:
 				powerOn(PM_BACKLIGHT_TOP);
@@ -334,40 +315,31 @@ void runFile(
 				powerOff(PM_BACKLIGHT_BOTTOM);
 				break;
 		}
-		int err = runNdsFile(
-			argarray[0],
-			strdup(savPath.c_str()),
-			saveSize,
-			language,
-			dsiMode, // SDK 5
-			donorSdkVer,
-			patchMpuRegion,
-			patchMpuSize,
-			consoleModel,
-			loadingScreen,
-			romread_LED,
-			gameSoftReset,
-			asyncPrefetch,
-			logging,
-			argarray.size(), (const char**)&argarray[0], 
-			cheat_data, cheat_data_len
-		);
+		int err = runNdsFile(conf);
 		powerOff(PM_BACKLIGHT_TOP);
 		dbg_printf("Start failed. Error %i\n", err);
 	}
 }
 
 int main(int argc, char** argv) {
+	configuration* conf = (configuration*)malloc(sizeof(configuration));
+	conf->status = -1;
+	conf->initDisc = true;
+	conf->dldiPatchNds = true;
 	if (access("fat:/", F_OK) == 0) {
 		consoleDemoInit();
 		printf("This edition of nds-bootstrap\n");
 		printf("can only be used on the\n");
 		printf("SD card.\n");
 	} else {
-		loadFromSD();
+		loadFromSD(conf);
 	}
 
-	stop();
+	if (conf->status == 0) {
+		runFile(conf);
+	} else {
+		stop();
+	}
 
 	return 0;
 }

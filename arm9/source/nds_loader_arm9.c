@@ -33,6 +33,7 @@
 #include <fat.h>
 
 #include "hex.h"
+#include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "locations.h"
 #include "load_crt0.h"
@@ -203,28 +204,7 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	return true;
 }
 
-int runNds(
-	const void* loader,
-	u32 loaderSize,
-	u32 cluster,
-	u32 saveCluster,
-	u32 saveSize,
-	u32 language,
-	bool dsiMode,
-	u32 donorSdkVer,
-	u32 patchMpuRegion,
-	u32 patchMpuSize,
-	u32 consoleModel,
-	u32 loadingScreen,
-	u32 romread_LED,
-	bool gameSoftReset,
-	bool asyncPrefetch,
-	bool logging,
-	bool initDisc,
-	bool dldiPatchNds,
-	int argc, const char** argv,
-	u32* cheat_data, u32 cheat_data_len
-) {
+int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -239,26 +219,26 @@ int runNds(
 	// Set the parameters for the loader
 
 	lc0->storedFileCluster = cluster;
-	lc0->initDisc = initDisc;
-	lc0->wantToPatchDLDI = dldiPatchNds;
+	lc0->initDisc          = conf->initDisc;
+	lc0->wantToPatchDLDI   = conf->dldiPatchNds;
 
-	loadArgs(argc, argv);
+	loadArgs(conf->argc, conf->argv);
 
 	lc0->saveFileCluster = saveCluster;
-	lc0->saveSize        = saveSize;
-	lc0->language        = language;
-	lc0->dsiMode         = dsiMode; // SDK 5
-	lc0->donorSdkVer     = donorSdkVer;
-	lc0->patchMpuRegion  = patchMpuRegion;
-	lc0->patchMpuSize    = patchMpuSize;
-	lc0->consoleModel    = consoleModel;
-	lc0->loadingScreen   = loadingScreen;
-	lc0->romread_LED     = romread_LED;
-	lc0->gameSoftReset   = gameSoftReset;
-	lc0->asyncPrefetch   = asyncPrefetch;
-	lc0->logging         = logging;
+	lc0->saveSize        = conf->saveSize;
+	lc0->language        = conf->language;
+	lc0->dsiMode         = conf->dsiMode; // SDK 5
+	lc0->donorSdkVer     = conf->donorSdkVer;
+	lc0->patchMpuRegion  = conf->patchMpuRegion;
+	lc0->patchMpuSize    = conf->patchMpuSize;
+	lc0->consoleModel    = conf->consoleModel;
+	lc0->loadingScreen   = conf->loadingScreen;
+	lc0->romread_LED     = conf->romread_LED;
+	lc0->gameSoftReset   = conf->gameSoftReset;
+	lc0->asyncPrefetch   = conf->asyncPrefetch;
+	lc0->logging         = conf->logging;
 
-	loadCheatData(cheat_data, cheat_data_len);
+	loadCheatData(conf->cheat_data, conf->cheat_data_len);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);
@@ -287,24 +267,7 @@ int runNds(
 	return true;
 }
 
-int runNdsFile(
-	const char* filename,
-	const char* savename,
-	u32 saveSize,
-	u32 language,
-	bool dsiMode, // SDK 5
-	u32 donorSdkVer,
-	u32 patchMpuRegion,
-	u32 patchMpuSize,
-	u32 consoleModel,
-	u32 loadingScreen,
-	u32 romread_LED,
-	bool gameSoftReset,
-	bool asyncPrefetch,
-	bool logging,
-	int argc, const char** argv,
-	u32* cheat_data, u32 cheat_data_len
-) {
+int runNdsFile(configuration* conf) {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
@@ -312,48 +275,27 @@ int runNdsFile(
 	int pathLen;
 	const char* args[1];
 
-	if (stat(filename, &st) < 0) {
+	if (stat(conf->filename, &st) < 0) {
 		return 1;
 	}
 	
-	if (stat(savename, &stSav) >= 0) {
+	if (stat(conf->savPath, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
 	}
 	
-	if (argc <= 0 || !argv) {
+	if (conf->argc <= 0 || !conf->argv) {
 		// Construct a command line if we weren't supplied with one
 		if (!getcwd(filePath, PATH_MAX)) {
 			return 2;
 		}
 		pathLen = strlen(filePath);
-		strcpy(filePath + pathLen, filename);
+		strcpy(filePath + pathLen, conf->filename);
 		args[0] = filePath;
-		argv = args;
+		conf->argv = args;
 	}
 
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	return runNds(
-		load_bin,
-		load_bin_size,
-		st.st_ino,
-		clusterSav,
-		saveSize,
-		language,
-		dsiMode, // SDK 5
-		donorSdkVer,
-		patchMpuRegion,
-		patchMpuSize,
-		consoleModel,
-		loadingScreen,
-		romread_LED,
-		gameSoftReset,
-		asyncPrefetch,
-		logging,
-		true,
-		true,
-		argc, argv,
-		cheat_data, cheat_data_len
-	);
+	return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
 }

@@ -815,7 +815,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 
 	dbg_printf("findCardIdStartOffset:\n");
 
-	u32* cardIdStartOffset = 0;
+	u32* cardIdStartOffset = NULL;
 
 	if (moduleParams->sdk_version > 0x5000000) {
 		// SDK 5
