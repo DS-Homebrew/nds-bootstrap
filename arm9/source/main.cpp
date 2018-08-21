@@ -42,7 +42,7 @@ extern "C" {
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
-#include "load_sd.h"
+#include "conf_sd.h"
 
 //using namespace std;
 
