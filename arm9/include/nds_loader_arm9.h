@@ -31,7 +31,6 @@ extern "C" {
 #define LOAD_DEFAULT_NDS 0
 
 int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
-int runNdsFile(configuration* conf);
 
 #ifdef __cplusplus
 }

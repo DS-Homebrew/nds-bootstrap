@@ -37,12 +37,15 @@ extern "C" {
 #include "hex.h"
 }
 
+#include <sys/stat.h>
 #include <fat.h>
 
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
+
+#include "load_bin.h"
 
 //using namespace std;
 
@@ -153,7 +156,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
-void runFile(configuration* conf) {
+int runFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
@@ -298,6 +301,7 @@ void runFile(configuration* conf) {
 
 	if (strcasecmp(conf->filename + strlen(conf->filename) - 4, ".nds") != 0 || conf->argc == 0) {
 		dbg_printf("No NDS file specified\n");
+		return 3;
 	} else {
 		dbg_printf("Running %s with %d parameters\n", conf->filename, conf->argc);
 		switch(conf->backlightMode) {
@@ -319,9 +323,37 @@ void runFile(configuration* conf) {
 				powerOff(PM_BACKLIGHT_BOTTOM);
 				break;
 		}
-		int err = runNdsFile(conf);
-		powerOff(PM_BACKLIGHT_TOP);
-		dbg_printf("Start failed. Error %i\n", err);
+
+		struct stat st;
+		struct stat stSav;
+		u32 clusterSav = 0;
+		char filePath[PATH_MAX];
+		int pathLen;
+		const char* args[1];
+
+		if (stat(conf->filename, &st) < 0) {
+			return 1;
+		}
+		
+		if (stat(conf->savPath, &stSav) >= 0) {
+			clusterSav = stSav.st_ino;
+		}
+		
+		if (conf->argc <= 0 || !conf->argv) {
+			// Construct a command line if we weren't supplied with one
+			if (!getcwd(filePath, PATH_MAX)) {
+				return 2;
+			}
+			pathLen = strlen(filePath);
+			strcpy(filePath + pathLen, conf->filename);
+			args[0] = filePath;
+			conf->argv = args;
+		}
+
+		//bool havedsiSD = false;
+		//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
+
+		return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
 	}
 }
 
@@ -340,7 +372,9 @@ int main(int argc, char** argv) {
 	}
 
 	if (conf->status == 0) {
-		runFile(conf);
+		int err = runFile(conf);
+		powerOff(PM_BACKLIGHT_TOP);
+		dbg_printf("Start failed. Error %i\n", err);
 	} else {
 		stop();
 	}

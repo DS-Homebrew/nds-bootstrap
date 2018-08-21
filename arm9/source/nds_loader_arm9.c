@@ -39,8 +39,6 @@
 #include "load_crt0.h"
 #include "cardengine_header_arm7.h"
 
-#include "load_bin.h"
-
 //#define memcpy __builtin_memcpy
 
 //#define LCDC_BANK_C (u16*)0x06840000
@@ -265,37 +263,4 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, con
 	swiSoftReset();
 
 	return true;
-}
-
-int runNdsFile(configuration* conf) {
-	struct stat st;
-	struct stat stSav;
-	u32 clusterSav = 0;
-	char filePath[PATH_MAX];
-	int pathLen;
-	const char* args[1];
-
-	if (stat(conf->filename, &st) < 0) {
-		return 1;
-	}
-	
-	if (stat(conf->savPath, &stSav) >= 0) {
-		clusterSav = stSav.st_ino;
-	}
-	
-	if (conf->argc <= 0 || !conf->argv) {
-		// Construct a command line if we weren't supplied with one
-		if (!getcwd(filePath, PATH_MAX)) {
-			return 2;
-		}
-		pathLen = strlen(filePath);
-		strcpy(filePath + pathLen, conf->filename);
-		args[0] = filePath;
-		conf->argv = args;
-	}
-
-	//bool havedsiSD = false;
-	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
-
-	return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
 }
