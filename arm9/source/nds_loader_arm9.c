@@ -198,7 +198,7 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	return true;
 }
 
-int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
+void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -257,6 +257,4 @@ int runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, con
 	// swi soft reset
 	nocashMessage("swiSoftReset");
 	swiSoftReset();
-
-	return true;
 }

@@ -295,60 +295,62 @@ static int runNdsFile(configuration* conf) {
 
 	if (strcasecmp(conf->filename + strlen(conf->filename) - 4, ".nds") != 0 || conf->argc == 0) {
 		dbg_printf("No NDS file specified\n");
-		return 3;
-	} else {
-		dbg_printf("Running %s with %d parameters\n", conf->filename, conf->argc);
-		switch(conf->backlightMode) {
-			case 0:
-			default:
-				powerOn(PM_BACKLIGHT_TOP);
-				//powerOn(PM_BACKLIGHT_BOTTOM);
-				break;
-			case 1:
-				powerOn(PM_BACKLIGHT_TOP);
-				powerOff(PM_BACKLIGHT_BOTTOM);
-				break;
-			case 2:
-				powerOff(PM_BACKLIGHT_TOP);
-				powerOn(PM_BACKLIGHT_BOTTOM);
-				break;
-			case 3:
-				powerOff(PM_BACKLIGHT_TOP);
-				powerOff(PM_BACKLIGHT_BOTTOM);
-				break;
-		}
-
-		struct stat st;
-		struct stat stSav;
-		u32 clusterSav = 0;
-		char filePath[PATH_MAX];
-		int pathLen;
-		const char* args[1];
-
-		if (stat(conf->filename, &st) < 0) {
-			return 1;
-		}
-		
-		if (stat(conf->savPath, &stSav) >= 0) {
-			clusterSav = stSav.st_ino;
-		}
-		
-		if (conf->argc <= 0 || !conf->argv) {
-			// Construct a command line if we weren't supplied with one
-			if (!getcwd(filePath, PATH_MAX)) {
-				return 2;
-			}
-			pathLen = strlen(filePath);
-			strcpy(filePath + pathLen, conf->filename);
-			args[0] = filePath;
-			conf->argv = args;
-		}
-
-		//bool havedsiSD = false;
-		//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
-
-		return runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
+		return -1;
 	}
+
+	dbg_printf("Running %s with %d parameters\n", conf->filename, conf->argc);
+	switch(conf->backlightMode) {
+		case 0:
+		default:
+			powerOn(PM_BACKLIGHT_TOP);
+			//powerOn(PM_BACKLIGHT_BOTTOM);
+			break;
+		case 1:
+			powerOn(PM_BACKLIGHT_TOP);
+			powerOff(PM_BACKLIGHT_BOTTOM);
+			break;
+		case 2:
+			powerOff(PM_BACKLIGHT_TOP);
+			powerOn(PM_BACKLIGHT_BOTTOM);
+			break;
+		case 3:
+			powerOff(PM_BACKLIGHT_TOP);
+			powerOff(PM_BACKLIGHT_BOTTOM);
+			break;
+	}
+
+	struct stat st;
+	struct stat stSav;
+	u32 clusterSav = 0;
+	char filePath[PATH_MAX];
+	int pathLen;
+	const char* args[1];
+
+	if (stat(conf->filename, &st) < 0) {
+		return -2;
+	}
+	
+	if (stat(conf->savPath, &stSav) >= 0) {
+		clusterSav = stSav.st_ino;
+	}
+	
+	if (conf->argc <= 0 || !conf->argv) {
+		// Construct a command line if we weren't supplied with one
+		if (!getcwd(filePath, PATH_MAX)) {
+			return -3;
+		}
+		pathLen = strlen(filePath);
+		strcpy(filePath + pathLen, conf->filename);
+		args[0] = filePath;
+		conf->argv = args;
+	}
+
+	//bool havedsiSD = false;
+	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
+
+	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
+
+	return 0;
 }
 
 int main(int argc, char** argv) {
