@@ -18,14 +18,13 @@
 
 ------------------------------------------------------------------*/
 
-//#include <stdio.h>
-//#include <nds.h>
-#include <string>
-#include <vector>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cstdarg>
-#include <climits>
+#include <climits> // PATH_MAX
 #include <unistd.h>
+#include <sys/stat.h>
 #include <nds/ndstypes.h>
 #include <nds/arm9/input.h>
 #include <nds/fifocommon.h>
@@ -34,13 +33,8 @@
 extern "C" {
 #include <nds/system.h>
 #include <nds/debug.h>
-#include "hex.h"
 }
 
-#include <sys/stat.h>
-#include <fat.h>
-
-#include "cheat_engine.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
