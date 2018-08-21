@@ -82,7 +82,7 @@ static void stop(void) {
 	}
 }
 
-static void dopause() {
+/*static void dopause() {
 	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
@@ -91,7 +91,7 @@ static void dopause() {
 		swiWaitForVBlank();
 	}
 	scanKeys();
-}
+}*/
 
 static void getSFCG_ARM9() {
 	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
