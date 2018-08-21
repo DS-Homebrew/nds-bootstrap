@@ -19,7 +19,7 @@ extern "C" {
 #include "configuration.h"
 #include "conf_sd.h"
 
-off_t getSaveSize(const char* path) {
+static off_t getSaveSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
 	if (fp) {
