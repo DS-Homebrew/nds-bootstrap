@@ -63,11 +63,15 @@ int loadFromSD(configuration* conf) {
 	conf->asyncPrefetch  = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "ASYNC_PREFETCH", 0);
 	conf->logging        = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "LOGGING", 0);
 
-	std::vector<char*> argarray;
+	//conf->argc = 0;
+	//conf->argv = (const char**)malloc(ARG_MAX*sizeof(const char*));
+	conf->argv = (const char**)malloc(256*sizeof(const char*));
+	//std::vector<char*> argv;
 	if (strcasecmp(conf->filename + strlen(conf->filename) - 5, ".argv") == 0) {
 		FILE* argfile = fopen(conf->filename, "rb");
-		char str[PATH_MAX], *pstr;
-		const char seps[] = "\n\r\t ";
+		char str[PATH_MAX];
+		char* pstr;
+		const char* seps = "\n\r\t ";
 
 		while (fgets(str, PATH_MAX, argfile)) {
 			// Find comment and end string there
@@ -79,27 +83,36 @@ int loadFromSD(configuration* conf) {
 			pstr = strtok(str, seps);
 
 			while (pstr != NULL) {
-				argarray.push_back(strdup(pstr));
-				pstr= strtok(NULL, seps);
+				conf->argv[conf->argc] = strdup(pstr); //strcpy(conf->argv[conf->argc], pstr);
+				++conf->argc;
+				//argv.push_back(strdup(pstr));
+
+				pstr = strtok(NULL, seps);
 			}
 		}
 		fclose(argfile);
-		conf->filename = argarray.at(0);
+		//conf->filename = strdup(conf->argv[0]);
+		//conf->filename = argv.at(0);
 	} else {
-		argarray.push_back(strdup(conf->filename));
+		conf->argv[0] = strdup(conf->filename); //strcpy(conf->argv[0], conf->filename);
+		conf->argc = 1; //++conf->argc;
+		//argv.push_back(strdup(conf->filename));
 	}
-	conf->argc = argarray.size();
-	conf->argv = (const char**)&argarray[0];
+	realloc(conf->argv, conf->argc*sizeof(const char*));
+	//conf->argc = argv.size();
+	//conf->argv = (const char**)&argv[0];
 
 	std::vector<std::string> cheats;
+	//static std::vector<u32> cheat_data;
 	bootstrapini.GetStringVector("NDS-BOOTSTRAP", "CHEAT_DATA", cheats, ' ');
 	conf->cheat_data_len = cheats.size();
+	conf->cheat_data = (u32*)malloc(conf->cheat_data_len*sizeof(u32));
 	if (conf->cheat_data_len > 0) {
 		printf("Cheat data present\n");
 		
 		if (!checkCheatDataLen(conf->cheat_data_len)) {
 			printf("Cheat data size limit reached, the cheats are ignored!\n");
-			//cheats.clear();
+			cheats.clear();
 			conf->cheat_data_len = 0;
 		}
 		
@@ -111,11 +124,13 @@ int loadFromSD(configuration* conf) {
 			printf(" ");
 
 			conf->cheat_data[i] = strtoul(cheat, NULL, 16);
+			//cheat_data.push_back(strtoul(cheat, NULL, 16));
 			
 			nocashMessage(tohex(conf->cheat_data[i]));
 			printf(" "); 
 		}
 	}
+	//conf->cheat_data = (u32*)&cheat_data[0];
 
 	conf->backlightMode = bootstrapini.GetInt("NDS-BOOTSTRAP", "BACKLIGHT_MODE", 0);
 	conf->boostCpu      = (bool)bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", 0);

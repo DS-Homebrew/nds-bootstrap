@@ -318,7 +318,7 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterSav = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
-	const char* args[1];
+	//const char* args[1];
 
 	if (stat(conf->filename, &st) < 0) {
 		return -2;
@@ -335,8 +335,11 @@ static int runNdsFile(configuration* conf) {
 		}
 		pathLen = strlen(filePath);
 		strcpy(filePath + pathLen, conf->filename);
-		args[0] = filePath;
-		conf->argv = args;
+		//args[0] = filePath;
+		//conf->argv = args;
+		memset(conf->argv, 0, conf->argc*sizeof(const char*));
+		conf->argv[0] = filePath;
+		conf->argc = 1;
 	}
 
 	//bool havedsiSD = false;

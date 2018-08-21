@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ------------------------------------------------------------------*/
+#include <stdlib.h> // free
 #include <string.h> // memcpy
 #include <nds/interrupts.h>
 #include <nds/arm9/video.h>
@@ -217,6 +218,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->wantToPatchDLDI   = conf->dldiPatchNds;
 
 	loadArgs(conf->argc, conf->argv);
+	free(conf->argv);
 
 	lc0->saveFileCluster = saveCluster;
 	lc0->saveSize        = conf->saveSize;
@@ -233,6 +235,9 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->logging         = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);
+	free(conf->cheat_data);
+
+	free(conf);
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);

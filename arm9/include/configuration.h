@@ -1,6 +1,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+//#include <limits.h> // ARG_MAX
 #include <nds/ndstypes.h>
 #include "cheat_engine.h"
 
@@ -24,8 +25,8 @@ typedef struct configuration {
 	bool initDisc;
 	bool dldiPatchNds;
 	int argc;
-	const char** argv;
-	u32 cheat_data[CHEAT_DATA_MAX_LEN];
+	const char** argv; //const char* argv[ARG_MAX];
+	u32* cheat_data; //u32 cheat_data[CHEAT_DATA_MAX_LEN]
 	u32 cheat_data_len;
 	u32 backlightMode;
 } configuration;
