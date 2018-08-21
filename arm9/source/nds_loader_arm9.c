@@ -213,6 +213,9 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 
 	// Set the parameters for the loader
 
+	free(conf->ndsPath);
+	free(conf->savPath);
+
 	lc0->storedFileCluster = cluster;
 	lc0->initDisc          = conf->initDisc;
 	lc0->wantToPatchDLDI   = conf->dldiPatchNds;
