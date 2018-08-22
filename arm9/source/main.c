@@ -77,7 +77,7 @@ static void stop(void) {
 	}
 }
 
-/*static void dopause() {
+/*static void dopause(void) {
 	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
@@ -88,13 +88,13 @@ static void stop(void) {
 	scanKeys();
 }*/
 
-static void getSFCG_ARM9() {
+static void getSFCG_ARM9(void) {
 	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
 	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
 	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
-static void getSFCG_ARM7() {
+static void getSFCG_ARM7(void) {
 	//iprintf("SCFG_ROM ARM7\n");
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_ROM);\n");
