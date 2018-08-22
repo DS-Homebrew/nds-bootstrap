@@ -10,7 +10,7 @@ typedef struct configuration {
 	char* ndsPath;
 	char* savPath;
 	u32 saveSize;
-	u32 language;
+	u8 language;
 	bool dsiMode; // SDK 5
 	u32 donorSdkVer;
 	u32 patchMpuRegion;

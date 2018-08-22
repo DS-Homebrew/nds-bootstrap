@@ -123,7 +123,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("ndsPath: %s\n", conf->ndsPath);
 	dbg_printf("savPath: %s\n", conf->savPath);
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
-	dbg_printf("language: %lX\n", conf->language);
+	dbg_printf("language: %hhX\n", conf->language);
 	dbg_printf("dsiMode: %s\n", btoa(conf->dsiMode));
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
