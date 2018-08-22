@@ -307,11 +307,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = (sdk5 ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
 
-		// SDK 5
-		if (dsiMode) {
-			REG_SCFG_EXT = 0x8307F100;
-		}
-
 		ndsHeader->romSize += 0x1000;
 
 		if (enableExceptionHandler) {

@@ -44,6 +44,7 @@
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
+volatile bool dsiModeConfirmed = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -188,9 +189,6 @@ void arm9_main(void) {
 	//);
 
 	REG_SCFG_EXT = 0x8300C000;
-	
-    // lock SCFG
-    REG_SCFG_EXT &= ~(1UL << 31);
 
 	screenBrightness = 31;
 	fadeType = true;
@@ -241,6 +239,13 @@ void arm9_main(void) {
 			}
 		}
 	}
+
+	if (dsiModeConfirmed) {
+		REG_SCFG_EXT = 0x8307F100;
+	}
+
+	// lock SCFG
+	REG_SCFG_EXT &= ~(1UL << 31);
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

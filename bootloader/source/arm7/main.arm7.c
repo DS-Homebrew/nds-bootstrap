@@ -81,7 +81,7 @@ extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 language;
-extern u32 dsiMode; // SDK 5
+extern u32 dsiMode;		// SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
@@ -344,7 +344,7 @@ static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
 static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp[0x10 >> 2] & BIT(16+1));
 	//dsiModeConfirmed = (dsiMode && (dsiHeaderTemp->ndshdr.deviceSize & BIT(16+1)));
-	return (ndsHeader->deviceSize & BIT(16+1));
+	return (ndsHeader->unitCode > 0);
 }
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool dsiMode, bool* dsiModeConfirmedPtr) {
@@ -573,7 +573,6 @@ int arm7_main(void) {
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
 
-	bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
 	
 	increaseLoadBarLength();
