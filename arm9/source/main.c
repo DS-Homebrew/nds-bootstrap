@@ -77,7 +77,7 @@ static void stop(void) {
 	}
 }
 
-/*static void dopause(void) {
+static void dopause(void) {
 	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
@@ -86,7 +86,7 @@ static void stop(void) {
 		swiWaitForVBlank();
 	}
 	scanKeys();
-}*/
+}
 
 static void getSFCG_ARM9(void) {
 	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
@@ -293,6 +293,10 @@ static int runNdsFile(configuration* conf) {
 	}
 
 	dbg_printf("Running \"%s\" with %d parameters\n", conf->ndsPath, conf->argc);
+	if (debug) {
+		dopause();
+	}
+
 	switch(conf->backlightMode) {
 		case 0:
 		default:
