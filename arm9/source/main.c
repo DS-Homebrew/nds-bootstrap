@@ -292,7 +292,7 @@ static int runNdsFile(configuration* conf) {
 		return -1;
 	}
 
-	dbg_printf("Running %s with %d parameters\n", conf->ndsPath, conf->argc);
+	dbg_printf("Running \"%s\" with %d parameters\n", conf->ndsPath, conf->argc);
 	switch(conf->backlightMode) {
 		case 0:
 		default:
