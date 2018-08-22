@@ -712,39 +712,22 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 
 	dbg_printf("findCardIdEndOffset:\n");
 
-	u32* cardIdEndOffset = findOffset(
-		(u32*)cardReadEndOffset + 0x10, ndsHeader->arm9binarySize,
-		cardIdEndSignature, 2
-	); //if (!usesThumb) {
-	if (!cardIdEndOffset) {
-		cardIdEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			cardIdEndSignature, 2
-		);
-	}
-	if (cardIdEndOffset) {
-		dbg_printf("Card ID end found: ");
-	} else {
-		dbg_printf("Card ID end not found\n");
-	}
+	u32* cardIdEndOffset = NULL;
 
-	if (!cardIdEndOffset) {
+	if (moduleParams->sdk_version > 0x5000000) {
 		// SDK 5
-		if (moduleParams->sdk_version > 0x5000000) {
-			cardIdEndOffset = findOffsetBackwards(
-				(u32*)cardReadEndOffset, 0x800,
-				cardIdEndSignature5, 4
-			);
-			if (cardIdEndOffset) {
-				dbg_printf("Card ID end SDK 5 found: ");
-			} else {
-				dbg_printf("Card ID end SDK 5 not found\n");
-			}
+		cardIdEndOffset = findOffsetBackwards(
+			(u32*)cardReadEndOffset, 0x800,
+			cardIdEndSignature5, 4
+		);
+		if (cardIdEndOffset) {
+			dbg_printf("Card ID end SDK 5 found: ");
+		} else {
+			dbg_printf("Card ID end SDK 5 not found\n");
 		}
-	}
-	if (!cardIdEndOffset) {
-		// SDK 5
-		if (moduleParams->sdk_version > 0x5000000) {
+
+		if (!cardIdEndOffset) {
+			// SDK 5
 			cardIdEndOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
 				cardIdEndSignature5Alt, 3
@@ -754,6 +737,22 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 			} else {
 				dbg_printf("Card ID end SDK 5 alt not found\n");
 			}
+		}
+	} else {
+		cardIdEndOffset = findOffset(
+			(u32*)cardReadEndOffset + 0x10, ndsHeader->arm9binarySize,
+			cardIdEndSignature, 2
+		); //if (!usesThumb) {
+		if (!cardIdEndOffset) {
+			cardIdEndOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+				cardIdEndSignature, 2
+			);
+		}
+		if (cardIdEndOffset) {
+			dbg_printf("Card ID end found: ");
+		} else {
+			dbg_printf("Card ID end not found\n");
 		}
 	}
 
