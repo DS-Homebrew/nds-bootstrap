@@ -53,6 +53,7 @@ extern u32 asyncPrefetch;
 extern u32 needFlushDCCache;
 
 extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS] = {0xFFFFFFFF};
@@ -78,14 +79,6 @@ static bool alreadySetMpu = false;*/
 
 static bool flagsSet = false;
 static bool hgssFix = false;
-
-//---------------------------------------------------------------------------------
-void setExceptionHandler2(void) {
-//---------------------------------------------------------------------------------
-	exceptionStack = (u32)0x23EFFFC;
-	EXCEPTION_VECTOR = enterException;
-	*exceptionC = user_exception;
-}
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -310,7 +303,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		ndsHeader->romSize += 0x1000;
 
 		if (enableExceptionHandler) {
-			setExceptionHandler2();
+			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			setExceptionHandler(user_exception);
 		}
 		flagsSet = true;
 	}

@@ -1,8 +1,8 @@
 #ifndef LOCATIONS_H
 #define LOCATIONS_H
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Important things
+#define EXCEPTION_STACK_LOCATION 0x23EFFFC
+
 //#define TEMP_MEM 0x02FFE000 // __DSiHeader
 
 #define NDS_HEADER         0x027FFE00
