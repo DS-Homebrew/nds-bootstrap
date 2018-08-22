@@ -58,6 +58,7 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
+extern u32 soundFix;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -350,7 +351,9 @@ static void runCardEngineCheckHalt(void) {
 	if (lockMutex(&cardEgnineCommandMutex)) {
 		initialize();
 
-		cardReadTimeOut = 0;
+		if (soundFix) {
+			cardReadTimeOut = 0;
+		}
 
 		//nocashMessage("runCardEngineCheck mutex ok");
 		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
@@ -413,8 +416,12 @@ void myIrqHandlerVBlank(void) {
 		runCardEngineCheck();
 	}
 
-	if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
-		cardReadTimeOut++;
+	if (soundFix) {
+		if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
+			cardReadTimeOut++;
+		}
+	} else {
+		cardReadTimeOut = 30;
 	}
 
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {

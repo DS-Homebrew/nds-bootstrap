@@ -41,6 +41,7 @@
 	.global romread_LED
 	.global gameSoftReset
 	.global asyncPrefetch
+	.global soundFix
 	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
@@ -88,6 +89,8 @@ romread_LED:
 gameSoftReset:
 	.word	0x00000000
 asyncPrefetch:
+	.word	0x00000000
+soundFix:
 	.word	0x00000000
 logging:
 	.word	0x00000000

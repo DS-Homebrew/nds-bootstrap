@@ -89,6 +89,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Async prefetch
 		conf->asyncPrefetch = (bool)strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "SOUND_FIX")) {
+		// Sound fix
+		conf->soundFix = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LOGGING")) {
 		// Logging
 		conf->logging = (bool)strtol(value, NULL, 0);

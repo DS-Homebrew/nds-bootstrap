@@ -134,6 +134,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
 	dbg_printf("asyncPrefetch: %s\n", btoa(conf->asyncPrefetch));
+	dbg_printf("soundFix: %s\n", btoa(conf->soundFix));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));

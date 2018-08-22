@@ -90,6 +90,7 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 extern u32 asyncPrefetch;
+extern u32 soundFix;
 //extern u32 logging;
 
 static void initMBK(void) {
@@ -657,7 +658,8 @@ int arm7_main(void) {
 		ROMinRAM,
 		consoleModel,
 		romread_LED,
-		gameSoftReset
+		gameSoftReset,
+		soundFix
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

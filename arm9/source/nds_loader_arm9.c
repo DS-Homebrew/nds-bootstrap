@@ -238,6 +238,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->romread_LED     = conf->romread_LED;
 	lc0->gameSoftReset   = conf->gameSoftReset;
 	lc0->asyncPrefetch   = conf->asyncPrefetch;
+	lc0->soundFix        = conf->soundFix;
 	lc0->logging         = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);
