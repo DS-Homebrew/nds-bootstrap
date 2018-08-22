@@ -563,7 +563,7 @@ int arm7_main(void) {
 
 	int errorCode;
 
-	if (REG_SCFG_EXT == 0 || consoleModel < 2) {
+	if (REG_SCFG_EXT == 0) {
 		NDSTouchscreenMode();
 		*(u16*)0x4000500 = 0x807F;
 	}
