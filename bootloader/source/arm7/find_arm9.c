@@ -836,9 +836,9 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 					cardIdStartSignature5Alt, 1
 				);
 				if (cardIdStartOffset) {
-					dbg_printf("Card ID start SDK 5 alt 1 found\n");
+					dbg_printf("Card ID start SDK 5 alt 1 found: ");
 				} else {
-					dbg_printf("Card ID start SDK 5 alt 1 not found: ");
+					dbg_printf("Card ID start SDK 5 alt 1 not found\n");
 				}
 			}
 		}
@@ -859,9 +859,9 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 				cardIdStartSignatureAlt1, 1
 			);
 			if (cardIdStartOffset) {
-				dbg_printf("Card ID start alt 1 found\n");
+				dbg_printf("Card ID start alt 1 found: ");
 			} else {
-				dbg_printf("Card ID start alt 1 not found: ");
+				dbg_printf("Card ID start alt 1 not found\n");
 			}
 		}
 	}
@@ -872,9 +872,9 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 			cardIdStartSignatureAlt2, 1
 		);
 		if (cardIdStartOffset) {
-			dbg_printf("Card ID start alt 2 found\n");
+			dbg_printf("Card ID start alt 2 found: ");
 		} else {
-			dbg_printf("Card ID start alt 2 not found: ");
+			dbg_printf("Card ID start alt 2 not found\n");
 		}
 	}
 
