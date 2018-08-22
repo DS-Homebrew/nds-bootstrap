@@ -590,7 +590,7 @@ int arm7_main(void) {
 	decompressBinary(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, moduleParams, consoleModel);
+	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
