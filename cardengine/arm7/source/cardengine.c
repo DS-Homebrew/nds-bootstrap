@@ -84,49 +84,51 @@ static const char* romLocation = NULL;
 static char* saveLocation = NULL;
 
 static void initialize(void) {
-	if (!initialized) {
-		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-			sdmmc_init();
-			SD_Init();
-		}
-		FAT_InitFiles(false, 3);
-		//romFile = getFileFromCluster(fileCluster);
-		//buildFatTableCache(&romFile, 3);
-		#ifdef DEBUG	
-		if (romFile->fatTableCached) {
-			nocashMessage("fat table cached");
-		} else {
-		   nocashMessage("fat table not cached"); 
-		}
-		#endif
-		
-		/*if (saveCluster > 0) {
-			savFile = getFileFromCluster(saveCluster);
-		} else {
-			savFile.firstCluster = CLUSTER_FREE;
-		}*/
-			
-		#ifdef DEBUG		
-		aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
-		enableDebug(myDebugFile);
-		dbg_printf("logging initialized\n");		
-		dbg_printf("sdk version :");
-		dbg_hexa(moduleParams->sdk_version);		
-		dbg_printf("\n");	
-		dbg_printf("rom file :");
-		dbg_hexa(fileCluster);	
-		dbg_printf("\n");	
-		dbg_printf("save file :");
-		dbg_hexa(saveCluster);	
-		dbg_printf("\n");
-		#endif
-					
-		initialized = true;
+	if (initialized) {
+		return;
 	}
+	
+	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+		sdmmc_init();
+		SD_Init();
+	}
+	FAT_InitFiles(false, 3);
+	//romFile = getFileFromCluster(fileCluster);
+	//buildFatTableCache(&romFile, 3);
+	#ifdef DEBUG	
+	if (romFile->fatTableCached) {
+		nocashMessage("fat table cached");
+	} else {
+		nocashMessage("fat table not cached"); 
+	}
+	#endif
+	
+	/*if (saveCluster > 0) {
+		savFile = getFileFromCluster(saveCluster);
+	} else {
+		savFile.firstCluster = CLUSTER_FREE;
+	}*/
+		
+	#ifdef DEBUG		
+	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
+	enableDebug(myDebugFile);
+	dbg_printf("logging initialized\n");		
+	dbg_printf("sdk version :");
+	dbg_hexa(moduleParams->sdk_version);		
+	dbg_printf("\n");	
+	dbg_printf("rom file :");
+	dbg_hexa(fileCluster);	
+	dbg_printf("\n");	
+	dbg_printf("save file :");
+	dbg_hexa(saveCluster);	
+	dbg_printf("\n");
+	#endif
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	romLocation = (char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	saveLocation = (char*)(isSdk5(moduleParams) ? SAVE_SDK5_LOCATION : SAVE_LOCATION);
+				
+	initialized = true;
 }
 
 static void cardReadLED(bool on) {
