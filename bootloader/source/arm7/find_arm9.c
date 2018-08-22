@@ -59,7 +59,8 @@ static const u32 cardIdEndSignature5Alt[3]        = {0x02FFFAE0, 0x040001A4, 0x0
 static const u16 cardIdEndSignatureThumb[6]       = {0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410};
 static const u16 cardIdEndSignatureThumb5[8]      = {0xFAE0, 0x02FF, 0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
 static const u32 cardIdStartSignature[1]          = {0xE92D4000};
-static const u32 cardIdStartSignatureAlt1[2]      = {0xE92D4008, 0xE3A0032E};
+//static const u32 cardIdStartSignatureAlt1[2]      = {0xE92D4008, 0xE3A0032E};
+static const u32 cardIdStartSignatureAlt1[1]      = {0xE92D4008};
 static const u32 cardIdStartSignatureAlt2[1]      = {0xE92D4010};
 static const u32 cardIdStartSignature5[2]         = {0xE92D4010, 0xE3A050B8}; // SDK 5
 static const u32 cardIdStartSignature5Alt[1]      = {0xE92D4038};             // SDK 5
@@ -857,7 +858,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 		if (!cardIdStartOffset) {
 			cardIdStartOffset = findOffsetBackwards(
 				(u32*)cardIdEndOffset, 0x100,
-				cardIdStartSignatureAlt1, 2
+				cardIdStartSignatureAlt1, 1
 			);
 			if (cardIdStartOffset) {
 				dbg_printf("Card ID start alt 1 not found\n");
@@ -1004,49 +1005,49 @@ u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* 
 
 	//if (!usesThumb) {
 
-	u32* cardReadDmaStartOffset = findOffsetBackwards(
-		(u32*)cardReadDmaEndOffset, 0x200,
-		cardReadDmaStartSignature, 1
-	);
-	if (cardReadDmaStartOffset) {
-		dbg_printf("Card read DMA start found: ");
-	} else {
-		dbg_printf("Card read DMA start not found\n");
-	}
+	u32* cardReadDmaStartOffset = NULL;
 
-	if (!cardReadDmaStartOffset) {
+	if (moduleParams->sdk_version > 0x5000000) {
 		cardReadDmaStartOffset = findOffsetBackwards(
 			(u32*)cardReadDmaEndOffset, 0x200,
-			cardReadDmaStartSignatureAlt1, 1
+			cardReadDmaStartSignature5, 1
 		);
 		if (cardReadDmaStartOffset) {
-			dbg_printf("Card read DMA start alt 1 found: ");
+			dbg_printf("Card read DMA start SDK 5 found: ");
 		} else {
-			dbg_printf("Card read DMA start alt 1 not found\n");
+			dbg_printf("Card read DMA start SDK 5 not found\n");
 		}
-	}
-	if (!cardReadDmaStartOffset) {
+	} else {
 		cardReadDmaStartOffset = findOffsetBackwards(
 			(u32*)cardReadDmaEndOffset, 0x200,
-			cardReadDmaStartSignatureAlt2, 1
+			cardReadDmaStartSignature, 1
 		);
 		if (cardReadDmaStartOffset) {
-			dbg_printf("Card read DMA start alt 2 found: ");
+			dbg_printf("Card read DMA start found: ");
 		} else {
-			dbg_printf("Card read DMA start alt 2 not found\n");
+			dbg_printf("Card read DMA start not found\n");
 		}
-	}
-	if (!cardReadDmaStartOffset) {
-		// SDK 5
-		if (moduleParams->sdk_version > 0x5000000) {
+
+		if (!cardReadDmaStartOffset) {
 			cardReadDmaStartOffset = findOffsetBackwards(
 				(u32*)cardReadDmaEndOffset, 0x200,
-				cardReadDmaStartSignature5, 1
+				cardReadDmaStartSignatureAlt1, 1
 			);
 			if (cardReadDmaStartOffset) {
-				dbg_printf("Card read DMA start SDK 5 found: ");
+				dbg_printf("Card read DMA start alt 1 found: ");
 			} else {
-				dbg_printf("Card read DMA start SDK 5 not found\n");
+				dbg_printf("Card read DMA start alt 1 not found\n");
+			}
+		}
+		if (!cardReadDmaStartOffset) {
+			cardReadDmaStartOffset = findOffsetBackwards(
+				(u32*)cardReadDmaEndOffset, 0x200,
+				cardReadDmaStartSignatureAlt2, 1
+			);
+			if (cardReadDmaStartOffset) {
+				dbg_printf("Card read DMA start alt 2 found: ");
+			} else {
+				dbg_printf("Card read DMA start alt 2 not found\n");
 			}
 		}
 	}
