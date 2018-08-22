@@ -391,9 +391,8 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 }
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
-	if (!usesThumb) { // Based on: cardengine/arm9/source/card_engine_header.s
-		ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
-	}
+	//if (!usesThumb) {
+	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
