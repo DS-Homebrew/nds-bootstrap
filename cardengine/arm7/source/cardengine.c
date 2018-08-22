@@ -59,7 +59,6 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 
-u32 numberToActivateRunViaHalt = 10; // SDK 5
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
@@ -69,8 +68,7 @@ static bool calledViaIPC = false;
 static aFile* romFile = (aFile*)0x37D5000;
 static aFile* savFile = (aFile*)0x37D5000 + 1;
 
-static bool runViaHalt = false; // SDK 5
-static int accessCounter = 0;   // SDK 5
+static int cardReadTimeOut = 0;
 
 static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -316,34 +314,24 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-	if (tryLockMutex(&cardEgnineCommandMutex)) {
+	if (cardReadTimeOut == 30 && tryLockMutex(&cardEgnineCommandMutex)) {
 		initialize();
 
 		//nocashMessage("runCardEngineCheck mutex ok");
 
-		if (*(vu32*)(0x027FFB14) != 0) {
-			// SDK 5
-			if (accessCounter > numberToActivateRunViaHalt - 1) {
-				accessCounter = numberToActivateRunViaHalt;
-				runViaHalt = true;
-			}
-			
-			if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-				log_arm9();
-				*(vu32*)(0x027FFB14) = 0;
-			}
+		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+			log_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
 
-			if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-				cardRead_arm9();
-				*(vu32*)(0x027FFB14) = 0;
-				accessCounter++;
-			}
+		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+			cardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
+		}
 
-			if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-				asyncCardRead_arm9();
-				*(vu32*)(0x027FFB14) = 0;
-				accessCounter++;
-			}
+		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+			asyncCardRead_arm9();
+			*(vu32*)(0x027FFB14) = 0;
 		}
 		unlockMutex(&cardEgnineCommandMutex);
 	}
@@ -359,6 +347,8 @@ static void runCardEngineCheckHalt(void) {
 	// to be checked
 	if (lockMutex(&cardEgnineCommandMutex)) {
 		initialize();
+
+		cardReadTimeOut = 0;
 
 		//nocashMessage("runCardEngineCheck mutex ok");
 		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
@@ -401,7 +391,6 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	//if (!runViaIRQ) { // SDK 5 --> if (runViaHalt) {
 	runCardEngineCheckHalt();
 }
 
@@ -420,6 +409,10 @@ void myIrqHandlerVBlank(void) {
 
 	if (!ROMinRAM) {
 		runCardEngineCheck();
+	}
+
+	if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
+		cardReadTimeOut++;
 	}
 
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
