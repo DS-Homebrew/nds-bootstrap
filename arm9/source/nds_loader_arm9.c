@@ -221,6 +221,9 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->wantToPatchDLDI   = conf->dldiPatchNds;
 
 	loadArgs(conf->argc, conf->argv);
+	for (int i = 0; i < conf->argc; ++i) {
+		free((void*)conf->argv[i]);
+	}
 	free(conf->argv);
 
 	lc0->saveFileCluster = saveCluster;

@@ -39,13 +39,15 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "NDS_PATH")) {
 		// NDS path
-		conf->ndsPath = (char*)malloc((strlen(value) + 1)*sizeof(char));
-		strcpy(conf->ndsPath, value);
+		//conf->ndsPath = malloc((strlen(value) + 1)*sizeof(char));
+		//strcpy(conf->ndsPath, value);
+		conf->ndsPath = strdup(value);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "SAV_PATH")) {
 		// SAV path
-		conf->savPath = (char*)malloc((strlen(value) + 1)*sizeof(char));
-		strcpy(conf->savPath, value);
+		//conf->savPath = malloc((strlen(value) + 1)*sizeof(char));
+		//strcpy(conf->savPath, value);
+		conf->savPath = strdup(value);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LANGUAGE")) {
 		// Language
@@ -93,7 +95,7 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CHEAT_DATA")) {
 		// Cheat data
-		conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
+		conf->cheat_data = malloc(CHEAT_DATA_MAX_SIZE);
 		conf->cheat_data_len = 0;
 		char* str = strdup(value);
 		char* cheat = strtok(str, " ");
@@ -120,6 +122,9 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 			cheat = strtok(NULL, " ");
 		}
+
+		free(str);
+
 		realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BACKLIGHT_MODE")) {
@@ -151,9 +156,10 @@ int loadFromSD(configuration* conf) {
 	conf->saveSize = getSaveSize(conf->savPath);
 
 	conf->argc = 0;
-	conf->argv = (const char**)malloc(ARG_MAX);
+	conf->argv = malloc(ARG_MAX);
 	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
 		FILE* argfile = fopen(conf->ndsPath, "rb");
+
 		char str[PATH_MAX];
 		char* pstr;
 		const char* seps = "\n\r\t ";
@@ -168,16 +174,18 @@ int loadFromSD(configuration* conf) {
 			pstr = strtok(str, seps);
 
 			while (pstr != NULL) {
-				conf->argv[conf->argc] = strdup(pstr); //strcpy(conf->argv[conf->argc], pstr);
+				conf->argv[conf->argc] = strdup(pstr);
 				++conf->argc;
 
 				pstr = strtok(NULL, seps);
 			}
 		}
 		fclose(argfile);
+
+		free(conf->ndsPath);
 		conf->ndsPath = strdup(conf->argv[0]);
 	} else {
-		conf->argv[0] = strdup(conf->ndsPath); //strcpy(conf->argv[0], conf->ndsPath);
+		conf->argv[0] = strdup(conf->ndsPath);
 		conf->argc = 1; //++conf->argc;
 	}
 	realloc(conf->argv, conf->argc*sizeof(const char*));

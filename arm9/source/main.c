@@ -351,7 +351,7 @@ static int runNdsFile(configuration* conf) {
 }
 
 int main(int argc, char** argv) {
-	configuration* conf = (configuration*)malloc(sizeof(configuration));
+	configuration* conf = malloc(sizeof(configuration));
 	conf->initDisc = true;
 	conf->dldiPatchNds = true;
 
