@@ -620,7 +620,7 @@ void myIrqHandlerVBlank(void) {
 		REG_MASTER_VOLUME = volLevel;
 	}
 
-	if (consoleModel < 2) {
+	if (consoleModel < 2 && romread_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
