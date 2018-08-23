@@ -138,10 +138,10 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
-	dbg_printf("argc: %lX\n", conf->argc);
+	dbg_printf("argc: %lu\n", conf->argc);
 	//const char** argv;
 	//u32 cheat_data[CHEAT_DATA_MAX_LEN];
-	dbg_printf("cheat_data_len: %lX\n", conf->cheat_data_len);
+	dbg_printf("cheat_data_len: %lu\n", conf->cheat_data_len);
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
