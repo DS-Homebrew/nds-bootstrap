@@ -588,7 +588,7 @@ int arm7_main(void) {
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
 
-	decompressBinary(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
+	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
 	// If possible, set to load ROM into RAM
 	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);

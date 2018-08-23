@@ -5,6 +5,6 @@
 #include <nds/memory.h> // tNDSHeader
 #include "module_params.h"
 
-void decompressBinary(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams);
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams);
 
 #endif // DECOMPRESS_H
