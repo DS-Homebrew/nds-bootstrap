@@ -54,6 +54,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
+TARGET			:=	nds-bootstrap
 export ARM7ELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
