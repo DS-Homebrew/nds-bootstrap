@@ -5,35 +5,39 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM)
 endif
 
--include $(DEVKITARM)/ds_rules
+include $(DEVKITARM)/ds_rules
 
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
+# DATA is a list of directories containing binary files
+# all directories are relative to this makefile
 #---------------------------------------------------------------------------------
-TARGET		:=	load
 BUILD		:=	build
 SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../common/source
 INCLUDES	:=	include build ../common/include
 DATA		:=	../data
-SPECS		:=  specs
- 
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=  -mthumb-interwork -march=armv4t
+ARCH	:=	-mthumb-interwork -march=armv4t
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
+CFLAGS	+=	$(INCLUDE) -DARM7
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+LDFLAGS	=	-nostartfiles -T ../load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notdir $*).map
 
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
 LIBS	:= -lnds7
 
 #---------------------------------------------------------------------------------
@@ -49,8 +53,7 @@ LIBDIRS	:=	$(LIBNDS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
- 
-export TOPDIR	:=	$(CURDIR)
+
 export LOADBIN	:=	$(CURDIR)/../data/$(TARGET).bin
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
@@ -72,9 +75,17 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 #---------------------------------------------------------------------------------
-# use CC for linking standard C
+# use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
-export LD	:=	$(CC)
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
 #---------------------------------------------------------------------------------
 
 .PHONY: $(BUILD) clean
@@ -100,15 +111,9 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(LOADBIN)	:	$(LOADELF)
 
-
 $(LOADELF)	:	$(OFILES)
 	@echo linking $(notdir $@)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
-	
-	
-#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
-#	@echo $(notdir $<)
-#	$(bin2o)
 	
 cardengine_arm7.bin.o : $(CURDIR)/../../data/cardengine_arm7.bin
 	@echo $(notdir $<)
@@ -118,21 +123,17 @@ cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
 	@echo $(notdir $<)
 	$(bin2o)
 
--include $(DEPENDS)
-
 
 #---------------------------------------------------------------------------------
-%.bin: %.elf
+# you need a rule like this for each extension you use as binary data 
 #---------------------------------------------------------------------------------
-	@$(OBJCOPY) -O binary $< $@
-	@echo built ... $(notdir $@)
-
-#---------------------------------------------------------------------------------
-%.bin.o: %.bin
+%.bin.o	:	%.bin
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	$(bin2o)
+	@$(bin2o)
 
+-include $(DEPENDS)
+ 
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

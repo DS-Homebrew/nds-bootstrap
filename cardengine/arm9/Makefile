@@ -1,7 +1,6 @@
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
-
 ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
@@ -9,39 +8,39 @@ endif
 include $(DEVKITARM)/ds_rules
 
 #---------------------------------------------------------------------------------
-# TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# SPECS is the directory containing the important build and link files
+# INCLUDES is a list of directories containing extra header files
+# DATA is a list of directories containing binary files
+# all directories are relative to this makefile
 #---------------------------------------------------------------------------------
-export TARGET	:=	cardengine_arm9
-BUILD			:=	build
-SOURCES			:=	source ../../common/source
-DATA			:=	data
-INCLUDES		:=	include ../../common/include
+BUILD		:=	build
+SOURCES		:=	source ../../common/source
+INCLUDES	:=	include ../../common/include
+DATA		:=	data
 
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s   -DARM9
+ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-COMMON	:=	-g -Wall -O2\
-		 -fomit-frame-pointer\
+CFLAGS	:=	-g -Wall -O2\
+ 			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-COMMON	+=	$(INCLUDE) -DARM9 -fPIC
+CFLAGS	+=	$(INCLUDE) -DARM9
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-CFLAGS	:=	$(COMMON) -std=gnu99
-CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 
-ASFLAGS	:=	-g $(ARCH) $(INCLUDE) 
-LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project (order is important)
+#---------------------------------------------------------------------------------
 LIBS	:=	-lnds9
 
 #---------------------------------------------------------------------------------
@@ -57,13 +56,13 @@ LIBDIRS	:=	$(LIBNDS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
- 
+
+export TARGET	:=	cardengine_arm9
 export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
-
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
@@ -85,19 +84,17 @@ endif
 #---------------------------------------------------------------------------------
 
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
-
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD)
+ 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-.PHONY: $(BUILD) clean all
+ 
+.PHONY: $(BUILD) clean
  
 #---------------------------------------------------------------------------------
-all: $(BUILD)
-
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
@@ -110,27 +107,26 @@ clean:
  
 #---------------------------------------------------------------------------------
 else
- 
-DEPENDS	:=	$(OFILES:.o=.d)
- 
+
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
 $(OUTPUT).bin:	$(TARGET).elf
 $(TARGET).elf:	cardengine.ld $(OFILES)
+	@echo linking $(notdir $@)
+	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 cardengine.ld:	$(CURDIR)/../cardengine.ld.in
 	arm-none-eabi-cpp -P $(INCLUDE) $< $@
 
 
 #---------------------------------------------------------------------------------
-%.bin: %.elf
+%.bin	:	%.elf
+#---------------------------------------------------------------------------------
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
- 
 
--include $(DEPENDS)
-
+-include $(DEPSDIR)/*.d
  
 #---------------------------------------------------------------------------------------
 endif
