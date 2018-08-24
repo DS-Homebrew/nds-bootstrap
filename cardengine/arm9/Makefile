@@ -117,7 +117,7 @@ $(TARGET).elf:	cardengine.ld $(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 cardengine.ld:	$(CURDIR)/../cardengine.ld.in
-	arm-none-eabi-cpp -P $(INCLUDE) $< $@
+	$(CPP) -P $(INCLUDE) $< $@
 
 
 #---------------------------------------------------------------------------------
