@@ -111,8 +111,8 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).bin:	$(TARGET).elf
-$(TARGET).elf:	cardengine.ld $(OFILES)
+$(OUTPUT).bin:	$(DEPSDIR)/$(TARGET).elf
+$(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 #	@echo linking $(notdir $@)
 #	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
