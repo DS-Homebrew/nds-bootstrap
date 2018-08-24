@@ -115,8 +115,8 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(OUTPUT).bin:	$(TARGET).elf
 $(TARGET).elf:	cardengine.ld $(OFILES)
-	@echo linking $(notdir $@)
-	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+#	@echo linking $(notdir $@)
+#	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 cardengine.ld:	$(CURDIR)/../cardengine.ld.in
 	$(CPP) -P $(INCLUDE) $< $@
