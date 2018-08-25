@@ -128,9 +128,11 @@ Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
 static void resetMemory_ARM7(void) {
+	register int i;
+	
 	REG_IME = 0;
 
-	for (int i = 0; i < 16; i++) {
+	for (i = 0; i < 16; i++) {
 		SCHANNEL_CR(i) = 0;
 		SCHANNEL_TIMER(i) = 0;
 		SCHANNEL_SOURCE(i) = 0;
@@ -140,7 +142,7 @@ static void resetMemory_ARM7(void) {
 	REG_SOUNDCNT = 0;
 
 	// Clear out ARM7 DMA channels and timers
-	for (int i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		DMA_CR(i) = 0;
 		DMA_SRC(i) = 0;
 		DMA_DEST(i) = 0;
