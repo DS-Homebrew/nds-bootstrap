@@ -42,12 +42,9 @@ redistribute it freely, subject to the following restrictions:
 
 //static vu32* wordCommandAddr;
 
-//---------------------------------------------------------------------------------
 void VcountHandler(void) {
-//---------------------------------------------------------------------------------
 	inputGetAndSend();
 }
-
 
 void myFIFOValue32Handler(u32 value, void* data) {
 	nocashMessage("myFIFOValue32Handler");
@@ -58,34 +55,7 @@ void myFIFOValue32Handler(u32 value, void* data) {
 
 }
 
-// See: arm9/source/nds_loader_arm9.c
-/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
-	const int* dataChunk = (const int*) data;
-	int searchChunk = ((const int*)search)[0];
-	u32 i;
-	u32 dataLen = (u32)(dataSize / sizeof(int));
-
-	for ( i = 0; i < dataLen; i++) {
-		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchSize) > dataSize) {
-				return -1;
-			}
-			if (memcmp (&data[i*sizeof(int)], search, searchSize) == 0) {
-				return i*sizeof(int);
-			}
-		}
-	}
-
-	return -1;
-}*/
-
-//static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-
-
-
-//---------------------------------------------------------------------------------
 int main(void) {
-//---------------------------------------------------------------------------------
 	// Switch to NTR Mode
 	//REG_SCFG_ROM = 0x703;
 
@@ -105,14 +75,14 @@ int main(void) {
 
 	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
 
-	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power button for auto-reset
-	//i2cWriteRegister(0x4A, 0x12, 0x01);		// Have IRQ check for power button press
-	i2cWriteRegister(0x4A, 0x70, 0x01);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
+	i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 0);		// Press power button for auto-reset
+	//i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
+	i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
 
 	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
-	//
+
 	SCFGFifoCheck();
-	//
+
 	fifoSendValue32(FIFO_USER_05, 1);
 
 	fifoSetValue32Handler(FIFO_USER_01, myFIFOValue32Handler, 0);
@@ -121,4 +91,6 @@ int main(void) {
 	while (1) {
 		swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 	}
+	
+	return 0;
 }
