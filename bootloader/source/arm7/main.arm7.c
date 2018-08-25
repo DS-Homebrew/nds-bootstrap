@@ -438,8 +438,13 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	return ndsHeader;
 }
 
-static void reloadFirmwareSettings(const tNDSHeader* ndsHeader) {
+static void my_readUserSettings(const tNDSHeader* ndsHeader) {
+	PERSONAL_DATA slot1;
+	PERSONAL_DATA slot2;
+
 	short slot1count, slot2count; //u8
+	short slot1CRC, slot2CRC;
+
 	u32 userSettingsBase;
 
 	// Get settings location
@@ -449,16 +454,37 @@ static void reloadFirmwareSettings(const tNDSHeader* ndsHeader) {
 	u32 slot2Address = userSettingsBase * 8 + 0x100;
 
 	// Reload DS Firmware settings
-	readFirmware(slot1Address + 0x70, &slot1count, 0x1);
-	readFirmware(slot2Address + 0x70, &slot2count, 0x1);
+	readFirmware(slot1Address, &slot1, sizeof(PERSONAL_DATA)); //readFirmware(slot1Address, personalData, 0x70);
+	readFirmware(slot2Address, &slot2, sizeof(PERSONAL_DATA)); //readFirmware(slot2Address, personalData, 0x70);
+	readFirmware(slot1Address + 0x70, &slot1count, 2); //readFirmware(slot1Address + 0x70, &slot1count, 1);
+	readFirmware(slot2Address + 0x70, &slot2count, 2); //readFirmware(slot1Address + 0x70, &slot2count, 1);
+	readFirmware(slot1Address + 0x72, &slot1CRC, 2);
+	readFirmware(slot2Address + 0x72, &slot2CRC, 2);
 
-	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)ndsHeader + (u32)PersonalData - (u32)__NDSHeader); //(u8*)((u32)ndsHeader - 0x180)
+	// Default to slot 1 user settings
+	void *currentSettings = &slot1;
 
-	if ((slot1count & 0x7F) == ((slot2count + 1) & 0x7F)) {
-		readFirmware(slot1Address, personalData, sizeof(PERSONAL_DATA)); //readFirmware(slot1Address, personalData, 0x70);
-	} else {
-		readFirmware(slot2Address, personalData, sizeof(PERSONAL_DATA)); //readFirmware(slot2Address, personalData, 0x70);
+	short calc1CRC = swiCRC16(0xFFFF, &slot1, sizeof(PERSONAL_DATA));
+	short calc2CRC = swiCRC16(0xFFFF, &slot2, sizeof(PERSONAL_DATA));
+
+	// Bail out if neither slot is valid
+	if (calc1CRC != slot1CRC && calc2CRC != slot2CRC) {
+		return;
 	}
+
+	// If both slots are valid pick the most recent
+	if (calc1CRC == slot1CRC && calc2CRC == slot2CRC) { 
+		currentSettings = (slot2count == ((slot1count + 1) & 0x7f) ? &slot2 : &slot1); //if ((slot1count & 0x7F) == ((slot2count + 1) & 0x7F)) {
+	} else {
+		if (calc2CRC == slot2CRC) {
+			currentSettings = &slot2;
+		}
+	}
+
+	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
+	
+	memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
+	
 	if (language >= 0 && language < 6) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
@@ -598,7 +624,7 @@ int arm7_main(void) {
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
-	reloadFirmwareSettings(ndsHeader); // Header has to be loaded first
+	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	if (!dsiModeConfirmed) {
 		NTR_BIOS();
