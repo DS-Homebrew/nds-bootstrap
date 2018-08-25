@@ -429,12 +429,13 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
+	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
+	*ndsHeader = dsiHeaderTemp->ndshdr;
 	if (dsiMode) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
-		*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
-	} else {
-		//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
-		*ndsHeader = dsiHeaderTemp->ndshdr;
+		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
+		tDSiHeader* dsiHeader = (tDSiHeader*)((u32)ndsHeader - (u32)__NDSHeader + (u32)__DSiHeader); // __DSiHeader
+		*dsiHeader = *dsiHeaderTemp;
 	}
 
 	return ndsHeader;
