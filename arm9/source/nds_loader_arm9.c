@@ -259,8 +259,10 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
 	
 	*(vu32*)0x02FFFFFC = 0;
-	*(vu32*)0x02FFFE04 = (u32)0xE59FF018;
-	*(vu32*)0x02FFFE24 = (u32)0x02FFFE04;
+
+	// Return to passme loop
+	*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
+	*(vu32*)0x02FFFE24 = (u32)0x02FFFE04;  // Set ARM9 Loop address --> resetARM9(0x02FFFE04);
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
