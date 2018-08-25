@@ -29,6 +29,7 @@ redistribute it freely, subject to the following restrictions:
 ---------------------------------------------------------------------------------*/
 
 //#include <stdio.h>
+#include <stdlib.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/arm7/input.h>
 #include <nds/fifocommon.h>
@@ -46,13 +47,11 @@ void VcountHandler(void) {
 	inputGetAndSend();
 }
 
-void myFIFOValue32Handler(u32 value, void* data) {
+void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler");
-
  	nocashMessage("default");
 	nocashMessage("fifoSendValue32");
-	fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));
-
+	fifoSendValue32(FIFO_USER_02, *(u16*)value);
 }
 
 int main(void) {
@@ -85,7 +84,7 @@ int main(void) {
 
 	fifoSendValue32(FIFO_USER_05, 1);
 
-	fifoSetValue32Handler(FIFO_USER_01, myFIFOValue32Handler, 0);
+	fifoSetValue32Handler(FIFO_USER_01, myFIFOValue32Handler, NULL);
 
 	// Keep the ARM7 mostly idle
 	while (1) {

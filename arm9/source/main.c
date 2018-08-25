@@ -78,7 +78,7 @@ static void stop(void) {
 }
 
 static void dopause(void) {
-	iprintf("Press start...\n");
+	printf("Press start...\n");
 	while(1) {
 		scanKeys();
 		if (keysDown() & KEY_START)
@@ -89,33 +89,33 @@ static void dopause(void) {
 }
 
 static void getSFCG_ARM9(void) {
-	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
-	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
-	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
+	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
+	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
+	//printf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
 static void getSFCG_ARM7(void) {
-	//iprintf("SCFG_ROM ARM7\n");
+	//printf("SCFG_ROM ARM7\n");
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_ROM);\n");
-	//fifoSendValue32(FIFO_USER_01, (long unsigned int)&REG_SCFG_ROM);
+	//fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_ROM);
 
 	//nocashMessage("dbg_printf\n");
 
-	iprintf("SCFG_CLK ARM7\n");
+	printf("SCFG_CLK ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_CLK);\n");
-	fifoSendValue32(FIFO_USER_01, (long unsigned int)&REG_SCFG_CLK);
+	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_CLK);
 
-	iprintf("SCFG_EXT ARM7\n");
+	printf("SCFG_EXT ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_EXT);\n");
-	fifoSendValue32(FIFO_USER_01, (long unsigned int)&REG_SCFG_EXT);
+	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_EXT);
 }
 
-static void myFIFOValue32Handler(u32 value, void* data) {
+static void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler\n");
-	iprintf("ARM7 data %lX\n", value);
+	printf("ARM7 data %lX\n", value);
 }
 
 static inline void debugConf(configuration* conf) {
@@ -155,7 +155,7 @@ static int runNdsFile(configuration* conf) {
 		powerOff(PM_BACKLIGHT_TOP);
 		consoleDemoInit();
 
-		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, 0);
+		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
 
 		getSFCG_ARM9();
 		getSFCG_ARM7();
