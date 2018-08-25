@@ -120,8 +120,11 @@ static void myFIFOValue32Handler(u32 value, void* data) {
 
 static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
-	dbg_printf("ndsPath: %s\n", conf->ndsPath);
-	dbg_printf("savPath: %s\n", conf->savPath);
+	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
+	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
 	dbg_printf("dsiMode: %s\n", btoa(conf->dsiMode));
@@ -157,9 +160,9 @@ static int runNdsFile(configuration* conf) {
 		getSFCG_ARM9();
 		getSFCG_ARM7();
 
-		for (int i = 0; i < 60; i++) {
+		/*for (int i = 0; i < 60; i++) {
 			swiWaitForVBlank();
-		}
+		}*/
 	}
 
 	// ROM read LED
@@ -290,10 +293,13 @@ static int runNdsFile(configuration* conf) {
 
 	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0 || conf->argc == 0) {
 		dbg_printf("No NDS file specified\n");
+		if (debug) {
+			dopause();
+		}
 		return -1;
 	}
 
-	dbg_printf("Running \"%s\" with %d parameters\n", conf->ndsPath, conf->argc);
+	//dbg_printf("Running \"%s\" with %d parameters\n", conf->ndsPath, conf->argc);
 	if (debug) {
 		dopause();
 	}
