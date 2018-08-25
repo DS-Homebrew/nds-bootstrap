@@ -288,10 +288,8 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
 	
 	// Power management
-	writePowerManagement(0x80, 0x00);
-	writePowerManagement(0x00, 0x0D);
-	//*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
-	//*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
+	writePowerManagement(PM_READ_REGISTER, 0x00); //*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
+	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
@@ -441,25 +439,29 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 }
 
 static void reloadFirmwareSettings(const tNDSHeader* ndsHeader) {
-	u8 settings1, settings2;
-	u32 settingsOffset = 0;
+	short slot1count, slot2count; //u8
+	u32 userSettingsBase;
 
 	// Get settings location
-	readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
-	settingsOffset *= 8;
+	readFirmware(0x20, &userSettingsBase, 2);
+
+	u32 slot1Address = userSettingsBase * 8;
+	u32 slot2Address = userSettingsBase * 8 + 0x100;
 
 	// Reload DS Firmware settings
-	readFirmware(settingsOffset + 0x070, &settings1, 0x1);
-	readFirmware(settingsOffset + 0x170, &settings2, 0x1);
+	readFirmware(slot1Address + 0x70, &slot1count, 0x1);
+	readFirmware(slot2Address + 0x70, &slot2count, 0x1);
 
-	if ((settings1 & 0x7F) == ((settings2 + 1) & 0x7F)) {
-		readFirmware(settingsOffset + 0x000, (u8*)((u32)ndsHeader - 0x180), 0x70);
+	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)ndsHeader + (u32)PersonalData - (u32)__NDSHeader); //(u8*)((u32)ndsHeader - 0x180)
+
+	if ((slot1count & 0x7F) == ((slot2count + 1) & 0x7F)) {
+		readFirmware(slot1Address, personalData, sizeof(PERSONAL_DATA)); //readFirmware(slot1Address, personalData, 0x70);
 	} else {
-		readFirmware(settingsOffset + 0x100, (u8*)((u32)ndsHeader - 0x180), 0x70);
+		readFirmware(slot2Address, personalData, sizeof(PERSONAL_DATA)); //readFirmware(slot2Address, personalData, 0x70);
 	}
 	if (language >= 0 && language < 6) {
 		// Change language
-		*(u8*)((u32)ndsHeader - 0x11C) = language;
+		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 }
 
