@@ -78,7 +78,7 @@ typedef struct cardengineArm7 {
     u32 soundFix;
     u32 cheat_data_offset; //u32* cheat_data;
     u32 cheat_data_len;
-    u32* romFile;
+    u32* romFileOffset;
 
 } __attribute__ ((__packed__)) cardengineArm7;
 

@@ -66,8 +66,8 @@ static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 
-static aFile* romFile = (aFile*)0x37D5000;
-static aFile* savFile = (aFile*)0x37D5000 + 1;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 
 static int cardReadTimeOut = 0;
 

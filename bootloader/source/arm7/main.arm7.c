@@ -567,7 +567,7 @@ int arm7_main(void) {
 	}
 
 	// ROM file
-	aFile* romFile = (aFile*)0x37D5000;
+	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 	*romFile = getFileFromCluster(storedFileCluster);
 
 	const char* bootName = "BOOT.NDS";
@@ -585,7 +585,7 @@ int arm7_main(void) {
 	buildFatTableCache(romFile, 3);
 
 	// Sav file
-	aFile* savFile = romFile + 1; //aFile* savFile = (aFile*)0x37D5000 + 1;
+	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
 	if (savFile->firstCluster != CLUSTER_FREE) {
