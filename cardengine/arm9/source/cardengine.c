@@ -523,13 +523,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardStruct[0] = src;
 	}
 
-	if(src <= 0x8000){
-		src = 0x8000+(src & 0x1FF);	// Fix reads below 0x8000
-	}
-	if (src == 0) {
-		// If ROM read location is 0, do not proceed.
-		return 0;
-	}
 	u8* dst = (isSdk5(moduleParams) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = (isSdk5(moduleParams) ? len0 : cardStruct[2]);
 
@@ -571,6 +564,16 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			readNum += 1;
 		}
 	}*/
+
+	if (src == 0) {
+		// If ROM read location is 0, do not proceed.
+		return 0;
+	}
+
+	// Fix reads below 0x8000
+	if (src <= 0x8000){
+		src = 0x8000 + (src & 0x1FF);
+	}
 
 	return ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }
