@@ -263,9 +263,8 @@ static int runNdsFile(configuration* conf) {
 	if (conf->boostCpu) {
 		dbg_printf("CPU boosted\n");
 		// libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-		setCpuClock(false);
 	} else {
-		setCpuClock(true); //REG_SCFG_CLK = 0x80;
+		setCpuClock(false); //REG_SCFG_CLK = 0x80;
 		fifoSendValue32(FIFO_USER_06, 1);
 	}
 
