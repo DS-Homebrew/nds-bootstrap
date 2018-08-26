@@ -19,6 +19,7 @@ typedef struct configuration {
 	u32 loadingScreen;
 	u32 romread_LED;
 	bool boostCpu;
+	bool boostVram;
 	bool gameSoftReset;
 	bool asyncPrefetch;
 	bool soundFix;
