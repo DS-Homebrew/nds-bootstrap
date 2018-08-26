@@ -70,6 +70,7 @@ static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 
 static int cardReadTimeOut = 0;
+static int saveTimer = 0;
 
 static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -78,7 +79,6 @@ static bool volumeAdjustActivated = false;
 //static bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
-static int saveMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static const char* romLocation = NULL;
@@ -133,63 +133,67 @@ static void initialize(void) {
 }
 
 static void cardReadLED(bool on) {
-	if (on) {
-		switch(romread_LED) {
-			case 0:
-			default:
-				break;
-			case 1:
-				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-				break;
-			case 2:
-				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-				break;
-			case 3:
-				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-				break;
-		}
-	} else {
-		switch(romread_LED) {
-			case 0:
-			default:
-				break;
-			case 1:
-				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-				break;
-			case 2:
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-				break;
-			case 3:
-				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-				break;
+	if (consoleModel < 2) {
+		if (on) {
+			switch(romread_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+					break;
+				case 3:
+					i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+					break;
+			}
+		} else {
+			switch(romread_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+					break;
+				case 3:
+					i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+					break;
+			}
 		}
 	}
 }
 
 static void asyncCardReadLED(bool on) {
-	if (on) {
-		switch(romread_LED) {
-			case 0:
-			default:
-				break;
-			case 1:
-				i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-				break;
-			case 2:
-				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-				break;
-		}
-	} else {
-		switch(romread_LED) {
-			case 0:
-			default:
-				break;
-			case 1:
-				i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-				break;
-			case 2:
-				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-				break;
+	if (consoleModel < 2) {
+		if (on) {
+			switch(romread_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+					break;
+			}
+		} else {
+			switch(romread_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+					break;
+			}
 		}
 	}
 }
@@ -428,11 +432,10 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	} else { 
 		if (softResetTimer == 60 * 2) {
-			if (lockMutex(&saveMutex)) {
+			if (saveTimer == 0) {
 				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot into DSiMenu++
-				unlockMutex(&saveMutex);
 			}
 		}
 		softResetTimer++;
@@ -440,11 +443,10 @@ void myIrqHandlerVBlank(void) {
 
 	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
 	} else if (!gameSoftReset) {
-		if (lockMutex(&saveMutex)) {
+		if (saveTimer == 0) {
 			memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot game
-			unlockMutex(&saveMutex);
 		}
 	}
 
@@ -648,6 +650,14 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 	}
+	
+	if (saveTimer > 0) {
+		saveTimer++;
+		if (saveTimer == 60) {
+			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+			saveTimer = 0;
+		}
+	}
 
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
@@ -715,10 +725,9 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
 	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
 		memcpy(dst, saveLocation + src, len);
-	} else if (lockMutex(&saveMutex)) {
+	} else {
 		initialize();
 		fileRead(dst, *savFile, src, len, -1);
-		unlockMutex(&saveMutex);
 	}
 	return true;
 }
@@ -735,16 +744,16 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (lockMutex(&saveMutex)) {
-		initialize();
+	initialize();
+	if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy(saveLocation + dst, src, len);
-		}
-		fileWrite(src, *savFile, dst, len, -1);
-		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-		unlockMutex(&saveMutex);
 	}
+	saveTimer = 1;
+	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
+		memcpy(saveLocation + dst, src, len);
+	}
+	fileWrite(src, *savFile, dst, len, -1);
+
 	return true;
 }
 
@@ -760,16 +769,16 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (lockMutex(&saveMutex)) {
-		initialize();
-		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.    
-		if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-			memcpy(saveLocation + dst, src, len);
-		}
-		fileWrite(src, *savFile, dst, len, -1);
-		i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-		unlockMutex(&saveMutex);
+	initialize();
+	if (saveTimer == 0) {
+		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
+	saveTimer = 1;
+	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
+		memcpy(saveLocation + dst, src, len);
+	}
+	fileWrite(src, *savFile, dst, len, -1);
+
 	return true;
 }
 
@@ -824,7 +833,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	
 	if (ROMinRAM) {
 		memcpy(dst, romLocation + src, len);
-	} else if (lockMutex(&saveMutex)) {
+	} else {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
@@ -834,7 +843,6 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, *romFile, src, len, 2);
 		//ndmaUsed = true;
 		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-		unlockMutex(&saveMutex);
 	}
 	
 	return true;
