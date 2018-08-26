@@ -24,6 +24,7 @@ typedef struct loadCrt0 {
     u32 consoleModel;
     u32 loadingScreen;
     u32 romread_LED;
+    u32 boostVram;
     u32 gameSoftReset;
     u32 asyncPrefetch;
     u32 soundFix;

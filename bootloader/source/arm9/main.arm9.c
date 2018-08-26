@@ -45,6 +45,7 @@ extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
+extern u32 boostVram;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -189,6 +190,9 @@ void arm9_main(void) {
 	//);
 
 	REG_SCFG_EXT = 0x8300C000;
+	if (boostVram) {
+		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+	}
 
 	screenBrightness = 31;
 	fadeType = true;

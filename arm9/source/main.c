@@ -268,6 +268,11 @@ static int runNdsFile(configuration* conf) {
 		fifoSendValue32(FIFO_USER_06, 1);
 	}
 
+	// Boost VRAM
+	if (conf->boostVram) {
+		dbg_printf("VRAM boosted\n");
+	}
+
 	fifoSendValue32(FIFO_USER_03, 1);
 	fifoWaitValue32(FIFO_USER_05);
 

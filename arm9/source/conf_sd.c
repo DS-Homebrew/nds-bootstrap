@@ -139,6 +139,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Boost CPU
 		conf->boostCpu = (bool)strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_VRAM")) {
+		// Boost VRAM
+		conf->boostVram = (bool)strtol(value, NULL, 0);
+
 	} else {
 		// Unknown section/name
 		//return 0; // Error

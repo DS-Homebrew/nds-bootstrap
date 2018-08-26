@@ -39,6 +39,7 @@
 	.global consoleModel
 	.global loadingScreen
 	.global romread_LED
+	.global boostVram
 	.global gameSoftReset
 	.global asyncPrefetch
 	.global soundFix
@@ -85,6 +86,8 @@ consoleModel:
 loadingScreen:
 	.word	0x00000000
 romread_LED:
+	.word	0x00000000
+boostVram:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
