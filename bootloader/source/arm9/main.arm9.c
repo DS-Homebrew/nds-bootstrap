@@ -246,10 +246,10 @@ void arm9_main(void) {
 
 	if (dsiModeConfirmed) {
 		REG_SCFG_EXT = 0x8307F100;
+	} else {
+		// lock SCFG
+		REG_SCFG_EXT &= ~(1UL << 31);
 	}
-
-	// lock SCFG
-	REG_SCFG_EXT &= ~(1UL << 31);
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

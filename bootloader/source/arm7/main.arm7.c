@@ -729,7 +729,9 @@ int arm7_main(void) {
 
 	fadeOut();
 
-	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	if (!dsiModeConfirmed) {
+		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	}
 
 	nocashMessage("Starting the NDS file...");
 	startBinary_ARM7(arm9StartAddress);
