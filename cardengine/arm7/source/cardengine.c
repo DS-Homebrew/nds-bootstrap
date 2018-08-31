@@ -49,7 +49,6 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
-extern u32 saveSize;
 extern module_params_t* moduleParams;
 extern u32 language;
 extern u32 gottenSCFGExt;
@@ -168,7 +167,7 @@ static void cardReadLED(bool on) {
 	}
 }
 
-static void asyncCardReadLED(bool on) {
+/*static void asyncCardReadLED(bool on) {
 	if (consoleModel < 2) {
 		if (on) {
 			switch(romread_LED) {
@@ -196,7 +195,7 @@ static void asyncCardReadLED(bool on) {
 			}
 		}
 	}
-}
+}*/
 
 static void log_arm9(void) {
 	#ifdef DEBUG
@@ -273,7 +272,7 @@ static void cardRead_arm9(void) {
 	#endif
 }
 
-static void asyncCardRead_arm9(void) {
+/*static void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -313,7 +312,7 @@ static void asyncCardRead_arm9(void) {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
-}
+}*/
 
 static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
@@ -336,10 +335,10 @@ static void runCardEngineCheck(void) {
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-		}
+		}*/
 		unlockMutex(&cardEgnineCommandMutex);
 	}
 }
@@ -370,10 +369,10 @@ static void runCardEngineCheckHalt(void) {
 			*(vu32*)(0x027FFB14) = 0;
 		}
 
-		if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
 			asyncCardRead_arm9();
 			*(vu32*)(0x027FFB14) = 0;
-		}
+		}*/
 		unlockMutex(&cardEgnineCommandMutex);
 	}
 }
@@ -723,12 +722,8 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-		memcpy(dst, saveLocation + src, len);
-	} else {
-		initialize();
-		fileRead(dst, *savFile, src, len, -1);
-	}
+	initialize();
+	fileRead(dst, *savFile, src, len, -1);
 	return true;
 }
 
@@ -749,9 +744,6 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-		memcpy(saveLocation + dst, src, len);
-	}
 	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;
@@ -774,9 +766,6 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	if (!ROMinRAM && saveSize > 0 && saveSize <= 0x00100000) {
-		memcpy(saveLocation + dst, src, len);
-	}
 	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;

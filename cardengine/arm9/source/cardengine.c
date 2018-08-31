@@ -66,13 +66,13 @@ static u32 cacheAddress = CACHE_ADRESS_START; // SDK 5
 static u16 cacheSlots = retail_CACHE_SLOTS;
 
 static u32 cacheReadSizeSubtract = 0;
-static u32 asyncReadSizeSubtract = 0;
+/*static u32 asyncReadSizeSubtract = 0;
 
 static u32 asyncSector = 0xFFFFFFFF;
 static u32 asyncQueue[10];
 static int aQHead = 0;
 static int aQTail = 0;
-static int aQSize = 0;
+static int aQSize = 0;*/
 
 static u32 readNum = 0;
 static bool alreadySetMpu = false;
@@ -118,7 +118,7 @@ static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0);
 }
 
-static void addToAsyncQueue(u32 sector) {
+/*static void addToAsyncQueue(u32 sector) {
 	#ifdef DEBUG
 	nocashMessage("\narm9 addToAsyncQueue\n");	
 	nocashMessage("\narm9 sector\n");	
@@ -231,7 +231,7 @@ static void getAsyncSector(void) {
 			asyncSector = 0xFFFFFFFF;
 		}	
 	}
-}
+}*/
 
 static inline bool isHGSS(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -252,16 +252,16 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	accessCounter++;
 
-	bool pAC = ((isSdk5(moduleParams) && consoleModel > 0) || (!isSdk5(moduleParams) && !hgssFix));
+	//bool pAC = ((isSdk5(moduleParams) && consoleModel > 0) || (!isSdk5(moduleParams) && !hgssFix));
 
-	if (asyncPrefetch && pAC) {
+	/*if (asyncPrefetch && pAC) {
 		processAsyncCommand();
-	}
+	}*/
 
 	if (page == src && len > _128KB_READ_SIZE && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		if (asyncPrefetch && pAC) {
+		/*if (asyncPrefetch && pAC) {
 			getAsyncSector();
-		}
+		}*/
 
 		// Read directly at ARM7 level
 		commandRead = 0x025FFB08;
@@ -282,12 +282,12 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			u32 nextSector = sector+_128KB_READ_SIZE;	
+			//u32 nextSector = sector+_128KB_READ_SIZE;	
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
-				if (asyncPrefetch && pAC) {
+				/*if (asyncPrefetch && pAC) {
 					getAsyncSector();
-				}
+				}*/
 
 				// Send a command to the ARM7 to fill the RAM cache
 				commandRead = 0x025FFB08;
@@ -312,11 +312,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				updateDescriptor(slot, sector);	
 	
-				if (asyncPrefetch && pAC) {
+				/*if (asyncPrefetch && pAC) {
 					triggerAsyncPrefetch(nextSector);
-				}
+				}*/
 			} else {
-				if (asyncPrefetch && pAC) {
+				/*if (asyncPrefetch && pAC) {
 					if (cacheCounter[slot] == 0x0FFFFFFF) {
 						// Prefetch successful
 						getAsyncSector();
@@ -331,7 +331,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 							}
 						}
 					}
-				}
+				}*/
 				updateDescriptor(slot, sector);
 			}
 

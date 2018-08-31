@@ -18,7 +18,7 @@ static const u32 a7JumpTableSignatureUniversal[3]      = {0xE592000C, 0xE5921010
 static const u32 a7JumpTableSignatureUniversal_2[3]    = {0xE593000C, 0xE5931010, 0xE5932014};
 static const u16 a7JumpTableSignatureUniversalThumb[4] = {0x6822, 0x68D0, 0x6911, 0x6952};
 
-u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
     //dbg_printf("\nArm7 (patch vAll)\n");
 	dbg_printf("\nArm7 (patch v5)\n");
 
@@ -205,7 +205,6 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_p
 
 	}
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
-	ce7->patches->arm7Functions->saveSize    = saveSize;
 
 	return 1;
 }

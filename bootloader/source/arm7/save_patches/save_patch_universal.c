@@ -34,7 +34,7 @@ static const u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x694
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
 
-u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster, u32 saveSize) {
+u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
 	dbg_printf("\nArm7 (patch vAll)\n");
 	
 	bool usesThumb = false;
@@ -372,7 +372,6 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	}
 
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
-	ce7->patches->arm7Functions->saveSize    = saveSize;
 
 	return 1;
 }
