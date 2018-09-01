@@ -165,7 +165,6 @@ int main( int argc, char **argv) {
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
-		fifoSendValue32(FIFO_MAXMOD, 1);
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
