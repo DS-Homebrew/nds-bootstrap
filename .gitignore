@@ -83,3 +83,13 @@ $RECYCLE.BIN/
 *.nds
 *.cia
 *.d
+release/nds-bootstrap.zip
+release/_nds/nds-bootstrap.ini
+
+# Build folders
+data
+arm7/build
+arm9/build
+sdengine/build
+bootloader/build
+bootstub/build

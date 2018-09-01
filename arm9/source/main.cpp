@@ -145,11 +145,12 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int main( int argc, char **argv) {
 
-    REG_SCFG_CLK = 0x85;
-
 	nocashMessage("main arm9");
     
     consoleDemoInit();
+
+	extern bool __dsimode;
+	__dsimode = false;
 
 	__NDSHeader->unitCode = 0;
 	
