@@ -231,6 +231,12 @@ void loadBinary_ARM7 (u32 fileCluster)
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEAD, 0x170);
 }
 
+static void NTR_BIOS() {
+	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
+	nocashMessage("Switch to NTR mode BIOS");
+	REG_SCFG_ROM = 0x703;
+}
+
 /*-------------------------------------------------------------------------
 startBinary_ARM7
 Jumps to the ARM7 NDS binary in sync with the display and ARM9
@@ -344,6 +350,8 @@ int main (void) {
 	u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
 	u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
 	
+	NTR_BIOS();
+
 	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	// Pass command line arguments to loaded program

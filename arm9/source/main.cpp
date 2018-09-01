@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, bool ntrMode) {
+void runFile(string filename) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -98,7 +98,7 @@ void runFile(string filename, bool ntrMode) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], ntrMode, argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0]);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -151,7 +151,6 @@ int main( int argc, char **argv) {
     
     consoleDemoInit();
 
-	bool ntrMode = false;
 	__NDSHeader->unitCode = 0;
 	
 	// No! broke no$gba compatibility
@@ -164,9 +163,7 @@ int main( int argc, char **argv) {
         printf("fat inited");    
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
-		ntrMode = bootstrapini.GetInt("NDS-BOOTSTRAP","NTR_MODE",1);
-			
-          // REG_SCFG_CLK = 0x80;
+        // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 		fifoSendValue32(FIFO_MAXMOD, 1);
 
@@ -193,7 +190,7 @@ int main( int argc, char **argv) {
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
-		
+
 		if (0 != argc ) {
 			dbg_printf("arguments passed\n");
 			int i;
@@ -203,10 +200,6 @@ int main( int argc, char **argv) {
 			dbg_printf("\n");
 		} else {
 			dbg_printf("No arguments passed!\n");
-		}
-	
-		if(ntrMode) {
-			printf("NTR mode enabled\n");
 		}
 
 
@@ -237,14 +230,9 @@ int main( int argc, char **argv) {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
-		
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOCK_ARM9_SCFG_EXT",0) == 1) {	
-			dbg_printf("ARM9_SCFG_EXT locked\n");
-			REG_SCFG_EXT = 0x03000000; // NAND/SD Access
-		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), ntrMode);
+		runFile(ndsPath.c_str());
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
