@@ -81,7 +81,6 @@ static int cardEgnineCommandMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static const char* romLocation = NULL;
-static char* saveLocation = NULL;
 
 static void initialize(void) {
 	if (initialized) {
@@ -126,8 +125,7 @@ static void initialize(void) {
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	romLocation = (char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	saveLocation = (char*)(isSdk5(moduleParams) ? SAVE_SDK5_LOCATION : SAVE_LOCATION);
-				
+
 	initialized = true;
 }
 

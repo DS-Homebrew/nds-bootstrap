@@ -30,28 +30,25 @@
 #define ROM_LOCATION      0x0C804000
 #define ROM_SDK5_LOCATION 0x0D000000
 
-#define SAVE_LOCATION      0x0C820000
-#define SAVE_SDK5_LOCATION 0x0CE00000
-
-#define CACHE_ADRESS_START             0x0C920000
+#define CACHE_ADRESS_START             0x0C808000
 #define retail_CACHE_ADRESS_START_SDK5 0x0C480000
 
-//#define retail_CACHE_ADRESS_SIZE      0x6E0000
+//#define retail_CACHE_ADRESS_SIZE      0x7F8000
 //#define retail_CACHE_ADRESS_SIZE_SDK5 0x280000
 
-#define retail_CACHE_SLOTS      0x37
-#define retail_CACHE_SLOTS_SDK5 0x14
+#define retail_CACHE_SLOTS      0xFF
+#define retail_CACHE_SLOTS_SDK5 0x50
 
 #define dev_CACHE_ADRESS_START_SDK5 0x0D000000
 
-//#define dev_CACHE_ADRESS_SIZE      0x16E0000
+//#define dev_CACHE_ADRESS_SIZE      0x17F8000
 //#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
 
-#define dev_CACHE_SLOTS      0xB7
-#define dev_CACHE_SLOTS_SDK5 0x80
+#define dev_CACHE_SLOTS      0x2FF
+#define dev_CACHE_SLOTS_SDK5 0x200
 
 //#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
 
-#define HGSS_CACHE_SLOTS 0xF
+#define HGSS_CACHE_SLOTS 0x3C
 
 #endif // LOCATIONS_H
