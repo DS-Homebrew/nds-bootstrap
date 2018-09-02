@@ -35,5 +35,5 @@ void increaseLoadBarLength(void) {
 
 void fadeOut(void) {
 	fadeType = false;
-	while (screenBrightness != 31);	// Wait for screen to fade out
+	while (screenBrightness != 25);	// Wait for screen to fade out
 }

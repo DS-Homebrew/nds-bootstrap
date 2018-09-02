@@ -216,7 +216,7 @@ void arm9_main(void) {
 				if (screenBrightness < 0) screenBrightness = 0;
 			} else {
 				screenBrightness++;
-				if (screenBrightness > 31) screenBrightness = 31;
+				if (screenBrightness > 25) screenBrightness = 25;
 			}
 			SetBrightness(0, screenBrightness);
 			SetBrightness(1, screenBrightness);
