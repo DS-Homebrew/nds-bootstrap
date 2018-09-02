@@ -555,7 +555,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 
 	// SDK 5 --> White screen
-	if (!isSdk5(moduleParams) && *(vu32*)0x2800010 != 1) {
+	/*if (!isSdk5(moduleParams) && *(vu32*)0x2800010 != 1) {
 		if (readNum >= 0x100){ // Don't set too early or some games will crash
 			*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)0x2800004;
 			*(vu32*)(*(vu32*)(0x2800008)) = *(vu32*)0x280000C;
@@ -563,7 +563,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		} else {
 			readNum += 1;
 		}
-	}
+	}*/
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
