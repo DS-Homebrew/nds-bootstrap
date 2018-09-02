@@ -21,6 +21,7 @@
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
+#include <nds/interrupts.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -65,7 +66,6 @@ static u32 romLocation = ROM_LOCATION;
 static u32 cacheAddress = CACHE_ADRESS_START; // SDK 5
 static u16 cacheSlots = retail_CACHE_SLOTS;
 
-static u32 cacheReadSizeSubtract = 0;
 /*static u32 asyncReadSizeSubtract = 0;
 
 static u32 asyncSector = 0xFFFFFFFF;
@@ -242,13 +242,6 @@ static inline bool isHGSS(const tNDSHeader* ndsHeader) {
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	u32 commandRead;
 	u32 sector = (src/_32KB_READ_SIZE)*_32KB_READ_SIZE;
-	cacheReadSizeSubtract = 0;
-	if ((ndsHeader->romSize > 0) && ((sector+_32KB_READ_SIZE) > ndsHeader->romSize)) {
-		for (u32 i = 0; i < _32KB_READ_SIZE; i++) {
-			cacheReadSizeSubtract++;
-			if (((sector+_32KB_READ_SIZE)-cacheReadSizeSubtract) == ndsHeader->romSize) break;
-		}
-	}
 
 	accessCounter++;
 
@@ -300,15 +293,19 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 					DC_FlushRange((u8*)buffer, _32KB_READ_SIZE);
 				}
 
+				REG_IME = 0;
+
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = _32KB_READ_SIZE - cacheReadSizeSubtract;
+				sharedAddr[1] = _32KB_READ_SIZE;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
 				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
+
+				REG_IME = 1;
 
 				updateDescriptor(slot, sector);	
 	
@@ -402,15 +399,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				dst = (u8*)cardStruct[1];
 				page = (src / 512) * 512;
 				sector = (src / _32KB_READ_SIZE) * _32KB_READ_SIZE;
-				cacheReadSizeSubtract = 0;
-				if (ndsHeader->romSize > 0 && (sector+_32KB_READ_SIZE) > ndsHeader->romSize) {
-					for (u32 i = 0; i < _32KB_READ_SIZE; i++) {
-						cacheReadSizeSubtract++;
-						if ((sector+_32KB_READ_SIZE) - cacheReadSizeSubtract == ndsHeader->romSize) {
-							break;
-						}
-					}
-				}
 				accessCounter++;
 			}
 		}
