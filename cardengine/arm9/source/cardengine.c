@@ -498,7 +498,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = (isSdk5(moduleParams) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
+			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
 
 		//ndsHeader->romSize += 0x1000;
