@@ -331,14 +331,14 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
 
 		
-	//if(dldiPatchNds) {
+	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
 		if (!dldiPatchLoader ((data_t*)LCDC_BANK_C, loaderSize, initDisc)) {
 			nocashMessage("return 3");
 			return 3;
 		}
-	//}
+	}
 	
 	nocashMessage("irqDisable(IRQ_ALL);");
 

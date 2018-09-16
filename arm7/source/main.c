@@ -104,6 +104,7 @@ int main(void) {
 	swiIntrWait(0,IRQ_FIFO_NOT_EMPTY);
 	//
 	if(fifoCheckValue32(FIFO_USER_04)) { dsi_resetSlot1(); }
+	fifocheck();
     nocashMessage("fifoSendValue32(FIFO_USER_05, 1);");
 	//
 	fifoSendValue32(FIFO_USER_05, 1);
@@ -112,6 +113,8 @@ int main(void) {
 	//fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);   
 
 	// Keep the ARM7 mostly idle
-	while (1) { swiIntrWait(0,IRQ_FIFO_NOT_EMPTY); fifocheck(); }
+	while (1) {
+		swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
+	}
 }
 
