@@ -52,7 +52,7 @@ extern u32 saveCluster;
 extern module_params_t* moduleParams;
 extern u32 language;
 extern u32 gottenSCFGExt;
-extern u32 dsiMode; // SDK 5
+extern u32 dsiMode;
 extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
@@ -124,7 +124,7 @@ static void initialize(void) {
 	#endif
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	romLocation = (char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 
 	initialized = true;
 }
