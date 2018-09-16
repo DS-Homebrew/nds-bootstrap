@@ -147,33 +147,28 @@ int main( int argc, char **argv) {
 
 	nocashMessage("main arm9");
     
-    consoleDemoInit();
+    //consoleDemoInit();
 
-	extern bool __dsimode;
-	__dsimode = false;
-
-	__NDSHeader->unitCode = 0;
-	
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
 
-    printf("fat init ...");    
+    //printf("fat init ...");    
 	
-	if (fatInitDefault()) {
+	if (fatMountSimple("sd", get_io_dsisd())) {
     	nocashMessage("fat inited");
-        printf("fat inited");    
-		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+        //printf("fat inited");    
+		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
 			debug=true;			
-			
+
 			consoleDemoInit();
 
-			fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-			
+			//fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
+
 			getSFCG_ARM9();
 			//getSFCG_ARM7();
 		}
@@ -205,23 +200,23 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
 			fclose (debugFile);
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
+			debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
 			for (int i=0; i<50000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
 			
 		} else {
-			remove ("fat:/NDSBTSRP.LOG");
+			remove ("sd:/NDSBTSRP.LOG");
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-        std::string	substr = "sd:/";
-        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
+        //std::string	substr = "sd:/";
+        //if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
 			dbg_printf("CPU boosted\n");

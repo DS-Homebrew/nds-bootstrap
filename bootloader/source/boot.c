@@ -296,11 +296,11 @@ static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Nor
 
 int main (void) {
 	nocashMessage("bootloader");
-	if (dsiSD) {
+	/*if (dsiSD) {
 		_io_dldi.fn_readSectors = sdmmc_readsectors;
 		_io_dldi.fn_isInserted = sdmmc_inserted;
 		_io_dldi.fn_startup = sdmmc_startup;
-	}
+	}*/
 
 	u32 fileCluster = storedFileCluster;
 	// Init card

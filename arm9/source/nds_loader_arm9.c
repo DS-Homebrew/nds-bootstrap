@@ -289,10 +289,10 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	// INIT_DISC = initDisc;
 	writeAddr ((data_t*) LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
 
-	if(argv[0][0]=='s' && argv[0][1]=='d') {
+	/*if(argv[0][0]=='s' && argv[0][1]=='d') {
 		dldiPatchNds = false;
 		writeAddr ((data_t*) LCDC_BANK_C, HAVE_DSISD_OFFSET, 1);
-	}
+	}*/
 
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
 	writeAddr ((data_t*) LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
@@ -331,23 +331,24 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
 
 		
-	if(dldiPatchNds) {
+	//if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
 		if (!dldiPatchLoader ((data_t*)LCDC_BANK_C, loaderSize, initDisc)) {
 			nocashMessage("return 3");
 			return 3;
 		}
-	}
+	//}
 	
 	nocashMessage("irqDisable(IRQ_ALL);");
 
 	irqDisable(IRQ_ALL);
 
+	REG_SCFG_EXT = 0x03000000;
+
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;  
-	REG_SCFG_EXT = 0x03000000; // NAND/SD Access	
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop

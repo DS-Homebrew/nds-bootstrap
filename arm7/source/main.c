@@ -34,52 +34,17 @@ redistribute it freely, subject to the following restrictions:
 #include "fifocheck.h"
 #include "sdmmcEngine.h"
 
-static u32 * wordCommandAddr;
-
-//---------------------------------------------------------------------------------
-void SyncHandler(void) {
-//---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
-}
-
-//---------------------------------------------------------------------------------
-void VcountHandler() {
-//---------------------------------------------------------------------------------
-	runSdMmcEngineCheck(myMemUncached(wordCommandAddr));
+void VcountHandler(void) {
 	inputGetAndSend();
 }
 
 static void myFIFOValue32Handler(u32 value,void* data)
 {
-  nocashMessage("myFIFOValue32Handler");
-
-  nocashMessage("default");
-  nocashMessage("fifoSendValue32");
-  fifoSendValue32(FIFO_USER_02,*((unsigned int*)value));	
-
+	nocashMessage("myFIFOValue32Handler");
+ 	nocashMessage("default");
+	nocashMessage("fifoSendValue32");
+	fifoSendValue32(FIFO_USER_02, *(u16*)value);
 }
-
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
-	const int* dataChunk = (const int*) data;
-	int searchChunk = ((const int*)search)[0];
-	u32 i;
-	u32 dataChunkEnd = (u32)(dataLen / sizeof(int));
-
-	for ( i = 0; i < dataChunkEnd; i++) {
-		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
-				return -1;
-			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
-				return i*sizeof(int);
-			}
-		}
-	}
-
-	return -1;
-}
-
-static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 
 void dsi_resetSlot1() {
 		
@@ -111,27 +76,12 @@ void dsi_resetSlot1() {
 int main(void) {
 //---------------------------------------------------------------------------------
 	nocashMessage("main arm7");
-    
-    //REG_SCFG_CLK = 0x0181;
-	//REG_SCFG_EXT = 0x93A40000; // NAND/SD Access
-    
-    __NDSHeader->unitCode = 0;
-    	
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind (__DSiHeader->ndshdr.arm9destination, dldiMagicString, __DSiHeader->ndshdr.arm9binarySize, sizeof(dldiMagicString));
-	if(patchOffset == -1) {
-		nocashMessage("dldi not found");
-	}
-	wordCommandAddr = (u32 *) (((u32)__DSiHeader->ndshdr.arm9destination)+patchOffset+0x80);
-    
-    nocashMessage("dldi found");
 	
 	irqInit();
 	fifoInit();
 
 	// read User Settings from firmware
 	readUserSettings();
-
 
 	// Start the RTC tracking IRQ
 	initClockIRQ();
@@ -141,12 +91,9 @@ int main(void) {
 	installSystemFIFO();
 	
 	irqSet(IRQ_VCOUNT, VcountHandler);
-	irqSet(IRQ_IPC_SYNC, SyncHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_IPC_SYNC);
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT );
   
-	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE; 
-
 	i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
 	i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
     
@@ -162,7 +109,7 @@ int main(void) {
 	fifoSendValue32(FIFO_USER_05, 1);
 
 
-	fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);   
+	//fifoSetValue32Handler(FIFO_USER_01,myFIFOValue32Handler,0);   
 
 	// Keep the ARM7 mostly idle
 	while (1) { swiIntrWait(0,IRQ_FIFO_NOT_EMPTY); fifocheck(); }
