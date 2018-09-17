@@ -137,11 +137,19 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_CPU")) {
 		// Boost CPU
-		conf->boostCpu = (bool)strtol(value, NULL, 0);
+		if (conf->dsiMode) {
+			conf->boostCpu = true;
+		} else {
+			conf->boostCpu = (bool)strtol(value, NULL, 0);
+		}
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_VRAM")) {
 		// Boost VRAM
-		conf->boostVram = (bool)strtol(value, NULL, 0);
+		if (conf->dsiMode) {
+			conf->boostVram = true;
+		} else {
+			conf->boostVram = (bool)strtol(value, NULL, 0);
+		}
 
 	} else {
 		// Unknown section/name
