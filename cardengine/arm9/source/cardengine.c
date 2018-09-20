@@ -22,7 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 //#include <nds/interrupts.h>
-#include <nds/ipc.h>
+//#include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -189,7 +189,7 @@ static void triggerAsyncPrefetch(u32 sector) {
 			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
-			IPC_SendSync(0xEE24);			
+			//IPC_SendSync(0xEE24);			
 
 
 			// do it asynchronously
@@ -269,7 +269,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		sharedAddr[2] = src;
 		sharedAddr[3] = commandRead;
 
-		IPC_SendSync(0xEE24);
+		//IPC_SendSync(0xEE24);
 
 		waitForArm7();
 
@@ -306,7 +306,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
 
@@ -358,7 +358,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = buffer+src-sector;
 				sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
 				// -------------------------------------*/
@@ -382,7 +382,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = buffer+page-sector;
 				sharedAddr[3] = commandRead;
 
-				IPC_SendSync(0xEE24);
+				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
 				// -------------------------------------
@@ -432,7 +432,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			sharedAddr[2] = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
 			sharedAddr[3] = commandRead;
 
-			IPC_SendSync(0xEE24);
+			//IPC_SendSync(0xEE24);
 
 			waitForArm7();
 			// -------------------------------------
@@ -456,7 +456,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			sharedAddr[2] = (((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
 			sharedAddr[3] = commandRead;
 
-			IPC_SendSync(0xEE24);
+			//IPC_SendSync(0xEE24);
 
 			waitForArm7();
 			// -------------------------------------
@@ -543,7 +543,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	sharedAddr[2] = src;
 	sharedAddr[3] = commandRead;
 
-	IPC_SendSync(0xEE24);
+	//IPC_SendSync(0xEE24);
 
 	waitForArm7();
 	// -------------------------------------*/
