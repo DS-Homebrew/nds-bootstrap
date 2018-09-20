@@ -26,6 +26,6 @@ Once all that is downloaded and installed, `git clone` this repository, navigate
 # Frontends
 
 In order to use this, you'll need to get a frontend:
-- [DSiMenu++](https://github.com/Robz8/SRLoader) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
+- [TWiLightMenu++](https://github.com/Robz8/SRLoader) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
 - [TWLoader](https://github.com/Robz8/TWLoader) is a discontinued 3DS frontend.
 - [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a 3DS frontend based off the Nintendo DSi homebrew menu.
