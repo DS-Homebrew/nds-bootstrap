@@ -239,6 +239,7 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 	return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles)
 		|| strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
 		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
+		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
 		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
 		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
 		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
