@@ -64,6 +64,7 @@ static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
+static u32 readSize = _128KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS;
 
@@ -79,7 +80,6 @@ static int aQSize = 0;*/
 static bool alreadySetMpu = false;*/
 
 static bool flagsSet = false;
-static bool hgssFix = false;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -106,8 +106,8 @@ static int getSlotForSector(u32 sector) {
 }
 
 static vu8* getCacheAddress(int slot) {
-	//return (vu32*)(cacheAddress + slot*_128KB_READ_SIZE);
-	return (vu8*)(cacheAddress + slot*_128KB_READ_SIZE);
+	//return (vu32*)(cacheAddress + slot*readSize);
+	return (vu8*)(cacheAddress + slot*readSize);
 }
 
 static void updateDescriptor(int slot, u32 sector) {
@@ -155,10 +155,10 @@ static void triggerAsyncPrefetch(u32 sector) {
 		if (ndsHeader->romSize > 0) {
 			if (sector > ndsHeader->romSize) {
 				sector = 0;
-			} else if ((sector+_128KB_READ_SIZE) > ndsHeader->romSize) {
-				for (u32 i = 0; i < _128KB_READ_SIZE; i++) {
+			} else if ((sector+readSize) > ndsHeader->romSize) {
+				for (u32 i = 0; i < readSize; i++) {
 					asyncReadSizeSubtract++;
-					if (((sector+_128KB_READ_SIZE)-asyncReadSizeSubtract) == ndsHeader->romSize) {
+					if (((sector+readSize)-asyncReadSizeSubtract) == ndsHeader->romSize) {
 						break;
 					}
 				}
@@ -176,7 +176,7 @@ static void triggerAsyncPrefetch(u32 sector) {
 			vu8* buffer = getCacheAddress(slot);
 
 			if (needFlushDCCache) {
-				DC_FlushRange((u8*)buffer, _128KB_READ_SIZE);
+				DC_FlushRange((u8*)buffer, readSize);
 			}
 
 			cacheDescriptor[slot] = sector;
@@ -185,7 +185,7 @@ static void triggerAsyncPrefetch(u32 sector) {
 
 			// write the command
 			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = _128KB_READ_SIZE-asyncReadSizeSubtract;
+			sharedAddr[1] = readSize-asyncReadSizeSubtract;
 			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
@@ -234,25 +234,35 @@ static void getAsyncSector(void) {
 	}
 }*/
 
-static inline bool isHGSS(const tNDSHeader* ndsHeader) {
+static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
-	return (strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold
-		|| strncmp(romTid, "IPG", 3) == 0); // Pokemon SoulSilver
+	return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles)
+		|| strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
+		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
+		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
+		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
+		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
+		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
+		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
+		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
+		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
+		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
+		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
 }
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	u32 commandRead;
-	u32 sector = (src/_128KB_READ_SIZE)*_128KB_READ_SIZE;
+	u32 sector = (src/readSize)*readSize;
 
 	accessCounter++;
 
-	//bool pAC = ((isSdk5(moduleParams) && consoleModel > 0) || (!isSdk5(moduleParams) && !hgssFix));
+	//bool pAC = (isSdk5(moduleParams) && consoleModel > 0);
 
 	/*if (asyncPrefetch && pAC) {
 		processAsyncCommand();
 	}*/
 
-	if (page == src && len > _128KB_READ_SIZE && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		/*if (asyncPrefetch && pAC) {
 			getAsyncSector();
 		}*/
@@ -280,7 +290,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			//u32 nextSector = sector+_128KB_READ_SIZE;	
+			//u32 nextSector = sector+readSize;	
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
 				/*if (asyncPrefetch && pAC) {
@@ -295,14 +305,14 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				buffer = getCacheAddress(slot);
 
 				if (needFlushDCCache) {
-					DC_FlushRange((u8*)buffer, _128KB_READ_SIZE);
+					DC_FlushRange((u8*)buffer, readSize);
 				}
 
 				//REG_IME = 0;
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = _128KB_READ_SIZE;
+				sharedAddr[1] = readSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -338,8 +348,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			}*/
 
 			u32 len2 = len;
-			if ((src - sector) + len2 > _128KB_READ_SIZE) {
-				len2 = sector - src + _128KB_READ_SIZE;
+			if ((src - sector) + len2 > readSize) {
+				len2 = sector - src + readSize;
 			}
 
 			if (len2 > 512) {
@@ -403,7 +413,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				src = cardStruct[0];
 				dst = (u8*)cardStruct[1];
 				page = (src / 512) * 512;
-				sector = (src / _128KB_READ_SIZE) * _128KB_READ_SIZE;
+				sector = (src / readSize) * readSize;
 				accessCounter++;
 			}
 		}
@@ -490,9 +500,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = retail_CACHE_SLOTS_SDK5;
 		}
 
-		if (isHGSS(ndsHeader)) {
-			cacheSlots = HGSS_CACHE_SLOTS;	// Use smaller cache size to avoid timing issues
-			hgssFix = true;
+		if (isGameLaggy(ndsHeader)) {
+			if (consoleModel > 0) {
+				if (dsiMode || isSdk5(moduleParams)) {
+					// SDK 5
+					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+				}
+				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+			} else {
+				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
+			}
+			readSize = _32KB_READ_SIZE;
 		} else if (consoleModel > 0) {
 			if (dsiMode || isSdk5(moduleParams)) {
 				// SDK 5

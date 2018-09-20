@@ -36,16 +36,20 @@
 //#define retail_CACHE_ADRESS_SIZE      0x6E0000
 //#define retail_CACHE_ADRESS_SIZE_SDK5 0x280000
 
-#define retail_CACHE_SLOTS      0x37
-#define retail_CACHE_SLOTS_SDK5 0x14
+#define retail_CACHE_SLOTS           0x37
+#define retail_CACHE_SLOTS_32KB      0xDC
+#define retail_CACHE_SLOTS_SDK5      0x14
+#define retail_CACHE_SLOTS_32KB_SDK5 0x50
 
 #define dev_CACHE_ADRESS_START_SDK5 0x0D000000
 
 //#define dev_CACHE_ADRESS_SIZE      0x16E0000
 //#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
 
-#define dev_CACHE_SLOTS      0xB7
-#define dev_CACHE_SLOTS_SDK5 0x80
+#define dev_CACHE_SLOTS           0xB7
+#define dev_CACHE_SLOTS_32KB      0x2DC
+#define dev_CACHE_SLOTS_SDK5      0x80
+#define dev_CACHE_SLOTS_32KB_SDK5 0x200
 
 //#define HGSS_CACHE_ADRESS_SIZE 0x1E0000
 
