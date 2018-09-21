@@ -241,10 +241,19 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
 		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
 		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
+		|| strncmp(romTid, "ARZ", 3) == 0   // MegaMan ZX (slightly boosts load speed)
+		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
+		|| strncmp(romTid, "YZX", 3) == 0   // MegaMan ZX Advent (slightly boosts load speed)
 		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
+		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
+		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
 		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
+		|| strncmp(romTid, "CS3", 3) == 0   // Sonic & SEGA All-Stars Racing
+		|| strncmp(romTid, "VSO", 3) == 0   // Sonic Classic Collection
 		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
 		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
+		|| strncmp(romTid, "B6Z", 3) == 0   // MegaMan Zero Collection (slightly boosts load speed)
+		|| strncmp(romTid, "BXS", 3) == 0   // Sonic Colo(u)rs (fixes some streamed sound pauses)
 		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
 		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
 		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
