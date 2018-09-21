@@ -253,7 +253,6 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
 		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
 		|| strncmp(romTid, "B6Z", 3) == 0   // MegaMan Zero Collection (slightly boosts load speed)
-		|| strncmp(romTid, "BXS", 3) == 0   // Sonic Colo(u)rs (fixes some streamed sound pauses)
 		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
 		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
 		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
