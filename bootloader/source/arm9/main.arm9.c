@@ -49,7 +49,7 @@ extern u32 boostVram;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-volatile int screenBrightness = 31;
+volatile int screenBrightness = 25;
 volatile bool fadeType = true;
 
 volatile bool arm9_errorColor = false;
