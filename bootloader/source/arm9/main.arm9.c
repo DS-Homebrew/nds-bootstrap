@@ -194,7 +194,7 @@ void arm9_main(void) {
 		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 	}
 
-	screenBrightness = 31;
+	screenBrightness = 25;
 	fadeType = true;
 
 	// Set ARM9 state to ready and wait for it to change again
