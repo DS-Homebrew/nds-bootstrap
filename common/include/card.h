@@ -45,6 +45,14 @@ static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndm
 	return __myio_dsisd.readSectors(sector, count, buffer, ndmaSlot);
 }
 
+static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer, int ndmaSlot) {
+	return __myio_dsisd.readSectorsNonBlocking(sector, count, buffer, ndmaSlot);
+}
+
+static inline int CARD_CheckCommand(int cmd, int ndmaSlot) {
+	return __myio_dsisd.checkCommand(cmd, ndmaSlot);
+}
+
 static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
 	return __myio_dsisd.writeSectors(sector, 1, buffer, ndmaSlot);
 }

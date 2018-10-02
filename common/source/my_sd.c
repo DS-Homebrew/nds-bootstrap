@@ -41,6 +41,27 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 }
 
 /*-----------------------------------------------------------------
+readSectors
+Read "numSectors" 512-byte sized sectors from the card into "buffer", 
+starting at "sector". 
+The buffer may be unaligned, and the driver must deal with this correctly.
+return true if it was successful, false if it failed for any reason
+-----------------------------------------------------------------*/
+int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+	#ifdef DEBUG
+	nocashMessage("my_sdio_ReadSectors_nonblocking");
+	#endif
+	return my_sdmmc_sdcard_readsectors_nonblocking(sector, numSectors, buffer, ndmaSlot);
+}
+
+bool  my_sdio_check_command(int cmd, int ndmaSlot) {
+	#ifdef DEBUG
+	nocashMessage("my_sdio_check_command");
+	#endif
+	return my_sdmmc_sdcard_check_command(cmd, ndmaSlot);
+}
+
+/*-----------------------------------------------------------------
 writeSectors
 Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
 starting at "sector".
