@@ -309,7 +309,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 		if((status1 & TMIO_STAT1_RXRDY))
 #endif
 		{
-            nocashMessage("readdata check");
+            /*nocashMessage("readdata check");
 			if(readdata)
 			{
                 nocashMessage("readdata");
@@ -323,7 +323,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 				}
 
 				sdmmc_mask16(REG_DATACTL32, 0x800, 0);
-			}
+			}*/
 		}
 #ifdef DATA32_SUPPORT
 		if(!(ctl32 & 0x200))
@@ -401,10 +401,11 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
         {
             // command is finished already without going busy : return
             // not supposed to happen
-            status0 = sdmmc_read16(REG_SDSTATUS0);
+            // needed for no$gba only
+            /*status0 = sdmmc_read16(REG_SDSTATUS0);
             nocashMessage("already finished");
             if((status0 & flags) == flags)
-            break;
+            break;*/
 		}		
 	}
 	//ctx->stat0 = sdmmc_read16(REG_SDSTATUS0);
