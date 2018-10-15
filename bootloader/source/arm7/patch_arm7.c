@@ -153,7 +153,9 @@ u32 patchCardNdsArm7(
 		patchSwiHalt(ce7, ndsHeader, moduleParams);
 	}
 
-	patchSleep(ndsHeader);
+	if (REG_SCFG_EXT == 0 || REG_SCFG_MC == 0x11) {
+		patchSleep(ndsHeader);
+	}
 
 	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
