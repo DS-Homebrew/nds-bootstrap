@@ -425,26 +425,22 @@ void myIrqHandlerVBlank(void) {
 		cardReadTimeOut = 30;
 	}
 
-	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) {
-		softResetTimer = 0;
-	} else { 
-		if (softResetTimer == 60 * 2) {
-			if (saveTimer == 0) {
-				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
-				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot into DSiMenu++
-			}
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
+		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
+			memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
 		}
 		softResetTimer++;
+	} else {
+		softResetTimer = 0;
 	}
 
-	if (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) {
-	} else if (!gameSoftReset) {
-		if (saveTimer == 0) {
-			memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
-			i2cWriteRegister(0x4A, 0x70, 0x01);
-			i2cWriteRegister(0x4A, 0x11, 0x01);	// Reboot game
-		}
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
+		//memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
+		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 	}
 
 	if (gottenSCFGExt == 0) {
