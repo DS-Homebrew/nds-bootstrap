@@ -44,7 +44,6 @@ typedef	struct
 	u32	currentCluster;
 	u32 currentOffset;
 	bool fatTableCached;
-	bool oneClusterCached;
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
 } aFile;
