@@ -628,13 +628,14 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
     context.dataPos+=beginBytes;
 
     context.chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR;
+    context.cmd=0;
 	
     return false;
 }
 
 bool resumeFileRead()
 {
-    if(CARD_CheckCommand(0x33C12, context.ndmaSlot))
+    if(!context.cmd || CARD_CheckCommand(context.cmd, context.ndmaSlot))
     {
         if(context.chunks>0)
         {
@@ -689,7 +690,8 @@ bool resumeFileRead()
               dbg_hexa(context.curSect/discSecPerClus);
               context.clusterIndex+= context.curSect/discSecPerClus;
               context.curSect = context.curSect % discSecPerClus;
-              context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];         
+              context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
+              context.cmd=0x33C12;         
           } else {
               // Move to the next cluster if necessary
   			if (context.curSect >= discSecPerClus)

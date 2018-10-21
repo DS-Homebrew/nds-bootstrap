@@ -251,7 +251,10 @@ static void cardRead_arm9(void) {
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
-	fileRead((char*)dst, *romFile, src, len, 0);
+	if(!fileReadNonBLocking((char*)dst, romFile, src, len, 0))
+    {
+        while(!resumeFileRead()){}
+    }
 
 	// Primary fix for Mario's Holiday
 	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
