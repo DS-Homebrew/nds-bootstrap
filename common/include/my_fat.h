@@ -48,6 +48,20 @@ typedef	struct
 	u32 fatTableCacheSize;
 } aFile;
 
+typedef	struct
+{
+	aFile * file;
+    char* buffer;
+	u32 startOffset;
+	u32 length;
+	int ndmaSlot;
+    int dataPos;
+    int curSect;
+    int curByte;
+    int clusterIndex;
+    int chunks;
+} readContext;
+
 bool FAT_InitFiles(bool initCard, int ndmaSlot);
 aFile getBootFileCluster(const char* bootName, int ndmaSlot);
 aFile getFileFromCluster(u32 cluster);
