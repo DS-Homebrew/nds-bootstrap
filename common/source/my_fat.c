@@ -635,7 +635,7 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 
 bool resumeFileRead()
 {
-    if(!context.cmd || CARD_CheckCommand(context.cmd, context.ndmaSlot))
+    if(context.cmd == 0 || CARD_CheckCommand(context.cmd, context.ndmaSlot))
     {
         if(context.chunks>0)
         {
@@ -691,7 +691,8 @@ bool resumeFileRead()
               context.clusterIndex+= context.curSect/discSecPerClus;
               context.curSect = context.curSect % discSecPerClus;
               context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
-              context.cmd=0x33C12;         
+              context.cmd=0x33C12;
+              return false;         
           } else {
               // Move to the next cluster if necessary
   			if (context.curSect >= discSecPerClus)
@@ -707,10 +708,12 @@ bool resumeFileRead()
       		sectorsToRead = context.chunks;
               
               // Read the sectors
-  			CARD_ReadSectors(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos, context.ndmaSlot);
+  			CARD_ReadSectorsNonBlocking(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos, context.ndmaSlot);
   			context.chunks  -= sectorsToRead;
   			context.curSect += sectorsToRead;
   			context.dataPos += BYTES_PER_SECTOR * sectorsToRead;
+            context.cmd=0x33C12;
+            return false;         
           }			
   	}
       else
@@ -754,6 +757,7 @@ bool resumeFileRead()
       	}
           return true;
       }
+      
     }  
 	return false;
 } 
