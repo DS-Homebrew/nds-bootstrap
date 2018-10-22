@@ -116,14 +116,14 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 
 static void waitForArm7(void) {
-    IPC_SendSync(0xEE24);
+    //IPC_SendSync(0xEE24);
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
-        count++;
-        if(count==100000){
+        /*count++;
+        if(count==500000){
             IPC_SendSync(0xEE24);
             count=0;
-        }
+        }*/
     }
 }
 
