@@ -222,7 +222,9 @@ static void log_arm9(void) {
 	#endif
 }
 
-static void cardRead_arm9(void) {
+static bool readOngoing = false;
+
+static bool start_cardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -253,15 +255,20 @@ static void cardRead_arm9(void) {
 	#endif
 	if(!fileReadNonBLocking((char*)dst, romFile, src, len, 0))
     {
-        while(!resumeFileRead()){}
+        readOngoing = true;
+        return false;    
+        //while(!resumeFileRead()){}
+    } 
+    else
+    {
+        readOngoing = false;
+        // Primary fix for Mario's Holiday
+    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
+    		*(u32*)(0x0C9328AC) = 0xA00;
+    	}
+        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        return true;    
     }
-
-	// Primary fix for Mario's Holiday
-	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
-		*(u32*)(0x0C9328AC) = 0xA00;
-	}
-
-	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	#ifdef DEBUG
 	dbg_printf("\nread \n");
@@ -271,6 +278,23 @@ static void cardRead_arm9(void) {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
+}
+
+static bool resume_cardRead_arm9(void) {
+    if(resumeFileRead())
+    {
+        readOngoing = false;
+        // Primary fix for Mario's Holiday
+    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
+    		*(u32*)(0x0C9328AC) = 0xA00;
+    	}
+        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        return true;    
+    } 
+    else
+    {
+        return false;    
+    }
 }
 
 /*static void asyncCardRead_arm9(void) {
@@ -321,63 +345,40 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-	if (cardReadTimeOut == 30 && tryLockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
+  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+      if(!readOngoing)
+      { 
+  
+  		//nocashMessage("runCardEngineCheck mutex ok");
+  
+  		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+  			log_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}
+  
+  
+      		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+      			if(start_cardRead_arm9()) {
+                    *(vu32*)(0x027FFB14) = 0;
+                } 
+                
+      			
+      		}
+  
+  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+  			asyncCardRead_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}*/
+        } else {
+            if(resume_cardRead_arm9()) {
+                *(vu32*)(0x027FFB14) = 0;
+            } 
+        }
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
 }
-
-static void runCardEngineCheckHalt(void) {
-	//dbg_printf("runCardEngineCheckHalt\n");
-	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheckHalt");
-	#endif	
-
-	// lockMutex should be possible to be used here instead of tryLockMutex since the execution of irq is not blocked
-	// to be checked
-	if (lockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		if (soundFix) {
-			cardReadTimeOut = 0;
-		}
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
-}
-
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -400,7 +401,7 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	runCardEngineCheckHalt();
+	runCardEngineCheck();
 }
 
 
