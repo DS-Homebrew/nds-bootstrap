@@ -22,7 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 //#include <nds/interrupts.h>
-//#include <nds/ipc.h>
+#include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -116,6 +116,7 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 
 static void waitForArm7(void) {
+    IPC_SendSync(0xEE24);
 	while (sharedAddr[3] != (vu32)0);
 }
 
