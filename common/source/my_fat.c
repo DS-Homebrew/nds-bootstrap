@@ -613,17 +613,13 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 	// and store them
 	context.curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
 	context.curByte = startOffset % BYTES_PER_SECTOR;
+    context.dataPos=0;
+    beginBytes = (BYTES_PER_SECTOR < length + context.curByte ? (BYTES_PER_SECTOR - context.curByte) : length);
 
 	// Load sector buffer for new position in file
-	CARD_ReadSector( context.curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
+	CARD_ReadSector( context.curSect + FAT_ClustToSect(file->currentCluster), buffer+context.dataPos, context.curByte, 0);
 	context.curSect++;
-
-	// Number of bytes needed to read to align with a sector
-	beginBytes = (BYTES_PER_SECTOR < length + context.curByte ? (BYTES_PER_SECTOR - context.curByte) : length);
-
-	// Read first part from buffer, to align with sector boundary
-    context.dataPos=0;
-    memcpy(buffer+context.dataPos,globalBuffer+context.curByte,beginBytes-context.dataPos);
+    
     context.curByte+=beginBytes;
     context.dataPos+=beginBytes;
 
