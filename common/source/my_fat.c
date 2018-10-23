@@ -682,8 +682,10 @@ bool resumeFileRead()
     			context.chunks  -= sectorsToRead;
     			context.curSect += sectorsToRead;
     			context.dataPos += BYTES_PER_SECTOR * sectorsToRead;
+              #ifdef DEBUG
               dbg_hexa(discSecPerClus);
               dbg_hexa(context.curSect/discSecPerClus);
+              #endif
               context.clusterIndex+= context.curSect/discSecPerClus;
               context.curSect = context.curSect % discSecPerClus;
               context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
@@ -744,10 +746,9 @@ bool resumeFileRead()
               dbg_hexa(globalBuffer);
               #endif
                 
-      		CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), globalBuffer, 0, 0);
+      		CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
       
       		// Read in last partial chunk
-              memcpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
               context.curByte+=context.length;
               context.dataPos+=context.length;
       	}
@@ -882,8 +883,12 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
     			chunks  -= sectorsToRead;
     			curSect += sectorsToRead;
     			dataPos += BYTES_PER_SECTOR * sectorsToRead;
+                
+              #ifdef DEBUG
               dbg_hexa(discSecPerClus);
               dbg_hexa(curSect/discSecPerClus);
+              #endif
+              
               clusterIndex+= curSect/discSecPerClus;
               curSect = curSect % discSecPerClus;
               file.currentCluster = file.fatTableCache[clusterIndex];         

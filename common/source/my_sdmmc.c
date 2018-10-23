@@ -145,20 +145,22 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
                         u32 copied = 0;
 						if(!((u32)rDataPtr32 & 3))
 						{
-							for(copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
+							for(int i = 0; i < blkSize-ctx->startOffset-ctx->endOffset; i += 4)
 							{
 								*rDataPtr32++ = sdmmc_read32(REG_SDFIFO32);
+								copied+=4;
 							}
 						}
 						else
 						{
-							for(copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
+							for(int i = 0; i < blkSize-ctx->startOffset-ctx->endOffset; i += 4)
 							{
 								u32 data = sdmmc_read32(REG_SDFIFO32);
 								*rDataPtr8++ = data;
 								*rDataPtr8++ = data >> 8;
 								*rDataPtr8++ = data >> 16;
 								*rDataPtr8++ = data >> 24;
+								copied+=4;
 							}
 						}
                         // skip endOffset bytes at the end of the read
@@ -179,9 +181,8 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
                                 {
                                     *rDataPtr8++ = *pdata8++;
                                 }                                
-                          }
-                          u32 skipped=0;
-                          for(u32 skipped = 0; skipped < ctx->endOffset-remain; skipped += 4)
+                          }                          
+                          for(u32 skipped=4-remain; skipped < ctx->endOffset; skipped += 4)
                           {
                               sdmmc_read32(REG_SDFIFO32);        
                           }
