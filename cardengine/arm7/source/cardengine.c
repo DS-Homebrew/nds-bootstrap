@@ -380,6 +380,47 @@ static void runCardEngineCheck(void) {
   	}
 }
 
+static void runCardEngineCheckAlt(void) {
+	//dbg_printf("runCardEngineCheck\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheck");
+	#endif	
+
+  	if (lockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+      if(!readOngoing)
+      { 
+  
+  		//nocashMessage("runCardEngineCheck mutex ok");
+  
+  		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+  			log_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}
+  
+  
+      		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+      			if(start_cardRead_arm9()) {
+                    *(vu32*)(0x027FFB14) = 0;
+                } else {
+                    while(!resume_cardRead_arm9()) {} 
+                    *(vu32*)(0x027FFB14) = 0;
+                } 			
+      		}
+  
+  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+  			asyncCardRead_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}*/
+        } else {
+            while(!resume_cardRead_arm9()) {} 
+            *(vu32*)(0x027FFB14) = 0; 
+        }
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
@@ -401,7 +442,7 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	runCardEngineCheck();
+	runCardEngineCheckAlt();
 }
 
 
