@@ -745,10 +745,13 @@ bool resumeFileRead()
               dbg_hexa(context.curSect + FAT_ClustToSect(context.file->currentCluster));
               dbg_hexa(globalBuffer);
               #endif
-                
-      		CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
+              
+            CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), globalBuffer, 0, 0);    
+      		//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
       
       		// Read in last partial chunk
+              memcpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
+              
               context.curByte+=context.length;
               context.dataPos+=context.length;
       	}
