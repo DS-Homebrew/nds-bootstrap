@@ -235,7 +235,7 @@ u32 FAT_NextCluster(u32 cluster, int ndmaSlot)
 		case FS_FAT12:
 			sector = discFAT + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
-			CARD_ReadSector(sector, globalBuffer, ndmaSlot);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			nextCluster = ((u8*) globalBuffer)[offset];
 			offset++;
 
@@ -244,7 +244,7 @@ u32 FAT_NextCluster(u32 cluster, int ndmaSlot)
 				sector++;
 			}
 
-			CARD_ReadSector(sector, globalBuffer, ndmaSlot);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			nextCluster |= (((u8*) globalBuffer)[offset]) << 8;
 
 			if (cluster & 0x01) {
@@ -259,7 +259,7 @@ u32 FAT_NextCluster(u32 cluster, int ndmaSlot)
 			sector = discFAT + ((cluster << 1) / BYTES_PER_SECTOR);
 			offset = cluster % (BYTES_PER_SECTOR >> 1);
 
-			CARD_ReadSector(sector, globalBuffer, ndmaSlot);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			// read the nextCluster value
 			nextCluster = ((u16*)globalBuffer)[offset];
 
@@ -273,7 +273,7 @@ u32 FAT_NextCluster(u32 cluster, int ndmaSlot)
 			sector = discFAT + ((cluster << 2) / BYTES_PER_SECTOR);
 			offset = cluster % (BYTES_PER_SECTOR >> 2);
 
-			CARD_ReadSector(sector, globalBuffer, ndmaSlot);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			// read the nextCluster value
 			nextCluster = (((u32*)globalBuffer)[offset]) & 0x0FFFFFFF;
 
@@ -325,7 +325,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 	}
 
 	// Read first sector of card
-	if (!CARD_ReadSector (0, globalBuffer, ndmaSlot)) 
+	if (!CARD_ReadSector (0, globalBuffer, 0, 0)) 
 	{
 		#ifdef DEBUG
 		nocashMessage("!CARD_ReadSector (0, globalBuffer)");
@@ -362,7 +362,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 
 	// Read in boot sector
 	bootSec = (BOOT_SEC*) globalBuffer;
-	CARD_ReadSector (bootSector,  bootSec, ndmaSlot);
+	CARD_ReadSector (bootSector,  bootSec, 0, 0);
 
 	// Store required information about the file system
 	if (bootSec->sectorsPerFAT != 0)
@@ -467,7 +467,7 @@ aFile getBootFileCluster (const char* bootName, int ndmaSlot)
 //	maxSectors = (wrkDirCluster == FAT16_ROOT_DIR_CLUSTER ? (discData - discRootDir) : discSecPerClus);
 	// Scan Dir for correct entry
 	firstSector = discRootDir;
-	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, ndmaSlot);
+	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0);
 	found = false;
 	notFound = false;
 	wrkDirOffset = -1;	// Start at entry zero, Compensating for increment
@@ -491,7 +491,7 @@ aFile getBootFileCluster (const char* bootName, int ndmaSlot)
 			{
 				notFound = true;	// Got to end of root dir
 			}
-			CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, ndmaSlot);
+			CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0);
 		}
 		dir = ((DIR_ENT*) globalBuffer)[wrkDirOffset];
 		found = true;
@@ -615,7 +615,7 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 	context.curByte = startOffset % BYTES_PER_SECTOR;
 
 	// Load sector buffer for new position in file
-	CARD_ReadSector( context.curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, ndmaSlot);
+	CARD_ReadSector( context.curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
 	context.curSect++;
 
 	// Number of bytes needed to read to align with a sector
@@ -748,7 +748,7 @@ bool resumeFileRead()
               dbg_hexa(globalBuffer);
               #endif
                 
-      		CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), globalBuffer, context.ndmaSlot);
+      		CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), globalBuffer, 0, 0);
       
       		// Read in last partial chunk
               memcpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
@@ -823,7 +823,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	curByte = startOffset % BYTES_PER_SECTOR;
 
 	// Load sector buffer for new position in file
-	CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+	CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 	curSect++;
 
 	// Number of bytes needed to read to align with a sector
@@ -943,7 +943,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
           dbg_hexa(globalBuffer);
           #endif
           
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 
 		// Read in last partial chunk
           memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
@@ -1009,7 +1009,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 	curByte = startOffset % BYTES_PER_SECTOR;
 
 	// Load sector buffer for new position in file
-	CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+	CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 
 
 	// Number of bytes needed to read to align with a sector
@@ -1074,7 +1074,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 			curSect = 0;
 			file.currentOffset+=discBytePerClus;
 		}
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 
 		// Read in last partial chunk
         memcpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);

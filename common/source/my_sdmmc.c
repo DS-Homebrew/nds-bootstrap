@@ -112,16 +112,47 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
 					if(size >= blkSize)
 					{
 						#ifdef DATA32_SUPPORT
+                        // skip startOffset bytes at the beggining of the read
+                        if(ctx->startOffset>0)
+                        {
+                            u32 skipped=0;
+                            for(u32 skipped = 0; skipped < ctx->startOffset; skipped += 4)
+                            {
+                                sdmmc_read32(REG_SDFIFO32);        
+                            }
+                            u32 remain = ctx->startOffset-skipped;
+                            if(remain>0)
+                            {
+                                u32 data = sdmmc_read32(REG_SDFIFO32);
+                                u8 data8[4];
+                                u8* pdata8 = data8;
+                                *pdata8++ = data;
+    							*pdata8++ = data >> 8;
+    							*pdata8++ = data >> 16;
+    							*pdata8++ = data >> 24;
+    							pdata8 = data8;
+                                for (int i=0; i<remain; i++)
+                                {
+                                    pdata8++;        
+                                }
+                                for (int i=0; i<4-remain; i++)
+                                {
+                                    *rDataPtr8++ = *pdata8++;
+                                }     
+                            }
+                        }
+                        // copy data
+                        u32 copied = 0;
 						if(!((u32)rDataPtr32 & 3))
 						{
-							for(u32 i = 0; i < blkSize; i += 4)
+							for(u32 copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
 							{
 								*rDataPtr32++ = sdmmc_read32(REG_SDFIFO32);
 							}
 						}
 						else
 						{
-							for(u32 i = 0; i < blkSize; i += 4)
+							for(u32 copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
 							{
 								u32 data = sdmmc_read32(REG_SDFIFO32);
 								*rDataPtr8++ = data;
@@ -130,7 +161,34 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
 								*rDataPtr8++ = data >> 24;
 							}
 						}
+                        // skip endOffset bytes at the end of the read
+                        if(ctx->endOffset>0)
+                        {
+                          u32 remain = blkSize-ctx->startOffset-ctx->endOffset-copied;
+                          if(remain)
+                          {
+                              u32 data = sdmmc_read32(REG_SDFIFO32);
+                              u8 data8[4];
+                              u8* pdata8 = data8;
+                              *pdata8++ = data;
+  							*pdata8++ = data >> 8;
+  							*pdata8++ = data >> 16;
+  							*pdata8++ = data >> 24;
+  							pdata8 = data8;
+                              for (int i=0; i<remain; i++)
+                              {
+                                  *rDataPtr8++ = *pdata8++;
+                              }                                
+                          }
+                          u32 skipped=0;
+                          for(u32 skipped = 0; skipped < ctx->endOffset-remain; skipped += 4)
+                          {
+                              sdmmc_read32(REG_SDFIFO32);        
+                          }
+                        }
 						#else
+                        // startOffset & endOffset NOT IMPLEMENTED in DATA16 mode
+                        // copy data : this code seems wrong
 						if(!((u32)rDataPtr16 & 1))
 						{
 							for(u32 i = 0; i < blkSize; i += 4)
@@ -710,11 +768,31 @@ int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, in
 	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
 	handleSD.tData = in;
 	handleSD.size = numsectors << 9;
+    handleSD.startOffset = 0;
+    handleSD.endOffset = 0;
 	if (ndmaSlot == -1) {
 		sdmmc_send_command(&handleSD,0x52C19,sector_no);
 	} else {
 		sdmmc_send_command_ndma(&handleSD,0x52C19,sector_no,ndmaSlot);
 	}
+	return get_error(&handleSD);
+}
+
+int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset)
+{
+	if(handleSD.isSDHC == 0) sector_no <<= 9;
+	set_target(&handleSD);
+	sdmmc_write16(REG_SDSTOP,0x100);
+#ifdef DATA32_SUPPORT
+	sdmmc_write16(REG_SDBLKCOUNT32,1);
+	sdmmc_write16(REG_SDBLKLEN32,0x200);
+#endif
+	sdmmc_write16(REG_SDBLKCOUNT,1);
+	handleSD.rData = out;
+	handleSD.size = 1 << 9;
+    handleSD.startOffset = startOffset;
+    handleSD.endOffset = endOffset;
+	sdmmc_send_command(&handleSD,0x33C12,sector_no);          
 	return get_error(&handleSD);
 }
 
@@ -730,6 +808,8 @@ int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndma
 	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
 	handleSD.rData = out;
 	handleSD.size = numsectors << 9;
+    handleSD.startOffset = 0;
+    handleSD.endOffset = 0;
 	if (ndmaSlot == -1) {
 		sdmmc_send_command(&handleSD,0x33C12,sector_no);
 	} else {
@@ -759,6 +839,8 @@ int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *o
 	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
 	handleSD.rData = out;
 	handleSD.size = numsectors << 9;
+    handleSD.startOffset = 0;
+    handleSD.endOffset = 0;
 	if (ndmaSlot < 0 || ndmaSlot > 3) {
         // ndmaSlot needs to be valid
         return -1;
@@ -770,38 +852,6 @@ int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *o
         nocashMessage("command checked");*/
 	}          
 	return 0x33C12;
-}
-
-int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out)
-{
-	if(handleNAND.isSDHC == 0) sector_no <<= 9;
-	set_target(&handleNAND);
-	sdmmc_write16(REG_SDSTOP,0x100);
-#ifdef DATA32_SUPPORT
-	sdmmc_write16(REG_SDBLKCOUNT32,numsectors);
-	sdmmc_write16(REG_SDBLKLEN32,0x200);
-#endif
-	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
-	handleNAND.rData = out;
-	handleNAND.size = numsectors << 9;
-	sdmmc_send_command(&handleNAND,0x33C12,sector_no);
-	return get_error(&handleNAND);
-}
-
-int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in) //experimental
-{
-	if(handleNAND.isSDHC == 0) sector_no <<= 9;
-	set_target(&handleNAND);
-	sdmmc_write16(REG_SDSTOP,0x100);
-#ifdef DATA32_SUPPORT
-	sdmmc_write16(REG_SDBLKCOUNT32,numsectors);
-	sdmmc_write16(REG_SDBLKLEN32,0x200);
-#endif
-	sdmmc_write16(REG_SDBLKCOUNT,numsectors);
-	handleNAND.tData = in;
-	handleNAND.size = numsectors << 9;
-	sdmmc_send_command(&handleNAND,0x52C19,sector_no);
-	return get_error(&handleNAND);
 }
 
 static u32 sdmmc_calc_size(u8* csd, int type)
@@ -836,14 +886,6 @@ static u32 sdmmc_calc_size(u8* csd, int type)
 
 void sdmmc_init(void)
 {
-	//NAND
-	handleNAND.isSDHC = 0;
-	handleNAND.SDOPT = 0;
-	handleNAND.res = 0;
-	handleNAND.initarg = 1;
-	handleNAND.clk = 0x20; // 523.655968 KHz
-	handleNAND.devicenumber = 1;
-
 	//SD
 	handleSD.isSDHC = 0;
 	handleSD.SDOPT = 0;
@@ -887,56 +929,6 @@ void sdmmc_init(void)
 	*(vu16*)0x10006002 &= 0xFFFCu; ////SDPORTSEL
 	*(vu16*)0x10006026 = 512; //SDBLKLEN
 	*(vu16*)0x10006008 = 0; //SDSTOP
-}
-
-int Nand_Init(void)
-{
-	// The eMMC is always on. Nothing special to do.
-	set_target(&handleNAND);
-
-	sdmmc_send_command(&handleNAND,0,0);
-
-	do
-	{
-		do
-		{
-			sdmmc_send_command(&handleNAND,0x10701,0x100000);
-		} while ( !(handleNAND.error & 1) );
-	}
-	while((handleNAND.ret[0] & 0x80000000) == 0);
-
-	sdmmc_send_command(&handleNAND,0x10602,0x0);
-	if((handleNAND.error & 0x4))return -1;
-
-	sdmmc_send_command(&handleNAND,0x10403,handleNAND.initarg << 0x10);
-	if((handleNAND.error & 0x4))return -1;
-
-	sdmmc_send_command(&handleNAND,0x10609,handleNAND.initarg << 0x10);
-	if((handleNAND.error & 0x4))return -1;
-
-	handleNAND.total_size = sdmmc_calc_size((u8*)&handleNAND.ret[0],0);
-	setckl(0x201); // 16.756991 MHz
-
-	sdmmc_send_command(&handleNAND,0x10407,handleNAND.initarg << 0x10);
-	if((handleNAND.error & 0x4))return -1;
-
-	handleNAND.SDOPT = 1;
-	sdmmc_send_command(&handleNAND,0x10506,0x3B70100); // Set 4 bit bus width.
-	if((handleNAND.error & 0x4))return -1;
-	sdmmc_mask16(REG_SDOPT, 0x8000, 0); // Switch to 4 bit mode.
-
-	sdmmc_send_command(&handleNAND,0x10506,0x3B90100); // Switch to high speed timing.
-	if((handleNAND.error & 0x4))return -1;
-	handleNAND.clk = 0x200; // 33.513982 MHz
-	setckl(0x200);
-
-	sdmmc_send_command(&handleNAND,0x1040D,handleNAND.initarg << 0x10);
-	if((handleNAND.error & 0x4))return -1;
-
-	sdmmc_send_command(&handleNAND,0x10410,0x200);
-	if((handleNAND.error & 0x4))return -1;
-
-	return 0;
 }
 
 int SD_Init(void)
@@ -1009,6 +1001,8 @@ int SD_Init(void)
 		sdmmc_write16(REG_SDBLKLEN,64);
 		handleSD.rData = NULL;
 		handleSD.size = 64;
+        handleSD.startOffset = 0;
+        handleSD.endOffset = 0;
 		sdmmc_send_command(&handleSD,0x31C06,0x80FFFFF1);
 		sdmmc_write16(REG_SDBLKLEN,512);
 		if(handleSD.error & 0x4) return -9;
