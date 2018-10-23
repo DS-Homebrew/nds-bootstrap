@@ -145,14 +145,14 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
                         u32 copied = 0;
 						if(!((u32)rDataPtr32 & 3))
 						{
-							for(u32 copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
+							for(copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
 							{
 								*rDataPtr32++ = sdmmc_read32(REG_SDFIFO32);
 							}
 						}
 						else
 						{
-							for(u32 copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
+							for(copied = 0; copied < blkSize-ctx->startOffset-ctx->endOffset; copied += 4)
 							{
 								u32 data = sdmmc_read32(REG_SDFIFO32);
 								*rDataPtr8++ = data;
@@ -167,18 +167,18 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
                           u32 remain = blkSize-ctx->startOffset-ctx->endOffset-copied;
                           if(remain)
                           {
-                              u32 data = sdmmc_read32(REG_SDFIFO32);
-                              u8 data8[4];
-                              u8* pdata8 = data8;
-                              *pdata8++ = data;
-  							*pdata8++ = data >> 8;
-  							*pdata8++ = data >> 16;
-  							*pdata8++ = data >> 24;
-  							pdata8 = data8;
-                              for (int i=0; i<remain; i++)
-                              {
-                                  *rDataPtr8++ = *pdata8++;
-                              }                                
+                                u32 data = sdmmc_read32(REG_SDFIFO32);
+                                u8 data8[4];
+                                u8* pdata8 = data8;
+                                *pdata8++ = data;
+                                *pdata8++ = data >> 8;
+                                *pdata8++ = data >> 16;
+                                *pdata8++ = data >> 24;
+                                pdata8 = data8;
+                                for (int i=0; i<remain; i++)
+                                {
+                                    *rDataPtr8++ = *pdata8++;
+                                }                                
                           }
                           u32 skipped=0;
                           for(u32 skipped = 0; skipped < ctx->endOffset-remain; skipped += 4)
