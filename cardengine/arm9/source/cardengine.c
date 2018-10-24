@@ -120,7 +120,7 @@ static void waitForArm7(void) {
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-        if(count==2000000){
+        if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;
         }
