@@ -277,10 +277,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		processAsyncCommand();
 	}*/
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		/*if (asyncPrefetch && pAC) {
-			getAsyncSector();
-		}*/
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		//if (asyncPrefetch && pAC) {
+		//	getAsyncSector();
+		//}
 
 		// Read directly at ARM7 level
 		commandRead = 0x025FFB08;
@@ -298,7 +298,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 		//REG_IME = 1;
 
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -424,7 +424,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	}
+	//}
 	
 	return 0;
 }
