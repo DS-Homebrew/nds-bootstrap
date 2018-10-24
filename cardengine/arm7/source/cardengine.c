@@ -442,7 +442,7 @@ void mySwiHalt(void) {
 	
 	calledViaIPC = false;
 
-	runCardEngineCheckAlt();
+	runCardEngineCheck();
 }
 
 
