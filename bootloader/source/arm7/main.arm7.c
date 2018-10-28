@@ -634,7 +634,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (!dsiModeConfirmed) {
+	if (!dsiModeConfirmed && soundFix) {
 		NTR_BIOS();
 	}
 
