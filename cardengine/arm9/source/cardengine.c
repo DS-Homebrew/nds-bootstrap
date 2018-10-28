@@ -503,7 +503,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = retail_CACHE_SLOTS_SDK5;
 		}
 
-		if (isGameLaggy(ndsHeader)) {
+		//if (isGameLaggy(ndsHeader)) {
 			if (consoleModel > 0) {
 				if (dsiMode || isSdk5(moduleParams)) {
 					// SDK 5
@@ -514,13 +514,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
 			}
 			readSize = _32KB_READ_SIZE;
-		} else if (consoleModel > 0) {
+		/*} else if (consoleModel > 0) {
 			if (dsiMode || isSdk5(moduleParams)) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
-		}
+		}*/
 
 		//ndsHeader->romSize += 0x1000;
 

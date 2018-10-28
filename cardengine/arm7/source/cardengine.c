@@ -263,6 +263,7 @@ static bool start_cardRead_arm9(void) {
     {
         readOngoing = false;
         // Primary fix for Mario's Holiday
+		// TODO: Apply fix outside of RAM cache
     	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
     		*(u32*)(0x0C9328AC) = 0xA00;
     	}
@@ -285,6 +286,7 @@ static bool resume_cardRead_arm9(void) {
     {
         readOngoing = false;
         // Primary fix for Mario's Holiday
+		// TODO: Apply fix outside of RAM cache
     	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
     		*(u32*)(0x0C9328AC) = 0xA00;
     	}
