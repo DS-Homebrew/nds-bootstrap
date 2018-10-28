@@ -460,17 +460,13 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if (!ROMinRAM) {
-		runCardEngineCheck();
-	}
-
-	if (soundFix) {
+	/*if (soundFix) {
 		if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
 			cardReadTimeOut++;
 		}
 	} else {
 		cardReadTimeOut = 30;
-	}
+	}*/
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
@@ -704,6 +700,10 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 	
 	cheat_engine_start();
+
+	if (!ROMinRAM) {
+		runCardEngineCheck();
+	}
 }
 
 u32 myIrqEnable(u32 irq) {	
