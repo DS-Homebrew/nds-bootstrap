@@ -152,7 +152,6 @@ static int runNdsFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
-		powerOff(PM_BACKLIGHT_TOP);
 		consoleDemoInit();
 
 		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
@@ -312,16 +311,12 @@ static int runNdsFile(configuration* conf) {
 	switch(conf->backlightMode) {
 		case 0:
 		default:
-			powerOn(PM_BACKLIGHT_TOP);
-			powerOn(PM_BACKLIGHT_BOTTOM);
 			break;
 		case 1:
-			powerOn(PM_BACKLIGHT_TOP);
 			powerOff(PM_BACKLIGHT_BOTTOM);
 			break;
 		case 2:
 			powerOff(PM_BACKLIGHT_TOP);
-			powerOn(PM_BACKLIGHT_BOTTOM);
 			break;
 		case 3:
 			powerOff(PM_BACKLIGHT_TOP);
