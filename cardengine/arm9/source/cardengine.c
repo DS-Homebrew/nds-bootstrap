@@ -241,9 +241,7 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
 		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
 		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
-		|| strncmp(romTid, "ARZ", 3) == 0   // MegaMan ZX (slightly boosts load speed)
 		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
-		|| strncmp(romTid, "YZX", 3) == 0   // MegaMan ZX Advent (slightly boosts load speed)
 		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
 		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
 		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
