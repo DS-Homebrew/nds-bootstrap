@@ -470,7 +470,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = page;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = (((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
 			sharedAddr[3] = commandRead;
 
 			//IPC_SendSync(0xEE24);
@@ -480,7 +480,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)((((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+			memcpy(cacheBuffer, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
 			(*readCachedRef)(cacheStruct);
 		}
