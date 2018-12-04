@@ -103,12 +103,12 @@ thumbPatches:
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r4-r6,lr}
+	stmfd   sp!, {r4-r11,lr}
 
 	ldr		r6, =cardRead
 	bl		_blx_r3_stub_card_read
 
-	ldmfd   sp!, {r4-r6,lr}
+	ldmfd   sp!, {r4-r11,lr}
 	bx      lr
 _blx_r3_stub_card_read:
 	bx	r6

@@ -431,7 +431,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
-	while (len > 0) {
+	if (len > 0) {
 		u32 len2 = len;
 		if (len2 > 512) {
 			len2 -= src % 4;
