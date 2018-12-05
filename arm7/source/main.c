@@ -80,7 +80,7 @@ int main(void) {
 
 	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 
-	//SCFGFifoCheck();
+	SCFGFifoCheck();
 
 	fifoSendValue32(FIFO_USER_05, 1);
 
