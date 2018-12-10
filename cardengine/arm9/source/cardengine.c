@@ -495,6 +495,11 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 	return 0;
 }
 
+//Currently used for NSMBDS romhacks
+void __attribute__((target("arm"))) debug8mbMpuFix(){
+	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
@@ -525,6 +530,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}
+
+		debug8mbMpuFix();
 
 		//ndsHeader->romSize += 0x1000;
 
