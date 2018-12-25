@@ -163,31 +163,31 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	dbg_printf("Eeprom page erase:\t");
 	dbg_hexa((u32)eepromPageErase);
 	dbg_printf("\n");
-	*eepromPageErase = ce7->patches->arm7Functions->eepromPageErase;
+	*eepromPageErase = 0x02000100; //ce7->patches->arm7Functions->eepromPageErase;
 
 	u32* eepromPageVerify = (u32*)(JumpTableFunc + 0x2C);
 	dbg_printf("Eeprom verify:\t");
 	dbg_hexa((u32)eepromPageVerify);
 	dbg_printf("\n");
-	*eepromPageVerify = ce7->patches->arm7Functions->eepromPageVerify;
+	*eepromPageVerify = 0x02000100; //ce7->patches->arm7Functions->eepromPageVerify;
 
 	u32* eepromPageWrite = (u32*)(JumpTableFunc + 0x48);
 	dbg_printf("Eeprom page write:\t");
 	dbg_hexa((u32)eepromPageWrite);
 	dbg_printf("\n");
-	*eepromPageWrite = ce7->patches->arm7Functions->eepromPageWrite;
+	*eepromPageWrite = 0x02000100; //ce7->patches->arm7Functions->eepromPageWrite;
 
 	u32* eepromPageProg = (u32*)(JumpTableFunc + 0x64);
 	dbg_printf("Eeprom page prog:\t");
 	dbg_hexa((u32)eepromPageProg);
 	dbg_printf("\n");
-	*eepromPageProg = ce7->patches->arm7Functions->eepromPageProg;
+	*eepromPageProg = 0x02000100; //ce7->patches->arm7Functions->eepromPageProg;
 
 	u32* eepromRead = (u32*)(JumpTableFunc + 0x80);
 	dbg_printf("Eeprom read:\t");
 	dbg_hexa((u32)eepromRead);
 	dbg_printf("\n");
-	*eepromRead = ce7->patches->arm7Functions->eepromRead;
+	*eepromRead = 0x02000100; //ce7->patches->arm7Functions->eepromRead;
 
 	u32* cardRead = (u32*)(JumpTableFunc + 0xA0);
 	dbg_printf("Card read:\t");
@@ -210,7 +210,7 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		dbg_printf("???:\t\t\t");
 		dbg_hexa((u32)current);
 		dbg_printf("\n");
-		*current = ce7->patches->arm7Functions->eepromProtect;
+		*current = 0x02000100; //ce7->patches->arm7Functions->eepromProtect;
 	}
 
 

@@ -17,6 +17,7 @@
 */
 
 #include <string.h>
+#include <stdio.h>
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
@@ -30,6 +31,8 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
+
+#include "my_fat.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -78,6 +81,8 @@ static int aQSize = 0;*/
 
 /*static u32 readNum = 0;
 static bool alreadySetMpu = false;*/
+
+aFile romFile;
 
 static bool flagsSet = false;
 
@@ -258,10 +263,16 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 }
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
-	u32 commandRead;
-	u32 sector = (src/readSize)*readSize;
-
 	accessCounter++;
+
+	nocashMessage("begin\n");
+
+	dbg_hexa(dst);
+	nocashMessage("\n");
+	dbg_hexa(src);
+	nocashMessage("\n");
+	dbg_hexa(len);
+	nocashMessage("\n");
 
 	//bool pAC = (isSdk5(moduleParams) && consoleModel > 0);
 
@@ -269,162 +280,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		processAsyncCommand();
 	}*/
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		/*if (asyncPrefetch && pAC) {
-			getAsyncSector();
-		}*/
+	//nocashMessage("aaaaaaaaaa\n");
+	fileRead(dst, romFile, src, len, 3);
 
-		// Read directly at ARM7 level
-		commandRead = 0x025FFB08;
-
-		//cacheFlush();
-
-		//REG_IME = 0;
-
-		sharedAddr[0] = (vu32)dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
-
-		//IPC_SendSync(0xEE24);
-
-		waitForArm7();
-
-		//REG_IME = 1;
-
-	} else {
-		// Read via the main RAM cache
-		while(len > 0) {
-			int slot = getSlotForSector(sector);
-			vu8* buffer = getCacheAddress(slot);
-			//u32 nextSector = sector+readSize;	
-			// Read max CACHE_READ_SIZE via the main RAM cache
-			if (slot == -1) {
-				/*if (asyncPrefetch && pAC) {
-					getAsyncSector();
-				}*/
-
-				// Send a command to the ARM7 to fill the RAM cache
-				commandRead = 0x025FFB08;
-
-				slot = allocateCacheSlot();
-
-				buffer = getCacheAddress(slot);
-
-				if (needFlushDCCache) {
-					DC_FlushRange((u8*)buffer, readSize);
-				}
-
-				//REG_IME = 0;
-
-				// Write the command
-				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = readSize;
-				sharedAddr[2] = sector;
-				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
-
-				waitForArm7();
-
-				//REG_IME = 1;
-			}
-				updateDescriptor(slot, sector);	
-	
-				/*if (asyncPrefetch && pAC) {
-					triggerAsyncPrefetch(nextSector);
-				}*/
-			/*} else {
-				if (asyncPrefetch && pAC) {
-					if (cacheCounter[slot] == 0x0FFFFFFF) {
-						// Prefetch successful
-						getAsyncSector();
-						
-						triggerAsyncPrefetch(nextSector);	
-					} else {
-						for (int i = 0; i < 10; i++) {
-							if (asyncQueue[i]==sector) {
-								// Prefetch successful
-								triggerAsyncPrefetch(nextSector);	
-								break;
-							}
-						}
-					}
-				}
-				updateDescriptor(slot, sector);
-			}*/
-
-			u32 len2 = len;
-			if ((src - sector) + len2 > readSize) {
-				len2 = sector - src + readSize;
-			}
-
-			if (len2 > 512) {
-				len2 -= src % 4;
-				len2 -= len2 % 32;
-			}
-
-			if (isSdk5(moduleParams) || readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
-
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+src-sector;
-				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
-
-				waitForArm7();
-				// -------------------------------------*/
-				#endif
-
-				// Copy directly
-				memcpy(dst, (u8*)buffer+(src-sector), len2);
-
-				// Update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = (vu32)(dst + len2);
-				cardStruct[2] = len - len2;
-			} else {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
-
-				sharedAddr[0] = page;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+page-sector;
-				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
-
-				waitForArm7();
-				// -------------------------------------
-				#endif
-
-				// Read via the 512b ram cache
-				//copy8(buffer+(page-sector)+(src%512), dst, len2);
-				//cardStruct[0] = src + len2;
-				//cardStruct[1] = dst + len2;
-				//cardStruct[2] = len - len2;
-				//(*readCachedRef)(cacheStruct);
-				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
-				*cachePage = page;
-				(*readCachedRef)(cacheStruct);
-			}
-			len = cardStruct[2];
-			if (len > 0) {
-				src = cardStruct[0];
-				dst = (u8*)cardStruct[1];
-				page = (src / 512) * 512;
-				sector = (src / readSize) * readSize;
-				accessCounter++;
-			}
-		}
-	}
+	nocashMessage("end\n");
 
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
@@ -507,6 +366,21 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		if (!FAT_InitFiles(true, 3)) {
+			nocashMessage("!FAT_InitFiles");
+			return -1;
+		}
+
+		const char* romName = "NDS.NDS";
+		romFile = getBootFileCluster(romName, 3);
+
+		buildFatTableCache(&romFile, 0);
+
+		const char* tmpName = "BTSTRP.TMP";
+		aFile tmpFile = getBootFileCluster(tmpName, 3);
+
+		fileWrite(0x2380000, tmpFile, 0, 0x40000, 3);
+
 		if (isSdk5(moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
@@ -599,6 +473,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
 		return 0;
+	}
+
+	if((*(u32*)(0x2380000)) == 0){
+		const char* tmpName = "BTSTRP.TMP";
+		aFile tmpFile = getBootFileCluster(tmpName, 3);
+		fileRead(0x2380000, tmpFile, 0, 0x40000, 3);
 	}
 
 	// Fix reads below 0x8000

@@ -167,7 +167,7 @@ int loadFromSD(configuration* conf) {
 	}
 	nocashMessage("fatInitDefault");
 
-	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
+	ini_browse(callback, conf, "fat:/_nds/nds-bootstrap.ini");
 
 	conf->saveSize = getSaveSize(conf->savPath);
 

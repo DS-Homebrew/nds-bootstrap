@@ -744,8 +744,8 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
-	fileRead(dst, *savFile, src, len, -1);
+	/*initialize();
+	fileRead(dst, *savFile, src, len, -1);*/
 	return true;
 }
 
@@ -761,12 +761,12 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	initialize();
+	/*initialize();
 	if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);
+	fileWrite(src, *savFile, dst, len, -1);*/
 
 	return true;
 }
@@ -783,12 +783,12 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
+	/*initialize();
 	if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);
+	fileWrite(src, *savFile, dst, len, -1);*/
 
 	return true;
 }
@@ -842,7 +842,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (ROMinRAM) {
+	/*if (ROMinRAM) {
 		memcpy(dst, romLocation + src, len);
 	} else {
 		initialize();
@@ -854,7 +854,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, *romFile, src, len, 2);
 		//ndmaUsed = true;
 		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-	}
+	}*/
 	
 	return true;
 }

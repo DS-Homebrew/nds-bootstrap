@@ -197,6 +197,8 @@ void arm9_main(void) {
 	screenBrightness = 25;
 	fadeType = true;
 
+//	*(u8*)(0x23FFC44) = 0;
+
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
@@ -257,8 +259,12 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();
+//	while(true){
+//		if(*(u8*)(0x23FFC44) != 0x00){
+			VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+			arm9code();
+//		}
+//	}
 	
 	while (1);
 }

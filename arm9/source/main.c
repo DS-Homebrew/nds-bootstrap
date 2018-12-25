@@ -105,12 +105,12 @@ static void getSFCG_ARM7(void) {
 	printf("SCFG_CLK ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_CLK);\n");
-	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_CLK);
+	//fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_CLK);
 
 	printf("SCFG_EXT ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_EXT);\n");
-	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_EXT);
+	//fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_EXT);
 }
 
 static void myFIFOValue32Handler(u32 value, void* userdata) {
@@ -156,8 +156,8 @@ static int runNdsFile(configuration* conf) {
 
 		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
 
-		getSFCG_ARM9();
-		getSFCG_ARM7();
+		//getSFCG_ARM9();
+		//getSFCG_ARM7();
 
 		/*for (int i = 0; i < 60; i++) {
 			swiWaitForVBlank();
@@ -259,24 +259,24 @@ static int runNdsFile(configuration* conf) {
 	}*/
 
 	// Boost CPU
-	if (conf->boostCpu) {
+	/*if (conf->boostCpu) {
 		dbg_printf("CPU boosted\n");
 		setCpuClock(true); // libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
 	} else {
 		setCpuClock(false); //REG_SCFG_CLK = 0x80;
 		fifoSendValue32(FIFO_USER_06, 1);
-	}
+	}*/
 
 	// Boost VRAM
-	if (conf->boostVram) {
+	/*if (conf->boostVram) {
 		dbg_printf("VRAM boosted\n");
-	}
+	}*/
 
-	fifoSendValue32(FIFO_USER_03, 1);
-	fifoWaitValue32(FIFO_USER_05);
+	//fifoSendValue32(FIFO_USER_03, 1);
+	//fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
-	if (conf->logging) {
+	/*if (conf->logging) {
 		static FILE* loggingFile;
 		loggingFile = fopen("sd:/NDSBTSRP.LOG", "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
@@ -290,8 +290,8 @@ static int runNdsFile(configuration* conf) {
 
 		fclose(loggingFile);
 	} else {
-		remove("sd:/NDSBTSRP.LOG");
-	}
+	//	remove("sd:/NDSBTSRP.LOG");
+	}*/
 
 	debugConf(conf);
 

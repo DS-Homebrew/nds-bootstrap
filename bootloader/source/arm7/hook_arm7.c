@@ -256,6 +256,8 @@ int hookNdsRetailArm7(
 	u32 gameSoftReset,
 	u32 soundFix
 ) {
+	return ERR_NONE;
+
 	nocashMessage("hookNdsRetailArm7");
 
 	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);

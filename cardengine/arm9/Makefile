@@ -34,14 +34,14 @@ CFLAGS	:=	-g -Wall -O2\
 CFLAGS	+=	$(INCLUDE) -DARM9
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE) -DSTANDARD_DLDI
 
 LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project (order is important)
 #---------------------------------------------------------------------------------
-LIBS	:=	-lnds9
+LIBS	:=	-lnds9 -lfat
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

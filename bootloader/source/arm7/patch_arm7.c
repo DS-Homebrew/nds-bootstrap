@@ -146,7 +146,7 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	if (REG_SCFG_ROM != 0x703) {
+	/*if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ce7, ndsHeader, moduleParams);
 	}
 	if (!ROMinRAM) {
@@ -161,7 +161,9 @@ u32 patchCardNdsArm7(
 		return 0;
 	}
 
-	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
+	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);*/
+
+	*(u32*)(0x2000100) = 0xE12FFF1E;
 
 	u32 saveResult = 0;
 	if (isSdk5(moduleParams)) {

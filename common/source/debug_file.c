@@ -45,5 +45,6 @@ u32 dbg_printf(const char* message) {
 }
 
 u32 dbg_hexa(u32 n) {
-	return dbg_printf(tohex(n));
+	nocashMessage(tohex(n));
+	return 1;
 }
