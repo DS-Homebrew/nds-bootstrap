@@ -426,6 +426,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		}
 	//}
 	
+	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
+		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
+	}
+
 	return 0;
 }
 
@@ -468,7 +472,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = page;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = (((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -476,7 +480,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)((((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+			memcpy(cacheBuffer, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
 			(*readCachedRef)(cacheStruct);
 		}
@@ -489,6 +493,11 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 	}
 
 	return 0;
+}
+
+//Currently used for NSMBDS romhacks
+void __attribute__((target("arm"))) debug8mbMpuFix(){
+	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -521,6 +530,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}*/
+
+		debug8mbMpuFix();
 
 		//ndsHeader->romSize += 0x1000;
 
