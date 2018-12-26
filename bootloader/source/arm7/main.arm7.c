@@ -871,7 +871,7 @@ int arm7_main(void) {
 
 	memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
 
-	//dldiPatchLoader((data_t*)(CARDENGINE_ARM9_LOCATION), cardengine_arm9_bin_size, true);
+	dldiPatchBinary((data_t*)(CARDENGINE_ARM9_LOCATION), cardengine_arm9_bin_size);
 
 	increaseLoadBarLength();
 
