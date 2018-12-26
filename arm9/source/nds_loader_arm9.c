@@ -360,12 +360,13 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 
 	free(conf);
 
+	// Patch the loader with a DLDI for the card
+	if (!dldiPatchLoader ((data_t*)lc0, loaderSize, true)) {
+		return;
+	}
+
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);
-
-	if (!dldiPatchLoader ((data_t*)lc0, loaderSize, true)) {
-		return 3;
-	}
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
