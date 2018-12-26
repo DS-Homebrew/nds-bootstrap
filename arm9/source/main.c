@@ -258,22 +258,24 @@ static int runNdsFile(configuration* conf) {
 		fifoSendValue32(FIFO_MAXMOD, 1); // Special setting (when found special gamecode)
 	}*/
 
-	// Boost CPU
-	/*if (conf->boostCpu) {
-		dbg_printf("CPU boosted\n");
-		setCpuClock(true); // libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-	} else {
-		setCpuClock(false); //REG_SCFG_CLK = 0x80;
-		fifoSendValue32(FIFO_USER_06, 1);
-	}*/
+	if (isDSiMode()) {
+		// Boost CPU
+		if (conf->boostCpu) {
+			dbg_printf("CPU boosted\n");
+			setCpuClock(true); // libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+		} else {
+			setCpuClock(false); //REG_SCFG_CLK = 0x80;
+			fifoSendValue32(FIFO_USER_06, 1);
+		}
 
-	// Boost VRAM
-	/*if (conf->boostVram) {
-		dbg_printf("VRAM boosted\n");
-	}*/
+		// Boost VRAM
+		if (conf->boostVram) {
+			dbg_printf("VRAM boosted\n");
+		}
 
-	//fifoSendValue32(FIFO_USER_03, 1);
-	//fifoWaitValue32(FIFO_USER_05);
+		fifoSendValue32(FIFO_USER_03, 1);
+		fifoWaitValue32(FIFO_USER_05);
+	}
 
 	// Logging
 	/*if (conf->logging) {
@@ -283,7 +285,7 @@ static int runNdsFile(configuration* conf) {
 		fclose(loggingFile);
 
 		// Create a big file (minimal sdengine libfat cannot append to a file)
-		loggingFile = fopen("sd:/NDSBTSRP.LOG", "a");
+		loggingFile = fopen("fat:/NDSBTSRP.LOG", "a");
 		for (int i = 0; i < 1000; i++) {
 			fprintf(loggingFile, "                                                                                                                                          \n");
 		}

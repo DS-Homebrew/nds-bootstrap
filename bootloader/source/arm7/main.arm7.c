@@ -851,7 +851,7 @@ int arm7_main(void) {
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	if (!dsiModeConfirmed) {
-	//	NTR_BIOS();
+		NTR_BIOS();
 	}
 
 	increaseLoadBarLength();
@@ -954,9 +954,9 @@ int arm7_main(void) {
 
 	//fadeOut();
 
-	/*if (!dsiModeConfirmed) {
+	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}*/
+	}
 
 	nocashMessage("Starting the NDS file...");
 	startBinary_ARM7(arm9StartAddress);
