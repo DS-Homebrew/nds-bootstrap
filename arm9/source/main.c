@@ -58,7 +58,7 @@ static int dbg_printf(const char* format, ...) { // static int...
 	}
 
 	static FILE* debugFile;
-	debugFile = fopen("sd:/NDSBTSRP.LOG", "a");
+	debugFile = fopen("fat:/NDSBTSRP.LOG", "a");
 
 	va_list args;
 	va_start(args, format);
@@ -278,7 +278,7 @@ static int runNdsFile(configuration* conf) {
 	// Logging
 	/*if (conf->logging) {
 		static FILE* loggingFile;
-		loggingFile = fopen("sd:/NDSBTSRP.LOG", "w");
+		loggingFile = fopen("fat:/NDSBTSRP.LOG", "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
 		fclose(loggingFile);
 
@@ -290,7 +290,7 @@ static int runNdsFile(configuration* conf) {
 
 		fclose(loggingFile);
 	} else {
-	//	remove("sd:/NDSBTSRP.LOG");
+	//	remove("fat:/NDSBTSRP.LOG");
 	}*/
 
 	debugConf(conf);
@@ -366,17 +366,7 @@ int main(int argc, char** argv) {
 	conf->initDisc = true;
 	conf->dldiPatchNds = true;
 
-	int status = 0;
-
-	if (access("fat:/", F_OK) == 0) {
-		consoleDemoInit();
-		printf("This edition of nds-bootstrap\n");
-		printf("can only be used on the\n");
-		printf("SD card.\n");
-		status = -1;
-	} else {
-		status = loadFromSD(conf);
-	}
+	int status = loadFromSD(conf);
 
 	if (status == 0) {
 		status = runNdsFile(conf);

@@ -931,6 +931,7 @@ int arm7_main(void) {
 	hookNdsRetailArm9(
 		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
 		moduleParams,
+		romFile->firstCluster,
 		ROMinRAM,
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),

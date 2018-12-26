@@ -49,6 +49,7 @@ extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
 
 extern module_params_t* moduleParams;
+extern u32 fileCluster;
 extern u32 ROMinRAM;
 extern u32 dsiMode;
 extern u32 enableExceptionHandler;
@@ -371,8 +372,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			return -1;
 		}
 
-		const char* romName = "NDS.NDS";
-		romFile = getBootFileCluster(romName, 3);
+		romFile = getFileFromCluster(fileCluster);
 
 		buildFatTableCache(&romFile, 0);
 
