@@ -358,7 +358,7 @@ static void resetMemory_ARM7(void) {
 		TIMER_DATA(i) = 0;
 	}
 
-	//arm7clearRAM();
+	arm7clearRAM();
 
 	REG_IE = 0;
 	REG_IF = ~0;
