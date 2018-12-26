@@ -162,7 +162,7 @@ static int callback(const char *section, const char *key, const char *value, voi
 int loadFromSD(configuration* conf) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
-		printf("SD init failed!\n");
+		printf("FAT init failed!\n");
 		return -1;
 	}
 	nocashMessage("fatInitDefault");

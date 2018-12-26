@@ -358,7 +358,7 @@ static int runNdsFile(configuration* conf) {
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
+	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, conf);
 
 	return 0;
 }

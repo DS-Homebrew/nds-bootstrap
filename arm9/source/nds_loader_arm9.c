@@ -312,7 +312,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -321,17 +321,14 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
-	// Load the loader into the correct address
-	memcpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
-
 	// Set the parameters for the loader
 
 	free(conf->ndsPath);
 	free(conf->savPath);
 
-	lc0->storedFileCluster = cluster;
-	lc0->initDisc          = conf->initDisc;
-	lc0->wantToPatchDLDI   = conf->dldiPatchNds;
+	loader->storedFileCluster = cluster;
+	loader->initDisc          = conf->initDisc;
+	loader->wantToPatchDLDI   = conf->dldiPatchNds;
 
 	loadArgs(conf->argc, conf->argv);
 	for (int i = 0; i < conf->argc; ++i) {
@@ -339,26 +336,29 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	}
 	free(conf->argv);
 
-	lc0->saveFileCluster = saveCluster;
-	lc0->saveSize        = conf->saveSize;
-	lc0->language        = conf->language;
-	lc0->dsiMode         = conf->dsiMode; // SDK 5
-	lc0->donorSdkVer     = conf->donorSdkVer;
-	lc0->patchMpuRegion  = conf->patchMpuRegion;
-	lc0->patchMpuSize    = conf->patchMpuSize;
-	lc0->consoleModel    = conf->consoleModel;
-	lc0->loadingScreen   = conf->loadingScreen;
-	lc0->romread_LED     = conf->romread_LED;
-	lc0->boostVram       = conf->boostVram;
-	lc0->gameSoftReset   = conf->gameSoftReset;
-	lc0->asyncPrefetch   = conf->asyncPrefetch;
-	lc0->soundFix        = conf->soundFix;
-	lc0->logging         = conf->logging;
+	loader->saveFileCluster = saveCluster;
+	loader->saveSize        = conf->saveSize;
+	loader->language        = conf->language;
+	loader->dsiMode         = conf->dsiMode; // SDK 5
+	loader->donorSdkVer     = conf->donorSdkVer;
+	loader->patchMpuRegion  = conf->patchMpuRegion;
+	loader->patchMpuSize    = conf->patchMpuSize;
+	loader->consoleModel    = conf->consoleModel;
+	loader->loadingScreen   = conf->loadingScreen;
+	loader->romread_LED     = conf->romread_LED;
+	loader->boostVram       = conf->boostVram;
+	loader->gameSoftReset   = conf->gameSoftReset;
+	loader->asyncPrefetch   = conf->asyncPrefetch;
+	loader->soundFix        = conf->soundFix;
+	loader->logging         = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);
 	free(conf->cheat_data);
 
 	free(conf);
+
+	// Load the loader into the correct address
+	memcpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Patch the loader with a DLDI for the card
 	if (!dldiPatchLoader ((data_t*)lc0, loaderSize, true)) {
