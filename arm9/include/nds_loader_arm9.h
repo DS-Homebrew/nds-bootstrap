@@ -23,9 +23,10 @@
 #define NDS_LOADER_ARM9_H
 
 #include "configuration.h"
+#include "load_crt0.h"
 
 //#define LOAD_DEFAULT_NDS 0
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
 
 #endif // NDS_LOADER_ARM9_H

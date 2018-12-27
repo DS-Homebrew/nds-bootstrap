@@ -35,7 +35,6 @@
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
-#include "load_crt0.h"
 
 #include "load_bin.h"
 
