@@ -154,7 +154,7 @@ static int runNdsFile(configuration* conf) {
 	if (debug) {
 		consoleDemoInit();
 
-		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
+		//fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
 
 		//getSFCG_ARM9();
 		//getSFCG_ARM7();
