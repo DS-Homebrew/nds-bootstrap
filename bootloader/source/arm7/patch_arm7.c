@@ -10,7 +10,7 @@
 
 //#define memcpy __builtin_memcpy
 
-extern u32 ROMinRAM;
+extern u32 forceSleepPatch;
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
@@ -151,13 +151,13 @@ u32 patchCardNdsArm7(
 	}
 	if (!ROMinRAM) {
 		patchSwiHalt(ce7, ndsHeader, moduleParams);
-	}
+	}*/
 
-	if (REG_SCFG_EXT == 0 || REG_SCFG_MC == 0x11) {
+	if (forceSleepPatch) {
 		patchSleep(ndsHeader);
 	}
 
-	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+	/*if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
 	}
 

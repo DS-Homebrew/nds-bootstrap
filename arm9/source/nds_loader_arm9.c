@@ -348,7 +348,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	loader->romread_LED     = conf->romread_LED;
 	loader->boostVram       = conf->boostVram;
 	loader->gameSoftReset   = conf->gameSoftReset;
-	loader->asyncPrefetch   = conf->asyncPrefetch;
+	loader->forceSleepPatch = conf->forceSleepPatch;
 	loader->soundFix        = conf->soundFix;
 	loader->logging         = conf->logging;
 

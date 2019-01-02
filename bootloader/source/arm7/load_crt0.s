@@ -41,7 +41,7 @@
 	.global romread_LED
 	.global boostVram
 	.global gameSoftReset
-	.global asyncPrefetch
+	.global forceSleepPatch
 	.global soundFix
 	.global logging
 @---------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ boostVram:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
-asyncPrefetch:
+forceSleepPatch:
 	.word	0x00000000
 soundFix:
 	.word	0x00000000
