@@ -48,8 +48,7 @@ int hookNdsRetailArm9(
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
-	u32 consoleModel,
-	u32 asyncPrefetch
+	u32 consoleModel
 );
 
 #endif // HOOK_H

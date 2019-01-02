@@ -89,7 +89,7 @@ extern u32 consoleModel;
 //extern u32 loadingScreen;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-extern u32 asyncPrefetch;
+//extern u32 forceSleepPatch;
 extern u32 soundFix;
 //extern u32 logging;
 
@@ -715,13 +715,12 @@ int arm7_main(void) {
 		ROMinRAM,
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
-		consoleModel,
-		asyncPrefetch
+		consoleModel
 	);
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	} else {
-		if (romread_LED == 1 || (romread_LED > 0 && asyncPrefetch)) {
+		if (romread_LED == 1) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
