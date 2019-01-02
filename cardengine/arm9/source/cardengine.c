@@ -84,6 +84,7 @@ static int aQSize = 0;*/
 static bool alreadySetMpu = false;*/
 
 aFile romFile;
+aFile tmpFile;
 
 static bool flagsSet = false;
 
@@ -282,7 +283,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	}*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead(dst, romFile, src, len, 3);
+	fileRead(dst, romFile, src, len, 0);
 
 	nocashMessage("end\n");
 
@@ -377,9 +378,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		buildFatTableCache(&romFile, 0);
 
 		const char* tmpName = "BTSTRP.TMP";
-		aFile tmpFile = getBootFileCluster(tmpName, 3);
+		tmpFile = getBootFileCluster(tmpName, 3);
 
-		fileWrite(0x2380000, tmpFile, 0, 0x40000, 3);
+		fileWrite(0x2740000, tmpFile, 0, 0x40000, 3);
 
 		if (isSdk5(moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -475,10 +476,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		return 0;
 	}
 
-	if((*(u32*)(0x2380000)) == 0){
-		const char* tmpName = "BTSTRP.TMP";
-		aFile tmpFile = getBootFileCluster(tmpName, 3);
-		fileRead(0x2380000, tmpFile, 0, 0x40000, 3);
+	if((*(u32*)(0x2740000)) == 0){
+		fileRead(0x2740000, tmpFile, 0, 0x40000, 3);
 	}
 
 	// Fix reads below 0x8000
