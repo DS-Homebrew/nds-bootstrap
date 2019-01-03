@@ -56,6 +56,7 @@ enum {
 
 extern tNDSHeader* ndsHeader;
 extern bool dsiModeConfirmed;
+extern bool extendedMemory;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

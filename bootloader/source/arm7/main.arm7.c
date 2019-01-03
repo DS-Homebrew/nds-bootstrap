@@ -66,6 +66,7 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
+#include "cardengine_arm9_exmem_bin.h"
 
 #define STORED_FILE_CLUSTER_OFFSET 4 
 #define INIT_DISC_OFFSET 8
@@ -300,6 +301,8 @@ extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 dsiModeConsole;
 //extern u32 logging;
+
+static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -872,9 +875,14 @@ int arm7_main(void) {
 	// 4 dots
 	//
 
-	memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-
-	dldiPatchBinary((data_t*)(CARDENGINE_ARM9_LOCATION), cardengine_arm9_bin_size);
+	if (extendedMemory) {
+		memcpy((u32*)CARDENGINE_ARM9_EXMEM_LOCATION, (u32*)cardengine_arm9_exmem_bin, cardengine_arm9_exmem_bin_size);
+		dldiPatchBinary((data_t*)(CARDENGINE_ARM9_EXMEM_LOCATION), cardengine_arm9_exmem_bin_size);
+		ce9Location = CARDENGINE_ARM9_EXMEM_LOCATION;
+	} else {
+		memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+		dldiPatchBinary((data_t*)(CARDENGINE_ARM9_LOCATION), cardengine_arm9_bin_size);
+	}
 
 	increaseLoadBarLength();
 
@@ -884,7 +892,7 @@ int arm7_main(void) {
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
 		patchMpuRegion,
@@ -933,7 +941,7 @@ int arm7_main(void) {
 	//
 
 	hookNdsRetailArm9(
-		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
 		ROMinRAM,

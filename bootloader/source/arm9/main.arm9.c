@@ -45,6 +45,7 @@ extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
+bool extendedMemory = false;
 extern u32 boostVram;
 extern u32 dsiModeConsole;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -192,9 +193,12 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	REG_SCFG_EXT = 0x8300C000;
-	if (boostVram) {
-		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+	if (REG_SCFG_EXT != 0) {
+		extendedMemory = true;
+		REG_SCFG_EXT = 0x8300C000;
+		if (boostVram) {
+			REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+		}
 	}
 
 	screenBrightness = 25;
