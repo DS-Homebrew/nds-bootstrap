@@ -380,7 +380,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		const char* tmpName = "BTSTRP.TMP";
 		tmpFile = getBootFileCluster(tmpName, 3);
 
-		fileWrite(0x2740000, tmpFile, 0, 0x40000, 3);
+		fileWrite(0x2780000, tmpFile, 0, 0x40000, 3);
 
 		if (isSdk5(moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -476,8 +476,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		return 0;
 	}
 
-	if((*(u32*)(0x2740000)) == 0){
-		fileRead(0x2740000, tmpFile, 0, 0x40000, 3);
+	if((*(u32*)(0x2780000)) == 0){
+		fileRead(0x2780000, tmpFile, 0, 0x40000, 3);
 	}
 
 	// Fix reads below 0x8000
