@@ -83,8 +83,8 @@ static int aQSize = 0;*/
 /*static u32 readNum = 0;
 static bool alreadySetMpu = false;*/
 
-aFile romFile;
-aFile tmpFile;
+static aFile romFile;
+static aFile tmpFile;
 
 static bool flagsSet = false;
 

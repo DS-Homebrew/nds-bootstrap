@@ -851,7 +851,10 @@ int arm7_main(void) {
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = false;//isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+	u32 ROMinRAM = false;
+	/*if (extendedMemory) {
+		ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+	}*/
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
@@ -951,13 +954,8 @@ int arm7_main(void) {
 		supportsExceptionHandler(ndsHeader),
 		consoleModel
 	);
-	/*if (ROMinRAM) {
+	/*if (ROMinRAM && extendedMemory) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
-	} else {
-		if (romread_LED == 1) {
-			// Turn WiFi LED off
-			i2cWriteRegister(0x4A, 0x30, 0x12);
-		}
 	}*/
 	increaseLoadBarLength();
 

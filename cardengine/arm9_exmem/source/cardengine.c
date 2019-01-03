@@ -62,13 +62,13 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-/*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];*/
+//static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
+//static u32 cacheCounter[dev_CACHE_SLOTS_32KB];
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 /*static u32 romLocation = ROM_LOCATION;
-static u32 readSize = _128KB_READ_SIZE;
+static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS;*/
 
@@ -119,9 +119,9 @@ static vu8* getCacheAddress(int slot) {
 static void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
-}
+}*/
 
-static void waitForArm7(void) {
+/*static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0);
 }*/
 
@@ -264,21 +264,11 @@ static void getAsyncSector(void) {
 }*/
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+	//u32 sector = (src/readSize)*readSize;
+
 	accessCounter++;
 
-	/*nocashMessage("begin\n");
-
-	dbg_hexa(dst);
-	nocashMessage("\n");
-	dbg_hexa(src);
-	nocashMessage("\n");
-	dbg_hexa(len);
-	nocashMessage("\n");*/
-
-	//nocashMessage("aaaaaaaaaa\n");
 	fileRead((char*)dst, *romFile, src, len, 0);
-
-	//nocashMessage("end\n");
 
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
@@ -361,10 +351,7 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		if (!FAT_InitFiles(true, 3)) {
-			//nocashMessage("!FAT_InitFiles");
-			return -1;
-		}
+		FAT_InitFiles(true, 3);
 
 		//romFile = getFileFromCluster(fileCluster);
 		//buildFatTableCache(&romFile, 0);
@@ -378,23 +365,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = retail_CACHE_SLOTS_SDK5;
 		}
 
-		if (isGameLaggy(ndsHeader)) {
-			if (consoleModel > 0) {
-				if (dsiMode || isSdk5(moduleParams)) {
-					// SDK 5
-					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				}
-				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
-			} else {
-				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
-			}
-			readSize = _32KB_READ_SIZE;
-		} else if (consoleModel > 0) {
+		if (consoleModel > 0) {
 			if (dsiMode || isSdk5(moduleParams)) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
+			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+		} else {
+			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
 		}*/
 
 		debug8mbMpuFix();
@@ -429,7 +407,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
 
-	#ifdef DEBUG
+	/*#ifdef DEBUG
 	u32 commandRead;
 
 	// send a log command for debug purpose
@@ -444,8 +422,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//IPC_SendSync(0xEE24);
 
 	waitForArm7();
-	// -------------------------------------*/
-	#endif
+	// -------------------------------------
+	#endif*/
 
 	// SDK 5 --> White screen
 	/*if (!isSdk5(moduleParams) && *(vu32*)0x2800010 != 1) {
