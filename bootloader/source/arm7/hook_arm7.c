@@ -253,10 +253,8 @@ int hookNdsRetailArm7(
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 soundFix
+	u32 gameSoftReset
 ) {
-	return ERR_NONE;
 
 	nocashMessage("hookNdsRetailArm7");
 
@@ -316,7 +314,7 @@ int hookNdsRetailArm7(
 	}
 
 	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation + 16;
+	//u32* ipcSyncHandler = hookLocation + 16;
 
 	debug[9] = (u32)hookLocation;
 
@@ -337,7 +335,7 @@ int hookNdsRetailArm7(
 	}*/
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
-	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
 	ce7->fileCluster             = fileCluster;
 	ce7->language                = language;
@@ -347,15 +345,11 @@ int hookNdsRetailArm7(
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
-	ce7->soundFix                = soundFix;
 
 	u32* ce7_cheat_data = getCheatData(ce7);
 	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	if (!ROMinRAM) {
-		*ipcSyncHandler = ce7->patches->fifoHandler;
-	}
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

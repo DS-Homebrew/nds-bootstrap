@@ -39,8 +39,7 @@ int hookNdsRetailArm7(
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 soundFix
+	u32 gameSoftReset
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

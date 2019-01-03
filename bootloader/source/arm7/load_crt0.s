@@ -42,7 +42,7 @@
 	.global boostVram
 	.global gameSoftReset
 	.global forceSleepPatch
-	.global soundFix
+	.global dsiModeConsole
 	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
@@ -93,7 +93,7 @@ gameSoftReset:
 	.word	0x00000000
 forceSleepPatch:
 	.word	0x00000000
-soundFix:
+dsiModeConsole:
 	.word	0x00000000
 logging:
 	.word	0x00000000

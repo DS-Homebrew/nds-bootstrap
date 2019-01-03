@@ -46,6 +46,7 @@ extern void arm9_clearCache(void);
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
 extern u32 boostVram;
+extern u32 dsiModeConsole;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -105,7 +106,9 @@ void arm9_main(void) {
 	WRAM_CR = 0x03;
 	REG_EXMEMCNT = 0xE880;
 
-	initMBKARM9();
+	if (dsiModeConsole) {
+		initMBKARM9();
+	}
 
 	arm9_stateFlag = ARM9_START;
 

@@ -349,7 +349,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	loader->boostVram       = conf->boostVram;
 	loader->gameSoftReset   = conf->gameSoftReset;
 	loader->forceSleepPatch = conf->forceSleepPatch;
-	loader->soundFix        = conf->soundFix;
+	loader->dsiModeConsole  = isDSiMode();
 	loader->logging         = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);

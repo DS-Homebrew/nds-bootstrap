@@ -298,7 +298,7 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
-extern u32 soundFix;
+extern u32 dsiModeConsole;
 //extern u32 logging;
 
 static void initMBK(void) {
@@ -765,7 +765,9 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
-	initMBK();
+	if (dsiModeConsole) {
+		initMBK();
+	}
 	
 	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
@@ -903,26 +905,27 @@ int arm7_main(void) {
 	// 6 dots
 	//
 
-	/*cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
-	errorCode = hookNdsRetailArm7(
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-		ndsHeader,
-		moduleParams,
-		romFile->firstCluster,
-		language,
-		dsiModeConfirmed,
-		ROMinRAM,
-		consoleModel,
-		romread_LED,
-		gameSoftReset,
-		soundFix
-	);
-	if (errorCode == ERR_NONE) {
-		nocashMessage("Card hook successful");
-	} else {
-		nocashMessage("Card hook failed");
-		errorOutput();
-	}*/
+	if (dsiModeConsole) {
+		cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
+		errorCode = hookNdsRetailArm7(
+			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+			ndsHeader,
+			moduleParams,
+			romFile->firstCluster,
+			language,
+			dsiModeConfirmed,
+			ROMinRAM,
+			consoleModel,
+			romread_LED,
+			gameSoftReset
+		);
+		if (errorCode == ERR_NONE) {
+			nocashMessage("Card hook successful");
+		} else {
+			nocashMessage("Card hook failed");
+			//errorOutput();
+		}
+	}
 	increaseLoadBarLength();
 
 	//

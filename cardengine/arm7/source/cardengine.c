@@ -217,81 +217,6 @@ static void cardReadLED(bool on) {
 	}
 }*/
 
-static void log_arm9(void) {
-	#ifdef DEBUG
-	u32 src = *(vu32*)(sharedAddr+2);
-	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr+1);
-	u32 marker = *(vu32*)(sharedAddr+3);
-
-	dbg_printf("\ncard read received\n");
-
-	if (calledViaIPC) {
-		dbg_printf("\ntriggered via IPC\n");
-	}
-	dbg_printf("\nstr : \n");
-	dbg_hexa((u32)cardStruct);
-	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);
-
-	dbg_printf("\nlog only \n");
-	#endif
-}
-
-static void cardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr + 2);
-	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr + 1);
-	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr + 3);
-
-	dbg_printf("\ncard read received v2\n");
-
-	if (calledViaIPC) {
-		dbg_printf("\ntriggered via IPC\n");
-	}
-
-	dbg_printf("\nstr : \n");
-	dbg_hexa((u32)cardStruct);
-	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);	
-	#endif
-
-	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-	#ifdef DEBUG
-	nocashMessage("fileRead romFile");
-	#endif
-	fileRead((char*)dst, *romFile, src, len, 0);
-
-	// Primary fix for Mario's Holiday
-	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
-		*(u32*)(0x0C9328AC) = 0xA00;
-	}
-
-	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-
-	#ifdef DEBUG
-	dbg_printf("\nread \n");
-	if (is_aligned(dst, 4) || is_aligned(len, 4)) {
-		dbg_printf("\n aligned read : \n");
-	} else {
-		dbg_printf("\n misaligned read : \n");
-	}
-	#endif
-}
-
 /*static void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
@@ -334,69 +259,6 @@ static void cardRead_arm9(void) {
 	#endif
 }*/
 
-static void runCardEngineCheck(void) {
-	//dbg_printf("runCardEngineCheck\n");
-	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheck");
-	#endif	
-
-	if (cardReadTimeOut == 30 && tryLockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
-}
-
-static void runCardEngineCheckHalt(void) {
-	//dbg_printf("runCardEngineCheckHalt\n");
-	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheckHalt");
-	#endif	
-
-	// lockMutex should be possible to be used here instead of tryLockMutex since the execution of irq is not blocked
-	// to be checked
-	if (lockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		if (soundFix) {
-			cardReadTimeOut = 0;
-		}
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
-}
-
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -406,8 +268,6 @@ void myIrqHandlerFIFO(void) {
 	#endif	
 	
 	calledViaIPC = true;
-	
-	runCardEngineCheck();
 }
 
 //---------------------------------------------------------------------------------
@@ -418,8 +278,6 @@ void mySwiHalt(void) {
 	#endif	
 	
 	calledViaIPC = false;
-
-	runCardEngineCheckHalt();
 }
 
 
@@ -433,18 +291,6 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language < 6) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
-	}
-
-	if (!ROMinRAM) {
-		runCardEngineCheck();
-	}
-
-	if (soundFix) {
-		if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
-			cardReadTimeOut++;
-		}
-	} else {
-		cardReadTimeOut = 30;
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
@@ -469,178 +315,6 @@ void myIrqHandlerVBlank(void) {
 		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-	}
-
-	if (gottenSCFGExt == 0) {
-		// Control volume with the - and + buttons.
-		u8 volLevel;
-		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-		if (consoleModel >= 2) {
-			switch(i2cVolLevel) {
-				case 0x00:
-				case 0x01:
-				default:
-					volLevel = 0;
-					break;
-				case 0x02:
-				case 0x03:
-					volLevel = 1;
-					break;
-				case 0x04:
-				case 0x05:
-					volLevel = 2;
-					break;
-				case 0x06:
-				case 0x07:
-					volLevel = 3;
-					break;
-				case 0x08:
-				case 0x09:
-					volLevel = 4;
-					break;
-				case 0x0A:
-				case 0x0B:
-					volLevel = 5;
-					break;
-				case 0x0C:
-				case 0x0D:
-					volLevel = 6;
-					break;
-				case 0x0E:
-				case 0x0F:
-					volLevel = 7;
-					break;
-				case 0x10:
-				case 0x11:
-					volLevel = 8;
-					break;
-				case 0x12:
-				case 0x13:
-					volLevel = 9;
-					break;
-				case 0x14:
-				case 0x15:
-					volLevel = 10;
-					break;
-				case 0x16:
-				case 0x17:
-					volLevel = 11;
-					break;
-				case 0x18:
-				case 0x19:
-					volLevel = 12;
-					break;
-				case 0x1A:
-				case 0x1B:
-					volLevel = 13;
-					break;
-				case 0x1C:
-				case 0x1D:
-					volLevel = 14;
-					break;
-				case 0x1E:
-				case 0x1F:
-					volLevel = 15;
-					break;
-			}
-		} else {
-			switch(i2cVolLevel) {
-				case 0x00:
-				case 0x01:
-				default:
-					volLevel = 0;
-					break;
-				case 0x02:
-				case 0x03:
-					volLevel = 1;
-					break;
-				case 0x04:
-					volLevel = 2;
-					break;
-				case 0x05:
-					volLevel = 3;
-					break;
-				case 0x06:
-					volLevel = 4;
-					break;
-				case 0x07:
-					volLevel = 6;
-					break;
-				case 0x08:
-					volLevel = 8;
-					break;
-				case 0x09:
-					volLevel = 10;
-					break;
-				case 0x0A:
-					volLevel = 12;
-					break;
-				case 0x0B:
-					volLevel = 15;
-					break;
-				case 0x0C:
-					volLevel = 17;
-					break;
-				case 0x0D:
-					volLevel = 21;
-					break;
-				case 0x0E:
-					volLevel = 24;
-					break;
-				case 0x0F:
-					volLevel = 28;
-					break;
-				case 0x10:
-					volLevel = 32;
-					break;
-				case 0x11:
-					volLevel = 36;
-					break;
-				case 0x12:
-					volLevel = 40;
-					break;
-				case 0x13:
-					volLevel = 45;
-					break;
-				case 0x14:
-					volLevel = 50;
-					break;
-				case 0x15:
-					volLevel = 55;
-					break;
-				case 0x16:
-					volLevel = 60;
-					break;
-				case 0x17:
-					volLevel = 66;
-					break;
-				case 0x18:
-					volLevel = 71;
-					break;
-				case 0x19:
-					volLevel = 78;
-					break;
-				case 0x1A:
-					volLevel = 85;
-					break;
-				case 0x1B:
-					volLevel = 91;
-					break;
-				case 0x1C:
-					volLevel = 100;
-					break;
-				case 0x1D:
-					volLevel = 113;
-					break;
-				case 0x1E:
-					volLevel = 120;
-					break;
-				case 0x1F:
-					volLevel = 127;
-					break;
-			}
-		}
-		REG_MASTER_VOLUME = volLevel;
 	}
 
 	if (consoleModel < 2 && romread_LED == 0) {
