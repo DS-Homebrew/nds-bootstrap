@@ -111,6 +111,8 @@ void arm9_main(void) {
 		initMBKARM9();
 	}
 
+	extendedMemory = (REG_SCFG_EXT != 0);
+
 	arm9_stateFlag = ARM9_START;
 
 	REG_IME = 0;
@@ -193,8 +195,7 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	if (REG_SCFG_EXT != 0) {
-		extendedMemory = true;
+	if (extendedMemory) {
 		REG_SCFG_EXT = 0x8300C000;
 		if (boostVram) {
 			REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access

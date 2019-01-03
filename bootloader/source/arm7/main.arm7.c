@@ -793,7 +793,7 @@ int arm7_main(void) {
 	}
 
 	// ROM file
-	aFile* romFile = malloc(32);
+	aFile* romFile = (extendedMemory ? (aFile*)ROM_FILE_LOCATION : malloc(32));
 	*romFile = getFileFromCluster(storedFileCluster);
 
 	const char* bootName = "NDS.NDS";
@@ -808,7 +808,9 @@ int arm7_main(void) {
 		return -1;
 	}
 	
-	//buildFatTableCache(romFile, 3);
+	if (extendedMemory) {
+		buildFatTableCache(romFile, 3);
+	}
 
 	nocashMessage("status1");
 

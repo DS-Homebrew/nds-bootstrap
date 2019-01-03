@@ -83,7 +83,7 @@ static int aQSize = 0;*/
 /*static u32 readNum = 0;
 static bool alreadySetMpu = false;*/
 
-aFile romFile;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 
 static bool flagsSet = false;
 
@@ -276,7 +276,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 
 	//nocashMessage("end\n");
 
@@ -366,9 +366,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			return -1;
 		}
 
-		romFile = getFileFromCluster(fileCluster);
-
-		buildFatTableCache(&romFile, 0);
+		//romFile = getFileFromCluster(fileCluster);
+		//buildFatTableCache(&romFile, 0);
 
 		if (isSdk5(moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
