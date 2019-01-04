@@ -38,7 +38,7 @@ static const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; //
 //static const u32 instructionBHI[1] = {0x8A000001};
 
 // Card pull out
-static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
+static const u32 cardPullOutSignature1[5]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK <= 3
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
 static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
@@ -557,15 +557,27 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 			}
 		}
 	} else {
-		if (moduleParams->sdk_version < 0x4000000) {
-			cardPullOutOffset = findOffsetBackwards(
-				(u32*)ndsHeader->arm9destination+ndsHeader->arm9binarySize, 0x00300000,//ndsHeader->arm9binarySize,
-				cardPullOutSignature1, 4
+		if (moduleParams->sdk_version < 0x3000000) {
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				cardPullOutSignature1, 5
 			);
 			if (cardPullOutOffset) {
 				dbg_printf("Card pull out handler found: ");
 			} else {
 				dbg_printf("Card pull out handler not found\n");
+			}
+		}
+
+		if (!cardPullOutOffset && moduleParams->sdk_version < 0x4000000) {
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				cardPullOutSignature1, 4
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler alt found: ");
+			} else {
+				dbg_printf("Card pull out handler alt not found\n");
 			}
 		}
 
