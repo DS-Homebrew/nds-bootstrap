@@ -2,7 +2,7 @@ nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebre
 
 # Bug Reporting
 
-Before reporting a bug, check the [compatibility list](https://docs.google.com/spreadsheets/d/1M7MxYQzVhb4604esdvo57a7crSvbGzFIdotLW0bm0Co/edit?usp=sharing) to see if it has already been reported.
+Before reporting a bug, check the [compatibility list](https://docs.google.com/spreadsheets/d/1LRTkXOUXraTMjg1eedz_f7b5jiuyMv2x6e_jY_nyHSc/edit?usp=sharing) to see if it has already been reported.
 
 A few questions one can answer:
 1) How you encountered the bug
@@ -26,6 +26,6 @@ Once all that is downloaded and installed, `git clone` this repository, navigate
 # Frontends
 
 In order to use this, you'll need to get a frontend:
-- [TWiLightMenu++](https://github.com/Robz8/SRLoader) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
-- [TWLoader](https://github.com/Robz8/TWLoader) is a discontinued 3DS frontend.
+- [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
+- [TWLoader](https://github.com/RocketRobz/TWLoader) is a discontinued 3DS frontend.
 - [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a 3DS frontend based off the Nintendo DSi homebrew menu.
