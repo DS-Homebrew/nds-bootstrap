@@ -504,7 +504,7 @@ void myIrqHandlerVBlank(void) {
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			}
-      memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
 		}
