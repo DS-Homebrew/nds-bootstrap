@@ -886,9 +886,9 @@ u16* findSwiHaltOffsetThumb(const tNDSHeader* ndsHeader) {
 		swiHaltSignatureThumb, 2
 	);
 	if (swiHaltOffset) {
-		dbg_printf("swiHalt SDK 5 call thumb found: ");
+		dbg_printf("swiHalt call thumb found: ");
 	} else {
-		dbg_printf("swiHalt SDK 5 call thumb not found\n");
+		dbg_printf("swiHalt call thumb not found\n");
 	}
 
 	if (swiHaltOffset) {
