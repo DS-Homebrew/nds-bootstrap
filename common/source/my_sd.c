@@ -27,6 +27,20 @@ bool my_sdio_IsInserted(void) {
 }
 
 /*-----------------------------------------------------------------
+readSector
+Read 1 512-byte sized sectors from the card into "buffer", 
+starting at "sector". 
+The buffer may be unaligned, and the driver must deal with this correctly.
+return true if it was successful, false if it failed for any reason
+-----------------------------------------------------------------*/
+bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffset) {
+	#ifdef DEBUG
+	nocashMessage("readSector internal");
+	#endif
+	return my_sdmmc_sdcard_readsector(sector, buffer, startOffset, endOffset) == 0;
+}
+
+/*-----------------------------------------------------------------
 readSectors
 Read "numSectors" 512-byte sized sectors from the card into "buffer", 
 starting at "sector". 
@@ -38,6 +52,27 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	nocashMessage("readSectors internal");
 	#endif
 	return my_sdmmc_sdcard_readsectors(sector, numSectors, buffer, ndmaSlot) == 0;
+}
+
+/*-----------------------------------------------------------------
+readSectors
+Read "numSectors" 512-byte sized sectors from the card into "buffer", 
+starting at "sector". 
+The buffer may be unaligned, and the driver must deal with this correctly.
+return true if it was successful, false if it failed for any reason
+-----------------------------------------------------------------*/
+int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+	#ifdef DEBUG
+	nocashMessage("my_sdio_ReadSectors_nonblocking");
+	#endif
+	return my_sdmmc_sdcard_readsectors_nonblocking(sector, numSectors, buffer, ndmaSlot);
+}
+
+bool  my_sdio_check_command(int cmd, int ndmaSlot) {
+	#ifdef DEBUG
+	nocashMessage("my_sdio_check_command");
+	#endif
+	return my_sdmmc_sdcard_check_command(cmd, ndmaSlot);
 }
 
 /*-----------------------------------------------------------------
@@ -86,7 +121,10 @@ const DISC_INTERFACE __myio_dsisd = {
 	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 	(FN_MEDIUM_STARTUP)&my_sdio_Startup,
 	(FN_MEDIUM_ISINSERTED)&my_sdio_IsInserted,
+    (FN_MEDIUM_READSECTOR)&my_sdio_ReadSector,
 	(FN_MEDIUM_READSECTORS)&my_sdio_ReadSectors,
+    (FN_MEDIUM_READSECTORS_NONBLOCKING)&my_sdio_ReadSectors_nonblocking,
+    (FN_MEDIUM_CHECK_COMMAND)&my_sdio_check_command,
 	(FN_MEDIUM_WRITESECTORS)&my_sdio_WriteSectors,
 	(FN_MEDIUM_CLEARSTATUS)&my_sdio_ClearStatus,
 	(FN_MEDIUM_SHUTDOWN)&my_sdio_Shutdown

@@ -60,7 +60,6 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-extern u32 soundFix;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -71,7 +70,6 @@ static bool calledViaIPC = false;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 
-static int cardReadTimeOut = 0;
 static int saveTimer = 0;
 
 static int softResetTimer = 0;
@@ -244,7 +242,9 @@ static void log_arm9(void) {
 	#endif
 }
 
-static void cardRead_arm9(void) {
+static bool readOngoing = false;
+
+static bool start_cardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -273,14 +273,23 @@ static void cardRead_arm9(void) {
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
-	fileRead((char*)dst, *romFile, src, len, 0);
-
-	// Primary fix for Mario's Holiday
-	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
-		*(u32*)(0x0C9328AC) = 0xA00;
-	}
-
-	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+	if(!fileReadNonBLocking((char*)dst, romFile, src, len, 0))
+    {
+        readOngoing = true;
+        return false;    
+        //while(!resumeFileRead()){}
+    } 
+    else
+    {
+        readOngoing = false;
+        // Primary fix for Mario's Holiday
+		// TODO: Apply fix outside of RAM cache
+    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
+    		*(u32*)(0x0C9328AC) = 0xA00;
+    	}
+        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        return true;    
+    }
 
 	#ifdef DEBUG
 	dbg_printf("\nread \n");
@@ -290,6 +299,24 @@ static void cardRead_arm9(void) {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
+}
+
+static bool resume_cardRead_arm9(void) {
+    if(resumeFileRead())
+    {
+        readOngoing = false;
+        // Primary fix for Mario's Holiday
+		// TODO: Apply fix outside of RAM cache
+    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
+    		*(u32*)(0x0C9328AC) = 0xA00;
+    	}
+        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        return true;    
+    } 
+    else
+    {
+        return false;    
+    }
 }
 
 /*static void asyncCardRead_arm9(void) {
@@ -334,69 +361,106 @@ static void cardRead_arm9(void) {
 	#endif
 }*/
 
+static void runCardEngineCheckResume(void) {
+	//dbg_printf("runCardEngineCheckResume\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheckResume");
+	#endif	
+
+  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+		if(readOngoing)
+		{
+			if(resume_cardRead_arm9()) {
+				*(vu32*)(0x027FFB14) = 0;
+			} 
+		}
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}
+
 static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-	if (cardReadTimeOut == 30 && tryLockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
+  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+      if(!readOngoing)
+      { 
+  
+  		//nocashMessage("runCardEngineCheck mutex ok");
+  
+  		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+  			log_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}
+  
+  
+      		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+      			if(start_cardRead_arm9()) {
+                    *(vu32*)(0x027FFB14) = 0;
+                } 
+                
+      			
+      		}
+  
+  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+  			asyncCardRead_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}*/
+        } else {
+            if(resume_cardRead_arm9()) {
+                *(vu32*)(0x027FFB14) = 0;
+            } 
+        }
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
 }
 
-static void runCardEngineCheckHalt(void) {
-	//dbg_printf("runCardEngineCheckHalt\n");
+/*static void runCardEngineCheckAlt(void) {
+	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheckHalt");
+	nocashMessage("runCardEngineCheck");
 	#endif	
 
-	// lockMutex should be possible to be used here instead of tryLockMutex since the execution of irq is not blocked
-	// to be checked
-	if (lockMutex(&cardEgnineCommandMutex)) {
-		initialize();
-
-		if (soundFix) {
-			cardReadTimeOut = 0;
-		}
-
-		//nocashMessage("runCardEngineCheck mutex ok");
-		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-			log_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
-			cardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}
-
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-			asyncCardRead_arm9();
-			*(vu32*)(0x027FFB14) = 0;
-		}*/
-		unlockMutex(&cardEgnineCommandMutex);
-	}
-}
-
+  	if (lockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+      if(!readOngoing)
+      { 
+  
+  		//nocashMessage("runCardEngineCheck mutex ok");
+  
+  		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+  			log_arm9();
+  			*(vu32*)(0x027FFB14) = 0;
+  		}
+  
+  
+      		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+      			if(start_cardRead_arm9()) {
+                    *(vu32*)(0x027FFB14) = 0;
+                } else {
+                    while(!resume_cardRead_arm9()) {} 
+                    *(vu32*)(0x027FFB14) = 0;
+                } 			
+      		}
+  
+  		//if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+  		//	asyncCardRead_arm9();
+  		//	*(vu32*)(0x027FFB14) = 0;
+  		//}
+        } else {
+            while(!resume_cardRead_arm9()) {} 
+            *(vu32*)(0x027FFB14) = 0; 
+        }
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}*/
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -411,15 +475,15 @@ void myIrqHandlerFIFO(void) {
 }
 
 //---------------------------------------------------------------------------------
-void mySwiHalt(void) {
+void myIrqHandlerTimer(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
-	nocashMessage("mySwiHalt");
+	nocashMessage("myIrqHandlerTimer");
 	#endif	
 	
 	calledViaIPC = false;
 
-	runCardEngineCheckHalt();
+	runCardEngineCheckResume();
 }
 
 
@@ -435,24 +499,12 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if (!ROMinRAM) {
-		runCardEngineCheck();
-	}
-
-	if (soundFix) {
-		if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
-			cardReadTimeOut++;
-		}
-	} else {
-		cardReadTimeOut = 30;
-	}
-
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			}
-			memcpy((u32*)0x02000300, sr_data_srloader, 0x20);
+      memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
 		}
@@ -685,6 +737,10 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 	
 	cheat_engine_start();
+
+	if (!ROMinRAM) {
+		runCardEngineCheck();
+	}
 }
 
 u32 myIrqEnable(u32 irq) {	

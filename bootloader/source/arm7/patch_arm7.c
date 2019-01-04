@@ -10,7 +10,7 @@
 
 //#define memcpy __builtin_memcpy
 
-extern u32 ROMinRAM;
+extern u32 forceSleepPatch;
 
 static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
 
@@ -55,44 +55,6 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		// Patch
 		u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-	}
-}
-
-static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	bool usesThumb = false;
-
-	// swi halt
-	u32* swiHaltOffset = findSwiHaltOffset(ndsHeader, moduleParams);
-	if (!swiHaltOffset) {
-		dbg_printf("Trying thumb...\n");
-		swiHaltOffset = (u32*)findSwiHaltOffsetThumb(ndsHeader);
-		if (swiHaltOffset) {
-			usesThumb = true;
-		}
-	}
-	if (swiHaltOffset) {
-		// Patch
-		u32* swiHaltPatch = (usesThumb ? ce7->patches->jThumb_newSwiHalt : ce7->patches->j_newSwiHalt); // SDK 5
-		if (usesThumb) {
-			/*
-            // Find the relocation signature
-            u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-                relocateStartSignature, 1, 1);
-            if (!relocationStart) {
-                dbg_printf("Relocation start not found\n");
-        		return 0;
-            }
-        
-        	// Validate the relocation signature
-            u32 vAddrOfRelocSrc = relocationStart + 0x8;
-        
-            dbg_hexa((u32)swiHaltOffset);
-			const u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
-			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
-            ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
-		} else {
-			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
-		}
 	}
 }
 
@@ -149,11 +111,8 @@ u32 patchCardNdsArm7(
 	if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ce7, ndsHeader, moduleParams);
 	}
-	if (!ROMinRAM) {
-		patchSwiHalt(ce7, ndsHeader, moduleParams);
-	}
 
-	if (REG_SCFG_EXT == 0 || REG_SCFG_MC == 0x11) {
+	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
 		patchSleep(ndsHeader);
 	}
 

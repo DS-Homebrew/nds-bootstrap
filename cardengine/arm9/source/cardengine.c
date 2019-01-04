@@ -22,7 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 //#include <nds/interrupts.h>
-//#include <nds/ipc.h>
+#include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -116,7 +116,15 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 
 static void waitForArm7(void) {
-	while (sharedAddr[3] != (vu32)0);
+    IPC_SendSync(0xEE24);
+    int count = 0;
+	while (sharedAddr[3] != (vu32)0) {
+        count++;
+        if(count==20000000){
+            IPC_SendSync(0xEE24);
+            count=0;
+        }
+    }
 }
 
 /*static void addToAsyncQueue(u32 sector) {
@@ -187,9 +195,7 @@ static void triggerAsyncPrefetch(u32 sector) {
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = readSize-asyncReadSizeSubtract;
 			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
-
-			//IPC_SendSync(0xEE24);			
+			sharedAddr[3] = commandRead;		
 
 
 			// do it asynchronously
@@ -269,10 +275,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		processAsyncCommand();
 	}*/
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		/*if (asyncPrefetch && pAC) {
-			getAsyncSector();
-		}*/
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		//if (asyncPrefetch && pAC) {
+		//	getAsyncSector();
+		//}
 
 		// Read directly at ARM7 level
 		commandRead = 0x025FFB08;
@@ -286,13 +292,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		sharedAddr[2] = src;
 		sharedAddr[3] = commandRead;
 
-		//IPC_SendSync(0xEE24);
-
 		waitForArm7();
 
 		//REG_IME = 1;
 
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -322,8 +326,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[1] = readSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
 
@@ -375,8 +377,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = buffer+src-sector;
 				sharedAddr[3] = commandRead;
 
-				//IPC_SendSync(0xEE24);
-
 				waitForArm7();
 				// -------------------------------------*/
 				#endif
@@ -398,8 +398,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[1] = len2;
 				sharedAddr[2] = buffer+page-sector;
 				sharedAddr[3] = commandRead;
-
-				//IPC_SendSync(0xEE24);
 
 				waitForArm7();
 				// -------------------------------------
@@ -424,12 +422,12 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	}
+	//}
 
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
-	
+
 	return 0;
 }
 
@@ -453,8 +451,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			sharedAddr[2] = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
 			sharedAddr[3] = commandRead;
 
-			//IPC_SendSync(0xEE24);
-
 			waitForArm7();
 			// -------------------------------------
 			#endif
@@ -476,8 +472,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			sharedAddr[1] = len2;
 			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
 			sharedAddr[3] = commandRead;
-
-			//IPC_SendSync(0xEE24);
 
 			waitForArm7();
 			// -------------------------------------
@@ -516,7 +510,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = retail_CACHE_SLOTS_SDK5;
 		}
 
-		if (isGameLaggy(ndsHeader)) {
+		//if (isGameLaggy(ndsHeader)) {
 			if (consoleModel > 0) {
 				if (dsiMode || isSdk5(moduleParams)) {
 					// SDK 5
@@ -527,13 +521,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
 			}
 			readSize = _32KB_READ_SIZE;
-		} else if (consoleModel > 0) {
+		/*} else if (consoleModel > 0) {
 			if (dsiMode || isSdk5(moduleParams)) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
-		}
+		}*/
+
+		debug8mbMpuFix();
 
 		debug8mbMpuFix();
 
@@ -578,8 +574,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	sharedAddr[1] = len;
 	sharedAddr[2] = src;
 	sharedAddr[3] = commandRead;
-
-	//IPC_SendSync(0xEE24);
 
 	waitForArm7();
 	// -------------------------------------*/

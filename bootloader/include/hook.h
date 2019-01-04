@@ -39,8 +39,7 @@ int hookNdsRetailArm7(
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 soundFix
+	u32 gameSoftReset
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
@@ -48,8 +47,7 @@ int hookNdsRetailArm9(
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
-	u32 consoleModel,
-	u32 asyncPrefetch
+	u32 consoleModel
 );
 
 #endif // HOOK_H

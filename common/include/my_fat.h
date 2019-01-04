@@ -44,15 +44,31 @@ typedef	struct
 	u32	currentCluster;
 	u32 currentOffset;
 	bool fatTableCached;
-	bool oneClusterCached;
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
 } aFile;
+
+typedef	struct
+{
+	aFile * file;
+    char* buffer;
+	u32 startOffset;
+	u32 length;
+	int ndmaSlot;
+    int dataPos;
+    int curSect;
+    int curByte;
+    int clusterIndex;
+    int chunks;
+    int cmd;
+} readContext;
 
 bool FAT_InitFiles(bool initCard, int ndmaSlot);
 aFile getBootFileCluster(const char* bootName, int ndmaSlot);
 aFile getFileFromCluster(u32 cluster);
 u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+bool fileReadNonBLocking(char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot);
+bool resumeFileRead();
 u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
 u32 FAT_ClustToSect(u32 cluster);
 void buildFatTableCache(aFile* file, int ndmaSlot);

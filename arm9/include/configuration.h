@@ -21,7 +21,7 @@ typedef struct configuration {
 	bool boostCpu;
 	bool boostVram;
 	bool gameSoftReset;
-	bool asyncPrefetch;
+	bool forceSleepPatch;
 	bool soundFix;
 	bool logging;
 	bool initDisc;

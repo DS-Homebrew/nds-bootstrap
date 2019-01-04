@@ -108,6 +108,8 @@ extern "C" {
 		u8* rData;
 		const u8* tData;
 		u32 size;
+        u32 startOffset;
+        u32 endOffset;        
 		u32 error;
 		u16 stat0;
 		u16 stat1;
@@ -122,13 +124,17 @@ extern "C" {
 	} mmcdevice;
 
 	void sdmmc_init();
-	int sdmmc_sdcard_readsector(u32 sector_no, u8 *out);
+	int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset);
 	int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
 	int sdmmc_sdcard_writesector(u32 sector_no, const u8 *in);
 	int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot);
 
 	int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
 	int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
+    
+    // ndmaSlot needs to be valid
+    int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
+    bool my_sdmmc_sdcard_check_command(int cmd, int ndmaSlot);
 
 	int my_sdmmc_get_cid(bool isNand, u32 *info);
 
