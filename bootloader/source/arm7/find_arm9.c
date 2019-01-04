@@ -129,9 +129,9 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if (strcmp(romTid, "UORE") != 0 && (moduleParams->sdk_version < 0x4000000 || moduleParams->sdk_version > 0x5000000)) {
+	if (strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4000000 || moduleParams->sdk_version > 0x5000000)) {
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignature, 2
 		);
 	}
@@ -159,13 +159,13 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
 	if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x3800 for "WarioWare: DIY"
 		//readType = 1;
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination + 0x3800, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm9destination + 0x3800, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignatureAlt, 2
 		);
 	} else {
 		//readType = 1;
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignatureAlt, 2
 		);
 	}
@@ -190,7 +190,7 @@ u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader) {
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb, 4
 	);
 	if (cardReadEndOffset) {
@@ -219,7 +219,7 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5, 8
 	);
 	if (cardReadEndOffset) {
@@ -230,7 +230,7 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 
     if (!cardReadEndOffset) {
         cardReadEndOffset = findOffsetThumb(
-			(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignatureThumb5Alt1, 8
 		);
 		if (cardReadEndOffset) {
@@ -260,7 +260,7 @@ u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5Alt2, 4
 	);
 	if (cardReadEndOffset) {
@@ -475,7 +475,7 @@ u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_param
 	}
 	
 	u32* cardReadCachedEndOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadCachedEndSignature, 4
 	);
 	if (cardReadCachedEndOffset) {
@@ -535,7 +535,7 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 	if (moduleParams->sdk_version > 0x5000000) {
 		// SDK 5
 		cardPullOutOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardPullOutSignature5, 4
 		);
 		if (cardPullOutOffset) {
@@ -547,7 +547,7 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 		if (!cardPullOutOffset) {
 			// SDK 5
 			cardPullOutOffset = findOffset(
-				(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				cardPullOutSignature5Alt, 4
 			);
 			if (cardPullOutOffset) {
@@ -559,7 +559,7 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 	} else {
 		if (moduleParams->sdk_version < 0x4000000) {
 			cardPullOutOffset = findOffsetBackwards(
-				(u32*)ndsHeader->arm9destination+ndsHeader->arm9binarySize, ndsHeader->arm9binarySize,
+				(u32*)ndsHeader->arm9destination+ndsHeader->arm9binarySize, 0x00300000,//ndsHeader->arm9binarySize,
 				cardPullOutSignature1, 4
 			);
 			if (cardPullOutOffset) {
@@ -572,7 +572,7 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 		if (!cardPullOutOffset) {
 			// SDK 4
 			cardPullOutOffset = findOffset(
-				(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				cardPullOutSignature4, 4
 			);
 			if (cardPullOutOffset) {
@@ -598,7 +598,7 @@ u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader) {
 	//if (usesThumb) {
 	
 	u16* cardPullOutOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardPullOutSignatureThumb, 4
 	);
 	if (cardPullOutOffset) {
@@ -609,7 +609,7 @@ u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	if (!cardPullOutOffset) {
 		cardPullOutOffset = findOffsetThumb(
-			(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardPullOutSignatureThumbAlt, 4
 		);
 		if (cardPullOutOffset) {
@@ -637,7 +637,7 @@ u16* findCardPullOutOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 	dbg_printf("findCardPullOutOffsetThumbType0:\n");
 	
 	u16* cardPullOutOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
 		cardPullOutSignatureThumb5, 4
 	);
 	if (cardPullOutOffset) {
@@ -664,7 +664,7 @@ u16* findCardPullOutOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 	dbg_printf("findCardPullOutOffsetThumbType1:\n");
 	
 	u16* cardPullOutOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
 		cardPullOutSignatureThumb5Alt, 4
 	);
 	if (cardPullOutOffset) {
@@ -686,7 +686,7 @@ u16* findCardPullOutOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 	dbg_printf("findForceToPowerOffOffset:\n");
 
 	u32 forceToPowerOffOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		forceToPowerOffSignature, 4
 	);
 	if (forceToPowerOffOffset) {
@@ -953,7 +953,7 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findCardReadDmaEndOffset:\n");
 
 	u32* cardReadDmaEndOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadDmaEndSignature, 2
 	);
 	if (cardReadDmaEndOffset) {
@@ -977,7 +977,7 @@ u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader) {
 	//if (usesThumb) {
 
 	u16* cardReadDmaEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadDmaEndSignatureThumbAlt, 4
 	);
 	if (cardReadDmaEndOffset) {
@@ -1219,7 +1219,7 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 	dbg_printf("findArenaLowOffset:\n");
 
 	u32* arenaLowOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		arenaLowSignature, 4
 	);
 	if (arenaLowOffset) {
@@ -1241,7 +1241,7 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset:\n");
 
 	u32* randomPatchOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		randomPatchSignature, 4
 	);
 	if (randomPatchOffset) {
@@ -1268,7 +1268,7 @@ u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_param
 	dbg_printf("findRandomPatchOffset5First:\n");
 
 	u32* randomPatchOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 		randomPatchSignature5First, 4
 	);
 	if (randomPatchOffset) {
@@ -1295,7 +1295,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_para
 	dbg_printf("findRandomPatchOffset5Second:\n");
 
 	u32* randomPatchOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
         randomPatchSignature5Second, 3
 	);
 	if (randomPatchOffset) {
