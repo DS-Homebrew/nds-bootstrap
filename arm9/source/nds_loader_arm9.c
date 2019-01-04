@@ -239,7 +239,6 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->boostVram       = conf->boostVram;
 	lc0->gameSoftReset   = conf->gameSoftReset;
 	lc0->forceSleepPatch = conf->forceSleepPatch;
-	lc0->soundFix        = conf->soundFix;
 	lc0->logging         = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);

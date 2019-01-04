@@ -33,6 +33,10 @@ patches_offset:
 	.word	patches
 intr_vblank_orig_return:
 	.word	0x00000000
+intr_timer0_orig_return:
+	.word	0x00000000
+intr_timer1_orig_return:
+	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
 moduleParams:
@@ -55,13 +59,9 @@ romread_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
-soundFix:
-	.word	0x00000000
 cheat_data_offset:    
 	.word	cheat_data - patches_offset
 cheat_data_len:
-	.word	0x00000000
-intr_timer0_orig_return:
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -82,6 +82,13 @@ timer0Handler:
 	ldr 	r0,	intr_timer0_orig_return
 	bx  	r0
 
+timer1Handler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_timer1
+	ldr 	r0,	intr_timer1_orig_return
+	bx  	r0
+
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -99,7 +106,15 @@ code_handler_start_vblank:
 
 code_handler_start_timer0:
 	push	{r0-r12} 
-	ldr	r3, =mySwiHalt
+	ldr	r3, =myIrqHandlerTimer
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
+code_handler_start_timer1:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerTimer
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
 	@ exit after return
@@ -150,119 +165,18 @@ loop_fastCopy32:
 card_engine_end:
 
 patches:
-.word	timer0Handler
 .word	card_pull_out_arm9
 .word	card_irq_enable_arm7
 .word	vblankHandler
+.word	timer0Handler
+.word	timer1Handler
 .word	fifoHandler
-.word	cardStructArm9
 .word   card_pull
-.word   cacheFlushRef
-.word   readCachedRef
 .word   arm7Functions
 .word   swi02
-.word   jThumb_newSwiHalt
-.word   j_newSwiHalt
 .word   j_twlGetPitchTable
 .word   getPitchTableStub
 .word   arm7FunctionsThumb
-
-@---------------------------------------------------------------------------------
-card_read_arm9:
-@---------------------------------------------------------------------------------
-	stmfd   sp!, {r0-r11,lr}
-	str 	r0, cacheRef
-
-begin:
-	@ registers used r0,r1,r2,r3,r5,r8,r11
-	ldr     r3,=0x4000100     @IPC_SYNC & command value
-	ldr     r8,=0x027FFB08    @shared area command
-	ldr     r4, cardStructArm9
-	ldr     r5, [R4]      @SRC
-	ldr     r1, [R4,#0x8] @LEN
-	ldr     r0, [R4,#0x4] @DST
-	mov     r2, #0x2400
-
-	@page computation
-	mov     r9, #0x200
-	rsb     r10, r9, #0
-	and     r11, r5, r10
-	
-	@ check for cmd2
-	cmp     r11, r5
-	bne     cmd1
-	cmp     r1, #1024
-	blt     cmd1
-	sub     r7, r8, #(0x027FFB08 - 0x026FFB08) @below dtcm
-	cmp     r0, r7
-	bgt     cmd1
-	sub     r7, r8, #(0x027FFB08 - 0x019FFB08) @above itcm
-	cmp     r0, r7
-	blt     cmd1
-	ands    r10, r0, #3
-	bne     cmd1
-
-cmd2:
-	sub r7, r8, #(0x027FFB08 - 0x025FFB08) @cmd2 marker
-	@r0 dst, r1 len
-	ldr r9, cacheFlushRef
-	bx r9  			@ cache flush code
-	b 	send_cmd
-
-cmd1:
-	mov     R1, #0x200
-	mov     r5, r11       @ current page
-	sub     r7, r8, #(0x027FFB08 - 0x027ff800) @cmd1 marker
-
-send_cmd:
-	@dst, len, src, marker
-	stmia r8, {r0,r1,r5,r7}
-	
-	@sendIPCSync
-	strh    r2, [r3,#0x80]
-
-loop_wait:
-	ldr r9, [r8,#12]
-	cmp r9,#0
-	bne loop_wait
-
-	@ check for cmd2
-	cmp     r1, #0x200
-	bne     exitfunc
-
-	ldr 	r9, cacheRef
-	add     r9,r9,#0x20	@ cache buffer
-	mov     r10,r7
-
-	@ copy 512 bytes
-	mov     r8, #512
-loop_copy:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_copy
-
-	ldr 	r0, cacheRef
-	str     r11, [r0, #8]	@ cache page
-
-	ldr r9, readCachedRef
-	bx r9
-
-	cmp r0,#0
-	bne begin
-
-exitfunc:
-	ldmfd   sp!, {r0-r11,lr}
-	bx      lr
-
-cardStructArm9:
-.word    0x00000000     
-cacheFlushRef:
-.word    0x00000000  
-readCachedRef:
-.word    0x00000000  
-cacheRef:
-.word    0x00000000  
 .pool
 @---------------------------------------------------------------------------------
 
@@ -274,39 +188,13 @@ swi02:
 	bx	lr
 @---------------------------------------------------------------------------------
 
-@---------------------------------------------------------------------------------
-jThumb_newSwiHalt:
-@---------------------------------------------------------------------------------
-	ldr	r3, = newSwiHalt
-	bx	r3
-.pool
-@---------------------------------------------------------------------------------
-
 	.arm
-@---------------------------------------------------------------------------------
-j_newSwiHalt:
-@---------------------------------------------------------------------------------
-	ldr	r12, = newSwiHalt
-	bx	r12
-.pool
-@---------------------------------------------------------------------------------
-
 @---------------------------------------------------------------------------------
 j_twlGetPitchTable:
 @---------------------------------------------------------------------------------
 	ldr	r12, = twlGetPitchTable
 	bx	r12
 .pool
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
-newSwiHalt:
-@---------------------------------------------------------------------------------
-	swi	#0x060000
-	ldr	r12, =mySwiHalt
-	bx	r12
-	swi	#0x060000
-	bx	lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -426,7 +314,6 @@ arm7FunctionsThumb:
 .word    eepromReadThumbStub
 .word    cardReadThumbStub
 .word    cardIdThumbStub
-.word    swiHaltThumbStub
 
 .thumb
 _blx_r3_stubthumb:
@@ -503,16 +390,6 @@ cardIdThumbStub:
 	pop   	{r1-r4} 
 	pop  	{r3}
 	bx  r3
-
-swiHaltThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =newSwiHalt
-	bl	_blx_r3_stubthumb
-	swi #0x6
-	pop   	{r1-r4} 
-	pop  	{r3}
-	bx       r3
 
 	.pool
 

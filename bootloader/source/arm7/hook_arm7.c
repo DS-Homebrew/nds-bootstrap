@@ -253,8 +253,7 @@ int hookNdsRetailArm7(
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,
-	u32 gameSoftReset,
-	u32 soundFix
+	u32 gameSoftReset
 ) {
 	nocashMessage("hookNdsRetailArm7");
 
@@ -315,6 +314,9 @@ int hookNdsRetailArm7(
 
 	u32* vblankHandler = hookLocation;
 	u32* timer0Handler = hookLocation + 3;
+	u32* timer1Handler = hookLocation + 4;
+	//u32* timer2Handler = hookLocation + 5;
+	//u32* timer3Handler = hookLocation + 6;
 	u32* ipcSyncHandler = hookLocation + 16;
 
 	debug[9] = (u32)hookLocation;
@@ -336,6 +338,8 @@ int hookNdsRetailArm7(
 	}*/
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
+	ce7->intr_timer0_orig_return = *timer0Handler;
+	ce7->intr_timer1_orig_return = *timer1Handler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
 	ce7->fileCluster             = fileCluster;
@@ -346,8 +350,6 @@ int hookNdsRetailArm7(
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
-	ce7->soundFix                = soundFix;
-	ce7->intr_timer0_orig_return = *timer0Handler;
 
 	u32* ce7_cheat_data = getCheatData(ce7);
 	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);
@@ -355,6 +357,7 @@ int hookNdsRetailArm7(
 	*vblankHandler = ce7->patches->vblankHandler;
 	if (!ROMinRAM) {
 		*timer0Handler = ce7->patches->timer0Handler;
+		*timer1Handler = ce7->patches->timer1Handler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 

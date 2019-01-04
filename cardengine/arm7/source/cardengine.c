@@ -57,7 +57,6 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-extern u32 soundFix;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -68,7 +67,6 @@ static bool calledViaIPC = false;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 
-static int cardReadTimeOut = 0;
 static int saveTimer = 0;
 
 static int softResetTimer = 0;
@@ -455,10 +453,10 @@ void myIrqHandlerFIFO(void) {
 }
 
 //---------------------------------------------------------------------------------
-void mySwiHalt(void) {
+void myIrqHandlerTimer(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerTimer0");
+	nocashMessage("myIrqHandlerTimer");
 	#endif	
 	
 	calledViaIPC = false;
@@ -478,14 +476,6 @@ void myIrqHandlerVBlank(void) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
-
-	/*if (soundFix) {
-		if (*(vu32*)(0x027FFB14) != 0 && cardReadTimeOut != 30) {
-			cardReadTimeOut++;
-		}
-	} else {
-		cardReadTimeOut = 30;
-	}*/
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
