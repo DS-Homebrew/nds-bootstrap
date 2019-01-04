@@ -83,7 +83,7 @@ static bool volumeAdjustActivated = false;
 static int cardEgnineCommandMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
-static const char* romLocation = NULL;
+//static const char* romLocation = NULL;
 
 static void unlaunchSetHiyaBoot(void) {
 	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
@@ -109,10 +109,10 @@ static void initialize(void) {
 		return;
 	}
 	
-	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+	/*if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 		sdmmc_init();
 		SD_Init();
-	}
+	}*/
 	FAT_InitFiles(false, 3);
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 3);
@@ -146,7 +146,7 @@ static void initialize(void) {
 	#endif
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	//romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 
 	initialized = true;
 }
@@ -418,8 +418,8 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	/*initialize();
-	fileRead(dst, *savFile, src, len, -1);*/
+	initialize();
+	fileRead(dst, *savFile, src, len, -1);
 	return true;
 }
 
@@ -435,12 +435,12 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	/*initialize();
+	initialize();
 	if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);*/
+	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;
 }
@@ -457,12 +457,12 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	/*initialize();
+	initialize();
 	if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
 	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);*/
+	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;
 }
@@ -480,7 +480,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src, savFile, dst, len, -1);
+	//fileWrite(src, *savFile, dst, len, -1);
 	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
@@ -518,17 +518,17 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	
 	/*if (ROMinRAM) {
 		memcpy(dst, romLocation + src, len);
-	} else {
+	} else {*/
 		initialize();
-		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+		//cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
 		fileRead(dst, *romFile, src, len, 2);
 		//ndmaUsed = true;
-		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-	}*/
+		//cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+	//}
 	
 	return true;
 }
