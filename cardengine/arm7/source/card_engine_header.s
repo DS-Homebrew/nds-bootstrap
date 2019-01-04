@@ -61,8 +61,8 @@ cheat_data_offset:
 	.word	cheat_data - patches_offset
 cheat_data_len:
 	.word	0x00000000
-romFileOffset:    
-	.word	ROM_FILE_LOCATION
+intr_timer0_orig_return:
+	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -75,6 +75,13 @@ vblankHandler:
 	ldr 	r0,	intr_vblank_orig_return
 	bx  	r0
 
+timer0Handler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_timer0
+	ldr 	r0,	intr_timer0_orig_return
+	bx  	r0
+
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -85,6 +92,14 @@ fifoHandler:
 code_handler_start_vblank:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerVBlank
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
+code_handler_start_timer0:
+	push	{r0-r12} 
+	ldr	r3, =mySwiHalt
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
 	@ exit after return
@@ -135,7 +150,7 @@ loop_fastCopy32:
 card_engine_end:
 
 patches:
-.word	card_read_arm9
+.word	timer0Handler
 .word	card_pull_out_arm9
 .word	card_irq_enable_arm7
 .word	vblankHandler

@@ -74,18 +74,71 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		// Patch
 		u32* swiHaltPatch = (usesThumb ? ce7->patches->jThumb_newSwiHalt : ce7->patches->j_newSwiHalt); // SDK 5
 		if (usesThumb) {
-			/*
+			
             // Find the relocation signature
-            u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-                relocateStartSignature, 1, 1);
+            /*u32 relocationStart = (u32)findOffset(
+				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				0x027FFFFA, 1
+			);
             if (!relocationStart) {
                 dbg_printf("Relocation start not found\n");
         		return 0;
             }
-        
-        	// Validate the relocation signature
-            u32 vAddrOfRelocSrc = relocationStart + 0x8;
-        
+
+			// Validate the relocation signature
+			u32 forwardedRelocStartAddr = relocationStart + 4;
+			if (!*(u32*)forwardedRelocStartAddr) {
+				forwardedRelocStartAddr += 4;
+			}
+			u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+
+			// Sanity checks
+			u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+			u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+			if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
+				dbg_printf("Error in relocation checking method 1\n");
+				
+				// Find the beginning of the next function
+				u32 nextFunction = (u32)findOffset(
+					(u32*)relocationStart, ndsHeader->arm7binarySize,
+					0xE92D4000, 1
+				);
+			
+				// Validate the relocation signature
+				forwardedRelocStartAddr = nextFunction - 0x14;
+				
+				// Validate the relocation signature
+				vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
+				
+				// Sanity checks
+				relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+				relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+				if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
+					dbg_printf("Error in relocation checking method 2\n");
+					return 0;
+				}
+			}
+
+			// Get the remaining details regarding relocation
+			u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
+			u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
+			if (relocDestAtSharedMem != 0x37F8000) { // Shared memory in RAM
+				// Try again
+				vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
+				relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
+				if (relocDestAtSharedMem != 0x37F8000) {
+					dbg_printf("Error in finding shared memory relocation area\n");
+					return 0;
+				}
+			}
+
+			dbg_printf("Relocation src: ");
+			dbg_hexa(vAddrOfRelocSrc);
+			dbg_printf("\n");
+			dbg_printf("Relocation dst: ");
+			dbg_hexa(relocDestAtSharedMem);
+			dbg_printf("\n");
+
             dbg_hexa((u32)swiHaltOffset);
 			const u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
 			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];

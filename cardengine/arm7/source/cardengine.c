@@ -341,6 +341,25 @@ static bool resume_cardRead_arm9(void) {
 	#endif
 }*/
 
+static void runCardEngineCheckResume(void) {
+	//dbg_printf("runCardEngineCheckResume\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheckResume");
+	#endif	
+
+  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  		initialize();
+  
+		if(readOngoing)
+		{
+			if(resume_cardRead_arm9()) {
+				*(vu32*)(0x027FFB14) = 0;
+			} 
+		}
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}
+
 static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
@@ -382,7 +401,7 @@ static void runCardEngineCheck(void) {
   	}
 }
 
-static void runCardEngineCheckAlt(void) {
+/*static void runCardEngineCheckAlt(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
@@ -411,17 +430,17 @@ static void runCardEngineCheckAlt(void) {
                 } 			
       		}
   
-  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-  			asyncCardRead_arm9();
-  			*(vu32*)(0x027FFB14) = 0;
-  		}*/
+  		//if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+  		//	asyncCardRead_arm9();
+  		//	*(vu32*)(0x027FFB14) = 0;
+  		//}
         } else {
             while(!resume_cardRead_arm9()) {} 
             *(vu32*)(0x027FFB14) = 0; 
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
-}
+}*/
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -439,12 +458,12 @@ void myIrqHandlerFIFO(void) {
 void mySwiHalt(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
-	nocashMessage("mySwiHalt");
+	nocashMessage("myIrqHandlerTimer0");
 	#endif	
 	
 	calledViaIPC = false;
 
-	runCardEngineCheck();
+	runCardEngineCheckResume();
 }
 
 

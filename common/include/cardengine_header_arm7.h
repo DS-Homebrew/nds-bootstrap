@@ -39,7 +39,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 // ARM7 cardengine patches
 //
 typedef struct cardengineArm7Patches {
-    u32 card_read_arm9;
+    u32 timer0Handler;
     u32* card_pull_out_arm9;
     u32* card_irq_enable_arm7;
     u32 vblankHandler;
@@ -77,7 +77,7 @@ typedef struct cardengineArm7 {
     u32 soundFix;
     u32 cheat_data_offset; //u32* cheat_data;
     u32 cheat_data_len;
-    u32* romFileOffset;
+    u32 intr_timer0_orig_return;
 
 } __attribute__ ((__packed__)) cardengineArm7;
 
