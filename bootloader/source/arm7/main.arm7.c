@@ -64,6 +64,7 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
+#include "cardengine_arm9_sdk5_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -92,6 +93,8 @@ extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 soundFix;
 //extern u32 logging;
+
+static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -658,7 +661,12 @@ int arm7_main(void) {
 	// 4 dots
 	//
 
-	memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
+	if (isSdk5(moduleParams)) {
+		ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
+	}
+	memcpy((u32*)(isSdk5(moduleParams) ? CARDENGINE_ARM9_SDK5_LOCATION : CARDENGINE_ARM9_LOCATION),
+			(u32*)(isSdk5(moduleParams) ? cardengine_arm9_sdk5_bin : cardengine_arm9_bin),
+			(isSdk5(moduleParams) ? cardengine_arm9_sdk5_bin_size : cardengine_arm9_bin_size));
 	increaseLoadBarLength();
 
 	//
@@ -667,7 +675,7 @@ int arm7_main(void) {
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
 		patchMpuRegion,
@@ -714,7 +722,7 @@ int arm7_main(void) {
 	//
 
 	hookNdsRetailArm9(
-		(cardengineArm9*)CARDENGINE_ARM9_LOCATION,
+		(cardengineArm9*)ce9Location,
 		moduleParams,
 		ROMinRAM,
 		dsiModeConfirmed,

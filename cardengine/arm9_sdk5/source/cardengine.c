@@ -50,7 +50,6 @@ extern u32 ROMinRAM;
 extern u32 dsiMode;
 extern u32 enableExceptionHandler;
 extern u32 consoleModel;
-extern u32 asyncPrefetch;
 
 extern u32 needFlushDCCache;
 
@@ -58,18 +57,14 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];
+static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
+static u32 cacheCounter[dev_CACHE_SLOTS_32KB_SDK5];
 static u32 accessCounter = 0;
 
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-static u32 romLocation = ROM_LOCATION;
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static u32 readSize = _32KB_READ_SIZE;
-static u32 cacheAddress = CACHE_ADRESS_START;
-static u16 cacheSlots = retail_CACHE_SLOTS;
-
-/*static u32 readNum = 0;
-static bool alreadySetMpu = false;*/
+static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
+static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 
 static bool flagsSet = false;
 
@@ -144,7 +139,7 @@ static void waitForArm7(void) {
 		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
 }*/
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -199,7 +194,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			}
 
 			updateDescriptor(slot, sector);	
-	
+
 			u32 len2 = len;
 			if ((src - sector) + len2 > readSize) {
 				len2 = sector - src + readSize;
@@ -210,53 +205,28 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 -= len2 % 32;
 			}
 
-			if (readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
+			#ifdef DEBUG
+			// Send a log command for debug purpose
+			// -------------------------------------
+			commandRead = 0x026ff800;
 
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+src-sector;
-				sharedAddr[3] = commandRead;
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len2;
+			sharedAddr[2] = buffer+src-sector;
+			sharedAddr[3] = commandRead;
 
-				waitForArm7();
-				// -------------------------------------*/
-				#endif
+			waitForArm7();
+			// -------------------------------------*/
+			#endif
 
-				// Copy directly
-				memcpy(dst, (u8*)buffer+(src-sector), len2);
+			// Copy directly
+			memcpy(dst, (u8*)buffer+(src-sector), len2);
 
-				// Update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = (vu32)(dst + len2);
-				cardStruct[2] = len - len2;
-			} else {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
+			// Update cardi common
+			cardStruct[0] = src + len2;
+			cardStruct[1] = (vu32)(dst + len2);
+			cardStruct[2] = len - len2;
 
-				sharedAddr[0] = page;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+page-sector;
-				sharedAddr[3] = commandRead;
-
-				waitForArm7();
-				// -------------------------------------
-				#endif
-
-				// Read via the 512b ram cache
-				//copy8(buffer+(page-sector)+(src%512), dst, len2);
-				//cardStruct[0] = src + len2;
-				//cardStruct[1] = dst + len2;
-				//cardStruct[2] = len - len2;
-				//(*readCachedRef)(cacheStruct);
-				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
-				*cachePage = page;
-				(*readCachedRef)(cacheStruct);
-			}
 			len = cardStruct[2];
 			if (len > 0) {
 				src = cardStruct[0];
@@ -268,14 +238,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		}
 	//}
 	
-	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
-		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
-	}
-
 	return 0;
 }
 
-static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
 	//u32 commandRead;
 	while (len > 0) {
 		u32 len2 = len;
@@ -284,48 +250,28 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if (readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+		#ifdef DEBUG
+		// Send a log command for debug purpose
+		// -------------------------------------
+		commandRead = 0x026ff800;
 
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
-			sharedAddr[3] = commandRead;
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = ((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src);
+		sharedAddr[3] = commandRead;
 
-			waitForArm7();
-			// -------------------------------------
-			#endif
+		waitForArm7();
+		// -------------------------------------
+		#endif
 
-			// Copy directly
-			memcpy(dst, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+		// Copy directly
+		memcpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
 
-			// Update cardi common
-			cardStruct[0] = src + len;
-			cardStruct[1] = (vu32)(dst + len);
-			cardStruct[2] = len - len;
-		} else {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+		// Update cardi common
+		cardStruct[0] = src + len;
+		cardStruct[1] = (vu32)(dst + len);
+		cardStruct[2] = len - len;
 
-			sharedAddr[0] = page;
-			sharedAddr[1] = len2;
-			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
-			sharedAddr[3] = commandRead;
-
-			waitForArm7();
-			// -------------------------------------
-			#endif
-
-			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
-			*cachePage = page;
-			(*readCachedRef)(cacheStruct);
-		}
 		len = cardStruct[2];
 		if (len > 0) {
 			src = cardStruct[0];
@@ -337,42 +283,21 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 	return 0;
 }
 
-//Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}
-
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		if (dsiMode) {
-			romLocation = ROM_SDK5_LOCATION;
-			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-			cacheSlots = retail_CACHE_SLOTS_SDK5;
-		}
-
 		//if (isGameLaggy(ndsHeader)) {
 			if (consoleModel > 0) {
-				if (dsiMode) {
-					// SDK 5
-					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				}
-				cacheSlots = (dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
-			} else {
-				cacheSlots = (dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
+				// SDK 5
+				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+				cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
 			}
 			//readSize = _32KB_READ_SIZE;
 		/*} else if (consoleModel > 0) {
-			if (dsiMode) {
-				// SDK 5
-				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-			}
-			cacheSlots = (dsiMode ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
+			// SDK 5
+			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+			cacheSlots = dev_CACHE_SLOTS_SDK5;
 		}*/
-
-		debug8mbMpuFix();
-
-		//ndsHeader->romSize += 0x1000;
 
 		if (enableExceptionHandler) {
 			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
@@ -382,16 +307,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = cardStruct0;
+	vu32* volatile cardStruct = (vu32* volatile)(CARDENGINE_ARM9_SDK5_LOCATION + 0x50C0);
 
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+
+	cardStruct[0] = src;
+	cardStruct[1] = (vu32)dst;
+	cardStruct[2] = len;
 
 	u32 page = (src / 512) * 512;
-
-	u8* cacheBuffer = (u8*)(cacheStruct + 8);
-	u32* cachePage = cacheStruct + 2;
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -409,16 +335,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	// -------------------------------------*/
 	#endif
 
-	/*if (*(vu32*)0x2800010 != 1) {
-		if (readNum >= 0x100){ // Don't set too early or some games will crash
-			*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)0x2800004;
-			*(vu32*)(*(vu32*)(0x2800008)) = *(vu32*)0x280000C;
-			alreadySetMpu = true;
-		} else {
-			readNum += 1;
-		}
-	}*/
-
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
 		return 0;
@@ -429,5 +345,5 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	return ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	return ROMinRAM ? cardReadRAM(cardStruct, dst, src, len, page) : cardReadNormal(cardStruct, dst, src, len, page);
 }
