@@ -247,7 +247,9 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
 		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
 		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
+		|| strncmp(romTid, "ARZ", 3) == 0   // MegaMan ZX (slightly boosts load speed)
 		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
+		|| strncmp(romTid, "YZX", 3) == 0   // MegaMan ZX Advent (slightly boosts load speed)
 		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
 		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
 		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
@@ -423,7 +425,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			}
 		}
 	//}
-
+	
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
@@ -528,8 +530,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}*/
-
-		debug8mbMpuFix();
 
 		debug8mbMpuFix();
 

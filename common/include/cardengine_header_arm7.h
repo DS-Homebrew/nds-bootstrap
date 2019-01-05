@@ -43,6 +43,8 @@ typedef struct cardengineArm7Patches {
     u32 vblankHandler;
     u32 timer0Handler;
     u32 timer1Handler;
+    u32 timer2Handler;
+    u32 timer3Handler;
     u32 fifoHandler;
     u32 card_pull;
     cardengineArm7PatchesArm7Functions* arm7Functions;
@@ -60,6 +62,8 @@ typedef struct cardengineArm7 {
     u32 intr_vblank_orig_return;
     u32 intr_timer0_orig_return;
     u32 intr_timer1_orig_return;
+    u32 intr_timer2_orig_return;
+    u32 intr_timer3_orig_return;
     u32 intr_fifo_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;

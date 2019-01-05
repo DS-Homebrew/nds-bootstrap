@@ -37,6 +37,10 @@ intr_timer0_orig_return:
 	.word	0x00000000
 intr_timer1_orig_return:
 	.word	0x00000000
+intr_timer2_orig_return:
+	.word	0x00000000
+intr_timer3_orig_return:
+	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
 moduleParams:
@@ -89,6 +93,20 @@ timer1Handler:
 	ldr 	r0,	intr_timer1_orig_return
 	bx  	r0
 
+timer2Handler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_timer2
+	ldr 	r0,	intr_timer2_orig_return
+	bx  	r0
+
+timer3Handler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_timer3
+	ldr 	r0,	intr_timer3_orig_return
+	bx  	r0
+
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -113,6 +131,22 @@ code_handler_start_timer0:
 	b	exit
 
 code_handler_start_timer1:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerTimer
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
+code_handler_start_timer2:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerTimer
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
+code_handler_start_timer3:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerTimer
 	bl	_blx_r3_stub		@ jump to myIrqHandler
@@ -170,6 +204,8 @@ patches:
 .word	vblankHandler
 .word	timer0Handler
 .word	timer1Handler
+.word	timer2Handler
+.word	timer3Handler
 .word	fifoHandler
 .word   card_pull
 .word   arm7Functions
