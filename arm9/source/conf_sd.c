@@ -55,7 +55,7 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "DSI_MODE")) {
 		// DSi mode
-		conf->dsiMode = (bool)strtol(value, NULL, 0);
+		conf->dsiMode = strtol(value, NULL, 0);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "DONOR_SDK_VER")) {
 		// Donor SDK version

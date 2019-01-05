@@ -127,7 +127,7 @@ static inline void debugConf(configuration* conf) {
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
-	dbg_printf("dsiMode: %s\n", btoa(conf->dsiMode));
+	dbg_printf("dsiMode: %s\n",conf->dsiMode);
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
