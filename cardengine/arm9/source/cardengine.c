@@ -64,7 +64,7 @@ static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
-static u32 readSize = _128KB_READ_SIZE;
+static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS;
 
@@ -240,7 +240,7 @@ static void getAsyncSector(void) {
 	}
 }*/
 
-static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
+/*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 	//return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles, breaks Mario's Holiday)
 	return (strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
@@ -263,7 +263,7 @@ static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
 		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
 		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
-}
+}*/
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	u32 commandRead;
@@ -522,7 +522,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			} else {
 				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
 			}
-			readSize = _32KB_READ_SIZE;
+			//readSize = _32KB_READ_SIZE;
 		/*} else if (consoleModel > 0) {
 			if (dsiMode || isSdk5(moduleParams)) {
 				// SDK 5
