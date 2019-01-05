@@ -315,7 +315,7 @@ int hookNdsRetailArm7(
 	u32* vblankHandler = hookLocation;
 	u32* timer0Handler = hookLocation + 3;
 	u32* timer1Handler = hookLocation + 4;
-	u32* timer2Handler = hookLocation + 5;
+	//u32* timer2Handler = hookLocation + 5;
 	//u32* timer3Handler = hookLocation + 6;
 	u32* ipcSyncHandler = hookLocation + 16;
 
@@ -340,7 +340,7 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_timer0_orig_return = *timer0Handler;
 	ce7->intr_timer1_orig_return = *timer1Handler;
-	ce7->intr_timer2_orig_return = *timer2Handler;
+	//ce7->intr_timer2_orig_return = *timer2Handler;
 	//ce7->intr_timer3_orig_return = *timer3Handler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
@@ -360,7 +360,7 @@ int hookNdsRetailArm7(
 	if (!ROMinRAM) {
 		*timer0Handler = ce7->patches->timer0Handler;
 		*timer1Handler = ce7->patches->timer1Handler;
-		*timer2Handler = ce7->patches->timer2Handler;
+		//*timer2Handler = ce7->patches->timer2Handler;
 		//*timer3Handler = ce7->patches->timer3Handler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
