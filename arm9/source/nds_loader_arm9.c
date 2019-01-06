@@ -66,6 +66,7 @@ dsiSD:
 #define ARG_START_OFFSET 16
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
+#define LOADING_SCREEN_OFFSET 32
 
 
 typedef signed int addr_t;
@@ -266,7 +267,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
 {
 	char* argStart;
 	u16* argData;
@@ -329,6 +330,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_C);
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
+	writeAddr ((data_t*) LCDC_BANK_C, LOADING_SCREEN_OFFSET, loadingScreen);
 
 		
 	if(dldiPatchNds) {
@@ -343,8 +345,6 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	nocashMessage("irqDisable(IRQ_ALL);");
 
 	irqDisable(IRQ_ALL);
-
-	REG_SCFG_EXT = 0x03000000;
 
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
@@ -368,7 +368,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	return true;
 }
 
-int runNdsFile (const char* filename, int argc, const char** argv)  {
+int runNdsFile (const char* filename, int argc, const char** argv, int loadingScreen)  {
 	struct stat st;
 	char filePath[PATH_MAX];
 	int pathLen;
@@ -396,7 +396,7 @@ int runNdsFile (const char* filename, int argc, const char** argv)  {
 	
 	installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, true, true, argc, argv);
+	return runNds (load_bin, load_bin_size, st.st_ino, true, true, argc, argv, loadingScreen);
 }
 
 /*

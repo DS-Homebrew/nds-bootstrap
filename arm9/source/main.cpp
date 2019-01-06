@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename) {
+void runFile(string filename, int loadingScreen) {
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -98,7 +98,7 @@ void runFile(string filename) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0]);
+		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -227,7 +227,7 @@ int main( int argc, char **argv) {
         //if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str());
+		runFile(ndsPath.c_str(), bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

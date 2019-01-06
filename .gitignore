@@ -93,3 +93,7 @@ arm9/build
 sdengine/build
 bootloader/build
 bootstub/build
+cardengine/arm7/build
+cardengine/arm9/build
+cardengine/arm9_sdk5/build
+cardengine/arm9_exmem/build

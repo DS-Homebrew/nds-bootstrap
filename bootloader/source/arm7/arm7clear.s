@@ -20,26 +20,42 @@
  project at chishm@hotmail.com
 ------------------------------------------------------------------*/
 
-#ifndef CARD_H
-#define CARD_H
+	.arm
+	.global arm7clearRAM
+	.type	arm7clearRAM STT_FUNC
+arm7clearRAM:
 
-#include "disc_io.h"
-#include "io_dldi.h"
+	push	{r0-r9}
+	// clear exclusive IWRAM
+	// 0380:0000 to 0380:FFFF, total 64KiB
+	mov	r0, #0
+	mov	r1, #0
+	mov	r2, #0
+	mov	r3, #0
+	mov	r4, #0
+	mov	r5, #0
+	mov	r6, #0
+	mov	r7, #0
+	mov	r8, #0x03800000
+	sub	r8, #0x00008000
+	mov	r9, #0x03800000
+	orr	r9, r9, #0x10000
+clear_IWRAM_loop:
+	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
+	cmp	r8, r9
+	blt	clear_IWRAM_loop
 
-static inline bool CARD_StartUp (void) {
-	return _io_dldi.fn_startup();
-}
+	// clear most of EWRAM - except after RAM end - 0xc000, which has the bootstub
+	mov	r8, #0x02000000
 
-static inline bool CARD_IsInserted (void) {
-	return _io_dldi.fn_isInserted();
-}
+	mov	r9, #0x02400000
+	sub	r9, #0x00010000
+clear_EWRAM_loop:
+	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
+	cmp	r8, r9
+	blt	clear_EWRAM_loop
 
-static inline bool CARD_ReadSector (u32 sector, void *buffer) {
-	return _io_dldi.fn_readSectors(sector, 1, buffer);
-}
-
-static inline bool CARD_ReadSectors (u32 sector, int count, void *buffer) {
-	return _io_dldi.fn_readSectors(sector, count, buffer);
-}
-
-#endif // CARD_H
+	pop	{r0-r9}
+	
+	bx	lr
+  

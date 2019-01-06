@@ -16,6 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <string.h> // memcpy
+#include <stdio.h>
+#include <nds/system.h>
+#include <nds/debug.h>
+
 #include "hook.h"
 #include "common.h"
 #include "sdengine_bin.h"
@@ -242,7 +247,7 @@ int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngine
 		nocashMessage("ACCEL_IPC_OK");
 	}
 	
-	copyLoop (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
+	memcpy (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
 	
 	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
 	
