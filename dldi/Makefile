@@ -20,7 +20,7 @@ export TARGET		:=	dsisd
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../common/include
 
 
 #---------------------------------------------------------------------------------

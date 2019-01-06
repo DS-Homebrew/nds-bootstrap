@@ -90,6 +90,7 @@ release/_nds/nds-bootstrap.ini
 data
 arm7/build
 arm9/build
+dldi/build
 sdengine/build
 bootloader/build
 bootstub/build

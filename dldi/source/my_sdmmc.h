@@ -1,5 +1,5 @@
-#ifndef __SDMMC_H__
-#define __SDMMC_H__
+#ifndef SDMMC_H
+#define SDMMC_H
 
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -108,6 +108,8 @@ extern "C" {
 		u8* rData;
 		const u8* tData;
 		u32 size;
+        u32 startOffset;
+        u32 endOffset;        
 		u32 error;
 		u16 stat0;
 		u16 stat1;
@@ -122,15 +124,19 @@ extern "C" {
 	} mmcdevice;
 
 	void sdmmc_init();
-	int sdmmc_sdcard_readsector(u32 sector_no, u8 *out);
-	int sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out);
+	int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset);
+	int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
 	int sdmmc_sdcard_writesector(u32 sector_no, const u8 *in);
-	int sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
+	int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot);
 
-	int sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
-	int sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
+	int my_sdmmc_nand_readsectors(u32 sector_no, u32 numsectors, u8 *out);
+	int my_sdmmc_nand_writesectors(u32 sector_no, u32 numsectors, const u8 *in);
+    
+    // ndmaSlot needs to be valid
+    int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot);
+    bool my_sdmmc_sdcard_check_command(int cmd, int ndmaSlot);
 
-	int sdmmc_get_cid(bool isNand, u32 *info);
+	int my_sdmmc_get_cid(bool isNand, u32 *info);
 
 	mmcdevice *getMMCDevice(int drive);
 
@@ -180,4 +186,4 @@ static inline void setckl(u32 data)
 	sdmmc_write16(REG_SDCLKCTL, 1u<<8 | (data & 0x2FF));
 }
 
-#endif
+#endif // SDMMC_H

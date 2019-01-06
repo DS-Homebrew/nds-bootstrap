@@ -38,43 +38,11 @@
 #include <nds/dma.h>
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
-#include "sdmmc.h"
+#include "my_sdmmc.h"
 
 extern vu32 word_command;
 extern vu32 word_params;
 extern vu32 words_msg;
-
-static char hexbuffer [9];
-
-
-char* tohex(u32 n)
-{
-    unsigned size = 9;
-    char *buffer = hexbuffer;
-    unsigned index = size - 2;
-
-	for (int i=0; i<size; i++) {
-		buffer[i] = '0';
-	}
-
-    while (n > 0)
-    {
-        unsigned mod = n % 16;
-
-        if (mod >= 10)
-            buffer[index--] = (mod - 10) + 'A';
-        else
-            buffer[index--] = mod + '0';
-
-        n /= 16;
-    }
-    buffer[size - 1] = '\0';
-    return buffer;
-}
-
-void dbg_hexa(u32 n) {
-	nocashMessage(tohex(n));
-}
 
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
@@ -307,7 +275,7 @@ return true if it was successful, false if it failed for any reason
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("readSectors");
 	if(isArm7()) {
-		return sdmmc_sdcard_readsectors(sector,numSectors,buffer)==0;
+		return my_sdmmc_sdcard_readsectors(sector,numSectors,buffer,0)==0;
 	} else {	
 		return sd_ReadSectors(sector,numSectors,buffer);
 	}
@@ -325,7 +293,7 @@ return true if it was successful, false if it failed for any reason
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("writeSectors");
 	if(isArm7()) {
-		return sdmmc_sdcard_writesectors(sector,numSectors,buffer)==0;
+		return my_sdmmc_sdcard_writesectors(sector,numSectors,buffer,-1)==0;
 	} else {	
 		return sd_WriteSectors(sector,numSectors,buffer);
 	}

@@ -128,7 +128,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: sdengine bootloader bootstub BootStrap clean
-.PHONY: all dist release nightly bootloader bootstub sdengine BootStrap clean
+.PHONY: all dist release nightly bootloader bootstub BootStrap dldi/dsisd.dldi sdengine clean
 
 all:	$(OUTPUT)
 
