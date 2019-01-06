@@ -139,7 +139,7 @@ static void waitForArm7(void) {
 		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
 }*/
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
+static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -231,7 +231,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 			if (len > 0) {
 				src = cardStruct[0];
 				dst = (u8*)cardStruct[1];
-				page = (src / 512) * 512;
 				sector = (src / readSize) * readSize;
 				accessCounter++;
 			}
@@ -241,7 +240,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 	return 0;
 }
 
-static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
+static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
 	//u32 commandRead;
 	while (len > 0) {
 		u32 len2 = len;
@@ -276,7 +275,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 l
 		if (len > 0) {
 			src = cardStruct[0];
 			dst = (u8*)cardStruct[1];
-			page = (src / 512) * 512;
 		}
 	}
 
@@ -317,8 +315,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	cardStruct[1] = (vu32)dst;
 	cardStruct[2] = len;
 
-	u32 page = (src / 512) * 512;
-
 	#ifdef DEBUG
 	u32 commandRead;
 
@@ -332,7 +328,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
-	// -------------------------------------*/
+	// -------------------------------------
 	#endif
 
 	if (src == 0) {
@@ -345,5 +341,5 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	return ROMinRAM ? cardReadRAM(cardStruct, dst, src, len, page) : cardReadNormal(cardStruct, dst, src, len, page);
+	return ROMinRAM ? cardReadRAM(cardStruct, dst, src, len) : cardReadNormal(cardStruct, dst, src, len);
 }

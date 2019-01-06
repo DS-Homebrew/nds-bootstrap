@@ -349,7 +349,7 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
 }
 
-static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool dsiMode, bool* dsiModeConfirmedPtr) {
+static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsiMode, bool* dsiModeConfirmedPtr) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
@@ -436,14 +436,14 @@ static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t*
 	return arm9StartAddress;
 }
 
-static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, bool dsiMode) {
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
 	*ndsHeader = dsiHeaderTemp->ndshdr;
-	if (dsiMode) {
+	if (dsiMode > 0) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
 		tDSiHeader* dsiHeader = (tDSiHeader*)((u32)ndsHeader - (u32)__NDSHeader + (u32)__DSiHeader); // __DSiHeader
