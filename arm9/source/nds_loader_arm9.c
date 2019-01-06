@@ -343,7 +343,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	loader->donorSdkVer     = conf->donorSdkVer;
 	loader->patchMpuRegion  = conf->patchMpuRegion;
 	loader->patchMpuSize    = conf->patchMpuSize;
-	loader->consoleModel    = conf->consoleModel;
+	loader->consoleModel    = ((REG_SCFG_EXT != 0) ? conf->consoleModel : 0);
 	loader->loadingScreen   = conf->loadingScreen;
 	loader->romread_LED     = conf->romread_LED;
 	loader->boostVram       = conf->boostVram;

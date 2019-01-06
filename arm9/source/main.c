@@ -258,7 +258,7 @@ static int runNdsFile(configuration* conf) {
 		fifoSendValue32(FIFO_MAXMOD, 1); // Special setting (when found special gamecode)
 	}*/
 
-	if (isDSiMode()) {
+	if (REG_SCFG_EXT != 0) {
 		// Boost CPU
 		if (conf->boostCpu) {
 			dbg_printf("CPU boosted\n");
