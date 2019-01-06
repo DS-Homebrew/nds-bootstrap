@@ -22,15 +22,20 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
-#include "sdmmc.h"
+#include "my_sdmmc.h"
 #include "sdmmcEngine.h"
 #include "i2c.h"
+
+extern int tryLockMutex(int* addr);
+extern int lockMutex(int* addr);
+extern int unlockMutex(int* addr);
 
 static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern vu32* volatile irqSig; // always NULL
 extern vu32* volatile commandAddr;
-extern u32 ntrModeTouch;
+
+static int cardEgnineCommandMutex = 0;
 
 void sendValue32(vu32 value32) {
 	//nocashMessage("sendValue32");
@@ -87,10 +92,10 @@ void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
-        retval = sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
+        retval = my_sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, 0);
         break;
     case SDMMC_SD_WRITE_SECTORS:
-        retval = sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
+        retval = my_sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
     }    
 
@@ -99,7 +104,54 @@ void sdmmcCustomMsgHandler(int bytes) {
 
 void runSdMmcEngineCheck (void) {
 
-	if (ntrModeTouch) {
+  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+		if(*commandAddr == (vu32)0x027FEE04)
+		{
+			sdmmcCustomValueHandler(commandAddr[1]);
+		} else if(*commandAddr == (vu32)0x027FEE05)
+		{
+			sdmmcCustomMsgHandler(commandAddr[1]);
+		}
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}
+
+//---------------------------------------------------------------------------------
+void SyncHandler(void) {
+//---------------------------------------------------------------------------------
+	//nocashMessage("SyncHandler");
+	runSdMmcEngineCheck();
+}
+
+//---------------------------------------------------------------------------------
+void checkIRQ_IPC_SYNC() {
+//---------------------------------------------------------------------------------
+	if(!initialized) {	
+		//nocashMessage("!initialized");	
+		u32* current=irqHandler+1;
+		
+		while(*current!=IRQ_IPC_SYNC && *current!=0) {
+			current+=2;
+		}
+		/*if(current==IRQ_IPC_SYNC) {
+			nocashMessage("IRQ_IPC_SYNC slot found");	
+		} else {
+			nocashMessage("empty irqtable slot found");	
+		}*/		
+		
+		*((IntFn*)current-1)	= SyncHandler;
+		*current				= IRQ_IPC_SYNC;
+	
+		//nocashMessage("IRQ_IPC_SYNC setted");
+	
+		initialized = true;
+	}	
+}
+
+
+void myIrqHandler(void) {
+	
+	if (REG_SCFG_EXT == 0) {
 		// Control volume with the - and + buttons.
 		u8 volLevel;
 		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
@@ -205,105 +257,6 @@ void runSdMmcEngineCheck (void) {
 		REG_MASTER_VOLUME = volLevel;
 	}
 
-	int oldIME = enterCriticalSection();
-
-	if(*commandAddr == (vu32)0x027FEE04)
-	{
-		sdmmcCustomValueHandler(commandAddr[1]);
-	} else if(*commandAddr == (vu32)0x027FEE05)
-	{
-		sdmmcCustomMsgHandler(commandAddr[1]);
-	}
-
-	leaveCriticalSection(oldIME);
-}
-
-// interruptDispatcher.s jump_intr:
-static const u32 homebrewSig[5] = {
-	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
-	0xE3510000, // cmp    r1, #0
-	0x1A000001, // bne    got_handler
-	0xE1A01000, // mov    r1, r0
-	0xEAFFFFF6  // b    no_handler
-};	
-
-// interruptDispatcher.s jump_intr:
-//patch
-static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x23FF00C   @ my custom handler
-	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
-	0xE501F004, // str    pc, [r1,#-4]     @ irqsig 
-	0xEA000000, // b      got_handler
-	0x0390000C  // DCD 	  0x0390000C       
-};
-
-static u32* restoreInterruptHandlerHomebrew (u32* addr, u32 size) {
-	u32* end = addr + size/sizeof(u32);
-	
-	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == homebrewSigPatched[0]) && 
-			(addr[1] == homebrewSigPatched[1]) && 
-			(addr[2] == homebrewSigPatched[2]) && 
-			(addr[3] == homebrewSigPatched[3]) && 
-			(addr[4] == homebrewSigPatched[4])) 
-		{
-			break;
-		}
-		addr++;
-	}
-	
-	if (addr >= end) {
-		return 0;
-	}
-	
-	// patch the program
-	addr -= 5;
-	addr[0] = homebrewSig[0];
-	addr[1] = homebrewSig[1];
-	addr[2] = homebrewSig[2];
-	addr[3] = homebrewSig[3];
-	addr[4] = homebrewSig[4];
-	
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return addr;
-}
-
-//---------------------------------------------------------------------------------
-void SyncHandler(void) {
-//---------------------------------------------------------------------------------
-	//nocashMessage("SyncHandler");
-	runSdMmcEngineCheck();
-}
-
-//---------------------------------------------------------------------------------
-void checkIRQ_IPC_SYNC() {
-//---------------------------------------------------------------------------------
-	if(!initialized) {	
-		//nocashMessage("!initialized");	
-		u32* current=irqHandler+1;
-		
-		while(*current!=IRQ_IPC_SYNC && *current!=0) {
-			current+=2;
-		}
-		/*if(current==IRQ_IPC_SYNC) {
-			nocashMessage("IRQ_IPC_SYNC slot found");	
-		} else {
-			nocashMessage("empty irqtable slot found");	
-		}*/		
-		
-		*((IntFn*)current-1)	= SyncHandler;
-		*current				= IRQ_IPC_SYNC;
-	
-		//nocashMessage("IRQ_IPC_SYNC setted");
-	
-		initialized = true;
-	}	
-}
-
-
-void myIrqHandler(void) {
-	
 	checkIRQ_IPC_SYNC();
 	runSdMmcEngineCheck();
 }

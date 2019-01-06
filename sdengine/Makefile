@@ -18,9 +18,9 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET		:=	sdengine
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../common/source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../common/include
 
 
 #---------------------------------------------------------------------------------

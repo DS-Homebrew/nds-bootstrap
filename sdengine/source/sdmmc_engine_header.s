@@ -12,7 +12,6 @@
 .global irqSig
 .global sdmmc_engine_size
 .global commandAddr
-.global ntrModeTouch
 
 
 sdmmc_engine_size:
@@ -22,8 +21,6 @@ commandAddr:
 irqHandler:
 	.word	0x00000000
 irqSig:
-	.word	0x00000000
-ntrModeTouch:
 	.word	0x00000000
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -85,6 +82,45 @@ exit:
 	bx  lr
 
 .pool
+
+.global tryLockMutex
+.type	tryLockMutex STT_FUNC
+@ r0 : mutex adr
+tryLockMutex:
+	mov r1, r0   
+	mov r2, #1
+	swp r0,r2, [r1]
+	cmp r0, r2
+	beq trymutex_fail	
+	mov r0, #1
+	b mutex_exit	
+trymutex_fail:
+	mov r0, #0
+mutex_exit:
+	bx  lr
+
+.global lockMutex
+.type	lockMutex STT_FUNC
+@ r0 : mutex adr
+lockMutex:
+  mov r1, r0    
+  mov r2, #1
+mutex_loop:
+  swp r0,r2, [r1]
+  cmp r0,r2
+  beq mutex_loop    
+  mov r0, #1	
+  bx  lr
+
+
+
+.global unlockMutex
+.type	unlockMutex STT_FUNC
+@ r0 : mutex adr
+unlockMutex:  
+	mov r1, #0
+	str r1, [r0]
+	bx  lr
 
 sdmmc_engine_end:
 
