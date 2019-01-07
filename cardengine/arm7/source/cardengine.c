@@ -79,6 +79,7 @@ static bool volumeAdjustActivated = false;
 //static bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
+static int saveMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static const char* romLocation = NULL;
@@ -500,13 +501,16 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
-		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
-			if (consoleModel < 2) {
-				unlaunchSetHiyaBoot();
+		if (tryLockMutex(&saveMutex)) {
+			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
+				if (consoleModel < 2) {
+					unlaunchSetHiyaBoot();
+				}
+				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				i2cWriteRegister(0x4A, 0x70, 0x01);
+				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
 			}
-			memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			i2cWriteRegister(0x4A, 0x70, 0x01);
-			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
+			unlockMutex(&saveMutex);
 		}
 		softResetTimer++;
 	} else {
@@ -514,13 +518,16 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
-		if (consoleModel < 2) {
-			unlaunchSetHiyaBoot();
+		if (tryLockMutex(&saveMutex)) {
+			if (consoleModel < 2) {
+				unlaunchSetHiyaBoot();
+			}
+			//memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
+			memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+			unlockMutex(&saveMutex);
 		}
-		//memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
-		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 	}
 
 	if (gottenSCFGExt == 0) {
@@ -800,8 +807,11 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
-	fileRead(dst, *savFile, src, len, 0);
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		fileRead(dst, *savFile, src, len, 0);
+  		unlockMutex(&saveMutex);
+	}
 	return true;
 }
 
@@ -817,13 +827,15 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	initialize();
-	if (saveTimer == 0) {
-		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		if (saveTimer == 0) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+		}
+		saveTimer = 1;
+		fileWrite(src, *savFile, dst, len, -1);
+  		unlockMutex(&saveMutex);
 	}
-	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);
-
 	return true;
 }
 
@@ -839,13 +851,15 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
-	if (saveTimer == 0) {
-		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		if (saveTimer == 0) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+		}
+		saveTimer = 1;
+		fileWrite(src, *savFile, dst, len, -1);
+  		unlockMutex(&saveMutex);
 	}
-	saveTimer = 1;
-	fileWrite(src, *savFile, dst, len, -1);
-
 	return true;
 }
 
