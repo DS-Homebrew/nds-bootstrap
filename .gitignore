@@ -90,10 +90,12 @@ data
 bin
 arm7/build
 arm9/build
+dldi/build
 cardengine/arm7/build
 cardengine/arm9/build
 cardengine/arm9_sdk5/build
 cardengine/arm9_exmem/build
+sdengine/build
 bootloader/build
 
 # =========================

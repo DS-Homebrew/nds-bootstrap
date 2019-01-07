@@ -358,7 +358,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
+	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -380,8 +380,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	}
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 3);
-	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
+	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 
 	// SDK 5
 	if (dsiMode == 2) {
@@ -391,10 +391,10 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	}
 	if (*dsiModeConfirmedPtr) {
 		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 3);
+			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
 		}
 		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 3);
+			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
 		}
 	}
 }
@@ -578,7 +578,7 @@ int arm7_main(void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if (!FAT_InitFiles(initDisc, 3)) {
+	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
 		return -1;
 	}
@@ -591,7 +591,7 @@ int arm7_main(void) {
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
-		*romFile = getBootFileCluster(bootName, 3);
+		*romFile = getBootFileCluster(bootName, 0);
 	}
 
 	if (romFile->firstCluster == CLUSTER_FREE) {
@@ -599,14 +599,14 @@ int arm7_main(void) {
 		return -1;
 	}
 	
-	buildFatTableCache(romFile, 3);
+	buildFatTableCache(romFile, 0);
 
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
 	if (savFile->firstCluster != CLUSTER_FREE) {
-		buildFatTableCache(savFile, 3);
+		buildFatTableCache(savFile, 0);
 	}
 
 	int errorCode;

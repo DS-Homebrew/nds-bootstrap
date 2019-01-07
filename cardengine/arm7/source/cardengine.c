@@ -111,9 +111,9 @@ static void initialize(void) {
 		sdmmc_init();
 		SD_Init();
 	}
-	FAT_InitFiles(false, 3);
+	FAT_InitFiles(false, 0);
 	//romFile = getFileFromCluster(fileCluster);
-	//buildFatTableCache(&romFile, 3);
+	//buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
 	if (romFile->fatTableCached) {
 		nocashMessage("fat table cached");
@@ -801,7 +801,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
 	initialize();
-	fileRead(dst, *savFile, src, len, -1);
+	fileRead(dst, *savFile, src, len, 0);
 	return true;
 }
 
@@ -907,7 +907,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
-		fileRead(dst, *romFile, src, len, 2);
+		fileRead(dst, *romFile, src, len, 0);
 		//ndmaUsed = true;
 		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	}
