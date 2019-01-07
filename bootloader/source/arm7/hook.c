@@ -30,21 +30,6 @@ extern unsigned long intr_orig_return_offset;
 
 extern const u8 cheat_engine_start[]; 
 
-static const u32 handlerStartSig[5] = {
-	0xe92d4000, 	// push {lr}
-	0xe3a0c301, 	// mov  ip, #0x4000000
-	0xe28cce21,		// add  ip, ip, #0x210
-	0xe51c1008,		// ldr	r1, [ip, #-8]
-	0xe3510000		// cmp	r1, #0
-};
-
-static const u32 handlerEndSig[4] = {
-	0xe59f1008, 	// ldr  r1, [pc, #8]	(IRQ Vector table address)
-	0xe7910100,		// ldr  r0, [r1, r0, lsl #2]
-	0xe59fe004,		// ldr  lr, [pc, #4]	(IRQ return address)
-	0xe12fff10		// bx   r0
-};
-
 // libnds v1.5.12 2016
 static const u32 homebrewStartSig_2016[1] = {
 	0x04000208, 	// DCD 0x4000208
@@ -114,56 +99,6 @@ static const u32 homebrewAccelSigPatched[4] = {
 
 static const int MAX_HANDLER_SIZE = 50;
 
-static u32* hookInterruptHandler (u32* addr, size_t size) {
-	u32* end = addr + size/sizeof(u32);
-	int i;
-	
-	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == handlerStartSig[0]) && 
-			(addr[1] == handlerStartSig[1]) && 
-			(addr[2] == handlerStartSig[2]) && 
-			(addr[3] == handlerStartSig[3]) && 
-			(addr[4] == handlerStartSig[4])) 
-		{
-			break;
-		}
-		addr++;
-	}
-	
-	if (addr >= end) {
-		return NULL;
-	}
-	
-	// Find the end of the handler
-	for (i = 0; i < MAX_HANDLER_SIZE; i++) {
-		if ((addr[i+0] == handlerEndSig[0]) && 
-			(addr[i+1] == handlerEndSig[1]) && 
-			(addr[i+2] == handlerEndSig[2]) && 
-			(addr[i+3] == handlerEndSig[3])) 
-		{
-			break;
-		}
-	}
-	
-	if (i >= MAX_HANDLER_SIZE) {
-		return NULL;
-	}
-	
-	// Now find the IRQ vector table
-	// Make addr point to the vector table address pointer within the IRQ handler
-	addr = addr + i + sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
-	
-	// Use relative and absolute addresses to find the location of the table in RAM
-	u32 tableAddr = addr[0];
-	u32 returnAddr = addr[1];
-	u32* actualReturnAddr = addr + 2;
-	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-	
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return actualTableAddr;
-}
-
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
 	
@@ -202,7 +137,7 @@ static u32* hookAccelIPCHomebrew (u32* addr, size_t size) {
 	while (addr < end) {
 		if ((addr[0] == homebrewAccelSig[0]) && 
 			(addr[1] == homebrewAccelSig[1]) && 
-			(addr[2] == homebrewAccelSig[2]) && 
+			//(addr[2] == homebrewAccelSig[2]) && 
 			(addr[3] == homebrewAccelSig[3])) 
 		{
 			break;
@@ -224,7 +159,7 @@ static u32* hookAccelIPCHomebrew (u32* addr, size_t size) {
 	return addr;
 }
 
-int hookNds (const tNDSHeader* ndsHeader, const u32* cheatData, u32* cheatEngineLocation, u32* sdEngineLocation, u32* wordCommandAddr) {
+int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 	

@@ -62,8 +62,6 @@ void arm7clearRAM();
 #define NDS_HEAD 0x02FFFE00
 #define TEMP_ARM9_START_ADDRESS (*(vu32*)0x02FFFFF4)
 
-#define CHEAT_ENGINE_LOCATION	0x027FE000
-#define CHEAT_DATA_LOCATION  	0x06010000
 #define SD_ENGINE_LOCATION  	0x037C0000
 
 extern unsigned long _start;
@@ -376,7 +374,7 @@ int arm7_main (void) {
 	// 3 dots
 	//
 
-	hookNds(NDS_HEAD, (const u32*)CHEAT_DATA_LOCATION, (u32*)CHEAT_ENGINE_LOCATION, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+	hookNds(NDS_HEAD, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
 
 	increaseLoadBarLength();
 
@@ -386,6 +384,10 @@ int arm7_main (void) {
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
+
+	for (int i = 0; i < 4; i++) {
+		increaseLoadBarLength();
+	}
 
 	startBinary_ARM7();
 
