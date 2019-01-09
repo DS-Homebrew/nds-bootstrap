@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <string.h> // memcpy
 #include <nds/fifomessages.h>
 #include <nds/fifocommon.h>
 #include <nds/ipc.h>
@@ -25,6 +26,13 @@
 #include "my_sdmmc.h"
 #include "sdmmcEngine.h"
 #include "i2c.h"
+
+#include "sr_data_error.h"      // For showing an error screen
+#include "sr_data_srloader.h"   // For rebooting into DSiMenu++
+#include "sr_data_srllastran.h" // For rebooting the game
+
+static const char *unlaunchAutoLoadID = "AutoLoadInfo";
+static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
@@ -37,20 +45,41 @@ extern vu32* volatile commandAddr;
 
 static int cardEgnineCommandMutex = 0;
 
-void sendValue32(vu32 value32) {
+static int softResetTimer = 0;
+
+static void unlaunchSetHiyaBoot(void) {
+	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
+	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
+	*(u32*)(0x02000810) |= BIT(0);		// Load the title at 2000838h
+	*(u32*)(0x02000810) |= BIT(1);		// Use colors 2000814h
+	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
+	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
+	memset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	int i2 = 0;
+	for (int i = 0; i < 14; i++) {
+		*(u8*)(0x02000838+i2) = hiyaNdsPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+		i2 += 2;
+	}
+	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
+		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
+	}
+}
+
+static void sendValue32(vu32 value32) {
 	//nocashMessage("sendValue32");
 	commandAddr[0] = (u32)0x027FEE08;
 	commandAddr[1] = value32;
 }
 
-void getDatamsg(int size, vu8* msg) {
+static void getDatamsg(int size, vu8* msg) {
 	for(int i=0;i<size;i++)  {
 		msg[i]=*((vu8*)commandAddr+8+i);
 	}	
 }
 
 //---------------------------------------------------------------------------------
-void sdmmcCustomValueHandler(u32 value) {
+static void sdmmcCustomValueHandler(u32 value) {
 //---------------------------------------------------------------------------------
     int result = 0;
 
@@ -81,7 +110,7 @@ void sdmmcCustomValueHandler(u32 value) {
 }
 
 //---------------------------------------------------------------------------------
-void sdmmcCustomMsgHandler(int bytes) {
+static void sdmmcCustomMsgHandler(int bytes) {
 //---------------------------------------------------------------------------------
     FifoMessage msg;
     int retval = 0;
@@ -117,14 +146,14 @@ void runSdMmcEngineCheck (void) {
 }
 
 //---------------------------------------------------------------------------------
-void SyncHandler(void) {
+static void SyncHandler(void) {
 //---------------------------------------------------------------------------------
 	//nocashMessage("SyncHandler");
 	runSdMmcEngineCheck();
 }
 
 //---------------------------------------------------------------------------------
-void checkIRQ_IPC_SYNC() {
+static void checkIRQ_IPC_SYNC() {
 //---------------------------------------------------------------------------------
 	if(!initialized) {	
 		//nocashMessage("!initialized");	
@@ -151,7 +180,30 @@ void checkIRQ_IPC_SYNC() {
 
 void myIrqHandler(void) {
 	
-	if (REG_SCFG_EXT == 0) {
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
+		if (softResetTimer == 60 * 2) {
+			//if (consoleModel < 2) {
+				unlaunchSetHiyaBoot();
+			//}
+			memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+		}
+		softResetTimer++;
+	} else {
+		softResetTimer = 0;
+	}
+
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
+		//if (consoleModel < 2) {
+			unlaunchSetHiyaBoot();
+		//}
+		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+	}
+
+	/*if (REG_SCFG_EXT == 0) {
 		// Control volume with the - and + buttons.
 		u8 volLevel;
 		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
@@ -255,7 +307,7 @@ void myIrqHandler(void) {
 				break;
 		}
 		REG_MASTER_VOLUME = volLevel;
-	}
+	}*/
 
 	checkIRQ_IPC_SYNC();
 	runSdMmcEngineCheck();
