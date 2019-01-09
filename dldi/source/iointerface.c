@@ -39,6 +39,7 @@
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
+#include "memcpy.h"
 
 extern vu32 word_command;
 extern vu32 word_params;
@@ -78,11 +79,11 @@ u32 getValue32() {
 	return *((vu32*)myMemUncached(&word_params));
 }
 
-void goodOldCopy32(u32* src, u32* dst, int size) {
+/*void goodOldCopy32(u32* src, u32* dst, int size) {
 	for(int i = 0 ; i<size/4; i++) {
 		dst[i]=src[i];
 	}
-}
+}*/
 
 void __custom_mpu_setup();
 void __custom_mpu_restore();
@@ -161,7 +162,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 		result = getValue32();
 		
-		goodOldCopy32(mybuffer, buffer+numreads*512, readsectors*512);
+		memcpy(mybuffer, buffer+numreads*512, readsectors*512);
 	}
 	
 	//__custom_mpu_restore();
@@ -189,7 +190,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	
 		vu32* mybuffer = myMemUncached(tmp_buf_addr);		
 		
-		goodOldCopy32(buffer+numreads*512, mybuffer, readsectors*512);
+		memcpy(buffer+numreads*512, mybuffer, readsectors*512);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = startsector;
