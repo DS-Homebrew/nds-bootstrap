@@ -190,6 +190,7 @@ void arm9_main(void) {
 	//);
 
 	REG_SCFG_EXT = 0x8300C000;
+	//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
 	if (boostVram) {
 		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 	}

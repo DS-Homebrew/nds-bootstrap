@@ -58,15 +58,15 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];
+static u32 cacheDescriptor = 0x02710000;
+static u32 cacheCounter = 0x02714000;
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
-static u16 cacheSlots = retail_CACHE_SLOTS;
+static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 
 /*static u32 readNum = 0;
 static bool alreadySetMpu = false;*/
@@ -77,8 +77,8 @@ static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheCounter[i] <= lowerCounter) {
-			lowerCounter = cacheCounter[i];
+		if (*(u32*)(cacheCounter+(i*4)) <= lowerCounter) {
+			lowerCounter = *(u32*)(cacheCounter+(i*4));
 			slot = i;
 			if (!lowerCounter) {
 				break;
@@ -90,7 +90,7 @@ static int allocateCacheSlot(void) {
 
 static int getSlotForSector(u32 sector) {
 	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheDescriptor[i] == sector) {
+		if (*(u32*)(cacheDescriptor+(i*4)) == sector) {
 			return i;
 		}
 	}
@@ -103,8 +103,8 @@ static vu8* getCacheAddress(int slot) {
 }
 
 static void updateDescriptor(int slot, u32 sector) {
-	cacheDescriptor[slot] = sector;
-	cacheCounter[slot] = accessCounter;
+	*(u32*)(cacheDescriptor+(slot*4)) = sector;
+	*(u32*)(cacheCounter+(slot*4)) = accessCounter;
 }
 
 static void waitForArm7(void) {
@@ -348,7 +348,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (dsiMode) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-			cacheSlots = retail_CACHE_SLOTS_SDK5;
 		}
 
 		//if (isGameLaggy(ndsHeader)) {
