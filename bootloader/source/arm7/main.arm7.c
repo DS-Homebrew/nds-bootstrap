@@ -52,7 +52,6 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
-#include "loading_screen.h"
 
 void arm7clearRAM();
 
@@ -317,12 +316,6 @@ int arm7_main (void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-	debugOutput();
-
-	//
-	// 1 dot
-	//
-
 	resetMemory_ARM7();
 
 	// Init card
@@ -350,12 +343,6 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(*romFile);
 
-	increaseLoadBarLength();
-
-	//
-	// 2 dots
-	//
-
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
@@ -368,26 +355,10 @@ int arm7_main (void) {
 	
 	NTR_BIOS();
 
-	increaseLoadBarLength();
-
-	//
-	// 3 dots
-	//
-
 	hookNds(NDS_HEAD, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
-
-	increaseLoadBarLength();
-
-	//
-	// 4 dots
-	//
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
-
-	for (int i = 0; i < 4; i++) {
-		increaseLoadBarLength();
-	}
 
 	startBinary_ARM7();
 
