@@ -76,11 +76,30 @@ static const u32 homebrewAccelSig2007[4] = {
 	               // MOVS    R4, #1
 	0xD0064220   , // .
 				// .
-	0x881A4B10   , // ...
+	0x881A4B0C   , // ...
 	0x430A2108   , // ...
 };
 
 static const u32 homebrewAccelSig2007Patched[4] = {
+	0x47104A00   , // LDR     R2, =0x037C0020
+	               // BX      R2
+	0x037C0020   , // 
+				   // 
+	0x881A4B0C   , // ...
+	0x430A2108   , // ...
+};
+
+// Accelerator patch for IPC_SYNC v2007
+static const u32 homebrewAccelSig2007_2[4] = {
+	0x2401B510   , // .
+	               // MOVS    R4, #1
+	0xD0064220   , // .
+				// .
+	0x881A4B10   , // ...
+	0x430A2108   , // ...
+};
+
+static const u32 homebrewAccelSig2007Patched_2[4] = {
 	0x47104A00   , // LDR     R2, =0x037C0020
 	               // BX      R2
 	0x037C0020   , // 
@@ -170,6 +189,34 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 	return addr;
 }
 
+static u32* hookAccelIPCHomebrew2007_2(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig2007_2[0]) && 
+			(addr[1] == homebrewAccelSig2007_2[1]) && 
+			(addr[2] == homebrewAccelSig2007_2[2]) && 
+			(addr[3] == homebrewAccelSig2007_2[3])) 
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	// patch the program
+	addr[0] = homebrewAccelSig2007Patched_2[0];
+	addr[1] = homebrewAccelSig2007Patched_2[1];
+	addr[2] = homebrewAccelSig2007Patched_2[2];
+	addr[3] = homebrewAccelSig2007Patched_2[3];
+
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}
 
 static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
@@ -215,6 +262,10 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	
 	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	
+	if (!hookAccel) {
+		hookAccel = hookAccelIPCHomebrew2007_2((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	}
+
 	if (!hookAccel) {
 		hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
