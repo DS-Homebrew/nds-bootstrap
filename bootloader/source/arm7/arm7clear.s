@@ -48,15 +48,15 @@ clear_IWRAM_loop:
 	// clear most of EWRAM - except before 0x02480000, which has the arm9 code
 	mov	r8, #0x02000000
 
-	mov	r9, #0x02480000
+	mov	r9, #0x02400000
+	sub	r9, #0x0000C000
 clear_EWRAM_loop:
 	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
 	cmp	r8, r9
 	blt	clear_EWRAM_loop
 
 	// clear other part of EWRAM
-	mov	r8, #0x02480000
-	add	r8, #0x00004000
+	mov	r8, #0x02400000
 
 	mov	r9, #0x03000000
 clear_EWRAM2_loop:

@@ -138,7 +138,7 @@ u32 patchCardNds(
 	u32 saveSize
 ) {
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 3));
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
 	dbg_printf("patchCardNds\n\n");
