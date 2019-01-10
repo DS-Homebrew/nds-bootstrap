@@ -58,8 +58,8 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-#define cacheDescriptor		0x023FC000
-#define cacheCounter		0x023FD800
+#define cacheDescriptor		0x02710000
+#define cacheCounter		0x02712000
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
