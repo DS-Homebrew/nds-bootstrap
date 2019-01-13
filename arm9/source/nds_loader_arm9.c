@@ -67,6 +67,7 @@ dsiSD:
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
 #define LOADING_SCREEN_OFFSET 32
+#define RAM_DISK_CLUSTER_OFFSET 36
 
 
 typedef signed int addr_t;
@@ -267,7 +268,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
 {
 	char* argStart;
 	u16* argData;
@@ -331,6 +332,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_C);
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
 	writeAddr ((data_t*) LCDC_BANK_C, LOADING_SCREEN_OFFSET, loadingScreen);
+	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
 
 		
 	if(dldiPatchNds) {
@@ -368,8 +370,9 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool
 	return true;
 }
 
-int runNdsFile (const char* filename, int argc, const char** argv, int loadingScreen)  {
+int runNdsFile (const char* filename, const char* ramDiskFilename, int argc, const char** argv, int loadingScreen)  {
 	struct stat st;
+	struct stat ramSt;
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
@@ -378,6 +381,8 @@ int runNdsFile (const char* filename, int argc, const char** argv, int loadingSc
 	if (stat (filename, &st) < 0) {
 		return 1;
 	}
+	
+	stat (ramDiskFilename, &ramSt);
 
 	if (argc <= 0 || !argv) {
 		// Construct a command line if we weren't supplied with one
@@ -396,7 +401,7 @@ int runNdsFile (const char* filename, int argc, const char** argv, int loadingSc
 	
 	installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, true, true, argc, argv, loadingScreen);
+	return runNds (load_bin, load_bin_size, st.st_ino, ramSt.st_ino, true, true, argc, argv, loadingScreen);
 }
 
 /*

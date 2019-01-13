@@ -65,7 +65,7 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, int loadingScreen) {
+void runFile(string filename, string ramDiskFilename, int loadingScreen) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -106,7 +106,7 @@ void runFile(string filename, int loadingScreen) {
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (argarray[0], ramDiskFilename.c_str(), argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -248,7 +248,7 @@ int main( int argc, char **argv) {
 		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(filename, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		runFile(filename, bootstrapini.GetString("NDS-BOOTSTRAP","RAM_DRIVE_PATH",""), bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

@@ -57,11 +57,8 @@ void arm7clearRAM();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
-#define TEMP_MEM 0x023FE000
 #define NDS_HEAD 0x023FFE00
 #define TEMP_ARM9_START_ADDRESS (*(vu32*)0x023FFFF4)
-
-#define SD_ENGINE_LOCATION  	0x037C0000
 
 extern unsigned long _start;
 extern unsigned long storedFileCluster;
@@ -70,6 +67,7 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern u32 ramDiskCluster;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -346,7 +344,7 @@ int arm7_main (void) {
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B]);
+		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B], (ramDiskCluster != 0));
 	}
 	
 	// Find the DLDI reserved space in the file
@@ -355,7 +353,14 @@ int arm7_main (void) {
 	
 	NTR_BIOS();
 
-	hookNds(NDS_HEAD, (u32*)SD_ENGINE_LOCATION, wordCommandAddr);
+	if (ramDiskCluster > 0) {
+		aFile* ramDiskFile = malloc(32);
+		*ramDiskFile = getFileFromCluster(ramDiskCluster);
+
+		fileRead(RAM_DISK_LOCATION, *ramDiskFile, 0, 0xC00000, 0);
+	} else {
+		hookNds(NDS_HEAD, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+	}
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();

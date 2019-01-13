@@ -40,6 +40,8 @@
 #include "locations.h"
 #include "common.h"
 
+extern u32 ramDiskCluster;
+
 extern void arm9_clearCache(void);
 
 //tNDSHeader* ndsHeader = NULL;
@@ -179,7 +181,7 @@ void arm9_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31);
 	}*/
 
-	REG_SCFG_EXT = 0x03000000;
+	REG_SCFG_EXT = (ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

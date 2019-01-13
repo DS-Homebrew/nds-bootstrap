@@ -40,10 +40,12 @@
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
 #include "memcpy.h"
+#include "locations.h"
 
 extern vu32 word_command;
 extern vu32 word_params;
 extern vu32 words_msg;
+extern vu32 ramDisk;
 
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
@@ -115,20 +117,6 @@ bool sd_Startup() {
 	//__custom_mpu_restore();
 	
 	return result == 0;
-}
-
-//---------------------------------------------------------------------------------
-bool sd_IsInserted() {
-//---------------------------------------------------------------------------------
-	/*if (!isSDAcessible()) return false;
-
-	fifoSendValue32(FIFO_SDMMCDSI,SDMMC_SD_IS_INSERTED);
-
-	fifoWaitValue32(FIFO_SDMMCDSI);
-
-	int result = fifoGetValue32(FIFO_SDMMCDSI);*/
-
-	return true;
 }
 
 //---------------------------------------------------------------------------------
@@ -215,16 +203,24 @@ bool isArm7() {
 
 
 //---------------------------------------------------------------------------------
-bool sd_ClearStatus() {
+bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	//if (!isSDAcessible()) return false;
+	REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	for(int numreads = 0; numreads < numSectors; numreads++) {
+		memcpy(RAM_DISK_LOCATION+sector, buffer+numreads*512, 512);
+	}
+	REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
 
 //---------------------------------------------------------------------------------
-bool sd_Shutdown() {
+bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	//if (!isSDAcessible()) return false;
+	REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	for(int numreads = 0; numreads < numSectors; numreads++) {
+		memcpy(buffer, RAM_DISK_LOCATION+sector+numreads*512, 512);
+	}
+	REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
 
@@ -236,9 +232,11 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
 	//nocashMessage("startup");
-	if(isArm7()) {
+	if (isArm7()) {
 		sdmmc_init();
 		return SD_Init()==0;
+	} else if (ramDisk) {	
+		return true;
 	} else {	
 		return sd_Startup();
 	}
@@ -251,7 +249,7 @@ return true if a card is inserted and usable
 -----------------------------------------------------------------*/
 bool isInserted (void) {
 	//nocashMessage("isInserted");
-	return sd_IsInserted();
+	return true;
 }
 
 
@@ -262,7 +260,7 @@ return true if the card is idle and ready
 -----------------------------------------------------------------*/
 bool clearStatus (void) {
 	//nocashMessage("clearStatus");
-	return sd_ClearStatus();
+	return true;
 }
 
 
@@ -275,8 +273,10 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("readSectors");
-	if(isArm7()) {
+	if (isArm7()) {
 		return my_sdmmc_sdcard_readsectors(sector,numSectors,buffer,0)==0;
+	} else if (ramDisk) {	
+		return ramd_ReadSectors(sector,numSectors,buffer);
 	} else {	
 		return sd_ReadSectors(sector,numSectors,buffer);
 	}
@@ -293,8 +293,10 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("writeSectors");
-	if(isArm7()) {
+	if (isArm7()) {
 		return my_sdmmc_sdcard_writesectors(sector,numSectors,buffer,-1)==0;
+	} else if (ramDisk) {	
+		return ramd_WriteSectors(sector,numSectors,buffer);
 	} else {	
 		return sd_WriteSectors(sector,numSectors,buffer);
 	}
@@ -309,5 +311,5 @@ return true if the card is no longer active
 -----------------------------------------------------------------*/
 bool shutdown(void) {
 	//nocashMessage("shutdown");
-	return sd_Shutdown();
+	return true;
 }

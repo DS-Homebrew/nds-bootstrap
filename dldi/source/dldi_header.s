@@ -5,6 +5,7 @@
 	.global word_command
 	.global word_params
 	.global words_msg
+	.global ramDisk
 	.global tmp_buf_addr
 	.global allocated_space
 	.align	4
@@ -69,6 +70,8 @@
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
+	.word	0x00000000
+	ramDisk:
 	.word	0x00000000
 	
 @---------------------------------------------------------------------------------

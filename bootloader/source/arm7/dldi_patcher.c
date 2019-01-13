@@ -58,7 +58,8 @@ enum DldiOffsets {
 	DO_writeSectors = 0x74,
 	DO_clearStatus = 0x78,
 	DO_shutdown = 0x7C,
-	DO_code = 0x80
+	DO_ramDisk = 0x98,
+	DO_code = 0xA0
 };
 
 static addr_t readAddr (data_t *mem, addr_t offset) {
@@ -96,7 +97,7 @@ static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Diff
 
 extern const u32 _io_dldi;
 
-bool dldiPatchBinary (data_t *binData, u32 binSize) {
+bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -167,6 +168,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	writeAddr (pAH, DO_writeSectors, readAddr (pAH, DO_writeSectors) + relocationOffset);
 	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
+	writeAddr (pAH, DO_ramDisk, ramDisk);
 
 	// Put the correct DLDI magic string back into the DLDI header
 	memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));

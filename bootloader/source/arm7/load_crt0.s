@@ -30,6 +30,7 @@
 	.global argSize
 	.global dsiSD
 	.global loadingScreen
+	.global ramDiskCluster
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -54,6 +55,8 @@ dldiOffset:
 dsiSD:
 	.word	0
 loadingScreen:
+	.word	0x00000000
+ramDiskCluster:
 	.word	0x00000000
 
 startUp:
