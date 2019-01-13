@@ -197,30 +197,28 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	return result == 0;
 }
 
-bool isArm7() {
-	return sdmmc_read16(REG_SDSTATUS0)!=0;
-}
+bool isArm7 = false;
 
 
 //---------------------------------------------------------------------------------
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
 	for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy(RAM_DISK_LOCATION+sector, buffer+numreads*512, 512);
 	}
-	REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
 
 //---------------------------------------------------------------------------------
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
 	for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy(buffer, RAM_DISK_LOCATION+sector+numreads*512, 512);
 	}
-	REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
 
@@ -232,11 +230,12 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
 	//nocashMessage("startup");
-	if (isArm7()) {
+	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
+	if (ramDisk) {	
+		return true;
+	} else if (isArm7) {
 		sdmmc_init();
 		return SD_Init()==0;
-	} else if (ramDisk) {	
-		return true;
 	} else {	
 		return sd_Startup();
 	}
@@ -273,10 +272,10 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("readSectors");
-	if (isArm7()) {
-		return my_sdmmc_sdcard_readsectors(sector,numSectors,buffer,0)==0;
-	} else if (ramDisk) {	
+	if (ramDisk) {	
 		return ramd_ReadSectors(sector,numSectors,buffer);
+	} else if (isArm7) {
+		return my_sdmmc_sdcard_readsectors(sector,numSectors,buffer,0)==0;
 	} else {	
 		return sd_ReadSectors(sector,numSectors,buffer);
 	}
@@ -293,10 +292,10 @@ return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	//nocashMessage("writeSectors");
-	if (isArm7()) {
-		return my_sdmmc_sdcard_writesectors(sector,numSectors,buffer,-1)==0;
-	} else if (ramDisk) {	
+	if (ramDisk) {	
 		return ramd_WriteSectors(sector,numSectors,buffer);
+	} else if (isArm7) {
+		return my_sdmmc_sdcard_writesectors(sector,numSectors,buffer,-1)==0;
 	} else {	
 		return sd_WriteSectors(sector,numSectors,buffer);
 	}

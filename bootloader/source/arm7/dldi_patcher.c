@@ -93,6 +93,9 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 
 static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+static const data_t ramdFriendlyNameString[] = "RAM disk\x00\x00\xA0\xE1\x00\x00\xA0\xE1";
+static const data_t ramdIoTypeString[] = "RAMD";
+
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 _io_dldi;
@@ -168,7 +171,11 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	writeAddr (pAH, DO_writeSectors, readAddr (pAH, DO_writeSectors) + relocationOffset);
 	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
-	writeAddr (pAH, DO_ramDisk, ramDisk);
+	if (ramDisk) {
+		memcpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
+		memcpy (pAH+DO_ioType, ramdIoTypeString, 4);
+		writeAddr (pAH, DO_ramDisk, true);
+	}
 
 	// Put the correct DLDI magic string back into the DLDI header
 	memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));
