@@ -65,7 +65,19 @@ void dopause() {
 	scanKeys();
 }
 
-void runFile(string filename, string ramDiskFilename, int loadingScreen) {
+static off_t getFileSize(const char* path) {
+	FILE* fp = fopen(path, "rb");
+	off_t fsize = 0;
+	if (fp) {
+		fseek(fp, 0, SEEK_END);
+		fsize = ftell(fp);
+		if (!fsize) fsize = 0;
+		fclose(fp);
+	}
+	return fsize;
+}
+
+void runFile(string filename, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -106,7 +118,7 @@ void runFile(string filename, string ramDiskFilename, int loadingScreen) {
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], ramDiskFilename.c_str(), argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (argarray[0], ramDiskFilename.c_str(), ramDiskSize, argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -234,6 +246,9 @@ int main( int argc, char **argv) {
         std::string	substr = "sd:/";
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
+		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
+        if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
+
 		std::string	romfolder = ndsPath;
 		while (!romfolder.empty() && romfolder[romfolder.size()-1] != '/') {
 			romfolder.resize(romfolder.size()-1);
@@ -246,9 +261,15 @@ int main( int argc, char **argv) {
 		{
 			filename.erase(0, last_slash_idx + 1);
 		}
+		
+		u32 ramDiskSize = getFileSize(ramDrivePath.c_str());
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(filename, bootstrapini.GetString("NDS-BOOTSTRAP","RAM_DRIVE_PATH",""), bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		if (ramDiskSize > 0) {
+			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
+			dbg_printf("RAM disk size: %x\n", ramDiskSize);
+		}
+		runFile(filename, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

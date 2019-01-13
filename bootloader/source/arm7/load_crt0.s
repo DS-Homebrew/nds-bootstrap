@@ -31,6 +31,7 @@
 	.global dsiSD
 	.global loadingScreen
 	.global ramDiskCluster
+	.global ramDiskSize
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -57,6 +58,8 @@ dsiSD:
 loadingScreen:
 	.word	0x00000000
 ramDiskCluster:
+	.word	0x00000000
+ramDiskSize:
 	.word	0x00000000
 
 startUp:

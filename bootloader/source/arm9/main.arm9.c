@@ -189,7 +189,7 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = *(VoidFn*)(0x2FFFE24);
+	VoidFn arm9code = *(VoidFn*)(0x23FFE24);
 	arm9code();
 	
 	while (1);

@@ -33,6 +33,7 @@ Helpful information:
  This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
+#include <stdlib.h>
 #include <nds/ndstypes.h>
 #include <nds/dma.h>
 #include <nds/system.h>
@@ -68,6 +69,7 @@ extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern u32 ramDiskCluster;
+extern u32 ramDiskSize;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -323,47 +325,44 @@ int arm7_main (void) {
 		return -1;
 	}
 
-	aFile* romFile = malloc(32);
-	*romFile = getFileFromCluster(storedFileCluster);
+	aFile romFile = getFileFromCluster(storedFileCluster);
 
 	const char* bootName = "BOOT.NDS";
 
-	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
-		*romFile = getBootFileCluster(bootName, 0);
+	if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
+		romFile = getBootFileCluster(bootName, 0);
 	}
 
-	if (romFile->firstCluster == CLUSTER_FREE) {
+	if (romFile.firstCluster == CLUSTER_FREE) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
 	
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
-	loadBinary_ARM7(*romFile);
+	loadBinary_ARM7(romFile);
 
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEAD)[0x0A], ((u32*)NDS_HEAD)[0x0B], (ramDiskCluster != 0));
 	}
-	
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
-	u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
-	
+
 	NTR_BIOS();
-
-	if (ramDiskCluster > 0) {
-		aFile* ramDiskFile = malloc(32);
-		*ramDiskFile = getFileFromCluster(ramDiskCluster);
-
-		fileRead(RAM_DISK_LOCATION, *ramDiskFile, 0, 0xC00000, 0);
-	} else {
-		hookNds(NDS_HEAD, (u32*)SDENGINE_LOCATION, wordCommandAddr);
-	}
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
+
+	if (ramDiskCluster != 0) {
+		aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
+		fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0x4000, ramDiskSize-0x4000, 0);
+	} else {
+		// Find the DLDI reserved space in the file
+		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
+		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEAD)[0x0A])+patchOffset+0x80);
+
+		hookNds(NDS_HEAD, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
