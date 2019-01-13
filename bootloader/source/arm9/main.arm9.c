@@ -86,8 +86,6 @@ void arm9_main(void) {
 
 	initMBKARM9();
 
-	REG_SCFG_EXT = 0x03000000;
-
 	arm9_stateFlag = ARM9_START;
 
 	REG_IME = 0;
@@ -180,6 +178,8 @@ void arm9_main(void) {
 		// lock SCFG
 		REG_SCFG_EXT &= ~(1UL << 31);
 	}*/
+
+	REG_SCFG_EXT = 0x03000000;
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

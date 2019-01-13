@@ -57,9 +57,9 @@ void arm7clearRAM();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
-#define TEMP_MEM 0x02FFE000
-#define NDS_HEAD 0x02FFFE00
-#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x02FFFFF4)
+#define TEMP_MEM 0x023FE000
+#define NDS_HEAD 0x023FFE00
+#define TEMP_ARM9_START_ADDRESS (*(vu32*)0x023FFFF4)
 
 #define SD_ENGINE_LOCATION  	0x037C0000
 
@@ -215,9 +215,9 @@ static void resetMemory_ARM7 (void)
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
 	
 	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
-		boot_readFirmware(settingsOffset + 0x000, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x000, (u8*)0x023FFC80, 0x70);
 	} else {
-		boot_readFirmware(settingsOffset + 0x100, (u8*)0x02FFFC80, 0x70);
+		boot_readFirmware(settingsOffset + 0x100, (u8*)0x023FFC80, 0x70);
 	}
 }
 
@@ -268,7 +268,7 @@ static void startBinary_ARM7 (void) {
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
 	// copy NDS ARM9 start address into the header, starting ARM9
-	*((vu32*)0x02FFFE24) = TEMP_ARM9_START_ADDRESS;
+	*((vu32*)0x023FFE24) = TEMP_ARM9_START_ADDRESS;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -277,7 +277,7 @@ static void startBinary_ARM7 (void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
+	VoidFn arm7code = *(VoidFn*)(0x23FFE34);
 	arm7code();
 }
 

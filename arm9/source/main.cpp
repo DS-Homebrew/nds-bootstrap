@@ -66,6 +66,10 @@ void dopause() {
 }
 
 void runFile(string filename, int loadingScreen) {
+	char filePath[256];
+
+	getcwd (filePath, 256);
+	int pathLen = strlen (filePath);
 	vector<char*> argarray;
 	
 	if(debug) dopause();
@@ -97,6 +101,10 @@ void runFile(string filename, int loadingScreen) {
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
 		dbg_printf("no nds file specified\n");
 	} else {
+		char *name = argarray.at(0);
+		strcpy (filePath + pathLen, name);
+		free(argarray.at(0));
+		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
 		int err = runNdsFile (argarray[0], argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
@@ -104,7 +112,7 @@ void runFile(string filename, int loadingScreen) {
 	}
 }
 
-void getSFCG_ARM9() {
+/*void getSFCG_ARM9() {
 	dbg_printf( "SCFG_ROM ARM9 %x\n", REG_SCFG_ROM ); 
 	dbg_printf( "SCFG_CLK ARM9 %x\n", REG_SCFG_CLK ); 
 	dbg_printf( "SCFG_EXT ARM9 %x\n", REG_SCFG_EXT ); 
@@ -132,7 +140,7 @@ void getSFCG_ARM7() {
 static void myFIFOValue32Handler(u32 value,void* data)
 {
 	dbg_printf( "ARM7 data %x\n", value );
-}
+}*/
 
 std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
@@ -154,10 +162,10 @@ int main( int argc, char **argv) {
 
     //printf("fat init ...");    
 	
-	if (fatMountSimple("sd", get_io_dsisd())) {
+	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
         //printf("fat inited");    
-		CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
+		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
@@ -169,7 +177,7 @@ int main( int argc, char **argv) {
 
 			//fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
 
-			getSFCG_ARM9();
+			//getSFCG_ARM9();
 			//getSFCG_ARM7();
 		}
 
@@ -208,26 +216,39 @@ int main( int argc, char **argv) {
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
 			static FILE * debugFile;
-			debugFile = fopen ("sd:/NDSBTSRP.LOG","w");
+			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
 			fclose (debugFile);
 			
 			// create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen ("sd:/NDSBTSRP.LOG","a");
+			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
 			for (int i=0; i<50000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
 			
 		} else {
-			remove ("sd:/NDSBTSRP.LOG");
+			remove ("fat:/NDSBTSRP.LOG");
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-        //std::string	substr = "sd:/";
-        //if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
+        std::string	substr = "sd:/";
+        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
+
+		std::string	romfolder = ndsPath;
+		while (!romfolder.empty() && romfolder[romfolder.size()-1] != '/') {
+			romfolder.resize(romfolder.size()-1);
+		}
+		chdir(romfolder.c_str());
+
+		std::string	filename = ndsPath;
+		const size_t last_slash_idx = filename.find_last_of("/");
+		if (std::string::npos != last_slash_idx)
+		{
+			filename.erase(0, last_slash_idx + 1);
+		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
-		runFile(ndsPath.c_str(), bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		runFile(filename, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
