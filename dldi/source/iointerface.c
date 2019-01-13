@@ -208,6 +208,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 	/*for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy((u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), buffer+numreads*512, 512);
 	}*/
+	sector++;
 	numSectors++;
 	memcpy((u8*)(RAM_DISK_LOCATION+(sector*512)), buffer, numSectors*512);
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
@@ -221,6 +222,7 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 	/*for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy(buffer+numreads*512, (u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), 512);
 	}*/
+	sector++;
 	numSectors++;
 	memcpy(buffer, (u8*)(RAM_DISK_LOCATION+(sector*512)), numSectors*512);
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
