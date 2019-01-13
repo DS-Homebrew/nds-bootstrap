@@ -80,30 +80,12 @@ static const u32 homebrewAccelSig2007[4] = {
 	0x430A2108   , // ...
 };
 
-static const u32 homebrewAccelSig2007Patched[4] = {
-	0x47104A00   , // LDR     R2, =0x037C0020
-	               // BX      R2
-	0x037C0020   , // 
-				   // 
-	0x881A4B0C   , // ...
-	0x430A2108   , // ...
-};
-
 // Accelerator patch for IPC_SYNC v2007
 static const u32 homebrewAccelSig2007_2[4] = {
 	0x2401B510   , // .
 	               // MOVS    R4, #1
 	0xD0064220   , // .
 				// .
-	0x881A4B10   , // ...
-	0x430A2108   , // ...
-};
-
-static const u32 homebrewAccelSig2007Patched_2[4] = {
-	0x47104A00   , // LDR     R2, =0x037C0020
-	               // BX      R2
-	0x037C0020   , // 
-				   // 
 	0x881A4B10   , // ...
 	0x430A2108   , // ...
 };
@@ -118,16 +100,13 @@ static const u32 homebrewAccelSig2010[4] = {
 	0x0412430A   , // ...
 };
 
-static const u32 homebrewAccelSig2010Patched[4] = {
+static const u32 homebrewAccelSigPatched[2] = {
 	0x47104A00   , // LDR     R2, =0x037C0020
 	               // BX      R2
-	0x037C0020   , // 
-				   // 
-	0x22088819   , // ...
-	0x0412430A   , // ...
+	0x037C0020
 };
 
-static const int MAX_HANDLER_SIZE = 50;
+//static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
@@ -180,10 +159,8 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 	}
 
 	// patch the program
-	addr[0] = homebrewAccelSig2007Patched[0];
-	addr[1] = homebrewAccelSig2007Patched[1];
-	addr[2] = homebrewAccelSig2007Patched[2];
-	addr[3] = homebrewAccelSig2007Patched[3];
+	addr[0] = homebrewAccelSigPatched[0];
+	addr[1] = homebrewAccelSigPatched[1];
 
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
@@ -209,10 +186,8 @@ static u32* hookAccelIPCHomebrew2007_2(u32* addr, size_t size) {
 	}
 
 	// patch the program
-	addr[0] = homebrewAccelSig2007Patched_2[0];
-	addr[1] = homebrewAccelSig2007Patched_2[1];
-	addr[2] = homebrewAccelSig2007Patched_2[2];
-	addr[3] = homebrewAccelSig2007Patched_2[3];
+	addr[0] = homebrewAccelSigPatched[0];
+	addr[1] = homebrewAccelSigPatched[1];
 
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
@@ -238,10 +213,8 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	}
 
 	// patch the program
-	addr[0] = homebrewAccelSig2010Patched[0];
-	addr[1] = homebrewAccelSig2010Patched[1];
-	addr[2] = homebrewAccelSig2010Patched[2];
-	addr[3] = homebrewAccelSig2010Patched[3];
+	addr[0] = homebrewAccelSigPatched[0];
+	addr[1] = homebrewAccelSigPatched[1];
 
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
