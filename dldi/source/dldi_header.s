@@ -2,10 +2,10 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global ioType
 	.global word_command
 	.global word_params
 	.global words_msg
-	.global ramDisk
 	.global tmp_buf_addr
 	.global allocated_space
 	.align	4
@@ -53,6 +53,7 @@
 
 @---------------------------------------------------------------------------------
 @ IO_INTERFACE data -- 32 bytes
+	ioType:
 	.ascii	"DSID"			@ ioType
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA
 	.word	startup			@ 
@@ -70,8 +71,6 @@
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
-	.word	0x00000000
-	ramDisk:
 	.word	0x00000000
 	
 @---------------------------------------------------------------------------------

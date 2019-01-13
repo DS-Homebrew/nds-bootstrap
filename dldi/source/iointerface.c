@@ -42,10 +42,10 @@
 #include "memcpy.h"
 #include "locations.h"
 
+extern char ioType[4];
 extern vu32 word_command;
 extern vu32 word_params;
 extern vu32 words_msg;
-extern vu32 ramDisk;
 
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
@@ -198,6 +198,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 }
 
 bool isArm7 = false;
+bool ramDisk = false;
 
 
 //---------------------------------------------------------------------------------
@@ -231,6 +232,9 @@ returns true if successful, otherwise returns false
 bool startup(void) {	
 	//nocashMessage("startup");
 	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
+	
+	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
+	
 	if (ramDisk) {	
 		return true;
 	} else if (isArm7) {
