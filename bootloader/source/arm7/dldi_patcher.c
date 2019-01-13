@@ -58,8 +58,7 @@ enum DldiOffsets {
 	DO_writeSectors = 0x74,
 	DO_clearStatus = 0x78,
 	DO_shutdown = 0x7C,
-	DO_ramDisk = 0x98,
-	DO_code = 0xA0
+	DO_code = 0x80
 };
 
 static addr_t readAddr (data_t *mem, addr_t offset) {
@@ -174,7 +173,6 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	if (ramDisk) {
 		memcpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
 		memcpy (pAH+DO_ioType, ramdIoTypeString, 4);
-		writeAddr (pAH, DO_ramDisk, true);
 	}
 
 	// Put the correct DLDI magic string back into the DLDI header
