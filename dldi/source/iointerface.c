@@ -205,6 +205,7 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	u32 sectorInRam = RAM_DISK_LOCATION+sector*512;
 	/*for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy((u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), buffer+numreads*512, 512);
 	}*/
@@ -217,9 +218,8 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads; 
 	
-		memcpy((u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), buffer+numreads*512, readsectors*512);
+		memcpy((u32*)(sectorInRam+numreads*512), buffer+numreads*512, readsectors*512);
 	}
-	//sector++;
 	//numSectors++;
 	//memcpy((u32*)(RAM_DISK_LOCATION+(sector*512)), buffer, numSectors*512);
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
@@ -230,6 +230,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	u32 sectorInRam = RAM_DISK_LOCATION+sector*512;
 	/*for(int numreads = 0; numreads < numSectors; numreads++) {
 		memcpy(buffer+numreads*512, (u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), 512);
 	}*/
@@ -242,9 +243,8 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads; 
 	
-		memcpy(buffer+numreads*512, (u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), readsectors*512);
+		memcpy(buffer+numreads*512, (u32*)(sectorInRam+numreads*512), readsectors*512);
 	}
-	//sector++;
 	//numSectors++;
 	//memcpy(buffer, (u32*)(RAM_DISK_LOCATION+(sector*512)), numSectors*512);
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
