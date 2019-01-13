@@ -360,6 +360,8 @@ int arm7_main (void) {
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
+	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+
 	startBinary_ARM7();
 
 	return 0;
