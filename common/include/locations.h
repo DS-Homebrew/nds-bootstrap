@@ -43,11 +43,11 @@
 
 #define dev_CACHE_ADRESS_START_SDK5 0x0D000000
 
-//#define dev_CACHE_ADRESS_SIZE      0x16E0000
+//#define dev_CACHE_ADRESS_SIZE      0x1800000
 //#define dev_CACHE_ADRESS_SIZE_SDK5 0x1000000
 
-#define dev_CACHE_SLOTS           0xB7
-#define dev_CACHE_SLOTS_32KB      0x2DC
+#define dev_CACHE_SLOTS           0xC0
+#define dev_CACHE_SLOTS_32KB      0x300
 #define dev_CACHE_SLOTS_SDK5      0x80
 #define dev_CACHE_SLOTS_32KB_SDK5 0x200
 
