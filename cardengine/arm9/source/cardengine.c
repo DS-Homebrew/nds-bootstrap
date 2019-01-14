@@ -68,9 +68,6 @@ static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 
-/*static u32 readNum = 0;
-static bool alreadySetMpu = false;*/
-
 static bool flagsSet = false;
 
 static int allocateCacheSlot(void) {
@@ -407,16 +404,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	waitForArm7();
 	// -------------------------------------*/
 	#endif
-
-	/*if (*(vu32*)0x2800010 != 1) {
-		if (readNum >= 0x100){ // Don't set too early or some games will crash
-			*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)0x2800004;
-			*(vu32*)(*(vu32*)(0x2800008)) = *(vu32*)0x280000C;
-			alreadySetMpu = true;
-		} else {
-			readNum += 1;
-		}
-	}*/
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
