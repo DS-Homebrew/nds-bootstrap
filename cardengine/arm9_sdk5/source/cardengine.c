@@ -42,7 +42,6 @@
 
 extern void user_exception(void);
 
-extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
 
 extern module_params_t* moduleParams;
@@ -139,7 +138,7 @@ static void waitForArm7(void) {
 		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
 }*/
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
+static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -222,15 +221,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 			// Copy directly
 			memcpy(dst, (u8*)buffer+(src-sector), len2);
 
-			// Update cardi common
-			cardStruct[0] = src + len2;
-			cardStruct[1] = (vu32)(dst + len2);
-			cardStruct[2] = len - len2;
-
-			len = cardStruct[2];
+			len = len - len2;
 			if (len > 0) {
-				src = cardStruct[0];
-				dst = (u8*)cardStruct[1];
+				src = src + len2;
+				dst = (u8*)(dst + len2);
 				sector = (src / readSize) * readSize;
 				accessCounter++;
 			}
@@ -240,7 +234,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 	return 0;
 }
 
-static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
+static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	//u32 commandRead;
 	while (len > 0) {
 		u32 len2 = len;
@@ -266,15 +260,10 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u8* dst, u32 src, u32 l
 		// Copy directly
 		memcpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
 
-		// Update cardi common
-		cardStruct[0] = src + len;
-		cardStruct[1] = (vu32)(dst + len);
-		cardStruct[2] = len - len;
-
-		len = cardStruct[2];
+		len = len - len2;
 		if (len > 0) {
-			src = cardStruct[0];
-			dst = (u8*)cardStruct[1];
+			src = src + len2;
+			dst = (u8*)(dst + len2);
 		}
 	}
 
@@ -305,15 +294,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = (vu32* volatile)(CARDENGINE_ARM9_SDK5_LOCATION + 0x50C0);
-
 	u32 src = src0;
 	u8* dst = dst0;
 	u32 len = len0;
-
-	cardStruct[0] = src;
-	cardStruct[1] = (vu32)dst;
-	cardStruct[2] = len;
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -341,5 +324,5 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	return ROMinRAM ? cardReadRAM(cardStruct, dst, src, len) : cardReadNormal(cardStruct, dst, src, len);
+	return ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
 }
