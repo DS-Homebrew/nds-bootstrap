@@ -202,29 +202,47 @@ bool ramDisk = false;
 
 
 //---------------------------------------------------------------------------------
-bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
+bool ramd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
-	/*for(int numreads = 0; numreads < numSectors; numreads++) {
-		memcpy((u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), buffer+numreads*512, 512);
-	}*/
+	
+	sec_t startsector, readsectors;
+	
+	int max_reads = ((1 << allocated_space) / 512) - 11;
+	
+	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+		startsector = sector+numreads;
+		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+		else readsectors = max_reads; 
+	
+		vu32* mybuffer = myMemUncached(RAM_DISK_LOCATION+startsector*512);
 
-	numSectors++;
-	memcpy((void*)(RAM_DISK_LOCATION+sector*512), buffer, numSectors*512);
+		memcpy(mybuffer, buffer+numreads*512, readsectors*512);
+	}
+
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
 
 //---------------------------------------------------------------------------------
-bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
+bool ramd_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
-	/*for(int numreads = 0; numreads < numSectors; numreads++) {
-		memcpy(buffer+numreads*512, (u32*)(RAM_DISK_LOCATION+(sector+numreads*512)), 512);
-	}*/
 
-	numSectors++;
-	memcpy(buffer, (void*)(RAM_DISK_LOCATION+sector*512), numSectors*512);
+	sec_t startsector, readsectors;
+
+	int max_reads = ((1 << allocated_space) / 512) - 11;
+	
+	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+		startsector = sector+numreads;
+		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+		else readsectors = max_reads; 
+	
+		vu32* mybuffer = myMemUncached(RAM_DISK_LOCATION+startsector*512);
+
+		memcpy(buffer+numreads*512, mybuffer, readsectors*512);
+	}
+
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
 	return true;
 }
