@@ -27,7 +27,6 @@
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
 #include "nds_header.h"
-#include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
 
@@ -44,7 +43,6 @@ extern void user_exception(void);
 
 //extern vu32* volatile cacheStruct;
 
-extern module_params_t* moduleParams;
 extern u32 ROMinRAM;
 extern u32 dsiMode;
 extern u32 enableExceptionHandler;
