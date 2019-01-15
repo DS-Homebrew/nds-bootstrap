@@ -88,6 +88,14 @@ u32 getValue32() {
 	}
 }*/
 
+void extendedMemory(bool yes) {
+	if (yes) {
+		REG_SCFG_EXT = 0x8300C000;
+	} else {
+		REG_SCFG_EXT = 0x83000000;
+	}
+}
+
 void __custom_mpu_setup();
 void __custom_mpu_restore();
 
@@ -205,19 +213,35 @@ bool ramDisk = false;
 //---------------------------------------------------------------------------------
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
+		buffer -= 0xC00000;		// Move out of RAM disk location
+	} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
+		buffer -= 0x800000;		// Move out of RAM disk location
+	} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
+		buffer -= 0x400000;		// Move out of RAM disk location
+	}
+
+	if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
 	memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
-	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+	if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 
 	return true;
 }
 
 //---------------------------------------------------------------------------------
-bool ramd_WriteSectors(u32 sector, u32 numSectors, const void* buffer) {
+bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
+	if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
+		buffer -= 0xC00000;		// Move out of RAM disk location
+	} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
+		buffer -= 0x800000;		// Move out of RAM disk location
+	} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
+		buffer -= 0x400000;		// Move out of RAM disk location
+	}
+
+	if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
 	memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
-	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+	if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 
 	return true;
 }
