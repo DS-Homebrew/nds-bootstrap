@@ -58,8 +58,10 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];
+/*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
+static u32 cacheCounter[dev_CACHE_SLOTS_32KB];*/
+static u32* cacheDescriptor = (u32*)0x02710000;
+static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
@@ -74,8 +76,8 @@ static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheCounter[i] <= lowerCounter) {
-			lowerCounter = cacheCounter[i];
+		if (*(cacheCounter+i) <= lowerCounter) {
+			lowerCounter = *(cacheCounter+i);
 			slot = i;
 			if (!lowerCounter) {
 				break;
@@ -87,7 +89,7 @@ static int allocateCacheSlot(void) {
 
 static int getSlotForSector(u32 sector) {
 	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheDescriptor[i] == sector) {
+		if (*(cacheDescriptor+i) == sector) {
 			return i;
 		}
 	}
@@ -100,8 +102,8 @@ static vu8* getCacheAddress(int slot) {
 }
 
 static void updateDescriptor(int slot, u32 sector) {
-	cacheDescriptor[slot] = sector;
-	cacheCounter[slot] = accessCounter;
+	*(cacheDescriptor+slot) = sector;
+	*(cacheCounter+slot) = accessCounter;
 }
 
 static void waitForArm7(void) {
@@ -177,10 +179,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				slot = allocateCacheSlot();
 
 				buffer = getCacheAddress(slot);
-
-				if (needFlushDCCache) {
-					DC_FlushRange((u8*)buffer, readSize);
-				}
 
 				//REG_IME = 0;
 
@@ -370,10 +368,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		//ndsHeader->romSize += 0x1000;
 
-		if (enableExceptionHandler) {
+		/*if (enableExceptionHandler) {
 			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			setExceptionHandler(user_exception);
-		}
+		}*/
 		
 		flagsSet = true;
 	}
