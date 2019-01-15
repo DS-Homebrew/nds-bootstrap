@@ -49,6 +49,7 @@ extern void arm9_clearCache(void);
 //extern u32 boostVram;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
+volatile u32 arm9_ramDiskCluster = 0;
 volatile bool fadeType = true;
 
 void initMBKARM9(void) {
@@ -181,7 +182,7 @@ void arm9_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31);
 	}*/
 
-	REG_SCFG_EXT = (ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
+	REG_SCFG_EXT = (arm9_ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

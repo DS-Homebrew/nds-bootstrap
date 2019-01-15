@@ -56,6 +56,7 @@ enum {
 
 extern tNDSHeader* ndsHeader;
 extern volatile int arm9_stateFlag;
+extern volatile u32 arm9_ramDiskCluster;
 
 static inline void dmaFill(const void* src, void* dest, u32 size) {
 	DMA_SRC(3)  = (u32)src;

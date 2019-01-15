@@ -42,6 +42,7 @@
 #include "memcpy.h"
 #include "locations.h"
 
+extern vu32* dldiDataOffset;
 extern char ioType[4];
 extern vu32 word_command;
 extern vu32 word_params;
@@ -205,16 +206,9 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
-	
-	/*void* sectorInRam = (void*)RAM_DISK_LOCATION+sector*512;
-
-	for (int numreads=0; numreads<numSectors; numreads++) {
-		memcpy(sectorInRam+numreads*512, buffer+numreads*512, 512);
-	}*/
-
 	memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
-
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+
 	return true;
 }
 
@@ -222,16 +216,9 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, const void* buffer) {
 //---------------------------------------------------------------------------------
 	if (!isArm7) REG_SCFG_EXT = 0x8300C000;	// Enable extended memory mode to access RAM drive
-
-	/*void* sectorInRam = (void*)RAM_DISK_LOCATION+sector*512;
-
-	for (int numreads=0; numreads<numSectors; numreads++) {
-		memcpy(buffer+numreads*512, sectorInRam+numreads*512, 512);
-	}*/
-
 	memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
-
 	if (!isArm7) REG_SCFG_EXT = 0x83000000;	// Disable extended memory mode
+
 	return true;
 }
 
@@ -243,10 +230,10 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {	
 	//nocashMessage("startup");
-	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
-	
+	isArm7 = (dldiDataOffset > (vu32*)0x02380000);
+
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
-	
+
 	if (ramDisk) {	
 		return true;
 	} else if (isArm7) {
