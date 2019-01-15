@@ -173,10 +173,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				buffer = getCacheAddress(slot);
 
-				if (needFlushDCCache) {
-					DC_FlushRange((u8*)buffer, readSize);
-				}
-
 				//REG_IME = 0;
 
 				// Write the command

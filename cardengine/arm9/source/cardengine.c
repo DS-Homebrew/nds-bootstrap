@@ -368,10 +368,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		//ndsHeader->romSize += 0x1000;
 
-		/*if (enableExceptionHandler) {
+		if (enableExceptionHandler) {
 			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			setExceptionHandler(user_exception);
-		}*/
+		}
 		
 		flagsSet = true;
 	}
