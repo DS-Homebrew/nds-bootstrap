@@ -355,7 +355,7 @@ int arm7_main (void) {
 
 	if (ramDiskCluster != 0) {
 		aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
-		fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0x4000, ramDiskSize-0x4000, 0);
+		fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize-0x1000, 0);
 	} else {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEAD)[0x0A], dldiMagicString, ((u32*)NDS_HEAD)[0x0B], sizeof(dldiMagicString));
