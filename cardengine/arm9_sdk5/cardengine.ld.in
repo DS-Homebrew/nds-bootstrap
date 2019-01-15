@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINE_ARM9_SDK5_LOCATION, LENGTH = 20K /* Main RAM */
+	vram	: ORIGIN = CARDENGINE_ARM9_SDK5_LOCATION, LENGTH = 8K /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

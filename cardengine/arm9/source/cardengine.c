@@ -58,8 +58,8 @@ extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-#define cacheDescriptor		0x02710000
-#define cacheCounter		0x02712000
+static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
+static u32 cacheCounter[dev_CACHE_SLOTS_32KB];
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
@@ -74,8 +74,8 @@ static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
 	for (int i = 0; i < cacheSlots; i++) {
-		if (*(u32*)(cacheCounter+(i*4)) <= lowerCounter) {
-			lowerCounter = *(u32*)(cacheCounter+(i*4));
+		if (cacheCounter[i] <= lowerCounter) {
+			lowerCounter = cacheCounter[i];
 			slot = i;
 			if (!lowerCounter) {
 				break;
@@ -87,7 +87,7 @@ static int allocateCacheSlot(void) {
 
 static int getSlotForSector(u32 sector) {
 	for (int i = 0; i < cacheSlots; i++) {
-		if (*(u32*)(cacheDescriptor+(i*4)) == sector) {
+		if (cacheDescriptor[i] == sector) {
 			return i;
 		}
 	}
@@ -100,8 +100,8 @@ static vu8* getCacheAddress(int slot) {
 }
 
 static void updateDescriptor(int slot, u32 sector) {
-	*(u32*)(cacheDescriptor+(slot*4)) = sector;
-	*(u32*)(cacheCounter+(slot*4)) = accessCounter;
+	cacheDescriptor[slot] = sector;
+	cacheCounter[slot] = accessCounter;
 }
 
 static void waitForArm7(void) {
