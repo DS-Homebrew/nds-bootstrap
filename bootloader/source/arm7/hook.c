@@ -257,4 +257,32 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	return ERR_NONE;
 }
 
+void patchMemoryAddresses(const tNDSHeader* ndsHeader) {
+	u32* top9=(u32*)ndsHeader->arm9destination;
+	u32* bottom9=(u32*)(ndsHeader->arm9destination+ndsHeader->arm9binarySize);
+	for(u32* i = top9; i < bottom9; i++)
+	{
+		if(*i >= 0x027FF000 && *i < 0x02800000)
+		{
+			*i -= 0x400000;
+		}
+		if(*i >= 0x02FFF000 && *i < 0x03000000)
+		{
+			*i -= 0xC00000;
+		}
+	}
 
+	u32* top7=(u32*)ndsHeader->arm7destination;
+	u32* bottom7=(u32*)(ndsHeader->arm7destination+ndsHeader->arm7binarySize);
+	for(u32* i = top7; i < bottom7; i++)
+	{
+		if(*i >= 0x027FF000 && *i < 0x02800000)
+		{
+			*i -= 0x400000;
+		}
+		if(*i >= 0x02FFF000 && *i < 0x03000000)
+		{
+			*i -= 0xC00000;
+		}
+	}
+}

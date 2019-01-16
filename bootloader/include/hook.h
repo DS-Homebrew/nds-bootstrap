@@ -25,3 +25,5 @@ Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr);
 
+void patchMemoryAddresses(const tNDSHeader* ndsHeader);
+
