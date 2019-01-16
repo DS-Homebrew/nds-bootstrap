@@ -339,9 +339,9 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
-	if (ramDiskCluster != 0) {
+	/*if (ramDiskCluster != 0) {
 		patchMemoryAddresses(NDS_HEADER);
-	}
+	}*/
 
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
