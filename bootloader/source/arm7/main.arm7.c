@@ -356,7 +356,7 @@ int arm7_main (void) {
 
 	if (ramDiskCluster != 0) {
 		arm9_ramDiskCluster = ramDiskCluster;
-		if (ramDiskSize < 0x01C00000) {
+		if (ramDiskSize < 0x01C01000) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
 		}
