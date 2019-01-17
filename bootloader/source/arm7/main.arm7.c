@@ -53,6 +53,7 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "loading_screen.h"
 
 void arm7clearRAM();
 
@@ -313,6 +314,8 @@ int arm7_main (void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
+	debugOutput();
+
 	resetMemory_ARM7();
 
 	// Init card
@@ -370,6 +373,8 @@ int arm7_main (void) {
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+
+	fillLoadBarLength();
 
 	startBinary_ARM7();
 
