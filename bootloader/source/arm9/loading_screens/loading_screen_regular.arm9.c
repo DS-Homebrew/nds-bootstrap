@@ -323,7 +323,7 @@ void arm9_regularLoadingScreen(void) {
 	// Draw loading bar
 	for (int y = 160; y <= 183; y++) {
 		for (int k = 8+arm9_loadBarLength; k < 8+arm9_loadBarLength+(2-ram32MB); k++) {
-			if (arm9_loadBarLength < 239) {
+			if (arm9_loadBarLength < 239+ram32MB) {
 				VRAM_A[y*256+k] = 0x6F7B;
 			}
 		}
