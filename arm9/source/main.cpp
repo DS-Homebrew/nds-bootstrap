@@ -77,7 +77,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
+void runFile(string filename, string fullPath, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -86,7 +86,7 @@ void runFile(string filename, string ramDiskFilename, u32 ramDiskSize, int loadi
 	
 	if(debug) dopause();
 	
-	if ( strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0) {
+	if ( strcasecmp (filename.c_str() + filename.size() - 5, ".argv") == 0 && ramDiskSize == 0) {
 		FILE *argfile = fopen(filename.c_str(),"rb");
 		char str[PATH_MAX], *pstr;
 		const char seps[]= "\n\r\t ";
@@ -118,7 +118,7 @@ void runFile(string filename, string ramDiskFilename, u32 ramDiskSize, int loadi
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (argarray[0], ramDiskFilename.c_str(), ramDiskSize, argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -263,13 +263,16 @@ int main( int argc, char **argv) {
 		}
 		
 		u32 ramDiskSize = getFileSize(ramDrivePath.c_str());
+		if (ramDiskSize > 0) {
+			chdir("fat:/");	// Change directory to root for RAM disk usage
+		}
 
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		if (ramDiskSize > 0) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-		runFile(filename, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		runFile(filename, ndsPath, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
