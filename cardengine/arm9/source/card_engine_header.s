@@ -86,7 +86,7 @@ card_read_arm9:
 	ldr		r6, =cardRead
 	bl		_blx_r3_stub_card_read
 
-	ldmfd   sp!, {r4-r11,lr}
+	ldmfd   sp!, {r4-r11,pc}
 	bx      lr
 _blx_r3_stub_card_read:
 	bx	r6
