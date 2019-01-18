@@ -266,10 +266,10 @@ void patchMemoryAddresses(const tNDSHeader* ndsHeader) {
 		{
 			*i -= 0x400000;
 		}
-		if(*i >= 0x02FFF000 && *i < 0x03000000)
+		/*if(*i >= 0x02FFF000 && *i < 0x03000000)
 		{
 			*i -= 0xC00000;
-		}
+		}*/
 	}
 
 	u32* top7=(u32*)ndsHeader->arm7destination;
@@ -280,9 +280,9 @@ void patchMemoryAddresses(const tNDSHeader* ndsHeader) {
 		{
 			*i -= 0x400000;
 		}
-		if(*i >= 0x02FFF000 && *i < 0x03000000)
+		/*if(*i >= 0x02FFF000 && *i < 0x03000000)
 		{
 			*i -= 0xC00000;
-		}
+		}*/
 	}
 }

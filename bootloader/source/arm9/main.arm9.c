@@ -48,6 +48,7 @@ extern void arm9_clearCache(void);
 //tNDSHeader* ndsHeader = NULL;
 //bool dsiModeConfirmed = false;
 //extern u32 boostVram;
+volatile bool dldiAtArm7 = false;
 volatile bool ram32MB = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
@@ -264,7 +265,11 @@ void arm9_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31);
 	}*/
 
-	REG_SCFG_EXT = (arm9_ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
+	if (dldiAtArm7 && arm9_ramDiskCluster != 0) {
+		REG_SCFG_EXT = 0x0300C000;	// If DLDI is at arm7, then keep extended memory open at all times
+	} else {
+		REG_SCFG_EXT = (arm9_ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
+	}
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

@@ -99,6 +99,12 @@ static const data_t ramdIoTypeString[] = "RAMD";
 
 extern const u32 _io_dldi;
 
+bool checkArm7DLDI (data_t *binData, u32 binSize) {
+	// Find the DLDI reserved space in the file
+	addr_t patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+	return (patchOffset > 0x02380000);
+}
+
 bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory

@@ -55,6 +55,7 @@ enum {
 } ARM9_STATE;
 
 extern tNDSHeader* ndsHeader;
+extern volatile bool dldiAtArm7;
 extern volatile bool ram32MB;
 extern volatile int arm9_stateFlag;
 extern volatile u32 arm9_ramDiskCluster;
