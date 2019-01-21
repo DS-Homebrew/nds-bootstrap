@@ -54,25 +54,6 @@ asyncPrefetch:
 
 card_engine_start:
 
-.global fastCopy32
-.type	fastCopy32 STT_FUNC
-@ r0 : src, r1 : dst, r2 : len
-fastCopy32:
-	stmfd   sp!, {r3-r11,lr}
-	@ copy r2 bytes
-	mov     r10, r0
-	mov     r9, r1
-	mov     r8, r2
-loop_fastCopy32:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_fastCopy32
-	ldmfd   sp!, {r3-r11,lr}
-	bx      lr
-
-card_engine_end:
-
 .global readCachedRef
 patches:
 .word	card_read_arm9
@@ -108,7 +89,7 @@ card_read_arm9:
 	ldr		r6, =cardRead
 	bl		_blx_r3_stub_card_read
 
-	ldmfd   sp!, {r4-r11,lr}
+	ldmfd   sp!, {r4-r11,pc}
 	bx      lr
 _blx_r3_stub_card_read:
 	bx	r6
@@ -238,50 +219,4 @@ DC_WaitWriteBufferEmpty:
 	bx      lr
 	.pool
 
-.global DC_FlushRange
-.type	DC_FlushRange STT_FUNC
-DC_FlushRange:
-	MOV             R12, #0
-	ADD             R1, R1, R0
-	BIC             R0, R0, #0x1F
-loop_flush_range :
-	MCR             p15, 0, R12,c7,c10, 4
-	MCR             p15, 0, R0,c7,c14, 1
-	ADD             R0, R0, #0x20
-	CMP             R0, R1
-	BLT             loop_flush_range
-	BX              LR
-
-.global tryLockMutex
-.type	tryLockMutex STT_FUNC
-tryLockMutex:
-adr     r1, mutex    
-mov r2, #1
-mutex_loop:
-	swp r0,r2, [r1]
-	cmp r0, #1
-	beq mutex_fail
-
-mutex_success:
-	mov r2, #1
-	str r2, [r1]
-	mov r0, #1
-	b mutex_exit
-
-mutex_fail:
-	mov r0, #0
-
-mutex_exit:
-	bx  lr
-
-
-.global unLockMutex
-.type	unLockMutex STT_FUNC
-unLockMutex:
-	adr r1, mutex    
-	mov r2, #0
-	str r2, [r1]
-	bx  lr
-
-mutex:
-.word    0x00000000
+card_engine_end:
