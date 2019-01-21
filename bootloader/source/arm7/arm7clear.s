@@ -49,7 +49,7 @@ clear_IWRAM_loop:
 	mov	r8, #0x02000000
 
 	mov	r9, #0x02400000
-	sub	r9, #0x00006000
+	sub	r9, #0x0000C000
 clear_EWRAM_loop:
 	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
 	cmp	r8, r9
