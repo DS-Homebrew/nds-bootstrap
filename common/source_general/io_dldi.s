@@ -24,6 +24,7 @@
 	.arm
 	.global _dldi_start
 	.global _io_dldi
+	.global _io_dldi_features
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
 .equ FEATURE_MEDIUM_CANWRITE,		0x00000002
@@ -67,6 +68,7 @@ _dldi_start:
 @ IO_INTERFACE data -- 32 bytes
 _io_dldi:
 	.ascii	"DLDI"				@ ioType
+_io_dldi_features:
 	.word	0x00000000			@ Features
 	.word	_DLDI_startup			@ 
 	.word	_DLDI_isInserted		@ 

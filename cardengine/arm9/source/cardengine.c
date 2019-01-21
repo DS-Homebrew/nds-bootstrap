@@ -43,7 +43,7 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern char _io_dldi[4];
+extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
@@ -362,7 +362,7 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		if (_io_dldi[0] == 'S' && _io_dldi[1] == 'C' && _io_dldi[2] == 'S' && _io_dldi[3] == 'D') {
+		if (_io_dldi_features & 0x00000010) {
 			sysSetCartOwner (BUS_OWNER_ARM9);
 		}
 
