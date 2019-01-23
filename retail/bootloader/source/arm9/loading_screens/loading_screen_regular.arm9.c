@@ -29,12 +29,12 @@ static u16 color8;
 arm9_errorOutput
 Displays an error code on screen.
 Written by Chishm.
-Modified by Robz8:
+Modified by RocketRobz:
  * Replace dots with brand new loading screen (original image made by Uupo03)
 --------------------------------------------------------------------------*/
 void arm9_regularLoadingScreen(void) {
 	if (!drawnStuff) {
-		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
+		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
 

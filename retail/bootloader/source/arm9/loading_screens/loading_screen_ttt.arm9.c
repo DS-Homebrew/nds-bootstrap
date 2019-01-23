@@ -76,7 +76,7 @@ static void ttt_drawT(void) {
 
 void arm9_ttt(void) {
 	if (!drawnStuff) {
-		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
+		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
 
