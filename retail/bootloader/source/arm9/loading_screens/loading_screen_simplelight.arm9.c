@@ -102,7 +102,7 @@ void arm9_simplelightLoadingScreen(void) {
 	
 }
 
-void arm9_errorText(void) {
+void arm9_errorText2(void) {
 
 	// Draw "Error!" text
 	// E: Part 1
