@@ -9,7 +9,7 @@ A few questions one can answer:
 2) What happens when the bug occurs
 3) If the bug is reproduce-able, what steps can one take in order to get there. 
 
-Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discordapp.com/invite/7bxTQfZ).
+Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discord.gg/yqSut8c).
 
 # Compiling
 
