@@ -250,6 +250,7 @@ void arm9_main(void) {
 					arm9_simpledarkLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText();
+					}
 					break;
 			}
 		}
