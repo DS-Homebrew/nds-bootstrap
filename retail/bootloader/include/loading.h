@@ -9,6 +9,9 @@ void arm9_loadingCircle(void);        // Regular
 void arm9_errorText(void);            // Regular
 void arm9_pong(void);                 // Pong
 void arm9_ttt(void);                  // Tic-Tac-Toe
+void arm9_simpleLoadingScreen(bool light); // Simple Light/Dark
+void arm9_errorText2(void);            // Simple Light
+void arm9_errorText3(void);            // Simple Dark
 
 extern volatile bool arm9_animateLoadingCircle;
 
