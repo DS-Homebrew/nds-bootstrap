@@ -241,6 +241,17 @@ void arm9_main(void) {
 				case 2:
 					arm9_ttt();
 					break;
+				case 3:
+					arm9_simplelightLoadingScreen();
+					if (arm9_errorColor) {
+						arm9_errorText();
+					break;
+				case 4:
+					arm9_simpledarkLoadingScreen();
+					if (arm9_errorColor) {
+						arm9_errorText();
+					break;
+				
 			}
 		}
 	}
