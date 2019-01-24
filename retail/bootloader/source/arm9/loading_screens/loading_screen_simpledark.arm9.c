@@ -29,7 +29,7 @@ Written by Chishm.
 Modified by RocketRobz.
 Just Loading Bar (code originally written by RocketRobz, modified by FlameKat53, original image by Uupo03)
 --------------------------------------------------------------------------*/
-void arm9_simpleLoadingScreen(void) {
+void arm9_simpledarkLoadingScreen(void) {
 	if (!drawnStuff) {
 		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		REG_DISPCNT = MODE_FB0;
