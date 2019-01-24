@@ -251,7 +251,6 @@ void arm9_main(void) {
 					if (arm9_errorColor) {
 						arm9_errorText();
 					break;
-				
 			}
 		}
 	}
