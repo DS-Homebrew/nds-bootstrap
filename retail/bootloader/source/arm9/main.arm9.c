@@ -245,6 +245,7 @@ void arm9_main(void) {
 					arm9_simplelightLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText();
+					}
 					break;
 				case 4:
 					arm9_simpledarkLoadingScreen();
