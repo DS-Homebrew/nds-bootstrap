@@ -25,7 +25,7 @@ Once all that is downloaded and installed, `git clone` this repository, navigate
 
 # Frontends
 
-In order to use this, you'll need to get a frontend:
-- [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS.
-- [TWLoader](https://github.com/RocketRobz/TWLoader) is a discontinued 3DS frontend.
-- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a 3DS frontend based off the Nintendo DSi homebrew menu.
+For ease of use, we recommend you get one of the following frontends:
+- [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS made by RocketRobz that can also be used as a nds-bootstrap frontend.
+- [TWLoader](https://github.com/RocketRobz/TWLoader) is a discontinued frontend for nds-bootstrap made by RocketRobz that's 3DS exclusive as it uses the CTR-Mode.
+- [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a frontend based off the Nintendo DSi homebrew menu.
