@@ -50,14 +50,14 @@ void arm9_regularLoadingScreen(void) {
 	if (!drawnStuff) {
 		baseColor = arm9_darkTheme ? 0x2D6B : 0x5294;
 
-		color1 = arm9_darkTheme ? 0x294A : 0x56B5;
-		color2 = arm9_darkTheme ? 0x2529 : 0x5AD6;
-		color3 = arm9_darkTheme ? 0x2108 : 0x5EF7;
-		color4 = arm9_darkTheme ? 0x1CE7 : 0x6318;
-		color5 = arm9_darkTheme ? 0x18C6 : 0x6739;
-		color6 = arm9_darkTheme ? 0x14A5 : 0x6B5A;
-		color7 = arm9_darkTheme ? 0x1084 : 0x6F7B;
-		color8 = arm9_darkTheme ? 0x0C63 : 0x739C;
+		color1 = arm9_darkTheme ? 0x0C63 : 0x739C;
+		color2 = arm9_darkTheme ? 0x1084 : 0x6F7B;
+		color3 = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+		color4 = arm9_darkTheme ? 0x18C6 : 0x6739;
+		color5 = arm9_darkTheme ? 0x1CE7 : 0x6318;
+		color6 = arm9_darkTheme ? 0x2108 : 0x5EF7;
+		color7 = arm9_darkTheme ? 0x2529 : 0x5AD6;
+		color8 = arm9_darkTheme ? 0x294A : 0x56B5;
 
 		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
 
@@ -341,7 +341,7 @@ void arm9_regularLoadingScreen(void) {
 	for (int i = 0; i <= arm9_loadBarLength; i++) {
 		for (int y = 160; y <= 183; y++) {
 			for (int k = 30*i+8; k < 30*i+38; k++) {
-				VRAM_A[y*256+k] = color6;
+				VRAM_A[y*256+k] = color3;
 			}
 		}
 	}
