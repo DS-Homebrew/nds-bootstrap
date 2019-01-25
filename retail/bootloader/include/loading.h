@@ -23,7 +23,4 @@ extern bool displayScreen; //extern static bool displayScreen;
 // Pong & Tic-Tac-Toe
 extern volatile bool arm9_errorColor;
 
-extern u32 darkTheme;
-extern u32 swapLcds;
-
 #endif // LOADING_H

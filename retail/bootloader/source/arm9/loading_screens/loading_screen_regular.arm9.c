@@ -36,9 +36,9 @@ static u16 color6;
 static u16 color7;
 static u16 color8;
 
-static bgColor;
+static u16 bgColor;
 
-static errorColor;
+static u16 errorColor;
 /*-------------------------------------------------------------------------
 arm9_errorOutput
 Displays an error code on screen.
@@ -48,26 +48,26 @@ Modified by RocketRobz:
 --------------------------------------------------------------------------*/
 void arm9_regularLoadingScreen(void) {
 	if (!drawnStuff) {
-		baseColor = darkTheme ? 0x2D6B : 0x5294;
+		baseColor = arm9_darkTheme ? 0x2D6B : 0x5294;
 
-		color1 = darkTheme ? 0x294A : 0x56B5;
-		color2 = darkTheme ? 0x2529 : 0x5AD6;
-		color3 = darkTheme ? 0x2108 : 0x5EF7;
-		color4 = darkTheme ? 0x1CE7 : 0x6318;
-		color5 = darkTheme ? 0x18C6 : 0x6739;
-		color6 = darkTheme ? 0x14A5 : 0x6B5A;
-		color7 = darkTheme ? 0x1084 : 0x6F7B;
-		color8 = darkTheme ? 0x0C63 : 0x739C;
+		color1 = arm9_darkTheme ? 0x294A : 0x56B5;
+		color2 = arm9_darkTheme ? 0x2529 : 0x5AD6;
+		color3 = arm9_darkTheme ? 0x2108 : 0x5EF7;
+		color4 = arm9_darkTheme ? 0x1CE7 : 0x6318;
+		color5 = arm9_darkTheme ? 0x18C6 : 0x6739;
+		color6 = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+		color7 = arm9_darkTheme ? 0x1084 : 0x6F7B;
+		color8 = arm9_darkTheme ? 0x0C63 : 0x739C;
 
-		bgColor = darkTheme ? 0x0842 : 0x7fff;
+		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
 
-		//if (!darkTheme) {
+		//if (!arm9_darkTheme) {
 			errorColor = 0x001B;
 		//} else {
 		//	errorColor = 0x001B;
 		//}
 
-		if (!swapLcds) {
+		if (!arm9_swapLcds) {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		} else {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);	

@@ -27,11 +27,11 @@ Just Loading Bar (code originally written by RocketRobz, modified by FlameKat53,
 
 void arm9_simpleLoadingScreen(void) {
 	if (!drawnStuff) {
-		loadingBarEdge = darkTheme ? 0x2D6B : 0x5294;
-		loadingBar = darkTheme ? 0x14A5 : 0x6B5A;
-		bgColor = darkTheme ? 0x0842 : 0x7FFF;
+		loadingBarEdge = arm9_darkTheme ? 0x2D6B : 0x5294;
+		loadingBar = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+		bgColor = arm9_darkTheme ? 0x0842 : 0x7FFF;
 
-		if (!swapLcds){
+		if (!arm9_swapLcds){
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		} else {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);	

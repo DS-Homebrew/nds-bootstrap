@@ -29,9 +29,9 @@ static u16 errorColor;
 
 void arm9_pong(void) {
 	if (!drawnStuff) {
-		pongPaddleColor = darkTheme ? 0x2D6B : 0x5294;
-		pongBallColor = darkTheme ? 0x14A5 : 0x6B5A;
-		bgColor = darkTheme ? 0x0842 : 0x7FFF;
+		pongPaddleColor = arm9_darkTheme ? 0x2D6B : 0x5294;
+		pongBallColor = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+		bgColor = arm9_darkTheme ? 0x0842 : 0x7FFF;
 
 		//if (!darkTheme) {
 			errorColor = 0x001B;
@@ -39,7 +39,7 @@ void arm9_pong(void) {
 		//	errorColor = 0x001B;
 		//}
 
-		if (!swapLcds){
+		if (!arm9_swapLcds){
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		} else {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);	
