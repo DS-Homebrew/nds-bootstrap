@@ -17,6 +17,8 @@ typedef struct configuration {
 	u32 patchMpuSize;
 	u32 consoleModel;
 	u32 loadingScreen;
+	bool loadingDarkTheme;
+	bool loadingSwapLcds;
 	u32 romread_LED;
 	bool boostCpu;
 	bool boostVram;

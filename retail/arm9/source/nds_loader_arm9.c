@@ -226,20 +226,22 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	}
 	free(conf->argv);
 
-	lc0->saveFileCluster = saveCluster;
-	lc0->saveSize        = conf->saveSize;
-	lc0->language        = conf->language;
-	lc0->dsiMode         = conf->dsiMode; // SDK 5
-	lc0->donorSdkVer     = conf->donorSdkVer;
-	lc0->patchMpuRegion  = conf->patchMpuRegion;
-	lc0->patchMpuSize    = conf->patchMpuSize;
-	lc0->consoleModel    = conf->consoleModel;
-	lc0->loadingScreen   = conf->loadingScreen;
-	lc0->romread_LED     = conf->romread_LED;
-	lc0->boostVram       = conf->boostVram;
-	lc0->gameSoftReset   = conf->gameSoftReset;
-	lc0->forceSleepPatch = conf->forceSleepPatch;
-	lc0->logging         = conf->logging;
+	lc0->saveFileCluster  = saveCluster;
+	lc0->saveSize         = conf->saveSize;
+	lc0->language         = conf->language;
+	lc0->dsiMode          = conf->dsiMode; // SDK 5
+	lc0->donorSdkVer      = conf->donorSdkVer;
+	lc0->patchMpuRegion   = conf->patchMpuRegion;
+	lc0->patchMpuSize     = conf->patchMpuSize;
+	lc0->consoleModel     = conf->consoleModel;
+	lc0->loadingScreen    = conf->loadingScreen;
+	lc0->loadingDarkTheme = conf->loadingDarkTheme;
+	lc0->loadingSwapLcds  = conf->loadingSwapLcds;
+	lc0->romread_LED      = conf->romread_LED;
+	lc0->boostVram        = conf->boostVram;
+	lc0->gameSoftReset    = conf->gameSoftReset;
+	lc0->forceSleepPatch  = conf->forceSleepPatch;
+	lc0->logging          = conf->logging;
 
 	loadCheatData(conf->cheat_data, conf->cheat_data_len);
 	free(conf->cheat_data);

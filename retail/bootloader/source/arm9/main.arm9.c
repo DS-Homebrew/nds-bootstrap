@@ -242,13 +242,13 @@ void arm9_main(void) {
 					arm9_ttt();
 					break;
 				case 3:
-					arm9_simpleLoadingScreen(true);
+					arm9_simpleLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText2();
 					}
 					break;
 				case 4:
-					arm9_simpleLoadingScreen(false);
+					arm9_simpleLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText3();
 					}

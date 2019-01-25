@@ -133,6 +133,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	dbg_printf("loadingScreen: %lX\n", conf->loadingScreen);
+	dbg_printf("loadingDarkTheme: %lX\n", btoa(conf->loadingDarkTheme));
+	dbg_printf("loadingSwapLcds: %lX\n", btoa(conf->loadingSwapLcds));
 	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));

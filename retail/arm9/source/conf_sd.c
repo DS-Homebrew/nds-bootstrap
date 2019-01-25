@@ -77,6 +77,14 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Loading screen
 		conf->loadingScreen = strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_DARK_THEME")) {
+		// Loading screen (Dark theme)
+		conf->loadingDarkTheme = (bool)strtol(value, NULL, 0);
+
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SWAP_LCDS")) {
+		// Swap screens in loading screen
+		conf->loadingSwapLcds = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "ROMREAD_LED")) {
 		// ROM read LED
 		conf->romread_LED = strtol(value, NULL, 0);

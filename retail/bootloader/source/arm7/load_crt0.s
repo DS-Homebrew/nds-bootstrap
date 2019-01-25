@@ -38,6 +38,8 @@
 	.global patchMpuSize
 	.global consoleModel
 	.global loadingScreen
+	.global darkTheme
+	.global swapLcds
 	.global romread_LED
 	.global boostVram
 	.global gameSoftReset
@@ -83,6 +85,10 @@ patchMpuSize:
 consoleModel:
 	.word	0x00000000
 loadingScreen:
+	.word	0x00000000
+darkTheme:
+	.word	0x00000000
+swapLcds:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000
