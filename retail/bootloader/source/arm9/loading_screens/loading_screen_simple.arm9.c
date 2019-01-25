@@ -59,8 +59,8 @@ void arm9_simpleLoadingScreen(void) {
 		}
 
 		// Draw loading bar left edge
-		for (int y = 88; y <= 112; y++) {
-			for (int k = 2; k <= 5; k++) {
+		for (int y = 88; y <= 111; y++) {
+			for (int k = 2; k <= 7; k++) {
 				VRAM_A[y*256+k] = loadingBarEdge;
 			}
 		}
