@@ -13,6 +13,7 @@ Loading pong
 #include "loading.h"
 
 static bool drawnStuff = false;
+static bool rightpaddle_control = false;
 
 static int leftpaddle_yPos = 76;
 static int rightpaddle_yPos = 76;
@@ -26,6 +27,25 @@ static u16 pongPaddleColor;
 static u16 pongBallColor;
 static u16 bgColor;
 static u16 errorColor;
+
+void restartPong(void) {
+	// Restart minigame
+	for (int i = 0; i < 256*192; i++) {
+		VRAM_A[i] = bgColor;
+	}
+	leftpaddle_yPos = 76;
+	rightpaddle_yPos = 76;
+	if (!ball_moveLR) {
+		ball_xPos = 16;
+		ball_moveLR = true;	// false = left, true = right
+	} else {
+		ball_xPos = 256-16;
+		ball_moveLR = false;	// false = left, true = right
+	}
+	ball_yPos = 64;
+	ball_ySpeed = 2;
+	ball_moveUD = false;	// false = up, true = down
+}
 
 void arm9_pong(void) {
 	if (!drawnStuff) {
@@ -60,9 +80,11 @@ void arm9_pong(void) {
 
 	while (REG_VCOUNT!=191); // Fix speed
 	
-	rightpaddle_yPos = ball_yPos-16;
-	if (rightpaddle_yPos <= 0) rightpaddle_yPos = 0;
-	if (rightpaddle_yPos >= 156) rightpaddle_yPos = 156;
+	if (!rightpaddle_control) {
+		rightpaddle_yPos = ball_yPos-16;
+		if (rightpaddle_yPos < 0) rightpaddle_yPos = 0;
+		if (rightpaddle_yPos > 156) rightpaddle_yPos = 156;
+	}
 
 	// Draw ball (back)
 	for (int y = ball_yPos-16; y <= ball_yPos+24; y++) {
@@ -123,49 +145,55 @@ void arm9_pong(void) {
 					ball_ySpeed++;	// Increase Y speed of ball
 				}
 			}
-		} else {
-			if (ball_xPos <= 0) {
-				// Restart minigame
-				for (int i = 0; i < 256*192; i++) {
-					VRAM_A[i] = bgColor;
-				}
-				leftpaddle_yPos = 76;
-				rightpaddle_yPos = 76;
-				ball_xPos = 16;
-				ball_yPos = 64;
-				ball_ySpeed = 2;
-				ball_moveUD = false;	// false = up, true = down
-				ball_moveLR = true;	// false = left, true = right
-			}
+		} else if (ball_xPos <= 0) {
+			restartPong();
 		}
 	} else if (ball_moveLR==true) {
 		ball_xPos += 2;
-		if (ball_xPos == 236) {
-			ball_moveLR = false;
-			if (ball_ySpeed != 6) {
-				ball_ySpeed++;	// Increase Y speed of ball
+		if ((ball_yPos > rightpaddle_yPos-8) && (ball_yPos < rightpaddle_yPos+32)) {
+			if (ball_xPos == 256-24) {
+				ball_moveLR = false;
+				if (ball_ySpeed != 6) {
+					ball_ySpeed++;	// Increase Y speed of ball
+				}
 			}
+		} else if (ball_xPos >= 255) {
+			restartPong();
 		}
 	}
 
 	// Control left paddle
-	if (REG_KEYINPUT & (KEY_UP)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_UP)) {
 		leftpaddle_yPos -= 4;
-		if (leftpaddle_yPos <= 0) leftpaddle_yPos = 0;
+		if (leftpaddle_yPos < 0) leftpaddle_yPos = 0;
 	}
-	if (REG_KEYINPUT & (KEY_DOWN)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_DOWN)) {
 		leftpaddle_yPos += 4;
-		if (leftpaddle_yPos >= 156) leftpaddle_yPos = 156;
+		if (leftpaddle_yPos > 156) leftpaddle_yPos = 156;
 	}
 
 	// Control right paddle
-	/*if (REG_KEYINPUT & (KEY_X)) {} else {
-		rightpaddle_yPos--;
-		if (rightpaddle_yPos <= 0) rightpaddle_yPos = 0;
+	/*if (0 == (REG_KEYINPUT & KEY_X) && rightpaddle_control) {
+		rightpaddle_yPos -= 4;
+		if (rightpaddle_yPos < 0) rightpaddle_yPos = 0;
 	}
-	if (REG_KEYINPUT & (KEY_B)) {} else {
-		rightpaddle_yPos++;
-		if (rightpaddle_yPos >= 156) rightpaddle_yPos = 156;
+	if (0 == (REG_KEYINPUT & KEY_B) && rightpaddle_control) {
+		rightpaddle_yPos += 4;
+		if (rightpaddle_yPos > 156) rightpaddle_yPos = 156;
 	}*/
+	if (rightpaddle_control) {
+		if (0 == (REG_KEYINPUT & KEY_B)) {
+			rightpaddle_yPos += 4;
+			if (rightpaddle_yPos > 156) rightpaddle_yPos = 156;
+		} else {
+			rightpaddle_yPos -= 4;
+			if (rightpaddle_yPos < 0) rightpaddle_yPos = 0;
+		}
+	} else {
+		if (0 == (REG_KEYINPUT & KEY_R)) {
+			rightpaddle_control = true;
+			restartPong();
+		}
+	}
 
 }
