@@ -14,8 +14,13 @@ Loading Tic-Tac-Toe
 
 static bool drawnStuff = false;
 
+static u16 bgColor;
+static u16 borderColor;
+static u16 borderEdgeColor;
+
 static int ttt_selected[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};	// 0 = Blank, 1 = N, 2 = T
 static int ttt_highlighted = 0;
+static int ttt_highlightedRow = 0;
 
 static u16 ttt_rectColor[9] = {0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF};
 
@@ -30,31 +35,31 @@ static void ttt_drawN(void) {
 	// 1st h line
 	for (int y = ttt_drawYpos+0; y <= ttt_drawYpos+39; y++) {
 		for (int k = ttt_drawXpos+0; k <= ttt_drawXpos+7; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 	// 2nd h line
 	for (int y = ttt_drawYpos+8; y <= ttt_drawYpos+15; y++) {
 		for (int k = ttt_drawXpos+8; k <= ttt_drawXpos+15; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 	// 3rd h line
 	for (int y = ttt_drawYpos+16; y <= ttt_drawYpos+23; y++) {
 		for (int k = ttt_drawXpos+16; k <= ttt_drawXpos+23; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 	// 4th h line
 	for (int y = ttt_drawYpos+24; y <= ttt_drawYpos+31; y++) {
 		for (int k = ttt_drawXpos+24; k <= ttt_drawXpos+31; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 	// 5th h line
 	for (int y = ttt_drawYpos+0; y <= ttt_drawYpos+39; y++) {
 		for (int k = ttt_drawXpos+32; k <= ttt_drawXpos+39; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 }
@@ -63,67 +68,75 @@ static void ttt_drawT(void) {
 	// Top
 	for (int y = ttt_drawYpos+0; y <= ttt_drawYpos+7; y++) {
 		for (int k = ttt_drawXpos+0; k <= ttt_drawXpos+39; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 	// Bottom
 	for (int y = ttt_drawYpos+8; y <= ttt_drawYpos+39; y++) {
 		for (int k = ttt_drawXpos+16; k <= ttt_drawXpos+23; k++) {
-			VRAM_A[y*256+k] = 0x0000;
+			VRAM_A[y*256+k] = borderColor;
 		}
 	}
 }
 
 void arm9_ttt(void) {
 	if (!drawnStuff) {
-		REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
+		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
+		borderColor = arm9_darkTheme ? 0x2D6B : 0x5294;
+		borderEdgeColor = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+
+		if (!arm9_swapLcds) {
+			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
+		} else {
+			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);	
+		}
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
 
-		// Draw white BG
+		// Draw white/dark BG
 		for (int i = 0; i < 256*192; i++) {
-			VRAM_A[i] = 0x7FFF;
+			VRAM_A[i] = bgColor;
 		}
 
 		// Draw top of v line 1
 		for (int y = 56; y <= 59; y++) {
 			for (int k = 0; k <= 256; k++) {
-				VRAM_A[y*256+k] = 0x4631;
+				VRAM_A[y*256+k] = borderEdgeColor;
 			}
 		}
 
 		// Draw v line 1
 		for (int y = 60; y <= 67; y++) {
 			for (int k = 0; k <= 256; k++) {
-				VRAM_A[y*256+k] = 0x0000;
+				VRAM_A[y*256+k] = borderColor;
 			}
 		}
 
 		// Draw v line 2
 		for (int y = 124; y <= 131; y++) {
 			for (int k = 0; k <= 256; k++) {
-				VRAM_A[y*256+k] = 0x0000;
+				VRAM_A[y*256+k] = borderColor;
 			}
 		}
 
 		// Draw bottom of v line 2
 		for (int y = 132; y <= 135; y++) {
 			for (int k = 0; k <= 256; k++) {
-				VRAM_A[y*256+k] = 0x4631;
+				VRAM_A[y*256+k] = borderEdgeColor;
 			}
 		}
 
 		// Draw h line 1
 		for (int y = 0; y <= 191; y++) {
 			for (int k = 80; k <= 87; k++) {
-				VRAM_A[y*256+k] = 0x0000;
+				VRAM_A[y*256+k] = borderColor;
 			}
 		}
 
 		// Draw h line 2
 		for (int y = 0; y <= 191; y++) {
 			for (int k = 168; k <= 175; k++) {
-				VRAM_A[y*256+k] = 0x0000;
+				VRAM_A[y*256+k] = borderColor;
 			}
 		}
 
@@ -204,28 +217,44 @@ void arm9_ttt(void) {
 	while (REG_VCOUNT!=191);	// fix speed
 
 	// Control highlighter
-	if (REG_KEYINPUT & (KEY_UP)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_UP)) {
 		ttt_highlighted -= 3;
-		if (ttt_highlighted < 0) ttt_highlighted = 0;
+		ttt_highlightedRow--;
+		if (ttt_highlightedRow < 0) ttt_highlightedRow = 0;
+		if (ttt_highlighted < 0) ttt_highlighted += 3;
 		//ttt_keypressed = true;
 	}
-	if (REG_KEYINPUT & (KEY_DOWN)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_DOWN)) {
 		ttt_highlighted += 3;
-		if (ttt_highlighted > 8) ttt_highlighted = 8;
+		ttt_highlightedRow++;
+		if (ttt_highlightedRow > 2) ttt_highlightedRow = 2;
+		if (ttt_highlighted > 8) ttt_highlighted -= 3;
 		//ttt_keypressed = true;
 	}
-	if (REG_KEYINPUT & (KEY_LEFT)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_LEFT)) {
 		ttt_highlighted--;
-		if (ttt_highlighted < 0) ttt_highlighted = 0;
+		if (ttt_highlightedRow == 2) {
+			if (ttt_highlighted < 6) ttt_highlighted++;
+		} else if (ttt_highlightedRow == 1) {
+			if (ttt_highlighted < 3) ttt_highlighted++;
+		} else {
+			if (ttt_highlighted < 0) ttt_highlighted++;
+		}
 		//ttt_keypressed = true;
 	}
-	if (REG_KEYINPUT & (KEY_RIGHT)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_RIGHT)) {
 		ttt_highlighted++;
-		if (ttt_highlighted > 8) ttt_highlighted = 8;
+		if (ttt_highlightedRow == 2) {
+			if (ttt_highlighted > 8) ttt_highlighted--;
+		} else if (ttt_highlightedRow == 1) {
+			if (ttt_highlighted > 5) ttt_highlighted--;
+		} else {
+			if (ttt_highlighted > 2) ttt_highlighted--;
+		}
 		//ttt_keypressed = true;
 	}
 
-	if (REG_KEYINPUT & (KEY_L)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_L)) {
 		if (ttt_selected[ttt_highlighted] == 0){
 			ttt_selected[ttt_highlighted] = 1;	// N
 			// Set X position
@@ -269,7 +298,7 @@ void arm9_ttt(void) {
 			ttt_drawN();
 		}
 	}
-	if (REG_KEYINPUT & (KEY_R)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_R)) {
 		if (ttt_selected[ttt_highlighted] == 0){
 			ttt_selected[ttt_highlighted] = 2;	// T
 			// Set X position
@@ -314,7 +343,7 @@ void arm9_ttt(void) {
 		}
 	}
 
-	if (REG_KEYINPUT & (KEY_START)) {} else {
+	if (0 == (REG_KEYINPUT & KEY_START)) {
 		// Clear all marks
 		drawnStuff = false;
 		for (int i = 0; i < 9; i++) ttt_selected[i] = 0;
@@ -323,47 +352,47 @@ void arm9_ttt(void) {
 	if (ttt_highlighted == 0) {
 		ttt_rectColor[0] = ttt_selColor;
 	} else {
-		ttt_rectColor[0] = 0x7FFF;
+		ttt_rectColor[0] = bgColor;
 	}
 	if (ttt_highlighted == 1) {
 		ttt_rectColor[1] = ttt_selColor;
 	} else {
-		ttt_rectColor[1] = 0x7FFF;
+		ttt_rectColor[1] = bgColor;
 	}
 	if (ttt_highlighted == 2) {
 		ttt_rectColor[2] = ttt_selColor;
 	} else {
-		ttt_rectColor[2] = 0x7FFF;
+		ttt_rectColor[2] = bgColor;
 	}
 	if (ttt_highlighted == 3) {
 		ttt_rectColor[3] = ttt_selColor;
 	} else {
-		ttt_rectColor[3] = 0x7FFF;
+		ttt_rectColor[3] = bgColor;
 	}
 	if (ttt_highlighted == 4) {
 		ttt_rectColor[4] = ttt_selColor;
 	} else {
-		ttt_rectColor[4] = 0x7FFF;
+		ttt_rectColor[4] = bgColor;
 	}
 	if (ttt_highlighted == 5) {
 		ttt_rectColor[5] = ttt_selColor;
 	} else {
-		ttt_rectColor[5] = 0x7FFF;
+		ttt_rectColor[5] = bgColor;
 	}
 	if (ttt_highlighted == 6) {
 		ttt_rectColor[6] = ttt_selColor;
 	} else {
-		ttt_rectColor[6] = 0x7FFF;
+		ttt_rectColor[6] = bgColor;
 	}
 	if (ttt_highlighted == 7) {
 		ttt_rectColor[7] = ttt_selColor;
 	} else {
-		ttt_rectColor[7] = 0x7FFF;
+		ttt_rectColor[7] = bgColor;
 	}
 	if (ttt_highlighted == 8) {
 		ttt_rectColor[8] = ttt_selColor;
 	} else {
-		ttt_rectColor[8] = 0x7FFF;
+		ttt_rectColor[8] = bgColor;
 	}
 	
 }
