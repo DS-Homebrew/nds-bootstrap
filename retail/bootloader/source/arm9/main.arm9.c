@@ -91,6 +91,14 @@ void SetBrightness(u8 screen, s8 bright) {
 	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
+void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color) {
+	for (int iy = y; iy <= y+sizeY-1; iy++) {
+		for (int ix = x; ix <= x+sizeX-1; ix++) {
+			VRAM_A[iy*256+ix] = color;	
+		}
+	}
+}
+
 /*-------------------------------------------------------------------------
 arm9_main
 
