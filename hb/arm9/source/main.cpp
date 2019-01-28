@@ -126,18 +126,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0)
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SFC") == 0))
 	{
-		bool hasHeader = true;
-		char snesRomHeader[0x200];
-		FILE *snesRom = fopen(ramDiskFilename.c_str(), "rb");
-		if (snesRom) fread(snesRomHeader, 1, sizeof(snesRomHeader), snesRom);
-		fclose(snesRom);
-		for (int i = 0x100; i < 0x200; i++) {
-			if (snesRomHeader[i] != 0) {
-				hasHeader = false;
-				break;
-			}
-		}
-		romFileType = 1+hasHeader;
+		romFileType = 1;
 	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
