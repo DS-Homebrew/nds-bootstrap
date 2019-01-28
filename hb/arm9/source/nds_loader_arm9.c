@@ -154,7 +154,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+//static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 
 #define DEVICE_TYPE_DLDI 0x49444C44
@@ -272,6 +272,8 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
+char imgTemplateBuffer[0xDE00];
+
 int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
 {
 	char* argStart;
@@ -279,20 +281,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	u16 argTempVal = 0;
 	int argSize;
 	const char* argChar;
-	char imgTemplateBuffer[0xDE00];
 	
 	nocashMessage("runNds");
-
-	FILE *ramDiskTemplate;
-	if (romToRamDisk == 1) {
-		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
-		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
-		fclose(ramDiskTemplate);
-	} else if (romToRamDisk == 0) {
-		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
-		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
-		fclose(ramDiskTemplate);
-	}
 
 	irqDisable(IRQ_ALL);
 
@@ -398,6 +388,17 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
+
+	FILE *ramDiskTemplate;
+	if (romToRamDisk == 1) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 0) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	}
 
 	
 	if (stat (filename, &st) < 0) {
