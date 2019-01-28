@@ -22,6 +22,7 @@
 #include <nds.h>
 #include <nds/arm9/dldi.h>
 #include <sys/stat.h>
+#include <stdio.h>
 #include <limits.h>
 
 #include <unistd.h>
@@ -35,6 +36,7 @@
 
 #include "nds_loader_arm9.h"
 #define LCDC_BANK_C (u16*)0x06840000
+#define LCDC_BANK_D (u16*)0x06860000
 #define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_C) + 1))
 #define INIT_DISC (*(((u32*)LCDC_BANK_C) + 2))
 #define WANT_TO_PATCH_DLDI (*(((u32*)LCDC_BANK_C) + 3))
@@ -69,6 +71,7 @@ dsiSD:
 #define LOADING_SCREEN_OFFSET 32
 #define RAM_DISK_CLUSTER_OFFSET 36
 #define RAM_DISK_SIZE_OFFSET 40
+#define ROM_FILE_TYPE_OFFSET 44
 
 
 typedef signed int addr_t;
@@ -269,7 +272,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
 {
 	char* argStart;
 	u16* argData;
@@ -283,8 +286,20 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	// Direct CPU access to VRAM bank C
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
 	vramcpy (LCDC_BANK_C, loader, loaderSize);
+
+	FILE *ramDiskTemplate;
+	if (romToRamDisk == 1) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
+		if (ramDiskTemplate) fread(LCDC_BANK_D, 0xDE00, 1, ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 0) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
+		if (ramDiskTemplate) fread(LCDC_BANK_D, 0xDE00, 1, ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	}
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;
@@ -335,6 +350,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_C, LOADING_SCREEN_OFFSET, loadingScreen);
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_SIZE_OFFSET, ramDiskSize);
+	writeAddr ((data_t*) LCDC_BANK_C, ROM_FILE_TYPE_OFFSET, romToRamDisk);
 
 		
 	if(dldiPatchNds) {
@@ -372,7 +388,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int argc, const char** argv, int loadingScreen)  {
+int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, int argc, const char** argv, int loadingScreen)  {
 	struct stat st;
 	struct stat stRam;
 	u32 clusterRam = 0;
@@ -400,13 +416,13 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 		argv = args;
 	}
 
-	bool havedsiSD = false;
+	//bool havedsiSD = false;
 
-	if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
+	//if(argv[0][0]=='s' && argv[0][1]=='d') havedsiSD = true;
 	
-	installBootStub(havedsiSD);
+	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, true, true, argc, argv, loadingScreen);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, true, true, argc, argv, loadingScreen);
 }
 
 /*

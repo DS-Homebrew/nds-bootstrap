@@ -32,6 +32,7 @@
 	.global loadingScreen
 	.global ramDiskCluster
 	.global ramDiskSize
+	.global romFileType
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -60,6 +61,8 @@ loadingScreen:
 ramDiskCluster:
 	.word	0x00000000
 ramDiskSize:
+	.word	0x00000000
+romFileType:
 	.word	0x00000000
 
 startUp:

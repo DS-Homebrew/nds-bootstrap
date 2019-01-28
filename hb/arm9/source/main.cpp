@@ -29,6 +29,7 @@
 
 #include "nds_loader_arm9.h"
 #include "inifile.h"
+#include "nitrofs.h"
 
 using namespace std;
 
@@ -77,7 +78,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -109,6 +110,21 @@ void runFile(string filename, string fullPath, string ramDiskFilename, u32 ramDi
 	} else {
 		argarray.push_back(strdup(filename.c_str()));
 	}
+	
+	if (access(homebrewArg.c_str(), F_OK) == 0) {
+		argarray.push_back(strdup(homebrewArg.c_str()));
+	}
+
+	int romFileType = -1;
+	if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
+	{
+		romFileType = 0;
+	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0))
+	{
+		romFileType = 1;
+	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
 		dbg_printf("no nds file specified\n");
@@ -118,7 +134,7 @@ void runFile(string filename, string fullPath, string ramDiskFilename, u32 ramDi
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], loadingScreen);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -176,6 +192,9 @@ int main( int argc, char **argv) {
 	
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
+
+		nitroFSInit(argv[0]);
+
         //printf("fat inited");    
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
@@ -246,6 +265,9 @@ int main( int argc, char **argv) {
         std::string	substr = "sd:/";
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
+		std::string	homebrewArg = bootstrapini.GetString( "NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
+        if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0) homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
+
 		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
         if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
 
@@ -272,7 +294,7 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-		runFile(filename, ndsPath, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

@@ -68,6 +68,7 @@ extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
+extern u32 romFileType;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -363,7 +364,12 @@ int arm7_main (void) {
 		arm9_ramDiskCluster = ramDiskCluster;
 		if (ramDiskSize < 0x01C01000) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
-			fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
+			if (romFileType != -1) {
+				memcpy ((char*)RAM_DISK_LOCATION, 0x06020000, 0xDE00);
+				fileRead((char*)RAM_DISK_LOCATION_ROM, ramDiskFile, 0, ramDiskSize, 0);
+			} else {
+				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
+			}
 		}
 		REG_SCFG_EXT = 0x12A03000;
 	} else if (!dldiAtArm7) {
