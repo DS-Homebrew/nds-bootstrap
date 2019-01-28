@@ -116,14 +116,28 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 	}
 
 	int romFileType = -1;
-	if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
+	if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
+	|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".GEN") == 0))
 	{
 		romFileType = 0;
 	}
 	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0))
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMC") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SFC") == 0))
 	{
-		romFileType = 1;
+		bool hasHeader = true;
+		char snesRomHeader[0x200];
+		FILE *snesRom = fopen(ramDiskFilename.c_str(), "rb");
+		if (snesRom) fread(snesRomHeader, 1, sizeof(snesRomHeader), snesRom);
+		fclose(snesRom);
+		for (int i = 0x100; i < 0x200; i++) {
+			if (snesRomHeader[i] != 0) {
+				hasHeader = false;
+				break;
+			}
+		}
+		romFileType = 1+hasHeader;
 	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {

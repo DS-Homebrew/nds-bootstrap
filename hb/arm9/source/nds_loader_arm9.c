@@ -390,8 +390,12 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	const char* args[1];
 
 	FILE *ramDiskTemplate;
-	if (romToRamDisk == 1) {
-		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
+	if (romToRamDisk == 2) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES-headered.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 1) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES-headerless.bin", "rb");
 		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
 	} else if (romToRamDisk == 0) {

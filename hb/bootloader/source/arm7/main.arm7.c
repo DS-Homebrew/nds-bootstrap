@@ -366,7 +366,7 @@ int arm7_main (void) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
 				memcpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, 0xEA00);
-				fileRead((char*)((romFileType == 1) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
+				fileRead((char*)((romFileType == 1 || romFileType == 2) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 			} else {
 				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
 			}
