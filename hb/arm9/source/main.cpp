@@ -193,8 +193,6 @@ int main( int argc, char **argv) {
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
 
-		nitroFSInit(argv[0]);
-
         //printf("fat inited");    
 		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
 
@@ -211,6 +209,12 @@ int main( int argc, char **argv) {
 			//getSFCG_ARM9();
 			//getSFCG_ARM7();
 		}
+
+		std::string	bootstrapPath = argv[0];
+        std::string	substr = "sd:/";
+        if(strncmp(bootstrapPath.c_str(), substr.c_str(), substr.size()) == 0) bootstrapPath = ReplaceAll(bootstrapPath, "sd:/", "fat:/");
+
+		nitroFSInit(bootstrapPath.c_str());
 
 		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
 			if(REG_SCFG_MC == 0x11) { 
@@ -262,7 +266,6 @@ int main( int argc, char **argv) {
 		}
 
 		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-        std::string	substr = "sd:/";
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
 		std::string	homebrewArg = bootstrapini.GetString( "NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
