@@ -279,8 +279,20 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	u16 argTempVal = 0;
 	int argSize;
 	const char* argChar;
+	char imgTemplateBuffer[0xDE00];
 	
 	nocashMessage("runNds");
+
+	FILE *ramDiskTemplate;
+	if (romToRamDisk == 1) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, sizeof(imgTemplateBuffer), 1, ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 0) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, sizeof(imgTemplateBuffer), 1, ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	}
 
 	irqDisable(IRQ_ALL);
 
@@ -289,17 +301,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
 	vramcpy (LCDC_BANK_C, loader, loaderSize);
-
-	FILE *ramDiskTemplate;
-	if (romToRamDisk == 1) {
-		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
-		if (ramDiskTemplate) fread(LCDC_BANK_D, 0xDE00, 1, ramDiskTemplate);
-		fclose(ramDiskTemplate);
-	} else if (romToRamDisk == 0) {
-		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
-		if (ramDiskTemplate) fread(LCDC_BANK_D, 0xDE00, 1, ramDiskTemplate);
-		fclose(ramDiskTemplate);
-	}
+	vramcpy (LCDC_BANK_D, imgTemplateBuffer, sizeof(imgTemplateBuffer));
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;
