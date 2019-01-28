@@ -111,7 +111,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		argarray.push_back(strdup(filename.c_str()));
 	}
 	
-	if (access(homebrewArg.c_str(), F_OK) == 0) {
+	if (homebrewArg != "") {
 		argarray.push_back(strdup(homebrewArg.c_str()));
 	}
 
@@ -269,7 +269,9 @@ int main( int argc, char **argv) {
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
 		std::string	homebrewArg = bootstrapini.GetString( "NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
-        if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0) homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
+		if (homebrewArg != "") {
+			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0) homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
+		}
 
 		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
         if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
