@@ -286,11 +286,11 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	FILE *ramDiskTemplate;
 	if (romToRamDisk == 1) {
 		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
-		if (ramDiskTemplate) fread(imgTemplateBuffer, sizeof(imgTemplateBuffer), 1, ramDiskTemplate);
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
 	} else if (romToRamDisk == 0) {
 		ramDiskTemplate = fopen("nitro:/imgTemplate_SegaMD.bin", "rb");
-		if (ramDiskTemplate) fread(imgTemplateBuffer, sizeof(imgTemplateBuffer), 1, ramDiskTemplate);
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
 	}
 
