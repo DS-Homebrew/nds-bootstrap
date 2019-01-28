@@ -272,7 +272,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-char imgTemplateBuffer[0xDE00];
+char imgTemplateBuffer[0xEA00];
 
 int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
 {
