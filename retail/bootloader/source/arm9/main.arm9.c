@@ -262,8 +262,7 @@ void arm9_main(void) {
 					if (arm9_errorColor) {
 						arm9_darkTheme ? arm9errorText4() : arm9_errorText5();
 					}
-					break;
-						
+					break;		
 			}
 		}
 	}
