@@ -262,7 +262,7 @@ void arm9_main(void) {
 					if (arm9_errorColor) {
 						arm9_errorText3();
 					}
-					if (arm9_rotateLoadingCircle) {
+					if (arm9_animateLoadingCircle) {
 						arm9_loadingCircle();
 					}
 					break;		
