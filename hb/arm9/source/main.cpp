@@ -112,7 +112,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 	}
 	
 	if (homebrewArg != "") {
-		argarray.push_back(strdup(homebrewArg.c_str()));
+		argarray.push_back((char*)homebrewArg.c_str());
 	}
 
 	int romFileType = -1;
