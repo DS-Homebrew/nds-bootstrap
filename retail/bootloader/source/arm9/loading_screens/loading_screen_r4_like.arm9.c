@@ -292,7 +292,7 @@ void arm9_R4LikeLoadingScreen(void) {
 		}
 	}
 	
-	arm9_animateLoadingCircle = true;
+	arm9_rotateLoadingCircle = true;
 }
 
 void arm9_loadingCircle(void) {
@@ -573,6 +573,6 @@ void arm9_errorText4(void) {
 		}
 	}
 
-	arm9_animateLoadingCircle = false;
+	arm9_rotateLoadingCircle = false;
 	displayScreen = false;
 }
