@@ -295,7 +295,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	arm9_animateLoadingCircle = true;
 }
 
-void arm9_loadingCircle(void) {
+void arm9_loadingCircle2(void) {
 	switch (loadingCircleFrame) {
 		case 0:
 			default:
