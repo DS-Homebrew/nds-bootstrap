@@ -284,7 +284,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	}
 
 	// Draw loading bar
-	drawRectangle (36, 88, 24*arm9_loadBarLength, 24, color3);
+	drawRectangle (36, 88, 24*arm9_loadBarLength, 39, color3);
 	
 	arm9_animateLoadingCircle = true;
 }
