@@ -254,9 +254,18 @@ void arm9_main(void) {
 				case 3:
 					arm9_simpleLoadingScreen();
 					if (arm9_errorColor) {
-						arm9_darkTheme ? arm9_errorText3() : arm9_errorText2();
+						arm9_errorText2();
 					}
 					break;
+				case 4:
+					arm9_flashcardlikeLoadingScreen();
+					if (arm9_errorColor) {
+						arm9_errorText3();
+					}
+					if (arm9_animateLoadingCircle) {
+						arm9_loadingCircle2();
+					}
+					break;		
 			}
 		}
 	}
