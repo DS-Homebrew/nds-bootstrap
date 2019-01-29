@@ -386,17 +386,17 @@ void arm9_loadingCircle2(void) {
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
 
-		drawRectangle (2, 64, 24, 24, dot1);
-		drawRectangle (30, 64, 24, 24, dot2);
-		drawRectangle (58, 64, 24, 24, dot3);
+		drawRectangle (2, 64, 9, 9, dot1);
+		drawRectangle (30, 64, 9, 9, dot2);
+		drawRectangle (58, 64, 9, 9, dot3);
 
-		drawRectangle (2, 92, 24, 24, dot8);
-		drawRectangle (30, 92, 24, 24, baseColor);
-		drawRectangle (58, 92, 24, 24, dot4);
+		drawRectangle (2, 92, 9, 9, dot8);
+		drawRectangle (30, 92, 9, 9, baseColor);
+		drawRectangle (58, 92, 9, 9, dot4);
 
-		drawRectangle (2, 120, 24, 24, dot7);
-		drawRectangle (30, 120, 24, 24, dot6);
-		drawRectangle (58, 120, 24, 24, dot5);
+		drawRectangle (2, 120, 9, 9, dot7);
+		drawRectangle (30, 120, 9, 9, dot6);
+		drawRectangle (58, 120, 9, 9, dot5);
 
 		loadingCircleFrame++;
 		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
