@@ -292,7 +292,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 		}
 	}
 	
-	arm9_rotateLoadingCircle = true;
+	arm9_animateLoadingCircle = true;
 }
 
 void arm9_loadingCircle(void) {
@@ -573,6 +573,6 @@ void arm9_errorText4(void) {
 		}
 	}
 
-	arm9_rotateLoadingCircle = false;
+	arm9_animateLoadingCircle = false;
 	displayScreen = false;
 }
