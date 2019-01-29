@@ -92,6 +92,7 @@ extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 soundFix;
+extern u32 boostVram;
 //extern u32 logging;
 
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
@@ -559,7 +560,9 @@ int arm7_main(void) {
 	nocashMessage("bootloader");
 
 	initMBK();
-	
+
+	arm9_boostVram = boostVram;
+
 	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
