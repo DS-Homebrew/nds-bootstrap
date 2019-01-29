@@ -226,7 +226,7 @@ void arm9_errorText2(void) {
 	displayScreen = false;
 }
 
-void arm9_errorText3(void) {
+void arm9_errorText2(void) {
 
 	// Draw "Error!" text
 	// E: Part 1
