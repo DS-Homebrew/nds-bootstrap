@@ -258,7 +258,7 @@ void arm9_main(void) {
 					}
 					break;
 				case 4:
-					arm9_R4LikeLoadingScreen();
+					arm9_flashcardlikeLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText4();
 					}
