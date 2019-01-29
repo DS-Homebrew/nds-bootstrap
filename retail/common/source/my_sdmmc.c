@@ -25,6 +25,8 @@
 #include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
+#include <nds/debug.h>
+
 #include "my_sdmmc.h"
 #include "my_disc_io.h"
 
@@ -323,7 +325,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 	
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8004000;
 
-	const bool getSDRESP = (cmd << 15) >> 31;
+	//const bool getSDRESP = (cmd << 15) >> 31;
 	u16 flags = (cmd << 15) >> 31;
 	const bool readdata = cmd & 0x20000;
 	const bool writedata = cmd & 0x40000;
@@ -346,18 +348,18 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 
 	u32 size = ctx->size;
 	const u16 blkSize = sdmmc_read16(REG_SDBLKLEN32);
-	u32 *rDataPtr32 = (u32*)ctx->rData;
+	//u32 *rDataPtr32 = (u32*)ctx->rData;
 	//u8  *rDataPtr8  = ctx->rData;
 	const u32 *tDataPtr32 = (u32*)ctx->tData;
 	const u8  *tDataPtr8  = ctx->tData;
 
-	bool rUseBuf = ( NULL != rDataPtr32 );
+	//bool rUseBuf = ( NULL != rDataPtr32 );
 	bool tUseBuf = ( NULL != tDataPtr32 );
 
     
     nocashMessage("main loop");
 
-	u16 status0 = 0;
+	//u16 status0 = 0;
 	while(1)
 	{
 		volatile u16 status1 = sdmmc_read16(REG_SDSTATUS1);
