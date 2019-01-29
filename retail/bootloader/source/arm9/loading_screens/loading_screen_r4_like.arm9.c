@@ -286,7 +286,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	// Draw loading bar
 	for (int i = 0; i <= arm9_loadBarLength; i++) {
 		for (int y = 88; y <= 111; y++) {
-			for (int k = 30*i+36; k < 30*i+52; k++) {
+			for (int k = 30*i+36; k < 30*i+66; k++) {
 				VRAM_A[y*256+k] = color3;
 			}
 		}
