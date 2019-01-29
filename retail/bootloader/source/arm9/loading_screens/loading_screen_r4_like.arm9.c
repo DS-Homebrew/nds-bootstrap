@@ -405,7 +405,7 @@ void arm9_loadingCircle(void) {
 	}
 }
 
-void arm9_errorText4(void) {
+void arm9_errorText3(void) {
 	// Cover "Loading..." text
 	for (int i = 0; i < 256*48; i++) {
 		VRAM_A[i] = 0x7FFF;
