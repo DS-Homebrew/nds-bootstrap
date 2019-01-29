@@ -8,9 +8,9 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 # These set the information text in the nds file
-GAME_TITLE     := NDS BOOTSTRAP
+GAME_TITLE     := nds-bootstrap
 GAME_SUBTITLE1 := Runs an .nds file
-GAME_SUBTITLE2 := Made by Ahezard
+GAME_SUBTITLE2 := Ahezard
 
 include $(DEVKITARM)/ds_rules
 
@@ -29,7 +29,7 @@ VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 # GRAPHICS is a list of directories containing image files to be converted with grit
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
-BIN			:=	bin
+BIN		:=	bin
 BUILD		:=	build
 SOURCES		:=	source
 INCLUDES	:=	include
@@ -84,7 +84,7 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 export CC		:=	$(PREFIX)gcc
 export CXX		:=	$(PREFIX)g++
 export AR		:=	$(PREFIX)ar
-export OBJCOPY	:=	$(PREFIX)objcopy
+export OBJCOPY		:=	$(PREFIX)objcopy
 export CPP		:=	$(PREFIX)cpp
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
