@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-Loading regular
+Loading R4-Like
 --------------------------------------------------------------------------*/
 
 #define ARM9
@@ -284,34 +284,6 @@ void arm9_regularLoadingScreen(void) {
 
 		// End of Draw "Loading..." text
 
-		// Draw loading bar top edge
-		for (int y = 154; y <= 159; y++) {
-			for (int k = 8; k <= 247; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw loading bar bottom edge
-		for (int y = 184; y <= 189; y++) {
-			for (int k = 8; k <= 247; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw loading bar left edge
-		for (int y = 160; y <= 183; y++) {
-			for (int k = 2; k <= 7; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw loading bar right edge
-		for (int y = 160; y <= 183; y++) {
-			for (int k = 247; k <= 252; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-		
 		drawnStuff = true;
 	}
 
@@ -324,7 +296,7 @@ void arm9_regularLoadingScreen(void) {
 		}
 	}
 	
-	arm9_animateLoadingCircle = true;
+	arm9_spinLoadingCircle = true;
 }
 
 void arm9_loadingCircle(void) {
@@ -418,17 +390,17 @@ void arm9_loadingCircle(void) {
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
 
-		drawRectangle (88, 64, 24, 24, dot1);
-		drawRectangle (116, 64, 24, 24, dot2);
-		drawRectangle (144, 64, 24, 24, dot3);
+		drawRectangle (2, 64, 24, 24, dot1);
+		drawRectangle (30, 64, 24, 24, dot2);
+		drawRectangle (58, 64, 24, 24, dot3);
 
-		drawRectangle (88, 92, 24, 24, dot8);
-		drawRectangle (116, 92, 24, 24, baseColor);
-		drawRectangle (144, 92, 24, 24, dot4);
+		drawRectangle (2, 92, 24, 24, dot8);
+		drawRectangle (30, 92, 24, 24, baseColor);
+		drawRectangle (58, 92, 24, 24, dot4);
 
-		drawRectangle (88, 120, 24, 24, dot7);
-		drawRectangle (116, 120, 24, 24, dot6);
-		drawRectangle (144, 120, 24, 24, dot5);
+		drawRectangle (2, 120, 24, 24, dot7);
+		drawRectangle (30, 120, 24, 24, dot6);
+		drawRectangle (58, 120, 24, 24, dot5);
 
 		loadingCircleFrame++;
 		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
@@ -605,6 +577,6 @@ void arm9_errorText(void) {
 		}
 	}
 
-	arm9_animateLoadingCircle = false;
+	arm9_spinLoadingCircle = false;
 	displayScreen = false;
 }
