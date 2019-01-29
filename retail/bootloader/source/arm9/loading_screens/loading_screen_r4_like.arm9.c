@@ -16,25 +16,11 @@ static bool drawnStuff = false;
 static int loadingCircleTime = 3;
 static int loadingCircleFrame = 0;
 
-static u16 dot1;
-static u16 dot2;
-static u16 dot3;
-static u16 dot4;
-static u16 dot5;
-static u16 dot6;
-static u16 dot7;
-static u16 dot8;
+static u16 dot[8];
 
 static u16 baseColor;
 
-static u16 color1;
-static u16 color2;
-static u16 color3;
-static u16 color4;
-static u16 color5;
-static u16 color6;
-static u16 color7;
-static u16 color8;
+static u16 color[8];
 
 static u16 bgColor;
 
@@ -52,23 +38,23 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	if (!drawnStuff) {
 		baseColor = arm9_darkTheme ? 0x2D6B : 0x5294;
 
-		color1 = arm9_darkTheme ? 0x0C63 : 0x739C;
-		color2 = arm9_darkTheme ? 0x1084 : 0x6F7B;
-		color3 = arm9_darkTheme ? 0x14A5 : 0x6B5A;
-		color4 = arm9_darkTheme ? 0x18C6 : 0x6739;
-		color5 = arm9_darkTheme ? 0x1CE7 : 0x6318;
-		color6 = arm9_darkTheme ? 0x2108 : 0x5EF7;
-		color7 = arm9_darkTheme ? 0x2529 : 0x5AD6;
-		color8 = arm9_darkTheme ? 0x294A : 0x56B5;
+		color[0] = arm9_darkTheme ? 0x0C63 : 0x739C;
+		color[1] = arm9_darkTheme ? 0x1084 : 0x6F7B;
+		color[2] = arm9_darkTheme ? 0x14A5 : 0x6B5A;
+		color[3] = arm9_darkTheme ? 0x18C6 : 0x6739;
+		color[4] = arm9_darkTheme ? 0x1CE7 : 0x6318;
+		color[5] = arm9_darkTheme ? 0x2108 : 0x5EF7;
+		color[6] = arm9_darkTheme ? 0x2529 : 0x5AD6;
+		color[7] = arm9_darkTheme ? 0x294A : 0x56B5;
 
 		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
-	
+
 			errorColor = 0x001B;
 
 		if (!arm9_swapLcds) {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
 		} else {
-			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);	
+			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A);
 		}
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
@@ -284,8 +270,8 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	}
 
 	// Draw loading bar
-	drawRectangle (36, 83, 24*arm9_loadBarLength, 29, color3);
-	
+	drawRectangle (36, 83, 24*arm9_loadBarLength, 29, color[2]);
+
 	arm9_animateLoadingCircle = true;
 }
 
@@ -293,84 +279,84 @@ void arm9_loadingCircle2(void) {
 	switch (loadingCircleFrame) {
 		case 0:
 			default:
-			dot1 = color1;
-			dot2 = color2;
-			dot3 = color3;
-			dot4 = color4;
-			dot5 = color5;
-			dot6 = color6;
-			dot7 = color7;
-			dot8 = color8;
+			dot[0] = color[0];
+			dot[1] = color[1];
+			dot[2] = color[2];
+			dot[3] = color[3];
+			dot[4] = color[4];
+			dot[5] = color[5];
+			dot[6] = color[6];
+			dot[7] = color[7];
 			break;
 		case 1:
-			dot1 = color8;
-			dot2 = color1;
-			dot3 = color2;
-			dot4 = color3;
-			dot5 = color4;
-			dot6 = color5;
-			dot7 = color6;
-			dot8 = color7;
+			dot[0] = color[7];
+			dot[1] = color[0];
+			dot[2] = color[1];
+			dot[3] = color[2];
+			dot[4] = color[3];
+			dot[5] = color[4];
+			dot[6] = color[5];
+			dot[7] = color[6];
 			break;
 		case 2:
-			dot1 = color7;
-			dot2 = color8;
-			dot3 = color1;
-			dot4 = color2;
-			dot5 = color3;
-			dot6 = color4;
-			dot7 = color5;
-			dot8 = color6;
+			dot[0] = color[6];
+			dot[1] = color[7];
+			dot[2] = color[0];
+			dot[3] = color[1];
+			dot[4] = color[2];
+			dot[5] = color[3];
+			dot[6] = color[4];
+			dot[7] = color[5];
 			break;
 		case 3:
-			dot1 = color6;
-			dot2 = color7;
-			dot3 = color8;
-			dot4 = color1;
-			dot5 = color2;
-			dot6 = color3;
-			dot7 = color4;
-			dot8 = color5;
+			dot[0] = color[5];
+			dot[1] = color[6];
+			dot[2] = color[7];
+			dot[3] = color[0];
+			dot[4] = color[1];
+			dot[5] = color[2];
+			dot[6] = color[3];
+			dot[7] = color[4];
 			break;
 		case 4:
-			dot1 = color5;
-			dot2 = color6;
-			dot3 = color7;
-			dot4 = color8;
-			dot5 = color1;
-			dot6 = color2;
-			dot7 = color3;
-			dot8 = color4;
+			dot[0] = color[4];
+			dot[1] = color[5];
+			dot[2] = color[6];
+			dot[3] = color[7];
+			dot[4] = color[0];
+			dot[5] = color[1];
+			dot[6] = color[2];
+			dot[7] = color[3];
 			break;
 		case 5:
-			dot1 = color4;
-			dot2 = color5;
-			dot3 = color6;
-			dot4 = color7;
-			dot5 = color8;
-			dot6 = color1;
-			dot7 = color2;
-			dot8 = color3;
+			dot[0] = color[3];
+			dot[1] = color[4];
+			dot[2] = color[5];
+			dot[3] = color[6];
+			dot[4] = color[7];
+			dot[5] = color[0];
+			dot[6] = color[1];
+			dot[7] = color[2];
 			break;
 		case 6:
-			dot1 = color3;
-			dot2 = color4;
-			dot3 = color5;
-			dot4 = color6;
-			dot5 = color7;
-			dot6 = color8;
-			dot7 = color1;
-			dot8 = color2;
+			dot[0] = color[2];
+			dot[1] = color[3];
+			dot[2] = color[4];
+			dot[3] = color[5];
+			dot[4] = color[6];
+			dot[5] = color[7];
+			dot[6] = color[0];
+			dot[7] = color[1];
 			break;
 		case 7:
-			dot1 = color2;
-			dot2 = color3;
-			dot3 = color4;
-			dot4 = color5;
-			dot5 = color6;
-			dot6 = color7;
-			dot7 = color8;
-			dot8 = color1;
+			dot[0] = color[1];
+			dot[1] = color[2];
+			dot[2] = color[3];
+			dot[3] = color[4];
+			dot[4] = color[5];
+			dot[5] = color[6];
+			dot[6] = color[7];
+			dot[7] = color[0];
 			break;
 	}
 
@@ -380,17 +366,17 @@ void arm9_loadingCircle2(void) {
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
 
-		drawRectangle (3, 103, 9, 9, dot1);
-		drawRectangle (14, 103, 9, 9, dot2);
-		drawRectangle (25, 103, 9, 9, dot3);
+		drawRectangle (3, 103, 9, 9, dot[0]);
+		drawRectangle (14, 103, 9, 9, dot[1]);
+		drawRectangle (25, 103, 9, 9, dot[2]);
 
-		drawRectangle (3, 93, 9, 9, dot8);
+		drawRectangle (3, 93, 9, 9, dot[7]);
 		drawRectangle (14, 93, 9, 9, baseColor);
-		drawRectangle (25, 93, 9, 9, dot4);
+		drawRectangle (25, 93, 9, 9, dot[3]);
 
-		drawRectangle (3, 83, 9, 9, dot7);
-		drawRectangle (14, 83, 9, 9, dot6);
-		drawRectangle (25, 83, 9, 9, dot5);
+		drawRectangle (3, 83, 9, 9, dot[6]);
+		drawRectangle (14, 83, 9, 9, dot[5]);
+		drawRectangle (25, 83, 9, 9, dot[4]);
 
 		loadingCircleFrame++;
 		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
@@ -412,7 +398,7 @@ void arm9_errorText3(void) {
 			VRAM_A[y*256+k] = baseColor;
 		}
 	}
-	
+
 	// Draw "Error!" text
 	// E: Part 2
 	for (int y = 12; y <= 15; y++) {
@@ -420,7 +406,7 @@ void arm9_errorText3(void) {
 			VRAM_A[y*256+k] = baseColor;
 		}
 	}
-	
+
 	// Draw "Error!" text
 	// E: Part 3
 	for (int y = 26; y <= 29; y++) {
@@ -428,7 +414,7 @@ void arm9_errorText3(void) {
 			VRAM_A[y*256+k] = baseColor;
 		}
 	}
-	
+
 	// Draw "Error!" text
 	// E: Part 4
 	for (int y = 41; y <= 44; y++) {
@@ -447,7 +433,7 @@ void arm9_errorText3(void) {
 				VRAM_A[y*256+k+i*19] = baseColor;
 			}
 		}
-		
+
 		// Draw "Error!" text
 		// r: Part 2
 		for (int y = 26; y <= 29; y++) {
@@ -455,7 +441,7 @@ void arm9_errorText3(void) {
 				VRAM_A[y*256+k+i*19] = baseColor;
 			}
 		}
-		
+
 		// Draw "Error!" text
 		// r: Part 3
 		for (int y = 23; y <= 26; y++) {
@@ -464,7 +450,7 @@ void arm9_errorText3(void) {
 			}
 		}
 	}
-	
+
 	// Draw "Error!" text
 	// o: Part 1
 	for (int y = 23; y <= 26; y++) {
@@ -520,7 +506,7 @@ void arm9_errorText3(void) {
 			VRAM_A[y*256+k] = baseColor;
 		}
 	}
-	
+
 	// Draw "Error!" text
 	// !: Part 1
 	for (int y = 12; y <= 32; y++) {
@@ -538,7 +524,7 @@ void arm9_errorText3(void) {
 	}
 
 	// End of Draw "Error!" text
-	
+
 	// Change dots of loading circle to form an X
 	for (int y = 64; y <= 87; y++) {
 		// 1st dot
@@ -555,7 +541,7 @@ void arm9_errorText3(void) {
 		for (int k = 116; k <= 139; k++) {
 			VRAM_A[y*256+k] = errorColor;
 		}
-	}	
+	}
 	for (int y = 120; y <= 143; y++) {
 		// 7th dot
 		for (int k = 88; k <= 111; k++) {
