@@ -260,7 +260,7 @@ void arm9_main(void) {
 				case 4:
 					arm9_R4LikeLoadingScreen();
 					if (arm9_errorColor) {
-						arm9errorText3();
+						arm9_errorText3();
 					}
 					if (arm9_animateLoadingCircle) {
 						arm9_loadingCircle();
