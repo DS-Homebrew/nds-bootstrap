@@ -289,7 +289,7 @@ void arm9_regularLoadingScreen(void) {
 
 	// Draw loading bar
 	for (int i = 0; i <= arm9_loadBarLength; i++) {
-		for (int y = 160; y <= 183; y++) {
+		for (int y = 88; y <= 111; y++) {
 			for (int k = 30*i+8; k < 30*i+38; k++) {
 				VRAM_A[y*256+k] = color3;
 			}
