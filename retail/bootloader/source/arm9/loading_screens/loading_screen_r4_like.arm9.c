@@ -62,12 +62,8 @@ void arm9_r4likeLoadingScreen(void) {
 		color8 = arm9_darkTheme ? 0x294A : 0x56B5;
 
 		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
-
-		//if (!arm9_darkTheme) {
+	
 			errorColor = 0x001B;
-		//} else {
-		//	errorColor = 0x001B;
-		//}
 
 		if (!arm9_swapLcds) {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
@@ -296,7 +292,7 @@ void arm9_r4likeLoadingScreen(void) {
 		}
 	}
 	
-	arm9_spinLoadingCircle = true;
+	arm9_animateLoadingCircle = true;
 }
 
 void arm9_loadingCircle(void) {
@@ -577,6 +573,6 @@ void arm9_errorText(void) {
 		}
 	}
 
-	arm9_spinLoadingCircle = false;
+	arm9_animateLoadingCircle = false;
 	displayScreen = false;
 }
