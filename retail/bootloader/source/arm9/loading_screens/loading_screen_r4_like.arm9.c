@@ -48,7 +48,7 @@ Written by Chishm.
 Modified by RocketRobz:
  * Replace dots with brand new loading screen (original image made by Uupo03)
 --------------------------------------------------------------------------*/
-void arm9_regularLoadingScreen(void) {
+void arm9_r4likeLoadingScreen(void) {
 	if (!drawnStuff) {
 		baseColor = arm9_darkTheme ? 0x2D6B : 0x5294;
 
