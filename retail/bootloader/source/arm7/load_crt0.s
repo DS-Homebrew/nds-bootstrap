@@ -40,6 +40,7 @@
 	.global loadingScreen
 	.global darkTheme
 	.global swapLcds
+	.global loadingBarYpos
 	.global romread_LED
 	.global boostVram
 	.global gameSoftReset
@@ -89,6 +90,8 @@ loadingScreen:
 darkTheme:
 	.word	0x00000000
 swapLcds:
+	.word	0x00000000
+loadingBarYpos:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000

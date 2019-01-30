@@ -19,6 +19,8 @@ typedef struct configuration {
 	u32 loadingScreen;
 	bool loadingDarkTheme;
 	bool loadingSwapLcds;
+	char* loadingImagePath;
+	int loadingBarYpos;
 	u32 romread_LED;
 	bool boostCpu;
 	bool boostVram;

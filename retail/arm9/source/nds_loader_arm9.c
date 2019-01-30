@@ -237,6 +237,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->loadingScreen    = conf->loadingScreen;
 	lc0->loadingDarkTheme = conf->loadingDarkTheme;
 	lc0->loadingSwapLcds  = conf->loadingSwapLcds;
+	lc0->loadingBarYpos   = conf->loadingBarYpos;
 	lc0->romread_LED      = conf->romread_LED;
 	lc0->boostVram        = conf->boostVram;
 	lc0->gameSoftReset    = conf->gameSoftReset;

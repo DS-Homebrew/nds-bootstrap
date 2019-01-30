@@ -67,6 +67,7 @@ extern volatile bool fadeType;
 
 extern volatile bool arm9_darkTheme;
 extern volatile bool arm9_swapLcds;
+extern volatile int arm9_loadingBarYpos;
 
 static inline void dmaFill(const void* src, void* dest, u32 size) {
 	DMA_SRC(3)  = (u32)src;

@@ -54,6 +54,7 @@ volatile bool fadeType = true;
 
 volatile bool arm9_darkTheme = false;
 volatile bool arm9_swapLcds = false;
+volatile int arm9_loadingBarYpos = 0;
 volatile bool arm9_errorColor = false;
 volatile int arm9_loadBarLength = 0;
 volatile bool arm9_animateLoadingCircle = false;

@@ -89,6 +89,14 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Swap screens in loading screen
 		conf->loadingSwapLcds = (bool)strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN_IMAGE")) {
+		// Loading screen .bmp path
+		conf->loadingImagePath = strdup(value);
+
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR_Y")) {
+		// Loading bar Y position
+		conf->loadingBarYpos = strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "ROMREAD_LED")) {
 		// ROM read LED
 		conf->romread_LED = strtol(value, NULL, 0);
@@ -175,9 +183,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	nocashMessage("fatInitDefault");
 	
+	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
+
 	nitroFSInit(bootstrapPath);
 	
-	FILE* loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+	FILE* loadingScreenImage = fopen(conf->loadingImagePath, "rb");
+	if (!loadingScreenImage) loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+
 	if (loadingScreenImage) {
 		// Start loading
 		fseek(loadingScreenImage, 0xe, SEEK_SET);
@@ -199,8 +211,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		memcpy((void*)0x02D00000, renderedImageBuffer, sizeof(renderedImageBuffer));
 	}
 	fclose(loadingScreenImage);
-
-	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
 
 	conf->saveSize = getSaveSize(conf->savPath);
 
