@@ -64,213 +64,11 @@ void arm9_flashcardlikeLoadingScreen(void) {
 			VRAM_A[i] = bgColor;
 		}
 
-		// Draw "Loading..." text
-		// L: Part 1
-		drawRectangle (54, 10, 4, 33, baseColor);
-
-		// Draw "Loading..." text
-		// L: Part 2
-		drawRectangle (58, 39, 10, 4, baseColor);
-
-		// Draw "Loading..." text
-		// o: Part 1
-		drawRectangle (77, 21, 11, 4, baseColor);
-
-		// Draw "Loading..." text
-		// o: Part 2
-		drawRectangle (77, 39, 11, 4, baseColor);
-
-		// Draw "Loading..." text
-		// o: Part 3
-		drawRectangle (73, 25, 4, 14, baseColor);
-
-		// Draw "Loading..." text
-		// o: Part 4
-		drawRectangle (88, 25, 4, 14, baseColor);
-
-		// Draw "Loading..." text
-		// a: Part 1
-		for (int y = 21; y <= 24; y++) {
-			for (int k = 96; k <= 110; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// a: Part 2
-		for (int y = 25; y <= 42; y++) {
-			for (int k = 111; k <= 114; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// a: Part 3
-		for (int y = 32; y <= 38; y++) {
-			for (int k = 96; k <= 99; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// a: Part 4
-		for (int y = 28; y <= 31; y++) {
-			for (int k = 100; k <= 110; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// a: Part 5
-		for (int y = 39; y <= 42; y++) {
-			for (int k = 100; k <= 110; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// d: Part 1
-		for (int y = 21; y <= 24; y++) {
-			for (int k = 123; k <= 133; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// d: Part 2
-		for (int y = 39; y <= 42; y++) {
-			for (int k = 123; k <= 133; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// d: Part 3
-		for (int y = 25; y <= 38; y++) {
-			for (int k = 119; k <= 122; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// d: Part 4
-		for (int y = 10; y <= 42; y++) {
-			for (int k = 134; k <= 137; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// i: Part 1
-		for (int y = 13; y <= 16; y++) {
-			for (int k = 142; k <= 145; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// i: Part 2
-		for (int y = 21; y <= 42; y++) {
-			for (int k = 142; k <= 145; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// n: Part 1
-		for (int y = 21; y <= 24; y++) {
-			for (int k = 150; k <= 164; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// n: Part 2
-		for (int y = 25; y <= 42; y++) {
-			for (int k = 150; k <= 153; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// n: Part 3
-		for (int y = 25; y <= 42; y++) {
-			for (int k = 165; k <= 168; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// g: Part 1
-		for (int y = 21; y <= 24; y++) {
-			for (int k = 177; k <= 187; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// g: Part 2
-		for (int y = 36; y <= 39; y++) {
-			for (int k = 177; k <= 187; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// g: Part 3
-		for (int y = 43; y <= 46; y++) {
-			for (int k = 173; k <= 187; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// g: Part 4
-		for (int y = 25; y <= 35; y++) {
-			for (int k = 173; k <= 176; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// g: Part 5
-		for (int y = 21; y <= 42; y++) {
-			for (int k = 188; k <= 191; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// Dot 1
-		for (int y = 39; y <= 42; y++) {
-			for (int k = 196; k <= 199; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// Dot 2
-		for (int y = 39; y <= 42; y++) {
-			for (int k = 204; k <= 207; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// Draw "Loading..." text
-		// Dot 3
-		for (int y = 39; y <= 42; y++) {
-			for (int k = 212; k <= 215; k++) {
-				VRAM_A[y*256+k] = baseColor;
-			}
-		}
-
-		// End of Draw "Loading..." text
-
 		drawnStuff = true;
 	}
 
 	// Draw loading bar
-	drawRectangle (36, 83, 24*arm9_loadBarLength, 29, color[2]);
+	drawRectangle (16, 88, 30*(arm9_loadBarLength+1), 16, color[2]);
 
 	arm9_animateLoadingCircle = true;
 }
@@ -366,17 +164,17 @@ void arm9_loadingCircle2(void) {
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
 
-		drawRectangle (3, 103, 9, 9, dot[0]);
-		drawRectangle (14, 103, 9, 9, dot[1]);
-		drawRectangle (25, 103, 9, 9, dot[2]);
+		drawRectangle (1, 89, 4, 4, dot[6]);
+		drawRectangle (6, 89, 4, 4, dot[5]);
+		drawRectangle (11, 89, 4, 4, dot[4]);
 
-		drawRectangle (3, 93, 9, 9, dot[7]);
-		drawRectangle (14, 93, 9, 9, baseColor);
-		drawRectangle (25, 93, 9, 9, dot[3]);
+		drawRectangle (1, 94, 4, 4, dot[7]);
+		drawRectangle (6, 94, 4, 4, baseColor);
+		drawRectangle (11, 94, 4, 4, dot[3]);
 
-		drawRectangle (3, 83, 9, 9, dot[6]);
-		drawRectangle (14, 83, 9, 9, dot[5]);
-		drawRectangle (25, 83, 9, 9, dot[4]);
+		drawRectangle (1, 99, 4, 4, dot[0]);
+		drawRectangle (6, 99, 4, 4, dot[1]);
+		drawRectangle (11, 99, 4, 4, dot[2]);
 
 		loadingCircleFrame++;
 		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
@@ -526,32 +324,11 @@ void arm9_errorText3(void) {
 	// End of Draw "Error!" text
 
 	// Change dots of loading circle to form an X
-	for (int y = 64; y <= 87; y++) {
-		// 1st dot
-		for (int k = 88; k <= 111; k++) {
-			VRAM_A[y*256+k] = errorColor;
-		}
-		// 3rd dot
-		for (int k = 144; k <= 167; k++) {
-			VRAM_A[y*256+k] = errorColor;
-		}
-	}
-	for (int y = 92; y <= 115; y++) {
-		// 5th dot
-		for (int k = 116; k <= 139; k++) {
-			VRAM_A[y*256+k] = errorColor;
-		}
-	}
-	for (int y = 120; y <= 143; y++) {
-		// 7th dot
-		for (int k = 88; k <= 111; k++) {
-			VRAM_A[y*256+k] = errorColor;
-		}
-		// 9th dot
-		for (int k = 144; k <= 167; k++) {
-			VRAM_A[y*256+k] = errorColor;
-		}
-	}
+	drawRectangle (1, 89, 4, 4, errorColor);
+	drawRectangle (11, 89, 4, 4, errorColor);
+	drawRectangle (6, 94, 4, 4, errorColor);
+	drawRectangle (1, 99, 4, 4, errorColor);
+	drawRectangle (11, 99, 4, 4, errorColor);
 
 	arm9_animateLoadingCircle = false;
 	displayScreen = false;
