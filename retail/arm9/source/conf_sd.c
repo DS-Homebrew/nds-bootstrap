@@ -188,7 +188,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	nitroFSInit(bootstrapPath);
 	
 	FILE* loadingScreenImage = fopen(conf->loadingImagePath, "rb");
-	if (!loadingScreenImage) loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+	if (!loadingScreenImage) {
+		loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+		conf->loadingBarYpos = 89;
+	}
 
 	if (loadingScreenImage) {
 		// Start loading
