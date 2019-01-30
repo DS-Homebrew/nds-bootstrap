@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
 		printf("SD card.\n");
 		status = -1;
 	} else {
-		status = loadFromSD(conf);
+		status = loadFromSD(conf, argv[0]);
 	}
 
 	if (status == 0) {

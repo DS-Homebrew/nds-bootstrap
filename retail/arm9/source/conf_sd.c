@@ -13,6 +13,10 @@
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "conf_sd.h"
+#include "nitrofs.h"
+
+static u16 bmpImageBuffer[256*192];
+static u16 renderedImageBuffer[256*192];
 
 static off_t getSaveSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -163,13 +167,38 @@ static int callback(const char *section, const char *key, const char *value, voi
 	return 1; // Continue searching
 }
 
-int loadFromSD(configuration* conf) {
+int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
 		printf("SD init failed!\n");
 		return -1;
 	}
 	nocashMessage("fatInitDefault");
+	
+	nitroFSInit(bootstrapPath);
+	
+	FILE* loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+	if (loadingScreenImage) {
+		// Start loading
+		fseek(loadingScreenImage, 0xe, SEEK_SET);
+		u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
+		fseek(loadingScreenImage, pixelStart, SEEK_SET);
+		fread(bmpImageBuffer, 2, 0x1A000, loadingScreenImage);
+		u16* src = bmpImageBuffer;
+		int x = 0;
+		int y = 191;
+		for (int i=0; i<256*192; i++) {
+			if (x >= 256) {
+				x = 0;
+				y--;
+			}
+			u16 val = *(src++);
+			renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
+			x++;
+		}
+		memcpy((u16*)0x02700000, renderedImageBuffer, 0x1A000);
+	}
+	fclose(loadingScreenImage);
 
 	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
 
