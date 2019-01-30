@@ -27,6 +27,7 @@ static u16 bgColor;
 static u16 errorColor;
 
 extern void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color);
+extern void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, int B);
 /*-------------------------------------------------------------------------
 arm9_errorOutput
 Displays an error code on screen.
@@ -71,7 +72,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	}
 
 	// Draw loading bar
-	drawRectangle (16, 88, 30*(arm9_loadBarLength+1), 16, color[2]);
+	drawRectangleGradient(16, 91, 30*(arm9_loadBarLength+1), 10, 16, 16, 16);
 
 	arm9_animateLoadingCircle = true;
 }
