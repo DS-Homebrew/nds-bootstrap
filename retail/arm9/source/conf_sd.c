@@ -196,7 +196,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
 			x++;
 		}
-		memcpy((void*)0x02700000, renderedImageBuffer, sizeof(renderedImageBuffer));
+		memcpy((void*)0x02D00000, renderedImageBuffer, sizeof(renderedImageBuffer));
 	}
 	fclose(loadingScreenImage);
 

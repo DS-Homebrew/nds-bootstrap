@@ -22,8 +22,6 @@ static u16 baseColor;
 
 static u16 color[8];
 
-static u16 bgColor;
-
 static u16 errorColor;
 
 extern void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color);
@@ -37,20 +35,18 @@ Modified by RocketRobz:
 --------------------------------------------------------------------------*/
 void arm9_flashcardlikeLoadingScreen(void) {
 	if (!drawnStuff) {
-		baseColor = arm9_darkTheme ? 0x2D6B : 0x5294;
+		baseColor = 0x2D6B;
 
-		color[0] = arm9_darkTheme ? 0x0C63 : 0x739C;
-		color[1] = arm9_darkTheme ? 0x1084 : 0x6F7B;
-		color[2] = arm9_darkTheme ? 0x14A5 : 0x6B5A;
-		color[3] = arm9_darkTheme ? 0x18C6 : 0x6739;
-		color[4] = arm9_darkTheme ? 0x1CE7 : 0x6318;
-		color[5] = arm9_darkTheme ? 0x2108 : 0x5EF7;
-		color[6] = arm9_darkTheme ? 0x2529 : 0x5AD6;
-		color[7] = arm9_darkTheme ? 0x294A : 0x56B5;
+		color[0] = 0x0C63;
+		color[1] = 0x1084;
+		color[2] = 0x14A5;
+		color[3] = 0x18C6;
+		color[4] = 0x1CE7;
+		color[5] = 0x2108;
+		color[6] = 0x2529;
+		color[7] = 0x294A;
 
-		bgColor = arm9_darkTheme ? 0x0842 : 0x7fff;
-
-			errorColor = 0x001B;
+		errorColor = 0x001B;
 
 		if (!arm9_swapLcds) {
 			REG_POWERCNT = (u16)(POWER_LCD | POWER_2D_A | POWER_SWAP_LCDS);
@@ -60,13 +56,10 @@ void arm9_flashcardlikeLoadingScreen(void) {
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
 
-		u16* bgLocation = (u16*)0x02700000;
+		u16* bgLocation = (u16*)0x02D00000;
 
 		// Draw Loading Screen Image
-		for (int i = 0; i < 256*192; i++) {
-			//VRAM_A[i] = bgColor;
-			VRAM_A[i] = *(bgLocation+i);
-		}
+		dmaCopy(bgLocation, VRAM_A, 0x20000);
 
 		drawnStuff = true;
 	}
