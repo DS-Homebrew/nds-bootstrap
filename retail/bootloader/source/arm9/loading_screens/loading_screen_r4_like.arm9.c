@@ -62,7 +62,7 @@ void arm9_flashcardlikeLoadingScreen(void) {
 		// Draw white/dark BG
 		for (int i = 0; i < 256*192; i++) {
 			//VRAM_A[i] = bgColor;
-			VRAM_A[i] = *(u16*)(0x02700000)+i;
+			VRAM_A[i] = *(u16*)(0x02700000+i);
 		}
 
 		drawnStuff = true;
