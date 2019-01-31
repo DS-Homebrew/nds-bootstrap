@@ -32,6 +32,9 @@ static u16 errorColor;
 
 extern void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color);
 extern void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, int B);
+
+extern void drawRectangleAddr (u16* addr, int x, int y, int sizeX, int sizeY, u16 color);
+extern void drawRectangleGradientAddr (u16* addr, int x, int y, int sizeX, int sizeY, int R, int G, int B);
 /*-------------------------------------------------------------------------
 arm9_errorOutput
 Displays an error code on screen.
@@ -209,17 +212,31 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
 
-		drawRectangle (1, arm9_loadingBarYpos, 4, 4, dot[6]);
-		drawRectangle (6, arm9_loadingBarYpos, 4, 4, dot[5]);
-		drawRectangle (11, arm9_loadingBarYpos, 4, 4, dot[4]);
+		if (arm9_loadingFps > 0) {
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos, 4, 4, dot[6]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos, 4, 4, dot[5]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos, 4, 4, dot[4]);
 
-		drawRectangle (1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
-		drawRectangle (6, arm9_loadingBarYpos+5, 4, 4, baseColor);
-		drawRectangle (11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+5, 4, 4, baseColor);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
 
-		drawRectangle (1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
-		drawRectangle (6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
-		drawRectangle (11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
+			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+		} else {
+			drawRectangle (1, arm9_loadingBarYpos, 4, 4, dot[6]);
+			drawRectangle (6, arm9_loadingBarYpos, 4, 4, dot[5]);
+			drawRectangle (11, arm9_loadingBarYpos, 4, 4, dot[4]);
+
+			drawRectangle (1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
+			drawRectangle (6, arm9_loadingBarYpos+5, 4, 4, baseColor);
+			drawRectangle (11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
+
+			drawRectangle (1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
+			drawRectangle (6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
+			drawRectangle (11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+		}
 
 		loadingCircleFrame++;
 		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
@@ -228,7 +245,11 @@ void arm9_flashcardlikeLoadingScreen(void) {
 	}
 
 	// Draw loading bar
-	drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+	if (arm9_loadingFps > 0) {
+		drawRectangleGradientAddr(bgLocation+(currentFrame*(0x18000/1)), 16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+	} else {
+		drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+	}
 
 	while (REG_VCOUNT!=191);
 }

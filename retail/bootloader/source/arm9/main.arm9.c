@@ -114,6 +114,26 @@ void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, in
 	}
 }
 
+void drawRectangleAddr (u16* addr, int x, int y, int sizeX, int sizeY, u16 color) {
+	for (int iy = y; iy <= y+sizeY-1; iy++) {
+		for (int ix = x; ix <= x+sizeX-1; ix++) {
+			addr[iy*256+ix] = color;	
+		}
+	}
+}
+
+void drawRectangleGradientAddr (u16* addr, int x, int y, int sizeX, int sizeY, int R, int G, int B) {
+	for (int iy = y; iy <= y+sizeY-1; iy++) {
+		for (int ix = x; ix <= x+sizeX-1; ix++) {
+			addr[iy*256+ix] = RGB15(R,G,B);	
+		}
+		// Darken color on next vertical line
+		if (R>0) R--;
+		if (G>0) G--;
+		if (B>0) B--;
+	}
+}
+
 /*-------------------------------------------------------------------------
 arm9_main
 
