@@ -11,7 +11,11 @@ Loading R4-Like
 #include "common.h"
 #include "loading.h"
 
-static u16* bgLocation = (u16*)0x02800000;
+static void* bgLocation = (void*)0x02800000;
+static int currentFrame = 0;
+static int frameDelay = 0;
+static bool frameDelayEven = true;	// For 24FPS
+static bool loadFrame = true;
 
 static bool drawnStuff = false;
 
@@ -60,10 +64,59 @@ void arm9_flashcardlikeLoadingScreen(void) {
 
 		if (arm9_loadingFps == 0) {
 			// Draw Loading Screen Image
-			dmaCopy(bgLocation, VRAM_A, 0x1A000);
+			dmaCopy(bgLocation, VRAM_A, 0x18000);
 		}
 
 		drawnStuff = true;
+	}
+	
+	if (arm9_loadingFps > 0) {
+		if (!loadFrame) {
+			frameDelay++;
+			switch (arm9_loadingFps) {
+				case 1:
+				default:
+					loadFrame = (frameDelay == 60);
+					break;
+				case 2:
+					loadFrame = (frameDelay == 30);
+					break;
+				case 3:
+					loadFrame = (frameDelay == 20);
+					break;
+				case 6:
+					loadFrame = (frameDelay == 10);
+					break;
+				case 10:
+					loadFrame = (frameDelay == 6);
+					break;
+				case 12:
+					loadFrame = (frameDelay == 5);
+					break;
+				case 15:
+					loadFrame = (frameDelay == 4);
+					break;
+				case 20:
+					loadFrame = (frameDelay == 3);
+					break;
+				case 24:
+					loadFrame = (frameDelay == 2+frameDelayEven);
+					break;
+				case 30:
+					loadFrame = (frameDelay == 2);
+					break;
+			}
+		}
+
+		if (loadFrame) {
+			dmaCopy(bgLocation+(currentFrame*0x18000), VRAM_A, 0x18000);
+
+			currentFrame++;
+			if (currentFrame > arm9_loadingFrames) currentFrame = 0;
+			frameDelay = 0;
+			frameDelayEven = !frameDelayEven;
+			loadFrame = false;
+		}
 	}
 
 	arm9_animateLoadingCircle = true;

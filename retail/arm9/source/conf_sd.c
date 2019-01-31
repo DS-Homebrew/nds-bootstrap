@@ -199,7 +199,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		FILE* loadingScreenImage;
 		char loadingImagePath[256];
 
-		for (int i = 0; i <= conf->loadingFrames; i++) {	
+		for (int i = 0; i <= conf->loadingFrames; i++) {
 			snprintf(loadingImagePath, sizeof(loadingImagePath), "%s%i.bmp", conf->loadingImagePath, i);
 			loadingScreenImage = fopen(loadingImagePath, "rb");
 			if (!loadingScreenImage && i == 0) {
@@ -225,7 +225,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
 					x++;
 				}
-				memcpy((void*)0x02800000+(i*0x1A000), renderedImageBuffer, sizeof(renderedImageBuffer));
+				memcpy((void*)0x02800000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));
 			}
 			fclose(loadingScreenImage);
 
