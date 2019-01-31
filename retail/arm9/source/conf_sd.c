@@ -203,7 +203,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			snprintf(loadingImagePath, sizeof(loadingImagePath), "%s%i.bmp", conf->loadingImagePath, i);
 			loadingScreenImage = fopen(loadingImagePath, "rb");
 			if (!loadingScreenImage && i == 0) {
-				loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+				loadingScreenImage = fopen("nitro:/loading_metalBG.bmp", "rb");
 				conf->loadingFps = 0;
 				conf->loadingBarYpos = 89;
 			}
