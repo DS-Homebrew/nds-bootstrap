@@ -417,8 +417,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	if (strncmp(romTid, "AMC", 3) == 0) return false; 
 	else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01380000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00380000));
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00800000));
 }
 
 static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -510,13 +510,25 @@ static void NTR_BIOS() {
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
-	char* romLocation = (char*)((dsiModeConfirmed || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-
 	// Load ROM into RAM
-	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
-	// Primary fix for Mario's Holiday
-	if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-		*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;
+	if (isSdk5(moduleParams)) {
+		fileRead((char*)ROM_SDK5_LOCATION, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+	} else if (getRomSizeNoArm9(ndsHeader) > 0x2D0000) {
+		fileRead((char*)ROM_LOCATION_2ND_HALF, file, 0x4000 + ndsHeader->arm9binarySize + 0x2D0000, getRomSizeNoArm9(ndsHeader)-0x2D0000, 0);
+	}
+
+	increaseLoadBarLength();
+	fadeOut();	// Fade-out the loading screen and overwrite it's frames
+
+	if (!isSdk5(moduleParams)) {
+		u32 romSize = getRomSizeNoArm9(ndsHeader);
+		if (romSize > 0x2D0000) {
+			romSize = 0x2D0000;
+		}
+		fileRead((char*)ROM_LOCATION, file, 0x4000 + ndsHeader->arm9binarySize, romSize, 0);
+		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+			*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		}
 	}
 }
 
@@ -738,14 +750,13 @@ int arm7_main(void) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
+		increaseLoadBarLength();
+		fadeOut();
 	}
-	increaseLoadBarLength();
 
 	//
 	// Final 8 dots
 	//
-
-	fadeOut();
 
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
