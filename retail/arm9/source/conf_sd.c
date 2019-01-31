@@ -89,9 +89,17 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Swap screens in loading screen
 		conf->loadingSwapLcds = (bool)strtol(value, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN_IMAGE")) {
-		// Loading screen .bmp path
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN_FOLDER")) {
+		// Loading screen .bmp folder path
 		conf->loadingImagePath = strdup(value);
+
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FRAMES")) {
+		// Number of loading screen frames
+		conf->loadingFrames = strtol(value, NULL, 0);
+
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FPS")) {
+		// FPS of animated loading screen
+		conf->loadingFps = strtol(value, NULL, 0);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR_Y")) {
 		// Loading bar Y position
@@ -187,33 +195,43 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	nitroFSInit(bootstrapPath);
 	
-	FILE* loadingScreenImage = fopen(conf->loadingImagePath, "rb");
-	if (!loadingScreenImage) {
-		loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
-		conf->loadingBarYpos = 89;
-	}
+	if (conf->loadingScreen == 5) {
+		FILE* loadingScreenImage;
+		char loadingImagePath[256];
 
-	if (loadingScreenImage) {
-		// Start loading
-		fseek(loadingScreenImage, 0xe, SEEK_SET);
-		u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
-		fseek(loadingScreenImage, pixelStart, SEEK_SET);
-		fread(bmpImageBuffer, 2, 0x1A000, loadingScreenImage);
-		u16* src = bmpImageBuffer;
-		int x = 0;
-		int y = 191;
-		for (int i=0; i<256*192; i++) {
-			if (x >= 256) {
-				x = 0;
-				y--;
+		for (int i = 0; i <= conf->loadingFrames; i++) {	
+			snprintf(loadingImagePath, sizeof(loadingImagePath), "%s%i.bmp", conf->loadingImagePath, i);
+			loadingScreenImage = fopen(loadingImagePath, "rb");
+			if (!loadingScreenImage && i == 0) {
+				loadingScreenImage = fopen("nitro:/loading_R4.bmp", "rb");
+				conf->loadingFps = 0;
+				conf->loadingBarYpos = 89;
 			}
-			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
-			x++;
+			if (loadingScreenImage) {
+				// Start loading
+				fseek(loadingScreenImage, 0xe, SEEK_SET);
+				u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
+				fseek(loadingScreenImage, pixelStart, SEEK_SET);
+				fread(bmpImageBuffer, 2, 0x1A000, loadingScreenImage);
+				u16* src = bmpImageBuffer;
+				int x = 0;
+				int y = 191;
+				for (int i=0; i<256*192; i++) {
+					if (x >= 256) {
+						x = 0;
+						y--;
+					}
+					u16 val = *(src++);
+					renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
+					x++;
+				}
+				memcpy((void*)0x02800000+(i*0x1A000), renderedImageBuffer, sizeof(renderedImageBuffer));
+			}
+			fclose(loadingScreenImage);
+
+			if (conf->loadingFps == 0 || i == 29) break;
 		}
-		memcpy((void*)0x02D00000, renderedImageBuffer, sizeof(renderedImageBuffer));
 	}
-	fclose(loadingScreenImage);
 
 	conf->saveSize = getSaveSize(conf->savPath);
 

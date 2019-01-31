@@ -54,6 +54,8 @@ volatile bool fadeType = true;
 
 volatile bool arm9_darkTheme = false;
 volatile bool arm9_swapLcds = false;
+volatile int arm9_loadingFrames = 0;
+volatile int arm9_loadingFps = 0;
 volatile int arm9_loadingBarYpos = 0;
 volatile bool arm9_errorColor = false;
 volatile int arm9_loadBarLength = 0;
@@ -274,9 +276,6 @@ void arm9_main(void) {
 					arm9_flashcardlikeLoadingScreen();
 					if (arm9_errorColor) {
 						arm9_errorText3();
-					}
-					if (arm9_animateLoadingCircle) {
-						arm9_loadingCircle2();
 					}
 					break;		
 			}

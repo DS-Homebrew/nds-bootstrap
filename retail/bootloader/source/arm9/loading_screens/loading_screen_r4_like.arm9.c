@@ -11,6 +11,8 @@ Loading R4-Like
 #include "common.h"
 #include "loading.h"
 
+static u16* bgLocation = (u16*)0x02800000;
+
 static bool drawnStuff = false;
 
 static int loadingCircleTime = 3;
@@ -56,21 +58,16 @@ void arm9_flashcardlikeLoadingScreen(void) {
 		REG_DISPCNT = MODE_FB0;
 		VRAM_A_CR = VRAM_ENABLE;
 
-		u16* bgLocation = (u16*)0x02D00000;
-
-		// Draw Loading Screen Image
-		dmaCopy(bgLocation, VRAM_A, 0x20000);
+		if (arm9_loadingFps == 0) {
+			// Draw Loading Screen Image
+			dmaCopy(bgLocation, VRAM_A, 0x1A000);
+		}
 
 		drawnStuff = true;
 	}
 
-	// Draw loading bar
-	drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
-
 	arm9_animateLoadingCircle = true;
-}
 
-void arm9_loadingCircle2(void) {
 	switch (loadingCircleFrame) {
 		case 0:
 			default:
@@ -155,8 +152,6 @@ void arm9_loadingCircle2(void) {
 			break;
 	}
 
-	while (REG_VCOUNT!=191);
-
 	// Draw loading circle
 	if (loadingCircleTime == 3) {
 		loadingCircleTime = 0;
@@ -178,6 +173,11 @@ void arm9_loadingCircle2(void) {
 	} else {
 		loadingCircleTime++;
 	}
+
+	// Draw loading bar
+	drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+
+	while (REG_VCOUNT!=191);
 }
 
 void arm9_errorText3(void) {

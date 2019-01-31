@@ -136,6 +136,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("loadingDarkTheme: %s\n", btoa(conf->loadingDarkTheme));
 	dbg_printf("loadingSwapLcds: %s\n", btoa(conf->loadingSwapLcds));
 	dbg_printf("loadingImagePath: \"%s\"\n", conf->loadingImagePath);
+	dbg_printf("loadingFrames: %i\n", conf->loadingFrames);
+	dbg_printf("loadingFps: %i\n", conf->loadingFps);
 	dbg_printf("loadingBarYpos: %i\n", conf->loadingBarYpos);
 	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));

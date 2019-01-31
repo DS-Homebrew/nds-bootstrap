@@ -20,6 +20,8 @@ typedef struct configuration {
 	bool loadingDarkTheme;
 	bool loadingSwapLcds;
 	char* loadingImagePath;
+	int loadingFrames;
+	int loadingFps;
 	int loadingBarYpos;
 	u32 romread_LED;
 	bool boostCpu;
