@@ -41,6 +41,9 @@ addons:
     - lftp
 
 after_success:
+  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh success $WEBHOOK_URL
   - >
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
@@ -49,3 +52,8 @@ after_success:
         cp bin/nds-bootstrap.nds $REV_NAME
         lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
     fi
+
+after_failure:
+  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh failure $WEBHOOK_URL
