@@ -118,8 +118,7 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		return;
 	}
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "A2D", 3) != 0 // New Super Mario Bros
-	&& strncmp(romTid, "ADM", 3) != 0) // Animal Crossing: Wild World
+	if (strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
 	{
 		// Patch
 		u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
