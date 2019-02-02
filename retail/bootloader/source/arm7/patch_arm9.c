@@ -107,7 +107,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }
 
 static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (moduleParams->sdk_version > 0x5000000) {
+	if (usesThumb || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
