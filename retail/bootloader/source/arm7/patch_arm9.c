@@ -111,15 +111,15 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		return;
 	}
 
-	// Card read cached
-	u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
-	u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
-	if (!cardReadCachedStartOffset) {
-		return;
-	}
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
 	{
+		// Card read cached
+		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
+		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
+		if (!cardReadCachedStartOffset) {
+			return;
+		}
 		// Patch
 		u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
 		*readCachedPatch = (u32)cardReadCachedStartOffset;
