@@ -36,6 +36,7 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
+	.global ceCached
 	.global consoleModel
 	.global loadingScreen
 	.global darkTheme
@@ -84,6 +85,8 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000
 patchMpuSize:
+	.word	0x00000000
+ceCached:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000

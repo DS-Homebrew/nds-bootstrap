@@ -15,6 +15,7 @@ typedef struct configuration {
 	u32 donorSdkVer;
 	u32 patchMpuRegion;
 	u32 patchMpuSize;
+	bool ceCached;	// SDK 1-4
 	u32 consoleModel;
 	u32 loadingScreen;
 	bool loadingDarkTheme;

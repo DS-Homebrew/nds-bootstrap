@@ -64,6 +64,7 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
+#include "cardengine_arm9_cached_bin.h"
 #include "cardengine_arm9_sdk5_bin.h"
 
 //#define memcpy __builtin_memcpy
@@ -86,6 +87,7 @@ extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
+extern u32 ceCached;
 extern u32 consoleModel;
 //extern u32 loadingScreen;
 extern u32 romread_LED;
@@ -677,10 +679,14 @@ int arm7_main(void) {
 
 	if (isSdk5(moduleParams)) {
 		ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
+		memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+	} else if (ceCached) {
+		ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+		memcpy((u32*)CARDENGINE_ARM9_CACHED_LOCATION, cardengine_arm9_cached_bin, cardengine_arm9_cached_bin_size);
+	} else {
+		ce9Location = CARDENGINE_ARM9_LOCATION;
+		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
-	memcpy((u32*)(isSdk5(moduleParams) ? CARDENGINE_ARM9_SDK5_LOCATION : CARDENGINE_ARM9_LOCATION),
-			(u32*)(isSdk5(moduleParams) ? cardengine_arm9_sdk5_bin : cardengine_arm9_bin),
-			(isSdk5(moduleParams) ? cardengine_arm9_sdk5_bin_size : cardengine_arm9_bin_size));
 	increaseLoadBarLength();
 
 	//

@@ -233,6 +233,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->donorSdkVer      = conf->donorSdkVer;
 	lc0->patchMpuRegion   = conf->patchMpuRegion;
 	lc0->patchMpuSize     = conf->patchMpuSize;
+	lc0->ceCached         = conf->ceCached; // SDK 1-4
 	lc0->consoleModel     = conf->consoleModel;
 	lc0->loadingScreen    = conf->loadingScreen;
 	lc0->loadingDarkTheme = conf->loadingDarkTheme;

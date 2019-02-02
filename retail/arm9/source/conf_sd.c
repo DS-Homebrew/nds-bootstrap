@@ -73,6 +73,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Patch MPU size
 		conf->patchMpuSize = strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "CARDENGINE_CACHED")) {
+		// Card engine (arm9) cached
+		conf->ceCached = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CONSOLE_MODEL")) {
 		// Console model
 		conf->consoleModel = strtol(value, NULL, 0);
