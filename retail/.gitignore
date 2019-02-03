@@ -94,6 +94,7 @@ dldi/build
 cardengine/arm7/build
 cardengine/arm9/build
 cardengine/arm9_cached/build
+cardengine/arm9_acww/build
 cardengine/arm9_sdk5/build
 sdengine/build
 bootloader/build

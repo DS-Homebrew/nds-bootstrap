@@ -85,7 +85,7 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 export CC		:=	$(PREFIX)gcc
 export CXX		:=	$(PREFIX)g++
 export AR		:=	$(PREFIX)ar
-export OBJCOPY		:=	$(PREFIX)objcopy
+export OBJCOPY	:=	$(PREFIX)objcopy
 export CPP		:=	$(PREFIX)cpp
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9 cardengine_arm9_cached cardengine_arm9_sdk5 clean
+.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9 cardengine_arm9_cached cardengine_arm9_acww cardengine_arm9_sdk5 clean
 
 all:	$(OUTPUT)
 
@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_cached cardengine_arm9_sdk5
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_cached cardengine_arm9_acww cardengine_arm9_sdk5
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -176,6 +176,10 @@ cardengine_arm9: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9_cached: $(DATA)
 	@$(MAKE) -C cardengine/arm9_cached
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_acww: $(DATA)
+	@$(MAKE) -C cardengine/arm9_acww
 
 #---------------------------------------------------------------------------------		
 cardengine_arm9_sdk5: $(DATA)
@@ -195,6 +199,7 @@ clean:
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
 	@$(MAKE) -C cardengine/arm9_cached clean
+	@$(MAKE) -C cardengine/arm9_acww clean
 	@$(MAKE) -C cardengine/arm9_sdk5 clean
 	@$(MAKE) -C bootloader clean
 		
