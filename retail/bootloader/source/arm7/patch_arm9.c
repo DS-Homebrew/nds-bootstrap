@@ -371,6 +371,100 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 	}
 }
 
+static u32 iSpeed = 1;
+
+static u32 CalculateOffset(u16* anAddress,u32 aShift)
+{
+  u32 ptr=(u32)(anAddress+2+aShift);
+  ptr&=0xfffffffc;
+  ptr+=(anAddress[aShift]&0xff)*sizeof(u32);
+  return ptr;
+}
+
+void patchDownloadplayArm(u32* aPtr)
+{
+	*(aPtr) = 0xe59f0000; //ldr r0, [pc]
+	*(aPtr+1) = 0xea000000; //b pc
+	*(aPtr+2) = iSpeed;
+}
+
+void patchDownloadplay(const tNDSHeader* ndsHeader)
+{
+  u16* top=(u16*)ndsHeader->arm9destination;
+  u16* bottom=(u16*)(ndsHeader->arm9destination+0x300000);
+  for(u16* ii=top;ii<bottom;++ii)
+  {
+    //31 6E ?? 48 0? 43 3? 66
+    //ldr     r1, [r6,#0x60]
+    //ldr     r0, =0x406000
+    //orrs    rx, ry
+    //str     rx, [r6,#0x60]
+    //3245 - 42 All-Time Classics (Europe) (En,Fr,De,Es,It) (Rev 1)
+    if(ii[0]==0x6e31&&(ii[1]&0xff00)==0x4800&&(ii[2]&0xfff6)==0x4300&&(ii[3]&0xfffe)==0x6630)
+    {
+      u32 ptr=CalculateOffset(ii,1);
+		*(ii+2) = 0x46c0; //nop
+		*(ii+3) = 0x6630; //str r0, [r6,#0x60]
+		*(u32*)(ptr) = iSpeed;
+      break;
+    }
+    //01 98 01 6E ?? 48 01 43 01 98 01 66
+    //ldr     r0, [sp,#4]
+    //ldr     r1, [r0,#0x60]
+    //ldr     r0, =0x406000
+    //orrs    r1, r0
+    //ldr     r0, [sp,#4]
+    //str     r1, [r0,#0x60]
+    else if(ii[0]==0x9801&&ii[1]==0x6e01&&(ii[2]&0xff00)==0x4800&&ii[3]==0x4301&&ii[4]==0x9801&&ii[5]==0x6601)
+    {
+      u32 ptr=CalculateOffset(ii,2);
+		*(ii+3) = 0x1c01; //mov r1, r0
+		*(u32*)(ptr) = iSpeed;
+      break;
+    }
+    else if(0==(((u32)ii)&1))
+    {
+      u32* buffer32=(u32*)ii;
+      //60 00 99 E5 06 0A 80 E3 01 05 80 E3 60 00 89 E5
+      //ldr     r0, [r9,#0x60]
+      //orr     r0, r0, #0x6000
+      //orr     r0, r0, #0x400000
+      //str     r0, [r9,#0x60]
+      //1606 - Cars - Mater-National Championship (USA)
+      //2119 - Nanostray 2 (USA)
+      //4512 - Might & Magic - Clash of Heroes (USA) (En,Fr,Es)
+      if(buffer32[0]==0xe5990060&&buffer32[1]==0xe3800a06&&buffer32[2]==0xe3800501&&buffer32[3]==0xe5890060)
+      {
+        patchDownloadplayArm(buffer32);
+        break;
+      }
+      //60 10 99 E5 ?? 0? 9F E5 00 00 81 E1 60 00 89 E5
+      //ldr     r1, [r9,#0x60]
+      //ldr     r0, =0x406000
+      //orr     r0, r1, r0
+      //str     r0, [r9,#0x60]
+      //3969 - Power Play Pool (Europe) (En,Fr,De,Es,It)
+      else if(buffer32[0]==0xe5991060&&(buffer32[1]&0xfffff000)==0xe59f0000&&buffer32[2]==0xe1810000&&buffer32[3]==0xe5890060)
+      {
+        patchDownloadplayArm(buffer32);
+        break;
+      }
+      //60 20 8? E2 00 ?0 92 E5 ?? 0? 9F E5 00 00 81 E1 00 00 82 E5
+      //add     r2, rx, #0x60
+      //ldr     ry, [r2]
+      //ldr     rz, =0x406000
+      //orr     r0, ry, rz
+      //str     r0, [r2]
+      //0118 - GoldenEye - Rogue Agent (Europe)
+      else if((buffer32[0]&0xfff0ffff)==0xe2802060&&(buffer32[1]&0xffffefff)==0xe5920000&&(buffer32[2]&0xffffe000)==0xe59f0000&&(buffer32[3]&0xfffefffe)==0xe1800000&&buffer32[4]==0xe5820000)
+      {
+        patchDownloadplayArm(buffer32+1);
+        break;
+      }
+    }
+  }
+}
+
 // SDK 5
 static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Random patch SDK 5 first
@@ -432,6 +526,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+
+	patchDownloadplay(ndsHeader);
 
 	//patchArenaLow(ce9, ndsHeader, usesThumb);
 	
