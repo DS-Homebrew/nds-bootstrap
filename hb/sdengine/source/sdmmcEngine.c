@@ -75,7 +75,7 @@ static void sendValue32(vu32 value32) {
 static void getDatamsg(int size, vu8* msg) {
 	for(int i=0;i<size;i++)  {
 		msg[i]=*((vu8*)commandAddr+8+i);
-	}	
+	}
 }
 
 //---------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ static void sdmmcCustomMsgHandler(int bytes) {
 	//char buf[64];
 
     getDatamsg(bytes, (u8*)&msg);
-    
+
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
@@ -126,7 +126,7 @@ static void sdmmcCustomMsgHandler(int bytes) {
     case SDMMC_SD_WRITE_SECTORS:
         retval = my_sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
         break;
-    }    
+    }
 
     sendValue32(retval);
 }
@@ -155,31 +155,31 @@ static void SyncHandler(void) {
 //---------------------------------------------------------------------------------
 static void checkIRQ_IPC_SYNC() {
 //---------------------------------------------------------------------------------
-	if(!initialized) {	
-		//nocashMessage("!initialized");	
+	if(!initialized) {
+		//nocashMessage("!initialized");
 		u32* current=irqHandler+1;
-		
+
 		while(*current!=IRQ_IPC_SYNC && *current!=0) {
 			current+=2;
 		}
 		/*if(current==IRQ_IPC_SYNC) {
-			nocashMessage("IRQ_IPC_SYNC slot found");	
+			nocashMessage("IRQ_IPC_SYNC slot found");
 		} else {
-			nocashMessage("empty irqtable slot found");	
-		}*/		
-		
+			nocashMessage("empty irqtable slot found");
+		}*/
+
 		*((IntFn*)current-1)	= SyncHandler;
 		*current				= IRQ_IPC_SYNC;
-	
+
 		//nocashMessage("IRQ_IPC_SYNC setted");
-	
+
 		initialized = true;
-	}	
+	}
 }
 
 
 void myIrqHandler(void) {
-	
+
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (softResetTimer == 60 * 2) {
 			//if (consoleModel < 2) {
@@ -313,15 +313,15 @@ void myIrqHandler(void) {
 	runSdMmcEngineCheck();
 }
 
-void myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();	
+void myIrqEnable(u32 irq) {
+	int oldIME = enterCriticalSection();
 	if (irq & IRQ_VBLANK)
 		REG_DISPSTAT |= DISP_VBLANK_IRQ ;
 	if (irq & IRQ_HBLANK)
 		REG_DISPSTAT |= DISP_HBLANK_IRQ ;
 	if (irq & IRQ_VCOUNT)
 		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-		
+
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 	//nocashMessage("IRQ_IPC_SYNC enabled");
@@ -329,5 +329,3 @@ void myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 }
-
-
