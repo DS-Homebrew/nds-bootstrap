@@ -28,7 +28,8 @@ install:
 script:
   - cd retail/
   - make nightly
-  - echo $TRAVIS_TAG >> nightly-bootstrap.ver
+  - mkdir TWiLightMenu/
+  - echo $TRAVIS_TAG >> TWiLightMenu/nightly-bootstrap.ver
   - cd ../hb/
   - make nightly
   - cd ../
@@ -48,6 +49,7 @@ addons:
     - lftp
 
 before_deploy:
+  - git config --local user.name "TWLBot"
   - git tag $TRAVIS_TAG
 
 deploy:
@@ -57,3 +59,4 @@ deploy:
   file: nds-bootstrap.zip
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
+  prerelease: true
