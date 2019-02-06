@@ -42,8 +42,7 @@ addons:
 deploy:
   provider: releases
   overwrite: true
-  user: $GITHUB_NAME
-  password: $GITHUB_PASS
+  api_key: $GITHUB_TOKEN
   file: "retail/bin/nds-bootstrap.nds"
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
