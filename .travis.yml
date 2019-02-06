@@ -52,7 +52,7 @@ addons:
 before_deploy:
   - git config --local user.name "TWLBot"
   - export CURRENT_TIME="$(date +'%Y%m%d-%H%M%S')"
-  - git tag $TRAVIS_BUILD_NUMBER
+  - git tag v$TRAVIS_BUILD_NUMBER
 
 deploy:
   provider: releases
