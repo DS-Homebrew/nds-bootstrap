@@ -73,4 +73,4 @@ deploy:
   repo: epicpk11/TWLBuilds-test
   prerelease: true
   name: nds-bootstrap | $COMMIT_TAG
-  body: $TRAVIS_COMMIT_MESSAGE
+  body: $COMMIT_MESSAGE
