@@ -74,4 +74,4 @@ deploy:
   repo: TWLBot/Builds
   prerelease: true
   name: nds-bootstrap | $COMMIT_TAG
-  body: $TRAVIS_COMMIT_MESSAGE
+  body: $COMMIT_MESSAGE
