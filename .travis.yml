@@ -43,6 +43,8 @@ deploy:
   provider: releases
   overwrite: true
   api_key: $GITHUB_TOKEN
-  file: "retail/bin/nds-bootstrap.nds"
+  file:
+    - $REV_NAME
+    - $REV_NAME_HB
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
