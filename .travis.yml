@@ -28,8 +28,8 @@ script:
   - export TRAVIS_TAG="$(git log --format=%h -1)"
   - cd retail/
   - make nightly
-  - mkdir TWiLightMenu/
-  - echo $TRAVIS_TAG >> TWiLightMenu/nightly-bootstrap.ver
+  - mkdir bin/TWiLightMenu/
+  - echo $TRAVIS_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
   - cd ../hb/
   - make nightly
   - cd ../
