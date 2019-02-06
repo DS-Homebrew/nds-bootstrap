@@ -8,7 +8,6 @@ env:
   global:
     - DEVKITPRO=/opt/devkitpro    
     - DEVKITARM=/opt/devkitpro/devkitARM
-    - TRAVIS_TAG=${git log --format=%h -1}
     
 cache:
   directories:
@@ -29,6 +28,7 @@ script:
   - cd retail/
   - make nightly
   - mkdir TWiLightMenu/
+  - export TRAVIS_TAG=${git log --format=%h -1}
   - echo $TRAVIS_TAG >> TWiLightMenu/nightly-bootstrap.ver
   - cd ../hb/
   - make nightly
