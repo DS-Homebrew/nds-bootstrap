@@ -62,7 +62,8 @@ after_failure:
 
 before_deploy:
   - git config --local user.name "TWLBot"
-  - git tag v$TRAVIS_BUILD_NUMBER
+  - export CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
+  - git tag v$CURRENT_DATE
 
 deploy:
   provider: releases
