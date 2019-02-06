@@ -49,6 +49,23 @@ addons:
     - libstdc++6
     - lftp
 
+after_success:
+  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh success $WEBHOOK_URL
+  - GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
+  - GITREV="`git show -s --format='%h'`"
+  - REV_NAME="nds-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
+  - REV_NAME_HB="nds-bootstrap-hb-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
+  - cp hb/bin/nds-bootstrap.nds $REV_NAME_HB
+  - cp retail/bin/nds-bootstrap.nds $REV_NAME
+  - lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; put ${REV_NAME_HB} bye"
+
+after_failure:
+  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh failure $WEBHOOK_URL
+
 before_deploy:
   - git config --local user.name "TWLBot"
   - export CURRENT_TIME="$(date +'%Y%m%d-%H%M%S')"
@@ -60,7 +77,7 @@ deploy:
   api_key: $GITHUB_TOKEN
   file: nds-bootstrap.zip
   skip_cleanup: true
-  repo: Epicpk11/TWLBuilds-test
+  repo: TWLBot/Builds
   prerelease: true
   name: nds-bootstrap | $COMMIT_TAG
   body: $COMMIT_MESSAGE
