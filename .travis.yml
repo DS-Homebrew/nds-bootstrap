@@ -16,6 +16,8 @@ cache:
 
 before_install:
   - curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
+  - sudo apt-get update
+  - apt-get install p7zip-full
 
 install:
   - sudo dpkg -i pacman.deb
@@ -23,7 +25,6 @@ install:
   - sudo dkp-pacman -S devkitARM general-tools dstools ndstool libnds libfat-nds --noconfirm
   - export DEVKITPRO=/opt/devkitpro
   - export DEVKITARM=${DEVKITPRO}/devkitARM
-  - apt-get install p7zip-full
 
 script:
   - export COMMIT_TAG="$(git log --format=%h -1)"
