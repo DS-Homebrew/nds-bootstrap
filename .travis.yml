@@ -28,7 +28,7 @@ install:
 script:
   - cd retail/
   - make nightly
-  - >> nightly-bootstrap.ver echo $TRAVIS_TAG
+  - echo $TRAVIS_TAG >> nightly-bootstrap.ver
   - cd ../hb/
   - make nightly
   - cd ../
