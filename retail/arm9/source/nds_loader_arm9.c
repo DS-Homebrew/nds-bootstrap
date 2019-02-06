@@ -240,6 +240,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	lc0->loadingSwapLcds  = conf->loadingSwapLcds;
 	lc0->loadingFrames    = conf->loadingFrames;
 	lc0->loadingFps       = conf->loadingFps;
+	lc0->loadingBar       = conf->loadingBar;
 	lc0->loadingBarYpos   = conf->loadingBarYpos;
 	lc0->romread_LED      = conf->romread_LED;
 	lc0->boostVram        = conf->boostVram;
