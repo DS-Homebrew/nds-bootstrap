@@ -105,6 +105,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// FPS of animated loading screen
 		conf->loadingFps = strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR")) {
+		// Show/Hide loading bar
+		conf->loadingBar = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR_Y")) {
 		// Loading bar Y position
 		conf->loadingBarYpos = strtol(value, NULL, 0);
@@ -209,6 +213,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (!loadingScreenImage && i == 0) {
 				loadingScreenImage = fopen("nitro:/loading_metalBG.bmp", "rb");
 				conf->loadingFps = 0;
+				conf->loadingBar = true;
 				conf->loadingBarYpos = 89;
 			}
 			if (loadingScreenImage) {

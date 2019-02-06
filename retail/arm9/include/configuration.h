@@ -23,6 +23,7 @@ typedef struct configuration {
 	char* loadingImagePath;
 	int loadingFrames;
 	int loadingFps;
+	bool loadingBar;
 	int loadingBarYpos;
 	u32 romread_LED;
 	bool boostCpu;

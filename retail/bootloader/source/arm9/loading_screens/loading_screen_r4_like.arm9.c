@@ -124,147 +124,150 @@ void arm9_flashcardlikeLoadingScreen(void) {
 
 	arm9_animateLoadingCircle = true;
 
-	switch (loadingCircleFrame) {
-		case 0:
-			default:
-			dot[0] = color[0];
-			dot[1] = color[1];
-			dot[2] = color[2];
-			dot[3] = color[3];
-			dot[4] = color[4];
-			dot[5] = color[5];
-			dot[6] = color[6];
-			dot[7] = color[7];
-			break;
-		case 1:
-			dot[0] = color[7];
-			dot[1] = color[0];
-			dot[2] = color[1];
-			dot[3] = color[2];
-			dot[4] = color[3];
-			dot[5] = color[4];
-			dot[6] = color[5];
-			dot[7] = color[6];
-			break;
-		case 2:
-			dot[0] = color[6];
-			dot[1] = color[7];
-			dot[2] = color[0];
-			dot[3] = color[1];
-			dot[4] = color[2];
-			dot[5] = color[3];
-			dot[6] = color[4];
-			dot[7] = color[5];
-			break;
-		case 3:
-			dot[0] = color[5];
-			dot[1] = color[6];
-			dot[2] = color[7];
-			dot[3] = color[0];
-			dot[4] = color[1];
-			dot[5] = color[2];
-			dot[6] = color[3];
-			dot[7] = color[4];
-			break;
-		case 4:
-			dot[0] = color[4];
-			dot[1] = color[5];
-			dot[2] = color[6];
-			dot[3] = color[7];
-			dot[4] = color[0];
-			dot[5] = color[1];
-			dot[6] = color[2];
-			dot[7] = color[3];
-			break;
-		case 5:
-			dot[0] = color[3];
-			dot[1] = color[4];
-			dot[2] = color[5];
-			dot[3] = color[6];
-			dot[4] = color[7];
-			dot[5] = color[0];
-			dot[6] = color[1];
-			dot[7] = color[2];
-			break;
-		case 6:
-			dot[0] = color[2];
-			dot[1] = color[3];
-			dot[2] = color[4];
-			dot[3] = color[5];
-			dot[4] = color[6];
-			dot[5] = color[7];
-			dot[6] = color[0];
-			dot[7] = color[1];
-			break;
-		case 7:
-			dot[0] = color[1];
-			dot[1] = color[2];
-			dot[2] = color[3];
-			dot[3] = color[4];
-			dot[4] = color[5];
-			dot[5] = color[6];
-			dot[6] = color[7];
-			dot[7] = color[0];
-			break;
-	}
-
-	// Draw loading circle
-	if (loadingCircleTime == 3) {
-		loadingCircleTime = 0;
-
-		if (arm9_loadingFps > 0) {
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos, 4, 4, dot[6]);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos, 4, 4, dot[5]);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos, 4, 4, dot[4]);
-
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+5, 4, 4, baseColor);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
-
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
-			drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
-		} else {
-			drawRectangle (1, arm9_loadingBarYpos, 4, 4, dot[6]);
-			drawRectangle (6, arm9_loadingBarYpos, 4, 4, dot[5]);
-			drawRectangle (11, arm9_loadingBarYpos, 4, 4, dot[4]);
-
-			drawRectangle (1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
-			drawRectangle (6, arm9_loadingBarYpos+5, 4, 4, baseColor);
-			drawRectangle (11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
-
-			drawRectangle (1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
-			drawRectangle (6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
-			drawRectangle (11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+	if (arm9_loadingBar) {
+		switch (loadingCircleFrame) {
+			case 0:
+				default:
+				dot[0] = color[0];
+				dot[1] = color[1];
+				dot[2] = color[2];
+				dot[3] = color[3];
+				dot[4] = color[4];
+				dot[5] = color[5];
+				dot[6] = color[6];
+				dot[7] = color[7];
+				break;
+			case 1:
+				dot[0] = color[7];
+				dot[1] = color[0];
+				dot[2] = color[1];
+				dot[3] = color[2];
+				dot[4] = color[3];
+				dot[5] = color[4];
+				dot[6] = color[5];
+				dot[7] = color[6];
+				break;
+			case 2:
+				dot[0] = color[6];
+				dot[1] = color[7];
+				dot[2] = color[0];
+				dot[3] = color[1];
+				dot[4] = color[2];
+				dot[5] = color[3];
+				dot[6] = color[4];
+				dot[7] = color[5];
+				break;
+			case 3:
+				dot[0] = color[5];
+				dot[1] = color[6];
+				dot[2] = color[7];
+				dot[3] = color[0];
+				dot[4] = color[1];
+				dot[5] = color[2];
+				dot[6] = color[3];
+				dot[7] = color[4];
+				break;
+			case 4:
+				dot[0] = color[4];
+				dot[1] = color[5];
+				dot[2] = color[6];
+				dot[3] = color[7];
+				dot[4] = color[0];
+				dot[5] = color[1];
+				dot[6] = color[2];
+				dot[7] = color[3];
+				break;
+			case 5:
+				dot[0] = color[3];
+				dot[1] = color[4];
+				dot[2] = color[5];
+				dot[3] = color[6];
+				dot[4] = color[7];
+				dot[5] = color[0];
+				dot[6] = color[1];
+				dot[7] = color[2];
+				break;
+			case 6:
+				dot[0] = color[2];
+				dot[1] = color[3];
+				dot[2] = color[4];
+				dot[3] = color[5];
+				dot[4] = color[6];
+				dot[5] = color[7];
+				dot[6] = color[0];
+				dot[7] = color[1];
+				break;
+			case 7:
+				dot[0] = color[1];
+				dot[1] = color[2];
+				dot[2] = color[3];
+				dot[3] = color[4];
+				dot[4] = color[5];
+				dot[5] = color[6];
+				dot[6] = color[7];
+				dot[7] = color[0];
+				break;
 		}
 
-		loadingCircleFrame++;
-		if (loadingCircleFrame == 8) loadingCircleFrame = 0;
-	} else {
-		loadingCircleTime++;
-	}
+		// Draw loading circle
+		if (loadingCircleTime == 3) {
+			loadingCircleTime = 0;
 
-	// Draw loading bar
-	if (arm9_loadingFps > 0) {
-		drawRectangleGradientAddr(bgLocation+(currentFrame*(0x18000/1)), 16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
-	} else {
-		drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+			if (arm9_loadingFps > 0) {
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos, 4, 4, dot[6]);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos, 4, 4, dot[5]);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos, 4, 4, dot[4]);
+
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+5, 4, 4, baseColor);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
+
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
+				drawRectangleAddr (bgLocation+(currentFrame*(0x18000/1)), 11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+			} else {
+				drawRectangle (1, arm9_loadingBarYpos, 4, 4, dot[6]);
+				drawRectangle (6, arm9_loadingBarYpos, 4, 4, dot[5]);
+				drawRectangle (11, arm9_loadingBarYpos, 4, 4, dot[4]);
+
+				drawRectangle (1, arm9_loadingBarYpos+5, 4, 4, dot[7]);
+				drawRectangle (6, arm9_loadingBarYpos+5, 4, 4, baseColor);
+				drawRectangle (11, arm9_loadingBarYpos+5, 4, 4, dot[3]);
+
+				drawRectangle (1, arm9_loadingBarYpos+10, 4, 4, dot[0]);
+				drawRectangle (6, arm9_loadingBarYpos+10, 4, 4, dot[1]);
+				drawRectangle (11, arm9_loadingBarYpos+10, 4, 4, dot[2]);
+			}
+
+			loadingCircleFrame++;
+			if (loadingCircleFrame == 8) loadingCircleFrame = 0;
+		} else {
+			loadingCircleTime++;
+		}
+
+		// Draw loading bar
+		if (arm9_loadingFps > 0) {
+			drawRectangleGradientAddr(bgLocation+(currentFrame*(0x18000/1)), 16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+		} else {
+			drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 16, 16, 16);
+		}
 	}
 
 	while (REG_VCOUNT!=191);
 }
 
 void arm9_errorText3(void) {
-	// Change dots of loading circle to form an X
-	drawRectangle (1, 89, 4, 4, errorColor);
-	drawRectangle (11, 89, 4, 4, errorColor);
-	drawRectangle (6, 94, 4, 4, errorColor);
-	drawRectangle (1, 99, 4, 4, errorColor);
-	drawRectangle (11, 99, 4, 4, errorColor);
+	if (arm9_loadingBar) {
+		// Change dots of loading circle to form an X
+		drawRectangle (1, 89, 4, 4, errorColor);
+		drawRectangle (11, 89, 4, 4, errorColor);
+		drawRectangle (6, 94, 4, 4, errorColor);
+		drawRectangle (1, 99, 4, 4, errorColor);
+		drawRectangle (11, 99, 4, 4, errorColor);
 
-	// Make loading bar red
-	drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 0, 16, 0);
-
+		// Make loading bar red
+		drawRectangleGradient(16, arm9_loadingBarYpos+2, 28*(arm9_loadBarLength+1), 10, 0, 16, 0);
+	}
 	arm9_animateLoadingCircle = false;
 	displayScreen = false;
 }

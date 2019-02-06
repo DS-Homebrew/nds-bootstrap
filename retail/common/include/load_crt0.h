@@ -28,6 +28,7 @@ typedef struct loadCrt0 {
     u32 loadingSwapLcds;
 	u32 loadingFrames;
 	u32 loadingFps;
+    u32 loadingBar;
     u32 loadingBarYpos;
     u32 romread_LED;
     u32 boostVram;

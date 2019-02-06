@@ -43,6 +43,7 @@
 	.global swapLcds
 	.global loadingFrames
 	.global loadingFps
+	.global loadingBar
 	.global loadingBarYpos
 	.global romread_LED
 	.global boostVram
@@ -99,6 +100,8 @@ swapLcds:
 loadingFrames:
 	.word	0x00000000
 loadingFps:
+	.word	0x00000000
+loadingBar:
 	.word	0x00000000
 loadingBarYpos:
 	.word	0x00000000

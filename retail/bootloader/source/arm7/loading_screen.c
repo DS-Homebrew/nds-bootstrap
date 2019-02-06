@@ -6,6 +6,7 @@ extern u32 darkTheme;
 extern u32 swapLcds;
 extern u32 loadingFrames;
 extern u32 loadingFps;
+extern u32 loadingBar;
 extern u32 loadingBarYpos;
 
 void errorOutput(void) {
@@ -29,6 +30,7 @@ void debugOutput(void) {
 		arm9_swapLcds = swapLcds;
 		arm9_loadingFrames = loadingFrames;
 		arm9_loadingFps = loadingFps;
+		arm9_loadingBar = loadingBar;
 		arm9_loadingBarYpos = loadingBarYpos;
 		arm9_stateFlag = ARM9_DISPERR;
 		// Wait for completion
