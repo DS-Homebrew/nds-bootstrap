@@ -26,7 +26,9 @@ install:
 
 script:
   - cd retail/
-  - make
+  - make nightly
+  - cd ../hb/
+  - make nightly
   - cd ../
   
 addons:
@@ -44,7 +46,8 @@ deploy:
   overwrite: true
   api_key: $GITHUB_TOKEN
   file:
-    - $REV_NAME
-    - $REV_NAME_HB
+    - retail/bin/nds-bootstrap-nightly.nds
+    - hb/bin/nds-bootstrap-nightly-hb.nds
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
+  name: $TRAVIS_BUILD_NUMBER
