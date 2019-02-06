@@ -57,4 +57,3 @@ deploy:
   file: nds-bootstrap.zip
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
-  name: $TRAVIS_TAG
