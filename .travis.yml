@@ -26,7 +26,7 @@ install:
 
 script:
   - export COMMIT_TAG="$(git log --format=%h -1)"
-  - export COMMIT_MESSAGE="$(git log --format=%h -1)"
+  - export COMMIT_MESSAGE="$(git log --format=%B -1)"
   - cd retail/
   - make nightly
   - mkdir bin/TWiLightMenu/
@@ -62,4 +62,5 @@ deploy:
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
   prerelease: true
+  tag: $COMMIT_TAG
   body: $COMMIT_MESSAGE
