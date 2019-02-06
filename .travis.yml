@@ -62,5 +62,5 @@ deploy:
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
   prerelease: true
-  tag: nds-bootstrap | $COMMIT_TAG
+  name: nds-bootstrap | $COMMIT_TAG
   body: $COMMIT_MESSAGE
