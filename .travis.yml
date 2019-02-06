@@ -23,6 +23,7 @@ install:
   - sudo dkp-pacman -S devkitARM general-tools dstools ndstool libnds libfat-nds --noconfirm
   - export DEVKITPRO=/opt/devkitpro
   - export DEVKITARM=${DEVKITPRO}/devkitARM
+  - apt-get install p7zip-full
 
 script:
   - export COMMIT_TAG="$(git log --format=%h -1)"
@@ -37,7 +38,7 @@ script:
   - mkdir nds-bootstrap/
   - mv retail/bin/* nds-bootstrap/
   - mv hb/bin/* nds-bootstrap/
-  - zip -r nds-bootstrap.zip nds-bootstrap/
+  - 7z a nds-bootstrap.7z nds-bootstrap/
   
 addons:
   apt:
@@ -67,9 +68,9 @@ deploy:
   provider: releases
   overwrite: true
   api_key: $GITHUB_TOKEN
-  file: nds-bootstrap.zip
+  file: nds-bootstrap.7z
   skip_cleanup: true
-  repo: TWLBot/Builds
+  repo: epicpk11/TWLBuilds-test
   prerelease: true
   name: nds-bootstrap | $COMMIT_TAG
   body: $TRAVIS_COMMIT_MESSAGE
