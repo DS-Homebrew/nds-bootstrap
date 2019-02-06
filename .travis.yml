@@ -70,7 +70,7 @@ deploy:
   api_key: $GITHUB_TOKEN
   file: nds-bootstrap.7z
   skip_cleanup: true
-  repo: epicpk11/TWLBuilds-test
+  repo: TWLBot/Builds
   prerelease: true
   name: nds-bootstrap | $COMMIT_TAG
   body: $TRAVIS_COMMIT_MESSAGE
