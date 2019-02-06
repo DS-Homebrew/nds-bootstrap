@@ -25,10 +25,19 @@ install:
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 script:
+  - export COMMIT_TAG="$(git log --format=%h -1)"
+  - export COMMIT_MESSAGE="$(git log --format=%B -1)"
   - cd retail/
-  - make
+  - make nightly
+  - mkdir bin/TWiLightMenu/
+  - echo $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
   - cd ../hb/
-  - make
+  - make nightly
+  - cd ../
+  - mkdir nds-bootstrap/
+  - mv retail/bin/* nds-bootstrap/
+  - mv hb/bin/* nds-bootstrap/
+  - zip -r nds-bootstrap.zip nds-bootstrap/
   
 addons:
   apt:
@@ -57,14 +66,17 @@ after_failure:
   - chmod +x send.sh
   - ./send.sh failure $WEBHOOK_URL
 
+before_deploy:
+  - git config --local user.name "TWLBot"
+  - git tag v$TRAVIS_BUILD_NUMBER
+
 deploy:
   provider: releases
   overwrite: true
-  user: $GITHUB_NAME
-  password: $GITHUB_PASS
-  file:
-    - $REV_NAME
-    - $REV_NAME_HB
+  api_key: $GITHUB_TOKEN
+  file: nds-bootstrap.zip
   skip_cleanup: true
-  on:
-    tags: true
+  repo: TWLBot/Builds
+  prerelease: true
+  name: nds-bootstrap | $COMMIT_TAG
+  body: $COMMIT_MESSAGE
