@@ -25,11 +25,12 @@ install:
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 script:
-  - export TRAVIS_TAG="$(git log --format=%h -1)"
+  - export COMMIT_TAG="$(git log --format=%h -1)"
+  - export COMMIT_MESSAGE="$(git log --format=%h -1)"
   - cd retail/
   - make nightly
   - mkdir bin/TWiLightMenu/
-  - echo $TRAVIS_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
+  - echo $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
   - cd ../hb/
   - make nightly
   - cd ../
@@ -50,7 +51,7 @@ addons:
 
 before_deploy:
   - git config --local user.name "TWLBot"
-  - git tag $TRAVIS_TAG
+  - git tag $COMMIT_TAG
 
 deploy:
   provider: releases
@@ -60,3 +61,4 @@ deploy:
   skip_cleanup: true
   repo: Epicpk11/TWLBuilds-test
   prerelease: true
+  body: $COMMIT_MESSAGE
