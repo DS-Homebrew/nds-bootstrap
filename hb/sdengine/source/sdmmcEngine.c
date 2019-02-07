@@ -157,7 +157,7 @@ static void checkIRQ_IPC_SYNC() {
 //---------------------------------------------------------------------------------
 	if(!initialized) {
 		//nocashMessage("!initialized");
-		u32* current=irqHandler+1;
+		u32* current=(u32*)irqHandler+1;
 
 		while(*current!=IRQ_IPC_SYNC && *current!=0) {
 			current+=2;
