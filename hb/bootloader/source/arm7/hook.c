@@ -25,10 +25,12 @@
 #include "common.h"
 #include "sdengine_bin.h"
 
+extern vu32* myMemUncached(vu32*);
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
-extern const u8 cheat_engine_start[]; 
+extern const u8 cheat_engine_start[];
 
 /*// libnds v1.5.12 2016
 static const u32 homebrewStartSig_2016[1] = {
@@ -65,11 +67,11 @@ static const u32 homebrewSig[5] = {
 static const u32 homebrewSigPatched[5] = {
 	0xE59F1008, // ldr    r1, =0x3900010   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
-	0xE501F004, // str    r0, [r1,#-4]     @ irqsig 
+	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x037C0010  // DCD 	  0x037C0010       
+	0x037C0010  // DCD 	  0x037C0010
 };
- 
+
 // Accelerator patch for IPC_SYNC v2007
 static const u32 homebrewAccelSig2007[4] = {
 	0x2401B510   , // .
@@ -110,31 +112,31 @@ static const u32 homebrewAccelSigPatched[2] = {
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	u32* end = addr + size/sizeof(u32);
-	
+
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewSig[0]) && 
-			(addr[1] == homebrewSig[1]) && 
-			(addr[2] == homebrewSig[2]) && 
-			(addr[3] == homebrewSig[3]) && 
-			(addr[4] == homebrewSig[4])) 
+		if ((addr[0] == homebrewSig[0]) &&
+			(addr[1] == homebrewSig[1]) &&
+			(addr[2] == homebrewSig[2]) &&
+			(addr[3] == homebrewSig[3]) &&
+			(addr[4] == homebrewSig[4]))
 		{
 			break;
 		}
 		addr++;
 	}
-	
+
 	if (addr >= end) {
 		return NULL;
 	}
-	
+
 	// patch the program
 	addr[0] = homebrewSigPatched[0];
 	addr[1] = homebrewSigPatched[1];
 	addr[2] = homebrewSigPatched[2];
 	addr[3] = homebrewSigPatched[3];
 	addr[4] = homebrewSigPatched[4];
-	
+
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
@@ -144,10 +146,10 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewAccelSig2007[0]) && 
-			(addr[1] == homebrewAccelSig2007[1]) && 
-			(addr[2] == homebrewAccelSig2007[2]) && 
-			(addr[3] == homebrewAccelSig2007[3])) 
+		if ((addr[0] == homebrewAccelSig2007[0]) &&
+			(addr[1] == homebrewAccelSig2007[1]) &&
+			(addr[2] == homebrewAccelSig2007[2]) &&
+			(addr[3] == homebrewAccelSig2007[3]))
 		{
 			break;
 		}
@@ -171,10 +173,10 @@ static u32* hookAccelIPCHomebrew2007_2(u32* addr, size_t size) {
 
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewAccelSig2007_2[0]) && 
-			(addr[1] == homebrewAccelSig2007_2[1]) && 
-			(addr[2] == homebrewAccelSig2007_2[2]) && 
-			(addr[3] == homebrewAccelSig2007_2[3])) 
+		if ((addr[0] == homebrewAccelSig2007_2[0]) &&
+			(addr[1] == homebrewAccelSig2007_2[1]) &&
+			(addr[2] == homebrewAccelSig2007_2[2]) &&
+			(addr[3] == homebrewAccelSig2007_2[3]))
 		{
 			break;
 		}
@@ -198,10 +200,10 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 
 	// Find the start of the handler
 	while (addr < end) {
-		if ((addr[0] == homebrewAccelSig2010[0]) && 
-			(addr[1] == homebrewAccelSig2010[1]) && 
-			(addr[2] == homebrewAccelSig2010[2]) && 
-			(addr[3] == homebrewAccelSig2010[3])) 
+		if ((addr[0] == homebrewAccelSig2010[0]) &&
+			(addr[1] == homebrewAccelSig2010[1]) &&
+			(addr[2] == homebrewAccelSig2010[2]) &&
+			(addr[3] == homebrewAccelSig2010[3]))
 		{
 			break;
 		}
@@ -223,18 +225,18 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
-	
+
 	nocashMessage("hookNds");
 
 	hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	
+
 	if (!hookLocation) {
 		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
 	}
-	
+
 	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	
+
 	if (!hookAccel) {
 		hookAccel = hookAccelIPCHomebrew2007_2((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 	}
@@ -248,11 +250,11 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	} else {
 		nocashMessage("ACCEL_IPC_OK");
 	}
-	
-	memcpy (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);	
-	
-	sdEngineLocation[1] = myMemUncached(wordCommandAddr);
-	
+
+	memcpy (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
+
+	sdEngineLocation[1] = (u32)myMemUncached(wordCommandAddr);
+
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }

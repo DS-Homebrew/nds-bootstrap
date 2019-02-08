@@ -1,10 +1,10 @@
 /*-----------------------------------------------------------------
  boot.c
- 
+
  BootLoader
  Loads a file into memory and runs it
 
- All resetMemory and startBinary functions are based 
+ All resetMemory and startBinary functions are based
  on the MultiNDS loader by Darkain.
  Original source available at:
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
@@ -28,13 +28,15 @@ License:
 
  If you use this code, please give due credit and email me about your
  project at chishm@hotmail.com
- 
+
 Helpful information:
  This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
 
 #include <stdlib.h>
+#include <string.h>
 #include <nds/ndstypes.h>
+#include <nds/debug.h>
 #include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
@@ -112,7 +114,7 @@ static inline void copyLoop (u32* dest, const u32* src, u32 size) {
 
 /*-------------------------------------------------------------------------
 passArgs_ARM7
-Copies the command line arguments to the end of the ARM9 binary, 
+Copies the command line arguments to the end of the ARM9 binary,
 then sets a flag in memory for the loaded NDS to use
 --------------------------------------------------------------------------*/
 static void passArgs_ARM7 (void) {
@@ -120,15 +122,15 @@ static void passArgs_ARM7 (void) {
 	u32 ARM9_LEN = *((u32*)(NDS_HEADER + 0x02C));
 	u32* argSrc;
 	u32* argDst;
-	
+
 	if (!argStart || !argSize) return;
-	
+
 	argSrc = (u32*)(argStart + (int)&_start);
-	
-	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned 
-	
+
+	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned
+
 	copyLoop(argDst, argSrc, argSize);
-	
+
 	__system_argv->argvMagic = ARGV_MAGIC;
 	__system_argv->commandLine = (char*)argDst;
 	__system_argv->length = argSize;
@@ -140,22 +142,22 @@ static void passArgs_ARM7 (void) {
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
-	
+
 	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK9 = 0x3000000F;
-	
+
 	// WRAM-A fully mapped to ARM7
 	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-	
+
 	// WRAM-B fully mapped to ARM7 // inverted order
 	*(vu32*)REG_MBK2 = 0x9195999D;
 	*(vu32*)REG_MBK3 = 0x8185898D;
-	
+
 	// WRAM-C fully mapped to arm7 // inverted order
 	*(vu32*)REG_MBK4 = 0x9195999D;
 	*(vu32*)REG_MBK5 = 0x8185898D;
-	
-	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area
 	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
 	REG_MBK6 = 0x080037C0; // same as DSiWare
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
@@ -176,7 +178,7 @@ static void resetMemory_ARM7 (void)
 	int i;
 	u8 settings1, settings2;
 	u32 settingsOffset = 0;
-	
+
 	REG_IME = 0;
 
 	for (i=0; i<16; i++) {
@@ -196,7 +198,7 @@ static void resetMemory_ARM7 (void)
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
 	}
-	
+
 	arm7clearRAM();
 
 	REG_IE = 0;
@@ -204,15 +206,15 @@ static void resetMemory_ARM7 (void)
 	(*(vu32*)(0x04000000-4)) = 0;  //IRQ_HANDLER ARM7 version
 	(*(vu32*)(0x04000000-8)) = ~0; //VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  //turn off power to stuff
-	
+
 	// Get settings location
 	boot_readFirmware((u32)0x00020, (u8*)&settingsOffset, 0x2);
 	settingsOffset *= 8;
-	
+
 	// Reload DS Firmware settings
 	boot_readFirmware(settingsOffset + 0x070, &settings1, 0x1);
 	boot_readFirmware(settingsOffset + 0x170, &settings2, 0x1);
-	
+
 	if ((settings1 & 0x7F) == ((settings2+1) & 0x7F)) {
 		boot_readFirmware(settingsOffset + 0x000, (u8*)(NDS_HEADER-0x180), 0x70);
 	} else {
@@ -224,7 +226,7 @@ static void resetMemory_ARM7 (void)
 static void loadBinary_ARM7 (aFile file)
 {
 	u32 ndsHeader[0x170>>2];
-	
+
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
@@ -237,7 +239,7 @@ static void loadBinary_ARM7 (aFile file)
 	u32 ARM7_SRC = ndsHeader[0x030>>2];
 	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
-	
+
 	// Load binaries into memory
 	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 0);
 	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 0);
@@ -262,7 +264,7 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-static void startBinary_ARM7 (void) {	
+static void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
@@ -338,15 +340,15 @@ int arm7_main (void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
-	
+
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
-	
+
 	dldiAtArm7 = checkArm7DLDI((u8*)((u32*)NDS_HEADER)[0x0E], ((u32*)NDS_HEADER)[0x0F]);
 
 	if (dldiAtArm7 && ramDiskCluster != 0) {
-		patchMemoryAddresses(NDS_HEADER);
+		patchMemoryAddresses((tNDSHeader*)NDS_HEADER);
 	}
 
 	// Patch with DLDI if desired
@@ -382,7 +384,7 @@ int arm7_main (void) {
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
@@ -393,4 +395,3 @@ int arm7_main (void) {
 
 	return 0;
 }
-
