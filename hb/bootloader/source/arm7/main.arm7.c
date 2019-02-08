@@ -34,6 +34,7 @@ Helpful information:
 ------------------------------------------------------------------*/
 
 #include <stdlib.h>
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
 #include <nds/dma.h>
