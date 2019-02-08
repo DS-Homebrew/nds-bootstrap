@@ -255,13 +255,13 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
 	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
-	
+
 	*(u32*)(0x400410C+(ndmaSlot*0x1C)) = ctx->size;
-	
+
 	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
-	
+
 	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
-	
+
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8004000;
 
 
@@ -289,7 +289,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	u32 size = ctx->size;
 	const u16 blkSize = sdmmc_read16(REG_SDBLKLEN32);
 	u32 *rDataPtr32 = (u32*)ctx->rData;
-	u8  *rDataPtr8  = ctx->rData;
+	//u8  *rDataPtr8  = ctx->rData;
 	const u32 *tDataPtr32 = (u32*)ctx->tData;
 	const u8  *tDataPtr8  = ctx->tData;
 
