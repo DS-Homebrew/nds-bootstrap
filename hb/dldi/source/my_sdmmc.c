@@ -25,6 +25,7 @@
 #include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
+#include <nds/debug.h>
 #include "my_sdmmc.h"
 #include "my_disc_io.h"
 

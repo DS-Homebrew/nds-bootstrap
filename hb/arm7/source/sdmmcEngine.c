@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <nds/debug.h>
 #include <nds/fifomessages.h>
 #include <nds/fifocommon.h>
 #include <nds/ipc.h>
@@ -38,7 +39,7 @@ void sendValue32(vu32* commandAddr, u32 value32) {
 void getDatamsg(vu32* commandAddr, int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
 		msg[i]=*((u8*)commandAddr+8+i);
-	}	
+	}
 }
 
 //---------------------------------------------------------------------------------
