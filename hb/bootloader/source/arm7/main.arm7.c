@@ -348,7 +348,7 @@ int arm7_main (void) {
 	dldiAtArm7 = checkArm7DLDI((u8*)((u32*)NDS_HEADER)[0x0E], ((u32*)NDS_HEADER)[0x0F]);
 
 	if (dldiAtArm7 && ramDiskCluster != 0) {
-		patchMemoryAddresses(NDS_HEADER);
+		patchMemoryAddresses((tNDSHeader*)NDS_HEADER);
 	}
 
 	// Patch with DLDI if desired
@@ -384,7 +384,7 @@ int arm7_main (void) {
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
