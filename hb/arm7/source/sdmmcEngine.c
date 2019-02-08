@@ -30,6 +30,8 @@
 #include "fat.h"
 #include "i2c.h"
 
+extern vu32* myMemUncached(vu32*);
+
 void sendValue32(vu32* commandAddr, u32 value32) {
 	nocashMessage("sendValue32");
 	commandAddr[1] = value32;
