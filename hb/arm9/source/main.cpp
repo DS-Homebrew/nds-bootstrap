@@ -277,7 +277,9 @@ int main( int argc, char **argv) {
 		}
 
 		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
-        if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
+		if (ramDrivePath != "") {
+			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
+		}
 
 		std::string	romfolder = ndsPath;
 		while (!romfolder.empty() && romfolder[romfolder.size()-1] != '/') {
