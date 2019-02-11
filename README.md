@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master)](https://travis-ci.org/ahezard/nds-bootstrap)
 nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebrew and ROMs through the SD card of the Nintendo DSi/3DS, rather than through emulators or flashcarts.
 
 # Bug Reporting
