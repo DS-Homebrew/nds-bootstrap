@@ -23,6 +23,7 @@
 # Executables
 *.out
 *.app
+*.dldi
 *.i*86
 *.x86_64
 *.hex
@@ -80,24 +81,14 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
 #*.nds
 #*.cia
 #*.d
 
 # Build folders
-data
-bin
-arm7/build
-arm9/build
-dldi/build
-cardengine/arm7/build
-cardengine/arm9/build
-cardengine/arm9_cached/build
-cardengine/arm9_acww/build
-cardengine/arm9_sdk5/build
-sdengine/build
-bootloader/build
+data/
+bin/
+build/
 
 # =========================
 # Project Files
