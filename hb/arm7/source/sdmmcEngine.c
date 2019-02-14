@@ -24,7 +24,7 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
-#include "sdmmc.h"
+#include "my_sdmmc.h"
 #include "debugToFile.h"
 #include "sdmmcEngine.h"
 #include "fat.h"
