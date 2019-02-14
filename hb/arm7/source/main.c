@@ -48,28 +48,30 @@ void VcountHandler(void) {
 
 void dsi_resetSlot1() {
 
-	// Power off Slot
-	while(REG_SCFG_MC&0x0C !=  0x0C); 		// wait until state<>3
-	if(REG_SCFG_MC&0x0C != 0x08) return; 		// exit if state<>2
+#define REG_SCFG_MC_MASK (REG_SCFG_MC & 0x0C)
 
-	REG_SCFG_MC = 0x0C;          		// set state=3
-	while(REG_SCFG_MC&0x0C !=  0x00);  // wait until state=0
+	// Power off Slot.
+	while(REG_SCFG_MC_MASK != 0x0C); 	// Wait until state<>3.
+	if(REG_SCFG_MC_MASK != 0x08) return; 	// Exit if state<>2.
+
+	REG_SCFG_MC = 0x0C;          		// Set state=3.
+	while(REG_SCFG_MC_MASK != 0x00);	// Wait until state=0.
 
 	swiWaitForVBlank();
 
-	// Power On Slot
-	while(REG_SCFG_MC&0x0C !=  0x0C); // wait until state<>3
-	if(REG_SCFG_MC&0x0C != 0x00) return; //  exit if state<>0
+	// Power On Slot.
+	while(REG_SCFG_MC_MASK != 0x0C);	// Wait until state<>3.
+	if(REG_SCFG_MC_MASK != 0x00) return;	// Exit if state<>0.
 
-	REG_SCFG_MC = 0x04;    // wait 1ms, then set state=1
-	while(REG_SCFG_MC&0x0C != 0x04);
+	REG_SCFG_MC = 0x04;		// Wait 1ms, then set state=1.
+	while(REG_SCFG_MC_MASK != 0x04);
 
-	REG_SCFG_MC = 0x08;    // wait 10ms, then set state=2
-	while(REG_SCFG_MC&0x0C != 0x08);
+	REG_SCFG_MC = 0x08;		// Wait 10ms, then set state=2.
+	while(REG_SCFG_MC_MASK != 0x08);
 
-	REG_ROMCTRL = 0x20000000; // wait 27ms, then set REG_ROMCTRL=20000000h
+	REG_ROMCTRL = 0x20000000;	// Wait 27ms, then set REG_ROMCTRL=20000000h.
 
-	while(REG_ROMCTRL&0x8000000 != 0x8000000);
+	while((REG_ROMCTRL & 0x8000000) != 0x8000000);
 }
 
 //---------------------------------------------------------------------------------
