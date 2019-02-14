@@ -152,7 +152,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		msg.type = SDMMC_SD_READ_SECTORS;
 		msg.sdParams.startsector = startsector;
 		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = mybuffer;
+		msg.sdParams.buffer = (u32*)mybuffer;
 
 		sendMsg(sizeof(msg), (u8*)&msg);
 
@@ -160,7 +160,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 		result = getValue32();
 
-		memcpy(mybuffer, buffer+numreads*512, readsectors*512);
+		memcpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
 	}
 
 	//__custom_mpu_restore();
@@ -188,12 +188,12 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 
 		vu32* mybuffer = myMemUncached(tmp_buf_addr);
 
-		memcpy(buffer+numreads*512, mybuffer, readsectors*512);
+		memcpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = startsector;
 		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = mybuffer;
+		msg.sdParams.buffer = (u32*)mybuffer;
 
 		sendMsg(sizeof(msg), (u8*)&msg);
 
