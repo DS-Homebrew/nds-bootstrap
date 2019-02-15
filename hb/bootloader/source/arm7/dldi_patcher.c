@@ -52,9 +52,9 @@ enum DldiOffsets {
 	// IO_INTERFACE data
 	DO_ioType = 0x60,
 	DO_features = 0x64,
-	DO_startup = 0x68,	
-	DO_isInserted = 0x6C,	
-	DO_readSectors = 0x70,	
+	DO_startup = 0x68,
+	DO_isInserted = 0x6C,
+	DO_readSectors = 0x70,
 	DO_writeSectors = 0x74,
 	DO_clearStatus = 0x78,
 	DO_shutdown = 0x7C,
@@ -107,20 +107,17 @@ bool checkArm7DLDI (data_t *binData, u32 binSize) {
 
 bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 
-	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
-	addr_t patchOffset;			// Position of patch destination in the file
+	addr_t memOffset;		// Offset of DLDI after the file is loaded into memory
+	addr_t patchOffset;		// Position of patch destination in the file
 	addr_t relocationOffset;	// Value added to all offsets within the patch to fix it properly
-	addr_t ddmemOffset;			// Original offset used in the DLDI file
-	addr_t ddmemStart;			// Start of range that offsets can be in the DLDI file
-	addr_t ddmemEnd;			// End of range that offsets can be in the DLDI file
-	addr_t ddmemSize;			// Size of range that offsets can be in the DLDI file
+	addr_t ddmemOffset;		// Original offset used in the DLDI file
+	addr_t ddmemStart;		// Start of range that offsets can be in the DLDI file
+	addr_t ddmemEnd;		// End of range that offsets can be in the DLDI file
+	addr_t ddmemSize;		// Size of range that offsets can be in the DLDI file
 	addr_t addrIter;
 
-	data_t *pDH;
-	data_t *pAH;
-
 	size_t dldiFileSize = 0;
-	
+
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
 
@@ -129,8 +126,8 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		return false;
 	}
 
-	pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);
-	pAH = &(binData[patchOffset]);
+	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);
+	data_t *pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
 		// No DLDI patch
@@ -141,7 +138,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		// Not enough space for patch
 		return false;
 	}
-	
+
 	dldiFileSize = 1 << pDH[DO_driverSize];
 
 	memOffset = readAddr (pAH, DO_text_start);
@@ -158,7 +155,8 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-	memcpy (pAH, pDH, dldiFileSize);
+        for (size_t i = 0; i < dldiFileSize; i++)
+        	pAH[i] = pDH[i];
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -184,7 +182,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	// Put the correct DLDI magic string back into the DLDI header
 	memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
-	if (pDH[DO_fixSections] & FIX_ALL) { 
+	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file
 		for (addrIter = (readAddr(pDH, DO_text_start) - ddmemStart); addrIter < (readAddr(pDH, DO_data_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -193,7 +191,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_GLUE) { 
+	if (pDH[DO_fixSections] & FIX_GLUE) {
 		// Search through and fix pointers within the glue section of the file
 		for (addrIter = (readAddr(pDH, DO_glue_start) - ddmemStart); addrIter < (readAddr(pDH, DO_glue_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -202,7 +200,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_GOT) { 
+	if (pDH[DO_fixSections] & FIX_GOT) {
 		// Search through and fix pointers within the Global Offset Table section of the file
 		for (addrIter = (readAddr(pDH, DO_got_start) - ddmemStart); addrIter < (readAddr(pDH, DO_got_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -211,7 +209,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_BSS) { 
+	if (pDH[DO_fixSections] & FIX_BSS) {
 		// Initialise the BSS to 0
 		memset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}

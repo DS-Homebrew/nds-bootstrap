@@ -16,28 +16,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds/debug.h>
 #include <string.h>
-#include "fat.h"
+#include <nds/debug.h>
+#include "my_fat.h"
 
 static bool _debug = false;
-static u32 _debugFileCluster = 0;
+static aFile _debugFileCluster;
 static u32 _currentPos = 0;
 
-void enableDebug(u32 debugFileCluster) {
+void enableDebug(aFile debugFileCluster) {
 	_debug = true;
 	_debugFileCluster = debugFileCluster;
 }
 
-u32 dbg_printf( char * message)
-{
+u32 dbg_printf(const char* message) {
+	if(!_debug)
+		return 0;
+
 	nocashMessage(message);
 
-	if(!_debug) return 0;
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 3);
 
-	u32 ret = fileWrite (message, _debugFileCluster, _currentPos,  strlen(message));
-
-	_currentPos+=strlen(message);
+	_currentPos += strlen(message);
 
 	return ret;
 }

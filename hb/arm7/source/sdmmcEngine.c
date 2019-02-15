@@ -24,8 +24,8 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
-#include "sdmmc.h"
-#include "debugToFile.h"
+#include "my_sdmmc.h"
+#include "debug_file.h"
 #include "sdmmcEngine.h"
 #include "fat.h"
 #include "i2c.h"

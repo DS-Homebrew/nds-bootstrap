@@ -20,7 +20,7 @@ include $(DEVKITARM)/ds_rules
 TARGET		:=	nds-bootstrap
 BUILD		:=	build
 SOURCES		:=	source
-INCLUDES	:=	include build
+INCLUDES	:=	include ../common/include build
 
 #---------------------------------------------------------------------------------
 # options for code generation
