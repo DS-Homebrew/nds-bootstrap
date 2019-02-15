@@ -81,6 +81,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Console model
 		conf->consoleModel = strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "COLOR_MODE")) {
+		// Color mode
+		conf->colorMode = strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN")) {
 		// Loading screen
 		conf->loadingScreen = strtol(value, NULL, 0);
@@ -191,6 +195,29 @@ static int callback(const char *section, const char *key, const char *value, voi
 	return 1; // Continue searching
 }
 
+u16 convertToDsBmp(int colorMode, u16 val) {
+	if (colorMode == 1) {
+		u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
+
+		u8 b,g,r,max,min;
+		b = ((newVal)>>10)&31;
+		g = ((newVal)>>5)&31;
+		r = (newVal)&31;
+		// Value decomposition of hsv
+		max = (b > g) ? b : g;
+		max = (max > r) ? max : r;
+
+		// Desaturate
+		min = (b < g) ? b : g;
+		min = (min < r) ? min : r;
+		max = (max + min) / 2;
+		
+		return 32768|(max<<10)|(max<<5)|(max);
+	} else {
+		return ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
+	}
+}
+
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
@@ -221,7 +248,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fseek(loadingScreenImage, 0xe, SEEK_SET);
 				u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
 				fseek(loadingScreenImage, pixelStart, SEEK_SET);
-				fread(bmpImageBuffer, 2, 0x1A000, loadingScreenImage);
+				fread(bmpImageBuffer, 2, 0x18000, loadingScreenImage);
 				u16* src = bmpImageBuffer;
 				int x = 0;
 				int y = 191;
@@ -231,7 +258,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						y--;
 					}
 					u16 val = *(src++);
-					renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
+					renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
 					x++;
 				}
 				memcpy((void*)0x02800000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));

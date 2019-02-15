@@ -133,6 +133,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("ceCached: %s\n", btoa(conf->ceCached));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
+	dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("loadingScreen: %lX\n", conf->loadingScreen);
 	dbg_printf("loadingDarkTheme: %s\n", btoa(conf->loadingDarkTheme));
 	dbg_printf("loadingSwapLcds: %s\n", btoa(conf->loadingSwapLcds));
