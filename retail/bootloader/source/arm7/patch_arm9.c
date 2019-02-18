@@ -342,6 +342,38 @@ u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
     return oldheapPointer;
 }
 
+void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
+    dbg_printf("relocate_ce9");
+    
+    u32 location_sig[1] = {default_location};
+    
+	u32* armReadCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armReadCardLocation) {
+		return;
+	}
+    dbg_printf("armReadCardLocation ");
+	dbg_hexa((u32)armReadCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadCardLocation);
+    dbg_printf("\n\n");
+    
+    *armReadCardLocation = current_location;
+    
+    u32* thumbReadCardLocation =  findOffset(armReadCardLocation, 0x200, location_sig, 1);
+	if (!armReadCardLocation) {
+		return;
+	}
+    dbg_printf("thumbReadCardLocation ");
+	dbg_hexa((u32)thumbReadCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadCardLocation);
+    dbg_printf("\n\n");
+    
+    *thumbReadCardLocation = current_location;
+        
+
+}
+
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 

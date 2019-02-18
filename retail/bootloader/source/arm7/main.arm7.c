@@ -687,7 +687,7 @@ int arm7_main(void) {
         ce9Location = patchHeapPointer(ndsHeader, false);
         if(ce9Location) {
             	memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
-                //relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location);
+                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
         } else {         
     		const char* romTid = getRomTid(ndsHeader);
     		if (strncmp(romTid, "ADM", 3) == 0) {
