@@ -684,14 +684,19 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 	} else if (ceCached) {
-		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "ADM", 3) == 0) {
-			ce9Location = CARDENGINE_ARM9_ACWW_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_ACWW_LOCATION, cardengine_arm9_acww_bin, cardengine_arm9_acww_bin_size);
-		} else {
-			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_CACHED_LOCATION, cardengine_arm9_cached_bin, cardengine_arm9_cached_bin_size);
-		}
+        ce9Location = patchHeapPointer(ndsHeader, false);
+        if(ce9Location) {
+            	memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
+        } else {         
+    		const char* romTid = getRomTid(ndsHeader);
+    		if (strncmp(romTid, "ADM", 3) == 0) {
+    			ce9Location = CARDENGINE_ARM9_ACWW_LOCATION;
+    			memcpy((u32*)CARDENGINE_ARM9_ACWW_LOCATION, cardengine_arm9_acww_bin, cardengine_arm9_acww_bin_size);
+    		} else {
+    			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+    			memcpy((u32*)CARDENGINE_ARM9_CACHED_LOCATION, cardengine_arm9_cached_bin, cardengine_arm9_cached_bin_size);
+    		}
+        }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);

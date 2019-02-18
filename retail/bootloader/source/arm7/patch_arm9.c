@@ -321,7 +321,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-static u32* patchHeapPointer(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
+u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
 	u32* heapPointer = findHeapPointerOffset(ndsHeader);
 	if (!heapPointer) {
 		return;
@@ -532,7 +532,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchDownloadplay(ndsHeader);
 
-	patchHeapPointer(ce9, ndsHeader, usesThumb);
+	//patchHeapPointer(ndsHeader, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 
