@@ -22,6 +22,7 @@
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
+#define CARDENGINE_ARM9_LOCATION	0x02700000
 
 
 patches_offset:
@@ -83,12 +84,15 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, =cardRead
-	bl		_blx_r3_stub_card_read
+	ldr		r6, cardReadRef1
+    ldr     r7, ce9location1
+    add     r6, r6, r7
+    
+	bl		_blx_r6_stub_card_read
 
 	ldmfd   sp!, {r4-r11,pc}
 	bx      lr
-_blx_r3_stub_card_read:
+_blx_r6_stub_card_read:
 	bx	r6
 .pool
 cardStructArm9:
@@ -98,22 +102,33 @@ cacheFlushRef:
 readCachedRef:
 .word    0x00000000  
 cacheRef:
-.word    0x00000000  
+.word    0x00000000
+ce9location1:
+.word   CARDENGINE_ARM9_LOCATION
+cardReadRef1:
+.word   cardRead-CARDENGINE_ARM9_LOCATION 	  
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push	{r3-r7, lr}
 
-	ldr		r6, =cardRead
+	ldr		r6, cardReadRef2
+    ldr     r7, ce9location2
+    add     r6, r6, r7
 
-	bl		_blx_r3_stub_thumb_card_read	
+	bl		_blx_r6_stub_thumb_card_read	
 
 	pop	{r3-r7, pc}
 	bx      lr
-_blx_r3_stub_thumb_card_read:
+_blx_r6_stub_thumb_card_read:
 	bx	r6	
-.pool	
+.pool
+.align	4
+ce9location2:
+.word   CARDENGINE_ARM9_LOCATION
+cardReadRef2:
+.word   cardRead-CARDENGINE_ARM9_LOCATION 	
 	.arm
 @---------------------------------------------------------------------------------
 
