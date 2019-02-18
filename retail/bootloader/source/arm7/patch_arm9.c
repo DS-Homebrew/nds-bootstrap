@@ -329,7 +329,7 @@ static u32* patchHeapPointer(cardengineArm9* ce9, const tNDSHeader* ndsHeader, b
     u32* oldheapPointer = (u32*)*heapPointer;
         
     dbg_printf("old heap pointer: ");
-	dbg_hexa((u32)*oldheapPointer);
+	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
 	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
