@@ -1264,7 +1264,7 @@ u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
     dbg_printf("heapPointer: ");
     u32* heapPointer = initHeapEnd-5;
     
-    dbg_hexa((u32)initHeapStart);
+    dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
     
 	return heapPointer;

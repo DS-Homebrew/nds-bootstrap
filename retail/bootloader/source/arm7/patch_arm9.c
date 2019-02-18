@@ -327,11 +327,16 @@ static u32* patchHeapPointer(cardengineArm9* ce9, const tNDSHeader* ndsHeader, b
 		return;
 	}
     u32* oldheapPointer = (u32*)*heapPointer;
-	*heapPointer = (u32*)((u32)heapPointer + 0x10000); // shrink heap by 10 KB
+        
+    dbg_printf("old heap pointer: ");
+	dbg_hexa((u32)*oldheapPointer);
+    dbg_printf("\n\n");
+    
+	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
 	// *(vu32*)(0x027FFDA0) = *heapPointer;
     
     dbg_printf("new heap pointer: ");
-	dbg_hexa((u32)heapPointer);
+	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     
     return oldheapPointer;
