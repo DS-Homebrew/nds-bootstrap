@@ -491,6 +491,19 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
+static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	// Opera RAM patch
+	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
+	if (!operaRamOffset) {
+		return;
+	}
+	extern u32 consoleModel;
+	// Patch to read from DSi RAM
+	for (int i = 0; i <= 5; i++) {
+		*(operaRamOffset + i) += 0x03800000;
+	}
+}
+
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
@@ -536,6 +549,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5First(ndsHeader, moduleParams);
 	
 	randomPatch5Second(ndsHeader, moduleParams);
+	
+	operaRamPatch(ndsHeader, moduleParams);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 

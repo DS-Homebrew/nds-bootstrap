@@ -102,6 +102,8 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 // Mpu cache init
 static const u32 mpuInitCache[1] = {0xE3A00042};
 
+static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
+
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
@@ -1323,4 +1325,30 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_para
 
 	dbg_printf("\n");
 	return randomPatchOffset;
+}
+
+u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return NULL;
+	}
+
+	dbg_printf("findOperaRamOffset:\n");
+
+	u32* operaRamOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+        operaRamSignature, 2
+	);
+	if (operaRamOffset) {
+		dbg_printf("Opera RAM found: ");
+	} else {
+		dbg_printf("Opera RAM not found\n");
+	}
+
+	if (operaRamOffset) {
+		dbg_hexa((u32)operaRamOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return operaRamOffset;
 }

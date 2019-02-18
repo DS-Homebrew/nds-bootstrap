@@ -364,7 +364,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = (dsiMode ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}*/
 
-		debug8mbMpuFix();
+		const char* romTid = getRomTid(ndsHeader);
+		if (strncmp(romTid, "UBR", 3) == 0) {
+			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
+			cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
+		} else {
+			debug8mbMpuFix();
+		}
 
 		//ndsHeader->romSize += 0x1000;
 

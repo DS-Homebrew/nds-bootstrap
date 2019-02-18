@@ -417,8 +417,10 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "AMC", 3) == 0) return false; 
-	else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
+	if (strncmp(romTid, "AMC", 3) == 0
+	|| strncmp(romTid, "UBR", 3) == 0) {
+		return false;
+	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00800000));
