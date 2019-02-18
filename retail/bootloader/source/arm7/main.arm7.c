@@ -96,7 +96,7 @@ extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 soundFix;
 extern u32 boostVram;
-//extern u32 logging;
+extern u32 logging;
 
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
@@ -597,6 +597,10 @@ int arm7_main(void) {
 	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
 		return -1;
+	}
+    
+    if (logging) {
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
 	// ROM file

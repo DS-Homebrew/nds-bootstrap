@@ -137,10 +137,6 @@ u32 patchCardNds(
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
-	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
-	}
-
 	dbg_printf("patchCardNds\n\n");
 
 	bool sdk5 = isSdk5(moduleParams);
