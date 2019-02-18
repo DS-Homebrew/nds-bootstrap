@@ -1234,7 +1234,7 @@ u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointerOffset:\n");
 
 	u32* initHeapStart = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, 0x00300000,
 		initHeapStartSignature, 3
 	);
 	if (initHeapStart) {
@@ -1249,13 +1249,13 @@ u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
 	
     
     u32* initHeapEnd = findOffset(
-        initHeapStart, 0x100,//ndsHeader->arm9binarySize,
+        initHeapStart, 0x200,
 		initHeapEndSignature, 2
 	);
     if (initHeapEnd) {
 		dbg_printf("Init Heap End found: ");
 	} else {
-		dbg_printf("Init Heap End not found\n");
+		dbg_printf("Init Heap End not found\n\n");
         return 0;
 	}
     

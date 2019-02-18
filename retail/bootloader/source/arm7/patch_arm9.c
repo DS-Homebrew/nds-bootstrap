@@ -332,7 +332,7 @@ static u32* patchHeapPointer(cardengineArm9* ce9, const tNDSHeader* ndsHeader, b
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)heapPointer);
-    dbg_printf("\n");
+    dbg_printf("\n\n");
     
     return oldheapPointer;
 }
@@ -527,7 +527,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchDownloadplay(ndsHeader);
 
-	//patchHeapPointer(ce9, ndsHeader, usesThumb);
+	patchHeapPointer(ce9, ndsHeader, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 
