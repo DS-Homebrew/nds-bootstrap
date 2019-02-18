@@ -321,36 +321,21 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-/*static void patchArenaLow(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* arenaLowOffset = findArenaLowOffset(ndsHeader);
-	if (!arenaLowOffset) {
+static u32* patchHeapPointer(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
+	u32* heapPointer = findHeapPointerOffset(ndsHeader);
+	if (!heapPointer) {
 		return;
 	}
-	debug[0] = (u32)arenaLowOffset;
-
-	arenaLowOffset = (u32*)((u32)arenaLowOffset + 0x88);
-	debug[10] = (u32)arenaLowOffset;
-	debug[11] = *arenaLowOffset;
-
-	u32* oldArenaLow = (u32*)*arenaLowOffset;
-
-	// *arenaLowOffset += 0x800; // shrink heap by 8 KB
-	// *(vu32*)(0x027FFDA0) = *arenaLowOffset;
-	debug[12] = *arenaLowOffset;
-
-	u32* arenaLow2Offset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00100000,//ndsHeader->arm9binarySize,
-		oldArenaLow, 1
-	);
-
-	// *arenaLow2Offset += 0x800; // shrink heap by 8 KB
-
-	debug[13] = (u32)arenaLow2Offset;
-
-	// Patch
-	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	memcpy(oldArenaLow, cardReadPatch, 0xF0);
-}*/
+    u32* oldheapPointer = (u32*)*heapPointer;
+	*heapPointer = (u32*)((u32)heapPointer + 0x10000); // shrink heap by 10 KB
+	// *(vu32*)(0x027FFDA0) = *heapPointer;
+    
+    dbg_printf("new heap pointer: ");
+	dbg_hexa((u32)heapPointer);
+    dbg_printf("\n");
+    
+    return oldheapPointer;
+}
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -542,7 +527,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchDownloadplay(ndsHeader);
 
-	//patchArenaLow(ce9, ndsHeader, usesThumb);
+	//patchHeapPointer(ce9, ndsHeader, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 
