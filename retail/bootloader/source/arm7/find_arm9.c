@@ -78,9 +78,6 @@ static const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
 static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
-// Arena low
-//static const u32 arenaLowSignature[4] = {0xE1A00100, 0xE2800627, 0xE2800AFF, 0xE5801DA0};
-
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
 static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
@@ -103,6 +100,10 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuInitCache[1] = {0xE3A00042};
 
 static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
+
+// Init Heap
+static const initHeapStartSignature[3]        = {0xE92D4008, 0xE3500006, 0x908FF100};
+static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
@@ -1229,27 +1230,45 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 	return mpuInitCacheOffset;
 }
 
-/*u32* findArenaLowOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findArenaLowOffset:\n");
+u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findHeapPointerOffset:\n");
 
-	u32* arenaLowOffset = findOffset(
+	u32* initHeapStart = findOffset(
 		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		arenaLowSignature, 4
+		initHeapStartSignature, 3
 	);
-	if (arenaLowOffset) {
-		dbg_printf("Arena low found: ");
+	if (initHeapStart) {
+		dbg_printf("Init Heap Start found: ");
 	} else {
-		dbg_printf("Arena low not found\n");
+		dbg_printf("Init Heap Start not found\n");
+        return 0;
 	}
 
-	if (arenaLowOffset) {
-		dbg_hexa((u32)arenaLowOffset);
-		dbg_printf("\n");
-	}
-
+    dbg_hexa((u32)initHeapStart);
 	dbg_printf("\n");
-	return arenaLowOffset;
-}*/
+	
+    
+    u32* initHeapEnd = findOffset(
+        initHeapStart, 0x100,//ndsHeader->arm9binarySize,
+		initHeapEndSignature, 2
+	);
+    if (initHeapEnd) {
+		dbg_printf("Init Heap End found: ");
+	} else {
+		dbg_printf("Init Heap End not found\n");
+        return 0;
+	}
+    
+    dbg_hexa((u32)initHeapEnd);
+	dbg_printf("\n");
+    dbg_printf("heapPointer: ");
+    u32* heapPointer = initHeapEnd-5;
+    
+    dbg_hexa((u32)initHeapStart);
+	dbg_printf("\n");
+    
+	return heapPointer;
+}
 
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset:\n");
