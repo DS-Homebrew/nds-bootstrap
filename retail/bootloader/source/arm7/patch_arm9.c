@@ -338,6 +338,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
+    dbg_printf("Heap Shrink Sucessfull\n\n");
     
     return oldheapPointer;
 }

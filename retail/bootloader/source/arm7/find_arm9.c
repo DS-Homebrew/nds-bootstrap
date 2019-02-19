@@ -105,10 +105,9 @@ static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
  
   
  
-   
- 
 // Init Heap
-static const initHeapStartSignature2[3]        = {0xE3500006, 0xE3500006, 0xEA000012};
+static const initHeapStartSignature2[3]        = {0xE3500006, 0x908FF100, 0xEA000012};
+static const initHeapStartSignature2alt[3]        = {0xE3500006, 0xE3500006, 0xEA000012};
 static const initHeapStartSignature3[3]        = {0xE92D4000, 0xE24DD004, 0xE3500006};
 static const initHeapStartSignature4[3]        = {0xE92D4008, 0x908FF100, 0x908FF100};
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
@@ -1279,7 +1278,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
     dbg_printf("heapPointer: ");
     u32* heapPointer = initHeapEnd-5;
     if (moduleParams->sdk_version < 0x3000000) {
-        u32* heapPointer = initHeapEnd-3;
+        heapPointer = initHeapEnd-3;
     }
         
     dbg_hexa((u32)heapPointer);
