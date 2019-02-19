@@ -2,29 +2,16 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global ce9
 	.align	4
 	.arm
-
-.global card_engine_start
-.global card_engine_start_sync
-.global card_engine_end
-.global cardStruct0
-.global cacheStruct
-.global patches_offset
-.global moduleParams
-.global fileCluster
-.global saveCluster
-.global ROMinRAM
-.global dsiMode
-.global enableExceptionHandler
-.global consoleModel
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
-#define CARDENGINE_ARM9_LOCATION	0x02700000
 
-
+ce9 :
+	.word	ce9
 patches_offset:
 	.word	patches
 thumbPatches_offset:
@@ -52,7 +39,6 @@ consoleModel:
 
 card_engine_start:
 
-.global readCachedRef
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
@@ -64,7 +50,6 @@ patches:
 .word   cacheFlushRef
 .word   readCachedRef
 .word   0x0
-.global needFlushDCCache
 needFlushDCCache:
 .word   0x0
 thumbPatches:
@@ -104,9 +89,9 @@ readCachedRef:
 cacheRef:
 .word    0x00000000
 ce9location1:
-.word   CARDENGINE_ARM9_LOCATION
+.word   ce9
 cardReadRef1:
-.word   cardRead-CARDENGINE_ARM9_LOCATION 	  
+.word   cardRead-ce9 	  
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
@@ -126,9 +111,9 @@ _blx_r6_stub_thumb_card_read:
 .pool
 .align	4
 ce9location2:
-.word   CARDENGINE_ARM9_LOCATION
+.word   ce9
 cardReadRef2:
-.word   cardRead-CARDENGINE_ARM9_LOCATION 	
+.word   cardRead-ce9 	
 	.arm
 @---------------------------------------------------------------------------------
 

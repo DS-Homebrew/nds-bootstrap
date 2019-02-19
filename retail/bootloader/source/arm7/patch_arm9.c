@@ -343,9 +343,21 @@ u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
-    dbg_printf("relocate_ce9");
+    dbg_printf("relocate_ce9\n");
     
     u32 location_sig[1] = {default_location};
+    
+    u32* firstCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!firstCardLocation) {
+		return;
+	}
+    dbg_printf("firstCardLocation ");
+	dbg_hexa((u32)firstCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*firstCardLocation);
+    dbg_printf("\n\n");
+    
+    *firstCardLocation = current_location;
     
 	u32* armReadCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadCardLocation) {
@@ -359,8 +371,8 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadCardLocation = current_location;
     
-    u32* thumbReadCardLocation =  findOffset(armReadCardLocation, 0x200, location_sig, 1);
-	if (!armReadCardLocation) {
+    u32* thumbReadCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadCardLocation) {
 		return;
 	}
     dbg_printf("thumbReadCardLocation ");
@@ -370,7 +382,19 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadCardLocation = current_location;
-        
+    
+    u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!globalCardLocation) {
+		return;
+	}
+    dbg_printf("globalCardLocation ");
+	dbg_hexa((u32)globalCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*globalCardLocation);
+    dbg_printf("\n\n");
+    
+    *globalCardLocation = current_location;
+    
 
 }
 

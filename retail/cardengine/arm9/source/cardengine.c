@@ -30,6 +30,7 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
+#include "cardengine_header_arm9.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -40,21 +41,10 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern void user_exception(void);
+//extern void user_exception(void);
+//extern u32 enableExceptionHandler;
 
-extern vu32* volatile cardStruct0;
-//extern vu32* volatile cacheStruct;
-
-extern module_params_t* moduleParams;
-extern u32 ROMinRAM;
-extern u32 dsiMode;
-extern u32 enableExceptionHandler;
-extern u32 consoleModel;
-extern u32 asyncPrefetch;
-
-extern u32 needFlushDCCache;
-
-extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -205,7 +195,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 -= len2 % 32;
 			}
 
-			if (readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+			if (ce9->patches->readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 				#ifdef DEBUG
 				// Send a log command for debug purpose
 				// -------------------------------------
@@ -247,9 +237,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				//cardStruct[0] = src + len2;
 				//cardStruct[1] = dst + len2;
 				//cardStruct[2] = len - len2;
-				//(*readCachedRef)(cacheStruct);
 				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
 				*cachePage = page;
+				
+				volatile int (*readCachedRef)(u32*) = ce9->patches->readCachedRef;
 				(*readCachedRef)(cacheStruct);
 			}
 			len = cardStruct[2];
@@ -279,7 +270,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if (readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+		if (ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -287,7 +278,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
-			sharedAddr[2] = (dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
+			sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -295,7 +286,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Copy directly
-			memcpy(dst, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+			memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 			// Update cardi common
 			cardStruct[0] = src + len;
@@ -309,7 +300,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = page;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+			sharedAddr[2] = ((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -317,8 +308,9 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+			memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
+			volatile int (*readCachedRef)(u32*) = ce9->patches->readCachedRef;
 			(*readCachedRef)(cacheStruct);
 		}
 		len = cardStruct[2];
@@ -340,28 +332,28 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		if (dsiMode) {
+		if (ce9->dsiMode) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 		}
 
 		//if (isGameLaggy(ndsHeader)) {
-			if (consoleModel > 0) {
-				if (dsiMode) {
+			if (ce9->consoleModel > 0) {
+				if (ce9->dsiMode) {
 					// SDK 5
 					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 				}
-				cacheSlots = (dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
 			} else {
-				cacheSlots = (dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
+				cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
 			}
 			//readSize = _32KB_READ_SIZE;
-		/*} else if (consoleModel > 0) {
-			if (dsiMode) {
+		/*} else if (ce9->consoleModel > 0) {
+			if (ce9->dsiMode) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			}
-			cacheSlots = (dsiMode ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
+			cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}*/
 
 		const char* romTid = getRomTid(ndsHeader);
@@ -374,15 +366,16 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		//ndsHeader->romSize += 0x1000;
 
-		if (enableExceptionHandler) {
+        // TODO : fix exceptionHandler
+		/*if (enableExceptionHandler) {
 			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			setExceptionHandler(user_exception);
-		}
+		}*/
 		
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = cardStruct0;
+	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
@@ -419,5 +412,5 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	return ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }
