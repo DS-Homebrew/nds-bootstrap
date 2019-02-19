@@ -69,7 +69,7 @@ const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
 u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
 u32* findMpuInitCacheOffset(const u32* mpuStartOffset);
-//u32* findArenaLowOffset(const tNDSHeader* ndsHeader);
+u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5

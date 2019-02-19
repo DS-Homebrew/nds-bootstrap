@@ -321,8 +321,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* heapPointer = findHeapPointerOffset(ndsHeader);
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
+	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
 	if (!heapPointer) {
 		return;
 	}
