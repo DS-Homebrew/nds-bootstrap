@@ -398,6 +398,11 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     // fix the header pointer
     cardengineArm9* ce9 = (cardengineArm9*) current_location;
     ce9->patches = (cardengineArm9Patches*)((u32)ce9->patches - default_location + current_location);
+    
+    dbg_printf(" ce9->patches ");
+	dbg_hexa((u32) ce9->patches);
+    dbg_printf("\n\n");
+    
     ce9->thumbPatches = (cardengineArm9ThumbPatches*)((u32)ce9->thumbPatches - default_location + current_location);
     ce9->patches->card_read_arm9 = (u32*)((u32)ce9->patches->card_read_arm9 - default_location + current_location);
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
