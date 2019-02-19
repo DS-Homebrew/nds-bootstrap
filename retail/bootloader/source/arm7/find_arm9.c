@@ -104,13 +104,8 @@ static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
    
  
 // Init Heap
-static const initHeapStartSignature2[3]        = {0xE3500006, 0x908FF100, 0xEA000012};
-static const initHeapStartSignature2alt[3]        = {0xE3500006, 0xE3500006, 0xEA000012};
-static const initHeapStartSignature3[3]        = {0xE92D4000, 0xE24DD004, 0xE3500006};
-static const initHeapStartSignature4[3]        = {0xE92D4008, 0x908FF100, 0x908FF100};
-static const u32 initHeapStartSignature4Alt[3]     = {0xE92D4008, 0xE3500006, 0x908FF100};
-static const u16 initHeapStartSignatureThumb4Alt[3]     = {0xB508, 0x2806, 0xD824};
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
+static const initHeapEndFuncSignature[1]     = {0xE12FFF1E};      
 
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
@@ -1255,61 +1250,14 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
     dbg_hexa((u32)initHeapEnd);
 	dbg_printf("\n");
     dbg_printf("heapPointer: ");
-    u32* heapPointer = initHeapEnd-5;
-    if (moduleParams->sdk_version < 0x2010000) {
-        heapPointer = initHeapEnd-3;
-    }
-        
-    dbg_hexa((u32)heapPointer);
-	dbg_printf("\n");
 
-    const u32* startSig = initHeapStartSignature4;
-    const u16* startSigThumb = initHeapStartSignatureThumb4Alt;
-    if (moduleParams->sdk_version > 0x2010000 && moduleParams->sdk_version < 0x4000000) {
-        startSig = initHeapStartSignature3;
-    } else if (moduleParams->sdk_version < 0x2010000) {
-        startSig = initHeapStartSignature2;
-    }
-
-	u32* initHeapStart = findOffsetBackwards(
+	u32* initEndFunc = findOffsetBackwards(
 		(u32*)initHeapEnd, 0x200,
-		startSig, 3
+		initHeapEndFuncSignature, 1
 	);
-	if (initHeapStart) {
-		dbg_printf("Init Heap Start found: ");
-	} else {
-		dbg_printf("Init Heap Start not found\n");
-        if (moduleParams->sdk_version < 0x4000000) return 0;
-	}
-	if (moduleParams->sdk_version > 0x4000000) {
-		if (!initHeapStart) {
-		startSig = initHeapStartSignature4Alt;
-		initHeapStart = findOffsetBackwards(
-			(u32*)initHeapEnd, 0x200,
-			startSig, 3
-		);
-		if (initHeapStart) {
-			dbg_printf("Init Heap Start alt found: ");
-		} else {
-			dbg_printf("Init Heap Start alt not found\n");
-		}
-		}
-
-		if (!initHeapStart) {
-		initHeapStart = findOffsetBackwardsThumb(
-			(u16*)initHeapEnd, 0x200,
-			startSigThumb, 3
-		);
-		if (initHeapStart) {
-			dbg_printf("Init Heap Start thumb alt found: ");
-		} else {
-			dbg_printf("Init Heap Start thumb alt not found\n");
-			return 0;
-		}
-		}
-	}
-
-    dbg_hexa((u32)initHeapStart);
+    u32* heapPointer = initEndFunc + 1;
+    
+    dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
 
 	return heapPointer;
