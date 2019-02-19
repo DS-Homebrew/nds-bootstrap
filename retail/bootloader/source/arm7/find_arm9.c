@@ -101,9 +101,14 @@ static const u32 mpuInitCache[1] = {0xE3A00042};
 
 static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
+   
+ 
 // Init Heap
-static const initHeapStartSignature[3]        = {0xE92D4008, 0xE3500006, 0x908FF100};
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
+static const initHeapEndFuncSignature[1]     = {0xE12FFF1E};      
+static const initHeapEndFuncSignatureAlt[1]     = {0xE8BD8008};      
+static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};      
+
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
@@ -1230,26 +1235,11 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 	return mpuInitCacheOffset;
 }
 
-u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
+u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointerOffset:\n");
-
-	u32* initHeapStart = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,
-		initHeapStartSignature, 3
-	);
-	if (initHeapStart) {
-		dbg_printf("Init Heap Start found: ");
-	} else {
-		dbg_printf("Init Heap Start not found\n");
-        return 0;
-	}
-
-    dbg_hexa((u32)initHeapStart);
-	dbg_printf("\n");
-	
     
     u32* initHeapEnd = findOffset(
-        initHeapStart, 0x200,
+        (u32*)ndsHeader->arm9destination, 0x00300000,
 		initHeapEndSignature, 2
 	);
     if (initHeapEnd) {
@@ -1262,11 +1252,30 @@ u32* findHeapPointerOffset(const tNDSHeader* ndsHeader) {
     dbg_hexa((u32)initHeapEnd);
 	dbg_printf("\n");
     dbg_printf("heapPointer: ");
-    u32* heapPointer = initHeapEnd-5;
+
+	u32* initEndFunc = findOffsetBackwards(
+		(u32*)initHeapEnd, 0x40,
+		initHeapEndFuncSignature, 1
+	);
+	if (!initEndFunc) {
+		initEndFunc = findOffsetBackwards(
+			(u32*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureAlt, 1
+		);
+	}
+    u32* heapPointer = initEndFunc + 1;
+    
+	if (!initEndFunc) {
+		u16* initEndFuncThumb = findOffsetBackwardsThumb(
+			(u16*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureThumb, 1
+		);
+        heapPointer = initEndFuncThumb+1;
+	}
     
     dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
-    
+
 	return heapPointer;
 }
 

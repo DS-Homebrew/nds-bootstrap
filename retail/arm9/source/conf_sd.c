@@ -75,7 +75,8 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CARDENGINE_CACHED")) {
 		// Card engine (arm9) cached
-		conf->ceCached = (bool)strtol(value, NULL, 0);
+		//conf->ceCached = (bool)strtol(value, NULL, 0);
+        conf->ceCached = true;
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CONSOLE_MODEL")) {
 		// Console model

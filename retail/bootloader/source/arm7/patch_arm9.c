@@ -321,11 +321,16 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* heapPointer = findHeapPointerOffset(ndsHeader);
-	if (!heapPointer) {
-		return;
-	}
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
+	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
+    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("heap pointer value: ");
+	    dbg_hexa(*heapPointer);    
+		dbg_printf("\n\n");
+        return 0;
+    }
+    
     u32* oldheapPointer = (u32*)*heapPointer;
         
     dbg_printf("old heap pointer: ");
@@ -333,19 +338,31 @@ u32* patchHeapPointer(const tNDSHeader* ndsHeader, bool usesThumb) {
     dbg_printf("\n\n");
     
 	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
-	// *(vu32*)(0x027FFDA0) = *heapPointer;
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
+    dbg_printf("Heap Shrink Sucessfull\n\n");
     
     return oldheapPointer;
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
-    dbg_printf("relocate_ce9");
+    dbg_printf("relocate_ce9\n");
     
     u32 location_sig[1] = {default_location};
+    
+    u32* firstCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!firstCardLocation) {
+		return;
+	}
+    dbg_printf("firstCardLocation ");
+	dbg_hexa((u32)firstCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*firstCardLocation);
+    dbg_printf("\n\n");
+    
+    *firstCardLocation = current_location;
     
 	u32* armReadCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadCardLocation) {
@@ -359,8 +376,8 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadCardLocation = current_location;
     
-    u32* thumbReadCardLocation =  findOffset(armReadCardLocation, 0x200, location_sig, 1);
-	if (!armReadCardLocation) {
+    u32* thumbReadCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadCardLocation) {
 		return;
 	}
     dbg_printf("thumbReadCardLocation ");
@@ -370,8 +387,44 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadCardLocation = current_location;
-        
-
+    
+    u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!globalCardLocation) {
+		return;
+	}
+    dbg_printf("globalCardLocation ");
+	dbg_hexa((u32)globalCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*globalCardLocation);
+    dbg_printf("\n\n");
+    
+    *globalCardLocation = current_location;
+    
+    // fix the header pointer
+    cardengineArm9* ce9 = (cardengineArm9*) current_location;
+    ce9->patches = (cardengineArm9Patches*)((u32)ce9->patches - default_location + current_location);
+    
+    dbg_printf(" ce9->patches ");
+	dbg_hexa((u32) ce9->patches);
+    dbg_printf("\n\n");
+    
+    ce9->thumbPatches = (cardengineArm9ThumbPatches*)((u32)ce9->thumbPatches - default_location + current_location);
+    ce9->patches->card_read_arm9 = (u32*)((u32)ce9->patches->card_read_arm9 - default_location + current_location);
+    ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
+    ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
+    ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
+    ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
+    ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
+    ce9->patches->readCachedRef = (u32*)((u32)ce9->patches->readCachedRef - default_location + current_location);
+    ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
+    ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
+    ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
+    ce9->thumbPatches->readCachedRef = (u32*)((u32)ce9->thumbPatches->readCachedRef - default_location + current_location);
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

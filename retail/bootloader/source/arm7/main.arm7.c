@@ -64,8 +64,6 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
-#include "cardengine_arm9_cached_bin.h"
-#include "cardengine_arm9_acww_bin.h"
 #include "cardengine_arm9_sdk5_bin.h"
 
 //#define memcpy __builtin_memcpy
@@ -654,6 +652,9 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+    dbg_printf("sdk_version: ");
+    dbg_hexa(moduleParams->sdk_version);
+    dbg_printf("\n"); 
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
@@ -688,20 +689,14 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 	} else if (ceCached) {
-        //ce9Location = patchHeapPointer(ndsHeader, false);
-        ce9Location=0;
+
+        ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
         if(ce9Location) {
             	memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
                 relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
         } else {         
-    		const char* romTid = getRomTid(ndsHeader);
-    		if (strncmp(romTid, "ADM", 3) == 0) {
-    			ce9Location = CARDENGINE_ARM9_ACWW_LOCATION;
-    			memcpy((u32*)CARDENGINE_ARM9_ACWW_LOCATION, cardengine_arm9_acww_bin, cardengine_arm9_acww_bin_size);
-    		} else {
-    			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-    			memcpy((u32*)CARDENGINE_ARM9_CACHED_LOCATION, cardengine_arm9_cached_bin, cardengine_arm9_cached_bin_size);
-    		}
+    		ce9Location = CARDENGINE_ARM9_LOCATION;
+    		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
         }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;

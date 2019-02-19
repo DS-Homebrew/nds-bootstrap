@@ -79,6 +79,7 @@ u32 patchCardNds(
 	u32 saveSize
 );
 u32* patchHeapPointer(
+    const module_params_t* moduleParams,
     const tNDSHeader* ndsHeader, 
     bool usesThumb
 );
