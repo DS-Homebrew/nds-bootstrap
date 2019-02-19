@@ -106,6 +106,8 @@ static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 // Init Heap
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
 static const initHeapEndFuncSignature[1]     = {0xE12FFF1E};      
+static const initHeapEndFuncSignatureAlt[1]     = {0xE8BD8008};      
+static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};      
 
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
@@ -1255,6 +1257,18 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 		(u32*)initHeapEnd, 0x40,
 		initHeapEndFuncSignature, 1
 	);
+	if (!initEndFunc) {
+		initEndFunc = findOffsetBackwards(
+			(u32*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureAlt, 1
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffsetBackwardsThumb(
+			(u16*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureThumb, 1
+		);
+	}
     u32* heapPointer = initEndFunc + 1;
     
     dbg_hexa((u32)heapPointer);
