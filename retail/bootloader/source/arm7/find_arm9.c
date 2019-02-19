@@ -1263,13 +1263,15 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 			initHeapEndFuncSignatureAlt, 1
 		);
 	}
+    u32* heapPointer = initEndFunc + 1;
+    
 	if (!initEndFunc) {
-		initEndFunc = findOffsetBackwardsThumb(
+		u16* initEndFuncThumb = findOffsetBackwardsThumb(
 			(u16*)initHeapEnd, 0x40,
 			initHeapEndFuncSignatureThumb, 1
 		);
+        heapPointer = initEndFuncThumb+1;
 	}
-    u32* heapPointer = initEndFunc + 1;
     
     dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
