@@ -688,7 +688,7 @@ int arm7_main(void) {
 	if (isSdk5(moduleParams)) {
 		ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
-	} else if (ceCached) {
+	} else /*if (ceCached)*/ {
 
         ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
         if(ce9Location) {
@@ -698,10 +698,10 @@ int arm7_main(void) {
     		ce9Location = CARDENGINE_ARM9_LOCATION;
     		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
         }
-	} else {
+	} /*else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
-	}
+	}*/
 	increaseLoadBarLength();
 
 	//
