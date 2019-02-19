@@ -2,6 +2,7 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global ce9
 	.align	4
 	.arm
 
@@ -24,6 +25,8 @@
 #define CACHE_LINE_SIZE	32
 
 
+ce9 :
+	.word	ce9
 patches_offset:
 	.word	patches
 thumbPatches_offset:
