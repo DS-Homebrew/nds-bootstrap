@@ -108,7 +108,7 @@ static const initHeapStartSignature2[3]        = {0xE3500006, 0x908FF100, 0xEA00
 static const initHeapStartSignature2alt[3]        = {0xE3500006, 0xE3500006, 0xEA000012};
 static const initHeapStartSignature3[3]        = {0xE92D4000, 0xE24DD004, 0xE3500006};
 static const initHeapStartSignature4[3]        = {0xE92D4008, 0x908FF100, 0x908FF100};
-static const u32 initHeapStartSignature4Alt[4]     = {0xE92D4008, 0xE3500006, 0x908FF100, 0xEA00001C};
+static const u32 initHeapStartSignature4Alt[3]     = {0xE92D4008, 0xE3500006, 0x908FF100};
 static const u16 initHeapStartSignatureThumb4Alt[3]     = {0xB508, 0x2806, 0xD824};
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
 
@@ -1241,58 +1241,9 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointerOffset:\n");
     
-    const u32* startSig = initHeapStartSignature4;
-    const u16* startSigThumb = initHeapStartSignatureThumb4Alt;
-    if (moduleParams->sdk_version > 0x2010000 && moduleParams->sdk_version < 0x4000000) {
-        startSig = initHeapStartSignature3;
-    } else if (moduleParams->sdk_version < 0x2010000) {
-        startSig = initHeapStartSignature2;
-    }
-
-	u32* initHeapStart = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,
-		startSig, 3
-	);
-	if (initHeapStart) {
-		dbg_printf("Init Heap Start found: ");
-	} else {
-		dbg_printf("Init Heap Start not found\n");
-        if (moduleParams->sdk_version < 0x4000000) return 0;
-	}
-	if (moduleParams->sdk_version > 0x4000000) {
-		if (!initHeapStart) {
-		startSig = initHeapStartSignature4Alt;
-		initHeapStart = findOffset(
-			(u32*)ndsHeader->arm9destination, 0x00300000,
-			startSig, 4
-		);
-		if (initHeapStart) {
-			dbg_printf("Init Heap Start alt found: ");
-		} else {
-			dbg_printf("Init Heap Start alt not found\n");
-		}
-		}
-
-		if (!initHeapStart) {
-		initHeapStart = findOffsetThumb(
-			(u16*)ndsHeader->arm9destination, 0x00300000,
-			startSigThumb, 3
-		);
-		if (initHeapStart) {
-			dbg_printf("Init Heap Start thumb alt found: ");
-		} else {
-			dbg_printf("Init Heap Start thumb alt not found\n");
-			return 0;
-		}
-		}
-	}
-
-    dbg_hexa((u32)initHeapStart);
-	dbg_printf("\n");
-	
-    
     u32* initHeapEnd = findOffset(
-        initHeapStart, 0x200,
+        //initHeapStart, 0x200,
+        (u32*)ndsHeader->arm9destination, 0x00300000,
 		initHeapEndSignature, 2
 	);
     if (initHeapEnd) {
@@ -1312,7 +1263,56 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
         
     dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
-    
+
+    const u32* startSig = initHeapStartSignature4;
+    const u16* startSigThumb = initHeapStartSignatureThumb4Alt;
+    if (moduleParams->sdk_version > 0x2010000 && moduleParams->sdk_version < 0x4000000) {
+        startSig = initHeapStartSignature3;
+    } else if (moduleParams->sdk_version < 0x2010000) {
+        startSig = initHeapStartSignature2;
+    }
+
+	u32* initHeapStart = findOffsetBackwards(
+		initHeapEnd, 0x200,
+		startSig, 3
+	);
+	if (initHeapStart) {
+		dbg_printf("Init Heap Start found: ");
+	} else {
+		dbg_printf("Init Heap Start not found\n");
+        if (moduleParams->sdk_version < 0x4000000) return 0;
+	}
+	if (moduleParams->sdk_version > 0x4000000) {
+		if (!initHeapStart) {
+		startSig = initHeapStartSignature4Alt;
+		initHeapStart = findOffsetBackwards(
+			initHeapEnd, 0x200,
+			startSig, 3
+		);
+		if (initHeapStart) {
+			dbg_printf("Init Heap Start alt found: ");
+		} else {
+			dbg_printf("Init Heap Start alt not found\n");
+		}
+		}
+
+		if (!initHeapStart) {
+		initHeapStart = findOffsetBackwardsThumb(
+			(u16*)initHeapEnd, 0x200,
+			startSigThumb, 3
+		);
+		if (initHeapStart) {
+			dbg_printf("Init Heap Start thumb alt found: ");
+		} else {
+			dbg_printf("Init Heap Start thumb alt not found\n");
+			return 0;
+		}
+		}
+	}
+
+    dbg_hexa((u32)initHeapStart);
+	dbg_printf("\n");
+
 	return heapPointer;
 }
 
