@@ -3,7 +3,6 @@
 @---------------------------------------------------------------------------------
 	.global _start
 	.global ce9
-    .global readCachedRef
 	.align	4
 	.arm
 
