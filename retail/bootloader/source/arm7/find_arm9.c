@@ -1243,9 +1243,9 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
     
     const u32* startSig = initHeapStartSignature4;
     const u16* startSigThumb = initHeapStartSignatureThumb4Alt;
-    if (moduleParams->sdk_version > 0x2020000 && moduleParams->sdk_version < 0x4000000) {
+    if (moduleParams->sdk_version > 0x2010000 && moduleParams->sdk_version < 0x4000000) {
         startSig = initHeapStartSignature3;
-    } else if (moduleParams->sdk_version < 0x2020000) {
+    } else if (moduleParams->sdk_version < 0x2010000) {
         startSig = initHeapStartSignature2;
     }
 
@@ -1306,7 +1306,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 	dbg_printf("\n");
     dbg_printf("heapPointer: ");
     u32* heapPointer = initHeapEnd-5;
-    if (moduleParams->sdk_version < 0x2020000) {
+    if (moduleParams->sdk_version < 0x2010000) {
         heapPointer = initHeapEnd-3;
     }
         
