@@ -1242,7 +1242,6 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 	dbg_printf("findHeapPointerOffset:\n");
     
     u32* initHeapEnd = findOffset(
-        //initHeapStart, 0x200,
         (u32*)ndsHeader->arm9destination, 0x00300000,
 		initHeapEndSignature, 2
 	);
@@ -1273,7 +1272,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
     }
 
 	u32* initHeapStart = findOffsetBackwards(
-		initHeapEnd, 0x200,
+		(u32*)initHeapEnd, 0x200,
 		startSig, 3
 	);
 	if (initHeapStart) {
@@ -1286,7 +1285,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 		if (!initHeapStart) {
 		startSig = initHeapStartSignature4Alt;
 		initHeapStart = findOffsetBackwards(
-			initHeapEnd, 0x200,
+			(u32*)initHeapEnd, 0x200,
 			startSig, 3
 		);
 		if (initHeapStart) {
