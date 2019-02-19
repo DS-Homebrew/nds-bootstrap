@@ -323,7 +323,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
 	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
-    if(!heapPointer || heapPointer<0x02000000 || heapPointer>0x03000000) {
+    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa((u32)heapPointer);    
@@ -337,9 +337,6 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     dbg_printf("\n\n");
     
 	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
-	// *(vu32*)(0x027FFDA0) = *heapPointer;
-    
-
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
