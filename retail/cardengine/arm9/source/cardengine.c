@@ -44,6 +44,8 @@
 //extern void user_exception(void);
 //extern u32 enableExceptionHandler;
 
+extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
+
 extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
@@ -195,7 +197,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 -= len2 % 32;
 			}
 
-			if (ce9->patches->readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+			if (readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 				#ifdef DEBUG
 				// Send a log command for debug purpose
 				// -------------------------------------
@@ -240,7 +242,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
 				*cachePage = page;
 				
-				volatile int (*readCachedRef)(u32*) = ce9->patches->readCachedRef;
 				(*readCachedRef)(cacheStruct);
 			}
 			len = cardStruct[2];
@@ -270,7 +271,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if (ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+		if (readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -310,7 +311,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			// Read via the 512b ram cache
 			memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
-			volatile int (*readCachedRef)(u32*) = ce9->patches->readCachedRef;
 			(*readCachedRef)(cacheStruct);
 		}
 		len = cardStruct[2];
