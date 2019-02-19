@@ -335,6 +335,13 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
 	// *(vu32*)(0x027FFDA0) = *heapPointer;
     
+    if(*heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("new heap pointer: ");
+	    dbg_hexa((u32)*heapPointer);    
+        return 0;
+    }
+    
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
