@@ -12,8 +12,6 @@
 
 extern u32 forceSleepPatch;
 
-static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
-
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -97,7 +95,6 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
-	debug[0] = (u32)cardIrqEnableOffset;
 	u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
 	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	return true;
@@ -107,7 +104,6 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	// Card check pull out
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
-		debug[0] = (u32)cardCheckPullOutOffset;
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
