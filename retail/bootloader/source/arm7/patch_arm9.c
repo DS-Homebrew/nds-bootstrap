@@ -108,7 +108,8 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
+	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
+	|| strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
 	{
 		// Card read cached
 		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
