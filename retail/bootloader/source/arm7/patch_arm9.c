@@ -107,16 +107,20 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }
 
 static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	// Card read cached
-	u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
-	u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
-	if (!cardReadCachedStartOffset) {
+	if (usesThumb || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
+
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "A2D", 3) != 0 // New Super Mario Bros
-	&& strncmp(romTid, "ADM", 3) != 0) // Animal Crossing: Wild World
+	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
+	|| strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
 	{
+		// Card read cached
+		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
+		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
+		if (!cardReadCachedStartOffset) {
+			return;
+		}
 		// Patch
 		u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
 		*readCachedPatch = (u32)cardReadCachedStartOffset;
@@ -314,36 +318,111 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-/*static void patchArenaLow(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* arenaLowOffset = findArenaLowOffset(ndsHeader);
-	if (!arenaLowOffset) {
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
+	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
+    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("heap pointer value: ");
+	    dbg_hexa(*heapPointer);    
+		dbg_printf("\n\n");
+        return 0;
+    }
+    
+    u32* oldheapPointer = (u32*)*heapPointer;
+        
+    dbg_printf("old heap pointer: ");
+	dbg_hexa((u32)oldheapPointer);
+    dbg_printf("\n\n");
+    
+	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
+    
+    dbg_printf("new heap pointer: ");
+	dbg_hexa((u32)*heapPointer);
+    dbg_printf("\n\n");
+    dbg_printf("Heap Shrink Sucessfull\n\n");
+    
+    return oldheapPointer;
+}
+
+void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
+    dbg_printf("relocate_ce9\n");
+    
+    u32 location_sig[1] = {default_location};
+    
+    u32* firstCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!firstCardLocation) {
 		return;
 	}
-	debug[0] = (u32)arenaLowOffset;
-
-	arenaLowOffset = (u32*)((u32)arenaLowOffset + 0x88);
-	debug[10] = (u32)arenaLowOffset;
-	debug[11] = *arenaLowOffset;
-
-	u32* oldArenaLow = (u32*)*arenaLowOffset;
-
-	// *arenaLowOffset += 0x800; // shrink heap by 8 KB
-	// *(vu32*)(0x027FFDA0) = *arenaLowOffset;
-	debug[12] = *arenaLowOffset;
-
-	u32* arenaLow2Offset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00100000,//ndsHeader->arm9binarySize,
-		oldArenaLow, 1
-	);
-
-	// *arenaLow2Offset += 0x800; // shrink heap by 8 KB
-
-	debug[13] = (u32)arenaLow2Offset;
-
-	// Patch
-	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	memcpy(oldArenaLow, cardReadPatch, 0xF0);
-}*/
+    dbg_printf("firstCardLocation ");
+	dbg_hexa((u32)firstCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*firstCardLocation);
+    dbg_printf("\n\n");
+    
+    *firstCardLocation = current_location;
+    
+	u32* armReadCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armReadCardLocation) {
+		return;
+	}
+    dbg_printf("armReadCardLocation ");
+	dbg_hexa((u32)armReadCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadCardLocation);
+    dbg_printf("\n\n");
+    
+    *armReadCardLocation = current_location;
+    
+    u32* thumbReadCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadCardLocation) {
+		return;
+	}
+    dbg_printf("thumbReadCardLocation ");
+	dbg_hexa((u32)thumbReadCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadCardLocation);
+    dbg_printf("\n\n");
+    
+    *thumbReadCardLocation = current_location;
+    
+    u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!globalCardLocation) {
+		return;
+	}
+    dbg_printf("globalCardLocation ");
+	dbg_hexa((u32)globalCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*globalCardLocation);
+    dbg_printf("\n\n");
+    
+    *globalCardLocation = current_location;
+    
+    // fix the header pointer
+    cardengineArm9* ce9 = (cardengineArm9*) current_location;
+    ce9->patches = (cardengineArm9Patches*)((u32)ce9->patches - default_location + current_location);
+    
+    dbg_printf(" ce9->patches ");
+	dbg_hexa((u32) ce9->patches);
+    dbg_printf("\n\n");
+    
+    ce9->thumbPatches = (cardengineArm9ThumbPatches*)((u32)ce9->thumbPatches - default_location + current_location);
+    ce9->patches->card_read_arm9 = (u32*)((u32)ce9->patches->card_read_arm9 - default_location + current_location);
+    ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
+    ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
+    ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
+    ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
+    ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
+    ce9->patches->readCachedRef = (u32*)((u32)ce9->patches->readCachedRef - default_location + current_location);
+    ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
+    ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
+    ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
+    ce9->thumbPatches->readCachedRef = (u32*)((u32)ce9->thumbPatches->readCachedRef - default_location + current_location);
+}
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -362,6 +441,100 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 			*(randomPatchOffset + 3) = 0x0;
 		}
 	}
+}
+
+static u32 iSpeed = 1;
+
+static u32 CalculateOffset(u16* anAddress,u32 aShift)
+{
+  u32 ptr=(u32)(anAddress+2+aShift);
+  ptr&=0xfffffffc;
+  ptr+=(anAddress[aShift]&0xff)*sizeof(u32);
+  return ptr;
+}
+
+void patchDownloadplayArm(u32* aPtr)
+{
+	*(aPtr) = 0xe59f0000; //ldr r0, [pc]
+	*(aPtr+1) = 0xea000000; //b pc
+	*(aPtr+2) = iSpeed;
+}
+
+void patchDownloadplay(const tNDSHeader* ndsHeader)
+{
+  u16* top=(u16*)ndsHeader->arm9destination;
+  u16* bottom=(u16*)(ndsHeader->arm9destination+0x300000);
+  for(u16* ii=top;ii<bottom;++ii)
+  {
+    //31 6E ?? 48 0? 43 3? 66
+    //ldr     r1, [r6,#0x60]
+    //ldr     r0, =0x406000
+    //orrs    rx, ry
+    //str     rx, [r6,#0x60]
+    //3245 - 42 All-Time Classics (Europe) (En,Fr,De,Es,It) (Rev 1)
+    if(ii[0]==0x6e31&&(ii[1]&0xff00)==0x4800&&(ii[2]&0xfff6)==0x4300&&(ii[3]&0xfffe)==0x6630)
+    {
+      u32 ptr=CalculateOffset(ii,1);
+		*(ii+2) = 0x46c0; //nop
+		*(ii+3) = 0x6630; //str r0, [r6,#0x60]
+		*(u32*)(ptr) = iSpeed;
+      break;
+    }
+    //01 98 01 6E ?? 48 01 43 01 98 01 66
+    //ldr     r0, [sp,#4]
+    //ldr     r1, [r0,#0x60]
+    //ldr     r0, =0x406000
+    //orrs    r1, r0
+    //ldr     r0, [sp,#4]
+    //str     r1, [r0,#0x60]
+    else if(ii[0]==0x9801&&ii[1]==0x6e01&&(ii[2]&0xff00)==0x4800&&ii[3]==0x4301&&ii[4]==0x9801&&ii[5]==0x6601)
+    {
+      u32 ptr=CalculateOffset(ii,2);
+		*(ii+3) = 0x1c01; //mov r1, r0
+		*(u32*)(ptr) = iSpeed;
+      break;
+    }
+    else if(0==(((u32)ii)&1))
+    {
+      u32* buffer32=(u32*)ii;
+      //60 00 99 E5 06 0A 80 E3 01 05 80 E3 60 00 89 E5
+      //ldr     r0, [r9,#0x60]
+      //orr     r0, r0, #0x6000
+      //orr     r0, r0, #0x400000
+      //str     r0, [r9,#0x60]
+      //1606 - Cars - Mater-National Championship (USA)
+      //2119 - Nanostray 2 (USA)
+      //4512 - Might & Magic - Clash of Heroes (USA) (En,Fr,Es)
+      if(buffer32[0]==0xe5990060&&buffer32[1]==0xe3800a06&&buffer32[2]==0xe3800501&&buffer32[3]==0xe5890060)
+      {
+        patchDownloadplayArm(buffer32);
+        break;
+      }
+      //60 10 99 E5 ?? 0? 9F E5 00 00 81 E1 60 00 89 E5
+      //ldr     r1, [r9,#0x60]
+      //ldr     r0, =0x406000
+      //orr     r0, r1, r0
+      //str     r0, [r9,#0x60]
+      //3969 - Power Play Pool (Europe) (En,Fr,De,Es,It)
+      else if(buffer32[0]==0xe5991060&&(buffer32[1]&0xfffff000)==0xe59f0000&&buffer32[2]==0xe1810000&&buffer32[3]==0xe5890060)
+      {
+        patchDownloadplayArm(buffer32);
+        break;
+      }
+      //60 20 8? E2 00 ?0 92 E5 ?? 0? 9F E5 00 00 81 E1 00 00 82 E5
+      //add     r2, rx, #0x60
+      //ldr     ry, [r2]
+      //ldr     rz, =0x406000
+      //orr     r0, ry, rz
+      //str     r0, [r2]
+      //0118 - GoldenEye - Rogue Agent (Europe)
+      else if((buffer32[0]&0xfff0ffff)==0xe2802060&&(buffer32[1]&0xffffefff)==0xe5920000&&(buffer32[2]&0xffffe000)==0xe59f0000&&(buffer32[3]&0xfffefffe)==0xe1800000&&buffer32[4]==0xe5820000)
+      {
+        patchDownloadplayArm(buffer32+1);
+        break;
+      }
+    }
+  }
 }
 
 // SDK 5
@@ -426,7 +599,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
-	//patchArenaLow(ce9, ndsHeader, usesThumb);
+	patchDownloadplay(ndsHeader);
+
+	//patchHeapPointer(ndsHeader, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 

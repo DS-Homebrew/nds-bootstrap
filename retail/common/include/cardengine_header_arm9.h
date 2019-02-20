@@ -43,6 +43,7 @@ typedef struct cardengineArm9ThumbPatches {
 // ARM9 cardengine
 //
 typedef struct cardengineArm9 {
+    u32 ce9;
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_fifo_orig_return;

@@ -31,6 +31,7 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
+#include "cardengine_header_arm9.h"
 
 #include "my_fat.h"
 
@@ -43,22 +44,12 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
+extern cardengineArm9* volatile ce9;
+
 extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
-
-extern module_params_t* moduleParams;
-extern u32 fileCluster;
-extern u32 ROMinRAM;
-extern u32 dsiMode;
-extern u32 enableExceptionHandler;
-extern u32 consoleModel;
-extern u32 asyncPrefetch;
-
-extern u32 needFlushDCCache;
-
-extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -124,121 +115,6 @@ static void updateDescriptor(int slot, u32 sector) {
 
 static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0);
-}*/
-
-/*static void addToAsyncQueue(u32 sector) {
-	#ifdef DEBUG
-	nocashMessage("\narm9 addToAsyncQueue\n");	
-	nocashMessage("\narm9 sector\n");	
-	nocashMessage(tohex(sector));
-	#endif
-	
-	asyncQueue[aQHead] = sector;
-	aQHead++;
-	aQSize++;
-	if (aQHead > 9) {
-		aQHead = 0;
-	}
-	if (aQSize > 10) {
-		aQSize = 10;
-		aQTail++;
-		if(aQTail > 9) {
-			aQTail = 0;
-		}
-	}
-}
-
-static void triggerAsyncPrefetch(u32 sector) {	
-	#ifdef DEBUG
-	nocashMessage("\narm9 triggerAsyncPrefetch\n");	
-	nocashMessage("\narm9 sector\n");	
-	nocashMessage(tohex(sector));
-	nocashMessage("\narm9 asyncSector\n");	
-	nocashMessage(tohex(asyncSector));
-	#endif
-	
-	asyncReadSizeSubtract = 0;
-	if (asyncSector == 0xFFFFFFFF) {
-		if (ndsHeader->romSize > 0) {
-			if (sector > ndsHeader->romSize) {
-				sector = 0;
-			} else if ((sector+readSize) > ndsHeader->romSize) {
-				for (u32 i = 0; i < readSize; i++) {
-					asyncReadSizeSubtract++;
-					if (((sector+readSize)-asyncReadSizeSubtract) == ndsHeader->romSize) {
-						break;
-					}
-				}
-			}
-		}
-		int slot = getSlotForSector(sector);
-		// read max CACHE_READ_SIZE via the main RAM cache
-		// do it only if there is no async command ongoing
-		if (slot == -1) {
-			addToAsyncQueue(sector);
-			// send a command to the arm7 to fill the RAM cache
-			u32 commandRead = 0x020ff800;		
-
-			slot = allocateCacheSlot();
-			vu8* buffer = getCacheAddress(slot);
-
-			if (needFlushDCCache) {
-				DC_FlushRange((u8*)buffer, readSize);
-			}
-
-			cacheDescriptor[slot] = sector;
-			cacheCounter[slot] = 0x0FFFFFFF; // async marker
-			asyncSector = sector;		
-
-			// write the command
-			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = readSize-asyncReadSizeSubtract;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
-
-			//IPC_SendSync(0xEE24);			
-
-
-			// do it asynchronously
-			//waitForArm7();
-		}
-	}
-}
-
-static void processAsyncCommand(void) {
-	#ifdef DEBUG
-	nocashMessage("\narm9 processAsyncCommand\n");	
-	nocashMessage("\narm9 asyncSector\n");	
-	nocashMessage(tohex(asyncSector));
-	#endif
-	
-	if (asyncSector != 0xFFFFFFFF) {
-		int slot = getSlotForSector(asyncSector);
-		if (slot != -1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			if(sharedAddr[3] == (vu32)0) {
-				updateDescriptor(slot, asyncSector);
-				asyncSector = 0xFFFFFFFF;
-			}			
-		}	
-	}
-}
-
-static void getAsyncSector(void) {
-	#ifdef DEBUG
-	nocashMessage("\narm9 getAsyncSector\n");	
-	nocashMessage("\narm9 asyncSector\n");	
-	nocashMessage(tohex(asyncSector));
-	#endif
-	
-	if (asyncSector != 0xFFFFFFFF) {
-		int slot = getSlotForSector(asyncSector);
-		if (slot != -1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			waitForArm7();
-
-			updateDescriptor(slot, asyncSector);
-			asyncSector = 0xFFFFFFFF;
-		}	
-	}
 }*/
 
 /*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
@@ -371,7 +247,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			return -1;
 		}
 
-		romFile = getFileFromCluster(fileCluster);
+		romFile = getFileFromCluster(ce9->fileCluster);
 
 		buildFatTableCache(&romFile, 0);
 
@@ -380,7 +256,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);
 
-		if (isSdk5(moduleParams)) {
+		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
 		/*if (dsiMode || isSdk5(moduleParams)) {
@@ -415,17 +291,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = (isSdk5(moduleParams) ? (vu32* volatile)(CARDENGINE_ARM9_LOCATION + 0x7BC0) : cardStruct0);
+	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)(CARDENGINE_ARM9_LOCATION + 0x7BC0) : ce9->cardStruct0);
 
-	u32 src = (isSdk5(moduleParams) ? src0 : cardStruct[0]);
-	if (isSdk5(moduleParams)) {
+	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
+	if (isSdk5(ce9->moduleParams)) {
 		cardStruct[0] = src;
 	}
 
-	u8* dst = (isSdk5(moduleParams) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = (isSdk5(moduleParams) ? len0 : cardStruct[2]);
+	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
 
-	if (isSdk5(moduleParams)) {
+	if (isSdk5(ce9->moduleParams)) {
 		cardStruct[1] = (vu32)dst;
 		cardStruct[2] = len;
 	}
@@ -478,6 +354,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	//return ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	//return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 	return cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }

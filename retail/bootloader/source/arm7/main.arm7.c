@@ -66,7 +66,6 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
-#include "cardengine_arm9_exmem_bin.h"
 
 #define STORED_FILE_CLUSTER_OFFSET 4 
 #define INIT_DISC_OFFSET 8
@@ -771,15 +770,17 @@ int arm7_main(void) {
 	if (extendedMemory) {
 		memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
 		dldiPatchBinary((data_t*)(CARDENGINE_ARM7_LOCATION), cardengine_arm7_bin_size);
-		increaseLoadBarLength();
-		memcpy((u32*)CARDENGINE_ARM9_EXMEM_LOCATION, (u32*)cardengine_arm9_exmem_bin, cardengine_arm9_exmem_bin_size);
-		dldiPatchBinary((data_t*)(CARDENGINE_ARM9_EXMEM_LOCATION), cardengine_arm9_exmem_bin_size);
-		ce9Location = CARDENGINE_ARM9_EXMEM_LOCATION;
-	} else {
-		increaseLoadBarLength();
-		memcpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)cardengine_arm9_bin, cardengine_arm9_bin_size);
-		dldiPatchBinary((data_t*)(CARDENGINE_ARM9_LOCATION), cardengine_arm9_bin_size);
 	}
+	increaseLoadBarLength();
+    ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
+    if(ce9Location) {
+		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
+		relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
+    } else {         
+		ce9Location = CARDENGINE_ARM9_LOCATION;
+		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+    }
+	dldiPatchBinary((data_t*)(ce9Location), cardengine_arm9_bin_size);
 
 	increaseLoadBarLength();
 

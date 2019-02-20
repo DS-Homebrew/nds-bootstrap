@@ -78,5 +78,15 @@ u32 patchCardNds(
 	u32 saveFileCluster,
 	u32 saveSize
 );
+u32* patchHeapPointer(
+    const module_params_t* moduleParams,
+    const tNDSHeader* ndsHeader, 
+    bool usesThumb
+);
+void relocate_ce9(
+    u32 default_location, 
+    u32 current_location, 
+    u32 size
+);  
 
 #endif // PATCH_H

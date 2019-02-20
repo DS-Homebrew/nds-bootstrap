@@ -38,7 +38,7 @@ static const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; //
 //static const u32 instructionBHI[1] = {0x8A000001};
 
 // Card pull out
-static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
+static const u32 cardPullOutSignature1[5]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK <= 3
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
 static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
@@ -101,6 +101,13 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 
 // Mpu cache init
 static const u32 mpuInitCache[1] = {0xE3A00042};
+
+// Init Heap
+static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
+static const initHeapEndFuncSignature[1]     = {0xE12FFF1E};      
+static const initHeapEndFuncSignatureAlt[1]     = {0xE8BD8008};      
+static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};      
+
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
@@ -1215,27 +1222,49 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 	return mpuInitCacheOffset;
 }
 
-/*u32* findArenaLowOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findArenaLowOffset:\n");
-
-	u32* arenaLowOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		arenaLowSignature, 4
+u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	dbg_printf("findHeapPointerOffset:\n");
+    
+    u32* initHeapEnd = findOffset(
+        (u32*)ndsHeader->arm9destination, 0x00300000,
+		initHeapEndSignature, 2
 	);
-	if (arenaLowOffset) {
-		dbg_printf("Arena low found: ");
+    if (initHeapEnd) {
+		dbg_printf("Init Heap End found: ");
 	} else {
-		dbg_printf("Arena low not found\n");
+		dbg_printf("Init Heap End not found\n\n");
+        return 0;
 	}
-
-	if (arenaLowOffset) {
-		dbg_hexa((u32)arenaLowOffset);
-		dbg_printf("\n");
-	}
-
+    
+    dbg_hexa((u32)initHeapEnd);
 	dbg_printf("\n");
-	return arenaLowOffset;
-}*/
+    dbg_printf("heapPointer: ");
+
+	u32* initEndFunc = findOffsetBackwards(
+		(u32*)initHeapEnd, 0x40,
+		initHeapEndFuncSignature, 1
+	);
+	if (!initEndFunc) {
+		initEndFunc = findOffsetBackwards(
+			(u32*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureAlt, 1
+		);
+	}
+    u32* heapPointer = initEndFunc + 1;
+    
+	if (!initEndFunc) {
+		u16* initEndFuncThumb = findOffsetBackwardsThumb(
+			(u16*)initHeapEnd, 0x40,
+			initHeapEndFuncSignatureThumb, 1
+		);
+        heapPointer = initEndFuncThumb+1;
+	}
+    
+    dbg_hexa((u32)heapPointer);
+	dbg_printf("\n");
+
+	return heapPointer;
+}
 
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset:\n");
