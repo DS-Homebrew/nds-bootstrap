@@ -28,7 +28,8 @@ install:
 script:
   - cd retail/
   - make
-  
+  - mv bin/ nds-bootstrap/
+  - 7z a B4DS.7z nds-bootstrap/
 addons:
   apt:
     sources:
