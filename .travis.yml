@@ -27,9 +27,9 @@ install:
   
 script:
   - cd retail/
-  - make
+  - make package-nightly
   - mv bin/ nds-bootstrap/
-  - 7z a B4DS.7z nds-bootstrap/
+  - 7z a bootstrap44DS.7z nds-bootstrap/
   
 addons:
   apt:
@@ -55,9 +55,9 @@ before_deploy:
   - git config --local user.name "TWLBot"
   - git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
   - cd Builds/
-  - cp ../B4DS.7z B4DS.7z
+  - cp ../bootstrap4DS.7z bootstrap4DS.7z
   - git stage .
-  - git commit -m "B4DS (Bootstrap for DS) | $COMMIT_TAG"
+  - git commit -m "nds-bootstrap for DS | $COMMIT_TAG"
   - git push origin master
   - export CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
   - git tag v$CURRENT_DATE
@@ -66,11 +66,11 @@ deploy:
   provider: releases
   overwrite: true
   api_key: $GITHUB_TOKEN
-  file: B4DS.7z
+  file: Bootstrap4DS.7z
   skip_cleanup: true
   repo: TWLBot/Builds
   prerelease: true
-  name: B4DS (Bootstrap for DS) | $COMMIT_TAG
+  name: Bootstrap for DS | $COMMIT_TAG
   body: $COMMIT_MESSAGE
   on:
   all_branches: true
