@@ -58,7 +58,7 @@ before_deploy:
   - cp ../B4DS.7z B4DS.7z
   - git stage .
   - git commit -m "nds-bootstrap for DS | $COMMIT_TAG"
-  - git push origin master
+  - git push origin b4ds
   - export CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
   - git tag v$CURRENT_DATE
 
