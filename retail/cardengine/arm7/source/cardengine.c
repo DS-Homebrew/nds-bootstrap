@@ -894,6 +894,23 @@ bool eepromPageErase (u32 dst) {
 TODO: return the correct ID
 
 From gbatek 
+Returns RAW unencrypted Chip ID (eg. C2h,0Fh,00h,00h), repeated every 4 bytes.
+  1st byte - Manufacturer (eg. C2h=Macronix) (roughly based on JEDEC IDs)
+  2nd byte - Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?)
+  3rd byte - Flags (see below)
+  4th byte - Flags (see below)
+The Flag Bits in 3th byte can be
+  0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
+  1   Unknown (set in some 3DS carts)
+  2-7 Zero
+The Flag Bits in 4th byte can be
+  0-2 Zero
+  3   Seems to be NAND flag (0=ROM, 1=NAND) (observed in only ONE cartridge)
+  4   3DS Flag (0=NDS/DSi, 1=3DS)
+  5   Zero   ... set in ... DSi-exclusive games?
+  6   DSi flag (0=NDS/3DS, 1=DSi)
+  7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
+
 Existing/known ROM IDs are:
   C2h,07h,00h,00h NDS Macronix 8MB ROM  (eg. DS Vision)
   AEh,0Fh,00h,00h NDS Noname   16MB ROM (eg. Meine Tierarztpraxis)
@@ -935,9 +952,28 @@ Existing/known ROM IDs are:
 u32 cardId(void) {
 	#ifdef DEBUG	
 	dbg_printf("\ncardId\n");
-	#endif	
+	#endif
     
-	return 1;
+    u32 cardid = 0xC2000000;
+    u8 size = ndsHeader->deviceSize;
+    
+    //Devicecapacity         (Chipsize = 128KB SHL nn) (eg. 7 = 16MB)
+    //Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?) (eg. 0Fh = 16MB)
+    u8 mb = (0x20000 << size / 0x10000) - 1; //128KB
+    cardid |= mb << 16;
+    	
+    //The Flag Bits in 4th byte can be
+    //6   DSi flag (0=NDS/3DS, 1=DSi)
+    //7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
+    u8 unit = 0;
+    if(ndsHeader->unitCode==0x02) unit=0xC0;
+    cardid |= unit;    
+    
+    #ifdef DEBUG
+    dbg_hexa(cardid);
+    #endif
+    
+	return cardid;
 }
 
 bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
