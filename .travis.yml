@@ -29,7 +29,7 @@ script:
   - cd retail/
   - make package-nightly
   - mv bin/ nds-bootstrap/
-  - 7z a bootstrap44DS.7z nds-bootstrap/
+  - 7z a bootstrap4DS.7z nds-bootstrap/
   
 addons:
   apt:
