@@ -41,7 +41,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project (order is important)
 #---------------------------------------------------------------------------------
-LIBS	:=	-lnds9
+LIBS	:=	
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
