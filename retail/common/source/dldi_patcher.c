@@ -123,22 +123,24 @@ bool dldiRelocate (u32 default_location, u32 current_location, u32 binSize) {
 		return false;
 	}
 
-	*(u32*)(patchOffset+16) -= default_location;
-	*(u32*)(patchOffset+16) += current_location;
-	*(u32*)(patchOffset+17) -= default_location;
-	*(u32*)(patchOffset+17) += current_location;
-	*(u32*)(patchOffset+26) -= default_location;
-	*(u32*)(patchOffset+26) += current_location;
-	*(u32*)(patchOffset+27) -= default_location;
-	*(u32*)(patchOffset+27) += current_location;
-	*(u32*)(patchOffset+28) -= default_location;
-	*(u32*)(patchOffset+28) += current_location;
-	*(u32*)(patchOffset+29) -= default_location;
-	*(u32*)(patchOffset+29) += current_location;
-	*(u32*)(patchOffset+30) -= default_location;
-	*(u32*)(patchOffset+30) += current_location;
-	*(u32*)(patchOffset+31) -= default_location;
-	*(u32*)(patchOffset+31) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_text_start)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_text_start)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_data_end)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_data_end)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_startup)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_startup)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_isInserted)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_isInserted)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_readSectors)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_readSectors)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_writeSectors)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_writeSectors)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_clearStatus)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_clearStatus)) += current_location;
+	*((u32*)((data_t*)patchOffset + DO_shutdown)) -= default_location;
+	*((u32*)((data_t*)patchOffset + DO_shutdown)) += current_location;
+
+	return true;
 }
 
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
