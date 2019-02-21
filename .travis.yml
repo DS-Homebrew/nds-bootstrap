@@ -25,6 +25,7 @@ install:
   - export DEVKITARM=${DEVKITPRO}/devkitARM
 
 script:
+  - cd retail/
   - make
   
 addons:
