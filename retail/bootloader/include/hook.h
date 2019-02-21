@@ -46,6 +46,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 ROMinRAM,
+	u32 romLocation,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
 	u32 consoleModel

@@ -164,7 +164,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	return 0;
 }
 
-/*static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
 	while (len > 0) {
 		u32 len2 = len;
@@ -173,7 +173,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			len2 -= len2 % 32;
 		}
 
-		if (isSdk5(moduleParams) || readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+		if (isSdk5(ce9->moduleParams) || *ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -181,7 +181,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
-			sharedAddr[2] = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
+			sharedAddr[2] = src;
 			sharedAddr[3] = commandRead;
 
 			//IPC_SendSync(0xEE24);
@@ -191,7 +191,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			#endif
 
 			// Copy directly
-			memcpy(dst, (u8*)((((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+			memcpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 			// Update cardi common
 			cardStruct[0] = src + len;
@@ -203,9 +203,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			// -------------------------------------
 			commandRead = 0x026ff800;
 
-			sharedAddr[0] = page;
+			sharedAddr[0] = cacheBuffer;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = ((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+			sharedAddr[2] = page;
 			sharedAddr[3] = commandRead;
 
 			//IPC_SendSync(0xEE24);
@@ -215,8 +215,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			#endif
 
 			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)(((dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+			memcpy(cacheBuffer, (u8*)((ce9->romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
+            volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
 			(*readCachedRef)(cacheStruct);
 		}
 		len = cardStruct[2];
@@ -228,7 +229,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	}
 
 	return 0;
-}*/
+}
 
 //Currently used for NSMBDS romhacks
 void __attribute__((target("arm"))) debug8mbMpuFix(){
@@ -237,24 +238,29 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
+
+	sysSetCartOwner (BUS_OWNER_ARM9);
+
 	if (!flagsSet) {
-		if (_io_dldi_features & 0x00000010) {
-			sysSetCartOwner (BUS_OWNER_ARM9);
+		//if (_io_dldi_features & 0x00000010) {
+		//	sysSetCartOwner (BUS_OWNER_ARM9);
+		//}
+
+		if (!ce9->ROMinRAM) {
+			if (!FAT_InitFiles(true, 0)) {
+				//nocashMessage("!FAT_InitFiles");
+				return -1;
+			}
+
+			romFile = getFileFromCluster(ce9->fileCluster);
+
+			buildFatTableCache(&romFile, 0);
+
+			const char* tmpName = "BTSTRP.TMP";
+			tmpFile = getBootFileCluster(tmpName, 0);
+
+			fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);
 		}
-
-		if (!FAT_InitFiles(true, 3)) {
-			//nocashMessage("!FAT_InitFiles");
-			return -1;
-		}
-
-		romFile = getFileFromCluster(ce9->fileCluster);
-
-		buildFatTableCache(&romFile, 0);
-
-		const char* tmpName = "BTSTRP.TMP";
-		tmpFile = getBootFileCluster(tmpName, 0);
-
-		fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -345,7 +351,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		return 0;
 	}
 
-	if((*(u32*)(0x2780000)) == 0){
+	if(!ce9->ROMinRAM && (*(u32*)(0x2780000)) == 0){
 		fileRead((char*)0x2780000, tmpFile, 0, 0x40000, 0);
 	}
 
@@ -354,6 +360,5 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	//return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
-	return cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }

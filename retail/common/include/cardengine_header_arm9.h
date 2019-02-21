@@ -52,10 +52,10 @@ typedef struct cardengineArm9 {
     u32 cardStruct0;
     u32 cacheStruct;
     u32 ROMinRAM;
+	u32 romLocation;
     u32 dsiMode;
     u32 enableExceptionHandler;
     u32 consoleModel;
-    u32 asyncPrefetch;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H

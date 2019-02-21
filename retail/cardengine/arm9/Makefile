@@ -31,7 +31,7 @@ CFLAGS	:=	-g -Wall -O1\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -fPIE
+CFLAGS	+=	$(INCLUDE) -DARM9
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE) -DSTANDARD_DLDI

@@ -511,6 +511,13 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+	if (!extendedMemory) {
+		/* *(vu32*)(0x08240000) = 1;
+		if (*(vu32*)(0x08240000) == 1) {
+			return (getRomSizeNoArm9(ndsHeader) <= 0x00800000);
+		}*/
+		return false;
+	}
 	return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 		|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 		|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x017FC000)
@@ -607,12 +614,19 @@ static void NTR_BIOS() {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	char* romLocation = (char*)((dsiModeConfirmed || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	if (!extendedMemory) {
+		romLocation = (char*)ROM_LOCATION_S2;
+	}
 
 	// Load ROM into RAM
 	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 	// Primary fix for Mario's Holiday
 	if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
 		*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;
+	}
+
+	if (!extendedMemory) {
+		*(vu32*)(0x08240000) = 0;
 	}
 }
 
@@ -741,10 +755,7 @@ int arm7_main(void) {
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = false;
-	/*if (extendedMemory) {
-		ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
-	}*/
+	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
@@ -772,15 +783,15 @@ int arm7_main(void) {
 		dldiPatchBinary((data_t*)(CARDENGINE_ARM7_LOCATION), cardengine_arm7_bin_size);
 	}
 	increaseLoadBarLength();
-    ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
+    /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
 		relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
 		dldiRelocate(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
-    } else {         
+    } else {*/      
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
-    }
+    //}
 	dldiPatchBinary((data_t*)(ce9Location), cardengine_arm9_bin_size);
 
 	increaseLoadBarLength();
@@ -839,18 +850,24 @@ int arm7_main(void) {
 	// 7 dots
 	//
 
+	u32 romLocation = ((dsiModeConfirmed || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	if (!extendedMemory) {
+		romLocation = ROM_LOCATION_S2;
+	}
+
 	hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
 		ROMinRAM,
+		romLocation,
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel
 	);
-	/*if (ROMinRAM && extendedMemory) {
+	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
-	}*/
+	}
 	increaseLoadBarLength();
 
 	//
