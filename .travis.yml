@@ -72,5 +72,5 @@ deploy:
   prerelease: true
   name: B4DS (Bootstrap for DS) | $COMMIT_TAG
   body: $COMMIT_MESSAGE
- on:
+  on:
   all_branches: true
