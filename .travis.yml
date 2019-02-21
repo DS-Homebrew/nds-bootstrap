@@ -28,7 +28,6 @@ install:
 script:
   - export COMMIT_TAG="$(git log --format=%h -1)"
   - export COMMIT_MESSAGE="$(git log --pretty=format:"%an - %s" -1)"
-  - cd retail/
   - make package-nightly
   - mkdir bin/TWiLightMenu/
   - printf $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
