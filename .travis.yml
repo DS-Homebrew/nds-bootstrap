@@ -39,16 +39,6 @@ addons:
     - g++-4.9
     - libstdc++6 
     - lftp
-
-after_success:
-  - >
-    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "b4ds" ]; then
-        GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
-        GITREV="`git show -s --format='%h'`"
-        REV_NAME="nds-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
-        cp bin/nds-bootstrap.nds $REV_NAME
-        lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
-    fi
     
 #after_success:
 #  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
@@ -81,3 +71,5 @@ deploy:
   prerelease: true
   name: B4DS (Bootstrap for DS) | $COMMIT_TAG
   body: $COMMIT_MESSAGE
+ on:
+  all_branches: true
