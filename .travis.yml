@@ -73,4 +73,4 @@ deploy:
   name: Bootstrap for DS | $COMMIT_TAG
   body: $COMMIT_MESSAGE
   on:
-  all_branches: true
+    all_branches: true
