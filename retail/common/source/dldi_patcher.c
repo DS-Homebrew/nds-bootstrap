@@ -123,22 +123,22 @@ bool dldiRelocate (u32 default_location, u32 current_location, u32 binSize) {
 		return false;
 	}
 
-	*(u32*)(patchOffset+10) -= default_location;
-	*(u32*)(patchOffset+10) += current_location;
-	*(u32*)(patchOffset+11) -= default_location;
-	*(u32*)(patchOffset+11) += current_location;
-	*(u32*)(patchOffset+20) -= default_location;
-	*(u32*)(patchOffset+20) += current_location;
-	*(u32*)(patchOffset+21) -= default_location;
-	*(u32*)(patchOffset+21) += current_location;
-	*(u32*)(patchOffset+22) -= default_location;
-	*(u32*)(patchOffset+22) += current_location;
-	*(u32*)(patchOffset+23) -= default_location;
-	*(u32*)(patchOffset+23) += current_location;
-	*(u32*)(patchOffset+24) -= default_location;
-	*(u32*)(patchOffset+24) += current_location;
-	*(u32*)(patchOffset+25) -= default_location;
-	*(u32*)(patchOffset+25) += current_location;
+	*(u32*)(patchOffset+16) -= default_location;
+	*(u32*)(patchOffset+16) += current_location;
+	*(u32*)(patchOffset+17) -= default_location;
+	*(u32*)(patchOffset+17) += current_location;
+	*(u32*)(patchOffset+26) -= default_location;
+	*(u32*)(patchOffset+26) += current_location;
+	*(u32*)(patchOffset+27) -= default_location;
+	*(u32*)(patchOffset+27) += current_location;
+	*(u32*)(patchOffset+28) -= default_location;
+	*(u32*)(patchOffset+28) += current_location;
+	*(u32*)(patchOffset+29) -= default_location;
+	*(u32*)(patchOffset+29) += current_location;
+	*(u32*)(patchOffset+30) -= default_location;
+	*(u32*)(patchOffset+30) += current_location;
+	*(u32*)(patchOffset+31) -= default_location;
+	*(u32*)(patchOffset+31) += current_location;
 }
 
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
