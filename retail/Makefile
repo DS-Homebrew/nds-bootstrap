@@ -8,9 +8,9 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 # These set the information text in the nds file
-GAME_TITLE     := NDS BOOTSTRAP
+GAME_TITLE     := nds-bootstrap
 GAME_SUBTITLE1 := Runs an .nds file
-GAME_SUBTITLE2 := Made by Ahezard
+GAME_SUBTITLE2 := Made by ahezard
 
 include $(DEVKITARM)/ds_rules
 

@@ -16,6 +16,7 @@ cache:
 
 before_install:
   - curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
+  - sudo apt-get install -y p7zip-full
 
 install:
   - sudo dpkg -i pacman.deb
@@ -23,10 +24,15 @@ install:
   - sudo dkp-pacman -S devkitARM general-tools dstools ndstool libnds libfat-nds --noconfirm
   - export DEVKITPRO=/opt/devkitpro
   - export DEVKITARM=${DEVKITPRO}/devkitARM
-
+  
 script:
-  - cd retail/
-  - make
+  - export COMMIT_TAG="$(git log --format=%h -1)"
+  - export COMMIT_MESSAGE="$(git log --pretty=format:"%an - %s" -1)"
+  - make package-nightly
+  - mkdir bin/TWiLightMenu/
+  - printf $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
+  - mv bin/ nds-bootstrap/
+  - 7z a B4DS.7z nds-bootstrap/
   
 addons:
   apt:
@@ -35,15 +41,39 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    - libstdc++6
+    - libstdc++6 
     - lftp
+    
+#after_success:
+#  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+#  - chmod +x send.sh
+#  - ./send.sh success $WEBHOOK_URL
 
-after_success:
-  - >
-    if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "hb" ]; then
-        GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
-        GITREV="`git show -s --format='%h'`"
-        REV_NAME="nds-bootstrap-${TRAVIS_BRANCH}-${GITDATE}-${GITREV}.nds"
-        cp bin/nds-bootstrap.nds $REV_NAME
-        lftp ftp://$FTP_LOGIN:$FTP_PASSWORD@$FTP_ADDR  -e "set net:timeout 5; set net:max-retries 2; put ${REV_NAME}; bye"
-    fi
+#after_failure:
+#  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+#  - chmod +x send.sh
+#  - ./send.sh failure $WEBHOOK_URL
+
+before_deploy:
+  - git config --local user.name "TWLBot"
+  - git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
+  - cd Builds/
+  - cp ../B4DS.7z B4DS.7z
+  - git stage .
+  - git commit -m "nds-bootstrap for DS | $COMMIT_TAG"
+  - git push origin master
+  - export CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
+  - git tag v$CURRENT_DATE
+
+deploy:
+  provider: releases
+  overwrite: true
+  api_key: $GITHUB_TOKEN
+  file: B4DS.7z
+  skip_cleanup: true
+  repo: TWLBot/Builds
+  prerelease: true
+  name: Bootstrap for DS | $COMMIT_TAG
+  body: $COMMIT_MESSAGE
+  on:
+    all_branches: true
