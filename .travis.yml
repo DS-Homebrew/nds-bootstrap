@@ -29,7 +29,9 @@ script:
   - cd retail/
   - make
   - mv bin/ nds-bootstrap/
+  - cd nds-bootstrap/
   - mv nds-bootstrap.nds nds-bootstrap-nightly.nds
+  - cd ../
   - 7z a B4DS.7z nds-bootstrap/
   
 addons:
