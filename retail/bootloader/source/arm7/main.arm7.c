@@ -776,6 +776,7 @@ int arm7_main(void) {
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
 		relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
+		dldiRelocate(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
     } else {         
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);

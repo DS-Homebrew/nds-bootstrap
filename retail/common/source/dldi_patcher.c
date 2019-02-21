@@ -109,6 +109,38 @@ static void demangleMagicString(data_t *dest, const data_t *src) {
 
 extern const u32 _io_dldi;
 
+bool dldiRelocate (u32 default_location, u32 current_location, u32 binSize) {
+	addr_t patchOffset;			// Position of patch destination in the file
+
+	data_t dldiMagicString[DLDI_MAGIC_LEN];
+
+	// Find the DLDI reserved space in the file
+	demangleMagicString(dldiMagicString, dldiMagicStringMangled);
+	patchOffset = quickFind ((data_t*)current_location, dldiMagicString, binSize, sizeof(dldiMagicString));
+
+	if (patchOffset < 0) {
+		// does not have a DLDI section
+		return false;
+	}
+
+	*(u32*)(patchOffset+10) -= default_location;
+	*(u32*)(patchOffset+10) += current_location;
+	*(u32*)(patchOffset+11) -= default_location;
+	*(u32*)(patchOffset+11) += current_location;
+	*(u32*)(patchOffset+20) -= default_location;
+	*(u32*)(patchOffset+20) += current_location;
+	*(u32*)(patchOffset+21) -= default_location;
+	*(u32*)(patchOffset+21) += current_location;
+	*(u32*)(patchOffset+22) -= default_location;
+	*(u32*)(patchOffset+22) += current_location;
+	*(u32*)(patchOffset+23) -= default_location;
+	*(u32*)(patchOffset+23) += current_location;
+	*(u32*)(patchOffset+24) -= default_location;
+	*(u32*)(patchOffset+24) += current_location;
+	*(u32*)(patchOffset+25) -= default_location;
+	*(u32*)(patchOffset+25) += current_location;
+}
+
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
