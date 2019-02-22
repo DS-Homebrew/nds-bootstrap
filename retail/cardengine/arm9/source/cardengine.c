@@ -239,12 +239,12 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	sysSetCartOwner (BUS_OWNER_ARM9);
+	//sysSetCartOwner (BUS_OWNER_ARM9);
 
 	if (!flagsSet) {
-		//if (_io_dldi_features & 0x00000010) {
-		//	sysSetCartOwner (BUS_OWNER_ARM9);
-		//}
+		if (_io_dldi_features & 0x00000010) {
+			sysSetCartOwner (BUS_OWNER_ARM9);
+		}
 
 		if (!ce9->ROMinRAM) {
 			if (!FAT_InitFiles(true, 0)) {
@@ -264,6 +264,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		} else {
+			debug8mbMpuFix();
 		}
 		/*if (dsiMode || isSdk5(moduleParams)) {
 			romLocation = ROM_SDK5_LOCATION;
@@ -290,14 +292,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
 		}*/
 
-		debug8mbMpuFix();
-
 		//ndsHeader->romSize += 0x1000;
 
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)(CARDENGINE_ARM9_LOCATION + 0x7BC0) : ce9->cardStruct0);
+	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)((u8*)CARDENGINE_ARM9_LOCATION + 0x61C0) : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
 	if (isSdk5(ce9->moduleParams)) {
