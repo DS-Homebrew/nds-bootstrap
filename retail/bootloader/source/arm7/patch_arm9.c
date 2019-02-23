@@ -251,7 +251,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 0x4 : 0x8);
+	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 0xA0 : 0xE0);
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
@@ -409,6 +409,30 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadCardLocation = current_location;
+    
+    u32* armReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armReadCardLocation) {
+		return;
+	}
+    dbg_printf("armReadCardDmaLocation ");
+	dbg_hexa((u32)armReadDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *armReadDmaCardLocation = current_location;
+    
+    u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadCardLocation) {
+		return;
+	}
+    dbg_printf("thumbReadCardDmaLocation ");
+	dbg_hexa((u32)thumbReadDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *thumbReadDmaCardLocation = current_location;
     
     u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {

@@ -39,7 +39,7 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern void user_exception(void);
+//extern void user_exception(void);
 
 //extern vu32* volatile cacheStruct;
 
@@ -264,6 +264,10 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
+bool cardReadDma() {
+    return false;    
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
@@ -281,8 +285,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}*/
 
 		if (enableExceptionHandler) {
-			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			setExceptionHandler(user_exception);
+			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			//setExceptionHandler(user_exception);
 		}
 		
 		flagsSet = true;

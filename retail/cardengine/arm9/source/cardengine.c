@@ -41,7 +41,7 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern void user_exception(void);
+//extern void user_exception(void);
 
 extern cardengineArm9* volatile ce9;
 
@@ -328,6 +328,10 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
+bool cardReadDma() {
+    return false;    
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
@@ -366,8 +370,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		//ndsHeader->romSize += 0x1000;
 
 		if (ce9->enableExceptionHandler && ce9==CARDENGINE_ARM9_LOCATION) {
-			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			setExceptionHandler(user_exception);
+			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			//setExceptionHandler(user_exception);
 		}
 		
 		flagsSet = true;

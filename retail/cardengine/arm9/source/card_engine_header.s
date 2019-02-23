@@ -129,8 +129,24 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-	mov r0, #0
+    stmfd   sp!, {r3-r11,lr}
+
+	ldr		r6, cardReadRef3
+    ldr     r7, ce9location3
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_card_read_dma	
+    
+
+	ldmfd   sp!, {r3-r11,pc}
 	bx      lr
+_blx_r6_stub_card_read_dma:
+	bx	r6	
+.pool
+ce9location3:
+.word   ce9
+cardReadRef3:
+.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -156,8 +172,24 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-	mov r0, #0
-	bx      lr		
+    push	{r3-r7, lr}
+    
+	ldr		r6, cardReadRef4
+    ldr     r7, ce9location4
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_card_read_dma	
+
+    pop	{r3-r7, pc}
+	bx      lr
+_blx_r6_stub_thumb_card_read_dma:
+	bx	r6	
+.pool
+.align	4
+ce9location4:
+.word   ce9
+cardReadRef4:
+.word   cardReadDma-ce9 			
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
