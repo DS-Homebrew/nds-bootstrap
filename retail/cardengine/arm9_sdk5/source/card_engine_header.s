@@ -86,12 +86,15 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, =cardRead
-	bl		_blx_r3_stub_card_read
+	ldr		r6, cardReadRef1
+    ldr     r7, ce9location1
+    add     r6, r6, r7
+    
+	bl		_blx_r6_stub_card_read
 
 	ldmfd   sp!, {r4-r11,pc}
 	bx      lr
-_blx_r3_stub_card_read:
+_blx_r6_stub_card_read:
 	bx	r6
 .pool
 cardStructArm9:
@@ -101,22 +104,33 @@ cacheFlushRef:
 readCachedRef:
 .word    0x00000000  
 cacheRef:
-.word    0x00000000  
+.word    0x00000000
+ce9location1:
+.word   ce9
+cardReadRef1:
+.word   cardRead-ce9  
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push	{r3-r7, lr}
 
-	ldr		r6, =cardRead
+	ldr		r6, cardReadRef2
+    ldr     r7, ce9location2
+    add     r6, r6, r7
 
-	bl		_blx_r3_stub_thumb_card_read	
+	bl		_blx_r6_stub_thumb_card_read	
 
 	pop	{r3-r7, pc}
 	bx      lr
-_blx_r3_stub_thumb_card_read:
+_blx_r6_stub_thumb_card_read:
 	bx	r6	
-.pool	
+.pool
+.align	4
+ce9location2:
+.word   ce9
+cardReadRef2:
+.word   cardRead-ce9 	
 	.arm
 @---------------------------------------------------------------------------------
 

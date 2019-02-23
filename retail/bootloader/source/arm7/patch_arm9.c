@@ -188,6 +188,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 
 	if (cardIdStartOffset) {
+		dbg_printf("Found cardId\n\n");
 		/*
 		// Cache struct
 		u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
@@ -195,9 +196,36 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		// Save cache struct
 		ce9->cacheStruct = (u32)*cacheStruct;
 		*/
+        
+        // Compute cardId        
+        u32 cardid = 0xC2000000;
+        
+        u8 size = ndsHeader->deviceSize;
+
+        //Devicecapacity         (Chipsize = 128KB SHL nn) (eg. 7 = 16MB)
+        //Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?) (eg. 0Fh = 16MB)
+        u8 mb = (0x20000 << size / 0x10000) - 1; //128KB
+        cardid |= mb << 16;
+        
+        //The Flag Bits in 4th byte can be
+        //6   DSi flag (0=NDS/3DS, 1=DSi)
+        //7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
+        u8 unit = 0;
+        if(ndsHeader->unitCode==0x02) unit=0xC0;
+        cardid |= unit;
+        
+        dbg_printf("cardId : ");
+        dbg_hexa(cardid);
+        dbg_printf("\n\n");
 
 		// Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
+
+        dbg_printf("default Card Id : ");
+        dbg_hexa(cardIdPatch[usesThumb ? 1 : 2]);
+        dbg_printf("\n\n");        
+
+        cardIdPatch[usesThumb ? 2 : 3] = cardid;
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
