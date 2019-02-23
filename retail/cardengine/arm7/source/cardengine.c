@@ -388,6 +388,11 @@ static void runCardEngineCheck(void) {
 	#endif	
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
+		if (*(vu32*)(0x400481C) & BIT(3)) {
+			memcpy((u32*)0x02000300, sr_data_error, 0x020);
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
+		}
   		initialize();
   
       if(!readOngoing)
