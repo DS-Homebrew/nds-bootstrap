@@ -972,7 +972,10 @@ u32 cardId(void) {
     //7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
     u8 unit = 0;
     if(ndsHeader->unitCode==0x02) unit=0xC0;
-    cardid |= unit;    
+    cardid |= unit;
+    
+    // Keep the default CardID fow now
+    cardid = 0xC2FF01C0;    
     
     #ifdef DEBUG
     dbg_hexa(cardid);
