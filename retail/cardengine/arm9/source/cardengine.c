@@ -22,7 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 #include <nds/dma.h>
-//#include <nds/interrupts.h>
+#include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -41,6 +41,12 @@
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
+
+#define ICACHE_SIZE      0x2000      
+#define DCACHE_SIZE      0x1000      
+#define CACHE_LINE_SIZE  32
+
+#define THRESHOLD_CACHE_FLUSH 0x500  
 
 //extern void user_exception(void);
 
@@ -351,8 +357,8 @@ u32 cardReadDma() {
 	void* func = (void*)cardStruct[4]; // function to call back once read done
 	void* arg  = (void*)cardStruct[5]; // arguments of the function above
     
-    if(dma > 0 
-        && dma <= 4 
+    if(dma >= 0 
+        && dma <= 3 
         //&& func != NULL
         && len > 0
         && !(((int)dst) & 31)
@@ -365,9 +371,26 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
         ) {
         isDma = true;
-        // TODO optimize the cache flush to avoid full flush according to the read size
-        // Note : cacheFlush disable / reenable irq
-        cacheFlush();
+        
+        /*if (len < THRESHOLD_CACHE_FLUSH) {
+            int oldIME = enterCriticalSection();
+            u32     dst2 = dst;
+            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+            if (mod)
+            {
+                dst2 -= mod;
+                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                len += CACHE_LINE_SIZE;
+            }
+            IC_InvalidateRange((void *)dst, len);
+            DC_InvalidateRange((void *)dst2, len);
+            DC_WaitWriteBufferEmpty();
+            leaveCriticalSection(oldIME);   
+        } else {*/ 
+            // Note : cacheFlush disable / reenable irq
+            cacheFlush();
+        //}
     } else { 
         isDma = false;
         dma=0;
