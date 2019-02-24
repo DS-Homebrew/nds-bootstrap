@@ -64,6 +64,7 @@ static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 
 static bool flagsSet = false;
+static bool isDma = false;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
