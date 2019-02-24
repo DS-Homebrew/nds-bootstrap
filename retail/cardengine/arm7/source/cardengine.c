@@ -103,6 +103,13 @@ static void unlaunchSetHiyaBoot(void) {
 	}
 }
 
+static bool isSdEjected(void) {
+	if (*(vu32*)(0x400481C) & BIT(3)) {
+		return true;
+	}
+	return false;
+}
+
 static void initialize(void) {
 	if (initialized) {
 		return;
@@ -388,7 +395,7 @@ static void runCardEngineCheck(void) {
 	#endif	
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-		if (*(vu32*)(0x400481C) & BIT(3)) {
+		if (isSdEjected()) {
 			memcpy((u32*)0x02000300, sr_data_error, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
@@ -812,6 +819,10 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
+	if (isSdEjected()) {
+		return false;
+	}
+
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst, *savFile, src, len, 0);
@@ -832,6 +843,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+	if (isSdEjected()) {
+		return false;
+	}
+
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
 		if (saveTimer == 0) {
@@ -855,6 +870,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	#endif	
+
+	if (isSdEjected()) {
+		return false;
+	}
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
@@ -891,6 +910,10 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
+	if (isSdEjected()) {
+		return false;
+	}
+
 	// TODO: this should be implemented?
 	return true;
 }
