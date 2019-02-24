@@ -196,16 +196,16 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 -= src % 4;
 				len2 -= len2 % 32;
 			}
-
+            
             if (isDma) {
                 // Copy via dma
-  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+  				dmaCopyWords(dma, (u8*)buffer+(src-sector), dst, len2);
   
   				// Update cardi common
   				cardStruct[0] = src + len2;
   				cardStruct[1] = (vu32)(dst + len2);
   				cardStruct[2] = len - len2; 
-            } else {
+            }  else {
     			if (*ce9->patches->readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
     				#ifdef DEBUG
     				// Send a log command for debug purpose
@@ -262,9 +262,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				page = (src / 512) * 512;
 				sector = (src / readSize) * readSize;
 				accessCounter++;
-			}
-			if (isDma) {
-				while (dmaBusy(dma));
 			}
 		}
 	//}
