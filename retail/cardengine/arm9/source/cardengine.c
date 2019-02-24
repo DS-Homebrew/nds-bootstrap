@@ -365,6 +365,9 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
         ) {
         isDma = true;
+        // TODO optimize the cache flush to avoid full flush according to the read size
+        // Note : cacheFlush disable / reenable irq
+        cacheFlush();
     } else { 
         isDma = false;
         dma=0;
