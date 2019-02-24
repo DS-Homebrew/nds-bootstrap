@@ -251,7 +251,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 0xA0 : 0xE0);
+	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
