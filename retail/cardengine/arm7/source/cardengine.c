@@ -998,7 +998,7 @@ u32 cardId(void) {
     cardid |= unit;
     
     // Keep the default CardID fow now
-    cardid = 0xC2FF01C0;    
+    cardid = 1;    
     
     #ifdef DEBUG
     dbg_hexa(cardid);
