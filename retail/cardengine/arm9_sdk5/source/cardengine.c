@@ -264,8 +264,8 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-bool cardReadDma() {
-    return false;    
+u32 cardReadDma() {
+    return 0;    
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {

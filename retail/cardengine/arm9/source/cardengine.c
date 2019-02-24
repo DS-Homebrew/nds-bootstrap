@@ -328,8 +328,8 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
-bool cardReadDma() {
-    return false;    
+u32 cardReadDma() {
+    return 0;    
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
