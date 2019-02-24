@@ -369,6 +369,7 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
         ) {
         isDma = true;
+		dma--;
     } else { 
         isDma = false;
         dma=0;
