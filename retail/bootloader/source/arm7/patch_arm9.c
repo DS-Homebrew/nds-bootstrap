@@ -225,7 +225,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
         dbg_hexa(cardIdPatch[usesThumb ? 1 : 2]);
         dbg_printf("\n\n");        
 
-        cardIdPatch[usesThumb ? 2 : 3] = cardid;
+        //cardIdPatch[usesThumb ? 2 : 3] = cardid;
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
