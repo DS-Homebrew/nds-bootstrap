@@ -198,6 +198,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			}
 
             if (isDma) {
+				while (dmaBusy(dma));
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
   
@@ -263,11 +264,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sector = (src / readSize) * readSize;
 				accessCounter++;
 			}
-			if (isDma) {
-				while (dmaBusy(dma));
-			}
 		}
 	//}
+	if (isDma) {
+		while (dmaBusy(dma));
+	}
 	
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
