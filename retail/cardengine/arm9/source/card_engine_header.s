@@ -209,6 +209,7 @@ thumb_card_pull:
 	bx      lr
 
 	.arm
+    
 .global callYieldThumb
 .type	callYieldThumb STT_FUNC
 callYieldThumb:

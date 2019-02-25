@@ -29,6 +29,7 @@
 #include "nds_header.h"
 #include "cardengine.h"
 #include "locations.h"
+#include "cardengine_header_arm9.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -42,6 +43,8 @@
 //extern void user_exception(void);
 
 //extern vu32* volatile cacheStruct;
+
+extern cardengineArm9* volatile ce9;
 
 extern u32 ROMinRAM;
 extern u32 dsiMode;
@@ -100,11 +103,21 @@ static void updateDescriptor(int slot, u32 sector) {
 	cacheCounter[slot] = accessCounter;
 }
 
+static void yield() {
+    if(ce9->patches->yieldRef) {
+        volatile void (*yieldRef)(void) = ce9->patches->yieldRef;
+        (*yieldRef)();
+    } else if(ce9->thumbPatches->yieldRef) {
+        callYieldThumb();
+    }    
+}
+
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
+        yield();
         if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;

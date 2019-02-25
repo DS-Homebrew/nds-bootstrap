@@ -24,7 +24,6 @@
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
 
-
 ce9 :
 	.word	ce9
 patches_offset:
@@ -80,6 +79,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+thumbYieldRef:
 .word   0x0 @yieldRef
 .word   0x0
 
@@ -223,7 +223,23 @@ thumb_card_pull_out_arm9:
 thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+    
 	.arm
+    
+.global callYieldThumb
+.type	callYieldThumb STT_FUNC
+callYieldThumb:
+    push	{r1-r7, lr}
+    ldr     r6, thumbYieldRef
+    add     r6, #1
+    bl		_blx_r6_stub_callYieldThumb	
+    pop	    {r1-r7, pc}
+	bx      lr
+_blx_r6_stub_callYieldThumb:
+	bx	r6	
+.pool
+
+
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:
