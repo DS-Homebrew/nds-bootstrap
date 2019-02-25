@@ -63,6 +63,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+thumbYieldRef:
 .word   0x0 @yieldRef
 .word   0x0
 
@@ -208,14 +209,17 @@ thumb_card_pull:
 	bx      lr
 
 	.arm
-.global callThumbPtr
-.type	callThumbPtr STT_FUNC
-callThumbPtr:
+.global callYieldThumb
+.type	callYieldThumb STT_FUNC
+callYieldThumb:
     push	{r1-r7, lr}
-    mov     lr,pc
-    bx      r0;  
+    ldr     r6, thumbYieldRef
+    bl		_blx_r6_stub_callYieldThumb	
     pop	    {r1-r7, pc}
 	bx      lr
+_blx_r6_stub_callYieldThumb:
+	bx	r6	
+.pool
         
 .global cacheFlush
 .type	cacheFlush STT_FUNC
