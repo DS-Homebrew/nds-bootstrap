@@ -101,8 +101,11 @@ static const u32 mpuInitCache[1] = {0xE3A00042};
 
 static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
   
-static const u32 yieldSignature[4]        = {0xE92D41F0, 0xE59F00A8, 0xE3A04000, 0xE1A05004}; // sdk4
-static const u16 yieldSignatureThumb[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A85}; // sdk4 
+static const u32 yieldSignature4[4]        = {0xE92D41F0, 0xE59F00A8, 0xE3A04000, 0xE1A05004}; // sdk4
+static const u16 yieldSignatureThumb4[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A85}; // sdk4
+static const u32 yieldSignature5[4]        = {0xE92D41F0, 0xE59F50A0, 0xE3A74000, 0xE1A04007}; // sdk5
+static const u16 yieldSignatureThumb5[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A05}; // sdk4
+
 
 // Init Heap
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
@@ -1383,6 +1386,13 @@ u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 }
 
 u32* findYieldOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    u32* yieldSignature = yieldSignature4;
+    u32* yieldSignatureThumb = yieldSignatureThumb4;    
+	if (moduleParams->sdk_version > 0x5000000) {
+        yieldSignature = yieldSignature5;
+        yieldSignatureThumb = yieldSignatureThumb5;     
+    } 
+        
     u32* yieldOffset = NULL;
     if(usesThumb) {
 		yieldOffset = findOffsetThumb(
