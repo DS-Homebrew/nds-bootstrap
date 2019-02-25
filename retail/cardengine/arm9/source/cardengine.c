@@ -215,7 +215,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
             
             if (isDma) {
                 // Copy via dma
-  				dmaCopyWords(dma, (u8*)buffer+(src-sector), dst, len2);
+  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+                while (dmaBusy(dma)) yield();
+                        
   
   				// Update cardi common
   				cardStruct[0] = src + len2;
