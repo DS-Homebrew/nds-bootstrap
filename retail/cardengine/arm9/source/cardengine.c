@@ -104,7 +104,7 @@ static void updateDescriptor(int slot, u32 sector) {
 	*(cacheCounter+slot) = accessCounter;
 }
 
-static void yield(){
+static void yield() {
     if(ce9->patches->yieldRef) {
         volatile void (*yieldRef)(void) = ce9->patches->yieldRef;
         (*yieldRef)();
@@ -118,7 +118,7 @@ static void waitForArm7(void) {
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-
+        yield();
         if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;
