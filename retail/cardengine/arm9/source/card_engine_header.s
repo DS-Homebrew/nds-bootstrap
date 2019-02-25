@@ -214,6 +214,7 @@ thumb_card_pull:
 callYieldThumb:
     push	{r1-r7, lr}
     ldr     r6, thumbYieldRef
+    add     r6, #1
     bl		_blx_r6_stub_callYieldThumb	
     pop	    {r1-r7, pc}
 	bx      lr
