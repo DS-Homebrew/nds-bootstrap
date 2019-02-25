@@ -109,6 +109,12 @@ static void waitForArm7(void) {
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
+        if(ce9->patches->yieldRef) {
+            volatile void (*yieldRef)(void) = ce9->patches->yieldRef;
+    		(*yieldRef)();
+        } else if(ce9->thumbPatches->yieldRef) {
+            callThumbPtr(ce9->thumbPatches->yieldRef);
+        } 
         if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;

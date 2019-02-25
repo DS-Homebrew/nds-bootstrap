@@ -254,6 +254,13 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
+static void patchYield(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	// yield
+    u32* yield = findYieldOffset(ndsHeader,moduleParams,usesThumb);
+    if(usesThumb) ce9->thumbPatches->yieldRef = yield; 
+    else ce9->patches->yieldRef = yield; 
+}
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	if (moduleParams->sdk_version > 0x5000000) {
 		return;
@@ -659,7 +666,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchDownloadplay(ndsHeader);
 
-	//patchHeapPointer(ndsHeader, usesThumb);
+	patchYield(ce9, ndsHeader, moduleParams, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 

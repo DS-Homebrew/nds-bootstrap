@@ -49,6 +49,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   0x0 @yieldRef
 .word   0x0
 needFlushDCCache:
 .word   0x0
@@ -62,6 +63,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   0x0 @yieldRef
 .word   0x0
 
 @---------------------------------------------------------------------------------
@@ -204,7 +206,17 @@ thumb_card_pull_out_arm9:
 thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+
 	.arm
+.global callThumbPtr
+.type	callThumbPtr STT_FUNC
+callThumbPtr:
+    push	{r1-r7, lr}
+    mov     lr,pc
+    bx      r0;  
+    pop	    {r1-r7, pc}
+	bx      lr
+        
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:

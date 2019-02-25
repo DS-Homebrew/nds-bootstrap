@@ -65,6 +65,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   0x0 @yieldRef
 .word   0x0
 .global needFlushDCCache
 needFlushDCCache:
@@ -79,6 +80,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   0x0 @yieldRef
 .word   0x0
 
 @---------------------------------------------------------------------------------
