@@ -228,19 +228,6 @@ thumb_card_pull:
 	bx      lr
     
 	.arm
-    
-.global callYieldThumb
-.type	callYieldThumb STT_FUNC
-callYieldThumb:
-    push	{r1-r7, lr}
-    ldr     r6, thumbYieldRef
-    add     r6, #1
-    bl		_blx_r6_stub_callYieldThumb	
-    pop	    {r1-r7, pc}
-	bx      lr
-_blx_r6_stub_callYieldThumb:
-	bx	r6	
-.pool
 
 .global callSleepThumb
 .type	callSleepThumb STT_FUNC

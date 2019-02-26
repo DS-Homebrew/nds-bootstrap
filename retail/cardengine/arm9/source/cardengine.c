@@ -104,15 +104,6 @@ static void updateDescriptor(int slot, u32 sector) {
 	*(cacheCounter+slot) = accessCounter;
 }
 
-static void yield() {
-    if(ce9->patches->yieldRef) {
-        volatile void (*yieldRef)(void) = ce9->patches->yieldRef;
-        (*yieldRef)();
-    } else if(ce9->thumbPatches->yieldRef) {
-        callYieldThumb();
-    }    
-}
-
 static void sleep(u32 ms) {
     if(ce9->patches->sleepRef) {
         volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
@@ -136,7 +127,6 @@ static void waitForArm7(void) {
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-        yield();
         sleep(2);
         if(count==20000000 || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef){
             IPC_SendSync(0xEE24);
@@ -236,7 +226,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
-                    yield();
                     sleep(1);
                 }        
   
