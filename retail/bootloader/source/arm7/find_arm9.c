@@ -110,6 +110,8 @@ static const u16 yieldSignatureThumb5[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A05};
 
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2 : no yield method
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2 : no yield method
+static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
+static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA802}; // sdk4
 
 // Init Heap
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
@@ -1430,7 +1432,12 @@ u32* findYieldOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     u32* sleepSignature = sleepSignature2;
-    u16* sleepSignatureThumb = sleepSignatureThumb2; 
+    u16* sleepSignatureThumb = sleepSignatureThumb2;
+    
+    if (moduleParams->sdk_version > 0x4000000) {
+        sleepSignature = sleepSignature4;
+        sleepSignatureThumb = sleepSignatureThumb4;         
+    }
         
     u32* sleepOffset = NULL;
     if(usesThumb) {
