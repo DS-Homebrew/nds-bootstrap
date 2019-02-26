@@ -128,7 +128,7 @@ static void waitForArm7(void) {
 	while (sharedAddr[3] != (vu32)0) {
         count++;
         yield();
-        sleep(10);
+        sleep(5);
         if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;
@@ -228,7 +228,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
                     yield();
-                    sleep(5);
+                    sleep(2);
                 }        
   
   				// Update cardi common
