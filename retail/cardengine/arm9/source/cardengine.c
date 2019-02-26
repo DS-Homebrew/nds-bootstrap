@@ -412,3 +412,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }
+
+void cardPullOut(void) {
+	if (!ce9->ROMinRAM && *(vu32*)(0x027FFB30) != 0) {
+		VoidFn terminateCode = (VoidFn)ce9->patches->terminateForPullOutRef;
+		terminateCode();
+	}
+}

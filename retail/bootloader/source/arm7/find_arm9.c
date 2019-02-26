@@ -47,6 +47,9 @@ static const u16 cardPullOutSignatureThumbAlt[4]  = {0xB500, 0xB081, 0x203F, 0x4
 static const u16 cardPullOutSignatureThumb5[4]    = {0xB510, 0x203F, 0x4008, 0x2811};                 // SDK 5
 static const u16 cardPullOutSignatureThumb5Alt[4] = {0xB538, 0x203F, 0x4008, 0x2811};                 // SDK 5
 
+// Terminate for card pull out
+static const u32 cardTerminateForPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F002C, 0xE1D000B0}; // SDK <= 3
+
 //static const u32 cardSendSignature[7] = {0xE92D40F0, 0xE24DD004, 0xE1A07000, 0xE1A06001, 0xE1A01007, 0xE3A0000E, 0xE3A02000};
 
 // Force to power off
@@ -688,6 +691,30 @@ u16* findCardPullOutOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 
 	dbg_printf("\n");
 	return cardPullOutOffset;
+}
+
+u32* findCardTerminateForPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findCardTerminateForCardPullOutOffset:\n");
+
+	//if (!usesThumb) {
+	
+	u32* cardTerminateForPullOutOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		cardTerminateForPullOutSignature1, 4
+	);
+	if (cardTerminateForPullOutOffset) {
+		dbg_printf("Card terminate for pull out handler found: ");
+	} else {
+		dbg_printf("Card terminate for pull out handler not found\n");
+	}
+
+	if (cardTerminateForPullOutOffset) {
+		dbg_hexa((u32)cardTerminateForPullOutOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return cardTerminateForPullOutOffset;
 }
 
 /*u32* findForceToPowerOffOffset(const tNDSHeader* ndsHeader) {

@@ -49,7 +49,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
-.word   0x0
+.word   terminateForPullOutRef
 needFlushDCCache:
 .word   0x0
 thumbPatches:
@@ -62,7 +62,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
-.word   0x0
+.word   terminateForPullOutRef
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -85,6 +85,8 @@ cardStructArm9:
 cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
+.word    0x00000000  
+terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000
@@ -136,7 +138,25 @@ card_dma_arm9:
 @---------------------------------------------------------------------------------
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
+	stmfd   sp!, {lr}
+	sub     sp, sp, #4
+	ldr		r6, cardPullOutRef
+    ldr     r7, ce9location3
+    add     r6, r6, r7
+    
+	bl		_blx_r6_stub_card_pull_out
+
+	addeq   sp, sp, #4
+	.word  0x08BD4000 @ldmeqfs sp!, {lr}
 	bx      lr
+_blx_r6_stub_card_pull_out:
+	bx	r6
+.pool
+.align	4
+ce9location3:
+.word   ce9
+cardPullOutRef:
+.word   cardPullOut-ce9 	
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
