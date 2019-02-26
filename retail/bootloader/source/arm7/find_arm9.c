@@ -1389,7 +1389,7 @@ u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 u32* findYieldOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     u32* yieldSignature = yieldSignature3;
     u32* yieldSignatureThumb = yieldSignatureThumb4; 
-	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) { 
+	if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
 		yieldSignature = yieldSignature4;  
 	}
 	if (moduleParams->sdk_version > 0x5000000) {
