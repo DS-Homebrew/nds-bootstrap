@@ -422,7 +422,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *thumbReadCardLocation = current_location;
     
-	u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
+	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armPullCardLocation) {
 		return;
 	}
@@ -432,7 +432,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_hexa((u32)*armPullCardLocation);
     dbg_printf("\n\n");
     
-    *armPullCardLocation = current_location;
+    *armPullCardLocation = current_location;*/
     
     u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {
@@ -649,7 +649,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
 
-	patchCardTerminateForPullOut(ce9, usesThumb, ndsHeader, moduleParams, cardPullOutOffset);
+	//patchCardTerminateForPullOut(ce9, usesThumb, ndsHeader, moduleParams, cardPullOutOffset);
 
 	patchCacheFlush(ce9, usesThumb, cardPullOutOffset);
 
