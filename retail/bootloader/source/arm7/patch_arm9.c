@@ -146,8 +146,8 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 
 	// Patch
-	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
-	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x28);
+	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull_out_arm9 : ce9->patches->card_pull_out_arm9);
+	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
 }
 
 static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {

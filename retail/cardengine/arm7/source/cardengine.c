@@ -403,6 +403,11 @@ static void runCardEngineCheck(void) {
   
   		//nocashMessage("runCardEngineCheck mutex ok");
   
+		if (*(vu32*)(0x027FFB14) == (vu32)0x5245424F) {
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);
+		}
+
   		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
   			log_arm9();
   			*(vu32*)(0x027FFB14) = 0;
@@ -516,7 +521,7 @@ void myIrqHandlerVBlank(void) {
 				}
 				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
+				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 			}
 			unlockMutex(&saveMutex);
 		}
