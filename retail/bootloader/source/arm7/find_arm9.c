@@ -107,16 +107,10 @@ static const u32 mpuInitCache[1] = {0xE3A00042};
 static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
 // thread management  
-static const u32 yieldSignature3[4]        = {0xE92D41F0, 0xE59F00AC, 0xE3A07000, 0xE1A06007}; // sdk3
-static const u32 yieldSignature4[4]        = {0xE92D41F0, 0xE59F00A8, 0xE3A04000, 0xE1A05004}; // sdk4
-static const u16 yieldSignatureThumb4[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A85}; // sdk4
-static const u32 yieldSignature5[4]        = {0xE92D41F0, 0xE59F50A0, 0xE3A74000, 0xE1A04007}; // sdk5
-static const u16 yieldSignatureThumb5[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A05}; // sdk4
-
-static const u32 sleepSignature1[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk pre 2 : no yield method
-static const u16 sleepSignatureThumb1[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk pre 2 : no yield method
-static const u32 sleepSignature2[4]        = {0xE92D4070, 0xE24DD008, 0xE1A04000, 0xEB00FB62}; // sdk2 : no yield method
-static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2 : no yield method
+static const u32 sleepSignature1[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk pre 2
+static const u16 sleepSignatureThumb1[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk pre 2
+static const u32 sleepSignature2[4]        = {0xE92D4070, 0xE24DD008, 0xE1A04000, 0xEB00FB62}; // sdk2
+static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2
 static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
 static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA802}; // sdk4
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
@@ -1412,45 +1406,6 @@ u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 
 	dbg_printf("\n");
 	return operaRamOffset;
-}
-
-u32* findYieldOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-    u32* yieldSignature = yieldSignature3;
-    u16* yieldSignatureThumb = yieldSignatureThumb4; 
-	if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
-		yieldSignature = yieldSignature4;  
-	}
-	if (moduleParams->sdk_version > 0x5000000) {
-        yieldSignature = yieldSignature5;
-        yieldSignatureThumb = yieldSignatureThumb5;     
-    } 
-        
-    u32* yieldOffset = NULL;
-    if(usesThumb) {
-		yieldOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-        yieldSignatureThumb, 4
-        );
-	} else {
-		yieldOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-        yieldSignature, 4
-        );
-	}
-    
-	if (yieldOffset) {
-		dbg_printf("Yield found: ");
-	} else {
-		dbg_printf("Yield not found\n");
-	}
-
-	if (yieldOffset) {
-		dbg_hexa((u32)yieldOffset);
-		dbg_printf("\n");
-	}
-
-	dbg_printf("\n");
-	return yieldOffset;
 }
 
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {

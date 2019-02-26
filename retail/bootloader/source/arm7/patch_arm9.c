@@ -266,13 +266,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
-static void patchYield(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	// yield
-    u32* yield = findYieldOffset(ndsHeader,moduleParams,usesThumb);
-    if(usesThumb) ce9->thumbPatches->yieldRef = yield; 
-    else ce9->patches->yieldRef = yield; 
-}
-
 static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// yield
     u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
@@ -700,9 +693,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
 	patchDownloadplay(ndsHeader);
-
-	//patchYield(ce9, ndsHeader, moduleParams, usesThumb);
-    
+  
     patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
