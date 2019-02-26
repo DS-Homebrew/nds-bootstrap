@@ -146,8 +146,20 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 
 	// Patch
-	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
-	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4);
+	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull_out_arm9 : ce9->patches->card_pull_out_arm9);
+	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
+}
+
+static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
+	if (!cardPullOutOffset) {
+		return;
+	}
+
+	u32* cardTerminateForPullOutOffset = findCardTerminateForPullOutOffset(ndsHeader, moduleParams);
+
+	// Patch
+	u32* cardTerminateForPullOut = (usesThumb ? ce9->thumbPatches->terminateForPullOutRef : ce9->patches->terminateForPullOutRef);
+	*cardTerminateForPullOut = cardTerminateForPullOutOffset;
 }
 
 static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
@@ -157,7 +169,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 
 	// Patch
 	u32* cacheFlushPatch = (usesThumb ? ce9->thumbPatches->cacheFlushRef : ce9->patches->cacheFlushRef);
-	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
+	*cacheFlushPatch = (u32)cardPullOutOffset + 13;
 }
 
 /*static void patchForceToPowerOff(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
@@ -447,6 +459,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadDmaCardLocation = current_location;
+
+	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armPullCardLocation) {
+		return;
+	}
+    dbg_printf("armPullCardLocation ");
+	dbg_hexa((u32)armPullCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armPullCardLocation);
+    dbg_printf("\n\n");
+    
+    *armPullCardLocation = current_location;*/
     
     u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {
@@ -477,6 +501,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
     ce9->patches->readCachedRef = (u32*)((u32)ce9->patches->readCachedRef - default_location + current_location);
+    ce9->patches->terminateForPullOutRef = (u32*)((u32)ce9->patches->terminateForPullOutRef - default_location + current_location);
     ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
@@ -485,6 +510,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
     ce9->thumbPatches->readCachedRef = (u32*)((u32)ce9->thumbPatches->readCachedRef - default_location + current_location);
+    ce9->thumbPatches->terminateForPullOutRef = (u32*)((u32)ce9->thumbPatches->terminateForPullOutRef - default_location + current_location);
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -660,6 +686,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
+
+	//patchCardTerminateForPullOut(ce9, usesThumb, ndsHeader, moduleParams, cardPullOutOffset);
 
 	patchCacheFlush(ce9, usesThumb, cardPullOutOffset);
 

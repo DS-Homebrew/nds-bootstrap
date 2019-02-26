@@ -88,8 +88,8 @@ static void unlaunchSetHiyaBoot(void) {
 	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
-	*(u32*)(0x02000810) |= BIT(0);		// Load the title at 2000838h
-	*(u32*)(0x02000810) |= BIT(1);		// Use colors 2000814h
+	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
+													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
 	memset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
@@ -101,6 +101,13 @@ static void unlaunchSetHiyaBoot(void) {
 	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 	}
+}
+
+static bool isSdEjected(void) {
+	if (*(vu32*)(0x400481C) & BIT(3)) {
+		return true;
+	}
+	return false;
 }
 
 static void initialize(void) {
@@ -388,7 +395,8 @@ static void runCardEngineCheck(void) {
 	#endif	
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-		if (*(vu32*)(0x400481C) & BIT(3)) {
+		//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
+		if (isSdEjected()) {
 			memcpy((u32*)0x02000300, sr_data_error, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
@@ -400,6 +408,11 @@ static void runCardEngineCheck(void) {
   
   		//nocashMessage("runCardEngineCheck mutex ok");
   
+		/*if (*(vu32*)(0x027FFB14) == (vu32)0x5245424F) {
+			i2cWriteRegister(0x4A, 0x70, 0x01);
+			i2cWriteRegister(0x4A, 0x11, 0x01);
+		}*/
+
   		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
   			log_arm9();
   			*(vu32*)(0x027FFB14) = 0;
@@ -513,7 +526,7 @@ void myIrqHandlerVBlank(void) {
 				}
 				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++/DSiMenu++/SRLoader
+				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 			}
 			unlockMutex(&saveMutex);
 		}
@@ -812,6 +825,10 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
+	if (isSdEjected()) {
+		return false;
+	}
+
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
 		fileRead(dst, *savFile, src, len, 0);
@@ -832,6 +849,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+	if (isSdEjected()) {
+		return false;
+	}
+
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
 		if (saveTimer == 0) {
@@ -855,6 +876,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	#endif	
+
+	if (isSdEjected()) {
+		return false;
+	}
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
@@ -891,6 +916,10 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
+	if (isSdEjected()) {
+		return false;
+	}
+
 	// TODO: this should be implemented?
 	return true;
 }
@@ -975,7 +1004,7 @@ u32 cardId(void) {
     cardid |= unit;
     
     // Keep the default CardID fow now
-    cardid = 0xC2FF01C0;    
+    cardid = 1;    
     
     #ifdef DEBUG
     dbg_hexa(cardid);

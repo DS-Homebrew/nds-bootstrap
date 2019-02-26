@@ -519,3 +519,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	return ret; 
 }
+
+void cardPullOut(void) {
+	if (!ce9->ROMinRAM && *(vu32*)(0x027FFB30) != 0) {
+		/*VoidFn terminateCode = (VoidFn)ce9->patches->terminateForPullOutRef;
+		terminateCode();*/
+		sharedAddr[3] = 0x5245424F;
+		waitForArm7();
+	}
+}

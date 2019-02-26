@@ -51,7 +51,7 @@ patches:
 .word   readCachedRef
 .word   0x0 @yieldRef
 .word   0x0 @sleepRef
-.word   0x0
+.word   terminateForPullOutRef
 needFlushDCCache:
 .word   0x0
 thumbPatches:
@@ -68,7 +68,8 @@ thumbYieldRef:
 .word   0x0 @yieldRef
 thumbSleepRef:
 .word   0x0 @sleepRef
-.word   0x0
+.word   terminateForPullOutRef
+
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -93,6 +94,8 @@ cacheFlushRef:
 readCachedRef:
 .word    0x00000000
 readCachedRefThumb:
+.word    0x00000000  
+terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000
@@ -162,6 +165,25 @@ cardReadRef3:
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	bx      lr
+@	stmfd   sp!, {lr}
+@	sub     sp, sp, #4
+@	ldr		r6, cardPullOutRef
+@    ldr     r7, ce9location3
+@    add     r6, r6, r7
+    
+@	bl		_blx_r6_stub_card_pull_out
+
+@	add     sp, sp, #4
+@	ldmfd   sp!, {lr}
+@	bx      lr
+@_blx_r6_stub_card_pull_out:
+@	bx	r6
+@.pool
+@.align	4
+@ce9location3:
+@.word   ce9
+@cardPullOutRef:
+@.word   cardPullOut-ce9
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -175,7 +197,7 @@ thumb_card_id_arm9:
 	ldr r0, cardIdDataT 
 	bx      lr
 cardIdDataT:
-.word  0xC2FF01C0	
+.word  1	
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

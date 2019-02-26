@@ -9,17 +9,17 @@
 //
 typedef struct cardengineArm9Patches {
     u32* card_read_arm9;
-    u32* card_pull_out_arm9; // Unused
+    u32* card_pull_out_arm9;
     u32 offset2;
     u32* card_id_arm9;
     u32* card_dma_arm9;
     u32* cardStructArm9;
-    u32* card_pull;
+    u32* card_pull; // Unused
     u32* cacheFlushRef;
     u32* readCachedRef;
     u32* yieldRef;
     u32* sleepRef;
-    u32 offset9;
+    u32* terminateForPullOutRef;
     u32 needFlushDCCache;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
@@ -29,17 +29,17 @@ typedef struct cardengineArm9Patches {
 //
 typedef struct cardengineArm9ThumbPatches {
     u32* card_read_arm9;
-    u32* card_pull_out_arm9; // Unused
+    u32* card_pull_out_arm9;
     u32 offset2;
     u32* card_id_arm9;
     u32* card_dma_arm9;
     u32* cardStructArm9;
-    u32* card_pull;
+    u32* card_pull; // Unused
     u32* cacheFlushRef;
     u32* readCachedRef;
     u32* yieldRef;
     u32* sleepRef;
-    u32 offset9;
+    u32* terminateForPullOutRef;
 } __attribute__ ((__packed__)) cardengineArm9ThumbPatches;
 
 
