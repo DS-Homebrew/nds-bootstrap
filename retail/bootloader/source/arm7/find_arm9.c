@@ -30,6 +30,8 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 // Card read cached
 static const u32 cardReadCachedEndSignature1[4]   = {0xE5950020, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK <= 2
 static const u32 cardReadCachedStartSignature1[2] = {0xE92D4030, 0xE24DD004};
+static const u32 cardReadCachedEndSignatureThumb1[4]   = {0x2000, 0xB001, 0xBC30, 0xBC08}; // SDK <= 2
+static const u16 cardReadCachedStartSignatureThumb1[2] = {0xB530, 0xB081};
 static const u32 cardReadCachedEndSignature3[4]   = {0xE5950024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK 3
 //               cardReadCachedStartSignature3
 static const u32 cardReadCachedEndSignature4[4]   = {0xE5940024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK >= 4
@@ -111,12 +113,16 @@ static const u16 yieldSignatureThumb4[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A85};
 static const u32 yieldSignature5[4]        = {0xE92D41F0, 0xE59F50A0, 0xE3A74000, 0xE1A04007}; // sdk5
 static const u16 yieldSignatureThumb5[4]     = {0xB5F8, 0x4819, 0x2700, 0x6A05}; // sdk4
 
-static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2 : no yield method
+static const u32 sleepSignature1[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk pre 2 : no yield method
+static const u16 sleepSignatureThumb1[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk pre 2 : no yield method
+static const u32 sleepSignature2[4]        = {0xE92D4070, 0xE24DD008, 0xE1A04000, 0xEB00FB62}; // sdk2 : no yield method
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2 : no yield method
 static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
 static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA802}; // sdk4
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
 static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C05}; // sdk5
+
+static const u32 sleepConstantValue = {0x82EA}; 
 
 // Init Heap
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};

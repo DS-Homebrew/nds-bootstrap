@@ -701,7 +701,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchDownloadplay(ndsHeader);
 
-	patchYield(ce9, ndsHeader, moduleParams, usesThumb);
+	//patchYield(ce9, ndsHeader, moduleParams, usesThumb);
     
     patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 	
