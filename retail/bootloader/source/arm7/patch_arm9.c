@@ -263,7 +263,7 @@ static void patchYield(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 
 static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// yield
-    u32* sleep = findYieldOffset(ndsHeader,moduleParams,usesThumb);
+    u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
     if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
     else ce9->patches->sleepRef = sleep; 
 }
