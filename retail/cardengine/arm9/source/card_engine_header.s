@@ -63,7 +63,7 @@ thumbPatches:
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-.word   readCachedRef
+.word   readCachedRefThumb
 thumbYieldRef:
 .word   0x0 @yieldRef
 thumbSleepRef:
@@ -91,6 +91,8 @@ cardStructArm9:
 cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
+.word    0x00000000
+readCachedRefThumb:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000
@@ -236,6 +238,19 @@ callSleepThumb:
     pop	    {r1-r7, pc}
 	bx      lr
 _blx_r6_stub_callSleepThumb:
+	bx	r6	
+.pool
+
+.global callReadCacheRefThumb
+.type	callReadCacheRefThumb STT_FUNC
+callReadCacheRefThumb:
+    push	{r1-r7, lr}
+    ldr     r6, readCachedRefThumb
+    add     r6, #1
+    bl		_blx_r6_stub_callReadCacheThumb	
+    pop	    {r1-r7, pc}
+	bx      lr
+_blx_r6_stub_callReadCacheThumb:
 	bx	r6	
 .pool
         

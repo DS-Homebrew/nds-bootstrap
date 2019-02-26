@@ -122,6 +122,15 @@ static void sleep(u32 ms) {
     }    
 }
 
+static void readCached(u32* cacheStruct) {
+    if(*ce9->patches->readCachedRef) {
+        volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
+        (*readCachedRef)(cacheStruct);
+    } else if(*ce9->thumbPatches->readCachedRef) {
+        callReadCacheRefThumb(cacheStruct);
+    }    
+}
+
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
@@ -236,7 +245,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
   				cardStruct[1] = (vu32)(dst + len2);
   				cardStruct[2] = len - len2; 
             }  else {
-    			if (*ce9->patches->readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+    			if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
     				#ifdef DEBUG
     				// Send a log command for debug purpose
     				// -------------------------------------
@@ -281,8 +290,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
     				*cachePage = page;
     				
-                    volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-    				(*readCachedRef)(cacheStruct);
+                    readCached(cacheStruct);
     			}
             }
 			len = cardStruct[2];
@@ -312,7 +320,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if (*ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+		if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -352,8 +360,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			// Read via the 512b ram cache
 			memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 			*cachePage = page;
-            volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-			(*readCachedRef)(cacheStruct);
+            readCached(cacheStruct);
 		}
 		len = cardStruct[2];
 		if (len > 0) {
