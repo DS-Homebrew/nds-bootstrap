@@ -22,6 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 //#include <nds/interrupts.h>
+#include <nds/dma.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -68,6 +69,7 @@ static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 
 static bool flagsSet = false;
 static bool isDma = false;
+static u8 dma = 0;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -236,9 +238,19 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			// -------------------------------------*/
 			#endif
 
-			// Copy directly
-			memcpy(dst, (u8*)buffer+(src-sector), len2);
-
+            if (isDma) {
+                // Copy via dma
+  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+                while (dmaBusy(dma)) {
+                    yield();
+                    sleep(2);
+                }        
+  
+            }  else {
+    			// Copy directly
+    			memcpy(dst, (u8*)buffer+(src-sector), len2);
+            }
+            
 			len = len - len2;
 			if (len > 0) {
 				src = src + len2;
@@ -289,6 +301,54 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 }
 
 u32 cardReadDma() {
+	vu32* volatile cardStruct = ce9->cardStruct0;
+    
+	u32 src = cardStruct[0];
+	u8* dst = (u8*)(cardStruct[1]);
+	u32 len = cardStruct[2];
+    dma = cardStruct[3]; // dma channel
+	void* func = (void*)cardStruct[4]; // function to call back once read done
+	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+    
+    if(dma >= 0 
+        && dma <= 3 
+        //&& func != NULL
+        && len > 0
+        && !(((int)dst) & 31)
+        // test data not in ITCM
+        && dst > 0x02000000
+        // test data not in DTCM
+        && (dst < 0x27E0000 || dst > 0x27E4000) 
+        // check 512 bytes page alignement 
+        && !(((int)len) & 511)
+        && !(((int)src) & 511)
+        ) {
+        isDma = true;
+        
+        /*if (len < THRESHOLD_CACHE_FLUSH) {
+            int oldIME = enterCriticalSection();
+            u32     dst2 = dst;
+            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+            if (mod)
+            {
+                dst2 -= mod;
+                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                len += CACHE_LINE_SIZE;
+            }
+            IC_InvalidateRange((void *)dst, len);
+            DC_InvalidateRange((void *)dst2, len);
+            DC_WaitWriteBufferEmpty();
+            leaveCriticalSection(oldIME);   
+        } else {*/ 
+            // Note : cacheFlush disable / reenable irq
+            cacheFlush();
+        //}
+    } else { 
+        isDma = false;
+        dma=0;
+    }
+    
     return 0;    
 }
 
