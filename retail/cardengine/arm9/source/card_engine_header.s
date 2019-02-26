@@ -146,8 +146,8 @@ card_pull_out_arm9:
     
 	bl		_blx_r6_stub_card_pull_out
 
-	addeq   sp, sp, #4
-	.word  0x08BD4000 @ldmeqfs sp!, {lr}
+	add     sp, sp, #4
+	ldmfd   sp!, {lr}
 	bx      lr
 _blx_r6_stub_card_pull_out:
 	bx	r6
