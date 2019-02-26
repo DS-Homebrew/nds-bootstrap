@@ -261,6 +261,13 @@ static void patchYield(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     else ce9->patches->yieldRef = yield; 
 }
 
+static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	// yield
+    u32* sleep = findYieldOffset(ndsHeader,moduleParams,usesThumb);
+    if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
+    else ce9->patches->sleepRef = sleep; 
+}
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	if (moduleParams->sdk_version > 0x5000000) {
 		return;
@@ -667,6 +674,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchDownloadplay(ndsHeader);
 
 	patchYield(ce9, ndsHeader, moduleParams, usesThumb);
+    
+    patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 

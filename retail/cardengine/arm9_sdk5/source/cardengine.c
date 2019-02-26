@@ -112,12 +112,22 @@ static void yield() {
     }    
 }
 
+static void sleep(u32 ms) {
+    if(ce9->patches->sleepRef) {
+        volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
+        (*sleepRef)(ms);
+    } else if(ce9->thumbPatches->sleepRef) {
+        callSleepThumb(ms);
+    }    
+}
+
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
         yield();
+        sleep(10);
         if(count==20000000){
             IPC_SendSync(0xEE24);
             count=0;
