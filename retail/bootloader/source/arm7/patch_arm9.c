@@ -269,7 +269,11 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     const char* romTid = getRomTid(ndsHeader);
     
-    if (strncmp(romTid, "YGX", 3) == 0) { // GTA Chinatow Wars
+    if (
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatow Wars
+    ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
+    ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V
+    ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
       else ce9->patches->sleepRef = sleep;
