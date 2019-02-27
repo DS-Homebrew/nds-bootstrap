@@ -116,7 +116,7 @@ static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA80
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
 static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C05}; // sdk5
 
-static const u32 sleepConstantValue = {0x82EA}; 
+static const u16 sleepConstantValue = {0x82EA}; 
 
 // Init Heap
 static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
@@ -1409,9 +1409,10 @@ u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 }
 
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findSleepOffset\n");
     u32* sleepSignature = sleepSignature2;
     u16* sleepSignatureThumb = sleepSignatureThumb2;
-    
+        
     if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
         sleepSignature = sleepSignature4;
         sleepSignatureThumb = sleepSignatureThumb4;         
@@ -1420,19 +1421,56 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
         sleepSignature = sleepSignature5;
         sleepSignature = sleepSignatureThumb5;     
     }
-        
-    u32* sleepOffset = NULL;
+    
+    u32 * sleepOffset = NULL;
+    
     if(usesThumb) {
-		sleepOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-        sleepSignatureThumb, 4
+  		sleepOffset = findOffsetThumb(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            sleepSignatureThumb, 4
         );
-	} else {
-		sleepOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-        sleepSignature, 4
+  	} else {
+  		sleepOffset = findOffset(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            sleepSignature, 4
         );
-	}
+  	}
+    
+    if (sleepOffset) {
+		dbg_printf("Sleep found: ");
+        dbg_hexa((u32)sleepOffset);
+		dbg_printf("\n");
+    } 
+    
+    while(sleepOffset!=NULL) {
+    	u32* sleepEndOffset = findOffsetThumb(
+    		sleepOffset, 0x200,
+    		sleepConstantValue, 1
+    	);
+        if (sleepEndOffset) {
+    		dbg_printf("Sleep constant found: ");
+            dbg_hexa((u32)sleepEndOffset);
+    		dbg_printf("\n");
+            break;
+        } 
+        
+        if(usesThumb) {
+      		sleepOffset = findOffsetThumb(
+          		sleepOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
+                sleepSignatureThumb, 4
+            );
+      	} else {
+      		sleepOffset = findOffset(
+          		sleepOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
+                sleepSignature, 4
+            );
+      	}
+        if (sleepOffset) {
+		    dbg_printf("Sleep found: ");
+            dbg_hexa((u32)sleepOffset);
+    		dbg_printf("\n");
+        } 
+    } 
     
 	if (sleepOffset) {
 		dbg_printf("Sleep found: ");
