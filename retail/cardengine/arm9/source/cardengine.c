@@ -309,47 +309,60 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
-
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
-			sharedAddr[3] = commandRead;
-
-			waitForArm7();
-			// -------------------------------------
-			#endif
-
-			// Copy directly
-			memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
-
-			// Update cardi common
-			cardStruct[0] = src + len;
-			cardStruct[1] = (vu32)(dst + len);
-			cardStruct[2] = len - len;
+		if (isDma) {
+            // Copy via dma
+  			dmaCopyWordsAsynch(dma, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
+            while (dmaBusy(dma)) {
+                sleep(1);
+            }        
+  
+  			// Update cardi common
+  			cardStruct[0] = src + len;
+  			cardStruct[1] = (vu32)(dst + len);
+  			cardStruct[2] = len - len; 
 		} else {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+			if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+				#ifdef DEBUG
+				// Send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
 
-			sharedAddr[0] = page;
-			sharedAddr[1] = len2;
-			sharedAddr[2] = ((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
-			sharedAddr[3] = commandRead;
+				sharedAddr[0] = dst;
+				sharedAddr[1] = len;
+				sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
+				sharedAddr[3] = commandRead;
 
-			waitForArm7();
-			// -------------------------------------
-			#endif
+				waitForArm7();
+				// -------------------------------------
+				#endif
 
-			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
-			*cachePage = page;
-            readCached(cacheStruct);
+				// Copy directly
+				memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+
+				// Update cardi common
+				cardStruct[0] = src + len;
+				cardStruct[1] = (vu32)(dst + len);
+				cardStruct[2] = len - len;
+			} else {
+				#ifdef DEBUG
+				// Send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
+
+				sharedAddr[0] = page;
+				sharedAddr[1] = len2;
+				sharedAddr[2] = ((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+				sharedAddr[3] = commandRead;
+
+				waitForArm7();
+				// -------------------------------------
+				#endif
+
+				// Read via the 512b ram cache
+				memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+				*cachePage = page;
+				readCached(cacheStruct);
+			}
 		}
 		len = cardStruct[2];
 		if (len > 0) {
