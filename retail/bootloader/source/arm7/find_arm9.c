@@ -1412,6 +1412,9 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_printf("findSleepOffset\n");
     u32* sleepSignature = sleepSignature2;
     u16* sleepSignatureThumb = sleepSignatureThumb2;
+    
+    if (moduleParams->sdk_version < 0x4000000)
+        return NULL;
         
     if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
         sleepSignature = sleepSignature4;
