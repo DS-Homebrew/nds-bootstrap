@@ -267,10 +267,13 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	// yield
-    u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
-    if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
-    else ce9->patches->sleepRef = sleep; 
+    const char* romTid = getRomTid(ndsHeader);
+    
+    if (strncmp(romTid, "YGX", 3) == 0) { // GTA Chinatow Wars
+      u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
+      if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
+      else ce9->patches->sleepRef = sleep;
+    } 
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {

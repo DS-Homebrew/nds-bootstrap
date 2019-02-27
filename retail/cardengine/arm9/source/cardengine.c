@@ -402,6 +402,7 @@ u32 cardReadDma() {
         // check 512 bytes page alignement 
         && !(((int)len) & 511)
         && !(((int)src) & 511)
+        && (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
         ) {
         isDma = true;
         
