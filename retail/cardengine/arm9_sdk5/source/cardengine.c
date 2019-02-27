@@ -22,6 +22,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 //#include <nds/interrupts.h>
+#include <nds/dma.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -29,6 +30,7 @@
 #include "nds_header.h"
 #include "cardengine.h"
 #include "locations.h"
+#include "cardengine_header_arm9.h"
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -39,9 +41,11 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern void user_exception(void);
+//extern void user_exception(void);
 
 //extern vu32* volatile cacheStruct;
+
+extern cardengineArm9* volatile ce9;
 
 extern u32 ROMinRAM;
 extern u32 dsiMode;
@@ -64,6 +68,8 @@ static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 
 static bool flagsSet = false;
+static bool isDma = false;
+static u8 dma = 0;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -99,12 +105,22 @@ static void updateDescriptor(int slot, u32 sector) {
 	cacheCounter[slot] = accessCounter;
 }
 
+static void sleep(u32 ms) {
+    if(ce9->patches->sleepRef) {
+        volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
+        (*sleepRef)(ms);
+    } else if(ce9->thumbPatches->sleepRef) {
+        callSleepThumb(ms);
+    }    
+}
+
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-        if(count==20000000){
+        sleep(2);
+        if(count==20000000 || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef){
             IPC_SendSync(0xEE24);
             count=0;
         }
@@ -212,9 +228,18 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			// -------------------------------------*/
 			#endif
 
-			// Copy directly
-			memcpy(dst, (u8*)buffer+(src-sector), len2);
-
+            if (isDma) {
+                // Copy via dma
+  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+                while (dmaBusy(dma)) {
+                    sleep(1);
+                }        
+  
+            }  else {
+    			// Copy directly
+    			memcpy(dst, (u8*)buffer+(src-sector), len2);
+            }
+            
 			len = len - len2;
 			if (len > 0) {
 				src = src + len2;
@@ -264,6 +289,59 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
+u32 cardReadDma() {
+	vu32* volatile cardStruct = ce9->cardStruct0;
+    
+	u32 src = cardStruct[0];
+	u8* dst = (u8*)(cardStruct[1]);
+	u32 len = cardStruct[2];
+    dma = cardStruct[3]; // dma channel
+	void* func = (void*)cardStruct[4]; // function to call back once read done
+	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+    
+    if(dma >= 0 
+        && dma <= 3 
+        //&& func != NULL
+        && len > 0
+        && !(((int)dst) & 31)
+        // test data not in ITCM
+        && dst > 0x02000000
+        // test data not in DTCM
+        && (dst < 0x27E0000 || dst > 0x27E4000) 
+        // check 512 bytes page alignement 
+        && !(((int)len) & 511)
+        && !(((int)src) & 511)
+        && (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
+        ) {
+        isDma = true;
+        
+        /*if (len < THRESHOLD_CACHE_FLUSH) {
+            int oldIME = enterCriticalSection();
+            u32     dst2 = dst;
+            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+            if (mod)
+            {
+                dst2 -= mod;
+                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                len += CACHE_LINE_SIZE;
+            }
+            IC_InvalidateRange((void *)dst, len);
+            DC_InvalidateRange((void *)dst2, len);
+            DC_WaitWriteBufferEmpty();
+            leaveCriticalSection(oldIME);   
+        } else {*/ 
+            // Note : cacheFlush disable / reenable irq
+            cacheFlush();
+        //}
+    } else { 
+        isDma = false;
+        dma=0;
+    }
+    
+    return 0;    
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
@@ -281,8 +359,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}*/
 
 		if (enableExceptionHandler) {
-			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			setExceptionHandler(user_exception);
+			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			//setExceptionHandler(user_exception);
 		}
 		
 		flagsSet = true;

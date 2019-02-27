@@ -24,7 +24,6 @@
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
 
-
 ce9 :
 	.word	ce9
 patches_offset:
@@ -65,6 +64,8 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+.word   0x0 @yieldRef
+.word   0x0 @sleepRef
 .word   0x0
 .global needFlushDCCache
 needFlushDCCache:
@@ -79,6 +80,10 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   readCachedRef
+thumbYieldRef:
+.word   0x0 @yieldRef
+thumbSleepRef:
+.word   0x0 @sleepRef
 .word   0x0
 
 @---------------------------------------------------------------------------------
@@ -146,8 +151,25 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef3
+    ldr     r7, ce9location3
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_card_read_dma	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
 	mov r0, #0
 	bx      lr
+_blx_r6_stub_card_read_dma:
+	bx	r6	
+.pool
+ce9location3:
+.word   ce9
+cardReadRef3:
+.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -173,8 +195,25 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-	mov r0, #0
-	bx      lr		
+    push	{r1-r7, lr}
+    
+	ldr		r6, cardReadRef4
+    ldr     r7, ce9location4
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_card_read_dma	
+
+    pop	{r1-r7, pc}
+    mov r0, #0
+	bx      lr
+_blx_r6_stub_thumb_card_read_dma:
+	bx	r6	
+.pool
+.align	4
+ce9location4:
+.word   ce9
+cardReadRef4:
+.word   cardReadDma-ce9 		
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -187,7 +226,23 @@ thumb_card_pull_out_arm9:
 thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+    
 	.arm
+
+.global callSleepThumb
+.type	callSleepThumb STT_FUNC
+callSleepThumb:
+    push	{r1-r7, lr}
+    ldr     r6, thumbSleepRef
+    add     r6, #1
+    bl		_blx_r6_stub_callSleepThumb	
+    pop	    {r1-r7, pc}
+	bx      lr
+_blx_r6_stub_callSleepThumb:
+	bx	r6	
+.pool
+
+
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:

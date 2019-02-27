@@ -21,7 +21,8 @@
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
-//#include <nds/interrupts.h>
+#include <nds/dma.h>
+#include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -41,7 +42,13 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-extern void user_exception(void);
+#define ICACHE_SIZE      0x2000      
+#define DCACHE_SIZE      0x1000      
+#define CACHE_LINE_SIZE  32
+
+#define THRESHOLD_CACHE_FLUSH 0x500  
+
+//extern void user_exception(void);
 
 extern cardengineArm9* volatile ce9;
 
@@ -60,6 +67,8 @@ static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 
 static bool flagsSet = false;
+static bool isDma = false;
+static u8 dma = 0;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -95,12 +104,31 @@ static void updateDescriptor(int slot, u32 sector) {
 	*(cacheCounter+slot) = accessCounter;
 }
 
+static void sleep(u32 ms) {
+    if(ce9->patches->sleepRef) {
+        volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
+        (*sleepRef)(ms);
+    } else if(ce9->thumbPatches->sleepRef) {
+        callSleepThumb(ms);
+    }    
+}
+
+static void readCached(u32* cacheStruct) {
+    if(*ce9->patches->readCachedRef) {
+        volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
+        (*readCachedRef)(cacheStruct);
+    } else if(*ce9->thumbPatches->readCachedRef) {
+        callReadCacheRefThumb(cacheStruct);
+    }    
+}
+
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-        if(count==20000000){
+        sleep(2);
+        if(count==20000000 || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef){
             IPC_SendSync(0xEE24);
             count=0;
         }
@@ -193,55 +221,67 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 -= src % 4;
 				len2 -= len2 % 32;
 			}
-
-			if (*ce9->patches->readCachedRef == 0 || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
-
-				sharedAddr[0] = dst;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+src-sector;
-				sharedAddr[3] = commandRead;
-
-				waitForArm7();
-				// -------------------------------------*/
-				#endif
-
-				// Copy directly
-				memcpy(dst, (u8*)buffer+(src-sector), len2);
-
-				// Update cardi common
-				cardStruct[0] = src + len2;
-				cardStruct[1] = (vu32)(dst + len2);
-				cardStruct[2] = len - len2;
-			} else {
-				#ifdef DEBUG
-				// Send a log command for debug purpose
-				// -------------------------------------
-				commandRead = 0x026ff800;
-
-				sharedAddr[0] = page;
-				sharedAddr[1] = len2;
-				sharedAddr[2] = buffer+page-sector;
-				sharedAddr[3] = commandRead;
-
-				waitForArm7();
-				// -------------------------------------
-				#endif
-
-				// Read via the 512b ram cache
-				//copy8(buffer+(page-sector)+(src%512), dst, len2);
-				//cardStruct[0] = src + len2;
-				//cardStruct[1] = dst + len2;
-				//cardStruct[2] = len - len2;
-				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
-				*cachePage = page;
-				
-                volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-				(*readCachedRef)(cacheStruct);
-			}
+            
+            if (isDma) {
+                // Copy via dma
+  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+                while (dmaBusy(dma)) {
+                    sleep(1);
+                }        
+  
+  				// Update cardi common
+  				cardStruct[0] = src + len2;
+  				cardStruct[1] = (vu32)(dst + len2);
+  				cardStruct[2] = len - len2; 
+            }  else {
+    			if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+    				#ifdef DEBUG
+    				// Send a log command for debug purpose
+    				// -------------------------------------
+    				commandRead = 0x026ff800;
+    
+    				sharedAddr[0] = dst;
+    				sharedAddr[1] = len2;
+    				sharedAddr[2] = buffer+src-sector;
+    				sharedAddr[3] = commandRead;
+    
+    				waitForArm7();
+    				// -------------------------------------*/
+    				#endif
+    
+    				// Copy directly
+    				memcpy(dst, (u8*)buffer+(src-sector), len2);
+    
+    				// Update cardi common
+    				cardStruct[0] = src + len2;
+    				cardStruct[1] = (vu32)(dst + len2);
+    				cardStruct[2] = len - len2;
+    			} else {
+    				#ifdef DEBUG
+    				// Send a log command for debug purpose
+    				// -------------------------------------
+    				commandRead = 0x026ff800;
+    
+    				sharedAddr[0] = page;
+    				sharedAddr[1] = len2;
+    				sharedAddr[2] = buffer+page-sector;
+    				sharedAddr[3] = commandRead;
+    
+    				waitForArm7();
+    				// -------------------------------------
+    				#endif
+    
+    				// Read via the 512b ram cache
+    				//copy8(buffer+(page-sector)+(src%512), dst, len2);
+    				//cardStruct[0] = src + len2;
+    				//cardStruct[1] = dst + len2;
+    				//cardStruct[2] = len - len2;
+    				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
+    				*cachePage = page;
+    				
+                    readCached(cacheStruct);
+    			}
+            }
 			len = cardStruct[2];
 			if (len > 0) {
 				src = cardStruct[0];
@@ -269,48 +309,60 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			len2 -= len2 % 32;
 		}
 
-		if (*ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
-
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
-			sharedAddr[3] = commandRead;
-
-			waitForArm7();
-			// -------------------------------------
-			#endif
-
-			// Copy directly
-			memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
-
-			// Update cardi common
-			cardStruct[0] = src + len;
-			cardStruct[1] = (vu32)(dst + len);
-			cardStruct[2] = len - len;
+		if (isDma) {
+            // Copy via dma
+  			dmaCopyWordsAsynch(dma, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
+            while (dmaBusy(dma)) {
+                sleep(1);
+            }        
+  
+  			// Update cardi common
+  			cardStruct[0] = src + len;
+  			cardStruct[1] = (vu32)(dst + len);
+  			cardStruct[2] = len - len; 
 		} else {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+			if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
+				#ifdef DEBUG
+				// Send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
 
-			sharedAddr[0] = page;
-			sharedAddr[1] = len2;
-			sharedAddr[2] = ((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
-			sharedAddr[3] = commandRead;
+				sharedAddr[0] = dst;
+				sharedAddr[1] = len;
+				sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
+				sharedAddr[3] = commandRead;
 
-			waitForArm7();
-			// -------------------------------------
-			#endif
+				waitForArm7();
+				// -------------------------------------
+				#endif
 
-			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
-			*cachePage = page;
-            volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-			(*readCachedRef)(cacheStruct);
+				// Copy directly
+				memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+
+				// Update cardi common
+				cardStruct[0] = src + len;
+				cardStruct[1] = (vu32)(dst + len);
+				cardStruct[2] = len - len;
+			} else {
+				#ifdef DEBUG
+				// Send a log command for debug purpose
+				// -------------------------------------
+				commandRead = 0x026ff800;
+
+				sharedAddr[0] = page;
+				sharedAddr[1] = len2;
+				sharedAddr[2] = ((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+page;
+				sharedAddr[3] = commandRead;
+
+				waitForArm7();
+				// -------------------------------------
+				#endif
+
+				// Read via the 512b ram cache
+				memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+				*cachePage = page;
+				readCached(cacheStruct);
+			}
 		}
 		len = cardStruct[2];
 		if (len > 0) {
@@ -326,6 +378,59 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 //Currently used for NSMBDS romhacks
 void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+}
+
+u32 cardReadDma() {
+	vu32* volatile cardStruct = ce9->cardStruct0;
+    
+	u32 src = cardStruct[0];
+	u8* dst = (u8*)(cardStruct[1]);
+	u32 len = cardStruct[2];
+    dma = cardStruct[3]; // dma channel
+	void* func = (void*)cardStruct[4]; // function to call back once read done
+	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+    
+    if(dma >= 0 
+        && dma <= 3 
+        //&& func != NULL
+        && len > 0
+        && !(((int)dst) & 31)
+        // test data not in ITCM
+        && dst > 0x02000000
+        // test data not in DTCM
+        && (dst < 0x27E0000 || dst > 0x27E4000) 
+        // check 512 bytes page alignement 
+        && !(((int)len) & 511)
+        && !(((int)src) & 511)
+        && (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
+        ) {
+        isDma = true;
+        
+        /*if (len < THRESHOLD_CACHE_FLUSH) {
+            int oldIME = enterCriticalSection();
+            u32     dst2 = dst;
+            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+            if (mod)
+            {
+                dst2 -= mod;
+                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                len += CACHE_LINE_SIZE;
+            }
+            IC_InvalidateRange((void *)dst, len);
+            DC_InvalidateRange((void *)dst2, len);
+            DC_WaitWriteBufferEmpty();
+            leaveCriticalSection(oldIME);   
+        } else {*/ 
+            // Note : cacheFlush disable / reenable irq
+            cacheFlush();
+        //}
+    } else { 
+        isDma = false;
+        dma=0;
+    }
+    
+    return 0;    
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -366,8 +471,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		//ndsHeader->romSize += 0x1000;
 
 		if (ce9->enableExceptionHandler && ce9==CARDENGINE_ARM9_LOCATION) {
-			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			setExceptionHandler(user_exception);
+			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			//setExceptionHandler(user_exception);
 		}
 		
 		flagsSet = true;
@@ -409,8 +514,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
 	}
+    
+    int ret = ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 
-	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+    isDma=false;
+    dma=0;
+
+	return ret; 
 }
 
 void cardPullOut(void) {
