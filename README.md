@@ -12,24 +12,19 @@
  </span>
 </p>
 
-nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebrew and ROMs through the SD card of the Nintendo DSi/3DS, rather than through emulators or flashcarts.
+nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs to be natively utilised rather than using an emulator. This works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcarts.
 
-# Bug Reporting
+# Compatibility
 
-Before reporting a bug, check the [compatibility list](https://docs.google.com/spreadsheets/d/1LRTkXOUXraTMjg1eedz_f7b5jiuyMv2x6e_jY_nyHSc/edit?usp=sharing) to see if it has already been reported.
+nds-bootstrap supports most DS ROMS, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention.
 
-A few questions one can answer:
-1) How you encountered the bug
-2) What happens when the bug occurs
-3) If the bug is reproduce-able, what steps can one take in order to get there. 
+Be sure to manually patch out the Anti-Piracy functions though, as nds-bootstrap does not include the patches by default.
 
-Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues).
+We also support many homebrew, including emulators such as lameboy & NesDS.
 
 # Compiling
 
-Firstly, if you want to self compile, check [travis](https://travis-ci.org/ahezard/nds-bootstrap) and see if it can compile successfully.
-
-To self-compile this you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. DevkitPro includes `dkp-pacman` for easy installation of all components:
+In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. DevkitPro includes `dkp-pacman` for easy installation of all components:
 
 ```
  $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
@@ -39,7 +34,7 @@ Once all that is downloaded and installed, `git clone` this repository, navigate
 
 # Frontends
 
-For ease of use, we recommend you get one of the following frontends:
-- [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu) (recommended) is an open-source DSi Menu upgrade/replacement for DS/DSi/3DS made by RocketRobz that can also be used as a nds-bootstrap frontend.
-- [TWLoader](https://github.com/RocketRobz/TWLoader) is a discontinued frontend for nds-bootstrap made by RocketRobz that's 3DS exclusive as it uses the CTR-Mode.
+Since nds-bootstrap uses a .ini file to load the settings, a front end isn't required. However, for ease of use, we recommend you get one of the following frontends:
+- [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu) is an open-source DS/DSi/3DS home menu alternative made by RocketRobz that can also be used as a nds-bootstrap frontend.
+- [TWLoader](https://github.com/RocketRobz/TWLoader) is a discontinued 3DS-exclusive frontend for nds-bootstrap made by RocketRobz.
 - [nds-hb-menu](https://github.com/ahezard/nds-hb-menu) is a frontend based off the Nintendo DSi homebrew menu.
