@@ -184,6 +184,8 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+    const char* romTid = getRomTid(ndsHeader);
+    
 	if (!cardReadEndOffset) {
 		return;
 	}
@@ -201,87 +203,11 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 	if (cardIdStartOffset) {
 		dbg_printf("Found cardId\n\n");
-		/*
-		// Cache struct
-		u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
-
-		// Save cache struct
-		ce9->cacheStruct = (u32)*cacheStruct;
-		*/
         
-        // Compute cardId        
-        u32 cardid = 0xC2000000;
-        
-        u8 size = ndsHeader->deviceSize;
-
-        //Devicecapacity         (Chipsize = 128KB SHL nn) (eg. 7 = 16MB)
-        //Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?) (eg. 0Fh = 16MB)
-		u8 mb = 0;
-		switch (size) {
-			default:
-				break;
-			case 0x04:
-				mb = 0x01;
-				break;
-			case 0x05:
-				mb = 0x03;
-				break;
-			case 0x06:
-				mb = 0x07;
-				break;
-			case 0x07:
-				mb = 0x0F;
-				break;
-			case 0x08:
-				mb = 0x1F;
-				break;
-			case 0x09:
-				mb = 0x3F;
-				break;
-			case 0x0A:
-				mb = 0x7F;
-				break;
-			case 0x0B:
-				mb = 0xFF;
-				break;
-			case 0x0C:
-				mb = 0xFE;
-				break;
-		}
-        cardid |= mb << 16;
-
-		//The Flag Bits in 3th byte can be
-		//0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
-		if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
-			cardid |= 0x01 << 8;
-		}
-
-        //The Flag Bits in 4th byte can be
-        //6   DSi flag (0=NDS/3DS, 1=DSi)
-        //7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
-        u8 unit = 0;
-        if (ndsHeader->unitCode==0x02) {
-			unit=0xC0;
-		} else if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
-			unit=0xE0;
-		} else if (moduleParams->sdk_version > 0x3000000) {
-			unit=0x80;
-		}
-        cardid |= unit;
-        
-        dbg_printf("cardId : ");
-        dbg_hexa(cardid);
-        dbg_printf("\n\n");
-
-		// Patch
+        // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
-        dbg_printf("default Card Id : ");
-        dbg_hexa(cardIdPatch[usesThumb ? 1 : 2]);
-        dbg_printf("\n\n");        
-
-        //cardIdPatch[usesThumb ? 1 : 2] = cardid;
-		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		memcpy(cardIdStartOffset, cardIdPatch, 0x40);
 	}
 }
 
@@ -479,6 +405,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *thumbReadCardLocation = current_location;
     
+    u32* armCardIdLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armCardIdLocation) {
+		return;
+	}
+    dbg_printf("armCardIdLocation ");
+	dbg_hexa((u32)armCardIdLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armCardIdLocation);
+    dbg_printf("\n\n");
+    
+    *armCardIdLocation = current_location;
+    
     u32* armReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadCardLocation) {
 		return;
@@ -490,6 +428,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *armReadDmaCardLocation = current_location;
+    
+    u32* thumbCardIdLocation = findOffset(current_location, size, location_sig, 1);
+	if (!thumbCardIdLocation) {
+		return;
+	}
+    dbg_printf("thumbCardIdLocation ");
+	dbg_hexa((u32)thumbCardIdLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbCardIdLocation);
+    dbg_printf("\n\n");
+    
+    *thumbCardIdLocation = current_location;
     
     u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadCardLocation) {
