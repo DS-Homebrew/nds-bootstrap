@@ -1,4 +1,16 @@
-[![Build Status](https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master)](https://travis-ci.org/ahezard/nds-bootstrap)
+<center>
+ <img src="https://i.imgur.com/BFIu7xX.png"><br><br>
+ <span style="padding-right: 5px;">
+  <a href="https://travis-ci.org/ahezard/nds-bootstrap">
+   <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master">
+  </a>
+ </span>
+ <span style="padding-left: 5px;">
+  <a href="https://dshomebrew.serveo.net/">
+   <img src="https://i.imgur.com/fjHCL6s.png">
+  </a>
+ </span>
+</center>
 
 nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebrew and ROMs through the SD card of the Nintendo DSi/3DS, rather than through emulators or flashcarts.
 
@@ -11,7 +23,7 @@ A few questions one can answer:
 2) What happens when the bug occurs
 3) If the bug is reproduce-able, what steps can one take in order to get there. 
 
-Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues) or on our [Discord server](https://discord.gg/yqSut8c).
+Bugs can be reported in the [Github issues section](https://github.com/ahezard/nds-bootstrap/issues).
 
 # Compiling
 
