@@ -7,7 +7,7 @@
  </span>
  <span style="padding-left: 5px;">
   <a href="https://dshomebrew.serveo.net/">
-   <img src="https://i.imgur.com/fjHCL6s.png">
+   <img src="https://github.com/ahezard/nds-bootstrap/blob/master/images/Rocket.Chat button.png">
   </a>
  </span>
 </p>
