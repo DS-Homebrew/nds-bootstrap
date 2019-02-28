@@ -203,7 +203,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 	if (cardIdStartOffset) {
 		dbg_printf("Found cardId\n\n");
-        
+                
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
