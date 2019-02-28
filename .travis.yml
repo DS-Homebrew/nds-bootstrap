@@ -57,8 +57,8 @@ after_failure:
 before_deploy:
   - git config --local user.name "TWLBot"
   - git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
-  - cd Builds/
-  - cp ../B4DS.7z B4DS.7z
+  - cd Builds/extras
+  - cp ../../B4DS.7z B4DS.7z
   - git stage .
   - git commit -m "nds-bootstrap for DS | $COMMIT_TAG"
   - git push origin master
