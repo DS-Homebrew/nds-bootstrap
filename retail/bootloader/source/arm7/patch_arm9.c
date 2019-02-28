@@ -210,7 +210,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		*/
         
         // Compute cardId        
-        u32 cardid = 0xC2000000;
+        u32 cardid = 0xC2;
         
         u8 size = ndsHeader->deviceSize;
 
@@ -248,12 +248,12 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 				mb = 0xFE;
 				break;
 		}
-        cardid |= mb << 16;
+        cardid |= mb << 8;
 
 		//The Flag Bits in 3th byte can be
 		//0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
 		if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
-			cardid |= 0x01 << 8;
+			cardid |= 0x01 << 16;
 		}
 
         //The Flag Bits in 4th byte can be
@@ -264,10 +264,10 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 			unit=0xC0;
 		} else if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 			unit=0xE0;
-		} else if (moduleParams->sdk_version > 0x3000000) {
+		} else if (moduleParams->sdk_version > 0x4000000) {
 			unit=0x80;
 		}
-        cardid |= unit;
+        cardid |= unit << 24;
         
         dbg_printf("cardId : ");
         dbg_hexa(cardid);
@@ -280,7 +280,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
         dbg_hexa(cardIdPatch[usesThumb ? 1 : 2]);
         dbg_printf("\n\n");        
 
-        //cardIdPatch[usesThumb ? 1 : 2] = cardid;
+        cardIdPatch[usesThumb ? 1 : 2] = cardid;
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
