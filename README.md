@@ -1,5 +1,5 @@
-<center>
- <img src="https://i.imgur.com/BFIu7xX.png"><br><br>
+<p align="center">
+ <img src="https://i.imgur.com/BFIu7xX.png"><br>
  <span style="padding-right: 5px;">
   <a href="https://travis-ci.org/ahezard/nds-bootstrap">
    <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master">
@@ -10,7 +10,7 @@
    <img src="https://i.imgur.com/fjHCL6s.png">
   </a>
  </span>
-</center>
+</p>
 
 nds-bootstrap is an application that allows the usage of Nintendo DS/DSi Homebrew and ROMs through the SD card of the Nintendo DSi/3DS, rather than through emulators or flashcarts.
 
