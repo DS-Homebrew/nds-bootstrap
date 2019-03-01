@@ -465,9 +465,6 @@ u32 cardId(void) {
 	}
     cardid |= unit << 24;
     
-    // Keep the default CardID fow now
-    cardid = 1;
-    
     
     if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
     //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x80FF80E0; // golden sun
