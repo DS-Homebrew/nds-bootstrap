@@ -498,7 +498,7 @@ u32 cardId(void) {
 	dbg_printf("\ncardId\n");
 	#endif
     
-    u32 cardid = 0xC2000000;
+    u32 cardid = 0xC2;
     u8 size = ndsHeader->deviceSize;
     
     //Devicecapacity         (Chipsize = 128KB SHL nn) (eg. 7 = 16MB)
@@ -535,12 +535,12 @@ u32 cardId(void) {
 			mb = 0xFE;
 			break;
 	}
-    cardid |= mb << 16;
+    cardid |= mb << 8;
 
 	//The Flag Bits in 3th byte can be
 	//0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
 	if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
-		cardid |= 0x01 << 8;
+		cardid |= 0x01 << 16;
 	}
 
     //The Flag Bits in 4th byte can be
@@ -551,19 +551,19 @@ u32 cardId(void) {
 		unit=0xC0;
 	} else if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 		unit=0xE0;
-	} else if (ce9->moduleParams->sdk_version > 0x3000000) {
+	} else if (ce9->moduleParams->sdk_version > 0x4000000) {
 		unit=0x80;
 	}
-    cardid |= unit;
+    cardid |= unit << 24;
     
     // Keep the default CardID fow now
     cardid = 1;
     
     
-    if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 1) == 0)  cardid = 0xE080FF80; // golden sun
-    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 1) == 0)  cardid = 0x80FF80E0; // golden sun
-    if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 1) == 0)  cardid = 0xFF000000; // golden sun
-    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 1) == 0)  cardid = 0x000000FF; // golden sun
+    if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
+    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x80FF80E0; // golden sun
+    if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xFF000000; // golden sun
+    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x000000FF; // golden sun
 
     cardInitialized= true;
     
