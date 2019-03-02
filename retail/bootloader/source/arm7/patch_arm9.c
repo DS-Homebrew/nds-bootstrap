@@ -245,6 +245,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
     ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
     ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
+    ||  strncmp(romTid, "AFF", 3) == 0  // FF3
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
