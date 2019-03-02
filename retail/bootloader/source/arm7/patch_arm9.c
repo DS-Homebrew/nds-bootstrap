@@ -242,7 +242,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatow Wars
     ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
     ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V
-    ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
+    //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
     ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
     ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
     ) {
