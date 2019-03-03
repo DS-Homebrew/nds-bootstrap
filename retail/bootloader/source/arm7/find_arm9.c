@@ -30,12 +30,14 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 // Card read cached
 static const u32 cardReadCachedEndSignature1[4]   = {0xE5950020, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK <= 2
 static const u32 cardReadCachedStartSignature1[2] = {0xE92D4030, 0xE24DD004};
-static const u32 cardReadCachedEndSignatureThumb1[4]   = {0x2000, 0xB001, 0xBC30, 0xBC08}; // SDK <= 2
+static const u16 cardReadCachedEndSignatureThumb1[4]   = {0x2000, 0xB001, 0xBC30, 0xBC08}; // SDK <= 2
 static const u16 cardReadCachedStartSignatureThumb1[2] = {0xB530, 0xB081};
 static const u32 cardReadCachedEndSignature3[4]   = {0xE5950024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK 3
 //               cardReadCachedStartSignature3
 static const u32 cardReadCachedEndSignature4[4]   = {0xE5940024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK >= 4
 static const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; // SDK >= 4
+static const u16 cardReadCachedEndSignatureThumb4[4]   = {0x2001, 0xBD38, 0x2000, 0xBD38}; // SDK >= 4
+static const u16 cardReadCachedStartSignatureThumb4[2] = {0xB538, 0x4C13}; // SDK >= 4
   
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -515,6 +517,37 @@ u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_param
 	return cardReadCachedEndOffset;
 }
 
+u32* findCardReadCachedEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findCardReadCachedEndOffsetThumb:\n");
+
+	const u16* cardReadCachedEndSignature = cardReadCachedEndSignatureThumb1;
+	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+        // TODO
+		cardReadCachedEndSignature = cardReadCachedEndSignatureThumb1;
+	} else if (moduleParams->sdk_version > 0x4000000) {
+		cardReadCachedEndSignature = cardReadCachedEndSignatureThumb4;
+	}
+	
+	u32* cardReadCachedEndOffset = findOffsetThumb(
+		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		cardReadCachedEndSignature, 4
+	);
+	if (cardReadCachedEndOffset) {
+		dbg_printf("Card read cached end found: ");
+	} else {
+		dbg_printf("Card read cached end not found\n");
+		//cardReadFound = false;
+	}
+
+	if (cardReadCachedEndOffset) {
+		dbg_hexa((u32)cardReadCachedEndOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return cardReadCachedEndOffset;
+}
+
 u32* findCardReadCachedStartOffset(const module_params_t* moduleParams, const u32* cardReadCachedEndOffset) {
 	if (!cardReadCachedEndOffset) {
 		return NULL;
@@ -528,6 +561,38 @@ u32* findCardReadCachedStartOffset(const module_params_t* moduleParams, const u3
 	}
 	
 	u32* cardReadCachedStartOffset = findOffsetBackwards(
+		cardReadCachedEndOffset, 0xFF,
+		cardReadCachedStartSignature, 2
+	);
+	if (cardReadCachedStartOffset) {
+		dbg_printf("Card read cached start found: ");
+	} else {
+		dbg_printf("Card read cached start not found\n");
+		//cardReadFound = false;
+	}
+
+	if (cardReadCachedStartOffset) {
+		dbg_hexa((u32)cardReadCachedStartOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return cardReadCachedStartOffset;
+}
+
+u32* findCardReadCachedStartOffsetThumb(const module_params_t* moduleParams, const u32* cardReadCachedEndOffset) {
+	if (!cardReadCachedEndOffset) {
+		return NULL;
+	}
+
+	dbg_printf("findCardReadCachedStartOffsetThumb:\n");
+
+	const u16* cardReadCachedStartSignature = cardReadCachedStartSignatureThumb1;
+	if (moduleParams->sdk_version > 0x4000000) {
+		cardReadCachedStartSignature = cardReadCachedStartSignatureThumb4;
+	}
+	
+	u32* cardReadCachedStartOffset = findOffsetBackwardsThumb(
 		cardReadCachedEndOffset, 0xFF,
 		cardReadCachedStartSignature, 2
 	);
