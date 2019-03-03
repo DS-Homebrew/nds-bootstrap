@@ -111,6 +111,7 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
 	|| strncmp(romTid, "A2L", 3) == 0 // Anno 1701: Dawn of Discovery
     || strncmp(romTid, "YGL", 3) == 0 // Geometry Wars
+    || strncmp(romTid, "CSP", 3) == 0 // Lock's quest
     )
 	{
         if(usesThumb) {

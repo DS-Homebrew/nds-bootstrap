@@ -36,9 +36,10 @@ static const u32 cardReadCachedEndSignature3[4]   = {0xE5950024, 0xE3500000, 0x1
 //               cardReadCachedStartSignature3
 static const u32 cardReadCachedEndSignature4[4]   = {0xE5940024, 0xE3500000, 0x13A00001, 0x03A00000}; // SDK >= 4
 static const u32 cardReadCachedStartSignature4[2] = {0xE92D4038, 0xE59F407C}; // SDK >= 4
-static const u16 cardReadCachedEndSignatureThumb4[4]   = {0x2001, 0xBD38, 0x2000, 0xBD38}; // SDK >= 4
+static const u16 cardReadCachedEndSignatureThumb4[8]   = {0x6260, 0x6A60, 0x2800, 0xD001, 0x2001, 0xBD38, 0x2000, 0xBD38}; // SDK >= 4
 static const u16 cardReadCachedStartSignatureThumb4[2] = {0xB538, 0x4C13}; // SDK >= 4
-  
+
+
 //static const u32 instructionBHI[1] = {0x8A000001};
 
 // Card pull out
@@ -519,18 +520,19 @@ u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_param
 
 u32* findCardReadCachedEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardReadCachedEndOffsetThumb:\n");
-
-	const u16* cardReadCachedEndSignature = cardReadCachedEndSignatureThumb1;
+    
+    // TODO
+	const u16* cardReadCachedEndSignature = cardReadCachedEndSignatureThumb4;
 	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
         // TODO
-		cardReadCachedEndSignature = cardReadCachedEndSignatureThumb1;
+		cardReadCachedEndSignature = cardReadCachedEndSignatureThumb4;
 	} else if (moduleParams->sdk_version > 0x4000000) {
 		cardReadCachedEndSignature = cardReadCachedEndSignatureThumb4;
 	}
 	
 	u32* cardReadCachedEndOffset = findOffsetThumb(
 		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardReadCachedEndSignature, 4
+		cardReadCachedEndSignature, 8
 	);
 	if (cardReadCachedEndOffset) {
 		dbg_printf("Card read cached end found: ");
