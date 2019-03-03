@@ -722,7 +722,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	
 	randomPatch5Second(ndsHeader, moduleParams);
 	
-	operaRamPatch(ndsHeader, moduleParams);
+	//operaRamPatch(ndsHeader, moduleParams);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
