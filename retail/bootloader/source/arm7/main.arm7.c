@@ -64,6 +64,7 @@
 
 #include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
+#include "cardengine_arm9_reloc_bin.h"
 #include "cardengine_arm9_sdk5_bin.h"
 
 //#define memcpy __builtin_memcpy
@@ -693,13 +694,13 @@ int arm7_main(void) {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "ACV", 3) == 0) {		// Castlevania DOS
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-            memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
-            relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
+            memcpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
+            relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
 		} else
         ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
         if(ce9Location) {
-            	memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
-                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
+            	memcpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
+                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
         } else {         
     		ce9Location = CARDENGINE_ARM9_LOCATION;
     		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
