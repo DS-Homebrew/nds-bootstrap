@@ -103,23 +103,37 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }
 
 static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (usesThumb || moduleParams->sdk_version > 0x5000000) {
+	if (moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
-	|| strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
+	|| strncmp(romTid, "A2L", 3) == 0 // Anno 1701: Dawn of Discovery
+    || strncmp(romTid, "YGL", 3) == 0 // Geometry Wars
+    )
 	{
-		// Card read cached
-		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
-		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
-		if (!cardReadCachedStartOffset) {
-			return;
+        if(usesThumb) {
+    		// Card read cached
+    		u32* cardReadCachedEndOffset = findCardReadCachedEndOffsetThumb(ndsHeader, moduleParams);
+    		u32* cardReadCachedStartOffset = findCardReadCachedStartOffsetThumb(moduleParams, cardReadCachedEndOffset);
+    		if (!cardReadCachedStartOffset) {
+    			return;
+    		}
+    		// Patch
+    		u32* readCachedPatch = ce9->thumbPatches->readCachedRef;
+    		*readCachedPatch = (u32)cardReadCachedStartOffset;           
+        } else { 
+    		// Card read cached
+    		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
+    		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
+    		if (!cardReadCachedStartOffset) {
+    			return;
+    		}
+    		// Patch
+    		u32* readCachedPatch = ce9->patches->readCachedRef;
+    		*readCachedPatch = (u32)cardReadCachedStartOffset;
 		}
-		// Patch
-		u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
-		*readCachedPatch = (u32)cardReadCachedStartOffset;
 	}
 }
 
@@ -247,6 +261,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
     ||  strncmp(romTid, "AFF", 3) == 0  // FF3
     ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
+    ||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
@@ -707,7 +722,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	
 	randomPatch5Second(ndsHeader, moduleParams);
 	
-	operaRamPatch(ndsHeader, moduleParams);
+	//operaRamPatch(ndsHeader, moduleParams);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
