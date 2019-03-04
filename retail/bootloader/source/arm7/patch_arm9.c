@@ -110,7 +110,7 @@ static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
 	|| strncmp(romTid, "A2L", 3) == 0 // Anno 1701: Dawn of Discovery
-    || strncmp(romTid, "YGL", 3) == 0 // Geometry Wars
+    //|| strncmp(romTid, "YGL", 3) == 0 // Geometry Wars
     || strncmp(romTid, "CSP", 3) == 0 // Lock's quest
     )
 	{
@@ -262,7 +262,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
     ||  strncmp(romTid, "AFF", 3) == 0  // FF3
     ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
-    ||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
+    //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
