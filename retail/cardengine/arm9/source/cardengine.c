@@ -113,6 +113,80 @@ static void sleep(u32 ms) {
     }    
 }
 
+//! VRAM-safe cpy.
+/*! This version mimics memcpy in functionality, with 
+    the benefit of working for VRAM as well. It is also 
+    slightly faster than the original memcpy, but faster 
+    implementations can be made.
+    \param dst  Destination pointer.
+    \param src  Source pointer.
+    \param size Fill-length in bytes.
+    \note   The pointers and size need not be word-aligned.
+*/
+void tonccpy(void *dst, const void *src, u32 size)
+{
+    if(size==0 || dst==NULL || src==NULL)
+        return;
+
+    u32 count;
+    u16 *dst16;     // hword destination
+    u8  *src8;      // byte source
+
+    // Ideal case: copy by 4x words. Leaves tail for later.
+    if( ((u32)src|(u32)dst)%4==0 && size>=4)
+    {
+        u32 *src32= (u32*)src, *dst32= (u32*)dst;
+
+        count= size/4;
+        u32 tmp= count&3;
+        count /= 4;
+
+        // Duff, bitch!
+        switch(tmp) {
+            do {    *dst32++ = *src32++;
+        case 3:     *dst32++ = *src32++;
+        case 2:     *dst32++ = *src32++;
+        case 1:     *dst32++ = *src32++;
+        case 0:     ; } while(count--);
+        }
+
+        // Check for tail
+        size &= 3;
+        if(size == 0)
+            return;
+
+        src8= (u8*)src32;
+        dst16= (u16*)dst32;
+    }
+    else        // Unaligned.
+    {
+        u32 dstOfs= (u32)dst&1;
+        src8= (u8*)src;
+        dst16= (u16*)(dst-dstOfs);
+
+        // Head: 1 byte.
+        if(dstOfs != 0)
+        {
+            *dst16= (*dst16 & 0xFF) | *src8++<<8;
+            dst16++;
+            if(--size==0)
+                return;
+        }
+    }
+
+    // Unaligned main: copy by 2x byte.
+    count= size/2;
+    while(count--)
+    {
+        *dst16++ = src8[0] | src8[1]<<8;
+        src8 += 2;
+    }
+
+    // Tail: 1 byte.
+    if(size&1)
+        *dst16= (*dst16 &~ 0xFF) | *src8;
+}
+
 static void readCached(u32* cacheStruct) {
     if(*ce9->patches->readCachedRef) {
         volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
@@ -250,7 +324,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     				#endif
     
     				// Copy directly
-    				memcpy(dst, (u8*)buffer+(src-sector), len2);
+    				tonccpy(dst, (u8*)buffer+(src-sector), len2);
     
     				// Update cardi common
     				cardStruct[0] = src + len2;
@@ -276,7 +350,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     				//cardStruct[0] = src + len2;
     				//cardStruct[1] = dst + len2;
     				//cardStruct[2] = len - len2;
-    				memcpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
+    				tonccpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
     				*cachePage = page;
     				
                     readCached(cacheStruct);
@@ -337,7 +411,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 				#endif
 
 				// Copy directly
-				memcpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+				tonccpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 				// Update cardi common
 				cardStruct[0] = src + len;
@@ -359,7 +433,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 				#endif
 
 				// Read via the 512b ram cache
-				memcpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
+				tonccpy(cacheBuffer, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation) - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
 				*cachePage = page;
 				readCached(cacheStruct);
 			}
