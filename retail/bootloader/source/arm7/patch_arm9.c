@@ -697,7 +697,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
-	patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
+    // made obsolete by tonccpy
+	//patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
 
