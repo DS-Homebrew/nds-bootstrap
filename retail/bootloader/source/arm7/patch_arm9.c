@@ -173,8 +173,8 @@ static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, co
 	u32* cardTerminateForPullOutOffset = findCardTerminateForPullOutOffset(ndsHeader, moduleParams);
 
 	// Patch
-	u32* cardTerminateForPullOut = (usesThumb ? ce9->thumbPatches->terminateForPullOutRef : ce9->patches->terminateForPullOutRef);
-	*cardTerminateForPullOut = cardTerminateForPullOutOffset;
+	u32* cardTerminateForPullOutPatch = (usesThumb ? ce9->thumbPatches->terminateForPullOutRef : ce9->patches->terminateForPullOutRef);
+	*cardTerminateForPullOutPatch = (u32)cardTerminateForPullOutOffset;
 }
 
 static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
