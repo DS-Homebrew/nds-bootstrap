@@ -257,33 +257,34 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	//u32 commandRead;
 	while (len > 0) {
-		u32 len2 = len;
-		if (len2 > 512) {
-			len2 -= src % 4;
-			len2 -= len2 % 32;
+		if (isDma) {
+            // Copy via dma
+  			dmaCopyWordsAsynch(dma, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
+            while (dmaBusy(dma)) {
+                sleep(1);
+            }        
+		} else {
+			#ifdef DEBUG
+			// Send a log command for debug purpose
+			// -------------------------------------
+			commandRead = 0x026ff800;
+
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len;
+			sharedAddr[2] = ((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src);
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+			// -------------------------------------
+			#endif
+
+			// Copy directly
+			tonccpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
 		}
-
-		#ifdef DEBUG
-		// Send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
-
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = ((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src);
-		sharedAddr[3] = commandRead;
-
-		waitForArm7();
-		// -------------------------------------
-		#endif
-
-		// Copy directly
-		tonccpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
-
-		len = len - len2;
+		len = len - len;
 		if (len > 0) {
-			src = src + len2;
-			dst = (u8*)(dst + len2);
+			src = src + len;
+			dst = (u8*)(dst + len);
 		}
 	}
 
