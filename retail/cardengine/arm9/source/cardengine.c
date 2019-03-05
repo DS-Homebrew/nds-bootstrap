@@ -217,11 +217,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			if ((src - sector) + len2 > readSize) {
 				len2 = sector - src + readSize;
 			}
-
-			if (len2 > 512) {
-				len2 -= src % 4;
-				len2 -= len2 % 32;
-			}
             
             if (isDma) {
                 // Copy via dma

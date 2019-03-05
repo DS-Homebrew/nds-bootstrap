@@ -210,11 +210,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				len2 = sector - src + readSize;
 			}
 
-			if (len2 > 512) {
-				len2 -= src % 4;
-				len2 -= len2 % 32;
-			}
-
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
