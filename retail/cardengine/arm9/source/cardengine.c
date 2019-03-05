@@ -114,15 +114,6 @@ static void sleep(u32 ms) {
     }    
 }
 
-static void readCached(u32* cacheStruct) {
-    if(*ce9->patches->readCachedRef) {
-        volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-        (*readCachedRef)(cacheStruct);
-    } else if(*ce9->thumbPatches->readCachedRef) {
-        callReadCacheRefThumb(cacheStruct);
-    }    
-}
-
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
