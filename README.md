@@ -30,15 +30,15 @@ In order to compile this on your own, you will need [devkitPro](https://devkitpr
  $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
 ```
 
-Once all that is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
+Once everything is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
 
 # Frontends
 
-Since nds-bootstrap uses a .ini file to load the settings, a frontend isn't required. However, for ease of use, we recommend you get the frontend known as TWiLightMenu++. It's an open-source Nintendo DS, DSi, and 3DS home menu alternative made by RocketRobz that can also be used as a nds-bootstrap frontend. It has a DSi theme, a 3DS theme, an R4 theme and an Acekard theme, as well as the ability to launch NES, SEGA Genesis, SEGA Gamegear, Gameboy, and SNES ROMS too as well as Nintendo DS roms.
+Since nds-bootstrap uses a .ini file to load the settings, a frontend isn't required. However, for ease of use, we recommend you use a frontend known as TWiLightMenu++. It's an open-source Nintendo DS, DSi, and 3DS home menu alternative made by RocketRobz that can also be used as a frontend for nds-bootstrap. It has a DSi theme, a 3DS theme, an R4 theme and an Acekard theme, as well as the ability to launch a large variety of ROMs including, NES, SNES, Game Boy, Game Boy Color, SEGA Master System, Game Gear, and Genesis, as well as Nintendo DS roms!
 
 # Rocket.Chat Server
 
-Would you like a place to talk about all your experiences with nds-bootstrap? Do you need some assistance? Well, why not join our Rocket.Chat server!
+Would you like a place to talk about your experiences with nds-bootstrap? Do you need some assistance? Well, why not join our Rocket.Chat server!
 
 Rocket.Chat is a self-hosted communication platform with the ability to share files and switch to an video/audio conferencing.
 
