@@ -692,7 +692,10 @@ int arm7_main(void) {
 		memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 	} else if (ceCached) {
 		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "ACV", 3) == 0) {		// Castlevania DOS
+		if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
+		 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+		)
+		{
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
             memcpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
             relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
