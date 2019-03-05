@@ -48,7 +48,6 @@ patches:
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
-.word   readCachedRef
 .word   0x0 @sleepRef
 .word   terminateForPullOutRef
 needFlushDCCache:
@@ -62,7 +61,6 @@ thumbPatches:
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-.word   readCachedRefThumb
 thumbSleepRef:
 .word   0x0 @sleepRef
 .word   terminateForPullOutRef
@@ -87,10 +85,6 @@ _blx_r6_stub_card_read:
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
-.word    0x00000000  
-readCachedRef:
-.word    0x00000000
-readCachedRefThumb:
 .word    0x00000000  
 terminateForPullOutRef:
 .word    0x00000000  

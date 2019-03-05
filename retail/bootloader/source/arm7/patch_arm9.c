@@ -102,42 +102,6 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
-static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return;
-	}
-
-	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
-	|| strncmp(romTid, "A2L", 3) == 0 // Anno 1701: Dawn of Discovery
-    //|| strncmp(romTid, "YGL", 3) == 0 // Geometry Wars
-    || strncmp(romTid, "CSP", 3) == 0 // Lock's quest
-    )
-	{
-        if(usesThumb) {
-    		// Card read cached
-    		u32* cardReadCachedEndOffset = findCardReadCachedEndOffsetThumb(ndsHeader, moduleParams);
-    		u32* cardReadCachedStartOffset = findCardReadCachedStartOffsetThumb(moduleParams, cardReadCachedEndOffset);
-    		if (!cardReadCachedStartOffset) {
-    			return;
-    		}
-    		// Patch
-    		u32* readCachedPatch = ce9->thumbPatches->readCachedRef;
-    		*readCachedPatch = (u32)cardReadCachedStartOffset;           
-        } else { 
-    		// Card read cached
-    		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
-    		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
-    		if (!cardReadCachedStartOffset) {
-    			return;
-    		}
-    		// Patch
-    		u32* readCachedPatch = ce9->patches->readCachedRef;
-    		*readCachedPatch = (u32)cardReadCachedStartOffset;
-		}
-	}
-}
-
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
 	u32* cardPullOutOffset;
@@ -515,7 +479,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
-    ce9->patches->readCachedRef = (u32*)((u32)ce9->patches->readCachedRef - default_location + current_location);
     ce9->patches->terminateForPullOutRef = (u32*)((u32)ce9->patches->terminateForPullOutRef - default_location + current_location);
     ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
@@ -524,7 +487,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
-    ce9->thumbPatches->readCachedRef = (u32*)((u32)ce9->thumbPatches->readCachedRef - default_location + current_location);
     ce9->thumbPatches->terminateForPullOutRef = (u32*)((u32)ce9->thumbPatches->terminateForPullOutRef - default_location + current_location);
 }
 
