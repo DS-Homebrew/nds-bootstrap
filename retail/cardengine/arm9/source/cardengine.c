@@ -69,7 +69,7 @@ static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 
 static bool flagsSet = false;
 static bool isDma = false;
-static u8 dma = 0;
+static u8 dma = 4;
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -396,7 +396,9 @@ u32 cardReadDma() {
         //}
     } else { 
         isDma = false;
-        dma=0;
+        // Seems to have no effect
+        //IC_InvalidateAll();
+        dma=4;
     }
     
     return 0;    
