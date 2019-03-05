@@ -29,7 +29,7 @@ void tonccpy(void *dst, const void *src, uint size)
         uint tmp= count&3;
         count /= 4;
 
-        // Duff, b**ch!
+        // Duff, good friend!
         switch(tmp) {
             do {    *dst32++ = *src32++;
         case 3:     *dst32++ = *src32++;
