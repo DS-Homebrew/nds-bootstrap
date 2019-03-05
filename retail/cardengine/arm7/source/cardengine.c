@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string.h> // memcpy
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
 #include <nds/ipc.h>
@@ -28,6 +28,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
+#include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
 #include "locations.h"
@@ -42,8 +43,6 @@
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
-
-//#define memcpy __builtin_memcpy
 
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
@@ -85,7 +84,7 @@ static const tNDSHeader* ndsHeader = NULL;
 static const char* romLocation = NULL;
 
 static void unlaunchSetHiyaBoot(void) {
-	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
@@ -397,7 +396,7 @@ static void runCardEngineCheck(void) {
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
 		//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
 		if (isSdEjected()) {
-			memcpy((u32*)0x02000300, sr_data_error, 0x020);
+			tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 		}
@@ -524,7 +523,7 @@ void myIrqHandlerVBlank(void) {
 				if (consoleModel < 2) {
 					unlaunchSetHiyaBoot();
 				}
-				memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 			}
@@ -540,8 +539,8 @@ void myIrqHandlerVBlank(void) {
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			}
-			//memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
-			memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+			//tonccpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
+			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 			unlockMutex(&saveMutex);
@@ -831,7 +830,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
-		fileRead(dst, *savFile, src, len, 0);
+		fileRead(dst, *savFile, src, len, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -1077,7 +1076,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	#endif	
 	
 	if (ROMinRAM) {
-		memcpy(dst, romLocation + src, len);
+		tonccpy(dst, romLocation + src, len);
 	} else {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator

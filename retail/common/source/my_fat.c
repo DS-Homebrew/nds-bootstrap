@@ -29,7 +29,7 @@
     project at chishm@hotmail.com
 ------------------------------------------------------------------*/
    
-#include <string.h> // memcpy
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
@@ -750,7 +750,7 @@ bool resumeFileRead()
       		//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
       
       		// Read in last partial chunk
-              memcpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
+              tonccpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
               
               context.curByte+=context.length;
               context.dataPos+=context.length;
@@ -831,7 +831,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    memcpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
+    tonccpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -950,7 +950,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 
 		// Read in last partial chunk
-          memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
+          tonccpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
           curByte+=length;
           dataPos+=length;
 	}
@@ -1021,7 +1021,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    memcpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
+    tonccpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -1081,7 +1081,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
 
 		// Read in last partial chunk
-        memcpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
+        tonccpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
         curByte+=length;
         dataPos+=length;
 
