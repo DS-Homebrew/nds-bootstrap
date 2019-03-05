@@ -229,9 +229,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
                     sleep(1);
-                }        
-  
-            }  else {
+                }
+            } else {
     			// Copy directly
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
             }

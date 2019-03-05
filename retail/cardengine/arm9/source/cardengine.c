@@ -217,67 +217,36 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			if ((src - sector) + len2 > readSize) {
 				len2 = sector - src + readSize;
 			}
-            
+
             if (isDma) {
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
                     sleep(1);
                 }        
-  
-  				// Update cardi common
-  				cardStruct[0] = src + len2;
-  				cardStruct[1] = (vu32)(dst + len2);
-  				cardStruct[2] = len - len2; 
-            }  else {
-    			if ((*ce9->patches->readCachedRef == 0 && *ce9->thumbPatches->readCachedRef == 0) || (len2 >= 512 && len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-    				#ifdef DEBUG
-    				// Send a log command for debug purpose
-    				// -------------------------------------
-    				commandRead = 0x026ff800;
+            } else {
+    			#ifdef DEBUG
+    			// Send a log command for debug purpose
+    			// -------------------------------------
+   				commandRead = 0x026ff800;
     
-    				sharedAddr[0] = dst;
-    				sharedAddr[1] = len2;
-    				sharedAddr[2] = buffer+src-sector;
-    				sharedAddr[3] = commandRead;
+    			sharedAddr[0] = dst;
+    			sharedAddr[1] = len2;
+    			sharedAddr[2] = buffer+src-sector;
+    			sharedAddr[3] = commandRead;
     
-    				waitForArm7();
-    				// -------------------------------------*/
-    				#endif
+    			waitForArm7();
+    			// -------------------------------------*/
+    			#endif
     
-    				// Copy directly
-    				tonccpy(dst, (u8*)buffer+(src-sector), len2);
-    
-    				// Update cardi common
-    				cardStruct[0] = src + len2;
-    				cardStruct[1] = (vu32)(dst + len2);
-    				cardStruct[2] = len - len2;
-    			} else {
-    				#ifdef DEBUG
-    				// Send a log command for debug purpose
-    				// -------------------------------------
-    				commandRead = 0x026ff800;
-    
-    				sharedAddr[0] = page;
-    				sharedAddr[1] = len2;
-    				sharedAddr[2] = buffer+page-sector;
-    				sharedAddr[3] = commandRead;
-    
-    				waitForArm7();
-    				// -------------------------------------
-    				#endif
-    
-    				// Read via the 512b ram cache
-    				//copy8(buffer+(page-sector)+(src%512), dst, len2);
-    				//cardStruct[0] = src + len2;
-    				//cardStruct[1] = dst + len2;
-    				//cardStruct[2] = len - len2;
-    				tonccpy(cacheBuffer, (u8*)buffer+(page-sector), 512);
-    				*cachePage = page;
-    				
-                    readCached(cacheStruct);
-    			}
+    			// Copy directly
+    			tonccpy(dst, (u8*)buffer+(src-sector), len2);
             }
+    		// Update cardi common
+    		cardStruct[0] = src + len2;
+    		cardStruct[1] = (vu32)(dst + len2);
+    		cardStruct[2] = len - len2;
+
 			len = cardStruct[2];
 			if (len > 0) {
 				src = cardStruct[0];
