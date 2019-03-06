@@ -227,6 +227,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     ||  strncmp(romTid, "AFF", 3) == 0  // FF3
     ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
     ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+    ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
     //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
