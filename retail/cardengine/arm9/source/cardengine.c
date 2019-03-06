@@ -130,6 +130,15 @@ static void waitForArm7(void) {
     }
 }
 
+static void clearIcache (void) {
+      // Seems to have no effect
+      // disable interrupt
+      /*int oldIME = enterCriticalSection();
+      IC_InvalidateAll();
+      // restore interrupt
+      leaveCriticalSection(oldIME);*/
+}
+
 /*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 	//return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles, breaks Mario's Holiday)
@@ -357,13 +366,13 @@ u32 cardReadDma() {
 		} else {
 			isDma = false;
 			dma=4;
+            clearIcache();        
 		}
     } else {
 		dmaLed = false;
         isDma = false;
-        // Seems to have no effect
-        //IC_InvalidateAll();
-        dma=4;
+        dma=4;        
+        clearIcache();        
     }
     
     return 0;    

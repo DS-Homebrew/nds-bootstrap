@@ -23,6 +23,7 @@
 #include <nds/system.h>
 //#include <nds/interrupts.h>
 #include <nds/dma.h>
+#include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -129,6 +130,15 @@ static void waitForArm7(void) {
             count=0;
         }
     }
+}
+
+static void clearIcache (void) {
+      // Seems to have no effect
+      // disable interrupt
+      /*int oldIME = enterCriticalSection();
+      IC_InvalidateAll();
+      // restore interrupt
+      leaveCriticalSection(oldIME);*/
 }
 
 /*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
@@ -331,12 +341,14 @@ u32 cardReadDma(u32* cacheStruct, u8* dst, u32 src, u32 len, u8 dma0, void* func
 		} else {
 			isDma = false;
 			dma=4;
+            
+            clearIcache(); 
 		}
     } else { 
         isDma = false;
-        // Seems to have no effect
-        //IC_InvalidateAll();
         dma=4;
+        
+        clearIcache(); 
     }
     
     return 0;    
