@@ -288,15 +288,8 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-u32 cardReadDma() {
-	vu32* volatile cardStruct = ce9->cardStruct0;
-    
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    dma = cardStruct[3]; // dma channel
-	void* func = (void*)cardStruct[4]; // function to call back once read done
-	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+u32 cardReadDma(u32* cacheStruct, u8* dst, u32 src, u32 len, u8 dma0, void* func, void* arg) {
+    dma = dma0; // dma channel
     
     if(dma >= 0 
         && dma <= 3 
@@ -483,7 +476,7 @@ u32 cardId(void) {
 	return cardid;
 }
 
-int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
+int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		//if (isGameLaggy(ndsHeader)) {
@@ -506,10 +499,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		
 		flagsSet = true;
 	}
-
-	u32 src = src0;
-	u8* dst = dst0;
-	u32 len = len0;
 
 	#ifdef DEBUG
 	u32 commandRead;
