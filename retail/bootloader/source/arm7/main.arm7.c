@@ -776,10 +776,10 @@ int arm7_main(void) {
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	} else {
-		//if (romread_LED == 1) {
+		if (romread_LED > 0) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
-		//}
+		}
 		increaseLoadBarLength();
 		fadeOut();
 	}

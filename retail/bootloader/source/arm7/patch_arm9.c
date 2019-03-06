@@ -227,10 +227,11 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     ||  strncmp(romTid, "AFF", 3) == 0  // FF3
     ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
     ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+    ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
     ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
     //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
-    //||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
-    //||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
+    ||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
+    ||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
