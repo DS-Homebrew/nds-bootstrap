@@ -65,6 +65,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
+static bool dmaLed = false;
 
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
@@ -158,35 +159,65 @@ static void initialize(void) {
 
 static void cardReadLED(bool on) {
 	if (consoleModel < 2) {
-		if (on) {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-					break;
+		if (dmaLed) {
+			if (on) {
+				switch(romread_LED) {
+					case 0:
+					default:
+						break;
+					case 1:
+						i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+						break;
+					case 2:
+					case 3:
+						i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+						break;
+				}
+			} else {
+				switch(romread_LED) {
+					case 0:
+					default:
+						break;
+					case 1:
+						i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+						break;
+					case 2:
+					case 3:
+						i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+						break;
+				}
 			}
 		} else {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-					break;
+			if (on) {
+				switch(romread_LED) {
+					case 0:
+					default:
+						break;
+					case 1:
+						i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+						break;
+					case 2:
+						i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+						break;
+					case 3:
+						i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+						break;
+				}
+			} else {
+				switch(romread_LED) {
+					case 0:
+					default:
+						break;
+					case 1:
+						i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+						break;
+					case 2:
+						i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+						break;
+					case 3:
+						i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+						break;
+				}
 			}
 		}
 	}
@@ -418,7 +449,8 @@ static void runCardEngineCheck(void) {
   		}
   
   
-      		if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) {
+      		if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
+				dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
       			if(start_cardRead_arm9()) {
                     *(vu32*)(0x027FFB14) = 0;
                 } 

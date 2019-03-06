@@ -69,6 +69,7 @@ static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 
 static bool flagsSet = false;
 static bool isDma = false;
+static bool dmaLed = false;
 static u8 dma = 4;
 
 static int allocateCacheSlot(void) {
@@ -183,7 +184,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
 				// Send a command to the ARM7 to fill the RAM cache
-				commandRead = 0x025FFB08;
+				commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
 				slot = allocateCacheSlot();
 
@@ -325,10 +326,12 @@ u32 cardReadDma() {
         && (dst < 0x27E0000 || dst > 0x27E4000) 
         // check 512 bytes page alignement 
         && !(((int)len) & 511)
-        && !(((int)src) & 511)
-        && (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
-        ) {
-        isDma = true;
+        && !(((int)src) & 511) 
+	) {
+		dmaLed = true;
+        if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
+        {
+			isDma = true;
         
         /*if (len < THRESHOLD_CACHE_FLUSH) {
             int oldIME = enterCriticalSection();
@@ -349,7 +352,12 @@ u32 cardReadDma() {
             // Note : cacheFlush disable / reenable irq
             cacheFlush();
         //}
-    } else { 
+		} else {
+			isDma = false;
+			dma=4;
+		}
+    } else {
+		dmaLed = false;
         isDma = false;
         // Seems to have no effect
         //IC_InvalidateAll();
