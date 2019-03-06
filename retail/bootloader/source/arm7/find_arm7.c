@@ -48,7 +48,8 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
 // Card check pull out
-static const u32 cardCheckPullOutSignature1[4] = {0xE92D4018, 0xE24DD004, 0xE59F204C, 0xE1D210B0}; // SDK != 3
+static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
+static const u32 cardCheckPullOutSignature2[4] = {0xE92D4018, 0xE24DD004, 0xE59F204C, 0xE1D210B0}; // SDK != 3
 static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F002C, 0xE1D000B0}; // SDK 3
 
 // irq enable
@@ -506,7 +507,9 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 	dbg_printf("findCardCheckPullOutOffset:\n");
 	
 	const u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
-	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+    if (moduleParams->sdk_version > 0x2004FFF && moduleParams->sdk_version < 0x3000000) {
+		cardCheckPullOutSignature = cardCheckPullOutSignature2;
+    } else if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature3;
 	}
 

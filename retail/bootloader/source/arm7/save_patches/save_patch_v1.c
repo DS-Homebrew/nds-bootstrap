@@ -207,9 +207,10 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
 	if (anotherWramAddr > 0x37F7FFF && anotherWramAddr < 0x3810000) {
 		u32* current = (u32*)(JumpTableFunc + 0xD0);
-		dbg_printf("???:\t\t\t");
+		dbg_printf("Identify backup:\t\t\t");
 		dbg_hexa((u32)current);
 		dbg_printf("\n");
+        // TODO : maybe write a specfic patch for Identify backup 
 		*current = ce7->patches->arm7Functions->eepromProtect;
 	}
 
