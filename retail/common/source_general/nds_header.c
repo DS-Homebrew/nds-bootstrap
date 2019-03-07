@@ -68,6 +68,8 @@ const u32 getChipId(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		unit=0x80;
 	}
     cardid |= unit << 24;
+
+    if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
     
     return cardid;
 }
