@@ -239,6 +239,20 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     } 
 }
 
+static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    const char* romTid = getRomTid(ndsHeader);
+    
+    if (
+        strncmp(romTid, "APD", 3) == 0  // Pokemon Dash
+    ) {
+        u32* reset = findResetOffset(ndsHeader,moduleParams,usesThumb);
+
+      	// Patch
+    	u32* resetPatch = (usesThumb ? ce9->thumbPatches->reset_arm9 : ce9->patches->reset_arm9);
+    	memcpy(reset, resetPatch, 0x40);
+    } 
+}
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	if (moduleParams->sdk_version > 0x5000000) {
 		return;
@@ -684,6 +698,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchDownloadplay(ndsHeader);
   
     patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
+    
+    patchReset(ce9, ndsHeader, moduleParams, usesThumb);
 	
 	randomPatch(ndsHeader, moduleParams);
 

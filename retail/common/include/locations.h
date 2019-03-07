@@ -16,6 +16,8 @@
 
 #define CARDENGINE_SHARED_ADDRESS 0x027FFB08
 
+#define RESET_PARAM 0x27FFC20
+
 //#define TEMP_MEM 0x02FFE000 // __DSiHeader
 
 #define NDS_HEADER         0x027FFE00
