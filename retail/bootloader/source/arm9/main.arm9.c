@@ -247,10 +247,6 @@ void arm9_main(void) {
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
-		// SDK 5
-		*(u32*)0x23FFC40 = 01;
-		*(u32*)0x2FFFC40 = 01;
-
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			displayScreen = true;
 			if (arm9_stateFlag == ARM9_DISPERR) {
