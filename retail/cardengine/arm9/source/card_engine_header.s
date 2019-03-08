@@ -50,6 +50,7 @@ patches:
 .word   cacheFlushRef
 .word   0x0 @sleepRef
 .word   terminateForPullOutRef
+.word   reset_arm9
 needFlushDCCache:
 .word   0x0
 thumbPatches:
@@ -64,6 +65,7 @@ thumbPatches:
 thumbSleepRef:
 .word   0x0 @sleepRef
 .word   terminateForPullOutRef
+.word   0x0
 
 
 @---------------------------------------------------------------------------------
@@ -255,6 +257,30 @@ thumb_card_pull:
 	bx      lr
 
 	.arm
+    
+@---------------------------------------------------------------------------------
+reset_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef8
+    ldr     r7, ce9location8
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_reset	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_reset:
+	bx	r6	
+.pool
+ce9location8:
+.word   ce9
+cardReadRef8:
+.word   reset-ce9 
+@---------------------------------------------------------------------------------
     
 .global callSleepThumb
 .type	callSleepThumb STT_FUNC

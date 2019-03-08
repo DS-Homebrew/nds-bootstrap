@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -71,6 +72,14 @@ static bool flagsSet = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u8 dma = 4;
+
+void turnScreenRed(void) {
+	setBackdropColor( RGB15(31, 0, 0));
+}
+
+void turnScreenBlack(void) {
+	setBackdropColor( RGB15(0, 0, 0));
+}
 
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -553,3 +562,9 @@ void cardPullOut(void) {
 		waitForArm7();
 	}
 }
+
+void reset(u32 param) {
+	turnScreenRed();
+	//bgUpdate();    
+}
+

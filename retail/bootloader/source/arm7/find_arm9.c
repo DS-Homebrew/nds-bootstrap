@@ -113,7 +113,7 @@ static const initHeapEndFuncSignatureAlt[1]     = {0xE8BD8008};
 static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};
 
 // Reset
-static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk2
+static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
 static const u16 resetSignatureThumb2[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk2
 // TODO complete with other sdks signatures
 static const u32 resetSignature4[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk4
@@ -1428,7 +1428,7 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	dbg_printf("findSleepOffset\n");
+	dbg_printf("findResetOffset\n");
     u32* resetSignature = resetSignature2;
     u16* resetSignatureThumb = resetSignatureThumb2;
           
