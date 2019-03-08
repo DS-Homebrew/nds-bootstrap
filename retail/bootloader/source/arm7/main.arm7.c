@@ -572,6 +572,19 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
+setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32 chipID = getChipId(ndsHeader, moduleParams);
+
+    // Set memory values expected by loaded NDS
+    // from NitroHax, thanks to Chism
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff800 : 0x027ff800)) = chipID;					// CurrentCardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff804 : 0x027ff804)) = chipID;					// Command10CardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc00 : 0x027ffc00)) = chipID;					// 3rd chip ID
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff808 : 0x027ff808)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff80a : 0x027ff80a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Booted from card -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+}
+
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
@@ -783,6 +796,8 @@ int arm7_main(void) {
 		increaseLoadBarLength();
 		fadeOut();
 	}
+    
+
 
 	//
 	// Final 8 dots
@@ -791,8 +806,9 @@ int arm7_main(void) {
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
-
+                           
 	nocashMessage("Starting the NDS file...");
+    setMemoryAddress(ndsHeader, moduleParams);
 	startBinary_ARM7(arm9StartAddress);
 
 	return 0;
