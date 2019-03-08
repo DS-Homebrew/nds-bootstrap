@@ -124,6 +124,16 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	if (strcmp(romTid, "UORE") == 0) {
 		*(u32*)0x02003114 = 0xE12FFF1E; //mov r0, #0
 	}
+    
+    // Pokemon Dash
+	if (strcmp(romTid, "APDE") == 0) {
+		*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
+        //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
+		*(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
+
+		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
+	}    
+    
 }
 
 u32 patchCardNds(
