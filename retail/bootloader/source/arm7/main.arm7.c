@@ -574,6 +574,10 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32 chipID = getChipId(ndsHeader, moduleParams);
+    
+    // TODO
+    // figure out what is 0x027ffc10, somehow related to cardId check
+    //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
 
     // Set memory values expected by loaded NDS
     // from NitroHax, thanks to Chism
