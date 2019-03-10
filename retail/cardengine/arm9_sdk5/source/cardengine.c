@@ -122,8 +122,8 @@ static void waitForArm7(void) {
     int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
         count++;
-		if (isDma) {
-			sleep(2);
+		if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+			sleep(1);
             IPC_SendSync(0xEE24);
 		} else if(count==20000000) {
             IPC_SendSync(0xEE24);
