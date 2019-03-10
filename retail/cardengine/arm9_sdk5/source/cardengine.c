@@ -124,8 +124,8 @@ static void waitForArm7(void) {
         count++;
 		if (isDma) {
 			sleep(2);
-		}
-        if(count==20000000 || isDma&&ce9->patches->sleepRef || isDma&&ce9->thumbPatches->sleepRef){
+            IPC_SendSync(0xEE24);
+		} else if(count==20000000) {
             IPC_SendSync(0xEE24);
             count=0;
         }
