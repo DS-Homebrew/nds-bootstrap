@@ -25,6 +25,7 @@ static const u32 a7JumpTableSignatureV4_2[3]                    = {0xE92D41F0, 0
 static const u32 a7JumpTableSignatureUniversal[3]               = {0xE592000C, 0xE5921010, 0xE5922014};
 static const u32 a7JumpTableSignatureUniversal_pt2[3]           = {0xE5920010, 0xE592100C, 0xE5922014};
 static const u32 a7JumpTableSignatureUniversal_pt3[2]           = {0xE5920010, 0xE5921014};
+static const u32 a7JumpTableSignatureUniversal_pt3_alt[2]       = {0xE5910010, 0xE5911014};
 static const u32 a7JumpTableSignatureUniversal_2[3]             = {0xE593000C, 0xE5931010, 0xE5932014};
 static const u32 a7JumpTableSignatureUniversal_2_pt2[3]         = {0xE5930010, 0xE593100C, 0xE5932014};
 static const u32 a7JumpTableSignatureUniversal_2_pt3[2]         = {0xE5930010, 0xE5931014};
@@ -33,6 +34,7 @@ static const u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910, 0x68D
 static const u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
+
 
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
 	dbg_printf("\nArm7 (patch vAll)\n");
@@ -148,6 +150,10 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 		EepromEraseJump = findOffset(
 			EepromVerifyJump + 4, ndsHeader->arm7binarySize,
 			a7JumpTableSignatureUniversal_pt3, 2
+		);
+        if(!EepromEraseJump) EepromEraseJump = findOffset(
+			EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal_pt3_alt, 2
 		);
 	} else {
 		JumpTableFunc = findOffset(
