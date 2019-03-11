@@ -161,9 +161,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     
     // Pokemon Dash
 	if (strcmp(romTid, "APDJ") == 0) {
-		*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
+		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
-		*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
+		//*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
+        
+        *(u32*)0x02000B94 = 0xE1A00000; //nop
 
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
