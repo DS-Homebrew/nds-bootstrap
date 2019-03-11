@@ -269,6 +269,31 @@ _blx_r6_stub_callSleepThumb:
 	bx	r6	
 .pool
 
+/*.global patchPdash
+.type	patchPdash STT_FUNC
+patchPdash:
+    nop
+@ r0 cardstruct like struct, to be copied to cardstruct
+    push	{r1-r7, lr}
+    mov     r1, #0x28
+    mov     r2, #0
+    ldr     r3, cardstruct
+loop_patchPdash:
+    ldr     r4, [r0, r2]
+    str     r4, [r3, r2]
+    add     r2,r2,#4
+    cmp     r2,r1
+    bne     loop_patchPdash
+    ldr     r3, cardRead
+    blx     r3     
+    pop	    {r1-r7, pc}
+    mov     r0,#1
+    bx      lr     
+cardstruct:
+.word   0x20DA600
+cardRead:
+.word   0x20A4778*/ 
+
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll
 .type	 IC_InvalidateAll STT_FUNC
