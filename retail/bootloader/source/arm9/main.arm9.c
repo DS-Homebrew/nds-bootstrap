@@ -45,7 +45,7 @@ extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
-volatile bool arm9_boostVram = false;
+bool arm9_boostVram = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -235,12 +235,6 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	REG_SCFG_EXT = 0x8300C000;
-	//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
-	if (arm9_boostVram) {
-		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-	}
-
 	screenBrightness = 25;
 	fadeType = true;
 
@@ -302,6 +296,11 @@ void arm9_main(void) {
 	if (dsiModeConfirmed) {
 		REG_SCFG_EXT = 0x8307F100;
 	} else {
+		REG_SCFG_EXT = 0x8300C000;
+		//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
+		if (arm9_boostVram) {
+			REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+		}
 		// lock SCFG
 		REG_SCFG_EXT &= ~(1UL << 31);
 	}

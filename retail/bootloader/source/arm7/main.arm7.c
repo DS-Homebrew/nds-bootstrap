@@ -594,8 +594,6 @@ int arm7_main(void) {
 
 	initMBK();
 
-	arm9_boostVram = boostVram;
-
 	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
@@ -806,6 +804,8 @@ int arm7_main(void) {
 	//
 	// Final 8 dots
 	//
+
+	arm9_boostVram = boostVram;
 
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
