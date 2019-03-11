@@ -170,7 +170,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
     
-        
+    
+    // Golden sun
+    if (strcmp(romTid, "BO5E") == 0) {
+        *(u32*)0x204995C = 0xe12fff1e; //bx lr
+    }  
     
 }
 

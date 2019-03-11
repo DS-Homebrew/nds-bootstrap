@@ -234,6 +234,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
     ||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
     ||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
+    ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
