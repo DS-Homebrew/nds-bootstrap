@@ -1345,7 +1345,7 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     }
     if (moduleParams->sdk_version > 0x5000000) {
         sleepSignature = sleepSignature5;
-        sleepSignature = sleepSignatureThumb5;     
+        sleepSignatureThumb = sleepSignatureThumb5;     
     }
     
     u32 * sleepOffset = NULL;
