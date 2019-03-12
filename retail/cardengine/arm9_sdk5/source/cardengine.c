@@ -305,7 +305,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-u32 cardReadDma(u32* cacheStruct, u8* dst, u32 src, u32 len, u8 dma0, void* func, void* arg) {
+u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
     dma = dma0; // dma channel
     
     if(dma >= 0 

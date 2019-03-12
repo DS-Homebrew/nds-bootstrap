@@ -173,6 +173,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     
     // Golden sun
     if (strcmp(romTid, "BO5E") == 0) {
+        // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
     }  
     
