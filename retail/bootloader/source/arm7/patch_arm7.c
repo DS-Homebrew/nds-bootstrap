@@ -138,7 +138,7 @@ u32 patchCardNdsArm7(
     if (
         strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
     ) {
-        savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+        saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 	} else if (isSdk5(moduleParams)) {
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);

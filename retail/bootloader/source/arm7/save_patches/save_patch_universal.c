@@ -541,4 +541,6 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	eepromPageErase[1] = patchErase[1];
 	
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
+    
+    return 1;
 }
