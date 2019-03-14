@@ -234,6 +234,9 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
     //||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
     //||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
+    //||  strncmp(romTid, "CS3", 3) == 0  // Sonic & SEGA All Stars Racing
+    //||  strncmp(romTid, "VSO", 3) == 0  // Sonic Classic Collection
+    //||  strncmp(romTid, "BXS", 3) == 0  // Sonic Colors
     ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
