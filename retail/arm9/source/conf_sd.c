@@ -130,6 +130,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Force sleep patch
 		conf->forceSleepPatch = (bool)strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "PRECISE_VOLUME_CONTROL")) {
+		// Precise volume control
+		conf->preciseVolumeControl = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LOGGING")) {
 		// Logging
 		conf->logging = (bool)strtol(value, NULL, 0);

@@ -93,6 +93,7 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
+extern u32 preciseVolumeControl;
 extern u32 soundFix;
 extern u32 boostVram;
 extern u32 logging;
@@ -766,7 +767,8 @@ int arm7_main(void) {
 		ROMinRAM,
 		consoleModel,
 		romread_LED,
-		gameSoftReset
+		gameSoftReset,
+		preciseVolumeControl
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

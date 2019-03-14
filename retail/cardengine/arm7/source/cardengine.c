@@ -60,6 +60,7 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
+extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -752,7 +753,8 @@ void myIrqHandlerVBlank(void) {
 		REG_MASTER_VOLUME = volLevel;
 	}
 
-	if (consoleModel < 2 && romread_LED == 0) {
+	if (consoleModel < 2) {
+	if (preciseVolumeControl && romread_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -779,6 +781,7 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustActivated = true;
 			}
 		}
+	}
 	}
 	
 	if (saveTimer > 0) {

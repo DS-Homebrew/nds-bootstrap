@@ -97,7 +97,8 @@ int hookNdsRetailArm7(
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,
-	u32 gameSoftReset
+	u32 gameSoftReset,
+	u32 preciseVolumeControl
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -181,6 +182,7 @@ int hookNdsRetailArm7(
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
+	ce7->preciseVolumeControl    = preciseVolumeControl;
 
 	u32* ce7_cheat_data = getCheatData(ce7);
 	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);

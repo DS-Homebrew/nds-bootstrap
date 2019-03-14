@@ -22,7 +22,7 @@
 .global consoleModel
 .global romread_LED
 .global gameSoftReset
-.global soundFix
+.global preciseVolumeControl
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -62,6 +62,8 @@ consoleModel:
 romread_LED:
 	.word	0x00000000
 gameSoftReset:
+	.word	0x00000000
+preciseVolumeControl:
 	.word	0x00000000
 cheat_data_offset:    
 	.word	cheat_data - patches_offset

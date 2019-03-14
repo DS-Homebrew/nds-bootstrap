@@ -34,6 +34,7 @@ typedef struct loadCrt0 {
     u32 boostVram;
     u32 gameSoftReset;
     u32 forceSleepPatch;
+    u32 preciseVolumeControl;
     u32 logging;
     u32 cardengine_arm7_offset; //cardengineArm7* cardengine_arm7;
     u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
