@@ -193,8 +193,8 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 				return 0;
 			}
 
-			dbg_printf("usesThumb");
-			dbg_printf("JumpTableFunc");
+			dbg_printf("usesThumb\n");
+			dbg_printf("JumpTableFunc\n");
 			dbg_hexa((u32)JumpTableFunc);
 	
 			EepromReadJump = (u32*)findOffsetThumb(
@@ -252,7 +252,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 		return 0;
 	}*/
 		
-	dbg_printf("JumpTableFunc: ");
+	dbg_printf("\nJumpTableFunc: ");
 	dbg_hexa((u32)JumpTableFunc);
 	dbg_printf("\n");
 
@@ -380,4 +380,167 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
 
 	return 1;
+}
+
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
+    dbg_printf("\nArm7 (patch kirby specific)\n");
+	
+	bool usesThumb = false;
+	int thumbType = 0;
+
+	// Find the relocation signature
+	u32 relocationStart = (u32)findOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		relocateStartSignature, 1
+	);
+	if (!relocationStart) {
+		dbg_printf("Relocation start not found\n");
+		return 0;
+	}
+
+    // Validate the relocation signature
+	u32 forwardedRelocStartAddr = relocationStart + 4;
+	if (!*(u32*)forwardedRelocStartAddr) {
+		forwardedRelocStartAddr += 4;
+	}
+	u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+	
+	// Sanity checks
+	u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+	u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+	if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
+		dbg_printf("Error in relocation checking method 1\n");
+		
+		// Find the beginning of the next function
+		u32 nextFunction = (u32)findOffset(
+			(u32*)relocationStart, ndsHeader->arm7binarySize,
+			nextFunctiontSignature, 1
+		);
+	
+		// Validate the relocation signature
+		forwardedRelocStartAddr = nextFunction - 0x14;
+		
+		// Validate the relocation signature
+		vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
+		
+		// Sanity checks
+		relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
+		relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
+		if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
+			dbg_printf("Error in relocation checking method 2\n");
+			return 0;
+		}
+	}
+
+	// Get the remaining details regarding relocation
+	u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
+	u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
+	if (relocDestAtSharedMem != 0x37F8000) { // Shared memory in RAM
+		// Try again
+		vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
+		relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
+		if (relocDestAtSharedMem != 0x37F8000) {
+			dbg_printf("Error in finding shared memory relocation area\n");
+			return 0;
+		}
+	}
+
+	dbg_printf("Relocation src: ");
+	dbg_hexa(vAddrOfRelocSrc);
+	dbg_printf("\n");
+	dbg_printf("Relocation dst: ");
+	dbg_hexa(relocDestAtSharedMem);
+	dbg_printf("\n");
+
+	u32* JumpTableFunc;
+	u32* EepromReadJump;
+	u32* EepromWriteJump;
+	u32* EepromProgJump;
+	u32* EepromVerifyJump;
+	u32* EepromEraseJump;
+	
+    usesThumb = true;
+
+    // inverted order
+    EepromEraseJump = (u32*)findOffsetThumb(
+    	(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    		a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+	);
+    
+    EepromVerifyJump = (u32*)findOffsetThumb(
+		(u16*)EepromEraseJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+    
+    EepromProgJump = (u32*)findOffsetThumb(
+		(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+    
+    EepromWriteJump = (u32*)findOffsetThumb(
+		(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+    
+    EepromReadJump = (u32*)findOffsetThumb(
+		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb, 3
+	);
+
+	dbg_printf("usesThumb\n");
+    dbg_printf("inverted order\n");
+	dbg_printf("EepromEraseJump\n");
+	dbg_hexa((u32)EepromEraseJump);
+    dbg_printf("\n");
+    
+    u32 srcAddr;
+    
+	u16* eepromRead = (u16*)((u32)EepromReadJump + 0x6);
+	dbg_printf("Eeprom read:\t");
+	dbg_hexa((u32)eepromRead);
+	dbg_printf("\n");
+	srcAddr = (u32)EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	const u16* patchRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromRead);
+	eepromRead[0] = patchRead[0];
+	eepromRead[1] = patchRead[1];
+
+	u16* eepromPageWrite = (u16*)((u32)EepromWriteJump + 0x6);
+	dbg_printf("Eeprom page write:\t");
+	dbg_hexa((u32)eepromPageWrite);
+	dbg_printf("\n");
+	srcAddr = (u32)EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	const u16* patchWrite = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageWrite);
+	eepromPageWrite[0] = patchWrite[0];
+	eepromPageWrite[1] = patchWrite[1];
+
+	u16* eepromPageProg = (u16*)((u32)EepromProgJump + 0x6);
+	dbg_printf("Eeprom page prog:\t");
+	dbg_hexa((u32)eepromPageProg);
+	dbg_printf("\n");
+	srcAddr = (u32)EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	const u16* patchProg = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageProg);
+	eepromPageProg[0] = patchProg[0];
+	eepromPageProg[1] = patchProg[1];
+
+	u16* eepromPageVerify = (u16*)((u32)EepromVerifyJump + 0x6);
+	dbg_printf("Eeprom verify:\t");
+	dbg_hexa((u32)eepromPageVerify);
+	dbg_printf("\n");
+	srcAddr = (u32)EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	const u16* patchVerify = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageVerify);
+	eepromPageVerify[0] = patchVerify[0];
+	eepromPageVerify[1] = patchVerify[1];
+
+	u16* eepromPageErase = (u16*)((u32)EepromEraseJump + 0x4);
+	dbg_printf("Eeprom page erase:\t");
+	dbg_hexa((u32)eepromPageErase);
+	dbg_printf("\n");
+	srcAddr = (u32)EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
+	const u16* patchErase = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageErase);
+	eepromPageErase[0] = patchErase[0];
+	eepromPageErase[1] = patchErase[1];
+	
+	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
+    
+    return 1;
 }
