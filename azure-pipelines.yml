@@ -59,10 +59,8 @@ steps:
   displayName: "Commit to TWLBot/Builds"
 
 - script: |
-    echo $(BUILD_SOURCEVERSION)
-    echo $(COMMIT_TAG)
     echo $(TRAVIS_COMMIT)
-  displayName: 'Test'
+  displayName: 'Echo Variables'
 
 # GitHub Release
 # Create, edit, or delete a GitHub release.
