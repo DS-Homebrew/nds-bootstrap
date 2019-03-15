@@ -44,7 +44,7 @@ steps:
 
 - script: |
      mkdir bin/TWiLightMenu/
-     printf $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
+     printf $(COMMIT_TAG) >> bin/TWiLightMenu/nightly-bootstrap.ver
      mv bin/ nds-bootstrap/
      7z a nds-bootstrap.7z nds-bootstrap/
      cp nds-bootstrap.7z $(Build.ArtifactStagingDirectory)/nds-bootstrap.7z
