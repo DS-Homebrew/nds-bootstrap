@@ -483,7 +483,7 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	);
     
     EepromReadJump = (u32*)findOffsetThumb(
-		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u16*)EepromWriteJump, ndsHeader->arm7binarySize,
 		a7JumpTableSignatureUniversalThumb, 3
 	);
 
@@ -500,6 +500,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_hexa((u32)eepromRead);
 	dbg_printf("\n");
 	srcAddr = (u32)EepromReadJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	dbg_printf("srcAddr:\t");
+	dbg_hexa((u32)srcAddr);
+	dbg_printf("\n");
 	const u16* patchRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromRead);
 	eepromRead[0] = patchRead[0];
 	eepromRead[1] = patchRead[1];
@@ -509,6 +512,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_hexa((u32)eepromPageWrite);
 	dbg_printf("\n");
 	srcAddr = (u32)EepromWriteJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	dbg_printf("srcAddr:\t");
+	dbg_hexa((u32)srcAddr);
+	dbg_printf("\n");
 	const u16* patchWrite = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageWrite);
 	eepromPageWrite[0] = patchWrite[0];
 	eepromPageWrite[1] = patchWrite[1];
@@ -518,6 +524,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_hexa((u32)eepromPageProg);
 	dbg_printf("\n");
 	srcAddr = (u32)EepromProgJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	dbg_printf("srcAddr:\t");
+	dbg_hexa((u32)srcAddr);
+	dbg_printf("\n");
 	const u16* patchProg = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageProg);
 	eepromPageProg[0] = patchProg[0];
 	eepromPageProg[1] = patchProg[1];
@@ -527,6 +536,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_hexa((u32)eepromPageVerify);
 	dbg_printf("\n");
 	srcAddr = (u32)EepromVerifyJump + 0x6 - vAddrOfRelocSrc + 0x37F8000;
+	dbg_printf("srcAddr:\t");
+	dbg_hexa((u32)srcAddr);
+	dbg_printf("\n");
 	const u16* patchVerify = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageVerify);
 	eepromPageVerify[0] = patchVerify[0];
 	eepromPageVerify[1] = patchVerify[1];
@@ -536,6 +548,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_hexa((u32)eepromPageErase);
 	dbg_printf("\n");
 	srcAddr = (u32)EepromEraseJump + 0x4 - vAddrOfRelocSrc + 0x37F8000;
+	dbg_printf("srcAddr:\t");
+	dbg_hexa((u32)srcAddr);
+	dbg_printf("\n");
 	const u16* patchErase = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->eepromPageErase);
 	eepromPageErase[0] = patchErase[0];
 	eepromPageErase[1] = patchErase[1];
