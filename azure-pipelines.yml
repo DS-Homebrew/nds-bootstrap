@@ -37,6 +37,8 @@ steps:
   displayName: 'Build nds-bootstrap'
 
 - script: |
+     mkdir bin/TWiLightMenu/
+     printf $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
      mv bin/ nds-bootstrap/
      7z a nds-bootstrap.7z nds-bootstrap/
      cp nds-bootstrap.7z $(Build.ArtifactStagingDirectory)/nds-bootstrap.7z
@@ -60,11 +62,13 @@ steps:
 
 - script: |
     echo $(TRAVIS_COMMIT)
+    echo $(COMMIT_TAG)
+    echo $(BUILD_SOURCEVERSION)
   displayName: 'Echo Variables'
 
 # GitHub Release
 # Create, edit, or delete a GitHub release.
-- task: GitHubRelease@1
+- task: GitHubRelease@0
   displayName: 'Release to TWLBot/Builds'
   inputs:
     gitHubConnection: TWLBot
