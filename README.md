@@ -2,7 +2,10 @@
  <img src="https://i.imgur.com/BFIu7xX.png"><br>
  <span style="padding-right: 5px;">
   <a href="https://travis-ci.org/ahezard/nds-bootstrap">
-   <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master">
+   <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master"> 
+ <span style="padding-right: 5px;">
+  <a href="https://dev.azure.com/DS-Homebrew/Builds/FlameKat53.nds-bootstrap">
+   <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/FlameKat53.nds-bootstrap?branch=master">
   </a>
  </span>
  <span style="padding-left: 5px;">
