@@ -1,0 +1,95 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - master
+
+name:  $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
+
+pool:
+  vmImage: 'Ubuntu-16.04'
+
+variables:
+  CURRENT_DATE: $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
+  REPOSITORY_NAME: $(Build.Repository.Name)
+  COMMIT_TAG: $(git log --format=%h -1)
+
+steps:
+- script: |
+     curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
+     sudo apt update
+     sudo apt install p7zip-full haveged
+     sudo dpkg -i pacman.deb
+     sudo dkp-pacman -Sy
+     sudo dkp-pacman -S nds-dev --noconfirm
+  displayName: 'Setup environment'
+
+- script: |
+     export DEVKITPRO="/opt/devkitpro"
+     export DEVKITARM="/opt/devkitpro/devkitARM"
+     sudo cp libmm7.a /opt/devkitpro/libnds/lib/libmm7.a
+     make package-nightly
+  displayName: 'Build nds-bootstrap'
+
+- script: |
+     mv bin/ nds-bootstrap/
+     7z a nds-bootstrap.7z nds-bootstrap/
+     cp nds-bootstrap.7z $(Build.ArtifactStagingDirectory)/nds-bootstrap.7z
+  displayName: 'Pack 7z'
+
+- script: |
+     export COMMIT_TAG="$(git log --format=%h -1)"
+     git config --global user.email "flamekat54@aol.com"
+     git config --global user.name "TWLBot"
+     git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
+     cd Builds
+     cp ../nds-bootstrap.7z nds-bootstrap.7z
+     git stage .
+     git commit -m "nds-bootstrap | $COMMIT_TAG"
+     git push origin master
+     git tag v$CURRENT_DATE
+     git log -1 --format="%H" >> travisCommit.txt
+    mkdir Builds
+    cd Builds
+     echo "2428412f374d13bf3f378dd36bd9c69c207964a6" >> travisCommit.txt
+     echo '##vso[task.setvariable variable=TRAVIS_COMMIT]$(git log -1 --format="%H")'
+     echo '##vso[task.setvariable variable=TRAVIS_COMMIT]2428412f374d13bf3f378dd36bd9c69c207964a6'
+  displayName: 'Commit to TWLBot/Builds'
+
+- script: |
+    echo $(TRAVIS_COMMIT)
+  displayName: 'Test'
+
+# GitHub Release
+# Create, edit, or delete a GitHub release.
+- task: GitHubRelease@0
+  displayName: 'Release to TWLBot/Builds'
+  inputs:
+    gitHubConnection: TWLBot
+    repositoryName: TWLBot/Builds
+    action: create
+    target: $(TRAVIS_COMMIT)
+    tagSource: 'manual'
+    tag: v$(CURRENT_DATE)
+    title: nds-bootstrap | $(COMMIT_TAG)
+    assets: '$(Build.ArtifactStagingDirectory)/*' # Optional
+    isPreRelease: true
+    addChangeLog: false
+
+- script: |
+    curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
+    chmod +x send.sh
+    ./send.sh success $WEBHOOK_URL
+  condition: succeeded()
+  displayName: 'Send success webhook'
+
+- script: |
+    curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
+    chmod +x send.sh
+    ./send.sh failure $WEBHOOK_URL
+  condition: failed()
+  displayName: 'Send failure webhook'
