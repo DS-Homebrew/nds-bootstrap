@@ -58,6 +58,10 @@ steps:
      echo '##vso[task.setvariable variable=TRAVIS_COMMIT]2428412f374d13bf3f378dd36bd9c69c207964a6'
   displayName: 'Commit to TWLBot/Builds'
 
+- script: |
+    echo $(TRAVIS_COMMIT)
+  displayName: 'Test'
+
 # GitHub Release
 # Create, edit, or delete a GitHub release.
 - task: GitHubRelease@0
@@ -79,6 +83,11 @@ steps:
     chmod +x send.sh
     ./send.sh success $WEBHOOK_URL
   condition: succeeded()
+  displayName: 'Send success webhook'
+
+- script: |
+    curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
+    chmod +x send.sh
     ./send.sh failure $WEBHOOK_URL
   condition: failed()
-  displayName: 'Send webhook'
+  displayName: 'Send failure webhook'
