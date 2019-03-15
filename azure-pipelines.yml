@@ -56,7 +56,7 @@ steps:
     git config --global user.name "TWLBot"
     git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
     cd Builds/
-    # cp ../nds-bootstrap.7z nds-bootstrap.7z
+    cp ../nds-bootstrap.7z nds-bootstrap.7z
     git stage .
     git commit -m "nds-bootstrap | $COMMIT_TAG"
     git push origin master
@@ -68,19 +68,19 @@ steps:
 
 # GitHub Release
 # Create, edit, or delete a GitHub release.
-- task: GitHubRelease@0
-  displayName: 'Release to TWLBot/Builds'
-  inputs:
-    gitHubConnection: TWLBot
-    repositoryName: TWLBot/Builds
-    action: create
-    target: $(TRAVIS_COMMIT)
-    tagSource: 'manual'
-    tag: v$(CURRENT_DATE)
-    title: nds-bootstrap | $(COMMIT_TAG)
-    assets: '$(Build.ArtifactStagingDirectory)/*' # Optional
-    isPreRelease: true
-    addChangeLog: false
+#- task: GitHubRelease@0
+#  displayName: 'Release to TWLBot/Builds'
+#  inputs:
+#    gitHubConnection: TWLBot
+#    repositoryName: TWLBot/Builds
+#    action: create
+#    target: $(TRAVIS_COMMIT)
+#    tagSource: 'manual'
+#    tag: v$(CURRENT_DATE)
+#    title: nds-bootstrap | $(COMMIT_TAG)
+#    assets: '$(Build.ArtifactStagingDirectory)/*' # Optional
+#    isPreRelease: true
+#    addChangeLog: false
 
 - script: |
     curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
