@@ -17,6 +17,7 @@ variables:
   CURRENT_DATE: $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
   REPOSITORY_NAME: $(Build.Repository.Name)
   COMMIT_TAG: $(git log --format=%h -1)
+  BUILD_SOURCEVERSION: $(git log --format=%h -1)
 
 steps:
 - script: |
@@ -58,7 +59,7 @@ steps:
   displayName: "Commit to TWLBot/Builds"
 
 - script: |
-    echo $(TRAVIS_COMMIT)
+    echo $(BUILD_SOURCEVERSION)
   displayName: 'Test'
 
 # GitHub Release
@@ -69,7 +70,7 @@ steps:
     gitHubConnection: TWLBot
     repositoryName: TWLBot/Builds
     action: create
-    target: $(TRAVIS_COMMIT)
+    target: $(BUILD_SOURCEVERSION)
     tagSource: 'manual'
     tag: v$(CURRENT_DATE)
     title: nds-bootstrap | $(COMMIT_TAG)
