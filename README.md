@@ -3,9 +3,8 @@
  <span style="padding-right: 5px;">
   <a href="https://travis-ci.org/ahezard/nds-bootstrap">
    <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master"> 
- <span style="padding-right: 5px;">
-  <a href="https://dev.azure.com/DS-Homebrew/Builds/_build?definitionId=8">
-   <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master">
+  <a href="https://dev.azure.com/DS-Homebrew/Builds/_build?definitionId=9">
+   <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
  </span>
  <span style="padding-left: 5px;">
@@ -45,4 +44,4 @@ Would you like a place to talk about your experiences with nds-bootstrap? Do you
 
 Rocket.Chat is a self-hosted communication platform with the ability to share files and switch to an video/audio conferencing.
 
-Come join today by following this link: https://dshomebrew.serveo.net/ ([alternative link](https://b2b38a00.ngrok.io))
+Come join today by following this link: https://dshomebrew.serveo.net ([alternative link](https://b2b38a00.ngrok.io))
