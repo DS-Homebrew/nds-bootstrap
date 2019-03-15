@@ -68,20 +68,20 @@ steps:
 
 # GitHub Release
 # Create, edit, or delete a GitHub release.
-- task: GitHubRelease@0
-  inputs:
-    gitHubConnection: TWLBot
-    repositoryName: TWLBot/Builds
-    action: create
-    target: $(TRAVIS_COMMIT)
-    tagSource: 'manual'
-    tag: v$(CURRENT_DATE)
-    title: nds-bootstrap | $(COMMIT_TAG)
-    #releaseNotes:
-    assets: '$(Build.ArtifactStagingDirectory)/*'
-    isPreRelease: true
-    addChangeLog: false
-  displayName: "Release to TWLBot/Builds"
+#- task: GitHubRelease@0
+#  inputs:
+#    gitHubConnection: TWLBot
+#    repositoryName: TWLBot/Builds
+#    action: create
+#    target: $(TRAVIS_COMMIT)
+#    tagSource: 'manual'
+#    tag: v$(CURRENT_DATE)
+#    title: nds-bootstrap | $(COMMIT_TAG)
+#    #releaseNotes:
+#    assets: '$(Build.ArtifactStagingDirectory)/*'
+#    isPreRelease: true
+#    addChangeLog: false
+#  displayName: "Release to TWLBot/Builds"
   
 - script: |
     curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
