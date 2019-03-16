@@ -237,7 +237,7 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     //||  strncmp(romTid, "CS3", 3) == 0  // Sonic & SEGA All Stars Racing
     //||  strncmp(romTid, "VSO", 3) == 0  // Sonic Classic Collection
     //||  strncmp(romTid, "BXS", 3) == 0  // Sonic Colors
-    ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
+    //||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
       u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 

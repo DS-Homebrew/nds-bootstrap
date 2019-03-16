@@ -175,6 +175,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
+        *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }  
     
 }

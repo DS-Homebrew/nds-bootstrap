@@ -217,7 +217,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				sharedAddr[1] = readSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
-
+                
 				waitForArm7();
 
 				//REG_IME = 1;
@@ -264,6 +264,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	//}
+    
+    if(strncmp(getRomTid(ndsHeader), "BO5", 3) == 0){ // golden sun
+	   cacheFlush(); 
+	}
+
 	
 	return 0;
 }
