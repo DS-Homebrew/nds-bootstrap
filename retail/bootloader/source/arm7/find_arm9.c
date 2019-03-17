@@ -792,7 +792,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 	if (moduleParams->sdk_version > 0x5000000) {
 		// SDK 5
 		cardIdStartOffset = findOffsetBackwards(
-			(u32*)cardIdEndOffset, 0x100,
+			(u32*)cardIdEndOffset, 0x50,
 			cardIdStartSignature5, 2
 		);
 		if (cardIdStartOffset) {
@@ -805,7 +805,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 			// SDK 5
 			if (moduleParams->sdk_version > 0x5000000) {
 				cardIdStartOffset = findOffsetBackwards(
-					(u32*)cardIdEndOffset, 0x100,
+					(u32*)cardIdEndOffset, 0x50,
 					cardIdStartSignature5Alt, 1
 				);
 				if (cardIdStartOffset) {
