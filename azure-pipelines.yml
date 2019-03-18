@@ -17,7 +17,6 @@ variables:
   CURRENT_DATE: $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
   REPOSITORY_NAME: $(Build.Repository.Name)
   COMMIT_TAG: $(git log --format=%h -1)
-  BUILD_SOURCEVERSION: $(git log --format=%h -1)
 
 steps:
 - script: |
@@ -27,13 +26,7 @@ steps:
      sudo dpkg -i pacman.deb
      sudo dkp-pacman -Sy
      sudo dkp-pacman -S nds-dev --noconfirm
-  displayName: 'Setup environment'
-
-- script: |
-    echo $(TWLBOT_COMMIT)
-    echo $(COMMIT_TAG)
-    echo $(BUILD_SOURCEVERSION)
-  displayName: 'Echo Variables'
+  displayName: 'Setup devkitPro'
   
 - script: |
      export DEVKITPRO="/opt/devkitpro"
@@ -48,7 +41,7 @@ steps:
      mv bin/ nds-bootstrap/
      7z a nds-bootstrap.7z nds-bootstrap/
      cp nds-bootstrap.7z $(Build.ArtifactStagingDirectory)/nds-bootstrap.7z
-  displayName: 'Pack 7z'
+  displayName: 'Pack 7z package'
 
 - script: |
     echo '##vso[task.setvariable variable=COMMIT_TAG]'$(git log --format=%h -1)
