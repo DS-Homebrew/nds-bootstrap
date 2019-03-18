@@ -7,7 +7,7 @@
    <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
   <a href="https://dshomebrew.serveo.net/">
-   <img src="https://img.shields.io/badge/Rocket.Chat%20Server-%23nds-bootstrap-green.svg">
+   <img src="https://img.shields.io/badge/Rocket.Chat%20Server--%23nds-bootstrap-green.svg">
   </a>
 </p>
 
