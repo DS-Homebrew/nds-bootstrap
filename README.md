@@ -7,7 +7,7 @@
    <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
   <a href="https://dshomebrew.serveo.net/">
-   <img src="https://img.shields.io/badge/Rocket.Chat%20Server-%23twilightmenu-green.svg">
+   <img src="https://img.shields.io/badge/Rocket.Chat%20Server-%23nds-bootstrap-green.svg">
   </a>
 </p>
 
@@ -36,7 +36,7 @@ A frontend isn't required to be used as nds-bootstrap uses an ini file to load i
 
 ## [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu)
 
-TWiLight Menu++ is the frontend for nds-bootstrap. Developed by RocketRobz, it has 4 customizable themes, each reminicent of a DS menu (DSi menu, 3DS Home Menu, R4 kernel and the akmenu loader).
+TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 4 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
 
 # Rocket.Chat Server
 
