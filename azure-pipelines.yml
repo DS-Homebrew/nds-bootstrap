@@ -30,7 +30,7 @@ steps:
   displayName: 'Setup environment'
 
 - script: |
-    echo $(TRAVIS_COMMIT)
+    echo $(TWLBOT_COMMIT)
     echo $(COMMIT_TAG)
     echo $(BUILD_SOURCEVERSION)
   displayName: 'Echo Variables'
@@ -50,38 +50,36 @@ steps:
      cp nds-bootstrap.7z $(Build.ArtifactStagingDirectory)/nds-bootstrap.7z
   displayName: 'Pack 7z'
 
-- script: |    
-    export COMMIT_TAG="$(git log --format=%h -1)"
+- script: |
+    echo '##vso[task.setvariable variable=COMMIT_TAG]'$(git log --format=%h -1)
+    echo '##vso[task.setvariable variable=COMMIT_MESSAGE]'$(git log --pretty=format:"%an - %s" -1)
     git config --global user.email "flamekat54@aol.com"
     git config --global user.name "TWLBot"
     git clone https://$GITHUB_TOKEN@github.com/TWLBot/Builds.git
     cd Builds/
     cp ../nds-bootstrap.7z nds-bootstrap.7z
     git stage .
-    git commit -m "nds-bootstrap | $COMMIT_TAG"
+    git commit -m "nds-bootstrap | $(COMMIT_TAG)"
     git push origin master
     git tag v$CURRENT_DATE
-    git log -1 --format="%H" >> travisCommit.txt
-    echo "2428412f374d13bf3f378dd36bd9c69c207964a6" >> travisCommit.txt
-    echo '##vso[task.setvariable variable=TRAVIS_COMMIT]$(git log -1 --format="%H")'
+    echo '##vso[task.setvariable variable=TWLBOT_COMMIT]'$(git log -1 --format="%H")
   displayName: "Commit to TWLBot/Builds"
 
-# GitHub Release
-# Create, edit, or delete a GitHub release.
-#- task: GitHubRelease@0
-#  inputs:
-#    gitHubConnection: TWLBot
-#    repositoryName: TWLBot/Builds
-#    action: create
-#    target: $(TRAVIS_COMMIT)
-#    tagSource: 'manual'
-#    tag: v$(CURRENT_DATE)
-#    title: nds-bootstrap | $(COMMIT_TAG)
-#    #releaseNotes:
-#    assets: '$(Build.ArtifactStagingDirectory)/*'
-#    isPreRelease: true
-#    addChangeLog: false
-#  displayName: "Release to TWLBot/Builds"
+- task: GitHubRelease@0
+  displayName: "Release to TWLBot/Builds"
+  inputs:
+    gitHubConnection: TWLBot
+    repositoryName: TWLBot/Builds
+    action: create
+    target: $(TWLBOT_COMMIT)
+    tagSource: 'manual'
+    tag: v$(CURRENT_DATE)
+    title: nds-bootstrap | $(COMMIT_TAG)
+    releaseNotesSource: input
+    releaseNotes: $(COMMIT_MESSAGE)
+    assets: '$(Build.ArtifactStagingDirectory)/*'
+    isPreRelease: true
+    addChangeLog: false
   
 - script: |
     curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-azure.sh
