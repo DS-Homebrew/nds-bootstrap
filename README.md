@@ -7,11 +7,11 @@
    <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
   <a href="https://dshomebrew.serveo.net/">
-   <img src="https://img.shields.io/badge/Rocket.Chat%20Server--%23nds-bootstrap-green.svg">
+   <img src="https://img.shields.io/badge/Rocket.Chat%20Server-%23nds--bootstrap-green.svg">
   </a>
 </p>
 
-nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs to be natively utilised rather than using an emulator. This works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcarts.
+nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and homebrew to be natively utilised rather than using an emulator. nds-bootstrap works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcarts.
 
 # ROM Compatibility
 
@@ -23,7 +23,7 @@ nds-bootstrap also supports many homebrew applications, including emulators such
 
 # Compiling
 
-In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. DevkitPro includes `dkp-pacman` for easy installation of all components:
+In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. devkitPro includes `dkp-pacman` for easy installation of all components:
 
 ```
  $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
@@ -40,7 +40,7 @@ TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https
 
 # Rocket.Chat Server
 
-Would you like a place to talk about your experiences with nds-bootstrap? Do you need some assistance? Well, why not join our Rocket.Chat server!
+Would you like a place to talk about your experiences with nds-bootstrap or need some assistance? Well, why not join our Rocket.Chat server!
 
 Rocket.Chat is a self-hosted communication platform with the ability to share files and switch to an video/audio conferencing.
 
