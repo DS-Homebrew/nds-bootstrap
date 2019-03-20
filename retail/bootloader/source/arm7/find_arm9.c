@@ -870,7 +870,7 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	//if (usesThumb) {
 	
 	u16* cardIdStartOffset = findOffsetBackwardsThumb(
-		(u16*)cardIdEndOffset, 0x40,
+		(u16*)cardIdEndOffset, 0x50,
 		cardIdStartSignatureThumb, 2
 	);
 	if (cardIdStartOffset) {
@@ -881,7 +881,7 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 
 	if (!cardIdStartOffset) {
 		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x40,
+			(u16*)cardIdEndOffset, 0x50,
 			cardIdStartSignatureThumbAlt1, 2
 		);
 		if (cardIdStartOffset) {
@@ -892,7 +892,7 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	}
 	if (!cardIdStartOffset) {
 		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x40,
+			(u16*)cardIdEndOffset, 0x50,
 			cardIdStartSignatureThumbAlt2, 2
 		);
 		if (cardIdStartOffset) {
@@ -903,7 +903,7 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	}
 	if (!cardIdStartOffset) {
 		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x40,
+			(u16*)cardIdEndOffset, 0x50,
 			cardIdStartSignatureThumbAlt3, 2
 		);
 		if (cardIdStartOffset) {
