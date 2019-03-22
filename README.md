@@ -44,4 +44,4 @@ Would you like a place to talk about your experiences with nds-bootstrap or need
 
 Rocket.Chat is a self-hosted communication platform with the ability to share files and switch to an video/audio conferencing.
 
-Come join today by following this link: https://dshomebrew.serveo.net ([alternative link](http://beastbot2855.com:3000/))
+Come join today by following this link: https://dshomebrew.serveo.net ([alternative link](https://5a31a0c4.ngrok.io/))
