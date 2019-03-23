@@ -455,7 +455,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	return ndsHeader;
 }
 
-static void my_readUserSettings(const tNDSHeader* ndsHeader) {
+static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	PERSONAL_DATA slot1;
 	PERSONAL_DATA slot2;
 
@@ -505,6 +505,10 @@ static void my_readUserSettings(const tNDSHeader* ndsHeader) {
 	if (language >= 0 && language < 6) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
+	}
+	
+	if (personalData->language != 6 && ndsHeader->reserved1[8] == 0x80) {
+		ndsHeader->reserved1[8] = 0;	// Patch iQue game to region-free
 	}
 }
 
