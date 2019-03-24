@@ -384,6 +384,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
+	isGSDD = (strncmp(romTid, "BO5", 3) == 0);			// Golden Sun: Dark Dawn
+
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
 	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
@@ -429,6 +431,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 
 static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? ARM9_START_ADDRESS_SDK5_LOCATION : ARM9_START_ADDRESS_LOCATION);
+	if (isGSDD) {
+		arm9StartAddress = (vu32*)(ARM9_START_ADDRESS_4MB_LOCATION);
+	}
 
 	// Store for later
 	*arm9StartAddress = (vu32)ndsHeader->arm9executeAddress;
@@ -441,6 +446,9 @@ static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t*
 
 static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
+	if (isGSDD) {
+		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
+	}
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
@@ -578,12 +586,24 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
-setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32 chipID = getChipId(ndsHeader, moduleParams);
     
     // TODO
     // figure out what is 0x027ffc10, somehow related to cardId check
     //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
+
+	if (isGSDD) {
+		// Set memory values expected by loaded NDS
+		// from NitroHax, thanks to Chism
+		*((u32*)0x023ff800) = chipID;					// CurrentCardID
+		*((u32*)0x023ff804) = chipID;					// Command10CardID
+		*((u32*)0x023ffc00) = chipID;					// 3rd chip ID
+		*((u16*)0x023ff808) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
+		*((u16*)0x023ff80a) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+		*((u16*)0x023ffc40) = 0x1;						// Booted from card -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+		return;
+	}
 
     // Set memory values expected by loaded NDS
     // from NitroHax, thanks to Chism
@@ -709,9 +729,7 @@ int arm7_main(void) {
 
 	if (isSdk5(moduleParams)) {
 		const char* romTid = getRomTid(ndsHeader);
-		if (ceCached && (ndsHeader->unitCode == 0)
-		&& (strncmp(romTid, "BO5", 3) == 0))			// Golden Sun: Dark Dawn
-		{
+		if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
 			if(ce9Location) {
 				memcpy((u32*)ce9Location, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);

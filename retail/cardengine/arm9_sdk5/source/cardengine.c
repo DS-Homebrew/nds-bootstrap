@@ -61,6 +61,7 @@ static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 
 static bool flagsSet = false;
+static bool isGSDD = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u8 dma = 4;
@@ -130,6 +131,18 @@ static void waitForArm7(void) {
         }
     }
 }
+
+static void accessExtRam(bool yes) {
+	if (!isGSDD) return;
+	if (yes) {
+		REG_IME = 0;	// Disable all IRQs to prevent crashing when accessing extra RAM
+		REG_SCFG_EXT = 0x8300C000;
+	} else {
+		REG_IME = 1;	// Re-enable all IRQs when done accessing extra RAM
+		REG_SCFG_EXT = 0x83000000;
+	}
+}
+
 static void clearIcache (void) {
       // Seems to have no effect
       // disable interrupt
@@ -201,17 +214,17 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				buffer = getCacheAddress(slot);
 
-				//REG_IME = 0;
+				accessExtRam(true);
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = readSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
-                
+
 				waitForArm7();
 
-				//REG_IME = 1;
+				accessExtRam(false);
 			}
 
 			updateDescriptor(slot, sector);	
@@ -235,6 +248,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			// -------------------------------------*/
 			#endif
 
+			accessExtRam(true);
             if (isDma) {
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
@@ -245,7 +259,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
     			// Copy directly
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
             }
-            
+			accessExtRam(false);
+
 			len = len - len2;
 			if (len > 0) {
 				src = src + len2;
@@ -255,18 +270,18 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	//}
-    
-    if(strncmp(getRomTid(ndsHeader), "BO5", 3) == 0){ // golden sun
+	
+    if (isGSDD) {
 	   cacheFlush(); 
 	}
 
-	
 	return 0;
 }
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	//u32 commandRead;
 	while (len > 0) {
+		accessExtRam(true);
 		if (isDma) {
             // Copy via dma
   			dmaCopyWordsAsynch(dma, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
@@ -291,6 +306,8 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 			// Copy directly
 			tonccpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
 		}
+		accessExtRam(false);
+
 		len = len - len;
 		if (len > 0) {
 			src = src + len;
@@ -511,7 +528,9 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
 		}
-		
+
+		isGSDD = (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0);
+
 		flagsSet = true;
 	}
 

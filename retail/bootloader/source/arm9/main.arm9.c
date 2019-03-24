@@ -44,6 +44,7 @@
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
+bool isGSDD = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -295,6 +296,8 @@ void arm9_main(void) {
 
 	if (dsiModeConfirmed) {
 		REG_SCFG_EXT = 0x8307F100;
+	} else if (isGSDD) {
+		REG_SCFG_EXT = 0x83000000;
 	} else {
 		REG_SCFG_EXT = 0x8300C000;
 		//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
