@@ -708,7 +708,10 @@ int arm7_main(void) {
 	//
 
 	if (isSdk5(moduleParams)) {
-		if (ceCached && ndsHeader->unitCode == 0) {
+		const char* romTid = getRomTid(ndsHeader);
+		if (ceCached && (ndsHeader->unitCode == 0)
+		&& (strncmp(romTid, "BO5", 3) == 0))			// Golden Sun: Dark Dawn
+		{
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
 			if(ce9Location) {
 				memcpy((u32*)ce9Location, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
