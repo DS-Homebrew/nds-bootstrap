@@ -350,7 +350,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = *heapPointer + 0x3000; // shrink heap by 12 KB
+	*heapPointer = *heapPointer + (isSdk5(moduleParams) ? 0x3000 : 0x2000); // shrink heap by 8 KB (or for SDK5, 12 KB)
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
