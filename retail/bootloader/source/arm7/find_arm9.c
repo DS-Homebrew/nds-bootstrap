@@ -107,10 +107,11 @@ static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C0
 static const u16 sleepConstantValue = {0x82EA}; 
 
 // Init Heap
-static const initHeapEndSignature[2]        = {0x27FF000, 0x37F8000};
-static const initHeapEndFuncSignature[1]     = {0xE12FFF1E};      
-static const initHeapEndFuncSignatureAlt[1]     = {0xE8BD8008};      
-static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};      
+static const u32 initHeapEndSignature1[2]         = {0x27FF000, 0x37F8000};
+static const u32 initHeapEndSignature5[2]         = {0x2FFF000, 0x37F8000};
+static const u32 initHeapEndFuncSignature[1]      = {0xE12FFF1E};      
+static const u32 initHeapEndFuncSignatureAlt[1]   = {0xE8BD8008};      
+static const u16 initHeapEndFuncSignatureThumb[1] = {0xBD08};      
 
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
@@ -1191,6 +1192,11 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointerOffset:\n");
     
+	const u32* initHeapEndSignature = initHeapEndSignature1;
+	if (moduleParams->sdk_version > 0x5000000) {
+		initHeapEndSignature = initHeapEndSignature5;
+	}
+
     u32* initHeapEnd = findOffset(
         (u32*)ndsHeader->arm9destination, 0x00300000,
 		initHeapEndSignature, 2
