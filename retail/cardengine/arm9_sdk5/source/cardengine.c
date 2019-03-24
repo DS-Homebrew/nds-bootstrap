@@ -138,8 +138,8 @@ static void accessExtRam(bool yes) {
 		REG_IME = 0;	// Disable all IRQs to prevent crashing when accessing extra RAM
 		REG_SCFG_EXT = 0x8300C000;
 	} else {
-		REG_IME = 1;	// Re-enable all IRQs when done accessing extra RAM
 		REG_SCFG_EXT = 0x83000000;
+        REG_IME = 1;	// Re-enable all IRQs when done accessing extra RAM
 	}
 }
 
