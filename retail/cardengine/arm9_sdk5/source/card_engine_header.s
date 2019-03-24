@@ -183,6 +183,24 @@ cardReadRef4:
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	bx      lr
+@	stmfd   sp!, {lr}
+@	sub     sp, sp, #4
+@	ldr		r6, cardPullOutRef
+@    ldr     r7, ce9location5
+@    add     r6, r6, r7
+    
+@	bl		_blx_r6_stub_card_pull_out
+
+@	add     sp, sp, #4
+@	ldmfd   sp!, {lr}
+@	bx      lr
+@_blx_r6_stub_card_pull_out:
+@	bx	r6
+@.pool
+@ce9location5:
+@.word   ce9
+@cardPullOutRef:
+@.word   cardPullOut-ce9
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -195,8 +213,8 @@ thumb_card_id_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
 
-	ldr		r6, cardReadRef5
-    ldr     r7, ce9location5
+	ldr		r6, cardReadRef6
+    ldr     r7, ce9location6
     add     r6, r6, r7
 
 	bl		_blx_r6_stub_card_id_thumb	
@@ -208,9 +226,9 @@ _blx_r6_stub_card_id_thumb:
 	bx	r6	
 .pool
 .align	4
-ce9location5:
+ce9location6:
 .word   ce9
-cardReadRef5:
+cardReadRef6:
 .word   cardId-ce9 
 @---------------------------------------------------------------------------------
 
@@ -219,8 +237,8 @@ thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
     
-	ldr		r6, cardReadRef6
-    ldr     r7, ce9location6
+	ldr		r6, cardReadRef7
+    ldr     r7, ce9location7
     add     r6, r6, r7
 
 	bl		_blx_r6_stub_thumb_card_read_dma	
@@ -232,9 +250,9 @@ _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
 .align	4
-ce9location6:
+ce9location7:
 .word   ce9
-cardReadRef6:
+cardReadRef7:
 .word   cardReadDma-ce9 		
 @---------------------------------------------------------------------------------
 
