@@ -49,15 +49,6 @@
 
 extern cardengineArm9* volatile ce9;
 
-extern u32 ROMinRAM;
-extern u32 dsiMode;
-extern u32 enableExceptionHandler;
-extern u32 consoleModel;
-
-extern u32 needFlushDCCache;
-
-extern volatile int (*readCachedRef)(u32*); // This pointer is not at the end of the table but at the handler pointer corresponding to the current irq
-
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
@@ -504,19 +495,19 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		//if (isGameLaggy(ndsHeader)) {
-			if (consoleModel > 0) {
+			if (ce9->consoleModel > 0) {
 				// SDK 5
 				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 				cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
 			}
 			//readSize = _32KB_READ_SIZE;
-		/*} else if (consoleModel > 0) {
+		/*} else if (ce9->consoleModel > 0) {
 			// SDK 5
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			cacheSlots = dev_CACHE_SLOTS_SDK5;
 		}*/
 
-		if (enableExceptionHandler) {
+		if (ce9->enableExceptionHandler) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
 		}
@@ -550,5 +541,5 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	return ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
+	return ce9->ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
 }
