@@ -529,7 +529,9 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			//setExceptionHandler(user_exception);
 		}
 
-		isGSDD = (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0);
+	   isGSDD = (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)			// Golden Sun: Dark Dawn
+        || (strncmp(getRomTid(ndsHeader), "TBR", 3) == 0)			    // Disney Pixar Brave 
+        ;
 
 		flagsSet = true;
 	}

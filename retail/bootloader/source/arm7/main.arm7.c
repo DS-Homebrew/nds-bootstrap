@@ -384,7 +384,10 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
-	isGSDD = (strncmp(romTid, "BO5", 3) == 0);			// Golden Sun: Dark Dawn
+	isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
+        || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
+        ;
+    
 
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
@@ -849,7 +852,12 @@ int arm7_main(void) {
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
-                           
+    
+    if (isGSDD) {
+    	// WRAM-A slot 0 mapped to ARM9
+	   *(vu32*)REG_MBK1 = 0x8085898D; // Same as DSiWare
+	}
+                               
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);
 	startBinary_ARM7(arm9StartAddress);

@@ -202,9 +202,6 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #define CLUSTER_CACHE      0x3700000 // WRAM C+B
 #define CLUSTER_CACHE_SIZE 0x80000 // 512K
 
-#define ONE_CACHE  0x37C5000 // WRAM A
-#define ONE_CACHE_SIZE 0x10000 // 64K
-
 static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 
 
