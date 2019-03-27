@@ -246,7 +246,9 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (moduleParams->sdk_version > 0x5000000) {
+    const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version > 0x5000000 && strncmp(romTid, "BO5", 3) != 0) {
 		return;
 	}
 
