@@ -854,8 +854,7 @@ int arm7_main(void) {
 	}
     
     if (isGSDD) {
-    	// WRAM-A slot 0 mapped to ARM9
-	   *(vu32*)REG_MBK1 = 0x8085898D; // Same as DSiWare
+	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
 	}
                                
 	nocashMessage("Starting the NDS file...");
