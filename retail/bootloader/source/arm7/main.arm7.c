@@ -732,7 +732,15 @@ int arm7_main(void) {
 
 	if (isSdk5(moduleParams)) {
 		const char* romTid = getRomTid(ndsHeader);
-		if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
+        if(isGSDD) {
+			ce9Location = CARDENGINE_ARM9_GSDD_LOCATION;
+			memcpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
+            relocate_ce9(CARDENGINE_ARM9_SDK5_LOCATION,ce9Location,cardengine_arm9_sdk5_reloc_bin_size);
+        } else {
+			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
+			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+		}
+		/*if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
 			if(ce9Location) {
 				memcpy((u32*)ce9Location, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
@@ -740,7 +748,7 @@ int arm7_main(void) {
 			} else {
 				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 				memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
-			}
+			}*/
 		} else {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
