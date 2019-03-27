@@ -67,6 +67,7 @@
 #include "cardengine_arm9_reloc_bin.h"
 #include "cardengine_arm9_sdk5_bin.h"
 #include "cardengine_arm9_sdk5_reloc_bin.h"
+#include "cardengine_arm9_sdk5_gsdd_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -734,8 +735,7 @@ int arm7_main(void) {
 		const char* romTid = getRomTid(ndsHeader);
         if(isGSDD) {
 			ce9Location = CARDENGINE_ARM9_GSDD_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
-            relocate_ce9(CARDENGINE_ARM9_SDK5_LOCATION,ce9Location,cardengine_arm9_sdk5_reloc_bin_size);
+			memcpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_gsdd_bin, cardengine_arm9_sdk5_gsdd_bin_size);
         } else {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);

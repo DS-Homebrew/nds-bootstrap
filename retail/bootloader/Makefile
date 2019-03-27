@@ -61,7 +61,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 #BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-BINFILES	:=	cardengine_arm7.bin cardengine_arm9.bin cardengine_arm9_reloc.bin cardengine_arm9_sdk5.bin cardengine_arm9_sdk5_reloc.bin
+BINFILES	:=	cardengine_arm7.bin cardengine_arm9.bin cardengine_arm9_reloc.bin cardengine_arm9_sdk5.bin cardengine_arm9_sdk5_reloc.bin cardengine_arm9_sdk5_gsdd.bin
  
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
@@ -127,6 +127,10 @@ cardengine_arm9_sdk5.bin.o : $(CURDIR)/../../data/cardengine_arm9_sdk5.bin
 	$(bin2o)
 
 cardengine_arm9_sdk5_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_sdk5_reloc.bin
+	@echo $(notdir $<)
+	$(bin2o)
+
+cardengine_arm9_sdk5_gsdd.bin.o : $(CURDIR)/../../data/cardengine_arm9_sdk5_gsdd.bin
 	@echo $(notdir $<)
 	$(bin2o)
 
