@@ -748,11 +748,11 @@ int arm7_main(void) {
 			} else {
 				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 				memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
-			}*/
+			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
-		}
+		}*/
 	} else if (ceCached) {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
