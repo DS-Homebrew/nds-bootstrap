@@ -43,7 +43,9 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-//extern void user_exception(void);
+#ifdef GSDD
+extern void user_exception(void);
+#endif;
 
 //extern vu32* volatile cacheStruct;
 
@@ -271,9 +273,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	//}
 	
-    if (isGSDD) {
+    /*if (isGSDD) {
 	   cacheFlush(); 
-	}
+	}*/
 
 	return 0;
 }
@@ -523,6 +525,11 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			cacheSlots = dev_CACHE_SLOTS_SDK5;
 		}*/
+        
+        #ifdef GSDD
+			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+			setExceptionHandler(user_exception);
+        #endif
 
 		if (ce9->enableExceptionHandler) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;

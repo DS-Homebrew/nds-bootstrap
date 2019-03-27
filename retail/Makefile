@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_reloc cardengine_arm9_sdk5 cardengine_arm9_sdk5_reloc
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_reloc cardengine_arm9_sdk5 cardengine_arm9_sdk5_reloc cardengine_arm9_sdk5_gsdd
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -184,6 +184,10 @@ cardengine_arm9_sdk5: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9_sdk5_reloc: $(DATA)
 	@$(MAKE) -C cardengine/arm9_sdk5_reloc
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_sdk5_gsdd: $(DATA)
+	@$(MAKE) -C cardengine/arm9_sdk5_gsdd
     
 #---------------------------------------------------------------------------------
 #$(BUILD):
@@ -201,6 +205,7 @@ clean:
 	@$(MAKE) -C cardengine/arm9_reloc clean
 	@$(MAKE) -C cardengine/arm9_sdk5 clean
 	@$(MAKE) -C cardengine/arm9_sdk5_reloc clean
+	@$(MAKE) -C cardengine/arm9_sdk5_gsdd clean
 	@$(MAKE) -C bootloader clean
 		
 $(DATA):
