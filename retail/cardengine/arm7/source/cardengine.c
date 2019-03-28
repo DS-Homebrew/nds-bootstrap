@@ -155,10 +155,10 @@ static void initialize(void) {
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0
+	/*if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0
         || strncmp(getRomTid(ndsHeader), "TBR", 3) == 0) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
-	}
+	}*/
 
 	initialized = true;
 }

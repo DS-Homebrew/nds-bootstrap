@@ -294,11 +294,11 @@ void arm9_main(void) {
 		}
 	}
 
+	/*if (isGSDD) {       
+    	REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+	}*/
 	if (dsiModeConfirmed) {
 		REG_SCFG_EXT = 0x8307F100;
-	} else if (isGSDD) {       
-    	REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-		REG_SCFG_EXT = 0x83000000;
 	} else {
 		REG_SCFG_EXT = 0x8300C000;
 		//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller

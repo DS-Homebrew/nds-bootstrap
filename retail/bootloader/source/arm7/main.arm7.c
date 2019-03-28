@@ -385,9 +385,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
-	isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
+	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
-        ;
+        ;*/
     
 
 	// Load binaries into memory
@@ -435,9 +435,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 
 static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? ARM9_START_ADDRESS_SDK5_LOCATION : ARM9_START_ADDRESS_LOCATION);
-	if (isGSDD) {
+	/*if (isGSDD) {
 		arm9StartAddress = (vu32*)(ARM9_START_ADDRESS_4MB_LOCATION);
-	}
+	}*/
 
 	// Store for later
 	*arm9StartAddress = (vu32)ndsHeader->arm9executeAddress;
@@ -450,9 +450,9 @@ static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t*
 
 static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	if (isGSDD) {
+	/*if (isGSDD) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
-	}
+	}*/
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
@@ -597,7 +597,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
     // figure out what is 0x027ffc10, somehow related to cardId check
     //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
 
-	if (isGSDD) {
+	/*if (isGSDD) {
 		// Set memory values expected by loaded NDS
 		// from NitroHax, thanks to Chism
 		*((u32*)0x023ff800) = chipID;					// CurrentCardID
@@ -610,15 +610,18 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*((u16*)0x023ffc0a) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 		*((u16*)0x023ffc40) = 0x1;						// Booted from card -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 		return;
-	}
+	}*/
 
     // Set memory values expected by loaded NDS
     // from NitroHax, thanks to Chism
 	*((u32*)(isSdk5(moduleParams) ? 0x02fff800 : 0x027ff800)) = chipID;					// CurrentCardID
 	*((u32*)(isSdk5(moduleParams) ? 0x02fff804 : 0x027ff804)) = chipID;					// Command10CardID
 	*((u32*)(isSdk5(moduleParams) ? 0x02fffc00 : 0x027ffc00)) = chipID;					// 3rd chip ID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc04 : 0x027ffc04)) = chipID;					// 4th chip ID
 	*((u16*)(isSdk5(moduleParams) ? 0x02fff808 : 0x027ff808)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fff80a : 0x027ff80a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Booted from card -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }
 
@@ -736,13 +739,13 @@ int arm7_main(void) {
 
 	if (isSdk5(moduleParams)) {
 		const char* romTid = getRomTid(ndsHeader);
-        if(isGSDD) {
+        /*if(isGSDD) {
 			ce9Location = CARDENGINE_ARM9_GSDD_LOCATION;
 			memcpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_gsdd_bin, cardengine_arm9_sdk5_gsdd_bin_size);
-        } else {
+        } else {*/
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
-		}
+		//}
 		/*if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
 			if(ce9Location) {
@@ -860,14 +863,14 @@ int arm7_main(void) {
 
 	arm9_boostVram = boostVram;
 
+    /*if (isGSDD) {
+	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
+	}*/
+
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
-    
-    if (isGSDD) {
-	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
-	}
-                               
+
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);
 	startBinary_ARM7(arm9StartAddress);
