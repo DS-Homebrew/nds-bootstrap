@@ -592,7 +592,10 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32 chipID = getChipId(ndsHeader, moduleParams);
-    
+    dbg_printf("chipID: ");
+    dbg_hexa(chipID);
+    dbg_printf("\n"); 
+
     // TODO
     // figure out what is 0x027ffc10, somehow related to cardId check
     //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
