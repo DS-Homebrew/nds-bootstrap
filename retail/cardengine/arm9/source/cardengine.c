@@ -445,22 +445,12 @@ Existing/known ROM IDs are:
   C2h,F0h,00h,90h 3DS Macronix 4GB ROM CTR-P-ABRJ Biohazard Revelations
   FFh,FFh,FFh,FFh None (no cartridge inserted)
 */
-bool cardInitialized = false;
 u32 cardId(void) {
 	#ifdef DEBUG	
 	dbg_printf("\ncardId\n");
 	#endif
     
-    u32 cardid = getChipId(ndsHeader, ce9->moduleParams);
-    
-    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
-    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x80FF80E0; // golden sun
-    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xFF000000; // golden sun
-    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x000000FF; // golden sun
-
-    cardInitialized= true;
-    
-	return cardid;
+	return *(u32*)(0x027ff800);					// CurrentCardID
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
