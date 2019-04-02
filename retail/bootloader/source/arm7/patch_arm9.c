@@ -186,7 +186,8 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
-		memcpy(cardIdStartOffset, cardIdPatch, 0x40);
+		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
+		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
 
@@ -403,18 +404,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *thumbReadCardLocation = current_location;
     
-    u32* armCardIdLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armCardIdLocation) {
-		return;
-	}
-    dbg_printf("armCardIdLocation ");
-	dbg_hexa((u32)armCardIdLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*armCardIdLocation);
-    dbg_printf("\n\n");
-    
-    *armCardIdLocation = current_location;
-    
     u32* armReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadCardLocation) {
 		return;
@@ -426,18 +415,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *armReadDmaCardLocation = current_location;
-    
-    u32* thumbCardIdLocation = findOffset(current_location, size, location_sig, 1);
-	if (!thumbCardIdLocation) {
-		return;
-	}
-    dbg_printf("thumbCardIdLocation ");
-	dbg_hexa((u32)thumbCardIdLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*thumbCardIdLocation);
-    dbg_printf("\n\n");
-    
-    *thumbCardIdLocation = current_location;
     
     u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadCardLocation) {

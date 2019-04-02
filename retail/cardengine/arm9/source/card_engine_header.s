@@ -122,24 +122,10 @@ cardReadRef2:
 @---------------------------------------------------------------------------------
 card_id_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
-
-	ldr		r6, cardReadRef3
-    ldr     r7, ce9location3
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_card_id	
-    
-
-	ldmfd   sp!, {r1-r11,pc}
+	ldr r0, cardIdData
 	bx      lr
-_blx_r6_stub_card_id:
-	bx	r6	
-.pool
-ce9location3:
-.word   ce9
-cardReadRef3:
-.word   cardId-ce9 
+cardIdData:
+.word  0xC2FF01C0
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -198,25 +184,10 @@ card_pull:
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, cardReadRef6
-    ldr     r7, ce9location6
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_card_id_thumb	
-    
-
-    pop	{r1-r7, pc}
+	ldr r0, cardIdDataT
 	bx      lr
-_blx_r6_stub_card_id_thumb:
-	bx	r6	
-.pool
-.align	4
-ce9location6:
-.word   ce9
-cardReadRef6:
-.word   cardId-ce9 
+cardIdDataT:
+.word  0xC2FF01C0
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
