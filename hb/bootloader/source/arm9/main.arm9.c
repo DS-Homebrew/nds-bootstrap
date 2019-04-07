@@ -41,8 +41,6 @@
 #include "common.h"
 #include "loading.h"
 
-extern u32 ramDiskCluster;
-
 extern void arm9_clearCache(void);
 
 //tNDSHeader* ndsHeader = NULL;

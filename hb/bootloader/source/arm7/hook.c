@@ -16,13 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
 #include <nds/debug.h>
 
 #include "hook.h"
 #include "common.h"
+#include "tonccpy.h"
 #include "sdengine_bin.h"
 
 extern vu32* myMemUncached(vu32*);
@@ -251,40 +251,10 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		nocashMessage("ACCEL_IPC_OK");
 	}
 
-	memcpy (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
+	tonccpy (sdEngineLocation, (u32*)sdengine_bin, sdengine_bin_size);
 
 	sdEngineLocation[1] = (u32)myMemUncached(wordCommandAddr);
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
-}
-
-void patchMemoryAddresses(const tNDSHeader* ndsHeader) {
-	u32* top9=(u32*)ndsHeader->arm9destination;
-	u32* bottom9=(u32*)(ndsHeader->arm9destination+ndsHeader->arm9binarySize);
-	for(u32* i = top9; i < bottom9; i++)
-	{
-		if(*i >= 0x027FF000 && *i < 0x02800000)
-		{
-			*i -= 0x400000;
-		}
-		/*if(*i >= 0x02FFF000 && *i < 0x03000000)
-		{
-			*i -= 0xC00000;
-		}*/
-	}
-
-	u32* top7=(u32*)ndsHeader->arm7destination;
-	u32* bottom7=(u32*)(ndsHeader->arm7destination+ndsHeader->arm7binarySize);
-	for(u32* i = top7; i < bottom7; i++)
-	{
-		if(*i >= 0x027FF000 && *i < 0x02800000)
-		{
-			*i -= 0x400000;
-		}
-		/*if(*i >= 0x02FFF000 && *i < 0x03000000)
-		{
-			*i -= 0xC00000;
-		}*/
-	}
 }

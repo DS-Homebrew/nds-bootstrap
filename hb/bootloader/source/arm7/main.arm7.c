@@ -357,7 +357,7 @@ int arm7_main (void) {
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
-	if (ramDiskCluster != 0) {
+	if (ramDiskCluster != 0 && ramDiskSize > 0) {
 		arm9_ramDiskCluster = ramDiskCluster;
 		if (ramDiskSize < 0x01C01000) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
