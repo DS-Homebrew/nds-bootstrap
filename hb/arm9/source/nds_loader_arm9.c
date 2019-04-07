@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include <fat.h>
 
+#include "tonccpy.h"
+
 #include "load_bin.h"
 
 #ifndef _NO_BOOTSTUB_
@@ -290,8 +292,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
-	vramcpy (LCDC_BANK_C, loader, loaderSize);
-	vramcpy (LCDC_BANK_D, imgTemplateBuffer, sizeof(imgTemplateBuffer));
+	tonccpy (LCDC_BANK_C, loader, loaderSize);
+	tonccpy (LCDC_BANK_D, imgTemplateBuffer, sizeof(imgTemplateBuffer));
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;

@@ -50,6 +50,7 @@ Helpful information:
 #define ARM7
 #include <nds/arm7/audio.h>
 
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
 #include "hook.h"
@@ -345,16 +346,10 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
-	dldiAtArm7 = checkArm7DLDI((u8*)((u32*)NDS_HEADER)[0x0E], ((u32*)NDS_HEADER)[0x0F]);
-
-	if (dldiAtArm7 && ramDiskCluster != 0) {
-		patchMemoryAddresses((tNDSHeader*)NDS_HEADER);
-	}
-
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[dldiAtArm7 ? 0x0E : 0x0A], ((u32*)NDS_HEADER)[dldiAtArm7 ? 0x0F : 0x0B], (ramDiskCluster != 0));
+		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 	}
 
 	NTR_BIOS();
@@ -367,7 +362,7 @@ int arm7_main (void) {
 		if (ramDiskSize < 0x01C01000) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
-				memcpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, 0xEA00);
+				tonccpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, 0xEA00);
 				if (romFileType == 1) {
 					*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = ramDiskSize;
 				} else if (romFileType == 0) {
@@ -378,8 +373,7 @@ int arm7_main (void) {
 				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
 			}
 		}
-		REG_SCFG_EXT = 0x12A03000;
-	} else if (!dldiAtArm7) {
+	} else {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);

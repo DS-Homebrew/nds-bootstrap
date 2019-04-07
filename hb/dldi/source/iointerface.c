@@ -255,7 +255,7 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {
 	//nocashMessage("startup");
-	isArm7 = (dldiDataOffset > (vu32*)0x02380000);
+	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
 
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
 

@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <string.h> // memcpy
 #include <nds/fifomessages.h>
 #include <nds/fifocommon.h>
 #include <nds/ipc.h>
@@ -23,6 +22,7 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
+#include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "sdmmcEngine.h"
 #include "i2c.h"
@@ -48,14 +48,14 @@ static int cardEgnineCommandMutex = 0;
 static int softResetTimer = 0;
 
 static void unlaunchSetHiyaBoot(void) {
-	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) |= BIT(0);		// Load the title at 2000838h
 	*(u32*)(0x02000810) |= BIT(1);		// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	memset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	for (int i = 0; i < 14; i++) {
 		*(u8*)(0x02000838+i2) = hiyaNdsPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
@@ -185,7 +185,7 @@ void myIrqHandler(void) {
 			//if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			//}
-			memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 		}
@@ -198,7 +198,7 @@ void myIrqHandler(void) {
 		//if (consoleModel < 2) {
 			unlaunchSetHiyaBoot();
 		//}
-		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 	}
