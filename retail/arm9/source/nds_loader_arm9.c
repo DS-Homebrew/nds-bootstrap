@@ -183,7 +183,7 @@ int loadArgs(int argc, const char** argv) {
 int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("loadCheatData");
 			
-	cardengineArm7* ce7 = getCardengineArm7(lc0);
+	cardengineArm7* ce7 = (cardengineArm7*)0x027E0000;
 	nocashMessage("ce7");
 	nocashMessage(tohex((u32)ce7));
 
