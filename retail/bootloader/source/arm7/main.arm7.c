@@ -49,6 +49,7 @@
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "nds_header.h"
 #include "module_params.h"
@@ -62,11 +63,9 @@
 #include "locations.h"
 #include "loading_screen.h"
 
-#include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
 #include "cardengine_arm9_reloc_bin.h"
 #include "cardengine_arm9_sdk5_bin.h"
-#include "cardengine_arm9_sdk5_reloc_bin.h"
 #include "cardengine_arm9_sdk5_gsdd_bin.h"
 
 //#define memcpy __builtin_memcpy
@@ -159,7 +158,11 @@ static void resetMemory_ARM7(void) {
 		TIMER_DATA(i) = 0;
 	}
 
-	arm7clearRAM();
+	arm7clearRAM();								// clear exclusive IWRAM
+	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
+	toncset((u32*)0x02400000, 0, 0x3E0000);	// clear other part of EWRAM - except before ce7 binary and loading screen frames
+	toncset((u32*)0x027F0000, 0, 0x10000);
+	toncset((u32*)0x02D00000, 0, 0x300000);	// clear part of EWRAM - after loading screen frames
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -741,7 +744,8 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
+	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)0x027E0000, 0x10000);
+	toncset((u32*)0x027E0000, 0, 0x10000);
 	increaseLoadBarLength();
 
 	//
@@ -752,23 +756,23 @@ int arm7_main(void) {
 		const char* romTid = getRomTid(ndsHeader);
         /*if(isGSDD) {
 			ce9Location = CARDENGINE_ARM9_GSDD_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_gsdd_bin, cardengine_arm9_sdk5_gsdd_bin_size);
+			tonccpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_gsdd_bin, cardengine_arm9_sdk5_gsdd_bin_size);
         } else {*/
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 		//}
 		/*if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
 			if(ce9Location) {
-				memcpy((u32*)ce9Location, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
+				tonccpy((u32*)ce9Location, cardengine_arm9_sdk5_reloc_bin, cardengine_arm9_sdk5_reloc_bin_size);
 				relocate_ce9(CARDENGINE_ARM9_SDK5_LOCATION,ce9Location,cardengine_arm9_sdk5_reloc_bin_size);
 			} else {
 				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-				memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			memcpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
 		}*/
 	} else if (ceCached) {
 		const char* romTid = getRomTid(ndsHeader);
@@ -777,20 +781,20 @@ int arm7_main(void) {
 		)
 		{
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-            memcpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
+            tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
             relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
 		} else
         ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
         if(ce9Location) {
-            	memcpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
+            	tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
                 relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
         } else {         
     		ce9Location = CARDENGINE_ARM9_LOCATION;
-    		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
         }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
-		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
 	increaseLoadBarLength();
 

@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_reloc cardengine_arm9_sdk5 cardengine_arm9_sdk5_reloc cardengine_arm9_sdk5_gsdd
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_reloc cardengine_arm9_sdk5 cardengine_arm9_sdk5_gsdd
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		

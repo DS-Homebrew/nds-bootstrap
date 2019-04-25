@@ -45,34 +45,6 @@ clear_IWRAM_loop:
 	cmp	r8, r9
 	blt	clear_IWRAM_loop
 
-	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	mov	r8, #0x02000000
-
-	mov	r9, #0x02400000
-	sub	r9, #0x0000C000
-clear_EWRAM_loop:
-	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
-	cmp	r8, r9
-	blt	clear_EWRAM_loop
-
-	// clear other part of EWRAM - except before loading screen frames
-	mov	r8, #0x02400000
-
-	mov	r9, #0x02800000
-clear_EWRAM2_loop:
-	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
-	cmp	r8, r9
-	blt	clear_EWRAM2_loop
-
-	// clear part of EWRAM - after loading screen frames
-	mov	r8, #0x02D00000
-
-	mov	r9, #0x03000000
-clear_EWRAM3_loop:
-	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
-	cmp	r8, r9
-	blt	clear_EWRAM3_loop
-
 	pop	{r0-r9}
 
 	bx	lr
