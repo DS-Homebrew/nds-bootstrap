@@ -204,8 +204,8 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 
 	irqDisable(IRQ_ALL);
 
-	// Direct CPU access to VRAM bank C
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	// Direct CPU access to VRAM bank D
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Load the loader into the correct address
 	memcpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
@@ -258,7 +258,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
 	
 	// Reset into a passme loop
 	nocashMessage("Reset into a passme loop");
@@ -272,7 +272,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, co
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(0x06000000);	
+	resetARM7(0x06020000);	
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");
