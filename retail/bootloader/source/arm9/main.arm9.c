@@ -47,6 +47,7 @@ tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
+bool armStartConfirmed = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -296,6 +297,13 @@ void arm9_main(void) {
 		}
 	}
 
+	if (displayScreen) {
+		// Revert values
+		VRAM_A_CR = 0x80;
+		dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
+		REG_POWERCNT = 0x820F;
+	}
+
 	/*if (isGSDD) {       
     	REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
 	}*/
@@ -312,8 +320,11 @@ void arm9_main(void) {
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;
+
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
+
+	while (!armStartConfirmed);
 
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
