@@ -26,6 +26,10 @@
 #include "common.h"
 #include "debug_file.h"
 
+u32 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched
+
+patchOffsetCacheContents patchOffsetCache;
+
 extern bool logging;
 
 void patchBinary(const tNDSHeader* ndsHeader) {
@@ -192,6 +196,24 @@ u32 patchCardNds(
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
+
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.a9IsThumb = 0;
+		patchOffsetCache.cardReadOffset = 0;
+		patchOffsetCache.cardPullOutOffset = 0;
+		patchOffsetCache.cacheFlushOffset = 0;
+		patchOffsetCache.cardIdOffset = 0;
+		patchOffsetCache.cardReadDmaOffset = 0;
+		patchOffsetCache.sleepOffset = 0;
+		patchOffsetCache.randomPatchOffset = 0;
+		patchOffsetCache.randomPatchSecondOffset = 0;
+		patchOffsetCache.a7IsThumb = 0;
+		patchOffsetCache.swi12Offset = 0;
+		patchOffsetCache.swiGetPitchTableOffset = 0;
+		patchOffsetCache.sleepPatchOffset = 0;
+		patchOffsetCache.a7IrqHandlerOffset = 0;
+	}
 
 	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {

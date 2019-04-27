@@ -83,6 +83,7 @@ extern u32 initDisc;
 //extern u32 dsiSD;
 extern u32 saveFileCluster;
 extern u32 saveSize;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -693,6 +694,11 @@ int arm7_main(void) {
 		buildFatTableCache(savFile, 0);
 	}
 
+	// File containing cached patch offsets
+	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
+	fileRead(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+
 	int errorCode;
 
 	if (REG_SCFG_EXT == 0) {
@@ -846,6 +852,9 @@ int arm7_main(void) {
 		errorOutput();
 	}
 	increaseLoadBarLength();
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion) {
+		fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	}
 
 	//
 	// 7 dots

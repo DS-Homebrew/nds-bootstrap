@@ -1,12 +1,14 @@
 #include <stdlib.h> // strtol
+#include <unistd.h>
 //#include <stdio.h>
-//#include <nds.h>
+#include <nds.h>
+#include <string>
 #include <string.h>
 #include <limits.h> // PATH_MAX
-#include <nds/ndstypes.h>
+/*#include <nds/ndstypes.h>
 #include <nds/fifocommon.h>
 #include <nds/arm9/console.h>
-#include <nds/debug.h>
+#include <nds/debug.h>*/
 #include <fat.h>
 #include "minIni.h"
 #include "hex.h"
@@ -29,6 +31,8 @@ static off_t getSaveSize(const char* path) {
 	}
 	return fsize;
 }
+
+extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 
 static inline bool match(const char* section, const char* s, const char* key, const char* k) {
 	return (strcmp(section, s) == 0 && strcmp(key, k) == 0);
@@ -140,7 +144,7 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CHEAT_DATA")) {
 		// Cheat data
-		conf->cheat_data = malloc(CHEAT_DATA_MAX_SIZE);
+		conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
 		conf->cheat_data_len = 0;
 		char* str = strdup(value);
 		char* cheat = strtok(str, " ");
@@ -232,6 +236,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	nocashMessage("fatInitDefault");
 	
 	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
+	mkdir("sd:/_nds/nds-bootstrap", 0777);
+	mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 
 	nitroFSInit(bootstrapPath);
 	
@@ -281,7 +287,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->saveSize = getSaveSize(conf->savPath);
 
 	conf->argc = 0;
-	conf->argv = malloc(ARG_MAX);
+	conf->argv = (const char**)malloc(ARG_MAX);
 	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
 		FILE* argfile = fopen(conf->ndsPath, "rb");
 
@@ -314,6 +320,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->argc = 1; //++conf->argc;
 	}
 	realloc(conf->argv, conf->argc*sizeof(const char*));
+	
+	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
+	const size_t last_slash_idx = romFilename.find_last_of("/");
+	if (std::string::npos != last_slash_idx)
+	{
+		romFilename.erase(0, last_slash_idx + 1);
+	}
+
+	std::string patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	
+	if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
+		FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath.c_str(), "wb");
+		char buffer[0x200] = {0};
+		fwrite(buffer, 1, sizeof(buffer), patchOffsetCacheFile);
+		fclose(patchOffsetCacheFile);
+	}
 
 	return 0;
 }

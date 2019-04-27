@@ -20,17 +20,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <string.h>
 #include <stdarg.h>
 #include <limits.h> // PATH_MAX
 #include <unistd.h>
 #include <sys/stat.h>
-#include <nds/ndstypes.h>
+#include <nds.h>
+/*#include <nds/ndstypes.h>
 #include <nds/arm9/input.h>
 #include <nds/fifocommon.h>
 #include <nds/arm9/console.h>
 #include <nds/system.h>
-#include <nds/debug.h>
+#include <nds/debug.h>*/
 
 #include "configuration.h"
 #include "nds_loader_arm9.h"
@@ -86,6 +88,15 @@ static void dopause(void) {
 		swiWaitForVBlank();
 	}
 	scanKeys();
+}
+
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
 }
 
 static void getSFCG_ARM9(void) {
@@ -334,7 +345,9 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stPatchOffsetCache;
 	u32 clusterSav = 0;
+	u32 clusterPatchOffsetCache = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	//const char* args[1];
@@ -347,6 +360,19 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
+	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
+	const size_t last_slash_idx = romFilename.find_last_of("/");
+	if (std::string::npos != last_slash_idx)
+	{
+		romFilename.erase(0, last_slash_idx + 1);
+	}
+
+	std::string patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+
+	if (stat(patchOffsetCacheFilePath.c_str(), &stPatchOffsetCache) >= 0) {
+		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
+	}
+
 	if (conf->argc <= 0 || !conf->argv) {
 		// Construct a command line if we weren't supplied with one
 		if (!getcwd(filePath, PATH_MAX)) {
@@ -364,13 +390,13 @@ static int runNdsFile(configuration* conf) {
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, conf);
+	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, clusterPatchOffsetCache, conf);
 
 	return 0;
 }
 
 int main(int argc, char** argv) {
-	configuration* conf = malloc(sizeof(configuration));
+	configuration* conf = (configuration*)malloc(sizeof(configuration));
 	conf->initDisc = true;
 	conf->dldiPatchNds = true;
 

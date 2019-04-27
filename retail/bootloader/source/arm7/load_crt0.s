@@ -31,6 +31,7 @@
 	.global dsiSD
 	.global saveFileCluster
 	.global saveSize
+	.global patchOffsetCacheFileCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -77,7 +78,9 @@ dsiSD:
 saveFileCluster:
 	.word	0x00000000		@ .sav file
 saveSize:
-	.word	0x00000000		@ .sav file sive
+	.word	0x00000000		@ .sav file size
+patchOffsetCacheFileCluster:
+	.word	0x00000000
 language:
 	.word	0x00000000
 dsiMode:

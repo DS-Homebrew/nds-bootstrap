@@ -665,16 +665,16 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
-	patchDownloadplay(ndsHeader);
-  
+	//patchDownloadplay(ndsHeader);
+
     patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
-	
+
 	randomPatch(ndsHeader, moduleParams);
 
 	randomPatch5First(ndsHeader, moduleParams);
-	
+
 	randomPatch5Second(ndsHeader, moduleParams);
-	
+
 	//operaRamPatch(ndsHeader, moduleParams);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);

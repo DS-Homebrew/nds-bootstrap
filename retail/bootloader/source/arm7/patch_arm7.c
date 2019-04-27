@@ -39,24 +39,39 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 }
 
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	// swi 0x12 call
-	u32* swi12Offset = findSwi12Offset(ndsHeader);
-	if (swi12Offset) {
-		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = ce7->patches->swi02;
-		memcpy(swi12Offset, swi12Patch, 0x4);
+	u32* swi12Offset = patchOffsetCache.swi12Offset;
+	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
+	if (!swi12Offset) {
+		swi12Offset = findSwi12Offset(ndsHeader);
+		if (swi12Offset) {
+			patchOffsetCache.swi12Offset = swi12Offset;
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
+		if (swiGetPitchTableOffset) {
+			patchOffsetCache.swiGetPitchTableOffset = swiGetPitchTableOffset;
+		}
 	}
 
-	// swi get pitch table
-	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
-	if (swiGetPitchTableOffset) {
-		// Patch
-		u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+	if (REG_SCFG_ROM != 0x703) {
+		// swi 0x12 call
+		if (swi12Offset) {
+			// Patch to call swi 0x02 instead of 0x12
+			u32* swi12Patch = ce7->patches->swi02;
+			memcpy(swi12Offset, swi12Patch, 0x4);
+		}
+
+		// swi get pitch table
+		if (swiGetPitchTableOffset) {
+			// Patch
+			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+			memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+		}
 	}
 }
 
-static void patchSleep(const tNDSHeader* ndsHeader) {
+static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	bool usesThumb = false;
 
 	// Sleep
@@ -66,6 +81,7 @@ static void patchSleep(const tNDSHeader* ndsHeader) {
 		sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
 		usesThumb = true;
 	}
+	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
 	if (sleepPatchOffset) {
 		// Patch
 		if (usesThumb) {
@@ -74,6 +90,7 @@ static void patchSleep(const tNDSHeader* ndsHeader) {
 		} else {
 			*(sleepPatchOffset + 2) = 0;
 		}
+	}
 	}
 }
 
@@ -116,13 +133,9 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ce7, ndsHeader, moduleParams);
-	}
+	fixForDsiBios(ce7, ndsHeader, moduleParams);
 
-	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
-		patchSleep(ndsHeader);
-	}
+	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);
 

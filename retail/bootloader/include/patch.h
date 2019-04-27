@@ -50,6 +50,28 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
+typedef struct patchOffsetCacheContents {
+    u32 ver;
+	u32* moduleParamsOffset;
+	u32 a9IsThumb;
+    u32* cardReadOffset;
+    u32* cardPullOutOffset;
+    u32* cacheFlushOffset;
+    u32* cardIdOffset;
+    u32* cardReadDmaOffset;
+    u32* sleepOffset;
+	u32* randomPatchOffset;
+	u32* randomPatchSecondOffset;
+	u32 a7IsThumb;
+	u32* swi12Offset;
+	u32* swiGetPitchTableOffset;
+	u32* sleepPatchOffset;
+	u32* a7IrqHandlerOffset;
+} patchOffsetCacheContents;
+
+extern u32 patchOffsetCacheFileVersion;
+extern patchOffsetCacheContents patchOffsetCache;
+
 u32 generateA7Instr(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 void patchBinary(const tNDSHeader* ndsHeader);
