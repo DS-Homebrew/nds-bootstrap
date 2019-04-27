@@ -19,16 +19,18 @@
 ------------------------------------------------------------------*/
 
 #include <nds.h>
+#include <nds/fifocommon.h>
 #include <fat.h>
 #include <limits.h>
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string>
+#include <vector>
 
-#include <nds/fifocommon.h>
+#include <easykey.h>
 
 #include "nds_loader_arm9.h"
-#include "inifile.h"
 #include "nitrofs.h"
 
 using namespace std;
@@ -196,22 +198,22 @@ int main( int argc, char **argv) {
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
 
-        //printf("fat inited");    
-		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+        //printf("fat inited");   
+
+		// Load the ini file to memory.
+  		ek_key Ini[64];
+  		int IniCount = iniLoad("fat:/_nds/nds-bootstrap.ini", Ini);
+
+		ek_key Key = {(char *)"NDS-BOOTSTRAP", NULL, NULL};
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;			
-
+		Key.Data = (char *)"";
+		Key.Name = (char *)"DEBUG";
+		debug = (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		if (debug)
 			consoleDemoInit();
-
-			//fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-
-			//getSFCG_ARM9();
-			//getSFCG_ARM7();
-		}
 
 		std::string	bootstrapPath = argv[0];
         std::string	substr = "sd:/";
@@ -219,7 +221,9 @@ int main( int argc, char **argv) {
 
 		nitroFSInit(bootstrapPath.c_str());
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
+		Key.Data = (char *)"";
+		Key.Name = (char *)"RESETSLOT1";
+		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
 				printf("Please insert a cartridge...\n");
 				do { swiWaitForVBlank(); } 
@@ -228,7 +232,9 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_04, 1);
 		}
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
+		Key.Data = (char *)"";
+		Key.Name = (char *)"BOOST_CPU";
+		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
 			//REG_SCFG_CLK |= 0x1;
 		} else {
@@ -251,8 +257,9 @@ int main( int argc, char **argv) {
 			dbg_printf("No arguments passed!\n");
 		}
 
-
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
+		Key.Data = (char *)"";
+		Key.Name = (char *)"LOGGING";
+		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -263,22 +270,33 @@ int main( int argc, char **argv) {
 			for (int i=0; i<50000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
-			
 		} else {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
 
-		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
+		Key.Data = (char *)"";
+		Key.Name = (char *)"NDS_PATH";
+		iniGetKey(Ini, IniCount, &Key);
+		std::string	ndsPath(Key.Data);
+        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0)
+			ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
-		std::string	homebrewArg = bootstrapini.GetString( "NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
+		Key.Data = (char *)"";
+		Key.Name = (char *)"HOMEBREW_ARG";
+		iniGetKey(Ini, IniCount, &Key);
+		std::string	homebrewArg(Key.Data);
 		if (homebrewArg != "") {
-			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0) homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
+			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0)
+				homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
 		}
 
-		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
+		Key.Data = (char *)"";
+		Key.Name = (char *)"RAM_DRIVE_PATH";
+		iniGetKey(Ini, IniCount, &Key);
+		std::string	ramDrivePath(Key.Data);
 		if (ramDrivePath != "") {
-			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
+			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0)
+				ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
 		}
 
 		std::string	romfolder = ndsPath;
@@ -304,7 +322,15 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+		Key.Data = (char *)"";
+		Key.Name = (char *)"LOADING_SCREEN";
+		iniGetKey(Ini, IniCount, &Key);
+
+		int loadingScreen = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+
+		iniFree(Ini, IniCount);
+
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, loadingScreen);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
@@ -312,4 +338,3 @@ int main( int argc, char **argv) {
 
 	while(1) { swiWaitForVBlank(); }
 }
-
