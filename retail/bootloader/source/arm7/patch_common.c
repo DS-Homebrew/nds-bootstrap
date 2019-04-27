@@ -218,8 +218,10 @@ u32 patchCardNds(
 		patchOffsetCache.mpuDataOffset = 0;
 		patchOffsetCache.randomPatchOffset = 0;
 		patchOffsetCache.randomPatchChecked = 0;
-		patchOffsetCache.randomPatchSecondOffset = 0;
-		patchOffsetCache.randomPatchSecondChecked = 0;
+		patchOffsetCache.randomPatch5Offset = 0;
+		patchOffsetCache.randomPatch5Checked = 0;
+		patchOffsetCache.randomPatch5SecondOffset = 0;
+		patchOffsetCache.randomPatch5SecondChecked = 0;
 		patchOffsetCache.a7IsThumb = 0;
 		patchOffsetCache.swi12Offset = 0;
 		patchOffsetCache.swiGetPitchTableOffset = 0;
