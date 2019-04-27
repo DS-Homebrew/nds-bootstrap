@@ -22,11 +22,17 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
 	if (!patchOffsetCache.cardReadEndOffset) {
 		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+		if (cardReadEndOffset) {
+			usesThumb = true;
+			patchOffsetCache.a9IsThumb = usesThumb;
+		}
 		if (!cardReadEndOffset) {
 			// SDK 5
 			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
 			if (cardReadEndOffset) {
 				sdk5ReadType = 1;
+				usesThumb = true;
+				patchOffsetCache.a9IsThumb = usesThumb;
 			}
 		}
 		if (!cardReadEndOffset) {
@@ -120,6 +126,7 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Card pull out
 	u32* cardPullOutOffset = patchOffsetCache.cardPullOutOffset;
 	if (!patchOffsetCache.cardPullOutOffset) {
+		cardPullOutOffset = NULL;
 		if (usesThumb) {
 			//dbg_printf("Trying SDK 5 thumb...\n");
 			if (sdk5ReadType == 0) {
@@ -191,7 +198,8 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	// Card ID
 	u32* cardIdStartOffset = patchOffsetCache.cardIdOffset;
 	if (!patchOffsetCache.cardIdChecked) {
-		u32* cardIdEndOffset;
+		cardIdStartOffset = NULL;
+		u32* cardIdEndOffset = NULL;
 		if (usesThumb) {
 			cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
 			cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
@@ -220,6 +228,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Card read dma
 	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
 	if (!patchOffsetCache.cardReadDmaChecked) {
+		cardReadDmaStartOffset = NULL;
 		u32* cardReadDmaEndOffset = NULL;
 		if (usesThumb) {
 			//dbg_printf("Trying thumb alt...\n");
@@ -537,10 +546,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return;
-	}
-
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Random patch
@@ -667,13 +672,13 @@ static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t
 	}
 
 	// Random patch SDK 5 first
-	u32* randomPatchOffset5First = patchOffsetCache.randomPatchOffset;
-	if (!patchOffsetCache.randomPatchChecked) {
+	u32* randomPatchOffset5First = patchOffsetCache.randomPatch5Offset;
+	if (!patchOffsetCache.randomPatch5Checked) {
 		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
 		if (randomPatchOffset5First) {
-			patchOffsetCache.randomPatchOffset = randomPatchOffset5First;
+			patchOffsetCache.randomPatch5Offset = randomPatchOffset5First;
 		}
-		patchOffsetCache.randomPatchChecked = true;
+		patchOffsetCache.randomPatch5Checked = true;
 	}
 	if (!randomPatchOffset5First) {
 		return;
@@ -691,13 +696,13 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	}
 
 	// Random patch SDK 5 second
-	u32* randomPatchOffset5Second = patchOffsetCache.randomPatchSecondOffset;
-	if (!patchOffsetCache.randomPatchSecondChecked) {
+	u32* randomPatchOffset5Second = patchOffsetCache.randomPatch5SecondOffset;
+	if (!patchOffsetCache.randomPatch5SecondChecked) {
 		randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader);
 		if (randomPatchOffset5Second) {
-			patchOffsetCache.randomPatchSecondOffset = randomPatchOffset5Second;
+			patchOffsetCache.randomPatch5SecondOffset = randomPatchOffset5Second;
 		}
-		patchOffsetCache.randomPatchSecondChecked = true;
+		patchOffsetCache.randomPatch5SecondChecked = true;
 	}
 	if (!randomPatchOffset5Second) {
 		return;

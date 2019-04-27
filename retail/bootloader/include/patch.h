@@ -68,8 +68,10 @@ typedef struct patchOffsetCacheContents {
     u32* mpuDataOffset;
 	u32* randomPatchOffset;
 	u32 randomPatchChecked;
-	u32* randomPatchSecondOffset;
-	u32 randomPatchSecondChecked;
+	u32* randomPatch5Offset;
+	u32 randomPatch5Checked;
+	u32* randomPatch5SecondOffset;
+	u32 randomPatch5SecondChecked;
 	u32 a7IsThumb;
 	u32* swi12Offset;
 	u32* swiGetPitchTableOffset;

@@ -267,10 +267,18 @@ u16 convertToDsBmp(int colorMode, u16 val) {
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
-		printf("SD init failed!\n");
+		printf("fatInitDefault failed!\n");
 		return -1;
 	}
 	nocashMessage("fatInitDefault");
+
+	if (access("fat:/", F_OK) == 0) {
+		consoleDemoInit();
+		printf("This edition of nds-bootstrap\n");
+		printf("can only be used on the\n");
+		printf("SD card.\n");
+		return -1;
+	}
 	
 	load_conf(conf, "sd:/_nds/nds-bootstrap.ini");
 	mkdir("sd:/_nds/nds-bootstrap", 0777);

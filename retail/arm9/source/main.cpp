@@ -400,17 +400,7 @@ int main(int argc, char** argv) {
 	conf->initDisc = true;
 	conf->dldiPatchNds = true;
 
-	int status = 0;
-
-	if (access("fat:/", F_OK) == 0) {
-		consoleDemoInit();
-		printf("This edition of nds-bootstrap\n");
-		printf("can only be used on the\n");
-		printf("SD card.\n");
-		status = -1;
-	} else {
-		status = loadFromSD(conf, argv[0]);
-	}
+	int status = loadFromSD(conf, argv[0]);
 
 	if (status == 0) {
 		status = runNdsFile(conf);
