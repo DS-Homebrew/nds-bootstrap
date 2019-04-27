@@ -61,9 +61,9 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 u32* findMpuInitCacheOffset(const u32* mpuStartOffset);
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
-u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
-u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
-u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader); // SDK 5
+u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
+//u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
 u32* findSwi12Offset(const tNDSHeader* ndsHeader);

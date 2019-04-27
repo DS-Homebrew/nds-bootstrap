@@ -41,13 +41,13 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.swi12Offset;
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
-	if (!swi12Offset) {
+	if (!patchOffsetCache.swi12Offset) {
 		swi12Offset = findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
 			patchOffsetCache.swi12Offset = swi12Offset;
 		}
 	}
-	if (!swiGetPitchTableOffset) {
+	if (!patchOffsetCache.swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 		if (swiGetPitchTableOffset) {
 			patchOffsetCache.swiGetPitchTableOffset = swiGetPitchTableOffset;
@@ -72,25 +72,22 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 }
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
-	bool usesThumb = false;
-
 	// Sleep
-	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
-	if (!sleepPatchOffset) {
-		dbg_printf("Trying thumb...\n");
-		sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
-		usesThumb = true;
+	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
+	if (!patchOffsetCache.sleepPatchOffset) {
+		sleepPatchOffset = findSleepPatchOffset(ndsHeader);
+		if (!sleepPatchOffset) {
+			dbg_printf("Trying thumb...\n");
+			sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
+		}
+		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
 	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
-	if (sleepPatchOffset) {
-		// Patch
-		if (usesThumb) {
+		if (sleepPatchOffset) {
+			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
 			*((u16*)sleepPatchOffset + 3) = 0;
-		} else {
-			*(sleepPatchOffset + 2) = 0;
 		}
-	}
 	}
 }
 
@@ -108,7 +105,13 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 
 static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
-	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
+	u32* cardIrqEnableOffset = patchOffsetCache.a7CardIrqEnableOffset;
+	if (!patchOffsetCache.a7CardIrqEnableOffset) {
+		cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
+		if (cardIrqEnableOffset) {
+			patchOffsetCache.a7CardIrqEnableOffset = cardIrqEnableOffset;
+		}
+	}
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
@@ -119,7 +122,14 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 
 static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card check pull out
-	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
+	u32* cardCheckPullOutOffset = patchOffsetCache.cardCheckPullOutOffset;
+	if (!patchOffsetCache.cardCheckPullOutChecked) {
+		cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
+		if (cardCheckPullOutOffset) {
+			patchOffsetCache.cardCheckPullOutOffset = cardCheckPullOutOffset;
+		}
+		patchOffsetCache.cardCheckPullOutChecked = true;
+	}
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
@@ -156,13 +166,24 @@ u32 patchCardNdsArm7(
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);
 	} else {
-		saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-		if (!saveResult) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+		if (patchOffsetCache.savePatchType == 0) {
+			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 1;
+			}
 		}
-		if (!saveResult) {
+		if (!saveResult && patchOffsetCache.savePatchType == 1) {
+			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 2;
+			}
+		}
+		if (!saveResult && patchOffsetCache.savePatchType == 2) {
 			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 		}
+	}
+	if (!saveResult) {
+		patchOffsetCache.savePatchType = 0;
 	}
 
 	dbg_printf("ERR_NONE\n\n");

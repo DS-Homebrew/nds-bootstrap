@@ -53,24 +53,41 @@
 typedef struct patchOffsetCacheContents {
     u32 ver;
 	u32* moduleParamsOffset;
+    u32* heapPointerOffset;
 	u32 a9IsThumb;
-    u32* cardReadOffset;
+    u32* cardReadStartOffset;
+    u32* cardReadEndOffset;
     u32* cardPullOutOffset;
-    u32* cacheFlushOffset;
     u32* cardIdOffset;
+    u32 cardIdChecked;
     u32* cardReadDmaOffset;
+    u32 cardReadDmaChecked;
     u32* sleepOffset;
+    u32 patchMpuRegion;
+    u32* mpuStartOffset;
+    u32* mpuDataOffset;
 	u32* randomPatchOffset;
+	u32 randomPatchChecked;
 	u32* randomPatchSecondOffset;
+	u32 randomPatchSecondChecked;
 	u32 a7IsThumb;
 	u32* swi12Offset;
 	u32* swiGetPitchTableOffset;
 	u32* sleepPatchOffset;
+	u32* a7CardIrqEnableOffset;
+	u32* cardCheckPullOutOffset;
+	u32 cardCheckPullOutChecked;
 	u32* a7IrqHandlerOffset;
+	u32 savePatchType;
+	u32 relocateStartOffset;
+	u32 relocateValidateOffset;
+	u32 a7JumpTableFuncOffset;
 } patchOffsetCacheContents;
 
 extern u32 patchOffsetCacheFileVersion;
 extern patchOffsetCacheContents patchOffsetCache;
+
+extern bool patchOffsetCacheChanged;
 
 u32 generateA7Instr(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
@@ -102,8 +119,7 @@ u32 patchCardNds(
 );
 u32* patchHeapPointer(
     const module_params_t* moduleParams,
-    const tNDSHeader* ndsHeader, 
-    bool usesThumb
+    const tNDSHeader* ndsHeader
 );
 void relocate_ce9(
     u32 default_location, 

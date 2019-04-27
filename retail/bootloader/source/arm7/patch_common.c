@@ -26,9 +26,12 @@
 #include "common.h"
 #include "debug_file.h"
 
-u32 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched
+u32 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched, some offsets removed
+										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
+
+bool patchOffsetCacheChanged = false;
 
 extern bool logging;
 
@@ -199,20 +202,36 @@ u32 patchCardNds(
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.moduleParamsOffset = 0;
+		patchOffsetCache.heapPointerOffset = 0;
 		patchOffsetCache.a9IsThumb = 0;
-		patchOffsetCache.cardReadOffset = 0;
+		patchOffsetCache.cardReadStartOffset = 0;
+		patchOffsetCache.cardReadEndOffset = 0;
 		patchOffsetCache.cardPullOutOffset = 0;
-		patchOffsetCache.cacheFlushOffset = 0;
 		patchOffsetCache.cardIdOffset = 0;
+		patchOffsetCache.cardIdChecked = 0;
 		patchOffsetCache.cardReadDmaOffset = 0;
+		patchOffsetCache.cardReadDmaChecked = 0;
 		patchOffsetCache.sleepOffset = 0;
+		patchOffsetCache.patchMpuRegion = 0;
+		patchOffsetCache.mpuStartOffset = 0;
+		patchOffsetCache.mpuDataOffset = 0;
 		patchOffsetCache.randomPatchOffset = 0;
+		patchOffsetCache.randomPatchChecked = 0;
 		patchOffsetCache.randomPatchSecondOffset = 0;
+		patchOffsetCache.randomPatchSecondChecked = 0;
 		patchOffsetCache.a7IsThumb = 0;
 		patchOffsetCache.swi12Offset = 0;
 		patchOffsetCache.swiGetPitchTableOffset = 0;
 		patchOffsetCache.sleepPatchOffset = 0;
+		patchOffsetCache.a7CardIrqEnableOffset = 0;
+		patchOffsetCache.cardCheckPullOutOffset = 0;
+		patchOffsetCache.cardCheckPullOutChecked = 0;
 		patchOffsetCache.a7IrqHandlerOffset = 0;
+		patchOffsetCache.savePatchType = 0;
+		patchOffsetCache.relocateStartOffset = 0;
+		patchOffsetCache.relocateValidateOffset = 0;
+		patchOffsetCache.a7JumpTableFuncOffset = 0;
 	}
 
 	bool sdk5 = isSdk5(moduleParams);
