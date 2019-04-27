@@ -537,10 +537,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return;
-	}
-
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Random patch
