@@ -94,8 +94,8 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 
 // Mpu cache init
 static const u32 mpuInitCache[1] = {0xE3A00042};
-                                                                                                            
-static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
+
+//static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
 // thread management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
@@ -1273,11 +1273,7 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return NULL;
-	}
-
+u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset5First:\n");
 
 	u32* randomPatchOffset = findOffset(
@@ -1300,11 +1296,7 @@ u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_param
 }
 
 // SDK 5
-u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return NULL;
-	}
-
+u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset5Second:\n");
 
 	u32* randomPatchOffset = findOffset(
@@ -1326,7 +1318,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_para
 	return randomPatchOffset;
 }
 
-u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+/*u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version > 0x5000000) {
 		return NULL;
 	}
@@ -1350,7 +1342,7 @@ u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 
 	dbg_printf("\n");
 	return operaRamOffset;
-}
+}*/
 
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findSleepOffset\n");

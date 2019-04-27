@@ -790,7 +790,7 @@ int arm7_main(void) {
             tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
             relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
 		} else
-        ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
+        ce9Location = patchHeapPointer(moduleParams, ndsHeader);
         if(ce9Location) {
             	tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
                 relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
@@ -852,7 +852,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 	increaseLoadBarLength();
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion) {
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 		fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
 

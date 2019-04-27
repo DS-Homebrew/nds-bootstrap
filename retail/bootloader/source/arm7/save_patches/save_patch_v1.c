@@ -87,7 +87,7 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	// Find the card read
 	u32 cardReadEndAddr = (u32)findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00400000, 
+		(u32*)ndsHeader->arm7destination, 0x00020000, 
 		a7cardReadSignature, 2
 	);
 	if (!cardReadEndAddr) {

@@ -12,29 +12,34 @@
 //bool cardReadFound = false; // patch_common.c
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
-	bool usesThumb = false;
+	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
 	int sdk5ReadType = 0; // SDK 5
 
 	// Card read
 	// SDK 5
 	//dbg_printf("Trying SDK 5 thumb...\n");
-	u32* cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
-	if (!cardReadEndOffset) {
-		// SDK 5
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
-		if (cardReadEndOffset) {
-			sdk5ReadType = 1;
+	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
+	if (!patchOffsetCache.cardReadEndOffset) {
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+		if (!cardReadEndOffset) {
+			// SDK 5
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+			if (cardReadEndOffset) {
+				sdk5ReadType = 1;
+			}
 		}
-	}
-	if (!cardReadEndOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
-	}
-	if (cardReadEndOffset) {
-		usesThumb = true;
-	} else {
-		cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+		if (!cardReadEndOffset) {
+			//dbg_printf("Trying thumb...\n");
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+			if (cardReadEndOffset) {
+				usesThumb = true;
+				patchOffsetCache.a9IsThumb = usesThumb;
+			}
+		}
+		if (!cardReadEndOffset) {
+			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
 			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
@@ -44,8 +49,12 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 					dbg_printf("Found thumb\n\n");
 					--cardReadEndOffset;
 					usesThumb = true;
+					patchOffsetCache.a9IsThumb = usesThumb;
 				}
 			}
+		}
+		if (cardReadEndOffset) {
+			patchOffsetCache.cardReadEndOffset = cardReadEndOffset;
 		}
 	}
 	*usesThumbPtr = usesThumb;
@@ -55,27 +64,32 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardReadEndOffset) { // Not necessarily needed
 		return false;
 	}
-	u32* cardReadStartOffset;
-	// SDK 5
-	//dbg_printf("Trying SDK 5 thumb...\n");
-	if (sdk5ReadType == 0) {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
-	} else {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying SDK 5...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		if (readType == 0) {
-			cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+	u32* cardReadStartOffset = patchOffsetCache.cardReadStartOffset;
+	if (!patchOffsetCache.cardReadStartOffset) {
+		// SDK 5
+		//dbg_printf("Trying SDK 5 thumb...\n");
+		if (sdk5ReadType == 0) {
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
 		} else {
-			cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			//dbg_printf("Trying thumb...\n");
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			//dbg_printf("Trying SDK 5...\n");
+			cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			if (readType == 0) {
+				cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+			} else {
+				cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+			}
+		}
+		if (cardReadStartOffset) {
+			patchOffsetCache.cardReadStartOffset = cardReadStartOffset;
 		}
 	}
 	if (!cardReadStartOffset) {
@@ -104,20 +118,25 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
-	u32* cardPullOutOffset;
-	if (usesThumb) {
-		//dbg_printf("Trying SDK 5 thumb...\n");
-		if (sdk5ReadType == 0) {
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type0(ndsHeader, moduleParams);
+	u32* cardPullOutOffset = patchOffsetCache.cardPullOutOffset;
+	if (!patchOffsetCache.cardPullOutOffset) {
+		if (usesThumb) {
+			//dbg_printf("Trying SDK 5 thumb...\n");
+			if (sdk5ReadType == 0) {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type0(ndsHeader, moduleParams);
+			} else {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type1(ndsHeader, moduleParams);
+			}
+			if (!cardPullOutOffset) {
+				//dbg_printf("Trying thumb...\n");
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader);
+			}
 		} else {
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type1(ndsHeader, moduleParams);
+			cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 		}
-		if (!cardPullOutOffset) {
-			//dbg_printf("Trying thumb...\n");
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader);
+		if (cardPullOutOffset) {
+			patchOffsetCache.cardPullOutOffset = cardPullOutOffset;
 		}
-	} else {
-		cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 	}
 	*cardPullOutOffsetPtr = cardPullOutOffset;
 	if (!cardPullOutOffset) {
@@ -170,14 +189,20 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 
 	// Card ID
-	u32* cardIdEndOffset;
-	u32* cardIdStartOffset;
-	if (usesThumb) {
-		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
-		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
-	} else {
-		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
-		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
+	u32* cardIdStartOffset = patchOffsetCache.cardIdOffset;
+	if (!patchOffsetCache.cardIdChecked) {
+		u32* cardIdEndOffset;
+		if (usesThumb) {
+			cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
+			cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
+		} else {
+			cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
+			cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
+		}
+		if (cardIdStartOffset) {
+			patchOffsetCache.cardIdOffset = cardIdStartOffset;
+		}
+		patchOffsetCache.cardIdChecked = true;
 	}
 
 	if (cardIdStartOffset) {
@@ -193,19 +218,25 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Card read dma
-	u32* cardReadDmaEndOffset = NULL;
-	if (usesThumb) {
-		//dbg_printf("Trying thumb alt...\n");
-		cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
-	}
-	if (!cardReadDmaEndOffset) {
-		cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
-	}
-	u32* cardReadDmaStartOffset;
-	if (usesThumb) {
-		cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
-	} else {
-		cardReadDmaStartOffset = findCardReadDmaStartOffset(moduleParams, cardReadDmaEndOffset);
+	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
+	if (!patchOffsetCache.cardReadDmaChecked) {
+		u32* cardReadDmaEndOffset = NULL;
+		if (usesThumb) {
+			//dbg_printf("Trying thumb alt...\n");
+			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+		}
+		if (!cardReadDmaEndOffset) {
+			cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
+		}
+		if (usesThumb) {
+			cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
+		} else {
+			cardReadDmaStartOffset = findCardReadDmaStartOffset(moduleParams, cardReadDmaEndOffset);
+		}
+		if (cardReadDmaStartOffset) {
+			patchOffsetCache.cardReadDmaOffset = cardReadDmaStartOffset;
+		}
+		patchOffsetCache.cardReadDmaChecked = true;
 	}
 	if (!cardReadDmaStartOffset) {
 		return;
@@ -239,7 +270,11 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     //||  strncmp(romTid, "BXS", 3) == 0  // Sonic Colors
     //||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
-      u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
+      u32* sleep = patchOffsetCache.sleepOffset;
+	  if (!patchOffsetCache.sleepOffset) {
+		sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
+		if (sleep) patchOffsetCache.sleepOffset = sleep;
+	  }
       if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
       else ce9->patches->sleepRef = sleep;
     } 
@@ -252,9 +287,22 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		return;
 	}
 
+	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
+		patchOffsetCache.patchMpuRegion = 0;
+		patchOffsetCache.mpuStartOffset = 0;
+		patchOffsetCache.mpuDataOffset = 0;
+		patchOffsetCacheChanged = true;
+	}
+
 	// Find the mpu init
-	u32* mpuStartOffset = findMpuStartOffset(ndsHeader, patchMpuRegion);
-	u32* mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset;
+	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset;
+	if (!patchOffsetCache.mpuStartOffset) {
+		mpuStartOffset = findMpuStartOffset(ndsHeader, patchMpuRegion);
+	}
+	if (!patchOffsetCache.mpuDataOffset) {
+		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+	}
 	if (mpuDataOffset) {
 		// Change the region 1 configuration
 
@@ -334,17 +382,27 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			}*/
 		}
 	}
+
+	patchOffsetCache.patchMpuRegion = patchMpuRegion;
+	patchOffsetCache.mpuStartOffset = mpuStartOffset;
+	patchOffsetCache.mpuDataOffset = mpuDataOffset;
 }
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
-    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	u32* heapPointer = patchOffsetCache.heapPointerOffset;
+	if (!patchOffsetCache.heapPointerOffset) {
+		heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
+	}
+    if (!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
         dbg_printf("heap pointer value: ");
-	    dbg_hexa(*heapPointer);    
+	    dbg_hexa(*heapPointer);
 		dbg_printf("\n\n");
         return 0;
-    }
+    } else if (!patchOffsetCache.heapPointerOffset) {
+		patchOffsetCache.heapPointerOffset = heapPointer;
+		patchOffsetCacheChanged = true;
+	}
     
     u32* oldheapPointer = (u32*)*heapPointer;
         
@@ -479,6 +537,10 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return;
+	}
+
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Random patch
@@ -488,7 +550,14 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 	&& strncmp(romTid, "ABC", 3) != 0  // Harvest Moon DS
 	&& strncmp(romTid, "AWL", 3) != 0) // TWEWY
 	{
-		u32* randomPatchOffset = findRandomPatchOffset(ndsHeader);
+		u32* randomPatchOffset = patchOffsetCache.randomPatchOffset;
+		if (!patchOffsetCache.randomPatchChecked) {
+			randomPatchOffset = findRandomPatchOffset(ndsHeader);
+			if (randomPatchOffset) {
+				patchOffsetCache.randomPatchOffset = randomPatchOffset;
+			}
+			patchOffsetCache.randomPatchChecked = true;
+		}
 		if (randomPatchOffset) {
 			// Patch
 			//*(u32*)((u32)randomPatchOffset + 0xC) = 0x0;
@@ -593,8 +662,19 @@ void patchDownloadplay(const tNDSHeader* ndsHeader)
 
 // SDK 5
 static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
 	// Random patch SDK 5 first
-	u32* randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader, moduleParams);
+	u32* randomPatchOffset5First = patchOffsetCache.randomPatchOffset;
+	if (!patchOffsetCache.randomPatchChecked) {
+		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
+		if (randomPatchOffset5First) {
+			patchOffsetCache.randomPatchOffset = randomPatchOffset5First;
+		}
+		patchOffsetCache.randomPatchChecked = true;
+	}
 	if (!randomPatchOffset5First) {
 		return;
 	}
@@ -606,8 +686,19 @@ static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t
 
 // SDK 5
 static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
 	// Random patch SDK 5 second
-	u32* randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader, moduleParams);
+	u32* randomPatchOffset5Second = patchOffsetCache.randomPatchSecondOffset;
+	if (!patchOffsetCache.randomPatchSecondChecked) {
+		randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader);
+		if (randomPatchOffset5Second) {
+			patchOffsetCache.randomPatchSecondOffset = randomPatchOffset5Second;
+		}
+		patchOffsetCache.randomPatchSecondChecked = true;
+	}
 	if (!randomPatchOffset5Second) {
 		return;
 	}
@@ -617,7 +708,7 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
-static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+/*static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Opera RAM patch
 	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
 	if (!operaRamOffset) {
@@ -628,7 +719,7 @@ static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* mo
 	for (int i = 0; i <= 5; i++) {
 		*(operaRamOffset + i) += 0x03800000;
 	}
-}
+}*/
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
