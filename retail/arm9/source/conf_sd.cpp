@@ -41,127 +41,152 @@ static void load_conf(configuration* conf, const char* fn) {
 	ek_key Key = {(char*)"NDS-BOOTSTRAP", NULL, NULL};
 
 	// Debug
+	Key.Data = NULL;
 	Key.Name = (char*)"DEBUG";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->debug = (bool)strtol(Key.Data, NULL, 0);
 
 	// NDS path
+	Key.Data = NULL;
 	Key.Name = (char*)"NDS_PATH";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->ndsPath = strdup(Key.Data);
 
 	// SAV path
+	Key.Data = NULL;
 	Key.Name = (char*)"SAV_PATH";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->savPath = strdup(Key.Data);
 
 	// Language
+	Key.Data = NULL;
 	Key.Name = (char*)"LANGUAGE";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->language = strtol(Key.Data, NULL, 0);
 
 	// DSi mode
+	Key.Data = NULL;
 	Key.Name = (char*)"DSI_MODE";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->dsiMode = strtol(Key.Data, NULL, 0);
 
 	// Donor SDK version
+	Key.Data = NULL;
 	Key.Name = (char*)"DONOR_SDK_VER";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->donorSdkVer = strtol(Key.Data, NULL, 0);
 
 	// Patch MPU region
+	Key.Data = NULL;
 	Key.Name = (char*)"PATCH_MPU_REGION";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->patchMpuRegion = strtol(Key.Data, NULL, 0);
 
 	// Patch MPU size
+	Key.Data = NULL;
 	Key.Name = (char*)"PATCH_MPU_SIZE";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->patchMpuSize = strtol(Key.Data, NULL, 0);
 
 	// Card engine (arm9) cached
+	Key.Data = NULL;
 	Key.Name = (char*)"CARDENGINE_CACHED";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->ceCached = (bool)strtol(Key.Data, NULL, 0);
     // conf->ceCached = true;
 
 	// Console model
+	Key.Data = NULL;
 	Key.Name = (char*)"CONSOLE_MODEL";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->consoleModel = strtol(Key.Data, NULL, 0);
 
 	// Color mode
+	Key.Data = NULL;
 	Key.Name = (char*)"COLOR_MODE";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->colorMode = strtol(Key.Data, NULL, 0);
 
 	// Loading screen
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_SCREEN";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingScreen = strtol(Key.Data, NULL, 0);
 
 	// Loading screen (Dark theme)
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_DARK_THEME";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingDarkTheme = (bool)strtol(Key.Data, NULL, 0);
 
 	// Swap screens in loading screen
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_SWAP_LCDS";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingSwapLcds = (bool)strtol(Key.Data, NULL, 0);
 
 	// Loading screen .bmp folder path
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_SCREEN_FOLDER";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingImagePath = strdup(Key.Data);
 
 	// Number of loading screen frames
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_FRAMES";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingFrames = strtol(Key.Data, NULL, 0);
 
 	// FPS of animated loading screen
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_FPS";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingFps = strtol(Key.Data, NULL, 0);
 
 	// Show/Hide loading bar
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_BAR";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingBar = (bool)strtol(Key.Data, NULL, 0);
 
 	// Loading bar Y position
+	Key.Data = NULL;
 	Key.Name = (char*)"LOADING_BAR_Y";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->loadingBarYpos = strtol(Key.Data, NULL, 0);
 
 	// ROM read LED
+	Key.Data = NULL;
 	Key.Name = (char*)"ROMREAD_LED";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->romread_LED = strtol(Key.Data, NULL, 0);
 
 	// Game soft reset
+	Key.Data = NULL;
 	Key.Name = (char*)"GAME_SOFT_RESET";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->gameSoftReset = (bool)strtol(Key.Data, NULL, 0);
 
 	// Force sleep patch
+	Key.Data = NULL;
 	Key.Name = (char*)"FORCE_SLEEP_PATCH";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->forceSleepPatch = (bool)strtol(Key.Data, NULL, 0);
 
 	// Precise volume control
+	Key.Data = NULL;
 	Key.Name = (char*)"PRECISE_VOLUME_CONTROL";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->preciseVolumeControl = (bool)strtol(Key.Data, NULL, 0);
 
 	// Logging
+	Key.Data = NULL;
 	Key.Name = (char*)"LOGGING";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->logging = (bool)strtol(Key.Data, NULL, 0);
 
 	// Cheat data
+	Key.Data = NULL;
 	Key.Name = (char*)"CHEAT_DATA";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
@@ -194,17 +219,20 @@ static void load_conf(configuration* conf, const char* fn) {
 	realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
 
 	// Backlight mode
+	Key.Data = NULL;
 	Key.Name = (char*)"BACKLIGHT_MODE";
 	iniGetKey(IniData, IniCount, &Key);
 	conf->backlightMode = strtol(Key.Data, NULL, 0);
 
 	// Boost CPU
+	Key.Data = NULL;
 	Key.Name = (char*)"BOOST_CPU";
 	iniGetKey(IniData, IniCount, &Key);
 	// If DSi mode, then always boost CPU
 	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
 
 	// Boost VRAM
+	Key.Data = NULL;
 	Key.Name = (char*)"BOOST_VRAM";
 	iniGetKey(IniData, IniCount, &Key);
 	// If DSi mode, then always boost VRAM
