@@ -666,7 +666,7 @@ static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t
 	u32* randomPatchOffset5First = patchOffsetCache.randomPatch5Offset;
 	if (!patchOffsetCache.randomPatch5Checked) {
 		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
-		if (randomPatch5Offset5First) {
+		if (randomPatchOffset5First) {
 			patchOffsetCache.randomPatch5Offset = randomPatchOffset5First;
 		}
 		patchOffsetCache.randomPatch5Checked = true;
