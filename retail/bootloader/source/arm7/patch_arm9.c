@@ -226,7 +226,6 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
     ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
     ||  strncmp(romTid, "AFF", 3) == 0  // FF3
-    ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
     ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
     ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
     //||  strncmp(romTid, "B3R", 3) == 0  // Pokemon Ranger: Guardian Signs 
