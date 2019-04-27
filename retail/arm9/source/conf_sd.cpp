@@ -10,7 +10,7 @@
 #include <nds/arm9/console.h>
 #include <nds/debug.h>*/
 #include <fat.h>
-#include "minIni.h"
+#include <easykey.h>
 #include "hex.h"
 #include "cheat_engine.h"
 #include "configuration.h"
@@ -34,174 +34,183 @@ static off_t getSaveSize(const char* path) {
 
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 
-static inline bool match(const char* section, const char* s, const char* key, const char* k) {
-	return (strcmp(section, s) == 0 && strcmp(key, k) == 0);
-}
+static void load_conf(configuration* conf, const char* fn) {
+	ek_key IniData[64];
+	int IniCount = iniLoad(fn, IniData);
 
-static int callback(const char *section, const char *key, const char *value, void *userdata) {
-	configuration* conf = (configuration*)userdata;
+	ek_key Key = {(char*)"NDS-BOOTSTRAP", NULL, NULL};
 
-	if (match(section, "NDS-BOOTSTRAP", key, "DEBUG")) {
-		// Debug
-		conf->debug = (bool)strtol(value, NULL, 0);
+	// Debug
+	Key.Name = (char*)"DEBUG";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->debug = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "NDS_PATH")) {
-		// NDS path
-		//conf->ndsPath = malloc((strlen(value) + 1)*sizeof(char));
-		//strcpy(conf->ndsPath, value);
-		conf->ndsPath = strdup(value);
+	// NDS path
+	Key.Name = (char*)"NDS_PATH";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->ndsPath = strdup(Key.Data);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "SAV_PATH")) {
-		// SAV path
-		//conf->savPath = malloc((strlen(value) + 1)*sizeof(char));
-		//strcpy(conf->savPath, value);
-		conf->savPath = strdup(value);
+	// SAV path
+	Key.Name = (char*)"SAV_PATH";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->savPath = strdup(Key.Data);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LANGUAGE")) {
-		// Language
-		conf->language = strtol(value, NULL, 0);
+	// Language
+	Key.Name = (char*)"LANGUAGE";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->language = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "DSI_MODE")) {
-		// DSi mode
-		conf->dsiMode = strtol(value, NULL, 0);
+	// DSi mode
+	Key.Name = (char*)"DSI_MODE";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->dsiMode = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "DONOR_SDK_VER")) {
-		// Donor SDK version
-		conf->donorSdkVer = strtol(value, NULL, 0);
+	// Donor SDK version
+	Key.Name = (char*)"DONOR_SDK_VER";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->donorSdkVer = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "PATCH_MPU_REGION")) {
-		// Patch MPU region
-		conf->patchMpuRegion = strtol(value, NULL, 0);
+	// Patch MPU region
+	Key.Name = (char*)"PATCH_MPU_REGION";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->patchMpuRegion = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "PATCH_MPU_SIZE")) {
-		// Patch MPU size
-		conf->patchMpuSize = strtol(value, NULL, 0);
+	// Patch MPU size
+	Key.Name = (char*)"PATCH_MPU_SIZE";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->patchMpuSize = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "CARDENGINE_CACHED")) {
-		// Card engine (arm9) cached
-		conf->ceCached = (bool)strtol(value, NULL, 0);
-        //conf->ceCached = true;
+	// Card engine (arm9) cached
+	Key.Name = (char*)"CARDENGINE_CACHED";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->ceCached = (bool)strtol(Key.Data, NULL, 0);
+    // conf->ceCached = true;
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "CONSOLE_MODEL")) {
-		// Console model
-		conf->consoleModel = strtol(value, NULL, 0);
+	// Console model
+	Key.Name = (char*)"CONSOLE_MODEL";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->consoleModel = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "COLOR_MODE")) {
-		// Color mode
-		conf->colorMode = strtol(value, NULL, 0);
+	// Color mode
+	Key.Name = (char*)"COLOR_MODE";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->colorMode = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN")) {
-		// Loading screen
-		conf->loadingScreen = strtol(value, NULL, 0);
+	// Loading screen
+	Key.Name = (char*)"LOADING_SCREEN";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingScreen = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_DARK_THEME")) {
-		// Loading screen (Dark theme)
-		conf->loadingDarkTheme = (bool)strtol(value, NULL, 0);
+	// Loading screen (Dark theme)
+	Key.Name = (char*)"LOADING_DARK_THEME";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingDarkTheme = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SWAP_LCDS")) {
-		// Swap screens in loading screen
-		conf->loadingSwapLcds = (bool)strtol(value, NULL, 0);
+	// Swap screens in loading screen
+	Key.Name = (char*)"LOADING_SWAP_LCDS";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingSwapLcds = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN_FOLDER")) {
-		// Loading screen .bmp folder path
-		conf->loadingImagePath = strdup(value);
+	// Loading screen .bmp folder path
+	Key.Name = (char*)"LOADING_SCREEN_FOLDER";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingImagePath = strdup(Key.Data);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FRAMES")) {
-		// Number of loading screen frames
-		conf->loadingFrames = strtol(value, NULL, 0);
+	// Number of loading screen frames
+	Key.Name = (char*)"LOADING_FRAMES";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingFrames = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FPS")) {
-		// FPS of animated loading screen
-		conf->loadingFps = strtol(value, NULL, 0);
+	// FPS of animated loading screen
+	Key.Name = (char*)"LOADING_FPS";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingFps = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR")) {
-		// Show/Hide loading bar
-		conf->loadingBar = (bool)strtol(value, NULL, 0);
+	// Show/Hide loading bar
+	Key.Name = (char*)"LOADING_BAR";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingBar = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR_Y")) {
-		// Loading bar Y position
-		conf->loadingBarYpos = strtol(value, NULL, 0);
+	// Loading bar Y position
+	Key.Name = (char*)"LOADING_BAR_Y";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->loadingBarYpos = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "ROMREAD_LED")) {
-		// ROM read LED
-		conf->romread_LED = strtol(value, NULL, 0);
+	// ROM read LED
+	Key.Name = (char*)"ROMREAD_LED";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->romread_LED = strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "GAME_SOFT_RESET")) {
-		// Game soft reset
-		conf->gameSoftReset = (bool)strtol(value, NULL, 0);
+	// Game soft reset
+	Key.Name = (char*)"GAME_SOFT_RESET";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->gameSoftReset = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "FORCE_SLEEP_PATCH")) {
-		// Force sleep patch
-		conf->forceSleepPatch = (bool)strtol(value, NULL, 0);
+	// Force sleep patch
+	Key.Name = (char*)"FORCE_SLEEP_PATCH";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->forceSleepPatch = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "PRECISE_VOLUME_CONTROL")) {
-		// Precise volume control
-		conf->preciseVolumeControl = (bool)strtol(value, NULL, 0);
+	// Precise volume control
+	Key.Name = (char*)"PRECISE_VOLUME_CONTROL";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->preciseVolumeControl = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOGGING")) {
-		// Logging
-		conf->logging = (bool)strtol(value, NULL, 0);
+	// Logging
+	Key.Name = (char*)"LOGGING";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->logging = (bool)strtol(Key.Data, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "CHEAT_DATA")) {
-		// Cheat data
-		conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
-		conf->cheat_data_len = 0;
-		char* str = strdup(value);
-		char* cheat = strtok(str, " ");
-		if (cheat != NULL) {
-			printf("Cheat data present\n");
+	// Cheat data
+	Key.Name = (char*)"CHEAT_DATA";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
+	conf->cheat_data_len = 0;
+	char* str = strdup(Key.Data);
+	char* cheat = strtok(str, " ");
+	if (cheat != NULL)
+		printf("Cheat data present\n");
+	while (cheat != NULL) {
+		if (!checkCheatDataLen(conf->cheat_data_len)) {
+			printf("Cheat data size limit reached, the cheats are ignored!\n");
+			memset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
+			conf->cheat_data_len = 0;
+			break;
 		}
-		while (cheat != NULL) {
-			if (!checkCheatDataLen(conf->cheat_data_len)) {
-				printf("Cheat data size limit reached, the cheats are ignored!\n");
-				memset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
-				conf->cheat_data_len = 0;
-				break;
-			}
-			printf(cheat);
-			nocashMessage(cheat);
-			printf(" ");
+		printf(cheat);
+		nocashMessage(cheat);
+		printf(" ");
 
-			conf->cheat_data[conf->cheat_data_len] = strtoul(cheat, NULL, 16);
+		conf->cheat_data[conf->cheat_data_len] = strtoul(cheat, NULL, 16);
 
-			nocashMessage(tohex(conf->cheat_data[conf->cheat_data_len]));
-			printf(" ");
+		nocashMessage(tohex(conf->cheat_data[conf->cheat_data_len]));
+		printf(" ");
 
-			++conf->cheat_data_len;
+		++conf->cheat_data_len;
 
-			cheat = strtok(NULL, " ");
-		}
-
-		free(str);
-
-		realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "BACKLIGHT_MODE")) {
-		// Backlight mode
-		conf->backlightMode = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_CPU")) {
-		// Boost CPU
-		if (conf->dsiMode) {
-			conf->boostCpu = true;
-		} else {
-			conf->boostCpu = (bool)strtol(value, NULL, 0);
-		}
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_VRAM")) {
-		// Boost VRAM
-		if (conf->dsiMode) {
-			conf->boostVram = true;
-		} else {
-			conf->boostVram = (bool)strtol(value, NULL, 0);
-		}
-
-	} else {
-		// Unknown section/name
-		//return 0; // Error
+		cheat = strtok(NULL, " ");
 	}
-	
-	return 1; // Continue searching
+	free(str);
+	realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
+
+	// Backlight mode
+	Key.Name = (char*)"BACKLIGHT_MODE";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->backlightMode = strtol(Key.Data, NULL, 0);
+
+	// Boost CPU
+	Key.Name = (char*)"BOOST_CPU";
+	iniGetKey(IniData, IniCount, &Key);
+	// If DSi mode, then always boost CPU
+	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
+
+	// Boost VRAM
+	Key.Name = (char*)"BOOST_VRAM";
+	iniGetKey(IniData, IniCount, &Key);
+	// If DSi mode, then always boost VRAM
+	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
+
+	iniFree(IniData, IniCount);
 }
 
 u16 convertToDsBmp(int colorMode, u16 val) {
@@ -212,7 +221,7 @@ u16 convertToDsBmp(int colorMode, u16 val) {
 		b = ((newVal)>>10)&31;
 		g = ((newVal)>>5)&31;
 		r = (newVal)&31;
-		// Value decomposition of hsv
+		// Key.Data decomposition of hsv
 		max = (b > g) ? b : g;
 		max = (max > r) ? max : r;
 
@@ -235,7 +244,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	nocashMessage("fatInitDefault");
 	
-	ini_browse(callback, conf, "sd:/_nds/nds-bootstrap.ini");
+	load_conf(conf, "sd:/_nds/nds-bootstrap.ini");
 	mkdir("sd:/_nds/nds-bootstrap", 0777);
 	mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 
