@@ -29,6 +29,7 @@
 //#include <nds/arm9/dldi.h>
 #include <nds/debug.h>
 
+#include "tonccpy.h"
 #include "hex.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
@@ -191,8 +192,8 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	nocashMessage("ce7_cheat_data");
 	nocashMessage(tohex((u32)ce7_cheat_data));
 	
-	//memcpy(ce7_cheat_data, cheat_data, 32768);
-	memcpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
+	//tonccpy(ce7_cheat_data, cheat_data, 32768);
+	tonccpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
 
 	ce7->cheat_data_len = cheat_data_len;
 	
@@ -208,7 +209,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Load the loader into the correct address
-	memcpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
+	tonccpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
 
 	// Set the parameters for the loader
 
