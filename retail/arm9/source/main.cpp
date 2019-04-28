@@ -378,7 +378,9 @@ static int runNdsFile(configuration* conf) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 
-	if (stat("sd:/_nds/nds-bootstrap/fatTable.bin", &stFatTable) >= 0) {
+	std::string fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
+
+	if (stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
 		clusterFatTable = stFatTable.st_ino;
 	}
 

@@ -82,6 +82,7 @@ extern u32 initDisc;
 //extern u32 argSize;
 //extern u32 dsiSD;
 extern u32 saveFileCluster;
+extern u32 romSize;
 extern u32 saveSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 fatTableFileCluster;
@@ -665,9 +666,18 @@ int arm7_main(void) {
     
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x200, 0);
+		fileRead((char*)0x2700000, fatTableFile, 0, 0x400, -1);
 	}
-	bool fatTableEmpty = (*(vu32*)(0x3700000) == 0);
+	bool fatTableEmpty = (*(vu32*)(0x2700200) == 0);
+
+	if (*(vu32*)(0x2700040) != storedFileCluster
+	|| *(vu32*)(0x2700044) != romSize
+	|| *(vu32*)(0x2700048) != saveFileCluster
+	|| *(vu32*)(0x270004C) != saveSize)
+	{
+		fatTableEmpty = true;
+	}
+
 	if (!fatTableEmpty) {
 		loadingScreen = 0;	// Disable loading screen
 	}
@@ -697,7 +707,7 @@ int arm7_main(void) {
 	if (fatTableEmpty) {
 		buildFatTableCache(romFile, 0);
 	} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
+		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x2700000, 0x20);
 	}
 
 	// Sav file
@@ -708,7 +718,7 @@ int arm7_main(void) {
 		if (fatTableEmpty) {
 			buildFatTableCache(savFile, 0);
 		} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
-			fileRead((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
+			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x2700020, 0x20);
 		}
 	}
 
@@ -717,10 +727,17 @@ int arm7_main(void) {
 	}
 
 	if (fatTableEmpty && fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileWrite((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
-		fileWrite((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
+		tonccpy((char*)0x2700000, (char*)ROM_FILE_LOCATION, 0x20);
+		tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
+		*(vu32*)(0x2700040) = storedFileCluster;
+		*(vu32*)(0x2700044) = romSize;
+		*(vu32*)(0x2700048) = saveFileCluster;
+		*(vu32*)(0x270004C) = saveSize;
+		fileWrite((char*)0x2700000, fatTableFile, 0, 0x200, -1);
 		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	}
+
+	toncset((u32*)0x02700000, 0, 0x400);
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);

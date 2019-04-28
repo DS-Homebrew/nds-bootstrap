@@ -9,6 +9,7 @@ typedef struct configuration {
     bool debug;
 	char* ndsPath;
 	char* savPath;
+	u32 romSize;
 	u32 saveSize;
 	u8 language;
 	u8 dsiMode; // SDK 5

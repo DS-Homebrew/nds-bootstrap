@@ -227,6 +227,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	free(conf->argv);
 
 	lc0->saveFileCluster             = saveCluster;
+	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
 	lc0->fatTableFileCluster         = fatTableCluster;

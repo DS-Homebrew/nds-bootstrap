@@ -30,6 +30,7 @@
 	.global argSize
 	.global dsiSD
 	.global saveFileCluster
+	.global romSize
 	.global saveSize
 	.global patchOffsetCacheFileCluster
 	.global fatTableFileCluster
@@ -78,6 +79,8 @@ dsiSD:
 	.word	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+romSize:
+	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
 patchOffsetCacheFileCluster:
