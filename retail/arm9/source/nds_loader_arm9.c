@@ -199,7 +199,7 @@ int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
 	return true;
 }
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 patchOffsetCacheCluster, configuration* conf) {
+void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -228,6 +228,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->saveFileCluster             = saveCluster;
 	lc0->saveSize                    = conf->saveSize;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
+	lc0->fatTableFileCluster         = fatTableCluster;
 	lc0->language                    = conf->language;
 	lc0->dsiMode                     = conf->dsiMode; // SDK 5
 	lc0->donorSdkVer                 = conf->donorSdkVer;

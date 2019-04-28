@@ -32,6 +32,7 @@
 	.global saveFileCluster
 	.global saveSize
 	.global patchOffsetCacheFileCluster
+	.global fatTableFileCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -80,6 +81,8 @@ saveFileCluster:
 saveSize:
 	.word	0x00000000		@ .sav file size
 patchOffsetCacheFileCluster:
+	.word	0x00000000
+fatTableFileCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000

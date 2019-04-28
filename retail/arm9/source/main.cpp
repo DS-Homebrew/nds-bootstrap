@@ -346,8 +346,10 @@ static int runNdsFile(configuration* conf) {
 	struct stat st;
 	struct stat stSav;
 	struct stat stPatchOffsetCache;
+	struct stat stFatTable;
 	u32 clusterSav = 0;
 	u32 clusterPatchOffsetCache = 0;
+	u32 clusterFatTable = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	//const char* args[1];
@@ -373,6 +375,10 @@ static int runNdsFile(configuration* conf) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 
+	if (stat("sd:/_nds/nds-bootstrap/fatTable.bin", &stFatTable) >= 0) {
+		clusterFatTable = stFatTable.st_ino;
+	}
+
 	if (conf->argc <= 0 || !conf->argv) {
 		// Construct a command line if we weren't supplied with one
 		if (!getcwd(filePath, PATH_MAX)) {
@@ -390,7 +396,7 @@ static int runNdsFile(configuration* conf) {
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, clusterPatchOffsetCache, conf);
+	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, clusterPatchOffsetCache, clusterFatTable, conf);
 
 	return 0;
 }

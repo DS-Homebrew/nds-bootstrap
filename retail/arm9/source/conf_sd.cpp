@@ -382,5 +382,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
+	if (access("sd:/_nds/nds-bootstrap/fatTable.bin", F_OK) != 0) {
+		FILE* fatTableFile = fopen("sd:/_nds/nds-bootstrap/fatTable.bin", "wb");
+		char buffer[0x80200] = {0};
+		fwrite(buffer, 1, sizeof(buffer), fatTableFile);
+		fclose(fatTableFile);
+	}
+
 	return 0;
 }

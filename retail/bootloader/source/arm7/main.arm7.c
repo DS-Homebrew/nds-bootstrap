@@ -84,6 +84,7 @@ extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 patchOffsetCacheFileCluster;
+extern u32 fatTableFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -668,6 +669,10 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
+	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
+	fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+	bool fatTableEmpty = (*(vu32*)(0x3700000) == 0);
+
 	// ROM file
 	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 	*romFile = getFileFromCluster(storedFileCluster);
@@ -684,14 +689,28 @@ int arm7_main(void) {
 		return -1;
 	}
 	
-	buildFatTableCache(romFile, 0);
+	if (fatTableEmpty) {
+		buildFatTableCache(romFile, 0);
+	} else {
+		fileRead((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
+	}
 
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
 	if (savFile->firstCluster != CLUSTER_FREE) {
-		buildFatTableCache(savFile, 0);
+		if (fatTableEmpty) {
+			buildFatTableCache(savFile, 0);
+		} else {
+			fileRead((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
+		}
+	}
+
+	if (fatTableEmpty) {
+		fileWrite((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
+		fileWrite((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
+		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	}
 
 	// File containing cached patch offsets

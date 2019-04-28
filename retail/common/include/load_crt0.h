@@ -17,6 +17,7 @@ typedef struct loadCrt0 {
     u32 saveFileCluster;
     u32 saveSize;
     u32 patchOffsetCacheFileCluster;
+    u32 fatTableFileCluster;
     u32 language; //u8
     u32 dsiMode; // SDK 5
     u32 donorSdkVer;
