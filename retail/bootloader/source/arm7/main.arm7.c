@@ -670,7 +670,9 @@ int arm7_main(void) {
 	}
 
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
-	fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+	if (fatTableFile.firstCluster != CLUSTER_FREE) {
+		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+	}
 	bool fatTableEmpty = (*(vu32*)(0x3700000) == 0);
 
 	// ROM file
@@ -691,7 +693,7 @@ int arm7_main(void) {
 	
 	if (fatTableEmpty) {
 		buildFatTableCache(romFile, 0);
-	} else {
+	} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
 		fileRead((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
 	}
 
@@ -702,12 +704,12 @@ int arm7_main(void) {
 	if (savFile->firstCluster != CLUSTER_FREE) {
 		if (fatTableEmpty) {
 			buildFatTableCache(savFile, 0);
-		} else {
+		} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
 			fileRead((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
 		}
 	}
 
-	if (fatTableEmpty) {
+	if (fatTableEmpty && fatTableFile.firstCluster != CLUSTER_FREE) {
 		fileWrite((char*)ROM_FILE_LOCATION, fatTableFile, 0, 0x20, -1);
 		fileWrite((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
 		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
