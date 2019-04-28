@@ -92,7 +92,7 @@ extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 consoleModel;
-//extern u32 loadingScreen;
+extern u32 loadingScreen;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
@@ -651,13 +651,11 @@ int arm7_main(void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-	debugOutput();
+	resetMemory_ARM7();
 
 	//
 	// 1 dot
 	//
-
-	resetMemory_ARM7();
 
 	// Init card
 	if (!FAT_InitFiles(initDisc, 0)) {
@@ -665,15 +663,20 @@ int arm7_main(void) {
 		return -1;
 	}
     
-    if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
-	}
-
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x200, 0);
 	}
 	bool fatTableEmpty = (*(vu32*)(0x3700000) == 0);
+	if (!fatTableEmpty) {
+		loadingScreen = 0;	// Disable loading screen
+	}
+
+	debugOutput();
+
+	if (logging) {
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
+	}
 
 	// ROM file
 	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
@@ -707,6 +710,10 @@ int arm7_main(void) {
 		} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
 			fileRead((char*)SAV_FILE_LOCATION, fatTableFile, 0x20, 0x20, -1);
 		}
+	}
+
+	if (!fatTableEmpty) {
+		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}
 
 	if (fatTableEmpty && fatTableFile.firstCluster != CLUSTER_FREE) {
