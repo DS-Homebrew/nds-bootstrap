@@ -11,6 +11,7 @@
 #include <nds/debug.h>*/
 #include <fat.h>
 #include <easykey.h>
+#include "tonccpy.h"
 #include "hex.h"
 #include "cheat_engine.h"
 #include "configuration.h"
@@ -198,7 +199,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	while (cheat != NULL) {
 		if (!checkCheatDataLen(conf->cheat_data_len)) {
 			printf("Cheat data size limit reached, the cheats are ignored!\n");
-			memset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
+			toncset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
 			conf->cheat_data_len = 0;
 			break;
 		}
@@ -321,7 +322,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
 					x++;
 				}
-				memcpy((void*)0x02800000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));
+				tonccpy((void*)0x02800000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));
 			}
 			fclose(loadingScreenImage);
 
