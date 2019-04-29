@@ -291,6 +291,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	FILE* ce7bin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	fread((void*)0x027E0000, 1, 0x10000, ce7bin);
+	fclose(ce7bin);
 
 	if (conf->loadingScreen == 5) {
 		FILE* loadingScreenImage;
