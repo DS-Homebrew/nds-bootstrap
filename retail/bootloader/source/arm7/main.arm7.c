@@ -578,7 +578,8 @@ Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
-	extern bool armStartConfirmed;
+	extern bool arm9Ready;
+	extern bool arm7Ready;
 
 	REG_IME = 0;
 
@@ -591,10 +592,11 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
+	arm7Ready = true;
+	while (!arm9Ready);
+
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
-
-	armStartConfirmed = true;
 
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;

@@ -47,7 +47,8 @@ tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
-bool armStartConfirmed = false;
+bool arm9Ready = false;
+bool arm7Ready = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
@@ -321,10 +322,11 @@ void arm9_main(void) {
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;
 
+	arm9Ready = true;
+	while (!arm7Ready);
+
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
-
-	while (!armStartConfirmed);
 
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
