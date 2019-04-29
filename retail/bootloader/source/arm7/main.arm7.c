@@ -849,6 +849,13 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength();
 
+	const char* romTid = getRomTid(ndsHeader);
+	if (
+		strncmp(romTid, "AMQ", 3) == 0				// MvDK2
+	) {
+		patchOffsetCache.ver = 0;
+	}
+
 	//
 	// 5 dots
 	//
@@ -898,7 +905,11 @@ int arm7_main(void) {
 	}
 	increaseLoadBarLength();
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-		fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		if (
+			strncmp(romTid, "AMQ", 3) != 0				// MvDK2
+		) {
+			fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		}
 	}
 
 	//
