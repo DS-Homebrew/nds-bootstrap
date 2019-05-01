@@ -162,10 +162,8 @@ static void resetMemory_ARM7(void) {
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x3E0000);	// clear other part of EWRAM - except before ce7 binary and loading screen frames
-	toncset((u32*)0x027F0000, 0, 0x10000);
-	toncset((u32*)0x02D00000, 0, 0x300000);	// clear part of EWRAM - after loading screen frames
-
+	toncset((u32*)0x02400000, 0, 0x3E0000);	// clear other part of EWRAM - except before ce7 binary
+	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
