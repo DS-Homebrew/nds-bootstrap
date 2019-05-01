@@ -18,9 +18,6 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 
-static u16 bmpImageBuffer[256*192];
-static u16 renderedImageBuffer[256*192];
-
 static off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
@@ -108,54 +105,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniGetKey(IniData, IniCount, &Key);
 	conf->colorMode = strtol(Key.Data, NULL, 0);
 
-	// Loading screen
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_SCREEN";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingScreen = strtol(Key.Data, NULL, 0);
-
-	// Loading screen (Dark theme)
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_DARK_THEME";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingDarkTheme = (bool)strtol(Key.Data, NULL, 0);
-
-	// Swap screens in loading screen
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_SWAP_LCDS";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingSwapLcds = (bool)strtol(Key.Data, NULL, 0);
-
-	// Loading screen .bmp folder path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_SCREEN_FOLDER";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingImagePath = strdup(Key.Data);
-
-	// Number of loading screen frames
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_FRAMES";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingFrames = strtol(Key.Data, NULL, 0);
-
-	// FPS of animated loading screen
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_FPS";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingFps = strtol(Key.Data, NULL, 0);
-
-	// Show/Hide loading bar
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_BAR";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingBar = (bool)strtol(Key.Data, NULL, 0);
-
-	// Loading bar Y position
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOADING_BAR_Y";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->loadingBarYpos = strtol(Key.Data, NULL, 0);
-
 	// ROM read LED
 	Key.Data = (char*)"";
 	Key.Name = (char*)"ROMREAD_LED";
@@ -242,29 +191,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniFree(IniData, IniCount);
 }
 
-u16 convertToDsBmp(int colorMode, u16 val) {
-	if (colorMode == 1) {
-		u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-
-		u8 b,g,r,max,min;
-		b = ((newVal)>>10)&31;
-		g = ((newVal)>>5)&31;
-		r = (newVal)&31;
-		// Key.Data decomposition of hsv
-		max = (b > g) ? b : g;
-		max = (max > r) ? max : r;
-
-		// Desaturate
-		min = (b < g) ? b : g;
-		min = (min < r) ? min : r;
-		max = (max + min) / 2;
-		
-		return 32768|(max<<10)|(max<<5)|(max);
-	} else {
-		return ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-	}
-}
-
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
@@ -292,45 +218,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* ce7bin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	fread((void*)0x027E0000, 1, 0x10000, ce7bin);
 	fclose(ce7bin);
-
-	if (conf->loadingScreen == 5) {
-		FILE* loadingScreenImage;
-		char loadingImagePath[256];
-
-		for (int i = 0; i <= conf->loadingFrames; i++) {
-			snprintf(loadingImagePath, sizeof(loadingImagePath), "%s%i.bmp", conf->loadingImagePath, i);
-			loadingScreenImage = fopen(loadingImagePath, "rb");
-			if (!loadingScreenImage && i == 0) {
-				loadingScreenImage = fopen("nitro:/loading_metalBG.bmp", "rb");
-				conf->loadingFps = 0;
-				conf->loadingBar = true;
-				conf->loadingBarYpos = 89;
-			}
-			if (loadingScreenImage) {
-				// Start loading
-				fseek(loadingScreenImage, 0xe, SEEK_SET);
-				u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
-				fseek(loadingScreenImage, pixelStart, SEEK_SET);
-				fread(bmpImageBuffer, 2, 0x18000, loadingScreenImage);
-				u16* src = bmpImageBuffer;
-				int x = 0;
-				int y = 191;
-				for (int i=0; i<256*192; i++) {
-					if (x >= 256) {
-						x = 0;
-						y--;
-					}
-					u16 val = *(src++);
-					renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
-					x++;
-				}
-				tonccpy((void*)0x02800000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));
-			}
-			fclose(loadingScreenImage);
-
-			if (conf->loadingFps == 0 || i == 29) break;
-		}
-	}
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);

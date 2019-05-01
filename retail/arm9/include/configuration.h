@@ -19,14 +19,6 @@ typedef struct configuration {
 	bool ceCached;	// SDK 1-4
 	u32 consoleModel;
 	int colorMode;
-	u32 loadingScreen;
-	bool loadingDarkTheme;
-	bool loadingSwapLcds;
-	char* loadingImagePath;
-	int loadingFrames;
-	int loadingFps;
-	bool loadingBar;
-	int loadingBarYpos;
 	u32 romread_LED;
 	bool boostCpu;
 	bool boostVram;

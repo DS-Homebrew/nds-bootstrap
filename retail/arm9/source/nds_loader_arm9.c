@@ -238,13 +238,6 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->patchMpuSize                = conf->patchMpuSize;
 	lc0->ceCached                    = conf->ceCached; // SDK 1-4
 	lc0->consoleModel                = conf->consoleModel;
-	lc0->loadingScreen               = conf->loadingScreen;
-	lc0->loadingDarkTheme            = conf->loadingDarkTheme;
-	lc0->loadingSwapLcds             = conf->loadingSwapLcds;
-	lc0->loadingFrames               = conf->loadingFrames;
-	lc0->loadingFps                  = conf->loadingFps;
-	lc0->loadingBar                  = conf->loadingBar;
-	lc0->loadingBarYpos              = conf->loadingBarYpos;
 	lc0->romread_LED                 = conf->romread_LED;
 	lc0->boostVram                   = conf->boostVram;
 	lc0->gameSoftReset               = conf->gameSoftReset;

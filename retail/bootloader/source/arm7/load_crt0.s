@@ -41,13 +41,6 @@
 	.global patchMpuSize
 	.global ceCached
 	.global consoleModel
-	.global loadingScreen
-	.global darkTheme
-	.global swapLcds
-	.global loadingFrames
-	.global loadingFps
-	.global loadingBar
-	.global loadingBarYpos
 	.global romread_LED
 	.global boostVram
 	.global gameSoftReset
@@ -100,20 +93,6 @@ patchMpuSize:
 ceCached:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-loadingScreen:
-	.word	0x00000000
-darkTheme:
-	.word	0x00000000
-swapLcds:
-	.word	0x00000000
-loadingFrames:
-	.word	0x00000000
-loadingFps:
-	.word	0x00000000
-loadingBar:
-	.word	0x00000000
-loadingBarYpos:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000

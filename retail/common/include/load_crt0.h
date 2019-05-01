@@ -26,13 +26,6 @@ typedef struct loadCrt0 {
     u32 patchMpuSize;
     u32 ceCached; // SDK 1-4
     u32 consoleModel;
-    u32 loadingScreen;
-    u32 loadingDarkTheme;
-    u32 loadingSwapLcds;
-	u32 loadingFrames;
-	u32 loadingFps;
-    u32 loadingBar;
-    u32 loadingBarYpos;
     u32 romread_LED;
     u32 boostVram;
     u32 gameSoftReset;

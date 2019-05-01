@@ -47,23 +47,8 @@ tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
-bool armStartConfirmed = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
-volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-volatile int screenBrightness = 25;
-volatile bool fadeType = true;
-
-volatile bool arm9_darkTheme = false;
-volatile bool arm9_swapLcds = false;
-volatile int arm9_loadingFrames = 0;
-volatile int arm9_loadingFps = 0;
-volatile bool arm9_loadingBar = true;
-volatile int arm9_loadingBarYpos = 0;
-volatile bool arm9_errorColor = false;
-volatile int arm9_loadBarLength = 0;
-volatile bool arm9_animateLoadingCircle = false;
-bool displayScreen = false;
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -82,19 +67,6 @@ void initMBKARM9(void) {
 	REG_MBK7 = 0x07C03740; // Same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
 	REG_MBK8 = 0x07403700; // Same as DSiWare
-}
-
-void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
-
-	if (bright < 0) {
-		mode = 2 << 14;
-		bright = -bright;
-	}
-	if (bright > 31) {
-		bright = 31;
-	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
 void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color) {
@@ -225,11 +197,6 @@ void arm9_main(void) {
 
 	REG_SCFG_EXT = 0x8300C000;
 
-	*(u16*)0x0400006C |= BIT(14);
-	*(u16*)0x0400006C &= BIT(15);
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
-
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
 	//*(vu32*)0x02FFFE24 = (u32)0x02FFFE04; // Set ARM9 Loop address
@@ -239,69 +206,13 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	screenBrightness = 25;
-	fadeType = true;
-
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
 		if (arm9_stateFlag == ARM9_DISPERR) {
-			displayScreen = true;
-			if (arm9_stateFlag == ARM9_DISPERR) {
-				arm9_stateFlag = ARM9_READY;
-			}
+			arm9_errorText();
+			arm9_stateFlag = ARM9_READY;
 		}
-		if (displayScreen) {
-			if (fadeType) {
-				screenBrightness--;
-				if (screenBrightness < 0) screenBrightness = 0;
-			} else {
-				screenBrightness++;
-				if (screenBrightness > 25) screenBrightness = 25;
-			}
-			SetBrightness(0, screenBrightness);
-			SetBrightness(1, screenBrightness);
-
-			switch (arm9_screenMode) {
-				case 0:
-				default:
-					arm9_regularLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText();
-					}
-					if (arm9_animateLoadingCircle) {
-						arm9_loadingCircle();
-					}
-					break;
-
-				case 1:
-					arm9_pong();
-					break;
-					
-				case 2:
-					arm9_ttt();
-					break;
-				case 3:
-					arm9_simpleLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText2();
-					}
-					break;
-				case 4:
-					arm9_flashcardlikeLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText3();
-					}
-					break;		
-			}
-		}
-	}
-
-	if (displayScreen) {
-		// Revert values
-		VRAM_A_CR = 0x80;
-		dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000);		// Bank A
-		REG_POWERCNT = 0x820F;
 	}
 
 	/*if (isGSDD) {       
@@ -323,8 +234,6 @@ void arm9_main(void) {
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
-
-	while (!armStartConfirmed);
 
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;

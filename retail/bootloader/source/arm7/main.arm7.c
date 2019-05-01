@@ -93,7 +93,6 @@ extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 consoleModel;
-extern u32 loadingScreen;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
@@ -539,21 +538,9 @@ static void NTR_BIOS() {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load ROM into RAM
-	if (isSdk5(moduleParams)) {
-		fileRead((char*)ROM_SDK5_LOCATION, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
-	} else if (getRomSizeNoArm9(ndsHeader) > 0x2D0000) {
-		fileRead((char*)ROM_LOCATION_2ND_HALF, file, 0x4000 + ndsHeader->arm9binarySize + 0x2D0000, getRomSizeNoArm9(ndsHeader)-0x2D0000, 0);
-	}
-
-	increaseLoadBarLength();
-	fadeOut();	// Fade-out the loading screen and overwrite it's frames
+	fileRead((char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION), file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
 	if (!isSdk5(moduleParams)) {
-		u32 romSize = getRomSizeNoArm9(ndsHeader);
-		if (romSize > 0x2D0000) {
-			romSize = 0x2D0000;
-		}
-		fileRead((char*)ROM_LOCATION, file, 0x4000 + ndsHeader->arm9binarySize, romSize, 0);
 		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
 			*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
@@ -578,8 +565,6 @@ Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
-	extern bool armStartConfirmed;
-
 	REG_IME = 0;
 
 	while (REG_VCOUNT != 191);
@@ -590,8 +575,6 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
-
-	armStartConfirmed = true;
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
@@ -678,12 +661,6 @@ int arm7_main(void) {
 		fatTableEmpty = true;
 	}
 
-	if (!fatTableEmpty) {
-		loadingScreen = 0;	// Disable loading screen
-	}
-
-	debugOutput();
-
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
@@ -759,12 +736,6 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
 	
-	increaseLoadBarLength();
-
-	//
-	// 2 dots
-	//
-
 	nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
@@ -787,21 +758,10 @@ int arm7_main(void) {
 		NTR_BIOS();
 	}
 
-	increaseLoadBarLength();
-
-	//
-	// 3 dots
-	//
-
 	nocashMessage("Trying to patch the card...\n");
 
 	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)0x027E0000, 0x10000);
 	toncset((u32*)0x027E0000, 0, 0x10000);
-	increaseLoadBarLength();
-
-	//
-	// 4 dots
-	//
 
 	if (isSdk5(moduleParams)) {
 		const char* romTid = getRomTid(ndsHeader);
@@ -847,7 +807,6 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
-	increaseLoadBarLength();
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (
@@ -856,9 +815,6 @@ int arm7_main(void) {
 		patchOffsetCache.ver = 0;
 	}
 
-	//
-	// 5 dots
-	//
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -877,11 +833,6 @@ int arm7_main(void) {
 		nocashMessage("Card patch failed");
 		errorOutput();
 	}
-	increaseLoadBarLength();
-
-	//
-	// 6 dots
-	//
 
 	cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 	errorCode = hookNdsRetailArm7(
@@ -903,7 +854,7 @@ int arm7_main(void) {
 		nocashMessage("Card hook failed");
 		errorOutput();
 	}
-	increaseLoadBarLength();
+
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 		if (
 			strncmp(romTid, "AMQ", 3) != 0				// MvDK2
@@ -911,10 +862,6 @@ int arm7_main(void) {
 			fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 	}
-
-	//
-	// 7 dots
-	//
 
 	hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
@@ -931,15 +878,9 @@ int arm7_main(void) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
-		increaseLoadBarLength();
-		fadeOut();
 	}
     
 
-
-	//
-	// Final 8 dots
-	//
 
 	arm9_boostVram = boostVram;
 

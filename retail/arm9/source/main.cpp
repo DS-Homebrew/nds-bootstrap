@@ -145,21 +145,10 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("ceCached: %s\n", btoa(conf->ceCached));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	dbg_printf("colorMode: %lX\n", conf->colorMode);
-	dbg_printf("loadingScreen: %lX\n", conf->loadingScreen);
-	dbg_printf("loadingDarkTheme: %s\n", btoa(conf->loadingDarkTheme));
-	dbg_printf("loadingSwapLcds: %s\n", btoa(conf->loadingSwapLcds));
-	dbg_printf("loadingImagePath: \"%s\"\n", conf->loadingImagePath);
-	dbg_printf("loadingFrames: %i\n", conf->loadingFrames);
-	dbg_printf("loadingFps: %i\n", conf->loadingFps);
-	dbg_printf("loadingBar: %s\n", btoa(conf->loadingBar));
-	dbg_printf("loadingBarYpos: %i\n", conf->loadingBarYpos);
 	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
-	if (debug) {
-		dopause();
-	}
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	//dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
