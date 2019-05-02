@@ -646,9 +646,13 @@ int arm7_main(void) {
 		return -1;
 	}
     
+	if (logging) {
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
+	}
+
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x2700000, fatTableFile, 0, 0x400, -1);
+		fileRead((char*)0x2700000, fatTableFile, 0, 0x400, 0);
 	}
 	bool fatTableEmpty = (*(vu32*)(0x2700200) == 0);
 
@@ -658,10 +662,6 @@ int arm7_main(void) {
 	|| *(vu32*)(0x270004C) != saveSize)
 	{
 		fatTableEmpty = true;
-	}
-
-	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
 	// ROM file
