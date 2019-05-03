@@ -288,14 +288,5 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(fatTableFile);
 	}
 
-	FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "rb");
-	if (fatTableFile) {
-		fread((void*)0x02700000, 1, 0x400, fatTableFile);
-		if (*(u32*)(0x2700200) != 0) {
-			fread((void*)0x02700400, 1, 0x7FE00, fatTableFile);
-		}
-	}
-	fclose(fatTableFile);
-
 	return 0;
 }
