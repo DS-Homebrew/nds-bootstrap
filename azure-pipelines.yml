@@ -31,7 +31,6 @@ steps:
 - script: |
      export DEVKITPRO="/opt/devkitpro"
      export DEVKITARM="/opt/devkitpro/devkitARM"
-     sudo cp libmm7.a /opt/devkitpro/libnds/lib/libmm7.a
      make package-nightly
   displayName: 'Build nds-bootstrap'
 
