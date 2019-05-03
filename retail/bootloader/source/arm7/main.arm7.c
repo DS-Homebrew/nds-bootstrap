@@ -651,16 +651,6 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
-	bool fatTableEmpty = (*(vu32*)(0x2700200) == 0);
-
-	if (*(vu32*)(0x2700040) != storedFileCluster
-	|| *(vu32*)(0x2700044) != romSize
-	|| *(vu32*)(0x2700048) != saveFileCluster
-	|| *(vu32*)(0x270004C) != saveSize)
-	{
-		fatTableEmpty = true;
-	}
-
 	// ROM file
 	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 	*romFile = getFileFromCluster(storedFileCluster);
@@ -677,6 +667,16 @@ int arm7_main(void) {
 		return -1;
 	}
 	
+	bool fatTableEmpty = (*(u32*)(0x2700200) == 0);
+
+	if (*(u32*)(0x2700040) != storedFileCluster
+	|| *(u32*)(0x2700044) != romSize
+	|| *(u32*)(0x2700048) != saveFileCluster
+	|| *(u32*)(0x270004C) != saveSize)
+	{
+		fatTableEmpty = true;
+	}
+
 	if (fatTableEmpty) {
 		buildFatTableCache(romFile, 0);
 	} else {
