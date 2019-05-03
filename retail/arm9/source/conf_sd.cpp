@@ -18,7 +18,7 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 
-static off_t getFileSize(const char* path) {
+off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
 	if (fp) {

@@ -38,7 +38,7 @@
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
 
-#include "load_bin.h"
+void* load_bin[0x10000];
 
 /* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -390,7 +390,15 @@ static int runNdsFile(configuration* conf) {
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds(load_bin, load_bin_size, st.st_ino, clusterSav, clusterPatchOffsetCache, clusterFatTable, conf);
+	extern off_t getFileSize(const char* path);
+	u32 loaderSize = getFileSize("nitro:/load.bin");
+
+	// Load bootloader binary
+	FILE* bootloaderBin = fopen("nitro:/load.bin", "rb");
+	fread(load_bin, 1, loaderSize, bootloaderBin);
+	fclose(bootloaderBin);
+
+	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterPatchOffsetCache, clusterFatTable, conf);
 
 	return 0;
 }
