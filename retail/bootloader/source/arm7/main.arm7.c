@@ -162,8 +162,9 @@ static void resetMemory_ARM7(void) {
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x3E0000);	// clear other part of EWRAM - except before ce7 binary
-	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
+	toncset((u32*)0x02400000, 0, 0x300000);	// clear other part of EWRAM - except before FAT table and ce7 binary
+	toncset((u32*)0x02780200, 0, 0x5FE00);		// clear part of EWRAM
+	toncset((u32*)0x027F0000, 0, 0x810000);
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -650,10 +651,6 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
-	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
-	if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x2700000, fatTableFile, 0, 0x80200, 0);
-	}
 	bool fatTableEmpty = (*(vu32*)(0x2700200) == 0);
 
 	if (*(vu32*)(0x2700040) != storedFileCluster
@@ -682,7 +679,7 @@ int arm7_main(void) {
 	
 	if (fatTableEmpty) {
 		buildFatTableCache(romFile, 0);
-	} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
+	} else {
 		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x2700000, 0x20);
 	}
 
@@ -693,24 +690,27 @@ int arm7_main(void) {
 	if (savFile->firstCluster != CLUSTER_FREE) {
 		if (fatTableEmpty) {
 			buildFatTableCache(savFile, 0);
-		} else if (fatTableFile.firstCluster != CLUSTER_FREE) {
+		} else {
 			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x2700020, 0x20);
 		}
 	}
 
-	if (!fatTableEmpty) {
-		tonccpy((char*)0x3700000, (char*)0x2700200, 0x80000);
-	}
+	if (fatTableEmpty) {
+		// FAT table file
+		aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 
-	if (fatTableEmpty && fatTableFile.firstCluster != CLUSTER_FREE) {
-		tonccpy((char*)0x2700000, (char*)ROM_FILE_LOCATION, 0x20);
-		tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
-		*(vu32*)(0x2700040) = storedFileCluster;
-		*(vu32*)(0x2700044) = romSize;
-		*(vu32*)(0x2700048) = saveFileCluster;
-		*(vu32*)(0x270004C) = saveSize;
-		fileWrite((char*)0x2700000, fatTableFile, 0, 0x200, -1);
-		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+		if (fatTableFile.firstCluster != CLUSTER_FREE) {
+			tonccpy((char*)0x2700000, (char*)ROM_FILE_LOCATION, 0x20);
+			tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
+			*(vu32*)(0x2700040) = storedFileCluster;
+			*(vu32*)(0x2700044) = romSize;
+			*(vu32*)(0x2700048) = saveFileCluster;
+			*(vu32*)(0x270004C) = saveSize;
+			fileWrite((char*)0x2700000, fatTableFile, 0, 0x200, -1);
+			fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+		}
+	} else {
+		tonccpy((char*)0x3700000, (char*)0x2700200, 0x80000);
 	}
 
 	toncset((u32*)0x02700000, 0, 0x80200);

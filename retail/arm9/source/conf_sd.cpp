@@ -281,12 +281,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		char buffer[BUFFER_SIZE];
 		toncset(buffer, 0, sizeof(buffer));
 
-		FILE *pFile = fopen(fatTableFilePath.c_str(), "wb");
+		FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
 		for (int i = 0x80200; i > 0; i -= BUFFER_SIZE) {
-			fwrite(buffer, 1, sizeof(buffer), pFile);
+			fwrite(buffer, 1, sizeof(buffer), fatTableFile);
 		}
-		fclose(pFile);
+		fclose(fatTableFile);
 	}
+
+	FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "rb");
+	if (fatTableFile) {
+		fread((void*)0x02700000, 1, 0x80200, fatTableFile);
+	}
+	fclose(fatTableFile);
 
 	return 0;
 }
