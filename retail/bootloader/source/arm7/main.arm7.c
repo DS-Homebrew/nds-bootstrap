@@ -652,7 +652,7 @@ int arm7_main(void) {
 
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x2700000, fatTableFile, 0, 0x400, 0);
+		fileRead((char*)0x2700000, fatTableFile, 0, 0x80200, 0);
 	}
 	bool fatTableEmpty = (*(vu32*)(0x2700200) == 0);
 
@@ -699,7 +699,7 @@ int arm7_main(void) {
 	}
 
 	if (!fatTableEmpty) {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+		tonccpy((char*)0x3700000, (char*)0x2700200, 0x80000);
 	}
 
 	if (fatTableEmpty && fatTableFile.firstCluster != CLUSTER_FREE) {
@@ -713,7 +713,7 @@ int arm7_main(void) {
 		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	}
 
-	toncset((u32*)0x02700000, 0, 0x400);
+	toncset((u32*)0x02700000, 0, 0x80200);
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
