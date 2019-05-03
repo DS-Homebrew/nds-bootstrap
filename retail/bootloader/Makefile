@@ -51,7 +51,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
 export TOPDIR	:=	$(CURDIR)
-export LOADBIN	:=	$(CURDIR)/../data/$(TARGET).bin
+export LOADBIN	:=	$(CURDIR)/../nitrofiles/$(TARGET).bin
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
