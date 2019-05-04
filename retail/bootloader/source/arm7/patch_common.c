@@ -24,6 +24,7 @@
 #include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
+#include "loading_screen.h"
 #include "debug_file.h"
 
 u32 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched, some offsets removed
@@ -206,6 +207,7 @@ u32 patchCardNds(
 	dbg_printf("patchCardNds\n\n");
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+		pleaseWaitOutput();
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
 		patchOffsetCache.moduleParamsOffset = 0;
 		patchOffsetCache.heapPointerOffset = 0;

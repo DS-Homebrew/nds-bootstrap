@@ -47,6 +47,8 @@ tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
+volatile bool screenFadedIn = false;
+volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 
@@ -69,43 +71,30 @@ void initMBKARM9(void) {
 	REG_MBK8 = 0x07403700; // Same as DSiWare
 }
 
-void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = color;	
-		}
+void SetBrightness(u8 screen, s8 bright) {
+	u16 mode = 1 << 14;
+
+	if (bright < 0) {
+		mode = 2 << 14;
+		bright = -bright;
+	}
+	if (bright > 31) {
+		bright = 31;
+	}
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+}
+
+void fadeIn(void) {
+	for (int i = 25; i >= 0; i--) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
 	}
 }
 
-void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
-	}
-}
-
-void drawRectangleAddr (u16* addr, int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = color;	
-		}
-	}
-}
-
-void drawRectangleGradientAddr (u16* addr, int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
+void fadeOut(void) {
+	for (int i = 0; i <= 25; i++) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
 	}
 }
 
@@ -197,6 +186,11 @@ void arm9_main(void) {
 
 	REG_SCFG_EXT = 0x8300C000;
 
+	*(u16*)0x0400006C |= BIT(14);
+	*(u16*)0x0400006C &= BIT(15);
+	SetBrightness(0, 31);
+	SetBrightness(1, 31);
+
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
 	//*(vu32*)0x02FFFE24 = (u32)0x02FFFE04; // Set ARM9 Loop address
@@ -209,8 +203,32 @@ void arm9_main(void) {
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
+		if (arm9_stateFlag == ARM9_SCRNCLR) {
+			if (screenFadedIn) {
+				fadeOut();
+				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
+				VRAM_A_CR = 0;
+				REG_POWERCNT = 0x820F;
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
+		if (arm9_stateFlag == ARM9_DISPSCRN) {
+			if (!imageLoaded) {
+				arm9_pleaseWaitText();
+				imageLoaded = true;
+			}
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
 		if (arm9_stateFlag == ARM9_DISPERR) {
 			arm9_errorText();
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
 			arm9_stateFlag = ARM9_READY;
 		}
 	}

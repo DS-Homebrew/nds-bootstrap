@@ -162,7 +162,8 @@ static void resetMemory_ARM7(void) {
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x3E0000);	// clear other part of EWRAM - except before ce7 binary
+	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
+	toncset((u32*)0x027B0000, 0, 0x30000);		// clear other part of EWRAM - except before ce7 binary
 	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -682,6 +683,7 @@ int arm7_main(void) {
 	}
 
 	if (fatTableEmpty) {
+		pleaseWaitOutput();
 		buildFatTableCache(romFile, 0);
 	} else {
 		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x2700000, 0x20);
@@ -894,6 +896,9 @@ int arm7_main(void) {
 	if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
+
+	toncset((u32*)0x02780000, 0, 0x30000);	// clear nds-bootstrap images
+	clearScreen();
 
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);

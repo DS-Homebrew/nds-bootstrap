@@ -18,6 +18,9 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 
+static u16 bmpImageBuffer[256*192];
+static u16 renderedImageBuffer[256*192];
+
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
@@ -191,6 +194,29 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniFree(IniData, IniCount);
 }
 
+u16 convertToDsBmp(int colorMode, u16 val) {
+	if (colorMode == 1) {
+		u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
+
+		u8 b,g,r,max,min;
+		b = ((newVal)>>10)&31;
+		g = ((newVal)>>5)&31;
+		r = (newVal)&31;
+		// Key.Data decomposition of hsv
+		max = (b > g) ? b : g;
+		max = (max > r) ? max : r;
+
+		// Desaturate
+		min = (b < g) ? b : g;
+		min = (min < r) ? min : r;
+		max = (max + min) / 2;
+		
+		return 32768|(max<<10)|(max<<5)|(max);
+	} else {
+		return ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
+	}
+}
+
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
@@ -257,6 +283,54 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	realloc(conf->argv, conf->argc*sizeof(const char*));
 	
+	// Please wait screen
+	FILE* bootstrapImage = fopen("nitro:/pleasewait.bmp", "rb");
+	if (bootstrapImage) {
+		// Start loading
+		fseek(bootstrapImage, 0xe, SEEK_SET);
+		u8 pixelStart = (u8)fgetc(bootstrapImage) + 0xe;
+		fseek(bootstrapImage, pixelStart, SEEK_SET);
+		fread(bmpImageBuffer, 2, 0x18000, bootstrapImage);
+		u16* src = bmpImageBuffer;
+		int x = 0;
+		int y = 191;
+		for (int i=0; i<256*192; i++) {
+			if (x >= 256) {
+				x = 0;
+				y--;
+			}
+			u16 val = *(src++);
+			renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
+			x++;
+		}
+		tonccpy((void*)0x02780000, renderedImageBuffer, sizeof(renderedImageBuffer));
+	}
+	fclose(bootstrapImage);
+
+	// Error screen
+	bootstrapImage = fopen("nitro:/error.bmp", "rb");
+	if (bootstrapImage) {
+		// Start loading
+		fseek(bootstrapImage, 0xe, SEEK_SET);
+		u8 pixelStart = (u8)fgetc(bootstrapImage) + 0xe;
+		fseek(bootstrapImage, pixelStart, SEEK_SET);
+		fread(bmpImageBuffer, 2, 0x18000, bootstrapImage);
+		u16* src = bmpImageBuffer;
+		int x = 0;
+		int y = 191;
+		for (int i=0; i<256*192; i++) {
+			if (x >= 256) {
+				x = 0;
+				y--;
+			}
+			u16 val = *(src++);
+			renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
+			x++;
+		}
+		tonccpy((void*)0x02798000, renderedImageBuffer, sizeof(renderedImageBuffer));
+	}
+	fclose(bootstrapImage);
+
 	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
 	const size_t last_slash_idx = romFilename.find_last_of("/");
 	if (std::string::npos != last_slash_idx)
