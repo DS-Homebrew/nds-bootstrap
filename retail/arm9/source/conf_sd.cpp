@@ -194,29 +194,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniFree(IniData, IniCount);
 }
 
-u16 convertToDsBmp(int colorMode, u16 val) {
-	if (colorMode == 1) {
-		u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-
-		u8 b,g,r,max,min;
-		b = ((newVal)>>10)&31;
-		g = ((newVal)>>5)&31;
-		r = (newVal)&31;
-		// Key.Data decomposition of hsv
-		max = (b > g) ? b : g;
-		max = (max > r) ? max : r;
-
-		// Desaturate
-		min = (b < g) ? b : g;
-		min = (min < r) ? min : r;
-		max = (max + min) / 2;
-		
-		return 32768|(max<<10)|(max<<5)|(max);
-	} else {
-		return ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-	}
-}
-
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!fatInitDefault()) {
 		consoleDemoInit();
@@ -300,7 +277,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				y--;
 			}
 			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
+			renderedImageBuffer[y*256+x] = val;
 			x++;
 		}
 		tonccpy((void*)0x02780000, renderedImageBuffer, sizeof(renderedImageBuffer));
@@ -324,7 +301,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				y--;
 			}
 			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = convertToDsBmp(conf->colorMode, val);
+			renderedImageBuffer[y*256+x] = val;
 			x++;
 		}
 		tonccpy((void*)0x02798000, renderedImageBuffer, sizeof(renderedImageBuffer));
