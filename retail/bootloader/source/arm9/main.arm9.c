@@ -88,18 +88,18 @@ void fadeIn(void) {
 	for (int i = 25; i >= 0; i--) {
 		SetBrightness(0, i);
 		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
 }
 
 void fadeOut(void) {
 	for (int i = 0; i <= 25; i++) {
 		SetBrightness(0, i);
 		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
 }
 
 /*-------------------------------------------------------------------------
