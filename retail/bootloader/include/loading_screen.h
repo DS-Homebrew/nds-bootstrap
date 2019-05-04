@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+void clearScreen(void);
+void pleaseWaitOutput(void);
 void errorOutput(void);
 
 #endif // LOADING_SCREEN_H
