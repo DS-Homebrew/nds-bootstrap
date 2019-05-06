@@ -704,10 +704,10 @@ int arm7_main(void) {
 	if (fatTableEmpty) {
 		tonccpy((char*)0x2700000, (char*)ROM_FILE_LOCATION, 0x20);
 		tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
-		*(vu32*)(0x2700040) = storedFileCluster;
-		*(vu32*)(0x2700044) = romSize;
-		*(vu32*)(0x2700048) = saveFileCluster;
-		*(vu32*)(0x270004C) = saveSize;
+		*(u32*)(0x2700040) = storedFileCluster;
+		*(u32*)(0x2700044) = romSize;
+		*(u32*)(0x2700048) = saveFileCluster;
+		*(u32*)(0x270004C) = saveSize;
 		fileWrite((char*)0x2700000, fatTableFile, 0, 0x200, -1);
 		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	} else {
