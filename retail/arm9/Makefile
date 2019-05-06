@@ -17,7 +17,6 @@ include $(DEVKITARM)/ds_rules
 BUILD		:=	build
 SOURCES		:=	source easykey/source ../common/source_general
 INCLUDES	:=	include easykey/include ../common/include
-DATA		:=	../data
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -64,7 +63,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+BINFILES	:=	
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C

@@ -10,6 +10,8 @@
 // Subroutine function signatures ARM9
 //
 
+static const u16 swi12Signature[2] = {0xDF12, 0x4770}; // LZ77UnCompReadByCallbackWrite16bit
+
 // Module params
 static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
@@ -115,10 +117,32 @@ static const u32 initHeapEndFuncSignatureAlt[1]   = {0xE8BD8008};
 static const u16 initHeapEndFuncSignatureThumb[1] = {0xBD08};      
 
 
+u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSwi12Offset:\n");
+
+	u32* swi12Offset = (u32*)findOffsetThumb(
+		(u16*)ndsHeader->arm9destination, 0x00000800,//ndsHeader->arm9binarySize,
+		swi12Signature, 2
+	);
+	if (swi12Offset) {
+		dbg_printf("swi 0x12 call found: ");
+	} else {
+		dbg_printf("swi 0x12 call not found\n");
+	}
+
+	if (swi12Offset) {
+		dbg_hexa((u32)swi12Offset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return swi12Offset;
+}
+
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
-	u32* moduleParamsOffset = 0;
+	u32* moduleParamsOffset = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
 		patchOffsetCache.moduleParamsOffset = 0;
 	} else {

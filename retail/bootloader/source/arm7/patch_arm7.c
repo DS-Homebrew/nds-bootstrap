@@ -39,12 +39,12 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 }
 
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	u32* swi12Offset = patchOffsetCache.swi12Offset;
+	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
-	if (!patchOffsetCache.swi12Offset) {
-		swi12Offset = findSwi12Offset(ndsHeader);
+	if (!patchOffsetCache.a7Swi12Offset) {
+		swi12Offset = a7_findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
-			patchOffsetCache.swi12Offset = swi12Offset;
+			patchOffsetCache.a7Swi12Offset = swi12Offset;
 		}
 	}
 	if (!patchOffsetCache.swiGetPitchTableOffset) {

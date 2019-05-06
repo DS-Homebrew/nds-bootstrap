@@ -52,6 +52,7 @@
 
 typedef struct patchOffsetCacheContents {
     u32 ver;
+	u32* a9Swi12Offset;
 	u32* moduleParamsOffset;
     u32* heapPointerOffset;
 	u32 a9IsThumb;
@@ -73,7 +74,7 @@ typedef struct patchOffsetCacheContents {
 	u32* randomPatch5SecondOffset;
 	u32 randomPatch5SecondChecked;
 	u32 a7IsThumb;
-	u32* swi12Offset;
+	u32* a7Swi12Offset;
 	u32* swiGetPitchTableOffset;
 	u32* sleepPatchOffset;
 	u32* a7CardIrqEnableOffset;

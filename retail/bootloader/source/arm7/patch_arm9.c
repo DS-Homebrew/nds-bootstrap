@@ -1,4 +1,5 @@
 #include <string.h>
+#include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
@@ -10,6 +11,25 @@
 //#define memcpy __builtin_memcpy // memcpy
 
 //bool cardReadFound = false; // patch_common.c
+
+static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
+	if (!patchOffsetCache.a9Swi12Offset) {
+		swi12Offset = a9_findSwi12Offset(ndsHeader);
+		if (swi12Offset) {
+			patchOffsetCache.a9Swi12Offset = swi12Offset;
+		}
+	}
+
+	if (REG_SCFG_ROM == 0x01) {
+		// swi 0x12 call
+		if (swi12Offset) {
+			// Patch to call swi 0x02 instead of 0x12
+			u32* swi12Patch = ce9->patches->swi02;
+			memcpy(swi12Offset, swi12Patch, 0x4);
+		}
+	}
+}
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
@@ -398,7 +418,12 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
-	u32* heapPointer = patchOffsetCache.heapPointerOffset;
+	u32* heapPointer = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+		patchOffsetCache.heapPointerOffset = 0;
+	} else {
+		heapPointer = patchOffsetCache.heapPointerOffset;
+	}
 	if (!patchOffsetCache.heapPointerOffset) {
 		heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
 	}
@@ -738,6 +763,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
 	u32* cardPullOutOffset;
+
+	fixForDsiBios(ce9, ndsHeader);
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");

@@ -27,6 +27,7 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 }
 
 // ARM9
+u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader);
@@ -66,7 +67,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 //u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
-u32* findSwi12Offset(const tNDSHeader* ndsHeader);
+u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);

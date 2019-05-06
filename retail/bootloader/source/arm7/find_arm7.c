@@ -60,7 +60,7 @@ static const u32 irqEnableStartSignature4Alt2[4] = {0xE92D4010, 0xE1A04000, 0xEB
 
 //static bool sdk5 = false;
 
-u32* findSwi12Offset(const tNDSHeader* ndsHeader) {
+u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
 
 	u32* swi12Offset = findOffset(
