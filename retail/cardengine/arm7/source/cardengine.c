@@ -52,7 +52,6 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
-extern u32 saveSize;
 extern module_params_t* moduleParams;
 extern u32 language;
 extern u32 gottenSCFGExt;
@@ -865,7 +864,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (saveSize==0 || isSdEjected()) {
+	if (isSdEjected()) {
 		return false;
 	}
 
@@ -889,7 +888,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (saveSize==0 || isSdEjected()) {
+	if (isSdEjected()) {
 		return false;
 	}
 
@@ -917,7 +916,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (saveSize==0 || isSdEjected()) {
+	if (isSdEjected()) {
 		return false;
 	}
 
@@ -956,7 +955,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
-	if (saveSize==0 || isSdEjected()) {
+	if (isSdEjected()) {
 		return false;
 	}
 

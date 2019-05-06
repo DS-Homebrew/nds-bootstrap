@@ -15,7 +15,6 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
-.global saveSize
 .global language
 .global gottenSCFGExt
 .global dsiMode
@@ -342,8 +341,6 @@ arm7Functions:
 .word    cardRead
 .word    cardId
 saveCluster:
-.word    0x00000000
-saveSize:
 .word    0x00000000
 
 arm7FunctionsThumb:

@@ -17,7 +17,6 @@ typedef struct cardengineArm7PatchesArm7Functions {
     u32 cardRead;
     u32 cardId;
     u32 saveCluster;
-    u32 saveSize;
 } __attribute__ ((__packed__)) cardengineArm7PatchesArm7Functions;
 
 

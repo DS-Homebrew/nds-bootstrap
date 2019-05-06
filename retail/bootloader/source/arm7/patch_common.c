@@ -251,7 +251,7 @@ u32 patchCardNds(
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster, saveSize);
+		patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;
