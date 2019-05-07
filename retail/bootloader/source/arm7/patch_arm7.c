@@ -54,7 +54,9 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		}
 	}
 
-	if (REG_SCFG_ROM != 0x703) {
+	if (REG_SCFG_ROM & BIT(9)) {
+		// Do nothing, if using DS BIOS on arm7
+	} else {
 		// swi 0x12 call
 		if (swi12Offset) {
 			// Patch to call swi 0x02 instead of 0x12
