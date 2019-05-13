@@ -138,39 +138,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniGetKey(IniData, IniCount, &Key);
 	conf->logging = (bool)strtol(Key.Data, NULL, 0);
 
-	// Cheat data
-	Key.Data = (char*)"";
-	Key.Name = (char*)"CHEAT_DATA";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->cheat_data = (u32*)malloc(CHEAT_DATA_MAX_SIZE);
-	conf->cheat_data_len = 0;
-	char* str = strdup(Key.Data);
-	char* cheat = strtok(str, " ");
-	if (cheat != NULL)
-		printf("Cheat data present\n");
-	while (cheat != NULL) {
-		if (!checkCheatDataLen(conf->cheat_data_len)) {
-			printf("Cheat data size limit reached, the cheats are ignored!\n");
-			toncset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
-			conf->cheat_data_len = 0;
-			break;
-		}
-		printf(cheat);
-		nocashMessage(cheat);
-		printf(" ");
-
-		conf->cheat_data[conf->cheat_data_len] = strtoul(cheat, NULL, 16);
-
-		nocashMessage(tohex(conf->cheat_data[conf->cheat_data_len]));
-		printf(" ");
-
-		++conf->cheat_data_len;
-
-		cheat = strtok(NULL, " ");
-	}
-	free(str);
-	realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
-
 	// Backlight mode
 	Key.Data = (char*)"";
 	Key.Name = (char*)"BACKLIGHT_MODE";

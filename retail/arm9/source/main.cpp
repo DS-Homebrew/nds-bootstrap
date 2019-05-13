@@ -154,8 +154,6 @@ static inline void debugConf(configuration* conf) {
 	//dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
 	//dbg_printf("argc: %lu\n", conf->argc);
 	//const char** argv;
-	//u32 cheat_data[CHEAT_DATA_MAX_LEN];
-	dbg_printf("cheat_data_len: %lu\n", conf->cheat_data_len);
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
@@ -337,9 +335,11 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stCheat;
 	struct stat stPatchOffsetCache;
 	struct stat stFatTable;
 	u32 clusterSav = 0;
+	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
 	u32 clusterFatTable = 0;
 	char filePath[PATH_MAX];
@@ -354,6 +354,12 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
+	std::string cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
+
+	if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
+		clusterCheat = stCheat.st_ino;
+	}
+
 	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
 	const size_t last_slash_idx = romFilename.find_last_of("/");
 	if (std::string::npos != last_slash_idx)
@@ -398,7 +404,7 @@ static int runNdsFile(configuration* conf) {
 	fread(load_bin, 1, loaderSize, bootloaderBin);
 	fclose(bootloaderBin);
 
-	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterPatchOffsetCache, clusterFatTable, conf);
+	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
 
 	return 0;
 }
@@ -422,7 +428,6 @@ int main(int argc, char** argv) {
 		free(conf->ndsPath);
 		free(conf->savPath);
 		free(conf->argv);
-		free(conf->cheat_data);
 		free(conf);
 		
 		stop();

@@ -76,13 +76,8 @@ typedef struct cardengineArm7 {
     u32 romread_LED;
     u32 gameSoftReset;
 	u32 preciseVolumeControl;
-    u32 cheat_data_offset; //u32* cheat_data;
-    u32 cheat_data_len;
+    u32* cheat_data_offset; //u32* cheat_data;
 
 } __attribute__ ((__packed__)) cardengineArm7;
-
-inline u32* getCheatData(const cardengineArm7* ce7) {
-    return (u32*)((u32)ce7 + ce7->cheat_data_offset);
-}
 
 #endif // CARDENGINE_HEADER_ARM7_H

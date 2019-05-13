@@ -32,6 +32,7 @@
 	.global saveFileCluster
 	.global romSize
 	.global saveSize
+	.global cheatFileCluster
 	.global patchOffsetCacheFileCluster
 	.global fatTableFileCluster
 	.global language
@@ -76,6 +77,8 @@ romSize:
 	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
+cheatFileCluster:
+	.word	0x00000000
 patchOffsetCacheFileCluster:
 	.word	0x00000000
 fatTableFileCluster:

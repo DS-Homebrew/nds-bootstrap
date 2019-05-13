@@ -181,26 +181,7 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
-int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
-	nocashMessage("loadCheatData");
-			
-	cardengineArm7* ce7 = (cardengineArm7*)0x027E0000;
-	nocashMessage("ce7");
-	nocashMessage(tohex((u32)ce7));
-
-	u32* ce7_cheat_data = getCheatData(ce7);
-	nocashMessage("ce7_cheat_data");
-	nocashMessage(tohex((u32)ce7_cheat_data));
-	
-	//tonccpy(ce7_cheat_data, cheat_data, 32768);
-	tonccpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
-
-	ce7->cheat_data_len = cheat_data_len;
-	
-	return true;
-}
-
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
+void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -229,6 +210,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->saveFileCluster             = saveCluster;
 	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
+	lc0->cheatFileCluster            = cheatCluster;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
 	lc0->fatTableFileCluster         = fatTableCluster;
 	lc0->language                    = conf->language;
@@ -244,9 +226,6 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->forceSleepPatch             = conf->forceSleepPatch;
 	lc0->preciseVolumeControl        = conf->preciseVolumeControl;
 	lc0->logging                     = conf->logging;
-
-	loadCheatData(conf->cheat_data, conf->cheat_data_len);
-	free(conf->cheat_data);
 
 	free(conf);
 

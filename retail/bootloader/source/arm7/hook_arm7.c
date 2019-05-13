@@ -93,6 +93,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 cheatFileCluster,
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
@@ -189,9 +190,6 @@ int hookNdsRetailArm7(
 	ce7->gameSoftReset           = gameSoftReset;
 	ce7->preciseVolumeControl    = preciseVolumeControl;
 
-	u32* ce7_cheat_data = getCheatData(ce7);
-	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);
-
 	*vblankHandler = ce7->patches->vblankHandler;
 	if (!ROMinRAM) {
 		*timer0Handler = ce7->patches->timer0Handler;
@@ -199,6 +197,11 @@ int hookNdsRetailArm7(
 		//*timer2Handler = ce7->patches->timer2Handler;
 		//*timer3Handler = ce7->patches->timer3Handler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;
+	}
+
+	aFile cheatFile = getFileFromCluster(cheatFileCluster);
+	if (cheatFile.firstCluster != CLUSTER_FREE) {
+		fileRead(ce7->cheat_data_offset, cheatFile, 0, 0x8000, -1);
 	}
 
 	dbg_printf("ERR_NONE\n");

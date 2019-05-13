@@ -34,6 +34,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 cheatFileCluster,
 	u32 language,
 	u32 dsiMode, // SDK5
 	u32 ROMinRAM,

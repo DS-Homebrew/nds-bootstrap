@@ -84,6 +84,7 @@ extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
+extern u32 cheatFileCluster;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 fatTableFileCluster;
 extern u32 language;
@@ -845,6 +846,7 @@ int arm7_main(void) {
 		ndsHeader,
 		moduleParams,
 		romFile->firstCluster,
+		cheatFileCluster,
 		language,
 		dsiModeConfirmed,
 		ROMinRAM,
