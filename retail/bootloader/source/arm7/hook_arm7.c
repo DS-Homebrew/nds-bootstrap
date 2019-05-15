@@ -201,7 +201,7 @@ int hookNdsRetailArm7(
 	}
 
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	if (cheatFile.firstCluster != CLUSTER_FREE) {
+	if (cheatFile.firstCluster != CLUSTER_FREE && cheatSize < 0x8000) {
 		fileRead(ce7->cheat_data_offset, cheatFile, 0, cheatSize, 0);
 	}
 
