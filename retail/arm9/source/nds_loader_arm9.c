@@ -211,6 +211,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
 	lc0->cheatFileCluster            = cheatCluster;
+	lc0->cheatSize                   = conf->cheatSize;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
 	lc0->fatTableFileCluster         = fatTableCluster;
 	lc0->language                    = conf->language;

@@ -191,6 +191,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
+	conf->cheatSize = getFileSize("sd:/_nds/nds-bootstrap/cheatData.bin");
 
 	conf->argc = 0;
 	conf->argv = (const char**)malloc(ARG_MAX);

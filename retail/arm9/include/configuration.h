@@ -11,6 +11,7 @@ typedef struct configuration {
 	char* savPath;
 	u32 romSize;
 	u32 saveSize;
+	u32 cheatSize;
 	u8 language;
 	u8 dsiMode; // SDK 5
 	u32 donorSdkVer;

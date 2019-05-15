@@ -18,6 +18,7 @@ typedef struct loadCrt0 {
     u32 romSize;
     u32 saveSize;
     u32 cheatFileCluster;
+    u32 cheatSize;
     u32 patchOffsetCacheFileCluster;
     u32 fatTableFileCluster;
     u32 language; //u8

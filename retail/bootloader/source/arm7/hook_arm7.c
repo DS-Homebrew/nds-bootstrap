@@ -94,6 +94,7 @@ int hookNdsRetailArm7(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 cheatFileCluster,
+	u32 cheatSize,
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
@@ -201,7 +202,7 @@ int hookNdsRetailArm7(
 
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	if (cheatFile.firstCluster != CLUSTER_FREE) {
-		fileRead(ce7->cheat_data_offset, cheatFile, 0, 0x8000, 0);
+		fileRead(ce7->cheat_data_offset, cheatFile, 0, cheatSize, 0);
 	}
 
 	dbg_printf("ERR_NONE\n");
