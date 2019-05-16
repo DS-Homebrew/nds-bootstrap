@@ -363,7 +363,7 @@ static bool resume_cardRead_arm9(void) {
     }
 }
 
-/*static void asyncCardRead_arm9(void) {
+static void syncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr + 1);
@@ -388,12 +388,12 @@ static bool resume_cardRead_arm9(void) {
 	dbg_hexa(marker);	
 	#endif
 
-	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
+	cardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
 	fileRead((char*)dst, *romFile, src, len, 0);
-	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
+	cardReadLED(false);    // After loading is done, turn off LED for async card read indicator
 
 	#ifdef DEBUG
 	dbg_printf("\nread \n");
@@ -403,7 +403,7 @@ static bool resume_cardRead_arm9(void) {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
-}*/
+}
 
 static void runCardEngineCheckResume(void) {
 	//dbg_printf("runCardEngineCheckResume\n");
@@ -455,14 +455,18 @@ static void runCardEngineCheck(void) {
   		}
   
   
-      		if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
-				dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
-      			if(start_cardRead_arm9()) {
-                    *(vu32*)(0x027FFB14) = 0;
-                } 
-                
-      			
-      		}
+  		if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
+		  dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
+          if(start_cardRead_arm9()) {
+              *(vu32*)(0x027FFB14) = 0;
+          }			
+  		}
+        
+        if (*(vu32*)(0x027FFB14) == (vu32)0x025FFB16) {
+            // read synchronously
+           syncCardRead_arm9();
+            *(vu32*)(0x027FFB14) = 0;			
+  		}
   
   		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
   			asyncCardRead_arm9();
