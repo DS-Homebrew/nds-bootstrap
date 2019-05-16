@@ -33,10 +33,16 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	
 	// Validate the relocation signature
 	u32 forwardedRelocStartAddr = relocationStart + 4;
-	if (!*(u32*)forwardedRelocStartAddr) {
+	while (!*(u32*)forwardedRelocStartAddr || *(u32*)forwardedRelocStartAddr < 0x02000000 || *(u32*)forwardedRelocStartAddr > 0x03000000) {
 		forwardedRelocStartAddr += 4;
 	}
 	u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+    
+    dbg_printf("forwardedRelocStartAddr\n");
+    dbg_hexa(forwardedRelocStartAddr);   
+    dbg_printf("\nvAddrOfRelocSrc\n");
+    dbg_hexa(vAddrOfRelocSrc);
+    dbg_printf("\n");  
 
 	// Sanity checks
 	u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
