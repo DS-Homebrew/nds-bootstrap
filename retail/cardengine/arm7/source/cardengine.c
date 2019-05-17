@@ -312,7 +312,9 @@ static void nandRead(void) {
     
     if (tryLockMutex(&saveMutex)) {
 		initialize();
+	    cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		fileRead(memory, *savFile, flash, len, -1);
+    	cardReadLED(false);
   		unlockMutex(&saveMutex);
 	}    
 }
@@ -345,7 +347,9 @@ static void nandWrite(void) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
 		saveTimer = 1;
+	    cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, -1);
+    	cardReadLED(false);
   		unlockMutex(&saveMutex);
 	}    
 }
@@ -527,11 +531,13 @@ static void runCardEngineCheck(void) {
           }
           
             if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC01) {
+                dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFC01);
     			nandRead();
     			*(vu32*)(0x027FFB14) = 0;
     		}
             
             if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC02) {
+                dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFC02);
     			nandWrite();
     			*(vu32*)(0x027FFB14) = 0;
     		}
