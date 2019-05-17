@@ -485,10 +485,30 @@ void cardPullOut(void) {
 	}*/
 }
 
-u32 nandRead(void* memory,void* flash,u32 size,u32 dma_channel) {
+u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+    // Send a command to the ARM7 to read the nand save
+	u32 commandNandRead = 0x025FFC01;
+
+	// Write the command
+	sharedAddr[0] = memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = flash;
+	sharedAddr[3] = commandNandRead;
+
+	waitForArm7();
     return 0; 
 }
 
-u32 nandWrite(void* memory,void* flash,u32 size,u32 dma_channel) {
+u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+    // Send a command to the ARM7 to read the nand save
+	u32 commandNandWrite = 0x025FFC02;
+
+	// Write the command
+	sharedAddr[0] = memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = flash;
+	sharedAddr[3] = commandNandWrite;
+
+	waitForArm7();
     return 0; 
 }
