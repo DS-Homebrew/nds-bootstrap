@@ -105,3 +105,5 @@ build/
 #!.vscode/tasks.json
 #!.vscode/launch.json
 #!.vscode/extensions.json
+retail/nitrofiles/cardengine_arm7.bin
+retail/nitrofiles/load.bin

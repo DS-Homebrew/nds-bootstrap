@@ -60,6 +60,8 @@ patches:
 .word	0x0
 .word	card_id_arm9
 .word	card_dma_arm9
+.word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -75,6 +77,8 @@ thumbPatches:
 .word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef

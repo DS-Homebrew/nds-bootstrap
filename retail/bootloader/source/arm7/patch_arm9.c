@@ -740,6 +740,50 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
+static void nandSavePatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+    u32 sdPatchEntry = 0;
+    
+	const char* romTid = getRomTid(ndsHeader);
+    
+    // WarioWare D.I.Y. (USA)" 
+	if (strcmp(romTid, "UORE") == 0) {
+		sdPatchEntry = 0x2002c04; 
+	}
+    // WarioWare D.I.Y. (Europe)" 
+    if (strcmp(romTid, "UORP") == 0) {
+		sdPatchEntry = 0x2002ca4; 
+	}
+    // WarioWare D.I.Y. (Japan)"
+    if (strcmp(romTid, "UORJ") == 0) {
+		sdPatchEntry = 0x2002be4; 
+	}
+    
+    if(sdPatchEntry) {   
+      //u32 gNandInit(void* data)
+      *((u32*)(sdPatchEntry+0x50c+0)) = 0xe3a00001; //mov r0, #1
+      *((u32*)(sdPatchEntry+0x50c+4)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandWait(void)
+      *((u32*)(sdPatchEntry+0xc9c+0)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandState(void)
+      *((u32*)(sdPatchEntry+0xeb0+0)) = 0xe3a00003; //mov r0, #3
+      *((u32*)(sdPatchEntry+0xeb0+4)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandError(void)
+      *((u32*)(sdPatchEntry+0xec8+0)) = 0xe3a00000; //mov r0, #0
+      *((u32*)(sdPatchEntry+0xec8+4)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+      *((u32*)(sdPatchEntry+0x958+0)) = 0xe3a03000; //mov r3, #0
+      *((u32*)(sdPatchEntry+0x958+4)) = 0xe51ff004; //ldr pc, [pc, #-4]      
+         
+      //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+      *((u32*)(sdPatchEntry+0xd24+0)) = 0xe3a03000; //mov r3, #0
+      *((u32*)(sdPatchEntry+0xd24+4)) = 0xe51ff004; //ldr pc, [pc, #-4]
+    }
+}
+
 /*static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Opera RAM patch
 	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
@@ -799,6 +843,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5First(ndsHeader, moduleParams);
 
 	randomPatch5Second(ndsHeader, moduleParams);
+    
+    nandSavePatch(ndsHeader, moduleParams);
 
 	//operaRamPatch(ndsHeader, moduleParams);
 

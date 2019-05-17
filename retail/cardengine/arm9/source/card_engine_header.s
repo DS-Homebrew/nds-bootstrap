@@ -45,6 +45,8 @@ patches:
 .word	0x0
 .word	card_id_arm9
 .word	card_dma_arm9
+.word   nand_read_arm9
+.word   nand_write_arm9
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -59,6 +61,8 @@ thumbPatches:
 .word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word   thumb_nand_read_arm9
+.word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
@@ -125,7 +129,8 @@ _blx_r6_stub_thumb_card_read:
 ce9location2:
 .word   ce9
 cardReadRef2:
-.word   cardRead-ce9 	
+.word   cardRead-ce9
+ 	
 	.arm
 @---------------------------------------------------------------------------------
 
@@ -161,6 +166,7 @@ ce9location4:
 cardReadRef4:
 .word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
+
 
 @---------------------------------------------------------------------------------
 card_pull_out_arm9:
@@ -222,6 +228,106 @@ ce9location7:
 .word   ce9
 cardReadRef7:
 .word   cardReadDma-ce9 
+@---------------------------------------------------------------------------------
+
+	.arm
+@---------------------------------------------------------------------------------
+nand_read_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef8
+    ldr     r7, ce9location8
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_nand_read	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_nand_read:
+	bx	r6	
+.pool
+ce9location8:
+.word   ce9
+cardReadRef8:
+.word   nandRead-ce9 
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+nand_write_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef9
+    ldr     r7, ce9location9
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_nand_write
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_nand_write:
+	bx	r6	
+.pool
+ce9location9:
+.word   ce9
+cardReadRef9:
+.word   nandWrite-ce9 
+@---------------------------------------------------------------------------------
+
+	.thumb    
+@---------------------------------------------------------------------------------
+thumb_nand_read_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr		r6, cardReadRef10
+    ldr     r7, ce9location10
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_nand_read	
+    
+
+	pop	{r1-r7, pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_thumb_nand_read:
+	bx	r6	
+.pool
+.align	4
+ce9location10:
+.word   ce9
+cardReadRef10:
+.word   nandRead-ce9 
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_nand_write_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr		r6, cardReadRef11
+    ldr     r7, ce9location11
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_nand_write
+    
+
+	pop	{r1-r7, pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_thumb_nand_write:
+	bx	r6	
+.pool
+.align	4
+ce9location11:
+.word   ce9
+cardReadRef11:
+.word   nandWrite-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

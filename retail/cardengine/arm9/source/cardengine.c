@@ -484,3 +484,11 @@ void cardPullOut(void) {
 		waitForArm7();
 	}*/
 }
+
+u32 nandRead(void* memory,void* flash,u32 size,u32 dma_channel) {
+
+}
+
+u32 nandWrite(void* memory,void* flash,u32 size,u32 dma_channel) {
+
+}

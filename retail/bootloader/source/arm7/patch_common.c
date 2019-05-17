@@ -146,7 +146,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
     // Pokemon Dash
 	if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
-        /*unsigned char pdash_patch_chars[64] =
+        unsigned char pdash_patch_chars[64] =
         {
           0xFE, 0x40, 0x2D, 0xE9, 
           0x28, 0x10, 0xA0, 0xE3, 
@@ -168,8 +168,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         
         for(int i =0; i<64; i++) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
-        }*/
-        *(u32*)0x02000BB0 = 0xE1A00000; //nop
+        }
+        /*(u32*)0x02000BB0 = 0xE1A00000; //nop */
     
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
