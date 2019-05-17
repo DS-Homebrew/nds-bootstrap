@@ -740,7 +740,7 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
-static void nandSavePatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
     u32 sdPatchEntry = 0;
     
 	const char* romTid = getRomTid(ndsHeader);
@@ -773,14 +773,14 @@ static void nandSavePatch(const tNDSHeader* ndsHeader, const module_params_t* mo
       //u32 gNandError(void)
       *((u32*)(sdPatchEntry+0xec8+0)) = 0xe3a00000; //mov r0, #0
       *((u32*)(sdPatchEntry+0xec8+4)) = 0xe12fff1e; //bx lr
-      
+
       //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
-      *((u32*)(sdPatchEntry+0x958+0)) = 0xe3a03000; //mov r3, #0
-      *((u32*)(sdPatchEntry+0x958+4)) = 0xe51ff004; //ldr pc, [pc, #-4]      
+      u32* nandWritePatch = ce9->patches->nand_write_arm9;
+      memcpy(sdPatchEntry+0x958, nandWritePatch, 0x40);
          
       //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
-      *((u32*)(sdPatchEntry+0xd24+0)) = 0xe3a03000; //mov r3, #0
-      *((u32*)(sdPatchEntry+0xd24+4)) = 0xe51ff004; //ldr pc, [pc, #-4]
+      u32* nandReadPatch = ce9->patches->nand_read_arm9;
+      memcpy(sdPatchEntry+0xd24, nandReadPatch, 0x40);
     }
 }
 
@@ -844,7 +844,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	randomPatch5Second(ndsHeader, moduleParams);
     
-    nandSavePatch(ndsHeader, moduleParams);
+    nandSavePatch(ce9, ndsHeader, moduleParams);
 
 	//operaRamPatch(ndsHeader, moduleParams);
 

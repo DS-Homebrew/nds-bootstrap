@@ -486,9 +486,9 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 size,u32 dma_channel) {
-
+    return 0; 
 }
 
 u32 nandWrite(void* memory,void* flash,u32 size,u32 dma_channel) {
-
+    return 0; 
 }

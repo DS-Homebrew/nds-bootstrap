@@ -234,7 +234,7 @@ cardReadRef7:
 @---------------------------------------------------------------------------------
 nand_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
+    stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, cardReadRef8
     ldr     r7, ce9location8
@@ -243,7 +243,7 @@ nand_read_arm9:
 	bl		_blx_r6_stub_nand_read	
     
 
-	ldmfd   sp!, {r1-r11,pc}
+	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
 	bx      lr
 _blx_r6_stub_nand_read:
@@ -258,7 +258,7 @@ cardReadRef8:
 @---------------------------------------------------------------------------------
 nand_write_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
+    stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, cardReadRef9
     ldr     r7, ce9location9
@@ -267,7 +267,7 @@ nand_write_arm9:
 	bl		_blx_r6_stub_nand_write
     
 
-	ldmfd   sp!, {r1-r11,pc}
+	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
 	bx      lr
 _blx_r6_stub_nand_write:
