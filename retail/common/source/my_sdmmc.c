@@ -816,7 +816,11 @@ int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndma
 	if (ndmaSlot == -1) {
 		sdmmc_send_command(&handleSD,0x33C12,sector_no);
 	} else {
-        sdmmc_send_command_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+        nocashMessage("my_sdmmc_sdcard_readsectors");
+        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+        nocashMessage("command sent");
+        while(!sdmmc_check_command_ndma(&handleSD,0x33C12,ndmaSlot)) {}
+        nocashMessage("command checked");
 	}          
 	return get_error(&handleSD);
 }
