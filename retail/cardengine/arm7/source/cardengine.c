@@ -287,12 +287,12 @@ static void log_arm9(void) {
 }
 
 static void nandRead(void) {
-	#ifdef DEBUG
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
 	u32 marker = *(vu32*)(sharedAddr+3);
 
+	#ifdef DEBUG
 	dbg_printf("\nnand read received\n");
 
 	if (calledViaIPC) {
@@ -307,15 +307,23 @@ static void nandRead(void) {
 	dbg_printf("\nmarker : \n");
 	dbg_hexa(marker);
 	#endif
+    
+	
+    
+    if (tryLockMutex(&saveMutex)) {
+		initialize();
+		fileRead(memory, *savFile, flash, len, -1);
+  		unlockMutex(&saveMutex);
+	}    
 }
 
 static void nandWrite(void) {
-	#ifdef DEBUG
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
 	u32 marker = *(vu32*)(sharedAddr+3);
 
+	#ifdef DEBUG
 	dbg_printf("\nnand write received\n");
 
 	if (calledViaIPC) {
@@ -330,6 +338,16 @@ static void nandWrite(void) {
 	dbg_printf("\nmarker : \n");
 	dbg_hexa(marker);
 	#endif
+    
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		if (saveTimer == 0) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+		}
+		saveTimer = 1;
+		fileWrite(memory, *savFile, flash, len, -1);
+  		unlockMutex(&saveMutex);
+	}    
 }
 
 static bool readOngoing = false;
