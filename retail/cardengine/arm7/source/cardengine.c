@@ -286,6 +286,52 @@ static void log_arm9(void) {
 	#endif
 }
 
+static void nandRead(void) {
+	#ifdef DEBUG
+	u32 flash = *(vu32*)(sharedAddr+2);
+	u32 memory = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\nnand read received\n");
+
+	if (calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nflash : \n");
+	dbg_hexa(flash);
+	dbg_printf("\nmemory : \n");
+	dbg_hexa(memory);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+	#endif
+}
+
+static void nandWrite(void) {
+	#ifdef DEBUG
+	u32 flash = *(vu32*)(sharedAddr+2);
+	u32 memory = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\nnand write received\n");
+
+	if (calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nflash : \n");
+	dbg_hexa(flash);
+	dbg_printf("\nmemory : \n");
+	dbg_hexa(memory);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+	#endif
+}
+
 static bool readOngoing = false;
 
 static bool start_cardRead_arm9(void) {
@@ -439,35 +485,43 @@ static void runCardEngineCheck(void) {
 		}
   		initialize();
   
-      if(!readOngoing)
-      { 
-  
-  		//nocashMessage("runCardEngineCheck mutex ok");
-  
-		/*if (*(vu32*)(0x027FFB14) == (vu32)0x5245424F) {
-			i2cWriteRegister(0x4A, 0x70, 0x01);
-			i2cWriteRegister(0x4A, 0x11, 0x01);
-		}*/
-
-  		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
-  			log_arm9();
-  			*(vu32*)(0x027FFB14) = 0;
-  		}
-  
-  
-      		if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
-				dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
-      			if(start_cardRead_arm9()) {
-                    *(vu32*)(0x027FFB14) = 0;
-                } 
-                
-      			
-      		}
-  
-  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
-  			asyncCardRead_arm9();
-  			*(vu32*)(0x027FFB14) = 0;
+        if(!readOngoing)
+        { 
+    
+    		//nocashMessage("runCardEngineCheck mutex ok");
+    
+  		/*if (*(vu32*)(0x027FFB14) == (vu32)0x5245424F) {
+  			i2cWriteRegister(0x4A, 0x70, 0x01);
+  			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
+  
+    		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+    			log_arm9();
+    			*(vu32*)(0x027FFB14) = 0;
+    		}
+    
+    
+          if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
+              dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
+              if(start_cardRead_arm9()) {
+                  *(vu32*)(0x027FFB14) = 0;
+              } 
+          }
+          
+            if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC01) {
+    			nandRead();
+    			*(vu32*)(0x027FFB14) = 0;
+    		}
+            
+            if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC02) {
+    			nandWrite();
+    			*(vu32*)(0x027FFB14) = 0;
+    		}
+    
+    		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
+    			asyncCardRead_arm9();
+    			*(vu32*)(0x027FFB14) = 0;
+    		}*/
         } else {
             if(resume_cardRead_arm9()) {
                 *(vu32*)(0x027FFB14) = 0;
