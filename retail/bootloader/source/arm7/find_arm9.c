@@ -210,6 +210,12 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
 			(u32*)ndsHeader->arm9destination + 0x3800, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignatureAlt, 2
 		);
+	} else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
+		//readType = 1;
+		cardReadEndOffset = findOffset(
+			(u32*)((u8*)ndsHeader->arm9destination + 0x80000), 0x00300000,//ndsHeader->arm9binarySize,
+			cardReadEndSignatureAlt, 2
+		);
 	} else {
 		//readType = 1;
 		cardReadEndOffset = findOffset(
