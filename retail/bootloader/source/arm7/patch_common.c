@@ -170,7 +170,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
         }*/
         
-        (u32*)0x02000BB0 = 0xE1A00000; //nop 
+        *((u32*)0x02000BB0) = 0xE1A00000; //nop 
     
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
