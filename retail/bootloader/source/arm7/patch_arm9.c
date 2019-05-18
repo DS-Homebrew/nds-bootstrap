@@ -498,7 +498,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     *thumbReadCardLocation = current_location;
     
     u32* armReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armReadCardLocation) {
+	if (!armReadDmaCardLocation) {
 		return;
 	}
     dbg_printf("armReadCardDmaLocation ");
@@ -510,7 +510,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     *armReadDmaCardLocation = current_location;
     
     u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
-	if (!thumbReadCardLocation) {
+	if (!thumbReadDmaCardLocation) {
 		return;
 	}
     dbg_printf("thumbReadCardDmaLocation ");
@@ -520,6 +520,54 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadDmaCardLocation = current_location;
+
+    u32* armReadNandLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armReadNandLocation) {
+		return;
+	}
+    dbg_printf("armReadNandLocation ");
+	dbg_hexa((u32)armReadNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadNandLocation);
+    dbg_printf("\n\n");
+    
+    *armReadNandLocation = current_location;
+    
+    u32* thumbReadNandLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadNandLocation) {
+		return;
+	}
+    dbg_printf("thumbReadNandLocation ");
+	dbg_hexa((u32)thumbReadNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadNandLocation);
+    dbg_printf("\n\n");
+    
+    *thumbReadNandLocation = current_location;
+
+    u32* armWriteNandLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armWriteNandLocation) {
+		return;
+	}
+    dbg_printf("armWriteNandLocation ");
+	dbg_hexa((u32)armWriteNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armWriteNandLocation);
+    dbg_printf("\n\n");
+    
+    *armWriteNandLocation = current_location;
+    
+    u32* thumbWriteNandLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbWriteNandLocation) {
+		return;
+	}
+    dbg_printf("thumbWriteNandLocation ");
+	dbg_hexa((u32)thumbWriteNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbWriteNandLocation);
+    dbg_printf("\n\n");
+    
+    *thumbWriteNandLocation = current_location;
 
 	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armPullCardLocation) {
@@ -558,6 +606,8 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
     ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
     ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
+    ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
@@ -566,6 +616,8 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->nand_read_arm9 = (u32*)((u32)ce9->thumbPatches->nand_read_arm9 - default_location + current_location);
+    ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
