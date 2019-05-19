@@ -192,8 +192,6 @@ void arm9_main(void) {
 
 	*(u16*)0x0400006C |= BIT(14);
 	*(u16*)0x0400006C &= BIT(15);
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -213,10 +211,16 @@ void arm9_main(void) {
 				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
 				VRAM_A_CR = 0;
 				REG_POWERCNT = 0x820F;
+				SetBrightness(0, 0);
+				SetBrightness(1, 0);
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_DISPSCRN) {
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+			}
 			if (!imageLoaded) {
 				arm9_pleaseWaitText();
 				imageLoaded = true;
@@ -228,6 +232,10 @@ void arm9_main(void) {
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_DISPERR) {
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+			}
 			arm9_errorText();
 			if (!screenFadedIn) {
 				fadeIn();
