@@ -386,6 +386,84 @@ u32 cardReadDma() {
     return 0;    
 }
 
+int cardReadPDash(u8* dst, u32 src, u32 len) {
+	u32 commandRead;
+	u32 sector = (src/readSize)*readSize;
+
+    dmaLed = true;
+
+	accessCounter++;
+    while(len > 0) {
+		int slot = getSlotForSector(sector);
+		vu8* buffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			// Send a command to the ARM7 to fill the RAM cache
+			commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
+
+			slot = allocateCacheSlot();
+
+			buffer = getCacheAddress(slot);
+
+			//REG_IME = 0;
+
+			// Write the command
+			sharedAddr[0] = (vu32)buffer;
+			sharedAddr[1] = readSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+
+			//REG_IME = 1;
+		}
+
+		updateDescriptor(slot, sector);	
+
+		u32 len2 = len;
+		if ((src - sector) + len2 > readSize) {
+			len2 = sector - src + readSize;
+		}
+
+          if (isDma) {
+              // Copy via dma
+				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+              while (dmaBusy(dma)) {
+                  sleep(1);
+              }        
+          } else {
+  			#ifdef DEBUG
+  			// Send a log command for debug purpose
+  			// -------------------------------------
+ 				commandRead = 0x026ff800;
+  
+  			sharedAddr[0] = dst;
+  			sharedAddr[1] = len2;
+  			sharedAddr[2] = buffer+src-sector;
+  			sharedAddr[3] = commandRead;
+  
+  			waitForArm7();
+  			// -------------------------------------*/
+  			#endif
+  
+  			// Copy directly
+  			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+          }
+
+		len = len - len2;
+		if (len > 0) {
+			src = src + len2;
+			dst = (u8*)(dst + len2);
+			sector = (src / readSize) * readSize;
+			accessCounter++;
+		}
+	}
+	
+    dmaLed = false;
+
+	return 0;
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {

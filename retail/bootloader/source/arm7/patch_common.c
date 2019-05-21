@@ -162,20 +162,40 @@ void patchBinary(const tNDSHeader* ndsHeader) {
           0xFE, 0x80, 0xBD, 0xE8, 
           0x01, 0x00, 0xA0, 0xE3, 
           0x1E, 0xFF, 0x2F, 0xE1, 
-          0x00, 0xA6, 0x0D, 0x02, 
+          0x00, 0xA6, 0x0D, 0x02,              d
           0x78, 0x47, 0x0A, 0x02
         };
+
+        //6D38C
+        PatchMem(KArm9,s32(ii+1),0xe1a05000); //mov r5, r0
+        PatchMem(KArm9,s32(ii+2),0xe1a00001); //mov r0, r1
+        PatchMem(KArm9,s32(ii+3),0xe28fe004); //adr lr, [pc, #4]
+        PatchMem(KArm9,s32(ii+4),0xe51ff004); //ldr pc, [pc, #-4]
+        PatchMem(KArm9,s32(ii+5),(u32)iDmaFuncs.iFunc2);
+        PatchMem(KArm9,s32(ii+6),0xe1a00005); //mov r0, r5
+        PatchMem(KArm9,s32(ii+7),0xe28ff048); //adr pc, xxx  jump+48 (12*4)
+        //6D3FC
+        PatchMem(KArm9,s32(ii+28),0xe1a00000); //nop
+        
+        // r0 : ROMCTRL
+        // r1 : ROMCTRL
+        // r2 : DST
+        // r3 : SRC
+        // ..
+        // r6 : LEN
+        // ..
+        // r10 : cardstruct
         
         for(int i =0; i<64; i++) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
         }*/
         
-        *((u32*)0x02000BB0) = 0xE1A00000; //nop 
+        //*((u32*)0x02000BB0) = 0xE1A00000; //nop 
     
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
-
+        
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
     

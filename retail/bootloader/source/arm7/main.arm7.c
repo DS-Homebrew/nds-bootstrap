@@ -390,6 +390,16 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
 		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
+    
+    /*if (
+		strncmp(romTid, "APDE", 4) == 0    // Pokemon Dash
+	) {
+		// read statically the 6D2C4 function data 
+        fileRead(0x0218A960, file, 0x000CE000, 0x1000, 0);
+        fileRead(0x020D6340, file, 0x000D2400, 0x200, 0);
+        fileRead(0x020D6140, file, 0x000CFA00, 0x200, 0);
+        fileRead(0x023B9F00, file, 0x000CFC00, 0x2800, 0);
+	}*/
 
 	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 

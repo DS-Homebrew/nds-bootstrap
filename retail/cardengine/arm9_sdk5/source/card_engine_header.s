@@ -71,6 +71,7 @@ patches:
 .global needFlushDCCache
 needFlushDCCache:
 .word   0x0
+.word   0x0
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9

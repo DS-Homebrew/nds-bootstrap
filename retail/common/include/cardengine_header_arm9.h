@@ -22,6 +22,7 @@ typedef struct cardengineArm9Patches {
     u32* terminateForPullOutRef;
     u32* swi02;
     u32 needFlushDCCache;
+    u32 pdash_read;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 

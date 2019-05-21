@@ -568,6 +568,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbWriteNandLocation = current_location;
+    
+    u32* pdashReadLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!pdashReadLocation) {
+		return;
+	}
+    dbg_printf("pdashReadLocation ");
+	dbg_hexa((u32)pdashReadLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*pdashReadLocation);
+    dbg_printf("\n\n");
+    
+    *pdashReadLocation = current_location;
 
 	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armPullCardLocation) {
@@ -859,6 +871,23 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	}
 }
 
+static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+    u32 sdPatchEntry = 0;
+    
+	const char* romTid = getRomTid(ndsHeader);
+    
+    // Pokemon Dash USA
+	if (strcmp(romTid, "APDE") == 0) {
+		sdPatchEntry = 0x206D38C; 
+	}
+    
+    if(sdPatchEntry) {   
+     	// Patch
+    	u32* pDashReadPatch = ce9->patches->pdash_read;
+    	memcpy(sdPatchEntry, pDashReadPatch, 0x70);   
+    }
+}
+
 /*static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Opera RAM patch
 	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
@@ -920,6 +949,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5Second(ndsHeader, moduleParams);
     
     nandSavePatch(ce9, ndsHeader, moduleParams);
+    
+    patchCardReadPdash(ce9, ndsHeader);
 
 	//operaRamPatch(ndsHeader, moduleParams);
 

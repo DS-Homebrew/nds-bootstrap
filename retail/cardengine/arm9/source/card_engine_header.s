@@ -55,6 +55,7 @@ patches:
 .word	swi02
 needFlushDCCache:
 .word   0x0
+.word   pdash_read
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
@@ -196,12 +197,14 @@ card_pull_out_arm9:
 card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+    
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
 @---------------------------------------------------------------------------------
 	ldr r0, cardIdDataT
 	bx      lr
+.align	4
 cardIdDataT:
 .word  0xC2FF01C0
 @---------------------------------------------------------------------------------
@@ -330,6 +333,28 @@ cardReadRef11:
 .word   nandWrite-ce9 
 @---------------------------------------------------------------------------------
 
+	.arm    
+pdash_read:
+    push	{r1-r11, lr}
+    mov     r0, r2 @DST
+    mov     r1, r3 @SRC
+    mov     r2, r6 @LEN  
+    ldr		r6, cardReadRef12
+    ldr     r7, ce9location12
+    add     r6, r6, r7
+	bl		_blx_r6_stub_pdash   
+    pop	    {r1-r11, pc}
+    mov     r0,#1
+    bx      lr
+_blx_r6_stub_pdash:
+	bx	r6	
+.pool     
+ce9location12:
+.word   ce9
+cardReadRef12:
+.word   cardReadPDash-ce9 
+
+	.thumb   
 @---------------------------------------------------------------------------------
 thumb_card_pull_out_arm9:
 @---------------------------------------------------------------------------------
@@ -356,30 +381,6 @@ _blx_r6_stub_callSleepThumb:
 	bx	r6	
 .pool
 
-/*.global patchPdash
-.type	patchPdash STT_FUNC
-patchPdash:
-    nop
-@ r0 cardstruct like struct, to be copied to cardstruct
-    push	{r1-r7, lr}
-    mov     r1, #0x28
-    mov     r2, #0
-    ldr     r3, cardstruct
-loop_patchPdash:
-    ldr     r4, [r0, r2]
-    str     r4, [r3, r2]
-    add     r2,r2,#4
-    cmp     r2,r1
-    bne     loop_patchPdash
-    ldr     r3, cardRead
-    blx     r3     
-    pop	    {r1-r7, pc}
-    mov     r0,#1
-    bx      lr     
-cardstruct:
-.word   0x20DA600
-cardRead:
-.word   0x20A4778*/ 
 
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll
