@@ -179,9 +179,10 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         
         // r0 : ROMCTRL
         // r1 : ROMCTRL
-        // r2 : DST
-        // r3 : SRC
-        // ..
+        // r2 : ...
+        // r3 : ...
+        // r4 : DST
+        // r5 : SRC
         // r6 : LEN
         // ..
         // r10 : cardstruct

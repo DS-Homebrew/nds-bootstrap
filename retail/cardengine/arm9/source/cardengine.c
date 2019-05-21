@@ -386,7 +386,7 @@ u32 cardReadDma() {
     return 0;    
 }
 
-int cardReadPDash(u8* dst, u32 src, u32 len) {
+int cardReadPDash(u8* dst, u32 src, u32 len, vu32* volatile cardStruct) {
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -450,13 +450,18 @@ int cardReadPDash(u8* dst, u32 src, u32 len) {
   			tonccpy(dst, (u8*)buffer+(src-sector), len2);
           }
 
-		len = len - len2;
-		if (len > 0) {
-			src = src + len2;
-			dst = (u8*)(dst + len2);
-			sector = (src / readSize) * readSize;
-			accessCounter++;
-		}
+    		// Update cardi common
+    		cardStruct[0] = src + len2;
+    		cardStruct[1] = (vu32)(dst + len2);
+    		cardStruct[2] = len - len2;
+
+			len = cardStruct[2];
+			if (len > 0) {
+				src = cardStruct[0];
+				dst = (u8*)cardStruct[1];
+				sector = (src / readSize) * readSize;
+				accessCounter++;
+			}
 	}
 	
     dmaLed = false;
