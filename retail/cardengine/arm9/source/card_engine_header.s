@@ -336,17 +336,16 @@ cardReadRef11:
 	.arm    
 pdash_read:
     push	{r1-r11, lr}
-    mov     r0, r4 @DST
-    mov     r1, r5 @SRC
-    mov     r2, r6 @LEN
-    mov     r3, r10 @cardStruct
-    add     r3, r3, #0x2C    
+    @mov     r0, r4 @DST
+    @mov     r1, r5 @SRC
+    @mov     r2, r6 @LEN
+    @mov     r3, r10 @cardStruct
+    add     r0, r0, #0x2C    
     ldr		r6, cardReadRef12
     ldr     r7, ce9location12
     add     r6, r6, r7
 	bl		_blx_r6_stub_pdash   
     pop	    {r1-r11, pc}
-    mov     r0,#1
     bx      lr
 _blx_r6_stub_pdash:
 	bx	r6	

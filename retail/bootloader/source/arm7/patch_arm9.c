@@ -878,13 +878,19 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
     
     // Pokemon Dash USA
 	if (strcmp(romTid, "APDE") == 0) {
-		sdPatchEntry = 0x206D38C; 
+		sdPatchEntry = 0x206CFE8;
+        // TODO : try to target 206CFE8, more similar to cardread
+        // r0 cardstruct 218A6E0 ptr 20D6120
+        // r1 src
+        // r2 dst
+        // r3 len
+        // return r0=number of time executed ?? 206D1A8
 	}
     
     if(sdPatchEntry) {   
      	// Patch
     	u32* pDashReadPatch = ce9->patches->pdash_read;
-    	memcpy(sdPatchEntry, pDashReadPatch, 0x70);   
+    	memcpy(sdPatchEntry, pDashReadPatch, 0x40);   
     }
 }
 

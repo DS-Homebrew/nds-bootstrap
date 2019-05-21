@@ -386,7 +386,8 @@ u32 cardReadDma() {
     return 0;    
 }
 
-int cardReadPDash(u8* dst, u32 src, u32 len, vu32* volatile cardStruct) {
+static int counter=0;
+int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -466,7 +467,8 @@ int cardReadPDash(u8* dst, u32 src, u32 len, vu32* volatile cardStruct) {
 	
     dmaLed = false;
 
-	return 0;
+    counter++;
+	return counter;
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
