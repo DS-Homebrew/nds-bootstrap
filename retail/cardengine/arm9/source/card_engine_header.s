@@ -34,6 +34,7 @@ enableExceptionHandler:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
+	.word	tonccpy
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -149,23 +150,15 @@ card_dma_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRef4
-    ldr     r7, ce9location4
-    add     r6, r6, r7
+    ldr     r6, =cardReadDma
 
 	bl		_blx_r6_stub_card_read_dma	
     
-
 	ldmfd   sp!, {r1-r11,pc}
-	mov r0, #0
 	bx      lr
 _blx_r6_stub_card_read_dma:
 	bx	r6	
 .pool
-ce9location4:
-.word   ce9
-cardReadRef4:
-.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 

@@ -7,6 +7,7 @@
 #include "common.h"
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
+#include "tonccpy.h"
 
 //#define memcpy __builtin_memcpy // memcpy
 
@@ -274,7 +275,29 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x20);
+    
+    dbg_printf("\ncardReadDmaPatch\n");
+    dbg_hexa(cardReadDmaPatch);
+    dbg_printf("\n");
+    
+    dbg_printf("cardReadDmaStartOffset\n");
+    dbg_hexa(cardReadDmaStartOffset);
+    dbg_printf("\n");
+    
+    u32 oldCopy = ce9->tonccpy;
+    ce9->tonccpy = ((u32)cardReadDmaStartOffset)+0x20;
+    
+    dbg_printf("oldCopy\n");
+    dbg_hexa(oldCopy);
+    dbg_printf("\n");
+    
+    dbg_printf("ce9->tonccpy\n");
+    dbg_hexa(ce9->tonccpy);
+    dbg_printf("\n");
+    
+    memcpy(ce9->tonccpy, oldCopy, 0x124);
+    
 }
 
 static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {

@@ -129,7 +129,7 @@ static void waitForArm7(void) {
         }
     } else {
         while (sharedAddr[3] != (vu32)0) {
-           if(count==20000000) {
+           if(count==200000) {
                 IPC_SendSync(0xEE24);
                 count=0;
             }
@@ -251,7 +251,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     			#endif
     
     			// Copy directly
-    			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+    			(*(ce9->tonccpy))(dst, (u8*)buffer+(src-sector), len2);
             }
     		// Update cardi common
     		cardStruct[0] = src + len2;
@@ -301,7 +301,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Copy directly
-			tonccpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+			(*(ce9->tonccpy))(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
 		}
 		// Update cardi common
 		cardStruct[0] = src + len;
@@ -448,7 +448,7 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
   			#endif
   
   			// Copy directly
-  			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+  			(*(ce9->tonccpy))(dst, (u8*)buffer+(src-sector), len2);
           }
 
     		// Update cardi common

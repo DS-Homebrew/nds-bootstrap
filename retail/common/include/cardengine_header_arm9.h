@@ -2,6 +2,7 @@
 #define CARDENGINE_HEADER_ARM9_H
 
 #include <nds/ndstypes.h>
+#include "tonccpy.h"
 #include "module_params.h"
 
 //
@@ -61,7 +62,7 @@ typedef struct cardengineArm9 {
     u32 dsiMode;
     u32 enableExceptionHandler;
     u32 consoleModel;
-    u32 asyncPrefetch;
+    void (*tonccpy) (void *dst, const void *src, uint size);
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H
