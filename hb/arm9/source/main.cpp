@@ -233,8 +233,14 @@ int main( int argc, char **argv) {
 		}
 
 		Key.Data = (char *)"";
+		Key.Name = (char *)"DSI_MODE";
+		iniGetKey(Ini, IniCount, &Key);
+
+		int dsiMode = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+
+		Key.Data = (char *)"";
 		Key.Name = (char *)"BOOST_CPU";
-		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {	
+		if (dsiMode>0 || (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
 			//REG_SCFG_CLK |= 0x1;
 		} else {
@@ -322,11 +328,6 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-		Key.Data = (char *)"";
-		Key.Name = (char *)"DSI_MODE";
-		iniGetKey(Ini, IniCount, &Key);
-
-		int dsiMode = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
 
 		iniFree(Ini, IniCount);
 
