@@ -29,7 +29,7 @@
 	.global argStart
 	.global argSize
 	.global dsiSD
-	.global loadingScreen
+	.global dsiMode
 	.global ramDiskCluster
 	.global ramDiskSize
 	.global romFileType
@@ -56,7 +56,7 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
-loadingScreen:
+dsiMode:
 	.word	0x00000000
 ramDiskCluster:
 	.word	0x00000000

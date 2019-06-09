@@ -56,7 +56,6 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
-#include "loading_screen.h"
 
 void arm7clearRAM();
 
@@ -69,6 +68,7 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern u32 dsiMode;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
 extern u32 romFileType;
@@ -318,7 +318,6 @@ int arm7_main (void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-	debugOutput();
 
 	resetMemory_ARM7();
 
@@ -352,7 +351,11 @@ int arm7_main (void) {
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 	}
 
-	NTR_BIOS();
+	if (dsiMode) {
+		dsiModeConfirmed = true;
+	} else {
+		NTR_BIOS();
+	}
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
@@ -381,9 +384,14 @@ int arm7_main (void) {
 		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 	}
 
-	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	if (!dsiMode) {
+		tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x200);	// Copy header to 4MB area of main memory
+	}
 
-	fillLoadBarLength();
+	arm9_stateFlag = ARM9_SETSCFG;
+	while (arm9_stateFlag != ARM9_READY);
+
+	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
 	startBinary_ARM7();
 

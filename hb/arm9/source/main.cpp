@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int dsiMode) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -139,7 +139,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], dsiMode);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -311,7 +311,7 @@ int main( int argc, char **argv) {
 		{
 			filename.erase(0, last_slash_idx + 1);
 		}
-		
+
 		u32 ramDiskSize = getFileSize(ramDrivePath.c_str());
 		if (ramDiskSize > 0) {
 			chdir("fat:/");	// Change directory to root for RAM disk usage
@@ -323,14 +323,14 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
 		Key.Data = (char *)"";
-		Key.Name = (char *)"LOADING_SCREEN";
+		Key.Name = (char *)"DSI_MODE";
 		iniGetKey(Ini, IniCount, &Key);
 
-		int loadingScreen = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		int dsiMode = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
 
 		iniFree(Ini, IniCount);
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, loadingScreen);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, dsiMode);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

@@ -70,7 +70,7 @@ dsiSD:
 #define ARG_START_OFFSET 16
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
-#define LOADING_SCREEN_OFFSET 32
+#define DSIMODE_OFFSET 32
 #define RAM_DISK_CLUSTER_OFFSET 36
 #define RAM_DISK_SIZE_OFFSET 40
 #define ROM_FILE_TYPE_OFFSET 44
@@ -276,7 +276,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int dsiMode)
 {
 	char* argStart;
 	u16* argData;
@@ -341,7 +341,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_C);
 	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
-	writeAddr ((data_t*) LCDC_BANK_C, LOADING_SCREEN_OFFSET, loadingScreen);
+	writeAddr ((data_t*) LCDC_BANK_C, DSIMODE_OFFSET, dsiMode);
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_SIZE_OFFSET, ramDiskSize);
 	writeAddr ((data_t*) LCDC_BANK_C, ROM_FILE_TYPE_OFFSET, romToRamDisk);
@@ -383,7 +383,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, int argc, const char** argv, int loadingScreen)  {
+int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, int argc, const char** argv, int dsiMode) {
 	struct stat st;
 	struct stat stRam;
 	u32 clusterRam = 0;
@@ -428,7 +428,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, true, true, argc, argv, loadingScreen);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, true, true, argc, argv, dsiMode);
 }
 
 /*
