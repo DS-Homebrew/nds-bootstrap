@@ -18,6 +18,9 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 
+extern std::string patchOffsetCacheFilePath;
+extern std::string fatTableFilePath;
+
 static u16 bmpImageBuffer[256*192];
 static u16 renderedImageBuffer[256*192];
 
@@ -169,25 +172,39 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	nocashMessage("fatInitDefault");
 
-	if (access("fat:/", F_OK) == 0) {
+	if ((access("fat:/", F_OK) == 0) && (access("sd:/", F_OK) != 0)) {
 		consoleDemoInit();
 		printf("This edition of nds-bootstrap\n");
 		printf("can only be used on the\n");
-		printf("SD card.\n");
+		printf("SD card (optinally, alongside\n");
+		printf("a flashcard).\n");
 		return -1;
 	}
 	
 	load_conf(conf, "sd:/_nds/nds-bootstrap.ini");
+	mkdir("sd:/_nds", 0777);
 	mkdir("sd:/_nds/nds-bootstrap", 0777);
 	mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 	mkdir("sd:/_nds/nds-bootstrap/fatTable", 0777);
+	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+		conf->dldiPatchNds = true;
+		mkdir("fat:/_nds", 0777);
+		mkdir("fat:/_nds/nds-bootstrap", 0777);
+		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
+	}
 
 	nitroFSInit(bootstrapPath);
 	
 	// Load ce7 binary
-	FILE* ce7bin = fopen("nitro:/cardengine_arm7.bin", "rb");
-	fread((void*)0x027E0000, 1, 0x10000, ce7bin);
-	fclose(ce7bin);
+	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+	fread((void*)0x027E0000, 1, 0x10000, cebin);
+	fclose(cebin);
+
+	// Load SDK5 ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_sdk5.bin", "rb");
+	fread((void*)0x027F0000, 1, 0x2000, cebin);
+	fclose(cebin);
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
@@ -245,7 +262,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				y--;
 			}
 			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = val;
+			renderedImageBuffer[y*256+x] = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
 			x++;
 		}
 		tonccpy((void*)0x02780000, renderedImageBuffer, sizeof(renderedImageBuffer));
@@ -269,7 +286,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				y--;
 			}
 			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = val;
+			renderedImageBuffer[y*256+x] = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
 			x++;
 		}
 		tonccpy((void*)0x02798000, renderedImageBuffer, sizeof(renderedImageBuffer));
@@ -283,7 +300,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		romFilename.erase(0, last_slash_idx + 1);
 	}
 
-	std::string patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+		patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	}
 	
 	if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
 		char buffer[0x200] = {0};
@@ -293,7 +313,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	std::string fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
+	fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
+	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+		fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
+	}
 
 	if (access(fatTableFilePath.c_str(), F_OK) != 0) {
 		static const int BUFFER_SIZE = 4096;

@@ -64,6 +64,8 @@ extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
+bool sdRead = true;	// Unused, but added to prevent errors
+
 static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;

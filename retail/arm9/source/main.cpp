@@ -40,6 +40,9 @@
 
 void* load_bin[0x10000];
 
+std::string patchOffsetCacheFilePath;
+std::string fatTableFilePath;
+
 /* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
 	char gameCode[4];			//!< 4 characters for the game code.
@@ -151,7 +154,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
-	//dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
+	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
 	//dbg_printf("argc: %lu\n", conf->argc);
 	//const char** argv;
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
@@ -354,26 +357,13 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
-	std::string cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
-
-	if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
+	if (stat("sd:/_nds/nds-bootstrap/cheatData.bin", &stCheat) >= 0) {
 		clusterCheat = stCheat.st_ino;
 	}
-
-	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
-	const size_t last_slash_idx = romFilename.find_last_of("/");
-	if (std::string::npos != last_slash_idx)
-	{
-		romFilename.erase(0, last_slash_idx + 1);
-	}
-
-	std::string patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
 
 	if (stat(patchOffsetCacheFilePath.c_str(), &stPatchOffsetCache) >= 0) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
-
-	std::string fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
 
 	if (stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
 		clusterFatTable = stFatTable.st_ino;
@@ -412,7 +402,7 @@ static int runNdsFile(configuration* conf) {
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
 	conf->initDisc = true;
-	conf->dldiPatchNds = true;
+	conf->dldiPatchNds = false;
 
 	int status = loadFromSD(conf, argv[0]);
 

@@ -65,8 +65,6 @@
 
 #include "cardengine_arm9_bin.h"
 #include "cardengine_arm9_reloc_bin.h"
-#include "cardengine_arm9_sdk5_bin.h"
-#include "cardengine_arm9_sdk5_gsdd_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -77,7 +75,7 @@ extern void arm7clearRAM(void);
 //extern u32 _start;
 extern u32 storedFileCluster;
 extern u32 initDisc;
-//extern u32 wantToPatchDLDI;
+extern u32 gameOnFlashcard;
 //extern u32 argStart;
 //extern u32 argSize;
 //extern u32 dsiSD;
@@ -102,6 +100,8 @@ extern u32 preciseVolumeControl;
 extern u32 soundFix;
 extern u32 boostVram;
 extern u32 logging;
+
+bool sdRead = true;
 
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
@@ -166,7 +166,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x027B0000, 0, 0x30000);		// clear other part of EWRAM - except before ce7 binary
-	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
+	toncset((u32*)0x027F2000, 0, 0x80E000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -659,11 +659,22 @@ int arm7_main(void) {
 		return -1;
 	}
 
+	if (gameOnFlashcard) {
+		sdRead = false;
+		// Init Slot-1 card
+		if (!FAT_InitFiles(initDisc, 0)) {
+			nocashMessage("!FAT_InitFiles");
+			return -1;
+		}
+		sdRead = true;
+	}
+
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
 	// ROM file
+	if (gameOnFlashcard) sdRead = false;
 	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 	*romFile = getFileFromCluster(storedFileCluster);
 
@@ -687,11 +698,17 @@ int arm7_main(void) {
 	bool fatTableEmpty = (*(u32*)(0x2700200) == 0);
 
 	if (*(u32*)(0x2700040) != storedFileCluster
-	|| *(u32*)(0x2700044) != romSize
-	|| *(u32*)(0x2700048) != saveFileCluster
-	|| *(u32*)(0x270004C) != saveSize)
+	|| *(u32*)(0x2700044) != romSize)
 	{
 		fatTableEmpty = true;
+	}
+
+	if (!gameOnFlashcard) {
+		if (*(u32*)(0x2700048) != saveFileCluster
+		|| *(u32*)(0x270004C) != saveSize)
+		{
+			fatTableEmpty = true;
+		}
 	}
 
 	if (fatTableEmpty) {
@@ -701,25 +718,33 @@ int arm7_main(void) {
 		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x2700000, 0x20);
 	}
 
+	if (gameOnFlashcard) sdRead = true;
+
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
-	if (savFile->firstCluster != CLUSTER_FREE) {
+	if (savFile->firstCluster != CLUSTER_FREE && !gameOnFlashcard) {
 		if (fatTableEmpty) {
-			buildFatTableCache(savFile, 0);
+			buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 		} else {
 			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x2700020, 0x20);
 		}
 	}
 
+	if (gameOnFlashcard) sdRead = false;
+
 	if (fatTableEmpty) {
 		tonccpy((char*)0x2700000, (char*)ROM_FILE_LOCATION, 0x20);
-		tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
+		if (!gameOnFlashcard) {
+			tonccpy((char*)0x2700020, (char*)SAV_FILE_LOCATION, 0x20);
+		}
 		*(u32*)(0x2700040) = storedFileCluster;
 		*(u32*)(0x2700044) = romSize;
-		*(u32*)(0x2700048) = saveFileCluster;
-		*(u32*)(0x270004C) = saveSize;
+		if (!gameOnFlashcard) {
+			*(u32*)(0x2700048) = saveFileCluster;
+			*(u32*)(0x270004C) = saveSize;
+		}
 		fileWrite((char*)0x2700000, fatTableFile, 0, 0x200, -1);
 		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	} else {
@@ -787,7 +812,7 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINE_ARM9_GSDD_LOCATION, cardengine_arm9_sdk5_gsdd_bin, cardengine_arm9_sdk5_gsdd_bin_size);
         } else {*/
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, cardengine_arm9_sdk5_bin, cardengine_arm9_sdk5_bin_size);
+			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)0x027F0000, 0x2000);
 		//}
 		/*if (ceCached && (ndsHeader->unitCode == 0) && isGSDD) {
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
@@ -825,6 +850,8 @@ int arm7_main(void) {
 		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
 
+	toncset((u32*)0x027F0000, 0, 0x2000);
+
 	const char* romTid = getRomTid(ndsHeader);
 	if (
 		strncmp(romTid, "AMQ", 3) == 0				// MvDK2
@@ -851,6 +878,8 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
+	if (gameOnFlashcard) sdRead = true;
+
 	cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -873,6 +902,8 @@ int arm7_main(void) {
 		nocashMessage("Card hook failed");
 		errorOutput();
 	}
+
+	if (gameOnFlashcard) sdRead = false;
 
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 		if (

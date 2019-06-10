@@ -52,13 +52,14 @@ struct DISC_INTERFACE_STRUCT {
 	unsigned long			features ;
 	FN_MEDIUM_STARTUP		startup ;
 	FN_MEDIUM_ISINSERTED	isInserted ;
-    FN_MEDIUM_READSECTOR	readSector ;
 	FN_MEDIUM_READSECTORS	readSectors ;
-    FN_MEDIUM_READSECTORS_NONBLOCKING readSectorsNonBlocking;
-    FN_MEDIUM_CHECK_COMMAND checkCommand; 
 	FN_MEDIUM_WRITESECTORS	writeSectors ;
 	FN_MEDIUM_CLEARSTATUS	clearStatus ;
 	FN_MEDIUM_SHUTDOWN		shutdown ;
+	// Below not used for DLDI drivers
+    FN_MEDIUM_READSECTOR	readSector ;
+    FN_MEDIUM_READSECTORS_NONBLOCKING readSectorsNonBlocking;
+    FN_MEDIUM_CHECK_COMMAND checkCommand; 
 } ;
 
 typedef struct DISC_INTERFACE_STRUCT DISC_INTERFACE ;

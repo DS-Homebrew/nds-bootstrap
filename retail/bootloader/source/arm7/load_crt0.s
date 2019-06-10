@@ -25,7 +25,7 @@
 	.global _start
 	.global storedFileCluster
 	.global initDisc
-	.global wantToPatchDLDI
+	.global gameOnFlashcard
 	.global argStart
 	.global argSize
 	.global dsiSD
@@ -61,8 +61,8 @@ storedFileCluster:
 	.word	0x0FFFFFFF		@ default BOOT.NDS
 initDisc:
 	.word	0x00000001		@ init the disc by default
-wantToPatchDLDI:
-	.word	0x00000000		@ by default patch the DLDI section of the loaded NDS
+gameOnFlashcard:
+	.word	0x00000000
 @ Used for passing arguments to the loaded app
 argStart:
 	.word	_end - _start
