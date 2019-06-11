@@ -33,6 +33,10 @@
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+#ifdef DLDI
+#include "my_fat.h"
+#include "card_dldionly.h"
+#endif
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -43,31 +47,35 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-#ifdef GSDD
-extern void user_exception(void);
-#endif;
-
 //extern vu32* volatile cacheStruct;
 
 extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+
+#ifdef DLDI
+//static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+static aFile romFile;
+
+bool sdRead = false;
+#else
 static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS_32KB_SDK5];
 static u32 accessCounter = 0;
 
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
+#endif
 
 static bool flagsSet = false;
-static bool isGSDD = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u8 dma = 4;
 
+#ifndef DLDI
 static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
@@ -101,6 +109,7 @@ static void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
 }
+#endif
 
 static void sleep(u32 ms) {
     if(ce9->patches->sleepRef) {
@@ -111,6 +120,7 @@ static void sleep(u32 ms) {
     }    
 }
 
+#ifndef DLDI
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
@@ -133,17 +143,7 @@ static void waitForArm7(void) {
         }
     }
 }
-
-static void accessExtRam(bool yes) {
-	if (!isGSDD) return;
-	/*if (yes) {
-		REG_IME = 0;	// Disable all IRQs to prevent crashing when accessing extra RAM
-		REG_SCFG_EXT = 0x8300C000;
-	} else {
-		REG_SCFG_EXT = 0x83000000;
-        REG_IME = 1;	// Re-enable all IRQs when done accessing extra RAM
-	}*/
-}
+#endif
 
 static void clearIcache (void) {
       // Seems to have no effect
@@ -154,32 +154,10 @@ static void clearIcache (void) {
       leaveCriticalSection(oldIME);*/
 }
 
-/*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-	//return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles, breaks Mario's Holiday)
-	return (strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
-		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
-		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
-		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
-		|| strncmp(romTid, "ARZ", 3) == 0   // MegaMan ZX (slightly boosts load speed)
-		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
-		|| strncmp(romTid, "YZX", 3) == 0   // MegaMan ZX Advent (slightly boosts load speed)
-		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
-		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
-		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
-		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
-		|| strncmp(romTid, "CS3", 3) == 0   // Sonic & SEGA All-Stars Racing
-		|| strncmp(romTid, "VSO", 3) == 0   // Sonic Classic Collection
-		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
-		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
-		|| strncmp(romTid, "B6Z", 3) == 0   // MegaMan Zero Collection (slightly boosts load speed)
-		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
-		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
-		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
-		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
-}*/
-
 static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
+#ifdef DLDI
+	fileRead((char*)dst, romFile, src, len, 0);
+#else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -216,8 +194,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				buffer = getCacheAddress(slot);
 
-				accessExtRam(true);
-
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = readSize;
@@ -225,8 +201,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				sharedAddr[3] = commandRead;
 
 				waitForArm7();
-
-				accessExtRam(false);
 			}
 
 			updateDescriptor(slot, sector);	
@@ -250,7 +224,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			// -------------------------------------*/
 			#endif
 
-			accessExtRam(true);
             if (isDma) {
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
@@ -261,7 +234,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
     			// Copy directly
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
             }
-			accessExtRam(false);
 
 			len = len - len2;
 			if (len > 0) {
@@ -272,18 +244,14 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	//}
+#endif
 	
-    /*if (isGSDD) {
-	   cacheFlush(); 
-	}*/
-
 	return 0;
 }
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	//u32 commandRead;
 	while (len > 0) {
-		accessExtRam(true);
 		if (isDma) {
             // Copy via dma
   			dmaCopyWordsAsynch(dma, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
@@ -308,7 +276,6 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 			// Copy directly
 			tonccpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
 		}
-		accessExtRam(false);
 
 		len = len - len;
 		if (len > 0) {
@@ -379,6 +346,14 @@ u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		#ifdef DLDI
+		if (!FAT_InitFiles(true, 0)) {
+			//nocashMessage("!FAT_InitFiles");
+			return -1;
+		}
+		romFile = getFileFromCluster(ce9->fileCluster);
+		buildFatTableCache(&romFile, 0);
+		#else
 		//if (isGameLaggy(ndsHeader)) {
 			if (ce9->consoleModel > 0) {
 				// SDK 5
@@ -392,20 +367,11 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			cacheSlots = dev_CACHE_SLOTS_SDK5;
 		}*/
         
-        #ifdef GSDD
-			exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			setExceptionHandler(user_exception);
-        #endif
-
 		if (ce9->enableExceptionHandler) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
 		}
-
-	   /*isGSDD = (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)			// Golden Sun: Dark Dawn
-        || (strncmp(getRomTid(ndsHeader), "TBR", 3) == 0)			    // Disney Pixar Brave 
-        ;*/
-
+		#endif
 		flagsSet = true;
 	}
 

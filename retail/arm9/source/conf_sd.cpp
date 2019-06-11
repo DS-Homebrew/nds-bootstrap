@@ -206,6 +206,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fread((void*)0x027F0000, 1, 0x2000, cebin);
 	fclose(cebin);
 
+	// Load SDK5 DLDI ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.bin", "rb");
+	fread((void*)0x027F2000, 1, 0x7000, cebin);
+	fclose(cebin);
+
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->cheatSize = getFileSize("sd:/_nds/nds-bootstrap/cheatData.bin");

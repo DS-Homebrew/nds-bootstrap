@@ -14,7 +14,6 @@
 .global patches_offset
 .global moduleParams
 .global fileCluster
-.global saveCluster
 .global ROMinRAM
 .global dsiMode
 .global enableExceptionHandler

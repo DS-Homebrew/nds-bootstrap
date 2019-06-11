@@ -15,6 +15,7 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global gameOnFlashcard
 .global language
 .global gottenSCFGExt
 .global dsiMode
@@ -48,6 +49,8 @@ moduleParams:
 fileCluster:
 	.word	0x00000000
 cardStruct:
+	.word	0x00000000
+gameOnFlashcard:
 	.word	0x00000000
 language:
 	.word	0x00000000

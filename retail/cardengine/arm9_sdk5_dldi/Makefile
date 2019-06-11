@@ -15,8 +15,8 @@ include $(DEVKITARM)/ds_rules
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	../arm9_sdk5/source ../../common/source_general
-INCLUDES	:=	../arm9_sdk5/include ../../common/include
+SOURCES		:=	source_ext ../arm9_sdk5/source ../../common/source_general
+INCLUDES	:=	include_ext ../arm9_sdk5/include ../../common/include
 DATA		:=	data
 
 
@@ -25,13 +25,13 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-marm -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -O1\
+CFLAGS	:=	-g -Wall -O2\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -fPIE
+CFLAGS	+=	$(INCLUDE) -DARM9 -DDLDI
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
@@ -57,8 +57,8 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardengine_arm9_sdk5_reloc
-export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
+export TARGET	:=	cardengine_arm9_sdk5_dldi
+export OUTPUT	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \

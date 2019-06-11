@@ -53,6 +53,7 @@ extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern module_params_t* moduleParams;
+extern u32 gameOnFlashcard;
 extern u32 language;
 extern u32 gottenSCFGExt;
 extern u32 dsiMode;
@@ -882,7 +883,7 @@ void myIrqHandlerVBlank(void) {
 	
 	cheat_engine_start();
 
-	if (!ROMinRAM) {
+	if (!ROMinRAM && !gameOnFlashcard) {
 		runCardEngineCheck();
 	}
 }
@@ -1138,7 +1139,9 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (ROMinRAM) {
+	if (gameOnFlashcard) {
+		return true;
+	} else if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
 		initialize();
