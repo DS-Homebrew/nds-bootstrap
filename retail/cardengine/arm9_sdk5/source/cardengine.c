@@ -249,8 +249,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
+#ifndef DLDI
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
-	//u32 commandRead;
 	while (len > 0) {
 		if (isDma) {
             // Copy via dma
@@ -283,9 +283,9 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 			dst = (u8*)(dst + len);
 		}
 	}
-
 	return 0;
 }
+#endif
 
 u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
     dma = dma0; // dma channel
@@ -401,5 +401,9 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
+	#ifdef DLDI
+	return cardReadNormal(dst, src, len);
+	#else
 	return ce9->ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
+	#endif
 }

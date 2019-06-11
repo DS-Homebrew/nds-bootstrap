@@ -17,6 +17,7 @@
 #include "configuration.h"
 #include "conf_sd.h"
 #include "nitrofs.h"
+#include "locations.h"
 
 extern std::string patchOffsetCacheFilePath;
 extern std::string fatTableFilePath;
@@ -198,17 +199,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
-	fread((void*)0x027E0000, 1, 0x10000, cebin);
+	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x10000, cebin);
+	fclose(cebin);
+
+	// Load DLDI ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_dldi.bin", "rb");
+	fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
 	fclose(cebin);
 
 	// Load SDK5 ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_sdk5.bin", "rb");
-	fread((void*)0x027F0000, 1, 0x2000, cebin);
+	fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x2000, cebin);
 	fclose(cebin);
 
 	// Load SDK5 DLDI ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.bin", "rb");
-	fread((void*)0x027F2000, 1, 0x7000, cebin);
+	fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
 	fclose(cebin);
 
 	conf->romSize = getFileSize(conf->ndsPath);

@@ -33,6 +33,10 @@
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+#ifdef DLDI
+#include "my_fat.h"
+#include "card_dldionly.h"
+#endif
 
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
@@ -55,23 +59,32 @@ extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+
+#ifdef DLDI
+//static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+static aFile romFile;
+
+bool sdRead = false;
+#else
 /*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS_32KB];*/
 static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 romLocation = ROM_LOCATION;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
+#endif
 
 static bool flagsSet = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u8 dma = 4;
 
+#ifndef DLDI
 static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
@@ -105,6 +118,7 @@ static void updateDescriptor(int slot, u32 sector) {
 	*(cacheDescriptor+slot) = sector;
 	*(cacheCounter+slot) = accessCounter;
 }
+#endif
 
 static void sleep(u32 ms) {
     if(ce9->patches->sleepRef) {
@@ -173,6 +187,9 @@ static void clearIcache (void) {
 }*/
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+#ifdef DLDI
+	fileRead((char*)dst, romFile, src, len, 0);
+#else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -268,7 +285,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			}
 		}
 	//}
-	
+#endif
+
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
@@ -276,6 +294,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	return 0;
 }
 
+#ifndef DLDI
 static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
 	while (len > 0) {
@@ -318,6 +337,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 	return 0;
 }
+#endif
 
 //Currently used for NSMBDS romhacks
 void __attribute__((target("arm"))) debug8mbMpuFix(){
@@ -388,6 +408,9 @@ u32 cardReadDma() {
 
 static int counter=0;
 int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
+#ifdef DLDI
+	fileRead((char*)dst, romFile, src, len, 0);
+#else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -466,6 +489,7 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 	}
 	
     dmaLed = false;
+#endif
 
     counter++;
 	return counter;
@@ -474,6 +498,19 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		#ifdef DLDI
+		if (!FAT_InitFiles(true, 0)) {
+			//nocashMessage("!FAT_InitFiles");
+			return -1;
+		}
+		romFile = getFileFromCluster(ce9->fileCluster);
+		buildFatTableCache(&romFile, 0);
+
+		const char* romTid = getRomTid(ndsHeader);
+		if (strncmp(romTid, "UBR", 3) != 0) {
+			debug8mbMpuFix();
+		}
+		#else
 		if (ce9->dsiMode) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
@@ -512,6 +549,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
 		}
+		#endif
 		
 		flagsSet = true;
 	}
@@ -553,7 +591,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
     
-    int ret = ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	#ifdef DLDI
+	int ret = cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	#else
+	int ret = ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	#endif
 
     isDma=false;
     dma=0;

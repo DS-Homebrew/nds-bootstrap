@@ -165,8 +165,8 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x027B0000, 0, 0x30000);		// clear other part of EWRAM - except before ce7 binary
-	toncset((u32*)0x027F9000, 0, 0x807000);	// clear part of EWRAM
+	toncset((u32*)0x027B0000, 0, 0x20000);		// clear other part of EWRAM - except before ce7 binary and some ce9 binaries
+	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -808,20 +808,31 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)0x027E0000, 0x10000);
-	toncset((u32*)0x027E0000, 0, 0x10000);
+	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x10000);
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x10000);
 
 	if (isSdk5(moduleParams)) {
-        if(gameOnFlashcard) {
+        if(gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)0x027F2000, 0x7000);
+			tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 			if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
 				nocashMessage("DLDI patch failed");
+				dbg_printf("DLDI patch failed");
+				dbg_printf("\n");
 				errorOutput();
 			}
         } else {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)0x027F0000, 0x2000);
+			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x2000);
+		}
+	} else if (gameOnFlashcard && !ROMinRAM) {
+		ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
+		tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
+		if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
+			nocashMessage("DLDI patch failed");
+			dbg_printf("DLDI patch failed");
+			dbg_printf("\n");
+			errorOutput();
 		}
 	} else if (ceCached) {
 		const char* romTid = getRomTid(ndsHeader);
@@ -846,7 +857,7 @@ int arm7_main(void) {
 		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
 
-	toncset((u32*)0x027F0000, 0, 0x9000);
+	toncset((u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0, 0x10000);
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (
