@@ -883,7 +883,10 @@ void myIrqHandlerVBlank(void) {
 	
 	cheat_engine_start();
 
-	if (!ROMinRAM && !gameOnFlashcard) {
+	const char* romTid = getRomTid(ndsHeader);
+	if (strncmp(romTid, "UOR", 3) == 0
+	|| strncmp(romTid, "UXB", 3) == 0
+	|| (!ROMinRAM && !gameOnFlashcard)) {
 		runCardEngineCheck();
 	}
 }

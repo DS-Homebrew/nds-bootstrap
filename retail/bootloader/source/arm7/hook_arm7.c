@@ -22,6 +22,7 @@
 #include <nds/debug.h>
 
 //#include "my_fat.h"
+#include "nds_header.h"
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "common.h"
@@ -213,8 +214,11 @@ int hookNdsRetailArm7(
 	ce7->gameSoftReset           = gameSoftReset;
 	ce7->preciseVolumeControl    = preciseVolumeControl;
 
+	const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
-	if (!ROMinRAM && !gameOnFlashcard) {
+	if (strncmp(romTid, "UOR", 3) == 0
+	|| strncmp(romTid, "UXB", 3) == 0
+	|| (!ROMinRAM && !gameOnFlashcard)) {
 		*timer0Handler = ce7->patches->timer0Handler;
 		*timer1Handler = ce7->patches->timer1Handler;
 		//*timer2Handler = ce7->patches->timer2Handler;
@@ -224,7 +228,7 @@ int hookNdsRetailArm7(
 
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	if (cheatFile.firstCluster != CLUSTER_FREE && cheatSize <= 0x8000) {
-		fileRead(ce7->cheat_data_offset, cheatFile, 0, cheatSize, 0);
+		fileRead((char*)ce7->cheat_data_offset, cheatFile, 0, cheatSize, 0);
 	}
 
 	dbg_printf("ERR_NONE\n");
