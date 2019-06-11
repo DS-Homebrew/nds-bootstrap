@@ -1139,10 +1139,10 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (gameOnFlashcard) {
-		return true;
-	} else if (ROMinRAM) {
+	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
+	} else if (gameOnFlashcard) {
+		return true;
 	} else {
 		initialize();
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
