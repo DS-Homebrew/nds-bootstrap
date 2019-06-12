@@ -200,7 +200,9 @@ static void resetMemory_ARM7 (void)
 		TIMER_DATA(i) = 0;
 	}
 
-	arm7clearRAM();
+	arm7clearRAM();								// clear exclusive IWRAM
+	toncset((u32*)0x02000000, 0, 0x3F0000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
+	toncset((u32*)0x02400000, 0, 0xC00000);	// clear other part of EWRAM
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -384,8 +386,8 @@ int arm7_main (void) {
 		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 	}
 
-	if (!dsiMode) {
-		tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x200);	// Copy header to 4MB area of main memory
+	if (dsiMode) {
+		tonccpy ((char*)0x2FFF000, (char*)0x23FF000, 0x1000);	// Copy header to last MB of main memory
 	}
 
 	arm9_stateFlag = ARM9_SETSCFG;

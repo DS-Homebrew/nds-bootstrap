@@ -45,16 +45,6 @@ clear_IWRAM_loop:
 	cmp	r8, r9
 	blt	clear_IWRAM_loop
 
-	// clear most of EWRAM - except after RAM end - 0xc000, which has the bootstub
-	mov	r8, #0x02000000
-
-	mov	r9, #0x02400000
-	sub	r9, #0x00010000
-clear_EWRAM_loop:
-	stmia	r8!, {r0, r1, r2, r3, r4, r5, r6, r7}
-	cmp	r8, r9
-	blt	clear_EWRAM_loop
-
 	pop	{r0-r9}
 	
 	bx	lr
