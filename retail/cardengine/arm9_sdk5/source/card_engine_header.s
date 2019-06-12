@@ -6,19 +6,6 @@
 	.align	4
 	.arm
 
-.global card_engine_start
-.global card_engine_start_sync
-.global card_engine_end
-.global cardStruct0
-.global cacheStruct
-.global patches_offset
-.global moduleParams
-.global fileCluster
-.global ROMinRAM
-.global dsiMode
-.global enableExceptionHandler
-.global consoleModel
-
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
@@ -52,7 +39,6 @@ consoleModel:
 
 card_engine_start:
 
-.global readCachedRef
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9

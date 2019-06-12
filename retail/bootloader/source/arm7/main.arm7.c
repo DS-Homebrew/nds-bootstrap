@@ -954,6 +954,10 @@ int arm7_main(void) {
 	toncset((u32*)0x02780000, 0, 0x30000);	// clear nds-bootstrap images
 	clearScreen();
 
+	while (arm9_stateFlag != ARM9_READY);
+	arm9_stateFlag = ARM9_SETSCFG;
+	while (arm9_stateFlag != ARM9_READY);
+
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);
 	startBinary_ARM7(arm9StartAddress);

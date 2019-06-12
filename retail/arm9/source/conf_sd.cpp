@@ -173,7 +173,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	nocashMessage("fatInitDefault");
 
-	if ((access("fat:/", F_OK) == 0) && (access("sd:/", F_OK) != 0)) {
+	bool flashcardFound = (access("fat:/", F_OK) == 0);
+
+	if (flashcardFound && (access("sd:/", F_OK) != 0)) {
 		consoleDemoInit();
 		printf("This edition of nds-bootstrap\n");
 		printf("can only be used on the\n");
@@ -202,20 +204,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x10000, cebin);
 	fclose(cebin);
 
-	// Load DLDI ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_dldi.bin", "rb");
-	fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
-	fclose(cebin);
+	if (flashcardFound) {
+		// Load DLDI ce9 binary
+		cebin = fopen("nitro:/cardengine_arm9_dldi.bin", "rb");
+		fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		fclose(cebin);
+	}
 
 	// Load SDK5 ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_sdk5.bin", "rb");
 	fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x2000, cebin);
 	fclose(cebin);
 
-	// Load SDK5 DLDI ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.bin", "rb");
-	fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
-	fclose(cebin);
+	if (flashcardFound) {
+		// Load SDK5 DLDI ce9 binary
+		cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.bin", "rb");
+		fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		fclose(cebin);
+	}
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);

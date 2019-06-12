@@ -243,20 +243,22 @@ void arm9_main(void) {
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
-	}
-
-	/*if (isGSDD) {       
-    	REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-	}*/
-	if (dsiModeConfirmed) {
-		REG_SCFG_EXT = 0x8307F100;
-	} else {
-		//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
-		if (arm9_boostVram) {
-			REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+		if (arm9_stateFlag == ARM9_SETSCFG) {
+			/*if (isGSDD) {       
+				REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+			}*/
+			if (dsiModeConfirmed) {
+				REG_SCFG_EXT = 0x8307F100;
+			} else {
+				//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
+				if (arm9_boostVram) {
+					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+				}
+				// lock SCFG
+				REG_SCFG_EXT &= ~(1UL << 31);
+			}
+			arm9_stateFlag = ARM9_READY;
 		}
-		// lock SCFG
-		REG_SCFG_EXT &= ~(1UL << 31);
 	}
 
 	REG_IME = 0;
