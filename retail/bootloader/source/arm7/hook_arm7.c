@@ -184,7 +184,7 @@ int hookNdsRetailArm7(
 		return ERR_HOOK;
 	}
     
-   	dbg_printf("hookLocation: ");
+   	dbg_printf("hookLocation arm7: ");
 	dbg_hexa((u32)hookLocation);
 	dbg_printf("\n\n");
 	patchOffsetCache.a7IrqHandlerOffset = hookLocation;

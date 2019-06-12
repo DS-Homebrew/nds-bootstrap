@@ -61,6 +61,7 @@ typedef struct cardengineArm9 {
     u32 dsiMode;
     u32 enableExceptionHandler;
     u32 consoleModel;
+    u32 irqTable;
     u32 asyncPrefetch;
 } __attribute__ ((__packed__)) cardengineArm9;
 
