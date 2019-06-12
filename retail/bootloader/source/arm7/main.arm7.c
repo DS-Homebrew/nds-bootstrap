@@ -715,11 +715,12 @@ int arm7_main(void) {
 		pleaseWaitOutput();
 		buildFatTableCache(romFile, 0);
 	} else {
-		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x27C0000, 0x20);
+		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x27C0000, sizeof(aFile));
 	}
-	/*if (gameOnFlashcard) {
+	if (gameOnFlashcard) {
+		romFile->fatTableCache = 0x2700000;
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)ROM_FILE_LOCATION, sizeof(aFile));
-	}*/
+	}
 
 	if (gameOnFlashcard) sdRead = true;
 
@@ -731,16 +732,16 @@ int arm7_main(void) {
 		if (fatTableEmpty) {
 			buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 		} else {
-			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, 0x20);
+			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
 		}
 	}
 
 	if (gameOnFlashcard) sdRead = false;
 
 	if (fatTableEmpty) {
-		tonccpy((char*)0x27C0000, (char*)ROM_FILE_LOCATION, 0x20);
+		tonccpy((char*)0x27C0000, (char*)ROM_FILE_LOCATION, sizeof(aFile));
 		if (!gameOnFlashcard) {
-			tonccpy((char*)0x27C0020, (char*)SAV_FILE_LOCATION, 0x20);
+			tonccpy((char*)0x27C0020, (char*)SAV_FILE_LOCATION, sizeof(aFile));
 		}
 		*(u32*)(0x27C0040) = storedFileCluster;
 		*(u32*)(0x27C0044) = romSize;
@@ -753,9 +754,9 @@ int arm7_main(void) {
 	} else {
 		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}
-	/*if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x80000);
-	}*/
+	if (gameOnFlashcard) {
+		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFE0);
+	}
 
 	toncset((u32*)0x027C0000, 0, 0x400);
 

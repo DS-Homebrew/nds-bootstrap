@@ -56,8 +56,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
 #ifdef DLDI
-//static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
-static aFile romFile;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
@@ -156,7 +155,7 @@ static void clearIcache (void) {
 
 static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
@@ -351,8 +350,6 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			//nocashMessage("!FAT_InitFiles");
 			return -1;
 		}
-		romFile = getFileFromCluster(ce9->fileCluster);
-		buildFatTableCache(&romFile, 0);
 		#else
 		//if (isGameLaggy(ndsHeader)) {
 			if (ce9->consoleModel > 0) {

@@ -62,8 +62,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 #ifdef DLDI
-//static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
-static aFile romFile;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
@@ -188,7 +187,7 @@ static void clearIcache (void) {
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 #ifdef DLDI
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
@@ -409,7 +408,7 @@ u32 cardReadDma() {
 static int counter=0;
 int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 #ifdef DLDI
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
@@ -503,8 +502,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//nocashMessage("!FAT_InitFiles");
 			return -1;
 		}
-		romFile = getFileFromCluster(ce9->fileCluster);
-		buildFatTableCache(&romFile, 0);
 
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) != 0) {
