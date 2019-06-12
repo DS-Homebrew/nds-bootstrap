@@ -7,7 +7,7 @@
 -->
 ### Your console
 
-Tell us which console do you have:
+Tell us which console you are using:
 
 - [ ]  DS Phat/Lite
 - [ ]  DSi (XL)
@@ -28,8 +28,7 @@ DSi:
 
 - [ ]  Luma3DS
 - [ ]  Rei-Six
-- [ ]  Other CFW [specify]
-- [ ]  Older CFW
+- [ ]  Other/Older CFW [specify]
 
 ### nds-bootstrap version
 
@@ -37,6 +36,13 @@ Tell us which versions you are using:
 
 - [ ]  Release _[please specify version]_
 - [ ]  Nightly _[insert here commit hash]_
+
+### Your device
+
+Tell us which card you are using:
+
+- [ ]  SD Card
+- [ ]  (Slot-1) Flashcard
 
 ### If this issue only affects a certain game, which game is it?
 
