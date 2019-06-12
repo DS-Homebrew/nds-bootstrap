@@ -203,6 +203,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x10000, cebin);
 	fclose(cebin);
+    
+    // Load reloc ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_reloc.bin", "rb");
+	fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x2000, cebin);
+	fclose(cebin);
 
 	if (flashcardFound) {
 		// Load DLDI ce9 binary
@@ -213,7 +218,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	// Load SDK5 ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_sdk5.bin", "rb");
-	fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x2000, cebin);
+	fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	fclose(cebin);
 
 	if (flashcardFound) {

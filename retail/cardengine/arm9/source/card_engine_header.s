@@ -16,7 +16,7 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
-intr_fifo_orig_return:
+intr_ipc_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
@@ -58,6 +58,7 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
+.word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
@@ -370,6 +371,24 @@ thumb_card_pull:
 	bx      lr
 
 	.arm
+    
+ipcSyncHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_ipc
+	ldr 	r0,	intr_ipc_orig_return
+	bx  	r0
+    
+code_handler_start_ipc:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerIPC
+	bl	_blx_r3_stub_start_ipc		@ jump to myIrqHandler
+  
+	@ exit after return
+	b	exit
+_blx_r3_stub_start_ipc:
+	bx	r3
+.pool 
     
 .global callSleepThumb
 .type	callSleepThumb STT_FUNC

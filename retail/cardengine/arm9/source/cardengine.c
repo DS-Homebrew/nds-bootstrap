@@ -151,6 +151,32 @@ static void waitForArm7(void) {
     }
 }
 
+static bool IPC_SYNC_hooked = false;
+static void hookIPC_SYNC(void) {
+    if (!IPC_SYNC_hooked) {
+        u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_ipc_orig_return   = *ipcSyncHandler;
+        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+        IPC_SYNC_hooked = true;
+    }
+}
+
+static void enableIPCSYNC(void) {
+    // enable IPC_SYNC
+    int oldIME = enterCriticalSection();
+    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;    
+    REG_IE |= IRQ_IPC_SYNC;
+    leaveCriticalSection(oldIME);
+}
+
+static void disableIPCSYNC(void) {
+    // enable IPC_SYNC
+    int oldIME = enterCriticalSection();
+    REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;    
+    REG_IE &= !IRQ_IPC_SYNC;
+    leaveCriticalSection(oldIME);
+}
+
 static void clearIcache (void) {
       // Seems to have no effect
       // disable interrupt
@@ -370,6 +396,9 @@ u32 cardReadDma() {
         if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
         {
 			isDma = true;
+            
+            hookIPC_SYNC();
+            enableIPCSYNC();
         
         /*if (len < THRESHOLD_CACHE_FLUSH) {
             int oldIME = enterCriticalSection();
@@ -414,8 +443,11 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 	u32 sector = (src/readSize)*readSize;
 
     dmaLed = true;
-
-	accessCounter++;
+    
+    hookIPC_SYNC();
+    enableIPCSYNC();
+    
+    accessCounter++;
     while(len > 0) {
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -635,4 +667,14 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 	waitForArm7();
     return 0; 
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerIPC(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif	
+    
+    //continueCardReadDma();
 }

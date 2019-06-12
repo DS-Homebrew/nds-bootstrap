@@ -64,7 +64,6 @@
 #include "loading_screen.h"
 
 #include "cardengine_arm9_bin.h"
-#include "cardengine_arm9_reloc_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -842,16 +841,16 @@ int arm7_main(void) {
 		)
 		{
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-            tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
-            relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
+            tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+            relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 		} else
         ce9Location = patchHeapPointer(moduleParams, ndsHeader);
         if(ce9Location) {
-            	tonccpy((u32*)ce9Location, cardengine_arm9_reloc_bin, cardengine_arm9_reloc_bin_size);
-                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_reloc_bin_size);
+            	tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
         } else {         
     		ce9Location = CARDENGINE_ARM9_LOCATION;
-    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
         }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
