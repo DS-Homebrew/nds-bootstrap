@@ -397,8 +397,8 @@ u32 cardReadDma() {
         {
 			isDma = true;
             
-            //hookIPC_SYNC();
-            //enableIPCSYNC();
+            hookIPC_SYNC();
+            enableIPCSYNC();
         
         /*if (len < THRESHOLD_CACHE_FLUSH) {
             int oldIME = enterCriticalSection();
