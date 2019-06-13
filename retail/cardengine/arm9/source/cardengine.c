@@ -397,8 +397,8 @@ u32 cardReadDma() {
         {
 			isDma = true;
             
-            hookIPC_SYNC();
-            enableIPCSYNC();
+            //hookIPC_SYNC();
+            //enableIPCSYNC();
         
         /*if (len < THRESHOLD_CACHE_FLUSH) {
             int oldIME = enterCriticalSection();
@@ -444,8 +444,8 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 
     dmaLed = true;
     
-    hookIPC_SYNC();
-    enableIPCSYNC();
+    //hookIPC_SYNC();
+    //enableIPCSYNC();
     
     accessCounter++;
     while(len > 0) {
