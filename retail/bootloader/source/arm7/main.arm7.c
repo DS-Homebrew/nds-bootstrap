@@ -850,7 +850,7 @@ int arm7_main(void) {
                 relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
         } else {         
     		ce9Location = CARDENGINE_ARM9_LOCATION;
-    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
         }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
