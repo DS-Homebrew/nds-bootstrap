@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int dsiMode) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int language, int dsiMode) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -139,7 +139,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], dsiMode);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], language, dsiMode);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -232,10 +232,15 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_04, 1);
 		}
 
+		// Language
+		Key.Data = (char*)"";
+		Key.Name = (char*)"LANGUAGE";
+		iniGetKey(Ini, IniCount, &Key);
+		int language = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+
 		Key.Data = (char *)"";
 		Key.Name = (char *)"DSI_MODE";
 		iniGetKey(Ini, IniCount, &Key);
-
 		int dsiMode = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
 
 		Key.Data = (char *)"";
@@ -331,7 +336,7 @@ int main( int argc, char **argv) {
 
 		iniFree(Ini, IniCount);
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, dsiMode);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

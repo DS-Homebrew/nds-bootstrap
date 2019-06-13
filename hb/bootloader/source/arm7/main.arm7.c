@@ -68,6 +68,7 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern u32 language;
 extern u32 dsiMode;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
@@ -222,6 +223,11 @@ static void resetMemory_ARM7 (void)
 		boot_readFirmware(settingsOffset + 0x000, (u8*)(NDS_HEADER-0x180), 0x70);
 	} else {
 		boot_readFirmware(settingsOffset + 0x100, (u8*)(NDS_HEADER-0x180), 0x70);
+	}
+
+	if (language >= 0 && language < 6) {
+		// Change language
+		*(u8*)(0x23FFC80+0x64) = language;
 	}
 }
 
@@ -387,7 +393,7 @@ int arm7_main (void) {
 	}
 
 	if (dsiMode) {
-		tonccpy ((char*)0x2FFF000, (char*)0x23FF000, 0x1000);	// Copy header to last MB of main memory
+		tonccpy ((char*)0x2FFF000, (char*)0x23FF000, 0x1000);	// Copy user data and header to last MB of main memory
 	}
 
 	arm9_stateFlag = ARM9_SETSCFG;

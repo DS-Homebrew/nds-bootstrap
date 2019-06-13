@@ -29,6 +29,7 @@
 	.global argStart
 	.global argSize
 	.global dsiSD
+	.global language
 	.global dsiMode
 	.global ramDiskCluster
 	.global ramDiskSize
@@ -56,6 +57,8 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
+language:
+	.word	0x00000000
 dsiMode:
 	.word	0x00000000
 ramDiskCluster:
