@@ -227,7 +227,7 @@ static void resetMemory_ARM7 (void)
 
 	if (language >= 0 && language < 6) {
 		// Change language
-		*(u8*)(0x23FFC80+0x64) = language;
+		*(u8*)((u32)NDS_HEADER - 0x11C) = language;
 	}
 }
 
