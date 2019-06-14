@@ -385,9 +385,15 @@ code_handler_start_ipc:
 	bl	_blx_r3_stub_start_ipc		@ jump to myIrqHandler
   
 	@ exit after return
-	b	exit
+	b	arm9exit
 _blx_r3_stub_start_ipc:
 	bx	r3
+
+arm9exit:
+	pop   	{r0-r12} 
+	pop  	{lr}
+	bx  lr
+    
 .pool 
     
 .global callSleepThumb
