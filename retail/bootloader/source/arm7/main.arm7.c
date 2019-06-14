@@ -820,7 +820,14 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (!isDSiWare) {
+	if (isDSiWare) {
+		if (ndsHeader->reserved1[7] & BIT(1)) {
+			nocashMessage("DSiWare is modcrypted");
+			dbg_printf("DSiWare is modcrypted");
+			dbg_printf("\n");
+			errorOutput();
+		}
+	} else {
 		// If possible, set to load ROM into RAM
 		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
 
