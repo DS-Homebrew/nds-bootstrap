@@ -134,13 +134,13 @@ static void sleep(u32 ms) {
 }
 
 static void waitForArm7(void) {
-    IPC_SendSync(0xEE24);
+    IPC_SendSync(0x4);
     int count = 0;
     if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
                 sleep(1);
-                IPC_SendSync(0xEE24);
+                IPC_SendSync(0x4);
                 count=1000;
             }
             count--;
@@ -148,7 +148,7 @@ static void waitForArm7(void) {
     } else {
         while (sharedAddr[3] != (vu32)0) {
            if(count==20000000) {
-                IPC_SendSync(0xEE24);
+                IPC_SendSync(0x4);
                 count=0;
             }
             count++;
@@ -157,8 +157,8 @@ static void waitForArm7(void) {
 }
 
 static bool checkArm7(void) {
-    IPC_SendSync(0xEE24);
-	return (sharedAddr[4] == (vu32)0);
+    IPC_SendSync(0x4);
+	return (sharedAddr[3] == (vu32)0);
 }
 
 static bool IPC_SYNC_hooked = false;
@@ -225,9 +225,33 @@ static void clearIcache (void) {
 void endCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
-        // TODO Update cardi common
-        
-        // TODO execute the callback function
+    disableIPCSYNC();
+    
+    // TODO Update cardi common
+    // set end flag
+    int i=0;
+    while(i<300) {
+        if(cardStruct[i]==0xFFFFFFFF && cardStruct[i+1]==0xFFFFFFFF) {
+            cardStruct[i-1]=END_FLAG;
+            break;    
+        } 
+    }
+    // TODO wake up threads waiting for executing card commands    
+    void* queue = cardStruct+13;
+    //wakeupThread(queue)   
+
+    // TODO wake up the calling thread
+    u32* thread = cardStruct+10;     
+    //wakeupThreadDirect(thread)
+
+
+    // TODO execute the callback function
+    const (*func) (void *) = cardStruct[7];
+    void  *const arg = cardStruct[8];
+    
+    if(func) {
+        (*func) (arg);
+    }
 }
 
 void continueCardReadDma() {
@@ -355,11 +379,11 @@ void continueCardReadDma() {
         		// Update cardi common
         		cardStruct[0] = src + len2;
         		cardStruct[1] = (vu32)(dst + len2);
-        		cardStruct[2] = len - len2;                
+        		cardStruct[2] = len - len2;
+                                
               }  
         } else { 
-            cardStruct[14] = END_FLAG;
-            disableIPCSYNC();
+            endCardReadDma();
          }
     }
 
@@ -368,7 +392,17 @@ void continueCardReadDma() {
     }
 }
 
-static inline int startCardReadDma(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
+static inline bool startCardReadDma() {
+	vu32* volatile cardStruct = ce9->cardStruct0;
+
+	u32 src = cardStruct[0];
+	u8* dst = (u8*)(cardStruct[1]);
+	u32 len = cardStruct[2];
+    dma = cardStruct[3]; // dma channel
+	void* func = (void*)cardStruct[4]; // function to call back once read done
+	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+        
+
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
 
@@ -401,9 +435,6 @@ static inline int startCardReadDma(vu32* volatile cardStruct, u8* dst, u32 src, 
 
 		buffer = getCacheAddress(slot);
     
-        hookIPC_SYNC();
-        enableIPCSYNC();
-        
 		// Write the command
 		sharedAddr[0] = (vu32)buffer;
 		sharedAddr[1] = readSize;
@@ -417,8 +448,8 @@ static inline int startCardReadDma(vu32* volatile cardStruct, u8* dst, u32 src, 
         dmaReadOnArm7 = true;
         cardStruct[14] = BUSY_FLAG;
         
-        updateDescriptor(slot, sector);	
-
+        updateDescriptor(slot, sector);
+        return true;
 	} else {
 		updateDescriptor(slot, sector);	
 
@@ -441,9 +472,8 @@ static inline int startCardReadDma(vu32* volatile cardStruct, u8* dst, u32 src, 
 		cardStruct[1] = (vu32)(dst + len2);
 		cardStruct[2] = len - len2;
         
-      }    			    
-	
-	return 0;
+        return false;
+      }
 }
 
 #endif
@@ -647,10 +677,13 @@ u32 cardReadDma() {
         		src = 0x8000 + (src & 0x1FF);
         	}*/
             
-            //startCardReadDma(cardStruct, dst, src, len);
-        
-        /*if (len < THRESHOLD_CACHE_FLUSH) {
-            int oldIME = enterCriticalSection();
+            //int oldIME = enterCriticalSection();
+            
+            //hookIPC_SYNC();
+            // TODO : reset IPC_SYNC IRQs
+            //enableIPCSYNC();
+              
+            /*if (len < THRESHOLD_CACHE_FLUSH) {
             u32     dst2 = dst;
             u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
             if (mod)
@@ -663,13 +696,15 @@ u32 cardReadDma() {
             IC_InvalidateRange((void *)dst, len);
             DC_InvalidateRange((void *)dst2, len);
             DC_WaitWriteBufferEmpty();
-            leaveCriticalSection(oldIME);   
         } else {*/ 
             // Note : cacheFlush disable / reenable irq
+            
+            //leaveCriticalSection(oldIME); 
+            
+            cacheFlush();  
+                              
+            //return startCardReadDma();
 
-            cacheFlush();
-
-            //return true;
             #endif
         //}
 		} else {
