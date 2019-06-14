@@ -63,6 +63,7 @@
 #include "locations.h"
 #include "loading_screen.h"
 
+#include "deviceList.h"					// Modified to read from SD instead of NAND
 #include "cardengine_arm9_bin.h"
 
 //#define memcpy __builtin_memcpy
@@ -373,7 +374,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
-	//memcpy((char*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
+	//tonccpy((char*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
 	tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
 	*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
 
@@ -387,7 +388,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	) {
 		// Make the Pokemon game code ADAJ.
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
-		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
+		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
     
     /*if (
@@ -410,7 +411,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 
 	// SDK 5
-	if (dsiMode == 2) {
+	if (dsiHeaderTemp->access_control & BIT(4)) {
+		*dsiModeConfirmedPtr = true;
+	} else if (dsiMode == 2) {
 		*dsiModeConfirmedPtr = dsiMode;
 	} else {
 		*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
@@ -529,7 +532,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
 	
-	memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
+	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 	
 	if (language >= 0 && language < 6) {
 		// Change language
@@ -595,7 +598,29 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
-static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
+	if (isDSiWare) {
+		u8* deviceListAddr = *(u8*)0x02FFE1D4;
+		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
+
+		const char *ndsPath = "nand:/dsiware.nds";
+		tonccpy(deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
+
+		tonccpy(0x02FFC000, 0x02FFE000, 0x1000);		// Make a duplicate of DSi header
+		tonccpy(0x02FFFA80, NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
+
+		*(u32*)(0x02FFA680) = 0x02FD4D80;
+		*(u32*)(0x02FFA684) = 0x00000000;
+		*(u32*)(0x02FFA688) = 0x00001980;
+
+		*(u32*)(0x02FFF00C) = 0x0000007F;
+		*(u32*)(0x02FFF010) = 0x550E25B8;
+		*(u32*)(0x02FFF014) = 0x02FF4000;
+
+		*(u16*)(0x02FFFC40) = 0x3;						// Boot Indicator (NAND/SD)
+		return;
+	}
+
 	u32 chipID = getChipId(ndsHeader, moduleParams);
     dbg_printf("chipID: ");
     dbg_hexa(chipID);
@@ -778,6 +803,7 @@ int arm7_main(void) {
 
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
+	bool isDSiWare = (dsiHeaderTemp.access_control & BIT(4));
 	
 	nocashMessage("Loading the header...\n");
 
@@ -789,155 +815,155 @@ int arm7_main(void) {
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
-	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
-
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (!dsiModeConfirmed) {
+	if (!isDSiWare) {
+		// If possible, set to load ROM into RAM
+		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+
 		const char* romTid = getRomTid(ndsHeader);
-		if (
-			strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
-		) {
-			NTR_BIOS();
+		if (!dsiModeConfirmed) {
+			if (
+				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
+			) {
+				NTR_BIOS();
+			}
 		}
-	}
 
-	nocashMessage("Trying to patch the card...\n");
+		nocashMessage("Trying to patch the card...\n");
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x10000);
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x10000);
+		tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x10000);
 
-	if (isSdk5(moduleParams)) {
-        if(gameOnFlashcard && !ROMinRAM) {
-			ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
+		if (isSdk5(moduleParams)) {
+			if(gameOnFlashcard && !ROMinRAM) {
+				ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
+				tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
+				if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
+					nocashMessage("DLDI patch failed");
+					dbg_printf("DLDI patch failed");
+					dbg_printf("\n");
+					errorOutput();
+				}
+			} else {
+				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
+				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x2000);
+			}
+		} else if (gameOnFlashcard && !ROMinRAM) {
+			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
+			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
 			if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
 				nocashMessage("DLDI patch failed");
 				dbg_printf("DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();
 			}
-        } else {
-			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x2000);
+		} else if (ceCached) {
+			if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
+			 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+			)
+			{
+				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+				tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+			} else
+			ce9Location = patchHeapPointer(moduleParams, ndsHeader);
+			if(ce9Location) {
+					tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+			} else {         
+				ce9Location = CARDENGINE_ARM9_LOCATION;
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+			}
+		} else {
+			ce9Location = CARDENGINE_ARM9_LOCATION;
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 		}
-	} else if (gameOnFlashcard && !ROMinRAM) {
-		ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
-		tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
-		if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
-			nocashMessage("DLDI patch failed");
-			dbg_printf("DLDI patch failed");
-			dbg_printf("\n");
+
+		if (
+			strncmp(romTid, "AMQ", 3) == 0				// MvDK2
+		) {
+			patchOffsetCache.ver = 0;
+		}
+
+		patchBinary(ndsHeader);
+		errorCode = patchCardNds(
+			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+			(cardengineArm9*)ce9Location,
+			ndsHeader,
+			moduleParams,
+			patchMpuRegion,
+			patchMpuSize,
+			ROMinRAM,
+			saveFileCluster,
+			saveSize
+		);
+		if (errorCode == ERR_NONE) {
+			nocashMessage("Card patch successful");
+		} else {
+			nocashMessage("Card patch failed");
 			errorOutput();
 		}
-	} else if (ceCached) {
-		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
-		 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
-		)
-		{
-			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-            tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
-            relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
-		} else
-        ce9Location = patchHeapPointer(moduleParams, ndsHeader);
-        if(ce9Location) {
-            	tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
-                relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
-        } else {         
-    		ce9Location = CARDENGINE_ARM9_LOCATION;
-    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
-        }
-	} else {
-		ce9Location = CARDENGINE_ARM9_LOCATION;
-		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
-	}
 
-	toncset((u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0, 0x10000);
+		if (gameOnFlashcard) sdRead = true;
 
-	const char* romTid = getRomTid(ndsHeader);
-	if (
-		strncmp(romTid, "AMQ", 3) == 0				// MvDK2
-	) {
-		patchOffsetCache.ver = 0;
-	}
+		cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
+		errorCode = hookNdsRetailArm7(
+			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+			ndsHeader,
+			moduleParams,
+			romFile->firstCluster,
+			cheatFileCluster,
+			cheatSize,
+			gameOnFlashcard,
+			language,
+			dsiModeConfirmed,
+			ROMinRAM,
+			consoleModel,
+			romread_LED,
+			gameSoftReset,
+			preciseVolumeControl
+		);
+		if (errorCode == ERR_NONE) {
+			nocashMessage("Card hook successful");
+		} else {
+			nocashMessage("Card hook failed");
+			errorOutput();
+		}
 
-	patchBinary(ndsHeader);
-	errorCode = patchCardNds(
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-		(cardengineArm9*)ce9Location,
-		ndsHeader,
-		moduleParams,
-		patchMpuRegion,
-		patchMpuSize,
-		ROMinRAM,
-		saveFileCluster,
-		saveSize
-	);
-	if (errorCode == ERR_NONE) {
-		nocashMessage("Card patch successful");
-	} else {
-		nocashMessage("Card patch failed");
-		errorOutput();
-	}
+		if (gameOnFlashcard) sdRead = false;
 
-	if (gameOnFlashcard) sdRead = true;
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+			if (
+				strncmp(romTid, "AMQ", 3) != 0				// MvDK2
+			) {
+				fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+			}
+		}
 
-	cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
-	errorCode = hookNdsRetailArm7(
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-		ndsHeader,
-		moduleParams,
-		romFile->firstCluster,
-		cheatFileCluster,
-		cheatSize,
-		gameOnFlashcard,
-		language,
-		dsiModeConfirmed,
-		ROMinRAM,
-		consoleModel,
-		romread_LED,
-		gameSoftReset,
-		preciseVolumeControl
-	);
-	if (errorCode == ERR_NONE) {
-		nocashMessage("Card hook successful");
-	} else {
-		nocashMessage("Card hook failed");
-		errorOutput();
-	}
-
-	if (gameOnFlashcard) sdRead = false;
-
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-		if (
-			strncmp(romTid, "AMQ", 3) != 0				// MvDK2
-		) {
-			fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		hookNdsRetailArm9(
+			(cardengineArm9*)ce9Location,
+			moduleParams,
+			romFile->firstCluster,
+			ROMinRAM,
+			dsiModeConfirmed,
+			supportsExceptionHandler(ndsHeader),
+			consoleModel
+		);
+		if (ROMinRAM) {
+			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
+		} else {
+			if (romread_LED > 0) {
+				// Turn WiFi LED off
+				i2cWriteRegister(0x4A, 0x30, 0x12);
+			}
 		}
 	}
 
-	hookNdsRetailArm9(
-		(cardengineArm9*)ce9Location,
-		moduleParams,
-		romFile->firstCluster,
-		ROMinRAM,
-		dsiModeConfirmed,
-		supportsExceptionHandler(ndsHeader),
-		consoleModel
-	);
-	if (ROMinRAM) {
-		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
-	} else {
-		if (romread_LED > 0) {
-			// Turn WiFi LED off
-			i2cWriteRegister(0x4A, 0x30, 0x12);
-		}
-	}
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x20000);
+
     
 
 
@@ -947,7 +973,7 @@ int arm7_main(void) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
 	}*/
 
-	if (!dsiModeConfirmed) {
+	if (!dsiModeConfirmed && !isDSiWare) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
@@ -959,7 +985,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag != ARM9_READY);
 
 	nocashMessage("Starting the NDS file...");
-    setMemoryAddress(ndsHeader, moduleParams);
+    setMemoryAddress(ndsHeader, moduleParams, isDSiWare);
 	startBinary_ARM7(arm9StartAddress);
 
 	return 0;

@@ -249,6 +249,7 @@ void arm9_main(void) {
 			}*/
 			if (dsiModeConfirmed) {
 				REG_SCFG_EXT = 0x8307F100;
+				REG_SCFG_CLK = 0x84;
 			} else {
 				//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
 				if (arm9_boostVram) {
