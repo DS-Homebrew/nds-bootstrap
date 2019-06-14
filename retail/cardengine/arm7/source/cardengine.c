@@ -489,7 +489,7 @@ static void runCardEngineCheckResume(void) {
 		{
 			if(resume_cardRead_arm9()) {
 				*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                IPC_SendSync(0xEE28);
+                IPC_SendSync(0x8);
 			} 
 		}
   		unlockMutex(&cardEgnineCommandMutex);
@@ -524,7 +524,7 @@ static void runCardEngineCheck(void) {
     		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
     			log_arm9();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                IPC_SendSync(0xEE28);
+                IPC_SendSync(0x8);
     		}
     
     
@@ -532,7 +532,7 @@ static void runCardEngineCheck(void) {
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                    IPC_SendSync(0xEE28);
+                    IPC_SendSync(0x8);
               } 
           }
           
@@ -540,14 +540,14 @@ static void runCardEngineCheck(void) {
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01);
     			nandRead();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-    			IPC_SendSync(0xEE28);
+    			IPC_SendSync(0x8);
     		}
             
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02) {
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02);
     			nandWrite();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-    			IPC_SendSync(0xEE28);
+    			IPC_SendSync(0x8);
     		}
     
     		/*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF800) {
@@ -557,7 +557,7 @@ static void runCardEngineCheck(void) {
         } else {
             if(resume_cardRead_arm9()) {
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                IPC_SendSync(0xEE28);
+                IPC_SendSync(0x8);
             } 
         }
   		unlockMutex(&cardEgnineCommandMutex);
