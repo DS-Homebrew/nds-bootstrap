@@ -166,7 +166,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x027B0000, 0, 0x20000);		// clear other part of EWRAM - except before ce7 binary and some ce9 binaries
-	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
+	toncset((u32*)0x027F8000, 0, 0x808000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -873,12 +873,12 @@ int arm7_main(void) {
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-				tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 			} else
 			ce9Location = patchHeapPointer(moduleParams, ndsHeader);
 			if(ce9Location) {
-					tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
 					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
