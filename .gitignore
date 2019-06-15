@@ -107,3 +107,7 @@ build/
 #!.vscode/extensions.json
 retail/nitrofiles/cardengine_arm7.bin
 retail/nitrofiles/load.bin
+retail/nitrofiles/cardengine_arm9_dldi.bin
+retail/nitrofiles/cardengine_arm9_reloc.bin
+retail/nitrofiles/cardengine_arm9_sdk5.bin
+retail/nitrofiles/cardengine_arm9_sdk5_dldi.bin
