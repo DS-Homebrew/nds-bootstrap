@@ -133,6 +133,7 @@ static void sleep(u32 ms) {
     }    
 }
 
+
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
     int count = 0;
@@ -223,6 +224,14 @@ static void clearIcache (void) {
 
 #ifndef DLDI
 void endCardReadDma() {
+    if(ce9->patches->cardEndReadDmaRef) {
+        // TODO
+    } else if(ce9->thumbPatches->cardEndReadDmaRef) {
+        callEndReadDmaThumb();
+    }    
+}
+
+/*void endCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     disableIPCSYNC();
@@ -252,7 +261,7 @@ void endCardReadDma() {
     if(func) {
         (*func) (arg);
     }
-}
+}*/
 
 void continueCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
@@ -667,44 +676,46 @@ u32 cardReadDma() {
 
             
             #ifndef DLDI
-            /*if (src == 0) {
-        		// If ROM read location is 0, do not proceed.
-        		return false;
-        	}
-        
-        	// Fix reads below 0x8000
-        	if (src <= 0x8000){
-        		src = 0x8000 + (src & 0x1FF);
-        	}*/
             
-            //int oldIME = enterCriticalSection();
+            if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {   // new dma method
+                /*if (src == 0) {
+            		// If ROM read location is 0, do not proceed.
+            		return false;
+            	}
             
-            //hookIPC_SYNC();
-            // TODO : reset IPC_SYNC IRQs
-            //enableIPCSYNC();
-              
-            /*if (len < THRESHOLD_CACHE_FLUSH) {
-            u32     dst2 = dst;
-            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
-            if (mod)
-            {
-                dst2 -= mod;
-                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
-                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
-                len += CACHE_LINE_SIZE;
+            	// Fix reads below 0x8000
+            	if (src <= 0x8000){
+            		src = 0x8000 + (src & 0x1FF);
+            	}*/
+                
+                int oldIME = enterCriticalSection();
+                
+                hookIPC_SYNC();
+                // TODO : reset IPC_SYNC IRQs
+                enableIPCSYNC();
+                  
+                /*if (len < THRESHOLD_CACHE_FLUSH) {
+                u32     dst2 = dst;
+                u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+                if (mod)
+                {
+                    dst2 -= mod;
+                    DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                    DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                    len += CACHE_LINE_SIZE;
+                }
+                IC_InvalidateRange((void *)dst, len);
+                DC_InvalidateRange((void *)dst2, len);
+                DC_WaitWriteBufferEmpty();
+                } else {*/ 
+                // Note : cacheFlush disable / reenable irq
+                
+                leaveCriticalSection(oldIME); 
+                
+                cacheFlush();  
+                                  
+                return startCardReadDma();
             }
-            IC_InvalidateRange((void *)dst, len);
-            DC_InvalidateRange((void *)dst2, len);
-            DC_WaitWriteBufferEmpty();
-        } else {*/ 
-            // Note : cacheFlush disable / reenable irq
-            
-            //leaveCriticalSection(oldIME); 
-            
-            cacheFlush();  
-                              
-            //return startCardReadDma();
-
             #endif
         //}
 		} else {
@@ -964,7 +975,9 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerFIFO");
 	#endif	
 
-#ifndef DLDI    
-    //continueCardReadDma();
+#ifndef DLDI
+    if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+        continueCardReadDma();
+    }
 #endif
 }

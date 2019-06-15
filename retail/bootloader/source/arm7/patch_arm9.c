@@ -317,13 +317,19 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
     ) {
+
+      
       u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaOffset) {
 		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
 		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
 	  }                    
-      if(usesThumb) ce9->thumbPatches->cardEndReadDmaRef = offset; 
-      else ce9->patches->cardEndReadDmaRef = offset;
+      if(usesThumb) {
+        u16* thumbOffset = (u16*)offset;
+        thumbOffset--;
+        *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
+        ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+      } else ce9->patches->cardEndReadDmaRef = offset;
     } 
 }
 

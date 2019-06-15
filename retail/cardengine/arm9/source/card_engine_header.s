@@ -412,6 +412,20 @@ _blx_r6_stub_callSleepThumb:
 	bx	r6	
 .pool
 
+.global callEndReadDmaThumb
+.type	callEndReadDmaThumb STT_FUNC
+callEndReadDmaThumb:
+    push	{r1-r7, lr}
+    ldr     r6, thumbCardEndReadDmaRef
+    add     r6, #1
+    bl		_blx_r6_stub_callEndReadDmaThumb
+    pop	    {r1-r7, pc}
+	bx      lr
+_blx_r6_stub_callEndReadDmaThumb:
+	bx	r6	
+.pool
+
+
 
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll
