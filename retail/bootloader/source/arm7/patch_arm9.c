@@ -311,6 +311,23 @@ static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
     } 
 }
 
+static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    const char* romTid = getRomTid(ndsHeader);
+    
+    if (
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
+    ) {
+      u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+	  if (!patchOffsetCache.cardEndReadDmaOffset) {
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+	  }                    
+      if(usesThumb) ce9->thumbPatches->cardEndReadDmaRef = offset; 
+      else ce9->patches->cardEndReadDmaRef = offset;
+    } 
+}
+
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	extern u32 gameOnFlashcard;
     const char* romTid = getRomTid(ndsHeader);
@@ -950,6 +967,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchDownloadplay(ndsHeader);
 
     patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
+    
+    patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	randomPatch(ndsHeader, moduleParams);
 

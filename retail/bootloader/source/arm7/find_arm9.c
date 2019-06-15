@@ -76,6 +76,9 @@ static const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
 static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
+// Card end read DMA
+static const u16 cardEndReadDmaSignature[4]  = {0x2002, 0x0480, 0xF7F8, 0xFCD5};
+
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
 static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
@@ -1452,3 +1455,31 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_printf("\n");
 	return sleepOffset;
 }
+
+u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCardEndReadDma\n");
+    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignature;
+    
+    u32 * offset = NULL;
+    
+    if(usesThumb) {
+  		offset = findOffsetThumb(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignatureThumb, 4
+        );
+    }
+    
+    if (offset) {
+		dbg_printf("cardEndReadDma found: ");
+	} else {
+		dbg_printf("cardEndReadDma not found\n");
+	}
+    
+    if (offset) {
+		dbg_hexa((u32)offset);
+		dbg_printf("\n");
+	}
+
+    dbg_printf("\n");
+	return offset;
+}    

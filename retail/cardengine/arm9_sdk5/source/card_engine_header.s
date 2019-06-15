@@ -53,6 +53,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   0x0 @sleepRef
+.word   0x0 @cardEndReadDmaRef
 .word   0x0
 .word	swi02
 .global needFlushDCCache
@@ -73,6 +74,8 @@ thumbPatches:
 .word   cacheFlushRef
 thumbSleepRef:
 .word   0x0 @sleepRef
+thumbCardEndReadDmaRef:
+.word   0x0 @cardEndReadDmaRef
 .word   0x0
 
 	.thumb
