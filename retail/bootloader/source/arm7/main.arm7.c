@@ -191,10 +191,6 @@ static void NDSTouchscreenMode(void) {
 		volLevel = 0xA7;
 	//}
 
-	if (REG_SCFG_EXT == 0) {
-		volLevel += 0x13;
-	}
-
 	// Touchscreen
 	cdcReadReg (0x63, 0x00);
 	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
@@ -282,7 +278,7 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
 	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
 	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
-	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
 	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
 	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
 	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
@@ -297,13 +293,50 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
 	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
 	cdcReadReg (CDC_SOUND, 0x22);
-	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x00);
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	
+	// Set remaining values
+	cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
+	cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
+	cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
+	cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
+	cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
+	cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
+	cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
+	cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
+	cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
+	cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
+	cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
+	cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
+	cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
+	cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
+	cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
+	cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
+
+	// Finish up!
 	cdcReadReg (CDC_TOUCHCNT, 0x02);
 	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
 	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
-	
+
 	// Power management
 	writePowerManagement(PM_READ_REGISTER, 0x00); //*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
 	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
@@ -791,10 +824,8 @@ int arm7_main(void) {
 
 	int errorCode;
 
-	if (REG_SCFG_EXT == 0) {
-		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
-	}
+	NDSTouchscreenMode();
+	*(u16*)0x4000500 = 0x807F;
 
 	tDSiHeader dsiHeaderTemp;
 
