@@ -824,9 +824,6 @@ int arm7_main(void) {
 
 	int errorCode;
 
-	NDSTouchscreenMode();
-	*(u16*)0x4000500 = 0x807F;
-
 	tDSiHeader dsiHeaderTemp;
 
 	// Load the NDS file
@@ -859,6 +856,11 @@ int arm7_main(void) {
 			errorOutput();
 		}
 	} else {
+		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+			NDSTouchscreenMode();
+			*(u16*)0x4000500 = 0x807F;
+		}
+
 		// If possible, set to load ROM into RAM
 		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
 
