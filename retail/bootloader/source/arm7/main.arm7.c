@@ -96,8 +96,8 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
+extern u32 volumeFix;
 extern u32 preciseVolumeControl;
-extern u32 soundFix;
 extern u32 boostVram;
 extern u32 logging;
 
@@ -175,21 +175,11 @@ static void resetMemory_ARM7(void) {
 }
 
 static void NDSTouchscreenMode(void) {
-	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
-	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
-	//unsigned char * *(unsigned char*)0x40001C2=	(unsigned char*)0x40001C2;
-	//unsigned char * I2C_DATA=	(unsigned char*)0x4004500;
-	//unsigned char * I2C_CNT=	(unsigned char*)0x4004501;
-
 	u8 volLevel;
 	
-	//if (fifoCheckValue32(FIFO_MAXMOD)) {
-	//	// special setting (when found special gamecode)
-	//	volLevel = 0xAC;
-	//} else {
-		// normal setting (for any other gamecodes)
-		volLevel = 0xA7;
-	//}
+	// 0xAC: special setting (when found special gamecode)
+	// 0xA7: normal setting (for any other gamecodes)
+	volLevel = volumeFix ? 0xAC : 0xA7;
 
 	// Touchscreen
 	cdcReadReg (0x63, 0x00);

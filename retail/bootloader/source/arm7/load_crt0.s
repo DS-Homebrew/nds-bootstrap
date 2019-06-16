@@ -47,6 +47,7 @@
 	.global boostVram
 	.global gameSoftReset
 	.global forceSleepPatch
+	.global volumeFix
 	.global preciseVolumeControl
 	.global logging
 @---------------------------------------------------------------------------------
@@ -107,6 +108,8 @@ boostVram:
 gameSoftReset:
 	.word	0x00000000
 forceSleepPatch:
+	.word	0x00000000
+volumeFix:
 	.word	0x00000000
 preciseVolumeControl:
 	.word	0x00000000
