@@ -669,14 +669,11 @@ u32 cardReadDma() {
         && !(((int)src) & 511) 
 	) {
 		dmaLed = true;
+        #ifndef DLDI
         if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
         {
 			isDma = true;
-            
 
-            
-            #ifndef DLDI
-            
             if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {   // new dma method
                 /*if (src == 0) {
             		// If ROM read location is 0, do not proceed.
@@ -716,13 +713,13 @@ u32 cardReadDma() {
                                   
                 return startCardReadDma();
             }
-            #endif
         //}
 		} else {
 			isDma = false;
 			dma=4;
             clearIcache();        
 		}
+        #endif
     } else {
 		dmaLed = false;
         isDma = false;
