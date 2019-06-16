@@ -231,38 +231,6 @@ void endCardReadDma() {
     }    
 }
 
-/*void endCardReadDma() {
-	vu32* volatile cardStruct = ce9->cardStruct0;
-
-    disableIPCSYNC();
-    
-    // TODO Update cardi common
-    // set end flag
-    int i=0;
-    while(i<300) {
-        if(cardStruct[i]==0xFFFFFFFF && cardStruct[i+1]==0xFFFFFFFF) {
-            cardStruct[i-1]=END_FLAG;
-            break;    
-        } 
-    }
-    // TODO wake up threads waiting for executing card commands    
-    void* queue = cardStruct+13;
-    //wakeupThread(queue)   
-
-    // TODO wake up the calling thread
-    u32* thread = cardStruct+10;     
-    //wakeupThreadDirect(thread)
-
-
-    // TODO execute the callback function
-    const (*func) (void *) = cardStruct[7];
-    void  *const arg = cardStruct[8];
-    
-    if(func) {
-        (*func) (arg);
-    }
-}*/
-
 void continueCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
     u32 commandRead;
@@ -291,8 +259,6 @@ void continueCardReadDma() {
     	u8* dst = (u8*)(cardStruct[1]);
     	u32 len = cardStruct[2];
         u32	dma = cardStruct[3]; // dma channel
-    	void* func = (void*)cardStruct[4]; // function to call back once read done
-    	void* arg  = (void*)cardStruct[5]; // arguments of the function above
         
         #ifdef DEBUG
 		// Send a log command for debug purpose
@@ -326,7 +292,7 @@ void continueCardReadDma() {
 
         // TODO Copy via dma
         //dmaReadOnArm9 = true;
-		memcpy(dst, (u8*)buffer+(src-sector), len2);
+		tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
 		// Update cardi common
 		cardStruct[0] = src + len2;
@@ -383,7 +349,7 @@ void continueCardReadDma() {
         
         		// TODO Copy via dma
                 //dmaReadOnArm9 = true;
-        		memcpy(dst, (u8*)buffer+(src-sector), len2);
+        		tonccpy(dst, (u8*)buffer+(src-sector), len2);
         
         		// Update cardi common
         		cardStruct[0] = src + len2;
@@ -421,22 +387,7 @@ static inline bool startCardReadDma() {
 	int slot = getSlotForSector(sector);
 	vu8* buffer = getCacheAddress(slot);
 	// Read max CACHE_READ_SIZE via the main RAM cache
-	if (slot == -1) {
-        /*#ifdef DEBUG
-		// Send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
-
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = 2;
-		sharedAddr[4] = commandRead;
-
-		waitForArm7();
-		// -------------------------------------
-		#endif*/
-    
+	if (slot == -1) {    
 		// Send a command to the ARM7 to fill the RAM cache
         commandRead = 0x025FFB08;
 
@@ -455,7 +406,7 @@ static inline bool startCardReadDma() {
 		checkArm7();
         
         dmaReadOnArm7 = true;
-        cardStruct[14] = BUSY_FLAG;
+        //cardStruct[14] = BUSY_FLAG;
         
         updateDescriptor(slot, sector);
         return true;
@@ -474,7 +425,7 @@ static inline bool startCardReadDma() {
 
 		// TODO Copy via dma
         //dmaReadOnArm9 = true;
-		memcpy(dst, (u8*)buffer+(src-sector), len2);
+		tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
 		// Update cardi common
 		cardStruct[0] = src + len2;
