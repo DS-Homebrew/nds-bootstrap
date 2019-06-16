@@ -197,7 +197,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 
-	nitroFSInit(bootstrapPath);
+	if ((strncmp (bootstrapPath, "sd:/", 4) != 0) && (strncmp (bootstrapPath, "fat:/", 5) != 0)) {
+		//bootstrapPath = "sd:/_nds/nds-bootstrap-release.nds";
+		bootstrapPath = "sd:/_nds/nds-bootstrap-nightly.nds";
+	}
+	if (!nitroFSInit(bootstrapPath)) {
+		consoleDemoInit();
+		printf("nitroFSInit failed!\n");
+		return -1;
+	}
 	
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
