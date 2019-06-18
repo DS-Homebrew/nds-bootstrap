@@ -378,7 +378,6 @@ static inline bool startCardReadDma() {
 		checkArm7();
         
         dmaReadOnArm7 = true;
-        //cardStruct[14] = BUSY_FLAG;
         
         updateDescriptor(slot, sector);
         return true;

@@ -605,17 +605,17 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *pdashReadLocation = current_location;
 
-	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armPullCardLocation) {
+	u32* ipcSyncHandlerLocation = findOffset(current_location, size, location_sig, 1);
+	if (!ipcSyncHandlerLocation) {
 		return;
 	}
-    dbg_printf("armPullCardLocation ");
-	dbg_hexa((u32)armPullCardLocation);
+    dbg_printf("ipcSyncHandlerLocation ");
+	dbg_hexa((u32)ipcSyncHandlerLocation);
     dbg_printf(" : ");
-    dbg_hexa((u32)*armPullCardLocation);
+    dbg_hexa((u32)*ipcSyncHandlerLocation);
     dbg_printf("\n\n");
     
-    *armPullCardLocation = current_location;*/
+    *ipcSyncHandlerLocation = current_location;
     
     u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {
