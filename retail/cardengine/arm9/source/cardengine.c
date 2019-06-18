@@ -343,68 +343,72 @@ void continueCardReadDma() {
 static inline bool startCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
+
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
-    dma = cardStruct[3]; // dma channel
-	void* func = (void*)cardStruct[4]; // function to call back once read done
-	void* arg  = (void*)cardStruct[5]; // arguments of the function above
-        
+    dma = cardStruct[3]; // dma channel     
 
 	u32 commandRead;
 	u32 sector = (src/readSize)*readSize;
-
-	accessCounter++;
-
-	// Read via the main RAM cache
-	int slot = getSlotForSector(sector);
-	vu8* buffer = getCacheAddress(slot);
-	// Read max CACHE_READ_SIZE via the main RAM cache
-	if (slot == -1) {    
-		// Send a command to the ARM7 to fill the RAM cache
-        commandRead = 0x025FFB08;
-
-		slot = allocateCacheSlot();
-
-		buffer = getCacheAddress(slot);
     
-		// Write the command
-		sharedAddr[0] = (vu32)buffer;
-		sharedAddr[1] = readSize;
-		sharedAddr[2] = sector;
-		sharedAddr[3] = commandRead;
-
-        // do not wait for arm7 and return immediately
-		checkArm7();
+    while (len > 0) {
+        src = cardStruct[0];
+		dst = (u8*)cardStruct[1];
+		sector = (src / readSize) * readSize;
+		accessCounter++;  
+    
+    	// Read via the main RAM cache
+    	int slot = getSlotForSector(sector);
+    	vu8* buffer = getCacheAddress(slot);
+    	// Read max CACHE_READ_SIZE via the main RAM cache
+    	if (slot == -1) {    
+    		// Send a command to the ARM7 to fill the RAM cache
+            commandRead = 0x025FFB08;
+    
+    		slot = allocateCacheSlot();
+    
+    		buffer = getCacheAddress(slot);
         
-        dmaReadOnArm7 = true;
-        
-        updateDescriptor(slot, sector);
-        return true;
-	} else {
-		updateDescriptor(slot, sector);	
-
-		u32 len2 = len;
-		if ((src - sector) + len2 > readSize) {
-			len2 = sector - src + readSize;
-		}
-
-		if (len2 > 512) {
-			len2 -= src % 4;
-			len2 -= len2 % 32;
-		}
-
-		// TODO Copy via dma
-        //dmaReadOnArm9 = true;
-		tonccpy(dst, (u8*)buffer+(src-sector), len2);
-
-		// Update cardi common
-		cardStruct[0] = src + len2;
-		cardStruct[1] = (vu32)(dst + len2);
-		cardStruct[2] = len - len2;
-        
-        return false;
-      }
+    		// Write the command
+    		sharedAddr[0] = (vu32)buffer;
+    		sharedAddr[1] = readSize;
+    		sharedAddr[2] = sector;
+    		sharedAddr[3] = commandRead;
+    
+            // do not wait for arm7 and return immediately
+    		checkArm7();
+            
+            dmaReadOnArm7 = true;
+            
+            updateDescriptor(slot, sector);
+            return true;
+    	} else {
+    		updateDescriptor(slot, sector);	
+    
+    		u32 len2 = len;
+    		if ((src - sector) + len2 > readSize) {
+    			len2 = sector - src + readSize;
+    		}
+    
+    		if (len2 > 512) {
+    			len2 -= src % 4;
+    			len2 -= len2 % 32;
+    		}
+    
+    		// TODO Copy via dma
+            //dmaReadOnArm9 = true;
+    		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+    
+    		// Update cardi common
+    		cardStruct[0] = src + len2;
+    		cardStruct[1] = (vu32)(dst + len2);
+    		cardStruct[2] = len - len2;
+            
+            len = cardStruct[2];            
+          }
+    }      
+    return false;
 }
 
 #endif

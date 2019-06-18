@@ -126,6 +126,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	if (strcmp(romTid, "YGXE") == 0 || strcmp(romTid, "YGXP") == 0) {
 		*(u16*)0x02037a34 = 0x46c0;
 		*(u32*)0x0216ac0c = 0x0001fffb;
+		
+        //test patches 4 dma
+        // flag = common + 0x114
 	}
 
 	// WarioWare: DIY (USA)
