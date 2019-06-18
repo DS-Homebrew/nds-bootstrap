@@ -294,8 +294,7 @@ void continueCardReadDma() {
         		sharedAddr[0] = (vu32)buffer;
         		sharedAddr[1] = readSize;
         		sharedAddr[2] = sector;
-        		sharedAddr[3] = true;
-        		sharedAddr[4] = commandRead;
+        		sharedAddr[3] = commandRead;
         
                 // do not wait for arm7 and return immediately
         		checkArm7();
@@ -373,8 +372,7 @@ static inline bool startCardReadDma() {
 		sharedAddr[0] = (vu32)buffer;
 		sharedAddr[1] = readSize;
 		sharedAddr[2] = sector;
-		sharedAddr[3] = true;
-		sharedAddr[4] = commandRead;
+		sharedAddr[3] = commandRead;
 
         // do not wait for arm7 and return immediately
 		checkArm7();
