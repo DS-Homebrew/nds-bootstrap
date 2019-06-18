@@ -234,22 +234,7 @@ void endCardReadDma() {
 void continueCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
     u32 commandRead;
-    
-    #ifdef DEBUG
-	// Send a log command for debug purpose
-	// -------------------------------------
-	commandRead = 0x026ff800;
-
-	sharedAddr[0] = 0;
-	sharedAddr[1] = 0;
-	sharedAddr[2] = 0;
-	sharedAddr[3] = 4;
-	sharedAddr[4] = commandRead;
-
-	waitForArm7();
-	// -------------------------------------
-	#endif
-    
+        
     if(dmaReadOnArm7) {
         if(!checkArm7()) return;
         
@@ -259,22 +244,7 @@ void continueCardReadDma() {
     	u8* dst = (u8*)(cardStruct[1]);
     	u32 len = cardStruct[2];
         u32	dma = cardStruct[3]; // dma channel
-        
-        #ifdef DEBUG
-		// Send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
-
-		sharedAddr[0] = src;
-		sharedAddr[1] = dst;
-		sharedAddr[2] = len;
-		sharedAddr[3] = 3;
-		sharedAddr[4] = commandRead;
-
-		waitForArm7();
-		// -------------------------------------
-		#endif
-        
+               
         u32 sector = (src/readSize)*readSize;
         
         u32 len2 = len;
@@ -301,7 +271,7 @@ void continueCardReadDma() {
         
         len = cardStruct[2];
         
-        if (len > 0) {
+        while (len > 0) {
             src = cardStruct[0];
 			dst = (u8*)cardStruct[1];
 			sector = (src / readSize) * readSize;
@@ -333,6 +303,7 @@ void continueCardReadDma() {
                 dmaReadOnArm7 = true;
                 
                 updateDescriptor(slot, sector);	
+                break;
         
         	} else {
         		updateDescriptor(slot, sector);	
@@ -355,11 +326,14 @@ void continueCardReadDma() {
         		cardStruct[0] = src + len2;
         		cardStruct[1] = (vu32)(dst + len2);
         		cardStruct[2] = len - len2;
-                                
+                
+                len = cardStruct[2];         
               }  
-        } else { 
-            endCardReadDma();
-         }
+        } 
+        
+        if (len==0) { 
+          endCardReadDma();
+       }
     }
 
     if(dmaReadOnArm9) {
