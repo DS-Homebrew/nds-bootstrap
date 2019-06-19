@@ -712,13 +712,13 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 			len2 = sector - src + readSize;
 		}
 
-          if (isDma) {
+          /*if (isDma) {
               // Copy via dma
 				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
               while (dmaBusy(dma)) {
                   sleep(1);
               }        
-          } else {
+          } else {*/
   			#ifdef DEBUG
   			// Send a log command for debug purpose
   			// -------------------------------------
@@ -735,7 +735,7 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
   
   			// Copy directly
   			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-          }
+          //}
 
     		// Update cardi common
     		cardStruct[0] = src + len2;
