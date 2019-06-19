@@ -127,9 +127,9 @@ static void initialize(void) {
 	}
 	sdRead = true;				// Switch to SD
 	FAT_InitFiles(false, 0);
-	if (saveOnFlashcard) {
+	if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;			// Switch to flashcard
-		FAT_InitFiles(false, 0);
+		FAT_InitFiles(true, 0);
 		sdRead = true;				// Switch to SD
 	}
 	//romFile = getFileFromCluster(fileCluster);
@@ -793,7 +793,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
@@ -818,7 +818,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
@@ -847,7 +847,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
