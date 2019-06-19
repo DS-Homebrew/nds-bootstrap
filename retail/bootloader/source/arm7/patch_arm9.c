@@ -316,11 +316,11 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
-        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
+        //||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
-        ||  strncmp(romTid, "AFF", 3) == 0  // FF3
-        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
-        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        //||  strncmp(romTid, "AFF", 3) == 0  // FF3
+        //||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+        //||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
     ) {
 
       
