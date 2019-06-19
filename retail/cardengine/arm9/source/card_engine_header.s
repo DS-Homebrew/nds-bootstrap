@@ -388,8 +388,8 @@ ipcSyncHandler:
     
 code_handler_start_ipc:
 	push	{r0-r12} 
-    ldr		r6, cardReadRef12
-    ldr     r7, ce9location12
+    ldr		r6, cardReadRef13
+    ldr     r7, ce9location13
     add     r6, r6, r7
 	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
   
