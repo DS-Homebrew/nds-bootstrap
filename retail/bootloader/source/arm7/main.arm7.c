@@ -76,9 +76,7 @@ extern void arm7clearRAM(void);
 extern u32 storedFileCluster;
 extern u32 initDisc;
 extern u32 gameOnFlashcard;
-//extern u32 argStart;
-//extern u32 argSize;
-//extern u32 dsiSD;
+extern u32 saveOnFlashcard;
 extern u32 saveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
@@ -706,7 +704,7 @@ int arm7_main(void) {
 		return -1;
 	}
 
-	if (gameOnFlashcard) {
+	if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, 0)) {
@@ -765,21 +763,26 @@ int arm7_main(void) {
 		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x27C0000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
-		romFile->fatTableCache = 0x2700000;
+		romFile->fatTableCache = (u32*)0x2700000;	// Change fatTableCache addr for ce9 usage
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)ROM_FILE_LOCATION, sizeof(aFile));
 	}
 
-	if (gameOnFlashcard) sdRead = true;
+	sdRead = (saveOnFlashcard ? false : true);
 
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
-	if (savFile->firstCluster != CLUSTER_FREE && !gameOnFlashcard) {
-		if (fatTableEmpty) {
-			buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
-		} else {
-			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
+	if (savFile->firstCluster != CLUSTER_FREE) {
+		if (saveOnFlashcard) {
+			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)SAV_FILE_LOCATION, sizeof(aFile));
+		}
+		if (!gameOnFlashcard) {
+			if (fatTableEmpty) {
+				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
+			} else {
+				tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
+			}
 		}
 	}
 
@@ -802,7 +805,8 @@ int arm7_main(void) {
 		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}
 	if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFE0);
+		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFC0);
+		romFile->fatTableCache = (u32*)0x3700000;	// Revert back for ce7 usage
 	}
 
 	toncset((u32*)0x027C0000, 0, 0x400);
@@ -865,15 +869,23 @@ int arm7_main(void) {
 
 		nocashMessage("Trying to patch the card...\n");
 
-		tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x10000);
+		tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
+		if(gameOnFlashcard || saveOnFlashcard) {
+			if (!dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x12000)) {
+				nocashMessage("ce7 DLDI patch failed");
+				dbg_printf("ce7 DLDI patch failed");
+				dbg_printf("\n");
+				errorOutput();
+			}
+		}
 
 		if (isSdk5(moduleParams)) {
-			if(gameOnFlashcard && !ROMinRAM) {
+			if (gameOnFlashcard && !ROMinRAM) {
 				ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
 				tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 				if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
-					nocashMessage("DLDI patch failed");
-					dbg_printf("DLDI patch failed");
+					nocashMessage("ce9 DLDI patch failed");
+					dbg_printf("ce9 DLDI patch failed");
 					dbg_printf("\n");
 					errorOutput();
 				}
@@ -885,8 +897,8 @@ int arm7_main(void) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
 			if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
-				nocashMessage("DLDI patch failed");
-				dbg_printf("DLDI patch failed");
+				nocashMessage("ce9 DLDI patch failed");
+				dbg_printf("ce9 DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();
 			}
@@ -948,6 +960,7 @@ int arm7_main(void) {
 			cheatFileCluster,
 			cheatSize,
 			gameOnFlashcard,
+			saveOnFlashcard,
 			language,
 			dsiModeConfirmed,
 			ROMinRAM,
@@ -977,6 +990,8 @@ int arm7_main(void) {
 			(cardengineArm9*)ce9Location,
 			moduleParams,
 			romFile->firstCluster,
+			savFile->firstCluster,
+			saveOnFlashcard,
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),

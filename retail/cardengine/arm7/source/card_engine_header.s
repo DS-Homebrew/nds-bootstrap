@@ -16,6 +16,7 @@
 .global fileCluster
 .global saveCluster
 .global gameOnFlashcard
+.global saveOnFlashcard
 .global language
 .global gottenSCFGExt
 .global dsiMode
@@ -51,6 +52,8 @@ fileCluster:
 cardStruct:
 	.word	0x00000000
 gameOnFlashcard:
+	.word	0x00000000
+saveOnFlashcard:
 	.word	0x00000000
 language:
 	.word	0x00000000

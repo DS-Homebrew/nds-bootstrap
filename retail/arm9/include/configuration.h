@@ -29,9 +29,8 @@ typedef struct configuration {
 	bool preciseVolumeControl;
 	bool logging;
 	bool initDisc;
-	bool dldiPatchNds;
-	int argc;
-	const char** argv; //const char* argv[ARG_MAX];
+	bool gameOnFlashcard;
+	bool saveOnFlashcard;
 	u32 backlightMode;
 } configuration;
 

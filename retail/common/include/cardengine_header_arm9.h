@@ -58,6 +58,8 @@ typedef struct cardengineArm9 {
     u32 intr_ipc_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
+    u32 saveCluster;
+    u32 saveOnFlashcard;
     u32 cardStruct0;
     u32 cacheStruct;
     u32 ROMinRAM;
@@ -65,7 +67,6 @@ typedef struct cardengineArm9 {
     u32 enableExceptionHandler;
     u32 consoleModel;
     u32* irqTable;
-    u32 asyncPrefetch;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H

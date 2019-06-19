@@ -228,40 +228,6 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int loadArgs(int argc, const char** argv) {
-	// Give arguments to loader
-
-	char* argStart = (char*)lc0 + lc0->argStart;
-	argStart = (char*)(((int)argStart + 3) & ~3); // Align to word
-	u16* argData = (u16*)argStart;
-	int argSize = 0;
-	u16 argTempVal = 0;
-	
-	for (; argc > 0 && *argv; ++argv, --argc) {
-		for (const char* argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
-			if (argSize & 1) {
-				argTempVal |= (*argChar) << 8;
-				*argData = argTempVal;
-				++argData;
-			} else {
-				argTempVal = *argChar;
-			}
-		}
-		if (argSize & 1) {
-			*argData = argTempVal;
-			++argData;
-		}
-		argTempVal = 0;
-		++argSize;
-	}
-	*argData = argTempVal;
-
-	lc0->argStart = (u32)argStart - (u32)lc0;
-	lc0->argSize  = argSize;
-
-	return true;
-}
-
 void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
 	nocashMessage("runNds");
 
@@ -280,13 +246,8 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 
 	lc0->storedFileCluster = cluster;
 	lc0->initDisc          = conf->initDisc;
-	lc0->gameOnFlashcard   = conf->dldiPatchNds;
-
-	loadArgs(conf->argc, conf->argv);
-	for (int i = 0; i < conf->argc; ++i) {
-		free((void*)conf->argv[i]);
-	}
-	free(conf->argv);
+	lc0->gameOnFlashcard   = conf->gameOnFlashcard;
+	lc0->saveOnFlashcard   = conf->saveOnFlashcard;
 
 	lc0->saveFileCluster             = saveCluster;
 	lc0->romSize                     = conf->romSize;
@@ -312,10 +273,10 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 
 	free(conf);
 
-	if(conf->dldiPatchNds) {
+	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
 		if (!dldiPatchLoader ((data_t*)lc0, loaderSize, conf->initDisc)) {
-			return 3;
+			return;
 		}
 	}
 

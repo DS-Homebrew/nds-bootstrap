@@ -66,6 +66,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
@@ -864,6 +865,13 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+	if (ce9->saveOnFlashcard) {
+#ifdef DLDI
+		fileRead(memory, *savFile, flash, len, -1);
+#endif
+		return 0;
+	}
+
     // Send a command to the ARM7 to read the nand save
 	u32 commandNandRead = 0x025FFC01;
 
@@ -878,7 +886,14 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-    // Send a command to the ARM7 to read the nand save
+	if (ce9->saveOnFlashcard) {
+#ifdef DLDI
+		fileWrite(memory, *savFile, flash, len, -1);
+#endif
+		return 0;
+	}
+
+	// Send a command to the ARM7 to read the nand save
 	u32 commandNandWrite = 0x025FFC02;
 
 	// Write the command

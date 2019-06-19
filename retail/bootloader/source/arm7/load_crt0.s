@@ -26,8 +26,7 @@
 	.global storedFileCluster
 	.global initDisc
 	.global gameOnFlashcard
-	.global argStart
-	.global argSize
+	.global saveOnFlashcard
 	.global dsiSD
 	.global saveFileCluster
 	.global romSize
@@ -64,10 +63,7 @@ initDisc:
 	.word	0x00000001		@ init the disc by default
 gameOnFlashcard:
 	.word	0x00000000
-@ Used for passing arguments to the loaded app
-argStart:
-	.word	_end - _start
-argSize:
+saveOnFlashcard:
 	.word	0x00000000
 dldiOffset:
 	.word	0x00000000

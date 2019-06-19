@@ -16,11 +16,15 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
-intr_fifo_orig_return:
+intr_ipc_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 fileCluster:
+	.word	0x00000000
+saveCluster:
+	.word	0x00000000
+saveOnFlashcard:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000

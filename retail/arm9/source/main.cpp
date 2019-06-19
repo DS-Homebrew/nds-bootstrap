@@ -154,9 +154,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
-	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
-	//dbg_printf("argc: %lu\n", conf->argc);
-	//const char** argv;
+	dbg_printf("gameOnFlashcard: %s\n", btoa(conf->gameOnFlashcard));
+	dbg_printf("saveOnFlashcard: %s\n", btoa(conf->saveOnFlashcard));
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
@@ -304,7 +303,7 @@ static int runNdsFile(configuration* conf) {
 
 	debugConf(conf);
 
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0 || conf->argc == 0) {
+	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0) {
 		dbg_printf("No NDS file specified\n");
 		if (debug) {
 			dopause();
@@ -366,20 +365,6 @@ static int runNdsFile(configuration* conf) {
 		clusterFatTable = stFatTable.st_ino;
 	}
 
-	if (conf->argc <= 0 || !conf->argv) {
-		// Construct a command line if we weren't supplied with one
-		if (!getcwd(filePath, PATH_MAX)) {
-			return -3;
-		}
-		pathLen = strlen(filePath);
-		strcpy(filePath + pathLen, conf->ndsPath);
-		//args[0] = filePath;
-		//conf->argv = args;
-		memset(conf->argv, 0, conf->argc*sizeof(const char*));
-		conf->argv[0] = filePath;
-		conf->argc = 1;
-	}
-
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
@@ -399,7 +384,6 @@ static int runNdsFile(configuration* conf) {
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
 	conf->initDisc = true;
-	conf->dldiPatchNds = false;
 
 	int status = loadFromSD(conf, argv[0]);
 
@@ -414,7 +398,6 @@ int main(int argc, char** argv) {
 	if (status != 0) {
 		free(conf->ndsPath);
 		free(conf->savPath);
-		free(conf->argv);
 		free(conf);
 		
 		stop();

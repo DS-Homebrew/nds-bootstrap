@@ -97,6 +97,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
     u32 gameOnFlashcard,
+    u32 saveOnFlashcard,
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
@@ -205,6 +206,7 @@ int hookNdsRetailArm7(
 	ce7->moduleParams            = moduleParams;
 	ce7->fileCluster             = fileCluster;
 	ce7->gameOnFlashcard         = gameOnFlashcard;
+	ce7->saveOnFlashcard         = saveOnFlashcard;
 	ce7->language                = language;
 	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
 	ce7->dsiMode                 = dsiMode; // SDK 5
@@ -216,8 +218,8 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
-	if (strncmp(romTid, "UOR", 3) == 0
-	|| strncmp(romTid, "UXB", 3) == 0
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		*timer0Handler = ce7->patches->timer0Handler;
 		*timer1Handler = ce7->patches->timer1Handler;

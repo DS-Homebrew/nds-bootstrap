@@ -54,6 +54,7 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern module_params_t* moduleParams;
 extern u32 gameOnFlashcard;
+extern u32 saveOnFlashcard;
 extern u32 language;
 //extern u32 gottenSCFGExt;
 extern u32 dsiMode;
@@ -65,7 +66,7 @@ extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-bool sdRead = true;	// Unused, but added to prevent errors
+bool sdRead = true;
 
 static bool initialized = false;
 //static bool initializedIRQ = false;
@@ -124,7 +125,11 @@ static void initialize(void) {
 		sdmmc_init();
 		SD_Init();
 	}
+	sdRead = true;				// Switch to SD
 	FAT_InitFiles(false, 0);
+	sdRead = false;			// Switch to flashcard
+	FAT_InitFiles(false, 0);
+	sdRead = true;				// Switch to SD
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
@@ -522,6 +527,7 @@ static void runCardEngineCheck(void) {
   		}*/
   
     		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
+				sdRead = true;
     			log_arm9();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
                 IPC_SendSync(0x8);
@@ -529,6 +535,7 @@ static void runCardEngineCheck(void) {
     
     
           if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB08) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A)) {
+				sdRead = true;
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
@@ -537,6 +544,7 @@ static void runCardEngineCheck(void) {
           }
           
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
+				sdRead = true;
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01);
     			nandRead();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
@@ -544,6 +552,7 @@ static void runCardEngineCheck(void) {
     		}
             
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02) {
+				sdRead = true;
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02);
     			nandWrite();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
@@ -718,8 +727,8 @@ void myIrqHandlerVBlank(void) {
 	cheat_engine_start();
 
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "UOR", 3) == 0
-	|| strncmp(romTid, "UXB", 3) == 0
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		runCardEngineCheck();
 	}
@@ -788,6 +797,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		fileRead(dst, *savFile, src, len, -1);
   		unlockMutex(&saveMutex);
 	}
@@ -812,6 +822,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
@@ -840,6 +851,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
@@ -872,8 +884,8 @@ bool eepromPageErase (u32 dst) {
 	#ifdef DEBUG	
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
-	
-	if (isSdEjected()) {
+
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
@@ -940,7 +952,6 @@ Existing/known ROM IDs are:
   C2h,F0h,00h,90h 3DS Macronix 4GB ROM CTR-P-ABRJ Biohazard Revelations
   FFh,FFh,FFh,FFh None (no cartridge inserted)
 */
-bool cardInitialized = false;
 u32 cardId(void) {
 	#ifdef DEBUG	
 	dbg_printf("\ncardId\n");
@@ -953,8 +964,6 @@ u32 cardId(void) {
     //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xFF000000; // golden sun
     //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x000000FF; // golden sun
 
-    cardInitialized= true;
-    
     #ifdef DEBUG
     dbg_hexa(cardid);
     #endif
@@ -978,10 +987,9 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	
 	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
-	} else if (gameOnFlashcard) {
-		return true;
 	} else {
 		initialize();
+		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
