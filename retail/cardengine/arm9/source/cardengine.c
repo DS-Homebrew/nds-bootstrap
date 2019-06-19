@@ -235,19 +235,20 @@ void endCardReadDma() {
 
 void continueCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
-    u32 commandRead;
+    u32 commandRead=0x025FFB08;
+    u32 commandPool=0x025AAB08;
+    
+    u32 src = cardStruct[0];
+    u8* dst = (u8*)(cardStruct[1]);
+    u32 len = cardStruct[2];
+    u32	dma = cardStruct[3]; // dma channel
+    
+    u32 sector = (src/readSize)*readSize;
         
     if(dmaReadOnArm7) {
         if(!checkArm7()) return;
         
         dmaReadOnArm7 = false;
-        
-        u32 src = cardStruct[0];
-    	u8* dst = (u8*)(cardStruct[1]);
-    	u32 len = cardStruct[2];
-        u32	dma = cardStruct[3]; // dma channel
-               
-        u32 sector = (src/readSize)*readSize;
         
         u32 len2 = len;
 		if ((src - sector) + len2 > readSize) {
@@ -263,8 +264,10 @@ void continueCardReadDma() {
         vu8* buffer = getCacheAddress(slot);
 
         // TODO Copy via dma
-        tonccpy(dst, (u8*)buffer+(src-sector), len2);
-        //dmaReadOnArm9 = true;
+        dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+        dmaReadOnArm9 = true;
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);
 		
 		// Update cardi common
 		cardStruct[0] = src + len2;
@@ -272,8 +275,15 @@ void continueCardReadDma() {
 		cardStruct[2] = len - len2;
         
         len = cardStruct[2];
+    }
+
+    if(dmaReadOnArm9) {
+        if(dmaBusy(dma)) return;
         
-        while (len > 0) {
+        dmaReadOnArm9 = false;        
+        sharedAddr[3] = 0;
+        
+        if (len > 0) {
             src = cardStruct[0];
 			dst = (u8*)cardStruct[1];
 			sector = (src / readSize) * readSize;
@@ -281,7 +291,7 @@ void continueCardReadDma() {
             
             // Read via the main RAM cache
         	int slot = getSlotForSector(sector);
-        	buffer = getCacheAddress(slot);
+        	vu8* buffer = getCacheAddress(slot);
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
         		// Send a command to the ARM7 to fill the RAM cache
@@ -304,7 +314,7 @@ void continueCardReadDma() {
                 dmaReadOnArm7 = true;
                 
                 updateDescriptor(slot, sector);	
-                break;
+                return;
         
         	} else {
         		updateDescriptor(slot, sector);	
@@ -319,9 +329,11 @@ void continueCardReadDma() {
         			len2 -= len2 % 32;
         		}
         
-        		// TODO Copy via dma
-                //dmaReadOnArm9 = true;
-        		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+        		// Copy via dma
+                dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+                dmaReadOnArm9 = true;
+                sharedAddr[3] = commandPool;
+                IPC_SendSync(0x3);
         
         		// Update cardi common
         		cardStruct[0] = src + len2;
@@ -329,16 +341,11 @@ void continueCardReadDma() {
         		cardStruct[2] = len - len2;
                 
                 len = cardStruct[2];         
-              }  
-        } 
-        
+            }  
+        }
         if (len==0) { 
           endCardReadDma();
-       }
-    }
-
-    if(dmaReadOnArm9) {
-        // TODO
+       } 
     }
 }
 
@@ -351,66 +358,68 @@ static inline bool startCardReadDma() {
 	u32 len = cardStruct[2];
     dma = cardStruct[3]; // dma channel     
 
-	u32 commandRead;
+    u32 commandRead=0x025FFB08;
+    u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
     
-    while (len > 0) {
-        src = cardStruct[0];
-		dst = (u8*)cardStruct[1];
-		sector = (src / readSize) * readSize;
-		accessCounter++;  
-    
-    	// Read via the main RAM cache
-    	int slot = getSlotForSector(sector);
-    	vu8* buffer = getCacheAddress(slot);
-    	// Read max CACHE_READ_SIZE via the main RAM cache
-    	if (slot == -1) {    
-    		// Send a command to the ARM7 to fill the RAM cache
-            commandRead = 0x025FFB08;
-    
-    		slot = allocateCacheSlot();
-    
-    		buffer = getCacheAddress(slot);
+
+    src = cardStruct[0];
+	dst = (u8*)cardStruct[1];
+	sector = (src / readSize) * readSize;
+	accessCounter++;  
+  
+  	// Read via the main RAM cache
+  	int slot = getSlotForSector(sector);
+  	vu8* buffer = getCacheAddress(slot);
+  	// Read max CACHE_READ_SIZE via the main RAM cache
+  	if (slot == -1) {    
+  		// Send a command to the ARM7 to fill the RAM cache
+        commandRead = 0x025FFB08;
+  
+  		slot = allocateCacheSlot();
+  
+  		buffer = getCacheAddress(slot);
+      
+  		// Write the command
+  		sharedAddr[0] = (vu32)buffer;
+  		sharedAddr[1] = readSize;
+  		sharedAddr[2] = sector;
+  		sharedAddr[3] = commandRead;
+  
+          // do not wait for arm7 and return immediately
+  		checkArm7();
+          
+        dmaReadOnArm7 = true;
         
-    		// Write the command
-    		sharedAddr[0] = (vu32)buffer;
-    		sharedAddr[1] = readSize;
-    		sharedAddr[2] = sector;
-    		sharedAddr[3] = commandRead;
-    
-            // do not wait for arm7 and return immediately
-    		checkArm7();
-            
-            dmaReadOnArm7 = true;
-            
-            updateDescriptor(slot, sector);
-            return true;
-    	} else {
-    		updateDescriptor(slot, sector);	
-    
-    		u32 len2 = len;
-    		if ((src - sector) + len2 > readSize) {
-    			len2 = sector - src + readSize;
-    		}
-    
-    		if (len2 > 512) {
-    			len2 -= src % 4;
-    			len2 -= len2 % 32;
-    		}
-    
-    		// TODO Copy via dma
-            //dmaReadOnArm9 = true;
-    		tonccpy(dst, (u8*)buffer+(src-sector), len2);
-    
-    		// Update cardi common
-    		cardStruct[0] = src + len2;
-    		cardStruct[1] = (vu32)(dst + len2);
-    		cardStruct[2] = len - len2;
-            
-            len = cardStruct[2];            
-          }
-    }      
-    return false;
+        updateDescriptor(slot, sector);
+  	} else {
+  		updateDescriptor(slot, sector);	
+  
+  		u32 len2 = len;
+  		if ((src - sector) + len2 > readSize) {
+  			len2 = sector - src + readSize;
+  		}
+  
+  		if (len2 > 512) {
+  			len2 -= src % 4;
+  			len2 -= len2 % 32;
+  		}
+  
+  		// Copy via dma
+        dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
+        dmaReadOnArm9 = true;
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);
+  
+  		// Update cardi common
+  		cardStruct[0] = src + len2;
+  		cardStruct[1] = (vu32)(dst + len2);
+  		cardStruct[2] = len - len2;
+          
+        len = cardStruct[2];            
+      }
+   
+    return true;
 }
 
 #endif

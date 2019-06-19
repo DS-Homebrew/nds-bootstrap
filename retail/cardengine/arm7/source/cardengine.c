@@ -487,7 +487,11 @@ static void runCardEngineCheckResume(void) {
 	//dbg_printf("runCardEngineCheckResume\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheckResume");
-	#endif	
+	#endif
+    
+    if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
+        IPC_SendSync(0x7);
+    }	
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
   		initialize();
@@ -527,6 +531,10 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x70, 0x01);
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
+
+    		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
+                IPC_SendSync(0x7);
+    		}
   
     		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
 				sdRead = true;
