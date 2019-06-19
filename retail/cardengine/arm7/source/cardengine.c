@@ -127,9 +127,11 @@ static void initialize(void) {
 	}
 	sdRead = true;				// Switch to SD
 	FAT_InitFiles(false, 0);
-	sdRead = false;			// Switch to flashcard
-	FAT_InitFiles(false, 0);
-	sdRead = true;				// Switch to SD
+	if (saveOnFlashcard) {
+		sdRead = false;			// Switch to flashcard
+		FAT_InitFiles(false, 0);
+		sdRead = true;				// Switch to SD
+	}
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
