@@ -125,20 +125,20 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 #endif
 
-static void sleep(u32 ms) {
+/*static void sleep(u32 ms) {
     if(ce9->patches->sleepRef) {
         volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
         (*sleepRef)(ms);
     } else if(ce9->thumbPatches->sleepRef) {
         callSleepThumb(ms);
     }    
-}
+}*/
 
 
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
     int count = 0;
-    if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+    /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
                 sleep(1);
@@ -147,7 +147,7 @@ static void waitForArm7(void) {
             }
             count--;
         }
-    } else {
+    } else {*/
         while (sharedAddr[3] != (vu32)0) {
            if(count==20000000) {
                 IPC_SendSync(0x4);
@@ -155,7 +155,7 @@ static void waitForArm7(void) {
             }
             count++;
         }
-    }
+    //}
 }
 
 static bool checkArm7(void) {
@@ -226,7 +226,8 @@ static void clearIcache (void) {
 #ifndef DLDI
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
-        // TODO
+        volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
+        (*cardEndReadDmaRef)();
     } else if(ce9->thumbPatches->cardEndReadDmaRef) {
         callEndReadDmaThumb();
     }    
@@ -262,9 +263,9 @@ void continueCardReadDma() {
         vu8* buffer = getCacheAddress(slot);
 
         // TODO Copy via dma
+        tonccpy(dst, (u8*)buffer+(src-sector), len2);
         //dmaReadOnArm9 = true;
-		tonccpy(dst, (u8*)buffer+(src-sector), len2);
-
+		
 		// Update cardi common
 		cardStruct[0] = src + len2;
 		cardStruct[1] = (vu32)(dst + len2);
@@ -474,13 +475,13 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 = sector - src + readSize;
 			}
 
-            if (isDma) {
+            /*if (isDma) {
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
                     sleep(1);
                 }        
-            } else {
+            } else {*/
     			#ifdef DEBUG
     			// Send a log command for debug purpose
     			// -------------------------------------
@@ -497,7 +498,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     
     			// Copy directly
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-            }
+            //}
     		// Update cardi common
     		cardStruct[0] = src + len2;
     		cardStruct[1] = (vu32)(dst + len2);
@@ -526,13 +527,13 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
 	while (len > 0) {
-		if (isDma) {
+		/*if (isDma) {
             // Copy via dma
   			dmaCopyWordsAsynch(dma, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
             while (dmaBusy(dma)) {
                 sleep(1);
             }        
-		} else {
+		} else {*/
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -549,7 +550,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			// Copy directly
 			tonccpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
-		}
+		//}
 		// Update cardi common
 		cardStruct[0] = src + len;
 		cardStruct[1] = (vu32)(dst + len);	
@@ -597,50 +598,49 @@ u32 cardReadDma() {
 	) {
 		dmaLed = true;
         #ifndef DLDI
-        if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
-        {
-			isDma = true;
+        
 
-            if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {   // new dma method
-                /*if (src == 0) {
-            		// If ROM read location is 0, do not proceed.
-            		return false;
-            	}
+
+        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
+            isDma = true;
+           // new dma method
+              /*if (src == 0) {
+          		// If ROM read location is 0, do not proceed.
+          		return false;
+          	}
+          
+          	// Fix reads below 0x8000
+          	if (src <= 0x8000){
+          		src = 0x8000 + (src & 0x1FF);
+          	}*/
+              
+            int oldIME = enterCriticalSection();
             
-            	// Fix reads below 0x8000
-            	if (src <= 0x8000){
-            		src = 0x8000 + (src & 0x1FF);
-            	}*/
-                
-                int oldIME = enterCriticalSection();
-                
-                hookIPC_SYNC();
-                // TODO : reset IPC_SYNC IRQs
-                enableIPCSYNC();
-                  
-                /*if (len < THRESHOLD_CACHE_FLUSH) {
-                u32     dst2 = dst;
-                u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
-                if (mod)
-                {
-                    dst2 -= mod;
-                    DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
-                    DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
-                    len += CACHE_LINE_SIZE;
-                }
-                IC_InvalidateRange((void *)dst, len);
-                DC_InvalidateRange((void *)dst2, len);
-                DC_WaitWriteBufferEmpty();
-                } else {*/ 
-                // Note : cacheFlush disable / reenable irq
-                
-                leaveCriticalSection(oldIME); 
-                
-                cacheFlush();  
-                                  
-                return startCardReadDma();
+            hookIPC_SYNC();
+            // TODO : reset IPC_SYNC IRQs
+            enableIPCSYNC();
+              
+            /*if (len < THRESHOLD_CACHE_FLUSH) {
+            u32     dst2 = dst;
+            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
+            if (mod)
+            {
+                dst2 -= mod;
+                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
+                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
+                len += CACHE_LINE_SIZE;
             }
-        //}
+            IC_InvalidateRange((void *)dst, len);
+            DC_InvalidateRange((void *)dst2, len);
+            DC_WaitWriteBufferEmpty();
+            } else {*/ 
+            // Note : cacheFlush disable / reenable irq
+            
+            leaveCriticalSection(oldIME); 
+            
+            cacheFlush();  
+                              
+            return startCardReadDma();
 		} else {
 			isDma = false;
 			dma=4;
