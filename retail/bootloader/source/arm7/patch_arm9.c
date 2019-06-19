@@ -316,6 +316,11 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
+        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
     ) {
 
       
@@ -329,7 +334,12 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         thumbOffset--;
         *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
         ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
-      } else ce9->patches->cardEndReadDmaRef = offset;
+      } else  {
+        u32* armOffset = (u16*)offset;
+        armOffset--;
+        *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
+        ce9->patches->cardEndReadDmaRef = armOffset;
+      }  
     } 
 }
 
@@ -972,7 +982,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchDownloadplay(ndsHeader);
 
-    patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
+    //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
     
     patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
