@@ -85,7 +85,6 @@ static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 static bool flagsSet = false;
 static bool isDma = false;
 static bool dmaLed = false;
-static u8 dma = 4;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
@@ -193,11 +192,9 @@ static void hookIPC_SYNC(void) {
 
 static void hookDMA(int dma) {
       if(dma < 4) {
-        int oldIME = enterCriticalSection();
         u32* dmaHandler = ce9->irqTable + 8 + dma;
         *dmaHandler = myIrqHandlerDMA;
-        REG_IE |= IRQ_DMA0 << dma;
-        leaveCriticalSection(oldIME);        
+        REG_IE |= IRQ_DMA0 << dma;       
       }
 }
 
@@ -270,18 +267,20 @@ void endCardReadDma() {
 
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
+        vu32* volatile cardStruct = ce9->cardStruct0;
+        u32	dma = cardStruct[3]; // dma channel
+                
         if(dmaBusy(dma)) return;
         
         dmaReadOnArm9 = false;        
         
-        vu32* volatile cardStruct = ce9->cardStruct0;
+
         u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
         
         u32 src = cardStruct[0];
         u8* dst = (u8*)(cardStruct[1]);
         u32 len = cardStruct[2];
-        u32	dma = cardStruct[3]; // dma channel
         
         u32 sector = (src/readSize)*readSize;
         
@@ -401,7 +400,7 @@ static inline bool startCardReadDma() {
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
-    dma = cardStruct[3]; // dma channel     
+    u32 dma = cardStruct[3]; // dma channel     
 
     u32 commandRead=0x025FFB08;
     u32 commandPool=0x025AAB08;
@@ -631,9 +630,7 @@ u32 cardReadDma() {
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
-    dma = cardStruct[3]; // dma channel
-	void* func = (void*)cardStruct[4]; // function to call back once read done
-	void* arg  = (void*)cardStruct[5]; // arguments of the function above
+    u32 dma = cardStruct[3]; // dma channel
     
     if(dma >= 0 
         && dma <= 3 
@@ -672,6 +669,7 @@ u32 cardReadDma() {
             // TODO : reset IPC_SYNC IRQs
             enableIPCSYNC();
             
+            while (dmaBusy(dma));
             hookDMA(dma);
               
             /*if (len < THRESHOLD_CACHE_FLUSH) {
@@ -904,7 +902,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 
     isDma=false;
-    dma=0;
 
 	return ret; 
 }
