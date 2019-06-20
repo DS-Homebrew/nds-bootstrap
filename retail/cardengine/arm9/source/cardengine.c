@@ -270,7 +270,7 @@ void continueCardReadDmaArm9() {
         vu32* volatile cardStruct = ce9->cardStruct0;
         u32	dma = cardStruct[3]; // dma channel
                 
-        if(dmaBusy(dma)) return;
+        while(dmaBusy(dma));
         
         dmaReadOnArm9 = false;        
         
