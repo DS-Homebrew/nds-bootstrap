@@ -183,6 +183,7 @@ static bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        resetRequestIrqMask(IRQ_IPC_SYNC);
         u32* ipcSyncHandler = ce9->irqTable + 16;
         ce9->intr_ipc_orig_return   = *ipcSyncHandler;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
@@ -191,34 +192,30 @@ static void hookIPC_SYNC(void) {
 }
 
 static void hookDMA(int dma) {
-      if(dma < 4) {
+      if(dma < 4) {        
+        resetRequestIrqMask(IRQ_DMA0 << dma);
         u32* dmaHandler = ce9->irqTable + 8 + dma;
         *dmaHandler = myIrqHandlerDMA;
-        REG_IE |= IRQ_DMA0 << dma;       
+        enableIrqMask(IRQ_DMA0 << dma);       
       }
 }
 
 static void disableDMA(int dma) {
     // disable DMA X IRQ
-    int oldIME = enterCriticalSection();
-    REG_IE &= !(IRQ_DMA0 << dma);
-    leaveCriticalSection(oldIME);
+    DMA_CR(dma) = 0;
+    disableIrqMask(IRQ_DMA0 << dma);
 }
 
 static void enableIPCSYNC(void) {
     // enable IPC_SYNC
-    int oldIME = enterCriticalSection();
-    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;    
-    REG_IE |= IRQ_IPC_SYNC;
-    leaveCriticalSection(oldIME);
+    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;  
+    enableIrqMask(IRQ_IPC_SYNC);
 }
 
 static void disableIPCSYNC(void) {
     // disable IPC_SYNC
-    int oldIME = enterCriticalSection();
-    REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;    
-    REG_IE &= !IRQ_IPC_SYNC;
-    leaveCriticalSection(oldIME);
+    REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;  
+    disableIrqMask(IRQ_IPC_SYNC);;
 }
 
 static void clearIcache (void) {
@@ -270,7 +267,7 @@ void continueCardReadDmaArm9() {
         vu32* volatile cardStruct = ce9->cardStruct0;
         u32	dma = cardStruct[3]; // dma channel
                 
-        while(dmaBusy(dma));
+        if(dmaBusy(dma)) return;
         
         dmaReadOnArm9 = false;        
         
@@ -342,7 +339,10 @@ void continueCardReadDmaArm9() {
                 len = cardStruct[2];         
             }  
         }
-        if (len==0) { 
+        if (len==0) {
+          disableIrqMask(IRQ_DMA0 << dma);
+          resetRequestIrqMask(IRQ_DMA0 << dma);
+          disableDMA(dma); 
           endCardReadDma();
        } 
     }
@@ -664,6 +664,7 @@ u32 cardReadDma() {
           	}*/
               
             int oldIME = enterCriticalSection();
+            
             
             hookIPC_SYNC();
             // TODO : reset IPC_SYNC IRQs
