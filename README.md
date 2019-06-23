@@ -26,7 +26,7 @@ nds-bootstrap also supports many homebrew applications, including emulators such
 In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. devkitPro includes `dkp-pacman` for easy installation of all components:
 
 ```
- $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
+ $ dkp-pacman -Syu devkitARM devkitarm-rules general-tools dstools ndstool libnds libfat-nds
 ```
 
 Once everything is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
