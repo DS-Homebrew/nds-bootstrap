@@ -25,13 +25,12 @@ typedef struct configuration {
 	bool boostVram;
 	bool gameSoftReset;
 	bool forceSleepPatch;
+	bool volumeFix;
 	bool preciseVolumeControl;
-	bool soundFix;
 	bool logging;
 	bool initDisc;
-	bool dldiPatchNds;
-	int argc;
-	const char** argv; //const char* argv[ARG_MAX];
+	bool gameOnFlashcard;
+	bool saveOnFlashcard;
 	u32 backlightMode;
 } configuration;
 

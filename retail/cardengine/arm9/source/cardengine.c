@@ -63,6 +63,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
@@ -151,7 +152,7 @@ static void waitForArm7(void) {
     }
 }
 
-static bool IPC_SYNC_hooked = false;
+/*static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
         u32* ipcSyncHandler = ce9->irqTable + 16;
@@ -175,7 +176,7 @@ static void disableIPCSYNC(void) {
     REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;    
     REG_IE &= !IRQ_IPC_SYNC;
     leaveCriticalSection(oldIME);
-}
+}*/
 
 static void clearIcache (void) {
       // Seems to have no effect
@@ -393,12 +394,13 @@ u32 cardReadDma() {
         && !(((int)src) & 511) 
 	) {
 		dmaLed = true;
+        #ifndef DLDI
         if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
         {
 			isDma = true;
             
-            hookIPC_SYNC();
-            enableIPCSYNC();
+            //hookIPC_SYNC();
+            //enableIPCSYNC();
         
         /*if (len < THRESHOLD_CACHE_FLUSH) {
             int oldIME = enterCriticalSection();
@@ -424,6 +426,7 @@ u32 cardReadDma() {
 			dma=4;
             clearIcache();        
 		}
+        #endif
     } else {
 		dmaLed = false;
         isDma = false;
@@ -444,8 +447,8 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 
     dmaLed = true;
     
-    hookIPC_SYNC();
-    enableIPCSYNC();
+    //hookIPC_SYNC();
+    //enableIPCSYNC();
     
     accessCounter++;
     while(len > 0) {
@@ -642,6 +645,13 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+	if (ce9->saveOnFlashcard) {
+#ifdef DLDI
+		fileRead(memory, *savFile, flash, len, -1);
+#endif
+		return 0;
+	}
+
     // Send a command to the ARM7 to read the nand save
 	u32 commandNandRead = 0x025FFC01;
 
@@ -656,6 +666,13 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+	if (ce9->saveOnFlashcard) {
+#ifdef DLDI
+		fileWrite(memory, *savFile, flash, len, -1);
+#endif
+		return 0;
+	}
+
     // Send a command to the ARM7 to read the nand save
 	u32 commandNandWrite = 0x025FFC02;
 

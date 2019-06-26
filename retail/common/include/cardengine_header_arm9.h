@@ -23,7 +23,6 @@ typedef struct cardengineArm9Patches {
     u32* swi02;
     u32 needFlushDCCache;
     u32* pdash_read;
-    u32* ipcSyncHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 
@@ -56,14 +55,14 @@ typedef struct cardengineArm9 {
     u32 intr_ipc_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
+    u32 saveCluster;
+    u32 saveOnFlashcard;
     u32 cardStruct0;
     u32 cacheStruct;
     u32 ROMinRAM;
     u32 dsiMode;
     u32 enableExceptionHandler;
     u32 consoleModel;
-    u32 irqTable;
-    u32 asyncPrefetch;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H

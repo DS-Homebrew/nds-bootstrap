@@ -189,19 +189,29 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	mkdir("sd:/_nds/nds-bootstrap", 0777);
 	mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 	mkdir("sd:/_nds/nds-bootstrap/fatTable", 0777);
-	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
-		conf->dldiPatchNds = true;
+	if (flashcardFound) {
 		mkdir("fat:/_nds", 0777);
 		mkdir("fat:/_nds/nds-bootstrap", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 
-	nitroFSInit(bootstrapPath);
+	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
+	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+
+	if ((strncmp (bootstrapPath, "sd:/", 4) != 0) && (strncmp (bootstrapPath, "fat:/", 5) != 0)) {
+		//bootstrapPath = "sd:/_nds/nds-bootstrap-release.nds";
+		bootstrapPath = "sd:/_nds/nds-bootstrap-nightly.nds";
+	}
+	if (!nitroFSInit(bootstrapPath)) {
+		consoleDemoInit();
+		printf("nitroFSInit failed!\n");
+		return -1;
+	}
 	
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
-	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x10000, cebin);
+	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
 	fclose(cebin);
     
     // Load reloc ce9 binary
@@ -232,41 +242,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->cheatSize = getFileSize("sd:/_nds/nds-bootstrap/cheatData.bin");
 
-	conf->argc = 0;
-	conf->argv = (const char**)malloc(ARG_MAX);
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
-		FILE* argfile = fopen(conf->ndsPath, "rb");
-
-		char str[PATH_MAX];
-		char* pstr;
-		const char* seps = "\n\r\t ";
-
-		while (fgets(str, PATH_MAX, argfile)) {
-			// Find comment and end string there
-			if ((pstr = strchr(str, '#'))) {
-				*pstr = '\0';
-			}
-
-			// Tokenize arguments
-			pstr = strtok(str, seps);
-
-			while (pstr != NULL) {
-				conf->argv[conf->argc] = strdup(pstr);
-				++conf->argc;
-
-				pstr = strtok(NULL, seps);
-			}
-		}
-		fclose(argfile);
-
-		free(conf->ndsPath);
-		conf->ndsPath = strdup(conf->argv[0]);
-	} else {
-		conf->argv[0] = strdup(conf->ndsPath);
-		conf->argc = 1; //++conf->argc;
-	}
-	realloc(conf->argv, conf->argc*sizeof(const char*));
-	
 	// Please wait screen
 	FILE* bootstrapImage = fopen("nitro:/pleasewait.bmp", "rb");
 	if (bootstrapImage) {

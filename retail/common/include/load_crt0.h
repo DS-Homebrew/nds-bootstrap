@@ -10,8 +10,7 @@ typedef struct loadCrt0 {
     u32 storedFileCluster;
     u32 initDisc;
     u32 gameOnFlashcard;
-    u32 argStart;
-    u32 argSize;
+    u32 saveOnFlashcard;
     u32 dldiOffset;
     u32 dsiSD;
     u32 saveFileCluster;
@@ -32,6 +31,7 @@ typedef struct loadCrt0 {
     u32 boostVram;
     u32 gameSoftReset;
     u32 forceSleepPatch;
+	u32 volumeFix;
     u32 preciseVolumeControl;
     u32 logging;
     u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;

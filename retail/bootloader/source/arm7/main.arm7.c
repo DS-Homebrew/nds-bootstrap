@@ -75,9 +75,7 @@ extern void arm7clearRAM(void);
 extern u32 storedFileCluster;
 extern u32 initDisc;
 extern u32 gameOnFlashcard;
-//extern u32 argStart;
-//extern u32 argSize;
-//extern u32 dsiSD;
+extern u32 saveOnFlashcard;
 extern u32 saveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
@@ -95,8 +93,8 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
+extern u32 volumeFix;
 extern u32 preciseVolumeControl;
-extern u32 soundFix;
 extern u32 boostVram;
 extern u32 logging;
 
@@ -165,7 +163,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x027B0000, 0, 0x20000);		// clear other part of EWRAM - except before ce7 binary and some ce9 binaries
-	toncset((u32*)0x027F0000, 0, 0x810000);	// clear part of EWRAM
+	toncset((u32*)0x027F8000, 0, 0x808000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -174,25 +172,11 @@ static void resetMemory_ARM7(void) {
 }
 
 static void NDSTouchscreenMode(void) {
-	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
-	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
-	//unsigned char * *(unsigned char*)0x40001C2=	(unsigned char*)0x40001C2;
-	//unsigned char * I2C_DATA=	(unsigned char*)0x4004500;
-	//unsigned char * I2C_CNT=	(unsigned char*)0x4004501;
-
 	u8 volLevel;
 	
-	//if (fifoCheckValue32(FIFO_MAXMOD)) {
-	//	// special setting (when found special gamecode)
-	//	volLevel = 0xAC;
-	//} else {
-		// normal setting (for any other gamecodes)
-		volLevel = 0xA7;
-	//}
-
-	if (REG_SCFG_EXT == 0) {
-		volLevel += 0x13;
-	}
+	// 0xAC: special setting (when found special gamecode)
+	// 0xA7: normal setting (for any other gamecodes)
+	volLevel = volumeFix ? 0xAC : 0xA7;
 
 	// Touchscreen
 	cdcReadReg (0x63, 0x00);
@@ -281,7 +265,7 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
 	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
 	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
-	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
 	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
 	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
 	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
@@ -296,13 +280,50 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
 	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
 	cdcReadReg (CDC_SOUND, 0x22);
-	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x00);
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	
+	// Set remaining values
+	cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
+	cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
+	cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
+	cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
+	cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
+	cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
+	cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
+	cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
+	cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
+	cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
+	cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
+	cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
+	cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
+	cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
+	cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
+	cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
+
+	// Finish up!
 	cdcReadReg (CDC_TOUCHCNT, 0x02);
 	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
 	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
-	
+
 	// Power management
 	writePowerManagement(PM_READ_REGISTER, 0x00); //*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
 	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
@@ -658,7 +679,7 @@ int arm7_main(void) {
 		return -1;
 	}
 
-	if (gameOnFlashcard) {
+	if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, 0)) {
@@ -717,21 +738,26 @@ int arm7_main(void) {
 		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x27C0000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
-		romFile->fatTableCache = 0x2700000;
+		romFile->fatTableCache = (u32*)0x2700000;	// Change fatTableCache addr for ce9 usage
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)ROM_FILE_LOCATION, sizeof(aFile));
 	}
 
-	if (gameOnFlashcard) sdRead = true;
+	sdRead = (saveOnFlashcard ? false : true);
 
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
 	
-	if (savFile->firstCluster != CLUSTER_FREE && !gameOnFlashcard) {
-		if (fatTableEmpty) {
-			buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
-		} else {
-			tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
+	if (savFile->firstCluster != CLUSTER_FREE) {
+		if (saveOnFlashcard) {
+			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)SAV_FILE_LOCATION, sizeof(aFile));
+		}
+		if (!gameOnFlashcard) {
+			if (fatTableEmpty) {
+				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
+			} else {
+				tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
+			}
 		}
 	}
 
@@ -754,7 +780,8 @@ int arm7_main(void) {
 		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}
 	if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFE0);
+		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFC0);
+		romFile->fatTableCache = (u32*)0x3700000;	// Revert back for ce7 usage
 	}
 
 	toncset((u32*)0x027C0000, 0, 0x400);
@@ -765,11 +792,6 @@ int arm7_main(void) {
 	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
-
-	if (REG_SCFG_EXT == 0) {
-		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
-	}
 
 	tDSiHeader dsiHeaderTemp;
 
@@ -789,16 +811,21 @@ int arm7_main(void) {
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 
-	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
-
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
+	if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+	}
+
+	// If possible, set to load ROM into RAM
+	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+
+	const char* romTid = getRomTid(ndsHeader);
 	if (!dsiModeConfirmed) {
-		const char* romTid = getRomTid(ndsHeader);
 		if (
 			strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
 		) {
@@ -808,16 +835,23 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x10000);
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x10000);
+	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
+	if(gameOnFlashcard || saveOnFlashcard) {
+		if (!dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x12000)) {
+			nocashMessage("ce7 DLDI patch failed");
+			dbg_printf("ce7 DLDI patch failed");
+			dbg_printf("\n");
+			errorOutput();
+		}
+	}
 
 	if (isSdk5(moduleParams)) {
         if(gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 			if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
-				nocashMessage("DLDI patch failed");
-				dbg_printf("DLDI patch failed");
+				nocashMessage("ce9 DLDI patch failed");
+				dbg_printf("ce9 DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();
 			}
@@ -829,37 +863,33 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
 		tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
 		if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
-			nocashMessage("DLDI patch failed");
-			dbg_printf("DLDI patch failed");
+			nocashMessage("ce9 DLDI patch failed");
+			dbg_printf("ce9 DLDI patch failed");
 			dbg_printf("\n");
 			errorOutput();
 		}
 	} else if (ceCached) {
-		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
 		 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 		)
 		{
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-            tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+            tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
             relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 		} else
         ce9Location = patchHeapPointer(moduleParams, ndsHeader);
         if(ce9Location) {
-            	tonccpy((u32*)ce9Location, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+            	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
                 relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
         } else {         
     		ce9Location = CARDENGINE_ARM9_LOCATION;
-    		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
         }
 	} else {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 	}
 
-	toncset((u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0, 0x10000);
-
-	const char* romTid = getRomTid(ndsHeader);
 	if (
 		strncmp(romTid, "AMQ", 3) == 0				// MvDK2
 	) {
@@ -896,6 +926,7 @@ int arm7_main(void) {
 		cheatFileCluster,
 		cheatSize,
 		gameOnFlashcard,
+		saveOnFlashcard,
 		language,
 		dsiModeConfirmed,
 		ROMinRAM,
@@ -925,6 +956,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
+		savFile->firstCluster,
+		saveOnFlashcard,
 		ROMinRAM,
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
@@ -939,6 +972,9 @@ int arm7_main(void) {
 		}
 	}
     
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x28000);
+
+
 
 
 	arm9_boostVram = boostVram;

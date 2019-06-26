@@ -22,6 +22,10 @@ moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
+saveCluster:
+	.word	0x00000000
+saveOnFlashcard:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
@@ -33,8 +37,6 @@ dsiMode:
 enableExceptionHandler:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-irqTable:
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -58,7 +60,6 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
-.word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
@@ -160,7 +161,6 @@ card_dma_arm9:
     
 
 	ldmfd   sp!, {r1-r11,pc}
-	mov r0, #0
 	bx      lr
 _blx_r6_stub_card_read_dma:
 	bx	r6	
@@ -224,7 +224,6 @@ thumb_card_dma_arm9:
 	bl		_blx_r6_stub_thumb_card_read_dma	
 
     pop	{r1-r7, pc}
-    mov r0, #0
 	bx      lr
 _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
@@ -371,24 +370,6 @@ thumb_card_pull:
 	bx      lr
 
 	.arm
-    
-ipcSyncHandler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_ipc
-	ldr 	r0,	intr_ipc_orig_return
-	bx  	r0
-    
-code_handler_start_ipc:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerIPC
-	bl	_blx_r3_stub_start_ipc		@ jump to myIrqHandler
-  
-	@ exit after return
-	b	exit
-_blx_r3_stub_start_ipc:
-	bx	r3
-.pool 
     
 .global callSleepThumb
 .type	callSleepThumb STT_FUNC

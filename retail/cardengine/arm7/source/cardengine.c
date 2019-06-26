@@ -54,8 +54,9 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern module_params_t* moduleParams;
 extern u32 gameOnFlashcard;
+extern u32 saveOnFlashcard;
 extern u32 language;
-extern u32 gottenSCFGExt;
+//extern u32 gottenSCFGExt;
 extern u32 dsiMode;
 extern u32 ROMinRAM;
 extern u32 consoleModel;
@@ -65,7 +66,7 @@ extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-bool sdRead = true;	// Unused, but added to prevent errors
+bool sdRead = true;
 
 static bool initialized = false;
 //static bool initializedIRQ = false;
@@ -124,7 +125,13 @@ static void initialize(void) {
 		sdmmc_init();
 		SD_Init();
 	}
+	sdRead = true;				// Switch to SD
 	FAT_InitFiles(false, 0);
+	if (gameOnFlashcard || saveOnFlashcard) {
+		sdRead = false;			// Switch to flashcard
+		FAT_InitFiles(true, 0);
+		sdRead = true;				// Switch to SD
+	}
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
@@ -488,7 +495,7 @@ static void runCardEngineCheckResume(void) {
 		if(readOngoing)
 		{
 			if(resume_cardRead_arm9()) {
-				*(vu32*)(0x027FFB14) = 0;
+				*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 			} 
 		}
   		unlockMutex(&cardEgnineCommandMutex);
@@ -520,29 +527,33 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
   
-    		if (*(vu32*)(0x027FFB14) == (vu32)0x026FF800) {
+    		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
+				sdRead = true;
     			log_arm9();
-    			*(vu32*)(0x027FFB14) = 0;
+    			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}
     
     
-          if ((*(vu32*)(0x027FFB14) == (vu32)0x025FFB08) || (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A)) {
-              dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFB0A);
+          if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB08) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A)) {
+				sdRead = true;
+              dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
-                  *(vu32*)(0x027FFB14) = 0;
+                  *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
               } 
           }
           
-            if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC01) {
-                dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFC01);
+            if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
+				sdRead = true;
+                dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01);
     			nandRead();
-    			*(vu32*)(0x027FFB14) = 0;
+    			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}
             
-            if (*(vu32*)(0x027FFB14) == (vu32)0x025FFC02) {
-                dmaLed = (*(vu32*)(0x027FFB14) == (vu32)0x025FFC02);
+            if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02) {
+				sdRead = true;
+                dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02);
     			nandWrite();
-    			*(vu32*)(0x027FFB14) = 0;
+    			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}
     
     		/*if (*(vu32*)(0x027FFB14) == (vu32)0x020FF800) {
@@ -551,7 +562,7 @@ static void runCardEngineCheck(void) {
     		}*/
         } else {
             if(resume_cardRead_arm9()) {
-                *(vu32*)(0x027FFB14) = 0;
+                *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
             } 
         }
   		unlockMutex(&cardEgnineCommandMutex);
@@ -666,178 +677,6 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	if (gottenSCFGExt == 0) {
-		// Control volume with the - and + buttons.
-		u8 volLevel;
-		u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-		if (consoleModel >= 2) {
-			switch(i2cVolLevel) {
-				case 0x00:
-				case 0x01:
-				default:
-					volLevel = 0;
-					break;
-				case 0x02:
-				case 0x03:
-					volLevel = 1;
-					break;
-				case 0x04:
-				case 0x05:
-					volLevel = 2;
-					break;
-				case 0x06:
-				case 0x07:
-					volLevel = 3;
-					break;
-				case 0x08:
-				case 0x09:
-					volLevel = 4;
-					break;
-				case 0x0A:
-				case 0x0B:
-					volLevel = 5;
-					break;
-				case 0x0C:
-				case 0x0D:
-					volLevel = 6;
-					break;
-				case 0x0E:
-				case 0x0F:
-					volLevel = 7;
-					break;
-				case 0x10:
-				case 0x11:
-					volLevel = 8;
-					break;
-				case 0x12:
-				case 0x13:
-					volLevel = 9;
-					break;
-				case 0x14:
-				case 0x15:
-					volLevel = 10;
-					break;
-				case 0x16:
-				case 0x17:
-					volLevel = 11;
-					break;
-				case 0x18:
-				case 0x19:
-					volLevel = 12;
-					break;
-				case 0x1A:
-				case 0x1B:
-					volLevel = 13;
-					break;
-				case 0x1C:
-				case 0x1D:
-					volLevel = 14;
-					break;
-				case 0x1E:
-				case 0x1F:
-					volLevel = 15;
-					break;
-			}
-		} else {
-			switch(i2cVolLevel) {
-				case 0x00:
-				case 0x01:
-				default:
-					volLevel = 0;
-					break;
-				case 0x02:
-				case 0x03:
-					volLevel = 1;
-					break;
-				case 0x04:
-					volLevel = 2;
-					break;
-				case 0x05:
-					volLevel = 3;
-					break;
-				case 0x06:
-					volLevel = 4;
-					break;
-				case 0x07:
-					volLevel = 6;
-					break;
-				case 0x08:
-					volLevel = 8;
-					break;
-				case 0x09:
-					volLevel = 10;
-					break;
-				case 0x0A:
-					volLevel = 12;
-					break;
-				case 0x0B:
-					volLevel = 15;
-					break;
-				case 0x0C:
-					volLevel = 17;
-					break;
-				case 0x0D:
-					volLevel = 21;
-					break;
-				case 0x0E:
-					volLevel = 24;
-					break;
-				case 0x0F:
-					volLevel = 28;
-					break;
-				case 0x10:
-					volLevel = 32;
-					break;
-				case 0x11:
-					volLevel = 36;
-					break;
-				case 0x12:
-					volLevel = 40;
-					break;
-				case 0x13:
-					volLevel = 45;
-					break;
-				case 0x14:
-					volLevel = 50;
-					break;
-				case 0x15:
-					volLevel = 55;
-					break;
-				case 0x16:
-					volLevel = 60;
-					break;
-				case 0x17:
-					volLevel = 66;
-					break;
-				case 0x18:
-					volLevel = 71;
-					break;
-				case 0x19:
-					volLevel = 78;
-					break;
-				case 0x1A:
-					volLevel = 85;
-					break;
-				case 0x1B:
-					volLevel = 91;
-					break;
-				case 0x1C:
-					volLevel = 100;
-					break;
-				case 0x1D:
-					volLevel = 113;
-					break;
-				case 0x1E:
-					volLevel = 120;
-					break;
-				case 0x1F:
-					volLevel = 127;
-					break;
-			}
-		}
-		REG_MASTER_VOLUME = volLevel;
-	}
-
 	if (consoleModel < 2) {
 	if (preciseVolumeControl && romread_LED == 0) {
 		// Precise volume adjustment (for DSi)
@@ -884,8 +723,8 @@ void myIrqHandlerVBlank(void) {
 	cheat_engine_start();
 
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "UOR", 3) == 0
-	|| strncmp(romTid, "UXB", 3) == 0
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		runCardEngineCheck();
 	}
@@ -948,12 +787,13 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		fileRead(dst, *savFile, src, len, -1);
   		unlockMutex(&saveMutex);
 	}
@@ -972,12 +812,13 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
@@ -1000,12 +841,13 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
@@ -1039,7 +881,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
-	if (isSdEjected()) {
+	if (!saveOnFlashcard && isSdEjected()) {
 		return false;
 	}
 
@@ -1106,7 +948,6 @@ Existing/known ROM IDs are:
   C2h,F0h,00h,90h 3DS Macronix 4GB ROM CTR-P-ABRJ Biohazard Revelations
   FFh,FFh,FFh,FFh None (no cartridge inserted)
 */
-bool cardInitialized = false;
 u32 cardId(void) {
 	#ifdef DEBUG	
 	dbg_printf("\ncardId\n");
@@ -1119,8 +960,6 @@ u32 cardId(void) {
     //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xFF000000; // golden sun
     //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x000000FF; // golden sun
 
-    cardInitialized= true;
-    
     #ifdef DEBUG
     dbg_hexa(cardid);
     #endif
@@ -1144,10 +983,9 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	
 	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
-	} else if (gameOnFlashcard) {
-		return true;
 	} else {
 		initialize();
+		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
