@@ -1,5 +1,6 @@
 #include <string.h> // memcpy
 #include <nds/system.h>
+#include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
 #include "find.h"
@@ -10,11 +11,14 @@
 
 //#define memcpy __builtin_memcpy
 
+extern u32 gameOnFlashcard;
+extern u32 saveOnFlashcard;
 extern u32 forceSleepPatch;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
@@ -151,14 +155,19 @@ u32 patchCardNdsArm7(
 
 	//patchRamClear(ndsHeader, moduleParams);
 
-	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
-		return 0;
+    const char* romTid = getRomTid(ndsHeader);
+
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
+	|| (!ROMinRAM && !gameOnFlashcard)) {
+		if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+			return 0;
+		}
+
+		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
-	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
-
 	u32 saveResult = 0;
-    const char* romTid = getRomTid(ndsHeader);
     
     if (
         strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
