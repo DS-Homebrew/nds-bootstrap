@@ -188,7 +188,7 @@ void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 siz
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
 	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
 	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size;
+	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;
 	
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90000000;
 }
@@ -415,8 +415,6 @@ void continueCardReadDmaArm7() {
 		cardStruct[0] = src + len2;
 		cardStruct[1] = (vu32)(dst + len2);
 		cardStruct[2] = len - len2;
-        
-        len = cardStruct[2];
         
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);
