@@ -160,22 +160,6 @@ static void waitForArm7(void) {
 }
 
 static inline 
-/*! \fn void dmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
-\brief copies from source to destination on one of the 4 available channels in half words.  
-This function returns immediately after starting the transfer.
-\param channel the dma channel to use (0 - 3).  
-\param src the source to copy from
-\param dest the destination to copy to
-\param size the size in bytes of the data to copy.  Will be truncated to the nearest word (4 bytes)
-*/
-void dmaCopyWordsAsynchIrq(uint8 channel, const void* src, void* dest, uint32 size) {
-	DMA_SRC(channel) = (uint32)src;
-	DMA_DEST(channel) = (uint32)dest;
-	DMA_CR(channel) = DMA_COPY_WORDS | DMA_IRQ_REQ |(size>>2);
-
-}
-
-static inline 
 /*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
 \brief copies from source to destination on one of the 4 available channels in half words.  
 This function returns immediately after starting the transfer.
@@ -212,21 +196,6 @@ static void hookIPC_SYNC(void) {
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
-}
-
-static void hookDMA(int dma) {
-      if(dma < 4) {        
-        resetRequestIrqMask(IRQ_DMA0 << dma);
-        u32* dmaHandler = ce9->irqTable + 8 + dma;
-        *dmaHandler = myIrqHandlerDMA;
-        enableIrqMask(IRQ_DMA0 << dma);       
-      }
-}
-
-static void disableDMA(int dma) {
-    // disable DMA X IRQ
-    DMA_CR(dma) = 0;
-    disableIrqMask(IRQ_DMA0 << dma);
 }
 
 static void enableIPCSYNC(void) {
@@ -999,20 +968,6 @@ void myIrqHandlerIPC(void) {
 #ifndef DLDI
     if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
         continueCardReadDmaArm7();
-        continueCardReadDmaArm9();
-    }
-#endif
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerDMA(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerDMA");
-	#endif	
-
-#ifndef DLDI
-    if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
         continueCardReadDmaArm9();
     }
 #endif
