@@ -250,11 +250,13 @@ void arm9_main(void) {
 			if (dsiModeConfirmed) {
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x84;
+                REG_SCFG_EXT |= BIT(16);	// NDMA
 			} else {
 				//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
 				if (arm9_boostVram) {
 					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 				}
+                REG_SCFG_EXT |= BIT(16);	// NDMA
 				// lock SCFG
 				REG_SCFG_EXT &= ~(1UL << 31);
 			}
