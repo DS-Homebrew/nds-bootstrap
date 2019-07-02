@@ -80,7 +80,7 @@ static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 static const u32 cardEndReadDmaSignature2[4]  = {0xE3A00702, 0xEB0000A6, 0xE3A00702, 0xEB0000A1};
 static const u32 cardEndReadDmaSignature3[4]  = {0xE3A00702, 0xEBFFCC92, 0xE3A00702, 0xEBFFCC83};
 static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702, 0xEB000190, 0xE3A00702, 0xEB00018F};
-static const u16 cardEndReadDmaSignatureThumb[4]  = {0x2002, 0x0480, 0xF7F8, 0xFCD5};
+static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8, 0xFCD5};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -1461,7 +1461,7 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardEndReadDma\n");
-    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb;
+    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
     u32* cardEndReadDmaSignature = cardEndReadDmaSignature4;
     
     if (moduleParams->sdk_version < 0x4000000) { 
