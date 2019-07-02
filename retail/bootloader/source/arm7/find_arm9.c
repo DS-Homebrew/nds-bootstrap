@@ -77,6 +77,7 @@ static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
 // Card end read DMA
+static const u32 cardEndReadDmaSignature2[4]  = {0xE3A00702, 0xEB0000A6, 0xE3A00702, 0xEB0000A1};
 static const u32 cardEndReadDmaSignature3[4]  = {0xE3A00702, 0xEBFFCC92, 0xE3A00702, 0xEBFFCC83};
 static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702, 0xEB000190, 0xE3A00702, 0xEB00018F};
 static const u16 cardEndReadDmaSignatureThumb[4]  = {0x2002, 0x0480, 0xF7F8, 0xFCD5};
