@@ -484,10 +484,12 @@ static inline bool startCardReadDma() {
   		// Update cardi common
   		cardStruct[0] = src + len2;
   		cardStruct[1] = (vu32)(dst + len2);
+
   		cardStruct[2] = len - len2;
           
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
+
       }
    
     return true;
