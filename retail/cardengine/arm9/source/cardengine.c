@@ -334,9 +334,7 @@ void continueCardReadDmaArm9() {
         		// Update cardi common
         		cardStruct[0] = src + len2;
         		cardStruct[1] = (vu32)(dst + len2);
-        		cardStruct[2] = len - len2;
-                
-                len = cardStruct[2];         
+        		cardStruct[2] = len - len2;    
             }  
         }
         if (len==0) {
@@ -388,8 +386,6 @@ void continueCardReadDmaArm7() {
 		cardStruct[0] = src + len2;
 		cardStruct[1] = (vu32)(dst + len2);
 		cardStruct[2] = len - len2;
-        
-        len = cardStruct[2];
     }
 }
 
@@ -456,9 +452,7 @@ static inline bool startCardReadDma() {
   		// Update cardi common
   		cardStruct[0] = src + len2;
   		cardStruct[1] = (vu32)(dst + len2);
-  		cardStruct[2] = len - len2;
-          
-        len = cardStruct[2];            
+  		cardStruct[2] = len - len2;        
       }
    
     return true;
