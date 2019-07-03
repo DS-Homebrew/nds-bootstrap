@@ -316,7 +316,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
-        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // TODO : offset not found
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // sound cracking to be investigated
         //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
@@ -328,6 +328,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A8Q", 3) == 0  // Them park // works
+        ||  strncmp(romTid, "CLJ", 3) == 0  // M&L BiS // works
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
