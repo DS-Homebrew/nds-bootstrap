@@ -316,30 +316,39 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
-        //||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
-        //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
-        //||  strncmp(romTid, "AFF", 3) == 0  // FF3
-        //||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
-        //||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // TODO : offset not found
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
+        //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3
+        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII
+        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V 
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+        ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
+        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
     ) {
 
-      
-      u32* offset = patchOffsetCache.cardEndReadDmaOffset;
-	  if (!patchOffsetCache.cardEndReadDmaOffset) {
-		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
-		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
-	  }                    
-      if(usesThumb) {
-        u16* thumbOffset = (u16*)offset;
-        thumbOffset--;
-        *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
-        ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
-      } else  {
-        u32* armOffset = (u32*)offset;
-        armOffset--;
-        *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
-        ce9->patches->cardEndReadDmaRef = armOffset;
-      }  
+      if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
+        u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    	  if (!patchOffsetCache.cardEndReadDmaOffset) {
+    		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+    		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+    	  }
+        if(offset) {
+          dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");       
+          if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            thumbOffset--;
+            *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
+            ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+          } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+          } 
+        }
+      } 
     } 
 }
 

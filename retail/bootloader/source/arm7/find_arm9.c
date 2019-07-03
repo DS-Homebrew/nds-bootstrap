@@ -77,10 +77,9 @@ static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
 // Card end read DMA
-static const u32 cardEndReadDmaSignature2[4]  = {0xE3A00702, 0xEB0000A6, 0xE3A00702, 0xEB0000A1};
-static const u32 cardEndReadDmaSignature3[4]  = {0xE3A00702, 0xEBFFCC92, 0xE3A00702, 0xEBFFCC83};
-static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702, 0xEB000190, 0xE3A00702, 0xEB00018F};
-static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8, 0xFCD5};
+static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702};
+static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8};
+
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -1464,21 +1463,36 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
     u32* cardEndReadDmaSignature = cardEndReadDmaSignature4;
     
-    if (moduleParams->sdk_version < 0x4000000) { 
-        cardEndReadDmaSignature = cardEndReadDmaSignature3;         
+  	u32* cardReadDmaEndOffset = NULL;
+	if (usesThumb) {
+		//dbg_printf("Trying thumb alt...\n");
+		cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+	}
+	if (!cardReadDmaEndOffset) {
+		cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
+	}
+    
+    u32* offsetDmaHandler = cardReadDmaEndOffset+4;
+    if(offsetDmaHandler<0x2000000 || offsetDmaHandler>0x2400000) {
+        offsetDmaHandler = cardReadDmaEndOffset+3; 
+    }
+    
+    if(offsetDmaHandler<0x2000000 || offsetDmaHandler>0x2400000) {
+        dbg_printf("offsetDmaHandler not found\n");
+        return 0;
     }
     
     u32 * offset = NULL;
     
     if(usesThumb) {
   		offset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-            cardEndReadDmaSignatureThumb, 4
+      		offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignatureThumb, 3
         );
     } else {
   		offset = findOffset(
-      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-            cardEndReadDmaSignature, 4
+      		offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignature, 1
         ); 
     } 
     
