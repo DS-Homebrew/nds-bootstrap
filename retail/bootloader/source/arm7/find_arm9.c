@@ -1473,11 +1473,11 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 	}
     
     u32* offsetDmaHandler = cardReadDmaEndOffset+4;
-    if(offsetDmaHandler<0x2000000 || offsetDmaHandler>0x2400000) {
+    if(*offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
         offsetDmaHandler = cardReadDmaEndOffset+3; 
     }
     
-    if(offsetDmaHandler<0x2000000 || offsetDmaHandler>0x2400000) {
+    if(*offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
         dbg_printf("offsetDmaHandler not found\n");
         return 0;
     }
