@@ -1482,16 +1482,22 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
         return 0;
     }
     
+    dbg_printf("\noffsetDmaHandler found\n");
+ 	dbg_hexa((u32)offsetDmaHandler);
+	dbg_printf(" : ");
+    dbg_hexa(*offsetDmaHandler);   
+    dbg_printf("\n");
+    
     u32 * offset = NULL;
     
     if(usesThumb) {
   		offset = findOffsetThumb(
-      		offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignatureThumb, 3
         );
     } else {
   		offset = findOffset(
-      		offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+      		*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignature, 1
         ); 
     } 
