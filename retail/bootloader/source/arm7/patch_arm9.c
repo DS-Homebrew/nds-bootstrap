@@ -315,14 +315,14 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     const char* romTid = getRomTid(ndsHeader);
     
     if (
-        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // TODO : offset not found
-        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
+        //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
-        ||  strncmp(romTid, "AFF", 3) == 0  // FF3
-        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII
-        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V 
-        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
+        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // TODO : offset not found
+        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // TODO : offset not found
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
