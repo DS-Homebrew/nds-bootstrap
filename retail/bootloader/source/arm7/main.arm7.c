@@ -382,7 +382,12 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
 }
 
-static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsiMode, bool* dsiModeConfirmedPtr) {
+// SDK 5
+static bool ROMisDsiExclusive(const tNDSHeader* ndsHeader) {
+	return (ndsHeader->unitCode == 0x03);
+}
+
+static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
@@ -430,22 +435,14 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, int dsi
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
 	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
+}
 
-	// SDK 5
-	if (dsiHeaderTemp->access_control & BIT(4)) {
-		*dsiModeConfirmedPtr = true;
-	} else if (dsiMode == 2) {
-		*dsiModeConfirmedPtr = dsiMode;
-	} else {
-		*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
+static void loadIBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
+	if (dsiHeaderTemp->arm9ibinarySize > 0) {
+		fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
 	}
-	if (*dsiModeConfirmedPtr) {
-		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
-		}
-		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
-		}
+	if (dsiHeaderTemp->arm7ibinarySize > 0) {
+		fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
 	}
 }
 
@@ -824,9 +821,20 @@ int arm7_main(void) {
 	nocashMessage("Loading the NDS file...\n");
 
 	//bool dsiModeConfirmed;
-	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
-	bool isDSiWare = (dsiHeaderTemp.access_control & BIT(4));
-	
+	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
+	bool isDSiWare = false;
+	if (ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4))) {
+		dsiModeConfirmed = true;
+		isDSiWare = true;
+	} else if (dsiMode == 2) {
+		dsiModeConfirmed = dsiMode;
+	} else {
+		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
+	}
+	if (dsiModeConfirmed) {
+		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
+	}
+
 	nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
