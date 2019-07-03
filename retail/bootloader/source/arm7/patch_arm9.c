@@ -320,12 +320,13 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
-        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // TODO : offset not found
-        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // TODO : offset not found
+        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
+        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // woks
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
