@@ -323,7 +323,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 	
 	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
 	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8004000;
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8084000;
 
 	//const bool getSDRESP = (cmd << 15) >> 31;
 	u16 flags = (cmd << 15) >> 31;
@@ -569,7 +569,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	
 	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
 	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8004000;
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8084000;
 
 
 	const bool getSDRESP = (cmd << 15) >> 31;
