@@ -11,16 +11,13 @@ MEMORY {
 	ddmem	: ORIGIN = 0xBF800000, LENGTH = 10K		
 }
 
-__irq_flags	=	0x04000000 - 8;
-__irq_flagsaux	=	0x04000000 - 0x40;
-__irq_vector	=	0x04000000 - 4;
 
 SECTIONS
 {
-	.init	:
+	.crt0	:
 	{
 		__text_start = . ;
-		KEEP (*(.init))
+		KEEP (*(.crt0))
 		. = ALIGN(4);  /* REQUIRED. LD is flaky without it. */
 	} >ddmem = 0xff
 
