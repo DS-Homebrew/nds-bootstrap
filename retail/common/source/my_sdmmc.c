@@ -313,6 +313,8 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 {
 	if (ndmaSlot < 0) ndmaSlot = 0;
 	if (ndmaSlot > 3) ndmaSlot = 3;
+    
+    *((u32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
 	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
@@ -321,7 +323,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 	
 	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
 	
-	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
+	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x10;
 	
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8064000;
 
@@ -559,6 +561,8 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 {
 	if (ndmaSlot < 0) ndmaSlot = 0;
 	if (ndmaSlot > 3) ndmaSlot = 3;
+    
+    *((u32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
 	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
@@ -567,7 +571,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 	
 	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
 	
-	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
+	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x10;
 	
 	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8064000;
 
