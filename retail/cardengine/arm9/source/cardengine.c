@@ -172,10 +172,26 @@ void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 siz
 	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
 	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
 	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;
+	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;	
 	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90000000;
+    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
+	
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90080000;
 }
+
+/*static inline 
+void ndmaCopyWordsAsynchTimer1(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
+	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
+	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
+
+    *(u32*)(0x400410C+(ndmaSlot*0x1C)) = size/4;
+	
+	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
+	
+    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
+	
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x81080000;
+} */
 
 static inline 
 bool ndmaBusy(uint8 ndmaSlot) {
