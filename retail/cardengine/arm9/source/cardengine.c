@@ -270,6 +270,8 @@ void endCardReadDma() {
     }    
 }
 
+static int currentLen=0;
+
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
         vu32* volatile cardStruct = ce9->cardStruct0;
@@ -279,7 +281,6 @@ void continueCardReadDmaArm9() {
         
         dmaReadOnArm9 = false;
         sharedAddr[3] = 0;        
-        
 
         u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
@@ -287,6 +288,15 @@ void continueCardReadDmaArm9() {
         u32 src = cardStruct[0];
         u8* dst = (u8*)(cardStruct[1]);
         u32 len = cardStruct[2];
+        
+        // Update cardi common
+  		cardStruct[0] = src + currentLen;
+  		cardStruct[1] = (vu32)(dst + currentLen);
+  		cardStruct[2] = len - currentLen;
+        
+        src = cardStruct[0];
+        dst = (u8*)(cardStruct[1]);
+        len = cardStruct[2]; 
         
         u32 sector = (src/readSize)*readSize;
         
@@ -339,12 +349,7 @@ void continueCardReadDmaArm9() {
         		// Copy via dma
                 ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
                 dmaReadOnArm9 = true;
-
-
-        		// Update cardi common
-        		cardStruct[0] = src + len2;
-        		cardStruct[1] = (vu32)(dst + len2);
-        		cardStruct[2] = len - len2;
+                currentLen= len2;
  
                 sharedAddr[3] = commandPool;               
                 IPC_SendSync(0x3);        
@@ -393,13 +398,7 @@ void continueCardReadDmaArm7() {
         // TODO Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
         dmaReadOnArm9 = true;
-
-
-		
-		// Update cardi common
-		cardStruct[0] = src + len2;
-		cardStruct[1] = (vu32)(dst + len2);
-		cardStruct[2] = len - len2;
+        currentLen= len2;
         
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);
@@ -465,12 +464,7 @@ static inline bool startCardReadDma() {
   		// Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
         dmaReadOnArm9 = true;
-
-  		// Update cardi common
-  		cardStruct[0] = src + len2;
-  		cardStruct[1] = (vu32)(dst + len2);
-
-  		cardStruct[2] = len - len2;
+        currentLen= len2;
           
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
