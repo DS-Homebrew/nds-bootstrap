@@ -42,6 +42,8 @@
 #include "memcpy.h"
 #include "locations.h"
 
+extern vu32* myMemUncached(vu32*);
+
 extern char ioType[4];
 extern vu32* _start;
 static vu32* word_command;
@@ -107,7 +109,7 @@ bool sd_Startup() {
 	//REG_SCFG_EXT &= 0xC000;
 
 	//__custom_mpu_setup();
-    
+
     word_command = _start-6;
     word_params  = _start-5;
     words_msg    = _start-4;
