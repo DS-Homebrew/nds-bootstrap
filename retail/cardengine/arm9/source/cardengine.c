@@ -176,7 +176,7 @@ void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 siz
 	
     *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
 	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90080000;
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90070000;
 }
 
 /*static inline 
@@ -190,7 +190,7 @@ void ndmaCopyWordsAsynchTimer1(uint8 ndmaSlot, const void* src, void* dest, uint
 	
     *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
 	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x81080000;
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x81070000;
 } */
 
 static inline 
