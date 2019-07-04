@@ -42,9 +42,6 @@
 #include "memcpy.h"
 #include "locations.h"
 
-extern vu32* myMemUncached(vu32*);
-
-extern vu32* dldiDataOffset;
 extern char ioType[4];
 extern vu32 word_command;
 extern vu32 word_params;

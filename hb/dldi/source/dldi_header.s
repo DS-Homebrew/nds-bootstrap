@@ -4,7 +4,6 @@
 	.section ".crt0","ax"
 @---------------------------------------------------------------------------------
 	.global _start
-	.global dldiDataOffset
 	.global ioType
 	.global word_command
 	.global word_params
@@ -32,7 +31,6 @@
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
-	dldiDataOffset:
 	.word   __text_start	@ data start
 	.word   __data_end		@ data end
 	.word	__glue_start	@ Interworking glue start	-- Needs address fixing
