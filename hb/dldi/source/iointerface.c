@@ -43,9 +43,10 @@
 #include "locations.h"
 
 extern char ioType[4];
-extern vu32 word_command;
-extern vu32 word_params;
-extern vu32 words_msg;
+extern vu32* _start;
+static vu32* word_command;
+static vu32* word_params;
+static vu32* words_msg;
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
 extern vu32* tmp_buf_addr;
@@ -53,31 +54,31 @@ extern vu8 allocated_space;
 
 void sendValue32(u32 value32) {
 	//nocashMessage("sendValue32");
-	*((vu32*)myMemUncached(&word_params)) = value32;
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
+	*((vu32*)myMemUncached(word_params)) = value32;
+	*((vu32*)myMemUncached(word_command)) = (vu32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
-	*((vu32*)myMemUncached(&word_params)) = size;
+	*((vu32*)myMemUncached(word_params)) = size;
 	for(int i=0;i<size;i++)  {
-		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
+		*((u8*)myMemUncached(words_msg)+i) = msg[i];
 	}
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
+	*((vu32*)myMemUncached(word_command)) = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
 
 void waitValue32() {
 	//nocashMessage("waitValue32");
-    //dbg_hexa(&word_command);
-    //dbg_hexa(myMemUncached(&word_command));
-	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
+    //dbg_hexa(word_command);
+    //dbg_hexa(myMemUncached(word_command));
+	while(*((vu32*)myMemUncached(word_command)) != (vu32)0x027FEE08);
 }
 
 u32 getValue32() {
 	//nocashMessage("getValue32");
-	return *((vu32*)myMemUncached(&word_params));
+	return *((vu32*)myMemUncached(word_params));
 }
 
 /*void goodOldCopy32(u32* src, u32* dst, int size) {
@@ -106,6 +107,10 @@ bool sd_Startup() {
 	//REG_SCFG_EXT &= 0xC000;
 
 	//__custom_mpu_setup();
+    
+    word_command = _start-6;
+    word_params  = _start-5;
+    words_msg    = _start-4;
 
 	sendValue32(SDMMC_HAVE_SD);
 
