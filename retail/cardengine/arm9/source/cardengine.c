@@ -634,6 +634,14 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
+bool isTcm(u32 address, u32 len) {
+    u32 base = (getDtcmBase()>>12) << 12;
+    return    // test data not in ITCM
+    address > 0x02000000
+    // test data not in DTCM
+    && (address < base || address+len > base+0x4000);     
+}
+
 u32 cardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
     
@@ -646,11 +654,8 @@ u32 cardReadDma() {
         && dma <= 3 
         //&& func != NULL
         && len > 0
-        && !(((int)dst) & 31)
-        // test data not in ITCM
-        && dst > 0x02000000
-        // test data not in DTCM
-        && (dst < 0x27E0000 || dst > 0x27E4000) 
+        && !(((int)dst) & 3)
+        && !isTcm(dst, len)
         // check 512 bytes page alignement 
         && !(((int)len) & 511)
         && !(((int)src) & 511) 
