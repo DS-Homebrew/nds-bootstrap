@@ -116,6 +116,14 @@ static bool isSdEjected(void) {
 	return false;
 }
 
+// Alternative to swiWaitForVBlank()
+static void waitFrames(int count) {
+	for (int i = 0; i < count; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+}
+
 static void initialize(void) {
 	if (initialized) {
 		return;
@@ -664,10 +672,12 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
+				REG_MASTER_VOLUME = 0;
 				if (consoleModel < 2) {
 					unlaunchSetHiyaBoot();
 				}
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				waitFrames(10);							// Stabilize
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 			}
@@ -680,11 +690,13 @@ void myIrqHandlerVBlank(void) {
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
 		if (tryLockMutex(&saveMutex)) {
+			REG_MASTER_VOLUME = 0;
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			}
 			//tonccpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+			waitFrames(10);								// Stabilize
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 			unlockMutex(&saveMutex);
