@@ -277,40 +277,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
-static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-    const char* romTid = getRomTid(ndsHeader);
-    
-    if (
-        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
-    ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
-    //||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V
-    //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
-    ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
-    //||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
-    ||  strncmp(romTid, "AFF", 3) == 0  // FF3
-    ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
-    ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
-    //||  strncmp(romTid, "B3R", 3) == 0  // Pokemon Ranger: Guardian Signs 
-    //||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
-    ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
-    //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
-    //||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
-    //||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
-    //||  strncmp(romTid, "CS3", 3) == 0  // Sonic & SEGA All Stars Racing
-    //||  strncmp(romTid, "VSO", 3) == 0  // Sonic Classic Collection
-    //||  strncmp(romTid, "BXS", 3) == 0  // Sonic Colors
-    //||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
-    ) {
-      u32* sleep = patchOffsetCache.sleepOffset;
-	  if (!patchOffsetCache.sleepOffset) {
-		sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
-		if (sleep) patchOffsetCache.sleepOffset = sleep;
-	  }
-      if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
-      else ce9->patches->sleepRef = sleep;
-    } 
-}
-
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     const char* romTid = getRomTid(ndsHeader);
     
@@ -322,7 +288,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
-        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat

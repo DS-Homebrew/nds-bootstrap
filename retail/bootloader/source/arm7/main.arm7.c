@@ -986,14 +986,6 @@ int arm7_main(void) {
 
 		if (gameOnFlashcard) sdRead = false;
 
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-			if (
-				strncmp(romTid, "AMQ", 3) != 0				// MvDK2
-			) {
-				fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
-			}
-		}
-
 		hookNdsRetailArm9(
 			(cardengineArm9*)ce9Location,
 			moduleParams,
@@ -1005,6 +997,11 @@ int arm7_main(void) {
 			supportsExceptionHandler(ndsHeader),
 			consoleModel
 		);
+
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+			fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		}
+
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 		} else {
