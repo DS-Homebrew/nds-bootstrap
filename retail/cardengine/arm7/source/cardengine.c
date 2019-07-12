@@ -98,7 +98,7 @@ static void unlaunchSetHiyaBoot(void) {
 													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	memset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	for (int i = 0; i < 14; i++) {
 		*(u8*)(0x02000838+i2) = hiyaNdsPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
@@ -155,7 +155,7 @@ static void initialize(void) {
 	} else {
 		savFile.firstCluster = CLUSTER_FREE;
 	}*/
-		
+
 	#ifdef DEBUG		
 	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
 	enableDebug(myDebugFile);
@@ -703,8 +703,7 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	if (consoleModel < 2) {
-	if (preciseVolumeControl && romread_LED == 0) {
+	if (consoleModel < 2 && preciseVolumeControl && romread_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -731,7 +730,6 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustActivated = true;
 			}
 		}
-	}
 	}
 	
 	if (saveTimer > 0) {
