@@ -80,6 +80,8 @@ extern u32 saveOnFlashcard;
 extern u32 saveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
+extern u32 wideCheatFileCluster;
+extern u32 wideCheatSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
@@ -932,12 +934,6 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
 		}
 
-		if (
-			strncmp(romTid, "AMQ", 3) == 0				// MvDK2
-		) {
-			patchOffsetCache.ver = 0;
-		}
-
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
 			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -965,6 +961,8 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
+			wideCheatFileCluster,
+			wideCheatSize,
 			cheatFileCluster,
 			cheatSize,
 			gameOnFlashcard,

@@ -94,6 +94,8 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 wideCheatFileCluster,
+	u32 wideCheatSize,
 	u32 cheatFileCluster,
 	u32 cheatSize,
     u32 gameOnFlashcard,
@@ -228,9 +230,17 @@ int hookNdsRetailArm7(
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 	}
 
+	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	if (cheatFile.firstCluster != CLUSTER_FREE && cheatSize <= 0x8000) {
-		fileRead((char*)ce7->cheat_data_offset, cheatFile, 0, cheatSize, 0);
+	if (wideCheatSize+cheatSize <= 0x8000) {
+		char* cheatDataOffset = ce7->cheat_data_offset;
+		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
+			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
+			cheatDataOffset += wideCheatSize-4;
+		}
+		if (cheatFile.firstCluster != CLUSTER_FREE) {
+			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
+		}
 	}
 
 	dbg_printf("ERR_NONE\n");

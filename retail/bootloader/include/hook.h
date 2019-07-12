@@ -34,6 +34,8 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 wideCheatFileCluster,
+	u32 wideCheatSize,
 	u32 cheatFileCluster,
 	u32 cheatSize,
     u32 gameOnFlashcard,

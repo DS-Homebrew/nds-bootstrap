@@ -228,7 +228,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
+void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -252,6 +252,8 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	lc0->saveFileCluster             = saveCluster;
 	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
+	lc0->wideCheatFileCluster        = wideCheatCluster;
+	lc0->wideCheatSize               = conf->wideCheatSize;
 	lc0->cheatFileCluster            = cheatCluster;
 	lc0->cheatSize                   = conf->cheatSize;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;

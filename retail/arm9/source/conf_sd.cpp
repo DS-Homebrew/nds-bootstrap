@@ -240,6 +240,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
+	conf->wideCheatSize = getFileSize("sd:/_nds/nds-bootstrap/wideCheatData.bin");
 	conf->cheatSize = getFileSize("sd:/_nds/nds-bootstrap/cheatData.bin");
 
 	// Please wait screen

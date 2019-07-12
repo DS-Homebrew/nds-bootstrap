@@ -334,10 +334,12 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stWideCheat;
 	struct stat stCheat;
 	struct stat stPatchOffsetCache;
 	struct stat stFatTable;
 	u32 clusterSav = 0;
+	u32 clusterWideCheat = 0;
 	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
 	u32 clusterFatTable = 0;
@@ -353,6 +355,10 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
+	if (stat("sd:/_nds/nds-bootstrap/wideCheatData.bin", &stWideCheat) >= 0) {
+		clusterWideCheat = stWideCheat.st_ino;
+	}
+
 	if (stat("sd:/_nds/nds-bootstrap/cheatData.bin", &stCheat) >= 0) {
 		clusterCheat = stCheat.st_ino;
 	}
@@ -376,7 +382,7 @@ static int runNdsFile(configuration* conf) {
 	fread(load_bin, 1, loaderSize, bootloaderBin);
 	fclose(bootloaderBin);
 
-	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
+	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterWideCheat, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
 
 	return 0;
 }

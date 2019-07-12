@@ -31,6 +31,8 @@
 	.global saveFileCluster
 	.global romSize
 	.global saveSize
+	.global wideCheatFileCluster
+	.global wideCheatSize
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
@@ -75,6 +77,10 @@ romSize:
 	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
+wideCheatFileCluster:
+	.word	0x00000000
+wideCheatSize:
+	.word	0x00000000
 cheatFileCluster:
 	.word	0x00000000
 cheatSize:
