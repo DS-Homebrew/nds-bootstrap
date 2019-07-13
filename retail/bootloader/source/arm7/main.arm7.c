@@ -812,7 +812,7 @@ int arm7_main(void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
@@ -997,7 +997,7 @@ int arm7_main(void) {
 		);
 
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-			fileWrite(&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
 		if (ROMinRAM) {
