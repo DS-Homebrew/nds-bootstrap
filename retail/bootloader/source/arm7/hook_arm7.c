@@ -233,7 +233,7 @@ int hookNdsRetailArm7(
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	if (wideCheatSize+cheatSize <= 0x8000) {
-		char* cheatDataOffset = ce7->cheat_data_offset;
+		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
 			cheatDataOffset += wideCheatSize-4;
