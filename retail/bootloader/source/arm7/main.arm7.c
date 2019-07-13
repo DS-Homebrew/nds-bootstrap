@@ -693,10 +693,6 @@ int arm7_main(void) {
 	nocashMessage("Getting ARM7 to clear RAM...\n");
 	resetMemory_ARM7();
 
-	//
-	// 1 dot
-	//
-
 	// Init card
 	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
@@ -953,8 +949,6 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
-		if (gameOnFlashcard) sdRead = true;
-
 		cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -981,8 +975,6 @@ int arm7_main(void) {
 			nocashMessage("Card hook failed");
 			errorOutput();
 		}
-
-		if (gameOnFlashcard) sdRead = false;
 
 		hookNdsRetailArm9(
 			(cardengineArm9*)ce9Location,

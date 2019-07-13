@@ -42,6 +42,8 @@ void* load_bin[0x10000];
 
 std::string patchOffsetCacheFilePath;
 std::string fatTableFilePath;
+std::string wideCheatFilePath;
+std::string cheatFilePath;
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -355,11 +357,11 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
-	if (stat("sd:/_nds/nds-bootstrap/wideCheatData.bin", &stWideCheat) >= 0) {
+	if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 		clusterWideCheat = stWideCheat.st_ino;
 	}
 
-	if (stat("sd:/_nds/nds-bootstrap/cheatData.bin", &stCheat) >= 0) {
+	if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
 		clusterCheat = stCheat.st_ino;
 	}
 
