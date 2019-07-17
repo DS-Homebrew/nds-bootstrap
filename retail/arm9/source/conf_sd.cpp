@@ -253,8 +253,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
+	bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
+
 	// Please wait screen
-	FILE* bootstrapImage = fopen("nitro:/pleasewait.bmp", "rb");
+	FILE* bootstrapImage = fopen(wideCheatFound ? "nitro:/pleasewait_wide.bmp" : "nitro:/pleasewait.bmp", "rb");
 	if (bootstrapImage) {
 		// Start loading
 		fseek(bootstrapImage, 0xe, SEEK_SET);
@@ -278,7 +280,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(bootstrapImage);
 
 	// Error screen
-	bootstrapImage = fopen("nitro:/error.bmp", "rb");
+	bootstrapImage = fopen(wideCheatFound ? "nitro:/error_wide.bmp" : "nitro:/error.bmp", "rb");
 	if (bootstrapImage) {
 		// Start loading
 		fseek(bootstrapImage, 0xe, SEEK_SET);
