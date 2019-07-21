@@ -666,7 +666,9 @@ u32 cardReadDma() {
         
 
 
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
+        if((!ce9->ROMinRAM && ce9->patches->cardEndReadDmaRef)
+		|| (!ce9->ROMinRAM && ce9->thumbPatches->cardEndReadDmaRef))
+		{
             isDma = true;
            // new dma method
               /*if (src == 0) {
