@@ -203,9 +203,9 @@ clean:
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
 	@$(MAKE) -C cardengine/arm9_reloc clean
+	@$(MAKE) -C cardengine/arm9_dldi clean
 	@$(MAKE) -C cardengine/arm9_sdk5 clean
-	@$(MAKE) -C cardengine/arm9_sdk5_reloc clean
-	@$(MAKE) -C cardengine/arm9_sdk5_gsdd clean
+	@$(MAKE) -C cardengine/arm9_sdk5_dldi clean
 	@$(MAKE) -C bootloader clean
 		
 $(DATA):
