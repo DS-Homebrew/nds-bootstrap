@@ -188,8 +188,6 @@ void arm9_main(void) {
 	VRAM_I_CR = 0;
 	REG_POWERCNT = 0x820F;
 
-	REG_SCFG_EXT = 0x8300C000;
-
 	*(u16*)0x0400006C |= BIT(14);
 	*(u16*)0x0400006C &= BIT(15);
 
@@ -251,6 +249,7 @@ void arm9_main(void) {
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x84;
 			} else {
+				REG_SCFG_EXT = 0x8300C000;
 				if (arm9_boostVram) {
 					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 				}
