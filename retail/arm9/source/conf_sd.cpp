@@ -164,6 +164,12 @@ static void load_conf(configuration* conf, const char* fn) {
 	// If DSi mode, then always boost VRAM
 	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
 
+	// Sound/Mic frequency
+	Key.Data = (char*)"";
+	Key.Name = (char*)"SOUND_FREQ";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->soundFreq = (bool)strtol(Key.Data, NULL, 0);
+
 	iniFree(IniData, IniCount);
 }
 

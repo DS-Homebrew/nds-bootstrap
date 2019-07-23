@@ -46,6 +46,7 @@
 	.global consoleModel
 	.global romread_LED
 	.global boostVram
+	.global soundFreq
 	.global gameSoftReset
 	.global forceSleepPatch
 	.global volumeFix
@@ -106,6 +107,8 @@ consoleModel:
 romread_LED:
 	.word	0x00000000
 boostVram:
+	.word	0x00000000
+soundFreq:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000

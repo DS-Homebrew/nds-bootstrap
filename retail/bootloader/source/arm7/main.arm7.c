@@ -51,6 +51,7 @@
 
 #include "tonccpy.h"
 #include "my_fat.h"
+#include "debug_file.h"
 #include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
@@ -99,6 +100,7 @@ extern u32 gameSoftReset;
 extern u32 volumeFix;
 extern u32 preciseVolumeControl;
 extern u32 boostVram;
+extern u32 soundFreq;
 extern u32 logging;
 
 bool sdRead = true;
@@ -620,14 +622,14 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (isDSiWare) {
-		u8* deviceListAddr = *(u8*)0x02FFE1D4;
+		u8* deviceListAddr = (u8*)0x02FFE1D4;
 		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
 		const char *ndsPath = "nand:/dsiware.nds";
 		tonccpy(deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
 
-		tonccpy(0x02FFC000, 0x02FFE000, 0x1000);		// Make a duplicate of DSi header
-		tonccpy(0x02FFFA80, NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
+		tonccpy((u32*)0x02FFC000, (u32*)0x02FFE000, 0x1000);		// Make a duplicate of DSi header
+		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
 
 		*(u32*)(0x02FFA680) = 0x02FD4D80;
 		*(u32*)(0x02FFA684) = 0x00000000;
@@ -857,6 +859,7 @@ int arm7_main(void) {
 		}
 	} else {
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
 		}
@@ -917,7 +920,7 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 			} else
-			ce9Location = patchHeapPointer(moduleParams, ndsHeader);
+			ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
 			if(ce9Location) {
 					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
 					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);

@@ -152,6 +152,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
+	dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
+	dbg_printf("soundFreq: %s\n", btoa(conf->soundFreq));
 	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));

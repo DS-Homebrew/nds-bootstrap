@@ -24,6 +24,7 @@ typedef struct configuration {
 	u32 romread_LED;
 	bool boostCpu;
 	bool boostVram;
+	bool soundFreq;
 	bool gameSoftReset;
 	bool forceSleepPatch;
 	bool volumeFix;
