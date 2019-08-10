@@ -982,6 +982,7 @@ int arm7_main(void) {
 		hookNdsRetailArm9(
 			(cardengineArm9*)ce9Location,
 			moduleParams,
+			oldCompressedStaticEnd,
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,

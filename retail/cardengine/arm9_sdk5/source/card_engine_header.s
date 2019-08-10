@@ -20,6 +20,8 @@ intr_ipc_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
+oldCompressedStaticEnd:
+	.word	0x00000000
 fileCluster:
 	.word	0x00000000
 saveCluster:

@@ -132,6 +132,8 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 	return uncompressEnd;
 }
 
+u32 oldCompressedStaticEnd = 0;
+
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -145,9 +147,11 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		dbg_printf("This rom is compressed\n");
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
+		oldCompressedStaticEnd = moduleParams->compressed_static_end;
 		moduleParams->compressed_static_end = 0;
 	} else {
 		// Not compressed
 		dbg_printf("This rom is not compressed\n");
+		oldCompressedStaticEnd = moduleParams->compressed_static_end;
 	}
 }

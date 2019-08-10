@@ -85,6 +85,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
+	u32 oldCompressedStaticEnd,
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveOnFlashcard,
@@ -96,6 +97,7 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	ce9->moduleParams           = moduleParams;
+	ce9->oldCompressedStaticEnd = oldCompressedStaticEnd;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	ce9->saveOnFlashcard        = saveOnFlashcard;

@@ -82,7 +82,10 @@ static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 #endif
 
+static u32 readCounter = 0;
+
 static bool flagsSet = false;
+static bool compressedStaticEndReverted = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
@@ -862,7 +865,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 			cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
-		} else {
+		} else if (strncmp(romTid, "A2D", 3) == 0) {
 			debug8mbMpuFix();
 		}
 
@@ -903,6 +906,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	waitForArm7();
 	// -------------------------------------*/
 	#endif
+	
+	if (!compressedStaticEndReverted) {
+		readCounter++;
+		if (readCounter > 100) {
+			ce9->moduleParams->compressed_static_end = ce9->oldCompressedStaticEnd;
+			compressedStaticEndReverted = true;
+		}
+	}
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.

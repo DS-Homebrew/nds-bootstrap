@@ -38,9 +38,8 @@
 #include "nds_header.h"
 
 #include "sr_data_error.h"      // For showing an error screen
-#include "sr_data_srloader.h"   // For rebooting into DSiMenu++
+#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
 #include "sr_data_srllastran.h" // For rebooting the game
-#include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
