@@ -909,7 +909,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	
 	if (!compressedStaticEndReverted) {
 		readCounter++;
-		if (readCounter > 100) {
+		if (readCounter > 0x100) {
 			ce9->moduleParams->compressed_static_end = ce9->oldCompressedStaticEnd;
 			compressedStaticEndReverted = true;
 		}
