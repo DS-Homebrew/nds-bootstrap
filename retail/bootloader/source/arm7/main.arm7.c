@@ -696,7 +696,7 @@ int arm7_main(void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if (!FAT_InitFiles(initDisc, 0)) {
+	if (!FAT_InitFiles(true, 0)) {
 		nocashMessage("!FAT_InitFiles");
 		errorOutput();
 		//return -1;
