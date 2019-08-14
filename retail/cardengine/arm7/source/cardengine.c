@@ -134,7 +134,7 @@ static void initialize(void) {
 	}
 	sdRead = true;				// Switch to SD
 	FAT_InitFiles(false, 0);
-	if (gameOnFlashcard || saveOnFlashcard) {
+	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
 		sdRead = false;			// Switch to flashcard
 		FAT_InitFiles(true, 0);
 		sdRead = true;				// Switch to SD
