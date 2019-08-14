@@ -698,7 +698,8 @@ int arm7_main(void) {
 	// Init card
 	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
-		return -1;
+		errorOutput();
+		//return -1;
 	}
 
 	if (gameOnFlashcard || saveOnFlashcard) {
@@ -706,7 +707,8 @@ int arm7_main(void) {
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, 0)) {
 			nocashMessage("!FAT_InitFiles");
-			return -1;
+			errorOutput();
+			//return -1;
 		}
 		sdRead = true;
 	}
@@ -729,7 +731,8 @@ int arm7_main(void) {
 
 	if (romFile->firstCluster == CLUSTER_FREE) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
-		return -1;
+		errorOutput();
+		//return -1;
 	}
 	
 	// FAT table file
