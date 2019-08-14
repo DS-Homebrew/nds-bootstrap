@@ -51,7 +51,6 @@ int hookNdsRetailArm7(
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
-	u32 oldCompressedStaticEnd,
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveOnFlashcard,

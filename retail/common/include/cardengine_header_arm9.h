@@ -56,8 +56,7 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;
-    module_params_t* moduleParams;
-	u32 oldCompressedStaticEnd;
+    const module_params_t* moduleParams;
     u32 fileCluster;
     u32 saveCluster;
     u32 saveOnFlashcard;
