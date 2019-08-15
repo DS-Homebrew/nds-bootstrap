@@ -393,7 +393,7 @@ static int runNdsFile(configuration* conf) {
 
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
-	conf->initDisc = false;
+	conf->initDisc = true;
 
 	int status = loadFromSD(conf, argv[0]);
 
