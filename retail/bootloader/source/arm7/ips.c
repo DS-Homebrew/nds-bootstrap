@@ -15,7 +15,9 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 	while (1) {
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
 		if (offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) {
-			rombyte = ndsHeader->arm9destination - 0x4000;
+			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
+		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
+			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		}
 		ipson++;
 		ipson++;
