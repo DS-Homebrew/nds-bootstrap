@@ -2,6 +2,7 @@
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
 #include <nds/system.h>
+#include "debug_file.h"
 #include "hook.h"
 #include "common.h"
 #include "patch.h"

@@ -33,6 +33,8 @@
 	.global saveSize
 	.global wideCheatFileCluster
 	.global wideCheatSize
+	.global apPatchFileCluster
+	.global apPatchSize
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
@@ -81,6 +83,10 @@ saveSize:
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:
+	.word	0x00000000
+apPatchFileCluster:
+	.word	0x00000000
+apPatchSize:
 	.word	0x00000000
 cheatFileCluster:
 	.word	0x00000000

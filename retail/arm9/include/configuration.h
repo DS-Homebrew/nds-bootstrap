@@ -12,6 +12,7 @@ typedef struct configuration {
 	u32 romSize;
 	u32 saveSize;
 	u32 wideCheatSize;
+	u32 apPatchSize;
 	u32 cheatSize;
 	u8 language;
 	u8 dsiMode; // SDK 5

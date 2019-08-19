@@ -22,6 +22,7 @@
 extern std::string patchOffsetCacheFilePath;
 extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
+extern std::string apPatchFilePath;
 extern std::string cheatFilePath;
 
 static u16 bmpImageBuffer[256*192];
@@ -248,18 +249,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";
+		apPatchFilePath = "fat:/_nds/nds-bootstrap/apPatch.ips";
 		cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 	} else {
 		wideCheatFilePath = "sd:/_nds/nds-bootstrap/wideCheatData.bin";
+		apPatchFilePath = "sd:/_nds/nds-bootstrap/apPatch.ips";
 		cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
 	}
 
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
+	conf->apPatchSize = getFileSize(apPatchFilePath.c_str());
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
 	bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
+	//bool apPatchFound = (access(apPatchFilePath.c_str(), F_OK) == 0);
 
 	// Please wait screen
 	FILE* bootstrapImage = fopen(wideCheatFound ? "nitro:/pleasewait_wide.bmp" : "nitro:/pleasewait.bmp", "rb");

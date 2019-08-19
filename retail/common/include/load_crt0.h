@@ -18,6 +18,8 @@ typedef struct loadCrt0 {
     u32 saveSize;
     u32 wideCheatFileCluster;
     u32 wideCheatSize;
+    u32 apPatchFileCluster;
+    u32 apPatchSize;
     u32 cheatFileCluster;
     u32 cheatSize;
     u32 patchOffsetCacheFileCluster;

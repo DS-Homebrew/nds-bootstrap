@@ -83,6 +83,8 @@ extern u32 romSize;
 extern u32 saveSize;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
+extern u32 apPatchFileCluster;
+extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
@@ -963,6 +965,8 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			wideCheatFileCluster,
 			wideCheatSize,
+			apPatchFileCluster,
+			apPatchSize,
 			cheatFileCluster,
 			cheatSize,
 			gameOnFlashcard,
