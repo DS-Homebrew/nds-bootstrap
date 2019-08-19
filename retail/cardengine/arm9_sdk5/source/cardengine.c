@@ -55,6 +55,8 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
+static u32 overlaysSize = 0;
+static u32 romLocation = retail_CACHE_ADRESS_START_SDK5;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 
@@ -248,12 +250,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-#ifndef DLDI
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	while (len > 0) {
 		if (isDma) {
             // Copy via dma
-  			dmaCopyWordsAsynch(dma, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
+  			dmaCopyWordsAsynch(dma, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
             while (dmaBusy(dma)) {
                 sleep(1);
             }        
@@ -265,7 +266,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
-			sharedAddr[2] = ((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src);
+			sharedAddr[2] = ((romLocation-0x4000-ndsHeader->arm9binarySize)+src);
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -273,7 +274,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 			#endif
 
 			// Copy directly
-			tonccpy(dst, (u8*)((dev_CACHE_ADRESS_START_SDK5-0x4000-ndsHeader->arm9binarySize)+src), len);
+			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), len);
 		}
 
 		len = len - len;
@@ -284,7 +285,6 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	}
 	return 0;
 }
-#endif
 
 u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
     dma = dma0; // dma channel
@@ -350,20 +350,28 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			//nocashMessage("!FAT_InitFiles");
 			return -1;
 		}
+
+		for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+			overlaysSize = i;
+		}
 		#else
-		//if (isGameLaggy(ndsHeader)) {
-			if (ce9->consoleModel > 0) {
-				// SDK 5
-				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
-			}
-			//readSize = _32KB_READ_SIZE;
-		/*} else if (ce9->consoleModel > 0) {
-			// SDK 5
+		if (ce9->consoleModel > 0) {
+			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-			cacheSlots = dev_CACHE_SLOTS_SDK5;
-		}*/
-        
+			cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
+		}
+
+		if (!ce9->ROMinRAM) {
+			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+				overlaysSize = i;
+			}
+
+			for (int i = 0; i < overlaysSize; i += readSize) {
+				cacheAddress += readSize;
+				cacheSlots--;
+			}
+		}
+
 		if (ce9->enableExceptionHandler) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
@@ -396,6 +404,10 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	// Fix reads below 0x8000
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
+	}
+
+	if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+		return cardReadRAM(dst, src, len);
 	}
 
 	#ifdef DLDI

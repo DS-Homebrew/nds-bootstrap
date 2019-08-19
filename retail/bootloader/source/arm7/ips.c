@@ -5,9 +5,10 @@
 
 #include <nds/ndstypes.h>
 #include <nds/memory.h>
+#include "locations.h"
 #include "tonccpy.h"
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
+void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int consoleModel) {
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
@@ -15,9 +16,17 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 	while (1) {
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
 		if (offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) {
+			// ARM9 binary
 			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
+			// ARM7 binary
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
+		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
+			// Overlays
+			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
+			if (consoleModel == 0 && higherMem) {
+				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;
+			}
 		}
 		ipson++;
 		ipson++;

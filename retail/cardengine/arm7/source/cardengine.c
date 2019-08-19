@@ -411,11 +411,6 @@ static bool start_cardRead_arm9(void) {
     else
     {
         readOngoing = false;
-        // Primary fix for Mario's Holiday
-		// TODO: Apply fix outside of RAM cache
-    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
-    		*(u32*)(0x0C9328AC) = 0xA00;
-    	}
         cardReadLED(false);    // After loading is done, turn off LED for card read indicator
         return true;    
     }
@@ -434,11 +429,6 @@ static bool resume_cardRead_arm9(void) {
     if(resumeFileRead())
     {
         readOngoing = false;
-        // Primary fix for Mario's Holiday
-		// TODO: Apply fix outside of RAM cache
-    	if (*(u32*)(0x0C9328AC) == 0x4B434148) {
-    		*(u32*)(0x0C9328AC) = 0xA00;
-    	}
         cardReadLED(false);    // After loading is done, turn off LED for card read indicator
         return true;    
     } 

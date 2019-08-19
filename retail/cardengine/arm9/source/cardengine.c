@@ -64,6 +64,8 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
+static u32 overlaysSize = 0;
+static u32 romLocation = ROM_LOCATION;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
@@ -76,7 +78,6 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
-static u32 romLocation = ROM_LOCATION;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
@@ -584,7 +585,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	return 0;
 }
 
-#ifndef DLDI
 static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
 	while (len > 0) {
@@ -602,7 +602,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
-			sharedAddr[2] = (ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src;
+			sharedAddr[2] = (romLocation-0x4000-ndsHeader->arm9binarySize)+src;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -610,7 +610,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Copy directly
-			tonccpy(dst, (u8*)(((ce9->dsiMode ? dev_CACHE_ADRESS_START_SDK5 : romLocation)-0x4000-ndsHeader->arm9binarySize)+src),len);
+			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 		//}
 		// Update cardi common
 		cardStruct[0] = src + len;
@@ -627,7 +627,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 	return 0;
 }
-#endif
 
 //Currently used for NSMBDS romhacks
 void __attribute__((target("arm"))) debug8mbMpuFix(){
@@ -829,6 +828,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			return -1;
 		}
 
+		if (ce9->dsiMode) {
+			romLocation = ROM_SDK5_LOCATION;
+			if (ce9->consoleModel == 0) {
+				romLocation = retail_CACHE_ADRESS_START_SDK5;
+			}
+		}
+
+		for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+			overlaysSize = i;
+		}
+
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) != 0) {
 			debug8mbMpuFix();
@@ -836,27 +846,29 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		#else
 		if (ce9->dsiMode) {
 			romLocation = ROM_SDK5_LOCATION;
-			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
+			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+			if (ce9->consoleModel == 0) {
+				romLocation = retail_CACHE_ADRESS_START_SDK5;
+				cacheAddress = retail_CACHE_ADRESS_START_SDK5;
+			}
 		}
 
-		//if (isGameLaggy(ndsHeader)) {
-			if (ce9->consoleModel > 0) {
-				if (ce9->dsiMode) {
-					// SDK 5
-					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				}
-				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
-			} else {
-				cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
+		if (ce9->consoleModel > 0) {
+			cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+		} else {
+			cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
+		}
+
+		if (!ce9->ROMinRAM) {
+			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+				overlaysSize = i;
 			}
-			//readSize = _32KB_READ_SIZE;
-		/*} else if (ce9->consoleModel > 0) {
-			if (ce9->dsiMode) {
-				// SDK 5
-				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+
+			for (int i = 0; i < overlaysSize; i += readSize) {
+				cacheAddress += readSize;
+				cacheSlots--;
 			}
-			cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
-		}*/
+		}
 
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
@@ -913,7 +925,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
 	}
-    
+
+	if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+		return cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	}
+
 	#ifdef DLDI
 	int ret = cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 	#else

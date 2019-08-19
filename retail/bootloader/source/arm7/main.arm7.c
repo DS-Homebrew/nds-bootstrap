@@ -56,6 +56,7 @@
 #include "module_params.h"
 #include "decompress.h"
 #include "dldi_patcher.h"
+#include "ips.h"
 #include "patch.h"
 #include "find.h"
 #include "cheat_patch.h"
@@ -576,7 +577,26 @@ static void NTR_BIOS() {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load ROM into RAM
-	fileRead((char*)(isSdk5(moduleParams) ? ROM_SDK5_LOCATION : ROM_LOCATION), file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+	fileRead((char*)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION), file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+
+	if (!isSdk5(moduleParams)) {
+		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+			*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		}
+	}
+}
+
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool ROMinRAM, aFile file) {
+	// Load overlays into RAM
+	u32 overlaysSize = 0;
+	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+		overlaysSize = i;
+	}
+	u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	if (!ROMinRAM && isSdk5(moduleParams)) {
+		overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
+	}
+	fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
 
 	if (!isSdk5(moduleParams)) {
 		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
@@ -965,8 +985,6 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			wideCheatFileCluster,
 			wideCheatSize,
-			apPatchFileCluster,
-			apPatchSize,
 			cheatFileCluster,
 			cheatSize,
 			gameOnFlashcard,
@@ -1005,10 +1023,17 @@ int arm7_main(void) {
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 		} else {
+			loadOverlaysintoRAM(ndsHeader, moduleParams, ROMinRAM, *romFile);
 			if (romread_LED > 0) {
 				// Turn WiFi LED off
 				i2cWriteRegister(0x4A, 0x30, 0x12);
 			}
+		}
+
+		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+		if (apPatchFile.firstCluster != CLUSTER_FREE) {
+			fileRead((char*)0x02780000, apPatchFile, 0, apPatchSize, 0);
+			applyIpsPatch(ndsHeader, (u8*)0x02780000, (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
 		}
 	}
 
@@ -1027,7 +1052,7 @@ int arm7_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
-	toncset((u32*)0x02780000, 0, 0x30000);	// clear nds-bootstrap images
+	toncset((u32*)0x02780000, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	while (arm9_stateFlag != ARM9_READY);

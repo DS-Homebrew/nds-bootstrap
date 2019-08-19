@@ -27,7 +27,6 @@
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "common.h"
-#include "ips.h"
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
@@ -98,8 +97,6 @@ int hookNdsRetailArm7(
 	u32 fileCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,
-	u32 apPatchFileCluster,
-	u32 apPatchSize,
 	u32 cheatFileCluster,
 	u32 cheatSize,
     u32 gameOnFlashcard,
@@ -235,12 +232,7 @@ int hookNdsRetailArm7(
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
-	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	if (apPatchFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x02800000, apPatchFile, 0, apPatchSize, 0);
-		applyIpsPatch(ndsHeader, (u8*)0x02800000);
-	}
 	if (wideCheatSize+cheatSize <= 0x8000) {
 		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
