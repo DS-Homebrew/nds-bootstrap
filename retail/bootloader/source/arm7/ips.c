@@ -4,14 +4,19 @@
 */
 
 #include <nds/ndstypes.h>
+#include <nds/memory.h>
 #include "tonccpy.h"
 
-void applyIpsPatch(void* rombyte, u8* ipsbyte) {
+void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
+	void* rombyte = 0;
 	while (1) {
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
+		if (offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) {
+			rombyte = ndsHeader->arm9destination - 0x4000;
+		}
 		ipson++;
 		ipson++;
 		ipson++;

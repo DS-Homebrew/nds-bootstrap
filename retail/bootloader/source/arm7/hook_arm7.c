@@ -239,7 +239,7 @@ int hookNdsRetailArm7(
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	if (apPatchFile.firstCluster != CLUSTER_FREE) {
 		fileRead((char*)0x02800000, apPatchFile, 0, apPatchSize, 0);
-		applyIpsPatch((u32*)ndsHeader->arm9destination, (u8*)0x02800000);
+		applyIpsPatch(ndsHeader, (u8*)0x02800000);
 	}
 	if (wideCheatSize+cheatSize <= 0x8000) {
 		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
