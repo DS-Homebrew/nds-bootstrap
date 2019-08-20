@@ -27,6 +27,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int
 			if (consoleModel == 0 && higherMem) {
 				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;
 			}
+			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}
 		ipson++;
 		ipson++;
