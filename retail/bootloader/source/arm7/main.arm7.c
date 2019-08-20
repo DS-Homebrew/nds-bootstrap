@@ -473,6 +473,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 		return false;
 	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00700000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00800000));
 }
@@ -586,14 +587,14 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool ROMinRAM, aFile file) {
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
 	u32 overlaysSize = 0;
 	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
 		overlaysSize = i;
 	}
 	u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (!ROMinRAM && isSdk5(moduleParams)) {
+	if (consoleModel == 0 && isSdk5(moduleParams)) {
 		overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
 	}
 	fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
@@ -857,6 +858,12 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	if (dsiModeConfirmed) {
+		if (consoleModel == 0) {
+			nocashMessage("Cannot use DSi mode on DSi");
+			dbg_printf("Cannot use DSi mode on DSi");
+			dbg_printf("\n");
+			errorOutput();
+		}
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
 	}
 
@@ -1023,7 +1030,7 @@ int arm7_main(void) {
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 		} else {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, ROMinRAM, *romFile);
+			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
 			if (romread_LED > 0) {
 				// Turn WiFi LED off
 				i2cWriteRegister(0x4A, 0x30, 0x12);
