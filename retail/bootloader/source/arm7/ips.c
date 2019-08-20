@@ -29,15 +29,11 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int
 			}
 			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}
-		ipson++;
-		ipson++;
-		ipson++;
+		ipson += 3;
 		if (ipsbyte[ipson] * 256 + ipsbyte[ipson + 1] == 0) {
-			ipson++;
-			ipson++;
+			ipson += 2;
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
-			ipson++;
-			ipson++;
+			ipson += 2;
 			u8 repeatbyte[totalrepeats];
 			for (int ontime = 0; ontime < totalrepeats; ontime++) {
 				repeatbyte[ontime] = ipsbyte[ipson];
@@ -46,8 +42,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int
 			ipson++;
 		} else {
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
-			ipson++;
-			ipson++;
+			ipson += 2;
 			tonccpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
 			ipson += totalrepeats;
 		}
