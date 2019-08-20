@@ -43,7 +43,6 @@ void* load_bin[0x10000];
 std::string patchOffsetCacheFilePath;
 std::string fatTableFilePath;
 std::string wideCheatFilePath;
-std::string apPatchFilePath;
 std::string cheatFilePath;
 
 typedef struct {
@@ -350,9 +349,6 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
 	u32 clusterFatTable = 0;
-	char filePath[PATH_MAX];
-	int pathLen;
-	//const char* args[1];
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -366,7 +362,7 @@ static int runNdsFile(configuration* conf) {
 		clusterWideCheat = stWideCheat.st_ino;
 	}
 
-	if (stat(apPatchFilePath.c_str(), &stApPatch) >= 0) {
+	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
 		clusterApPatch = stApPatch.st_ino;
 	}
 

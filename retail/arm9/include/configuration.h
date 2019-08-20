@@ -9,6 +9,7 @@ typedef struct configuration {
     bool debug;
 	char* ndsPath;
 	char* savPath;
+	char* apPatchPath;
 	u32 romSize;
 	u32 saveSize;
 	u32 wideCheatSize;
