@@ -69,6 +69,7 @@ bool hasLoader;  //single global nds filehandle (is null if not in dldi/fat mode
 u16 chdirpathid; //default dir path id...
 FILE *ndsFile;
 off_t ndsFileLastpos; //Used to determine need to fseek or not
+struct stat stNitroNds;
 
 devoptab_t nitroFSdevoptab = {
     "nitro",                       //	const char *name;
@@ -161,10 +162,11 @@ nitroFSInit(const char *ndsfile)
             }
             setvbuf(ndsFile, NULL, _IONBF, 0); //we dont need double buffs u_u
             AddDevice(&nitroFSdevoptab);
+			stat(ndsfile, &stNitroNds);
             return (1);
         }
     }
-    REG_EXMEMCNT &= ~ARM7_OWNS_CARD; //give us gba slot ownership
+    /*REG_EXMEMCNT &= ~ARM7_OWNS_CARD; //give us gba slot ownership
     if (strncmp(((const char *)GBAROM) + LOADERSTROFFSET, LOADERSTR, strlen(LOADERSTR)) == 0)
     { // We has gba rahm
         printf("yes i think this is GBA?!\n");
@@ -186,7 +188,7 @@ nitroFSInit(const char *ndsfile)
             AddDevice(&nitroFSdevoptab);
             return (1);
         }
-    }
+    }*/
     return (0);
 }
 
@@ -442,6 +444,7 @@ int nitroFSstat(struct _reent *r, const char *file, struct stat *st)
     {
         st->st_mode = S_IFREG;
         st->st_size = fatStruct.end - fatStruct.start;
+		st->st_ino = stNitroNds.st_ino + (fatStruct.pos/0x200);
         return (0);
     }
 
@@ -450,6 +453,7 @@ int nitroFSstat(struct _reent *r, const char *file, struct stat *st)
     {
 
         st->st_mode = S_IFDIR;
+		st->st_ino = stNitroNds.st_ino + (fatStruct.pos/0x200);
         nitroFSDirClose(r, &dirState);
         return (0);
     }
