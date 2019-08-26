@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u32 patchOffsetCacheFileVersion = 4;	// Change when new functions are being patched, some offsets removed
+u32 patchOffsetCacheFileVersion = 5;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -265,7 +265,9 @@ u32 patchCardNds(
 		patchOffsetCache.savePatchType = 0;
 		patchOffsetCache.relocateStartOffset = 0;
 		patchOffsetCache.relocateValidateOffset = 0;
+		patchOffsetCache.a7CardReadEndOffset = 0;
 		patchOffsetCache.a7JumpTableFuncOffset = 0;
+		patchOffsetCache.a7JumpTableType = 0;
 	}
 
 	bool sdk5 = isSdk5(moduleParams);

@@ -84,8 +84,10 @@ typedef struct patchOffsetCacheContents {
 	u32* a7IrqHandlerOffset;
 	u32 savePatchType;
 	u32 relocateStartOffset;
-	u32 relocateValidateOffset;
+	u32 relocateValidateOffset;		// aka nextFunctionOffset
+	u32 a7CardReadEndOffset;
 	u32 a7JumpTableFuncOffset;
+	u32 a7JumpTableType;
 } patchOffsetCacheContents;
 
 extern u32 patchOffsetCacheFileVersion;
