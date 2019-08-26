@@ -11,6 +11,7 @@
 #include <nds/debug.h>*/
 #include <fat.h>
 #include <easykey.h>
+#include "lzss.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "cheat_engine.h"
@@ -24,8 +25,7 @@ extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 
-static u16 bmpImageBuffer[256*192];
-static u16 renderedImageBuffer[256*192];
+static u8 lz77ImageBuffer[0x8000];
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -268,53 +268,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
 
-	// Please wait screen
-	FILE* bootstrapImage = fopen(wideCheatFound ? "nitro:/pleasewait_wide.bmp" : "nitro:/pleasewait.bmp", "rb");
-	if (bootstrapImage) {
-		// Start loading
-		fseek(bootstrapImage, 0xe, SEEK_SET);
-		u8 pixelStart = (u8)fgetc(bootstrapImage) + 0xe;
-		fseek(bootstrapImage, pixelStart, SEEK_SET);
-		fread(bmpImageBuffer, 2, 0x18000, bootstrapImage);
-		u16* src = bmpImageBuffer;
-		int x = 0;
-		int y = 191;
-		for (int i=0; i<256*192; i++) {
-			if (x >= 256) {
-				x = 0;
-				y--;
-			}
-			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-			x++;
-		}
-		tonccpy((void*)0x02780000, renderedImageBuffer, sizeof(renderedImageBuffer));
+	FILE* bootstrapImages = fopen(wideCheatFound ? "nitro:/bootloader_wideImages.lz77" : "nitro:/bootloader_images.lz77", "rb");
+	if (bootstrapImages) {
+		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)0x02780000);
 	}
-	fclose(bootstrapImage);
-
-	// Error screen
-	bootstrapImage = fopen(wideCheatFound ? "nitro:/error_wide.bmp" : "nitro:/error.bmp", "rb");
-	if (bootstrapImage) {
-		// Start loading
-		fseek(bootstrapImage, 0xe, SEEK_SET);
-		u8 pixelStart = (u8)fgetc(bootstrapImage) + 0xe;
-		fseek(bootstrapImage, pixelStart, SEEK_SET);
-		fread(bmpImageBuffer, 2, 0x18000, bootstrapImage);
-		u16* src = bmpImageBuffer;
-		int x = 0;
-		int y = 191;
-		for (int i=0; i<256*192; i++) {
-			if (x >= 256) {
-				x = 0;
-				y--;
-			}
-			u16 val = *(src++);
-			renderedImageBuffer[y*256+x] = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
-			x++;
-		}
-		tonccpy((void*)0x02798000, renderedImageBuffer, sizeof(renderedImageBuffer));
-	}
-	fclose(bootstrapImage);
+	fclose(bootstrapImages);
 
 	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
 	const size_t last_slash_idx = romFilename.find_last_of("/");
