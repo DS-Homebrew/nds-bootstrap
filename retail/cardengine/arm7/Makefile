@@ -58,7 +58,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
 export TARGET	:=	cardengine_arm7
-export OUTPUT	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \

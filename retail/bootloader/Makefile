@@ -51,7 +51,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
 export TOPDIR	:=	$(CURDIR)
-export LOADBIN	:=	$(CURDIR)/../nitrofiles/$(TARGET).bin
+export LOADBIN	:=	$(CURDIR)/../nitrofiles_dec/$(TARGET).bin
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -61,7 +61,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 #BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-BINFILES	:=	cardengine_arm9.bin
+BINFILES	:=	
  
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
@@ -110,9 +110,9 @@ $(LOADELF)	:	$(OFILES)
 #	@echo $(notdir $<)
 #	$(bin2o)
 	
-cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
-	@echo $(notdir $<)
-	$(bin2o)
+#cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
 
 #cardengine_arm9_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_reloc.bin
 #	@echo $(notdir $<)

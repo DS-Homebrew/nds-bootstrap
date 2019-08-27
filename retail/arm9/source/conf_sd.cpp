@@ -25,7 +25,7 @@ extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 
-static u8 lz77ImageBuffer[0x8000];
+extern u8 lz77ImageBuffer[0x10000];
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -224,31 +224,60 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	
 	// Load ce7 binary
-	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
-	fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
+	FILE* cebin = fopen("nitro:/cardengine_arm7.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x8000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
+		//fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
+	}
 	fclose(cebin);
     
-    // Load reloc ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_reloc.bin", "rb");
-	fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x2000, cebin);
+    // Load ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x3000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_BUFFERED_LOCATION);
+		//fread((void*)CARDENGINE_ARM9_BUFFERED_LOCATION, 1, 0x3000, cebin);
+	}
 	fclose(cebin);
 
-	if (flashcardFound) {
+    // Load reloc ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_reloc.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x3000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION);
+		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
+	}
+	fclose(cebin);
+
+	if (conf->gameOnFlashcard) {
 		// Load DLDI ce9 binary
-		cebin = fopen("nitro:/cardengine_arm9_dldi.bin", "rb");
-		fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		cebin = fopen("nitro:/cardengine_arm9_dldi.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x7000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION);
+			//fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		}
 		fclose(cebin);
 	}
 
 	// Load SDK5 ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_sdk5.bin", "rb");
-	fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x3000, cebin);
+	cebin = fopen("nitro:/cardengine_arm9_sdk5.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x3000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION);
+		//fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x3000, cebin);
+	}
 	fclose(cebin);
 
-	if (flashcardFound) {
+	if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary
-		cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.bin", "rb");
-		fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x7000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
+			//fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
+		}
 		fclose(cebin);
 	}
 

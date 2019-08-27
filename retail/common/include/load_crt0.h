@@ -39,7 +39,6 @@ typedef struct loadCrt0 {
 	u32 volumeFix;
     u32 preciseVolumeControl;
     u32 logging;
-    u32 cardengine_arm9_offset; //cardengineArm9* cardengine_arm9;
 } __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H

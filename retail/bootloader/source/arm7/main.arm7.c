@@ -66,7 +66,6 @@
 #include "loading_screen.h"
 
 #include "deviceList.h"					// Modified to read from SD instead of NAND
-#include "cardengine_arm9_bin.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -170,7 +169,7 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x027B0000, 0, 0x20000);		// clear other part of EWRAM - except before ce7 binary and some ce9 binaries
+	toncset((u32*)0x027B0000, 0, 0x1D000);		// clear other part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x808000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -958,11 +957,11 @@ int arm7_main(void) {
 					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
 			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
 		}
 
 		patchBinary(ndsHeader);
@@ -1044,7 +1043,7 @@ int arm7_main(void) {
 		}
 	}
 
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x20000);
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x23000);
 
     
 

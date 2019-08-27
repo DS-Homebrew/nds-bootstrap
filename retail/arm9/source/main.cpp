@@ -34,11 +34,13 @@
 #include <nds/system.h>
 #include <nds/debug.h>*/
 
+#include "lzss.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
 
-void* load_bin[0x10000];
+u8 lz77ImageBuffer[0x10000];
+void* load_bin[0x20000];
 
 std::string patchOffsetCacheFilePath;
 std::string fatTableFilePath;
@@ -378,18 +380,19 @@ static int runNdsFile(configuration* conf) {
 		clusterFatTable = stFatTable.st_ino;
 	}
 
-	//bool havedsiSD = false;
-	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
-
-	extern off_t getFileSize(const char* path);
-	u32 loaderSize = getFileSize("nitro:/load.bin");
+	//extern off_t getFileSize(const char* path);
+	//u32 loaderSize = getFileSize("nitro:/load.bin");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen("nitro:/load.bin", "rb");
-	fread(load_bin, 1, loaderSize, bootloaderBin);
-	fclose(bootloaderBin);
+	FILE* bootloaderBin = fopen("nitro:/load.lz77", "rb");
+	if (bootloaderBin) {
+		fread(lz77ImageBuffer, 1, 0x10000, bootloaderBin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)load_bin);
+		//fread(load_bin, 1, loaderSize, bootloaderBin);
+		fclose(bootloaderBin);
 
-	runNds(load_bin, loaderSize, st.st_ino, clusterSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
+		runNds(load_bin, 0x20000, st.st_ino, clusterSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
+	}
 
 	return 0;
 }
