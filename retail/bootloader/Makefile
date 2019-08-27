@@ -7,6 +7,14 @@ endif
 
 -include $(DEVKITARM)/ds_rules
 
+ifeq ($(OS),Windows_NT)
+LZSS			?=	../lzss.exe
+
+else
+
+LZSS			?=	lzss
+
+endif
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
@@ -52,6 +60,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
  
 export TOPDIR	:=	$(CURDIR)
 export LOADBIN	:=	$(CURDIR)/../nitrofiles_dec/$(TARGET).bin
+export LOADBIN_CMP	:=	$(CURDIR)/../nitrofiles/$(TARGET).lz77
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -83,7 +92,9 @@ export LD	:=	$(CC)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile 
- 
+	@cp $(LOADBIN) $(LOADBIN_CMP)
+	@$(LZSS) -ewf $(LOADBIN_CMP)
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...

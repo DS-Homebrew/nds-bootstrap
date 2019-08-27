@@ -7,6 +7,14 @@ endif
 
 include $(DEVKITARM)/ds_rules
 
+ifeq ($(OS),Windows_NT)
+LZSS			?=	../../lzss.exe
+
+else
+
+LZSS			?=	lzss
+
+endif
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
@@ -59,6 +67,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 export TARGET	:=	cardengine_arm9_sdk5
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
+export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -98,7 +107,9 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
- 
+	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
+	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
