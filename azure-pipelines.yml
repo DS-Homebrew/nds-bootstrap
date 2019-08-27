@@ -27,6 +27,7 @@ steps:
     sudo dpkg -i pacman.deb
     sudo dkp-pacman -Sy
     sudo dkp-pacman -S nds-dev --noconfirm
+    sudo chmod +x lzss
     sudo mv lzss /opt/devkitpro/tools/bin
   displayName: 'Setup devkitPro'
   
