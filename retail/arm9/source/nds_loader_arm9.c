@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ------------------------------------------------------------------*/
+#include <stdio.h>
 #include <stdlib.h> // free
 #include <string.h> // memcpy
 #include <nds/interrupts.h>
@@ -30,6 +31,7 @@
 //#include <nds/arm9/dldi.h>
 #include <nds/debug.h>
 
+#include "lzss.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "configuration.h"
@@ -41,6 +43,9 @@
 //#define memcpy __builtin_memcpy
 
 //#define LCDC_BANK_C (u16*)0x06840000
+
+extern u8 lz77ImageBuffer[0x10000];
+void* loader[0x20000];
 
 loadCrt0* lc0 = (loadCrt0*)LOAD_CRT0_LOCATION;
 
@@ -228,8 +233,18 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
+void runNds(u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, configuration* conf) {
 	nocashMessage("runNds");
+
+	// Load bootloader binary
+	FILE* bootloaderBin = fopen("nitro:/load.lz77", "rb");
+	if (bootloaderBin) {
+		fread(lz77ImageBuffer, 1, 0x10000, bootloaderBin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)loader);
+		fclose(bootloaderBin);
+	} else {
+		return;
+	}
 
 	irqDisable(IRQ_ALL);
 
@@ -237,7 +252,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Load the loader into the correct address
-	tonccpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_D, loader, loaderSize);
+	tonccpy(lc0, loader, 0x20000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	// Set the parameters for the loader
 
@@ -279,7 +294,7 @@ void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u3
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
-		if (!dldiPatchLoader ((data_t*)lc0, loaderSize, conf->initDisc)) {
+		if (!dldiPatchLoader ((data_t*)lc0, 0x20000, conf->initDisc)) {
 			return;
 		}
 	}
