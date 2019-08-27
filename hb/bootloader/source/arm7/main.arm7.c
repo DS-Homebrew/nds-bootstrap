@@ -74,6 +74,7 @@ extern u32 dsiMode;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
 extern u32 romFileType;
+extern u32 romIsCompressed;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -204,7 +205,11 @@ static void resetMemory_ARM7 (void)
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x3F0000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0xC00000);	// clear other part of EWRAM
+	if (romIsCompressed) {
+		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
+	} else {
+		toncset((u32*)0x02400000, 0, 0xC00000);	// clear other part of EWRAM
+	}
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -544,13 +549,24 @@ int arm7_main (void) {
 		if (ramDiskSize < 0x01C01000) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
-				tonccpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, 0xEA00);
-				if (romFileType == 1) {
-					*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = ramDiskSize;
-				} else if (romFileType == 0) {
-					*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = ramDiskSize;
+				tonccpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, (romFileType == 1) ? 0xEA00 : 0xDE00);
+				if (romIsCompressed) {
+					u8* lz77RomSrc = (u8*)RAM_DISK_LOCATION_LZ77ROM;
+					u32 leng = (lz77RomSrc[1] | (lz77RomSrc[2] << 8) | (lz77RomSrc[3] << 16));
+					if (romFileType == 1) {
+						*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = leng;
+					} else if (romFileType == 0) {
+						*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = leng;
+					}
+					toncset((u32*)RAM_DISK_LOCATION_LZ77ROM, 0, 0x400000);	// clear compressed ROM
+				} else {
+					if (romFileType == 1) {
+						*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = ramDiskSize;
+					} else if (romFileType == 0) {
+						*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = ramDiskSize;
+					}
+					fileRead((char*)((romFileType == 1) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 				}
-				fileRead((char*)((romFileType == 1) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 			} else {
 				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
 			}

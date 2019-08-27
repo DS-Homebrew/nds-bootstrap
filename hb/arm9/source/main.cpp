@@ -118,10 +118,13 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 	}
 
 	int romFileType = -1;
+	bool romIsCompressed = false;
 	if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
 	|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".GEN") == 0))
 	{
 		romFileType = 0;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.gen") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.GEN") == 0));
 	}
 	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMC") == 0)
@@ -129,6 +132,10 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SFC") == 0))
 	{
 		romFileType = 1;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.smc") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMC") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sfc") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SFC") == 0));
 	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
@@ -139,7 +146,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], language, dsiMode);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}

@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <fat.h>
 
+#include "lzss.h"
 #include "tonccpy.h"
+#include "locations.h"
 
 #include "load_bin.h"
 
@@ -75,6 +77,7 @@ dsiSD:
 #define RAM_DISK_CLUSTER_OFFSET 40
 #define RAM_DISK_SIZE_OFFSET 44
 #define ROM_FILE_TYPE_OFFSET 48
+#define ROM_IS_COMPRESSED_OFFSET 52
 
 
 typedef signed int addr_t;
@@ -277,7 +280,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode)
 {
 	char* argStart;
 	u16* argData;
@@ -347,6 +350,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_SIZE_OFFSET, ramDiskSize);
 	writeAddr ((data_t*) LCDC_BANK_C, ROM_FILE_TYPE_OFFSET, romToRamDisk);
+	writeAddr ((data_t*) LCDC_BANK_C, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
 
 		
 	if(dldiPatchNds) {
@@ -385,7 +389,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, int argc, const char** argv, int language, int dsiMode) {
+int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode) {
 	struct stat st;
 	struct stat stRam;
 	u32 clusterRam = 0;
@@ -404,7 +408,20 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 		fclose(ramDiskTemplate);
 	}
 
-	
+	if (romIsCompressed) {
+		ramDiskTemplate = fopen(ramDiskFilename, "rb");
+		if (ramDiskTemplate) {
+			fread((void*)RAM_DISK_LOCATION_LZ77ROM, 1, ramDiskSize, ramDiskTemplate);
+			fclose(ramDiskTemplate);
+			if (romToRamDisk == 1) {
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION_SNESROM);
+			} else if (romToRamDisk == 0) {
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION_MDROM);
+			}
+		}
+	}
+
+
 	if (stat (filename, &st) < 0) {
 		return 1;
 	}
@@ -430,7 +447,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, true, true, argc, argv, language, dsiMode);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode);
 }
 
 /*

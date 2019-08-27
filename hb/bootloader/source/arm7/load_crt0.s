@@ -34,6 +34,7 @@
 	.global ramDiskCluster
 	.global ramDiskSize
 	.global romFileType
+	.global romIsCompressed
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -66,6 +67,8 @@ ramDiskCluster:
 ramDiskSize:
 	.word	0x00000000
 romFileType:
+	.word	0x00000000
+romIsCompressed:
 	.word	0x00000000
 
 startUp:
