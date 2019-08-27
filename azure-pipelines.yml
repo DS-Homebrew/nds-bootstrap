@@ -20,13 +20,14 @@ variables:
 
 steps:
 - script: |
-    curl https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
+    curl -L https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
     curl -L https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -o pacman.deb
     sudo apt update
     sudo apt install p7zip-full haveged
     sudo dpkg -i pacman.deb
     sudo dkp-pacman -Sy
     sudo dkp-pacman -S nds-dev --noconfirm
+    sudo mv lzss /opt/devkitpro/tools/bin
   displayName: 'Setup devkitPro'
   
 - script: |
