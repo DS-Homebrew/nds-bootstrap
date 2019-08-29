@@ -658,7 +658,7 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B)) && consoleModel != 2) {
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
@@ -677,7 +677,7 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && consoleModel != 2 && !gameSoftReset && saveTimer == 0) {
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
 		if (tryLockMutex(&saveMutex)) {
 			REG_MASTER_VOLUME = 0;
 			if (consoleModel < 2) {
