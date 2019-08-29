@@ -50,7 +50,7 @@ int iniLoad(const char *Filename, ek_key *Keys) {
     char *Section = strdup("default");
     char *Line = NULL;
     size_t Len;
-    for (; getline(&Line, &Len, File) != -1;) {
+    while (readLine(&Line, &Len, File) != -1) {
       // Strip trailing newline/whitespaces.
       while (Line[strlen(Line) - 1] == '\n' || Line[strlen(Line) - 1] == '\r' ||
              Line[strlen(Line) - 1] == ' ')
