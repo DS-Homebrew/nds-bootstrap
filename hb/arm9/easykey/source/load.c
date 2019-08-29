@@ -51,10 +51,6 @@ int iniLoad(const char *Filename, ek_key *Keys) {
     char *Line = NULL;
     size_t Len;
     for (; getline(&Line, &Len, File) != -1;) {
-      // Cut off any existing comment.
-      char *Str = strchr(Line, ';');
-      if (Str != NULL)
-        Line[Str - Line] = '\0';
       // Strip trailing newline/whitespaces.
       while (Line[strlen(Line) - 1] == '\n' || Line[strlen(Line) - 1] == '\r' ||
              Line[strlen(Line) - 1] == ' ')
@@ -69,12 +65,6 @@ int iniLoad(const char *Filename, ek_key *Keys) {
         Keys[Count].Section = strdup(Section);
         Keys[Count].Data = strdup(trimLeft(strchr(Line, '=') + 1));
         Keys[Count].Name = strdup(strtok(strtok(Line, "="), " "));
-        Count++;
-      } else if (strchr(Line, ':') != NULL) {
-        // Copy in the key.
-        Keys[Count].Section = strdup(Section);
-        Keys[Count].Data = strdup(trimLeft(strchr(Line, ':') + 1));
-        Keys[Count].Name = strdup(strtok(strtok(Line, ":"), " "));
         Count++;
       }
     }
