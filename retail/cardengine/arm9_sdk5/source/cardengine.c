@@ -55,7 +55,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
-static u32 overlaysSize = 0;
 static u32 romLocation = retail_CACHE_ADRESS_START_SDK5;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
@@ -66,6 +65,7 @@ static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS_32KB_SDK5];
 static u32 accessCounter = 0;
 
+static u32 overlaysSize = 0;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
@@ -125,7 +125,7 @@ static void sleep(u32 ms) {
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
     int count = 0;
-    if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+    /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
                 sleep(1);
@@ -134,7 +134,7 @@ static void waitForArm7(void) {
             }
             count--;
         }
-    } else {
+    } else {*/
         while (sharedAddr[3] != (vu32)0) {
            if(count==20000000) {
                 IPC_SendSync(0xEE24);
@@ -142,7 +142,7 @@ static void waitForArm7(void) {
             }
             count++;
         }
-    }
+    //}
 }
 #endif
 
@@ -349,10 +349,6 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		if (!FAT_InitFiles(true, 0)) {
 			//nocashMessage("!FAT_InitFiles");
 			return -1;
-		}
-
-		for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-			overlaysSize = i;
 		}
 		#else
 		if (ce9->consoleModel > 0) {

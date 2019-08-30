@@ -1029,7 +1029,9 @@ int arm7_main(void) {
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 		} else {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+			if (strncmp(romTid, "UBR", 3) != 0) {
+				loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+			}
 			if (romread_LED > 0) {
 				// Turn WiFi LED off
 				i2cWriteRegister(0x4A, 0x30, 0x12);

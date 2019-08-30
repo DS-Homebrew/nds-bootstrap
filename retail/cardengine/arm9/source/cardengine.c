@@ -64,7 +64,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
-static u32 overlaysSize = 0;
 static u32 romLocation = ROM_LOCATION;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
@@ -78,12 +77,14 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
+static u32 overlaysSize = 0;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 #endif
 
 static bool flagsSet = false;
+static bool loadOverlaysFromRam = true;
 static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
@@ -828,53 +829,53 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			return -1;
 		}
 
-		if (ce9->dsiMode) {
-			romLocation = ROM_SDK5_LOCATION;
-			if (ce9->consoleModel == 0) {
-				romLocation = retail_CACHE_ADRESS_START_SDK5;
-			}
-		}
-
-		for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-			overlaysSize = i;
-		}
-
 		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) != 0) {
+		if (strncmp(romTid, "UBR", 3) == 0) {
+			loadOverlaysFromRam = false;
+		} else {
+			if (ce9->dsiMode) {
+				romLocation = ROM_SDK5_LOCATION;
+				if (ce9->consoleModel == 0) {
+					romLocation = retail_CACHE_ADRESS_START_SDK5;
+				}
+			}
+
 			debug8mbMpuFix();
 		}
 		#else
-		if (ce9->dsiMode) {
-			romLocation = ROM_SDK5_LOCATION;
-			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-			if (ce9->consoleModel == 0) {
-				romLocation = retail_CACHE_ADRESS_START_SDK5;
-				cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-			}
-		}
-
-		if (ce9->consoleModel > 0) {
-			cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
-		} else {
-			cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
-		}
-
-		if (!ce9->ROMinRAM) {
-			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-				overlaysSize = i;
-			}
-
-			for (int i = 0; i < overlaysSize; i += readSize) {
-				cacheAddress += readSize;
-				cacheSlots--;
-			}
-		}
-
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
-			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-			cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
+			loadOverlaysFromRam = false;
+			cacheAddress = retail_CACHE_ADRESS_START_low;
+			cacheSlots = retail_CACHE_SLOTS_32KB_low;
 		} else {
+			if (ce9->dsiMode) {
+				romLocation = ROM_SDK5_LOCATION;
+				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+				/*if (ce9->consoleModel == 0) {
+					romLocation = retail_CACHE_ADRESS_START_SDK5;
+					cacheAddress = retail_CACHE_ADRESS_START_SDK5;
+				}*/
+			}
+
+			if (ce9->consoleModel > 0) {
+				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+			} else {
+				//cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_low : retail_CACHE_SLOTS_32KB);
+				cacheSlots = retail_CACHE_SLOTS_32KB;
+			}
+
+			if (!ce9->ROMinRAM) {
+				for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+					overlaysSize = i;
+				}
+
+				for (int i = 0; i < overlaysSize; i += readSize) {
+					cacheAddress += readSize;
+					cacheSlots--;
+				}
+			}
+
 			debug8mbMpuFix();
 		}
 
@@ -926,7 +927,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 	}
 
