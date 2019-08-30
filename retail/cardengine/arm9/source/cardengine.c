@@ -846,8 +846,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			loadOverlaysFromRam = false;
-			cacheAddress = retail_CACHE_ADRESS_START_low;
-			cacheSlots = retail_CACHE_SLOTS_32KB_low;
+			cacheAddress = CACHE_ADRESS_START_low;
+			cacheSlots = CACHE_SLOTS_32KB_low;
 		} else {
 			if (ce9->dsiMode) {
 				romLocation = ROM_SDK5_LOCATION;

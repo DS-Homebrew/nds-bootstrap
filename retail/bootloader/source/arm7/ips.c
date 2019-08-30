@@ -5,10 +5,14 @@
 
 #include <nds/ndstypes.h>
 #include <nds/memory.h>
+#include "nds_header.h"
 #include "locations.h"
 #include "tonccpy.h"
 
 void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int consoleModel) {
+	const char* romTid = getRomTid(ndsHeader);
+	bool doLow = (strncmp(romTid, "VKG", 3) == 0);
+
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
@@ -26,6 +30,10 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int
 			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (consoleModel == 0 && higherMem) {
 				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;
+
+				if (doLow) {
+					rombyte = (void*)CACHE_ADRESS_START_low;
+				}
 			}
 			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}

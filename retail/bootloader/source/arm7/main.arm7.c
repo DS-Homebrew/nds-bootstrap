@@ -468,7 +468,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "UBR", 3) == 0
-	|| strncmp(romTid, "UOR", 3) == 0) {
+	|| strncmp(romTid, "UOR", 3) == 0
+	|| (consoleModel == 0 && strncmp(romTid, "VKG", 3) == 0)) {
 		return false;
 	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
@@ -595,6 +596,11 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (consoleModel == 0 && isSdk5(moduleParams)) {
 		overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
+
+		const char* romTid = getRomTid(ndsHeader);
+		if (strncmp(romTid, "VKG", 3) == 0) {
+			overlaysLocation = (u32)CACHE_ADRESS_START_low;
+		}
 	}
 	fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
 

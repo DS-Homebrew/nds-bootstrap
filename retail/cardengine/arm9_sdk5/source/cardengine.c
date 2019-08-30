@@ -225,16 +225,16 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			// -------------------------------------*/
 			#endif
 
-            if (isDma) {
+            /*if (isDma) {
                 // Copy via dma
   				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
                 while (dmaBusy(dma)) {
                     sleep(1);
                 }
-            } else {
+            } else {*/
     			// Copy directly
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-            }
+            //}
 
 			len = len - len2;
 			if (len > 0) {
@@ -252,13 +252,13 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	while (len > 0) {
-		if (isDma) {
+		/*if (isDma) {
             // Copy via dma
   			dmaCopyWordsAsynch(dma, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
             while (dmaBusy(dma)) {
                 sleep(1);
             }        
-		} else {
+		} else {*/
 			#ifdef DEBUG
 			// Send a log command for debug purpose
 			// -------------------------------------
@@ -275,7 +275,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 			// Copy directly
 			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), len);
-		}
+		//}
 
 		len = len - len;
 		if (len > 0) {
@@ -345,16 +345,25 @@ u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		const char* romTid = getRomTid(ndsHeader);
 		#ifdef DLDI
 		if (!FAT_InitFiles(true, 0)) {
 			//nocashMessage("!FAT_InitFiles");
 			return -1;
+		}
+
+		if (strncmp(romTid, "VKG", 3) == 0) {
+			romLocation = CACHE_ADRESS_START_low;
 		}
 		#else
 		if (ce9->consoleModel > 0) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
+		} else if (strncmp(romTid, "VKG", 3) == 0) {
+			romLocation = CACHE_ADRESS_START_low;
+			cacheAddress = CACHE_ADRESS_START_low;
+			cacheSlots = CACHE_SLOTS_32KB_low;
 		}
 
 		if (!ce9->ROMinRAM) {
