@@ -881,6 +881,7 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
+	decrypt_arm9(&dsiHeaderTemp.ndshdr);
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
