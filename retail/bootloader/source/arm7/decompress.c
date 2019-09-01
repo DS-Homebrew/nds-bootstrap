@@ -520,35 +520,36 @@ void init1(u32 cardheader_gamecode)
 /*
  * decrypt_arm9
  */
-void decrypt_arm9(const tNDSHeader* ndsHeader)
+bool decrypt_arm9(const tNDSHeader* ndsHeader)
 {
-	if (*(u32*)0x02000000 == 0xE7FFDEFF) {
-		return;
+	if (*(u32*)0x02000000 == 0 || *(u32*)0x02000000 == 0xE7FFDEFF) {
+		return true;
 	}
 
-	u32 cardheader_gamecode = (u32)ndsHeader->gameCode;
+	u32 cardheader_gamecode = (u32)getRomTid(ndsHeader);
+	u32 *p = (u32*)0x02000000;
 
 	init1(cardheader_gamecode);
-	decrypt(card_hash, (u32*)0x02000004, (u32*)0x02000000);
+	decrypt(card_hash, p+1, p);
 	arg2[1] <<= 1;
 	arg2[2] >>= 1;	
 	init2(card_hash, arg2);
-	decrypt(card_hash, (u32*)0x02000004, (u32*)0x02000000);
+	decrypt(card_hash, p+1, p);
 
-	if (*(u32*)0x02000000 != MAGIC30 || *(u32*)0x02000004 != MAGIC34)
+	if (p[0] != MAGIC30 || p[1] != MAGIC34)
 	{
-		//fprintf(stderr, "Decryption failed!\n");
-		return;
+		return false;
 	}
 
-	*(u32*)0x02000000 = 0xE7FFDEFF;
-	*(u32*)0x02000004 = 0xE7FFDEFF;
-	int arm9pos = 2;
+	*p++ = 0xE7FFDEFF;
+	*p++ = 0xE7FFDEFF;
 	u32 size = 0x800 - 8;
 	while (size > 0)
 	{
-		decrypt(card_hash, (u32*)0x02000000+arm9pos+1, (u32*)0x02000000+arm9pos);
-		arm9pos += 2;
+		decrypt(card_hash, p+1, p);
+		p += 2;
 		size -= 8;
 	}
+
+	return true;
 }
