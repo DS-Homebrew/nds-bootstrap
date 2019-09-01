@@ -294,7 +294,6 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A8Q", 3) == 0  // Them park // works
-        ||  strncmp(romTid, "CLJ", 3) == 0  // M&L BiS // works
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
