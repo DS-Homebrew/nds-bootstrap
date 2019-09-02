@@ -522,12 +522,13 @@ void init1(u32 cardheader_gamecode)
  */
 bool decrypt_arm9(const tNDSHeader* ndsHeader)
 {
-	if (*(u32*)0x02000000 == 0 || *(u32*)0x02000000 == 0xE7FFDEFF) {
-		return true;
+	u32 *p = (u32*)ndsHeader->arm9destination;
+
+	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
+		return false;
 	}
 
-	u32 cardheader_gamecode = (u32)getRomTid(ndsHeader);
-	u32 *p = (u32*)0x02000000;
+	u32 cardheader_gamecode = (u32)ndsHeader->gameCode;
 
 	init1(cardheader_gamecode);
 	decrypt(card_hash, p+1, p);
@@ -536,13 +537,12 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 	init2(card_hash, arg2);
 	decrypt(card_hash, p+1, p);
 
-	if (p[0] != MAGIC30 || p[1] != MAGIC34)
+	if (p[0] == MAGIC30 && p[1] == MAGIC34)
 	{
-		return false;
+		*p++ = 0xE7FFDEFF;
+		*p++ = 0xE7FFDEFF;
 	}
-
-	*p++ = 0xE7FFDEFF;
-	*p++ = 0xE7FFDEFF;
+	else p+=2;
 	u32 size = 0x800 - 8;
 	while (size > 0)
 	{

@@ -881,12 +881,14 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
-	if (!decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
-		nocashMessage("Failed to decrypt secure area");
-		dbg_printf("Failed to decrypt secure area");
-		dbg_printf("\n");
-		errorOutput();
+	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
+		nocashMessage("Secure area decrypted successfully");
+		dbg_printf("Secure area decrypted successfully");
+	} else {
+		nocashMessage("Secure area already decrypted");
+		dbg_printf("Secure area already decrypted");
 	}
+	dbg_printf("\n");
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
