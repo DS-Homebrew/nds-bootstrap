@@ -873,17 +873,17 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 		} else {
 			dbg_printf("Card ID start not found\n");
 		}
+	}
 
-		if (!cardIdStartOffset) {
-			cardIdStartOffset = findOffsetBackwards(
-				(u32*)cardIdEndOffset, 0x100,
-				cardIdStartSignatureAlt1, 1
-			);
-			if (cardIdStartOffset) {
-				dbg_printf("Card ID start alt 1 found: ");
-			} else {
-				dbg_printf("Card ID start alt 1 not found\n");
-			}
+	if (!cardIdStartOffset) {
+		cardIdStartOffset = findOffsetBackwards(
+			(u32*)cardIdEndOffset, 0x100,
+			cardIdStartSignatureAlt1, 1
+		);
+		if (cardIdStartOffset) {
+			dbg_printf("Card ID start alt 1 found: ");
+		} else {
+			dbg_printf("Card ID start alt 1 not found\n");
 		}
 	}
 
