@@ -528,7 +528,7 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 		return false;
 	}
 
-	u32 cardheader_gamecode = (u32)ndsHeader->gameCode;
+	u32 cardheader_gamecode = *(u32*)ndsHeader->gameCode;
 
 	init1(cardheader_gamecode);
 	decrypt(card_hash, p+1, p);
