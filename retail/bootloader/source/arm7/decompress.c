@@ -20,6 +20,8 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
+static const unsigned char* dsi_encr_data = (unsigned char*)0x0000C6D0;
+
 static const unsigned char encr_data[] =
 {
 	0x99,0xD5,0x20,0x5F,0x57,0x44,0xF5,0xB9,0x6E,0x19,0xA4,0xD9,0x9E,0x6A,0x5A,0x94,
@@ -503,9 +505,9 @@ void init2(u32 *magic, u32 a[3])
 	update_hashtable(magic, (u8*)a);
 }
 
-void init1(u32 cardheader_gamecode)
+void init1(u32 cardheader_gamecode, bool dsi)
 {
-	tonccpy(card_hash, &encr_data, 4*(1024 + 18));
+	tonccpy(card_hash, dsi ? &dsi_encr_data : &encr_data, 4*(1024 + 18));
 	arg2[0] = *(u32 *)&cardheader_gamecode;
 	arg2[1] = (*(u32 *)&cardheader_gamecode) >> 1;
 	arg2[2] = (*(u32 *)&cardheader_gamecode) << 1;
@@ -522,6 +524,7 @@ void init1(u32 cardheader_gamecode)
  */
 bool decrypt_arm9(const tNDSHeader* ndsHeader)
 {
+	// Decrypt NDS secure area
 	u32 *p = (u32*)ndsHeader->arm9destination;
 
 	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
@@ -530,7 +533,7 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 
 	u32 cardheader_gamecode = *(u32*)ndsHeader->gameCode;
 
-	init1(cardheader_gamecode);
+	init1(cardheader_gamecode, false);
 	decrypt(card_hash, p+1, p);
 	arg2[1] <<= 1;
 	arg2[2] >>= 1;	
@@ -548,6 +551,28 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 	{
 		decrypt(card_hash, p+1, p);
 		p += 2;
+		size -= 8;
+	}
+
+	// Decrypt DSi secure area
+	u32 *pi = (u32*)ndsHeader->arm9idestination;
+
+	if (pi[0] == 0) {
+		return true;
+	}
+
+	init1(cardheader_gamecode, true);
+	decrypt(card_hash, p+1, p);
+	//arg2[1] <<= 1;
+	//arg2[2] >>= 1;	
+	init2(card_hash, arg2);
+	decrypt(card_hash, p+1, p);
+
+	u32 size = 0x4000;
+	while (size > 0)
+	{
+		decrypt(card_hash, pi+1, pi);
+		pi += 2;
 		size -= 8;
 	}
 
