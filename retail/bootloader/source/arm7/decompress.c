@@ -20,7 +20,7 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
-static const unsigned char* dsi_encr_data = (unsigned char*)0x0000C6D0;
+#include "dsi_encr_data.h"
 
 static const unsigned char encr_data[] =
 {

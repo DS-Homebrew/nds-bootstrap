@@ -38,7 +38,7 @@
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
 
-u8 lz77ImageBuffer[0x10000];
+u8 lz77ImageBuffer[0x12000];
 
 std::string patchOffsetCacheFilePath;
 std::string fatTableFilePath;
