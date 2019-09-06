@@ -1520,19 +1520,16 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     dbg_printf("\n");
 	return offset;
 }    
-static const u32 cardSetDmaSignatureValue1[1]  = {0x4100010};
-static const u32 cardSetDmaSignatureValue2[1]  = {0x40001A4};
-static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
 
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardEndReadDma\n");
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
     
   	u32* cardSetDmaEndOffset = NULL;
-    u32* currentOffset = u32*)ndsHeader->arm9destination;
+    u32* currentOffset = (u32*)ndsHeader->arm9destination;
 	while (cardSetDmaEndOffset==NULL) {
         cardSetDmaEndOffset = findOffset(
-      		(currentOffset, 0x00300000,
+      		currentOffset, 0x00300000,
             cardSetDmaSignatureValue1, 1
         );
         if (cardSetDmaEndOffset==NULL) {          
@@ -1541,7 +1538,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
         } else {
             currentOffset = cardSetDmaEndOffset;
             cardSetDmaEndOffset = findOffset(
-          		(currentOffset, 0x8,
+          		currentOffset, 0x8,
                 cardSetDmaSignatureValue2, 1
             );
             if (cardSetDmaEndOffset!=NULL) {

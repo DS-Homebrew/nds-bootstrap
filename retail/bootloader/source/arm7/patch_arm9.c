@@ -328,24 +328,16 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
-        /*u32* offset = patchOffsetCache.cardEndReadDmaOffset;
-    	  if (!patchOffsetCache.cardEndReadDmaOffset) {
-    		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
-    		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
-    	  }
-        if(offset) {*/
+        //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
+    		u32* offset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+    		//if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+    	  //}
+        if(offset) {
           dbg_printf("\nNDMASET CARD READ ARM9 METHOD ACTIVE\n");       
-          if(usesThumb) {
-            u16* thumbOffset = (u16*)offset;
-            thumbOffset--;
-            *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
-            ce9->thumbPatches->cardSetDmaRef = thumbOffset;
-          } else  {
-            u32* armOffset = (u32*)offset;
-            armOffset--;
-            *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
-            ce9->patches->cardSetDmaRef = armOffset;
-          } 
+          u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
+	      memcpy(offset, cardSetDmaPatch, 0x40);
+          return true;  
         }
       } 
     }

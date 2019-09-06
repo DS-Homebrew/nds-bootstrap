@@ -407,7 +407,7 @@ void continueCardReadDmaArm7() {
     }
 }
 
-bool setCardReadDma() {
+bool cardSetDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     int oldIME = enterCriticalSection();
@@ -481,6 +481,12 @@ bool setCardReadDma() {
       }
    
     return true;
+}
+
+#else
+
+bool cardSetDma() {
+    return false;
 }
 
 #endif
@@ -648,7 +654,7 @@ bool isNotTcm(u32 address, u32 len) {
     // test data not in DTCM
     && (address < base || address> base+0x4000)
     && (address+len < base || address+len> base+0x4000);     
-}
+}  
 
 u32 cardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
@@ -690,7 +696,7 @@ u32 cardReadDma() {
             
             cacheFlush();  
                               
-            return setCardReadDma();
+            return cardSetDma();
 		} else {
 			isDma = false;
 			dma=4;
