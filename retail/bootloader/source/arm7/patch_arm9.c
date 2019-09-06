@@ -977,7 +977,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    if(!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb))  {
+	   patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    }
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
