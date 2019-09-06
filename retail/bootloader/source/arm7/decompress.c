@@ -557,7 +557,7 @@ bool decrypt_arm9(const tDSiHeader* dsiHeader)
 	// Decrypt DSi secure area
 	u32 *pi = (u32*)dsiHeader->arm9idestination;
 
-	if (pi[0] == 0) {
+	if (pi[0] == 0 && pi[1] == 0) {
 		return true;
 	}
 
