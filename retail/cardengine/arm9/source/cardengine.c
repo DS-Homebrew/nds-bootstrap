@@ -407,9 +407,16 @@ void continueCardReadDmaArm7() {
     }
 }
 
-static inline bool startCardReadDma() {
+bool setCardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
+    int oldIME = enterCriticalSection();
+    
+    hookIPC_SYNC();
+    // TODO : reset IPC_SYNC IRQs
+    enableIPCSYNC();
+    
+    leaveCriticalSection(oldIME); 
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
@@ -680,38 +687,10 @@ u32 cardReadDma() {
           	if (src <= 0x8000){
           		src = 0x8000 + (src & 0x1FF);
           	}*/
-              
-            int oldIME = enterCriticalSection();
-            
-            
-            hookIPC_SYNC();
-            // TODO : reset IPC_SYNC IRQs
-            enableIPCSYNC();
-            
-            //while (dmaBusy(dma));
-            //hookDMA(dma);
-              
-            /*if (len < THRESHOLD_CACHE_FLUSH) {
-            u32     dst2 = dst;
-            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
-            if (mod)
-            {
-                dst2 -= mod;
-                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
-                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
-                len += CACHE_LINE_SIZE;
-            }
-            IC_InvalidateRange((void *)dst, len);
-            DC_InvalidateRange((void *)dst2, len);
-            DC_WaitWriteBufferEmpty();
-            } else {*/ 
-            // Note : cacheFlush disable / reenable irq
-            
-            leaveCriticalSection(oldIME); 
             
             cacheFlush();  
                               
-            return startCardReadDma();
+            return setCardReadDma();
 		} else {
 			isDma = false;
 			dma=4;

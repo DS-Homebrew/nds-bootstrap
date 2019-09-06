@@ -80,6 +80,10 @@ static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702};
 static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8};
 
+// Card set DMA
+static const u32 cardSetDmaSignatureValue1[1]  = {0x4100010};
+static const u32 cardSetDmaSignatureValue2[1]  = {0x40001A4};
+static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -1506,6 +1510,67 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 		dbg_printf("cardEndReadDma found: ");
 	} else {
 		dbg_printf("cardEndReadDma not found\n");
+	}
+    
+    if (offset) {
+		dbg_hexa((u32)offset);
+		dbg_printf("\n");
+	}
+
+    dbg_printf("\n");
+	return offset;
+}    
+static const u32 cardSetDmaSignatureValue1[1]  = {0x4100010};
+static const u32 cardSetDmaSignatureValue2[1]  = {0x40001A4};
+static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+
+u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCardEndReadDma\n");
+    u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
+    
+  	u32* cardSetDmaEndOffset = NULL;
+    u32* currentOffset = u32*)ndsHeader->arm9destination;
+	while (cardSetDmaEndOffset==NULL) {
+        cardSetDmaEndOffset = findOffset(
+      		(currentOffset, 0x00300000,
+            cardSetDmaSignatureValue1, 1
+        );
+        if (cardSetDmaEndOffset==NULL) {          
+		    dbg_printf("cardSetDmaEnd not found\n");
+            return NULL;
+        } else {
+            currentOffset = cardSetDmaEndOffset;
+            cardSetDmaEndOffset = findOffset(
+          		(currentOffset, 0x8,
+                cardSetDmaSignatureValue2, 1
+            );
+            if (cardSetDmaEndOffset!=NULL) {
+                break;
+            }             
+        }     
+    } 
+    
+    dbg_printf("\cardSetDmaEnd found\n");
+ 	dbg_hexa((u32)cardSetDmaEndOffset);
+	dbg_printf(" : ");
+    dbg_hexa(*cardSetDmaEndOffset);   
+    dbg_printf("\n");
+    
+    u32 * offset = NULL;
+    
+    if(usesThumb) {
+  		offset = findOffsetBackwardsThumb(
+      		((u32)*cardSetDmaEndOffset)-1, 0x40,
+            cardSetDmaSignatureStartThumb, 4
+        );
+    } else {
+  		// TODO
+    } 
+    
+    if (offset) {
+		dbg_printf("cardSetDma found: ");
+	} else {
+		dbg_printf("cardSetDma not found\n");
 	}
     
     if (offset) {

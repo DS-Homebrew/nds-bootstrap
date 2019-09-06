@@ -320,6 +320,38 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     } 
 }
 
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    const char* romTid = getRomTid(ndsHeader);
+    
+    if (
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
+    ) {
+
+      if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
+        /*u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    	  if (!patchOffsetCache.cardEndReadDmaOffset) {
+    		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+    		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+    	  }
+        if(offset) {*/
+          dbg_printf("\nNDMASET CARD READ ARM9 METHOD ACTIVE\n");       
+          if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            thumbOffset--;
+            *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
+            ce9->thumbPatches->cardSetDmaRef = thumbOffset;
+          } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
+            ce9->patches->cardSetDmaRef = armOffset;
+          } 
+        }
+      } 
+    }
+    return false; 
+}
+
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	extern u32 gameOnFlashcard;
