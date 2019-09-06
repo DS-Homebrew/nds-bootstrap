@@ -522,16 +522,16 @@ void init1(u32 cardheader_gamecode, bool dsi)
 /*
  * decrypt_arm9
  */
-bool decrypt_arm9(const tNDSHeader* ndsHeader)
+bool decrypt_arm9(const tDSiHeader* dsiHeader)
 {
 	// Decrypt NDS secure area
-	u32 *p = (u32*)ndsHeader->arm9destination;
+	u32 *p = (u32*)dsiHeader->ndshdr.arm9destination;
 
 	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
 		return false;
 	}
 
-	u32 cardheader_gamecode = *(u32*)ndsHeader->gameCode;
+	u32 cardheader_gamecode = *(u32*)dsiHeader->ndshdr.gameCode;
 
 	init1(cardheader_gamecode, false);
 	decrypt(card_hash, p+1, p);
@@ -555,7 +555,7 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 	}
 
 	// Decrypt DSi secure area
-	u32 *pi = (u32*)ndsHeader->arm9idestination;
+	u32 *pi = (u32*)dsiHeader->arm9idestination;
 
 	if (pi[0] == 0) {
 		return true;
@@ -568,7 +568,7 @@ bool decrypt_arm9(const tNDSHeader* ndsHeader)
 	init2(card_hash, arg2);
 	decrypt(card_hash, p+1, p);
 
-	u32 size = 0x4000;
+	size = 0x4000;
 	while (size > 0)
 	{
 		decrypt(card_hash, pi+1, pi);

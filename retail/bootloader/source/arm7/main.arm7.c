@@ -650,7 +650,7 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (isDSiWare) {
-		u8* deviceListAddr = (u8*)0x02FFE1D4;
+		u8* deviceListAddr = (u8*)((u8*)0x02FFE1D4);
 		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
 		const char *ndsPath = "nand:/dsiware.nds";
@@ -881,7 +881,7 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
-	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
+	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
 		dbg_printf("Secure area decrypted successfully");
 	} else {
