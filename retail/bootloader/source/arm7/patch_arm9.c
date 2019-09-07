@@ -326,7 +326,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE 
-        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS 
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // white screen 
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII 
