@@ -1522,26 +1522,38 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 }    
 
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	dbg_printf("findCardEndReadDma\n");
+	dbg_printf("findCardSetDma\n");
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
     
   	u32* cardSetDmaEndOffset = NULL;
     u32* currentOffset = (u32*)ndsHeader->arm9destination;
 	while (cardSetDmaEndOffset==NULL) {
         cardSetDmaEndOffset = findOffset(
-      		currentOffset, 0x00300000,
+      		currentOffset+1, 0x00300000,
             cardSetDmaSignatureValue1, 1
         );
         if (cardSetDmaEndOffset==NULL) {          
 		    dbg_printf("cardSetDmaEnd not found\n");
             return NULL;
         } else {
+            dbg_printf("\cardSetDmaSignatureValue1 found\n");
+         	dbg_hexa((u32)cardSetDmaEndOffset);
+        	dbg_printf(" : ");
+            dbg_hexa(*cardSetDmaEndOffset);   
+            dbg_printf("\n");
+        
             currentOffset = cardSetDmaEndOffset;
             cardSetDmaEndOffset = findOffset(
           		currentOffset, 0x8,
                 cardSetDmaSignatureValue2, 1
             );
             if (cardSetDmaEndOffset!=NULL) {
+                dbg_printf("\cardSetDmaSignatureValue2 found\n");
+             	dbg_hexa((u32)cardSetDmaEndOffset);
+            	dbg_printf(" : ");
+                dbg_hexa(*cardSetDmaEndOffset);   
+                dbg_printf("\n");
+                
                 break;
             }             
         }     
