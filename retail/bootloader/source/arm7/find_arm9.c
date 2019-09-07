@@ -1567,14 +1567,15 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     
     u32 * offset = NULL;
     
-    if(usesThumb) {
+    //if(usesThumb) {
+        dbg_printf("cardSetDmaSignatureStartThumb used: ");
   		offset = findOffsetBackwardsThumb(
-      		((u32)*cardSetDmaEndOffset)-1, 0x40,
+      		cardSetDmaEndOffset, 0x40,
             cardSetDmaSignatureStartThumb, 4
         );
-    } else {
+    //} else {
   		// TODO
-    } 
+    //} 
     
     if (offset) {
 		dbg_printf("cardSetDma found: ");
