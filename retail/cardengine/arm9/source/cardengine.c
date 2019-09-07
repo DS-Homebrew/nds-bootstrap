@@ -407,7 +407,7 @@ void continueCardReadDmaArm7() {
     }
 }
 
-bool cardSetDma() {
+void cardSetDma(void) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     int oldIME = enterCriticalSection();
@@ -477,10 +477,7 @@ bool cardSetDma() {
           
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
-
       }
-   
-    return true;
 }
 
 #else
@@ -695,8 +692,10 @@ u32 cardReadDma() {
           	}*/
             
             cacheFlush();  
+            
+            cardSetDma();
                               
-            return cardSetDma();
+            return true; 
 		} else {
 			isDma = false;
 			dma=4;
