@@ -330,13 +330,13 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
         //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
     	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
-    		u32* offset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
-    		//if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+    		u32* setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
     	  //}
-        if(offset) {
+        if(setDmaoffset) {
           dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
           u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
-	      memcpy(offset, cardSetDmaPatch, 0x40);
+	      memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
+    
           return true;  
         }
       } 
@@ -690,7 +690,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
-    ce9->thumbPatches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_set_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_set_dma_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_read_arm9 = (u32*)((u32)ce9->thumbPatches->nand_read_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);

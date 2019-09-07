@@ -225,7 +225,7 @@ static void enableIPCSYNC(void) {
 static void disableIPCSYNC(void) {
     // disable IPC_SYNC
     REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;  
-    disableIrqMask(IRQ_IPC_SYNC);;
+    disableIrqMask(IRQ_IPC_SYNC);
 }
 
 static void clearIcache (void) {
@@ -411,6 +411,9 @@ void cardSetDma(void) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     int oldIME = enterCriticalSection();
+    
+    disableIrqMask(IRQ_CARD);
+    disableIrqMask(IRQ_CARD_LINE );
     
     hookIPC_SYNC();
     // TODO : reset IPC_SYNC IRQs
