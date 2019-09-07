@@ -282,9 +282,9 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
-        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // sound cracking to be investigated
-        //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
-        //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
+        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
@@ -324,7 +324,19 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     const char* romTid = getRomTid(ndsHeader);
     
     if (
-        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE 
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS 
+        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3 
+        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII 
+        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V 
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
+        ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
+        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk 
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Them park
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5

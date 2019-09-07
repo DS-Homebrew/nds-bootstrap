@@ -84,6 +84,7 @@ static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8};
 static const u32 cardSetDmaSignatureValue1[1]  = {0x4100010};
 static const u32 cardSetDmaSignatureValue2[1]  = {0x40001A4};
 static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+static const u32 cardSetDmaSignatureStart2[4]  = {0xE92D4010, 0xE59F403C, 0xE59F103C, 0xE5940024};
 static const u32 cardSetDmaSignatureStart4[4]  = {0xE92D4038, 0xE59F4038, 0xE59F1038, 0xE5940028};
 
 // Random patch
@@ -1527,6 +1528,10 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
     u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
     
+    if (moduleParams->sdk_version < 0x3000000) { 
+        cardSetDmaSignatureStart = cardSetDmaSignatureStart2;         
+    }
+    
   	u32* cardSetDmaEndOffset = NULL;
     u32* currentOffset = (u32*)ndsHeader->arm9destination;
 	while (cardSetDmaEndOffset==NULL) {
@@ -1544,9 +1549,9 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
             dbg_hexa(*cardSetDmaEndOffset);   
             dbg_printf("\n");
         
-            currentOffset = cardSetDmaEndOffset;
+            currentOffset = cardSetDmaEndOffset+2;
             cardSetDmaEndOffset = findOffset(
-          		currentOffset, 0x10,
+          		currentOffset, 0x8,
                 cardSetDmaSignatureValue2, 1
             );
             if (cardSetDmaEndOffset!=NULL) {
@@ -1572,13 +1577,13 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     if(usesThumb) {
         dbg_printf("cardSetDmaSignatureStartThumb used: ");
   		offset = findOffsetBackwardsThumb(
-      		cardSetDmaEndOffset, 0x40,
+      		cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb, 4
         );
     } else {
         dbg_printf("cardSetDmaSignatureStart used: ");
   		offset = findOffsetBackwards(
-      		cardSetDmaEndOffset, 0x40,
+      		cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStart, 4
         );
     } 
