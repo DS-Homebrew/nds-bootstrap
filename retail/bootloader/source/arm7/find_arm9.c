@@ -84,6 +84,7 @@ static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8};
 static const u32 cardSetDmaSignatureValue1[1]  = {0x4100010};
 static const u32 cardSetDmaSignatureValue2[1]  = {0x40001A4};
 static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+static const u32 cardSetDmaSignatureStart4[4]  = {0xE92D4038, 0xE59F4038, 0xE59F1038, 0xE5940028};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -1524,6 +1525,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardSetDma\n");
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
+    u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
     
   	u32* cardSetDmaEndOffset = NULL;
     u32* currentOffset = (u32*)ndsHeader->arm9destination;
@@ -1567,15 +1569,19 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     
     u32 * offset = NULL;
     
-    //if(usesThumb) {
+    if(usesThumb) {
         dbg_printf("cardSetDmaSignatureStartThumb used: ");
   		offset = findOffsetBackwardsThumb(
       		cardSetDmaEndOffset, 0x40,
             cardSetDmaSignatureStartThumb, 4
         );
-    //} else {
-  		// TODO
-    //} 
+    } else {
+        dbg_printf("cardSetDmaSignatureStart used: ");
+  		offset = findOffsetBackwards(
+      		cardSetDmaEndOffset, 0x40,
+            cardSetDmaSignatureStart, 4
+        );
+    } 
     
     if (offset) {
 		dbg_printf("cardSetDma found: ");
