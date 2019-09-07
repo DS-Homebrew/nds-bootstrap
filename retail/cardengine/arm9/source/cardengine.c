@@ -482,7 +482,7 @@ void cardSetDma(void) {
 
 #else
 
-bool cardSetDma() {
+void cardSetDma(void) {
     return false;
 }
 
