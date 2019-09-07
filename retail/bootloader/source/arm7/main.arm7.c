@@ -649,7 +649,7 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
-	if (isDSiWare) {
+	if (ROMsupportsDsiMode(ndsHeader)) {
 		u8* deviceListAddr = (u8*)((u8*)0x02FFE1D4);
 		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
@@ -666,7 +666,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF00C) = 0x0000007F;
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000;
+	}
 
+	if (isDSiWare) {
 		*(u16*)(0x02FFFC40) = 0x3;						// Boot Indicator (NAND/SD)
 		return;
 	}
