@@ -544,6 +544,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadDmaCardLocation = current_location;
     
+    u32* armSetDmaCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armSetDmaCardLocation) {
+		return;
+	}
+    dbg_printf("armSetDmaCardLocation ");
+	dbg_hexa((u32)armSetDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armSetDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *armSetDmaCardLocation = current_location;
+    
     u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadDmaCardLocation) {
 		return;
@@ -555,6 +567,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadDmaCardLocation = current_location;
+    
+    u32* thumbSetDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbSetDmaCardLocation) {
+		return;
+	}
+    dbg_printf("thumbSetDmaCardLocation ");
+	dbg_hexa((u32)thumbSetDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbSetDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *thumbSetDmaCardLocation = current_location;
 
     u32* armReadNandLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadNandLocation) {
@@ -653,6 +677,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
     ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
     ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
     ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
@@ -665,6 +690,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_read_arm9 = (u32*)((u32)ce9->thumbPatches->nand_read_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
