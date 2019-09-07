@@ -334,7 +334,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     		//if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
     	  //}
         if(offset) {
-          dbg_printf("\nNDMASET CARD READ ARM9 METHOD ACTIVE\n");       
+          dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
           u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	      memcpy(offset, cardSetDmaPatch, 0x40);
           return true;  

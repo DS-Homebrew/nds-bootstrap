@@ -1544,7 +1544,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
         
             currentOffset = cardSetDmaEndOffset;
             cardSetDmaEndOffset = findOffset(
-          		currentOffset, 0x8,
+          		currentOffset, 0x10,
                 cardSetDmaSignatureValue2, 1
             );
             if (cardSetDmaEndOffset!=NULL) {
