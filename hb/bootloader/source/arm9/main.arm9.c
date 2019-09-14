@@ -179,7 +179,7 @@ void arm9_main(void) {
 			if (dsiModeConfirmed) {
 				REG_SCFG_EXT = 0x8307F100;
 			} else {
-				REG_SCFG_EXT = (arm9_ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
+				REG_SCFG_EXT = 0x83000000;
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
