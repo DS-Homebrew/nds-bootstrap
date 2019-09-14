@@ -71,6 +71,7 @@ extern unsigned long argSize;
 extern unsigned long dsiSD;
 extern u32 language;
 extern u32 dsiMode;
+extern u32 boostVram;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
 extern u32 romFileType;
@@ -583,6 +584,9 @@ int arm7_main (void) {
 		tonccpy ((char*)0x2FFF000, (char*)0x23FF000, 0x1000);	// Copy user data and header to last MB of main memory
 	}
 
+	arm9_boostVram = boostVram;
+
+	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 

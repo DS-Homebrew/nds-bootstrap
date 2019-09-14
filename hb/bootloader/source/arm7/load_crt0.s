@@ -31,6 +31,7 @@
 	.global dsiSD
 	.global language
 	.global dsiMode
+	.global boostVram
 	.global ramDiskCluster
 	.global ramDiskSize
 	.global romFileType
@@ -61,6 +62,8 @@ dsiSD:
 language:
 	.word	0x00000000
 dsiMode:
+	.word	0x00000000
+boostVram:
 	.word	0x00000000
 ramDiskCluster:
 	.word	0x00000000

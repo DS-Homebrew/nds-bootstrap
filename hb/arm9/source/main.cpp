@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int language, int dsiMode) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int language, int dsiMode, bool boostVram) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -146,7 +146,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -260,6 +260,13 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
 
+		Key.Data = (char *)"";
+		Key.Name = (char *)"BOOST_VRAM";
+		bool boostVram = (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		if (dsiMode>0 || boostVram) {	
+			dbg_printf("VRAM boosted\n");
+		}
+
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
@@ -343,7 +350,7 @@ int main( int argc, char **argv) {
 
 		iniFree(Ini, IniCount);
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode, boostVram);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

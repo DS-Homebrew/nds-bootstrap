@@ -56,6 +56,7 @@ enum {
 } ARM9_STATE;
 
 extern bool dsiModeConfirmed;
+extern bool arm9_boostVram;
 extern tNDSHeader* ndsHeader;
 extern volatile bool ram32MB;
 extern volatile int arm9_stateFlag;

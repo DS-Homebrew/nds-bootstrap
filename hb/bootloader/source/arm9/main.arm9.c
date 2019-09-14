@@ -44,7 +44,7 @@ extern void arm9_clearCache(void);
 
 //tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
-//extern u32 boostVram;
+bool arm9_boostVram = false;
 volatile bool ram32MB = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
@@ -167,11 +167,6 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	/*REG_SCFG_EXT = 0x8300C000;
-	if (boostVram) {
-		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-	}*/
-
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
@@ -180,6 +175,9 @@ void arm9_main(void) {
 				REG_SCFG_EXT = 0x8307F100;
 			} else {
 				REG_SCFG_EXT = 0x83000000;
+				if (arm9_boostVram) {
+					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+				}
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
