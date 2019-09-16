@@ -110,25 +110,14 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204e698 = 0xe12fff1e; //bx lr
 	}
 	
-	// Dementium II (USA/EUR)
-	if (strcmp(romTid, "BDEE") == 0 || strcmp(romTid, "BDEP") == 0) {
-		*(u32*)0x020e9120 = 0xe3a00002;
-		*(u32*)0x020e9124 = 0xea000029;
-	}
-	
-	// Dementium II: Tozasareta Byoutou (JPN)
-	if (strcmp(romTid, "BDEJ") == 0) {
-		*(u32*)0x020d9f60 = 0xe3a00005;
-		*(u32*)0x020d9f68 = 0xea000029;
+	// Power Rangers - Samurai (USA) (En,Fr,Es)
+	if (strcmp(romTid, "B3NE") == 0 {
+		*(u32*)0x02060608 = 0xe3a00001;
 	}
 
-	// Grand Theft Auto - Chinatown Wars (USA/Europe) (En,Fr,De,Es,It)
-	if (strcmp(romTid, "YGXE") == 0 || strcmp(romTid, "YGXP") == 0) {
-		*(u16*)0x02037a34 = 0x46c0;
-		*(u32*)0x0216ac0c = 0x0001fffb;
-		
-        //test patches 4 dma
-        // flag = common + 0x114
+	// Power Rangers - Samurai (Europe) (En,Fr,De,Es,It)
+	if (strcmp(romTid, "B3NP") == 0 {
+		*(u32*)0x02060724 = 0xe3a00001;
 	}
 
 	// WarioWare: DIY (USA)
