@@ -111,12 +111,12 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
-	if (strcmp(romTid, "B3NE") == 0 {
+	if (strcmp(romTid, "B3NE") == 0) {
 		*(u32*)0x02060608 = 0xe3a00001;
 	}
 
 	// Power Rangers - Samurai (Europe) (En,Fr,De,Es,It)
-	if (strcmp(romTid, "B3NP") == 0 {
+	if (strcmp(romTid, "B3NP") == 0) {
 		*(u32*)0x02060724 = 0xe3a00001;
 	}
 
