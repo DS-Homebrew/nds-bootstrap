@@ -945,7 +945,7 @@ int arm7_main(void) {
 				}
 			} else {
 				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x3000);
+				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x2FFF);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
