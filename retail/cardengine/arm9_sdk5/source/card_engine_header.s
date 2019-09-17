@@ -74,6 +74,7 @@ thumbPatches:
 .word	thumb_card_dma_arm9
 .word   thumb_card_set_dma_arm9
 .word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
