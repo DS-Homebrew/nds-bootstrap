@@ -293,31 +293,46 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
-        ||  strncmp(romTid, "A8Q", 3) == 0  // Them park // works
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park // works
+        ||  strncmp(romTid, "B05", 3) == 0  // Golden sun
     ) {
 
-      if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
-        u32* offset = patchOffsetCache.cardEndReadDmaOffset;
-    	  if (!patchOffsetCache.cardEndReadDmaOffset) {
-    		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
-    		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
-    	  }
-        if(offset) {
-          dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");       
-          if(usesThumb) {
+    u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+	  if (!patchOffsetCache.cardEndReadDmaOffset) {
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+	  }
+    if(offset) {
+      dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");
+      if(!isSdk5(moduleParams)) {
+        // SDK1-4        
+        if(usesThumb) {
             u16* thumbOffset = (u16*)offset;
             thumbOffset--;
             *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
             ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
-          } else  {
+        } else  {
             u32* armOffset = (u32*)offset;
             armOffset--;
-            *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
+            *armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
             ce9->patches->cardEndReadDmaRef = armOffset;
-          } 
         }
-      } 
-    } 
+      } else {
+        // SDK5 
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            thumbOffset--;
+            *thumbOffset = 0xB508; // push	{r3, lr} 
+            ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+        } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+        }  
+      }  
+    }
+  }  
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -336,13 +351,12 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk 
-        ||  strncmp(romTid, "A8Q", 3) == 0  // Them park
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park
+        ||  strncmp(romTid, "B05", 3) == 0  // Golden sun
     ) {
-
-      if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
         //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
     	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
-    		u32* setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+    	u32* setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
     	  //}
         if(setDmaoffset) {
           dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
@@ -351,8 +365,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     
           return true;  
         }
-      } 
-    }
+    } 
+
     return false; 
 }
 
