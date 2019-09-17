@@ -294,6 +294,36 @@ thumb_card_pull:
 	bx      lr
     
 	.arm
+    
+ipcSyncHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_ipc
+	ldr 	r0,	intr_ipc_orig_return
+	bx  	r0
+    
+code_handler_start_ipc:
+	push	{r0-r12} 
+    ldr		r6, cardReadRef13
+    ldr     r7, ce9location13
+    add     r6, r6, r7
+	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+  
+	@ exit after return
+	b	arm9exit
+_blx_r6_stub_start_ipc:
+	bx	r6
+
+arm9exit:
+	pop   	{r0-r12} 
+	pop  	{lr}
+	bx  lr
+    
+.pool
+ce9location13:
+.word   ce9
+cardReadRef13:
+.word   myIrqHandlerIPC-ce9  
 
 .global callSleepThumb
 .type	callSleepThumb STT_FUNC
