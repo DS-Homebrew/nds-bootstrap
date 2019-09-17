@@ -77,8 +77,10 @@ static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
 // Card end read DMA
-static const u32 cardEndReadDmaSignature4[4]  = {0xE3A00702};
-static const u16 cardEndReadDmaSignatureThumb4[4]  = {0x2002, 0x0480, 0xF7F8};
+static const u32 cardEndReadDmaSignature4[1]  = {0xE3A00702};
+static const u16 cardEndReadDmaSignatureThumb4[3]  = {0x2002, 0x0480, 0xF7F8};
+static const u32 cardEndReadDmaSignature5[4]  = {0xE59F0010, 0xE3A02000, 0xE5901000, 0xE5812000};
+static const u16 cardEndReadDmaSignatureThumb5[4]  = {0x4803, 0x2200, 0x6801, 0x600A};
 
 // Card set DMA
 static const u32 cardSetDmaSignatureValue1[1]       = {0x4100010};
@@ -1466,8 +1468,48 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	return sleepOffset;
 }
 
+u32* findCardEndReadDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCardEndReadDmaSdk5\n");
+
+    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb5;
+    u32* cardEndReadDmaSignature = cardEndReadDmaSignature5;
+
+    u32 * offset = NULL;
+    
+    if(usesThumb) {
+  		offset = findOffsetThumb(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignatureThumb, 4
+        );
+    } else {
+  		offset = findOffset(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignature, 4
+        ); 
+    } 
+    
+    if (offset) {
+		dbg_printf("cardEndReadDma found: ");
+	} else {
+		dbg_printf("cardEndReadDma not found\n");
+	}
+    
+    if (offset) {
+		dbg_hexa((u32)offset);
+		dbg_printf("\n");
+	}
+
+    dbg_printf("\n");
+	return offset;
+}
+
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardEndReadDma\n");
+    
+    if  (moduleParams->sdk_version > 0x5000000) {
+        return findCardEndReadDmaSdk5(ndsHeader,moduleParams,usesThumb);
+    }     
+    
     u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
     u32* cardEndReadDmaSignature = cardEndReadDmaSignature4;
     
@@ -1525,7 +1567,9 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 	return offset;
 }
 
-u32* findCardSetDmaSd5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCardSetDmaSdk5\n");
+    
     u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart5;
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb5;
     
@@ -1577,7 +1621,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	dbg_printf("findCardSetDma\n");
     
     if  (moduleParams->sdk_version > 0x5000000) {
-        return findCardSetDmaSd5;
+        return findCardSetDmaSdk5(ndsHeader,moduleParams,usesThumb);
     } 
     
     u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
