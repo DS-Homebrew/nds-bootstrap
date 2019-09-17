@@ -200,7 +200,7 @@ bool ndmaBusy(uint8 ndmaSlot) {
 	return	*(u32*)(0x400411C+(ndmaSlot*0x1C)) & BIT(31) == 0x80000000;
 }
 
-static bool checkArm7(void) {
+static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
