@@ -144,6 +144,19 @@ static void waitForArm7(void) {
         }
     //}
 }
+
+void cardSetDma(void) {
+    return false;
+}
+
+
+#else
+
+void cardSetDma(void) {
+    return false;
+}
+
+
 #endif
 
 static void clearIcache (void) {
