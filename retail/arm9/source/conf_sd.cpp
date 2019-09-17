@@ -25,7 +25,7 @@ extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 
-extern u8 lz77ImageBuffer[0x10000];
+extern u8 lz77ImageBuffer[0x12000];
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
