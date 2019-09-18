@@ -1584,7 +1584,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
 		    dbg_printf("cardSetDmaEnd not found\n");
             return NULL;
         } else {
-            dbg_printf("\cardSetDmaSignatureValue1 found\n");
+            dbg_printf("cardSetDmaSignatureValue1 found\n");
          	dbg_hexa((u32)cardSetDmaEndOffset);
         	dbg_printf(" : ");
             dbg_hexa(*cardSetDmaEndOffset);   
@@ -1605,7 +1605,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                   );
               } 
             if (startOffset!=NULL) {
-                dbg_printf("\cardSetDmaSignatureStart found\n");
+                dbg_printf("cardSetDmaSignatureStart found\n");
              	dbg_hexa((u32)startOffset);
             	dbg_printf(" : ");
                 dbg_hexa(*startOffset);   
@@ -1642,7 +1642,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		    dbg_printf("cardSetDmaEnd not found\n");
             return NULL;
         } else {
-            dbg_printf("\cardSetDmaSignatureValue1 found\n");
+            dbg_printf("cardSetDmaSignatureValue1 found\n");
          	dbg_hexa((u32)cardSetDmaEndOffset);
         	dbg_printf(" : ");
             dbg_hexa(*cardSetDmaEndOffset);   
@@ -1654,7 +1654,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
                 cardSetDmaSignatureValue2, 1
             );
             if (cardSetDmaEndOffset!=NULL) {
-                dbg_printf("\cardSetDmaSignatureValue2 found\n");
+                dbg_printf("cardSetDmaSignatureValue2 found\n");
              	dbg_hexa((u32)cardSetDmaEndOffset);
             	dbg_printf(" : ");
                 dbg_hexa(*cardSetDmaEndOffset);   
@@ -1665,7 +1665,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
         }     
     } 
     
-    dbg_printf("\cardSetDmaEnd found\n");
+    dbg_printf("cardSetDmaEnd found\n");
  	dbg_hexa((u32)cardSetDmaEndOffset);
 	dbg_printf(" : ");
     dbg_hexa(*cardSetDmaEndOffset);   
