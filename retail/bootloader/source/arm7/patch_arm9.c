@@ -294,7 +294,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park // works
-        ||  strncmp(romTid, "B05", 3) == 0  // Golden sun
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -337,7 +337,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     const char* romTid = getRomTid(ndsHeader);
-    
+    dbg_printf("\npatchCardSetDma\n");           
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE 
@@ -352,7 +352,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk 
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park
-        ||  strncmp(romTid, "B05", 3) == 0  // Golden sun
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
     ) {
         //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
     	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
