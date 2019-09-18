@@ -89,7 +89,7 @@ static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0
 static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
 static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
-static const u32 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
+static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
