@@ -94,35 +94,154 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02007c04 = 0xea000003;
 	}
 
-	// Chrono Trigger (Japan)
-	if (strcmp(romTid, "YQUJ") == 0) {
-		*(u32*)0x0204e364 = 0xe3a00000; //mov r0, #0
-		*(u32*)0x0204e368 = 0xe12fff1e; //bx lr
-		*(u32*)0x0204e6c4 = 0xe3a00000; //mov r0, #0
-		*(u32*)0x0204e6c8 = 0xe12fff1e; //bx lr
+	// Catan (Europe) (En,De)
+	if (strcmp(romTid, "CN7P") == 0) {
+		*(u32*)0x02000bc0 = 0xe3540000;
+		*(u32*)0x02000bc4 = 0x12441001;
+		*(u32*)0x02000bc8 = 0x112fff1e;
+		*(u32*)0x02000bcc = 0xe28dd070;
+		*(u32*)0x02000bd0 = 0xe3a00000;
+		*(u32*)0x02000bd4 = 0xe8bd8ff8;
+		*(u32*)0x0207a9f0 = 0xebfe1872;
 	}
 
-	// Chrono Trigger (USA/Europe)
-	if (strcmp(romTid, "YQUE") == 0 || strcmp(romTid, "YQUP") == 0) {
-		*(u32*)0x0204e334 = 0xe3a00000; //mov r0, #0
-		*(u32*)0x0204e338 = 0xe12fff1e; //bx lr
-		*(u32*)0x0204e694 = 0xe3a00000; //mov r0, #0
-		*(u32*)0x0204e698 = 0xe12fff1e; //bx lr
+	// De Kolonisten van Catan (Netherlands)
+	if (strcmp(romTid, "CN7H") == 0) {
+		*(u32*)0x02000bc0 = 0xe3540000;
+		*(u32*)0x02000bc4 = 0x12441001;
+		*(u32*)0x02000bc8 = 0x112fff1e;
+		*(u32*)0x02000bcc = 0xe28dd070;
+		*(u32*)0x02000bd0 = 0xe3a00000;
+		*(u32*)0x02000bd4 = 0xe8bd8ff8;
+		*(u32*)0x0207af40 = 0xebfe271e;
 	}
 	
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	if (strcmp(romTid, "B3NE") == 0) {
-		*(u32*)0x02060608 = 0xe3a00001;
+		*(u32*)0x02060608 = 0xe3a00001; //mov r0, #1
 	}
 
 	// Power Rangers - Samurai (Europe) (En,Fr,De,Es,It)
 	if (strcmp(romTid, "B3NP") == 0) {
-		*(u32*)0x02060724 = 0xe3a00001;
+		*(u32*)0x02060724 = 0xe3a00001; //mov r0, #1
+	}
+
+	// Learn with Pokemon - Typing Adventure (Europe)
+	if (strcmp(romTid, "UZPP") == 0) {
+		*(u32*)0x02000560 = 0xe59f0000; // ldr r0, 02000568
+		*(u32*)0x02000564 = 0xe12fff1e; // bx lr
+		*(u32*)0x02000568 = 0x0000b3cf; // andeq r11, r0, pc, asr#7
+		*(u32*)0x0200056c = 0xe59f0000; // ldr r0, 02000574
+		*(u32*)0x02000570 = 0xe12fff1e; // bx lr
+		*(u32*)0x02000574 = 0x0000c127; // andeq r12, r0 ,r7, lsr#2
+		*(u32*)0x02000578 = 0xe92d4007; // stmdb sp!, {r0-r2,lr}
+		*(u32*)0x0200057c = 0xe59f001c; // ldr r0, 020005a0
+		*(u32*)0x02000580 = 0xe59f101c; // ldr r1, 02000504
+		*(u32*)0x02000584 = 0xe5912000; // ldr r2, [r1, #0]
+		*(u32*)0x02000588 = 0xe1500002; // cmp r0, r2
+		*(u32*)0x0200058c = 0x059f0014; // ldreq r0, 020005a8
+		*(u32*)0x02000590 = 0x05810000; // streq r0, [r1, #0] 
+		*(u32*)0x02000594 = 0x0280000c; // addeq r0, r0 #c
+		*(u32*)0x02000598 = 0x058100ac; // streq r0, [r1, #ac]
+		*(u32*)0x0200059c = 0xe8bd8007; // ldmia sp!, {r0-r2.pc}
+		*(u32*)0x020005a0 = 0x6a0f71e8; // bvs 023dcd48
+		*(u32*)0x020005a4 = 0x020f84ec; // andeq r8, pc, #ec000000
+		*(u32*)0x020005a8 = 0x6a3fc400; // bvs 02ff15b0
+		*(u32*)0x020009f8 = 0xeafffede; // b 02000578
+		*(u32*)0x0200147c = 0x46c02800; // strbmi r2, [r0], r0, lsl #10
+		*(u32*)0x02004d30 = 0xf9d8f3f7; // ldmia r8, {r0-r2,r4-r9,r12-pc}
+		*(u32*)0x02018f6c = 0x00001000; // andeq r1, r0, r0
+		*(u32*)0x02019658 = 0xfcd2f3e2; // ldc2, cp3, crf, [r2], {e2}
+		*(u32*)0x0205b24c = 0x63212100; // msrvs cpsr_c, #0
+		*(u32*)0x02383f28 = 0xebb000fc; // bl 00f84320
+		*(u32*)0x023fc000 = 0x480db4ff; // stmdami sp, {r0-r7,r10,r12-sp,pc}
+		*(u32*)0x023fc004 = 0x1c016800; // stcne cp8, cr6, [r1], {0}
+		*(u32*)0x023fc008 = 0x31f031f0; // ldrshcc r3, [r0, #10]!
+		*(u32*)0x023fc00c = 0x1c0c7809; // stcne cp8, cr7, [r12], {9}
+		*(u32*)0x023fc010 = 0x43512278; // cmpmi r1, #80000007
+		*(u32*)0x023fc014 = 0x300c1840; // andcc r1, r12, r0, asr #10
+		*(u32*)0x023fc018 = 0xf41e2100; // ldr r2, [lr], -#100!
+		*(u32*)0x023fc01c = 0x1c01facd; // stcne cpa, crf, [r1], {cd}
+		*(u32*)0x023fc020 = 0x02122210; // andeqs r2, r2, #1
+		*(u32*)0x023fc024 = 0x1c204354; // stcne ,cp3 cr4, [r0], #-150
+		*(u32*)0x023fc028 = 0x6018a355; // andvss r10, r8, r5, asr r3
+		*(u32*)0x023fc02c = 0x609a6059; // addvss r6, r10, r9, asr r0
+		*(u32*)0x023fc030 = 0x60dc2401; // sbcvss r2, r12, r1, lsl #8
+		*(u32*)0x023fc034 = 0x4718bcff; // 
+		*(u32*)0x023fc038 = 0x020c30dc; // andeq r3 ,r12, #dc
+		*(u32*)0x023fc03c = 0xe2810001; // add r0 , r1, #1
+		*(u32*)0x023fc040 = 0xe92d401f; // stmdb sp!, {r0-r4,lr}
+		*(u32*)0x023fc044 = 0xe59f4140; // ldr r4, 023fc18c
+		*(u32*)0x023fc048 = 0xe3540001; // cmp r4, #1
+		*(u32*)0x023fc04c = 0x1a000005; // bne 023fc068
+		*(u32*)0x023fc050 = 0xe59f0128; // ldr r0, 023fc180
+		*(u32*)0x023fc054 = 0xe59f1128; // ldr r1, 023fc184
+		*(u32*)0x023fc058 = 0xe59f2128; // ldr r2, 023fc188
+		*(u32*)0x023fc05c = 0xe28fe06c; // add lr, pc, #6c
+		*(u32*)0x023fc060 = 0xe59f3074; // ldr r3, 023fc0dc
+		*(u32*)0x023fc064 = 0xe12fff13; // bx r3
+		*(u32*)0x023fc068 = 0xe3540002; // cmp r4, #2
+		*(u32*)0x023fc06c = 0x1a000017; // bne 023fc0d0
+		*(u32*)0x023fc070 = 0xe59f0108; // ldr r0, 023fc180
+		*(u32*)0x023fc074 = 0xe59f1108; // ldr r1, 023fc184
+		*(u32*)0x023fc078 = 0xe59f2108; // ldr r2, 023fc188
+		*(u32*)0x023fc07c = 0xe28fe004; // add lr, pc, #4
+		*(u32*)0x023fc080 = 0xe59f3058; // ldr r3, 023fc0e0
+		*(u32*)0x023fc084 = 0xe12fff13; // bx r3
+		*(u32*)0x023fc088 = 0xe59f0100; // ldr r0, 023fc190
+		*(u32*)0x023fc08c = 0xe59f1100; // ldr r1, 023fc194
+		*(u32*)0x023fc090 = 0xe59f2100; // ldr r2, 023fc198
+		*(u32*)0x023fc094 = 0xe28fe004; // add lr, pc, #4
+		*(u32*)0x023fc098 = 0xe59f3040; // ldr r3, 023fc0e0
+		*(u32*)0x023fc09c = 0xe12fff13; // bx r3
+		*(u32*)0x023fc0a0 = 0xe59f00f8; // ldr r0, 023fc1a0
+		*(u32*)0x023fc0a4 = 0xe59f10f8; // ldr r1, 023fc1a4
+		*(u32*)0x023fc0a8 = 0xe59f20f8; // ldr r2, 023fc1a8
+		*(u32*)0x023fc0ac = 0xe28fe004; // add lr, pc, #4
+		*(u32*)0x023fc0b0 = 0xe59f3028; // ldr r3, 023fc0e0
+		*(u32*)0x023fc0b4 = 0xe12fff13; // bx r3
+		*(u32*)0x023fc0b8 = 0xe59f00f0; // ldr r0, 023fc1b0
+		*(u32*)0x023fc0bc = 0xe59f10f0; // ldr r1, 023fc1b4
+		*(u32*)0x023fc0c0 = 0xe59f20f0; // ldr r2, 023fc1b8
+		*(u32*)0x023fc0c4 = 0xe28fe004; // add lr, pc, #4
+		*(u32*)0x023fc0c8 = 0xe59f3010; // ldr r3, 023fc0e0
+		*(u32*)0x023fc0cc = 0xe12fff13; // bx r3
+		*(u32*)0x023fc0d0 = 0xe3a04000; // mov r4, #0
+		*(u32*)0x023fc0d4 = 0xe58f40b0; // str r4, [pc, #b0]
+		*(u32*)0x023fc0d8 = 0xe8bd801f; // ldmia sp!, {r0-r4,pc}
+		*(u32*)0x023fc0dc = 0x038040b5; // orreq r4, r0, #b5
+		*(u32*)0x023fc0e0 = 0x03804071; // orreq r4, r0, #71
+		*(u32*)0x023fc0e4 = 0xf505b500; // str r11, [r5, -#500]
+		*(u32*)0x023fc0e8 = 0xb4fffc6b; // ldrblt pc, [pc], #46b!
+		*(u32*)0x023fc0ec = 0x4d164c15; // ldcmi cpc, cr4, [r6, #-54]
+		*(u32*)0x023fc0f0 = 0x350c682d; // strcc r6, [r12, -@2d]
+		*(u32*)0x023fc0f4 = 0x2000a622; // andcs r10, r0, r2, lsr #c
+		*(u32*)0x023fc0f8 = 0x1c286030; // stcne, cp0, cr6, [r8], #-c0
+		*(u32*)0x023fc0fc = 0xf41e2100; // ldr r2, [lr], -#100
+		*(u32*)0x023fc100 = 0x6070fa5b; // rsbvss pc, r0, r11, asr r10
+		*(u32*)0x023fc104 = 0x613460b4; // ldrhvs r6, [r4, -r4]!
+		*(u32*)0x023fc108 = 0x1c283578; // stcne cp5, cr3, [r8], #-1e0
+		*(u32*)0x023fc10c = 0xf41e2100; // ldr r2, [lr], #-100
+		*(u32*)0x023fc110 = 0x6170fa53; // cmnvs r0, r3, asr r10
+		*(u32*)0x023fc114 = 0x006061b4; // 
+		*(u32*)0x023fc118 = 0x35786230; // ldrbcc r6, [r8, -#230]!
+		*(u32*)0x023fc11c = 0x21001c28; // 
+		*(u32*)0x023fc120 = 0xfa4af41e; // blx 0331d1a0
+		*(u32*)0x023fc124 = 0x62b46270; // adcvss r6, r4, #7
+		*(u32*)0x023fc128 = 0x19000060; // stmdbne r0, {r5-r6}
+		*(u32*)0x023fc12c = 0x35786330; // ldrbcc r6, [r8, -#330]!
+		*(u32*)0x023fc130 = 0x21001c28; // 
+		*(u32*)0x023fc134 = 0xfa40f41e; // blx 0309d1b4
+		*(u32*)0x023fc138 = 0x63b46370; // movvss r6, #c0000001
+		*(u32*)0x023fc13c = 0x60f42402; // rscvss r2, r4, r2, lsl #8
+		*(u32*)0x023fc140 = 0xbd00bcff; // stclt cpc ,crb, [r0-#-3fc]
+		*(u32*)0x023fc144 = 0x00001000; // andeq r1, r0, r0
+		*(u32*)0x023fc148 = 0x020c30dc; // andeq r3, r12, #dc
 	}
 
 	// WarioWare: DIY (USA)
 	if (strcmp(romTid, "UORE") == 0) {
-		*(u32*)0x02003114 = 0xE12FFF1E; //mov r0, #0
+		*(u32*)0x02003114 = 0xE12FFF1E; //bx lr
 	}
     
     // Pokemon Dash
