@@ -286,6 +286,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
+        ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon diamond
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
@@ -294,7 +295,9 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park // works
-        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun // sdk5
+        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
+        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
     ) {
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -343,7 +346,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE 
         ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // white screen 
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // weird screen duplication
-        ||  strncmp(romTid, "AFF", 3) == 0  // FF3 
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3
+        ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon diamond 
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII 
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V 
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
@@ -352,7 +356,9 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk 
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park
-        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun // sdk5
+        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
+        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
     ) {
         //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
     	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
