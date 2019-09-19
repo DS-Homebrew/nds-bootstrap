@@ -90,9 +90,9 @@ u32 getValue32() {
 
 void extendedMemory(bool yes) {
 	if (yes) {
-		REG_SCFG_EXT |= BIT(15);
+		REG_SCFG_EXT += 0xC000;
 	} else {
-		REG_SCFG_EXT &= BIT(15);
+		REG_SCFG_EXT -= 0xC000;
 	}
 }
 
