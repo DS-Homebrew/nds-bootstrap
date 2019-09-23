@@ -205,11 +205,11 @@ void endCardReadDma() {
 static int currentLen=0;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
+static u32 * dmaParams = NULL;
 
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
         vu32* volatile cardStruct = ce9->cardStruct0;
-        u32	dma = cardStruct[3]; // dma channel
                 
         if(ndmaBusy(0)) return;
         
@@ -219,14 +219,14 @@ void continueCardReadDmaArm9() {
         u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
         
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
+        u32 src = dmaParams[3];
+    	u8* dst = (u8*)dmaParams[4];
+    	u32 len = dmaParams[5];           
         
-        // Update cardi common
-  		cardStruct[0] = src + currentLen;
-  		cardStruct[1] = (vu32)(dst + currentLen);
-  		cardStruct[2] = len - currentLen;
+        // Update dma params
+  		dmaParams[3] = src + currentLen;
+  		dmaParams[4] = (vu32)(dst + currentLen);
+  		dmaParams[5] = len - currentLen;
         
         src = cardStruct[0];
         dst = (u8*)(cardStruct[1]);
@@ -309,10 +309,9 @@ void continueCardReadDmaArm7() {
         u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
         
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
-        u32	dma = cardStruct[3]; // dma channel
+        u32 src = dmaParams[3];
+    	u8* dst = (u8*)dmaParams[4];
+    	u32 len = dmaParams[5];   
         
         u32 sector = (src/readSize)*readSize;
         
@@ -339,7 +338,7 @@ void continueCardReadDmaArm7() {
     }
 }
 
-void cardSetDma(void) {
+void cardSetDma(u32 * params) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     int oldIME = enterCriticalSection();
@@ -353,18 +352,15 @@ void cardSetDma(void) {
     
     leaveCriticalSection(oldIME); 
 
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel     
+    dmaParams = params;
+    u32 src = dmaParams[3];
+	u8* dst = (u8*)dmaParams[4];
+	u32 len = dmaParams[5];    
 
     u32 commandRead=0x025FFB08;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
     
-
-    src = cardStruct[0];
-	dst = (u8*)cardStruct[1];
 	sector = (src / readSize) * readSize;
 	accessCounter++;  
   
