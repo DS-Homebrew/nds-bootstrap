@@ -1595,7 +1595,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                   dbg_printf("cardSetDmaSignatureStartThumb used: ");
             		startOffset = findOffsetBackwardsThumb(
                 		cardSetDmaEndOffset, 0x90,
-                      cardSetDmaSignatureStartThumb, 4
+                      cardSetDmaSignatureStartThumb, 2
                   );
               } else {
                   dbg_printf("cardSetDmaSignatureStart used: ");
