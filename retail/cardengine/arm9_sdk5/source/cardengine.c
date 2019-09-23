@@ -110,7 +110,6 @@ static inline bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static inline void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
-        resetRequestIrqMask(IRQ_IPC_SYNC);
         u32* ipcSyncHandler = ce9->irqTable + 16;
         ce9->intr_ipc_orig_return   = *ipcSyncHandler;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
@@ -343,6 +342,8 @@ void cardSetDma(u32 * params) {
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
+    
+    resetRequestIrqMask(IRQ_IPC_SYNC);
 
     int oldIME = enterCriticalSection();
     
