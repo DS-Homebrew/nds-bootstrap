@@ -410,10 +410,10 @@ void continueCardReadDmaArm7() {
 void cardSetDma(void) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
-    int oldIME = enterCriticalSection();
-    
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
+
+    int oldIME = enterCriticalSection();
     
     hookIPC_SYNC();
     // TODO : reset IPC_SYNC IRQs
