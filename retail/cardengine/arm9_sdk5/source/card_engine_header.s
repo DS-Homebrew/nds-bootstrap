@@ -65,7 +65,7 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   0x0
-.word   0x0 @ipcSyncHandlerRef
+.word   ipcSyncHandler @ipcSyncHandlerRef
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
