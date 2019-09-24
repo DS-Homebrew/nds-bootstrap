@@ -35,15 +35,6 @@
 
 #include "my_fat.h"
 
-#define _32KB_READ_SIZE  0x8000
-#define _64KB_READ_SIZE  0x10000
-#define _128KB_READ_SIZE 0x20000
-#define _192KB_READ_SIZE 0x30000
-#define _256KB_READ_SIZE 0x40000
-#define _512KB_READ_SIZE 0x80000
-#define _768KB_READ_SIZE 0xC0000
-#define _1MB_READ_SIZE   0x100000
-
 extern cardengineArm9* volatile ce9;
 
 extern u32 _io_dldi_features;
@@ -53,92 +44,14 @@ extern vu32* volatile cardStruct0;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-/*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];*/
 static u32 accessCounter = 0;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-/*static u32 romLocation = ROM_LOCATION;
-static u32 readSize = _128KB_READ_SIZE;
-static u32 cacheAddress = CACHE_ADRESS_START;
-static u16 cacheSlots = retail_CACHE_SLOTS;*/
-
-/*static u32 asyncReadSizeSubtract = 0;
-
-static u32 asyncSector = 0xFFFFFFFF;
-static u32 asyncQueue[10];
-static int aQHead = 0;
-static int aQTail = 0;
-static int aQSize = 0;*/
-
-/*static u32 readNum = 0;
-static bool alreadySetMpu = false;*/
 
 static aFile romFile;
 static aFile tmpFile;
 
 static bool flagsSet = false;
-
-/*static int allocateCacheSlot(void) {
-	int slot = 0;
-	u32 lowerCounter = accessCounter;
-	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheCounter[i] <= lowerCounter) {
-			lowerCounter = cacheCounter[i];
-			slot = i;
-			if (!lowerCounter) {
-				break;
-			}
-		}
-	}
-	return slot;
-}
-
-static int getSlotForSector(u32 sector) {
-	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheDescriptor[i] == sector) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-static vu8* getCacheAddress(int slot) {
-	//return (vu32*)(cacheAddress + slot*readSize);
-	return (vu8*)(cacheAddress + slot*readSize);
-}
-
-static void updateDescriptor(int slot, u32 sector) {
-	cacheDescriptor[slot] = sector;
-	cacheCounter[slot] = accessCounter;
-}
-
-static void waitForArm7(void) {
-	while (sharedAddr[3] != (vu32)0);
-}*/
-
-/*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-	//return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles, breaks Mario's Holiday)
-	return (strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
-		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
-		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
-		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
-		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
-		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
-		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
-		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
-		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
-		|| strncmp(romTid, "CS3", 3) == 0   // Sonic & SEGA All-Stars Racing
-		|| strncmp(romTid, "VSO", 3) == 0   // Sonic Classic Collection
-		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
-		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
-		|| strncmp(romTid, "B6Z", 3) == 0   // MegaMan Zero Collection (slightly boosts load speed)
-		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
-		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
-		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
-		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
-}*/
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	accessCounter++;
@@ -232,9 +145,9 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 }
 
 //Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
+/*void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}
+}*/
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
@@ -264,9 +177,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} else {
+		} /*else {
 			debug8mbMpuFix();
-		}
+		}*/
 		/*if (dsiMode || isSdk5(moduleParams)) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
@@ -297,7 +210,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 
-	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)((u8*)CARDENGINE_ARM9_LOCATION + 0x61C0) : ce9->cardStruct0);
+	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)((u8*)CARDENGINE_ARM9_LOCATION + 0x3FC0) : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
 	if (isSdk5(ce9->moduleParams)) {
