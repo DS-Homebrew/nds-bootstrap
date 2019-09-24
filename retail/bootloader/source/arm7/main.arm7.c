@@ -669,6 +669,32 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32 chipID = getChipId(ndsHeader, moduleParams);
+    dbg_printf("chipID: ");
+    dbg_hexa(chipID);
+    dbg_printf("\n"); 
+
+    // TODO
+    // figure out what is 0x027ffc10, somehow related to cardId check
+    //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
+
+    // Set memory values expected by loaded NDS
+    // from NitroHax, thanks to Chism
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff800 : 0x027ff800)) = chipID;					// CurrentCardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff804 : 0x027ff804)) = chipID;					// Command10CardID
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff808 : 0x027ff808)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff80a : 0x027ff80a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+
+	// Copies of above
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc00 : 0x027ffc00)) = chipID;					// CurrentCardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc04 : 0x027ffc04)) = chipID;					// Command10CardID
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+}
+
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
@@ -881,6 +907,7 @@ int arm7_main(void) {
 	}
 
 	nocashMessage("Starting the NDS file...");
+    setMemoryAddress(ndsHeader, moduleParams);
 	startBinary_ARM7(arm9StartAddress);
 
 	return 0;
