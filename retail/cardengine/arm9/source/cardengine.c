@@ -411,16 +411,17 @@ void cardSetDma(void) {
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
-    
+
+    // reset IPC_SYNC IRQs     
     resetRequestIrqMask(IRQ_IPC_SYNC);
 
     int oldIME = enterCriticalSection();
     
     hookIPC_SYNC();
-    // TODO : reset IPC_SYNC IRQs
-    enableIPCSYNC();
     
     leaveCriticalSection(oldIME); 
+    
+    enableIPCSYNC();
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);

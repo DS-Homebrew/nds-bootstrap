@@ -207,9 +207,7 @@ static bool dmaReadOnArm9 = false;
 static u32 * dmaParams = NULL;
 
 void continueCardReadDmaArm9() {
-    if(dmaReadOnArm9) {
-        vu32* volatile cardStruct = ce9->cardStruct0;
-                
+    if(dmaReadOnArm9) {             
         if(ndmaBusy(0)) return;
         
         dmaReadOnArm9 = false;
@@ -227,15 +225,15 @@ void continueCardReadDmaArm9() {
   		dmaParams[4] = (vu32)(dst + currentLen);
   		dmaParams[5] = len - currentLen;
         
-        src = cardStruct[0];
-        dst = (u8*)(cardStruct[1]);
-        len = cardStruct[2]; 
+        src = dmaParams[3];
+        dst = (u8*)(dmaParams[4]);
+        len = dmaParams[5]; 
         
         u32 sector = (src/readSize)*readSize;
         
         if (len > 0) {
-            src = cardStruct[0];
-			dst = (u8*)cardStruct[1];
+            src = dmaParams[3];
+			dst = (u8*)(dmaParams[4]);
 			sector = (src / readSize) * readSize;
 			accessCounter++;  
             
@@ -337,21 +335,21 @@ void continueCardReadDmaArm7() {
     }
 }
 
-void cardSetDma(u32 * params) {
-	vu32* volatile cardStruct = ce9->cardStruct0;
-
+void cardSetDma (u32 * params) {
+    
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
     
+    // reset IPC_SYNC IRQs    
     resetRequestIrqMask(IRQ_IPC_SYNC);
 
     int oldIME = enterCriticalSection();
     
     hookIPC_SYNC();
-    // TODO : reset IPC_SYNC IRQs
-    enableIPCSYNC();
-    
+
     leaveCriticalSection(oldIME); 
+    
+    enableIPCSYNC();
 
     dmaParams = params;
     u32 src = dmaParams[3];
