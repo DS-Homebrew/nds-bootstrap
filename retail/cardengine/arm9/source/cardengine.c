@@ -42,6 +42,9 @@ extern u32 _io_dldi_features;
 extern vu32* volatile cardStruct0;
 //extern vu32* volatile cacheStruct;
 
+extern u32* lastClusterCacheUsed;
+extern u32 clusterCacheSize;
+
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static u32 accessCounter = 0;
@@ -165,14 +168,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				return -1;
 			}
 
+			lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
+			clusterCacheSize = 0x4000;
+
 			romFile = getFileFromCluster(ce9->fileCluster);
 
 			buildFatTableCache(&romFile, 0);
 
-			const char* tmpName = "BTSTRP.TMP";
+			/*const char* tmpName = "BTSTRP.TMP";
 			tmpFile = getBootFileCluster(tmpName, 0);
 
-			fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);
+			fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);*/
 		}
 
 		if (isSdk5(ce9->moduleParams)) {
@@ -180,32 +186,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		} /*else {
 			debug8mbMpuFix();
 		}*/
-		/*if (dsiMode || isSdk5(moduleParams)) {
-			romLocation = ROM_SDK5_LOCATION;
-			cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-			cacheSlots = retail_CACHE_SLOTS_SDK5;
-		}
-
-		if (isGameLaggy(ndsHeader)) {
-			if (consoleModel > 0) {
-				if (dsiMode || isSdk5(moduleParams)) {
-					// SDK 5
-					cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				}
-				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
-			} else {
-				cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? retail_CACHE_SLOTS_32KB_SDK5 : retail_CACHE_SLOTS_32KB);
-			}
-			readSize = _32KB_READ_SIZE;
-		} else if (consoleModel > 0) {
-			if (dsiMode || isSdk5(moduleParams)) {
-				// SDK 5
-				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-			}
-			cacheSlots = ((dsiMode || isSdk5(moduleParams)) ? dev_CACHE_SLOTS_SDK5 : dev_CACHE_SLOTS);
-		}*/
-
-		//ndsHeader->romSize += 0x1000;
 
 		flagsSet = true;
 	}
@@ -264,9 +244,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		return 0;
 	}
 
-	if(!ce9->ROMinRAM && (*(u32*)(0x2780000)) == 0){
+	/*if(!ce9->ROMinRAM && (*(u32*)(0x2780000)) == 0){
 		fileRead((char*)0x2780000, tmpFile, 0, 0x40000, 0);
-	}
+	}*/
 
 	// Fix reads below 0x8000
 	if (src <= 0x8000){

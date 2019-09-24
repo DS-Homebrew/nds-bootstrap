@@ -49,7 +49,8 @@ int hookNdsRetailArm9(
 	u32 romLocation,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
-	u32 consoleModel
+	u32 consoleModel,
+    u32 fatTableAddr
 );
 
 #endif // HOOK_H

@@ -200,12 +200,13 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 
 #define CLUSTER_CACHE      0x2780000 // WRAM C+B
-#define CLUSTER_CACHE_SIZE 0x40000 // 512K
+#define CLUSTER_CACHE_SIZE 0x40000 // 256K
 
 #define ONE_CACHE  0x37C5000 // WRAM A
 #define ONE_CACHE_SIZE 0x10000 // 64K
 
-static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -527,7 +528,6 @@ aFile getBootFileCluster (const char* bootName, int ndmaSlot)
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
 		file.fatTableCached=false;
-		file.oneClusterCached=false;
 
 		return file;
 	}
@@ -540,7 +540,6 @@ aFile getBootFileCluster (const char* bootName, int ndmaSlot)
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
 	file.fatTableCached=false;
-	file.oneClusterCached=false;
 	return file;
 }
 
@@ -550,7 +549,6 @@ aFile getFileFromCluster (u32 cluster) {
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
 	file.fatTableCached=false;
-	file.oneClusterCached=false;
 	return file;
 }
 
@@ -585,13 +583,6 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		file.currentCluster = file.firstCluster;
 	}
 
-	if(file.oneClusterCached && length == 512 && ((startOffset / discBytePerClus) * discBytePerClus) == file.currentOffset) {
-		// read from cache
-		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,(char*)(ONE_CACHE+curByte),length);
-		return length;
-	}
-
 	if(file.fatTableCached) {
     	#ifdef DEBUG
         nocashMessage("fat table cached");
@@ -616,156 +607,146 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		}
 	}
 
-	if(file.oneClusterCached && length == 512) {
-		// fill the cache
-		CARD_ReadSectors(FAT_ClustToSect(file.currentCluster), discSecPerClus, (char*)ONE_CACHE, ndmaSlot);
-		// read from cache
-		curByte = startOffset % discBytePerClus;
-		memcpy(buffer,(char*)(ONE_CACHE+curByte),length);
-		return length;
+	// Calculate the sector and byte of the current position,
+	// and store them
+	curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
+	curByte = startOffset % BYTES_PER_SECTOR;
 
-	} else {
-		// Calculate the sector and byte of the current position,
-		// and store them
-		curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
-		curByte = startOffset % BYTES_PER_SECTOR;
+	// Load sector buffer for new position in file
+	CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+	curSect++;
 
-		// Load sector buffer for new position in file
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
-		curSect++;
+	// Number of bytes needed to read to align with a sector
+	beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
 
-		// Number of bytes needed to read to align with a sector
-		beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
+	// Read first part from buffer, to align with sector boundary
+    dataPos=0;
+    memcpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
+    curByte+=beginBytes;
+    dataPos+=beginBytes;
 
-		// Read first part from buffer, to align with sector boundary
-        dataPos=0;
-        memcpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
-        curByte+=beginBytes;
-        dataPos+=beginBytes;
+	// Read in all the 512 byte chunks of the file directly, saving time
+	for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
+	{
+		int sectorsToRead=0;
 
-		// Read in all the 512 byte chunks of the file directly, saving time
-		for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
-		{
-			int sectorsToRead=0;
+		if(file.fatTableCached) {
 
-			if(file.fatTableCached) {
-            
-                // Move to the next cluster if necessary
-                if (curSect >= discSecPerClus)
-    			{
-                    clusterIndex+= curSect/discSecPerClus;
-                    curSect = curSect % discSecPerClus;;
-                    file.currentCluster = file.fatTableCache[clusterIndex];
-    				file.currentOffset+=discBytePerClus;
-    			}
-                
-                 // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
-                for(int tempClusterIndex=clusterIndex; sectorsToRead<=chunks; ) {   
-                    if(file.fatTableCache[tempClusterIndex]+1 == file.fatTableCache[tempClusterIndex+1]) {
-                        #ifdef DEBUG
-                    	nocashMessage("contiguous read");
-                    	#endif
-                        // the 2 cluster are consecutive
-                        sectorsToRead += discSecPerClus;
-                        tempClusterIndex++;    
-                    } else {
-                        #ifdef DEBUG
-                    	nocashMessage("non contiguous read");
-                    	#endif
-                        break;
-                    }
-                }
-                
-                if(!sectorsToRead) sectorsToRead = discSecPerClus - curSect;  
-                else sectorsToRead = sectorsToRead - curSect;
-                
-                if(chunks < sectorsToRead) {
-				    sectorsToRead = chunks;
-                }
-                
-                #ifdef DEBUG
-                dbg_hexa(curSect + FAT_ClustToSect(file.currentCluster));
-                dbg_hexa(sectorsToRead);
-                dbg_hexa(buffer + dataPos);
-                #endif
-                
-                // Read the sectors
-      			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
-      			chunks  -= sectorsToRead;
-      			curSect += sectorsToRead;
-      			dataPos += BYTES_PER_SECTOR * sectorsToRead;
-                dbg_hexa(discSecPerClus);
-                dbg_hexa(curSect/discSecPerClus);
+            // Move to the next cluster if necessary
+            if (curSect >= discSecPerClus)
+    		{
                 clusterIndex+= curSect/discSecPerClus;
-                curSect = curSect % discSecPerClus;
-                file.currentCluster = file.fatTableCache[clusterIndex];         
-            } else {
-                // Move to the next cluster if necessary
-    			if (curSect >= discSecPerClus)
-    			{
-    				curSect = 0;
-                    file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
-    				file.currentOffset+=discBytePerClus;
-    			}
-            
-                // Calculate how many sectors to read (read a maximum of discSecPerClus at a time)
-			    sectorsToRead = discSecPerClus - curSect;
-			    if(chunks < sectorsToRead)
-				sectorsToRead = chunks;
-                
-                // Read the sectors
-    			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
-    			chunks  -= sectorsToRead;
-    			curSect += sectorsToRead;
-    			dataPos += BYTES_PER_SECTOR * sectorsToRead;
-            }			
-		}
+                curSect = curSect % discSecPerClus;;
+                file.currentCluster = file.fatTableCache[clusterIndex];
+    			file.currentOffset+=discBytePerClus;
+    		}
 
-		// Take care of any bytes left over before end of read
-		if (dataPos < length)
-		{
-            #ifdef DEBUG
-          	nocashMessage("non aligned read, data is missing");
-            if(length-dataPos>BYTES_PER_SECTOR) {
-                nocashMessage("error: unread sector are missing");
-            }
-            #endif
-
-			// Update the read buffer
-			curByte = 0;
-			if (curSect >= discSecPerClus)
-			{
-				if(file.fatTableCached) {
-                    clusterIndex+= curSect/discSecPerClus;
-                    curSect = curSect % discSecPerClus;
-                    file.currentCluster = file.fatTableCache[clusterIndex]; 
+            // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
+            for(int tempClusterIndex=clusterIndex; sectorsToRead<=chunks; ) {   
+                if(file.fatTableCache[tempClusterIndex]+1 == file.fatTableCache[tempClusterIndex+1]) {
+                    #ifdef DEBUG
+                    nocashMessage("contiguous read");
+                    #endif
+                    // the 2 cluster are consecutive
+                    sectorsToRead += discSecPerClus;
+                    tempClusterIndex++;    
                 } else {
-                    curSect = 0;
-                    file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                    #ifdef DEBUG
+                    nocashMessage("non contiguous read");
+                	#endif
+                    break;
                 }
-				file.currentOffset+=discBytePerClus;
-			}
-            
+            }
+
+            if(!sectorsToRead) sectorsToRead = discSecPerClus - curSect;  
+            else sectorsToRead = sectorsToRead - curSect;
+
+            if(chunks < sectorsToRead) {
+				sectorsToRead = chunks;
+            }
+
             #ifdef DEBUG
             dbg_hexa(curSect + FAT_ClustToSect(file.currentCluster));
-            dbg_hexa(globalBuffer);
+            dbg_hexa(sectorsToRead);
+            dbg_hexa(buffer + dataPos);
             #endif
-            
-			CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
-			// Read in last partial chunk
-            memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
-            curByte+=length;
-            dataPos+=length;
-		}
-        
-        #ifdef DEBUG
-        nocashMessage("fileRead completed");
-        nocashMessage("");
-        #endif
-        
-		return dataPos;
+            // Read the sectors
+      		CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+      		chunks  -= sectorsToRead;
+      		curSect += sectorsToRead;
+      		dataPos += BYTES_PER_SECTOR * sectorsToRead;
+            dbg_hexa(discSecPerClus);
+            dbg_hexa(curSect/discSecPerClus);
+            clusterIndex+= curSect/discSecPerClus;
+            curSect = curSect % discSecPerClus;
+            file.currentCluster = file.fatTableCache[clusterIndex];         
+        } else {
+            // Move to the next cluster if necessary
+    		if (curSect >= discSecPerClus)
+    		{
+				curSect = 0;
+                file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+    			file.currentOffset+=discBytePerClus;
+    		}
+
+            // Calculate how many sectors to read (read a maximum of discSecPerClus at a time)
+			sectorsToRead = discSecPerClus - curSect;
+			if(chunks < sectorsToRead)
+			sectorsToRead = chunks;
+
+            // Read the sectors
+    		CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+    		chunks  -= sectorsToRead;
+    		curSect += sectorsToRead;
+    		dataPos += BYTES_PER_SECTOR * sectorsToRead;
+        }			
 	}
+
+	// Take care of any bytes left over before end of read
+	if (dataPos < length)
+	{
+        #ifdef DEBUG
+        nocashMessage("non aligned read, data is missing");
+        if(length-dataPos>BYTES_PER_SECTOR) {
+            nocashMessage("error: unread sector are missing");
+        }
+        #endif
+
+		// Update the read buffer
+		curByte = 0;
+		if (curSect >= discSecPerClus)
+		{
+			if(file.fatTableCached) {
+                clusterIndex+= curSect/discSecPerClus;
+                curSect = curSect % discSecPerClus;
+                file.currentCluster = file.fatTableCache[clusterIndex]; 
+            } else {
+                curSect = 0;
+                file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+            }
+			file.currentOffset+=discBytePerClus;
+		}
+
+        #ifdef DEBUG
+        dbg_hexa(curSect + FAT_ClustToSect(file.currentCluster));
+        dbg_hexa(globalBuffer);
+        #endif
+
+		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+
+		// Read in last partial chunk
+        memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
+        curByte+=length;
+        dataPos+=length;
+	}
+
+	#ifdef DEBUG
+	nocashMessage("fileRead completed");
+	nocashMessage("");
+	#endif
+
+	return dataPos;
 }
 
 /*-----------------------------------------------------------------
@@ -907,7 +888,7 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
+		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+clusterCacheSize)
 	{
 		*lastClusterCacheUsed = file->currentCluster;
 		file->currentOffset+=discBytePerClus;
@@ -920,7 +901,6 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
         nocashMessage("fat table cached");
         #endif
 		file->fatTableCached = true;
-		file->oneClusterCached = false;
 	}
     #ifdef DEBUG 
     else {

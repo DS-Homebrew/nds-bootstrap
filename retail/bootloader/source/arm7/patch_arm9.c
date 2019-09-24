@@ -318,7 +318,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
     if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
@@ -334,7 +334,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = *heapPointer + 0x10000; // shrink heap by 10 KB
+	*heapPointer = *heapPointer + 0x4000; // shrink heap by 16 KB
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -344,7 +344,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     return oldheapPointer;
 }
 
-void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
+/*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     
     u32 location_sig[1] = {default_location};
@@ -422,7 +422,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
     ce9->thumbPatches->readCachedRef = (u32*)((u32)ce9->thumbPatches->readCachedRef - default_location + current_location);
-}
+}*/
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);

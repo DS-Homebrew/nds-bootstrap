@@ -889,7 +889,8 @@ int arm7_main(void) {
 		romLocation,
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
-		consoleModel
+		consoleModel,
+		(u32)patchHeapPointer(moduleParams, ndsHeader)
 	);
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
