@@ -48,18 +48,13 @@ extern u32 clusterCacheSize;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-static u32 accessCounter = 0;
-
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
-static aFile tmpFile;
 
 static bool flagsSet = false;
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
-	accessCounter++;
-
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -130,11 +125,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			romFile = getFileFromCluster(ce9->fileCluster);
 
 			buildFatTableCache(&romFile, 0);
-
-			/*const char* tmpName = "BTSTRP.TMP";
-			tmpFile = getBootFileCluster(tmpName, 0);
-
-			fileWrite((char*)0x2780000, tmpFile, 0, 0x40000, 0);*/
 		}
 
 		if (isSdk5(ce9->moduleParams)) {
@@ -165,49 +155,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	u8* cacheBuffer = (u8*)(cacheStruct + 8);
 	u32* cachePage = cacheStruct + 2;
-
-	#ifdef DEBUG
-	u32 commandRead;
-
-	// send a log command for debug purpose
-	// -------------------------------------
-	commandRead = 0x026ff800;
-
-	sharedAddr[0] = dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
-
-	//IPC_SendSync(0xEE24);
-
-	waitForArm7();
-	// -------------------------------------*/
-	#endif
-
-	// SDK 5 --> White screen
-	/*if (!isSdk5(moduleParams) && *(vu32*)0x2800010 != 1) {
-		if (readNum >= 0x100){ // Don't set too early or some games will crash
-			*(vu32*)(*(vu32*)(0x2800000)) = *(vu32*)0x2800004;
-			*(vu32*)(*(vu32*)(0x2800008)) = *(vu32*)0x280000C;
-			alreadySetMpu = true;
-		} else {
-			readNum += 1;
-		}
-	}*/
-
-	if (src == 0) {
-		// If ROM read location is 0, do not proceed.
-		return 0;
-	}
-
-	/*if(!ce9->ROMinRAM && (*(u32*)(0x2780000)) == 0){
-		fileRead((char*)0x2780000, tmpFile, 0, 0x40000, 0);
-	}*/
-
-	// Fix reads below 0x8000
-	if (src <= 0x8000){
-		src = 0x8000 + (src & 0x1FF);
-	}
 
 	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
 }
