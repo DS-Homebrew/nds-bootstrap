@@ -886,7 +886,7 @@ int arm7_main(void) {
 		romLocation,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
-		(u32)patchHeapPointer(moduleParams, ndsHeader)/4
+		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader))
 	);
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
