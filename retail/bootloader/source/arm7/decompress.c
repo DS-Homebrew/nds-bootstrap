@@ -135,10 +135,6 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (foundModuleParams) {
-		*(vu32*)0x280000C = moduleParams->compressed_static_end;
-	}
-	
 	if (
 		moduleParams->compressed_static_end
 		|| strcmp(romTid, "YQUJ") == 0 // Chrono Trigger (Japan)
