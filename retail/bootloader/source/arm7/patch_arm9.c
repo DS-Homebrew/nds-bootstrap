@@ -636,7 +636,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
-	patchDownloadplay(ndsHeader);
+	//patchDownloadplay(ndsHeader);
 
 	//patchHeapPointer(ndsHeader, usesThumb);
 	
