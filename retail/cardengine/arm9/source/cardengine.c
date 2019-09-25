@@ -125,9 +125,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 			romFile = getFileFromCluster(ce9->fileCluster);
 			buildFatTableCache(&romFile, 0);
-
-			savFile = getFileFromCluster(ce9->saveCluster);
 		}
+
+		savFile = getFileFromCluster(ce9->saveCluster);
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
