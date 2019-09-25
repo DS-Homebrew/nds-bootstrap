@@ -11,8 +11,6 @@
 
 //bool cardReadFound = false; // patch_common.c
 
-static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
-
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
 	bool usesThumb = false;
 	int readType = 0;
@@ -57,7 +55,6 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardReadEndOffset) { // Not necessarily needed
 		return false;
 	}
-	debug[1] = (u32)cardReadEndOffset;
 	u32* cardReadStartOffset;
 	// SDK 5
 	//dbg_printf("Trying SDK 5 thumb...\n");
@@ -88,7 +85,6 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Card struct
 	u32** cardStruct = (u32**)(cardReadEndOffset - 1);
-	debug[6] = (u32)*cardStruct;
 	u32* cardStructPatch = (usesThumb ? ce9->thumbPatches->cardStructArm9 : ce9->patches->cardStructArm9);
 	if (moduleParams->sdk_version > 0x3000000) {
 		// Save card struct
@@ -608,11 +604,6 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 }
 
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	debug[2] = (u32)ce9;
-	debug[4] = (u32)ndsHeader->arm9destination;
-	debug[5] = (u32)ce9->patches;
-	debug[8] = moduleParams->sdk_version;
-
 	bool usesThumb;
 	int readType;
 	int sdk5ReadType; // SDK 5

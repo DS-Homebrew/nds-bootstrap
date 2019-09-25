@@ -41,8 +41,6 @@ extern unsigned long intr_orig_return_offset;
 
 extern const u8 cheat_engine_start[];*/
 
-static u32* debug = (u32*)DEBUG_PATCH_LOCATION;
-
 static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
 	0xe3a0c301, 	// mov  ip, #0x4000000
@@ -316,8 +314,6 @@ int hookNdsRetailArm7(
 	u32* vblankHandler = hookLocation;
 	//u32* ipcSyncHandler = hookLocation + 16;
 
-	debug[9] = (u32)hookLocation;
-
 	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 
 	if (!hookAccel) {
@@ -345,9 +341,6 @@ int hookNdsRetailArm7(
 	ce7->consoleModel            = consoleModel;
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
-
-	u32* ce7_cheat_data = getCheatData(ce7);
-	endCheatData(ce7_cheat_data, &ce7->cheat_data_len);
 
 	*vblankHandler = ce7->patches->vblankHandler;
 
