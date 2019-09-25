@@ -10,7 +10,7 @@
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
 
-ce9 :
+ce9:
 	.word	ce9
 patches_offset:
 	.word	patches
@@ -22,13 +22,15 @@ moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
+saveCluster:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
-dsiMode:
+romLocation:
 	.word	0x00000000
 enableExceptionHandler:
 	.word	0x00000000
@@ -47,10 +49,12 @@ patches:
 .word	0x0
 .word	card_id_arm9
 .word	card_dma_arm9
+.word   nand_read_arm9
+.word   nand_write_arm9
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
-.word   readCachedRef
+.word   terminateForPullOutRef
 .word   0x0
 needFlushDCCache:
 .word   0x0
@@ -60,10 +64,12 @@ thumbPatches:
 .word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word   thumb_nand_read_arm9
+.word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-.word   readCachedRef
+.word   terminateForPullOutRef
 .word   0x0
 
 @---------------------------------------------------------------------------------
@@ -71,9 +77,7 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, cardReadRef1
-    ldr     r7, ce9location1
-    add     r6, r6, r7
+	ldr		r6, =cardRead
     
 	bl		_blx_r6_stub_card_read
 
@@ -86,23 +90,17 @@ cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
 .word    0x00000000  
-readCachedRef:
+terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
-.word    0x00000000
-ce9location1:
-.word   ce9
-cardReadRef1:
-.word   cardRead-ce9 	  
+.word    0x00000000  
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push	{r3-r7, lr}
 
-	ldr		r6, cardReadRef2
-    ldr     r7, ce9location2
-    add     r6, r6, r7
+	ldr		r6, =cardRead
 
 	bl		_blx_r6_stub_thumb_card_read	
 
@@ -112,10 +110,6 @@ _blx_r6_stub_thumb_card_read:
 	bx	r6	
 .pool
 .align	4
-ce9location2:
-.word   ce9
-cardReadRef2:
-.word   cardRead-ce9 	
 	.arm
 @---------------------------------------------------------------------------------
 
@@ -135,14 +129,11 @@ card_dma_arm9:
 
 @---------------------------------------------------------------------------------
 card_pull_out_arm9:
+card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
 @---------------------------------------------------------------------------------
 
-@---------------------------------------------------------------------------------
-card_pull:
-@---------------------------------------------------------------------------------
-	bx      lr
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
@@ -160,15 +151,88 @@ thumb_card_dma_arm9:
 
 @---------------------------------------------------------------------------------
 thumb_card_pull_out_arm9:
+thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
 @---------------------------------------------------------------------------------
 
-@---------------------------------------------------------------------------------
-thumb_card_pull:
-@---------------------------------------------------------------------------------
-	bx      lr
 	.arm
+@---------------------------------------------------------------------------------
+nand_read_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, =nandRead
+
+	bl		_blx_r6_stub_nand_read	
+    
+
+	ldmfd   sp!, {r3-r9,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_nand_read:
+	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+nand_write_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, =nandWrite
+
+	bl		_blx_r6_stub_nand_write
+    
+
+	ldmfd   sp!, {r3-r9,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_nand_write:
+	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+	.thumb    
+@---------------------------------------------------------------------------------
+thumb_nand_read_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr		r6, =nandRead
+
+	bl		_blx_r6_stub_thumb_nand_read	
+    
+
+	pop	{r1-r7, pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_thumb_nand_read:
+	bx	r6	
+.pool
+.align	4
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_nand_write_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr		r6, =nandWrite
+
+	bl		_blx_r6_stub_thumb_nand_write
+    
+
+	pop	{r1-r7, pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_thumb_nand_write:
+	bx	r6	
+.pool
+.align	4
+@---------------------------------------------------------------------------------
+
+	.arm    
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:

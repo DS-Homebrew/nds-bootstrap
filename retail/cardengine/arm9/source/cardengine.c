@@ -51,6 +51,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
+static aFile savFile;
 
 static bool flagsSet = false;
 
@@ -123,8 +124,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			clusterCacheSize = 0x4000;
 
 			romFile = getFileFromCluster(ce9->fileCluster);
-
 			buildFatTableCache(&romFile, 0);
+
+			savFile = getFileFromCluster(ce9->saveCluster);
 		}
 
 		if (isSdk5(ce9->moduleParams)) {
@@ -157,4 +159,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32* cachePage = cacheStruct + 2;
 
 	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+}
+
+u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+	fileRead(memory, savFile, flash, len, -1);
+    return 0; 
+}
+
+u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+	fileWrite(memory, savFile, flash, len, -1);
+	return 0;
 }

@@ -885,9 +885,9 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
+		savFile->firstCluster,
 		ROMinRAM,
 		romLocation,
-		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
 		(u32)patchHeapPointer(moduleParams, ndsHeader)/4

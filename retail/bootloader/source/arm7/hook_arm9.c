@@ -8,9 +8,9 @@ int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 saveCluster,
 	u32 ROMinRAM,
 	u32 romLocation,
-	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
 	u32 consoleModel,
     u32 fatTableAddr
@@ -19,9 +19,9 @@ int hookNdsRetailArm9(
 
 	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
+	ce9->saveCluster            = saveCluster;
 	ce9->ROMinRAM               = ROMinRAM;
 	ce9->romLocation            = romLocation;
-	ce9->dsiMode                = dsiMode; // SDK 5
 	ce9->enableExceptionHandler = enableExceptionHandler;
 	ce9->consoleModel           = consoleModel;
 	ce9->fatTableAddr           = fatTableAddr;
