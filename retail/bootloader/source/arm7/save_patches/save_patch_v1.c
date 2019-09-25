@@ -165,31 +165,31 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	dbg_printf("Eeprom page erase:\t");
 	dbg_hexa((u32)eepromPageErase);
 	dbg_printf("\n");
-	*eepromPageErase = (extendedMemory ? ce7->patches->arm7Functions->eepromPageErase : 0x02000100);
+	*eepromPageErase = (extendedMemory ? ce7->patches->arm7Functions->eepromPageErase : 0x23DBFFC);
 
 	u32* eepromPageVerify = (u32*)(JumpTableFunc + 0x2C);
 	dbg_printf("Eeprom verify:\t");
 	dbg_hexa((u32)eepromPageVerify);
 	dbg_printf("\n");
-	*eepromPageVerify = (extendedMemory ? ce7->patches->arm7Functions->eepromPageVerify : 0x02000100);
+	*eepromPageVerify = (extendedMemory ? ce7->patches->arm7Functions->eepromPageVerify : 0x23DBFFC);
 
 	u32* eepromPageWrite = (u32*)(JumpTableFunc + 0x48);
 	dbg_printf("Eeprom page write:\t");
 	dbg_hexa((u32)eepromPageWrite);
 	dbg_printf("\n");
-	*eepromPageWrite = (extendedMemory ? ce7->patches->arm7Functions->eepromPageWrite : 0x02000100);
+	*eepromPageWrite = (extendedMemory ? ce7->patches->arm7Functions->eepromPageWrite : 0x23DBFFC);
 
 	u32* eepromPageProg = (u32*)(JumpTableFunc + 0x64);
 	dbg_printf("Eeprom page prog:\t");
 	dbg_hexa((u32)eepromPageProg);
 	dbg_printf("\n");
-	*eepromPageProg = (extendedMemory ? ce7->patches->arm7Functions->eepromPageProg : 0x02000100);
+	*eepromPageProg = (extendedMemory ? ce7->patches->arm7Functions->eepromPageProg : 0x23DBFFC);
 
 	u32* eepromRead = (u32*)(JumpTableFunc + 0x80);
 	dbg_printf("Eeprom read:\t");
 	dbg_hexa((u32)eepromRead);
 	dbg_printf("\n");
-	*eepromRead = (extendedMemory ? ce7->patches->arm7Functions->eepromRead : 0x02000100);
+	*eepromRead = (extendedMemory ? ce7->patches->arm7Functions->eepromRead : 0x23DBFFC);
 
 	u32* cardRead = (u32*)(JumpTableFunc + 0xA0);
 	dbg_printf("Card read:\t");
@@ -212,7 +212,7 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		dbg_printf("???:\t\t\t");
 		dbg_hexa((u32)current);
 		dbg_printf("\n");
-		*current = (extendedMemory ? ce7->patches->arm7Functions->eepromProtect : 0x02000100);
+		*current = (extendedMemory ? ce7->patches->arm7Functions->eepromProtect : 0x23DBFFC);
 	}
 
 

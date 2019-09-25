@@ -518,9 +518,6 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
-	*(u8*)(0x23FFC44) = 0x01;
-
-	// *(u32*)(0x2000a28) = 0xE2844004; //044084E2;
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);

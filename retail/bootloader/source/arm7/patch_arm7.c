@@ -159,7 +159,7 @@ u32 patchCardNdsArm7(
 
 	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);*/
 
-	*(u32*)(0x2000100) = 0xE12FFF1E;
+	*(u32*)(0x23DBFFC) = 0xE12FFF1E;
 
 	u32 saveResult = 0;
 	if (isSdk5(moduleParams)) {
