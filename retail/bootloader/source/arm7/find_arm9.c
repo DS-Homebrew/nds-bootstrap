@@ -164,10 +164,16 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if (strcmp(romTid, "UORE") == 0) { // Start at 0x3800 for "WarioWare: DIY (USA)"
+	if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x3800 for "WarioWare: DIY"
 		//readType = 1;
 		cardReadEndOffset = findOffset(
 			(u32*)ndsHeader->arm9destination + 0x3800, 0x00300000,//ndsHeader->arm9binarySize,
+			cardReadEndSignatureAlt, 2
+		);
+	} else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
+		//readType = 1;
+		cardReadEndOffset = findOffset(
+			(u32*)((u8*)ndsHeader->arm9destination + 0x80000), 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignatureAlt, 2
 		);
 	} else {
@@ -472,68 +478,6 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 	return cardReadStartOffset;
 }
 
-u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	dbg_printf("findCardReadCachedEndOffset:\n");
-
-	const u32* cardReadCachedEndSignature = cardReadCachedEndSignature1;
-	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
-		cardReadCachedEndSignature = cardReadCachedEndSignature3;
-	} else if (moduleParams->sdk_version > 0x4000000) {
-		cardReadCachedEndSignature = cardReadCachedEndSignature4;
-	}
-	
-	u32* cardReadCachedEndOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardReadCachedEndSignature, 4
-	);
-	if (cardReadCachedEndOffset) {
-		dbg_printf("Card read cached end found: ");
-	} else {
-		dbg_printf("Card read cached end not found\n");
-		//cardReadFound = false;
-	}
-
-	if (cardReadCachedEndOffset) {
-		dbg_hexa((u32)cardReadCachedEndOffset);
-		dbg_printf("\n");
-	}
-
-	dbg_printf("\n");
-	return cardReadCachedEndOffset;
-}
-
-u32* findCardReadCachedStartOffset(const module_params_t* moduleParams, const u32* cardReadCachedEndOffset) {
-	if (!cardReadCachedEndOffset) {
-		return NULL;
-	}
-
-	dbg_printf("findCardReadCachedStartOffset:\n");
-
-	const u32* cardReadCachedStartSignature = cardReadCachedStartSignature1;
-	if (moduleParams->sdk_version > 0x4000000) {
-		cardReadCachedStartSignature = cardReadCachedStartSignature4;
-	}
-	
-	u32* cardReadCachedStartOffset = findOffsetBackwards(
-		cardReadCachedEndOffset, 0xFF,
-		cardReadCachedStartSignature, 2
-	);
-	if (cardReadCachedStartOffset) {
-		dbg_printf("Card read cached start found: ");
-	} else {
-		dbg_printf("Card read cached start not found\n");
-		//cardReadFound = false;
-	}
-
-	if (cardReadCachedStartOffset) {
-		dbg_hexa((u32)cardReadCachedStartOffset);
-		dbg_printf("\n");
-	}
-
-	dbg_printf("\n");
-	return cardReadCachedStartOffset;
-}
-
 u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardPullOutOffset:\n");
 
@@ -827,7 +771,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 	if (moduleParams->sdk_version > 0x5000000) {
 		// SDK 5
 		cardIdStartOffset = findOffsetBackwards(
-			(u32*)cardIdEndOffset, 0x100,
+			(u32*)cardIdEndOffset, 0x50,
 			cardIdStartSignature5, 2
 		);
 		if (cardIdStartOffset) {
@@ -840,7 +784,7 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 			// SDK 5
 			if (moduleParams->sdk_version > 0x5000000) {
 				cardIdStartOffset = findOffsetBackwards(
-					(u32*)cardIdEndOffset, 0x100,
+					(u32*)cardIdEndOffset, 0x50,
 					cardIdStartSignature5Alt, 1
 				);
 				if (cardIdStartOffset) {
@@ -860,17 +804,17 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 		} else {
 			dbg_printf("Card ID start not found\n");
 		}
+	}
 
-		if (!cardIdStartOffset) {
-			cardIdStartOffset = findOffsetBackwards(
-				(u32*)cardIdEndOffset, 0x100,
-				cardIdStartSignatureAlt1, 1
-			);
-			if (cardIdStartOffset) {
-				dbg_printf("Card ID start alt 1 found: ");
-			} else {
-				dbg_printf("Card ID start alt 1 not found\n");
-			}
+	if (!cardIdStartOffset) {
+		cardIdStartOffset = findOffsetBackwards(
+			(u32*)cardIdEndOffset, 0x100,
+			cardIdStartSignatureAlt1, 1
+		);
+		if (cardIdStartOffset) {
+			dbg_printf("Card ID start alt 1 found: ");
+		} else {
+			dbg_printf("Card ID start alt 1 not found\n");
 		}
 	}
 
