@@ -1,18 +1,14 @@
 <p align="center">
  <img src="https://i.imgur.com/BFIu7xX.png"><br>
- <span style="padding-right: 5px;">
-  <a href="https://travis-ci.org/ahezard/nds-bootstrap">
-   <img src="https://travis-ci.org/ahezard/nds-bootstrap.svg?branch=master">
- <span style="padding-right: 5px;">
+  <a href="https://gbatemp.net/threads/nds-bootstrap-loader-run-commercial-nds-backups-from-an-sd-card.454323/">
+   <img src="https://img.shields.io/badge/GBATemp-Thread-blue.svg">
+  </a>
   <a href="https://dev.azure.com/DS-Homebrew/Builds/_build?definitionId=12">
-   <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=b4ds">
+   <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
- </span>
- <span style="padding-left: 5px;">
-  <a href="https://dshomebrew.serveo.net/">
-   <img src="https://github.com/ahezard/nds-bootstrap/blob/master/images/Rocket.Chat button.png" height="20">
+  <a href="https://discord.gg/yqSut8c">
+   <img src="https://img.shields.io/badge/Discord%20Server-%23nds--bootstrap-green.svg">
   </a>
- </span>
 </p>
 
 nds-bootstrap for DS (B4DS) is an open-source application that allows Nintendo DS ROMs to be natively utilised rather than using an emulator. This works on the Nintendo (3)DS(i) through flashcarts.
