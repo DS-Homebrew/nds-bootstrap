@@ -160,8 +160,8 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 
 	// Card ID
-	u32* cardIdEndOffset;
-	u32* cardIdStartOffset;
+	u32* cardIdStartOffset = NULL;
+	u32* cardIdEndOffset = NULL;
 	if (usesThumb) {
 		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
 		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
@@ -169,22 +169,15 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
 		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
 	}
-	if (cardIdEndOffset) {
-		debug[1] = (u32)cardIdEndOffset;
-	}
+
 	if (cardIdStartOffset) {
-		/*
-		// Cache struct
-		u32* cacheStruct = (u32**)(cardIdStartOffset - 1);
-		debug[7] = (u32)*cacheStruct;
+		dbg_printf("Found cardId\n\n");
 
-		// Save cache struct
-		ce9->cacheStruct = (u32)*cacheStruct;
-		*/
-
-		// Patch
+        // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
-		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x4 : 0x8);
+
+		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
+		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
 
@@ -313,7 +306,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = *heapPointer + 0x4000; // shrink heap by 16 KB
+	*heapPointer = *heapPointer + 0x2000; // shrink heap by 8 KB
     
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);

@@ -121,7 +121,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 
 			lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
-			clusterCacheSize = 0x4000;
+			clusterCacheSize = 0x2000;
 
 			romFile = getFileFromCluster(ce9->fileCluster);
 			buildFatTableCache(&romFile, 0);
