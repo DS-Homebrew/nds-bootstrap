@@ -890,7 +890,7 @@ int arm7_main(void) {
 		dsiModeConfirmed,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
-		(u32)patchHeapPointer(moduleParams, ndsHeader)
+		(u32)patchHeapPointer(moduleParams, ndsHeader)/4
 	);
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);

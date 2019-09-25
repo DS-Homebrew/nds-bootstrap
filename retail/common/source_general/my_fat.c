@@ -29,12 +29,13 @@
     project at chishm@hotmail.com
 ------------------------------------------------------------------*/
    
-#include <string.h> // memcpy
+#include <string.h> // tonccpy
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
 
-//#define memcpy __builtin_memcpy
+//#define tonccpy __builtin_tonccpy
 
 
 //---------------------------------------------------------------
@@ -621,7 +622,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    memcpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
+    tonccpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -736,7 +737,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
-        memcpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
+        tonccpy(buffer+dataPos,globalBuffer+curByte,length-dataPos);
         curByte+=length;
         dataPos+=length;
 	}
@@ -806,7 +807,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    memcpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
+    tonccpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -866,7 +867,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
-        memcpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
+        tonccpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
         curByte+=length;
         dataPos+=length;
 

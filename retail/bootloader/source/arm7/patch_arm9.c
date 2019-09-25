@@ -106,27 +106,6 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
-static void patchCardReadCached(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (usesThumb || moduleParams->sdk_version > 0x5000000) {
-		return;
-	}
-
-	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "AYW", 3) == 0 // Yoshi's Island DS
-	|| strncmp(romTid, "A2L", 3) == 0) // Anno 1701: Dawn of Discovery
-	{
-		// Card read cached
-		u32* cardReadCachedEndOffset = findCardReadCachedEndOffset(ndsHeader, moduleParams);
-		u32* cardReadCachedStartOffset = findCardReadCachedStartOffset(moduleParams, cardReadCachedEndOffset);
-		if (!cardReadCachedStartOffset) {
-			return;
-		}
-		// Patch
-		u32* readCachedPatch = (usesThumb ? ce9->thumbPatches->readCachedRef : ce9->patches->readCachedRef);
-		*readCachedPatch = (u32)cardReadCachedStartOffset;
-	}
-}
-
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
 	u32* cardPullOutOffset;
@@ -584,8 +563,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
-
-	patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
 

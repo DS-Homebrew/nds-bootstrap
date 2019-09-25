@@ -33,6 +33,7 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
+#include "tonccpy.h"
 #include "my_fat.h"
 
 extern cardengineArm9* volatile ce9;
@@ -83,59 +84,14 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	//u32 commandRead;
 	while (len > 0) {
-		u32 len2 = len;
-		if (len2 > 512) {
-			len2 -= src % 4;
-			len2 -= len2 % 32;
-		}
+		// Copy directly
+		tonccpy(dst, (u8*)((ce9->romLocation - 0x4000 - ndsHeader->arm9binarySize)+src),len);
 
-		if (isSdk5(ce9->moduleParams) || *ce9->patches->readCachedRef == 0 || (len2 % 32 == 0 && ((u32)dst)%4 == 0 && src%4 == 0)) {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+		// Update cardi common
+		cardStruct[0] = src + len;
+		cardStruct[1] = (vu32)(dst + len);	
+		cardStruct[2] = len - len;
 
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = src;
-			sharedAddr[3] = commandRead;
-
-			//IPC_SendSync(0xEE24);
-
-			waitForArm7();
-			// -------------------------------------
-			#endif
-
-			// Copy directly
-			memcpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
-
-			// Update cardi common
-			cardStruct[0] = src + len;
-			cardStruct[1] = (vu32)(dst + len);
-			cardStruct[2] = len - len;
-		} else {
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
-
-			sharedAddr[0] = cacheBuffer;
-			sharedAddr[1] = len2;
-			sharedAddr[2] = page;
-			sharedAddr[3] = commandRead;
-
-			//IPC_SendSync(0xEE24);
-
-			waitForArm7();
-			// -------------------------------------
-			#endif
-
-			// Read via the 512b ram cache
-			memcpy(cacheBuffer, (u8*)((ce9->romLocation - 0x4000 - ndsHeader->arm9binarySize) + page), 512);
-			*cachePage = page;
-            volatile int (*readCachedRef)(u32*) = *ce9->patches->readCachedRef;
-			(*readCachedRef)(cacheStruct);
-		}
 		len = cardStruct[2];
 		if (len > 0) {
 			src = cardStruct[0];
