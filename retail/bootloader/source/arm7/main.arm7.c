@@ -499,13 +499,9 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	*foundPtr = (bool)moduleParams;
 	if (*foundPtr) {
 		// Found module params
-		//*(vu32*)0x2800008 = ((u32)moduleParamsOffset - 0x8);
-		//*(vu32*)0x2800008 = (vu32)(moduleParamsOffset - 2);
-		*(vu32*)0x2800008 = (vu32)((u32*)moduleParams + 5); // (u32*)moduleParams + 7 - 2
 	} else {
 		nocashMessage("No moduleparams?\n");
 		moduleParams = buildModuleParams(donorSdkVer);
-		*(vu32*)0x2800010 = 1;
 	}
 	return moduleParams;
 }
