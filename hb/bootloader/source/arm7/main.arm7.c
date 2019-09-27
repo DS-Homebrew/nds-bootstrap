@@ -589,7 +589,7 @@ int arm7_main (void) {
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
-	if (ramDiskSize == 0) {
+	if (!dsiMode && ramDiskSize == 0) {
 		u32* a9bin = (u32*)0x02000000;
 		if (a9bin[0] == 0) {
 			a9bin = (u32*)0x02000800;
