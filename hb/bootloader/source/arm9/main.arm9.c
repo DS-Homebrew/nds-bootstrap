@@ -181,6 +181,10 @@ void arm9_main(void) {
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
+		if (arm9_stateFlag == ARM9_LOCKSCFG) {
+			REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+			arm9_stateFlag = ARM9_READY;
+		}
 	}
 
 	REG_IME = 0;

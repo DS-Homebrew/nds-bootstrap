@@ -52,7 +52,8 @@ enum {
 	ARM9_READY,
 	ARM9_BOOTBIN,
 	ARM9_DISPERR,
-	ARM9_SETSCFG
+	ARM9_SETSCFG,
+	ARM9_LOCKSCFG
 } ARM9_STATE;
 
 extern bool dsiModeConfirmed;

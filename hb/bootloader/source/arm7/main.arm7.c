@@ -589,6 +589,19 @@ int arm7_main (void) {
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
+	if (ramDiskSize == 0) {
+		u32* a9bin = (u32*)0x02000000;
+		if (a9bin[0] == 0) {
+			a9bin = (u32*)0x02000800;
+		}
+		if (a9bin[0] == 0xE3A00301
+		 && a9bin[1] == 0xE5800208
+		 && a9bin[2] == 0xE3A00013
+		 && a9bin[3] == 0xE129F000) {
+			arm9_stateFlag = ARM9_LOCKSCFG;
+			while (arm9_stateFlag != ARM9_READY);
+		}
+	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
