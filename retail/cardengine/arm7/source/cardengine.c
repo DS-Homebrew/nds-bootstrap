@@ -109,9 +109,9 @@ static void initialize(void) {
 		sdmmc_init();
 		SD_Init();
 	}*/
-	FAT_InitFiles(false, 3);
+	FAT_InitFiles(true, 0);
 	//romFile = getFileFromCluster(fileCluster);
-	//buildFatTableCache(&romFile, 3);
+	//buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
 	if (romFile->fatTableCached) {
 		nocashMessage("fat table cached");
@@ -127,7 +127,7 @@ static void initialize(void) {
 	}*/
 		
 	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
+	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
 	enableDebug(myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
