@@ -115,10 +115,6 @@ dsiModeConsole:
 	.word	0x00000000
 logging:
 	.word	0x00000000
-cardengine_arm7_offset:
-	.word   cardengine_arm7_bin - _start
-cardengine_arm9_offset:
-	.word   cardengine_arm9_bin - _start
 
 startUp:
 	mov	r0, #0x04000000

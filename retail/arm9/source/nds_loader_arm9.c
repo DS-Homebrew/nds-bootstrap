@@ -29,6 +29,7 @@
 #include <nds/arm9/dldi.h>
 #include <nds/debug.h>
 
+#include "tonccpy.h"
 #include "hex.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
@@ -180,25 +181,6 @@ int loadArgs(int argc, const char** argv) {
 	return true;
 }
 
-int loadCheatData(u32* cheat_data, u32 cheat_data_len) {
-	nocashMessage("loadCheatData");
-			
-	cardengineArm7* ce7 = getCardengineArm7(lc0);
-	nocashMessage("ce7");
-	nocashMessage(tohex((u32)ce7));
-
-	u32* ce7_cheat_data = getCheatData(ce7);
-	nocashMessage("ce7_cheat_data");
-	nocashMessage(tohex((u32)ce7_cheat_data));
-	
-	//memcpy(ce7_cheat_data, cheat_data, 32768);
-	memcpy(ce7_cheat_data, cheat_data, cheat_data_len*sizeof(u32));
-
-	ce7->cheat_data_len = cheat_data_len;
-	
-	return true;
-}
-
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm"; // Different to a normal DLDI file
 
 #define DEVICE_TYPE_DLDI 0x49444C44
@@ -317,8 +299,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 
 	irqDisable(IRQ_ALL);
 
-	// Direct CPU access to VRAM bank C
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	// Direct CPU access to VRAM bank D
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Set the parameters for the loader
@@ -329,13 +310,6 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	loader->storedFileCluster = cluster;
 	loader->initDisc          = conf->initDisc;
 	loader->wantToPatchDLDI   = conf->dldiPatchNds;
-
-	loadArgs(conf->argc, conf->argv);
-	for (int i = 0; i < conf->argc; ++i) {
-		free((void*)conf->argv[i]);
-	}
-	free(conf->argv);
-
 	loader->saveFileCluster  = saveCluster;
 	loader->saveSize         = conf->saveSize;
 	loader->language         = conf->language;
@@ -358,13 +332,10 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	loader->dsiModeConsole   = isDSiMode();
 	loader->logging          = conf->logging;
 
-	loadCheatData(conf->cheat_data, conf->cheat_data_len);
-	free(conf->cheat_data);
-
 	free(conf);
 
 	// Load the loader into the correct address
-	memcpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_C, loader, loaderSize);
+	tonccpy(lc0, loader, loaderSize); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	// Patch the loader with a DLDI for the card
 	if (!dldiPatchLoader ((data_t*)lc0, loaderSize, true)) {
@@ -376,7 +347,6 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;	
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;		
 	
 	// Reset into a passme loop
@@ -391,7 +361,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(0x06000000);	
+	resetARM7(0x06020000);	
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");

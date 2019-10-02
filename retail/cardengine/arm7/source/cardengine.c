@@ -40,8 +40,8 @@
 #include "sr_data_srllastran.h" // For rebooting the game
 #include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
 
-static const char *unlaunchAutoLoadID = "AutoLoadInfo";
-static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
+//static const char *unlaunchAutoLoadID = "AutoLoadInfo";
+//static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
 //#define memcpy __builtin_memcpy
 
@@ -71,21 +71,20 @@ static bool calledViaIPC = false;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 
-static int cardReadTimeOut = 0;
-static int saveTimer = 0;
+//static int saveTimer = 0;
 
-static int softResetTimer = 0;
+/*static int softResetTimer = 0;
 static int volumeAdjustDelay = 0;
-static bool volumeAdjustActivated = false;
+static bool volumeAdjustActivated = false;*/
 
 //static bool ndmaUsed = false;
 
-static int cardEgnineCommandMutex = 0;
+//static int cardEgnineCommandMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 //static const char* romLocation = NULL;
 
-static void unlaunchSetHiyaBoot(void) {
+/*static void unlaunchSetHiyaBoot(void) {
 	memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -102,7 +101,7 @@ static void unlaunchSetHiyaBoot(void) {
 	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 	}
-}
+}*/
 
 static void initialize(void) {
 	if (initialized) {
@@ -151,114 +150,6 @@ static void initialize(void) {
 	initialized = true;
 }
 
-static void cardReadLED(bool on) {
-	if (consoleModel < 2) {
-		if (on) {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-					break;
-			}
-		} else {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-					break;
-			}
-		}
-	}
-}
-
-/*static void asyncCardReadLED(bool on) {
-	if (consoleModel < 2) {
-		if (on) {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-					break;
-			}
-		} else {
-			switch(romread_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-					break;
-			}
-		}
-	}
-}*/
-
-/*static void asyncCardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr + 2);
-	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr + 1);
-	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr + 3);
-
-	dbg_printf("\nasync card read received\n");
-
-	if (calledViaIPC) {
-		dbg_printf("\ntriggered via IPC\n");
-	}
-
-	dbg_printf("\nstr : \n");
-	dbg_hexa((u32)cardStruct);
-	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);	
-	#endif
-
-	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
-	#ifdef DEBUG
-	nocashMessage("fileRead romFile");
-	#endif
-	fileRead((char*)dst, *romFile, src, len, 0);
-	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
-
-	#ifdef DEBUG
-	dbg_printf("\nread \n");
-	if (is_aligned(dst, 4) || is_aligned(len, 4)) {
-		dbg_printf("\n aligned read : \n");
-	} else {
-		dbg_printf("\n misaligned read : \n");
-	}
-	#endif
-}*/
-
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -293,7 +184,7 @@ void myIrqHandlerVBlank(void) {
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
+	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
@@ -352,7 +243,7 @@ void myIrqHandlerVBlank(void) {
 			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 			saveTimer = 0;
 		}
-	}
+	}*/
 
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
@@ -436,10 +327,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
 	initialize();
-	if (saveTimer == 0) {
+	/*if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
-	saveTimer = 1;
+	saveTimer = 1;*/
 	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;
@@ -458,10 +349,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	initialize();
-	if (saveTimer == 0) {
+	/*if (saveTimer == 0) {
 		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	}
-	saveTimer = 1;
+	saveTimer = 1;*/
 	fileWrite(src, *savFile, dst, len, -1);
 
 	return true;

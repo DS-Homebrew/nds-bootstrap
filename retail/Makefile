@@ -8,9 +8,9 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 # These set the information text in the nds file
-GAME_TITLE     := nds-bootstrap
+GAME_TITLE     := NDS BOOTSTRAP
 GAME_SUBTITLE1 := Runs an .nds file
-GAME_SUBTITLE2 := Made by ahezard
+GAME_SUBTITLE2 := Made by Ahezard
 
 include $(DEVKITARM)/ds_rules
 
@@ -35,6 +35,7 @@ SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=	data
 ASSETS		:=	assets
+NITRODATA	:=	nitrofiles
 GRAPHICS	:=  $(ASSETS)/gfx
 
 #---------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9  clean
+.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm9 clean
 
 all:	$(OUTPUT)
 
@@ -148,7 +149,7 @@ nightly:	$(OUTPUT)
 	@mv $(OUTPUT) $(CURDIR)/$(BIN)/$(TARGET)-nightly.nds
 
 $(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
-	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf \
+	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf -d $(NITRODATA) \
 			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
@@ -161,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -171,10 +172,6 @@ cardengine_arm7: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
-
-#---------------------------------------------------------------------------------		
-cardengine_arm9_exmem: $(DATA)
-	@$(MAKE) -C cardengine/arm9_exmem
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
@@ -189,7 +186,6 @@ clean:
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
-	@$(MAKE) -C cardengine/arm9_exmem clean
 	@$(MAKE) -C bootloader clean
 		
 $(DATA):

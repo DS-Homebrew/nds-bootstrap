@@ -33,10 +33,6 @@ typedef struct configuration {
 	bool logging;
 	bool initDisc;
 	bool dldiPatchNds;
-	int argc;
-	const char** argv; //const char* argv[ARG_MAX];
-	u32* cheat_data; //u32 cheat_data[CHEAT_DATA_MAX_LEN]
-	u32 cheat_data_len;
 	u32 backlightMode;
 } configuration;
 

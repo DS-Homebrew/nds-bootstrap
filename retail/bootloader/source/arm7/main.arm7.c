@@ -64,7 +64,6 @@
 #include "locations.h"
 #include "loading_screen.h"
 
-#include "cardengine_arm7_bin.h"
 #include "cardengine_arm9_bin.h"
 
 #define STORED_FILE_CLUSTER_OFFSET 4 
@@ -584,7 +583,7 @@ int arm7_main(void) {
 	aFile* romFile = (extendedMemory ? (aFile*)ROM_FILE_LOCATION : malloc(32));
 	*romFile = getFileFromCluster(storedFileCluster);
 
-	const char* bootName = "NDS.NDS";
+	const char* bootName = "BOOT.NDS";
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
@@ -603,12 +602,12 @@ int arm7_main(void) {
 	nocashMessage("status1");
 
 	// Sav file
-	aFile* savFile = (extendedMemory ? (aFile*)SAV_FILE_LOCATION : malloc(32));
-	*savFile = getFileFromCluster(storedFileCluster);
+	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+	*savFile = getFileFromCluster(saveFileCluster);
 	
-	if (savFile->firstCluster != CLUSTER_FREE && extendedMemory) {
+	/*if (savFile->firstCluster != CLUSTER_FREE && extendedMemory) {
 		buildFatTableCache(savFile, 3);
-	}
+	}*/
 
 	int errorCode;
 
@@ -657,11 +656,10 @@ int arm7_main(void) {
 	// 4 dots
 	//
 
-	if (extendedMemory) {
-		memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)cardengine_arm7_bin, cardengine_arm7_bin_size);
-		dldiPatchBinary((data_t*)(CARDENGINE_ARM7_LOCATION), cardengine_arm7_bin_size);
-	}
 	increaseLoadBarLength();
+	memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0x10000);
+	memset((u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0, 0x10000);
+	dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x10000);
     /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
@@ -702,26 +700,24 @@ int arm7_main(void) {
 	// 6 dots
 	//
 
-	if (extendedMemory) {
-		cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
-		errorCode = hookNdsRetailArm7(
-			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
-			ndsHeader,
-			moduleParams,
-			romFile->firstCluster,
-			language,
-			dsiModeConfirmed,
-			ROMinRAM,
-			consoleModel,
-			romread_LED,
-			gameSoftReset
-		);
-		if (errorCode == ERR_NONE) {
-			nocashMessage("Card hook successful");
-		} else {
-			nocashMessage("Card hook failed");
-			errorOutput();
-		}
+	//cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
+	errorCode = hookNdsRetailArm7(
+		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+		ndsHeader,
+		moduleParams,
+		romFile->firstCluster,
+		language,
+		dsiModeConfirmed,
+		ROMinRAM,
+		consoleModel,
+		romread_LED,
+		gameSoftReset
+	);
+	if (errorCode == ERR_NONE) {
+		nocashMessage("Card hook successful");
+	} else {
+		nocashMessage("Card hook failed");
+		errorOutput();
 	}
 	increaseLoadBarLength();
 

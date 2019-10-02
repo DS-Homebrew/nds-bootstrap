@@ -14,9 +14,7 @@
 #include "configuration.h"
 #include "conf_sd.h"
 #include "nitrofs.h"
-
-static u16 bmpImageBuffer[256*192];
-static u16 renderedImageBuffer[256*192];
+#include "locations.h"
 
 static off_t getSaveSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -125,40 +123,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Logging
 		conf->logging = (bool)strtol(value, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "CHEAT_DATA")) {
-		// Cheat data
-		conf->cheat_data = malloc(CHEAT_DATA_MAX_SIZE);
-		conf->cheat_data_len = 0;
-		char* str = strdup(value);
-		char* cheat = strtok(str, " ");
-		if (cheat != NULL) {
-			printf("Cheat data present\n");
-		}
-		while (cheat != NULL) {
-			if (!checkCheatDataLen(conf->cheat_data_len)) {
-				printf("Cheat data size limit reached, the cheats are ignored!\n");
-				memset(conf->cheat_data, 0, conf->cheat_data_len*sizeof(u32)); //cheats.clear();
-				conf->cheat_data_len = 0;
-				break;
-			}
-			printf(cheat);
-			nocashMessage(cheat);
-			printf(" ");
-
-			conf->cheat_data[conf->cheat_data_len] = strtoul(cheat, NULL, 16);
-
-			nocashMessage(tohex(conf->cheat_data[conf->cheat_data_len]));
-			printf(" ");
-
-			++conf->cheat_data_len;
-
-			cheat = strtok(NULL, " ");
-		}
-
-		free(str);
-
-		realloc(conf->cheat_data, conf->cheat_data_len*sizeof(u32));
-
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BACKLIGHT_MODE")) {
 		// Backlight mode
 		conf->backlightMode = strtol(value, NULL, 0);
@@ -197,84 +161,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	ini_browse(callback, conf, "fat:/_nds/nds-bootstrap.ini");
 
-	nitroFSInit(bootstrapPath);
+	if (!nitroFSInit(bootstrapPath)) {
+		consoleDemoInit();
+		printf("nitroFSInit failed!\n");
+		return -1;
+	}
 	
-	if (conf->loadingScreen == 5) {
-		FILE* loadingScreenImage;
-		//char loadingImagePath[256];
-
-		//for (int i = 0; i <= conf->loadingFrames; i++) {
-		for (int i = 0; i < 1; i++) {
-			//snprintf(loadingImagePath, sizeof(loadingImagePath), "%s%i.bmp", conf->loadingImagePath, i);
-			//loadingScreenImage = fopen(loadingImagePath, "rb");
-			//if (!loadingScreenImage && i == 0) {
-				loadingScreenImage = fopen("nitro:/loading_metalBG.bmp", "rb");
-				conf->loadingFps = 0;
-				conf->loadingBar = true;
-				conf->loadingBarYpos = 89;
-			//}
-			if (loadingScreenImage) {
-				// Start loading
-				fseek(loadingScreenImage, 0xe, SEEK_SET);
-				u8 pixelStart = (u8)fgetc(loadingScreenImage) + 0xe;
-				fseek(loadingScreenImage, pixelStart, SEEK_SET);
-				fread(bmpImageBuffer, 2, 0x1A000, loadingScreenImage);
-				u16* src = bmpImageBuffer;
-				int x = 0;
-				int y = 191;
-				for (int i=0; i<256*192; i++) {
-					if (x >= 256) {
-						x = 0;
-						y--;
-					}
-					u16 val = *(src++);
-					renderedImageBuffer[y*256+x] = ((val>>10)&0x1f) | ((val)&(0x1f<<5)) | (val&0x1f)<<10 | BIT(15);
-					x++;
-				}
-				memcpy((void*)0x02360000+(i*0x18000), renderedImageBuffer, sizeof(renderedImageBuffer));
-			}
-			fclose(loadingScreenImage);
-
-			if (conf->loadingFps == 0 || i == 29) break;
-		}
+	// Load ce7 binary
+	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+	if (cebin) {
+		fread((void*)CARDENGINE_ARM7_LOCATION_BUFFER, 1, 0x10000, cebin);
 	}
-
+	fclose(cebin);
+    
 	conf->saveSize = getSaveSize(conf->savPath);
-
-	conf->argc = 0;
-	conf->argv = malloc(ARG_MAX);
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 5, ".argv") == 0) {
-		FILE* argfile = fopen(conf->ndsPath, "rb");
-
-		char str[PATH_MAX];
-		char* pstr;
-		const char* seps = "\n\r\t ";
-
-		while (fgets(str, PATH_MAX, argfile)) {
-			// Find comment and end string there
-			if ((pstr = strchr(str, '#'))) {
-				*pstr = '\0';
-			}
-
-			// Tokenize arguments
-			pstr = strtok(str, seps);
-
-			while (pstr != NULL) {
-				conf->argv[conf->argc] = strdup(pstr);
-				++conf->argc;
-
-				pstr = strtok(NULL, seps);
-			}
-		}
-		fclose(argfile);
-
-		free(conf->ndsPath);
-		conf->ndsPath = strdup(conf->argv[0]);
-	} else {
-		conf->argv[0] = strdup(conf->ndsPath);
-		conf->argc = 1; //++conf->argc;
-	}
-	realloc(conf->argv, conf->argc*sizeof(const char*));
 
 	return 0;
 }

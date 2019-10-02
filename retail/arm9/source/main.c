@@ -88,7 +88,7 @@ static void dopause(void) {
 	scanKeys();
 }
 
-static void getSFCG_ARM9(void) {
+/*static void getSFCG_ARM9(void) {
 	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
 	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
 	//printf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
@@ -116,7 +116,7 @@ static void getSFCG_ARM7(void) {
 static void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler\n");
 	printf("ARM7 data %lX\n", value);
-}
+}*/
 
 static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
@@ -141,10 +141,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
-	dbg_printf("argc: %lu\n", conf->argc);
-	//const char** argv;
-	//u32 cheat_data[CHEAT_DATA_MAX_LEN];
-	dbg_printf("cheat_data_len: %lu\n", conf->cheat_data_len);
 	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
 }
 
@@ -297,7 +293,7 @@ static int runNdsFile(configuration* conf) {
 
 	debugConf(conf);
 
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0 || conf->argc == 0) {
+	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0) {
 		dbg_printf("No NDS file specified\n");
 		if (debug) {
 			dopause();
@@ -329,9 +325,6 @@ static int runNdsFile(configuration* conf) {
 	struct stat st;
 	struct stat stSav;
 	u32 clusterSav = 0;
-	char filePath[PATH_MAX];
-	int pathLen;
-	//const char* args[1];
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -341,20 +334,6 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
-	if (conf->argc <= 0 || !conf->argv) {
-		// Construct a command line if we weren't supplied with one
-		if (!getcwd(filePath, PATH_MAX)) {
-			return -3;
-		}
-		pathLen = strlen(filePath);
-		strcpy(filePath + pathLen, conf->ndsPath);
-		//args[0] = filePath;
-		//conf->argv = args;
-		memset(conf->argv, 0, conf->argc*sizeof(const char*));
-		conf->argv[0] = filePath;
-		conf->argc = 1;
-	}
-
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
@@ -381,8 +360,6 @@ int main(int argc, char** argv) {
 	if (status != 0) {
 		free(conf->ndsPath);
 		free(conf->savPath);
-		free(conf->argv);
-		free(conf->cheat_data);
 		free(conf);
 		
 		stop();
