@@ -34,7 +34,7 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	// Validate the relocation signature
 	u32 forwardedRelocStartAddr = relocationStart + 4;
-	if (!*(u32*)forwardedRelocStartAddr) {
+	if (!*(u32*)forwardedRelocStartAddr || *(u32*)forwardedRelocStartAddr < 0x02000000 || *(u32*)forwardedRelocStartAddr > 0x03000000) {
 		forwardedRelocStartAddr += 4;
 	}
 	u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
