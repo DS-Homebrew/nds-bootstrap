@@ -48,6 +48,8 @@ extern vu32* volatile cardStruct0;
 extern u32* lastClusterCacheUsed;
 extern u32 clusterCacheSize;
 
+static int cardEngineCommandMutex = 0;
+
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
@@ -56,29 +58,32 @@ static aFile savFile;
 static bool flagsSet = false;
 
 void myIrqHandlerVBlank(void) {
-	if (sharedAddr[3] == 0x53415652) {
-		// Read save
-		sysSetCardOwner (BUS_OWNER_ARM9);
+  	if (tryLockMutex(&cardEngineCommandMutex)) {
+		if (sharedAddr[3] == 0x53415652) {
+			// Read save
+			sysSetCardOwner (BUS_OWNER_ARM9);
 
-		u32 dst = *(vu32*)(sharedAddr+2);
-		u32 src = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
+			u32 dst = *(vu32*)(sharedAddr+2);
+			u32 src = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
 
-		fileRead((char*)dst, savFile, src, len, 0);
+			fileRead((char*)dst, savFile, src, len, 0);
 
-		sharedAddr[3] = 0;
-	}
-	if (sharedAddr[3] == 0x53415657) {
-		// Write save
-		sysSetCardOwner (BUS_OWNER_ARM9);
+			sharedAddr[3] = 0;
+		}
+		if (sharedAddr[3] == 0x53415657) {
+			// Write save
+			sysSetCardOwner (BUS_OWNER_ARM9);
 
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
+			u32 src = *(vu32*)(sharedAddr+2);
+			u32 dst = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
 
-		fileWrite((char*)src, savFile, dst, len, 0);
+			fileWrite((char*)src, savFile, dst, len, 0);
 
-		sharedAddr[3] = 0;
+			sharedAddr[3] = 0;
+		}
+  		unlockMutex(&cardEngineCommandMutex);
 	}
 }
 
