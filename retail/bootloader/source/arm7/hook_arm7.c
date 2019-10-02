@@ -342,7 +342,7 @@ int hookNdsRetailArm7(
 	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
 
-	*vblankHandler = ce7->patches->vblankHandler;
+	//*vblankHandler = ce7->patches->vblankHandler;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

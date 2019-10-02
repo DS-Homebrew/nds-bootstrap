@@ -32,7 +32,6 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
     u32 eepromRead;
     u32 cardRead;
     u32 cardId;
-    u32 swiHalt;
 } __attribute__ ((__packed__)) cardengineArm7PatchesArm7FunctionsThumb;
 
 //
@@ -49,11 +48,6 @@ typedef struct cardengineArm7Patches {
     u32 cacheFlushRef;
     u32 readCachedRef;
     cardengineArm7PatchesArm7Functions* arm7Functions;
-    u32* swi02;
-    u32* jThumb_newSwiHalt;
-    u32* j_newSwiHalt;
-    u32* j_twlGetPitchTable;
-    u32* getPitchTableStub;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
 } __attribute__ ((__packed__)) cardengineArm7Patches;
 
@@ -74,15 +68,7 @@ typedef struct cardengineArm7 {
     u32 consoleModel;
     u32 romread_LED;
     u32 gameSoftReset;
-    u32 soundFix;
-    u32 cheat_data_offset; //u32* cheat_data;
-    u32 cheat_data_len;
-    u32* romFileOffset;
 
 } __attribute__ ((__packed__)) cardengineArm7;
-
-inline u32* getCheatData(const cardengineArm7* ce7) {
-    return (u32*)((u32)ce7 + ce7->cheat_data_offset);
-}
 
 #endif // CARDENGINE_HEADER_ARM7_H

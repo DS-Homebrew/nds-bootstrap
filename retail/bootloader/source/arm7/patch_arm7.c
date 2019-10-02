@@ -40,62 +40,6 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	// swi 0x12 call
-	u32* swi12Offset = findSwi12Offset(ndsHeader);
-	if (swi12Offset) {
-		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = ce7->patches->swi02;
-		memcpy(swi12Offset, swi12Patch, 0x4);
-	}
-
-	// swi get pitch table
-	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
-	if (swiGetPitchTableOffset) {
-		// Patch
-		u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-	}
-}
-
-static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	bool usesThumb = false;
-
-	// swi halt
-	u32* swiHaltOffset = findSwiHaltOffset(ndsHeader, moduleParams);
-	if (!swiHaltOffset) {
-		dbg_printf("Trying thumb...\n");
-		swiHaltOffset = (u32*)findSwiHaltOffsetThumb(ndsHeader);
-		if (swiHaltOffset) {
-			usesThumb = true;
-		}
-	}
-	if (swiHaltOffset) {
-		// Patch
-		u32* swiHaltPatch = (usesThumb ? ce7->patches->jThumb_newSwiHalt : ce7->patches->j_newSwiHalt); // SDK 5
-		if (usesThumb) {
-			/*
-            // Find the relocation signature
-            u32 relocationStart = getOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-                relocateStartSignature, 1, 1);
-            if (!relocationStart) {
-                dbg_printf("Relocation start not found\n");
-        		return 0;
-            }
-        
-        	// Validate the relocation signature
-            u32 vAddrOfRelocSrc = relocationStart + 0x8;
-        
-            dbg_hexa((u32)swiHaltOffset);
-			const u16* patchSwiHalt = generateA7InstrThumb(swiHaltOffset - vAddrOfRelocSrc + 0x37F8000, ce7->patches->arm7FunctionsThumb->swiHalt);
-			((u16*)swiHaltOffset)[0] = patchSwiHalt[0];
-            ((u16*)swiHaltOffset)[1] = patchSwiHalt[1];*/
-		} else {
-			memcpy(swiHaltOffset, swiHaltPatch, 0xC);
-		}
-	}
-}
-
 static void patchSleep(const tNDSHeader* ndsHeader) {
 	bool usesThumb = false;
 
