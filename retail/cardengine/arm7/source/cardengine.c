@@ -77,6 +77,7 @@ static bool volumeAdjustActivated = false;*/
 //static bool ndmaUsed = false;
 
 //static int cardEgnineCommandMutex = 0;
+static int saveMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 //static const char* romLocation = NULL;
@@ -306,8 +307,11 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
-	fileRead(dst, *savFile, src, len, -1);
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		fileRead(dst, *savFile, src, len, -1);
+  		unlockMutex(&saveMutex);
+	}
 	return true;
 }
 
@@ -323,13 +327,15 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	initialize();
-	/*if (saveTimer == 0) {
-		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		/*if (saveTimer == 0) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+		}
+		saveTimer = 1;*/
+		fileWrite(src, *savFile, dst, len, -1);
+  		unlockMutex(&saveMutex);
 	}
-	saveTimer = 1;*/
-	fileWrite(src, *savFile, dst, len, -1);
-
 	return true;
 }
 
@@ -345,13 +351,15 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	initialize();
-	/*if (saveTimer == 0) {
-		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+  	if (tryLockMutex(&saveMutex)) {
+		initialize();
+		/*if (saveTimer == 0) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+		}
+		saveTimer = 1;*/
+		fileWrite(src, *savFile, dst, len, -1);
+  		unlockMutex(&saveMutex);
 	}
-	saveTimer = 1;*/
-	fileWrite(src, *savFile, dst, len, -1);
-
 	return true;
 }
 
