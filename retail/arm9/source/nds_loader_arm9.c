@@ -100,23 +100,6 @@ static inline void writeAddr(u8* mem, u32 offset, u32 value) {
 	((u32*)mem)[offset/sizeof(u32)] = value;
 }*/
 
-static inline void vramcpy(void* dst, const void* src, int len) {
-	u16* dst16 = (u16*)dst;
-	u16* src16 = (u16*)src;
-	
-	//dmaCopy(src, dst, len);
-
-	for (; len > 0; len -= 2) {
-		*dst16++ = *src16++;
-	}
-}
-/*static inline void vramcpy(u16* dst, const u16* src, u32 size) {
-	size = (size +1) & ~1; // Bigger nearest multiple of 2
-	do {
-		*dst++ = *src++;
-	} while (size -= 2);
-}*/
-
 // See: arm7/source/main.c
 static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataSize, u32 searchSize) {
 	const int* dataChunk = (const int*) data;
@@ -136,49 +119,6 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	}
 
 	return -1;
-}
-
-/*static inline void copyLoop(u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3; // Bigger nearest multiple of 4
-	do {
-		*dest = *src; //writeAddr((u8*)dest, 0, *src);
-		dest++;
-		src++;
-	} while (size -= 4);
-}*/
-
-int loadArgs(int argc, const char** argv) {
-	// Give arguments to loader
-
-	char* argStart = (char*)lc0 + lc0->argStart;
-	argStart = (char*)(((int)argStart + 3) & ~3); // Align to word
-	u16* argData = (u16*)argStart;
-	int argSize = 0;
-	u16 argTempVal = 0;
-	
-	for (; argc > 0 && *argv; ++argv, --argc) {
-		for (const char* argChar = *argv; *argChar != 0; ++argChar, ++argSize) {
-			if (argSize & 1) {
-				argTempVal |= (*argChar) << 8;
-				*argData = argTempVal;
-				++argData;
-			} else {
-				argTempVal = *argChar;
-			}
-		}
-		if (argSize & 1) {
-			*argData = argTempVal;
-			++argData;
-		}
-		argTempVal = 0;
-		++argSize;
-	}
-	*argData = argTempVal;
-
-	lc0->argStart = (u32)argStart - (u32)lc0;
-	lc0->argSize  = argSize;
-
-	return true;
 }
 
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm"; // Different to a normal DLDI file
@@ -240,7 +180,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-	vramcpy (pAH, pDH, dldiFileSize);
+	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -288,7 +228,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 	if (clearBSS && (pDH[DO_fixSections] & FIX_BSS)) { 
 		// Initialise the BSS to 0, only if the disc is being re-inited
-		memset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
+		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}
 
 	return true;

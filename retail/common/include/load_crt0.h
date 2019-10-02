@@ -10,8 +10,6 @@ typedef struct loadCrt0 {
     u32 storedFileCluster;
     u32 initDisc;
     u32 wantToPatchDLDI;
-    u32 argStart;
-    u32 argSize;
     u32 dldiOffset;
     u32 dsiSD;
     u32 saveFileCluster;

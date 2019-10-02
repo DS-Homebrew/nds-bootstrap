@@ -66,8 +66,10 @@ static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
-static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+//static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
+//static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+static aFile romFile;
+static aFile savFile;
 
 //static int saveTimer = 0;
 
@@ -112,22 +114,22 @@ static void initialize(void) {
 		SD_Init();
 	}*/
 	FAT_InitFiles(true, 0);
-	//romFile = getFileFromCluster(fileCluster);
-	//buildFatTableCache(&romFile, 0);
+	romFile = getFileFromCluster(fileCluster);
+	/*buildFatTableCache(&romFile, 0);
 	#ifdef DEBUG	
 	if (romFile->fatTableCached) {
 		nocashMessage("fat table cached");
 	} else {
 		nocashMessage("fat table not cached"); 
 	}
-	#endif
+	#endif*/
 	
-	/*if (saveCluster > 0) {
+	if (saveCluster > 0) {
 		savFile = getFileFromCluster(saveCluster);
 	} else {
 		savFile.firstCluster = CLUSTER_FREE;
-	}*/
-		
+	}
+
 	#ifdef DEBUG		
 	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
 	enableDebug(myDebugFile);
@@ -300,7 +302,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
-		fileRead(dst, *savFile, src, len, -1);
+		fileRead(dst, savFile, src, len, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -324,7 +326,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
 		saveTimer = 1;*/
-		fileWrite(src, *savFile, dst, len, -1);
+		fileWrite(src, savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -348,7 +350,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
 		saveTimer = 1;*/
-		fileWrite(src, *savFile, dst, len, -1);
+		fileWrite(src, savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -367,7 +369,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src, *savFile, dst, len, -1);
+	//fileWrite(src, savFile, dst, len, -1);
 	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 	return true;
 }
@@ -482,7 +484,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
-		fileRead(dst, *romFile, src, len, 2);
+		fileRead(dst, romFile, src, len, 2);
 		//ndmaUsed = true;
 		//cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 	//}

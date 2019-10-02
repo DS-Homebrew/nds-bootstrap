@@ -602,7 +602,7 @@ int arm7_main(void) {
 	nocashMessage("status1");
 
 	// Sav file
-	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+	aFile* savFile = (extendedMemory ? (aFile*)SAV_FILE_LOCATION : malloc(32));
 	*savFile = getFileFromCluster(saveFileCluster);
 	
 	/*if (savFile->firstCluster != CLUSTER_FREE && extendedMemory) {
@@ -657,9 +657,9 @@ int arm7_main(void) {
 	//
 
 	increaseLoadBarLength();
-	memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0x10000);
-	memset((u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0, 0x10000);
-	dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x10000);
+	//memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0x6000);
+	//memset((u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0, 0x6000);
+	dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x6000);
     /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);

@@ -56,8 +56,7 @@ clear_EWRAM_loop:
 	blt	clear_EWRAM_loop
 
 	mov	r8, #0x02400000
-	sub	r8, #0x00010000
-
+	sub	r8, #0x0001A000
 	mov	r9, #0x02400000
 	sub	r9, #0x0000C000
 clear_EWRAM_loop2:
