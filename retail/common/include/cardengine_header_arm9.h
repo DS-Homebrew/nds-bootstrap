@@ -10,7 +10,7 @@
 typedef struct cardengineArm9Patches {
     u32* card_read_arm9;
     u32* card_pull_out_arm9; // Unused
-    u32 offset2;
+    u32 vblankHandler;
     u32* card_id_arm9;
     u32* card_dma_arm9;
     u32* nand_read_arm9;
@@ -50,7 +50,7 @@ typedef struct cardengineArm9 {
     u32 ce9;
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
-    u32 intr_fifo_orig_return;
+    u32 intr_vblank_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
     u32 saveCluster;

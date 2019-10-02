@@ -38,6 +38,8 @@
 
 extern cardengineArm9* volatile ce9;
 
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+
 extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
@@ -52,6 +54,33 @@ static aFile romFile;
 static aFile savFile;
 
 static bool flagsSet = false;
+
+void myIrqHandlerVBlank(void) {
+	if (sharedAddr[3] == 0x53415652) {
+		// Read save
+		sysSetCardOwner (BUS_OWNER_ARM9);
+
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 src = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
+
+		fileRead((char*)dst, savFile, src, len, 0);
+
+		sharedAddr[3] = 0;
+	}
+	if (sharedAddr[3] == 0x53415657) {
+		// Write save
+		sysSetCardOwner (BUS_OWNER_ARM9);
+
+		u32 src = *(vu32*)(sharedAddr+2);
+		u32 dst = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
+
+		fileWrite((char*)src, savFile, dst, len, 0);
+
+		sharedAddr[3] = 0;
+	}
+}
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 	/*nocashMessage("begin\n");

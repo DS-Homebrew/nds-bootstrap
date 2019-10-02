@@ -729,7 +729,7 @@ int arm7_main(void) {
 		romLocation = ROM_LOCATION_S2;
 	}
 
-	hookNdsRetailArm9(
+	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
@@ -740,6 +740,12 @@ int arm7_main(void) {
 		consoleModel,
 		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader))
 	);
+	if (errorCode == ERR_NONE) {
+		nocashMessage("Card hook successful");
+	} else {
+		nocashMessage("Card hook failed");
+		errorOutput();
+	}
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	}

@@ -60,7 +60,8 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
-extern u32 soundFix;
+
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
 //static bool initializedIRQ = false;
@@ -103,6 +104,10 @@ static const tNDSHeader* ndsHeader = NULL;
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 	}
 }*/
+
+static void waitForArm9(void) {
+	while (sharedAddr[3] != (vu32)0);
+}
 
 static void initialize(void) {
 	if (initialized) {
@@ -301,8 +306,20 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
   	if (tryLockMutex(&saveMutex)) {
-		initialize();
-		fileRead(dst, savFile, src, len, -1);
+		//initialize();
+		//fileRead(dst, savFile, src, len, -1);
+
+		// Send a command to the ARM9 to read the save
+		u32 commandSaveRead = 0x53415652;
+
+		// Write the command
+		sharedAddr[0] = src;
+		sharedAddr[1] = len;
+		sharedAddr[2] = dst;
+		sharedAddr[3] = commandSaveRead;
+
+		waitForArm9();
+
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -321,12 +338,24 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
   	if (tryLockMutex(&saveMutex)) {
-		initialize();
+		//initialize();
 		/*if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
 		saveTimer = 1;*/
-		fileWrite(src, savFile, dst, len, -1);
+		//fileWrite(src, savFile, dst, len, -1);
+
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = src;
+		sharedAddr[3] = commandSaveWrite;
+
+		waitForArm9();
+
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -345,12 +374,24 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	if (tryLockMutex(&saveMutex)) {
-		initialize();
+		//initialize();
 		/*if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		}
 		saveTimer = 1;*/
-		fileWrite(src, savFile, dst, len, -1);
+		//fileWrite(src, savFile, dst, len, -1);
+
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = src;
+		sharedAddr[3] = commandSaveWrite;
+
+		waitForArm9();
+
   		unlockMutex(&saveMutex);
 	}
 	return true;

@@ -16,7 +16,7 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
-intr_fifo_orig_return:
+intr_vblank_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
@@ -43,10 +43,41 @@ fatTableAddr:
 
 card_engine_start:
 
+vblankHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_vblank
+	ldr 	r0,	intr_vblank_orig_return
+	bx  	r0
+
+code_handler_start_vblank:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerVBlank
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
+@---------------------------------------------------------------------------------
+_blx_r3_stub:
+@---------------------------------------------------------------------------------
+	bx	r3
+
+@---------------------------------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+exit:
+	pop   	{r0-r12} 
+	pop  	{lr}
+	bx  lr
+
+.pool
+
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
-.word	0x0
+.word	vblankHandler
 .word	card_id_arm9
 .word	card_dma_arm9
 .word   nand_read_arm9
