@@ -669,7 +669,7 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
     //}
-	dldiPatchBinary((data_t*)(ce9Location), cardengine_arm9_bin_size);
+	dldiPatchBinary((data_t*)ce9Location, cardengine_arm9_bin_size);
 
 	increaseLoadBarLength();
 
@@ -700,7 +700,6 @@ int arm7_main(void) {
 	// 6 dots
 	//
 
-	//cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		ndsHeader,

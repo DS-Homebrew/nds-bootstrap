@@ -28,7 +28,6 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
-#include "my_sdmmc.h"
 #include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
@@ -61,8 +60,6 @@ extern u32 consoleModel;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 extern u32 soundFix;
-
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
 //static bool initializedIRQ = false;

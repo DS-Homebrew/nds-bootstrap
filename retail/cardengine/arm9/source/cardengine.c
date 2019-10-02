@@ -46,8 +46,6 @@ extern vu32* volatile cardStruct0;
 extern u32* lastClusterCacheUsed;
 extern u32 clusterCacheSize;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
-
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
