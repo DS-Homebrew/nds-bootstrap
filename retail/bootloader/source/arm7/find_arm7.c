@@ -51,7 +51,8 @@ static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F
 // irq enable
 static const u32 irqEnableStartSignature1[4]    = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
 static const u32 irqEnableStartSignature4[4]    = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
-static const u32 irqEnableStartSignature4Alt[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u32 irqEnableStartSignature4Alt1[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u32 irqEnableStartSignature4Alt2[4] = {0xE92D4010, 0xE1A04000, 0xEB00122B, 0xE59F2030}; // SDK 5
 
 //static bool sdk5 = false;
 
@@ -529,12 +530,25 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-            irqEnableStartSignature4Alt, 4
+            irqEnableStartSignature4Alt1, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable alt found: ");
+			dbg_printf("irq enable alt 1 found: ");
 		} else {
-			dbg_printf("irq enable alt not found\n");
+			dbg_printf("irq enable alt 1 not found\n");
+		}
+	}
+
+	if (!cardIrqEnableOffset) {
+		// SDK 5
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+            irqEnableStartSignature4Alt2, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable alt 2 found: ");
+		} else {
+			dbg_printf("irq enable alt 2 not found\n");
 		}
 	}
 

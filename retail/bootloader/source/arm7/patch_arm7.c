@@ -1,5 +1,6 @@
 #include <string.h> // memcpy
 #include <nds/system.h>
+#include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
 #include "find.h"
@@ -15,6 +16,7 @@ extern u32 forceSleepPatch;
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
@@ -153,6 +155,8 @@ u32 patchCardNdsArm7(
 		patchSleep(ndsHeader);
 	}
 
+    const char* romTid = getRomTid(ndsHeader);
+
 	/*if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
 	}
@@ -160,7 +164,12 @@ u32 patchCardNdsArm7(
 	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);*/
 
 	u32 saveResult = 0;
-	if (isSdk5(moduleParams)) {
+
+	if (
+        strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
+    ) {
+        saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+	} else if (isSdk5(moduleParams)) {
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);
 	} else {
