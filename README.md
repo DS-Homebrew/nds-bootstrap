@@ -11,24 +11,32 @@
   </a>
 </p>
 
-nds-bootstrap for DS (B4DS) is an open-source application that allows Nintendo DS ROMs to be natively utilised rather than using an emulator. This works on the Nintendo (3)DS(i) through flashcarts.
+nds-bootstrap's B4DS fork allows users to run Nintendo DS games on a flashcard via homebrew. The purpose of this is to allow TWiLightMenu++ to be used as a replacement menu for flashcards and to allow game booting on flashcards that can only load homebrew.
 
 # ROM Compatibility
 
-B4DS supports a small amount of DS ROMS. If you find a bug, please report it on [our Discord Server](https://discord.gg/yqSut8c).
+B4DS's game compatibility, while growing, is fairly short. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues).
 
-Be sure to manually patch out the Anti-Piracy functions though, as B4DS does not include patches of this sort.
+Anti-Piracy patches can be loaded via IPS files, but they are not included inside the software itself.
+Game saving is supported too and will be saved in the `.sav` extention.
+
+nds-bootstrap also supports many homebrew applications, including games like DSCraft.
 
 # Compiling
 
 In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. devkitPro includes `dkp-pacman` for easy installation of all components:
 
 ```
- $ dkp-pacman -Syu devkitARM general-tools dstools ndstool libnds libfat-nds
+ $ dkp-pacman -Syu devkitARM devkitarm-rules general-tools dstools ndstool libnds libfat-nds
 ```
 
 Once everything is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
 
 # Frontends
+A frontend isn't required to be used as nds-bootstrap uses an ini file to load its parameters. However, it is very much recommended.
 
-Since B4DS uses a .ini file to load the settings, a frontend isn't required. However, for ease of use, we recommend you use a frontend known as TWiLightMenu++. It's an open-source Nintendo DS, DSi, and 3DS home menu alternative made by RocketRobz that can also be used as a frontend for B4DS. It has a DSi theme, a 3DS theme, a SEGA Saturn theme, an R4 theme, and even an Acekard theme. It also has the ability to launch a large variety of ROMs including, NES, SNES, Game Boy, Game Boy Color, SEGA Master System, SEGA Game Gear, and SEGA Genesis, as well as Nintendo DS roms!
+## [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu)
+
+TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 5 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, SEGA Saturn menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
+
+It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-boostrap for you, with customizable per game settings.
