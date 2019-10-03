@@ -3,9 +3,8 @@
 
 #include "common.h"
 
+void clearScreen(void);
+void pleaseWaitOutput(void);
 void errorOutput(void);
-void debugOutput(void);
-void increaseLoadBarLength(void);
-void fadeOut(void);
 
 #endif // LOADING_SCREEN_H

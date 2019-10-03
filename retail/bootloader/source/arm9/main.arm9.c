@@ -46,24 +46,10 @@ extern void arm9_clearCache(void);
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
 bool extendedMemory = false;
-extern u32 boostVram;
-extern u32 dsiModeConsole;
+volatile bool screenFadedIn = false;
+volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
-volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-volatile int screenBrightness = 25;
-volatile bool fadeType = true;
-
-volatile bool arm9_darkTheme = false;
-volatile bool arm9_swapLcds = false;
-volatile int arm9_loadingFrames = 0;
-volatile int arm9_loadingFps = 0;
-volatile bool arm9_loadingBar = true;
-volatile int arm9_loadingBarYpos = 0;
-volatile bool arm9_errorColor = false;
-volatile int arm9_loadBarLength = 0;
-volatile bool arm9_animateLoadingCircle = false;
-bool displayScreen = false;
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -97,43 +83,21 @@ void SetBrightness(u8 screen, s8 bright) {
 	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
-void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = color;	
-		}
+void fadeIn(void) {
+	for (int i = 25; i >= 0; i--) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
 }
 
-void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
-	}
-}
-
-void drawRectangleAddr (u16* addr, int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = color;	
-		}
-	}
-}
-
-void drawRectangleGradientAddr (u16* addr, int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
+void fadeOut(void) {
+	for (int i = 0; i <= 25; i++) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
 }
 
@@ -153,9 +117,7 @@ void arm9_main(void) {
 	WRAM_CR = 0x03;
 	REG_EXMEMCNT = 0xE880;
 
-	if (dsiModeConsole) {
-		initMBKARM9();
-	}
+	initMBKARM9();
 
 	extendedMemory = (REG_SCFG_EXT != 0);
 
@@ -229,8 +191,6 @@ void arm9_main(void) {
 
 	*(u16*)0x0400006C |= BIT(14);
 	*(u16*)0x0400006C &= BIT(15);
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -241,79 +201,55 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	if (extendedMemory) {
-		REG_SCFG_EXT = 0x8300C000;
-		if (boostVram) {
-			REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-		}
-	}
-
-	screenBrightness = 25;
-	fadeType = true;
-
-//	*(u8*)(0x23FFC44) = 0;
-
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
-		if (arm9_stateFlag == ARM9_DISPERR) {
-			displayScreen = true;
-			if (arm9_stateFlag == ARM9_DISPERR) {
-				arm9_stateFlag = ARM9_READY;
+		if (arm9_stateFlag == ARM9_SCRNCLR) {
+			if (screenFadedIn) {
+				fadeOut();
+				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
+				VRAM_A_CR = 0;
+				REG_POWERCNT = 0x820F;
+				SetBrightness(0, 0);
+				SetBrightness(1, 0);
 			}
+			arm9_stateFlag = ARM9_READY;
 		}
-		if (displayScreen) {
-			if (fadeType) {
-				screenBrightness--;
-				if (screenBrightness < 0) screenBrightness = 0;
-			} else {
-				screenBrightness++;
-				if (screenBrightness > 25) screenBrightness = 25;
+		if (arm9_stateFlag == ARM9_DISPSCRN) {
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
 			}
-			SetBrightness(0, screenBrightness);
-			SetBrightness(1, screenBrightness);
-
-			switch (arm9_screenMode) {
-				case 0:
-				default:
-					arm9_regularLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText();
-					}
-					if (arm9_animateLoadingCircle) {
-						arm9_loadingCircle();
-					}
-					break;
-
-				case 1:
-					arm9_pong();
-					break;
-					
-				case 2:
-					arm9_ttt();
-					break;
-				case 3:
-					arm9_simpleLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText2();
-					}
-					break;
-				case 4:
-					arm9_flashcardlikeLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText3();
-					}
-					break;		
+			if (!imageLoaded) {
+				arm9_pleaseWaitText();
+				imageLoaded = true;
 			}
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
+		if (arm9_stateFlag == ARM9_DISPERR) {
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+			}
+			arm9_errorText();
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
+			arm9_stateFlag = ARM9_READY;
 		}
 	}
 
-	if (dsiModeConfirmed) {
+	/*if (dsiModeConfirmed) {
 		REG_SCFG_EXT = 0x8307F100;
 	} else {
 		// lock SCFG
 		REG_SCFG_EXT &= ~(1UL << 31);
-	}
+	}*/
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;

@@ -252,7 +252,8 @@ static void resetMemory_ARM7(void) {
 	}
 
 	arm7clearRAM();
-	toncset((u32*)0x02000000, 0, 0x3F4000);
+	toncset((u32*)0x02000000, 0, 0x350000);
+	toncset((u32*)0x02380000, 0, 0x74000);
 	toncset((u32*)0x023F8000, 0, 0x6000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
@@ -559,28 +560,20 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
-	if (dsiModeConsole) {
-		initMBK();
-	}
+	initMBK();
 	
 	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-
-	debugOutput();
-
-	//
-	// 1 dot
-	//
-
 	resetMemory_ARM7();
 
 	// Init card
-	if (!FAT_InitFiles(initDisc, 3)) {
+	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
-		return -1;
+		errorOutput();
+		//return -1;
 	}
 
 	// ROM file
@@ -596,9 +589,12 @@ int arm7_main(void) {
 
 	if (romFile->firstCluster == CLUSTER_FREE) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
-		return -1;
+		errorOutput();
+		//return -1;
 	}
 	
+	pleaseWaitOutput();
+
 	if (extendedMemory) {
 		buildFatTableCache(romFile, 3);
 	}
@@ -623,12 +619,6 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
 	
-	increaseLoadBarLength();
-
-	//
-	// 2 dots
-	//
-
 	nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
@@ -648,19 +638,8 @@ int arm7_main(void) {
 		NTR_BIOS();
 	}
 
-	increaseLoadBarLength();
-
-	//
-	// 3 dots
-	//
-
 	nocashMessage("Trying to patch the card...\n");
 
-	//
-	// 4 dots
-	//
-
-	increaseLoadBarLength();
     /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
@@ -670,13 +649,13 @@ int arm7_main(void) {
 		ce9Location = CARDENGINE_ARM9_LOCATION;
 		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
     //}
-	dldiPatchBinary((data_t*)ce9Location, cardengine_arm9_bin_size);
+	if (!dldiPatchBinary((data_t*)ce9Location, cardengine_arm9_bin_size)) {
+		nocashMessage("ce9 DLDI patch failed");
+		dbg_printf("ce9 DLDI patch failed");
+		dbg_printf("\n");
+		errorOutput();
+	}
 
-	increaseLoadBarLength();
-
-	//
-	// 5 dots
-	//
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -695,11 +674,6 @@ int arm7_main(void) {
 		nocashMessage("Card patch failed");
 		errorOutput();
 	}
-	increaseLoadBarLength();
-
-	//
-	// 6 dots
-	//
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -719,11 +693,6 @@ int arm7_main(void) {
 		nocashMessage("Card hook failed");
 		errorOutput();
 	}
-	increaseLoadBarLength();
-
-	//
-	// 7 dots
-	//
 
 	u32 romLocation = ((dsiModeConfirmed || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (!extendedMemory) {
@@ -750,17 +719,9 @@ int arm7_main(void) {
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	}
-	increaseLoadBarLength();
 
-	//
-	// Final 8 dots
-	//
-
-	//fadeOut();
-
-	if (!dsiModeConfirmed) {
-		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}
+	toncset((u32*)0x02350000, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
+	clearScreen();
 
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);

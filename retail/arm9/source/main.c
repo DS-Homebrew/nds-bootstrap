@@ -38,6 +38,8 @@
 
 #include "load_bin.h"
 
+u8 lz77ImageBuffer[0x10000];
+
 /* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
 	char gameCode[4];			//!< 4 characters for the game code.

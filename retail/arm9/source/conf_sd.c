@@ -8,6 +8,7 @@
 #include <nds/arm9/console.h>
 #include <nds/debug.h>
 #include <fat.h>
+#include "lzss.h"
 #include "minIni.h"
 #include "hex.h"
 #include "cheat_engine.h"
@@ -15,6 +16,8 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 #include "locations.h"
+
+extern u8 lz77ImageBuffer[0x10000];
 
 static off_t getSaveSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -167,6 +170,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
+	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
+	if (bootstrapImages) {
+		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)0x02350000);
+	}
+	fclose(bootstrapImages);
+
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
