@@ -17,9 +17,9 @@ nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and
 
 nds-bootstrap supports most DS ROMS, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues).
 
-Be sure to manually patch out the Anti-Piracy functions though, as nds-bootstrap does not include patches of this sort.
+Anti-Piracy patches can be loaded via IPS files, but they are not included inside the software itself.
 
-nds-bootstrap also supports many homebrew applications, including emulators such as lameboy and NesDS.
+nds-bootstrap also supports many homebrew applications, including games like DSCraft.
 
 # Compiling
 
@@ -36,4 +36,6 @@ A frontend isn't required to be used as nds-bootstrap uses an ini file to load i
 
 ## [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu)
 
-TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 4 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
+TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 5 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, SEGA Saturn menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
+
+It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-boostrap for you, with customizable per game settings.
