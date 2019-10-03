@@ -6,6 +6,7 @@
 #include "cardengine_header_arm9.h"
 
 static const int MAX_HANDLER_LEN = 50;
+static const int MAX_HANDLER_LEN_ALT = 0x200;
 
 // same as arm7
 static const u32 handlerStartSig[5] = {
@@ -16,12 +17,28 @@ static const u32 handlerStartSig[5] = {
 	0xe3510000		// cmp	r1, #0
 };
 
+// alt gsun
+static const u32 handlerStartSigAlt[5] = {
+	0xe3a0c301, 	// mov  ip, #0x4000000
+	0xe5bc2208,		// 
+	0xe1ec00d8,		//
+	0xe3520000		// cmp	r2, #0
+};
+
 // same as arm7
 static const u32 handlerEndSig[4] = {
 	0xe59f1008, 	// ldr  r1, [pc, #8]	(IRQ Vector table address)
 	0xe7910100,		// ldr  r0, [r1, r0, lsl #2]
 	0xe59fe004,		// ldr  lr, [pc, #4]	(IRQ return address)
 	0xe12fff10		// bx   r0
+};
+
+// alt gsun
+static const u32 handlerEndSigAlt[4] = {
+	0xe59f100C, 	// 
+	0xe5813000,		// 
+	0xe5813004,		// 
+	0xeaffffb8		// 
 };
 
 static u32* hookInterruptHandler(const u32* start, size_t size) {
@@ -31,8 +48,14 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 		handlerStartSig, 5
 	);
 	if (!addr) {
-        dbg_printf("ERR_HOOK_9 : handlerStartSig\n");
-		return NULL;
+        addr = findOffset(
+    		start, size,
+    		handlerStartSigAlt, 4
+    	);
+        if (!addr) {
+            dbg_printf("ERR_HOOK_9 : handlerStartSig\n");
+    		return NULL;
+        }
 	}
     
     dbg_printf("handlerStartSig\n");
@@ -40,24 +63,30 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     dbg_printf("\n");
 
 	// Find the end of the handler
-	addr = findOffset(
+	u32* addr2 = findOffset(
 		addr, MAX_HANDLER_LEN*sizeof(u32),
 		handlerEndSig, 4
 	);
-	if (!addr) {
-        dbg_printf("ERR_HOOK_9 : handlerEndSig\n");
-		return NULL;
-	}
+	if (!addr2) {
+        addr2 = findOffset(
+    		addr, MAX_HANDLER_LEN_ALT*sizeof(u32),
+    		handlerEndSigAlt, 4
+    	);
+        if (!addr2) {
+            dbg_printf("ERR_HOOK_9 : handlerEndSig\n");
+    		return NULL;
+        }
+    }
     
     
     
     dbg_printf("handlerEndSig\n");
-    dbg_hexa(addr);
+    dbg_hexa(addr2);
     dbg_printf("\n");
 
 	// Now find the IRQ vector table
 	// Make addr point to the vector table address pointer within the IRQ handler
-	addr += sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
+	addr = addr2 + sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
 
 	// Use relative and absolute addresses to find the location of the table in RAM
 	u32 tableAddr = addr[0];
