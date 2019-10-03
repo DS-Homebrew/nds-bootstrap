@@ -136,7 +136,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 
 	// Patch
 	u32* cacheFlushPatch = (usesThumb ? ce9->thumbPatches->cacheFlushRef : ce9->patches->cacheFlushRef);
-	*cacheFlushPatch = (u32)cardPullOutOffset + 4;
+	*cacheFlushPatch = (u32)cardPullOutOffset + 13;
 }
 
 /*static void patchForceToPowerOff(cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
@@ -198,7 +198,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 0x4 : 0x8);
+	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
