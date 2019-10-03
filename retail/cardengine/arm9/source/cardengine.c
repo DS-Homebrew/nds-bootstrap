@@ -55,14 +55,18 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile romFile;
 static aFile savFile;
 
+static int cardReadCount = 0;
+
 static bool flagsSet = false;
 
+static bool vblankHooked = false;
 static void hookVblank(void) {
 	resetRequestIrqMask(IRQ_VBLANK);
 	u32* vblankHandler = ce9->irqTable;
 	ce9->intr_vblank_orig_return = *vblankHandler;
 	*vblankHandler = ce9->patches->vblankHandlerRef;
     enableIrqMask(IRQ_VBLANK);
+	vblankHooked = true;
 }
 
 void myIrqHandlerVBlank(void) {
@@ -161,6 +165,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	//sysSetCartOwner (BUS_OWNER_ARM9);
 
+	cardReadCount++;
+
 	if (!flagsSet) {
 		if (_io_dldi_features & 0x00000010) {
 			sysSetCartOwner (BUS_OWNER_ARM9);
@@ -185,13 +191,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} /*else {
-			debug8mbMpuFix();
-		}*/
-
-		hookVblank();
+		} else {
+			hookVblank();
+		}
 
 		flagsSet = true;
+	}
+	
+	if (isSdk5(ce9->moduleParams) && cardReadCount == 3 && !vblankHooked) {
+		hookVblank();
 	}
 
 	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)((u8*)CARDENGINE_ARM9_LOCATION + 0x3FC0) : ce9->cardStruct0);
