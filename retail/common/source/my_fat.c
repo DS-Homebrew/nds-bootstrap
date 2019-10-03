@@ -201,7 +201,7 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 
 #define CLUSTER_CACHE      0x2780000 // WRAM C+B
-#define CLUSTER_CACHE_SIZE 0x40000 // 256K
+#define CLUSTER_CACHE_SIZE 0x4000 // 16K
 
 #define ONE_CACHE  0x37C5000 // WRAM A
 #define ONE_CACHE_SIZE 0x10000 // 64K
