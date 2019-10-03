@@ -100,28 +100,26 @@ int hookNdsRetailArm9(
 	ce9->consoleModel           = consoleModel;
 	ce9->fatTableAddr           = fatTableAddr;
 
-    u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
+    u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
    
-    if (!hookLocation) {
+    if (!tableAddr) {
 		dbg_printf("ERR_HOOK_9\n");
 		return ERR_HOOK;
 	}
     
     dbg_printf("hookLocation arm9: ");
-	dbg_hexa((u32)hookLocation);
+	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
 
-    u32* vblankHandler = hookLocation;
-    /*u32* dma0Handler = hookLocation + 8;
+    /*u32* vblankHandler = hookLocation;
+    u32* dma0Handler = hookLocation + 8;
     u32* dma1Handler = hookLocation + 9;
     u32* dma2Handler = hookLocation + 10;
     u32* dma3Handler = hookLocation + 11;
     u32* ipcSyncHandler = hookLocation + 16;
     u32* cardCompletionIrq = hookLocation + 19;*/
     
-	ce9->intr_vblank_orig_return = *vblankHandler;
-
-	*vblankHandler = ce9->patches->vblankHandler;
+    ce9->irqTable = tableAddr;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

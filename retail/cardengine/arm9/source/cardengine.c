@@ -22,7 +22,7 @@
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
-//#include <nds/interrupts.h>
+#include <nds/interrupts.h>
 //#include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
@@ -56,6 +56,14 @@ static aFile romFile;
 static aFile savFile;
 
 static bool flagsSet = false;
+
+static void hookVblank(void) {
+	resetRequestIrqMask(IRQ_VBLANK);
+	u32* vblankHandler = ce9->irqTable;
+	ce9->intr_vblank_orig_return = *vblankHandler;
+	*vblankHandler = ce9->patches->vblankHandlerRef;
+    enableIrqMask(IRQ_VBLANK);
+}
 
 void myIrqHandlerVBlank(void) {
   	if (tryLockMutex(&cardEngineCommandMutex)) {
@@ -168,6 +176,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		} /*else {
 			debug8mbMpuFix();
 		}*/
+
+		hookVblank();
 
 		flagsSet = true;
 	}

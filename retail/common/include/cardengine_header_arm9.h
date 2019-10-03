@@ -10,7 +10,7 @@
 typedef struct cardengineArm9Patches {
     u32* card_read_arm9;
     u32* card_pull_out_arm9; // Unused
-    u32 vblankHandler;
+    u32 offset2;
     u32* card_id_arm9;
     u32* card_dma_arm9;
     u32* nand_read_arm9;
@@ -19,8 +19,8 @@ typedef struct cardengineArm9Patches {
     u32* card_pull;
     u32* cacheFlushRef;
     u32* readCachedRef;
-    u32 offset9;
     u32 needFlushDCCache;
+    u32* vblankHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 
@@ -61,6 +61,7 @@ typedef struct cardengineArm9 {
     u32 enableExceptionHandler;
     u32 consoleModel;
     u32 fatTableAddr;
+    u32* irqTable;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H
