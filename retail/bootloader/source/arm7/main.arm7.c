@@ -627,6 +627,14 @@ int arm7_main(void) {
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
+	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
+		nocashMessage("Secure area decrypted successfully");
+		dbg_printf("Secure area decrypted successfully");
+	} else {
+		nocashMessage("Secure area already decrypted");
+		dbg_printf("Secure area already decrypted");
+	}
+	dbg_printf("\n");
 
 	// If possible, set to load ROM into RAM
 	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
