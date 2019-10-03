@@ -32,6 +32,7 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "nds_header.h"
+#include "tonccpy.h"
 
 //#include "sr_data_error.h"      // For showing an error screen
 //#include "sr_data_srloader.h"   // For rebooting into DSiMenu++
@@ -109,7 +110,9 @@ static void initialize(void) {
 	if (initialized) {
 		return;
 	}
-	
+
+	toncset((u32*)0x023DA000, 0, 0x2000);	// Clear arm9 side of bootloader
+
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
 	initialized = true;
