@@ -19,7 +19,7 @@
 
 extern u8 lz77ImageBuffer[0x10000];
 
-static off_t getSaveSize(const char* path) {
+static off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
 	if (fp) {
@@ -54,6 +54,12 @@ static int callback(const char *section, const char *key, const char *value, voi
 		//strcpy(conf->savPath, value);
 		conf->savPath = strdup(value);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "AP_FIX_PATH")) {
+		// AP fix path
+		//conf->apPatchPath = malloc((strlen(value) + 1)*sizeof(char));
+		//strcpy(conf->apPatchPath, value);
+		conf->apPatchPath = strdup(value);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "LANGUAGE")) {
 		// Language
 		conf->language = strtol(value, NULL, 0);
@@ -77,38 +83,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 	} else if (match(section, "NDS-BOOTSTRAP", key, "CONSOLE_MODEL")) {
 		// Console model
 		conf->consoleModel = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN")) {
-		// Loading screen
-		conf->loadingScreen = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_DARK_THEME")) {
-		// Loading screen (Dark theme)
-		conf->loadingDarkTheme = (bool)strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SWAP_LCDS")) {
-		// Swap screens in loading screen
-		conf->loadingSwapLcds = (bool)strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_SCREEN_FOLDER")) {
-		// Loading screen .bmp folder path
-		conf->loadingImagePath = strdup(value);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FRAMES")) {
-		// Number of loading screen frames
-		conf->loadingFrames = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_FPS")) {
-		// FPS of animated loading screen
-		conf->loadingFps = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR")) {
-		// Show/Hide loading bar
-		conf->loadingBar = (bool)strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "LOADING_BAR_Y")) {
-		// Loading bar Y position
-		conf->loadingBarYpos = strtol(value, NULL, 0);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "ROMREAD_LED")) {
 		// ROM read LED
@@ -184,7 +158,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
     
-	conf->saveSize = getSaveSize(conf->savPath);
+	conf->saveSize = getFileSize(conf->savPath);
+	conf->apPatchSize = getFileSize(conf->apPatchPath);
 
 	return 0;
 }

@@ -31,19 +31,14 @@
 	.global dsiSD
 	.global saveFileCluster
 	.global saveSize
+	.global apPatchFileCluster
+	.global apPatchSize
 	.global language
 	.global dsiMode
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
 	.global consoleModel
-	.global loadingScreen
-	.global darkTheme
-	.global swapLcds
-	.global loadingFrames
-	.global loadingFps
-	.global loadingBar
-	.global loadingBarYpos
 	.global romread_LED
 	.global boostVram
 	.global gameSoftReset
@@ -72,6 +67,10 @@ saveFileCluster:
 	.word	0x00000000		@ .sav file
 saveSize:
 	.word	0x00000000		@ .sav file sive
+apPatchFileCluster:
+	.word	0x00000000
+apPatchSize:
+	.word	0x00000000
 language:
 	.word	0x00000000
 dsiMode:
@@ -83,20 +82,6 @@ patchMpuRegion:
 patchMpuSize:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-loadingScreen:
-	.word	0x00000000
-darkTheme:
-	.word	0x00000000
-swapLcds:
-	.word	0x00000000
-loadingFrames:
-	.word	0x00000000
-loadingFps:
-	.word	0x00000000
-loadingBar:
-	.word	0x00000000
-loadingBarYpos:
 	.word	0x00000000
 romread_LED:
 	.word	0x00000000

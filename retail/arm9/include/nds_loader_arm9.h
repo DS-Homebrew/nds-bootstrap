@@ -27,6 +27,6 @@
 
 //#define LOAD_DEFAULT_NDS 0
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 apPatchCluster, configuration* conf);
 
 #endif // NDS_LOADER_ARM9_H

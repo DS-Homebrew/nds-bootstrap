@@ -134,7 +134,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
-	dbg_printf("loadingScreen: %lX\n", conf->loadingScreen);
 	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
@@ -326,7 +325,9 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stApPatch;
 	u32 clusterSav = 0;
+	u32 clusterApPatch = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -336,10 +337,14 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
+	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
+		clusterApPatch = stApPatch.st_ino;
+	}
+
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, conf);
+	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, clusterApPatch, conf);
 
 	return 0;
 }

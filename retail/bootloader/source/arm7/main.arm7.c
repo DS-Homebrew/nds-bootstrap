@@ -57,6 +57,7 @@
 #include "module_params.h"
 #include "decompress.h"
 //#include "dldi_patcher.h"
+#include "ips.h"
 #include "patch.h"
 #include "find.h"
 #include "cheat_patch.h"
@@ -179,13 +180,14 @@ extern u32 initDisc;
 //extern u32 dsiSD;
 extern u32 saveFileCluster;
 extern u32 saveSize;
+extern u32 apPatchFileCluster;
+extern u32 apPatchSize;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 consoleModel;
-//extern u32 loadingScreen;
 extern u32 romread_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
@@ -718,6 +720,12 @@ int arm7_main(void) {
 	}
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
+	}
+
+	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+	if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x30000) {
+		fileRead((char*)0x02350000, apPatchFile, 0, apPatchSize, 0);
+		applyIpsPatch(ndsHeader, (u8*)0x02350000);
 	}
 
 	toncset((u32*)0x02350000, 0, 0x30000);	// clear nds-bootstrap images and IPS patch

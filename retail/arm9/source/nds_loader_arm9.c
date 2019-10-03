@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf) {
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 apPatchCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -247,30 +247,25 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, conf
 	free(conf->ndsPath);
 	free(conf->savPath);
 
-	loader->storedFileCluster = cluster;
-	loader->initDisc          = conf->initDisc;
-	loader->wantToPatchDLDI   = conf->dldiPatchNds;
-	loader->saveFileCluster  = saveCluster;
-	loader->saveSize         = conf->saveSize;
-	loader->language         = conf->language;
-	loader->dsiMode          = conf->dsiMode; // SDK 5
-	loader->donorSdkVer      = conf->donorSdkVer;
-	loader->patchMpuRegion   = conf->patchMpuRegion;
-	loader->patchMpuSize     = conf->patchMpuSize;
-	loader->consoleModel     = ((REG_SCFG_EXT != 0) ? conf->consoleModel : 0);
-	loader->loadingScreen    = conf->loadingScreen;
-	loader->loadingDarkTheme = conf->loadingDarkTheme;
-	loader->loadingSwapLcds  = conf->loadingSwapLcds;
-	loader->loadingFrames    = conf->loadingFrames;
-	loader->loadingFps       = conf->loadingFps;
-	loader->loadingBar       = conf->loadingBar;
-	loader->loadingBarYpos   = conf->loadingBarYpos;
-	loader->romread_LED      = conf->romread_LED;
-	loader->boostVram        = conf->boostVram;
-	loader->gameSoftReset    = conf->gameSoftReset;
-	loader->forceSleepPatch  = conf->forceSleepPatch;
-	loader->dsiModeConsole   = isDSiMode();
-	loader->logging          = conf->logging;
+	loader->storedFileCluster  = cluster;
+	loader->initDisc           = conf->initDisc;
+	loader->wantToPatchDLDI    = conf->dldiPatchNds;
+	loader->saveFileCluster    = saveCluster;
+	loader->saveSize           = conf->saveSize;
+	loader->apPatchFileCluster = apPatchCluster;
+	loader->apPatchSize        = conf->apPatchSize;
+	loader->language           = conf->language;
+	loader->dsiMode            = conf->dsiMode; // SDK 5
+	loader->donorSdkVer        = conf->donorSdkVer;
+	loader->patchMpuRegion     = conf->patchMpuRegion;
+	loader->patchMpuSize       = conf->patchMpuSize;
+	loader->consoleModel       = ((REG_SCFG_EXT != 0) ? conf->consoleModel : 0);
+	loader->romread_LED        = conf->romread_LED;
+	loader->boostVram          = conf->boostVram;
+	loader->gameSoftReset      = conf->gameSoftReset;
+	loader->forceSleepPatch    = conf->forceSleepPatch;
+	loader->dsiModeConsole     = isDSiMode();
+	loader->logging            = conf->logging;
 
 	free(conf);
 
