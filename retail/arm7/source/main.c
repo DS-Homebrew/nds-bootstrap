@@ -38,7 +38,7 @@ redistribute it freely, subject to the following restrictions:
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
-#include "hex.h"
+//#include "hex.h"
 #include "fifocheck.h"
 
 //static vu32* wordCommandAddr;
@@ -47,12 +47,12 @@ void VcountHandler(void) {
 	inputGetAndSend();
 }
 
-void myFIFOValue32Handler(u32 value, void* userdata) {
+/*void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler");
  	nocashMessage("default");
 	nocashMessage("fifoSendValue32");
 	fifoSendValue32(FIFO_USER_02, *(u16*)value);
-}
+}*/
 
 int main(void) {
 	// Switch to NTR Mode
