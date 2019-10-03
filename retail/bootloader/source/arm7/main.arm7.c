@@ -51,6 +51,7 @@
 
 #include <nds/arm9/dldi.h>
 
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "nds_header.h"
 #include "module_params.h"
@@ -251,6 +252,9 @@ static void resetMemory_ARM7(void) {
 	}
 
 	arm7clearRAM();
+	toncset((u32*)0x02000000, 0, 0x3F4000);
+	toncset((u32*)0x023F8000, 0, 0x6000);
+	toncset((u32*)0x023FF000, 0, 0x1000);
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -664,7 +668,7 @@ int arm7_main(void) {
 		dldiRelocate(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
     } else {*/      
 		ce9Location = CARDENGINE_ARM9_LOCATION;
-		memcpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
+		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
     //}
 	dldiPatchBinary((data_t*)ce9Location, cardengine_arm9_bin_size);
 
