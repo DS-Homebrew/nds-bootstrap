@@ -61,6 +61,19 @@ static void patchSleep(const tNDSHeader* ndsHeader) {
 	}
 }
 
+static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
+	u32* ramClearOffset = findRamClearOffset(ndsHeader);
+	
+	if (ramClearOffset) {
+		*(ramClearOffset) = 0x023FC000;
+		*(ramClearOffset + 1) = 0x023FE000;
+	}
+}
+
 static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
@@ -99,7 +112,9 @@ u32 patchCardNdsArm7(
 		patchSleep(ndsHeader);
 	}
 
-    const char* romTid = getRomTid(ndsHeader);
+	patchRamClear(ndsHeader, moduleParams);
+
+	const char* romTid = getRomTid(ndsHeader);
 
 	/*if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;

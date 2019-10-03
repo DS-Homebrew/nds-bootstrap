@@ -137,7 +137,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if (strcmp(romTid, "UORE") != 0 && (moduleParams->sdk_version < 0x4000000 || moduleParams->sdk_version > 0x5000000)) {
+	if (strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4000000 || moduleParams->sdk_version > 0x5000000)) {
 		cardReadEndOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignature, 2

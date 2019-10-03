@@ -65,6 +65,8 @@ static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 
+static int saveReadTimeOut = 0;
+
 //static int saveTimer = 0;
 
 /*static int softResetTimer = 0;
@@ -196,6 +198,16 @@ void myIrqHandlerVBlank(void) {
 			saveTimer = 0;
 		}
 	}*/
+
+	if (sharedAddr[3] != 0) {
+		saveReadTimeOut++;
+		if (saveReadTimeOut > 60*2) {
+			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
+			saveReadTimeOut = 0;
+		}
+	} else {
+		saveReadTimeOut = 0;
+	}
 
 	/*#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
