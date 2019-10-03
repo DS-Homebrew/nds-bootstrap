@@ -102,6 +102,7 @@ static const tNDSHeader* ndsHeader = NULL;
 
 static void waitForArm9(void) {
 	while (sharedAddr[3] != (vu32)0);
+	saveReadTimeOut = 0;
 }
 
 static void initialize(void) {
@@ -132,6 +133,8 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 
 	calledViaIPC = false;
+
+	initialize();
 
 	if (language >= 0 && language < 6) {
 		// Change language
@@ -201,12 +204,9 @@ void myIrqHandlerVBlank(void) {
 
 	if (sharedAddr[3] != 0) {
 		saveReadTimeOut++;
-		if (saveReadTimeOut > 60*2) {
+		if (saveReadTimeOut > 60) {
 			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
-			saveReadTimeOut = 0;
 		}
-	} else {
-		saveReadTimeOut = 0;
 	}
 
 	/*#ifdef DEBUG
