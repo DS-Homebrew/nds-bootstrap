@@ -657,9 +657,6 @@ int arm7_main(void) {
 	//
 
 	increaseLoadBarLength();
-	//memcpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0x6000);
-	//memset((u32*)CARDENGINE_ARM7_LOCATION_BUFFER, 0, 0x6000);
-	dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x6000);
     /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
     if(ce9Location) {
 		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);

@@ -170,7 +170,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION_BUFFER, 1, 0x10000, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x1000, cebin);
 	}
 	fclose(cebin);
     

@@ -91,6 +91,18 @@ void myIrqHandlerVBlank(void) {
 
 			sharedAddr[3] = 0;
 		}
+		if (sharedAddr[3] == 0x524F4D52) {
+			// Read ROM (redirected from arm7)
+			sysSetCardOwner (BUS_OWNER_ARM9);
+
+			u32 dst = *(vu32*)(sharedAddr+2);
+			u32 src = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
+
+			fileRead((char*)dst, romFile, src, len, 0);
+
+			sharedAddr[3] = 0;
+		}
   		unlockMutex(&cardEngineCommandMutex);
 	}
 }

@@ -28,10 +28,8 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
-#include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
-#include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
 
@@ -66,11 +64,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
-
-//static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
-//static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
-static aFile romFile;
-static aFile savFile;
 
 //static int saveTimer = 0;
 
@@ -114,44 +107,7 @@ static void initialize(void) {
 		return;
 	}
 	
-	/*if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-		sdmmc_init();
-		SD_Init();
-	}*/
-	FAT_InitFiles(true, 0);
-	romFile = getFileFromCluster(fileCluster);
-	/*buildFatTableCache(&romFile, 0);
-	#ifdef DEBUG	
-	if (romFile->fatTableCached) {
-		nocashMessage("fat table cached");
-	} else {
-		nocashMessage("fat table not cached"); 
-	}
-	#endif*/
-	
-	if (saveCluster > 0) {
-		savFile = getFileFromCluster(saveCluster);
-	} else {
-		savFile.firstCluster = CLUSTER_FREE;
-	}
-
-	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
-	enableDebug(myDebugFile);
-	dbg_printf("logging initialized\n");		
-	dbg_printf("sdk version :");
-	dbg_hexa(moduleParams->sdk_version);		
-	dbg_printf("\n");	
-	dbg_printf("rom file :");
-	dbg_hexa(fileCluster);	
-	dbg_printf("\n");	
-	dbg_printf("save file :");
-	dbg_hexa(saveCluster);	
-	dbg_printf("\n");
-	#endif
-
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	//romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 
 	initialized = true;
 }
@@ -306,9 +262,6 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
   	if (tryLockMutex(&saveMutex)) {
-		//initialize();
-		//fileRead(dst, savFile, src, len, -1);
-
 		// Send a command to the ARM9 to read the save
 		u32 commandSaveRead = 0x53415652;
 
@@ -338,13 +291,6 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
   	if (tryLockMutex(&saveMutex)) {
-		//initialize();
-		/*if (saveTimer == 0) {
-			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		}
-		saveTimer = 1;*/
-		//fileWrite(src, savFile, dst, len, -1);
-
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
@@ -374,13 +320,6 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	if (tryLockMutex(&saveMutex)) {
-		//initialize();
-		/*if (saveTimer == 0) {
-			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		}
-		saveTimer = 1;*/
-		//fileWrite(src, savFile, dst, len, -1);
-
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
@@ -409,9 +348,20 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src, savFile, dst, len, -1);
-	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+  	/*if (tryLockMutex(&saveMutex)) {
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
+		sharedAddr[0] = dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = src;
+		sharedAddr[3] = commandSaveWrite;
+
+		waitForArm9();
+
+  		unlockMutex(&saveMutex);
+	}*/
 	return true;
 }
 
@@ -516,19 +466,19 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	/*if (ROMinRAM) {
-		memcpy(dst, romLocation + src, len);
-	} else {*/
-		initialize();
-		//cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
-		//ndmaUsed = false;
-		#ifdef DEBUG	
-		nocashMessage("fileRead romFile");
-		#endif	
-		fileRead(dst, romFile, src, len, 2);
-		//ndmaUsed = true;
-		//cardReadLED(false);    // After loading is done, turn off LED for card read indicator
-	//}
-	
+  	if (tryLockMutex(&saveMutex)) {
+		// Send a command to the ARM9 to read the ROM
+		u32 commandRomRead = 0x524F4D52;
+
+		// Write the command
+		sharedAddr[0] = src;
+		sharedAddr[1] = len;
+		sharedAddr[2] = dst;
+		sharedAddr[3] = commandRomRead;
+
+		waitForArm9();
+
+  		unlockMutex(&saveMutex);
+	}
 	return true;
 }
