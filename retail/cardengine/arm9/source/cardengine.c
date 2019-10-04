@@ -81,6 +81,8 @@ void myIrqHandlerVBlank(void) {
 
 			if (dst >= 0x02000000 && dst < 0x03000000) {
 				fileRead((char*)dst, savFile, src, len, 0);
+			} else {
+				fileRead((char*)0x023E0000, savFile, src, len, 0);
 			}
 
 			sharedAddr[3] = 0;
@@ -95,6 +97,8 @@ void myIrqHandlerVBlank(void) {
 
 			if (src >= 0x02000000 && src < 0x03000000) {
 				fileWrite((char*)src, savFile, dst, len, 0);
+			} else {
+				fileWrite((char*)0x023E0000, savFile, dst, len, 0);
 			}
 
 			sharedAddr[3] = 0;

@@ -283,10 +283,15 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		// Write the command
 		sharedAddr[0] = src;
 		sharedAddr[1] = len;
-		sharedAddr[2] = dst;
+		sharedAddr[2] = (vu32)dst;
 		sharedAddr[3] = commandSaveRead;
 
 		waitForArm9();
+
+		if ((u32)dst < 0x02000000 && (u32)dst >= 0x03000000) {
+			// Transfer from main RAM to WRAM
+			tonccpy((char*)dst, (char*)0x023E0000, len);
+		}
 
   		unlockMutex(&saveMutex);
 	}
@@ -306,13 +311,18 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
   	if (tryLockMutex(&saveMutex)) {
+		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
+			// Transfer from WRAM to main RAM
+			tonccpy((char*)0x023E0000, (char*)src, len);
+		}
+
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
 		// Write the command
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
-		sharedAddr[2] = src;
+		sharedAddr[2] = (vu32)src;
 		sharedAddr[3] = commandSaveWrite;
 
 		waitForArm9();
@@ -335,13 +345,18 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	if (tryLockMutex(&saveMutex)) {
+		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
+			// Transfer from WRAM to main RAM
+			tonccpy((char*)0x023E0000, (char*)src, len);
+		}
+
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
 		// Write the command
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
-		sharedAddr[2] = src;
+		sharedAddr[2] = (vu32)src;
 		sharedAddr[3] = commandSaveWrite;
 
 		waitForArm9();
@@ -488,7 +503,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		// Write the command
 		sharedAddr[0] = src;
 		sharedAddr[1] = len;
-		sharedAddr[2] = dst;
+		sharedAddr[2] = (vu32)dst;
 		sharedAddr[3] = commandRomRead;
 
 		waitForArm9();
