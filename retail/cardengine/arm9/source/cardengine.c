@@ -79,7 +79,9 @@ void myIrqHandlerVBlank(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, savFile, src, len, 0);
+			if (dst >= 0x02000000 && dst < 0x03000000) {
+				fileRead((char*)dst, savFile, src, len, 0);
+			}
 
 			sharedAddr[3] = 0;
 		}
@@ -91,7 +93,9 @@ void myIrqHandlerVBlank(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileWrite((char*)src, savFile, dst, len, 0);
+			if (src >= 0x02000000 && src < 0x03000000) {
+				fileWrite((char*)src, savFile, dst, len, 0);
+			}
 
 			sharedAddr[3] = 0;
 		}

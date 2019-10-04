@@ -306,6 +306,9 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	for (u32 i = 0; i <= (ndsHeader->romSize>0 ? ndsHeader->romSize : romSize); i += 0x200) {
 		shrinksize += 4;
 	}
+	if (shrinksize > 0x4000) {
+		shrinksize = 0x4000;
+	}
 
 	*heapPointer = *heapPointer + shrinksize; // shrink heap by FAT table cache size
     
