@@ -153,7 +153,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	ini_browse(callback, conf, "fat:/_nds/nds-bootstrap.ini");
 	mkdir("fat:/_nds", 0777);
 	mkdir("fat:/_nds/nds-bootstrap", 0777);
-	mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+	mkdir("fat:/_nds/nds-bootstrap/B4DS-patchOffsetCache", 0777);
 
 	if (!nitroFSInit(bootstrapPath)) {
 		consoleDemoInit();
@@ -186,7 +186,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		romFilename.erase(0, last_slash_idx + 1);
 	}
 
-	patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/B4DS-patchOffsetCache/"+romFilename;
 	
 	if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
 		char buffer[0x200] = {0};
