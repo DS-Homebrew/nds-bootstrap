@@ -434,7 +434,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	u32* heapPointer = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0) {
 		patchOffsetCache.heapPointerOffset = 0;
 	} else {
 		heapPointer = patchOffsetCache.heapPointerOffset;
