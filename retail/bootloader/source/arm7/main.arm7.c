@@ -715,9 +715,6 @@ int arm7_main(void) {
 		romLocation = ROM_LOCATION_S2;
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
-	bool noHeapShrink = (strncmp(romTid, "AZW", 3) == 0);
-
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
@@ -727,7 +724,7 @@ int arm7_main(void) {
 		romLocation,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
-		(u32)((noHeapShrink || isSdk5(moduleParams)) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
+		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);
 	/*if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
