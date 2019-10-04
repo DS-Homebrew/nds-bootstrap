@@ -51,7 +51,8 @@
 //extern bool cardReadFound; // patch_arm9.c
 
 typedef struct patchOffsetCacheContents {
-    u32 ver;
+    u16 ver;
+    u16 type;
 	u32* a9Swi12Offset;
 	u32* moduleParamsOffset;
     u32* heapPointerOffset;
@@ -90,7 +91,7 @@ typedef struct patchOffsetCacheContents {
 	u32 a7JumpTableType;
 } patchOffsetCacheContents;
 
-extern u32 patchOffsetCacheFileVersion;
+extern u16 patchOffsetCacheFileVersion;
 extern patchOffsetCacheContents patchOffsetCache;
 
 extern bool patchOffsetCacheChanged;

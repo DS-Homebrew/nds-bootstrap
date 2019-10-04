@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u32 patchOffsetCacheFileVersion = 5;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 5;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -354,9 +354,11 @@ u32 patchCardNds(
 ) {
 	dbg_printf("patchCardNds\n\n");
 
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0) {
 		pleaseWaitOutput();
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
 		patchOffsetCache.a9Swi12Offset = 0;
 		patchOffsetCache.a9IsThumb = 0;
 		patchOffsetCache.cardReadStartOffset = 0;
