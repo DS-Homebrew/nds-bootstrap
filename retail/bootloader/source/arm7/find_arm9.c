@@ -1,4 +1,5 @@
 #include <stddef.h> // NULL
+#include "patch.h"
 #include "nds_header.h"
 #include "find.h"
 #include "debug_file.h"
@@ -113,14 +114,25 @@ static const u16 initHeapEndFuncSignatureThumb[1] = {0xBD08};
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
-	u32* moduleParamsOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-		moduleParamsSignature, 2
-	);
-	if (moduleParamsOffset) {
-		dbg_printf("Module params offset found: ");
+	u32* moduleParamsOffset = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+		patchOffsetCache.moduleParamsOffset = 0;
 	} else {
-		dbg_printf("Module params offset not found\n");
+		moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
+	}
+	if (!moduleParamsOffset) {
+		moduleParamsOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			moduleParamsSignature, 2
+		);
+		if (moduleParamsOffset) {
+			dbg_printf("Module params offset found: ");
+			patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
+		} else {
+			dbg_printf("Module params offset not found\n");
+		}
+	} else {
+		dbg_printf("Module params offset restored: ");
 	}
 
 	if (moduleParamsOffset) {
@@ -1239,11 +1251,7 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return NULL;
-	}
-
+u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset5First:\n");
 
 	u32* randomPatchOffset = findOffset(
@@ -1266,11 +1274,7 @@ u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader, const module_param
 }
 
 // SDK 5
-u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return NULL;
-	}
-
+u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset5Second:\n");
 
 	u32* randomPatchOffset = findOffset(

@@ -34,6 +34,7 @@
 	.global saveSize
 	.global apPatchFileCluster
 	.global apPatchSize
+	.global patchOffsetCacheFileCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -73,6 +74,8 @@ saveSize:
 apPatchFileCluster:
 	.word	0x00000000
 apPatchSize:
+	.word	0x00000000
+patchOffsetCacheFileCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000

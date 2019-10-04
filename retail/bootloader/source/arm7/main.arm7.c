@@ -183,6 +183,7 @@ extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -595,10 +596,9 @@ int arm7_main(void) {
 		errorOutput();
 		//return -1;
 	}
-	
-	pleaseWaitOutput();
 
 	if (extendedMemory) {
+		pleaseWaitOutput();
 		buildFatTableCache(romFile, 3);
 	}
 
@@ -611,6 +611,11 @@ int arm7_main(void) {
 	/*if (savFile->firstCluster != CLUSTER_FREE && extendedMemory) {
 		buildFatTableCache(savFile, 3);
 	}*/
+
+	// File containing cached patch offsets
+	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
 
@@ -721,12 +726,17 @@ int arm7_main(void) {
 		consoleModel,
 		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);
-	if (errorCode == ERR_NONE) {
+	/*if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
 	} else {
 		nocashMessage("Card hook failed");
 		errorOutput();
+	}*/
+
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
+
 	if (ROMinRAM) {
 		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	}

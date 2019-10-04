@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
+#include "patch.h"
 #include "hook.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
@@ -129,16 +130,20 @@ int hookNdsRetailArm9(
 	ce9->consoleModel           = consoleModel;
 	ce9->fatTableAddr           = fatTableAddr;
 
-    u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
-   
+    u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;
+ 	if (!tableAddr) {
+		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
+	}
+
     if (!tableAddr) {
 		dbg_printf("ERR_HOOK_9\n");
 		return ERR_HOOK;
 	}
-    
+
     dbg_printf("hookLocation arm9: ");
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
+	patchOffsetCache.a9IrqHandlerOffset = tableAddr;
 
     /*u32* vblankHandler = hookLocation;
     u32* dma0Handler = hookLocation + 8;

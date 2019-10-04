@@ -24,7 +24,15 @@
 #include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
+#include "loading_screen.h"
 #include "debug_file.h"
+
+u16 patchOffsetCacheFileVersion = 5;	// Change when new functions are being patched, some offsets removed
+										// the offset order changed, and/or the function signatures changed
+
+patchOffsetCacheContents patchOffsetCache;
+
+bool patchOffsetCacheChanged = false;
 
 extern bool logging;
 
@@ -349,6 +357,42 @@ u32 patchCardNds(
 	}
 
 	dbg_printf("patchCardNds\n\n");
+
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 1) {
+		pleaseWaitOutput();
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.a9IsThumb = 0;
+		patchOffsetCache.cardReadStartOffset = 0;
+		patchOffsetCache.cardReadEndOffset = 0;
+		patchOffsetCache.cardPullOutOffset = 0;
+		patchOffsetCache.cardIdOffset = 0;
+		patchOffsetCache.cardIdChecked = 0;
+		patchOffsetCache.cardReadDmaOffset = 0;
+		patchOffsetCache.cardReadDmaChecked = 0;
+		patchOffsetCache.patchMpuRegion = 0;
+		patchOffsetCache.mpuStartOffset = 0;
+		patchOffsetCache.mpuDataOffset = 0;
+		patchOffsetCache.randomPatchOffset = 0;
+		patchOffsetCache.randomPatchChecked = 0;
+		patchOffsetCache.randomPatch5Offset = 0;
+		patchOffsetCache.randomPatch5Checked = 0;
+		patchOffsetCache.randomPatch5SecondOffset = 0;
+		patchOffsetCache.randomPatch5SecondChecked = 0;
+		patchOffsetCache.a9IrqHandlerOffset = 0;
+		patchOffsetCache.a7IsThumb = 0;
+		patchOffsetCache.ramClearOffset = 0;
+		patchOffsetCache.ramClearChecked = 0;
+		patchOffsetCache.sleepPatchOffset = 0;
+		patchOffsetCache.a7IrqHandlerOffset = 0;
+		patchOffsetCache.savePatchType = 0;
+		patchOffsetCache.relocateStartOffset = 0;
+		patchOffsetCache.relocateValidateOffset = 0;
+		patchOffsetCache.a7CardReadEndOffset = 0;
+		patchOffsetCache.a7JumpTableFuncOffset = 0;
+		patchOffsetCache.a7JumpTableType = 0;
+	}
 
 	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {

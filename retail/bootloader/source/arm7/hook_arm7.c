@@ -25,6 +25,7 @@
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "common.h"
+#include "patch.h"
 #include "find.h"
 #include "hook.h"
 
@@ -256,8 +257,10 @@ int hookNdsRetailArm7(
 
 	nocashMessage("hookNdsRetailArm7");
 
-	u32* hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	//u32* hookAccel = NULL;
+	u32* hookLocation = patchOffsetCache.a7IrqHandlerOffset;
+	if (!hookLocation) {
+		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	}
 
 	// SDK 5
 	bool sdk5 = isSdk5(moduleParams);
@@ -330,6 +333,11 @@ int hookNdsRetailArm7(
 		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
 	}
+
+   	dbg_printf("hookLocation arm7: ");
+	dbg_hexa((u32)hookLocation);
+	dbg_printf("\n\n");
+	patchOffsetCache.a7IrqHandlerOffset = hookLocation;
 
 	u32* vblankHandler = hookLocation;
 	//u32* ipcSyncHandler = hookLocation + 16;

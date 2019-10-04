@@ -40,41 +40,46 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-static void patchSleep(const tNDSHeader* ndsHeader) {
-	bool usesThumb = false;
-
+static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
-	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
-	if (!sleepPatchOffset) {
-		dbg_printf("Trying thumb...\n");
-		sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
-		usesThumb = true;
+	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
+	if (!patchOffsetCache.sleepPatchOffset) {
+		sleepPatchOffset = findSleepPatchOffset(ndsHeader);
+		if (!sleepPatchOffset) {
+			dbg_printf("Trying thumb...\n");
+			sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
+		}
+		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
-	if (sleepPatchOffset) {
-		// Patch
-		if (usesThumb) {
+	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
+		if (sleepPatchOffset) {
+			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
 			*((u16*)sleepPatchOffset + 3) = 0;
-		} else {
-			*(sleepPatchOffset + 2) = 0;
 		}
 	}
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
+	if (moduleParams->sdk_version < 0x5000000 || patchOffsetCache.ramClearChecked) {
 		return;
 	}
 
-	u32* ramClearOffset = findRamClearOffset(ndsHeader);
-	
+	u32* ramClearOffset = patchOffsetCache.ramClearOffset;
+	if (!patchOffsetCache.ramClearOffset) {
+		ramClearOffset = findRamClearOffset(ndsHeader);
+		if (ramClearOffset) {
+			patchOffsetCache.ramClearOffset = ramClearOffset;
+		}
+	}
 	if (ramClearOffset) {
 		*(ramClearOffset) = 0x023FC000;
 		*(ramClearOffset + 1) = 0x023FE000;
 	}
+	patchOffsetCache.ramClearChecked = true;
 }
 
-static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+/*static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
 	if (!cardIrqEnableOffset) {
@@ -92,7 +97,7 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
-}
+}*/
 
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
@@ -108,9 +113,7 @@ u32 patchCardNdsArm7(
 		patchSwiHalt(ce7, ndsHeader, moduleParams);
 	}*/
 
-	if (forceSleepPatch) {
-		patchSleep(ndsHeader);
-	}
+	patchSleepMode(ndsHeader);
 
 	patchRamClear(ndsHeader, moduleParams);
 
@@ -124,7 +127,7 @@ u32 patchCardNdsArm7(
 
 	u32 saveResult = 0;
 
-	if (
+    if (
         strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
     ) {
         saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
@@ -132,13 +135,24 @@ u32 patchCardNdsArm7(
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);
 	} else {
-		saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-		if (!saveResult) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+		if (patchOffsetCache.savePatchType == 0) {
+			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 1;
+			}
 		}
-		if (!saveResult) {
+		if (!saveResult && patchOffsetCache.savePatchType == 1) {
+			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 2;
+			}
+		}
+		if (!saveResult && patchOffsetCache.savePatchType == 2) {
 			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 		}
+	}
+	if (!saveResult) {
+		patchOffsetCache.savePatchType = 0;
 	}
 
 	dbg_printf("ERR_NONE\n\n");

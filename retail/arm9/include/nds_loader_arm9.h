@@ -25,8 +25,17 @@
 #include "configuration.h"
 #include "load_crt0.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 //#define LOAD_DEFAULT_NDS 0
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 apPatchCluster, configuration* conf);
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, configuration* conf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // NDS_LOADER_ARM9_H

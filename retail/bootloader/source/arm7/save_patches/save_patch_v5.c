@@ -23,17 +23,24 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_p
 	dbg_printf("\nArm7 (patch v5)\n");
 
 	// Find the relocation signature
-    u32 relocationStart = (u32)findOffset(
-        (u32*)ndsHeader->arm7destination, 0x800,
-        relocateStartSignature, 1
-    );
-    if (!relocationStart) {
-        dbg_printf("Relocation start not found. Trying alt\n");
+    u32 relocationStart = patchOffsetCache.relocateStartOffset;
+	if (!patchOffsetCache.relocateStartOffset) {
 		relocationStart = (u32)findOffset(
-            (u32*)ndsHeader->arm7destination, 0x800,
-            relocateStartSignatureAlt, 1
-        );
-		if (relocationStart>0) relocationStart += 0x28;
+			(u32*)ndsHeader->arm7destination, 0x800,
+			relocateStartSignature, 1
+		);
+		if (!relocationStart) {
+			dbg_printf("Relocation start not found. Trying alt\n");
+			relocationStart = (u32)findOffset(
+				(u32*)ndsHeader->arm7destination, 0x800,
+				relocateStartSignatureAlt, 1
+			);
+			if (relocationStart>0) relocationStart += 0x28;
+		}
+
+		if (relocationStart) {
+			patchOffsetCache.relocateStartOffset = relocationStart;
+		}
 	}
     if (!relocationStart) {
         dbg_printf("Relocation start alt not found\n");
@@ -43,10 +50,16 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_p
 	// Validate the relocation signature
     u32 vAddrOfRelocSrc = relocationStart + 0x8;
     // sanity checks
-    u32 relocationCheck = (u32)findOffset(
-        (u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-        relocateValidateSignature, 1
-    );
+    u32 relocationCheck = patchOffsetCache.relocateValidateOffset;
+	if (!patchOffsetCache.relocateValidateOffset) {
+		relocationCheck = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			relocateValidateSignature, 1
+		);
+		if (relocationCheck) {
+			patchOffsetCache.relocateValidateOffset = relocationCheck;
+		}
+	}
     u32 relocationCheck2 =
         *(u32*)(relocationCheck - 0x4);
 
@@ -64,26 +77,35 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_p
 	dbg_hexa(vAddrOfRelocSrc);
 	dbg_printf("\n");
 
-	bool usesThumb = false;
+	bool usesThumb = patchOffsetCache.a7IsThumb;
 
-	u32 JumpTableFunc = (u32)findOffset(
-        (u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		a7JumpTableSignatureUniversal, 3
-    );
+	u32 JumpTableFunc = patchOffsetCache.a7JumpTableFuncOffset;
 
-	if(!JumpTableFunc){
+	if (!patchOffsetCache.a7JumpTableFuncOffset) {
 		JumpTableFunc = (u32)findOffset(
-            (u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		    a7JumpTableSignatureUniversal_2, 3
-        );
-	}
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			a7JumpTableSignatureUniversal, 3
+		);
 
-	if(!JumpTableFunc){
-		usesThumb = true;
-		JumpTableFunc = (u32)findOffsetThumb(
-            (u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		    a7JumpTableSignatureUniversalThumb, 4
-        );
+		if(!JumpTableFunc){
+			JumpTableFunc = (u32)findOffset(
+				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversal_2, 3
+			);
+		}
+
+		if(!JumpTableFunc){
+			usesThumb = true;
+			patchOffsetCache.a7IsThumb = true;
+			JumpTableFunc = (u32)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				a7JumpTableSignatureUniversalThumb, 4
+			);
+		}
+
+		if (JumpTableFunc) {
+			patchOffsetCache.a7JumpTableFuncOffset = JumpTableFunc;
+		}
 	}
 
 	if(!JumpTableFunc){
