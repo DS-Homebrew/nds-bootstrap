@@ -66,8 +66,6 @@
 #include "locations.h"
 #include "loading_screen.h"
 
-#include "cardengine_arm9_bin.h"
-
 #define STORED_FILE_CLUSTER_OFFSET 4 
 #define INIT_DISC_OFFSET 8
 #define WANT_TO_PATCH_DLDI_OFFSET 12
@@ -75,8 +73,6 @@
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
 #define DSIMODE_OFFSET 32
-
-extern DLDI_INTERFACE _dldi_start;
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
@@ -196,7 +192,7 @@ extern u32 gameSoftReset;
 extern u32 dsiModeConsole;
 //extern u32 logging;
 
-static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
+static u32 ce9Location = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -258,7 +254,7 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();
 	toncset((u32*)0x02000000, 0, 0x350000);
 	toncset((u32*)0x02380000, 0, 0x5A000);
-	toncset((u32*)0x023DB000, 0, 0x23000);
+	toncset((u32*)0x023DB000, 0, 0x5000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
 	REG_IE = 0;
@@ -656,16 +652,27 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-    /*ce9Location = patchHeapPointer(moduleParams, ndsHeader, false);
-    if(ce9Location) {
-		memcpy((u32*)ce9Location, cardengine_arm9_bin, cardengine_arm9_bin_size);
-		relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
-		dldiRelocate(CARDENGINE_ARM9_LOCATION,ce9Location,cardengine_arm9_bin_size);
-    } else {*/      
-		ce9Location = CARDENGINE_ARM9_LOCATION;
-		tonccpy((u32*)CARDENGINE_ARM9_LOCATION, cardengine_arm9_bin, cardengine_arm9_bin_size);
-    //}
-	if (!dldiPatchBinary((data_t*)ce9Location, cardengine_arm9_bin_size)) {
+	extern u32 _dldi_start;
+	u32 dldiStart = (u32)(_dldi_start+0x40);
+	u32 dldiEnd = (u32)(_dldi_start+0x44);
+	u16 dldiSize = 0;
+	for (u32 i = dldiStart; i <= dldiEnd; i += 4) {
+		dldiSize += 4;
+	}
+
+	if (dldiSize >= 0x2000 && dldiSize < 0x3000) {
+		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_12KB;
+		tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_12KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 0x5000);
+	} else if (dldiSize >= 0x1000 && dldiSize < 0x2000) {
+		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_8KB;
+		tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_8KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 0x4000);
+	} else if (dldiSize < 0x1000) {
+		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_4KB;
+		tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_4KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED3, 0x3000);
+	}
+	toncset((u32*)0x023E0000, 0, 0x10000);
+
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x5000)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");

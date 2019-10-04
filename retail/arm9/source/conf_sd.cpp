@@ -168,6 +168,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
     
+	// Load ce9 binary 1
+	cebin = fopen("nitro:/cardengine_arm9.bin", "rb");
+	if (cebin) {
+		fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 1, 0x5000, cebin);
+	}
+	fclose(cebin);
+    
+	// Load ce9 binary 2
+	cebin = fopen("nitro:/cardengine_arm9_8kb.bin", "rb");
+	if (cebin) {
+		fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 1, 0x4000, cebin);
+	}
+	fclose(cebin);
+    
+	// Load ce9 binary 3
+	cebin = fopen("nitro:/cardengine_arm9_4kb.bin", "rb");
+	if (cebin) {
+		fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED3, 1, 0x3000, cebin);
+	}
+	fclose(cebin);
+    
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);

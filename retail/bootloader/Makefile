@@ -61,7 +61,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 #BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-BINFILES	:=	cardengine_arm9.bin
+BINFILES	:=	
  
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
@@ -106,14 +106,6 @@ $(LOADELF)	:	$(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
 	
-#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
-#	@echo $(notdir $<)
-#	$(bin2o)
-	
-cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
-	@echo $(notdir $<)
-	$(bin2o)
-
 -include $(DEPENDS)
 
 

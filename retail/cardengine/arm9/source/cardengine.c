@@ -222,7 +222,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		hookVblank();
 	}
 
-	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)((u8*)CARDENGINE_ARM9_LOCATION + 0x3FC0) : ce9->cardStruct0);
+	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)(0x027DFFC0) : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
 	if (isSdk5(ce9->moduleParams)) {
