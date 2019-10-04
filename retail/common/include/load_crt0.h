@@ -8,6 +8,7 @@
 typedef struct loadCrt0 {
     u32 _start;
     u32 storedFileCluster;
+    u32 romSize;
     u32 initDisc;
     u32 wantToPatchDLDI;
     u32 dldiOffset;

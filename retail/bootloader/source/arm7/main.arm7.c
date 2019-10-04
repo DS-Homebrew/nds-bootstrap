@@ -173,6 +173,7 @@ extern void arm7clearRAM(void);
 
 //extern u32 _start;
 extern u32 storedFileCluster;
+extern u32 romSize;
 extern u32 initDisc;
 //extern u32 wantToPatchDLDI;
 //extern u32 argStart;
@@ -718,7 +719,7 @@ int arm7_main(void) {
 		romLocation,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
-		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader))
+		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize))
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

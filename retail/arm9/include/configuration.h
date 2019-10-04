@@ -10,6 +10,7 @@ typedef struct configuration {
 	char* ndsPath;
 	char* savPath;
 	char* apPatchPath;
+	u32 romSize;
 	u32 saveSize;
 	u32 apPatchSize;
 	u8 language;

@@ -158,6 +158,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
     
+	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
 

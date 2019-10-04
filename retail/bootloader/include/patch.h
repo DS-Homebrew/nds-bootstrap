@@ -80,7 +80,8 @@ u32 patchCardNds(
 );
 u32* patchHeapPointer(
     const module_params_t* moduleParams,
-    const tNDSHeader* ndsHeader
+    const tNDSHeader* ndsHeader,
+	u32 romSize
 );
 /*void relocate_ce9(
     u32 default_location, 

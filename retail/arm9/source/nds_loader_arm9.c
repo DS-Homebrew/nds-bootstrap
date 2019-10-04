@@ -248,6 +248,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 
 	free(conf->savPath);
 
 	loader->storedFileCluster  = cluster;
+	loader->romSize            = conf->romSize;
 	loader->initDisc           = conf->initDisc;
 	loader->wantToPatchDLDI    = conf->dldiPatchNds;
 	loader->saveFileCluster    = saveCluster;

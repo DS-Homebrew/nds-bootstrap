@@ -24,6 +24,7 @@
 	.section ".init"
 	.global _start
 	.global storedFileCluster
+	.global romSize
 	.global initDisc
 	.global wantToPatchDLDI
 	.global argStart
@@ -55,6 +56,8 @@ _start:
 
 storedFileCluster:
 	.word	0x0FFFFFFF		@ default BOOT.NDS
+romSize:
+	.word	0x00000000		@ .nds file size
 initDisc:
 	.word	0x00000001		@ init the disc by default
 wantToPatchDLDI:
@@ -66,7 +69,7 @@ dsiSD:
 saveFileCluster:
 	.word	0x00000000		@ .sav file
 saveSize:
-	.word	0x00000000		@ .sav file sive
+	.word	0x00000000		@ .sav file size
 apPatchFileCluster:
 	.word	0x00000000
 apPatchSize:
