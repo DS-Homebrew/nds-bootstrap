@@ -719,7 +719,7 @@ int arm7_main(void) {
 		romLocation,
 		supportsExceptionHandler(ndsHeader),
 		consoleModel,
-		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize))
+		(u32)(isSdk5(moduleParams) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

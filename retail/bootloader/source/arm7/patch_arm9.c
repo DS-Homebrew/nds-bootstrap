@@ -286,7 +286,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 }
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 romSize) {
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 romSize, u32 saveSize) {
 	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
     if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
@@ -303,7 +303,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     dbg_printf("\n\n");
     
 	u32 shrinksize = 0;
-	for (u32 i = 0; i <= (ndsHeader->romSize>0 ? ndsHeader->romSize : romSize); i += 0x200) {
+	for (u32 i = 0; i <= (ndsHeader->romSize>0 ? ndsHeader->romSize : romSize)+saveSize; i += 0x200) {
 		shrinksize += 4;
 	}
 	if (shrinksize > 0x4000) {
