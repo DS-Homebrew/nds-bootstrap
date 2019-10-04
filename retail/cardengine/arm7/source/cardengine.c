@@ -111,7 +111,7 @@ static void initialize(void) {
 		return;
 	}
 
-	toncset((u32*)0x023DA000, 0, 0x2000);	// Clear arm9 side of bootloader
+	toncset((u32*)0x023DA000, 0, 0x1000);	// Clear arm9 side of bootloader
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
