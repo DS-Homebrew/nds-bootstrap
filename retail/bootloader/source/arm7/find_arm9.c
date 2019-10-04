@@ -115,7 +115,8 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
 	u32* moduleParamsOffset = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion) {
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 1) {
 		patchOffsetCache.moduleParamsOffset = 0;
 	} else {
 		moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
