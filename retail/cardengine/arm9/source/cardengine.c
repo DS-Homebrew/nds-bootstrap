@@ -186,18 +186,19 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				return -1;
 			}
 
+			if (ndsHeader->romSize > 0) {
+				u32 shrinksize = 0;
+				for (u32 i = 0; i <= ndsHeader->romSize; i += 0x200) {
+					shrinksize += 4;
+				}
+				if (shrinksize > 0x4000) {
+					shrinksize = 0x4000;
+				}
+				clusterCacheSize = shrinksize;
+			}
+
 			if (ce9->fatTableAddr < 0x02400000) {
 				lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
-				if (ndsHeader->romSize > 0) {
-					u32 shrinksize = 0;
-					for (u32 i = 0; i <= ndsHeader->romSize; i += 0x200) {
-						shrinksize += 4;
-					}
-					if (shrinksize > 0x4000) {
-						shrinksize = 0x4000;
-					}
-					clusterCacheSize = shrinksize;
-				}
 			}
 
 			romFile = getFileFromCluster(ce9->fileCluster);
