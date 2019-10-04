@@ -61,12 +61,12 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000 || patchOffsetCache.ramClearChecked) {
+	if (moduleParams->sdk_version < 0x5000000) {
 		return;
 	}
 
 	u32* ramClearOffset = patchOffsetCache.ramClearOffset;
-	if (!patchOffsetCache.ramClearOffset) {
+	if (!patchOffsetCache.ramClearOffset && !patchOffsetCache.ramClearChecked) {
 		ramClearOffset = findRamClearOffset(ndsHeader);
 		if (ramClearOffset) {
 			patchOffsetCache.ramClearOffset = ramClearOffset;
