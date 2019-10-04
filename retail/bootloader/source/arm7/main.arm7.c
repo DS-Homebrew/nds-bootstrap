@@ -258,7 +258,7 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();
 	toncset((u32*)0x02000000, 0, 0x350000);
 	toncset((u32*)0x02380000, 0, 0x5A000);
-	toncset((u32*)0x023DC000, 0, 0x22000);
+	toncset((u32*)0x023DB000, 0, 0x23000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
 	REG_IE = 0;
