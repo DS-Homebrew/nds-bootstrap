@@ -47,8 +47,6 @@ extern vu32* volatile cardStruct0;
 extern u32* lastClusterCacheUsed;
 extern u32 clusterCacheSize;
 
-static int cardEngineCommandMutex = 0;
-
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
@@ -57,6 +55,9 @@ static aFile savFile;
 static int cardReadCount = 0;
 
 static bool flagsSet = false;
+
+extern void resetRequestIrqMask(u32 irq);
+extern void enableIrqMask(u32 irq);
 
 static bool vblankHooked = false;
 static void hookVblank(void) {
@@ -69,56 +70,53 @@ static void hookVblank(void) {
 }
 
 void myIrqHandlerVBlank(void) {
-  	if (tryLockMutex(&cardEngineCommandMutex)) {
-		if (sharedAddr[3] == 0x53415652) {
-			// Read save
-			sysSetCardOwner (BUS_OWNER_ARM9);
+	if (sharedAddr[3] == 0x53415652) {
+		// Read save
+		sysSetCardOwner (BUS_OWNER_ARM9);
 
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 src = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
 
-			if (dst >= 0x02000000 && dst < 0x03000000) {
-				fileRead((char*)dst, savFile, src, len);
-			} else {
-				fileRead((char*)0x023E0000, savFile, src, len);
-			}
-
-			sharedAddr[3] = 0;
+		if (dst >= 0x02000000 && dst < 0x03000000) {
+			fileRead((char*)dst, savFile, src, len);
+		} else {
+			fileRead((char*)0x023E0000, savFile, src, len);
 		}
-		if (sharedAddr[3] == 0x53415657) {
-			// Write save
-			sysSetCardOwner (BUS_OWNER_ARM9);
 
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+		sharedAddr[3] = 0;
+	}
+	if (sharedAddr[3] == 0x53415657) {
+		// Write save
+		sysSetCardOwner (BUS_OWNER_ARM9);
 
-			if (src >= 0x02000000 && src < 0x03000000) {
-				fileWrite((char*)src, savFile, dst, len);
-			} else {
-				fileWrite((char*)0x023E0000, savFile, dst, len);
-			}
+		u32 src = *(vu32*)(sharedAddr+2);
+		u32 dst = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
 
-			sharedAddr[3] = 0;
+		if (src >= 0x02000000 && src < 0x03000000) {
+			fileWrite((char*)src, savFile, dst, len);
+		} else {
+			fileWrite((char*)0x023E0000, savFile, dst, len);
 		}
-		if (sharedAddr[3] == 0x524F4D52) {
-			// Read ROM (redirected from arm7)
-			sysSetCardOwner (BUS_OWNER_ARM9);
 
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+		sharedAddr[3] = 0;
+	}
+	if (sharedAddr[3] == 0x524F4D52) {
+		// Read ROM (redirected from arm7)
+		sysSetCardOwner (BUS_OWNER_ARM9);
 
-			fileRead((char*)dst, romFile, src, len);
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 src = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
 
-			sharedAddr[3] = 0;
-		}
-  		unlockMutex(&cardEngineCommandMutex);
+		fileRead((char*)dst, romFile, src, len);
+
+		sharedAddr[3] = 0;
 	}
 }
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
+static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -199,7 +197,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		hookVblank();
 	}
 
-	vu32* volatile cardStruct = (isSdk5(ce9->moduleParams) ? (vu32* volatile)(0x027DFFC0) : ce9->cardStruct0);
+	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
 	if (isSdk5(ce9->moduleParams)) {
@@ -214,17 +212,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardStruct[2] = len;
 	}
 
-	u32 page = (src / 512) * 512;
-
-	return cardReadNormal(cardStruct, dst, src, len, page);
+	return cardReadNormal(cardStruct, dst, src, len);
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	fileRead(memory, savFile, flash, len);
+	fileRead(memory, savFile, (u32)flash, len);
     return 0; 
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	fileWrite(memory, savFile, flash, len);
+	fileWrite(memory, savFile, (u32)flash, len);
 	return 0;
 }

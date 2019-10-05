@@ -34,11 +34,6 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
-//#include "sr_data_error.h"      // For showing an error screen
-//#include "sr_data_srloader.h"   // For rebooting into DSiMenu++
-//#include "sr_data_srllastran.h" // For rebooting the game
-//#include "sr_data_srllastran_twltouch.h" // SDK 5 --> For rebooting the game (TWL-mode touch screen)
-
 //static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 //static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
@@ -54,13 +49,10 @@ extern u32 language;
 extern u32 dsiMode;
 extern u32 ROMinRAM;
 extern u32 consoleModel;
-extern u32 gameSoftReset;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
-//static bool initializedIRQ = false;
-static bool calledViaIPC = false;
 
 static int saveReadTimeOut = 0;
 
@@ -116,22 +108,11 @@ static void __attribute__((target("thumb"))) initialize(void) {
 
 
 //---------------------------------------------------------------------------------
-void myIrqHandlerFIFO(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerFIFO");
-	#endif	
-	
-	calledViaIPC = true;
-}
-
-
 void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
-
-	calledViaIPC = false;
 
 	initialize();
 
@@ -152,16 +133,6 @@ void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
 		softResetTimer++;
 	} else {
 		softResetTimer = 0;
-	}
-
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
-		if (consoleModel < 2) {
-			unlaunchSetHiyaBoot();
-		}
-		//memcpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
-		memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 	}
 
 	if (consoleModel < 2 && romread_LED == 0) {
@@ -215,39 +186,6 @@ void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
 	cheat_engine_start();*/
 }
 
-u32 myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();	
-	
-	#ifdef DEBUG		
-	nocashMessage("myIrqEnable\n");
-	#endif	
-	
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
-	irq |= IRQ_IPC_SYNC;
-	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-
-	REG_IE |= irq;
-	leaveCriticalSection(oldIME);
-	return irq_before;
-}
-
-/*static void irqIPCSYNCEnable(void) {	
-	if (!initializedIRQ) {
-		int oldIME = enterCriticalSection();	
-		initialize();	
-		#ifdef DEBUG		
-		dbg_printf("\nirqIPCSYNCEnable\n");	
-		#endif	
-		REG_IE |= IRQ_IPC_SYNC;
-		REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-		#ifdef DEBUG		
-		dbg_printf("IRQ_IPC_SYNC enabled\n");
-		#endif	
-		leaveCriticalSection(oldIME);
-		initializedIRQ = true;
-	}
-}*/
-
 //
 // ARM7 Redirected functions
 //
@@ -272,7 +210,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-  	if (tryLockMutex(&saveMutex)) {
+  	if (lockMutex(&saveMutex)) {
 		// Send a command to the ARM9 to read the save
 		u32 commandSaveRead = 0x53415652;
 
@@ -306,7 +244,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-  	if (tryLockMutex(&saveMutex)) {
+  	if (lockMutex(&saveMutex)) {
 		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
 			// Transfer from WRAM to main RAM
 			tonccpy((char*)0x023E0000, (char*)src, len);
@@ -340,7 +278,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-  	if (tryLockMutex(&saveMutex)) {
+  	if (lockMutex(&saveMutex)) {
 		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
 			// Transfer from WRAM to main RAM
 			tonccpy((char*)0x023E0000, (char*)src, len);
@@ -374,7 +312,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-  	/*if (tryLockMutex(&saveMutex)) {
+  	/*if (lockMutex(&saveMutex)) {
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
@@ -414,19 +352,16 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-  	if (tryLockMutex(&saveMutex)) {
-		// Send a command to the ARM9 to read the ROM
-		u32 commandRomRead = 0x524F4D52;
+	// Send a command to the ARM9 to read the ROM
+	u32 commandRomRead = 0x524F4D52;
 
-		// Write the command
-		sharedAddr[0] = src;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (vu32)dst;
-		sharedAddr[3] = commandRomRead;
+	// Write the command
+	sharedAddr[0] = src;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (vu32)dst;
+	sharedAddr[3] = commandRomRead;
 
-		waitForArm9();
+	waitForArm9();
 
-  		unlockMutex(&saveMutex);
-	}
 	return true;
 }

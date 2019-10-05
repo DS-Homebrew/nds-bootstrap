@@ -708,8 +708,7 @@ int arm7_main(void) {
 		language,
 		dsiModeConfirmed,
 		ROMinRAM,
-		consoleModel,
-		gameSoftReset
+		consoleModel
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

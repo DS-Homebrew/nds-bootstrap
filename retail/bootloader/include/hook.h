@@ -36,8 +36,7 @@ int hookNdsRetailArm7(
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
-	u32 consoleModel,
-	u32 gameSoftReset
+	u32 consoleModel
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

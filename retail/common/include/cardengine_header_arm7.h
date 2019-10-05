@@ -39,9 +39,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 //
 typedef struct cardengineArm7Patches {
     u32* card_pull_out_arm9;
-    u32* card_irq_enable_arm7;
     u32 vblankHandler;
-    u32 fifoHandler;
     u32 cardStructArm9;
     u32 card_pull;
     u32 cacheFlushRef;
@@ -56,14 +54,12 @@ typedef struct cardengineArm7Patches {
 typedef struct cardengineArm7 {
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
-    u32 intr_fifo_orig_return;
     const module_params_t* moduleParams;
     u32 cardStruct;
     u32 language; //u8
     u32 dsiMode;
     u32 ROMinRAM;
     u32 consoleModel;
-    u32 gameSoftReset;
 
 } __attribute__ ((__packed__)) cardengineArm7;
 

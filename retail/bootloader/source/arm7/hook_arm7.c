@@ -249,8 +249,7 @@ int hookNdsRetailArm7(
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
-	u32 consoleModel,
-	u32 gameSoftReset
+	u32 consoleModel
 ) {
 
 	nocashMessage("hookNdsRetailArm7");
@@ -363,7 +362,6 @@ int hookNdsRetailArm7(
 	ce7->dsiMode                 = dsiMode; // SDK 5
 	ce7->ROMinRAM                = ROMinRAM;
 	ce7->consoleModel            = consoleModel;
-	ce7->gameSoftReset           = gameSoftReset;
 
 	*vblankHandler = ce7->patches->vblankHandler;
 

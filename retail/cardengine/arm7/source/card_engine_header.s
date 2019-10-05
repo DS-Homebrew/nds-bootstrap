@@ -29,8 +29,6 @@ patches_offset:
 	.word	patches
 intr_vblank_orig_return:
 	.word	0x00000000
-intr_fifo_orig_return:
-	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 cardStruct:
@@ -42,8 +40,6 @@ dsiMode:
 ROMinRAM:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-gameSoftReset:
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -57,27 +53,11 @@ vblankHandler:
 	ldr 	r0,	intr_vblank_orig_return
 	bx  	r0
 
-fifoHandler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_fifo
-	ldr 	r0,	intr_fifo_orig_return
-	bx  	r0
-
 code_handler_start_vblank:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerVBlank
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
-	@ exit after return
-	b	exit
-
-code_handler_start_fifo:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerFIFO
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-  
-  
 	@ exit after return
 	b	exit
 
@@ -101,9 +81,7 @@ card_engine_end:
 
 patches:
 .word	card_pull_out_arm9
-.word	card_irq_enable_arm7
 .word	vblankHandler
-.word	fifoHandler
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -126,21 +104,6 @@ cacheRef:
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	bx      lr
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
-card_irq_enable_arm7:
-@---------------------------------------------------------------------------------
-	push    {lr}
-	push	{r1-r12}
-	ldr	r3, =myIrqEnable
-	bl	_blx_r3_stub2
-	pop   	{r1-r12} 
-	pop  	{lr}
-	bx  lr
-_blx_r3_stub2:
-	bx	lr
-.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -253,22 +216,6 @@ cardIdDataT:
 	.pool
 
 	.arm
-.global tryLockMutex
-.type	tryLockMutex STT_FUNC
-@ r0 : mutex adr
-tryLockMutex:
-	mov r1, r0   
-	mov r2, #1
-	swp r0,r2, [r1]
-	cmp r0, r2
-	beq trymutex_fail	
-	mov r0, #1
-	b mutex_exit	
-trymutex_fail:
-	mov r0, #0
-mutex_exit:
-	bx  lr
-
 .global lockMutex
 .type	lockMutex STT_FUNC
 @ r0 : mutex adr
