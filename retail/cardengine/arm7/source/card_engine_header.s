@@ -160,6 +160,12 @@ arm7Functions:
 saveCluster:
 .word    0x00000000
 
+cardId:
+	ldr r0, cardIdData
+	bx      lr
+cardIdData:
+.word  0xC2FF01C0
+
 arm7FunctionsThumb:
 .word    eepromProtectThumbStub
 .word    eepromPageEraseThumbStub
@@ -238,13 +244,11 @@ eepromReadThumbStub:
 	bx  r3
 	
 cardIdThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =cardId
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
-	pop  	{r3}
-	bx  r3
+	ldr r0, cardIdDataT
+	bx      lr
+.align	4
+cardIdDataT:
+.word  0xC2FF01C0
 
 	.pool
 
