@@ -12,6 +12,7 @@ const char* getRomTid(const tNDSHeader* ndsHeader) {
 
 const u32 getChipId(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
     u32 cardid = 0xC2;
+#ifndef NO_CARDID
     u8 size = ndsHeader->deviceSize;
     
     //Devicecapacity         (Chipsize = 128KB SHL nn) (eg. 7 = 16MB)
@@ -70,6 +71,6 @@ const u32 getChipId(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     cardid |= unit << 24;
 
     if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
-    
+#endif
     return cardid;
 }

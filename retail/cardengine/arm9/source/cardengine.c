@@ -43,7 +43,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
-//extern vu32* volatile cacheStruct;
 
 extern u32* lastClusterCacheUsed;
 extern u32 clusterCacheSize;
@@ -119,7 +118,7 @@ void myIrqHandlerVBlank(void) {
 	}
 }
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len, u32 page) {
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -134,32 +133,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	//nocashMessage("end\n");
 
-	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
+	/*if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
-	}
+	}*/
 	
-	return 0;
-}
-
-static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
-	//u32 commandRead;
-	while (len > 0) {
-		// Copy directly
-		tonccpy(dst, (u8*)((ce9->romLocation - 0x4000 - ndsHeader->arm9binarySize)+src),len);
-
-		// Update cardi common
-		cardStruct[0] = src + len;
-		cardStruct[1] = (vu32)(dst + len);	
-		cardStruct[2] = len - len;
-
-		len = cardStruct[2];
-		if (len > 0) {
-			src = cardStruct[0];
-			dst = (u8*)cardStruct[1];
-			page = (src / 512) * 512;
-		}
-	}
-
 	return 0;
 }
 
@@ -239,10 +216,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	u32 page = (src / 512) * 512;
 
-	u8* cacheBuffer = (u8*)(cacheStruct + 8);
-	u32* cachePage = cacheStruct + 2;
-
-	return ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	return cardReadNormal(cardStruct, dst, src, len, page);
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
