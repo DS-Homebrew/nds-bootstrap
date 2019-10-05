@@ -46,7 +46,6 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 ROMinRAM,
 	u32 romLocation,
-	u32 enableExceptionHandler,
 	u32 consoleModel,
     u32 fatTableAddr
 );

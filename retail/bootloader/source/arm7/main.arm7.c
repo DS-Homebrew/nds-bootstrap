@@ -730,7 +730,6 @@ int arm7_main(void) {
 		savFile->firstCluster,
 		ROMinRAM,
 		romLocation,
-		supportsExceptionHandler(ndsHeader),
 		consoleModel,
 		(u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);

@@ -115,7 +115,6 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 ROMinRAM,
 	u32 romLocation,
-	u32 enableExceptionHandler,
 	u32 consoleModel,
     u32 fatTableAddr
 ) {
@@ -126,7 +125,6 @@ int hookNdsRetailArm9(
 	ce9->saveCluster            = saveCluster;
 	ce9->ROMinRAM               = ROMinRAM;
 	ce9->romLocation            = romLocation;
-	ce9->enableExceptionHandler = enableExceptionHandler;
 	ce9->consoleModel           = consoleModel;
 	ce9->fatTableAddr           = fatTableAddr;
 

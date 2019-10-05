@@ -26,13 +26,9 @@ saveCluster:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
-cacheStruct:
-	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
 romLocation:
-	.word	0x00000000
-enableExceptionHandler:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
@@ -79,7 +75,6 @@ exit:
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
-.word	0
 .word	card_id_arm9
 .word	card_dma_arm9
 .word   nand_read_arm9
@@ -94,7 +89,6 @@ needFlushDCCache:
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
-.word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
 .word   thumb_nand_read_arm9
@@ -270,7 +264,6 @@ _blx_r6_stub_thumb_nand_write:
 .align	4
 @---------------------------------------------------------------------------------
 
-	.arm    
 .global setIrqMask
 .type	setIrqMask STT_FUNC
 setIrqMask:
@@ -306,16 +299,16 @@ enableIrqMask:
 .global disableIrqMask
 .type	disableIrqMask STT_FUNC
 disableIrqMask:
-    LDR             R12, =0x4000208
+    LDR             R7, =0x4000208
     MOV             R2, #0
-    LDRH            R3, [R12]
+    LDRH            R3, [R7]
     MVN             R1, R0
-    STRH            R2, [R12]
-    LDR             R0, [R12,#8]
+    STRH            R2, [R7]
+    LDR             R0, [R7,#8]
     AND             R1, R0, R1
-    STR             R1, [R12,#8]
-    LDRH            R1, [R12]
-    STRH            R3, [R12]
+    STR             R1, [R7,#8]
+    LDRH            R1, [R7]
+    STRH            R3, [R7]
     BX              LR
 .pool
     
@@ -334,6 +327,7 @@ resetRequestIrqMask:
     BX              LR
 
 
+	.arm    
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:
