@@ -325,7 +325,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 3);
+	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp));
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -347,18 +347,18 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 	}
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 3);
-	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 3);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
+	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 
 	// SDK 5
 	//*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
 	*dsiModeConfirmedPtr = dsiMode;
 	if (*dsiModeConfirmedPtr) {
 		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 3);
+			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize);
 		}
 		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 3);
+			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize);
 		}
 	}
 }
@@ -484,7 +484,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 
 	// Load ROM into RAM
-	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+	fileRead(romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader));
 	// Primary fix for Mario's Holiday
 	if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
 		*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;
@@ -570,7 +570,7 @@ int arm7_main(void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if (!FAT_InitFiles(initDisc, 0)) {
+	if (!FAT_InitFiles(initDisc)) {
 		nocashMessage("!FAT_InitFiles");
 		errorOutput();
 		//return -1;
@@ -584,7 +584,7 @@ int arm7_main(void) {
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
-		*romFile = getBootFileCluster(bootName, 3);
+		*romFile = getBootFileCluster(bootName);
 	}
 
 	if (romFile->firstCluster == CLUSTER_FREE) {
@@ -595,7 +595,7 @@ int arm7_main(void) {
 
 	if (extendedMemory) {
 		pleaseWaitOutput();
-		buildFatTableCache(romFile, 3);
+		buildFatTableCache(romFile);
 	}
 
 	nocashMessage("status1");
@@ -610,7 +610,7 @@ int arm7_main(void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
@@ -743,7 +743,7 @@ int arm7_main(void) {
 	}*/
 
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
 	if (ROMinRAM) {
@@ -752,7 +752,7 @@ int arm7_main(void) {
 
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x30000) {
-		fileRead((char*)0x02350000, apPatchFile, 0, apPatchSize, 0);
+		fileRead((char*)0x02350000, apPatchFile, 0, apPatchSize);
 		applyIpsPatch(ndsHeader, (u8*)0x02350000);
 	}
 

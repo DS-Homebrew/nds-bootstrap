@@ -39,8 +39,8 @@
 
 typedef bool (* FN_MEDIUM_STARTUP)(void) ;
 typedef bool (* FN_MEDIUM_ISINSERTED)(void) ;
-typedef bool (* FN_MEDIUM_READSECTORS)(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) ;
-typedef bool (* FN_MEDIUM_WRITESECTORS)(sec_t sector, sec_t numSectors, const void* buffer, int ndmaSlot) ;
+typedef bool (* FN_MEDIUM_READSECTORS)(sec_t sector, sec_t numSectors, void* buffer) ;
+typedef bool (* FN_MEDIUM_WRITESECTORS)(sec_t sector, sec_t numSectors, const void* buffer) ;
 typedef bool (* FN_MEDIUM_CLEARSTATUS)(void) ;
 typedef bool (* FN_MEDIUM_SHUTDOWN)(void) ;
 

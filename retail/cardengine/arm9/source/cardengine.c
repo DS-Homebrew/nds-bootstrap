@@ -80,9 +80,9 @@ void myIrqHandlerVBlank(void) {
 			u32 len = *(vu32*)(sharedAddr+1);
 
 			if (dst >= 0x02000000 && dst < 0x03000000) {
-				fileRead((char*)dst, savFile, src, len, 0);
+				fileRead((char*)dst, savFile, src, len);
 			} else {
-				fileRead((char*)0x023E0000, savFile, src, len, 0);
+				fileRead((char*)0x023E0000, savFile, src, len);
 			}
 
 			sharedAddr[3] = 0;
@@ -96,9 +96,9 @@ void myIrqHandlerVBlank(void) {
 			u32 len = *(vu32*)(sharedAddr+1);
 
 			if (src >= 0x02000000 && src < 0x03000000) {
-				fileWrite((char*)src, savFile, dst, len, 0);
+				fileWrite((char*)src, savFile, dst, len);
 			} else {
-				fileWrite((char*)0x023E0000, savFile, dst, len, 0);
+				fileWrite((char*)0x023E0000, savFile, dst, len);
 			}
 
 			sharedAddr[3] = 0;
@@ -111,7 +111,7 @@ void myIrqHandlerVBlank(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, romFile, src, len, 0);
+			fileRead((char*)dst, romFile, src, len);
 
 			sharedAddr[3] = 0;
 		}
@@ -130,7 +130,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, romFile, src, len);
 
 	//nocashMessage("end\n");
 
@@ -181,7 +181,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 
 		if (!ce9->ROMinRAM) {
-			if (!FAT_InitFiles(true, 0)) {
+			if (!FAT_InitFiles(true)) {
 				//nocashMessage("!FAT_InitFiles");
 				return -1;
 			}
@@ -202,12 +202,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 
 			romFile = getFileFromCluster(ce9->fileCluster);
-			buildFatTableCache(&romFile, 0);
+			buildFatTableCache(&romFile);
 		}
 
 		clusterCacheSize = 0x4000;
 		savFile = getFileFromCluster(ce9->saveCluster);
-		buildFatTableCache(&savFile, 0);
+		buildFatTableCache(&savFile);
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -246,11 +246,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	fileRead(memory, savFile, flash, len, -1);
+	fileRead(memory, savFile, flash, len);
     return 0; 
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	fileWrite(memory, savFile, flash, len, -1);
+	fileWrite(memory, savFile, flash, len);
 	return 0;
 }
