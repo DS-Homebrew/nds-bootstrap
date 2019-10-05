@@ -38,7 +38,6 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 // ARM7 cardengine patches
 //
 typedef struct cardengineArm7Patches {
-    u32 card_read_arm9;
     u32* card_pull_out_arm9;
     u32* card_irq_enable_arm7;
     u32 vblankHandler;
