@@ -246,12 +246,10 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 fileCluster,
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
 	u32 consoleModel,
-	u32 romread_LED,
 	u32 gameSoftReset
 ) {
 
@@ -361,13 +359,10 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
-	ce7->fileCluster             = fileCluster;
 	ce7->language                = language;
-	ce7->gottenSCFGExt           = REG_SCFG_EXT; // Pass unlocked SCFG before locking it
 	ce7->dsiMode                 = dsiMode; // SDK 5
 	ce7->ROMinRAM                = ROMinRAM;
 	ce7->consoleModel            = consoleModel;
-	ce7->romread_LED             = romread_LED;
 	ce7->gameSoftReset           = gameSoftReset;
 
 	*vblankHandler = ce7->patches->vblankHandler;

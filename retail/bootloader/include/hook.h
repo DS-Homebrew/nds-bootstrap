@@ -33,12 +33,10 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 fileCluster,
 	u32 language,
 	u32 dsiMode, // SDK 5
 	u32 ROMinRAM,
 	u32 consoleModel,
-	u32 romread_LED,
 	u32 gameSoftReset
 );
 int hookNdsRetailArm9(

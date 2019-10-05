@@ -49,15 +49,11 @@ extern int lockMutex(int* addr);
 extern int unlockMutex(int* addr);
 
 extern vu32* volatile cardStruct;
-extern u32 fileCluster;
-extern u32 saveCluster;
 extern module_params_t* moduleParams;
 extern u32 language;
-extern u32 gottenSCFGExt;
 extern u32 dsiMode;
 extern u32 ROMinRAM;
 extern u32 consoleModel;
-extern u32 romread_LED;
 extern u32 gameSoftReset;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;

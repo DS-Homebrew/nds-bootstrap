@@ -705,12 +705,10 @@ int arm7_main(void) {
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		ndsHeader,
 		moduleParams,
-		romFile->firstCluster,
 		language,
 		dsiModeConfirmed,
 		ROMinRAM,
 		consoleModel,
-		romread_LED,
 		gameSoftReset
 	);
 	if (errorCode == ERR_NONE) {

@@ -13,14 +13,11 @@
 .global cardStruct
 .global patches_offset
 .global moduleParams
-.global fileCluster
 .global saveCluster
 .global language
-.global gottenSCFGExt
 .global dsiMode
 .global ROMinRAM
 .global consoleModel
-.global romread_LED
 .global gameSoftReset
 
 #define ICACHE_SIZE	0x2000
@@ -36,21 +33,15 @@ intr_fifo_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
-fileCluster:
-	.word	0x00000000
 cardStruct:
 	.word	0x00000000
 language:
-	.word	0x00000000
-gottenSCFGExt:
 	.word	0x00000000
 dsiMode:
 	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
 consoleModel:
-	.word	0x00000000
-romread_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
