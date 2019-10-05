@@ -255,7 +255,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02000000, 0, 0x350000);
 	toncset((u32*)0x02380000, 0, 0x5A000);
 	toncset((u32*)0x023DB000, 0, 0x5000);
-	toncset((u32*)0x023F0000, 0, 0x10000);
+	toncset((u32*)0x023F0000, 0, 0xE000);
+	toncset((u32*)0x023FF000, 0, 0x1000);
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -652,7 +653,7 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	//tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 
 	extern u32 _dldi_start;
 	u32 dldiStart = (u32)(_dldi_start+0x40);
