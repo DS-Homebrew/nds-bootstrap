@@ -595,10 +595,6 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
         #ifdef DEBUG
         nocashMessage("fatTable not cached");
         #endif
-		if(startOffset<file.currentOffset) {
-			file.currentOffset=0;
-			file.currentCluster = file.firstCluster;
-		}
 
 		// Follow cluster list until desired one is found
 		for (chunks = (startOffset-file.currentOffset) / discBytePerClus; chunks > 0; chunks--)

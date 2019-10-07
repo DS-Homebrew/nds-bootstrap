@@ -14,17 +14,12 @@ typedef struct configuration {
 	u32 saveSize;
 	u32 apPatchSize;
 	u8 language;
-	u8 dsiMode; // SDK 5
 	u32 donorSdkVer;
 	u32 patchMpuRegion;
 	u32 patchMpuSize;
-	u32 consoleModel;
-	u32 romread_LED;
 	bool boostCpu;
 	bool boostVram;
-	bool gameSoftReset;
 	bool forceSleepPatch;
-	bool soundFix;
 	bool logging;
 	bool initDisc;
 	bool dldiPatchNds;

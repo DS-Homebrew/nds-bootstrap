@@ -53,9 +53,6 @@ typedef struct cardengineArm9 {
     u32 fileCluster;
     u32 saveCluster;
     u32 cardStruct0;
-    u32 ROMinRAM;
-	u32 romLocation;
-    u32 consoleModel;
     u32 fatTableAddr;
     u32* irqTable;
 } __attribute__ ((__packed__)) cardengineArm9;

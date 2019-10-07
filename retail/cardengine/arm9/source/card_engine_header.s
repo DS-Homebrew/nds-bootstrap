@@ -26,12 +26,6 @@ saveCluster:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
-ROMinRAM:
-	.word	0x00000000
-romLocation:
-	.word	0x00000000
-consoleModel:
-	.word	0x00000000
 fatTableAddr:
 	.word	0x00000000
 irqTable:

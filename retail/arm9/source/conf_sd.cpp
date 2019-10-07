@@ -70,10 +70,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Language
 		conf->language = strtol(value, NULL, 0);
 
-	} else if (match(section, "NDS-BOOTSTRAP", key, "DSI_MODE")) {
-		// DSi mode
-		conf->dsiMode = (bool)strtol(value, NULL, 0);
-
 	} else if (match(section, "NDS-BOOTSTRAP", key, "DONOR_SDK_VER")) {
 		// Donor SDK version
 		conf->donorSdkVer = strtol(value, NULL, 0);
@@ -85,18 +81,6 @@ static int callback(const char *section, const char *key, const char *value, voi
 	} else if (match(section, "NDS-BOOTSTRAP", key, "PATCH_MPU_SIZE")) {
 		// Patch MPU size
 		conf->patchMpuSize = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "CONSOLE_MODEL")) {
-		// Console model
-		conf->consoleModel = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "ROMREAD_LED")) {
-		// ROM read LED
-		conf->romread_LED = strtol(value, NULL, 0);
-
-	} else if (match(section, "NDS-BOOTSTRAP", key, "GAME_SOFT_RESET")) {
-		// Game soft reset
-		conf->gameSoftReset = (bool)strtol(value, NULL, 0);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "FORCE_SLEEP_PATCH")) {
 		// Force sleep patch
@@ -112,19 +96,11 @@ static int callback(const char *section, const char *key, const char *value, voi
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_CPU")) {
 		// Boost CPU
-		if (conf->dsiMode) {
-			conf->boostCpu = true;
-		} else {
-			conf->boostCpu = (bool)strtol(value, NULL, 0);
-		}
+		conf->boostCpu = (bool)strtol(value, NULL, 0);
 
 	} else if (match(section, "NDS-BOOTSTRAP", key, "BOOST_VRAM")) {
 		// Boost VRAM
-		if (conf->dsiMode) {
-			conf->boostVram = true;
-		} else {
-			conf->boostVram = (bool)strtol(value, NULL, 0);
-		}
+		conf->boostVram = (bool)strtol(value, NULL, 0);
 
 	} else {
 		// Unknown section/name

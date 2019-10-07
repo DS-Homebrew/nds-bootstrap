@@ -103,14 +103,10 @@ u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
 	/*if (REG_SCFG_ROM != 0x703) {
 		fixForDsiBios(ce7, ndsHeader, moduleParams);
-	}
-	if (!ROMinRAM) {
-		patchSwiHalt(ce7, ndsHeader, moduleParams);
 	}*/
 
 	patchSleepMode(ndsHeader);

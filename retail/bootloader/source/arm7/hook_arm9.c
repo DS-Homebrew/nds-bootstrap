@@ -113,9 +113,6 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 ROMinRAM,
-	u32 romLocation,
-	u32 consoleModel,
     u32 fatTableAddr
 ) {
 	nocashMessage("hookNdsRetailArm9");
@@ -123,9 +120,6 @@ int hookNdsRetailArm9(
 	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
-	ce9->ROMinRAM               = ROMinRAM;
-	ce9->romLocation            = romLocation;
-	ce9->consoleModel           = consoleModel;
 	ce9->fatTableAddr           = fatTableAddr;
 
     u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;

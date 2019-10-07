@@ -348,7 +348,6 @@ u32 patchCardNds(
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
-	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
@@ -404,7 +403,7 @@ u32 patchCardNds(
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);
+		patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
 
 		dbg_printf("ERR_NONE");
 		return ERR_NONE;

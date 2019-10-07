@@ -257,16 +257,11 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 
 	loader->apPatchSize                 = conf->apPatchSize;
 	loader->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
 	loader->language                    = conf->language;
-	loader->dsiMode                     = conf->dsiMode; // SDK 5
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;
-	loader->consoleModel                = ((REG_SCFG_EXT != 0) ? conf->consoleModel : 0);
-	loader->romread_LED                 = conf->romread_LED;
 	loader->boostVram                   = conf->boostVram;
-	loader->gameSoftReset               = conf->gameSoftReset;
 	loader->forceSleepPatch             = conf->forceSleepPatch;
-	loader->dsiModeConsole              = isDSiMode();
 	loader->logging                     = conf->logging;
 
 	free(conf);

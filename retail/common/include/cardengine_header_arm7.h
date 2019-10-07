@@ -56,10 +56,7 @@ typedef struct cardengineArm7 {
     u32 intr_vblank_orig_return;
     const module_params_t* moduleParams;
     u32 cardStruct;
-    u32 language; //u8
-    u32 dsiMode;
-    u32 ROMinRAM;
-    u32 consoleModel;
+    u32 language;
 
 } __attribute__ ((__packed__)) cardengineArm7;
 

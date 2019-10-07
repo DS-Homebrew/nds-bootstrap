@@ -142,16 +142,11 @@ static inline void debugConf(configuration* conf) {
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
-	dbg_printf("dsiMode: %s\n", btoa(conf->dsiMode));
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
-	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
-	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
-	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
-	dbg_printf("dsiModeConsole: %s\n", btoa(isDSiMode()));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("dldiPatchNds: %s\n", btoa(conf->dldiPatchNds));
@@ -172,22 +167,6 @@ static int runNdsFile(configuration* conf) {
 		/*for (int i = 0; i < 60; i++) {
 			swiWaitForVBlank();
 		}*/
-	}
-
-	// ROM read LED
-	switch(conf->romread_LED) {
-		case 0:
-		default:
-			break;
-		case 1:
-			dbg_printf("Using WiFi LED\n");
-			break;
-		case 2:
-			dbg_printf("Using Power LED\n");
-			break;
-		case 3:
-			dbg_printf("Using Camera LED\n");
-			break;
 	}
 
 	// adjust TSC[1:26h] and TSC[1:27h]

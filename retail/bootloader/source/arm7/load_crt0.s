@@ -29,23 +29,17 @@
 	.global wantToPatchDLDI
 	.global argStart
 	.global argSize
-	.global dsiSD
 	.global saveFileCluster
 	.global saveSize
 	.global apPatchFileCluster
 	.global apPatchSize
 	.global patchOffsetCacheFileCluster
 	.global language
-	.global dsiMode
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
-	.global consoleModel
-	.global romread_LED
 	.global boostVram
-	.global gameSoftReset
 	.global forceSleepPatch
-	.global dsiModeConsole
 	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
@@ -65,8 +59,6 @@ wantToPatchDLDI:
 	.word	0x00000000		@ by default patch the DLDI section of the loaded NDS
 dldiOffset:
 	.word	0x00000000
-dsiSD:
-	.word	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
 saveSize:
@@ -79,25 +71,15 @@ patchOffsetCacheFileCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000
-dsiMode:
-	.word	0x00000000
 donorSdkVer:
 	.word	0x00000000		@ donor SDK version
 patchMpuRegion:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000
-consoleModel:
-	.word	0x00000000
-romread_LED:
-	.word	0x00000000
 boostVram:
 	.word	0x00000000
-gameSoftReset:
-	.word	0x00000000
 forceSleepPatch:
-	.word	0x00000000
-dsiModeConsole:
 	.word	0x00000000
 logging:
 	.word	0x00000000

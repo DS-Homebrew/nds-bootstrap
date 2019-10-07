@@ -246,10 +246,7 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 language,
-	u32 dsiMode, // SDK 5
-	u32 ROMinRAM,
-	u32 consoleModel
+	u32 language
 ) {
 
 	nocashMessage("hookNdsRetailArm7");
@@ -359,9 +356,6 @@ int hookNdsRetailArm7(
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
 	ce7->language                = language;
-	ce7->dsiMode                 = dsiMode; // SDK 5
-	ce7->ROMinRAM                = ROMinRAM;
-	ce7->consoleModel            = consoleModel;
 
 	*vblankHandler = ce7->patches->vblankHandler;
 
