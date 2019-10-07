@@ -390,7 +390,10 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 }
 
 void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
-	if (moduleParams->sdk_version <= 0x2004FFF) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version <= 0x2004FFF
+	|| strncmp(romTid, "VSO", 3) == 0) {
 		return;
 	}
 
