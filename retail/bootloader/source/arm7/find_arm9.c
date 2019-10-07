@@ -104,15 +104,16 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuInitCache[1] = {0xE3A00042};
 
 // Init Heap
-static const u32 initHeapEndSignature1[2]          = {0x27FF000, 0x37F8000};
-static const u32 initHeapEndSignature5[2]          = {0x2FFF000, 0x37F8000};
-static const u32 initHeapEndFuncSignature[1]       = {0xE12FFF1E};
-static const u32 initHeapEndFunc2Signature[2]      = {0xE12FFF1E, 0x023E0000};
-static const u32 initHeapEndFuncSignatureAlt[1]    = {0xE8BD8008};
-static const u32 initHeapEndFunc2SignatureAlt1[2]  = {0xE8BD8008, 0x023E0000};
-static const u32 initHeapEndFunc2SignatureAlt2[2]  = {0xE8BD8010, 0x023E0000};
-static const u16 initHeapEndFuncSignatureThumb[1]  = {0xBD08};
-static const u32 initHeapEndFunc2SignatureThumb[2] = {0xBD082000, 0x023E0000};
+static const u32 initHeapEndSignature1[2]             = {0x27FF000, 0x37F8000};
+static const u32 initHeapEndSignature5[2]             = {0x2FFF000, 0x37F8000};
+static const u32 initHeapEndFuncSignature[1]          = {0xE12FFF1E};
+static const u32 initHeapEndFunc2Signature[2]         = {0xE12FFF1E, 0x023E0000};
+static const u32 initHeapEndFuncSignatureAlt[1]       = {0xE8BD8008};
+static const u32 initHeapEndFunc2SignatureAlt1[2]     = {0xE8BD8008, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureAlt2[2]     = {0xE8BD8010, 0x023E0000};
+static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};
+static const u32 initHeapEndFunc2SignatureThumb[2]    = {0xBD082000, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000};
 
 
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
@@ -1256,6 +1257,12 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 		initEndFunc = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,
 			initHeapEndFunc2SignatureThumb, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureThumbAlt, 2
 		);
 	}
     u32* heapPointer = initEndFunc + 1;
