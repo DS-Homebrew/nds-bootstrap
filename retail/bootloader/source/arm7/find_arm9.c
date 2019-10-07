@@ -107,7 +107,9 @@ static const u32 mpuInitCache[1] = {0xE3A00042};
 static const u32 initHeapEndSignature1[2]         = {0x27FF000, 0x37F8000};
 static const u32 initHeapEndSignature5[2]         = {0x2FFF000, 0x37F8000};
 static const u32 initHeapEndFuncSignature[1]      = {0xE12FFF1E};      
+static const u32 initHeapEndFunc2Signature[2]     = {0xE12FFF1E, 0x023E0000};      
 static const u32 initHeapEndFuncSignatureAlt[1]   = {0xE8BD8008};      
+static const u32 initHeapEndFunc2SignatureAlt[2]  = {0xE8BD8008, 0x023E0000};      
 static const u16 initHeapEndFuncSignatureThumb[1] = {0xBD08};      
 
 
@@ -1222,6 +1224,27 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 		);
         heapPointer = initEndFuncThumb+1;
 	}
+    
+    dbg_hexa((u32)heapPointer);
+	dbg_printf("\n");
+
+	return heapPointer;
+}
+
+u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	dbg_printf("findHeapPointer2Offset:\n");
+    
+	u32* initEndFunc = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,
+		initHeapEndFunc2Signature, 2
+	);
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureAlt, 2
+		);
+	}
+    u32* heapPointer = initEndFunc + 1;
     
     dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");

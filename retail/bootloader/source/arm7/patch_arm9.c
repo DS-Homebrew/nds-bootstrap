@@ -380,13 +380,46 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	}
 
 	*heapPointer = *heapPointer + shrinksize; // shrink heap by FAT table cache size
-    
+
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     dbg_printf("Heap Shrink Sucessfull\n\n");
     
     return oldheapPointer;
+}
+
+void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	if (moduleParams->sdk_version <= 0x2004FFF) {
+		return;
+	}
+
+	u32* heapPointer = patchOffsetCache.heapPointer2Offset;
+	if (!patchOffsetCache.heapPointer2Offset) {
+		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
+	}
+    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("heap pointer value: ");
+	    dbg_hexa(*heapPointer);    
+		dbg_printf("\n\n");
+        return;
+    } else if (!patchOffsetCache.heapPointer2Offset) {
+		patchOffsetCache.heapPointer2Offset = heapPointer;
+	}
+    
+    u32* oldheapPointer = (u32*)*heapPointer;
+        
+    dbg_printf("old heap end pointer: ");
+	dbg_hexa((u32)oldheapPointer);
+    dbg_printf("\n\n");
+    
+	*heapPointer = *heapPointer - 0x4000; // shrink heap by 16KB
+
+    dbg_printf("new heap 2 pointer: ");
+	dbg_hexa((u32)*heapPointer);
+    dbg_printf("\n\n");
+    dbg_printf("Heap 2 Shrink Sucessfull\n\n");
 }
 
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
@@ -735,7 +768,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchDownloadplay(ndsHeader);
 
-	//patchHeapPointer(ndsHeader, usesThumb);
+	patchHeapPointer2(moduleParams, ndsHeader);
 	
 	randomPatch(ndsHeader, moduleParams);
 

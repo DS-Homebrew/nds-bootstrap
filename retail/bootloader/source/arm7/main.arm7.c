@@ -612,7 +612,7 @@ int arm7_main(void) {
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	u32 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
 
