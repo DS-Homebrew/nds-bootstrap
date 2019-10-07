@@ -350,18 +350,6 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
 	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
-
-	// SDK 5
-	//*dsiModeConfirmedPtr = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp->ndshdr);
-	*dsiModeConfirmedPtr = dsiMode;
-	if (*dsiModeConfirmedPtr) {
-		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize);
-		}
-		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize);
-		}
-	}
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -640,7 +628,7 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+	u32 ROMinRAM = 0;
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
@@ -738,10 +726,6 @@ int arm7_main(void) {
 
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	}
-
-	if (ROMinRAM) {
-		loadROMintoRAM(ndsHeader, moduleParams, *romFile);
 	}
 
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
