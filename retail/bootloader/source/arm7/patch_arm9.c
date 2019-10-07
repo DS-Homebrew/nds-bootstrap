@@ -417,7 +417,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = *heapPointer - 0x4000; // shrink heap by 16KB
+	*heapPointer = 0x023DC000; // shrink heap by 16KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
