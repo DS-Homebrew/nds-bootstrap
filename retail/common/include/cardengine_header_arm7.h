@@ -71,8 +71,8 @@ typedef struct cardengineArm7 {
     u32 gameOnFlashcard;
     u32 saveOnFlashcard;
     u32 language; //u8
-    u32 gottenSCFGExt;
     u32 dsiMode;
+    u32 dsiSD;
     u32 ROMinRAM;
     u32 consoleModel;
     u32 romread_LED;

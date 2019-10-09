@@ -263,6 +263,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 apPatchClust
 	lc0->initDisc          = conf->initDisc;
 	lc0->gameOnFlashcard   = conf->gameOnFlashcard;
 	lc0->saveOnFlashcard   = conf->saveOnFlashcard;
+	lc0->dsiSD             = conf->sdFound;
 
 	lc0->saveFileCluster             = saveCluster;
 	lc0->romSize                     = conf->romSize;

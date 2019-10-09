@@ -33,6 +33,7 @@ typedef struct configuration {
 	bool preciseVolumeControl;
 	bool logging;
 	bool initDisc;
+	bool sdFound;
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
 	u32 backlightMode;

@@ -55,7 +55,6 @@ extern module_params_t* moduleParams;
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
 extern u32 language;
-//extern u32 gottenSCFGExt;
 extern u32 dsiMode;
 extern u32 ROMinRAM;
 extern u32 consoleModel;

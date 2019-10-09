@@ -42,6 +42,7 @@ int hookNdsRetailArm7(
     u32 saveOnFlashcard,
 	u32 language,
 	u32 dsiMode, // SDK5
+	u32 dsiSD,
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romread_LED,

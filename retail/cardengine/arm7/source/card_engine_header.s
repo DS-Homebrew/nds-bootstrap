@@ -18,8 +18,8 @@
 .global gameOnFlashcard
 .global saveOnFlashcard
 .global language
-.global gottenSCFGExt
 .global dsiMode
+.global dsiSD
 .global ROMinRAM
 .global consoleModel
 .global romread_LED
@@ -57,9 +57,9 @@ saveOnFlashcard:
 	.word	0x00000000
 language:
 	.word	0x00000000
-gottenSCFGExt:
-	.word	0x00000000
 dsiMode:
+	.word	0x00000000
+dsiSD:
 	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000

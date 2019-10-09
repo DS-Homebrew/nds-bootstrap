@@ -187,31 +187,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	nocashMessage("fatInitDefault");
 
-	bool flashcardFound = (access("fat:/", F_OK) == 0);
-
-	if (flashcardFound && (access("sd:/", F_OK) != 0)) {
+	if (!isDSiMode()) {
 		consoleDemoInit();
 		printf("This edition of nds-bootstrap\n");
-		printf("can only be used on the\n");
-		printf("SD card (optinally, alongside\n");
-		printf("a flashcard).\n");
+		printf("can only be used in DSi mode.\n");
 		return -1;
 	}
-	
-	load_conf(conf, "sd:/_nds/nds-bootstrap.ini");
-	mkdir("sd:/_nds", 0777);
-	mkdir("sd:/_nds/nds-bootstrap", 0777);
-	mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
-	mkdir("sd:/_nds/nds-bootstrap/fatTable", 0777);
-	if (flashcardFound) {
-		mkdir("fat:/_nds", 0777);
-		mkdir("fat:/_nds/nds-bootstrap", 0777);
-		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
-		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
-	}
-
-	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
-	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
 
 	if ((strncmp (bootstrapPath, "sd:/", 4) != 0) && (strncmp (bootstrapPath, "fat:/", 5) != 0)) {
 		//bootstrapPath = "sd:/_nds/nds-bootstrap-release.nds";
@@ -223,6 +204,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
+	conf->sdFound = (access("sd:/", F_OK) == 0);
+	bool flashcardFound = (access("fat:/", F_OK) == 0);
+
+	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
+
+	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
+	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+
+	if (conf->sdFound) {
+		mkdir("sd:/_nds", 0777);
+		mkdir("sd:/_nds/nds-bootstrap", 0777);
+		mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+		mkdir("sd:/_nds/nds-bootstrap/fatTable", 0777);
+	}
+	if (flashcardFound) {
+		mkdir("fat:/_nds", 0777);
+		mkdir("fat:/_nds/nds-bootstrap", 0777);
+		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
+	}
+
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.lz77", "rb");
 	if (cebin) {

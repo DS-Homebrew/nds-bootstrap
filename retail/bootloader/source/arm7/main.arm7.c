@@ -78,6 +78,7 @@ extern u32 storedFileCluster;
 extern u32 initDisc;
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
+extern u32 dsiSD;
 extern u32 saveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
@@ -726,10 +727,12 @@ int arm7_main(void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if (!FAT_InitFiles(true, 0)) {
-		nocashMessage("!FAT_InitFiles");
-		errorOutput();
-		//return -1;
+	if (dsiSD) {
+		if (!FAT_InitFiles(true, 0)) {
+			nocashMessage("!FAT_InitFiles");
+			errorOutput();
+			//return -1;
+		}
 	}
 
 	if (gameOnFlashcard || saveOnFlashcard) {
@@ -740,7 +743,7 @@ int arm7_main(void) {
 			errorOutput();
 			//return -1;
 		}
-		sdRead = true;
+		sdRead = dsiSD;
 	}
 
 	if (logging) {
@@ -797,7 +800,7 @@ int arm7_main(void) {
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)ROM_FILE_LOCATION, sizeof(aFile));
 	}
 
-	sdRead = (saveOnFlashcard ? false : true);
+	sdRead = (saveOnFlashcard ? false : dsiSD);
 
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
@@ -1013,6 +1016,7 @@ int arm7_main(void) {
 			saveOnFlashcard,
 			language,
 			dsiModeConfirmed,
+			dsiSD,
 			ROMinRAM,
 			consoleModel,
 			romread_LED,
