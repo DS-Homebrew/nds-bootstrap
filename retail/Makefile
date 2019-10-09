@@ -8,7 +8,7 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 # These set the information text in the nds file
-GAME_TITLE     := nds-bootstrap
+GAME_TITLE     := B4DS
 GAME_SUBTITLE1 := Runs an .nds file
 GAME_SUBTITLE2 := Ahezard
 
@@ -28,7 +28,7 @@ VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 # DATA is a list of directories containing binary files embedded using bin2o
 # GRAPHICS is a list of directories containing image files to be converted with grit
 #---------------------------------------------------------------------------------
-TARGET		:=	nds-bootstrap
+TARGET		:=	b4ds
 BIN			:=	bin
 BUILD		:=	build
 SOURCES		:=	source

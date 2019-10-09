@@ -12,11 +12,11 @@ all:	retail
 
 package-release: release
 	@mkdir -p "$(PACKAGE)"
-	@cp "retail/bin/nds-bootstrap-release.nds" "$(PACKAGE)/nds-bootstrap-release.nds"
+	@cp "retail/bin/b4ds-release.nds" "$(PACKAGE)/b4ds-release.nds"
 
 package-nightly: nightly
 	@mkdir -p "$(PACKAGE)"
-	@cp "retail/bin/nds-bootstrap-nightly.nds" "$(PACKAGE)/nds-bootstrap-nightly.nds"
+	@cp "retail/bin/b4ds-nightly.nds" "$(PACKAGE)/b4ds-nightly.nds"
 
 release:
 	@$(MAKE) -C retail release
