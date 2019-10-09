@@ -10,7 +10,7 @@
 
 //#define memcpy __builtin_memcpy // memcpy
 
-//bool cardReadFound = false; // patch_common.c
+extern u32 gameOnFlashcard;
 
 static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
@@ -453,21 +453,64 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 		patchOffsetCache.heapPointerOffset = heapPointer;
 		patchOffsetCacheChanged = true;
 	}
-    
+
     u32* oldheapPointer = (u32*)*heapPointer;
-        
+
     dbg_printf("old heap pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
-    
+
 	*heapPointer = *heapPointer + (isSdk5(moduleParams) ? 0x3000 : 0x3000); // shrink heap by 8 KB (or for SDK5, 12 KB)
-    
+
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     dbg_printf("Heap Shrink Sucessfull\n\n");
-    
+
     return oldheapPointer;
+}
+
+void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version <= 0x2004FFF
+	|| isSdk5(moduleParams)) {
+		return;
+	}
+
+	u32* heapPointer = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0) {
+		patchOffsetCache.heapPointerOffset = 0;
+	} else {
+		heapPointer = patchOffsetCache.heapPointerOffset;
+	}
+	if (!patchOffsetCache.heapPointerOffset) {
+		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
+	}
+    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("heap pointer value: ");
+	    dbg_hexa(*heapPointer);    
+		dbg_printf("\n\n");
+        return;
+    } else if (!patchOffsetCache.heapPointerOffset) {
+		patchOffsetCache.heapPointerOffset = heapPointer;
+		patchOffsetCacheChanged = true;
+	}
+
+    u32* oldheapPointer = (u32*)*heapPointer;
+
+    dbg_printf("old heap end pointer: ");
+	dbg_hexa((u32)oldheapPointer);
+    dbg_printf("\n\n");
+
+	*heapPointer = 0x023DC000; // shrink heap by 16KB
+
+    dbg_printf("new heap 2 pointer: ");
+	dbg_hexa((u32)*heapPointer);
+    dbg_printf("\n\n");
+    dbg_printf("Heap 2 Shrink Sucessfull\n\n");
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
@@ -965,6 +1008,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
     
     patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+
+	if (gameOnFlashcard) {
+		patchHeapPointer2(moduleParams, ndsHeader);
+	}
 
 	randomPatch(ndsHeader, moduleParams);
 

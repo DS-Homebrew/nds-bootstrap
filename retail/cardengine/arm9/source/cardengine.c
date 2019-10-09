@@ -225,7 +225,7 @@ static void enableIPCSYNC(void) {
 static void disableIPCSYNC(void) {
     // disable IPC_SYNC
     REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;  
-    disableIrqMask(IRQ_IPC_SYNC);;
+    disableIrqMask(IRQ_IPC_SYNC);
 }
 
 static void clearIcache (void) {

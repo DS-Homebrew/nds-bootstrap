@@ -115,11 +115,16 @@ static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C0
 static const u16 sleepConstantValue = {0x82EA}; 
 
 // Init Heap
-static const u32 initHeapEndSignature1[2]         = {0x27FF000, 0x37F8000};
-static const u32 initHeapEndSignature5[2]         = {0x2FFF000, 0x37F8000};
-static const u32 initHeapEndFuncSignature[1]      = {0xE12FFF1E};      
-static const u32 initHeapEndFuncSignatureAlt[1]   = {0xE8BD8008};      
-static const u16 initHeapEndFuncSignatureThumb[1] = {0xBD08};      
+static const u32 initHeapEndSignature1[2]             = {0x27FF000, 0x37F8000};
+static const u32 initHeapEndSignature5[2]             = {0x2FFF000, 0x37F8000};
+static const u32 initHeapEndFuncSignature[1]          = {0xE12FFF1E};
+static const u32 initHeapEndFunc2Signature[2]         = {0xE12FFF1E, 0x023E0000};
+static const u32 initHeapEndFuncSignatureAlt[1]       = {0xE8BD8008};
+static const u32 initHeapEndFunc2SignatureAlt1[2]     = {0xE8BD8008, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureAlt2[2]     = {0xE8BD8010, 0x023E0000};
+static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};
+static const u32 initHeapEndFunc2SignatureThumb[2]    = {0xBD082000, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000};
 
 
 u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
@@ -1279,6 +1284,45 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 		);
         heapPointer = initEndFuncThumb+1;
 	}
+    
+    dbg_hexa((u32)heapPointer);
+	dbg_printf("\n");
+
+	return heapPointer;
+}
+
+u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	dbg_printf("findHeapPointer2Offset:\n");
+    
+	u32* initEndFunc = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,
+		initHeapEndFunc2Signature, 2
+	);
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureAlt1, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureAlt2, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureThumb, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,
+			initHeapEndFunc2SignatureThumbAlt, 2
+		);
+	}
+    u32* heapPointer = initEndFunc + 1;
     
     dbg_hexa((u32)heapPointer);
 	dbg_printf("\n");
