@@ -288,21 +288,22 @@ static int runNdsFile(configuration* conf) {
 	fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
+	const char *logFilePath = (conf->sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
 	if (conf->logging) {
 		static FILE* loggingFile;
-		loggingFile = fopen("sd:/NDSBTSRP.LOG", "w");
+		loggingFile = fopen(logFilePath, "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
 		fclose(loggingFile);
 
 		// Create a big file (minimal sdengine libfat cannot append to a file)
-		loggingFile = fopen("sd:/NDSBTSRP.LOG", "a");
+		loggingFile = fopen(logFilePath, "a");
 		for (int i = 0; i < 1000; i++) {
 			fprintf(loggingFile, "                                                                                                                                          \n");
 		}
 
 		fclose(loggingFile);
 	} else {
-		remove("sd:/NDSBTSRP.LOG");
+		remove(logFilePath);
 	}
 
 	debugConf(conf);
