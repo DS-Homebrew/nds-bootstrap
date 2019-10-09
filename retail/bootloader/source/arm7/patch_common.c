@@ -400,7 +400,7 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ROMinRAM, patchMpuRegion, patchMpuSize);
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {

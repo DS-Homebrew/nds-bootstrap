@@ -971,7 +971,7 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	bool usesThumb;
 	int readType;
@@ -1009,7 +1009,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     
     patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	if (gameOnFlashcard) {
+	if (gameOnFlashcard && !ROMinRAM) {
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
 
