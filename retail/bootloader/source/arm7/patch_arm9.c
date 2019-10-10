@@ -772,7 +772,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchDownloadplay(ndsHeader);
 
 	patchHeapPointer2(moduleParams, ndsHeader);
-	
+
 	randomPatch(ndsHeader, moduleParams);
 
 	randomPatch5First(ndsHeader, moduleParams);

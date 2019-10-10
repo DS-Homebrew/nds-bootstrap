@@ -46,6 +46,7 @@ extern void arm9_clearCache(void);
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
+bool extendedMemory = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -118,6 +119,11 @@ void arm9_main(void) {
 	REG_EXMEMCNT = 0xE880;
 
 	initMBKARM9();
+
+	extendedMemory = (REG_SCFG_EXT != 0);
+	if (extendedMemory) {
+		REG_SCFG_EXT = 0x8300C000;
+	}
 
 	arm9_stateFlag = ARM9_START;
 
@@ -241,7 +247,6 @@ void arm9_main(void) {
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
-			REG_SCFG_EXT = 0x8300C000;
 			if (arm9_boostVram) {
 				REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 			}

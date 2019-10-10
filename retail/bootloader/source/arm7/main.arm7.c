@@ -257,6 +257,9 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023DB000, 0, 0x5000);
 	toncset((u32*)0x023F0000, 0, 0xE000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
+	if (extendedMemory) {
+		toncset((u32*)0x02400000, 0, 0xC00000);
+	}
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -648,7 +651,7 @@ int arm7_main(void) {
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
-		(u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
+		(u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) || extendedMemory) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);
 	/*if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
