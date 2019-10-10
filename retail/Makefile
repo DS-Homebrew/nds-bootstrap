@@ -191,7 +191,6 @@ clean:
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
 	@$(MAKE) -C cardengine/arm9_8kb clean
-	@$(MAKE) -C cardengine/arm9_4kb clean
 	@$(MAKE) -C bootloader clean
 		
 $(DATA):
