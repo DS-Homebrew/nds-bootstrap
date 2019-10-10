@@ -47,6 +47,7 @@ tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 bool extendedMemory = false;
+bool dsDebugRam = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -123,6 +124,13 @@ void arm9_main(void) {
 	extendedMemory = (REG_SCFG_EXT != 0);
 	if (extendedMemory) {
 		REG_SCFG_EXT = 0x8300C000;
+	} else {
+		*(vu32*)(0x02000000) = 0x314D454D;
+		*(vu32*)(0x02400000) = 0x324D454D;
+		if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+			extendedMemory = true;
+			dsDebugRam = true;
+		}
 	}
 
 	arm9_stateFlag = ARM9_START;

@@ -258,7 +258,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023F0000, 0, 0xE000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory) {
-		toncset((u32*)0x02400000, 0, 0xC00000);
+		toncset((u32*)0x02400000, 0, dsDebugRam ? 0x400000 : 0xC00000);
 	}
 
 	REG_IE = 0;
