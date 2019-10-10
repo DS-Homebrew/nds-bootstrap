@@ -651,6 +651,7 @@ int arm7_main(void) {
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
+		extendedMemory,
 		(u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) || extendedMemory) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
 	);
 	/*if (errorCode == ERR_NONE) {
