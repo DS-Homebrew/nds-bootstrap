@@ -557,8 +557,6 @@ int arm7_main (void) {
 				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
 			}
 		}
-
-		REG_SCFG_EXT &= BIT(18);	// Disable SD/MMC access
 	} else {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
@@ -573,19 +571,20 @@ int arm7_main (void) {
 
 	arm9_boostVram = boostVram;
 
-	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
-	bool recentLibnds =
-		  (a9exe[0] == 0xE3A00301
-		&& a9exe[1] == 0xE5800208
-		&& a9exe[2] == 0xE3A00013
-		&& a9exe[3] == 0xE129F000);
-
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
-	if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
-		arm9_stateFlag = ARM9_LOCKSCFG;
-		while (arm9_stateFlag != ARM9_READY);
+	if (!dsiMode && ramDiskSize == 0) {
+		u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		bool recentLibnds =
+			  (a9exe[0] == 0xE3A00301
+			&& a9exe[1] == 0xE5800208
+			&& a9exe[2] == 0xE3A00013
+			&& a9exe[3] == 0xE129F000);
+		if (recentLibnds) {
+			arm9_stateFlag = ARM9_LOCKSCFG;
+			while (arm9_stateFlag != ARM9_READY);
+		}
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
