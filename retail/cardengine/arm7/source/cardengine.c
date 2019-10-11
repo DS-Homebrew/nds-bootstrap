@@ -90,7 +90,15 @@ static const tNDSHeader* ndsHeader = NULL;
 }*/
 
 static void waitForArm9(void) {
-	while (sharedAddr[3] != (vu32)0);
+    IPC_SendSync(0x4);
+    int count = 0;
+	while (sharedAddr[3] != (vu32)0) {
+		if(count==20000000) {
+			IPC_SendSync(0x4);
+			count=0;
+		}
+		count++;
+	}
 	saveReadTimeOut = 0;
 }
 

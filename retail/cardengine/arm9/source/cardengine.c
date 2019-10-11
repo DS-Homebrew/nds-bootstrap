@@ -23,7 +23,7 @@
 #include <nds/arm9/cache.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
-//#include <nds/ipc.h>
+#include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -59,17 +59,25 @@ static bool flagsSet = false;
 extern void resetRequestIrqMask(u32 irq);
 extern void enableIrqMask(u32 irq);
 
-static bool vblankHooked = false;
-static void hookVblank(void) {
-	resetRequestIrqMask(IRQ_VBLANK);
-	u32* vblankHandler = ce9->irqTable;
-	ce9->intr_vblank_orig_return = *vblankHandler;
-	*vblankHandler = ce9->patches->vblankHandlerRef;
-    enableIrqMask(IRQ_VBLANK);
-	vblankHooked = true;
+static void enableIPCSYNC(void) {
+    // enable IPC_SYNC
+    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;  
+    enableIrqMask(IRQ_IPC_SYNC);
 }
 
-void myIrqHandlerVBlank(void) {
+static bool IPC_SYNC_hooked = false;
+static void hookIPC_SYNC(void) {
+    if (!IPC_SYNC_hooked) {
+        resetRequestIrqMask(IRQ_IPC_SYNC);
+        u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+        IPC_SYNC_hooked = true;
+		enableIPCSYNC();
+    }
+}
+
+void myIrqHandlerIPC(void) {
 	if (sharedAddr[3] == 0x53415652) {
 		// Read save
 		sysSetCardOwner (BUS_OWNER_ARM9);
@@ -85,6 +93,7 @@ void myIrqHandlerVBlank(void) {
 		}
 
 		sharedAddr[3] = 0;
+    	IPC_SendSync(0x8);
 	}
 	if (sharedAddr[3] == 0x53415657) {
 		// Write save
@@ -101,6 +110,7 @@ void myIrqHandlerVBlank(void) {
 		}
 
 		sharedAddr[3] = 0;
+    	IPC_SendSync(0x8);
 	}
 	if (sharedAddr[3] == 0x524F4D52) {
 		// Read ROM (redirected from arm7)
@@ -113,6 +123,7 @@ void myIrqHandlerVBlank(void) {
 		fileRead((char*)dst, romFile, src, len);
 
 		sharedAddr[3] = 0;
+    	IPC_SendSync(0x8);
 	}
 }
 
@@ -145,8 +156,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
-
-	//sysSetCartOwner (BUS_OWNER_ARM9);
 
 	cardReadCount++;
 
@@ -187,14 +196,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		} else {
-			hookVblank();
+			hookIPC_SYNC();
 		}
 
 		flagsSet = true;
 	}
 	
-	if (isSdk5(ce9->moduleParams) && cardReadCount == 3 && !vblankHooked) {
-		hookVblank();
+	if (isSdk5(ce9->moduleParams) && cardReadCount == 3 && !IPC_SYNC_hooked) {
+		hookIPC_SYNC();
 	}
 
 	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
