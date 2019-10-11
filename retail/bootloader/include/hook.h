@@ -40,7 +40,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 extendedMemory,
+	u32 maxClusterCacheSize,
     u32 fatTableAddr
 );
 

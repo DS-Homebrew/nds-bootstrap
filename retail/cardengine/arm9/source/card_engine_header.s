@@ -26,7 +26,7 @@ saveCluster:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
-extendedMemory:
+maxClusterCacheSize:
 	.word	0x00000000
 fatTableAddr:
 	.word	0x00000000
