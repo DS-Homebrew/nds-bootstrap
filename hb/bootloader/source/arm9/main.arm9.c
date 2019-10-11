@@ -130,7 +130,7 @@ void arm9_main(void) {
 	VRAM_B_CR = 0x80;
 	// Don't mess with the VRAM used for execution
 	//VRAM_C_CR = 0;
-	//VRAM_D_CR = 0x80;
+	VRAM_D_CR = 0x80;
 	VRAM_E_CR = 0x80;
 	VRAM_F_CR = 0x80;
 	VRAM_G_CR = 0x80;
@@ -141,8 +141,8 @@ void arm9_main(void) {
 	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_E, 272*1024);		// Banks E, F, G, H, I
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C (excluded)
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D, E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 
@@ -150,7 +150,7 @@ void arm9_main(void) {
 	VRAM_B_CR = 0;
 	// Don't mess with the ARM7's VRAM
 	//VRAM_C_CR = 0;
-	//VRAM_D_CR = 0;
+	VRAM_D_CR = 0;
 	VRAM_E_CR = 0;
 	VRAM_F_CR = 0;
 	VRAM_G_CR = 0;

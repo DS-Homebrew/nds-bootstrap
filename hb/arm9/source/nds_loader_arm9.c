@@ -295,10 +295,9 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	// Direct CPU access to VRAM bank C
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
 	tonccpy (LCDC_BANK_C, loader, loaderSize);
-	tonccpy (LCDC_BANK_D, imgTemplateBuffer, sizeof(imgTemplateBuffer));
+	tonccpy ((u32*)0x02370000, imgTemplateBuffer, sizeof(imgTemplateBuffer));
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;
@@ -370,8 +369,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;  
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;  
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
