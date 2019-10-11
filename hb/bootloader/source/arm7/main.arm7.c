@@ -557,6 +557,8 @@ int arm7_main (void) {
 				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
 			}
 		}
+
+		REG_SCFG_EXT &= BIT(18);	// Disable SD/MMC access
 	} else {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
@@ -584,7 +586,6 @@ int arm7_main (void) {
 	if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
 		arm9_stateFlag = ARM9_LOCKSCFG;
 		while (arm9_stateFlag != ARM9_READY);
-	} else if (dsiMode && ramDiskSize > 0 && recentLibnds) {
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
