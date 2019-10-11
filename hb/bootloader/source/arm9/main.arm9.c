@@ -42,7 +42,7 @@
 
 extern void arm9_clearCache(void);
 
-//tNDSHeader* ndsHeader = NULL;
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 volatile bool ram32MB = false;

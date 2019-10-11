@@ -416,9 +416,9 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 			fread((void*)RAM_DISK_LOCATION_LZ77ROM, 1, ramDiskSize, ramDiskTemplate);
 			fclose(ramDiskTemplate);
 			if (romToRamDisk == 1) {
-				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION_SNESROM);
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_SNESROM);
 			} else if (romToRamDisk == 0) {
-				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION_MDROM);
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_MDROM);
 			}
 		}
 	}

@@ -241,30 +241,14 @@ static void resetMemory_ARM7 (void)
 
 static void loadBinary_ARM7 (aFile file)
 {
-	u32 ndsHeader[0x170>>2];
-
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead ((char*)ndsHeader, file, 0, 0x170, 0);
-	// read ARM9 info from NDS header
-	u32 ARM9_SRC = ndsHeader[0x020>>2];
-	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
-	u32 ARM9_LEN = ndsHeader[0x02C>>2];
-	// read ARM7 info from NDS header
-	u32 ARM7_SRC = ndsHeader[0x030>>2];
-	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
-	u32 ARM7_LEN = ndsHeader[0x03C>>2];
+	fileRead ((char*)NDS_HEADER, file, 0, 0x170, 0);
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 0);
-	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 0);
-
-	// first copy the header to its proper location, excluding
-	// the ARM9 start address, so as not to start it
-	*(vu32*)ARM9_START_ADDRESS_LOCATION = ndsHeader[0x024>>2];		// Store for later
-	ndsHeader[0x024>>2] = 0;
-	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEADER, 0x170);
+	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
 }
 
 static void NDSTouchscreenMode(void) {
@@ -452,8 +436,6 @@ static void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
-	// copy NDS ARM9 start address into the header, starting ARM9
-	*((vu32*)0x023FFE24) = *(vu32*)ARM9_START_ADDRESS_LOCATION;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -462,7 +444,7 @@ static void startBinary_ARM7 (void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x23FFE34);
+	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
 }
 
@@ -546,30 +528,31 @@ int arm7_main (void) {
 	passArgs_ARM7();
 
 	if (ramDiskCluster != 0 && ramDiskSize > 0) {
+		void* ramDiskLocation = (void*)(dsiMode ? RAM_DISK_LOCATION_DSIMODE : RAM_DISK_LOCATION);
 		arm9_ramDiskCluster = ramDiskCluster;
-		if (ramDiskSize < 0x01C01000) {
+		if (ramDiskSize < (dsiMode ? 0x01001000 : 0x01C01000)) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
-				tonccpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, (romFileType == 1) ? 0xEA00 : 0xDE00);
+				tonccpy ((char*)ramDiskLocation, (char*)0x06020000, (romFileType == 1) ? RAM_DISK_SNESROM : RAM_DISK_MDROM);
 				if (romIsCompressed) {
 					u8* lz77RomSrc = (u8*)RAM_DISK_LOCATION_LZ77ROM;
 					u32 leng = (lz77RomSrc[1] | (lz77RomSrc[2] << 8) | (lz77RomSrc[3] << 16));
 					if (romFileType == 1) {
-						*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = leng;
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = leng;
 					} else if (romFileType == 0) {
-						*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = leng;
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = leng;
 					}
 					toncset((u32*)RAM_DISK_LOCATION_LZ77ROM, 0, 0x400000);	// clear compressed ROM
 				} else {
 					if (romFileType == 1) {
-						*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = ramDiskSize;
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = ramDiskSize;
 					} else if (romFileType == 0) {
-						*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = ramDiskSize;
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = ramDiskSize;
 					}
-					fileRead((char*)((romFileType == 1) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
+					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 				}
 			} else {
-				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
+				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
 			}
 		}
 	} else {
@@ -577,30 +560,29 @@ int arm7_main (void) {
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 	}
 
 	if (dsiMode) {
-		tonccpy ((char*)0x2FFF000, (char*)0x23FF000, 0x1000);	// Copy user data and header to last MB of main memory
+		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory
 	}
 
 	arm9_boostVram = boostVram;
 
+	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+	bool recentLibnds =
+		  (a9exe[0] == 0xE3A00301
+		&& a9exe[1] == 0xE5800208
+		&& a9exe[2] == 0xE3A00013
+		&& a9exe[3] == 0xE129F000);
+
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
-	if (!dsiMode && ramDiskSize == 0) {
-		u32* a9bin = (u32*)0x02000000;
-		if (a9bin[0] == 0) {
-			a9bin = (u32*)0x02000800;
-		}
-		if (a9bin[0] == 0xE3A00301
-		 && a9bin[1] == 0xE5800208
-		 && a9bin[2] == 0xE3A00013
-		 && a9bin[3] == 0xE129F000) {
-			arm9_stateFlag = ARM9_LOCKSCFG;
-			while (arm9_stateFlag != ARM9_READY);
-		}
+	if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
+		arm9_stateFlag = ARM9_LOCKSCFG;
+		while (arm9_stateFlag != ARM9_READY);
+	} else if (dsiMode && ramDiskSize > 0 && recentLibnds) {
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
