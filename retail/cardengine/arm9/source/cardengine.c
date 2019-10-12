@@ -52,7 +52,10 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile romFile;
 static aFile savFile;
 
+static int cardReadCount = 0;
+
 static bool flagsSet = false;
+static bool mariosHolidayPrimaryFixApplied = false;
 
 extern void resetRequestIrqMask(u32 irq);
 extern void enableIrqMask(u32 irq);
@@ -130,6 +133,17 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 	//nocashMessage("aaaaaaaaaa\n");
 	fileRead((char*)dst, romFile, src, len);
 
+	if (!isSdk5(ce9->moduleParams) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
+		for (u32 i = 0; i < len; i += 4) {
+			if (*(u32*)(dst+i) == 0x4B434148) {
+				*(u32*)(dst+i) = 0xA00;
+				mariosHolidayPrimaryFixApplied = true;
+				break;
+			}
+		}
+		if (cardReadCount > 10) mariosHolidayPrimaryFixApplied = true;
+	}
+
 	//nocashMessage("end\n");
 
 	/*if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
@@ -146,6 +160,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
+
+	cardReadCount++;
 
 	if (!flagsSet) {
 		if (_io_dldi_features & 0x00000010) {
