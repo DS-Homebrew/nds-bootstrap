@@ -88,14 +88,7 @@ static const tNDSHeader* ndsHeader = NULL;
 
 static void waitForArm9(void) {
     IPC_SendSync(0x4);
-    int count = 0;
-	while (sharedAddr[3] != (vu32)0) {
-		if(count==20000000) {
-			IPC_SendSync(0x4);
-			count=0;
-		}
-		count++;
-	}
+	while (sharedAddr[3] != (vu32)0);
 	saveReadTimeOut = 0;
 }
 
@@ -104,7 +97,7 @@ static void __attribute__((target("thumb"))) initialize(void) {
 		return;
 	}
 
-	//toncset((u32*)0x023DA000, 0, 0x1000);	// Clear arm9 side of bootloader
+	toncset((u32*)0x023FE000, 0, 0x800);	// Clear arm9 side of bootloader
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
