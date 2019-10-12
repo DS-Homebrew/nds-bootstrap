@@ -389,7 +389,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     return oldheapPointer;
 }
 
-void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+void patchHeapPointer2(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (moduleParams->sdk_version <= 0x2004FFF
@@ -417,7 +417,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = 0x023DC000; // shrink heap by 16KB
+	*heapPointer = (u32)ce9; // shrink heap by 16KB or 20KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -771,7 +771,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchDownloadplay(ndsHeader);
 
-	patchHeapPointer2(moduleParams, ndsHeader);
+	patchHeapPointer2(ce9, moduleParams, ndsHeader);
 
 	randomPatch(ndsHeader, moduleParams);
 
