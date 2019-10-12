@@ -52,8 +52,6 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile romFile;
 static aFile savFile;
 
-static int cardReadCount = 0;
-
 static bool flagsSet = false;
 
 extern void resetRequestIrqMask(u32 irq);
@@ -86,11 +84,7 @@ void myIrqHandlerIPC(void) {
 		u32 src = *(vu32*)(sharedAddr);
 		u32 len = *(vu32*)(sharedAddr+1);
 
-		if (dst >= 0x02000000 && dst < 0x03000000) {
-			fileRead((char*)dst, savFile, src, len);
-		} else {
-			fileRead((char*)0x023E0000, savFile, src, len);
-		}
+		fileRead((char*)dst, savFile, src, len);
 
 		sharedAddr[3] = 0;
     	IPC_SendSync(0x8);
@@ -103,11 +97,7 @@ void myIrqHandlerIPC(void) {
 		u32 dst = *(vu32*)(sharedAddr);
 		u32 len = *(vu32*)(sharedAddr+1);
 
-		if (src >= 0x02000000 && src < 0x03000000) {
-			fileWrite((char*)src, savFile, dst, len);
-		} else {
-			fileWrite((char*)0x023E0000, savFile, dst, len);
-		}
+		fileWrite((char*)src, savFile, dst, len);
 
 		sharedAddr[3] = 0;
     	IPC_SendSync(0x8);
@@ -157,8 +147,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
-	cardReadCount++;
-
 	if (!flagsSet) {
 		if (_io_dldi_features & 0x00000010) {
 			sysSetCartOwner (BUS_OWNER_ARM9);
@@ -191,14 +179,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} else {
-			hookIPC_SYNC();
 		}
 
 		flagsSet = true;
 	}
 	
-	if (isSdk5(ce9->moduleParams) && cardReadCount == 3 && !IPC_SYNC_hooked) {
+	if (REG_IME==1 && !IPC_SYNC_hooked) {
 		hookIPC_SYNC();
 	}
 

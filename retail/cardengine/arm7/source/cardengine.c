@@ -46,15 +46,10 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 language;
-extern u32 dsiMode;
-extern u32 ROMinRAM;
-extern u32 consoleModel;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
-
-static int saveReadTimeOut = 0;
 
 //static int saveTimer = 0;
 
@@ -99,7 +94,6 @@ static void waitForArm9(void) {
 		}
 		count++;
 	}
-	saveReadTimeOut = 0;
 }
 
 static void __attribute__((target("thumb"))) initialize(void) {
@@ -180,13 +174,6 @@ void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
 		}
 	}*/
 
-	if (sharedAddr[3] != 0) {
-		saveReadTimeOut++;
-		if (saveReadTimeOut > 60) {
-			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
-		}
-	}
-
 	/*#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
 	#endif	
@@ -230,11 +217,6 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
 		waitForArm9();
 
-		if ((u32)dst < 0x02000000 && (u32)dst >= 0x03000000) {
-			// Transfer from main RAM to WRAM
-			tonccpy((char*)dst, (char*)0x023E0000, len);
-		}
-
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -253,11 +235,6 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
   	if (lockMutex(&saveMutex)) {
-		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
-			// Transfer from WRAM to main RAM
-			tonccpy((char*)0x023E0000, (char*)src, len);
-		}
-
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
@@ -287,11 +264,6 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	if (lockMutex(&saveMutex)) {
-		if ((u32)src < 0x02000000 && (u32)src >= 0x03000000) {
-			// Transfer from WRAM to main RAM
-			tonccpy((char*)0x023E0000, (char*)src, len);
-		}
-
 		// Send a command to the ARM9 to write the save
 		u32 commandSaveWrite = 0x53415657;
 
