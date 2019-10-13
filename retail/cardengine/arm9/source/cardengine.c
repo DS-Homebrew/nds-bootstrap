@@ -54,7 +54,15 @@ static aFile savFile;
 
 static int cardReadCount = 0;
 
-static bool flagsSet = false;
+static inline void setDeviceOwner(void) {
+	if (_io_dldi_features & 0x00000010) {
+		sysSetCartOwner (BUS_OWNER_ARM9);
+	} else {
+		sysSetCardOwner (BUS_OWNER_ARM9);
+	}
+}
+
+static bool initialized = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
 static bool IPC_SYNC_hooked = false;
@@ -70,7 +78,7 @@ static void hookIPC_SYNC(void) {
 void myIrqHandlerIPC(void) {
 	if (sharedAddr[3] == 0x53415652) {
 		// Read save
-		sysSetCardOwner (BUS_OWNER_ARM9);
+		setDeviceOwner();
 
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 src = *(vu32*)(sharedAddr);
@@ -83,7 +91,7 @@ void myIrqHandlerIPC(void) {
 	}
 	if (sharedAddr[3] == 0x53415657) {
 		// Write save
-		sysSetCardOwner (BUS_OWNER_ARM9);
+		setDeviceOwner();
 
 		u32 src = *(vu32*)(sharedAddr+2);
 		u32 dst = *(vu32*)(sharedAddr);
@@ -96,7 +104,7 @@ void myIrqHandlerIPC(void) {
 	}
 	if (sharedAddr[3] == 0x524F4D52) {
 		// Read ROM (redirected from arm7)
-		sysSetCardOwner (BUS_OWNER_ARM9);
+		setDeviceOwner();
 
 		u32 dst = *(vu32*)(sharedAddr+2);
 		u32 src = *(vu32*)(sharedAddr);
@@ -106,6 +114,41 @@ void myIrqHandlerIPC(void) {
 
 		sharedAddr[3] = 0;
     	IPC_SendSync(0x8);
+	}
+}
+
+static void initialize(void) {
+	if (!initialized) {
+		if (!FAT_InitFiles(true)) {
+			//nocashMessage("!FAT_InitFiles");
+			while (1);
+		}
+
+		if (ndsHeader->romSize > 0) {
+			u32 shrinksize = 0;
+			for (u32 i = 0; i <= ndsHeader->romSize; i += 0x200) {
+				shrinksize += 4;
+			}
+			if (shrinksize > ce9->maxClusterCacheSize) {
+				shrinksize = ce9->maxClusterCacheSize;
+			}
+			clusterCacheSize = shrinksize;
+		}
+
+		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
+
+		romFile = getFileFromCluster(ce9->fileCluster);
+		buildFatTableCache(&romFile);
+
+		clusterCacheSize = ce9->maxClusterCacheSize;
+		savFile = getFileFromCluster(ce9->saveCluster);
+		buildFatTableCache(&savFile);
+
+		if (isSdk5(ce9->moduleParams)) {
+			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		}
+
+		initialized = true;
 	}
 }
 
@@ -150,45 +193,12 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u3
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
+	setDeviceOwner();
+
 	cardReadCount++;
 
-	if (!flagsSet) {
-		if (_io_dldi_features & 0x00000010) {
-			sysSetCartOwner (BUS_OWNER_ARM9);
-		}
+	initialize();
 
-		if (!FAT_InitFiles(true)) {
-			//nocashMessage("!FAT_InitFiles");
-			return -1;
-		}
-
-		if (ndsHeader->romSize > 0) {
-			u32 shrinksize = 0;
-			for (u32 i = 0; i <= ndsHeader->romSize; i += 0x200) {
-				shrinksize += 4;
-			}
-			if (shrinksize > ce9->maxClusterCacheSize) {
-				shrinksize = ce9->maxClusterCacheSize;
-			}
-			clusterCacheSize = shrinksize;
-		}
-
-		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
-
-		romFile = getFileFromCluster(ce9->fileCluster);
-		buildFatTableCache(&romFile);
-
-		clusterCacheSize = ce9->maxClusterCacheSize;
-		savFile = getFileFromCluster(ce9->saveCluster);
-		buildFatTableCache(&savFile);
-
-		if (isSdk5(ce9->moduleParams)) {
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		}
-
-		flagsSet = true;
-	}
-	
 	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
@@ -208,11 +218,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+	setDeviceOwner();
 	fileRead(memory, savFile, (u32)flash, len);
     return 0; 
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+	setDeviceOwner();
 	fileWrite(memory, savFile, (u32)flash, len);
 	return 0;
 }
@@ -224,6 +236,9 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	setDeviceOwner();
+	initialize();
 
 	hookIPC_SYNC();
 
