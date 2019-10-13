@@ -57,24 +57,13 @@ static int cardReadCount = 0;
 static bool flagsSet = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
-extern void resetRequestIrqMask(u32 irq);
-extern void enableIrqMask(u32 irq);
-
-static void enableIPCSYNC(void) {
-    // enable IPC_SYNC
-    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;  
-    enableIrqMask(IRQ_IPC_SYNC);
-}
-
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
-        resetRequestIrqMask(IRQ_IPC_SYNC);
         u32* ipcSyncHandler = ce9->irqTable + 16;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
-		enableIPCSYNC();
     }
 }
 
@@ -200,10 +189,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 	
-	if (REG_IME==1 && !IPC_SYNC_hooked) {
-		hookIPC_SYNC();
-	}
-
 	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
@@ -230,4 +215,23 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	fileWrite(memory, savFile, (u32)flash, len);
 	return 0;
+}
+
+
+u32 myIrqEnable(u32 irq) {	
+	int oldIME = enterCriticalSection();	
+
+	#ifdef DEBUG
+	nocashMessage("myIrqEnable\n");
+	#endif
+
+	hookIPC_SYNC();
+
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	irq |= IRQ_IPC_SYNC;
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
+	REG_IE |= irq;
+	leaveCriticalSection(oldIME);
+	return irq_before;
 }

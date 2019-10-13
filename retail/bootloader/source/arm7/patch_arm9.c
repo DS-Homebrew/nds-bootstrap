@@ -241,6 +241,26 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
+static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
+
+	// Card irq enable
+	u32* cardIrqEnableOffset = patchOffsetCache.a9CardIrqEnableOffset;
+	if (!patchOffsetCache.a9CardIrqEnableOffset) {
+		cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams, &usesThumb);
+		if (cardIrqEnableOffset) {
+			patchOffsetCache.a9CardIrqEnableOffset = cardIrqEnableOffset;
+			patchOffsetCache.a9CardIrqIsThumb = usesThumb;
+		}
+	}
+	if (!cardIrqEnableOffset) {
+		return false;
+	}
+	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
+	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
+	return true;
+}
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
@@ -731,11 +751,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
       
             //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            memcpy(0x0206176c, nandWritePatch, 0x40);
+            memcpy((u32*)0x0206176c, nandWritePatch, 0x40);
                
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            memcpy(0x02061ac4, nandReadPatch, 0x40);
+            memcpy((u32*)0x02061ac4, nandReadPatch, 0x40);
     	}    
 	}
 }
@@ -751,6 +771,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
 	u32* cardPullOutOffset;
+
+	if (!patchCardIrqEnable(ce9, ndsHeader, moduleParams)) {
+		dbg_printf("ERR_LOAD_OTHR\n\n");
+		return ERR_LOAD_OTHR;
+	}
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");

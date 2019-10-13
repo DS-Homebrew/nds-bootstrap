@@ -51,8 +51,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static bool initialized = false;
 
-static int saveReadTimeOut = 0;
-
 //static int saveTimer = 0;
 
 /*static int softResetTimer = 0;
@@ -89,7 +87,6 @@ static const tNDSHeader* ndsHeader = NULL;
 static void waitForArm9(void) {
     IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0);
-	saveReadTimeOut = 0;
 }
 
 static void __attribute__((target("thumb"))) initialize(void) {
@@ -169,13 +166,6 @@ void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
 			saveTimer = 0;
 		}
 	}*/
-
-	if (sharedAddr[3] != 0) {
-		saveReadTimeOut++;
-		if (saveReadTimeOut > 60) {
-			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
-		}
-	}
 
 	/*#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");

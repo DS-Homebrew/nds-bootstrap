@@ -70,6 +70,7 @@ exit:
 
 patches:
 .word	card_read_arm9
+.word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
@@ -84,6 +85,7 @@ needFlushDCCache:
 .word	ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
+.word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
@@ -260,70 +262,38 @@ _blx_r6_stub_thumb_nand_write:
 .align	4
 @---------------------------------------------------------------------------------
 
-.global setIrqMask
-.type	setIrqMask STT_FUNC
-setIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#8]
-    STR             R0, [R3,#8]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
+	.arm
+@---------------------------------------------------------------------------------
+card_irq_enable:
+@---------------------------------------------------------------------------------
+	push    {lr}
+	push	{r1-r12}
+	ldr	r3, =myIrqEnable
+	bl	_blx_r3_stub2
+	pop   	{r1-r12} 
+	pop  	{lr}
+	bx  lr
+_blx_r3_stub2:
+	bx	r3
 .pool
+@---------------------------------------------------------------------------------
 
-
-.global enableIrqMask
-.type	enableIrqMask STT_FUNC
-enableIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#8]
-    ORR             R0, R1, R0
-    STR             R0, [R3,#8]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
+	.thumb
+@---------------------------------------------------------------------------------
+thumb_card_irq_enable:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+	ldr	r3, =myIrqEnable
+	bl	thumb_blx_r3_stub2
+	pop	{r1-r7, pc}
+	bx  lr
+thumb_blx_r3_stub2:
+	bx	r3
 .pool
-
-.global disableIrqMask
-.type	disableIrqMask STT_FUNC
-disableIrqMask:
-    LDR             R7, =0x4000208
-    MOV             R2, #0
-    LDRH            R3, [R7]
-    MVN             R1, R0
-    STRH            R2, [R7]
-    LDR             R0, [R7,#8]
-    AND             R1, R0, R1
-    STR             R1, [R7,#8]
-    LDRH            R1, [R7]
-    STRH            R3, [R7]
-    BX              LR
-.pool
-    
-.global resetRequestIrqMask
-.type	resetRequestIrqMask STT_FUNC
-resetRequestIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#0xC]
-    STR             R0, [R3,#0xC]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
+@---------------------------------------------------------------------------------
 
 
-	.arm    
+	.arm
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:
