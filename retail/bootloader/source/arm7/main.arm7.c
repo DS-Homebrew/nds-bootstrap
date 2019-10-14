@@ -646,9 +646,11 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	u32 fatTableAddr = (u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	u32 fatTableAddr = ((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	u32 fatTableSize = ((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x8000 : 0x4000);
 	if (extendedMemory) {
 		fatTableAddr = 0x02700000;
+		fatTableSize = 0x40000;
 	}
 
 	errorCode = hookNdsRetailArm9(
@@ -656,7 +658,7 @@ int arm7_main(void) {
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
-		extendedMemory ? 0x40000 : 0x4000,
+		fatTableSize,
 		fatTableAddr
 	);
 	/*if (errorCode == ERR_NONE) {
