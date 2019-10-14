@@ -667,15 +667,15 @@ int arm7_main(void) {
 
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x30000) {
-		fileRead((char*)0x02350000, apPatchFile, 0, apPatchSize);
-		applyIpsPatch(ndsHeader, (u8*)0x02350000);
+		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
+		applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION);
 	}
 
 	arm9_boostVram = boostVram;
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
-	toncset((u32*)0x02350000, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
+	toncset((u32*)IMAGES_LOCATION, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	while (arm9_stateFlag != ARM9_READY);
