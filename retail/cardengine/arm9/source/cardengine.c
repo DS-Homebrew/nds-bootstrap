@@ -65,16 +65,6 @@ static inline void setDeviceOwner(void) {
 static bool initialized = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
-static bool IPC_SYNC_hooked = false;
-static void hookIPC_SYNC(void) {
-    if (!IPC_SYNC_hooked) {
-        u32* ipcSyncHandler = ce9->irqTable + 16;
-        ce9->intr_ipc_orig_return = *ipcSyncHandler;
-        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
-        IPC_SYNC_hooked = true;
-    }
-}
-
 void myIrqHandlerIPC(void) {
 	if (sharedAddr[3] == 0x53415652) {
 		// Read save
@@ -251,8 +241,6 @@ u32 myIrqEnable(u32 irq) {
 
 	setDeviceOwner();
 	initialize();
-
-	hookIPC_SYNC();
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
