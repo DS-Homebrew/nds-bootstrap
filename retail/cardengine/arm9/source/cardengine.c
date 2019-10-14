@@ -117,6 +117,11 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
+//Currently used for NSMBDS romhacks
+void __attribute__((target("arm"))) debug8mbMpuFix(){
+	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+}
+
 static void initialize(void) {
 	if (!initialized) {
 		if (!FAT_InitFiles(true)) {
@@ -146,6 +151,8 @@ static void initialize(void) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		} else {
+			debug8mbMpuFix();
 		}
 
 		initialized = true;
