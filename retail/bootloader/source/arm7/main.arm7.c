@@ -646,11 +646,11 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool pkmnRangerGS = (strncmp(getRomTid(ndsHeader), "B3R", 3) == 0);
+	bool otherLoc = (strncmp(getRomTid(ndsHeader), "B3R", 3) == 0);
 
-	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->romSize > 0x8000000)) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->romSize > 0x8000000) || otherLoc) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
 	u32 fatTableSize = ((ndsHeader->romSize > 0x8000000) ? 0x8000 : 0x4000);
-	if (pkmnRangerGS) {
+	if (otherLoc) {
 		fatTableAddr = 0x023D8000;
 	}
 	if (extendedMemory) {
