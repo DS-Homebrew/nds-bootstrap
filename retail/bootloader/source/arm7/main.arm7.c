@@ -646,8 +646,8 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	u32 fatTableAddr = ((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
-	u32 fatTableSize = ((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x8000 : 0x4000);
+	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->romSize > 0x8000000)) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	u32 fatTableSize = ((ndsHeader->romSize > 0x8000000) ? 0x8000 : 0x4000);
 	if (extendedMemory) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x40000;
