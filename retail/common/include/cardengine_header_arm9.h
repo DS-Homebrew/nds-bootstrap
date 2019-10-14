@@ -57,6 +57,7 @@ typedef struct cardengineArm9 {
     u32 cardStruct0;
     u32 maxClusterCacheSize;
     u32 fatTableAddr;
+    u32* irqTable;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H

@@ -633,7 +633,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
             if (curSect >= discSecPerClus)
     		{
                 clusterIndex+= curSect/discSecPerClus;
-                curSect = curSect % discSecPerClus;
+                curSect = curSect % discSecPerClus;;
                 file.currentCluster = file.fatTableCache[clusterIndex];
     			file.currentOffset+=discBytePerClus;
     		}
