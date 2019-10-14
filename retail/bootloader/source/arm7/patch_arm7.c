@@ -11,6 +11,8 @@
 
 //#define memcpy __builtin_memcpy
 
+extern u32 _io_dldi_features;
+
 extern u32 forceSleepPatch;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -51,7 +53,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 		}
 		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
-	if (forceSleepPatch) {
+	if ((_io_dldi_features & 0x00000010) || forceSleepPatch) {
 		if (sleepPatchOffset) {
 			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
