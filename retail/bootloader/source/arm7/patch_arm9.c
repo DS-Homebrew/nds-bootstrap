@@ -444,7 +444,7 @@ void patchHeapPointer2(cardengineArm9* ce9, const module_params_t* moduleParams,
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	*heapPointer = (u32)ce9; // shrink heap by 16KB or 20KB
+	*heapPointer = ((strncmp(romTid, "B3R", 3) == 0) ? 0x023D8000 : (u32)ce9); // shrink heap by 16KB or 20KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
