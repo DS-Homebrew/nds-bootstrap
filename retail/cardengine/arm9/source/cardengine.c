@@ -75,10 +75,10 @@ static void hookIPC_SYNC(void) {
     }
 }
 
-static void hookVblank(void) {
-	u32* vblankHandler = ce9->irqTable;
-	ce9->intr_vblank_orig_return = *vblankHandler;
-	*vblankHandler = ce9->patches->vblankHandlerRef;
+static void enableIPC_SYNC(void) {
+	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
+		REG_IE |= IRQ_IPC_SYNC;
+	}
 }
 
 void myIrqHandlerIPC(void) {
@@ -211,6 +211,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	cardReadCount++;
 
 	initialize();
+	enableIPC_SYNC();
 
 	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
 
@@ -249,8 +250,6 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 
 u32 myIrqEnable(u32 irq) {	
-	const char* romTid = getRomTid(ndsHeader);
-
 	int oldIME = enterCriticalSection();	
 
 	#ifdef DEBUG
@@ -260,7 +259,7 @@ u32 myIrqEnable(u32 irq) {
 	setDeviceOwner();
 	initialize();
 
-	(strncmp(romTid, "AKW", 3) == 0) ? hookVblank() : hookIPC_SYNC();
+	hookIPC_SYNC();
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
