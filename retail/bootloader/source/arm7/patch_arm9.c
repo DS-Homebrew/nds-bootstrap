@@ -211,8 +211,6 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
-    const char* romTid = getRomTid(ndsHeader);
-    
 	if (!cardReadEndOffset) {
 		return;
 	}

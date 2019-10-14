@@ -352,7 +352,8 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			return -1;
 		}
 
-		if (strncmp(romTid, "VKG", 3) == 0) {
+		if ((strncmp(romTid, "BKW", 3) == 0)
+		|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 		}
 		#else
@@ -360,7 +361,8 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 			cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
-		} else if (strncmp(romTid, "VKG", 3) == 0) {
+		} else if ((strncmp(romTid, "BKW", 3) == 0)
+				|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 			cacheAddress = CACHE_ADRESS_START_low;
 			cacheSlots = CACHE_SLOTS_32KB_low;

@@ -470,6 +470,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "UBR", 3) == 0
 	|| strncmp(romTid, "UOR", 3) == 0
+	|| (consoleModel == 0 && strncmp(romTid, "BKW", 3) == 0)
 	|| (consoleModel == 0 && strncmp(romTid, "VKG", 3) == 0)) {
 		return false;
 	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
