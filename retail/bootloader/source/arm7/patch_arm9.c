@@ -384,9 +384,9 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 		patchOffsetCache.heapPointerOffset = heapPointer;
 		patchOffsetCacheChanged = true;
 	}
-    
+
     u32* oldheapPointer = (u32*)*heapPointer;
-        
+
     dbg_printf("old heap pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
@@ -405,7 +405,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     dbg_printf("Heap Shrink Sucessfull\n\n");
-    
+
     return oldheapPointer;
 }
 
