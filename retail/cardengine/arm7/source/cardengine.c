@@ -89,7 +89,7 @@ static void waitForArm9(void) {
 	while (sharedAddr[3] != (vu32)0);
 }
 
-static void __attribute__((target("thumb"))) initialize(void) {
+static void initialize(void) {
 	if (initialized) {
 		return;
 	}
@@ -103,7 +103,7 @@ static void __attribute__((target("thumb"))) initialize(void) {
 
 
 //---------------------------------------------------------------------------------
-void __attribute__((target("thumb"))) myIrqHandlerVBlank(void) {
+void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");

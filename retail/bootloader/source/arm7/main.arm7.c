@@ -646,13 +646,18 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
+	u32 fatTableAddr = (u32)((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	if (extendedMemory) {
+		fatTableAddr = 0x02700000;
+	}
+
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
 		extendedMemory ? 0x40000 : 0x4000,
-		(u32)(((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || extendedMemory) ? 0x02780000 : patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize))
+		fatTableAddr
 	);
 	/*if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");
