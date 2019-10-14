@@ -423,9 +423,11 @@ void patchHeapPointer2(cardengineArm9* ce9, const module_params_t* moduleParams,
 		patchOffsetCache.heapPointer2Offset = 0;
 	} else {
 		heapPointer = patchOffsetCache.heapPointer2Offset;
-		patchOffsetCacheChanged = true;
 	}
-    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+	if (!patchOffsetCache.heapPointer2Offset) {
+		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
+	}
+	if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa(*heapPointer);    
@@ -433,6 +435,7 @@ void patchHeapPointer2(cardengineArm9* ce9, const module_params_t* moduleParams,
         return;
     } else if (!patchOffsetCache.heapPointer2Offset) {
 		patchOffsetCache.heapPointer2Offset = heapPointer;
+		patchOffsetCacheChanged = true;
 	}
     
     u32* oldheapPointer = (u32*)*heapPointer;
