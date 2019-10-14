@@ -75,6 +75,12 @@ static void hookIPC_SYNC(void) {
     }
 }
 
+static void hookVblank(void) {
+	u32* vblankHandler = ce9->irqTable;
+	ce9->intr_vblank_orig_return = *vblankHandler;
+	*vblankHandler = ce9->patches->vblankHandlerRef;
+}
+
 void myIrqHandlerIPC(void) {
 	if (sharedAddr[3] == 0x53415652) {
 		// Read save
@@ -243,6 +249,8 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 
 u32 myIrqEnable(u32 irq) {	
+	const char* romTid = getRomTid(ndsHeader);
+
 	int oldIME = enterCriticalSection();	
 
 	#ifdef DEBUG
@@ -252,7 +260,7 @@ u32 myIrqEnable(u32 irq) {
 	setDeviceOwner();
 	initialize();
 
-	hookIPC_SYNC();
+	(strncmp(romTid, "AKW", 3) == 0) ? hookVblank() : hookIPC_SYNC();
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

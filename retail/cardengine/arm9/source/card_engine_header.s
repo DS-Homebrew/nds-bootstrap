@@ -16,6 +16,8 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
+intr_vblank_orig_return:
+	.word	0x00000000
 intr_ipc_orig_return:
 	.word	0x00000000
 moduleParams:
@@ -36,6 +38,13 @@ irqTable:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 card_engine_start:
+
+vblankHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_ipc
+	ldr 	r0,	intr_vblank_orig_return
+	bx  	r0
 
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
@@ -82,6 +91,7 @@ patches:
 .word   terminateForPullOutRef
 needFlushDCCache:
 .word   0x0
+.word	vblankHandler
 .word	ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
