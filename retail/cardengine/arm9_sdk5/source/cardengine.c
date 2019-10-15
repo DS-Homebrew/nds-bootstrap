@@ -112,15 +112,6 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 #endif
 
-static void sleep(u32 ms) {
-    if(ce9->patches->sleepRef) {
-        volatile void (*sleepRef)(u32) = ce9->patches->sleepRef;
-        (*sleepRef)(ms);
-    } else if(ce9->thumbPatches->sleepRef) {
-        callSleepThumb(ms);
-    }    
-}
-
 #ifndef DLDI
 static void waitForArm7(void) {
     IPC_SendSync(0xEE24);
@@ -303,35 +294,19 @@ u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
         && !(((int)src) & 511)
 	) {
 		dmaLed = true;
-        if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
-        {
-			isDma = true;
+        //if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) // so far dma is useless without sleep method available
+        //{
+		//	isDma = true;
         
-        /*if (len < THRESHOLD_CACHE_FLUSH) {
-            int oldIME = enterCriticalSection();
-            u32     dst2 = dst;
-            u32     mod = (dst2 & (CACHE_LINE_SIZE - 1));
-            if (mod)
-            {
-                dst2 -= mod;
-                DC_StoreRange((void *)(dst2), CACHE_LINE_SIZE);
-                DC_StoreRange((void *)(dst2 + len), CACHE_LINE_SIZE);
-                len += CACHE_LINE_SIZE;
-            }
-            IC_InvalidateRange((void *)dst, len);
-            DC_InvalidateRange((void *)dst2, len);
-            DC_WaitWriteBufferEmpty();
-            leaveCriticalSection(oldIME);   
-        } else {*/ 
             // Note : cacheFlush disable / reenable irq
-            cacheFlush();
+            //cacheFlush();
         //}
-		} else {
+		/*} else {
 			isDma = false;
 			dma=4;
             
             clearIcache(); 
-		}
+		}*/
     } else { 
         isDma = false;
         dma=4;
