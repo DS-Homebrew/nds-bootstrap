@@ -795,7 +795,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     
     nandSavePatch(ce9, ndsHeader, moduleParams);
     
-    patchCardReadPdash(ce9, ndsHeader);
+    //patchCardReadPdash(ce9, ndsHeader);
 
 	//operaRamPatch(ndsHeader, moduleParams);
 
