@@ -5,6 +5,7 @@
 #include "patch.h"
 #include "find.h"
 #include "common.h"
+#include "locations.h"
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
 
@@ -426,7 +427,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
 }
 
-void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 ROMinRAM) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (moduleParams->sdk_version <= 0x2004FFF
@@ -461,7 +462,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = 0x023DC000; // shrink heap by 16KB
+	*heapPointer = (gameOnFlashcard && !ROMinRAM) ? CARDENGINE_ARM9_DLDI_LOCATION : CARDENGINE_ARM9_LOCATION; // shrink heap by 16KB or 8KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -783,9 +784,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     
     patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	if (gameOnFlashcard && !ROMinRAM) {
-		patchHeapPointer2(moduleParams, ndsHeader);
-	}
+	patchHeapPointer2(moduleParams, ndsHeader, ROMinRAM);
 
 	randomPatch(ndsHeader, moduleParams);
 
