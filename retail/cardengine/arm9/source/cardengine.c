@@ -703,7 +703,7 @@ u32 cardReadDma() {
     return 0;    
 }
 
-/*static int counter=0;
+static int counter=0;
 int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 #ifdef DLDI
 	fileRead((char*)dst, *romFile, src, len, 0);
@@ -749,6 +749,13 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 			len2 = sector - src + readSize;
 		}
 
+          /*if (isDma) {
+              // Copy via dma
+				dmaCopyWordsAsynchIrq(dma, (u8*)buffer+(src-sector), dst, len2);
+              while (dmaBusy(dma)) {
+                  sleep(1);
+              }        
+          } else {*/
   			#ifdef DEBUG
   			// Send a log command for debug purpose
   			// -------------------------------------
@@ -760,11 +767,12 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
   			sharedAddr[3] = commandRead;
   
   			waitForArm7();
-  			// -------------------------------------
+  			// -------------------------------------*/
   			#endif
   
   			// Copy directly
   			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+          //}
 
     		// Update cardi common
     		cardStruct[0] = src + len2;
@@ -785,7 +793,7 @@ int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
 
     counter++;
 	return counter;
-}*/
+}
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
