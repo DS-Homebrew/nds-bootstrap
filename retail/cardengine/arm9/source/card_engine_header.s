@@ -69,8 +69,6 @@ thumbPatches:
 .word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
-.word   thumb_nand_read_arm9
-.word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
@@ -243,46 +241,6 @@ _blx_r6_stub_nand_write:
 .pool
 @---------------------------------------------------------------------------------
 
-	.thumb    
-@---------------------------------------------------------------------------------
-thumb_nand_read_arm9:
-@---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =nandRead
-
-	bl		_blx_r6_stub_thumb_nand_read	
-    
-
-	pop	{r1-r7, pc}
-	mov r0, #0
-	bx      lr
-_blx_r6_stub_thumb_nand_read:
-	bx	r6	
-.pool
-.align	4
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
-thumb_nand_write_arm9:
-@---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =nandWrite
-
-	bl		_blx_r6_stub_thumb_nand_write
-    
-
-	pop	{r1-r7, pc}
-	mov r0, #0
-	bx      lr
-_blx_r6_stub_thumb_nand_write:
-	bx	r6	
-.pool
-.align	4
-@---------------------------------------------------------------------------------
-
-	.arm    
 pdash_read:
 @    push	{r1-r11, lr}
     @mov     r0, r4 @DST
