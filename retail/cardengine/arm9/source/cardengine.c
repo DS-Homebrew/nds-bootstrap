@@ -645,12 +645,12 @@ bool isNotTcm(u32 address, u32 len) {
 
 u32 cardReadDma() {
 	vu32* volatile cardStruct = ce9->cardStruct0;
-
+    
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
     u32 dma = cardStruct[3]; // dma channel
-
+    
     if(dma >= 0 
         && dma <= 3 
         //&& func != NULL
@@ -682,8 +682,8 @@ u32 cardReadDma() {
           	}*/
               
             int oldIME = enterCriticalSection();
-
-
+            
+            
             hookIPC_SYNC();
             // TODO : reset IPC_SYNC IRQs
             enableIPCSYNC();
@@ -706,11 +706,11 @@ u32 cardReadDma() {
             DC_WaitWriteBufferEmpty();
             } else {*/ 
             // Note : cacheFlush disable / reenable irq
-
+            
             leaveCriticalSection(oldIME); 
-
+            
             cacheFlush();  
-
+                              
             return startCardReadDma();
 		} else {
 			isDma = false;

@@ -339,6 +339,19 @@ arm9exit:
     
 .pool
     
+.global callSleepThumb
+.type	callSleepThumb STT_FUNC
+callSleepThumb:
+    push	{r1-r11, lr}
+    ldr     r6, thumbSleepRef
+    add     r6, #1
+    bl		_blx_r6_stub_callSleepThumb	
+    pop	    {r1-r11, pc}
+	bx      lr
+_blx_r6_stub_callSleepThumb:
+	bx	r6	
+.pool
+
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC
 callEndReadDmaThumb:
