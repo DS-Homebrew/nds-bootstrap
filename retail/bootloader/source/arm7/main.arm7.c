@@ -964,7 +964,7 @@ int arm7_main(void) {
 			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x1400);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
 		}
 
 		patchBinary(ndsHeader);
