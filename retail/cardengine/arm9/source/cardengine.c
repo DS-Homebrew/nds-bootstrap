@@ -954,7 +954,7 @@ void cardPullOut(void) {
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->saveOnFlashcard) {
 #ifdef DLDI
-		fileRead(memory, *savFile, flash, len, -1);
+		fileRead(memory, *savFile, (u32)flash, len, -1);
 #endif
 		return 0;
 	}
@@ -975,7 +975,7 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->saveOnFlashcard) {
 #ifdef DLDI
-		fileWrite(memory, *savFile, flash, len, -1);
+		fileWrite(memory, *savFile, (u32)flash, len, -1);
 #endif
 		return 0;
 	}
