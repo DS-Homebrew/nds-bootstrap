@@ -56,6 +56,7 @@ patches:
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
+.word   0x0 @sleepRef
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
 .word	swi02
@@ -74,6 +75,8 @@ thumbPatches:
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
+thumbSleepRef:
+.word   0x0 @sleepRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
