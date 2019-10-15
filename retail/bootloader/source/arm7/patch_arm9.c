@@ -5,7 +5,6 @@
 #include "patch.h"
 #include "find.h"
 #include "common.h"
-#include "locations.h"
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
 
@@ -462,7 +461,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = CARDENGINE_ARM9_DLDI_LOCATION; // shrink heap by 16KB
+	*heapPointer = 0x023DC000; // shrink heap by 16KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
