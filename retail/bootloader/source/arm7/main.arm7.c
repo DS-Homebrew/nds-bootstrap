@@ -962,9 +962,26 @@ int arm7_main(void) {
 				dbg_printf("\n");
 				errorOutput();
 			}
+		} else if (ceCached) {
+			if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
+			 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+			)
+			{
+				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+			} else
+			ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
+			if(ce9Location) {
+					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+			} else {         
+				ce9Location = CARDENGINE_ARM9_LOCATION;
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
+			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
 		}
 
 		patchBinary(ndsHeader);
