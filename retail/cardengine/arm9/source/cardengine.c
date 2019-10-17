@@ -367,21 +367,19 @@ void continueCardReadDmaArm9() {
 }
 
 void continueCardReadDmaArm7() {
-        
     if(dmaReadOnArm7) {
         if(!checkArm7()) return;
-        
+
         dmaReadOnArm7 = false;
-        
+
         vu32* volatile cardStruct = ce9->cardStruct0;
-        u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
-        
+
         u32 src = cardStruct[0];
         u8* dst = (u8*)(cardStruct[1]);
         u32 len = cardStruct[2];
         u32	dma = cardStruct[3]; // dma channel
-        
+
         u32 sector = (src/readSize)*readSize;
         
         u32 len2 = len;
@@ -393,7 +391,7 @@ void continueCardReadDmaArm7() {
 			len2 -= src % 4;
 			len2 -= len2 % 32;
 		}
-        
+
         int slot = getSlotForSector(sector);
         vu8* buffer = getCacheAddress(slot);
 
@@ -401,7 +399,7 @@ void continueCardReadDmaArm7() {
         ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
         dmaReadOnArm9 = true;
         currentLen= len2;
-        
+
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);
     }
