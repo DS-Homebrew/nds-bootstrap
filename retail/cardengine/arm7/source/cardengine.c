@@ -511,12 +511,6 @@ static void runCardEngineCheck(void) {
 	#endif	
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-		//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
-		if (isSdEjected()) {
-			tonccpy((u32*)0x02000300, sr_data_error, 0x020);
-			i2cWriteRegister(0x4A, 0x70, 0x01);
-			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
-		}
   		initialize();
   
         if(!readOngoing)
@@ -665,6 +659,13 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language < 6) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
+	}
+
+	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
+	if (!ROMinRAM && isSdEjected()) {
+		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
