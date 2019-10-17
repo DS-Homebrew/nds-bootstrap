@@ -225,8 +225,8 @@ int hookNdsRetailArm7(
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		*timer0Handler = ce7->patches->timer0Handler;
-		*timer1Handler = ce7->patches->timer1Handler;
+		//*timer0Handler = ce7->patches->timer0Handler;
+		//*timer1Handler = ce7->patches->timer1Handler;
 		//*timer2Handler = ce7->patches->timer2Handler;
 		//*timer3Handler = ce7->patches->timer3Handler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;

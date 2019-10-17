@@ -69,6 +69,7 @@ bool sdRead = true;
 static bool initialized = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
+static bool ipcSyncHooked = false;
 static bool dmaLed = false;
 
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
@@ -519,7 +520,7 @@ static void runCardEngineCheck(void) {
   		initialize();
   
         if(!readOngoing)
-        { 
+        {
     
     		//nocashMessage("runCardEngineCheck mutex ok");
     
@@ -546,7 +547,11 @@ static void runCardEngineCheck(void) {
               if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
                     IPC_SendSync(0x8);
-              } 
+              } else {
+                    while(!resume_cardRead_arm9()) {} 
+                    *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+                    IPC_SendSync(0x8);
+              }
           }
           
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
@@ -570,10 +575,11 @@ static void runCardEngineCheck(void) {
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}*/
         } else {
-            if(resume_cardRead_arm9()) {
+            //if(resume_cardRead_arm9()) {
+			    while(!resume_cardRead_arm9()) {} 
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
                 IPC_SendSync(0x8);
-            } 
+            //} 
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
@@ -596,15 +602,18 @@ static void runCardEngineCheck(void) {
   		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
   			log_arm9();
   			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+            IPC_SendSync(0x8);
   		}
   
   
       		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB08) {
       			if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+                    IPC_SendSync(0x8);
                 } else {
                     while(!resume_cardRead_arm9()) {} 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+                    IPC_SendSync(0x8);
                 } 			
       		}
   
@@ -612,10 +621,11 @@ static void runCardEngineCheck(void) {
   		//	asyncCardRead_arm9();
   		//	*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
   		//}
-        } else {
-            while(!resume_cardRead_arm9()) {} 
-            *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0; 
-        }
+      } else {
+          while(!resume_cardRead_arm9()) {} 
+          *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0; 
+          IPC_SendSync(0x8);
+      }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
 }*/
@@ -738,7 +748,11 @@ void myIrqHandlerVBlank(void) {
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		runCardEngineCheck();
+		if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
+			REG_IE |= IRQ_IPC_SYNC;
+		} else if (!ipcSyncHooked) {
+			runCardEngineCheck();
+		}
 	}
 }
 
@@ -755,6 +769,7 @@ u32 myIrqEnable(u32 irq) {
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
+	ipcSyncHooked = true;
 	return irq_before;
 }
 
