@@ -522,9 +522,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
-				REG_IME = 0;
+				//REG_IME = 0;
 				waitForArm7();
-				REG_IME = 1;
+				//REG_IME = 1;
 			}
 
 			updateDescriptor(slot, sector);	
