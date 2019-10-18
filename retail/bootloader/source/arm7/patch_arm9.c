@@ -471,7 +471,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (moduleParams->sdk_version <= 0x2004FFF
+	if (moduleParams->sdk_version <= 0x2007FFF
 	|| isSdk5(moduleParams)) {
 		return;
 	}
