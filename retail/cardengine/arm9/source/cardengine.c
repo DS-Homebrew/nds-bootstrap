@@ -516,17 +516,15 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				buffer = getCacheAddress(slot);
 
-				//REG_IME = 0;
-
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = readSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
+				REG_IME = 0;
 				waitForArm7();
-
-				//REG_IME = 1;
+				REG_IME = 1;
 			}
 
 			updateDescriptor(slot, sector);	

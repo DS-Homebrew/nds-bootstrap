@@ -56,7 +56,6 @@ patches:
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
-.word   0x0 @sleepRef
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
 .word	swi02
@@ -75,8 +74,6 @@ thumbPatches:
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-thumbSleepRef:
-.word   0x0 @sleepRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
@@ -405,19 +402,6 @@ ce9location13:
 cardReadRef13:
 .word   myIrqHandlerIPC-ce9  
     
-.global callSleepThumb
-.type	callSleepThumb STT_FUNC
-callSleepThumb:
-    push	{r1-r11, lr}
-    ldr     r6, thumbSleepRef
-    add     r6, #1
-    bl		_blx_r6_stub_callSleepThumb	
-    pop	    {r1-r11, pc}
-	bx      lr
-_blx_r6_stub_callSleepThumb:
-	bx	r6	
-.pool
-
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC
 callEndReadDmaThumb:
@@ -431,6 +415,7 @@ _blx_r6_stub_callEndReadDmaThumb:
 	bx	r6	
 .pool
 
+	.thumb
 .global setIrqMask
 .type	setIrqMask STT_FUNC
 setIrqMask:
@@ -466,16 +451,16 @@ enableIrqMask:
 .global disableIrqMask
 .type	disableIrqMask STT_FUNC
 disableIrqMask:
-    LDR             R12, =0x4000208
+    LDR             R7, =0x4000208
     MOV             R2, #0
-    LDRH            R3, [R12]
+    LDRH            R3, [R7]
     MVN             R1, R0
-    STRH            R2, [R12]
-    LDR             R0, [R12,#8]
+    STRH            R2, [R7]
+    LDR             R0, [R7,#8]
     AND             R1, R0, R1
-    STR             R1, [R12,#8]
-    LDRH            R1, [R12]
-    STRH            R3, [R12]
+    STR             R1, [R7,#8]
+    LDRH            R1, [R7]
+    STRH            R3, [R7]
     BX              LR
 .pool
     
@@ -493,6 +478,7 @@ resetRequestIrqMask:
     STRH            R2, [R3]
     BX              LR
 
+	.arm
 //---------------------------------------------------------------------------------
 .global  getDtcmBase
 .type	 getDtcmBase STT_FUNC

@@ -1282,7 +1282,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 			(u16*)initHeapEnd, 0x40,
 			initHeapEndFuncSignatureThumb, 1
 		);
-        heapPointer = initEndFuncThumb+1;
+        heapPointer = (u32*)((u16*)initEndFuncThumb+1);
 	}
     
     dbg_hexa((u32)heapPointer);
