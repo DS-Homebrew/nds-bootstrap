@@ -214,7 +214,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		sharedAddr[2] = (vu32)dst;
 
 		// Send a command to the ARM9 to read the save
-		IPC_SendSync(0x5352);
+		IPC_SendSync(4);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -241,7 +241,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		sharedAddr[2] = (vu32)src;
 
 		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
+		IPC_SendSync(5);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -268,7 +268,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		sharedAddr[2] = (vu32)src;
 
 		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
+		IPC_SendSync(5);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -295,7 +295,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 		sharedAddr[2] = src;
 
 		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
+		IPC_SendSync(5);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -332,7 +332,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	sharedAddr[2] = (vu32)dst;
 
 	// Send a command to the ARM9 to read the ROM
-	IPC_SendSync(0x5252);
+	IPC_SendSync(6);
 	waitForArm9();
 
 	return true;
