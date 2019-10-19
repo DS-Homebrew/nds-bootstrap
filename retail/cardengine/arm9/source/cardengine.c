@@ -82,42 +82,41 @@ static void enableIPC_SYNC(void) {
 }
 
 void myIrqHandlerIPC(void) {
-	switch (IPC_GetSync()) {
-		default:
-			setDeviceOwner();
-		case 0x5352: {
-			// Read save
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+	if (sharedAddr[3] == 0x53415652) {
+		// Read save
+		setDeviceOwner();
 
-			fileRead((char*)dst, savFile, src, len);
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 src = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
 
-			sharedAddr[1] = 0;
-			break;
-		}
-		case 0x5357: {
-			// Write save
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+		fileRead((char*)dst, savFile, src, len);
 
-			fileWrite((char*)src, savFile, dst, len);
+		sharedAddr[3] = 0;
+	}
+	if (sharedAddr[3] == 0x53415657) {
+		// Write save
+		setDeviceOwner();
 
-			sharedAddr[1] = 0;
-			break;
-		}
-		case 0x5252: {
-			// Read ROM (redirected from arm7)
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
+		u32 src = *(vu32*)(sharedAddr+2);
+		u32 dst = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, romFile, src, len);
+		fileWrite((char*)src, savFile, dst, len);
 
-			sharedAddr[1] = 0;
-			break;
-		}
+		sharedAddr[3] = 0;
+	}
+	if (sharedAddr[3] == 0x524F4D52) {
+		// Read ROM (redirected from arm7)
+		setDeviceOwner();
+
+		u32 dst = *(vu32*)(sharedAddr+2);
+		u32 src = *(vu32*)(sharedAddr);
+		u32 len = *(vu32*)(sharedAddr+1);
+
+		fileRead((char*)dst, romFile, src, len);
+
+		sharedAddr[3] = 0;
 	}
 }
 

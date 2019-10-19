@@ -87,7 +87,8 @@ static const tNDSHeader* ndsHeader = NULL;
 }*/
 
 static void waitForArm9(void) {
-	while (sharedAddr[1] != (vu32)0);
+    IPC_SendSync(0x4);
+	while (sharedAddr[3] != (vu32)0);
 	//saveReadTimeOut = 0;
 }
 
@@ -208,13 +209,15 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
   	if (lockMutex(&saveMutex)) {
-		// Set parameters
+		// Send a command to the ARM9 to read the save
+		u32 commandSaveRead = 0x53415652;
+
+		// Write the command
 		sharedAddr[0] = src;
 		sharedAddr[1] = len;
 		sharedAddr[2] = (vu32)dst;
+		sharedAddr[3] = commandSaveRead;
 
-		// Send a command to the ARM9 to read the save
-		IPC_SendSync(0x5352);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -235,13 +238,15 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
   	if (lockMutex(&saveMutex)) {
-		// Set parameters
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
 		sharedAddr[2] = (vu32)src;
+		sharedAddr[3] = commandSaveWrite;
 
-		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -262,13 +267,15 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	if (lockMutex(&saveMutex)) {
-		// Set parameters
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
 		sharedAddr[2] = (vu32)src;
+		sharedAddr[3] = commandSaveWrite;
 
-		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -289,13 +296,15 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	#endif	
 
   	/*if (lockMutex(&saveMutex)) {
-		// Set parameters
+		// Send a command to the ARM9 to write the save
+		u32 commandSaveWrite = 0x53415657;
+
+		// Write the command
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
 		sharedAddr[2] = src;
+		sharedAddr[3] = commandSaveWrite;
 
-		// Send a command to the ARM9 to write the save
-		IPC_SendSync(0x5357);
 		waitForArm9();
 
   		unlockMutex(&saveMutex);
@@ -326,13 +335,15 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	// Set parameters
+	// Send a command to the ARM9 to read the ROM
+	u32 commandRomRead = 0x524F4D52;
+
+	// Write the command
 	sharedAddr[0] = src;
 	sharedAddr[1] = len;
 	sharedAddr[2] = (vu32)dst;
+	sharedAddr[3] = commandRomRead;
 
-	// Send a command to the ARM9 to read the ROM
-	IPC_SendSync(0x5252);
 	waitForArm9();
 
 	return true;
