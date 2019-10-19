@@ -85,7 +85,7 @@ void myIrqHandlerIPC(void) {
 	switch (IPC_GetSync()) {
 		default:
 			setDeviceOwner();
-		case 4: {
+		case 0x5352: {
 			// Read save
 			u32 dst = *(vu32*)(sharedAddr+2);
 			u32 src = *(vu32*)(sharedAddr);
@@ -96,7 +96,7 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[1] = 0;
 			break;
 		}
-		case 5: {
+		case 0x5357: {
 			// Write save
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
@@ -107,7 +107,7 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[1] = 0;
 			break;
 		}
-		case 6: {
+		case 0x5252: {
 			// Read ROM (redirected from arm7)
 			u32 dst = *(vu32*)(sharedAddr+2);
 			u32 src = *(vu32*)(sharedAddr);
