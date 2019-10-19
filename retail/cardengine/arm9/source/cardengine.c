@@ -93,7 +93,6 @@ void myIrqHandlerIPC(void) {
 		fileRead((char*)dst, savFile, src, len);
 
 		sharedAddr[3] = 0;
-    	IPC_SendSync(0x8);
 	}
 	if (sharedAddr[3] == 0x53415657) {
 		// Write save
@@ -106,7 +105,6 @@ void myIrqHandlerIPC(void) {
 		fileWrite((char*)src, savFile, dst, len);
 
 		sharedAddr[3] = 0;
-    	IPC_SendSync(0x8);
 	}
 	if (sharedAddr[3] == 0x524F4D52) {
 		// Read ROM (redirected from arm7)
@@ -119,7 +117,6 @@ void myIrqHandlerIPC(void) {
 		fileRead((char*)dst, romFile, src, len);
 
 		sharedAddr[3] = 0;
-    	IPC_SendSync(0x8);
 	}
 }
 
