@@ -480,7 +480,7 @@ static bool resume_cardRead_arm9(void) {
 	#endif
 }*/
 
-static void runCardEngineCheckResume(void) {
+/*static void runCardEngineCheckResume(void) {
 	//dbg_printf("runCardEngineCheckResume\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheckResume");
@@ -502,13 +502,17 @@ static void runCardEngineCheckResume(void) {
 		}
   		unlockMutex(&cardEgnineCommandMutex);
   	}
-}
+}*/
 
 static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
+
+    if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
+		IPC_SendSync(0x7);
+	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
   		initialize();
@@ -523,10 +527,6 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
 
-    		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
-                IPC_SendSync(0x7);
-    		}
-  
     		if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x026FF800) {
 				sdRead = true;
     			log_arm9();
@@ -645,7 +645,7 @@ void myIrqHandlerTimer(void) {
 	
 	calledViaIPC = false;
 
-	runCardEngineCheckResume();
+	//runCardEngineCheckResume();
 }
 
 
