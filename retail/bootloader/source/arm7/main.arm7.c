@@ -185,11 +185,9 @@ extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
-extern u32 consoleModel;
-extern u32 romread_LED;
-extern u32 gameSoftReset;
-//extern u32 forceSleepPatch;
+extern u32 ceCached;
 extern u32 boostVram;
+//extern u32 forceSleepPatch;
 //extern u32 logging;
 
 static u32 ce9Location = 0;
@@ -646,11 +644,9 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool otherLoc = (strncmp(getRomTid(ndsHeader), "B3R", 3) == 0);
-
-	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->romSize > 0x8000000) || otherLoc) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
+	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->romSize > 0x8000000) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, romSize, saveSize));
 	u32 fatTableSize = ((ndsHeader->romSize > 0x8000000) ? 0x8000 : 0x4000);
-	if (otherLoc) {
+	if (!ceCached) {
 		fatTableAddr = 0x023D8000;
 	}
 	if (extendedMemory) {

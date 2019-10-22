@@ -17,6 +17,7 @@ typedef struct configuration {
 	u32 donorSdkVer;
 	u32 patchMpuRegion;
 	u32 patchMpuSize;
+	bool ceCached;	// SDK 1-4
 	bool boostCpu;
 	bool boostVram;
 	bool forceSleepPatch;

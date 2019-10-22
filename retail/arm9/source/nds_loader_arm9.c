@@ -260,6 +260,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;
+	loader->ceCached                    = conf->ceCached; // SDK 1-4
 	loader->boostVram                   = conf->boostVram;
 	loader->forceSleepPatch             = conf->forceSleepPatch;
 	loader->logging                     = conf->logging;

@@ -11,6 +11,8 @@
 
 //bool cardReadFound = false; // patch_common.c
 
+extern u32 ceCached;
+
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
@@ -444,7 +446,7 @@ void patchHeapPointer2(cardengineArm9* ce9, const module_params_t* moduleParams,
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = ((strncmp(romTid, "B3R", 3) == 0) ? 0x023D8000 : (u32)ce9); // shrink heap by 16KB or 20KB
+	*heapPointer = (!ceCached&&!extendedMemory ? 0x023D8000 : (u32)ce9); // shrink heap by 16KB or 20KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);

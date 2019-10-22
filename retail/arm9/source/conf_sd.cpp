@@ -82,6 +82,10 @@ static int callback(const char *section, const char *key, const char *value, voi
 		// Patch MPU size
 		conf->patchMpuSize = strtol(value, NULL, 0);
 
+	} else if (match(section, "NDS-BOOTSTRAP", key, "CARDENGINE_CACHED")) {
+		// Card engine (arm9) cached
+		conf->ceCached = (bool)strtol(value, NULL, 0);
+
 	} else if (match(section, "NDS-BOOTSTRAP", key, "FORCE_SLEEP_PATCH")) {
 		// Force sleep patch
 		conf->forceSleepPatch = (bool)strtol(value, NULL, 0);
@@ -140,7 +144,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	FILE* cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x1000, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x800, cebin);
 	}
 	fclose(cebin);
     

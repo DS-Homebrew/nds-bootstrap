@@ -38,6 +38,7 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
+	.global ceCached
 	.global boostVram
 	.global forceSleepPatch
 	.global logging
@@ -76,6 +77,8 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000
 patchMpuSize:
+	.word	0x00000000
+ceCached:
 	.word	0x00000000
 boostVram:
 	.word	0x00000000
