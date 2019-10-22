@@ -366,6 +366,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 romSize, u32 saveSize) {
+	if (moduleParams->sdk_version <= 0x2007FFF) {
+		return 0;
+	}
+
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
