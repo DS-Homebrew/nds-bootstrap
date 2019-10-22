@@ -1,0 +1,113 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.out
+*.app
+*.dldi
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+# =========================
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+#*.nds
+#*.cia
+#*.d
+
+# Build folders
+data/
+bin/
+build/
+
+# =========================
+# Project Files
+# =========================
+
+# Notepad++
+*.pnproj
+*.pnps
+*.bak
+
+# Visual Studio Code
+.vscode/*
+#!.vscode/settings.json
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json
+retail/nitrofiles/cardengine_arm7.bin
+retail/nitrofiles/load.bin
+retail/nitrofiles/cardengine_arm9_dldi.bin
+retail/nitrofiles/cardengine_arm9_reloc.bin
+retail/nitrofiles/cardengine_arm9_sdk5.bin
+retail/nitrofiles/cardengine_arm9_sdk5_dldi.bin
