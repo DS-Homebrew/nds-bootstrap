@@ -637,15 +637,15 @@ void myIrqHandlerFIFO(void) {
 }
 
 //---------------------------------------------------------------------------------
-void myIrqHandlerTimer(void) {
+void myIrqHandlerNetwork(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerTimer");
+	nocashMessage("myIrqHandlerNetwork");
 	#endif	
 	
 	calledViaIPC = false;
 
-	//runCardEngineCheckResume();
+	runCardEngineCheck();
 }
 
 

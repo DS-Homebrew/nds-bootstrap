@@ -195,41 +195,32 @@ int hookNdsRetailArm7(
 	patchOffsetCache.a7IrqHandlerOffset = hookLocation;
 
 	u32* vblankHandler = hookLocation;
-	u32* timer0Handler = hookLocation + 3;
-	u32* timer1Handler = hookLocation + 4;
-	//u32* timer2Handler = hookLocation + 5;
-	//u32* timer3Handler = hookLocation + 6;
 	u32* ipcSyncHandler = hookLocation + 16;
+	u32* networkHandler = hookLocation + 24;
 
-	ce7->intr_vblank_orig_return = *vblankHandler;
-	ce7->intr_timer0_orig_return = *timer0Handler;
-	ce7->intr_timer1_orig_return = *timer1Handler;
-	//ce7->intr_timer2_orig_return = *timer2Handler;
-	//ce7->intr_timer3_orig_return = *timer3Handler;
-	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
-	ce7->moduleParams            = moduleParams;
-	ce7->fileCluster             = fileCluster;
-	ce7->gameOnFlashcard         = gameOnFlashcard;
-	ce7->saveOnFlashcard         = saveOnFlashcard;
-	ce7->language                = language;
-	ce7->dsiMode                 = dsiMode; // SDK 5
-	ce7->dsiSD                   = dsiSD;
-	ce7->ROMinRAM                = ROMinRAM;
-	ce7->consoleModel            = consoleModel;
-	ce7->romread_LED             = romread_LED;
-	ce7->gameSoftReset           = gameSoftReset;
-	ce7->preciseVolumeControl    = preciseVolumeControl;
+	ce7->intr_vblank_orig_return  = *vblankHandler;
+	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
+	ce7->intr_network_orig_return = *networkHandler;
+	ce7->moduleParams             = moduleParams;
+	ce7->fileCluster              = fileCluster;
+	ce7->gameOnFlashcard          = gameOnFlashcard;
+	ce7->saveOnFlashcard          = saveOnFlashcard;
+	ce7->language                 = language;
+	ce7->dsiMode                  = dsiMode; // SDK 5
+	ce7->dsiSD                    = dsiSD;
+	ce7->ROMinRAM                 = ROMinRAM;
+	ce7->consoleModel             = consoleModel;
+	ce7->romread_LED              = romread_LED;
+	ce7->gameSoftReset            = gameSoftReset;
+	ce7->preciseVolumeControl     = preciseVolumeControl;
 
 	const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		//*timer0Handler = ce7->patches->timer0Handler;
-		//*timer1Handler = ce7->patches->timer1Handler;
-		//*timer2Handler = ce7->patches->timer2Handler;
-		//*timer3Handler = ce7->patches->timer3Handler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;
+		*networkHandler = ce7->patches->networkHandler;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
