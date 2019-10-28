@@ -34,7 +34,7 @@ Once everything is downloaded and installed, `git clone` this repository, naviga
 # Frontends
 A frontend isn't required to be used as nds-bootstrap uses an ini file to load its parameters. However, it is very much recommended.
 
-## [TWiLight Menu++](https://github.com/RocketRobz/TWiLightMenu)
+## [TWiLight Menu++](https://github.com/DS-Homebrew/TWiLightMenu)
 
 TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 5 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, SEGA Saturn menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
 
