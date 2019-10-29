@@ -268,6 +268,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
+		patchOffsetCache.mpuInitCacheOffset = 0;
 		patchOffsetCacheChanged = true;
 	}
 
@@ -319,7 +320,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
 	// Find the mpu cache init
-	u32* mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
+	u32* mpuInitCacheOffset = patchOffsetCache.mpuInitCacheOffset;
+	if (!patchOffsetCache.mpuInitCacheOffset) {
+		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
+	}
 	if (mpuInitCacheOffset) {
 		*mpuInitCacheOffset = 0xE3A00046;
 	}
@@ -329,22 +333,23 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
-	while (mpuStartOffset && patchMpuSize) {
+	u32* mpuInitOffset = mpuStartOffset;
+	while (mpuInitOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
 		if (patchMpuSize > 1) {
 			patchSize = patchMpuSize;
 		}
-		mpuStartOffset = findOffset(
+		mpuInitOffset = findOffset(
 			//(u32*)((u32)mpuStartOffset + 4), patchSize,
-			mpuStartOffset + 1, patchSize,
+			mpuInitOffset + 1, patchSize,
 			mpuInitRegionSignature, 1
 		);
-		if (mpuStartOffset) {
+		if (mpuInitOffset) {
 			dbg_printf("Mpu init: ");
-			dbg_hexa((u32)mpuStartOffset);
+			dbg_hexa((u32)mpuInitOffset);
 			dbg_printf("\n\n");
 
-			*mpuStartOffset = 0xE1A00000; // nop
+			*mpuInitOffset = 0xE1A00000; // nop
 
 			// Try to find it
 			/*for (int i = 0; i < 0x100; i++) {
@@ -363,6 +368,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
+	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 }
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 romSize, u32 saveSize) {
