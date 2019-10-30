@@ -37,11 +37,11 @@ static inline bool CARD_IsInserted(void) {
 }
 
 static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset) {
-	return __myio_dldi.readSectors(sector, 1, buffer, 0);
+	return __myio_dldi.readSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
-	return __myio_dldi.readSectors(sector, count, buffer, 0);
+	return __myio_dldi.readSectors(sector, count, buffer);
 }
 
 static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer, int ndmaSlot) {
@@ -53,11 +53,11 @@ static inline int CARD_CheckCommand(int cmd, int ndmaSlot) {
 }
 
 static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
-	return __myio_dldi.writeSectors(sector, 1, buffer, 0);
+	return __myio_dldi.writeSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
-	return __myio_dldi.writeSectors(sector, count, buffer, 0);
+	return __myio_dldi.writeSectors(sector, count, buffer);
 }
 
 #endif // CARD_H
