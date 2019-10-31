@@ -37,7 +37,6 @@
 #include <nds/ipc.h>
 #include <nds/system.h>
 
-#include "locations.h"
 #include "common.h"
 #include "loading.h"
 

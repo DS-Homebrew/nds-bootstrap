@@ -168,9 +168,9 @@ static void resetMemory_ARM7(void) {
 	}
 
 	arm7clearRAM();								// clear exclusive IWRAM
-	toncset((u32*)0x02000000, 0, 0x3F4000);	// clear most of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x380000);	// clear other part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x027B0000, 0, 0x1D000);		// clear other part of EWRAM - except before ce7 and ce9 binaries
+	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
+	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
+	toncset((u32*)0x02400000, 0, 0x3CD000);	// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x808000);	// clear part of EWRAM
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -1060,9 +1060,9 @@ int arm7_main(void) {
 		}
 
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-		if (apPatchFile.firstCluster != CLUSTER_FREE) {
-			fileRead((char*)0x02780000, apPatchFile, 0, apPatchSize, 0);
-			applyIpsPatch(ndsHeader, (u8*)0x02780000, (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
+		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x40000) {
+			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
+			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
 		}
 	}
 
@@ -1081,7 +1081,7 @@ int arm7_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
-	toncset((u32*)0x02780000, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
+	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	while (arm9_stateFlag != ARM9_READY);

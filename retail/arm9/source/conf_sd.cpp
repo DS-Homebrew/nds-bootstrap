@@ -309,7 +309,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* bootstrapImages = fopen(wideCheatFound ? "nitro:/bootloader_wideImages.lz77" : "nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
 		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)0x02780000);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
 	}
 	fclose(bootstrapImages);
 
