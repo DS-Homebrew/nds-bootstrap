@@ -508,7 +508,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	if (dsiMode > 0) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
-		tDSiHeader* dsiHeader = (tDSiHeader*)((u32)ndsHeader - (u32)__NDSHeader + (u32)__DSiHeader); // __DSiHeader
+		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
 		*dsiHeader = *dsiHeaderTemp;
 	}
 
