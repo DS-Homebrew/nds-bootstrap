@@ -871,9 +871,8 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	if (dsiModeConfirmed) {
-		if (consoleModel == 0 && !isDSiWare) {
-			nocashMessage("Cannot use DSi mode on DSi");
-			dbg_printf("Cannot use DSi mode on DSi");
+		if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
+			dbg_printf("Cannot use DSi mode on DSi SD");
 			dbg_printf("\n");
 			errorOutput();
 		}
