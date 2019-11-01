@@ -68,6 +68,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 bool sdRead = true;
 
 static bool initialized = false;
+static bool fcInited = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
@@ -133,6 +134,20 @@ static void waitFrames(int count) {
 	}
 }
 
+static void fcInitialize(void) {
+	if (fcInited) {
+		return;
+	}
+
+	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
+		sdRead = false;			// Switch to flashcard
+		FAT_InitFiles(false, 0);
+		sdRead = true;				// Switch to SD
+	}
+
+	fcInited = true;
+}
+
 static void initialize(void) {
 	if (initialized) {
 		return;
@@ -145,11 +160,6 @@ static void initialize(void) {
 		}
 		sdRead = true;				// Switch to SD
 		FAT_InitFiles(false, 0);
-	}
-	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
-		sdRead = false;			// Switch to flashcard
-		FAT_InitFiles(false, 0);
-		sdRead = true;				// Switch to SD
 	}
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -844,6 +854,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		fcInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		fileRead(dst, *savFile, src, len, -1);
   		unlockMutex(&saveMutex);
@@ -869,6 +880,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		fcInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -898,6 +910,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
+		fcInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1036,6 +1049,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
 		initialize();
+		fcInitialize();
 		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
