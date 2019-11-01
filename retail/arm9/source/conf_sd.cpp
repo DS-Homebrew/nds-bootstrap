@@ -226,7 +226,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	// Load ce7 binary
-	FILE* cebin = fopen("nitro:/cardengine_arm7.lz77", "rb");
+	FILE* cebin = fopen(conf->sdFound ? "nitro:/cardengine_arm7.lz77" : "nitro:/cardengine_arm7_alt.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
@@ -348,6 +348,25 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fwrite(buffer, 1, sizeof(buffer), fatTableFile);
 		}
 		fclose(fatTableFile);
+	}
+
+	if (conf->gameOnFlashcard) {
+		FILE* ndsFile = fopen(conf->ndsPath, "rb");
+		fseek(ndsFile, 0, SEEK_SET);
+		fread(__DSiHeader, 1, 0x1000, ndsFile);
+		fseek(ndsFile, __DSiHeader->ndshdr.arm9romOffset, SEEK_SET);
+		fread((void*)0x02800000, 1, __DSiHeader->ndshdr.arm9binarySize, ndsFile);
+		fseek(ndsFile, __DSiHeader->ndshdr.arm7romOffset, SEEK_SET);
+		fread((void*)0x02B80000, 1, __DSiHeader->ndshdr.arm7binarySize, ndsFile);
+		if (__DSiHeader->arm9ibinarySize > 0) {
+			fseek(ndsFile, (u32)__DSiHeader->arm9iromOffset, SEEK_SET);
+			fread((void*)0x02C00000, 1, __DSiHeader->arm9ibinarySize, ndsFile);
+		}
+		if (__DSiHeader->arm7ibinarySize > 0) {
+			fseek(ndsFile, (u32)__DSiHeader->arm7iromOffset, SEEK_SET);
+			fread((void*)0x02C80000, 1, __DSiHeader->arm7ibinarySize, ndsFile);
+		}
+		fclose(ndsFile);
 	}
 
 	return 0;

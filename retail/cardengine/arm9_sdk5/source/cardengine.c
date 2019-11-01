@@ -72,6 +72,7 @@ static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 #endif
 
 static bool flagsSet = false;
+static bool loadOverlaysFromRam = true;
 static bool isDma = false;
 static bool dmaLed = false;
 static u8 dma = 4;
@@ -295,6 +296,11 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 		}
+
+		if (!ce9->a7DldiInited) {
+			buildFatTableCache(romFile, 0);
+			loadOverlaysFromRam = false;
+		}
 		#else
 		if (ce9->consoleModel > 0) {
 			romLocation = ROM_SDK5_LOCATION;
@@ -352,7 +358,7 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(dst, src, len);
 	}
 

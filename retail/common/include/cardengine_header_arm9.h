@@ -58,6 +58,7 @@ typedef struct cardengineArm9 {
     u32 fileCluster;
     u32 saveCluster;
     u32 saveOnFlashcard;
+    u32 a7DldiInited;
     u32 cardStruct0;
     u32 cacheStruct;
     u32 ROMinRAM;

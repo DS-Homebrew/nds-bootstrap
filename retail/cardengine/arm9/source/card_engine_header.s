@@ -26,6 +26,8 @@ saveCluster:
 	.word	0x00000000
 saveOnFlashcard:
 	.word	0x00000000
+a7DldiInited:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:

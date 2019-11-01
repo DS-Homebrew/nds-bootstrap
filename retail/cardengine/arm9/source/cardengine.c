@@ -838,6 +838,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 			debug8mbMpuFix();
 		}
+
+		if (!ce9->a7DldiInited) {
+			buildFatTableCache(romFile, 0);
+			loadOverlaysFromRam = false;
+		}
 		#else
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {

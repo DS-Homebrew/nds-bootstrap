@@ -106,8 +106,11 @@ extern u32 boostVram;
 extern u32 soundFreq;
 extern u32 logging;
 
+static bool fcInited = false;
+
 bool sdRead = true;
 
+static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
 static void initMBK(void) {
@@ -171,7 +174,9 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x3CD000);	// clear part of EWRAM - except before ce7 and ce9 binaries
-	toncset((u32*)0x027F8000, 0, 0x808000);	// clear part of EWRAM
+	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
+	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
+	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
@@ -403,7 +408,11 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
+	if (gameOnFlashcard) {
+		tonccpy((char*)dsiHeaderTemp, (char*)DSI_HEADER_SDK5, sizeof(*dsiHeaderTemp));
+	} else {
+		fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
+	}
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -440,16 +449,30 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
     
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
-	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
+	if (gameOnFlashcard) {
+		tonccpy(dsiHeaderTemp->ndshdr.arm9destination, (char*)0x02800000, dsiHeaderTemp->ndshdr.arm9binarySize);
+		tonccpy(dsiHeaderTemp->ndshdr.arm7destination, (char*)0x02B80000, dsiHeaderTemp->ndshdr.arm7binarySize);
+	} else {
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
+	}
 }
 
 static void loadIBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
-	if (dsiHeaderTemp->arm9ibinarySize > 0) {
-		fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
-	}
-	if (dsiHeaderTemp->arm7ibinarySize > 0) {
-		fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
+	if (gameOnFlashcard) {
+		if (dsiHeaderTemp->arm9ibinarySize > 0) {
+			tonccpy(dsiHeaderTemp->arm9idestination, (char*)0x02C00000, dsiHeaderTemp->arm9ibinarySize);
+		}
+		if (dsiHeaderTemp->arm7ibinarySize > 0) {
+			tonccpy(dsiHeaderTemp->arm7idestination, (char*)0x02C80000, dsiHeaderTemp->arm7ibinarySize);
+		}
+	} else {
+		if (dsiHeaderTemp->arm9ibinarySize > 0) {
+			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
+		}
+		if (dsiHeaderTemp->arm7ibinarySize > 0) {
+			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
+		}
 	}
 }
 
@@ -466,6 +489,8 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+	if (gameOnFlashcard && !fcInited) return false;
+
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "UBR", 3) == 0
@@ -658,7 +683,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		const char *ndsPath = "nand:/dsiware.nds";
 		tonccpy(deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
 
-		tonccpy((u32*)0x02FFC000, (u32*)0x02FFE000, 0x1000);		// Make a duplicate of DSi header
+		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);		// Make a duplicate of DSi header
 		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
 
 		*(u32*)(0x02FFA680) = 0x02FD4D80;
@@ -739,9 +764,9 @@ int arm7_main(void) {
 	if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;
 		// Init Slot-1 card
-		if (!FAT_InitFiles(initDisc, 0)) {
+		fcInited = FAT_InitFiles(initDisc, 0);
+		if (!fcInited) {
 			nocashMessage("!FAT_InitFiles");
-			errorOutput();
 			//return -1;
 		}
 		sdRead = dsiSD;
@@ -756,7 +781,7 @@ int arm7_main(void) {
 	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 	*romFile = getFileFromCluster(storedFileCluster);
 
-	const char* bootName = "BOOT.NDS";
+	/*const char* bootName = "BOOT.NDS";
 
 	// Invalid file cluster specified
 	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
@@ -767,7 +792,7 @@ int arm7_main(void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		errorOutput();
 		//return -1;
-	}
+	}*/
 	
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
@@ -877,6 +902,7 @@ int arm7_main(void) {
 		}
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
 	}
+	toncset((u32*)0x02800000, 0, 0x500000);	// clear buffered binaries
 
 	nocashMessage("Loading the header...\n");
 
@@ -929,21 +955,27 @@ int arm7_main(void) {
 
 		nocashMessage("Trying to patch the card...\n");
 
-		tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
-		if(gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)CARDENGINE_ARM7_LOCATION, 0x12000)) {
+		if (!dsiSD) {
+			ce7Location = CARDENGINE_ARM7_LOCATION_ALT;
+		}
+
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
+		if (fcInited) {
+		  if (gameOnFlashcard || saveOnFlashcard) {
+			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
 				nocashMessage("ce7 DLDI patch failed");
 				dbg_printf("ce7 DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();
 			}
+		  }
 		}
 
 		if (isSdk5(moduleParams)) {
 			if (gameOnFlashcard && !ROMinRAM) {
 				ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
 				tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
-				if (!dldiPatchBinary((data_t*)(ce9Location), 0x7000)) {
+				if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
 					nocashMessage("ce9 DLDI patch failed");
 					dbg_printf("ce9 DLDI patch failed");
 					dbg_printf("\n");
@@ -956,7 +988,7 @@ int arm7_main(void) {
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4000);
-			if (!dldiPatchBinary((data_t*)(ce9Location), 0x4000)) {
+			if (!dldiPatchBinary((data_t*)ce9Location, 0x4000)) {
 				nocashMessage("ce9 DLDI patch failed");
 				dbg_printf("ce9 DLDI patch failed");
 				dbg_printf("\n");
@@ -986,7 +1018,7 @@ int arm7_main(void) {
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
-			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+			(cardengineArm7*)ce7Location,
 			(cardengineArm9*)ce9Location,
 			ndsHeader,
 			moduleParams,
@@ -1003,9 +1035,9 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
-		cheatPatch((cardengineArm7*)CARDENGINE_ARM7_LOCATION, ndsHeader);
+		cheatPatch((cardengineArm7*)ce7Location, ndsHeader);
 		errorCode = hookNdsRetailArm7(
-			(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+			(cardengineArm7*)ce7Location,
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
@@ -1037,6 +1069,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
+			fcInited,
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),
