@@ -777,7 +777,7 @@ int arm7_main(void) {
 
 	// ROM file
 	if (gameOnFlashcard) sdRead = false;
-	aFile* romFile = (aFile*)ROM_FILE_LOCATION;
+	aFile* romFile = (aFile*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT);
 	*romFile = getFileFromCluster(storedFileCluster);
 
 	/*const char* bootName = "BOOT.NDS";
@@ -818,21 +818,21 @@ int arm7_main(void) {
 		pleaseWaitOutput();
 		buildFatTableCache(romFile, 0);
 	} else {
-		tonccpy((char*)ROM_FILE_LOCATION, (char*)0x27C0000, sizeof(aFile));
+		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x27C0000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
 		romFile->fatTableCache = (u32*)0x2700000;	// Change fatTableCache addr for ce9 usage
-		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)ROM_FILE_LOCATION, sizeof(aFile));
+		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 	}
 
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 
 	// Sav file
-	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+	aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
 	*savFile = getFileFromCluster(saveFileCluster);
 
 	if (saveOnFlashcard) {
-		tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)SAV_FILE_LOCATION, sizeof(aFile));
+		tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 	}
 
 	if (savFile->firstCluster != CLUSTER_FREE) {
@@ -840,7 +840,7 @@ int arm7_main(void) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 			} else {
-				tonccpy((char*)SAV_FILE_LOCATION, (char*)0x27C0020, sizeof(aFile));
+				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x27C0020, sizeof(aFile));
 			}
 		}
 	}
@@ -848,9 +848,9 @@ int arm7_main(void) {
 	if (gameOnFlashcard) sdRead = false;
 
 	if (fatTableEmpty) {
-		tonccpy((char*)0x27C0000, (char*)ROM_FILE_LOCATION, sizeof(aFile));
+		tonccpy((char*)0x27C0000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 		if (!gameOnFlashcard) {
-			tonccpy((char*)0x27C0020, (char*)SAV_FILE_LOCATION, sizeof(aFile));
+			tonccpy((char*)0x27C0020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
 		*(u32*)(0x27C0040) = storedFileCluster;
 		*(u32*)(0x27C0044) = romSize;
