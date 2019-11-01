@@ -1093,6 +1093,8 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 	nocashMessage("buildFatTableCache");
     #endif
     
+	if (file->fatTableCached) return;
+
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;
 

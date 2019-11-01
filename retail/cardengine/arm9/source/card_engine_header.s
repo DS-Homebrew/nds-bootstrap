@@ -49,8 +49,8 @@ card_engine_start:
 
 patches:
 .word	card_read_arm9
+.word	card_irq_enable
 .word	card_pull_out_arm9
-.word	0x0
 .word	card_id_arm9
 .word	card_dma_arm9
 .word   nand_read_arm9
@@ -67,8 +67,8 @@ needFlushDCCache:
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
+.word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
-.word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
 .word   thumb_nand_read_arm9
@@ -338,7 +338,38 @@ cardReadRef11:
 .word   nandWrite-ce9 
 @---------------------------------------------------------------------------------
 
-	.arm    
+	.arm
+@---------------------------------------------------------------------------------
+card_irq_enable:
+@---------------------------------------------------------------------------------
+	push    {lr}
+	push	{r1-r12}
+	ldr	r3, =myIrqEnable
+	bl	_blx_r3_stub2
+	pop   	{r1-r12} 
+	pop  	{lr}
+	bx  lr
+_blx_r3_stub2:
+	bx	r3
+.pool
+@---------------------------------------------------------------------------------
+
+	.thumb
+@---------------------------------------------------------------------------------
+thumb_card_irq_enable:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+	ldr	r3, =myIrqEnable
+	bl	thumb_blx_r3_stub2
+	pop	{r1-r7, pc}
+	bx  lr
+thumb_blx_r3_stub2:
+	bx	r3
+.pool
+@---------------------------------------------------------------------------------
+
+
+	.arm
 pdash_read:
     push	{r1-r11, lr}
     @mov     r0, r4 @DST
@@ -403,7 +434,7 @@ ce9location13:
 .word   ce9
 cardReadRef13:
 .word   myIrqHandlerIPC-ce9  
-    
+
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC
 callEndReadDmaThumb:

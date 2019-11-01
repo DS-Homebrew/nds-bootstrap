@@ -106,8 +106,7 @@ extern u32 boostVram;
 extern u32 soundFreq;
 extern u32 logging;
 
-static bool fcInited = false;
-
+bool fcInited = false;
 bool sdRead = true;
 
 static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
