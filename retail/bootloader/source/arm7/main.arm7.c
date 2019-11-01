@@ -106,7 +106,6 @@ extern u32 boostVram;
 extern u32 soundFreq;
 extern u32 logging;
 
-bool fcInited = false;
 bool sdRead = true;
 
 static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
@@ -407,11 +406,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	if (gameOnFlashcard) {
-		tonccpy((char*)dsiHeaderTemp, (char*)DSI_HEADER_SDK5, sizeof(*dsiHeaderTemp));
-	} else {
-		fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
-	}
+	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -448,30 +443,16 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
     
 
 	// Load binaries into memory
-	if (gameOnFlashcard) {
-		tonccpy(dsiHeaderTemp->ndshdr.arm9destination, (char*)0x02800000, dsiHeaderTemp->ndshdr.arm9binarySize);
-		tonccpy(dsiHeaderTemp->ndshdr.arm7destination, (char*)0x02B80000, dsiHeaderTemp->ndshdr.arm7binarySize);
-	} else {
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
-	}
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
+	fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 }
 
 static void loadIBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
-	if (gameOnFlashcard) {
-		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			tonccpy(dsiHeaderTemp->arm9idestination, (char*)0x02C00000, dsiHeaderTemp->arm9ibinarySize);
-		}
-		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			tonccpy(dsiHeaderTemp->arm7idestination, (char*)0x02C80000, dsiHeaderTemp->arm7ibinarySize);
-		}
-	} else {
-		if (dsiHeaderTemp->arm9ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
-		}
-		if (dsiHeaderTemp->arm7ibinarySize > 0) {
-			fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
-		}
+	if (dsiHeaderTemp->arm9ibinarySize > 0) {
+		fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
+	}
+	if (dsiHeaderTemp->arm7ibinarySize > 0) {
+		fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
 	}
 }
 
@@ -488,8 +469,6 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
-	if (gameOnFlashcard && !fcInited) return false;
-
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "UBR", 3) == 0
@@ -760,16 +739,15 @@ int arm7_main(void) {
 		}
 	}
 
-	if (gameOnFlashcard || saveOnFlashcard) {
+	/*if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;
 		// Init Slot-1 card
-		fcInited = FAT_InitFiles(initDisc, 0);
-		if (!fcInited) {
+		if (!FAT_InitFiles(initDisc, 0)) {
 			nocashMessage("!FAT_InitFiles");
 			//return -1;
 		}
 		sdRead = dsiSD;
-	}
+	}*/
 
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
@@ -831,11 +809,10 @@ int arm7_main(void) {
 	aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
 	*savFile = getFileFromCluster(saveFileCluster);
 
-	if (saveOnFlashcard) {
-		tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
-	}
-
 	if (savFile->firstCluster != CLUSTER_FREE) {
+		if (saveOnFlashcard) {
+			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+		}
 		if (!gameOnFlashcard) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
@@ -960,8 +937,7 @@ int arm7_main(void) {
 		}
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
-		if ((gameOnFlashcard && fcInited)
-		|| (saveOnFlashcard && fcInited)) {
+		if (gameOnFlashcard || saveOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
 				dbg_printf("ce7 DLDI patch failed");
 				dbg_printf("\n");
@@ -1065,7 +1041,6 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			fcInited,
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),

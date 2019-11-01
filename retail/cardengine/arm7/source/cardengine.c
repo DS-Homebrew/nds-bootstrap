@@ -65,7 +65,6 @@ extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
-bool fcInited = false;
 bool sdRead = true;
 
 static bool initialized = false;
@@ -125,11 +124,6 @@ static void waitFrames(int count) {
 	}
 }
 
-static void waitForArm9(void) {
-    IPC_SendSync(0x4);
-	while (sharedAddr[3] != (vu32)0);
-}
-
 static void initialize(void) {
 	if (initialized) {
 		return;
@@ -145,7 +139,7 @@ static void initialize(void) {
 	}
 	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
 		sdRead = false;			// Switch to flashcard
-		fcInited = FAT_InitFiles(true, 0);
+		FAT_InitFiles(true, 0);
 		sdRead = true;				// Switch to SD
 	}
 	//romFile = getFileFromCluster(fileCluster);
@@ -830,27 +824,8 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		return false;
 	}
 
-	initialize();
-
-	if (saveOnFlashcard && !fcInited) {
-		if (tryLockMutex(&saveMutex)) {
-			// Send a command to the ARM9 to read the save
-			u32 commandSaveRead = 0x53415652;
-
-			// Write the command
-			sharedAddr[0] = src;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (vu32)dst;
-			sharedAddr[3] = commandSaveRead;
-
-			waitForArm9();
-
-			unlockMutex(&saveMutex);
-		}
-		return true;
-	}
-
   	if (tryLockMutex(&saveMutex)) {
+		initialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		fileRead(dst, *savFile, src, len, -1);
   		unlockMutex(&saveMutex);
@@ -874,27 +849,8 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
-	initialize();
-
-	if (saveOnFlashcard && !fcInited) {
-		if (tryLockMutex(&saveMutex)) {
-			// Send a command to the ARM9 to write the save
-			u32 commandSaveWrite = 0x53415657;
-
-			// Write the command
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (vu32)src;
-			sharedAddr[3] = commandSaveWrite;
-
-			waitForArm9();
-
-			unlockMutex(&saveMutex);
-		}
-		return true;
-	}
-
   	if (tryLockMutex(&saveMutex)) {
+		initialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -922,27 +878,8 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
-	initialize();
-
-	if (saveOnFlashcard && !fcInited) {
-		if (tryLockMutex(&saveMutex)) {
-			// Send a command to the ARM9 to write the save
-			u32 commandSaveWrite = 0x53415657;
-
-			// Write the command
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (vu32)src;
-			sharedAddr[3] = commandSaveWrite;
-
-			waitForArm9();
-
-			unlockMutex(&saveMutex);
-		}
-		return true;
-	}
-
   	if (tryLockMutex(&saveMutex)) {
+		initialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		if (saveTimer == 0) {
 			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1081,22 +1018,6 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
 		initialize();
-
-		if (gameOnFlashcard && !fcInited) {
-			// Send a command to the ARM9 to read the ROM
-			u32 commandRomRead = 0x524F4D52;
-
-			// Write the command
-			sharedAddr[0] = src;
-			sharedAddr[1] = len;
-			sharedAddr[2] = (vu32)dst;
-			sharedAddr[3] = commandRomRead;
-
-			waitForArm9();
-
-			return true;
-		}
-
 		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;

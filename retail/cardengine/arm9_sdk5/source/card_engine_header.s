@@ -26,8 +26,6 @@ saveCluster:
 	.word	0x00000000
 saveOnFlashcard:
 	.word	0x00000000
-a7DldiInited:
-	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
@@ -49,7 +47,6 @@ card_engine_start:
 
 patches:
 .word	card_read_arm9
-.word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
@@ -68,7 +65,6 @@ needFlushDCCache:
 .word   0x0 @ipcSyncHandlerRef
 thumbPatches:
 .word	thumb_card_read_arm9
-.word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
@@ -248,61 +244,6 @@ thumb_card_pull:
 	bx      lr
     
 	.arm
-@---------------------------------------------------------------------------------
-card_irq_enable:
-@---------------------------------------------------------------------------------
-	push    {lr}
-	push	{r1-r12}
-	ldr	r3, =myIrqEnable
-	bl	_blx_r3_stub2
-	pop   	{r1-r12} 
-	pop  	{lr}
-	bx  lr
-_blx_r3_stub2:
-	bx	r3
-.pool
-@---------------------------------------------------------------------------------
-
-	.thumb
-@---------------------------------------------------------------------------------
-thumb_card_irq_enable:
-@---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-	ldr	r3, =myIrqEnable
-	bl	thumb_blx_r3_stub2
-	pop	{r1-r7, pc}
-	bx  lr
-thumb_blx_r3_stub2:
-	bx	r3
-.pool
-@---------------------------------------------------------------------------------
-
-
-	.arm
-ipcSyncHandler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_ipc
-	ldr 	r0,	intr_ipc_orig_return
-	bx  	r0
-    
-code_handler_start_ipc:
-	push	{r0-r12} 
-    ldr		r6, =myIrqHandlerIPC
-	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
-  
-	@ exit after return
-	b	arm9exit
-_blx_r6_stub_start_ipc:
-	bx	r6
-
-arm9exit:
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
-    
-.pool
-    
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll
 .type	 IC_InvalidateAll STT_FUNC

@@ -13,8 +13,6 @@
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
 
-extern bool fcInited;
-
 static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
 	if (!patchOffsetCache.a9Swi12Offset) {
@@ -319,29 +317,6 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     } 
 }
 
-
-static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
-
-	// Card irq enable
-	u32* cardIrqEnableOffset = patchOffsetCache.a9CardIrqEnableOffset;
-	if (!patchOffsetCache.a9CardIrqEnableOffset) {
-		cardIrqEnableOffset = findA9CardIrqEnableOffset(ndsHeader, moduleParams, &usesThumb);
-		if (cardIrqEnableOffset) {
-			patchOffsetCache.a9CardIrqEnableOffset = cardIrqEnableOffset;
-			patchOffsetCache.a9CardIrqIsThumb = usesThumb;
-		}
-	}
-	if (!cardIrqEnableOffset) {
-		return false;
-	}
-	if ((gameOnFlashcard && !fcInited)
-	|| (saveOnFlashcard && !fcInited)) {
-		u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
-		memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
-	}
-	return true;
-}
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	extern u32 gameOnFlashcard;
@@ -1010,14 +985,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	u32* cardPullOutOffset;
 
 	fixForDsiBios(ce9, ndsHeader);
-
-	if (!patchCardIrqEnable(ce9, ndsHeader, moduleParams)) {
-		if ((gameOnFlashcard && !fcInited)
-		|| (saveOnFlashcard && !fcInited)) {
-			dbg_printf("ERR_LOAD_OTHR\n\n");
-			return ERR_LOAD_OTHR;
-		}
-	}
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");

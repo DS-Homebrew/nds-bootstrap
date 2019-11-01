@@ -58,7 +58,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static u32 romLocation = retail_CACHE_ADRESS_START_SDK5;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
-static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
+//static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
@@ -136,25 +136,6 @@ static void waitForArm7(void) {
             count++;
         }
     //}
-}
-#endif
-
-static bool IPC_SYNC_hooked = false;
-static void hookIPC_SYNC(void) {
-    if (!IPC_SYNC_hooked) {
-        u32* ipcSyncHandler = ce9->irqTable + 16;
-        ce9->intr_ipc_orig_return   = *ipcSyncHandler;
-        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
-        IPC_SYNC_hooked = true;
-    }
-}
-
-#ifdef DLDI
-static void enableIPCSYNC(void) {
-    // enable IPC_SYNC
-	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
-		REG_IE |= IRQ_IPC_SYNC;
-	}
 }
 #endif
 
@@ -316,12 +297,6 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 		}
-
-		if (!ce9->a7DldiInited) {
-			buildFatTableCache(romFile, 0);
-			buildFatTableCache(savFile, 0);
-			loadOverlaysFromRam = false;
-		}
 		#else
 		if (ce9->consoleModel > 0) {
 			romLocation = ROM_SDK5_LOCATION;
@@ -352,10 +327,6 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		#endif
 		flagsSet = true;
 	}
-
-	#ifdef DLDI
-	enableIPCSYNC();
-	#endif
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -392,77 +363,4 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	#else
 	return ce9->ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
 	#endif
-}
-
-u32 myIrqEnable(u32 irq) {
-#ifdef DLDI
-	int oldIME = enterCriticalSection();	
-
-	#ifdef DEBUG
-	nocashMessage("myIrqEnable\n");
-	#endif
-
-	sysSetCardOwner (BUS_OWNER_ARM9);
-	buildFatTableCache(romFile, 0);
-	buildFatTableCache(savFile, 0);
-
-	hookIPC_SYNC();
-
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
-	irq |= IRQ_IPC_SYNC;
-	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
-
-	REG_IE |= irq;
-	leaveCriticalSection(oldIME);
-	return irq_before;
-#else
-	return irq;
-#endif
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerIPC(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerIPC");
-	#endif	
-
-#ifdef DLDI
-	if (sharedAddr[3] == 0x53415652) {
-		// Read save
-		sysSetCardOwner (BUS_OWNER_ARM9);
-
-		u32 dst = *(vu32*)(sharedAddr+2);
-		u32 src = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-
-		fileRead((char*)dst, *savFile, src, len, 0);
-
-		sharedAddr[3] = 0;
-	}
-	if (sharedAddr[3] == 0x53415657) {
-		// Write save
-		sysSetCardOwner (BUS_OWNER_ARM9);
-
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-
-		fileWrite((char*)src, *savFile, dst, len, 0);
-
-		sharedAddr[3] = 0;
-	}
-	if (sharedAddr[3] == 0x524F4D52) {
-		// Read ROM (redirected from arm7)
-		sysSetCardOwner (BUS_OWNER_ARM9);
-
-		u32 dst = *(vu32*)(sharedAddr+2);
-		u32 src = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
-
-		fileRead((char*)dst, *romFile, src, len, 0);
-
-		sharedAddr[3] = 0;
-	}
-#endif
 }
