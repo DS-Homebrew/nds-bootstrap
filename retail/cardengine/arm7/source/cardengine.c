@@ -73,8 +73,13 @@ static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 static bool dmaLed = false;
 
+#ifdef TWLSDK
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
+#else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+#endif
 
 static int saveTimer = 0;
 
@@ -87,7 +92,11 @@ static bool volumeAdjustActivated = false;
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
-static const tNDSHeader* ndsHeader = NULL;
+#ifdef TWLSDK
+static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+#else
+static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+#endif
 static const char* romLocation = NULL;
 
 static void unlaunchSetHiyaBoot(void) {
@@ -173,7 +182,12 @@ static void initialize(void) {
 	dbg_printf("\n");
 	#endif
 
-	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
+	#ifndef TWLSDK
+	if (isSdk5(moduleParams)) {
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+	}
+	#endif
+
 	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	/*if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0
         || strncmp(getRomTid(ndsHeader), "TBR", 3) == 0) {
@@ -306,6 +320,7 @@ static void log_arm9(void) {
 	#endif
 }
 
+#ifndef TWLSDK
 static void nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
@@ -373,6 +388,7 @@ static void nandWrite(void) {
   		unlockMutex(&saveMutex);
 	}    
 }
+#endif
 
 static bool readOngoing = false;
 
@@ -550,7 +566,8 @@ static void runCardEngineCheck(void) {
                     IPC_SendSync(0x8);
               }
           }
-          
+
+			#ifndef TWLSDK
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
 				sdRead = true;
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01);
@@ -566,6 +583,7 @@ static void runCardEngineCheck(void) {
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     			IPC_SendSync(0x8);
     		}
+			#endif
     
     		/*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF800) {
     			asyncCardRead_arm9();

@@ -171,7 +171,7 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x3CD000);	// clear part of EWRAM - except before ce7 and ce9 binaries
+	toncset((u32*)0x02400000, 0, 0x3BB000);	// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
@@ -935,7 +935,18 @@ int arm7_main(void) {
 			ce7Location = CARDENGINE_ARM7_LOCATION_ALT;
 		}
 
-		tonccpy((u32*)ce7Location, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
+		bool useSdk5ce7 =
+		   ((isSdk5(moduleParams) && !dsiSD)
+		 || (isSdk5(moduleParams) && REG_SCFG_EXT == 0)
+		 || (isSdk5(moduleParams) && dsiModeConfirmed));
+
+		if (useSdk5ce7) {
+			ce7Location = CARDENGINE_ARM7_SDK5_LOCATION;
+			tonccpy((char*)ROM_FILE_LOCATION_SDK5, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+		}
+
+		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x12000);
 		if (gameOnFlashcard || saveOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
 				dbg_printf("ce7 DLDI patch failed");
@@ -1069,7 +1080,7 @@ int arm7_main(void) {
 		}
 	}
 
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x23000);
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
 
     
 
