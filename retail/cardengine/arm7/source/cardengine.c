@@ -78,8 +78,13 @@ static bool dmaLed = false;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
 #else
+#ifdef ALTERNATIVE
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_ALT;
+#else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+#endif
 #endif
 
 static int saveTimer = 0;
