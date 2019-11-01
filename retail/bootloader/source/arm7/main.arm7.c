@@ -830,11 +830,12 @@ int arm7_main(void) {
 	// Sav file
 	aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 	*savFile = getFileFromCluster(saveFileCluster);
-	
+
+	if (saveOnFlashcard) {
+		tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)SAV_FILE_LOCATION, sizeof(aFile));
+	}
+
 	if (savFile->firstCluster != CLUSTER_FREE) {
-		if (saveOnFlashcard) {
-			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)SAV_FILE_LOCATION, sizeof(aFile));
-		}
 		if (!gameOnFlashcard) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
@@ -959,15 +960,13 @@ int arm7_main(void) {
 		}
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0x12000);
-		if (fcInited) {
-		  if (gameOnFlashcard || saveOnFlashcard) {
+		if ((gameOnFlashcard && fcInited)
+		|| (saveOnFlashcard && fcInited)) {
 			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
-				nocashMessage("ce7 DLDI patch failed");
 				dbg_printf("ce7 DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();
 			}
-		  }
 		}
 
 		if (isSdk5(moduleParams)) {
@@ -975,7 +974,6 @@ int arm7_main(void) {
 				ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
 				tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 				if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
-					nocashMessage("ce9 DLDI patch failed");
 					dbg_printf("ce9 DLDI patch failed");
 					dbg_printf("\n");
 					errorOutput();
@@ -988,7 +986,6 @@ int arm7_main(void) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4000);
 			if (!dldiPatchBinary((data_t*)ce9Location, 0x4000)) {
-				nocashMessage("ce9 DLDI patch failed");
 				dbg_printf("ce9 DLDI patch failed");
 				dbg_printf("\n");
 				errorOutput();

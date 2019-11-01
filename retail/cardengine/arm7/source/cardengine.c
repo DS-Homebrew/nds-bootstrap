@@ -830,8 +830,10 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		return false;
 	}
 
+	initialize();
+
 	if (saveOnFlashcard && !fcInited) {
-		if (lockMutex(&saveMutex)) {
+		if (tryLockMutex(&saveMutex)) {
 			// Send a command to the ARM9 to read the save
 			u32 commandSaveRead = 0x53415652;
 
@@ -872,8 +874,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
+	initialize();
+
 	if (saveOnFlashcard && !fcInited) {
-		if (lockMutex(&saveMutex)) {
+		if (tryLockMutex(&saveMutex)) {
 			// Send a command to the ARM9 to write the save
 			u32 commandSaveWrite = 0x53415657;
 
@@ -918,8 +922,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
+	initialize();
+
 	if (saveOnFlashcard && !fcInited) {
-		if (lockMutex(&saveMutex)) {
+		if (tryLockMutex(&saveMutex)) {
 			// Send a command to the ARM9 to write the save
 			u32 commandSaveWrite = 0x53415657;
 
@@ -1074,6 +1080,8 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
+		initialize();
+
 		if (gameOnFlashcard && !fcInited) {
 			// Send a command to the ARM9 to read the ROM
 			u32 commandRomRead = 0x524F4D52;
