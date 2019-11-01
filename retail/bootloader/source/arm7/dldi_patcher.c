@@ -199,10 +199,10 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_BSS) { 
+	/*if (pDH[DO_fixSections] & FIX_BSS) { 
 		// Initialise the BSS to 0
 		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
-	}
+	}*/
 
 	return true;
 }

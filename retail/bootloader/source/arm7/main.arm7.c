@@ -739,7 +739,7 @@ int arm7_main(void) {
 		}
 	}
 
-	/*if (gameOnFlashcard || saveOnFlashcard) {
+	if (gameOnFlashcard || saveOnFlashcard) {
 		sdRead = false;
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, 0)) {
@@ -747,7 +747,7 @@ int arm7_main(void) {
 			//return -1;
 		}
 		sdRead = dsiSD;
-	}*/
+	}
 
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));

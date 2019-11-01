@@ -139,7 +139,7 @@ static void initialize(void) {
 	}
 	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
 		sdRead = false;			// Switch to flashcard
-		FAT_InitFiles(true, 0);
+		FAT_InitFiles(false, 0);
 		sdRead = true;				// Switch to SD
 	}
 	//romFile = getFileFromCluster(fileCluster);

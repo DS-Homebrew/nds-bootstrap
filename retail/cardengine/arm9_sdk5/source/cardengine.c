@@ -288,9 +288,9 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	if (!flagsSet) {
 		const char* romTid = getRomTid(ndsHeader);
 		#ifdef DLDI
-		if (!FAT_InitFiles(true, 0)) {
+		if (!FAT_InitFiles(false, 0)) {
 			//nocashMessage("!FAT_InitFiles");
-			return -1;
+			//return -1;
 		}
 
 		if ((strncmp(romTid, "BKW", 3) == 0)
