@@ -731,15 +731,17 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
-		if (tryLockMutex(&saveMutex)) {
+		if (tryLockMutex(&cardEgnineCommandMutex)) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
 				driveInitialize();
-				sdRead = (gameOnFlashcard ? false : true);
+				sdRead = dsiSD;
+				sharedAddr[3] = 0x52414D44;
 				fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
+				sharedAddr[3] = 0;
 				REG_MASTER_VOLUME = 127;
 			}
-			unlockMutex(&saveMutex);
+			unlockMutex(&cardEgnineCommandMutex);
 		}
 		ramDumpTimer++;
 	} else {

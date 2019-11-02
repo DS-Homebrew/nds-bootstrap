@@ -361,7 +361,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+	if (!conf->sdFound) {
 		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 	}
 

@@ -478,6 +478,7 @@ static inline bool startCardReadDma() {
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
 #ifdef DLDI
+	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;

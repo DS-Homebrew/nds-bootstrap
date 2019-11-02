@@ -150,6 +150,7 @@ static void clearIcache (void) {
 
 static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
+	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
