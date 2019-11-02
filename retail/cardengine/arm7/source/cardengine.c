@@ -730,7 +730,7 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
+	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
 		if (tryLockMutex(&cardEgnineCommandMutex)) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
