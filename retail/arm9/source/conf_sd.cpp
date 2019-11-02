@@ -361,11 +361,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-	if (!conf->sdFound) {
+	/*if (!conf->sdFound) {
 		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
-	}
+	}*/
 
-	if (access(ramDumpPath.c_str(), F_OK) != 0) {
+	if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
 		static const int BUFFER_SIZE = 4096;
 		char buffer[BUFFER_SIZE];
 		toncset(buffer, 0, sizeof(buffer));
