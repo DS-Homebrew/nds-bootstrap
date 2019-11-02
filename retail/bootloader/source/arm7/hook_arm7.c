@@ -95,6 +95,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 ramDumpCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,
 	u32 cheatFileCluster,
@@ -203,6 +204,7 @@ int hookNdsRetailArm7(
 	ce7->intr_network_orig_return = *networkHandler;
 	ce7->moduleParams             = moduleParams;
 	ce7->fileCluster              = fileCluster;
+	ce7->ramDumpCluster           = ramDumpCluster;
 	ce7->gameOnFlashcard          = gameOnFlashcard;
 	ce7->saveOnFlashcard          = saveOnFlashcard;
 	ce7->language                 = language;

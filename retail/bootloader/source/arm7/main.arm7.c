@@ -90,6 +90,7 @@ extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 fatTableFileCluster;
+extern u32 ramDumpCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -1023,6 +1024,7 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
+			ramDumpCluster,
 			wideCheatFileCluster,
 			wideCheatSize,
 			cheatFileCluster,

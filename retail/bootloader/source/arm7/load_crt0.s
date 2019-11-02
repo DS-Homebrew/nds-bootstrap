@@ -39,6 +39,7 @@
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
 	.global fatTableFileCluster
+	.global ramDumpCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -95,6 +96,8 @@ cheatSize:
 patchOffsetCacheFileCluster:
 	.word	0x00000000
 fatTableFileCluster:
+	.word	0x00000000
+ramDumpCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000

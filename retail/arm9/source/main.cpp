@@ -44,6 +44,7 @@ std::string patchOffsetCacheFilePath;
 std::string fatTableFilePath;
 std::string wideCheatFilePath;
 std::string cheatFilePath;
+std::string ramDumpPath;
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -344,12 +345,14 @@ static int runNdsFile(configuration* conf) {
 	struct stat stCheat;
 	struct stat stPatchOffsetCache;
 	struct stat stFatTable;
+	struct stat stRamDump;
 	u32 clusterSav = 0;
 	u32 clusterWideCheat = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
 	u32 clusterFatTable = 0;
+	u32 clusterRamDump = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -379,7 +382,11 @@ static int runNdsFile(configuration* conf) {
 		clusterFatTable = stFatTable.st_ino;
 	}
 
-	runNds(st.st_ino, clusterSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, conf);
+	if (stat(ramDumpPath.c_str(), &stRamDump) >= 0) {
+		clusterRamDump = stRamDump.st_ino;
+	}
+
+	runNds(st.st_ino, clusterSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, conf);
 
 	return 0;
 }

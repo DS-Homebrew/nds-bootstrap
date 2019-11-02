@@ -15,6 +15,7 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global ramDumpCluster
 .global gameOnFlashcard
 .global saveOnFlashcard
 .global language
@@ -42,6 +43,8 @@ intr_network_orig_return:
 moduleParams:
 	.word	0x00000000
 fileCluster:
+	.word	0x00000000
+ramDumpCluster:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000

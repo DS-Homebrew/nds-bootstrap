@@ -24,6 +24,7 @@ extern std::string patchOffsetCacheFilePath;
 extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
+extern std::string ramDumpPath;
 
 extern u8 lz77ImageBuffer[0x10000];
 
@@ -357,6 +358,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fwrite(buffer, 1, sizeof(buffer), fatTableFile);
 		}
 		fclose(fatTableFile);
+	}
+
+	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
+	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
+	}
+
+	if (access(ramDumpPath.c_str(), F_OK) != 0) {
+		static const int BUFFER_SIZE = 4096;
+		char buffer[BUFFER_SIZE];
+		toncset(buffer, 0, sizeof(buffer));
+
+		FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
+		for (u32 i = 0x02000000; i > 0; i -= BUFFER_SIZE) {
+			fwrite(buffer, 1, sizeof(buffer), ramDumpFile);
+		}
+		fclose(ramDumpFile);
 	}
 
 	return 0;

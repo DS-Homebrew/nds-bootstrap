@@ -61,6 +61,7 @@ typedef struct cardengineArm7 {
     u32 intr_network_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
+	u32 ramDumpCluster;
     u32 cardStruct;
     u32 gameOnFlashcard;
     u32 saveOnFlashcard;

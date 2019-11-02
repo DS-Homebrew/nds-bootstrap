@@ -51,6 +51,7 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 ramDumpCluster;
 extern module_params_t* moduleParams;
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
@@ -86,10 +87,12 @@ static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 #endif
 #endif
+static aFile ramDumpFile;
 
 static int saveTimer = 0;
 
 static int softResetTimer = 0;
+static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
@@ -157,6 +160,8 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, 0);
 		sdRead = true;				// Switch to SD
 	}
+
+	ramDumpFile = getFileFromCluster(ramDumpCluster);
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -723,6 +728,22 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer++;
 	} else {
 		softResetTimer = 0;
+	}
+
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
+		if (tryLockMutex(&saveMutex)) {
+			if (ramDumpTimer == 60 * 2) {
+				REG_MASTER_VOLUME = 0;
+				driveInitialize();
+				sdRead = (gameOnFlashcard ? false : true);
+				fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
+				REG_MASTER_VOLUME = 127;
+			}
+			unlockMutex(&saveMutex);
+		}
+		ramDumpTimer++;
+	} else {
+		ramDumpTimer = 0;
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
