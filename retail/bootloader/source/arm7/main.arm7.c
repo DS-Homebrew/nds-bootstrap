@@ -115,21 +115,21 @@ static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
-	
+
 	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK9 = 0x3000000F;
-	
+
 	// WRAM-A fully mapped to ARM7
 	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-	
+
 	// WRAM-B fully mapped to ARM7 // inverted order
 	*(vu32*)REG_MBK2 = 0x9195999D;
 	*(vu32*)REG_MBK3 = 0x8185898D;
-	
+
 	// WRAM-C fully mapped to arm7 // inverted order
 	*(vu32*)REG_MBK4 = 0x9195999D;
 	*(vu32*)REG_MBK5 = 0x8185898D;
-	
+
 	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
 	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
 	REG_MBK6 = 0x080037C0; // same as DSiWare
@@ -137,6 +137,24 @@ static void initMBK(void) {
 	REG_MBK7 = 0x07C03740; // same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
 	REG_MBK8 = 0x07403700; // same as DSiWare
+}
+
+static void initMBK_dsiEnhanced(void) {
+	// This function has no effect with ARM7 SCFG locked
+
+	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9 = 0x0000000F;
+
+	// WRAM-B fully mapped to ARM7 // inverted order
+	*(vu32*)REG_MBK2 = 0x0105090D;
+	*(vu32*)REG_MBK3 = 0x1115191D;
+
+	// WRAM-C fully mapped to arm7 // inverted order
+	*(vu32*)REG_MBK4 = 0x0105090D;
+	*(vu32*)REG_MBK5 = 0x1115191D;
+
+	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
+	REG_MBK6 = 0x00403000;
 }
 
 /*-------------------------------------------------------------------------
@@ -391,6 +409,11 @@ static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
 // SDK 5
 static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
+}
+
+// SDK 5
+static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
+	return (ndsHeader->unitCode == 0x02);
 }
 
 // SDK 5
@@ -1088,10 +1111,15 @@ int arm7_main(void) {
 
 
 	arm9_boostVram = boostVram;
+	arm9_isSdk5 = isSdk5(moduleParams);
 
     /*if (isGSDD) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
 	}*/
+
+	if (isSdk5(moduleParams) && ROMisDsiEnhanced(ndsHeader) && dsiModeConfirmed) {
+		initMBK_dsiEnhanced();
+	}
 
 	if (!dsiModeConfirmed && !isDSiWare) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
