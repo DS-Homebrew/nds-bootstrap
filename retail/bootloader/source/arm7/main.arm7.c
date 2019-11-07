@@ -522,7 +522,7 @@ static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t*
 	return arm9StartAddress;
 }
 
-static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode, bool isDSiWare) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	/*if (isGSDD) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
@@ -537,6 +537,13 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
 		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
 		*dsiHeader = *dsiHeaderTemp;
+
+		*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
+
+		if (!isDSiWare) {
+			// Clear out Digest offsets/lengths
+			toncset((char*)dsiHeader+0x1E0, 0, 0x28);
+		}
 	}
 
 	return ndsHeader;
@@ -923,7 +930,7 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
-	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
