@@ -21,7 +21,7 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-static char* dsi_encr_data = (char*)DSI_BLOWFISH_LOCATION;
+static const unsigned char* dsi_encr_data = (unsigned char*)DSI_BLOWFISH_LOCATION;
 
 static const unsigned char encr_data[] =
 {
@@ -523,7 +523,7 @@ void init1(u32 cardheader_gamecode, bool dsi)
 /*
  * decrypt_arm9
  */
-bool decrypt_arm9(const tDSiHeader* dsiHeader)
+bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 {
 	// Decrypt NDS secure area
 	u32 *p = (u32*)dsiHeader->ndshdr.arm9destination;
@@ -555,6 +555,11 @@ bool decrypt_arm9(const tDSiHeader* dsiHeader)
 		size -= 8;
 	}
 
+	return true;
+}
+
+bool decrypt_arm9twl(const tDSiHeader* dsiHeader)
+{
 	// Decrypt DSi secure area
 	u32 *pi = (u32*)dsiHeader->arm9idestination;
 
@@ -562,14 +567,16 @@ bool decrypt_arm9(const tDSiHeader* dsiHeader)
 		return true;
 	}
 
-	init1(cardheader_gamecode, true);
-	decrypt(card_hash, p+1, p);
-	//arg2[1] <<= 1;
-	//arg2[2] >>= 1;	
-	init2(card_hash, arg2);
-	decrypt(card_hash, p+1, p);
+	u32 cardheader_gamecode = *(u32*)dsiHeader->ndshdr.gameCode;
 
-	size = 0x4000;
+	init1(cardheader_gamecode, true);
+	decrypt(card_hash, pi+1, pi);
+	arg2[1] <<= 1;
+	arg2[2] >>= 1;	
+	init2(card_hash, arg2);
+	decrypt(card_hash, pi+1, pi);
+
+	u32 size = 0x4000;
 	while (size > 0)
 	{
 		decrypt(card_hash, pi+1, pi);
@@ -578,4 +585,12 @@ bool decrypt_arm9(const tDSiHeader* dsiHeader)
 	}
 
 	return true;
+}
+
+bool decrypt_arm9(const tDSiHeader* dsiHeader)
+{
+	bool result = decrypt_arm9ntr(dsiHeader);
+	decrypt_arm9twl(dsiHeader);
+
+	return result;
 }
