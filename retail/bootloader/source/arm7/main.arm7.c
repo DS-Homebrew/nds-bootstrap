@@ -42,6 +42,7 @@
 #include <nds/arm7/codec.h>
 #include <nds/dma.h>
 #include <nds/system.h>
+#include <nds/input.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>
 #include <nds/arm7/audio.h>
@@ -1141,6 +1142,14 @@ int arm7_main(void) {
 
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams, isDSiWare);
+
+	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
+
+		sdRead = dsiSD;
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
+	}
+
 	startBinary_ARM7(arm9StartAddress);
 
 	return 0;
