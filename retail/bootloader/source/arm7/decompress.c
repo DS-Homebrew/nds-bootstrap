@@ -563,18 +563,21 @@ bool decrypt_arm9twl(const tDSiHeader* dsiHeader)
 	// Decrypt DSi secure area
 	u32 *pi = (u32*)dsiHeader->arm9idestination;
 
-	if (pi[0] == 0 && pi[1] == 0) {
+	if ((pi[0] == 0 && pi[1] == 0)
+	|| (pi[0] == 0xFFFFFFFF && pi[1] == 0xFFFFFFFF)) {
 		return true;
 	}
+
+	tonccpy((void*)0x03FFC654, dsi_encr_data, 0x1048);
 
 	u32 cardheader_gamecode = *(u32*)dsiHeader->ndshdr.gameCode;
 
 	init1(cardheader_gamecode, true);
-	decrypt(card_hash, pi+1, pi);
+	//decrypt(card_hash, pi+1, pi);
 	arg2[1] <<= 1;
 	arg2[2] >>= 1;	
 	init2(card_hash, arg2);
-	decrypt(card_hash, pi+1, pi);
+	//decrypt(card_hash, pi+1, pi);
 
 	u32 size = 0x4000;
 	while (size > 0)
@@ -582,6 +585,7 @@ bool decrypt_arm9twl(const tDSiHeader* dsiHeader)
 		decrypt(card_hash, pi+1, pi);
 		pi += 2;
 		size -= 8;
+		if (*pi == 0xFFFFFFFF && *pi+1 == 0xFFFFFFFF) break;
 	}
 
 	return true;
