@@ -105,6 +105,14 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
+bool extention(const std::string& filename, const char* ext) {
+	if(strcasecmp(filename.c_str() + filename.size() - strlen(ext), ext)) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 static void getSFCG_ARM9(void) {
 	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
 	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 

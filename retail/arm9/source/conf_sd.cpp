@@ -41,6 +41,7 @@ off_t getFileSize(const char* path) {
 }
 
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
+extern bool extention(const std::string& filename, const char* ext);
 
 static void load_conf(configuration* conf, const char* fn) {
 	ek_key IniData[64];
@@ -323,7 +324,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(bootstrapImages);
 
-	std::string romFilename = ReplaceAll(conf->ndsPath, ".nds", ".bin");
+	const char *typeToReplace = ".nds";
+	if (extention(conf->ndsPath, ".dsi")) {
+		typeToReplace = ".dsi";
+	} else if (extention(conf->ndsPath, ".ids")) {
+		typeToReplace = ".ids";
+	} else if (extention(conf->ndsPath, ".srl")) {
+		typeToReplace = ".srl";
+	} else if (extention(conf->ndsPath, ".app")) {
+		typeToReplace = ".app";
+	}
+
+	std::string romFilename = ReplaceAll(conf->ndsPath, typeToReplace, ".bin");
 	const size_t last_slash_idx = romFilename.find_last_of("/");
 	if (std::string::npos != last_slash_idx)
 	{
