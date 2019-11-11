@@ -147,12 +147,13 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
 	if (debug) {
 		dopause();
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
-	dbg_printf("dsiMode: %s\n",conf->dsiMode);
+	dbg_printf("dsiMode: %i\n", conf->dsiMode);
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
@@ -348,6 +349,7 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stGba;
 	struct stat stWideCheat;
 	struct stat stApPatch;
 	struct stat stCheat;
@@ -355,6 +357,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stFatTable;
 	struct stat stRamDump;
 	u32 clusterSav = 0;
+	u32 clusterGba = 0;
 	u32 clusterWideCheat = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterCheat = 0;
@@ -368,6 +371,10 @@ static int runNdsFile(configuration* conf) {
 	
 	if (stat(conf->savPath, &stSav) >= 0) {
 		clusterSav = stSav.st_ino;
+	}
+	
+	if (stat(conf->gbaPath, &stGba) >= 0) {
+		clusterGba = stGba.st_ino;
 	}
 	
 	if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
@@ -394,7 +401,7 @@ static int runNdsFile(configuration* conf) {
 		clusterRamDump = stRamDump.st_ino;
 	}
 
-	runNds(st.st_ino, clusterSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, conf);
+	runNds(st.st_ino, clusterSav, clusterGba, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, conf);
 
 	return 0;
 }

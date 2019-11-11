@@ -81,6 +81,7 @@ extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
 extern u32 dsiSD;
 extern u32 saveFileCluster;
+extern u32 gbaFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
 extern u32 wideCheatFileCluster;
@@ -747,6 +748,15 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
+	aFile gbaFile = getFileFromCluster(gbaFileCluster);
+	if (gbaFile.firstCluster != CLUSTER_FREE) {
+		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc30 : 0x027ffc30), gbaFile, 0xBE, 2, -1);	// GBA Cartridge Header[BEh], Reserved
+		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc32 : 0x027ffc32), gbaFile, 0xB5, 3, -1);	// GBA Cartridge Header[B5h..B7h], Reserved
+		*((u8*)(isSdk5(moduleParams) ? 0x02fffc35 : 0x027ffc35)) = 1;								// Whatever flags ?
+		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc36 : 0x027ffc36), gbaFile, 0xB0, 2, -1);	// GBA Cartridge Header[B0h], Maker Code
+		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc38 : 0x027ffc38), gbaFile, 0xAC, 4, -1);	// GBA Cartridge Header[ACh], Gamecode
+	}
+
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }
 
@@ -1147,7 +1157,8 @@ int arm7_main(void) {
 		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
 
 		sdRead = dsiSD;
-		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
+		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
 	}
 
 	startBinary_ARM7(arm9StartAddress);

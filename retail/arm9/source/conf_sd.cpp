@@ -67,6 +67,12 @@ static void load_conf(configuration* conf, const char* fn) {
 	iniGetKey(IniData, IniCount, &Key);
 	conf->savPath = strdup(Key.Data);
 
+	// GBA path
+	Key.Data = (char*)"";
+	Key.Name = (char*)"GBA_PATH";
+	iniGetKey(IniData, IniCount, &Key);
+	conf->gbaPath = strdup(Key.Data);
+
 	// AP-patch path
 	Key.Data = (char*)"";
 	Key.Name = (char*)"AP_FIX_PATH";

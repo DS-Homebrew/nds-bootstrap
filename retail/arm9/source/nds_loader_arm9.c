@@ -233,7 +233,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, configuration* conf) {
+void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -266,6 +266,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 wideCheatCluster, u32 apPatchClust
 	lc0->dsiSD             = conf->sdFound;
 
 	lc0->saveFileCluster             = saveCluster;
+	lc0->gbaFileCluster              = gbaCluster;
 	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
 	lc0->wideCheatFileCluster        = wideCheatCluster;

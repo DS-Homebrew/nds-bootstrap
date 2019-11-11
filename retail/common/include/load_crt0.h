@@ -14,6 +14,7 @@ typedef struct loadCrt0 {
     u32 dldiOffset;
     u32 dsiSD;
     u32 saveFileCluster;
+    u32 gbaFileCluster;
     u32 romSize;
     u32 saveSize;
     u32 wideCheatFileCluster;
