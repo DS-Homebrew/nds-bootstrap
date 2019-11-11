@@ -13,6 +13,8 @@
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
 
+extern bool gbaRomFound;
+
 static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
 	if (!patchOffsetCache.a9Swi12Offset) {
@@ -176,7 +178,7 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
 }
 
-static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
+/*static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
 	if (!cardPullOutOffset) {
 		return;
 	}
@@ -186,7 +188,7 @@ static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, co
 	// Patch
 	u32* cardTerminateForPullOutPatch = (usesThumb ? ce9->thumbPatches->terminateForPullOutRef : ce9->patches->terminateForPullOutRef);
 	*cardTerminateForPullOutPatch = (u32)cardTerminateForPullOutOffset;
-}
+}*/
 
 static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
 	if (!cardPullOutOffset) {
@@ -435,6 +437,46 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 }
 
+static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+	// Slot-2 exist
+	//u32* slot2ExistOffset = patchOffsetCache.slot2ExistOffset;
+	u32* slot2ExistOffset = NULL;
+	//if (!patchOffsetCache.slot2ExistOffset) {
+		//slot2ExistOffset = NULL;
+		slot2ExistOffset = findSlot2ExistOffset(ndsHeader, &usesThumb);
+		if (slot2ExistOffset) {
+			//patchOffsetCache.slot2ExistOffset = slot2ExistOffset;
+		}
+	//}
+	if (!slot2ExistOffset) {
+		return;
+	}
+
+	// Patch
+	u32* slot2ExistPatch = (usesThumb ? ce9->thumbPatches->slot2_exists : ce9->patches->slot2_exists);
+	memcpy(slot2ExistOffset, slot2ExistPatch, usesThumb ? 0x4 : 0x8);
+}
+
+static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+	// Slot-2 read
+	//u32* slot2ReadOffset = patchOffsetCache.slot2ReadOffset;
+	u32* slot2ReadOffset = NULL;
+	//if (!patchOffsetCache.slot2ReadOffset) {
+		//slot2ReadStartOffset = NULL;
+		slot2ReadOffset = findSlot2ReadOffset(ndsHeader, &usesThumb);
+		if (slot2ReadOffset) {
+			//patchOffsetCache.slot2ReadOffset = slot2ReadOffset;
+		}
+	//}
+	if (!slot2ReadOffset) {
+		return;
+	}
+
+	// Patch
+	u32* slot2ReadPatch = (usesThumb ? ce9->thumbPatches->slot2_read : ce9->patches->slot2_read);
+	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
+}
+
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
@@ -523,7 +565,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     u32 location_sig[1] = {default_location};
     
-    u32* firstCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* firstCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!firstCardLocation) {
 		return;
 	}
@@ -547,7 +589,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadCardLocation = current_location;
     
-    u32* thumbReadCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbReadCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadCardLocation) {
 		return;
 	}
@@ -571,7 +613,19 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadDmaCardLocation = current_location;
     
-    u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* armReadSlot2Location = findOffset(current_location, size, location_sig, 1);
+	if (!armReadSlot2Location) {
+		return;
+	}
+    dbg_printf("armReadSlot2Location ");
+	dbg_hexa((u32)armReadSlot2Location);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadSlot2Location);
+    dbg_printf("\n\n");
+    
+    *armReadSlot2Location = current_location;
+    
+    u32* thumbReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadDmaCardLocation) {
 		return;
 	}
@@ -595,7 +649,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadNandLocation = current_location;
     
-    u32* thumbReadNandLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbReadNandLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadNandLocation) {
 		return;
 	}
@@ -631,7 +685,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *thumbWriteNandLocation = current_location;
     
-    u32* pdashReadLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* pdashReadLocation = findOffset(current_location, size, location_sig, 1);
 	if (!pdashReadLocation) {
 		return;
 	}
@@ -642,6 +696,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *pdashReadLocation = current_location;
+
+    u32* thumbReadSlot2Location = findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadSlot2Location) {
+		return;
+	}
+    dbg_printf("thumbReadSlot2Location ");
+	dbg_hexa((u32)thumbReadSlot2Location);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadSlot2Location);
+    dbg_printf("\n\n");
+    
+    *thumbReadSlot2Location = current_location;
 
 	u32* ipcSyncHandlerLocation = findOffset(current_location, size, location_sig, 1);
 	if (!ipcSyncHandlerLocation) {
@@ -655,7 +721,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *ipcSyncHandlerLocation = current_location;
     
-    u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* globalCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {
 		return;
 	}
@@ -979,6 +1045,7 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	bool usesThumb;
+	bool slot2usesThumb = false;
 	int readType;
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
@@ -1023,9 +1090,15 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5First(ndsHeader, moduleParams);
 
 	randomPatch5Second(ndsHeader, moduleParams);
-    
+
+	if (gbaRomFound) {
+		//patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+
+		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+	}
+
     nandSavePatch(ce9, ndsHeader, moduleParams);
-    
+
     patchCardReadPdash(ce9, ndsHeader);
 
 	//operaRamPatch(ndsHeader, moduleParams);

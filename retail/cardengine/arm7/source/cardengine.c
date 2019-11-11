@@ -78,13 +78,16 @@ static bool dmaLed = false;
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
+static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_SDK5;
 #else
 #ifdef ALTERNATIVE
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_ALT;
+static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_ALT;
 #else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
+static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 #endif
 static aFile ramDumpFile;
@@ -371,7 +374,7 @@ static void nandRead(void) {
 		fileRead(memory, *savFile, flash, len, -1);
     	cardReadLED(false);
   		unlockMutex(&saveMutex);
-	}    
+	}
 }
 
 static void nandWrite(void) {
@@ -406,7 +409,34 @@ static void nandWrite(void) {
 		fileWrite(memory, *savFile, flash, len, -1);
     	cardReadLED(false);
   		unlockMutex(&saveMutex);
-	}    
+	}
+}
+
+static void slot2Read(void) {
+	u32 src = *(vu32*)(sharedAddr+2);
+	u32 dst = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\nslot2 read received\n");
+
+	if (calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+	#endif
+
+	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	fileRead((char*)dst, *gbaFile, src, len, -1);
+	cardReadLED(false);
 }
 #endif
 
@@ -595,11 +625,19 @@ static void runCardEngineCheck(void) {
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     			IPC_SendSync(0x8);
     		}
-            
+
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02) {
 				sdRead = true;
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02);
     			nandWrite();
+    			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+    			IPC_SendSync(0x8);
+    		}
+
+            if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FBC01) {
+				sdRead = true;
+                dmaLed = false;
+    			slot2Read();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     			IPC_SendSync(0x8);
     		}

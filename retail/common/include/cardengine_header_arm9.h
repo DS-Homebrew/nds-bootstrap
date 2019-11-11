@@ -16,6 +16,8 @@ typedef struct cardengineArm9Patches {
     u32* nand_write_arm9;
     u32* cardStructArm9;
     u32* card_pull; // Unused
+    u32* slot2_exists;
+    u32* slot2_read;
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;
     u32* terminateForPullOutRef;
@@ -38,6 +40,8 @@ typedef struct cardengineArm9ThumbPatches {
     u32* nand_write_arm9;
     u32* cardStructArm9;
     u32* card_pull; // Unused
+    u32* slot2_exists;
+    u32* slot2_read;
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;
     u32* terminateForPullOutRef;

@@ -111,6 +111,8 @@ extern u32 logging;
 
 bool sdRead = true;
 
+bool gbaRomFound = false;
+
 static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
@@ -686,7 +688,7 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
-static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile gbaFile, bool isDSiWare) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
 		u8* deviceListAddr = (u8*)((u8*)0x02FFE1D4);
 		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
@@ -748,8 +750,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
-	aFile gbaFile = getFileFromCluster(gbaFileCluster);
-	if (gbaFile.firstCluster != CLUSTER_FREE) {
+	if (gbaRomFound) {
 		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc30 : 0x027ffc30), gbaFile, 0xBE, 2, -1);	// GBA Cartridge Header[BEh], Reserved
 		fileRead((char*)(isSdk5(moduleParams) ? 0x02fffc32 : 0x027ffc32), gbaFile, 0xB5, 3, -1);	// GBA Cartridge Header[B5h..B7h], Reserved
 		*((u8*)(isSdk5(moduleParams) ? 0x02fffc35 : 0x027ffc35)) = 1;								// Whatever flags ?
@@ -883,11 +884,18 @@ int arm7_main(void) {
 		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}
 	if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FFC0);
+		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FF80);
 		romFile->fatTableCache = (u32*)0x3700000;	// Revert back for ce7 usage
 	}
 
 	toncset((u32*)0x027C0000, 0, 0x400);
+
+	// GBA file
+	aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
+	*gbaFile = getFileFromCluster(gbaFileCluster);
+	if (gbaFile->firstCluster != CLUSTER_FREE) {
+		gbaRomFound = true;
+	}
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
@@ -1151,7 +1159,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag != ARM9_READY);
 
 	nocashMessage("Starting the NDS file...");
-    setMemoryAddress(ndsHeader, moduleParams, isDSiWare);
+    setMemoryAddress(ndsHeader, moduleParams, *gbaFile, isDSiWare);
 
 	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
 		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);

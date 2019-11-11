@@ -54,6 +54,8 @@ patches:
 .word   nand_write_arm9
 .word	cardStructArm9
 .word   card_pull
+.word   slot2_exists
+.word	slot2_read
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
@@ -71,6 +73,8 @@ thumbPatches:
 .word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
+.word   thumb_slot2_exists
+.word	thumb_slot2_read
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
@@ -113,7 +117,7 @@ cacheRef:
 ce9location1:
 .word   ce9
 cardReadRef1:
-.word   cardRead-ce9 	  
+.word   cardRead-ce9
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
@@ -200,7 +204,33 @@ card_pull_out_arm9:
 card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+
+@---------------------------------------------------------------------------------
+slot2_exists:
+@---------------------------------------------------------------------------------
+	mov r0, #1
+	bx      lr
+
+@---------------------------------------------------------------------------------
+slot2_read:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r4-r7,lr}
+
+	ldr		r6, cardReadRefS2R
+    ldr     r7, ce9locationS2R
+    add     r6, r6, r7
     
+	bl		_blx_r6_stub_slot2_read
+
+	ldmfd   sp!, {r4-r7,pc}
+	bx      lr
+_blx_r6_stub_slot2_read:
+	bx	r6
+.pool
+ce9locationS2R:
+.word   ce9
+cardReadRefS2R:
+.word   slot2Read-ce9
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
@@ -368,6 +398,34 @@ thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
 
+@---------------------------------------------------------------------------------
+thumb_slot2_exists:
+@---------------------------------------------------------------------------------
+	mov r0, #1
+	bx      r3
+
+@---------------------------------------------------------------------------------
+thumb_slot2_read:
+@---------------------------------------------------------------------------------
+	push	{r4-r7, lr}
+
+	ldr		r6, cardReadRefTS2R
+    ldr     r7, ce9locationTS2R
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_slot2_read	
+
+	POP		{r4-r7}
+	POP		{r3}
+	bx      r3
+_blx_r6_stub_thumb_slot2_read:
+	bx	r6	
+.pool
+.align	4
+ce9locationTS2R:
+.word   ce9
+cardReadRefTS2R:
+.word   slot2Read-ce9
 	.arm
     
 ipcSyncHandler:

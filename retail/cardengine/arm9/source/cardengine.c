@@ -977,7 +977,7 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 		return 0;
 	}
 
-	// Send a command to the ARM7 to read the nand save
+	// Send a command to the ARM7 to write the nand save
 	u32 commandNandWrite = 0x025FFC02;
 
 	// Write the command
@@ -985,6 +985,20 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[1] = len;
 	sharedAddr[2] = flash;
 	sharedAddr[3] = commandNandWrite;
+
+	waitForArm7();
+    return 0; 
+}
+
+u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {
+	// Send a command to the ARM7 to read the GBA ROM
+	u32 commandRead = 0x025FBC01;
+
+	// Write the command
+	sharedAddr[0] = (vu32)dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
 
 	waitForArm7();
     return 0; 
