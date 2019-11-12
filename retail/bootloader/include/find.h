@@ -66,7 +66,7 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader); // SDK 5
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 //u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findSlot2ExistOffset(const tNDSHeader* ndsHeader, bool *usesThumb);
+u32* findSlot2ExistEndOffset(const tNDSHeader* ndsHeader, bool *usesThumb);
 u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb);
 
 // ARM7

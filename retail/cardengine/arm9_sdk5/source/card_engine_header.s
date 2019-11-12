@@ -54,7 +54,7 @@ patches:
 .word   0x0
 .word	cardStructArm9
 .word   card_pull
-.word   slot2_exists
+.word   slot2_exists_fix
 .word   0x0
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
@@ -74,7 +74,6 @@ thumbPatches:
 .word   0x0
 .word	cardStructArm9
 .word   thumb_card_pull
-.word   slot2_exists
 .word   0x0
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
@@ -204,10 +203,9 @@ card_pull:
 	bx      lr
 
 @---------------------------------------------------------------------------------
-slot2_exists:
+slot2_exists_fix:
 @---------------------------------------------------------------------------------
-	mov r0, #1
-	bx      lr
+	mov r0, #0x02400000
 
 	.thumb
 @---------------------------------------------------------------------------------
@@ -254,12 +252,6 @@ thumb_card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
     
-@---------------------------------------------------------------------------------
-thumb_slot2_exists:
-@---------------------------------------------------------------------------------
-	mov r0, #1
-	bx      r3
-
 	.arm
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll

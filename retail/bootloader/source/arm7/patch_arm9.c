@@ -439,22 +439,35 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
 	// Slot-2 exist
-	//u32* slot2ExistOffset = patchOffsetCache.slot2ExistOffset;
-	u32* slot2ExistOffset = NULL;
-	//if (!patchOffsetCache.slot2ExistOffset) {
-		//slot2ExistOffset = NULL;
-		slot2ExistOffset = findSlot2ExistOffset(ndsHeader, &usesThumb);
-		if (slot2ExistOffset) {
-			//patchOffsetCache.slot2ExistOffset = slot2ExistOffset;
+	//u32* slot2ExistEndOffset = patchOffsetCache.slot2ExistEndOffset;
+	u32* slot2ExistEndOffset = NULL;
+	//if (!patchOffsetCache.slot2ExistEndOffset) {
+		//slot2ExistEndOffset = NULL;
+		slot2ExistEndOffset = findSlot2ExistEndOffset(ndsHeader, &usesThumb);
+		if (slot2ExistEndOffset) {
+			//patchOffsetCache.slot2ExistOffset = slot2ExistEndOffset;
 		}
 	//}
-	if (!slot2ExistOffset) {
+	if (!slot2ExistEndOffset) {
 		return;
 	}
 
 	// Patch
-	u32* slot2ExistPatch = (usesThumb ? ce9->thumbPatches->slot2_exists : ce9->patches->slot2_exists);
-	memcpy(slot2ExistOffset, slot2ExistPatch, usesThumb ? 0x4 : 0x8);
+	if (usesThumb) {
+		*(slot2ExistEndOffset + 3) = 0x02400000;
+		*(slot2ExistEndOffset + 4) = 0x024000CE;
+	} else {
+		*(slot2ExistEndOffset + 3) = 0x024000CE;
+
+		int instancesPatched = 0;
+		for (int i = 0x100/4; i > 0; i--) {
+			if (*(slot2ExistEndOffset - i) == 0xE3A00302) {
+				*(slot2ExistEndOffset - i) = *ce9->patches->slot2_exists_fix;
+				instancesPatched++;
+			}
+			if (instancesPatched == 2) break;
+		}
+	}
 }
 
 static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
@@ -1092,7 +1105,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (gbaRomFound) {
-		//patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+		patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 
 		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 	}

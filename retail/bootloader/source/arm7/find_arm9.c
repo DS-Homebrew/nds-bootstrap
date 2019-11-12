@@ -111,6 +111,7 @@ static const u16 slot2ReadSignatureThumb[4]    = {0xB5F0, 0xB081, 0x1C07, 0x1C0D
 //static const u16 slot2ReadSignatureThumb[6]    = {0xB530, 0xB081, 0x1C05, 0x1C0C, 0x1C13, 0x480D};
 
 // Slot-2 exists
+static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
 static const u32 slot2ExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
 static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
 
@@ -1408,32 +1409,26 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	return randomPatchOffset;
 }
 
-u32* findSlot2ExistOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
-	dbg_printf("findSlot2ExistOffset:\n");
+u32* findSlot2ExistEndOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
+	dbg_printf("findSlot2ExistEndOffset:\n");
 
-	u32* slot2ExistOffset = findOffset(
+	u32* slot2ExistEndOffset = findOffset(
 		(u32*)ndsHeader->arm9destination, 0x00300000,
-		slot2ExistSignature, 4
+		slot2ExistEndSignature, 2
 	);
-	if (!slot2ExistOffset) {
-		usesThumb = true;
-		slot2ExistOffset = findOffsetThumb(
-			(u16*)ndsHeader->arm9destination, 0x00300000,
-			slot2ExistSignatureThumb, 4
-		);
-	}
-	if (slot2ExistOffset) {
-		dbg_printf("Slot-2 exist offset found: ");
+	usesThumb = (*(slot2ExistEndOffset + 3) == 0x8000000);
+	if (slot2ExistEndOffset) {
+		dbg_printf("Slot-2 exist end offset found: ");
 	} else {
-		dbg_printf("Slot-2 exist offset not found\n");
+		dbg_printf("Slot-2 exist end offset not found\n");
 	}
 
-	if (slot2ExistOffset) {
-		dbg_hexa((u32)slot2ExistOffset);
+	if (slot2ExistEndOffset) {
+		dbg_hexa((u32)slot2ExistEndOffset);
 		dbg_printf("\n");
 	}
 
-	return slot2ExistOffset;
+	return slot2ExistEndOffset;
 }
 
 u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
