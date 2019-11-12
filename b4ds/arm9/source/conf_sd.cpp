@@ -119,15 +119,13 @@ static void load_conf(configuration* conf, const char* fn) {
 	Key.Data = (char*)"";
 	Key.Name = (char*)"BOOST_CPU";
 	iniGetKey(IniData, IniCount, &Key);
-	// If DSi mode, then always boost CPU
-	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
+	conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
 
 	// Boost VRAM
 	Key.Data = (char*)"";
 	Key.Name = (char*)"BOOST_VRAM";
 	iniGetKey(IniData, IniCount, &Key);
-	// If DSi mode, then always boost VRAM
-	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
+	conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
 
 	iniFree(IniData, IniCount);
 }
