@@ -841,7 +841,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 		#else
 		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) == 0) {
+		if (!ce9->ROMinRAM && strncmp(romTid, "UBR", 3) == 0) {
 			loadOverlaysFromRam = false;
 			cacheAddress = CACHE_ADRESS_START_low;
 			cacheSlots = CACHE_SLOTS_32KB_low;

@@ -1037,18 +1037,33 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
     }
 }
 
-/*static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	// Opera RAM patch
-	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
-	if (!operaRamOffset) {
+static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern int consoleModel;
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "UBRP") != 0) {
 		return;
 	}
-	extern u32 consoleModel;
-	// Patch to read from DSi RAM
-	for (int i = 0; i <= 5; i++) {
-		*(operaRamOffset + i) += 0x03800000;
+
+	// Opera RAM patch
+	*(u32*)0x020402BC = 0x24000C2;
+	*(u32*)0x020402C0 = 0x24000C0;
+	if (consoleModel > 0) {
+		*(u32*)0x020402CC = 0xD7FFFFE;
+		*(u32*)0x020402D0 = 0xD000000;
+		*(u32*)0x020402D4 = 0xD1FFFFF;
+		*(u32*)0x020402D8 = 0xD3FFFFF;
+		*(u32*)0x020402DC = 0xD7FFFFF;
+		*(u32*)0x020402E0 = 0xDFFFFFF;	// ???
+	} else {
+		*(u32*)0x020402CC = 0x2FFFFFE;
+		*(u32*)0x020402D0 = 0x2800000;
+		*(u32*)0x020402D4 = 0x29FFFFF;
+		*(u32*)0x020402D8 = 0x2BFFFFF;
+		*(u32*)0x020402DC = 0x2FFFFFF;
+		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
 	}
-}*/
+}
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
@@ -1110,11 +1125,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 	}
 
-    nandSavePatch(ce9, ndsHeader, moduleParams);
+	nandSavePatch(ce9, ndsHeader, moduleParams);
 
-    patchCardReadPdash(ce9, ndsHeader);
+	operaRamPatch(ndsHeader, moduleParams);
 
-	//operaRamPatch(ndsHeader, moduleParams);
+	patchCardReadPdash(ce9, ndsHeader);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 

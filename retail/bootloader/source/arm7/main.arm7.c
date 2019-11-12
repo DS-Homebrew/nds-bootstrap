@@ -499,7 +499,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
-	|| strncmp(romTid, "UBR", 3) == 0
+	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0
 	|| (consoleModel == 0 && strncmp(romTid, "BKW", 3) == 0)
 	|| (consoleModel == 0 && strncmp(romTid, "VKG", 3) == 0)) {
@@ -955,6 +955,19 @@ int arm7_main(void) {
 			errorOutput();
 		}
 	} else {
+		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
+			gbaRomFound = true;
+			toncset((char*)0x02400000, 0xFF, 0xC0);
+			*(u8*)0x024000B2 = 0;
+			*(u8*)0x024000B3 = 0;
+			*(u8*)0x024000B4 = 0;
+			*(u8*)0x024000B5 = 0x24;
+			*(u8*)0x024000B6 = 0x24;
+			*(u8*)0x024000B7 = 0x24;
+			*(u16*)0x024000BE = 0x7FFF;
+			*(u16*)0x024000CE = 0x7FFF;
+		}
+
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
