@@ -1041,7 +1041,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
 static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern int consoleModel;
 
-	// Opera RAM patch
+	// Opera RAM patch (ARM9)
 	*(u32*)0x02003D48 = 0x2400000;
 	*(u32*)0x02003D4C = 0x2400004;
 
@@ -1069,6 +1069,12 @@ static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* mo
 		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
 		toncset((char*)0x2800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
 	}
+
+	// Opera RAM patch (ARM7)
+	*(u32*)0x0238C7BC = 0x2400000;
+	*(u32*)0x0238C7C0 = 0x24000CE;
+
+	//*(u32*)0x0238C950 = 0x2400000;
 }
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
