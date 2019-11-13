@@ -112,8 +112,8 @@ static const u16 slot2ReadSignatureThumb[4]    = {0xB5F0, 0xB081, 0x1C07, 0x1C0D
 
 // Slot-2 exists
 static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
-static const u32 slot2ExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
-static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
+//static const u32 slot2ExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
+//static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
 
 // thread management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2

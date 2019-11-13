@@ -45,7 +45,7 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+//static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
 // Card check pull out
 static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
@@ -485,7 +485,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	return sleepPatchOffset;
 }
 
-u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
+/*u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
@@ -502,7 +502,7 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return ramClearOffset;
-}
+}*/
 
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardCheckPullOutOffset:\n");
