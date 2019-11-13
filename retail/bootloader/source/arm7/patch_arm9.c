@@ -1039,13 +1039,16 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
 
 static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern int consoleModel;
-	const char* romTid = getRomTid(ndsHeader);
-
-	if (strcmp(romTid, "UBRP") != 0) {
-		return;
-	}
 
 	// Opera RAM patch
+	*(u32*)0x02003D48 = 0x2400000;
+	*(u32*)0x02003D4C = 0x2400004;
+
+	*(u32*)0x02010FF0 = 0x2400000;
+	*(u32*)0x02010FF4 = 0x24000CE;
+
+	*(u32*)0x020112AC = 0x2400080;
+
 	*(u32*)0x020402BC = 0x24000C2;
 	*(u32*)0x020402C0 = 0x24000C0;
 	if (consoleModel > 0) {
@@ -1119,15 +1122,17 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	randomPatch5Second(ndsHeader, moduleParams);
 
-	if (gbaRomFound) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "UBRP") == 0) {
+		operaRamPatch(ndsHeader, moduleParams);
+	} else if (gbaRomFound) {
 		patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 
 		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 	}
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);
-
-	operaRamPatch(ndsHeader, moduleParams);
 
 	patchCardReadPdash(ce9, ndsHeader);
 
