@@ -367,6 +367,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if (access(fatTableFilePath.c_str(), F_OK) != 0) {
+		consoleDemoInit();
+		printf("Creating FAT table file.\n");
+		printf("Please wait...\n");
+
 		static const int BUFFER_SIZE = 4096;
 		char buffer[BUFFER_SIZE];
 		toncset(buffer, 0, sizeof(buffer));
@@ -376,6 +380,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fwrite(buffer, 1, sizeof(buffer), fatTableFile);
 		}
 		fclose(fatTableFile);
+
+		consoleClear();
 	}
 
 	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
@@ -384,6 +390,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}*/
 
 	if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
+		consoleDemoInit();
+		printf("Creating RAM dump file.\n");
+		printf("Please wait...\n");
+		/* printf("\n");
+		if (conf->consoleModel >= 2) {
+			printf("If this takes a while, press\n");
+			printf("HOME, then press B.\n");
+		} else {
+			printf("If this takes a while, close\n");
+			printf("the lid, and open it again.\n");
+		} */
+
 		static const int BUFFER_SIZE = 4096;
 		char buffer[BUFFER_SIZE];
 		toncset(buffer, 0, sizeof(buffer));
@@ -393,6 +411,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fwrite(buffer, 1, sizeof(buffer), ramDumpFile);
 		}
 		fclose(ramDumpFile);
+
+		consoleClear();
 	}
 
 	return 0;
