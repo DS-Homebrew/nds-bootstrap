@@ -585,8 +585,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
-	  if (extendedMemory && !dsDebugRam) {
+	if ((strcmp(getRomTid(ndsHeader), "UBRP") == 0) && extendedMemory && !dsDebugRam) {
 		toncset((char*)0x02400000, 0xFF, 0xC0);
 		*(u8*)0x024000B2 = 0;
 		*(u8*)0x024000B3 = 0;
@@ -596,7 +595,6 @@ int arm7_main(void) {
 		*(u8*)0x024000B7 = 0x24;
 		*(u16*)0x024000BE = 0x7FFF;
 		*(u16*)0x024000CE = 0x7FFF;
-	  }
 	}
 
 	nocashMessage("Trying to patch the card...\n");
