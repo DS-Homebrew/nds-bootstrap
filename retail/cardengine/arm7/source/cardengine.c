@@ -412,7 +412,7 @@ static void nandWrite(void) {
 	}
 }
 
-static void slot2Read(void) {
+/*static void slot2Read(void) {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -437,7 +437,7 @@ static void slot2Read(void) {
 	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 	fileRead((char*)dst, *gbaFile, src, len, -1);
 	cardReadLED(false);
-}
+}*/
 #endif
 
 static bool readOngoing = false;

@@ -66,11 +66,11 @@ static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS_32KB_SDK5];
 static u32 accessCounter = 0;
 
-static u32 overlaysSize = 0;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
 #endif
+static u32 overlaysSize = 0;
 
 static bool flagsSet = false;
 static bool loadOverlaysFromRam = true;
@@ -298,6 +298,14 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 		}
+
+		for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+			overlaysSize = i;
+		}
+
+		if (ce9->consoleModel>0 ? overlaysSize<=0x1000000 : overlaysSize<=0x700000) {} else {
+			loadOverlaysFromRam = false;
+		}
 		#else
 		if (ce9->consoleModel > 0) {
 			romLocation = ROM_SDK5_LOCATION;
@@ -315,9 +323,13 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 				overlaysSize = i;
 			}
 
-			for (int i = 0; i < overlaysSize; i += readSize) {
-				cacheAddress += readSize;
-				cacheSlots--;
+			if (ce9->consoleModel>0 ? overlaysSize<=0x1000000 : overlaysSize<=0x700000) {
+				for (int i = 0; i < overlaysSize; i += readSize) {
+					cacheAddress += readSize;
+					cacheSlots--;
+				}
+			} else {
+				loadOverlaysFromRam = false;
 			}
 		}
 

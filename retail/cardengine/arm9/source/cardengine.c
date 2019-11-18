@@ -77,11 +77,11 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
-static u32 overlaysSize = 0;
 static u32 readSize = _32KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
 #endif
+static u32 overlaysSize = 0;
 
 static bool flagsSet = false;
 static bool loadOverlaysFromRam = true;
@@ -837,6 +837,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				}
 			}
 
+			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+				overlaysSize = i;
+			}
+
+			if (ce9->consoleModel>0 ? overlaysSize<=0x1800000 : overlaysSize<=0x800000) {} else {
+				loadOverlaysFromRam = false;
+			}
+
 			debug8mbMpuFix();
 		}
 		#else
@@ -867,9 +875,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					overlaysSize = i;
 				}
 
-				for (int i = 0; i < overlaysSize; i += readSize) {
-					cacheAddress += readSize;
-					cacheSlots--;
+				if (ce9->consoleModel>0 ? overlaysSize<=0x1800000 : overlaysSize<=0x800000) {
+					for (int i = 0; i < overlaysSize; i += readSize) {
+						cacheAddress += readSize;
+						cacheSlots--;
+					}
+				} else {
+					loadOverlaysFromRam = false;
 				}
 			}
 
