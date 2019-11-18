@@ -880,13 +880,13 @@ int arm7_main(void) {
 	toncset((u32*)0x027C0000, 0, 0x400);
 
 	// GBA file
-	aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
+	/*aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
 	*gbaFile = getFileFromCluster(gbaFileCluster);
 	if (gbaFile->firstCluster != CLUSTER_FREE) {
 		gbaRomFound = true;
 		fileRead((char*)0x02400000, *gbaFile, 0, 0xC0, -1);
 		fileRead((char*)0x024000CE, *gbaFile, 0x1FFFE, 2, -1);
-	}
+	}*/
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);

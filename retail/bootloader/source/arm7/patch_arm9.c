@@ -438,7 +438,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 }
 
-static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+/*static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
 	// Slot-2 exist
 	//u32* slot2ExistEndOffset = patchOffsetCache.slot2ExistEndOffset;
 	u32* slot2ExistEndOffset = NULL;
@@ -469,9 +469,9 @@ static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 			if (instancesPatched == 2) break;
 		}
 	}
-}
+}*/
 
-static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+/*static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
 	// Slot-2 read
 	//u32* slot2ReadOffset = patchOffsetCache.slot2ReadOffset;
 	u32* slot2ReadOffset = NULL;
@@ -489,7 +489,7 @@ static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, con
 	// Patch
 	u32* slot2ReadPatch = (usesThumb ? ce9->thumbPatches->slot2_read : ce9->patches->slot2_read);
 	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
-}
+}*/
 
 u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	u32* heapPointer = NULL;
@@ -1135,11 +1135,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader, moduleParams);
-	} else if (gbaRomFound) {
+	} /*else if (gbaRomFound) {
 		patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 
 		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
-	}
+	}*/
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 

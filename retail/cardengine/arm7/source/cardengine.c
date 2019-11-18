@@ -634,13 +634,13 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}
 
-            if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FBC01) {
+            /*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FBC01) {
 				sdRead = true;
                 dmaLed = false;
     			slot2Read();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     			IPC_SendSync(0x8);
-    		}
+    		}*/
 			#endif
     
     		/*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF800) {
@@ -850,9 +850,8 @@ void myIrqHandlerVBlank(void) {
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 			REG_IE |= IRQ_IPC_SYNC;
-		} else if (!ipcSyncHooked) {
-			runCardEngineCheck();
 		}
+		runCardEngineCheck();
 	}
 }
 

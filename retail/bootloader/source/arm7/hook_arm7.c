@@ -222,7 +222,7 @@ int hookNdsRetailArm7(
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
-		*networkHandler = ce7->patches->networkHandler;
+		//*networkHandler = ce7->patches->networkHandler;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
