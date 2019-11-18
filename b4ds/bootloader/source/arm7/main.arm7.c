@@ -585,6 +585,20 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
+	if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
+	  if (extendedMemory && !dsDebugRam) {
+		toncset((char*)0x02400000, 0xFF, 0xC0);
+		*(u8*)0x024000B2 = 0;
+		*(u8*)0x024000B3 = 0;
+		*(u8*)0x024000B4 = 0;
+		*(u8*)0x024000B5 = 0x24;
+		*(u8*)0x024000B6 = 0x24;
+		*(u8*)0x024000B7 = 0x24;
+		*(u16*)0x024000BE = 0x7FFF;
+		*(u16*)0x024000CE = 0x7FFF;
+	  }
+	}
+
 	nocashMessage("Trying to patch the card...\n");
 
 	//tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);

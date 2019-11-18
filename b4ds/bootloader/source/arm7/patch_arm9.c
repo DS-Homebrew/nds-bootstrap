@@ -6,6 +6,7 @@
 #include "common.h"
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
+#include "tonccpy.h"
 
 //#define memcpy __builtin_memcpy // memcpy
 
@@ -779,6 +780,37 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	}
 }
 
+static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (dsDebugRam || !extendedMemory) {
+		return;
+	}
+
+	// Opera RAM patch (ARM9)
+	*(u32*)0x02003D48 = 0x2400000;
+	*(u32*)0x02003D4C = 0x2400004;
+
+	*(u32*)0x02010FF0 = 0x2400000;
+	*(u32*)0x02010FF4 = 0x24000CE;
+
+	*(u32*)0x020112AC = 0x2400080;
+
+	*(u32*)0x020402BC = 0x24000C2;
+	*(u32*)0x020402C0 = 0x24000C0;
+	*(u32*)0x020402CC = 0x2FFFFFE;
+	*(u32*)0x020402D0 = 0x2800000;
+	*(u32*)0x020402D4 = 0x29FFFFF;
+	*(u32*)0x020402D8 = 0x2BFFFFF;
+	*(u32*)0x020402DC = 0x2FFFFFF;
+	*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
+	toncset((char*)0x2800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+
+	// Opera RAM patch (ARM7)
+	*(u32*)0x0238C7BC = 0x2400000;
+	*(u32*)0x0238C7C0 = 0x24000CE;
+
+	//*(u32*)0x0238C950 = 0x2400000;
+}
+
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
@@ -823,7 +855,13 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	
 	randomPatch5Second(ndsHeader, moduleParams);
 
-    nandSavePatch(ce9, ndsHeader, moduleParams);
+    const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "UBRP") == 0) {
+		operaRamPatch(ndsHeader, moduleParams);
+	}
+
+	nandSavePatch(ce9, ndsHeader, moduleParams);
     
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
