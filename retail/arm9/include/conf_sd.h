@@ -1,6 +1,8 @@
 #ifndef CONF_SD_H
 #define CONF_SD_H
 
+#include "configuration.h"
+
 #ifdef __cplusplus
 extern "C"
 {

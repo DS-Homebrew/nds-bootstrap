@@ -11,7 +11,7 @@
 #include <nds/debug.h>*/
 #include <fat.h>
 #include "lzss.h"
-#include <easykey.h>
+#include <easysave/ini.hpp>
 #include "hex.h"
 #include "cheat_engine.h"
 #include "configuration.h"
@@ -38,96 +38,49 @@ static off_t getFileSize(const char* path) {
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 
 static void load_conf(configuration* conf, const char* fn) {
-	ek_key IniData[64];
-	int IniCount = iniLoad(fn, IniData);
-
-	ek_key Key = {(char*)"NDS-BOOTSTRAP", NULL, NULL};
+	easysave::ini config_file(fn);
 
 	// Debug
-	Key.Data = (char*)"";
-	Key.Name = (char*)"DEBUG";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->debug = (bool)strtol(Key.Data, NULL, 0);
+	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
 
 	// NDS path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"NDS_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->ndsPath = strdup(Key.Data);
+	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
 	// SAV path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"SAV_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->savPath = strdup(Key.Data);
+	conf->savPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "SAV_PATH").c_str());
 
 	// AP-patch path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"AP_FIX_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->apPatchPath = strdup(Key.Data);
+	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
 
 	// Language
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LANGUAGE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->language = strtol(Key.Data, NULL, 0);
+	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
 	// Donor SDK version
-	Key.Data = (char*)"";
-	Key.Name = (char*)"DONOR_SDK_VER";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->donorSdkVer = strtol(Key.Data, NULL, 0);
+	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER").c_str(), NULL, 0);
 
 	// Patch MPU region
-	Key.Data = (char*)"";
-	Key.Name = (char*)"PATCH_MPU_REGION";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->patchMpuRegion = strtol(Key.Data, NULL, 0);
+	conf->patchMpuRegion = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_REGION").c_str(), NULL, 0);
 
 	// Patch MPU size
-	Key.Data = (char*)"";
-	Key.Name = (char*)"PATCH_MPU_SIZE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->patchMpuSize = strtol(Key.Data, NULL, 0);
+	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
 
 	// Card engine (arm9) cached
-	Key.Data = (char*)"";
-	Key.Name = (char*)"CARDENGINE_CACHED";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->ceCached = (bool)strtol(Key.Data, NULL, 0);
+	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
 
 	// Force sleep patch
-	Key.Data = (char*)"";
-	Key.Name = (char*)"FORCE_SLEEP_PATCH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->forceSleepPatch = (bool)strtol(Key.Data, NULL, 0);
+	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH").c_str(), NULL, 0);
 
 	// Logging
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOGGING";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->logging = (bool)strtol(Key.Data, NULL, 0);
+	conf->logging = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0);
 
 	// Backlight mode
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BACKLIGHT_MODE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->backlightMode = strtol(Key.Data, NULL, 0);
+	conf->backlightMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "BACKLIGHT_MODE").c_str(), NULL, 0);
 
 	// Boost CPU
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BOOST_CPU";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
+	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0);
 
 	// Boost VRAM
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BOOST_VRAM";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
-
-	iniFree(IniData, IniCount);
+	conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
