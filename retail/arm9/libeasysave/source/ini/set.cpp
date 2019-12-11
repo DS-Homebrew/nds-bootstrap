@@ -1,3 +1,6 @@
+// libeasysave
+
+/*
 MIT License
 
 Copyright (c) 2019 Jonathan Archer
@@ -19,3 +22,30 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+#include <iostream>
+
+#include "easysave/ini.hpp"
+
+using namespace easysave;
+
+void ini::set(std::string section, std::string key_name, std::string key_data) {
+  int section_index = m_match_section_index(section);
+  if (section_index < 0) {
+    // Section does not exist; add it
+    m_sections.push_back(section);
+    section_index = m_sections.size() - 1;
+  }
+
+  int key_index = m_match_key_index(section_index, key_name);
+  if (key_index < 0) {
+    // Key does not exist; we create it from scratch
+    std::cout << "Creating key in section " << m_sections[section_index]
+              << std::endl;
+    m_keys.push_back((m_ini_key_t){section_index, key_name, key_data});
+    return;
+  }
+
+  m_keys[key_index].data = key_data;
+}

@@ -10,7 +10,7 @@
 #include <nds/arm9/console.h>
 #include <nds/debug.h>*/
 #include <fat.h>
-#include <easykey.h>
+#include <easysave/ini.hpp>
 #include "lzss.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -44,147 +44,77 @@ extern std::string ReplaceAll(std::string str, const std::string& from, const st
 extern bool extention(const std::string& filename, const char* ext);
 
 static void load_conf(configuration* conf, const char* fn) {
-	ek_key IniData[64];
-	int IniCount = iniLoad(fn, IniData);
-
-	ek_key Key = {(char*)"NDS-BOOTSTRAP", NULL, NULL};
+	easysave::ini config_file(fn);
 
 	// Debug
-	Key.Data = (char*)"";
-	Key.Name = (char*)"DEBUG";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->debug = (bool)strtol(Key.Data, NULL, 0);
+	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
 
 	// NDS path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"NDS_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->ndsPath = strdup(Key.Data);
+	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
 	// SAV path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"SAV_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->savPath = strdup(Key.Data);
+	conf->savPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "SAV_PATH").c_str());
 
 	// GBA path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"GBA_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->gbaPath = strdup(Key.Data);
+	conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
 
 	// AP-patch path
-	Key.Data = (char*)"";
-	Key.Name = (char*)"AP_FIX_PATH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->apPatchPath = strdup(Key.Data);
+	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
 
 	// Language
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LANGUAGE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->language = strtol(Key.Data, NULL, 0);
+	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
 	// DSi mode
-	Key.Data = (char*)"";
-	Key.Name = (char*)"DSI_MODE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->dsiMode = strtol(Key.Data, NULL, 0);
+	conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
 
 	// Donor SDK version
-	Key.Data = (char*)"";
-	Key.Name = (char*)"DONOR_SDK_VER";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->donorSdkVer = strtol(Key.Data, NULL, 0);
+	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER").c_str(), NULL, 0);
 
 	// Patch MPU region
-	Key.Data = (char*)"";
-	Key.Name = (char*)"PATCH_MPU_REGION";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->patchMpuRegion = strtol(Key.Data, NULL, 0);
+	conf->patchMpuRegion = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_REGION").c_str(), NULL, 0);
 
 	// Patch MPU size
-	Key.Data = (char*)"";
-	Key.Name = (char*)"PATCH_MPU_SIZE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->patchMpuSize = strtol(Key.Data, NULL, 0);
+	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
 
 	// Card engine (arm9) cached
-	Key.Data = (char*)"";
-	Key.Name = (char*)"CARDENGINE_CACHED";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->ceCached = (bool)strtol(Key.Data, NULL, 0);
+	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
     // conf->ceCached = true;
 
 	// Console model
-	Key.Data = (char*)"";
-	Key.Name = (char*)"CONSOLE_MODEL";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->consoleModel = strtol(Key.Data, NULL, 0);
+	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
 
 	// Color mode
-	Key.Data = (char*)"";
-	Key.Name = (char*)"COLOR_MODE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->colorMode = strtol(Key.Data, NULL, 0);
+	conf->colorMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "COLOR_MODE").c_str(), NULL, 0);
 
 	// ROM read LED
-	Key.Data = (char*)"";
-	Key.Name = (char*)"ROMREAD_LED";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->romread_LED = strtol(Key.Data, NULL, 0);
+	conf->romread_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "ROMREAD_LED").c_str(), NULL, 0);
 
 	// Game soft reset
-	Key.Data = (char*)"";
-	Key.Name = (char*)"GAME_SOFT_RESET";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->gameSoftReset = (bool)strtol(Key.Data, NULL, 0);
+	conf->gameSoftReset = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "GAME_SOFT_RESET").c_str(), NULL, 0);
 
 	// Force sleep patch
-	Key.Data = (char*)"";
-	Key.Name = (char*)"FORCE_SLEEP_PATCH";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->forceSleepPatch = (bool)strtol(Key.Data, NULL, 0);
+	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH").c_str(), NULL, 0);
 
 	// Precise volume control
-	Key.Data = (char*)"";
-	Key.Name = (char*)"PRECISE_VOLUME_CONTROL";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->preciseVolumeControl = (bool)strtol(Key.Data, NULL, 0);
+	conf->preciseVolumeControl = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "PRECISE_VOLUME_CONTROL").c_str(), NULL, 0);
 
 	// Logging
-	Key.Data = (char*)"";
-	Key.Name = (char*)"LOGGING";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->logging = (bool)strtol(Key.Data, NULL, 0);
+	conf->logging = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0);
 
 	// Backlight mode
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BACKLIGHT_MODE";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->backlightMode = strtol(Key.Data, NULL, 0);
+	conf->backlightMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "BACKLIGHT_MODE").c_str(), NULL, 0);
 
 	// Boost CPU
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BOOST_CPU";
-	iniGetKey(IniData, IniCount, &Key);
 	// If DSi mode, then always boost CPU
-	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(Key.Data, NULL, 0);
+	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0);
 
 	// Boost VRAM
-	Key.Data = (char*)"";
-	Key.Name = (char*)"BOOST_VRAM";
-	iniGetKey(IniData, IniCount, &Key);
 	// If DSi mode, then always boost VRAM
-	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(Key.Data, NULL, 0);
+	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
 
 	// Sound/Mic frequency
-	Key.Data = (char*)"";
-	Key.Name = (char*)"SOUND_FREQ";
-	iniGetKey(IniData, IniCount, &Key);
-	conf->soundFreq = (bool)strtol(Key.Data, NULL, 0);
+	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ").c_str(), NULL, 0);
 
-	iniFree(IniData, IniCount);
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {

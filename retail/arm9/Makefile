@@ -15,8 +15,8 @@ include $(DEVKITARM)/ds_rules
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source easykey/source ../common/source_general
-INCLUDES	:=	include easykey/include ../common/include
+SOURCES		:=	source libeasysave/source/ini ../common/source_general
+INCLUDES	:=	include libeasysave/include ../common/include
 
 #---------------------------------------------------------------------------------
 # options for code generation
