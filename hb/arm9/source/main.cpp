@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include <easykey.h>
+#include <easysave/ini.hpp>
 
 #include "nds_loader_arm9.h"
 #include "nitrofs.h"
@@ -205,20 +205,12 @@ int main( int argc, char **argv) {
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
 
-        //printf("fat inited");   
-
-		// Load the ini file to memory.
-  		ek_key Ini[64];
-  		int IniCount = iniLoad("fat:/_nds/nds-bootstrap.ini", Ini);
-
-		ek_key Key = {(char *)"NDS-BOOTSTRAP", NULL, NULL};
+  		easysave::ini config_file("fat:/_nds/nds-bootstrap.ini");
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"DEBUG";
-		debug = (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
 		if (debug)
 			consoleDemoInit();
 
@@ -228,9 +220,7 @@ int main( int argc, char **argv) {
 
 		nitroFSInit(bootstrapPath.c_str());
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"RESETSLOT1";
-		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {
+		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1").c_str(), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
 				printf("Please insert a cartridge...\n");
 				do { swiWaitForVBlank(); } 
@@ -240,19 +230,12 @@ int main( int argc, char **argv) {
 		}
 
 		// Language
-		Key.Data = (char*)"";
-		Key.Name = (char*)"LANGUAGE";
-		iniGetKey(Ini, IniCount, &Key);
-		int language = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		int language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"DSI_MODE";
-		iniGetKey(Ini, IniCount, &Key);
-		int dsiMode = strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		// DSi Mode
+		int dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"BOOST_CPU";
-		if (dsiMode>0 || (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {	
+		if (dsiMode>0 || (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
 			//REG_SCFG_CLK |= 0x1;
 		} else {
@@ -260,9 +243,7 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"BOOST_VRAM";
-		bool boostVram = (bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0);
+		bool boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
 		if (dsiMode>0 || boostVram) {	
 			dbg_printf("VRAM boosted\n");
 		}
@@ -282,9 +263,7 @@ int main( int argc, char **argv) {
 			dbg_printf("No arguments passed!\n");
 		}
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"LOGGING";
-		if ((bool)strtol(iniGetKey(Ini, IniCount, &Key), NULL, 0)) {
+		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0)) {
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -299,26 +278,17 @@ int main( int argc, char **argv) {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"NDS_PATH";
-		iniGetKey(Ini, IniCount, &Key);
-		std::string	ndsPath(Key.Data);
+		std::string	ndsPath(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH"));
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0)
 			ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"HOMEBREW_ARG";
-		iniGetKey(Ini, IniCount, &Key);
-		std::string	homebrewArg(Key.Data);
+		std::string	homebrewArg(config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG").c_str());
 		if (homebrewArg != "") {
 			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0)
 				homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
 		}
 
-		Key.Data = (char *)"";
-		Key.Name = (char *)"RAM_DRIVE_PATH";
-		iniGetKey(Ini, IniCount, &Key);
-		std::string	ramDrivePath(Key.Data);
+		std::string	ramDrivePath(config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH").c_str());
 		if (ramDrivePath != "") {
 			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0)
 				ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
@@ -347,8 +317,6 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-
-		iniFree(Ini, IniCount);
 
 		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode, boostVram);
 	} else {

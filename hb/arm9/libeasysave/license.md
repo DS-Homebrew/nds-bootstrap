@@ -1,6 +1,3 @@
-// easykey.h
-
-/*
 MIT License
 
 Copyright (c) 2019 Jonathan Archer
@@ -22,29 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
-
-#include <stdbool.h>
-#include <stdio.h>
-
-#include "easykey/types.h"
-
-#ifndef EASYKEY_H
-#define EASYKEY_H
-
-#define EK_VER "v0.03"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int iniLoad(const char *Filename, ek_key *Keys);
-void iniFree(ek_key *Keys, int Count);
-
-char *iniGetKey(const ek_key *Keys, int Count, ek_key *Key);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif

@@ -1,4 +1,4 @@
-// get.c
+// libeasysave
 
 /*
 MIT License
@@ -24,20 +24,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include "easysave/ini.hpp"
 
-#include "easykey.h"
+using namespace easysave;
 
-/*
-Retrieves a key's value.
-*/
-char *iniGetKey(const ek_key *Keys, int Count, ek_key *Key) {
-  for (int i = 0; i < Count; i++)
-    if (!strcmp(Keys[i].Section, Key->Section) &&
-        !strcmp(Keys[i].Name, Key->Name)) {
-      Key->Data = Keys[i].Data;
-      break;
-    }
-  return Key->Data;
+std::string ini::fetch(std::string section, std::string key_name) {
+  int section_index = m_match_section_index(section);
+  if (section_index < 0)
+    return "";
+
+  int key_index = m_match_key_index(section_index, key_name);
+  if (key_index < 0)
+    return "";
+
+  // Remove leading and trailing quotes
+  if (m_keys[key_index].data[0] == '\"' &&
+      m_keys[key_index].data[m_keys[key_index].data.size() - 1] == '\"')
+    return m_keys[key_index].data.substr(1, m_keys[key_index].data.size() - 2);
+  return m_keys[key_index].data;
 }
