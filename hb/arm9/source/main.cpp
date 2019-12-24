@@ -282,13 +282,13 @@ int main( int argc, char **argv) {
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0)
 			ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
-		std::string	homebrewArg(config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG").c_str());
+		std::string	homebrewArg(config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG"));
 		if (homebrewArg != "") {
 			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0)
 				homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
 		}
 
-		std::string	ramDrivePath(config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH").c_str());
+		std::string	ramDrivePath(config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH"));
 		if (ramDrivePath != "") {
 			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0)
 				ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
