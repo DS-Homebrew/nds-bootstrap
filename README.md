@@ -6,7 +6,7 @@
   <a href="https://dev.azure.com/DS-Homebrew/Builds/_build?definitionId=12">
    <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
   </a>
-  <a href="https://discord.gg/dzu8Mp">
+  <a href="https://discord.gg/yD3spjv">
    <img src="https://img.shields.io/badge/Discord%20Server-%23nds--bootstrap-green.svg">
   </a>
 </p>
