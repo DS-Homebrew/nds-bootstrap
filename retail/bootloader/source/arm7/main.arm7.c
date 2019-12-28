@@ -609,13 +609,17 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 static void NTR_BIOS() {
 	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
-	nocashMessage("Switch to NTR mode BIOS");
 	REG_SCFG_ROM = 0x703;
+	if (REG_SCFG_ROM == 0x703) {
+		dbg_printf("Switched to NTR mode BIOS\n");
+	}
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load ROM into RAM
 	fileRead((char*)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION), file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+
+	dbg_printf("ROM loaded into RAM\n");
 
 	if (!isSdk5(moduleParams)) {
 		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
@@ -918,8 +922,7 @@ int arm7_main(void) {
 	}
 	if (dsiModeConfirmed) {
 		if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
-			dbg_printf("Cannot use DSi mode on DSi SD");
-			dbg_printf("\n");
+			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
@@ -937,10 +940,8 @@ int arm7_main(void) {
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
-		dbg_printf("Secure area decrypted successfully");
 	} else {
 		nocashMessage("Secure area already decrypted");
-		dbg_printf("Secure area already decrypted");
 	}
 	dbg_printf("\n");
 
@@ -1008,8 +1009,7 @@ int arm7_main(void) {
 		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x12000);
 		if (gameOnFlashcard || saveOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
-				dbg_printf("ce7 DLDI patch failed");
-				dbg_printf("\n");
+				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
 		}
@@ -1019,8 +1019,7 @@ int arm7_main(void) {
 				ce9Location = CARDENGINE_ARM9_SDK5_DLDI_LOCATION;
 				tonccpy((u32*)CARDENGINE_ARM9_SDK5_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 				if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
-					dbg_printf("ce9 DLDI patch failed");
-					dbg_printf("\n");
+					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
 				}
 			} else {
@@ -1031,8 +1030,7 @@ int arm7_main(void) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4000);
 			if (!dldiPatchBinary((data_t*)ce9Location, 0x4000)) {
-				dbg_printf("ce9 DLDI patch failed");
-				dbg_printf("\n");
+				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
 		} else if (ceCached) {
@@ -1137,6 +1135,7 @@ int arm7_main(void) {
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x40000) {
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
 			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
+			dbg_printf("AP-fix found and applied\n");
 		}
 	}
 
