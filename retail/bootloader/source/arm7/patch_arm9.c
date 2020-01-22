@@ -294,11 +294,12 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "CPU", 3) == 0  // Pokemon Platinum // works
         ||  strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold // works
         ||  strncmp(romTid, "IPG", 3) == 0  // Pokemon SoulSilver // works
+        ||  strncmp(romTid, "BR4", 3) == 0  // Runaway: A Twist of Fate // works, fixes sound cracking
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
-        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park // works
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
         ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
     ) {
 
@@ -315,7 +316,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
             thumbOffset--;
             *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
             ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
-          } else  {
+          } else {
             u32* armOffset = (u32*)offset;
             armOffset--;
             *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
