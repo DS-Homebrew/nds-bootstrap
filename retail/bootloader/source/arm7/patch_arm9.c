@@ -285,16 +285,21 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // sound cracking to be investigated
         //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
-        ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
+        ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon Diamond // works
+        ||  strncmp(romTid, "APA", 3) == 0  // Pokemon Pearl // works
+        ||  strncmp(romTid, "CPU", 3) == 0  // Pokemon Platinum // works
+        ||  strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold // works
+        ||  strncmp(romTid, "IPG", 3) == 0  // Pokemon SoulSilver // works
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
-        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
-        ||  strncmp(romTid, "A8Q", 3) == 0  // Them park // works
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme park // works
+        ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
     ) {
 
       if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
