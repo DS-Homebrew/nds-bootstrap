@@ -226,12 +226,12 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	*ipcSyncHandler = ce7->patches->fifoHandler;
+	/*if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		*ipcSyncHandler = ce7->patches->fifoHandler;
 		//*networkHandler = ce7->patches->networkHandler;
-	}
+	}*/
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);

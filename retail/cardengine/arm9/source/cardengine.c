@@ -278,36 +278,36 @@ void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
         vu32* volatile cardStruct = ce9->cardStruct0;
         u32	dma = cardStruct[3]; // dma channel
-                
+
         if(ndmaBusy(0)) return;
-        
+
         dmaReadOnArm9 = false;
         sharedAddr[3] = 0;        
 
         u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
-        
+
         u32 src = cardStruct[0];
         u8* dst = (u8*)(cardStruct[1]);
         u32 len = cardStruct[2];
-        
+
         // Update cardi common
   		cardStruct[0] = src + currentLen;
   		cardStruct[1] = (vu32)(dst + currentLen);
   		cardStruct[2] = len - currentLen;
-        
+
         src = cardStruct[0];
         dst = (u8*)(cardStruct[1]);
         len = cardStruct[2]; 
-        
+
         u32 sector = (src/readSize)*readSize;
-        
+
         if (len > 0) {
             src = cardStruct[0];
 			dst = (u8*)cardStruct[1];
 			sector = (src / readSize) * readSize;
 			accessCounter++;  
-            
+
             // Read via the main RAM cache
         	int slot = getSlotForSector(sector);
         	vu8* buffer = getCacheAddress(slot);
@@ -315,12 +315,12 @@ void continueCardReadDmaArm9() {
         	if (slot == -1) {
         		// Send a command to the ARM7 to fill the RAM cache
                 commandRead = 0x025FFB08;
-        
+
         		slot = allocateCacheSlot();
-        
+
         		buffer = getCacheAddress(slot);
-        
-        
+
+
         		// Write the command
         		sharedAddr[0] = (vu32)buffer;
         		sharedAddr[1] = readSize;
@@ -329,30 +329,30 @@ void continueCardReadDmaArm9() {
         
                 // do not wait for arm7 and return immediately
         		checkArm7();
-                
+
                 dmaReadOnArm7 = true;
-                
+
                 updateDescriptor(slot, sector);	
                 return;
-        
+
         	} else {
         		updateDescriptor(slot, sector);	
-        
+
         		u32 len2 = len;
         		if ((src - sector) + len2 > readSize) {
         			len2 = sector - src + readSize;
         		}
-        
+
         		if (len2 > 512) {
         			len2 -= src % 4;
         			len2 -= len2 % 32;
         		}
-        
+
         		// Copy via dma
                 ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
                 dmaReadOnArm9 = true;
                 currentLen= len2;
- 
+
                 sharedAddr[3] = commandPool;               
                 IPC_SendSync(0x3);        
             }  
@@ -417,60 +417,75 @@ static inline bool startCardReadDma() {
     u32 commandRead=0x025FFB08;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
-    
 
-    src = cardStruct[0];
-	dst = (u8*)cardStruct[1];
-	sector = (src / readSize) * readSize;
+
+	if (ce9->ROMinRAM) {
+  		u32 len2 = len;
+  		if (len2 > 512) {
+  			len2 -= src % 4;
+  			len2 -= len2 % 32;
+  		}
+
+  		// Copy via dma
+        ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
+        dmaReadOnArm9 = true;
+        currentLen = len2;
+
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);        
+
+		return true;
+	}
+
 	accessCounter++;  
-  
+
   	// Read via the main RAM cache
   	int slot = getSlotForSector(sector);
   	vu8* buffer = getCacheAddress(slot);
   	// Read max CACHE_READ_SIZE via the main RAM cache
   	if (slot == -1) {    
   		// Send a command to the ARM7 to fill the RAM cache
-        commandRead = 0x025FFB08;
-  
+        //commandRead = 0x025FFB08;
+
   		slot = allocateCacheSlot();
-  
+
   		buffer = getCacheAddress(slot);
-      
+
   		// Write the command
   		sharedAddr[0] = (vu32)buffer;
   		sharedAddr[1] = readSize;
   		sharedAddr[2] = sector;
   		sharedAddr[3] = commandRead;
-  
-          // do not wait for arm7 and return immediately
+
+        // do not wait for arm7 and return immediately
   		checkArm7();
-          
+
         dmaReadOnArm7 = true;
-        
+
         updateDescriptor(slot, sector);
   	} else {
   		updateDescriptor(slot, sector);	
-  
+
   		u32 len2 = len;
   		if ((src - sector) + len2 > readSize) {
   			len2 = sector - src + readSize;
   		}
-  
+
   		if (len2 > 512) {
   			len2 -= src % 4;
   			len2 -= len2 % 32;
   		}
-  
+
   		// Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
         dmaReadOnArm9 = true;
-        currentLen= len2;
-          
+        currentLen = len2;
+
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
 
-      }
-   
+    }
+
     return true;
 }
 
@@ -663,8 +678,7 @@ u32 cardReadDma() {
         
 
 
-        if((!ce9->ROMinRAM && ce9->patches->cardEndReadDmaRef)
-		|| (!ce9->ROMinRAM && ce9->thumbPatches->cardEndReadDmaRef))
+        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
             isDma = true;
            // new dma method
@@ -707,7 +721,7 @@ u32 cardReadDma() {
             leaveCriticalSection(oldIME); 
             
             cacheFlush();  
-                              
+
             return startCardReadDma();
 		} else {
 			isDma = false;

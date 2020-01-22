@@ -298,6 +298,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
         ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        ||  strncmp(romTid, "CB6", 3) == 0  // Space Bust-A-Move
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
         ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
