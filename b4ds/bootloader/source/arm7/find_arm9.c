@@ -32,7 +32,7 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
 // Card pull out
-static const u32 cardPullOutSignature1[5]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK <= 3
+static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
 static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
@@ -51,6 +51,7 @@ static const u32 cardIdEndSignature[2]            = {0x040001A4, 0x04100010};
 static const u32 cardIdEndSignature5[4]           = {0xE8BD8010, 0x02FFFAE0, 0x040001A4, 0x04100010}; // SDK 5
 static const u32 cardIdEndSignature5Alt[3]        = {0x02FFFAE0, 0x040001A4, 0x04100010};             // SDK 5
 static const u16 cardIdEndSignatureThumb[6]       = {0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410};
+static const u16 cardIdEndSignatureThumbAlt[6]    = {0xFFFF, 0xF8FF, 0x0000, 0xA700, 0xE000, 0xFFFF};
 static const u16 cardIdEndSignatureThumb5[8]      = {0xFAE0, 0x02FF, 0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
 static const u32 cardIdStartSignature[1]          = {0xE92D4000};
 static const u32 cardIdStartSignatureAlt1[1]      = {0xE92D4008};
@@ -71,9 +72,6 @@ static const u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
 static const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
 static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
-
-// Arena low
-//static const u32 arenaLowSignature[4] = {0xE1A00100, 0xE2800627, 0xE2800AFF, 0xE5801DA0};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -759,6 +757,21 @@ u16* findCardIdEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t
 		dbg_printf("Card ID end thumb found: ");
 	} else {
 		dbg_printf("Card ID end thumb not found\n");
+	}
+
+	if (!cardIdEndOffset) {
+		// SDK <= 4
+		if (moduleParams->sdk_version < 0x5000000) {
+			cardIdEndOffset = findOffsetThumb(
+				(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+				cardIdEndSignatureThumbAlt, 6
+			);
+			if (cardIdEndOffset) {
+				dbg_printf("Card ID end thumb alt found: ");
+			} else {
+				dbg_printf("Card ID end thumb alt not found\n");
+			}
+		}
 	}
 
 	if (!cardIdEndOffset) {

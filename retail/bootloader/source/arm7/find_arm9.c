@@ -56,6 +56,7 @@ static const u32 cardIdEndSignature[2]            = {0x040001A4, 0x04100010};
 static const u32 cardIdEndSignature5[4]           = {0xE8BD8010, 0x02FFFAE0, 0x040001A4, 0x04100010}; // SDK 5
 static const u32 cardIdEndSignature5Alt[3]        = {0x02FFFAE0, 0x040001A4, 0x04100010};             // SDK 5
 static const u16 cardIdEndSignatureThumb[6]       = {0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410};
+static const u16 cardIdEndSignatureThumbAlt[6]    = {0xFFFF, 0xF8FF, 0x0000, 0xA700, 0xE000, 0xFFFF};
 static const u16 cardIdEndSignatureThumb5[8]      = {0xFAE0, 0x02FF, 0xFFFF, 0xF8FF, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
 static const u32 cardIdStartSignature[1]          = {0xE92D4000};
 static const u32 cardIdStartSignatureAlt1[1]      = {0xE92D4008};
@@ -828,6 +829,21 @@ u16* findCardIdEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t
 		dbg_printf("Card ID end thumb found: ");
 	} else {
 		dbg_printf("Card ID end thumb not found\n");
+	}
+
+	if (!cardIdEndOffset) {
+		// SDK <= 4
+		if (moduleParams->sdk_version < 0x5000000) {
+			cardIdEndOffset = findOffsetThumb(
+				(u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+				cardIdEndSignatureThumbAlt, 6
+			);
+			if (cardIdEndOffset) {
+				dbg_printf("Card ID end thumb alt found: ");
+			} else {
+				dbg_printf("Card ID end thumb alt not found\n");
+			}
+		}
 	}
 
 	if (!cardIdEndOffset) {
