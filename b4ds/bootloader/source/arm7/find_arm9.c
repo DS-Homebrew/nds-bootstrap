@@ -16,6 +16,7 @@ static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
 static const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
+static const u32 cardReadEndSignatureAlt2[3]        = {0x040001A4, 0x040001A1, 0x04100010};
 static const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
 static const u16 cardReadEndSignatureThumb5[8]      = {0xFE00, 0xFFFF, 0xE120, 0x0213, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
 static const u16 cardReadEndSignatureThumb5Alt1[8]  = {0xFE00, 0xFFFF, 0x9940, 0x0214, 0x01A4, 0x0400, 0x0010, 0x0410}; // SDK 5
@@ -200,6 +201,14 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
 			cardReadEndSignatureAlt, 2
 		);
 	}
+
+	if (!cardReadEndOffset) {
+		cardReadEndOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			cardReadEndSignatureAlt2, 3
+		);
+	}
+
 	if (cardReadEndOffset) {
 		dbg_printf("ARM9 Card read end alt (type 1) found: ");
 	} else {
@@ -403,7 +412,7 @@ u16* findCardReadStartOffsetThumb(const u16* cardReadEndOffset) {
 	dbg_printf("findCardReadStartOffsetThumb:\n");
 
 	u16* cardReadStartOffset = findOffsetBackwardsThumb(
-		cardReadEndOffset, 0xC0,
+		cardReadEndOffset, 0x120,
 		cardReadStartSignatureThumb, 2
 	);
 	if (cardReadStartOffset) {
