@@ -285,6 +285,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // sound cracking to be investigated
         //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
