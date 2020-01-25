@@ -292,6 +292,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "AWI",  // Hotel Dusk // works
+        "C6C",  // Infinite Space // works
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
@@ -384,6 +385,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "AWI",  // Hotel Dusk // works
+        //"C6C",  // Infinite Space // doesn't work here
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
