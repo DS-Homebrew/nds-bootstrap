@@ -312,6 +312,10 @@ bool dmaAllowed(void) {
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (gameOnFlashcard && !ROMinRAM) {
+		return;
+	}
+
   if (dmaAllowed) {
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -355,6 +359,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (gameOnFlashcard && !ROMinRAM) {
+		return false;
+	}
+
     dbg_printf("\npatchCardSetDma\n");           
 
   if (dmaAllowed) {
