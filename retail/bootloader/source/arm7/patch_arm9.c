@@ -717,8 +717,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadSlot2Location = current_location;
     
-    u32* thumbReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
-
     u32* armSetDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armSetDmaCardLocation) {
 		return;

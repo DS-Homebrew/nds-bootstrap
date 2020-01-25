@@ -446,7 +446,7 @@ void cardSetDma(void) {
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
 
-		return true;
+		return;
 	}
 
 	accessCounter++;  
