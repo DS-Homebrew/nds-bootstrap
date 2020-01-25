@@ -277,44 +277,51 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
-bool dmaAllowed(void) {
-    const char* romTid = getRomTid(ndsHeader);
-	return (
-        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
-        ||  strncmp(romTid, "C32", 3) == 0	// Ace Attorney Investigations: Miles Edgeworth // works
-        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
-        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
-        //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
-        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
-        ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
-        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
-        ||  strncmp(romTid, "BO5", 3) == 0  // Golden Sun // sdk5
-        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
-        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
-        ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon Diamond // works
-        ||  strncmp(romTid, "APA", 3) == 0  // Pokemon Pearl // works
-        ||  strncmp(romTid, "CPU", 3) == 0  // Pokemon Platinum // works
-        ||  strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold // works
-        ||  strncmp(romTid, "IPG", 3) == 0  // Pokemon SoulSilver // works
-        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon Black // sdk5
-        ||  strncmp(romTid, "IRA", 3) == 0  // Pokemon White // sdk5
-        ||  strncmp(romTid, "IRE", 3) == 0  // Pokemon Black 2 // sdk5
-        ||  strncmp(romTid, "IRD", 3) == 0  // Pokemon White 2 // sdk5
-        ||  strncmp(romTid, "BR4", 3) == 0  // Runaway: A Twist of Fate // works, fixes sound cracking
-        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
-        ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
-        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
-        ||  strncmp(romTid, "CB6", 3) == 0  // Space Bust-A-Move // works, fixes lags
-        ||  strncmp(romTid, "YG4", 3) == 0  // Suikoden: Tierkreis // works
-        ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
-        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
-        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
-        ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
-        ||  strncmp(romTid, "AH9", 3) == 0  // Wario: Master of Disguise // works
-    );
-}
-
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	bool dmaAllowed = false;
+    const char* romTid = getRomTid(ndsHeader);
+	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "AXF",  // FFXII // works
+        "BO5",  // Golden Sun // sdk5
+        "AWI",  // Hotel Dusk // works
+        "A5F",  // Layton Curious V // works
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "YT7",  // SEGA Superstars Tennis
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "AWI",  // Hotel Dusk // works
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
+    };
+
+	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+		if (memcmp(romTid, list[i], 3) == 0) {
+			// Found a match.
+			dmaAllowed = true;
+			break;
+		}
+	}
+
   if (dmaAllowed) {
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -357,12 +364,52 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
   }
 }
 
-static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, bool ROMinRAM) {
-	if (gameOnFlashcard && !ROMinRAM) {
-		return false;
-	}
-
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     dbg_printf("\npatchCardSetDma\n");           
+
+	bool dmaAllowed = false;
+    const char* romTid = getRomTid(ndsHeader);
+	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "AXF",  // FFXII // works
+        "BO5",  // Golden Sun // sdk5
+        "AWI",  // Hotel Dusk // works
+        "A5F",  // Layton Curious V // works
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "YT7",  // SEGA Superstars Tennis
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "AWI",  // Hotel Dusk // works
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
+    };
+
+	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+		if (memcmp(romTid, list[i], 3) == 0) {
+			// Found a match.
+			dmaAllowed = true;
+			break;
+		}
+	}
 
   if (dmaAllowed) {
     u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
@@ -1200,19 +1247,26 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-    if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-	   patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-    }
+	bool cardSetDmaPatched = false;
+	if (!gameOnFlashcard || (gameOnFlashcard && ROMinRAM)) {
+		cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb);
+	}
+
+	if (!cardSetDmaPatched) {
+		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
 	//patchDownloadplay(ndsHeader);
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
-    
-	if (gameOnFlashcard && !ROMinRAM) {
-		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
+	if (!gameOnFlashcard || (gameOnFlashcard && ROMinRAM)) {
+		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	}
+
+	if (gameOnFlashcard && !ROMinRAM) {
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
 
