@@ -312,7 +312,6 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
-        "AWI",  // Hotel Dusk // works
         "A8Q",  // Theme Park // works
         "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
@@ -405,7 +404,6 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
-        "AWI",  // Hotel Dusk // works
         "A8Q",  // Theme Park // works
         "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
