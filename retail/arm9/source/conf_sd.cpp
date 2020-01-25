@@ -261,6 +261,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
+	// Load DS blowfish
+	cebin = fopen("nitro:/encr_data.bin", "rb");
+	if (cebin) {
+		fread((void*)BLOWFISH_LOCATION, 1, 0x1048, cebin);
+	}
+	fclose(cebin);
+
+	// Load DSi blowfish
+	cebin = fopen("nitro:/dsi_encr_data.bin", "rb");
+	if (cebin) {
+		fread((void*)DSI_BLOWFISH_LOCATION, 1, 0x1048, cebin);
+	}
+	fclose(cebin);
+
 	// Load SDK5 ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_sdk5.lz77", "rb");
 	if (cebin) {
