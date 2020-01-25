@@ -291,6 +291,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "AFF",  // FF3 // works
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
+        "Y8L",  // Golden Sun Demo // sdk5
         "AWI",  // Hotel Dusk // works
         "C6C",  // Infinite Space // works
         "A5F",  // Layton: Curious Village // works
@@ -384,6 +385,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "AFF",  // FF3 // works
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
+        "Y8L",  // Golden Sun Demo // sdk5
         "AWI",  // Hotel Dusk // works
         //"C6C",  // Infinite Space // doesn't work here
         "A5F",  // Layton: Curious Village // works
