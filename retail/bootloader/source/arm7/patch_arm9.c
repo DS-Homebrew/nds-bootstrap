@@ -385,6 +385,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
     	if (!patchOffsetCache.cardReadDmaOffset) {
 			setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+			if (setDmaoffset) patchOffsetCache.cardReadDmaOffset = setDmaoffset;
     	}
         if(setDmaoffset) {
           dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
