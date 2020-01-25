@@ -92,6 +92,7 @@ static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0
 static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
 static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
+static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
 static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
 
 // Random patch
@@ -1709,9 +1710,6 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardSetDmaSdk5\n");
     
-    u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart5;
-    u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb5;
-    
     u32* currentOffset = (u32*)ndsHeader->arm9destination;
     u32* startOffset = NULL;
 	while (startOffset==NULL) {
@@ -1734,15 +1732,21 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                   dbg_printf("cardSetDmaSignatureStartThumb used: ");
             		startOffset = findOffsetBackwardsThumb(
                 		cardSetDmaEndOffset, 0x90,
-                      cardSetDmaSignatureStartThumb, 2
+                      cardSetDmaSignatureStartThumb5, 2
                   );
               } else {
                   dbg_printf("cardSetDmaSignatureStart used: ");
             		startOffset = findOffsetBackwards(
                 		cardSetDmaEndOffset, 0x90,
-                      cardSetDmaSignatureStart, 2
+                      cardSetDmaSignatureStart5, 2
                   );
               } 
+            if (!startOffset && !usesThumb) {
+            	startOffset = findOffsetBackwards(
+            		cardSetDmaEndOffset, 0x90,
+                  cardSetDmaSignatureStart5Alt, 2
+              );
+			}
             if (startOffset!=NULL) {
                 dbg_printf("cardSetDmaSignatureStart found\n");
              	dbg_hexa((u32)startOffset);

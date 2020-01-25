@@ -283,6 +283,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	static const char list[][4] = {
         "YGX",  // GTA Chinatown Wars // works
         "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
@@ -291,7 +292,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "AWI",  // Hotel Dusk // works
-        "A5F",  // Layton Curious V // works
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        "BLF",  // Layton: Last Specter // sdk5
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
@@ -372,6 +376,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	static const char list[][4] = {
         "YGX",  // GTA Chinatown Wars // works
         "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
@@ -380,7 +385,10 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "AWI",  // Hotel Dusk // works
-        "A5F",  // Layton Curious V // works
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        "BLF",  // Layton: Last Specter // sdk5
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
