@@ -50,6 +50,7 @@ patches:
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
+.word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
 .word	cardStructArm9
@@ -69,6 +70,7 @@ thumbPatches:
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word	thumb_card_set_dma_arm9
 .word   thumb_nand_read_arm9
 .word   thumb_nand_write_arm9
 .word	cardStructArm9
@@ -174,6 +176,27 @@ cardReadRef4:
 .word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
+@---------------------------------------------------------------------------------
+card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef14
+    ldr     r7, ce9location14
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_card_set_dma	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+_blx_r6_stub_card_set_dma:
+	bx	r6	
+.pool
+ce9location14:
+.word   ce9
+cardReadRef14:
+.word   cardSetDma-ce9 
+@---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 card_pull_out_arm9:
@@ -260,6 +283,28 @@ ce9location7:
 .word   ce9
 cardReadRef7:
 .word   cardReadDma-ce9 
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+    
+	ldr		r6, cardReadRef15
+    ldr     r7, ce9location15
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_card_set_dma	
+
+    pop	{r1-r7, pc}
+_blx_r6_stub_thumb_card_set_dma:
+	bx	r6	
+.pool
+.align	4
+ce9location15:
+.word   ce9
+cardReadRef15:
+.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 	.arm

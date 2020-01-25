@@ -282,10 +282,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
     
     if (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
-		||  strncmp(romTid, "C32", 3) == 0	 // Ace Attorney Investigations: Miles Edgeworth // works
-        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // sound cracking to be investigated
-        //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
-        //||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        ||  strncmp(romTid, "C32", 3) == 0	// Ace Attorney Investigations: Miles Edgeworth // works
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
+        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
@@ -302,19 +302,24 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         ||  strncmp(romTid, "CB6", 3) == 0  // Space Bust-A-Move // works, fixes lags
         ||  strncmp(romTid, "YG4", 3) == 0  // Suikoden: Tierkreis // works
         ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
         ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun // sdk5
+        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
+        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
     ) {
 
-      if(!isSdk5(moduleParams)) { // TODO : implements the method for sdk5
-        u32* offset = patchOffsetCache.cardEndReadDmaOffset;
-    	  if (!patchOffsetCache.cardEndReadDmaOffset) {
-    		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
-    		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
-    	  }
-        if(offset) {
-          dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");       
-          if(usesThumb) {
+    u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+	  if (!patchOffsetCache.cardEndReadDmaOffset) {
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+	  }
+    if(offset) {
+      dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");
+      if(!isSdk5(moduleParams)) {
+        // SDK1-4        
+        if(usesThumb) {
             u16* thumbOffset = (u16*)offset;
             thumbOffset--;
             *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
@@ -322,12 +327,75 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
           } else {
             u32* armOffset = (u32*)offset;
             armOffset--;
-            *armOffset = 0xE92D40F8; // STMFD           SP!, {R3-R7,LR}
+            *armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
             ce9->patches->cardEndReadDmaRef = armOffset;
-          } 
         }
-      } 
+      } else {
+        // SDK5 
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            while(*thumbOffset!=0xB508) { // push	{r3, lr}
+                *thumbOffset = 0x46C0; // NOP
+                thumbOffset--;
+            }
+            ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+        } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+        }  
+      }  
+    }
+  }  
+}
+
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    const char* romTid = getRomTid(ndsHeader);
+    dbg_printf("\npatchCardSetDma\n");           
+    if (
+        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
+        ||  strncmp(romTid, "C32", 3) == 0	// Ace Attorney Investigations: Miles Edgeworth // works
+        ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
+        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
+        ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
+        ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
+        ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
+        ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon Diamond // works
+        ||  strncmp(romTid, "APA", 3) == 0  // Pokemon Pearl // works
+        ||  strncmp(romTid, "CPU", 3) == 0  // Pokemon Platinum // works
+        ||  strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold // works
+        ||  strncmp(romTid, "IPG", 3) == 0  // Pokemon SoulSilver // works
+        ||  strncmp(romTid, "BR4", 3) == 0  // Runaway: A Twist of Fate // works, fixes sound cracking
+        ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
+        ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
+        ||  strncmp(romTid, "CB6", 3) == 0  // Space Bust-A-Move // works, fixes lags
+        ||  strncmp(romTid, "YG4", 3) == 0  // Suikoden: Tierkreis // works
+        ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
+        ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
+        ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
+        ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun // sdk5
+        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
+        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
+    ) {
+        //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
+    	u32* setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+    	  //}
+        if(setDmaoffset) {
+          dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
+          u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
+	      memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
+    
+          return true;  
+        }
     } 
+
+    return false; 
 }
 
 
@@ -650,6 +718,20 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     *armReadSlot2Location = current_location;
     
     u32* thumbReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
+
+    u32* armSetDmaCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armSetDmaCardLocation) {
+		return;
+	}
+    dbg_printf("armSetDmaCardLocation ");
+	dbg_hexa((u32)armSetDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armSetDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *armSetDmaCardLocation = current_location;
+    
+    u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadDmaCardLocation) {
 		return;
 	}
@@ -660,6 +742,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadDmaCardLocation = current_location;
+    
+    u32* thumbSetDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbSetDmaCardLocation) {
+		return;
+	}
+    dbg_printf("thumbSetDmaCardLocation ");
+	dbg_hexa((u32)thumbSetDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbSetDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *thumbSetDmaCardLocation = current_location;
 
     u32* armReadNandLocation = findOffset(current_location, size, location_sig, 1);
 	if (!armReadNandLocation) {
@@ -770,6 +864,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
     ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
     ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
     ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
@@ -782,6 +877,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_set_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_set_dma_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_read_arm9 = (u32*)((u32)ce9->thumbPatches->nand_read_arm9 - default_location + current_location);
     ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
@@ -1121,7 +1217,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    if(!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb))  {
+	   patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    }
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 

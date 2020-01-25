@@ -79,6 +79,53 @@ static bool dmaLed = false;
 static u8 dma = 4;
 
 #ifndef DLDI
+static inline 
+bool ndmaBusy(uint8 ndmaSlot) {
+	return	*(u32*)(0x400411C+(ndmaSlot*0x1C)) & BIT(31) == 0x80000000;
+}
+
+static inline 
+/*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
+\brief copies from source to destination on one of the 4 available channels in half words.  
+This function returns immediately after starting the transfer.
+\param channel the dma channel to use (0 - 3).  
+\param src the source to copy from
+\param dest the destination to copy to
+\param size the size in bytes of the data to copy.  Will be truncated to the nearest word (4 bytes)
+*/
+void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
+	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
+	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
+	
+	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;	
+	
+    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
+	
+	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90070000;
+}
+
+static inline bool checkArm7(void) {
+    IPC_SendSync(0x4);
+	return (sharedAddr[3] == (vu32)0);
+}
+
+static bool IPC_SYNC_hooked = false;
+static inline void hookIPC_SYNC(void) {
+    if (!IPC_SYNC_hooked) {
+        u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_ipc_orig_return   = *ipcSyncHandler;
+        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+        IPC_SYNC_hooked = true;
+    }
+}
+
+static inline void enableIPCSYNC(void) {
+    // enable IPC_SYNC
+    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;  
+    enableIrqMask(IRQ_IPC_SYNC);
+}
+
+
 static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
@@ -137,6 +184,232 @@ static void waitForArm7(void) {
         }
     //}
 }
+
+void endCardReadDma() {
+    if(ce9->patches->cardEndReadDmaRef) {
+        volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
+        (*cardEndReadDmaRef)();
+    } else if(ce9->thumbPatches->cardEndReadDmaRef) {
+        callEndReadDmaThumb();
+    }    
+}
+
+static int currentLen=0;
+static bool dmaReadOnArm7 = false;
+static bool dmaReadOnArm9 = false;
+static u32 * dmaParams = NULL;
+
+void continueCardReadDmaArm9() {
+    if(dmaReadOnArm9) {             
+        if(ndmaBusy(0)) return;
+        
+        dmaReadOnArm9 = false;
+        sharedAddr[3] = 0;        
+
+        u32 commandRead=0x025FFB08;
+        u32 commandPool=0x025AAB08;
+        
+        u32 src = dmaParams[3];
+    	u8* dst = (u8*)dmaParams[4];
+    	u32 len = dmaParams[5];           
+        
+        // Update dma params
+  		dmaParams[3] = src + currentLen;
+  		dmaParams[4] = (vu32)(dst + currentLen);
+  		dmaParams[5] = len - currentLen;
+        
+        src = dmaParams[3];
+        dst = (u8*)(dmaParams[4]);
+        len = dmaParams[5]; 
+        
+        u32 sector = (src/readSize)*readSize;
+        
+        if (len > 0) {
+            src = dmaParams[3];
+			dst = (u8*)(dmaParams[4]);
+			sector = (src / readSize) * readSize;
+			accessCounter++;  
+            
+            // Read via the main RAM cache
+        	int slot = getSlotForSector(sector);
+        	vu8* buffer = getCacheAddress(slot);
+        	// Read max CACHE_READ_SIZE via the main RAM cache
+        	if (slot == -1) {
+        		// Send a command to the ARM7 to fill the RAM cache
+                commandRead = 0x025FFB08;
+        
+        		slot = allocateCacheSlot();
+        
+        		buffer = getCacheAddress(slot);
+        
+        
+        		// Write the command
+        		sharedAddr[0] = (vu32)buffer;
+        		sharedAddr[1] = readSize;
+        		sharedAddr[2] = sector;
+        		sharedAddr[3] = commandRead;
+        
+                // do not wait for arm7 and return immediately
+        		checkArm7();
+                
+                dmaReadOnArm7 = true;
+                
+                updateDescriptor(slot, sector);	
+                return;
+        
+        	} else {
+        		updateDescriptor(slot, sector);	
+        
+        		u32 len2 = len;
+        		if ((src - sector) + len2 > readSize) {
+        			len2 = sector - src + readSize;
+        		}
+        
+        		if (len2 > 512) {
+        			len2 -= src % 4;
+        			len2 -= len2 % 32;
+        		}
+        
+        		// Copy via dma
+                ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+                dmaReadOnArm9 = true;
+                currentLen= len2;
+ 
+                sharedAddr[3] = commandPool;               
+                IPC_SendSync(0x3);        
+            }  
+        }
+        if (len==0) {
+          //disableIrqMask(IRQ_DMA0 << dma);
+          //resetRequestIrqMask(IRQ_DMA0 << dma);
+          //disableDMA(dma); 
+          endCardReadDma();
+       } 
+    }
+}
+
+void continueCardReadDmaArm7() {
+        
+    if(dmaReadOnArm7) {
+        if(!checkArm7()) return;
+        
+        dmaReadOnArm7 = false;
+        
+        vu32* volatile cardStruct = ce9->cardStruct0;
+        u32 commandRead=0x025FFB08;
+        u32 commandPool=0x025AAB08;
+        
+        u32 src = dmaParams[3];
+    	u8* dst = (u8*)dmaParams[4];
+    	u32 len = dmaParams[5];   
+        
+        u32 sector = (src/readSize)*readSize;
+        
+        u32 len2 = len;
+		if ((src - sector) + len2 > readSize) {
+			len2 = sector - src + readSize;
+		}
+
+		if (len2 > 512) {
+			len2 -= src % 4;
+			len2 -= len2 % 32;
+		}
+        
+        int slot = getSlotForSector(sector);
+        vu8* buffer = getCacheAddress(slot);
+
+        // TODO Copy via dma
+        ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+        dmaReadOnArm9 = true;
+        currentLen= len2;
+        
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);
+    }
+}
+
+void cardSetDma (u32 * params) {
+    
+    disableIrqMask(IRQ_CARD);
+    disableIrqMask(IRQ_CARD_LINE );
+    
+    // reset IPC_SYNC IRQs    
+    resetRequestIrqMask(IRQ_IPC_SYNC);
+
+    int oldIME = enterCriticalSection();
+    
+    hookIPC_SYNC();
+
+    leaveCriticalSection(oldIME); 
+    
+    enableIPCSYNC();
+
+    dmaParams = params;
+    u32 src = dmaParams[3];
+	u8* dst = (u8*)dmaParams[4];
+	u32 len = dmaParams[5];    
+
+    u32 commandRead=0x025FFB08;
+    u32 commandPool=0x025AAB08;
+	u32 sector = (src/readSize)*readSize;
+    
+	sector = (src / readSize) * readSize;
+	accessCounter++;  
+  
+  	// Read via the main RAM cache
+  	int slot = getSlotForSector(sector);
+  	vu8* buffer = getCacheAddress(slot);
+  	// Read max CACHE_READ_SIZE via the main RAM cache
+  	if (slot == -1) {    
+  		// Send a command to the ARM7 to fill the RAM cache
+        commandRead = 0x025FFB08;
+  
+  		slot = allocateCacheSlot();
+  
+  		buffer = getCacheAddress(slot);
+      
+  		// Write the command
+  		sharedAddr[0] = (vu32)buffer;
+  		sharedAddr[1] = readSize;
+  		sharedAddr[2] = sector;
+  		sharedAddr[3] = commandRead;
+  
+          // do not wait for arm7 and return immediately
+  		checkArm7();
+          
+        dmaReadOnArm7 = true;
+        
+        updateDescriptor(slot, sector);
+  	} else {
+  		updateDescriptor(slot, sector);	
+  
+  		u32 len2 = len;
+  		if ((src - sector) + len2 > readSize) {
+  			len2 = sector - src + readSize;
+  		}
+  
+  		if (len2 > 512) {
+  			len2 -= src % 4;
+  			len2 -= len2 % 32;
+  		}
+  
+  		// Copy via dma
+        ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+        dmaReadOnArm9 = true;
+        currentLen= len2;
+          
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);        
+      }
+}
+
+#else
+
+void cardSetDma(void) {
+    return false;
+}
+
+
 #endif
 
 static void clearIcache (void) {
@@ -376,4 +649,19 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	#else
 	return ce9->ROMinRAM ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len);
 	#endif
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerIPC(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerIPC");
+	#endif	
+
+#ifndef DLDI
+    if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+        continueCardReadDmaArm7();
+        continueCardReadDmaArm9();
+    }
+#endif
 }
