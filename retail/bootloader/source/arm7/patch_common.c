@@ -368,7 +368,9 @@ u32 patchCardNds(
 		patchOffsetCache.cardIdChecked = 0;
 		patchOffsetCache.cardReadDmaOffset = 0;
 		patchOffsetCache.cardEndReadDmaOffset = 0;
+		patchOffsetCache.cardSetDmaChecked = 0;
 		patchOffsetCache.cardReadDmaChecked = 0;
+		patchOffsetCache.cardEndReadDmaChecked = 0;
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
