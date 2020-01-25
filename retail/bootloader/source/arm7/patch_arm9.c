@@ -312,10 +312,6 @@ bool dmaAllowed(void) {
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (gameOnFlashcard && !ROMinRAM) {
-		return;
-	}
-
   if (dmaAllowed) {
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -358,7 +354,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
   }
 }
 
-static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, bool ROMinRAM) {
 	if (gameOnFlashcard && !ROMinRAM) {
 		return false;
 	}
@@ -1201,7 +1197,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-    if(!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb))  {
+    if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 	   patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
     }
 
@@ -1211,9 +1207,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
     
-    patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-
 	if (gameOnFlashcard && !ROMinRAM) {
+		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
 
