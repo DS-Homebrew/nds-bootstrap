@@ -1203,7 +1203,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
     
-    //patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	if (gameOnFlashcard && !ROMinRAM) {
 		patchHeapPointer2(moduleParams, ndsHeader);
