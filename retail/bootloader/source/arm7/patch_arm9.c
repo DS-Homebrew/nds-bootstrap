@@ -382,10 +382,10 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
         ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
     ) {
-        //u32* offset = patchOffsetCache.cardEndReadDmaOffset;
-    	  //if (!patchOffsetCache.cardEndReadDmaOffset) {
-    	u32* setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
-    	  //}
+        u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
+    	if (!patchOffsetCache.cardReadDmaOffset) {
+			setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+    	}
         if(setDmaoffset) {
           dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
           u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
