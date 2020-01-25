@@ -283,7 +283,7 @@ bool dmaAllowed(void) {
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
         ||  strncmp(romTid, "C32", 3) == 0	// Ace Attorney Investigations: Miles Edgeworth // works
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
-        ||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
+        //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
@@ -1203,7 +1203,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
     
-    patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+    //patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	if (gameOnFlashcard && !ROMinRAM) {
 		patchHeapPointer2(moduleParams, ndsHeader);
