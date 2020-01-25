@@ -282,11 +282,13 @@ bool dmaAllowed(void) {
 	return (
         strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars // works
         ||  strncmp(romTid, "C32", 3) == 0	// Ace Attorney Investigations: Miles Edgeworth // works
+        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
         ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE // works
         //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS // black screen issue to be investigated
         ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         ||  strncmp(romTid, "AFF", 3) == 0  // FF3 // works
         ||  strncmp(romTid, "AXF", 3) == 0  // FFXII // works
+        ||  strncmp(romTid, "BO5", 3) == 0  // Golden Sun // sdk5
         ||  strncmp(romTid, "AWI", 3) == 0  // Hotel Dusk // works
         ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V // works
         ||  strncmp(romTid, "ADA", 3) == 0  // Pokemon Diamond // works
@@ -294,6 +296,10 @@ bool dmaAllowed(void) {
         ||  strncmp(romTid, "CPU", 3) == 0  // Pokemon Platinum // works
         ||  strncmp(romTid, "IPK", 3) == 0  // Pokemon HeartGold // works
         ||  strncmp(romTid, "IPG", 3) == 0  // Pokemon SoulSilver // works
+        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon Black // sdk5
+        ||  strncmp(romTid, "IRA", 3) == 0  // Pokemon White // sdk5
+        ||  strncmp(romTid, "IRE", 3) == 0  // Pokemon Black 2 // sdk5
+        ||  strncmp(romTid, "IRD", 3) == 0  // Pokemon White 2 // sdk5
         ||  strncmp(romTid, "BR4", 3) == 0  // Runaway: A Twist of Fate // works, fixes sound cracking
         ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         ||  strncmp(romTid, "CSN", 3) == 0  // Sonic Chronicles: The Dark BrotherHood
@@ -305,9 +311,6 @@ bool dmaAllowed(void) {
         ||  strncmp(romTid, "A8Q", 3) == 0  // Theme Park // works
         ||  strncmp(romTid, "AH9", 3) == 0  // Tony Hawk's American Sk8land // works, fixes crashing
         ||  strncmp(romTid, "AH9", 3) == 0  // Wario: Master of Disguise // works
-        ||  strncmp(romTid, "BO5", 3) == 0  // Golden sun // sdk5
-        ||  strncmp(romTid, "TBR", 3) == 0  // Brave // sdk5
-        ||  strncmp(romTid, "IRB", 3) == 0  // Pokemon black // sdk5
     );
 }
 
