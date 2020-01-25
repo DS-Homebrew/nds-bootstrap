@@ -430,7 +430,6 @@ void cardSetDma(void) {
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
 
-
 	if (ce9->ROMinRAM) {
   		u32 len2 = len;
   		if (len2 > 512) {

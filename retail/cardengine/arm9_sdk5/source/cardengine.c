@@ -329,19 +329,19 @@ void continueCardReadDmaArm7() {
 }
 
 void cardSetDma (u32 * params) {
-    
+
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
-    
+
     // reset IPC_SYNC IRQs    
     resetRequestIrqMask(IRQ_IPC_SYNC);
 
     int oldIME = enterCriticalSection();
-    
+
     hookIPC_SYNC();
 
     leaveCriticalSection(oldIME); 
-    
+
     enableIPCSYNC();
 
     dmaParams = params;
@@ -352,8 +352,25 @@ void cardSetDma (u32 * params) {
     u32 commandRead=0x025FFB08;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
-    
-	sector = (src / readSize) * readSize;
+
+	if (ce9->ROMinRAM) {
+  		u32 len2 = len;
+  		if (len2 > 512) {
+  			len2 -= src % 4;
+  			len2 -= len2 % 32;
+  		}
+
+  		// Copy via dma
+        ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
+        dmaReadOnArm9 = true;
+        currentLen = len2;
+
+        sharedAddr[3] = commandPool;
+        IPC_SendSync(0x3);        
+
+		return;
+	}
+
 	accessCounter++;  
   
   	// Read via the main RAM cache
