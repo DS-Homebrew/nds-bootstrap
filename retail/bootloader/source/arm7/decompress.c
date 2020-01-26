@@ -245,7 +245,7 @@ void init2(u32 *magic, u32 a[3])
 
 void init1(u32 cardheader_gamecode, bool dsi)
 {
-	tonccpy(card_hash, dsi ? dsi_encr_data : &encr_data, 4*(1024 + 18));
+	tonccpy(card_hash, dsi ? dsi_encr_data : encr_data, 4*(1024 + 18));
 	arg2[0] = *(u32 *)&cardheader_gamecode;
 	arg2[1] = (*(u32 *)&cardheader_gamecode) >> 1;
 	arg2[2] = (*(u32 *)&cardheader_gamecode) << 1;
