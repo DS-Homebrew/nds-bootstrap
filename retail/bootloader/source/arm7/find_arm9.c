@@ -79,6 +79,8 @@ static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
 static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
 
 // Card end read DMA
+static const u16 cardEndReadDmaSignatureThumb3[3]     = {0x481E, 0xF7F6, 0xFA78};
+static const u16 cardEndReadDmaSignatureThumb3Alt[3]  = {0x481E, 0xF00C, 0xEEB0};
 static const u32 cardEndReadDmaSignature4[1]  = {0xE3A00702};
 static const u16 cardEndReadDmaSignatureThumb4[3]  = {0x2002, 0x0480, 0xF7F8};
 static const u32 cardEndReadDmaSignature5[4]  = {0xE59F0010, 0xE3A02000, 0xE5901000, 0xE5812000};
@@ -1650,7 +1652,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
         return findCardEndReadDmaSdk5(ndsHeader,moduleParams,usesThumb);
     }     
     
-    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
+    //u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
     u32* cardEndReadDmaSignature = cardEndReadDmaSignature4;
     
   	u32* cardReadDmaEndOffset = NULL;
@@ -1662,7 +1664,15 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 		cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
 	}
     
-    u32* offsetDmaHandler = cardReadDmaEndOffset+4;
+    u32* offsetDmaHandler = NULL;
+	if (moduleParams->sdk_version < 0x4000000) {
+		offsetDmaHandler = cardReadDmaEndOffset+8;
+	}
+
+    if(*offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
+        offsetDmaHandler = cardReadDmaEndOffset+4; 
+    }
+
     if(*offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
         offsetDmaHandler = cardReadDmaEndOffset+3; 
     }
@@ -1680,10 +1690,10 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     
     u32 * offset = NULL;
     
-    if(usesThumb) {
+    if (usesThumb) {
   		offset = findOffsetThumb(
       		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
-            cardEndReadDmaSignatureThumb, 3
+            cardEndReadDmaSignatureThumb4, 3
         );
     } else {
   		offset = findOffset(
@@ -1692,6 +1702,20 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
         ); 
     } 
     
+	if (!offset && usesThumb) {
+  		offset = findOffsetThumb(
+      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignatureThumb3, 3
+        );
+	}
+
+	if (!offset && usesThumb) {
+  		offset = findOffsetThumb(
+      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+            cardEndReadDmaSignatureThumb3Alt, 3
+        );
+	}
+
     if (offset) {
 		dbg_printf("cardEndReadDma found: ");
 	} else {

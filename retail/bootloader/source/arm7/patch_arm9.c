@@ -293,6 +293,12 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "BO5",  // Golden Sun // sdk5
         "Y8L",  // Golden Sun Demo // sdk5
         "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		"BEE",	// Inazuma Eleven 2 - Firestorm
+		"BEB",	// Inazuma Eleven 2 - Blizzard
+		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
         "C6C",  // Infinite Space // works
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
@@ -313,6 +319,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
         "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
         "A8Q",  // Theme Park // works
@@ -388,6 +395,12 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "BO5",  // Golden Sun // sdk5
         "Y8L",  // Golden Sun Demo // sdk5
         "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		"BEE",	// Inazuma Eleven 2 - Firestorm
+		"BEB",	// Inazuma Eleven 2 - Blizzard
+		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
         //"C6C",  // Infinite Space // doesn't work here
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
@@ -408,6 +421,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
         "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
         "A8Q",  // Theme Park // works
