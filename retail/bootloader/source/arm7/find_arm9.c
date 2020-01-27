@@ -1654,7 +1654,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     
     //u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb4;
     u32* cardEndReadDmaSignature = cardEndReadDmaSignature4;
-    
+
   	u32* cardReadDmaEndOffset = NULL;
 	if (usesThumb) {
 		//dbg_printf("Trying thumb alt...\n");

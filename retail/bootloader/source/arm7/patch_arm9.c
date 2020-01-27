@@ -304,6 +304,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
@@ -401,11 +402,12 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
 		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
 		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
-        //"C6C",  // Infinite Space // doesn't work here
+        //"C6C",  // Infinite Space // freezes after SEGA logo
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works

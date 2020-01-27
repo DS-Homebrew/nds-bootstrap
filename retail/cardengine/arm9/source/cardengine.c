@@ -505,7 +505,7 @@ void cardSetDma(void) {
 
 #endif
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
@@ -612,7 +612,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	return 0;
 }
 
-static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page, u8* cacheBuffer, u32* cachePage) {
+static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page) {
 	//u32 commandRead;
 	while (len > 0) {
 		/*if (isDma) {
@@ -728,92 +728,18 @@ u32 cardReadDma() {
 }
 
 static int counter=0;
-int cardReadPDash(vu32* volatile cardStruct, u32 src, u8* dst, u32 len) {
-#ifdef DLDI
-	fileRead((char*)dst, *romFile, src, len, 0);
-#else
-	u32 commandRead;
-	u32 sector = (src/readSize)*readSize;
-
+int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
+#ifndef DLDI
     dmaLed = true;
-    
-    //hookIPC_SYNC();
-    //enableIPCSYNC();
-    
-    accessCounter++;
-    while(len > 0) {
-		int slot = getSlotForSector(sector);
-		vu8* buffer = getCacheAddress(slot);
-		// Read max CACHE_READ_SIZE via the main RAM cache
-		if (slot == -1) {
-			// Send a command to the ARM7 to fill the RAM cache
-			commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
-
-			slot = allocateCacheSlot();
-
-			buffer = getCacheAddress(slot);
-
-			//REG_IME = 0;
-
-			// Write the command
-			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = readSize;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
-
-			waitForArm7();
-
-			//REG_IME = 1;
-		}
-
-		updateDescriptor(slot, sector);	
-
-		u32 len2 = len;
-		if ((src - sector) + len2 > readSize) {
-			len2 = sector - src + readSize;
-		}
-
-          /*if (isDma) {
-              // Copy via dma
-				dmaCopyWordsAsynchIrq(dma, (u8*)buffer+(src-sector), dst, len2);
-              while (dmaBusy(dma)) {
-                  sleep(1);
-              }        
-          } else {*/
-  			#ifdef DEBUG
-  			// Send a log command for debug purpose
-  			// -------------------------------------
- 				commandRead = 0x026ff800;
-  
-  			sharedAddr[0] = dst;
-  			sharedAddr[1] = len2;
-  			sharedAddr[2] = buffer+src-sector;
-  			sharedAddr[3] = commandRead;
-  
-  			waitForArm7();
-  			// -------------------------------------*/
-  			#endif
-  
-  			// Copy directly
-  			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-          //}
-
-    		// Update cardi common
-    		cardStruct[0] = src + len2;
-    		cardStruct[1] = (vu32)(dst + len2);
-    		cardStruct[2] = len - len2;
-
-			len = cardStruct[2];
-			if (len > 0) {
-				src = cardStruct[0];
-				dst = (u8*)cardStruct[1];
-				sector = (src / readSize) * readSize;
-				accessCounter++;
-			}
-	}
-	
-    dmaLed = false;
 #endif
+
+	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
+
+    cardStruct[0] = src;
+    cardStruct[1] = (vu32)dst;
+    cardStruct[2] = len;
+
+    cardRead(cacheStruct, dst, src, len);
 
     counter++;
 	return counter;
@@ -909,9 +835,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	u32 page = (src / 512) * 512;
 
-	u8* cacheBuffer = (u8*)(cacheStruct + 8);
-	u32* cachePage = cacheStruct + 2;
-
 	#ifdef DEBUG
 	u32 commandRead;
 
@@ -939,13 +862,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		return cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+		return cardReadRAM(cardStruct, cacheStruct, dst, src, len, page);
 	}
 
 	#ifdef DLDI
-	int ret = cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	int ret = cardReadNormal(cardStruct, cacheStruct, dst, src, len, page);
 	#else
-	int ret = ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page, cacheBuffer, cachePage);
+	int ret = ce9->ROMinRAM ? cardReadRAM(cardStruct, cacheStruct, dst, src, len, page) : cardReadNormal(cardStruct, cacheStruct, dst, src, len, page);
 	#endif
 
     isDma=false;
