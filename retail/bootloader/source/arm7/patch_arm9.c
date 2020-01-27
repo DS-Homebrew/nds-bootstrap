@@ -308,6 +308,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "IRE",  // Pokemon Black 2 // sdk5
         "IRD",  // Pokemon White 2 // sdk5
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
         "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
@@ -402,6 +403,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "IRE",  // Pokemon Black 2 // sdk5
         "IRD",  // Pokemon White 2 // sdk5
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
         "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
