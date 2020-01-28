@@ -278,22 +278,61 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	bool dmaAllowed = true;
+	bool dmaAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
 	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
         "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
-        "ACV",  // Castlevania DOS // black screen issue to be investigated
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
-        "APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "AXF",  // FFXII // works
+        "BO5",  // Golden Sun // sdk5
+        "Y8L",  // Golden Sun Demo // sdk5
+        "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		"BEE",	// Inazuma Eleven 2 - Firestorm
+		"BEB",	// Inazuma Eleven 2 - Blizzard
+		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
+        "C6C",  // Infinite Space // works
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        "BLF",  // Layton: Last Specter // sdk5
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
+        "YT7",  // SEGA Superstars Tennis
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
     };
 
-	if (moduleParams->sdk_version < 0x3000000) {
-		dmaAllowed = false;
-	} else
 	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
 		if (memcmp(romTid, list[i], 3) == 0) {
 			// Found a match.
-			dmaAllowed = false;
+			dmaAllowed = true;
 			break;
 		}
 	}
@@ -343,23 +382,61 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     dbg_printf("\npatchCardSetDma\n");           
 
-	bool dmaAllowed = true;
+	bool dmaAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
 	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
         "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
-        "ACV",  // Castlevania DOS // black screen issue to be investigated
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
-        "C6C",  // Infinite Space // freezes after SEGA logo
-        "APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "AXF",  // FFXII // works
+        "BO5",  // Golden Sun // sdk5
+        "Y8L",  // Golden Sun Demo // sdk5
+        "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		"BEE",	// Inazuma Eleven 2 - Firestorm
+		"BEB",	// Inazuma Eleven 2 - Blizzard
+		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
+        //"C6C",  // Infinite Space // freezes after SEGA logo
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        "BLF",  // Layton: Last Specter // sdk5
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
+        "YT7",  // SEGA Superstars Tennis
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
     };
 
-	if (moduleParams->sdk_version < 0x3000000) {
-		dmaAllowed = false;
-	} else
 	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
 		if (memcmp(romTid, list[i], 3) == 0) {
 			// Found a match.
-			dmaAllowed = false;
+			dmaAllowed = true;
 			break;
 		}
 	}
