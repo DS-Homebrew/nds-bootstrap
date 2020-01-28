@@ -316,9 +316,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "IRD",  // Pokemon White 2 // sdk5
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
-        "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
@@ -419,9 +420,10 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "IRD",  // Pokemon White 2 // sdk5
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
-        "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "YT7",  // SEGA Superstars Tennis
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works

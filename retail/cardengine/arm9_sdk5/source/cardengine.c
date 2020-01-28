@@ -202,53 +202,49 @@ static u32 * dmaParams = NULL;
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {             
         if(ndmaBusy(0)) return;
-        
+
         dmaReadOnArm9 = false;
         sharedAddr[3] = 0;        
 
-        u32 commandRead=0x025FFB08;
+        u32 commandRead=0x025FFB0A;
         u32 commandPool=0x025AAB08;
-        
+
         u32 src = dmaParams[3];
     	u8* dst = (u8*)dmaParams[4];
     	u32 len = dmaParams[5];           
-        
+
         // Update dma params
   		dmaParams[3] = src + currentLen;
   		dmaParams[4] = (vu32)(dst + currentLen);
   		dmaParams[5] = len - currentLen;
-        
+
         src = dmaParams[3];
         dst = (u8*)(dmaParams[4]);
         len = dmaParams[5]; 
-        
+
         u32 sector = (src/readSize)*readSize;
-        
+
         if (len > 0) {
-            src = dmaParams[3];
-			dst = (u8*)(dmaParams[4]);
-			sector = (src / readSize) * readSize;
 			accessCounter++;  
-            
+
             // Read via the main RAM cache
         	int slot = getSlotForSector(sector);
         	vu8* buffer = getCacheAddress(slot);
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
         		// Send a command to the ARM7 to fill the RAM cache
-                commandRead = 0x025FFB08;
-        
+
         		slot = allocateCacheSlot();
         
         		buffer = getCacheAddress(slot);
-        
-        
+
+
         		// Write the command
         		sharedAddr[0] = (vu32)buffer;
         		sharedAddr[1] = readSize;
         		sharedAddr[2] = sector;
         		sharedAddr[3] = commandRead;
-        
+
                 // do not wait for arm7 and return immediately
         		checkArm7();
                 
@@ -256,7 +252,7 @@ void continueCardReadDmaArm9() {
                 
                 updateDescriptor(slot, sector);	
                 return;
-        
+
         	} else {
         		updateDescriptor(slot, sector);	
         
@@ -296,7 +292,6 @@ void continueCardReadDmaArm7() {
         dmaReadOnArm7 = false;
         
         vu32* volatile cardStruct = ce9->cardStruct0;
-        u32 commandRead=0x025FFB08;
         u32 commandPool=0x025AAB08;
         
         u32 src = dmaParams[3];
@@ -349,7 +344,7 @@ void cardSetDma (u32 * params) {
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];    
 
-    u32 commandRead=0x025FFB08;
+    u32 commandRead=0x025FFB0A;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
 
@@ -379,7 +374,6 @@ void cardSetDma (u32 * params) {
   	// Read max CACHE_READ_SIZE via the main RAM cache
   	if (slot == -1) {    
   		// Send a command to the ARM7 to fill the RAM cache
-        commandRead = 0x025FFB08;
   
   		slot = allocateCacheSlot();
   

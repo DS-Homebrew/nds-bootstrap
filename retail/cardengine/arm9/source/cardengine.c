@@ -283,7 +283,7 @@ void continueCardReadDmaArm9() {
         dmaReadOnArm9 = false;
         sharedAddr[3] = 0;        
 
-        u32 commandRead=0x025FFB08;
+        u32 commandRead=0x025FFB0A;
         u32 commandPool=0x025AAB08;
 
         u32 src = cardStruct[0];
@@ -302,9 +302,6 @@ void continueCardReadDmaArm9() {
         u32 sector = (src/readSize)*readSize;
 
         if (len > 0) {
-            src = cardStruct[0];
-			dst = (u8*)cardStruct[1];
-			sector = (src / readSize) * readSize;
 			accessCounter++;  
 
             // Read via the main RAM cache
@@ -313,7 +310,6 @@ void continueCardReadDmaArm9() {
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
         		// Send a command to the ARM7 to fill the RAM cache
-                commandRead = 0x025FFB08;
 
         		slot = allocateCacheSlot();
 
@@ -426,7 +422,7 @@ void cardSetDma(void) {
 	u32 len = cardStruct[2];
     u32 dma = cardStruct[3]; // dma channel     
 
-    u32 commandRead=0x025FFB08;
+    u32 commandRead=0x025FFB0A;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
 
@@ -456,7 +452,6 @@ void cardSetDma(void) {
   	// Read max CACHE_READ_SIZE via the main RAM cache
   	if (slot == -1) {    
   		// Send a command to the ARM7 to fill the RAM cache
-        //commandRead = 0x025FFB08;
 
   		slot = allocateCacheSlot();
 
