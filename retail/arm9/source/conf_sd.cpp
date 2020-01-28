@@ -308,7 +308,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		printf("Creating FAT table file.\n");
 		printf("Please wait...\n");
 
-		static const int BUFFER_SIZE = 4096;
+		static const int BUFFER_SIZE = 512;
 		char buffer[BUFFER_SIZE];
 		toncset(buffer, 0, sizeof(buffer));
 
