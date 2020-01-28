@@ -285,7 +285,8 @@ void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, 
 	lc0->patchMpuSize                = conf->patchMpuSize;
 	lc0->ceCached                    = conf->ceCached; // SDK 1-4
 	lc0->consoleModel                = conf->consoleModel;
-	lc0->romread_LED                 = conf->romread_LED;
+	lc0->romRead_LED                 = conf->romRead_LED;
+	lc0->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	lc0->boostVram                   = conf->boostVram;
 	lc0->gameSoftReset               = conf->gameSoftReset;
 	lc0->forceSleepPatch             = conf->forceSleepPatch;

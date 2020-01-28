@@ -70,7 +70,8 @@ typedef struct cardengineArm7 {
     u32 dsiSD;
     u32 ROMinRAM;
     u32 consoleModel;
-    u32 romread_LED;
+    u32 romRead_LED;
+    u32 dmaRomRead_LED;
     u32 gameSoftReset;
 	u32 preciseVolumeControl;
     u32* cheat_data_offset; //u32* cheat_data;

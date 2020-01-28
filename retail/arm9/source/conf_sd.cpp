@@ -87,7 +87,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->colorMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "COLOR_MODE").c_str(), NULL, 0);
 
 	// ROM read LED
-	conf->romread_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "ROMREAD_LED").c_str(), NULL, 0);
+	conf->romRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "ROMREAD_LED").c_str(), NULL, 0);
+
+	// DMA ROM read LED
+	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED").c_str(), NULL, 0);
 
 	// Game soft reset
 	conf->gameSoftReset = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "GAME_SOFT_RESET").c_str(), NULL, 0);

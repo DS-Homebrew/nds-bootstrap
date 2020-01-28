@@ -100,7 +100,8 @@ extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 consoleModel;
-extern u32 romread_LED;
+extern u32 romRead_LED;
+extern u32 dmaRomRead_LED;
 extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 volumeFix;
@@ -1092,7 +1093,8 @@ int arm7_main(void) {
 			dsiSD,
 			ROMinRAM,
 			consoleModel,
-			romread_LED,
+			romRead_LED,
+			dmaRomRead_LED,
 			gameSoftReset,
 			preciseVolumeControl
 		);
@@ -1125,7 +1127,7 @@ int arm7_main(void) {
 			if (strncmp(romTid, "UBR", 3) != 0) {
 				loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
 			}
-			if (romread_LED > 0) {
+			if (romRead_LED==1 || dmaRomRead_LED==1) {
 				// Turn WiFi LED off
 				i2cWriteRegister(0x4A, 0x30, 0x12);
 			}

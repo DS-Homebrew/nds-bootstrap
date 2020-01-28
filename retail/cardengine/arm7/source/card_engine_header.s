@@ -23,7 +23,8 @@
 .global dsiSD
 .global ROMinRAM
 .global consoleModel
-.global romread_LED
+.global romRead_LED
+.global dmaRomRead_LED
 .global gameSoftReset
 .global preciseVolumeControl
 
@@ -62,7 +63,9 @@ ROMinRAM:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
-romread_LED:
+romRead_LED:
+	.word	0x00000000
+dmaRomRead_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000

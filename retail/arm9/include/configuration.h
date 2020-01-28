@@ -24,7 +24,8 @@ typedef struct configuration {
 	bool ceCached;	// SDK 1-4
 	u32 consoleModel;
 	int colorMode;
-	u32 romread_LED;
+	u32 romRead_LED;
+	u32 dmaRomRead_LED;
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;

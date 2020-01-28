@@ -160,7 +160,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("ceCached: %s\n", btoa(conf->ceCached));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	dbg_printf("colorMode: %lX\n", conf->colorMode);
-	dbg_printf("romread_LED: %lX\n", conf->romread_LED);
+	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);
+	dbg_printf("dmaRomRead_LED: %lX\n", conf->dmaRomRead_LED);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
 	dbg_printf("soundFreq: %s\n", btoa(conf->soundFreq));
@@ -190,7 +191,7 @@ static int runNdsFile(configuration* conf) {
 	}
 
 	// ROM read LED
-	switch(conf->romread_LED) {
+	switch(conf->romRead_LED) {
 		case 0:
 		default:
 			break;
@@ -202,6 +203,22 @@ static int runNdsFile(configuration* conf) {
 			break;
 		case 3:
 			dbg_printf("Using Camera LED\n");
+			break;
+	}
+
+	// DMA ROM read LED
+	switch(conf->dmaRomRead_LED) {
+		case 0:
+		default:
+			break;
+		case 1:
+			dbg_printf("DMA: Using WiFi LED\n");
+			break;
+		case 2:
+			dbg_printf("DMA: Using Power LED\n");
+			break;
+		case 3:
+			dbg_printf("DMA: Using Camera LED\n");
 			break;
 	}
 

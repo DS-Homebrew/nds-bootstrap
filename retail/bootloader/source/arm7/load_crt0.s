@@ -48,7 +48,8 @@
 	.global patchMpuSize
 	.global ceCached
 	.global consoleModel
-	.global romread_LED
+	.global romRead_LED
+	.global dmaRomRead_LED
 	.global boostVram
 	.global soundFreq
 	.global gameSoftReset
@@ -116,7 +117,9 @@ ceCached:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
-romread_LED:
+romRead_LED:
+	.word	0x00000000
+dmaRomRead_LED:
 	.word	0x00000000
 boostVram:
 	.word	0x00000000

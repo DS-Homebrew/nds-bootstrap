@@ -60,7 +60,8 @@ extern u32 dsiMode;
 extern u32 dsiSD;
 extern u32 ROMinRAM;
 extern u32 consoleModel;
-extern u32 romread_LED;
+extern u32 romRead_LED;
+extern u32 dmaRomRead_LED;
 extern u32 gameSoftReset;
 extern u32 preciseVolumeControl;
 
@@ -222,65 +223,36 @@ static void initialize(void) {
 
 static void cardReadLED(bool on) {
 	if (consoleModel < 2) {
-		if (dmaLed) {
-			if (on) {
-				switch(romread_LED) {
-					case 0:
-					default:
-						break;
-					case 1:
-						i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-						break;
-					case 2:
-					case 3:
-						i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-						break;
-				}
-			} else {
-				switch(romread_LED) {
-					case 0:
-					default:
-						break;
-					case 1:
-						i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-						break;
-					case 2:
-					case 3:
-						i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-						break;
-				}
+		if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
+		if (on) {
+			switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
+					break;
+				case 3:
+					i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+					break;
 			}
 		} else {
-			if (on) {
-				switch(romread_LED) {
-					case 0:
-					default:
-						break;
-					case 1:
-						i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-						break;
-					case 2:
-						i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-						break;
-					case 3:
-						i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-						break;
-				}
-			} else {
-				switch(romread_LED) {
-					case 0:
-					default:
-						break;
-					case 1:
-						i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-						break;
-					case 2:
-						i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-						break;
-					case 3:
-						i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-						break;
-				}
+			switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
+				case 0:
+				default:
+					break;
+				case 1:
+					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+					break;
+				case 2:
+					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
+					break;
+				case 3:
+					i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+					break;
 			}
 		}
 	}
@@ -742,6 +714,12 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
+	/*#ifdef DEBUG
+	nocashMessage("cheat_engine_start\n");
+	#endif*/
+	
+	cheat_engine_start();
+
 	calledViaIPC = false;
 
 	initialize();
@@ -810,7 +788,7 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	if (consoleModel < 2 && preciseVolumeControl && romread_LED == 0) {
+	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -846,12 +824,6 @@ void myIrqHandlerVBlank(void) {
 			saveTimer = 0;
 		}
 	}
-
-	#ifdef DEBUG
-	nocashMessage("cheat_engine_start\n");
-	#endif	
-	
-	cheat_engine_start();
 
 	const char* romTid = getRomTid(ndsHeader);
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)

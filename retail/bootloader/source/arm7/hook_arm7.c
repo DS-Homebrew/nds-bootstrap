@@ -107,7 +107,8 @@ int hookNdsRetailArm7(
 	u32 dsiSD,
 	u32 ROMinRAM,
 	u32 consoleModel,
-	u32 romread_LED,
+	u32 romRead_LED,
+	u32 dmaRomRead_LED,
 	u32 gameSoftReset,
 	u32 preciseVolumeControl
 ) {
@@ -220,7 +221,8 @@ int hookNdsRetailArm7(
 	ce7->dsiSD                    = dsiSD;
 	ce7->ROMinRAM                 = ROMinRAM;
 	ce7->consoleModel             = consoleModel;
-	ce7->romread_LED              = romread_LED;
+	ce7->romRead_LED              = romRead_LED;
+	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 	ce7->gameSoftReset            = gameSoftReset;
 	ce7->preciseVolumeControl     = preciseVolumeControl;
 
