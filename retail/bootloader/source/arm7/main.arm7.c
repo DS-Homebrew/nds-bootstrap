@@ -877,12 +877,12 @@ int arm7_main(void) {
 			*(u32*)(0x27C004C) = saveSize;
 		}
 		fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
-		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x20000, -1);
 	} else {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x20000, 0);
 	}
 	if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FF80);
+		tonccpy((char*)0x2700000, (char*)0x3700000, 0x20000);
 		romFile->fatTableCache = (u32*)0x3700000;	// Revert back for ce7 usage
 	}
 
