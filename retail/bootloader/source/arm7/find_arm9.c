@@ -1668,7 +1668,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 		offsetDmaHandler = cardReadDmaEndOffset+8;
 	}
 
-    if(*offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
+    if(moduleParams->sdk_version > 0x4000000 || *offsetDmaHandler<0x2000000 || *offsetDmaHandler>0x2400000) {
         offsetDmaHandler = cardReadDmaEndOffset+4; 
     }
 
