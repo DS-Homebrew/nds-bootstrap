@@ -509,26 +509,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00800000));
 }
 
-static vu32* storeArm9StartAddress(tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	vu32* arm9StartAddress = (vu32*)(isSdk5(moduleParams) ? ARM9_START_ADDRESS_SDK5_LOCATION : ARM9_START_ADDRESS_LOCATION);
-	/*if (isGSDD) {
-		arm9StartAddress = (vu32*)(ARM9_START_ADDRESS_4MB_LOCATION);
-	}*/
-
-	// Store for later
-	*arm9StartAddress = (vu32)ndsHeader->arm9executeAddress;
-	
-	// Exclude the ARM9 start address, so as not to start it
-	ndsHeader->arm9executeAddress = NULL; // 0
-	
-	return arm9StartAddress;
-}
-
 static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode, bool isDSiWare) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	/*if (isGSDD) {
-		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
-	}*/
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
@@ -546,6 +528,10 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 			// Clear out Digest offsets/lengths
 			toncset((char*)dsiHeader+0x1E0, 0, 0x28);
 		}
+	}
+
+	if (isSdk5(moduleParams)) {
+		tonccpy((char*)NDS_HEADER, (char*)NDS_HEADER_SDK5, 0x200);	// For resetCpu() to work
 	}
 
 	return ndsHeader;
@@ -675,14 +661,11 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
+static void startBinary_ARM7(void) {
 	REG_IME = 0;
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
-
-	// Copy NDS ARM9 start address into the header, starting ARM9
-	ndsHeader->arm9executeAddress = (void*)*tempArm9StartAddress;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -691,8 +674,12 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	if (dsiModeConfirmed) {
+		VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+		arm7code();
+	} else {
+		resetCpu();
+	}
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
@@ -946,7 +933,6 @@ int arm7_main(void) {
 	}
 	dbg_printf("\n");
 
-	vu32* arm9StartAddress = storeArm9StartAddress(&dsiHeaderTemp.ndshdr, moduleParams);
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
@@ -1178,7 +1164,7 @@ int arm7_main(void) {
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
 	}
 
-	startBinary_ARM7(arm9StartAddress);
+	startBinary_ARM7();
 
 	return 0;
 }
