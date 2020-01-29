@@ -305,7 +305,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
-        "A5F",  // Lunar Knights // works
+        "ALK",  // Lunar Knights // works
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
@@ -415,7 +415,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
-        "A5F",  // Lunar Knights // works
+        "ALK",  // Lunar Knights // works
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
