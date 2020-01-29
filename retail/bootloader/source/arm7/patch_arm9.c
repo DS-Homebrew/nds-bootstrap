@@ -432,7 +432,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
-        "YT7",  // SEGA Superstars Tennis
+        //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         "BXS",  // Sonic Colors // sdk5
         "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
