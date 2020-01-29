@@ -305,6 +305,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
+        "A5F",  // Lunar Knights // works
+        "B6Z",  // MegaMan Zero Collection // works
+        "ARZ",  // MegaMan ZX // works
+        "YZX",  // MegaMan ZX Advent // works
         //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
@@ -315,6 +319,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "IRA",  // Pokemon White // sdk5
         "IRE",  // Pokemon Black 2 // sdk5
         "IRD",  // Pokemon White 2 // sdk5
+        "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
         "YT7",  // SEGA Superstars Tennis
@@ -410,6 +415,10 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
         "BLF",  // Layton: Last Specter // sdk5
+        "A5F",  // Lunar Knights // works
+        "B6Z",  // MegaMan Zero Collection // works
+        "ARZ",  // MegaMan ZX // works
+        "YZX",  // MegaMan ZX Advent // works
         //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
@@ -420,6 +429,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "IRA",  // Pokemon White // sdk5
         "IRE",  // Pokemon Black 2 // sdk5
         "IRD",  // Pokemon White 2 // sdk5
+        "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
         "YT7",  // SEGA Superstars Tennis
