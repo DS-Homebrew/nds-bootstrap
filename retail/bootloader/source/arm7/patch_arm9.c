@@ -290,6 +290,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         "AFF",  // FF3 // works
+        "YF4",  // FF4 // works
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "Y8L",  // Golden Sun Demo // sdk5
@@ -400,6 +401,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         "AFF",  // FF3 // works
+        "YF4",  // FF4 // works
         "AXF",  // FFXII // works
         "BO5",  // Golden Sun // sdk5
         "Y8L",  // Golden Sun Demo // sdk5
