@@ -103,6 +103,14 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
+bool extention(const std::string& filename, const char* ext) {
+	if(strcasecmp(filename.c_str() + filename.size() - strlen(ext), ext)) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 /*static void getSFCG_ARM9(void) {
 	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
 	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
@@ -286,7 +294,11 @@ static int runNdsFile(configuration* conf) {
 
 	debugConf(conf);
 
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0) {
+	if ((extention(conf->ndsPath, ".nds") != 0)
+	&& (extention(conf->ndsPath, ".dsi") != 0)
+	&& (extention(conf->ndsPath, ".ids") != 0)
+	&& (extention(conf->ndsPath, ".srl") != 0)
+	&& (extention(conf->ndsPath, ".app") != 0)) {
 		dbg_printf("No NDS file specified\n");
 		if (debug) {
 			dopause();

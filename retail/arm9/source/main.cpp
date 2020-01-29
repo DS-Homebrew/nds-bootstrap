@@ -335,7 +335,11 @@ static int runNdsFile(configuration* conf) {
 
 	debugConf(conf);
 
-	if (strcasecmp(conf->ndsPath + strlen(conf->ndsPath) - 4, ".nds") != 0) {
+	if ((extention(conf->ndsPath, ".nds") != 0)
+	&& (extention(conf->ndsPath, ".dsi") != 0)
+	&& (extention(conf->ndsPath, ".ids") != 0)
+	&& (extention(conf->ndsPath, ".srl") != 0)
+	&& (extention(conf->ndsPath, ".app") != 0)) {
 		dbg_printf("No NDS file specified\n");
 		if (debug) {
 			dopause();
