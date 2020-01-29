@@ -415,11 +415,11 @@ static void nandWrite(void) {
 static bool readOngoing = false;
 
 static bool start_cardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr + 2);
-	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr + 1);
+	u32 src = sharedAddr[2];
+	u32 dst = sharedAddr[0];
+	u32 len = sharedAddr[1];
 	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr + 3);
+	u32 marker = sharedAddr[3];
 
 	dbg_printf("\ncard read received v2\n");
 

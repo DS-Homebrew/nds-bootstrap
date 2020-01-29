@@ -38,6 +38,7 @@
 #include "card_dldionly.h"
 #endif
 
+#define _16KB_READ_SIZE  0x4000
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
 #define _128KB_READ_SIZE 0x20000
@@ -62,13 +63,13 @@ static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 
 bool sdRead = false;
 #else
-static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB_SDK5] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB_SDK5];
+static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5] = {0xFFFFFFFF};
+static u32 cacheCounter[dev_CACHE_SLOTS_16KB_SDK5];
 static u32 accessCounter = 0;
 
-static u32 readSize = _32KB_READ_SIZE;
+static u32 readSize = _16KB_READ_SIZE;
 static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-static u16 cacheSlots = retail_CACHE_SLOTS_32KB_SDK5;
+static u16 cacheSlots = retail_CACHE_SLOTS_16KB_SDK5;
 #endif
 static u32 overlaysSize = 0;
 
@@ -594,12 +595,12 @@ int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 		if (ce9->consoleModel > 0) {
 			romLocation = ROM_SDK5_LOCATION;
 			cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-			cacheSlots = dev_CACHE_SLOTS_32KB_SDK5;
+			cacheSlots = dev_CACHE_SLOTS_16KB_SDK5;
 		} else if ((strncmp(romTid, "BKW", 3) == 0)
 				|| (strncmp(romTid, "VKG", 3) == 0)) {
 			romLocation = CACHE_ADRESS_START_low;
 			cacheAddress = CACHE_ADRESS_START_low;
-			cacheSlots = CACHE_SLOTS_32KB_low;
+			cacheSlots = CACHE_SLOTS_16KB_low;
 		}
 
 		if (!ce9->ROMinRAM) {

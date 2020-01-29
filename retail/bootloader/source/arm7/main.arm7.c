@@ -195,7 +195,7 @@ static void resetMemory_ARM7(void) {
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
-	toncset((u32*)0x02400000, 0, 0x3BB000);	// clear part of EWRAM - except before ce7 and ce9 binaries
+	toncset((u32*)0x02400000, 0, 0x3B9000);	// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
@@ -1007,9 +1007,9 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
 
-		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x12000);
+		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x14000);
 		if (gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, 0x12000)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, 0x14000)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -1025,7 +1025,7 @@ int arm7_main(void) {
 				}
 			} else {
 				ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x2000);
+				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 0x3000);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
@@ -1141,7 +1141,7 @@ int arm7_main(void) {
 		}
 	}
 
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
+	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x37000);
 
     
 

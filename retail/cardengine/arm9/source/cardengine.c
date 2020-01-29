@@ -38,6 +38,7 @@
 #include "card_dldionly.h"
 #endif
 
+#define _16KB_READ_SIZE  0x4000
 #define _32KB_READ_SIZE  0x8000
 #define _64KB_READ_SIZE  0x10000
 #define _128KB_READ_SIZE 0x20000
@@ -77,9 +78,9 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
-static u32 readSize = _32KB_READ_SIZE;
+static u32 readSize = _16KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
-static u16 cacheSlots = retail_CACHE_SLOTS_32KB;
+static u16 cacheSlots = retail_CACHE_SLOTS_16KB;
 #endif
 static u32 overlaysSize = 0;
 
@@ -775,7 +776,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (!ce9->ROMinRAM && strncmp(romTid, "UBR", 3) == 0) {
 			loadOverlaysFromRam = false;
 			cacheAddress = CACHE_ADRESS_START_low;
-			cacheSlots = CACHE_SLOTS_32KB_low;
+			cacheSlots = CACHE_SLOTS_16KB_low;
 		} else {
 			if (ce9->dsiMode) {
 				romLocation = ROM_SDK5_LOCATION;
@@ -787,10 +788,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 
 			if (ce9->consoleModel > 0) {
-				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_32KB_SDK5 : dev_CACHE_SLOTS_32KB);
+				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_16KB_SDK5 : dev_CACHE_SLOTS_16KB);
 			} else {
-				//cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_32KB_low : retail_CACHE_SLOTS_32KB);
-				cacheSlots = retail_CACHE_SLOTS_32KB;
+				//cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_16KB_low : retail_CACHE_SLOTS_16KB);
+				cacheSlots = retail_CACHE_SLOTS_16KB;
 			}
 
 			if (!ce9->ROMinRAM) {
