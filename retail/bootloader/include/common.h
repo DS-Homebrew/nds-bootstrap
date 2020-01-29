@@ -23,8 +23,8 @@
 #include <nds/dma.h>
 #include <nds/memory.h> // tNDSHeader
 
-/*#define resetCpu() \
-		__asm volatile("swi 0x000000")*/
+#define resetCpu() \
+		__asm volatile("swi 0x000000")
 
 enum {
 	ERR_NONE         = 0x00,
