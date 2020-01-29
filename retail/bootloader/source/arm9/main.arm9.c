@@ -292,12 +292,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	if (dsiModeConfirmed) {
-		VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-		arm9code();
-	} else {
-		resetCpu();
-	}
-
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();
+	
 	while (1);
 }
