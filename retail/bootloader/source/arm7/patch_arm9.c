@@ -284,6 +284,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "YGX",  // GTA Chinatown Wars // works
         "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
         "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
+        "YBA",  // Bomberman 2 // works
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
@@ -388,6 +389,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "YGX",  // GTA Chinatown Wars // works
         "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
         "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
+        "YBA",  // Bomberman 2 // works
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
         //"ACV",  // Castlevania DOS // black screen issue to be investigated
