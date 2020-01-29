@@ -114,6 +114,10 @@ int hookNdsRetailArm7(
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
+	if (ndsHeader->arm7binarySize < 0x1000) {
+		return ERR_NONE;
+	}
+
 	u32* hookLocation = patchOffsetCache.a7IrqHandlerOffset;
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
