@@ -275,7 +275,7 @@ static int runNdsFile(configuration* conf) {
 	fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
-	/*if (conf->logging) {
+	if (conf->logging) {
 		static FILE* loggingFile;
 		loggingFile = fopen("fat:/NDSBTSRP.LOG", "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
@@ -289,8 +289,8 @@ static int runNdsFile(configuration* conf) {
 
 		fclose(loggingFile);
 	} else {
-	//	remove("fat:/NDSBTSRP.LOG");
-	}*/
+		remove("fat:/NDSBTSRP.LOG");
+	}
 
 	debugConf(conf);
 
