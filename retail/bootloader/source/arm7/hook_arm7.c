@@ -128,7 +128,7 @@ int hookNdsRetailArm7(
 	if (!hookLocation && sdk5) {
 		switch (ndsHeader->arm7binarySize) {
 			case 0x0001D5A8:
-				hookLocation = (u32*)0x239D280;		// DS wiFi Settings
+				hookLocation = (u32*)0x239D280;		// DS WiFi Settings
 				break;
 
 			case 0x00022B40:

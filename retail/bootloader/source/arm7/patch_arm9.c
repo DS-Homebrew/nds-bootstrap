@@ -237,7 +237,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 	if (cardIdStartOffset) {
 		dbg_printf("Found cardId\n\n");
-                
+
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
@@ -674,7 +674,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = *heapPointer + (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6 KB (or for SDK5, 12 KB)
+	*heapPointer += (isSdk5(moduleParams) ? 0x4000 : 0x2000); // shrink heap by 6 KB (or for SDK5, 12 KB)
 
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
