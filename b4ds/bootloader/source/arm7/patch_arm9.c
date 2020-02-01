@@ -404,15 +404,12 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	u32 shrinksize = 0;
-	for (u32 i = 0; i <= (ndsHeader->romSize>0 ? ndsHeader->romSize : romSize)+saveSize; i += 0x200) {
-		shrinksize += 4;
-	}
+	u32 shrinksize = ((ndsHeader->romSize>0 ? ndsHeader->romSize : romSize)/0x2000)+(saveSize/0x2000);
 	if (shrinksize > 0x4000) {
 		shrinksize = 0x4000;
 	}
 
-	*heapPointer = *heapPointer + shrinksize; // shrink heap by FAT table cache size
+	*heapPointer += shrinksize; // shrink heap by FAT table cache size
 
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
