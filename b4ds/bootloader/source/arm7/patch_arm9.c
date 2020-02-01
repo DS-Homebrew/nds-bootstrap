@@ -404,7 +404,13 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
-	u32 shrinksize = ((ndsHeader->romSize>0 ? ndsHeader->romSize : romSize)/0x2000)+(saveSize/0x2000);
+	u32 shrinksize = 0;
+	for (u32 i = 0; i <= (ndsHeader->romSize>0 ? ndsHeader->romSize : romSize)/0x2000; i += 4) {
+		shrinksize = i;
+	}
+	for (u32 i = 0; i <= saveSize/0x2000; i += 4) {
+		shrinksize += i;
+	}
 	if (shrinksize > 0x4000) {
 		shrinksize = 0x4000;
 	}
