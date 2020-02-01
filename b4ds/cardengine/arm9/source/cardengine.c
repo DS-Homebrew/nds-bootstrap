@@ -133,10 +133,7 @@ static void initialize(void) {
 		}
 
 		if (ndsHeader->romSize > 0) {
-			u32 shrinksize = 0;
-			for (u32 i = 0; i <= ndsHeader->romSize; i += 0x200) {
-				shrinksize += 4;
-			}
+			u32 shrinksize = (ndsHeader->romSize)/0x2000;
 			if (shrinksize > ce9->maxClusterCacheSize) {
 				shrinksize = ce9->maxClusterCacheSize;
 			}
