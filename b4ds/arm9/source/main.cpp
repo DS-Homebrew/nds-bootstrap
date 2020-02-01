@@ -299,9 +299,12 @@ static int runNdsFile(configuration* conf) {
 	&& (extention(conf->ndsPath, ".ids") != 0)
 	&& (extention(conf->ndsPath, ".srl") != 0)
 	&& (extention(conf->ndsPath, ".app") != 0)) {
-		dbg_printf("No NDS file specified\n");
 		if (debug) {
+			dbg_printf("No NDS file specified\n");
 			dopause();
+		} else {
+			consoleDemoInit();
+			printf("No NDS file specified\n");
 		}
 		return -1;
 	}
@@ -370,7 +373,7 @@ int main(int argc, char** argv) {
 		status = runNdsFile(conf);
 		if (status != 0) {
 			powerOff(PM_BACKLIGHT_TOP);
-			dbg_printf("Start failed. Error %i\n", status);
+			debug ? dbg_printf("Start failed. Error %i\n", status) : printf("Start failed. Error %i\n", status);
 		}
 	}
 
