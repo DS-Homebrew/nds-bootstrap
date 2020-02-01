@@ -148,9 +148,9 @@ static void initialize(void) {
 		romFile = getFileFromCluster(ce9->fileCluster);
 		buildFatTableCache(&romFile);
 
-		//clusterCacheSize = ce9->maxClusterCacheSize;
+		clusterCacheSize = ce9->maxClusterCacheSize;
 		savFile = getFileFromCluster(ce9->saveCluster);
-		//buildFatTableCache(&savFile);
+		buildFatTableCache(&savFile);
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
