@@ -162,6 +162,16 @@ static void updateDescriptor(int slot, u32 sector) {
 }
 #endif
 
+void user_exception(void);
+
+//---------------------------------------------------------------------------------
+void setExceptionHandler2() {
+//---------------------------------------------------------------------------------
+	exceptionStack = (u32)0x23EFFFC ;
+	EXCEPTION_VECTOR = enterException ;
+	*exceptionC = user_exception;
+}
+
 #ifndef DLDI
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
@@ -418,7 +428,7 @@ void cardSetDma (u32 * params) {
 #else
 
 void cardSetDma(void) {
-    return false;
+    return;
 }
 
 
@@ -572,6 +582,7 @@ u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		setExceptionHandler2();
 		const char* romTid = getRomTid(ndsHeader);
 		#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {
