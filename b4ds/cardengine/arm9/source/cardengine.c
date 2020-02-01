@@ -133,7 +133,7 @@ static void initialize(void) {
 		}
 
 		if (ndsHeader->romSize > 0) {
-			u32 shrinkSize = 0;
+			u32 shrinksize = 0;
 			for (u32 i = 0; i <= (ndsHeader->romSize)/0x2000; i += 4) {
 				shrinksize = i;
 			}
