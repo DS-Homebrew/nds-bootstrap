@@ -23,7 +23,7 @@ nds-bootstrap also supports many homebrew applications, including games like DSC
 
 # Compiling
 
-In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries. devkitPro includes `dkp-pacman` for easy installation of all components:
+In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries, as well as lzss from [here](https://www.romhacking.net/download/utilities/826/), which goes in the `retail` folder. devkitPro includes `dkp-pacman` for easy installation of all components:
 
 ```
  $ dkp-pacman -Syu devkitARM devkitarm-rules general-tools dstools ndstool libnds libfat-nds
