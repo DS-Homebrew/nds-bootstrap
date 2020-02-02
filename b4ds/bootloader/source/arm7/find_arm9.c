@@ -79,10 +79,10 @@ static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // irq enable
-static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
-static const u32 irqEnableStartSignatureThumb1[5] = {0x4D07B430, 0x2100882C, 0x4B068029, 0x1C11681A, 0x60194301};		// SDK <= 2
-static const u32 irqEnableStartSignatureThumb3[4] = {0x4C07B418, 0x88232100, 0x32081C22, 0x68118021};					// SDK >= 3
-static const u32 irqEnableStartSignature4[4]      = {0xE59F3024, 0xE3A01000, 0xE1D320B0, 0xE1C310B0};					// SDK >= 4
+static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
+static const u32 irqEnableStartSignature4[4]        = {0xE59F3024, 0xE3A01000, 0xE1D320B0, 0xE1C310B0};					// SDK >= 4
+static const u32 irqEnableStartSignatureThumb[5]    = {0x4D07B430, 0x2100882C, 0x4B068029, 0x1C11681A, 0x60194301};		// SDK <= 3
+static const u32 irqEnableStartSignatureThumbAlt[4] = {0x4C07B418, 0x88232100, 0x32081C22, 0x68118021};					// SDK >= 3
 
 // Mpu cache
 static const u32 mpuInitRegion0Signature[1] = {0xEE060F10};
@@ -1095,13 +1095,6 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
-	const u32* irqEnableStartSignatureThumb = irqEnableStartSignatureThumb1;
-	int irqEnableStartSignatureThumbLen = 4;
-	if (moduleParams->sdk_version > 0x3000000) {
-		irqEnableStartSignatureThumb = irqEnableStartSignatureThumb3;
-	} else {
-		irqEnableStartSignatureThumbLen = 5;
-	}
 	if (moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
@@ -1131,7 +1124,20 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset) {
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
-            irqEnableStartSignatureThumb, irqEnableStartSignatureThumbLen
+            irqEnableStartSignatureThumb, 5
+		);
+		if (cardIrqEnableOffset) {
+			*usesThumb = true;
+			dbg_printf("irq enable thumb found: ");
+		} else {
+			dbg_printf("irq enable thumb not found\n");
+		}
+	}
+
+	if (!cardIrqEnableOffset) {
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
+            irqEnableStartSignatureThumbAlt, 4
 		);
 		if (cardIrqEnableOffset) {
 			*usesThumb = true;
