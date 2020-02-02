@@ -1095,7 +1095,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
-	if (moduleParams->sdk_version > 0x4000000) {
+	if (moduleParams->sdk_version > 0x4008000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
 
@@ -1109,7 +1109,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		dbg_printf("irq enable not found\n");
 	}
 
-	if (!cardIrqEnableOffset && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+	if (!cardIrqEnableOffset && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
             irqEnableStartSignature4, 4
@@ -1121,7 +1121,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
-	if (!cardIrqEnableOffset) {
+	if (!cardIrqEnableOffset && moduleParams->sdk_version < 0x4008000) {
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//, ndsHeader->arm9binarySize,
             irqEnableStartSignatureThumb, 5
