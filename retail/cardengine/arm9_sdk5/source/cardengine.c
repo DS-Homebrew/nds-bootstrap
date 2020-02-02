@@ -77,7 +77,8 @@ static bool flagsSet = false;
 static bool loadOverlaysFromRam = true;
 static bool isDma = false;
 static bool dmaLed = false;
-static u8 dma = 4;
+
+static u32 tempDmaParams[10] = {0};
 
 #ifndef DLDI
 static inline 
@@ -355,10 +356,10 @@ void cardSetDma (u32 * params) {
 	enableIPCSYNC();
 	#endif
 
-    dmaParams = params;
-    u32 src = dmaParams[3];
+	dmaParams = params;
+	u32 src = dmaParams[3];
 	u8* dst = (u8*)dmaParams[4];
-	u32 len = dmaParams[5];    
+	u32 len = dmaParams[5];
 
 	#ifdef DLDI
 	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
@@ -542,43 +543,75 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 }
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
-	while (len > 0) {
-		/*if (isDma) {
-            // Copy via dma
-  			dmaCopyWordsAsynch(dma, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len);
-            while (dmaBusy(dma)) {
-                sleep(1);
-            }        
-		} else {*/
-			#ifdef DEBUG
-			// Send a log command for debug purpose
-			// -------------------------------------
-			commandRead = 0x026ff800;
+	#ifdef DEBUG
+	// Send a log command for debug purpose
+	// -------------------------------------
+	commandRead = 0x026ff800;
 
-			sharedAddr[0] = dst;
-			sharedAddr[1] = len;
-			sharedAddr[2] = ((romLocation-0x4000-ndsHeader->arm9binarySize)+src);
-			sharedAddr[3] = commandRead;
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = ((romLocation-0x4000-ndsHeader->arm9binarySize)+src);
+	sharedAddr[3] = commandRead;
 
-			waitForArm7();
-			// -------------------------------------
-			#endif
+	waitForArm7();
+	// -------------------------------------
+	#endif
 
-			// Copy directly
-			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), len);
-		//}
+	// Copy directly
+	tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), len);
 
-		len = len - len;
-		if (len > 0) {
-			src = src + len;
-			dst = (u8*)(dst + len);
-		}
-	}
 	return 0;
 }
 
-u32 cardReadDma(u32 dma0, void *dst, u32 src, u32 len) {
-    return 0;    
+bool isNotTcm(u32 address, u32 len) {
+    u32 base = (getDtcmBase()>>12) << 12;
+    return    // test data not in ITCM
+    address > 0x02000000
+    // test data not in DTCM
+    && (address < base || address> base+0x4000)
+    && (address+len < base || address+len> base+0x4000);     
+}  
+
+u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
+	tempDmaParams[3] = src;
+	tempDmaParams[4] = (u32)dst;
+	tempDmaParams[5] = len;
+
+    if(dma >= 0 
+        && dma <= 3 
+        //&& func != NULL
+        && len > 0
+        && !(((int)dst) & 3)
+        && isNotTcm(dst, len)
+        // check 512 bytes page alignement 
+        && !(((int)len) & 511)
+        && !(((int)src) & 511)
+	) {
+		dmaLed = true;
+
+        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
+		{
+			isDma = true;
+			// new dma method
+
+            cacheFlush();
+
+            cardSetDma(tempDmaParams);
+
+            return true;
+		} else {
+			isDma = false;
+			dma=4;
+            clearIcache();
+		}
+    } else {
+		dmaLed = false;
+        isDma = false;
+        dma=4;
+        clearIcache();
+    }
+
+    return 0;
 }
 
 int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {

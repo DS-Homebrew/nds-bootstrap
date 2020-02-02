@@ -334,6 +334,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "A8Q",  // Theme Park // works
         "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
+		"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
     };
 
 	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
@@ -387,6 +388,10 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return false;
+	}
+
     dbg_printf("\npatchCardSetDma\n");           
 
 	bool dmaAllowed = false;
@@ -394,7 +399,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	static const char list[][4] = {
         "YGX",  // GTA Chinatown Wars // works
         "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
-        "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
+        //"A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
         "YBA",  // Bomberman 2 // works
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
@@ -403,20 +408,20 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "AFF",  // FF3 // works
         "YF4",  // FF4 // works
         "AXF",  // FFXII // works
-        "BO5",  // Golden Sun // sdk5
-        "Y8L",  // Golden Sun Demo // sdk5
+        //"BO5",  // Golden Sun // sdk5
+        //"Y8L",  // Golden Sun Demo // sdk5
         "AWI",  // Hotel Dusk // works
 		"YEE",	// Inazuma Eleven
-		"BEE",	// Inazuma Eleven 2 - Firestorm
-		"BEB",	// Inazuma Eleven 2 - Blizzard
-		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
-		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
-		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
+		//"BEE",	// Inazuma Eleven 2 - Firestorm
+		//"BEB",	// Inazuma Eleven 2 - Blizzard
+		//"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		//"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		//"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
         //"C6C",  // Infinite Space // freezes after SEGA logo
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
-        "BLF",  // Layton: Last Specter // sdk5
+        //"BLF",  // Layton: Last Specter // sdk5
         "ALK",  // Lunar Knights // works
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
@@ -427,16 +432,16 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "CPU",  // Pokemon Platinum // works
         "IPK",  // Pokemon HeartGold // works
         "IPG",  // Pokemon SoulSilver // works
-        "IRB",  // Pokemon Black // sdk5
-        "IRA",  // Pokemon White // sdk5
-        "IRE",  // Pokemon Black 2 // sdk5
-        "IRD",  // Pokemon White 2 // sdk5
+        //"IRB",  // Pokemon Black // sdk5
+        //"IRA",  // Pokemon White // sdk5
+        //"IRE",  // Pokemon Black 2 // sdk5
+        //"IRD",  // Pokemon White 2 // sdk5
         "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
         //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
-        "BXS",  // Sonic Colors // sdk5
+        //"BXS",  // Sonic Colors // sdk5
         "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
@@ -445,6 +450,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "A8Q",  // Theme Park // works
         "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
+		//"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
     };
 
 	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {

@@ -650,7 +650,7 @@ u32 cardReadDma() {
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
     u32 dma = cardStruct[3]; // dma channel
-    
+
     if(dma >= 0 
         && dma <= 3 
         //&& func != NULL
@@ -659,42 +659,33 @@ u32 cardReadDma() {
         && isNotTcm(dst, len)
         // check 512 bytes page alignement 
         && !(((int)len) & 511)
-        && !(((int)src) & 511) 
+        && !(((int)src) & 511)
 	) {
 		dmaLed = true;
 
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
-            isDma = true;
-           // new dma method
-              /*if (src == 0) {
-          		// If ROM read location is 0, do not proceed.
-          		return false;
-          	}
+			isDma = true;
+			// new dma method
 
-          	// Fix reads below 0x8000
-          	if (src <= 0x8000){
-          		src = 0x8000 + (src & 0x1FF);
-          	}*/
-
-            cacheFlush();  
+            cacheFlush();
 
             cardSetDma();
 
-            return true; 
+            return true;
 		} else {
 			isDma = false;
 			dma=4;
-            clearIcache();        
+            clearIcache();
 		}
     } else {
 		dmaLed = false;
         isDma = false;
-        dma=4;        
-        clearIcache();        
+        dma=4;
+        clearIcache();
     }
-    
-    return 0;    
+
+    return 0;
 }
 
 static int counter=0;
