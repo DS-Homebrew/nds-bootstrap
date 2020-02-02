@@ -614,7 +614,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
     return 0;
 }
 
-int cardRead(u32* cacheStruct, u8* dst, u32 src, u32 len) {
+int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		setExceptionHandler2();

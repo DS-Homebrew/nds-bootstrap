@@ -278,6 +278,10 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return false;
+	}
+
 	bool dmaAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
 	static const char list[][4] = {
