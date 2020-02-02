@@ -113,6 +113,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	bool expansionPakFound,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 ) {
@@ -121,6 +122,7 @@ int hookNdsRetailArm9(
 	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->expansionPakFound      = expansionPakFound;
 	ce9->maxClusterCacheSize    = maxClusterCacheSize;
 	ce9->fatTableAddr           = fatTableAddr;
 

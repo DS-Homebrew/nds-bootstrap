@@ -55,6 +55,7 @@ typedef struct cardengineArm9 {
     u32 fileCluster;
     u32 saveCluster;
     u32 cardStruct0;
+    u32 expansionPakFound;
     u32 maxClusterCacheSize;
     u32 fatTableAddr;
     u32* irqTable;

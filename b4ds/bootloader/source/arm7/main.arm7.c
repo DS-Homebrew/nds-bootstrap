@@ -656,57 +656,65 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	u32 fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
+	u32 fatTableAddr = 0;
 	u32 fatTableSize = 0;
-	switch (ndsHeader->deviceSize) {
-		case 0x00:
-			fatTableSize = 0x10;	// 0x20000
-			break;
-		case 0x01:
-			fatTableSize = 0x20;	// 0x40000
-			break;
-		case 0x02:
-			fatTableSize = 0x40;	// 0x80000
-			break;
-		case 0x03:
-			fatTableSize = 0x80;	// 0x100000
-			break;
-		case 0x04:
-			fatTableSize = 0x100;	// 0x200000
-			break;
-		case 0x05:
-			fatTableSize = 0x200;	// 0x400000
-			break;
-		case 0x06:
-			fatTableSize = 0x400;	// 0x800000
-			break;
-		case 0x07:
-			fatTableSize = 0x800;	// 0x1000000
-			break;
-		case 0x08:
-			fatTableSize = 0x1000;	// 0x2000000
-			break;
-		case 0x09:
-			fatTableSize = 0x2000;	// 0x4000000
-			break;
-		case 0x0A:
-			fatTableSize = 0x4000;	// 0x8000000
-			break;
-		case 0x0B:
-			fatTableSize = 0x8000;	// 0x10000000
-			break;
-		case 0x0C:
-			fatTableSize = 0x10000;	// 0x20000000
-			break;
-	}
-	if (moduleParams->sdk_version <= 0x2007FFF) {
-		fatTableAddr = 0x023E8000;
-	} else if (!ceCached) {
-		fatTableAddr = 0x023D8000;
+	*(vu32*)(0x08240000) = 1;
+	bool expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
+	if (expansionPakFound) {
+		fatTableAddr = 0x09000000;
+		fatTableSize = 0x20000;
+	} else {
+		fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
+		switch (ndsHeader->deviceSize) {
+			case 0x00:
+				fatTableSize = 0x10;	// 0x20000
+				break;
+			case 0x01:
+				fatTableSize = 0x20;	// 0x40000
+				break;
+			case 0x02:
+				fatTableSize = 0x40;	// 0x80000
+				break;
+			case 0x03:
+				fatTableSize = 0x80;	// 0x100000
+				break;
+			case 0x04:
+				fatTableSize = 0x100;	// 0x200000
+				break;
+			case 0x05:
+				fatTableSize = 0x200;	// 0x400000
+				break;
+			case 0x06:
+				fatTableSize = 0x400;	// 0x800000
+				break;
+			case 0x07:
+				fatTableSize = 0x800;	// 0x1000000
+				break;
+			case 0x08:
+				fatTableSize = 0x1000;	// 0x2000000
+				break;
+			case 0x09:
+				fatTableSize = 0x2000;	// 0x4000000
+				break;
+			case 0x0A:
+				fatTableSize = 0x4000;	// 0x8000000
+				break;
+			case 0x0B:
+				fatTableSize = 0x8000;	// 0x10000000
+				break;
+			case 0x0C:
+				fatTableSize = 0x10000;	// 0x20000000
+				break;
+		}
+		if (moduleParams->sdk_version <= 0x2007FFF) {
+			fatTableAddr = 0x023E8000;
+		} else if (!ceCached) {
+			fatTableAddr = 0x023D8000;
+		}
 	}
 	if (extendedMemory) {
 		fatTableAddr = 0x02700000;
-		fatTableSize = 0x40000;
+		fatTableSize = 0x20000;
 	}
 
 	errorCode = hookNdsRetailArm9(
@@ -714,6 +722,7 @@ int arm7_main(void) {
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
+		expansionPakFound,
 		fatTableSize,
 		fatTableAddr
 	);

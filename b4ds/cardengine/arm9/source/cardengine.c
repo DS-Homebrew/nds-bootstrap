@@ -55,9 +55,10 @@ static aFile savFile;
 static int cardReadCount = 0;
 
 static inline void setDeviceOwner(void) {
-	if (_io_dldi_features & 0x00000010) {
+	if (ce9->expansionPakFound || (_io_dldi_features & 0x00000010)) {
 		sysSetCartOwner (BUS_OWNER_ARM9);
-	} else {
+	}
+	if (_io_dldi_features & 0x00000020) {
 		sysSetCardOwner (BUS_OWNER_ARM9);
 	}
 }
@@ -132,7 +133,9 @@ static void initialize(void) {
 			while (1);
 		}
 
-		if (ndsHeader->romSize > 0) {
+		if (ce9->expansionPakFound) {
+			clusterCacheSize = ce9->maxClusterCacheSize;
+		} else if (ndsHeader->romSize > 0) {
 			u32 shrinksize = 0;
 			for (u32 i = 0; i <= (ndsHeader->romSize)/0x2000; i += 4) {
 				shrinksize = i;

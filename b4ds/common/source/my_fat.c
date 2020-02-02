@@ -31,6 +31,7 @@
    
 #include <string.h> // tonccpy
 #include "tonccpy.h"
+#include "nds_header.h"
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
@@ -203,8 +204,8 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #define CLUSTER_CACHE      0x2780000 // WRAM C+B
 #define CLUSTER_CACHE_SIZE 0x4000 // 16K
 
-#define ONE_CACHE  0x37C5000 // WRAM A
-#define ONE_CACHE_SIZE 0x10000 // 64K
+//static char oneCache[0x200];
+//u32 lastOneCacheUsed = -1;
 
 u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
@@ -884,13 +885,23 @@ void buildFatTableCache (aFile * file) {
 	file->fatTableCache = lastClusterCacheUsed;
 
 	// Follow cluster list until desired one is found
-	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+clusterCacheSize)
-	{
-		*lastClusterCacheUsed = file->currentCluster;
-		file->currentOffset+=discBytePerClus;
-		file->currentCluster = FAT_NextCluster (file->currentCluster);
-		lastClusterCacheUsed++;
+	if ((*(vu32*)(0x08240000) == 1) && (memcmp((char*)0x027FFE0C, "UBRP", 4) != 0)) {
+		while ((file->currentCluster != CLUSTER_EOF) && (file->firstCluster != CLUSTER_FREE))
+		{
+			*lastClusterCacheUsed = file->currentCluster;
+			file->currentOffset+=discBytePerClus;
+			file->currentCluster = FAT_NextCluster (file->currentCluster);
+			lastClusterCacheUsed++;
+		}
+	} else {
+		while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
+			&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+clusterCacheSize)
+		{
+			*lastClusterCacheUsed = file->currentCluster;
+			file->currentOffset+=discBytePerClus;
+			file->currentCluster = FAT_NextCluster (file->currentCluster);
+			lastClusterCacheUsed++;
+		}
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
