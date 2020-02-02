@@ -28,6 +28,10 @@ cardStruct0:
 	.word	0x00000000
 expansionPakFound:
 	.word	0x00000000
+extendedMemory:
+	.word	0x00000000
+dsDebugRam:
+	.word	0x00000000
 overlaysSize:
 	.word	0x00000000
 maxClusterCacheSize:

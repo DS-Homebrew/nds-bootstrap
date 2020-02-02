@@ -162,8 +162,10 @@ static void initialize(void) {
 			debug8mbMpuFix();
 		}
 
-		if (ce9->expansionPakFound && ce9->overlaysSize<0x7E0000) {
+		if (ce9->expansionPakFound || (ce9->extendedMemory && !ce9->dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
+		  if (ce9->overlaysSize<0x7E0000) {
 			loadOverlaysFromRam = true;
+		  }
 		}
 
 		initialized = true;
@@ -239,7 +241,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		tonccpy(dst, (u8*)((0x09000000-0x4000-ndsHeader->arm9binarySize)+src),len);
+		if (ce9->extendedMemory && !ce9->dsDebugRam) {
+			tonccpy(dst, (u8*)((0x0C800000-0x4000-ndsHeader->arm9binarySize)+src),len);
+		} else {
+			tonccpy(dst, (u8*)((0x09000000-0x4000-ndsHeader->arm9binarySize)+src),len);
+		}
 		return 0;
 	}
 

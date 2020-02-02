@@ -9,6 +9,9 @@
 #include "locations.h"
 #include "tonccpy.h"
 
+extern bool extendedMemory;
+extern bool dsDebugRam;
+
 void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -24,7 +27,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			rombyte = (void*)0x09000000;
+			rombyte = (void*)(extendedMemory&&!dsDebugRam ? 0x0C800000 : 0x09000000);
 			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}
 		ipson += 3;

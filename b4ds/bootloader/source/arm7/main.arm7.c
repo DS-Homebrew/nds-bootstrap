@@ -491,7 +491,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (overlaysSize < 0x7E0000)
 	{
-		u32 overlaysLocation = 0x09000000;
+		u32 overlaysLocation = (extendedMemory&&!dsDebugRam ? 0x0C800000 : 0x09000000);
 		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
 
 		if (!isSdk5(moduleParams)) {
@@ -736,7 +736,7 @@ int arm7_main(void) {
 		fatTableSize = 0x20000;
 	}
 
-	if (expansionPakFound) {
+	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
 		loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
 	}
 
@@ -746,6 +746,8 @@ int arm7_main(void) {
 		romFile->firstCluster,
 		savFile->firstCluster,
 		expansionPakFound,
+		extendedMemory,
+		dsDebugRam,
 		overlaysSize,
 		fatTableSize,
 		fatTableAddr
