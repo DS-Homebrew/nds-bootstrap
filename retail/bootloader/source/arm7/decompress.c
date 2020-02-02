@@ -21,8 +21,6 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-static const unsigned char* dsi_encr_data = (unsigned char*)DSI_BLOWFISH_LOCATION;
-
 static const unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION;
 
 /*static void decompressLZ77Backwards(u8* addr, u32 size) {
@@ -243,9 +241,9 @@ void init2(u32 *magic, u32 a[3])
 	update_hashtable(magic, (u8*)a);
 }
 
-void init1(u32 cardheader_gamecode, bool dsi)
+void init1(u32 cardheader_gamecode)
 {
-	tonccpy(card_hash, dsi ? dsi_encr_data : encr_data, 4*(1024 + 18));
+	tonccpy(card_hash, encr_data, 4*(1024 + 18));
 	arg2[0] = *(u32 *)&cardheader_gamecode;
 	arg2[1] = (*(u32 *)&cardheader_gamecode) >> 1;
 	arg2[2] = (*(u32 *)&cardheader_gamecode) << 1;
@@ -271,7 +269,7 @@ bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 
 	u32 cardheader_gamecode = *(u32*)dsiHeader->ndshdr.gameCode;
 
-	init1(cardheader_gamecode, false);
+	init1(cardheader_gamecode);
 	decrypt(card_hash, p+1, p);
 	arg2[1] <<= 1;
 	arg2[2] >>= 1;	

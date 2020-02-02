@@ -195,6 +195,7 @@ static void waitForArm7(void) {
         }
     //}
 }
+#endif
 
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
@@ -205,10 +206,11 @@ void endCardReadDma() {
     }    
 }
 
+static u32 * dmaParams = NULL;
+#ifndef DLDI
 static int currentLen=0;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
-static u32 * dmaParams = NULL;
 
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {             
@@ -333,28 +335,36 @@ void continueCardReadDmaArm7() {
         IPC_SendSync(0x3);
     }
 }
+#endif
 
 void cardSetDma (u32 * params) {
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
 
-    // reset IPC_SYNC IRQs    
-    resetRequestIrqMask(IRQ_IPC_SYNC);
+	#ifndef DLDI
+	// reset IPC_SYNC IRQs    
+	resetRequestIrqMask(IRQ_IPC_SYNC);
 
-    int oldIME = enterCriticalSection();
+	int oldIME = enterCriticalSection();
 
-    hookIPC_SYNC();
+	hookIPC_SYNC();
 
-    leaveCriticalSection(oldIME); 
+	leaveCriticalSection(oldIME); 
 
-    enableIPCSYNC();
+	enableIPCSYNC();
+	#endif
 
     dmaParams = params;
     u32 src = dmaParams[3];
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];    
 
+	#ifdef DLDI
+	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	fileRead((char*)dst, *romFile, src, len, 0);
+	endCardReadDma();
+	#else
     u32 commandRead=0x025FFB0A;
     u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
@@ -419,20 +429,12 @@ void cardSetDma (u32 * params) {
         ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
         dmaReadOnArm9 = true;
         currentLen= len2;
-          
+
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
-      }
+	}
+	#endif
 }
-
-#else
-
-void cardSetDma(void) {
-    return;
-}
-
-
-#endif
 
 static void clearIcache (void) {
       // Seems to have no effect

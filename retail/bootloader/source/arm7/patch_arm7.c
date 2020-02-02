@@ -157,7 +157,7 @@ u32 patchCardNdsArm7(
 
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
-	|| (!ROMinRAM && !gameOnFlashcard)) {
+	|| ROMinRAM || !gameOnFlashcard) {
 		if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 			return 0;
 		}

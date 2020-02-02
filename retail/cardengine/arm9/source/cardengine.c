@@ -162,6 +162,7 @@ static void waitForArm7(void) {
     //}
 }
 
+#ifndef DLDI
 static inline 
 /*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
 \brief copies from source to destination on one of the 4 available channels in half words.  
@@ -227,6 +228,7 @@ static void disableIPCSYNC(void) {
     REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;  
     disableIrqMask(IRQ_IPC_SYNC);
 }
+#endif
 
 static void clearIcache (void) {
       // Seems to have no effect
@@ -237,32 +239,6 @@ static void clearIcache (void) {
       leaveCriticalSection(oldIME);*/
 }
 
-/*static inline bool isGameLaggy(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-	//return (strncmp(romTid, "ASM", 3) == 0  // Super Mario 64 DS (fixes sound crackles, breaks Mario's Holiday)
-	return (strncmp(romTid, "AP2", 3) == 0   // Metroid Prime Pinball
-		|| strncmp(romTid, "ADM", 3) == 0   // Animal Crossing: Wild World (fixes some sound crackles)
-		|| strncmp(romTid, "APT", 3) == 0   // Pokemon Trozei (slightly boosts load speed)
-		|| strncmp(romTid, "A2D", 3) == 0   // New Super Mario Bros. (fixes sound crackles)
-		|| strncmp(romTid, "ARZ", 3) == 0   // MegaMan ZX (slightly boosts load speed)
-		|| strncmp(romTid, "AC9", 3) == 0   // Spider-Man: Battle for New York
-		|| strncmp(romTid, "YZX", 3) == 0   // MegaMan ZX Advent (slightly boosts load speed)
-		|| strncmp(romTid, "YCT", 3) == 0   // Contra 4 (slightly boosts load speed)
-		|| strncmp(romTid, "YT7", 3) == 0   // SEGA Superstars Tennis (fixes some sound issues)
-		|| strncmp(romTid, "CS5", 3) == 0   // Spider-Man: Web of Shadows
-		|| strncmp(romTid, "YGX", 3) == 0   // Grand Theft Auto: Chinatown Wars
-		|| strncmp(romTid, "CS3", 3) == 0   // Sonic & SEGA All-Stars Racing
-		|| strncmp(romTid, "VSO", 3) == 0   // Sonic Classic Collection
-		|| strncmp(romTid, "IPK", 3) == 0   // Pokemon HeartGold
-		|| strncmp(romTid, "IPG", 3) == 0   // Pokemon SoulSilver
-		|| strncmp(romTid, "B6Z", 3) == 0   // MegaMan Zero Collection (slightly boosts load speed)
-		|| strncmp(romTid, "IRB", 3) == 0   // Pokemon Black
-		|| strncmp(romTid, "IRA", 3) == 0   // Pokemon White
-		|| strncmp(romTid, "IRE", 3) == 0   // Pokemon Black 2
-		|| strncmp(romTid, "IRD", 3) == 0); // Pokemon White 2
-}*/
-
-#ifndef DLDI
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
         volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
@@ -272,6 +248,7 @@ void endCardReadDma() {
     }    
 }
 
+#ifndef DLDI
 static int currentLen=0;
 
 void continueCardReadDmaArm9() {
@@ -400,6 +377,7 @@ void continueCardReadDmaArm7() {
         IPC_SendSync(0x3);
     }
 }
+#endif
 
 void cardSetDma(void) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
@@ -407,24 +385,31 @@ void cardSetDma(void) {
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE );
 
-    // reset IPC_SYNC IRQs     
-    resetRequestIrqMask(IRQ_IPC_SYNC);
+	#ifndef DLDI
+	// reset IPC_SYNC IRQs     
+	resetRequestIrqMask(IRQ_IPC_SYNC);
 
     int oldIME = enterCriticalSection();
-    
+
     hookIPC_SYNC();
-    
+
     leaveCriticalSection(oldIME); 
-    
+
     enableIPCSYNC();
+	#endif
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
 	u32 len = cardStruct[2];
     u32 dma = cardStruct[3]; // dma channel     
 
-    u32 commandRead=0x025FFB0A;
-    u32 commandPool=0x025AAB08;
+	#ifdef DLDI
+	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	fileRead((char*)dst, *romFile, src, len, 0);
+	endCardReadDma();
+	#else
+	u32 commandRead=0x025FFB0A;
+	u32 commandPool=0x025AAB08;
 	u32 sector = (src/readSize)*readSize;
 
 	if (ce9->ROMinRAM) {
@@ -490,16 +475,9 @@ void cardSetDma(void) {
 
         sharedAddr[3] = commandPool;
         IPC_SendSync(0x3);        
-      }
+	}
+	#endif
 }
-
-#else
-
-void cardSetDma(void) {
-    return false;
-}
-
-#endif
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page) {
 #ifdef DLDI
@@ -684,9 +662,6 @@ u32 cardReadDma() {
         && !(((int)src) & 511) 
 	) {
 		dmaLed = true;
-        #ifndef DLDI
-        
-
 
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
@@ -696,23 +671,22 @@ u32 cardReadDma() {
           		// If ROM read location is 0, do not proceed.
           		return false;
           	}
-          
+
           	// Fix reads below 0x8000
           	if (src <= 0x8000){
           		src = 0x8000 + (src & 0x1FF);
           	}*/
-            
+
             cacheFlush();  
-            
+
             cardSetDma();
-                              
+
             return true; 
 		} else {
 			isDma = false;
 			dma=4;
             clearIcache();        
 		}
-        #endif
     } else {
 		dmaLed = false;
         isDma = false;
