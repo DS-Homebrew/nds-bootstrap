@@ -682,6 +682,9 @@ int arm7_main(void) {
 	if (expansionPakFound) {
 		fatTableAddr = 0x097E0000;
 		fatTableSize = 0x20000;
+	} else if (extendedMemory) {
+		fatTableAddr = 0x02700000;
+		fatTableSize = 0x20000;
 	} else {
 		fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
 		switch (ndsHeader->deviceSize) {
@@ -730,10 +733,6 @@ int arm7_main(void) {
 		} else if (!ceCached) {
 			fatTableAddr = 0x023D8000;
 		}
-	}
-	if (extendedMemory) {
-		fatTableAddr = 0x02700000;
-		fatTableSize = 0x20000;
 	}
 
 	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
