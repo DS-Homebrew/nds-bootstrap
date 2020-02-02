@@ -41,6 +41,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	bool expansionPakFound,
+	u32 overlaysSize,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 );

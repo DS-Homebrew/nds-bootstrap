@@ -64,6 +64,7 @@ static inline void setDeviceOwner(void) {
 }
 
 static bool initialized = false;
+static bool loadOverlaysFromRam = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
 static bool IPC_SYNC_hooked = false;
@@ -161,6 +162,10 @@ static void initialize(void) {
 			debug8mbMpuFix();
 		}
 
+		if (ce9->expansionPakFound && ce9->overlaysSize<0x7E0000) {
+			loadOverlaysFromRam = true;
+		}
+
 		initialized = true;
 	}
 }
@@ -213,7 +218,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 	enableIPC_SYNC();
 
-	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027DFFC0 : ce9->cardStruct0);
+	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027FE7E0 : ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
 	if (isSdk5(ce9->moduleParams)) {
@@ -231,6 +236,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	// Fix reads below 0x8000
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
+	}
+
+	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+		tonccpy(dst, (u8*)((0x09000000-0x4000-ndsHeader->arm9binarySize)+src),len);
+		return 0;
 	}
 
 	return cardReadNormal(cardStruct, dst, src, len);

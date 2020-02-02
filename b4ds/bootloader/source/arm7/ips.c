@@ -24,7 +24,8 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			break;
+			rombyte = (void*)0x09000000;
+			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}
 		ipson += 3;
 		if (ipsbyte[ipson] * 256 + ipsbyte[ipson + 1] == 0) {

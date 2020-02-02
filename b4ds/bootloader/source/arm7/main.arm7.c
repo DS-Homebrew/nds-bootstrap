@@ -191,6 +191,7 @@ extern u32 boostVram;
 //extern u32 logging;
 
 static u32 ce9Location = 0;
+static u32 overlaysSize = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -483,6 +484,24 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	arm7code();
 }
 
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+	// Load overlays into RAM
+	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+		overlaysSize = i;
+	}
+	if (overlaysSize < 0x7E0000)
+	{
+		u32 overlaysLocation = 0x09000000;
+		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
+
+		if (!isSdk5(moduleParams)) {
+			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+			}
+		}
+	}
+}
+
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32 chipID = getChipId(ndsHeader, moduleParams);
     dbg_printf("chipID: ");
@@ -661,7 +680,7 @@ int arm7_main(void) {
 	*(vu32*)(0x08240000) = 1;
 	bool expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
 	if (expansionPakFound) {
-		fatTableAddr = 0x09000000;
+		fatTableAddr = 0x097E0000;
 		fatTableSize = 0x20000;
 	} else {
 		fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
@@ -717,12 +736,17 @@ int arm7_main(void) {
 		fatTableSize = 0x20000;
 	}
 
+	if (expansionPakFound) {
+		loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+	}
+
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
 		romFile->firstCluster,
 		savFile->firstCluster,
 		expansionPakFound,
+		overlaysSize,
 		fatTableSize,
 		fatTableAddr
 	);
