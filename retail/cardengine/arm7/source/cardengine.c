@@ -825,14 +825,17 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
+	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
+		REG_IE |= IRQ_IPC_SYNC;
+	}
+
 	const char* romTid = getRomTid(ndsHeader);
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
-			REG_IE |= IRQ_IPC_SYNC;
-		}
+	  if (!ipcSyncHooked) {
 		runCardEngineCheck();
+	  }
 	}
 }
 
