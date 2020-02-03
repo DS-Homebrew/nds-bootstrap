@@ -590,12 +590,14 @@ static void runCardEngineCheck(void) {
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                    IPC_SendSync(0x8);
               } else {
-                    while(!resume_cardRead_arm9()) {} 
-                    *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                    IPC_SendSync(0x8);
+                    if(!resume_cardRead_arm9()) {
+						*(vu32*)(CARDENGINE_SHARED_ADDRESS+0x10) = 0x41524D39;	// Signal arm9
+					} else {
+						*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+					}
               }
+                IPC_SendSync(0x8);
           }
 
 			#ifndef TWLSDK
@@ -833,9 +835,9 @@ void myIrqHandlerVBlank(void) {
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-	  if (!ipcSyncHooked) {
-		runCardEngineCheck();
-	  }
+		if (!ipcSyncHooked) {
+			runCardEngineCheck();
+		}
 	}
 }
 

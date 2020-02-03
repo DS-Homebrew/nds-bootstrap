@@ -141,7 +141,6 @@ static void updateDescriptor(int slot, u32 sector) {
 
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
-    int count = 0;
     /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
@@ -153,11 +152,10 @@ static void waitForArm7(void) {
         }
     } else {*/
         while (sharedAddr[3] != (vu32)0) {
-           if(count==20000000) {
+			if(sharedAddr[4]==0x41524D39) {
                 IPC_SendSync(0x4);
-                count=0;
+				sharedAddr[4] = 0;
             }
-            count++;
         }
     //}
 }
