@@ -397,7 +397,15 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	const char* args[1];
 
 	FILE *ramDiskTemplate;
-	if (romToRamDisk == 1) {
+	if (romToRamDisk == 3) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_GG.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 2) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SMS.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 1) {
 		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
 		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
@@ -414,7 +422,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 			fclose(ramDiskTemplate);
 			if (romToRamDisk == 1) {
 				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_SNESROM);
-			} else if (romToRamDisk == 0) {
+			} else if (romToRamDisk == 0 || romToRamDisk == 2 || romToRamDisk == 3) {
 				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_MDROM);
 			}
 		}

@@ -541,14 +541,14 @@ int arm7_main (void) {
 					u32 leng = (lz77RomSrc[1] | (lz77RomSrc[2] << 8) | (lz77RomSrc[3] << 16));
 					if (romFileType == 1) {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = leng;
-					} else if (romFileType == 0) {
+					} else {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = leng;
 					}
 					toncset((u32*)RAM_DISK_LOCATION_LZ77ROM, 0, 0x400000);	// clear compressed ROM
 				} else {
 					if (romFileType == 1) {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = ramDiskSize;
-					} else if (romFileType == 0) {
+					} else {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = ramDiskSize;
 					}
 					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);

@@ -137,6 +137,20 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sfc") == 0)
 						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SFC") == 0));
 	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sms") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMS") == 0))
+	{
+		romFileType = 2;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sms") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMS") == 0));
+	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".gg") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".GG") == 0))
+	{
+		romFileType = 3;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".LZ77.GG") == 0));
+	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
 		dbg_printf("no nds file specified\n");
