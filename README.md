@@ -15,11 +15,13 @@ nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and
 
 # ROM Compatibility
 
-nds-bootstrap supports most DS ROMS, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues).
+nds-bootstrap supports most DS ROMs, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues).
 
 Anti-Piracy patches can be loaded via IPS files, but they are not included inside the software itself.
 
 nds-bootstrap also supports many homebrew applications, including games like DSCraft.
+
+B4DS (nds-bootstrap for DS-mode flashcards) only supports some DS ROMs. You can increase compatibility, by inserting a DS Memory Expansion Pak.
 
 # Compiling
 
