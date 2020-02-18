@@ -49,6 +49,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Debug
 	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
 
+	// Cache FAT table
+	conf->cacheFatTable = (bool)strdup(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE").c_str());
+
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
@@ -299,7 +302,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
 	}
 
-	if (access(fatTableFilePath.c_str(), F_OK) != 0) {
+	if (conf->cacheFatTable && access(fatTableFilePath.c_str(), F_OK) != 0) {
 		consoleDemoInit();
 		printf("Creating FAT table file.\n");
 		printf("Please wait...\n");

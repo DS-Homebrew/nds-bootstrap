@@ -276,6 +276,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, 
 	lc0->cheatFileCluster            = cheatCluster;
 	lc0->cheatSize                   = conf->cheatSize;
 	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
+	lc0->cacheFatTable               = conf->cacheFatTable;
 	lc0->fatTableFileCluster         = fatTableCluster;
 	lc0->ramDumpCluster              = ramDumpCluster;
 	lc0->language                    = conf->language;

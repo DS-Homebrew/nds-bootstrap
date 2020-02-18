@@ -7,6 +7,7 @@
 
 typedef struct configuration {
     bool debug;
+    bool cacheFatTable;
 	char* ndsPath;
 	char* savPath;
 	char* gbaPath;

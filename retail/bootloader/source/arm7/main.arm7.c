@@ -91,6 +91,7 @@ extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
+extern u32 cacheFatTable;
 extern u32 fatTableFileCluster;
 extern u32 ramDumpCluster;
 extern u32 language;
@@ -815,7 +816,7 @@ int arm7_main(void) {
 	
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
-	if (fatTableFile.firstCluster != CLUSTER_FREE) {
+	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
 		fileRead((char*)0x27C0000, fatTableFile, 0, 0x400, -1);
 	}
 	bool fatTableEmpty = (*(u32*)(0x27C0200) == 0);
@@ -877,8 +878,10 @@ int arm7_main(void) {
 			*(u32*)(0x27C0048) = saveFileCluster;
 			*(u32*)(0x27C004C) = saveSize;
 		}
-		fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
-		fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+		if (cacheFatTable) {
+			fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
+			fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+		}
 	} else {
 		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
 	}

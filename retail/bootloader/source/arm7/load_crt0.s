@@ -39,6 +39,7 @@
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
+	.global cacheFatTable
 	.global fatTableFileCluster
 	.global ramDumpCluster
 	.global language
@@ -98,6 +99,8 @@ cheatFileCluster:
 cheatSize:
 	.word	0x00000000
 patchOffsetCacheFileCluster:
+	.word	0x00000000
+cacheFatTable:
 	.word	0x00000000
 fatTableFileCluster:
 	.word	0x00000000
