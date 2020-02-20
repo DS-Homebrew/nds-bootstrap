@@ -489,7 +489,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
 		overlaysSize = i;
 	}
-	if (overlaysSize < 0x7E0000)
+	if (overlaysSize < 0x780000)
 	{
 		u32 overlaysLocation = (extendedMemory&&!dsDebugRam ? 0x0C800000 : 0x09000000);
 		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
@@ -680,11 +680,11 @@ int arm7_main(void) {
 	*(vu32*)(0x08240000) = 1;
 	bool expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
 	if (expansionPakFound) {
-		fatTableAddr = 0x097E0000;
-		fatTableSize = 0x20000;
+		fatTableAddr = 0x09780000;
+		fatTableSize = 0x80000;
 	} else if (extendedMemory) {
 		fatTableAddr = 0x02700000;
-		fatTableSize = 0x20000;
+		fatTableSize = 0x80000;
 	} else {
 		fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
 		switch (ndsHeader->deviceSize) {

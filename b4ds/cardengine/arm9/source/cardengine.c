@@ -163,7 +163,7 @@ static void initialize(void) {
 		}
 
 		if (ce9->expansionPakFound || (ce9->extendedMemory && !ce9->dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
-		  if (ce9->overlaysSize<0x7E0000) {
+		  if (ce9->overlaysSize<0x780000) {
 			loadOverlaysFromRam = true;
 		  }
 		}
