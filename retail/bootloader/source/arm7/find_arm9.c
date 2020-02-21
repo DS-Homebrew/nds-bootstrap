@@ -20,8 +20,8 @@ static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; 
 static const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
 static const u32 cardReadEndSignatureAlt2[3]        = {0x040001A4, 0x040001A1, 0x04100010};
 static const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
-static const u16 cardReadEndSignatureThumb5[5]      = {0x01A4, 0x0400, 0x0010, 0x0410, 0xB510};                         // SDK 5
-static const u16 cardReadEndSignatureThumb5Alt1[4]  = {0x01A4, 0x0400, 0xFE00, 0xFFFF};                                 // SDK 5
+static const u16 cardReadEndSignatureThumb5[4]      = {0x01A4, 0x0400, 0xFE00, 0xFFFF};                                 // SDK 5
+static const u16 cardReadEndSignatureThumb5Alt1[5]  = {0x01A4, 0x0400, 0x0010, 0x0410, 0xB510};                         // SDK 5
 static const u32 cardReadStartSignature[1]          = {0xE92D4FF0};
 static const u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
 static const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
@@ -307,23 +307,23 @@ u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return NULL;
 	}
 
-	dbg_printf("findCardReadEndOffsetThumb5Type0:\n");
+	dbg_printf("findCardReadEndOffsetThumb5Type1:\n");
 
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
 		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardReadEndSignatureThumb5, 5
+		cardReadEndSignatureThumb5, 4
 	);
 	if (cardReadEndOffset) {
-		dbg_printf("ARM9 Card read end SDK 5 thumb (type 0) found: ");
+		dbg_printf("ARM9 Card read end SDK 5 thumb (type 1) found: ");
 	} else {
-		dbg_printf("ARM9 Card read end SDK 5 thumb (type 0) not found\n");
+		dbg_printf("ARM9 Card read end SDK 5 thumb (type 1) not found\n");
 	}
 
 	if (cardReadEndOffset) {
@@ -336,23 +336,23 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 }
 
 // SDK 5
-u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return NULL;
 	}
 	
-	dbg_printf("findCardReadEndOffsetThumb5Type1:\n");
+	dbg_printf("findCardReadEndOffsetThumb5Type0:\n");
 
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
 		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardReadEndSignatureThumb5Alt1, 4
+		cardReadEndSignatureThumb5Alt1, 5
 	);
 	if (cardReadEndOffset) {
-		dbg_printf("ARM9 Card read end SDK 5 thumb alt 1 (type 1) found: ");
+		dbg_printf("ARM9 Card read end SDK 5 thumb alt 1 (type 0) found: ");
 	} else {
-		dbg_printf("ARM9 Card read end SDK 5 thumb alt 1 (type 1) not found\n");
+		dbg_printf("ARM9 Card read end SDK 5 thumb alt 1 (type 0) not found\n");
 	}
 
 	if (cardReadEndOffset) {

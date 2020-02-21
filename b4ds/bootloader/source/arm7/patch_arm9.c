@@ -24,16 +24,17 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	//dbg_printf("Trying SDK 5 thumb...\n");
 	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
 	if (!patchOffsetCache.cardReadEndOffset) {
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
 		if (cardReadEndOffset) {
+			sdk5ReadType = 1;
 			usesThumb = true;
 			patchOffsetCache.a9IsThumb = usesThumb;
 		}
 		if (!cardReadEndOffset) {
 			// SDK 5
-			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
 			if (cardReadEndOffset) {
-				sdk5ReadType = 1;
+				sdk5ReadType = 0;
 				usesThumb = true;
 				patchOffsetCache.a9IsThumb = usesThumb;
 			}
