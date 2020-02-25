@@ -14,7 +14,8 @@
 @   You should have received a copy of the GNU General Public License
 @   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nds/asminc.h>
+#include <nds/asminc.h>     
+.align	4
 .arm
 
 .global cheat_engine_start
@@ -470,6 +471,7 @@ exit:
 @	.word	0x00000000
 .pool
 
+.align	4
 cheat_data:
 
 cheat_engine_end:
