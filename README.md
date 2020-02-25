@@ -33,6 +33,20 @@ In order to compile this on your own, you will need [devkitPro](https://devkitpr
 
 Once everything is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
 
+## Compiling (Using Docker)
+
+```bash
+docker build . -t nds-bootstrap-builder
+docker run --name nds-bootstrap-builder nds-bootstrap-builder
+docker cp nds-bootstrap-builder:/nds-bootstrap/bin ./bin
+```
+
+For nightly builds change `docker run` command to
+
+```bash
+docker run --name nds-bootstrap-builder nds-bootstrap-builder make package-nightly
+```
+
 # Frontends
 A frontend isn't required to be used as nds-bootstrap uses an ini file to load its parameters. However, it is very much recommended.
 
