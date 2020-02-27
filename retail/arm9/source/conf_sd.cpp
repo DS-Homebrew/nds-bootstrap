@@ -50,7 +50,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
 
 	// Cache FAT table
-	conf->cacheFatTable = (bool)strdup(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE").c_str());
+	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE").c_str(), NULL, 0);
 
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
