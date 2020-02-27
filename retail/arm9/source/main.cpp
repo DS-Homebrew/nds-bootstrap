@@ -417,7 +417,7 @@ static int runNdsFile(configuration* conf) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 
-	if (stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
+	if (conf->cacheFatTable && stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
 		clusterFatTable = stFatTable.st_ino;
 	}
 
