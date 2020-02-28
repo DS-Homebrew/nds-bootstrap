@@ -49,6 +49,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
+#include <nds/ipc.h>
 
 #include "tonccpy.h"
 #include "my_fat.h"
@@ -163,6 +164,36 @@ static void initMBK_dsiEnhanced(void) {
 	REG_MBK6 = 0x00403000;
 }
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Firmware stuff
+
+#define FW_READ        0x03
+
+void arm7_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
+  uint32 index;
+
+  // Read command
+  while (REG_SPICNT & SPI_BUSY);
+  REG_SPICNT = SPI_ENABLE | SPI_CONTINUOUS | SPI_DEVICE_NVRAM;
+  REG_SPIDATA = FW_READ;
+  while (REG_SPICNT & SPI_BUSY);
+
+  // Set the address
+  REG_SPIDATA =  (address>>16) & 0xFF;
+  while (REG_SPICNT & SPI_BUSY);
+  REG_SPIDATA =  (address>>8) & 0xFF;
+  while (REG_SPICNT & SPI_BUSY);
+  REG_SPIDATA =  (address) & 0xFF;
+  while (REG_SPICNT & SPI_BUSY);
+
+  for (index = 0; index < size; index++) {
+    REG_SPIDATA = 0;
+    while (REG_SPICNT & SPI_BUSY);
+    buffer[index] = REG_SPIDATA & 0xFF;
+  }
+  REG_SPICNT = 0;
+}
+
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
 Clears all of the NDS's RAM that is visible to the ARM7
@@ -172,7 +203,8 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 static void resetMemory_ARM7(void) {
 	register int i;
-	
+	u8 settings1, settings2;
+
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -181,7 +213,7 @@ static void resetMemory_ARM7(void) {
 		SCHANNEL_SOURCE(i) = 0;
 		SCHANNEL_LENGTH(i) = 0;
 	}
-
+    
 	REG_SOUNDCNT = 0;
 
 	// Clear out ARM7 DMA channels and timers
@@ -192,6 +224,11 @@ static void resetMemory_ARM7(void) {
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
 	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
@@ -205,7 +242,23 @@ static void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	// Reload DS Firmware settings
+	arm7_readFirmware((u32)0x03FE70, &settings1, 0x1);
+	arm7_readFirmware((u32)0x03FF70, &settings2, 0x1);
+
+	if (settings1 > settings2) {
+		arm7_readFirmware((u32)0x03FE00, (u8*)0x027FFC80, 0x70);
+		arm7_readFirmware((u32)0x03FF00, (u8*)0x027FFD80, 0x70);
+	} else {
+		arm7_readFirmware((u32)0x03FF00, (u8*)0x027FFC80, 0x70);
+		arm7_readFirmware((u32)0x03FE00, (u8*)0x027FFD80, 0x70);
+	}
+
+	// Load FW header
+	arm7_readFirmware((u32)0x000000, (u8*)0x027FF830, 0x20);
 }
+
 
 static void NDSTouchscreenMode(void) {
 	u8 volLevel;
@@ -677,7 +730,9 @@ Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
-	REG_IME = 0;
+    
+	// Wait until the ARM9 is ready
+	while (arm9_stateFlag != ARM9_READY);
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
@@ -692,8 +747,7 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	resetCpu();
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
