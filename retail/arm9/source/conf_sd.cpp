@@ -175,6 +175,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
+		tonccpy((u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION+0x11F00, bootstrapPath, sizeof(bootstrapPath));
 	}
 	fclose(cebin);
     
@@ -184,6 +185,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION, 1, 0x12000, cebin);
+		tonccpy((u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION+0x11F00, bootstrapPath, sizeof(bootstrapPath));
 	}
 	fclose(cebin);
     

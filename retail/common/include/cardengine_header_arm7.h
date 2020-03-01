@@ -55,6 +55,7 @@ typedef struct cardengineArm7Patches {
 // ARM7 cardengine
 //
 typedef struct cardengineArm7 {
+    u32 ce7;
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
     u32 intr_fifo_orig_return;

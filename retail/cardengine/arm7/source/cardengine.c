@@ -41,8 +41,9 @@
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
 #include "sr_data_srllastran.h" // For rebooting the game
 
+extern u32 ce7;
+
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
-static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
@@ -122,8 +123,8 @@ static void unlaunchSetHiyaBoot(void) {
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
 	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
-	for (int i = 0; i < 14; i++) {
-		*(u8*)(0x02000838+i2) = hiyaNdsPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+	for (int i = 0; i < 256; i++) {
+		*(u8*)(0x02000838+i2) = ce7+0x11F00+i;		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 		i2 += 2;
 	}
 	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
@@ -136,14 +137,6 @@ static bool isSdEjected(void) {
 		return true;
 	}
 	return false;
-}
-
-// Alternative to swiWaitForVBlank()
-static void waitFrames(int count) {
-	for (int i = 0; i < count; i++) {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
 }
 
 static void driveInitialize(void) {
@@ -744,7 +737,6 @@ void myIrqHandlerVBlank(void) {
 					unlaunchSetHiyaBoot();
 				}
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-				waitFrames(10);							// Stabilize
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 			}
@@ -781,7 +773,6 @@ void myIrqHandlerVBlank(void) {
 			}
 			//tonccpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-			waitFrames(10);								// Stabilize
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 			unlockMutex(&saveMutex);
@@ -833,9 +824,7 @@ void myIrqHandlerVBlank(void) {
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-	  if (!ipcSyncHooked) {
 		runCardEngineCheck();
-	  }
 	}
 }
 
@@ -858,7 +847,7 @@ u32 myIrqEnable(u32 irq) {
 
 /*static void irqIPCSYNCEnable(void) {	
 	if (!initializedIRQ) {
-		int oldIME = enterCriticalSection();	
+		int oldIME = enterCriticalSection();
 		initialize();	
 		#ifdef DEBUG		
 		dbg_printf("\nirqIPCSYNCEnable\n");	
