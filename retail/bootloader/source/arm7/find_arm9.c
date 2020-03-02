@@ -129,7 +129,7 @@ static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
 //static const u32 slot2ExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
 //static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
 
-// thread management  
+// Threads management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2
 static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
@@ -150,6 +150,20 @@ static const u32 initHeapEndFunc2SignatureAlt2[2]     = {0xE8BD8010, 0x023E0000}
 static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};
 static const u32 initHeapEndFunc2SignatureThumb[2]    = {0xBD082000, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000};
+
+// Reset
+static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
+static const u16 resetSignatureThumb2[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk2
+// TODO complete with other sdks signatures
+static const u32 resetSignature4[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk4
+static const u16 resetSignatureThumb4[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk4
+static const u32 resetSignature5[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk5
+static const u16 resetSignatureThumb5[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk5
+
+static const u32 resetConstant[1]        = {RESET_PARAM};
+      
+// Panic
+// TODO : could be a good idea to catch the call to Panic function and store the message somewhere
 
 
 u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
@@ -1854,3 +1868,82 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     dbg_printf("\n");
 	return offset;
 }    
+
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findResetOffset\n");
+    u32* resetSignature = resetSignature2;
+    u16* resetSignatureThumb = resetSignatureThumb2;
+          
+    if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) { 
+        resetSignature = resetSignature4;
+        resetSignatureThumb = resetSignatureThumb4;         
+    }
+    if (moduleParams->sdk_version > 0x5000000) {
+        resetSignature = resetSignature5;
+        resetSignature = resetSignatureThumb5;     
+    }
+    
+    u32 * resetOffset = NULL;
+    
+    if(usesThumb) {
+  		resetOffset = findOffsetThumb(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            resetSignatureThumb, 4
+        );
+  	} else {
+  		resetOffset = findOffset(
+      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+            resetSignature, 4
+        );
+  	}
+    
+    if (resetOffset) {
+		dbg_printf("Reset found: ");
+        dbg_hexa((u32)resetOffset);
+		dbg_printf("\n");
+    } 
+    
+    while(resetOffset!=NULL) {
+    	u32* resetEndOffset = findOffsetThumb(
+    		resetOffset, 0x200,
+    		resetConstant, 1
+    	);
+        if (resetEndOffset) {
+    		dbg_printf("Reset constant found: ");
+            dbg_hexa((u32)resetEndOffset);
+    		dbg_printf("\n");
+            break;
+        } 
+        
+        if(usesThumb) {
+      		resetOffset = findOffsetThumb(
+          		resetOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
+                resetSignatureThumb, 4
+            );
+      	} else {
+      		resetOffset = findOffset(
+          		resetOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
+                resetSignature, 4
+            );
+      	}
+        if (resetOffset) {
+		    dbg_printf("Reset found: ");
+            dbg_hexa((u32)resetOffset);
+    		dbg_printf("\n");
+        } 
+    } 
+    
+	if (resetOffset) {
+		dbg_printf("Reset found: ");
+	} else {
+		dbg_printf("Reset not found\n");
+	}
+
+	if (resetOffset) {
+		dbg_hexa((u32)resetOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return resetOffset;
+}

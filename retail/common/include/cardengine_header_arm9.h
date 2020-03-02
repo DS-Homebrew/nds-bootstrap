@@ -23,6 +23,7 @@ typedef struct cardengineArm9Patches {
     u32* cardEndReadDmaRef;
     u32* terminateForPullOutRef;
     u32* swi02;
+    u32* reset_arm9;
     u32 needFlushDCCache;
     u32* pdash_read;
     u32* ipcSyncHandlerRef;
@@ -46,6 +47,7 @@ typedef struct cardengineArm9ThumbPatches {
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;
     u32* terminateForPullOutRef;
+    u32* reset_arm9;
 } __attribute__ ((__packed__)) cardengineArm9ThumbPatches;
 
 

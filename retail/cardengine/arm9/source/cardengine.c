@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -90,6 +91,14 @@ static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
+
+void turnScreenRed(void) {
+	setBackdropColor( RGB15(31, 0, 0));
+}
+
+void turnScreenBlack(void) {
+	setBackdropColor( RGB15(0, 0, 0));
+}
 
 void myIrqHandlerDMA(void);
 
@@ -916,3 +925,9 @@ void myIrqHandlerIPC(void) {
     }
 #endif
 }
+
+void reset(u32 param) {
+	turnScreenRed();
+	//bgUpdate();    
+}
+

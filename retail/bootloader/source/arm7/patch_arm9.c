@@ -485,6 +485,17 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     return false; 
 }
 
+static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+    const char* romTid = getRomTid(ndsHeader);
+    
+    u32* reset = findResetOffset(ndsHeader,moduleParams,usesThumb);
+
+    if(reset) {
+      // Patch
+      u32* resetPatch = (usesThumb ? ce9->thumbPatches->reset_arm9 : ce9->patches->reset_arm9);
+      memcpy(reset, resetPatch, 0x40);
+    }
+}
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	extern u32 gameOnFlashcard;
@@ -1317,6 +1328,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (gameOnFlashcard && !ROMinRAM) {
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
+
+  patchReset(ce9, ndsHeader, moduleParams, usesThumb);
 
 	randomPatch(ndsHeader, moduleParams);
 
