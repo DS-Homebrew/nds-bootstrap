@@ -95,6 +95,7 @@ extern u32 patchOffsetCacheFileCluster;
 extern u32 cacheFatTable;
 extern u32 fatTableFileCluster;
 extern u32 ramDumpCluster;
+extern u32 srParamsFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -764,6 +765,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
+	char zeroBuffer[0x20] = {0};
+
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	fileRead((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x20, -1);
+	fileWrite((char*)zeroBuffer, srParamsFile, 0, 0x20, -1);
+
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }
 
@@ -1089,6 +1096,7 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
+			srParamsFileCluster,
 			ramDumpCluster,
 			wideCheatFileCluster,
 			wideCheatSize,

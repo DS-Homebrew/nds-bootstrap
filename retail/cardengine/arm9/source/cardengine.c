@@ -92,14 +92,6 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
-void turnScreenRed(void) {
-	setBackdropColor( RGB15(31, 0, 0));
-}
-
-void turnScreenBlack(void) {
-	setBackdropColor( RGB15(0, 0, 0));
-}
-
 void myIrqHandlerDMA(void);
 
 #ifndef DLDI
@@ -927,7 +919,7 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
-	turnScreenRed();
-	//bgUpdate();    
+	*(u32*)RESET_PARAM = param;
+	sharedAddr[3] = 0x52534554;
+	while (1);
 }
-

@@ -153,14 +153,13 @@ static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000}
 
 // Reset
 static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
-static const u16 resetSignatureThumb2[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk2
-// TODO complete with other sdks signatures
-static const u32 resetSignature4[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk4
-static const u16 resetSignatureThumb4[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk4
-static const u32 resetSignature5[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk5
-static const u16 resetSignatureThumb5[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk5
+static const u32 resetSignature3[4]        = {0xE92D4010, 0xE59F106C, 0xE1A04000, 0xE1D100B0}; // sdk3
+static const u32 resetSignature4[4]        = {0xE92D4070, 0xE1A06400, 0xE3A0500C, 0xE3A04000}; // sdk4
+static const u32 resetSignature5[4]        = {0xE92D4038, 0xE59F1054, 0xE1A05000, 0xE1D100B0}; // sdk5
+static const u32 resetSignature5Alt[4]     = {0xE92D4010, 0xE59F1088, 0xE1A04000, 0xE1D100B0}; // sdk5
 
 static const u32 resetConstant[1]        = {RESET_PARAM};
+static const u32 resetConstant5[1]       = {RESET_PARAM_SDK5};
       
 // Panic
 // TODO : could be a good idea to catch the call to Panic function and store the message somewhere
@@ -1869,33 +1868,43 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	return offset;
 }    
 
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findResetOffset\n");
     u32* resetSignature = resetSignature2;
-    u16* resetSignatureThumb = resetSignatureThumb2;
-          
-    if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) { 
+
+    if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
-        resetSignatureThumb = resetSignatureThumb4;         
     }
     if (moduleParams->sdk_version > 0x5000000) {
         resetSignature = resetSignature5;
-        resetSignature = resetSignatureThumb5;     
     }
-    
+
     u32 * resetOffset = NULL;
-    
-    if(usesThumb) {
-  		resetOffset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-            resetSignatureThumb, 4
-        );
-  	} else {
-  		resetOffset = findOffset(
-      		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-            resetSignature, 4
-        );
-  	}
+
+  	resetOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		resetSignature, 4
+	);
+	
+	if (!resetOffset) {
+		if (moduleParams->sdk_version < 0x4008000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignature3, 4
+			);
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+					resetSignature4, 4
+				);
+			}
+		} else if (moduleParams->sdk_version > 0x5000000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignature5Alt, 4
+			);
+		}
+	}
     
     if (resetOffset) {
 		dbg_printf("Reset found: ");
@@ -1906,7 +1915,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     while(resetOffset!=NULL) {
     	u32* resetEndOffset = findOffsetThumb(
     		resetOffset, 0x200,
-    		resetConstant, 1
+    		(isSdk5(moduleParams) ? resetConstant5 : resetConstant), 1
     	);
         if (resetEndOffset) {
     		dbg_printf("Reset constant found: ");
@@ -1915,17 +1924,10 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
             break;
         } 
         
-        if(usesThumb) {
-      		resetOffset = findOffsetThumb(
-          		resetOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
-                resetSignatureThumb, 4
-            );
-      	} else {
-      		resetOffset = findOffset(
-          		resetOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
-                resetSignature, 4
-            );
-      	}
+      	resetOffset = findOffset(
+				resetOffset+1, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignature, 4
+			);
         if (resetOffset) {
 		    dbg_printf("Reset found: ");
             dbg_hexa((u32)resetOffset);

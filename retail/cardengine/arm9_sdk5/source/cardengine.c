@@ -723,3 +723,9 @@ void myIrqHandlerIPC(void) {
     }
 #endif
 }
+
+void reset(u32 param) {
+	*(u32*)RESET_PARAM_SDK5 = param;
+	sharedAddr[3] = 0x52534554;
+	while (1);
+}

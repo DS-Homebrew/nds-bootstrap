@@ -81,8 +81,6 @@ thumbPatches:
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
-.word   0x0
-
 
 	.thumb
 @---------------------------------------------------------------------------------
@@ -520,7 +518,7 @@ ce9locationRes:
 cardReadRefRes:
 .word   reset-ce9 
 @---------------------------------------------------------------------------------
-    
+
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC
 callEndReadDmaThumb:

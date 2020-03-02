@@ -233,7 +233,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, configuration* conf) {
+void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -279,6 +279,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, 
 	lc0->cacheFatTable               = conf->cacheFatTable;
 	lc0->fatTableFileCluster         = fatTableCluster;
 	lc0->ramDumpCluster              = ramDumpCluster;
+	lc0->srParamsFileCluster         = srParamsCluster;
 	lc0->language                    = conf->language;
 	lc0->dsiMode                     = conf->dsiMode; // SDK 5
 	lc0->donorSdkVer                 = conf->donorSdkVer;
@@ -289,7 +290,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, 
 	lc0->romRead_LED                 = conf->romRead_LED;
 	lc0->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	lc0->boostVram                   = conf->boostVram;
-	lc0->gameSoftReset               = conf->gameSoftReset;
 	lc0->forceSleepPatch             = conf->forceSleepPatch;
 	lc0->volumeFix                   = conf->volumeFix;
 	lc0->preciseVolumeControl        = conf->preciseVolumeControl;

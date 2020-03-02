@@ -34,6 +34,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,

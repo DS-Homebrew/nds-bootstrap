@@ -42,6 +42,7 @@
 	.global cacheFatTable
 	.global fatTableFileCluster
 	.global ramDumpCluster
+	.global srParamsFileCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -106,6 +107,8 @@ fatTableFileCluster:
 	.word	0x00000000
 ramDumpCluster:
 	.word	0x00000000
+srParamsFileCluster:
+	.word	0x00000000
 language:
 	.word	0x00000000
 dsiMode:
@@ -129,7 +132,7 @@ boostVram:
 soundFreq:
 	.word	0x00000000
 gameSoftReset:
-	.word	0x00000000
+	.word	0x00000001
 forceSleepPatch:
 	.word	0x00000000
 volumeFix:

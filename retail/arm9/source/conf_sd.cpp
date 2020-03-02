@@ -27,6 +27,7 @@ extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 extern std::string ramDumpPath;
+extern std::string srParamsFilePath;
 
 extern u8 lz77ImageBuffer[0x12000];
 
@@ -96,9 +97,6 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// DMA ROM read LED
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED").c_str(), NULL, 0);
-
-	// Game soft reset
-	conf->gameSoftReset = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "GAME_SOFT_RESET").c_str(), NULL, 0);
 
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH").c_str(), NULL, 0);
@@ -286,6 +284,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (std::string::npos != last_slash_idx)
 	{
 		romFilename.erase(0, last_slash_idx + 1);
+	}
+
+	srParamsFilePath = "sd:/_nds/nds-bootstrap/softResetParams.bin";
+	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+		srParamsFilePath = "fat:/_nds/nds-bootstrap/softResetParams.bin";
+	}
+	
+	if (access(srParamsFilePath.c_str(), F_OK) != 0) {
+		char buffer[0x20] = {0};
+
+		FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "wb");
+		fwrite(buffer, 1, sizeof(buffer), srParamsFile);
+		fclose(srParamsFile);
 	}
 
 	patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
