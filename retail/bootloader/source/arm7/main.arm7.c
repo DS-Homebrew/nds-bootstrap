@@ -767,7 +767,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x20, -1);
-	//fileWrite((char*)0, srParamsFile, 0, 0x20, -1);
+	fileWrite((char*)0, srParamsFile, 0, 0x20, -1);
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }
