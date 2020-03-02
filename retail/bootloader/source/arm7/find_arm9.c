@@ -1876,11 +1876,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     u32* resetSignature = resetSignature2;
     u16* resetSignatureThumb = resetSignatureThumb2;
 
-    if (moduleParams->sdk_version >= 0x3004000 && moduleParams->sdk_version < 0x4000000) { 
-        resetSignature = resetSignature3;
-        resetSignatureThumb = resetSignatureThumb3;
-    }
-    if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
+    if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
         resetSignatureThumb = resetSignatureThumb4;
     }
@@ -1902,6 +1898,20 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
             resetSignature, 4
         );
   	}
+	
+	if (!resetOffset && moduleParams->sdk_version < 0x4008000) {
+		if(usesThumb) {
+			resetOffset = findOffsetThumb(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignatureThumb3, 4
+			);
+		} else {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignature3, 4
+			);
+		}
+	}
     
     if (resetOffset) {
 		dbg_printf("Reset found: ");
