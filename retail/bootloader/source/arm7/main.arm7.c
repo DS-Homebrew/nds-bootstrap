@@ -765,11 +765,14 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
-	char zeroBuffer[0x20] = {0};
+	char zeroBuffer[0x4] = {0};
 
+	sdRead = (gameOnFlashcard == false);
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x20, -1);
-	fileWrite((char*)zeroBuffer, srParamsFile, 0, 0x20, -1);
+	fileRead((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
+	if (*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) != 0) {
+		fileWrite((char*)zeroBuffer, srParamsFile, 0, 0x4, -1);
+	}
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }

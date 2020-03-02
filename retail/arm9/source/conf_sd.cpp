@@ -302,7 +302,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	
 	if (access(srParamsFilePath.c_str(), F_OK) != 0) {
-		char buffer[0x20] = {0};
+		char buffer[0x4] = {0};
 
 		FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "wb");
 		fwrite(buffer, 1, sizeof(buffer), srParamsFile);
