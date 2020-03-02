@@ -172,7 +172,7 @@ static void initialize(void) {
 	}
 }
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u8* dst, u32 src, u32 len) {
+static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -220,20 +220,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 	enableIPC_SYNC();
 
-	vu32* cardStruct = (vu32*)(isSdk5(ce9->moduleParams) ? 0x027FE7E0 : ce9->cardStruct0);
+	vu32* cardStruct = (vu32*)(ce9->cardStruct0);
 
 	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
-	if (isSdk5(ce9->moduleParams)) {
-		cardStruct[0] = src;
-	}
-
 	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
-
-	if (isSdk5(ce9->moduleParams)) {
-		cardStruct[1] = (vu32)dst;
-		cardStruct[2] = len;
-	}
 
 	// Fix reads below 0x8000
 	if (src <= 0x8000){
@@ -249,7 +240,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		return 0;
 	}
 
-	return cardReadNormal(cardStruct, dst, src, len);
+	return cardReadNormal(dst, src, len);
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
