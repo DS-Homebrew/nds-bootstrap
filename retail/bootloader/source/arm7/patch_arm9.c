@@ -1,4 +1,5 @@
 #include <string.h>
+#include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
@@ -6,35 +7,70 @@
 #include "common.h"
 #include "cardengine_header_arm9.h"
 #include "debug_file.h"
+#include "tonccpy.h"
 
 //#define memcpy __builtin_memcpy // memcpy
 
-//bool cardReadFound = false; // patch_common.c
+extern u32 gameOnFlashcard;
+extern u32 saveOnFlashcard;
+
+extern bool gbaRomFound;
+
+static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
+	if (!patchOffsetCache.a9Swi12Offset) {
+		swi12Offset = a9_findSwi12Offset(ndsHeader);
+		if (swi12Offset) {
+			patchOffsetCache.a9Swi12Offset = swi12Offset;
+		}
+	}
+
+	if (!(REG_SCFG_ROM & BIT(1))) {
+		// swi 0x12 call
+		if (swi12Offset) {
+			// Patch to call swi 0x02 instead of 0x12
+			u32* swi12Patch = ce9->patches->swi02;
+			memcpy(swi12Offset, swi12Patch, 0x4);
+		}
+	}
+}
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
-	bool usesThumb = false;
+	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
 	int sdk5ReadType = 0; // SDK 5
 
 	// Card read
 	// SDK 5
 	//dbg_printf("Trying SDK 5 thumb...\n");
-	u32* cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
-	if (!cardReadEndOffset) {
-		// SDK 5
+	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
+	if (!patchOffsetCache.cardReadEndOffset) {
 		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
 		if (cardReadEndOffset) {
 			sdk5ReadType = 1;
+			usesThumb = true;
+			patchOffsetCache.a9IsThumb = usesThumb;
 		}
-	}
-	if (!cardReadEndOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
-	}
-	if (cardReadEndOffset) {
-		usesThumb = true;
-	} else {
-		cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+		if (!cardReadEndOffset) {
+			// SDK 5
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+			if (cardReadEndOffset) {
+				sdk5ReadType = 0;
+				usesThumb = true;
+				patchOffsetCache.a9IsThumb = usesThumb;
+			}
+		}
+		if (!cardReadEndOffset) {
+			//dbg_printf("Trying thumb...\n");
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+			if (cardReadEndOffset) {
+				usesThumb = true;
+				patchOffsetCache.a9IsThumb = usesThumb;
+			}
+		}
+		if (!cardReadEndOffset) {
+			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
 			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
@@ -44,8 +80,12 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 					dbg_printf("Found thumb\n\n");
 					--cardReadEndOffset;
 					usesThumb = true;
+					patchOffsetCache.a9IsThumb = usesThumb;
 				}
 			}
+		}
+		if (cardReadEndOffset) {
+			patchOffsetCache.cardReadEndOffset = cardReadEndOffset;
 		}
 	}
 	*usesThumbPtr = usesThumb;
@@ -55,27 +95,32 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardReadEndOffset) { // Not necessarily needed
 		return false;
 	}
-	u32* cardReadStartOffset;
-	// SDK 5
-	//dbg_printf("Trying SDK 5 thumb...\n");
-	if (sdk5ReadType == 0) {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
-	} else {
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying thumb...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		//dbg_printf("Trying SDK 5...\n");
-		cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
-	}
-	if (!cardReadStartOffset) {
-		if (readType == 0) {
-			cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+	u32* cardReadStartOffset = patchOffsetCache.cardReadStartOffset;
+	if (!patchOffsetCache.cardReadStartOffset) {
+		// SDK 5
+		//dbg_printf("Trying SDK 5 thumb...\n");
+		if (sdk5ReadType == 0) {
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type0(moduleParams, (u16*)cardReadEndOffset);
 		} else {
-			cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb5Type1(moduleParams, (u16*)cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			//dbg_printf("Trying thumb...\n");
+			cardReadStartOffset = (u32*)findCardReadStartOffsetThumb((u16*)cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			//dbg_printf("Trying SDK 5...\n");
+			cardReadStartOffset = (u32*)findCardReadStartOffset5(moduleParams, cardReadEndOffset);
+		}
+		if (!cardReadStartOffset) {
+			if (readType == 0) {
+				cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+			} else {
+				cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
+			}
+		}
+		if (cardReadStartOffset) {
+			patchOffsetCache.cardReadStartOffset = cardReadStartOffset;
 		}
 	}
 	if (!cardReadStartOffset) {
@@ -104,20 +149,26 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
-	u32* cardPullOutOffset;
-	if (usesThumb) {
-		//dbg_printf("Trying SDK 5 thumb...\n");
-		if (sdk5ReadType == 0) {
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type0(ndsHeader, moduleParams);
+	u32* cardPullOutOffset = patchOffsetCache.cardPullOutOffset;
+	if (!patchOffsetCache.cardPullOutOffset) {
+		cardPullOutOffset = NULL;
+		if (usesThumb) {
+			//dbg_printf("Trying SDK 5 thumb...\n");
+			if (sdk5ReadType == 0) {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type0(ndsHeader, moduleParams);
+			} else {
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type1(ndsHeader, moduleParams);
+			}
+			if (!cardPullOutOffset) {
+				//dbg_printf("Trying thumb...\n");
+				cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader);
+			}
 		} else {
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb5Type1(ndsHeader, moduleParams);
+			cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 		}
-		if (!cardPullOutOffset) {
-			//dbg_printf("Trying thumb...\n");
-			cardPullOutOffset = (u32*)findCardPullOutOffsetThumb(ndsHeader);
+		if (cardPullOutOffset) {
+			patchOffsetCache.cardPullOutOffset = cardPullOutOffset;
 		}
-	} else {
-		cardPullOutOffset = findCardPullOutOffset(ndsHeader, moduleParams);
 	}
 	*cardPullOutOffsetPtr = cardPullOutOffset;
 	if (!cardPullOutOffset) {
@@ -129,7 +180,7 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
 }
 
-static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
+/*static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
 	if (!cardPullOutOffset) {
 		return;
 	}
@@ -139,7 +190,7 @@ static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, co
 	// Patch
 	u32* cardTerminateForPullOutPatch = (usesThumb ? ce9->thumbPatches->terminateForPullOutRef : ce9->patches->terminateForPullOutRef);
 	*cardTerminateForPullOutPatch = (u32)cardTerminateForPullOutOffset;
-}
+}*/
 
 static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
 	if (!cardPullOutOffset) {
@@ -163,48 +214,61 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
-    const char* romTid = getRomTid(ndsHeader);
-    
 	if (!cardReadEndOffset) {
 		return;
 	}
 
 	// Card ID
-	u32* cardIdEndOffset;
-	u32* cardIdStartOffset;
-	if (usesThumb) {
-		cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
-		cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
-	} else {
-		cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
-		cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
+	u32* cardIdStartOffset = patchOffsetCache.cardIdOffset;
+	if (!patchOffsetCache.cardIdChecked) {
+		cardIdStartOffset = NULL;
+		u32* cardIdEndOffset = NULL;
+		if (usesThumb) {
+			cardIdEndOffset = (u32*)findCardIdEndOffsetThumb(ndsHeader, moduleParams, (u16*)cardReadEndOffset);
+			cardIdStartOffset = (u32*)findCardIdStartOffsetThumb(moduleParams, (u16*)cardIdEndOffset);
+		} else {
+			cardIdEndOffset = findCardIdEndOffset(ndsHeader, moduleParams, cardReadEndOffset);
+			cardIdStartOffset = findCardIdStartOffset(moduleParams, cardIdEndOffset);
+		}
+		if (cardIdStartOffset) {
+			patchOffsetCache.cardIdOffset = cardIdStartOffset;
+		}
+		patchOffsetCache.cardIdChecked = true;
 	}
 
 	if (cardIdStartOffset) {
 		dbg_printf("Found cardId\n\n");
-                
+
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
-		memcpy(cardIdStartOffset, cardIdPatch, 0x40);
+		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
+		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
 }
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Card read dma
-	u32* cardReadDmaEndOffset = NULL;
-	if (usesThumb) {
-		//dbg_printf("Trying thumb alt...\n");
-		cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
-	}
-	if (!cardReadDmaEndOffset) {
-		cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
-	}
-	u32* cardReadDmaStartOffset;
-	if (usesThumb) {
-		cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
-	} else {
-		cardReadDmaStartOffset = findCardReadDmaStartOffset(moduleParams, cardReadDmaEndOffset);
+	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
+	if (!patchOffsetCache.cardReadDmaChecked) {
+		cardReadDmaStartOffset = NULL;
+		u32* cardReadDmaEndOffset = NULL;
+		if (usesThumb) {
+			//dbg_printf("Trying thumb alt...\n");
+			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+		}
+		if (!cardReadDmaEndOffset) {
+			cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
+		}
+		if (usesThumb) {
+			cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
+		} else {
+			cardReadDmaStartOffset = findCardReadDmaStartOffset(moduleParams, cardReadDmaEndOffset);
+		}
+		if (cardReadDmaStartOffset) {
+			patchOffsetCache.cardReadDmaOffset = cardReadDmaStartOffset;
+		}
+		patchOffsetCache.cardReadDmaChecked = true;
 	}
 	if (!cardReadDmaStartOffset) {
 		return;
@@ -214,29 +278,211 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
-static void patchSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return false;
+	}
+
+	bool dmaAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
+	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        "A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
+        "YBA",  // Bomberman 2 // works
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "YF4",  // FF4 // works
+        "AXF",  // FFXII // works
+        "BO5",  // Golden Sun // sdk5
+        "Y8L",  // Golden Sun Demo // sdk5
+        "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		"BEE",	// Inazuma Eleven 2 - Firestorm
+		"BEB",	// Inazuma Eleven 2 - Blizzard
+		"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
+        //"C6C",  // Infinite Space // freezes after SEGA logo
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        "BLF",  // Layton: Last Specter // sdk5
+        "ALK",  // Lunar Knights // works
+        "B6Z",  // MegaMan Zero Collection // works
+        "ARZ",  // MegaMan ZX // works
+        "YZX",  // MegaMan ZX Advent // works
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
+        "B3R",  // Pokemon Ranger: Guardian Signs // works
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
+        "YT7",  // SEGA Superstars Tennis
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        "BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
+		"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
+    };
+
+	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+		if (memcmp(romTid, list[i], 3) == 0) {
+			// Found a match.
+			dmaAllowed = true;
+			break;
+		}
+	}
+
+  if (dmaAllowed) {
+    u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+	  if (!patchOffsetCache.cardEndReadDmaChecked) {
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+		patchOffsetCache.cardEndReadDmaChecked = true;
+	  }
+    if(offset) {
+      dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");
+      if(!isSdk5(moduleParams)) {
+        // SDK1-4        
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            thumbOffset--;
+            *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
+            ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+          } else {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+        }
+      } else {
+        // SDK5 
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            while(*thumbOffset!=0xB508) { // push	{r3, lr}
+                *thumbOffset = 0x46C0; // NOP
+                thumbOffset--;
+            }
+            ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+        } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+            *armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+        }  
+      }  
+    }
+  }
+}
+
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return false;
+	}
+
+    dbg_printf("\npatchCardSetDma\n");           
+
+	bool dmaAllowed = false;
+    const char* romTid = getRomTid(ndsHeader);
+	static const char list[][4] = {
+        "YGX",  // GTA Chinatown Wars // works
+        "C32",	// Ace Attorney Investigations: Miles Edgeworth // works
+        //"A3P",	// Anpanman to Touch de Waku Waku Training // sdk5
+        "YBA",  // Bomberman 2 // works
+        "TBR",  // Brave // sdk5
+        "YR9",  // Castlevania OE // works
+        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
+        "AFF",  // FF3 // works
+        "YF4",  // FF4 // works
+        "AXF",  // FFXII // works
+        //"BO5",  // Golden Sun // sdk5
+        //"Y8L",  // Golden Sun Demo // sdk5
+        "AWI",  // Hotel Dusk // works
+		"YEE",	// Inazuma Eleven
+		//"BEE",	// Inazuma Eleven 2 - Firestorm
+		//"BEB",	// Inazuma Eleven 2 - Blizzard
+		//"BEZ",	// Inazuma Eleven 3 - Bomb Blast
+		//"BE8",	// Inazuma Eleven 3 - Lightning Bolt
+		//"BOE",	// Inazuma Eleven 3 - Team Ogre Attacks!
+        //"C6C",  // Infinite Space // freezes after SEGA logo
+        "A5F",  // Layton: Curious Village // works
+        "YLT",  // Layton: Pandora's Box // works
+        "C3J",  // Layton: Unwound Future // works
+        //"BLF",  // Layton: Last Specter // sdk5
+        "ALK",  // Lunar Knights // works
+        "B6Z",  // MegaMan Zero Collection // works
+        "ARZ",  // MegaMan ZX // works
+        "YZX",  // MegaMan ZX Advent // works
+        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "ADA",  // Pokemon Diamond // works
+        "APA",  // Pokemon Pearl // works
+        "CPU",  // Pokemon Platinum // works
+        "IPK",  // Pokemon HeartGold // works
+        "IPG",  // Pokemon SoulSilver // works
+        //"IRB",  // Pokemon Black // sdk5
+        //"IRA",  // Pokemon White // sdk5
+        //"IRE",  // Pokemon Black 2 // sdk5
+        //"IRD",  // Pokemon White 2 // sdk5
+        "B3R",  // Pokemon Ranger: Guardian Signs // works
+        "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
+        "BZ3",  // SaGa 3 // works
+        //"YT7",  // SEGA Superstars Tennis // white screens
+        "CSN",  // Sonic Chronicles: The Dark BrotherHood
+        //"BXS",  // Sonic Colors // sdk5
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "CB6",  // Space Bust-A-Move // works, fixes lags
+        "ASF",  // Star Fox Command // works
+        "YG4",  // Suikoden: Tierkreis // works
+        "YUT",  // Ultimate Mortal Kombat
+        "A8Q",  // Theme Park // works
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
+        "AWA",  // Wario: Master of Disguise // works
+		//"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
+    };
+
+	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+		if (memcmp(romTid, list[i], 3) == 0) {
+			// Found a match.
+			dmaAllowed = true;
+			break;
+		}
+	}
+
+  if (dmaAllowed) {
+    u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
+    if (!patchOffsetCache.cardSetDmaChecked) {
+		setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+		if (setDmaoffset) patchOffsetCache.cardReadDmaOffset = setDmaoffset;
+		patchOffsetCache.cardSetDmaChecked = true;
+    }
+    if(setDmaoffset) {
+      dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
+      u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
+	  memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
     
-    if (
-        strncmp(romTid, "YGX", 3) == 0  // GTA Chinatown Wars
-    ||  strncmp(romTid, "YR9", 3) == 0  // Castlevania OE
-    ||  strncmp(romTid, "A5F", 3) == 0  // Layton Curious V
-    //||  strncmp(romTid, "ACV", 3) == 0  // Castlevania DOS
-    ||  strncmp(romTid, "AMH", 3) == 0  // Metroid Prime Hunters
-    ||  strncmp(romTid, "YMP", 3) == 0  // MapleStory
-    ||  strncmp(romTid, "AFF", 3) == 0  // FF3
-    ||  strncmp(romTid, "ADN", 3) == 0  // Digimon World DS
-    ||  strncmp(romTid, "A3Y", 3) == 0  // Sonic Rush Adventure
-    ||  strncmp(romTid, "YUT", 3) == 0  // Ultimate Mortal Kombat
-    ||  strncmp(romTid, "YT7", 3) == 0  // SEGA Superstars Tennis
-    //||  strncmp(romTid, "YGL", 3) == 0  // Geometry Wars
-    ||  strncmp(romTid, "CRR", 3) == 0  // MegaMan Star Force 3: Red Joker
-    ||  strncmp(romTid, "CRB", 3) == 0  // MegaMan Star Force 3: Black Ace
-    ) {
-      u32* sleep = findSleepOffset(ndsHeader,moduleParams,usesThumb);
-      if(usesThumb) ce9->thumbPatches->sleepRef = sleep; 
-      else ce9->patches->sleepRef = sleep;
-    } 
+      return true;  
+    }
+  }
+
+    return false; 
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -252,13 +498,32 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (moduleParams->sdk_version > 0x5000000) {
+	extern u32 gameOnFlashcard;
+    const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version > 0x5000000 && !gameOnFlashcard
+	&& strncmp(romTid, "KPF", 3) != 0	// Pop Island: Paperfield
+	) {
 		return;
 	}
 
+	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
+		patchOffsetCache.patchMpuRegion = 0;
+		patchOffsetCache.mpuStartOffset = 0;
+		patchOffsetCache.mpuDataOffset = 0;
+		patchOffsetCache.mpuInitCacheOffset = 0;
+		patchOffsetCacheChanged = true;
+	}
+
 	// Find the mpu init
-	u32* mpuStartOffset = findMpuStartOffset(ndsHeader, patchMpuRegion);
-	u32* mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset;
+	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset;
+	if (!patchOffsetCache.mpuStartOffset) {
+		mpuStartOffset = findMpuStartOffset(ndsHeader, patchMpuRegion);
+	}
+	if (!patchOffsetCache.mpuDataOffset) {
+		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+	}
 	if (mpuDataOffset) {
 		// Change the region 1 configuration
 
@@ -298,7 +563,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
 	// Find the mpu cache init
-	u32* mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
+	u32* mpuInitCacheOffset = patchOffsetCache.mpuInitCacheOffset;
+	if (!patchOffsetCache.mpuInitCacheOffset) {
+		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
+	}
 	if (mpuInitCacheOffset) {
 		*mpuInitCacheOffset = 0xE3A00046;
 	}
@@ -308,22 +576,23 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
-	while (mpuStartOffset && patchMpuSize) {
+	u32* mpuInitOffset = mpuStartOffset;
+	while (mpuInitOffset && patchMpuSize) {
 		u32 patchSize = ndsHeader->arm9binarySize;
 		if (patchMpuSize > 1) {
 			patchSize = patchMpuSize;
 		}
-		mpuStartOffset = findOffset(
+		mpuInitOffset = findOffset(
 			//(u32*)((u32)mpuStartOffset + 4), patchSize,
-			mpuStartOffset + 1, patchSize,
+			mpuInitOffset + 1, patchSize,
 			mpuInitRegionSignature, 1
 		);
-		if (mpuStartOffset) {
+		if (mpuInitOffset) {
 			dbg_printf("Mpu init: ");
-			dbg_hexa((u32)mpuStartOffset);
+			dbg_hexa((u32)mpuInitOffset);
 			dbg_printf("\n\n");
 
-			*mpuStartOffset = 0xE1A00000; // nop
+			*mpuInitOffset = 0xE1A00000; // nop
 
 			// Try to find it
 			/*for (int i = 0; i < 0x100; i++) {
@@ -338,32 +607,147 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			}*/
 		}
 	}
+
+	patchOffsetCache.patchMpuRegion = patchMpuRegion;
+	patchOffsetCache.mpuStartOffset = mpuStartOffset;
+	patchOffsetCache.mpuDataOffset = mpuDataOffset;
+	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 }
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool usesThumb) {
-	u32* heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
+/*static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+	// Slot-2 exist
+	//u32* slot2ExistEndOffset = patchOffsetCache.slot2ExistEndOffset;
+	u32* slot2ExistEndOffset = NULL;
+	//if (!patchOffsetCache.slot2ExistEndOffset) {
+		//slot2ExistEndOffset = NULL;
+		slot2ExistEndOffset = findSlot2ExistEndOffset(ndsHeader, &usesThumb);
+		if (slot2ExistEndOffset) {
+			//patchOffsetCache.slot2ExistOffset = slot2ExistEndOffset;
+		}
+	//}
+	if (!slot2ExistEndOffset) {
+		return;
+	}
+
+	// Patch
+	if (usesThumb) {
+		*(slot2ExistEndOffset + 3) = 0x02400000;
+		*(slot2ExistEndOffset + 4) = 0x024000CE;
+	} else {
+		*(slot2ExistEndOffset + 3) = 0x024000CE;
+
+		int instancesPatched = 0;
+		for (int i = 0x100/4; i > 0; i--) {
+			if (*(slot2ExistEndOffset - i) == 0xE3A00302) {
+				*(slot2ExistEndOffset - i) = *ce9->patches->slot2_exists_fix;
+				instancesPatched++;
+			}
+			if (instancesPatched == 2) break;
+		}
+	}
+}*/
+
+/*static void patchSlot2Read(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+	// Slot-2 read
+	//u32* slot2ReadOffset = patchOffsetCache.slot2ReadOffset;
+	u32* slot2ReadOffset = NULL;
+	//if (!patchOffsetCache.slot2ReadOffset) {
+		//slot2ReadStartOffset = NULL;
+		slot2ReadOffset = findSlot2ReadOffset(ndsHeader, &usesThumb);
+		if (slot2ReadOffset) {
+			//patchOffsetCache.slot2ReadOffset = slot2ReadOffset;
+		}
+	//}
+	if (!slot2ReadOffset) {
+		return;
+	}
+
+	// Patch
+	u32* slot2ReadPatch = (usesThumb ? ce9->thumbPatches->slot2_read : ce9->patches->slot2_read);
+	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
+}*/
+
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	u32* heapPointer = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0
+	 || patchOffsetCache.heapPointerOffset == 0x023E0000) {
+		patchOffsetCache.heapPointerOffset = 0;
+	} else {
+		heapPointer = patchOffsetCache.heapPointerOffset;
+	}
+	if (!patchOffsetCache.heapPointerOffset) {
+		heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
+	}
+    if (!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
+        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("heap pointer value: ");
+	    dbg_hexa(*heapPointer);
+		dbg_printf("\n\n");
+        return 0;
+    } else if (!patchOffsetCache.heapPointerOffset) {
+		patchOffsetCache.heapPointerOffset = heapPointer;
+		patchOffsetCacheChanged = true;
+	}
+
+    u32* oldheapPointer = (u32*)*heapPointer;
+
+    dbg_printf("old heap pointer: ");
+	dbg_hexa((u32)oldheapPointer);
+    dbg_printf("\n\n");
+
+	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6 KB (or for SDK5, 12 KB)
+
+    dbg_printf("new heap pointer: ");
+	dbg_hexa((u32)*heapPointer);
+    dbg_printf("\n\n");
+    dbg_printf("Heap Shrink Sucessfull\n\n");
+
+    return oldheapPointer;
+}
+
+void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version <= 0x2007FFF
+	|| isSdk5(moduleParams)) {
+		return;
+	}
+
+	u32* heapPointer = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0
+	 || patchOffsetCache.heapPointerOffset != 0x023E0000) {
+		patchOffsetCache.heapPointerOffset = 0;
+	} else {
+		heapPointer = patchOffsetCache.heapPointerOffset;
+	}
+	if (!patchOffsetCache.heapPointerOffset) {
+		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
+	}
     if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
         dbg_printf("ERROR: Wrong heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa(*heapPointer);    
 		dbg_printf("\n\n");
-        return 0;
-    }
-    
+        return;
+    } else if (!patchOffsetCache.heapPointerOffset) {
+		patchOffsetCache.heapPointerOffset = heapPointer;
+		patchOffsetCacheChanged = true;
+	}
+
     u32* oldheapPointer = (u32*)*heapPointer;
-        
-    dbg_printf("old heap pointer: ");
+
+    dbg_printf("old heap end pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
-    
-	*heapPointer = *heapPointer + 0x2000; // shrink heap by 8 KB
-    
-    dbg_printf("new heap pointer: ");
+
+	*heapPointer = 0x023DC000; // shrink heap by 16KB
+
+    dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Heap Shrink Sucessfull\n\n");
-    
-    return oldheapPointer;
+    dbg_printf("Heap 2 Shrink Sucessfull\n\n");
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
@@ -371,7 +755,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     u32 location_sig[1] = {default_location};
     
-    u32* firstCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* firstCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!firstCardLocation) {
 		return;
 	}
@@ -395,7 +779,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadCardLocation = current_location;
     
-    u32* thumbReadCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbReadCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadCardLocation) {
 		return;
 	}
@@ -407,20 +791,8 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *thumbReadCardLocation = current_location;
     
-    u32* armCardIdLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armCardIdLocation) {
-		return;
-	}
-    dbg_printf("armCardIdLocation ");
-	dbg_hexa((u32)armCardIdLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*armCardIdLocation);
-    dbg_printf("\n\n");
-    
-    *armCardIdLocation = current_location;
-    
     u32* armReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armReadCardLocation) {
+	if (!armReadDmaCardLocation) {
 		return;
 	}
     dbg_printf("armReadCardDmaLocation ");
@@ -431,20 +803,32 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     
     *armReadDmaCardLocation = current_location;
     
-    u32* thumbCardIdLocation = findOffset(current_location, size, location_sig, 1);
-	if (!thumbCardIdLocation) {
+    u32* armReadSlot2Location = findOffset(current_location, size, location_sig, 1);
+	if (!armReadSlot2Location) {
 		return;
 	}
-    dbg_printf("thumbCardIdLocation ");
-	dbg_hexa((u32)thumbCardIdLocation);
+    dbg_printf("armReadSlot2Location ");
+	dbg_hexa((u32)armReadSlot2Location);
     dbg_printf(" : ");
-    dbg_hexa((u32)*thumbCardIdLocation);
+    dbg_hexa((u32)*armReadSlot2Location);
     dbg_printf("\n\n");
     
-    *thumbCardIdLocation = current_location;
+    *armReadSlot2Location = current_location;
+    
+    u32* armSetDmaCardLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armSetDmaCardLocation) {
+		return;
+	}
+    dbg_printf("armSetDmaCardLocation ");
+	dbg_hexa((u32)armSetDmaCardLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armSetDmaCardLocation);
+    dbg_printf("\n\n");
+    
+    *armSetDmaCardLocation = current_location;
     
     u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
-	if (!thumbReadCardLocation) {
+	if (!thumbReadDmaCardLocation) {
 		return;
 	}
     dbg_printf("thumbReadCardDmaLocation ");
@@ -454,20 +838,104 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
     
     *thumbReadDmaCardLocation = current_location;
-
-	/*u32* armPullCardLocation = findOffset(current_location, size, location_sig, 1);
-	if (!armPullCardLocation) {
+    
+    u32* thumbSetDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbSetDmaCardLocation) {
 		return;
 	}
-    dbg_printf("armPullCardLocation ");
-	dbg_hexa((u32)armPullCardLocation);
+    dbg_printf("thumbSetDmaCardLocation ");
+	dbg_hexa((u32)thumbSetDmaCardLocation);
     dbg_printf(" : ");
-    dbg_hexa((u32)*armPullCardLocation);
+    dbg_hexa((u32)*thumbSetDmaCardLocation);
     dbg_printf("\n\n");
     
-    *armPullCardLocation = current_location;*/
+    *thumbSetDmaCardLocation = current_location;
+
+    u32* armReadNandLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armReadNandLocation) {
+		return;
+	}
+    dbg_printf("armReadNandLocation ");
+	dbg_hexa((u32)armReadNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armReadNandLocation);
+    dbg_printf("\n\n");
     
-    u32* globalCardLocation =  findOffset(current_location, size, location_sig, 1);
+    *armReadNandLocation = current_location;
+    
+    u32* thumbReadNandLocation = findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadNandLocation) {
+		return;
+	}
+    dbg_printf("thumbReadNandLocation ");
+	dbg_hexa((u32)thumbReadNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadNandLocation);
+    dbg_printf("\n\n");
+    
+    *thumbReadNandLocation = current_location;
+
+    u32* armWriteNandLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armWriteNandLocation) {
+		return;
+	}
+    dbg_printf("armWriteNandLocation ");
+	dbg_hexa((u32)armWriteNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armWriteNandLocation);
+    dbg_printf("\n\n");
+    
+    *armWriteNandLocation = current_location;
+    
+    u32* thumbWriteNandLocation =  findOffset(current_location, size, location_sig, 1);
+	if (!thumbWriteNandLocation) {
+		return;
+	}
+    dbg_printf("thumbWriteNandLocation ");
+	dbg_hexa((u32)thumbWriteNandLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbWriteNandLocation);
+    dbg_printf("\n\n");
+    
+    *thumbWriteNandLocation = current_location;
+    
+    u32* pdashReadLocation = findOffset(current_location, size, location_sig, 1);
+	if (!pdashReadLocation) {
+		return;
+	}
+    dbg_printf("pdashReadLocation ");
+	dbg_hexa((u32)pdashReadLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*pdashReadLocation);
+    dbg_printf("\n\n");
+    
+    *pdashReadLocation = current_location;
+
+    u32* thumbReadSlot2Location = findOffset(current_location, size, location_sig, 1);
+	if (!thumbReadSlot2Location) {
+		return;
+	}
+    dbg_printf("thumbReadSlot2Location ");
+	dbg_hexa((u32)thumbReadSlot2Location);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbReadSlot2Location);
+    dbg_printf("\n\n");
+    
+    *thumbReadSlot2Location = current_location;
+
+	u32* ipcSyncHandlerLocation = findOffset(current_location, size, location_sig, 1);
+	if (!ipcSyncHandlerLocation) {
+		return;
+	}
+    dbg_printf("ipcSyncHandlerLocation ");
+	dbg_hexa((u32)ipcSyncHandlerLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*ipcSyncHandlerLocation);
+    dbg_printf("\n\n");
+    
+    *ipcSyncHandlerLocation = current_location;
+    
+    u32* globalCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!globalCardLocation) {
 		return;
 	}
@@ -492,14 +960,22 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
     ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
     ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
+    ce9->patches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
+    ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
+    ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
     ce9->patches->terminateForPullOutRef = (u32*)((u32)ce9->patches->terminateForPullOutRef - default_location + current_location);
+    ce9->patches->pdash_read = (u32*)((u32)ce9->patches->pdash_read - default_location + current_location);
+    ce9->patches->ipcSyncHandlerRef = (u32*)((u32)ce9->patches->ipcSyncHandlerRef - default_location + current_location);
     ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_set_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_set_dma_arm9 - default_location + current_location);
+    ce9->thumbPatches->nand_read_arm9 = (u32*)((u32)ce9->thumbPatches->nand_read_arm9 - default_location + current_location);
+    ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
@@ -516,7 +992,14 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 	&& strncmp(romTid, "ABC", 3) != 0  // Harvest Moon DS
 	&& strncmp(romTid, "AWL", 3) != 0) // TWEWY
 	{
-		u32* randomPatchOffset = findRandomPatchOffset(ndsHeader);
+		u32* randomPatchOffset = patchOffsetCache.randomPatchOffset;
+		if (!patchOffsetCache.randomPatchChecked) {
+			randomPatchOffset = findRandomPatchOffset(ndsHeader);
+			if (randomPatchOffset) {
+				patchOffsetCache.randomPatchOffset = randomPatchOffset;
+			}
+			patchOffsetCache.randomPatchChecked = true;
+		}
 		if (randomPatchOffset) {
 			// Patch
 			//*(u32*)((u32)randomPatchOffset + 0xC) = 0x0;
@@ -621,8 +1104,19 @@ void patchDownloadplay(const tNDSHeader* ndsHeader)
 
 // SDK 5
 static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
 	// Random patch SDK 5 first
-	u32* randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader, moduleParams);
+	u32* randomPatchOffset5First = patchOffsetCache.randomPatch5Offset;
+	if (!patchOffsetCache.randomPatch5Checked) {
+		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
+		if (randomPatchOffset5First) {
+			patchOffsetCache.randomPatch5Offset = randomPatchOffset5First;
+		}
+		patchOffsetCache.randomPatch5Checked = true;
+	}
 	if (!randomPatchOffset5First) {
 		return;
 	}
@@ -634,8 +1128,19 @@ static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t
 
 // SDK 5
 static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
 	// Random patch SDK 5 second
-	u32* randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader, moduleParams);
+	u32* randomPatchOffset5Second = patchOffsetCache.randomPatch5SecondOffset;
+	if (!patchOffsetCache.randomPatch5SecondChecked) {
+		randomPatchOffset5Second = findRandomPatchOffset5Second(ndsHeader);
+		if (randomPatchOffset5Second) {
+			patchOffsetCache.randomPatch5SecondOffset = randomPatchOffset5Second;
+		}
+		patchOffsetCache.randomPatch5SecondChecked = true;
+	}
 	if (!randomPatchOffset5Second) {
 		return;
 	}
@@ -645,17 +1150,133 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	*(randomPatchOffset5Second + 1) = 0xE12FFF1E;
 }
 
+static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+    u32 sdPatchEntry = 0;
+    
+	const char* romTid = getRomTid(ndsHeader);
+    
+    // WarioWare D.I.Y. (USA)
+	if (strcmp(romTid, "UORE") == 0) {
+		sdPatchEntry = 0x2002c04; 
+	}
+    // WarioWare D.I.Y. (Europe)"
+    if (strcmp(romTid, "UORP") == 0) {
+		sdPatchEntry = 0x2002ca4; 
+	}
+    // WarioWare D.I.Y. (Japan)
+    if (strcmp(romTid, "UORJ") == 0) {
+		sdPatchEntry = 0x2002be4; 
+	}
+    
+    if(sdPatchEntry) {   
+      //u32 gNandInit(void* data)
+      *((u32*)(sdPatchEntry+0x50c+0)) = 0xe3a00001; //mov r0, #1
+      *((u32*)(sdPatchEntry+0x50c+4)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandWait(void)
+      *((u32*)(sdPatchEntry+0xc9c+0)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandState(void)
+      *((u32*)(sdPatchEntry+0xeb0+0)) = 0xe3a00003; //mov r0, #3
+      *((u32*)(sdPatchEntry+0xeb0+4)) = 0xe12fff1e; //bx lr
+      
+      //u32 gNandError(void)
+      *((u32*)(sdPatchEntry+0xec8+0)) = 0xe3a00000; //mov r0, #0
+      *((u32*)(sdPatchEntry+0xec8+4)) = 0xe12fff1e; //bx lr
+
+      //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+      u32* nandWritePatch = ce9->patches->nand_write_arm9;
+      memcpy(sdPatchEntry+0x958, nandWritePatch, 0x40);
+         
+      //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+      u32* nandReadPatch = ce9->patches->nand_read_arm9;
+      memcpy(sdPatchEntry+0xd24, nandReadPatch, 0x40);
+    } else {  
+        // Jam with the Band (Europe)
+        if (strcmp(romTid, "UXBP") == 0) {
+          	//u32 gNandInit(void* data)
+            *((u32*)(0x020613cc+0)) = 0xe3a00001; //mov r0, #1
+            *((u32*)(0x020613cc+4)) = 0xe12fff1e; //bx lr
+            
+            //u32 gNandResume(void)
+            *((u32*)(0x02061a4c+0)) = 0xe3a00000; //mov r0, #0
+            *((u32*)(0x02061a4c+4)) = 0xe12fff1e; //bx lr
+            
+            //u32 gNandError(void)
+            *((u32*)(0x02061c24+0)) = 0xe3a00000; //mov r0, #0
+            *((u32*)(0x02061c24+4)) = 0xe12fff1e; //bx lr
+      
+            //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+            u32* nandWritePatch = ce9->patches->nand_write_arm9;
+            memcpy(0x0206176c, nandWritePatch, 0x40);
+               
+            //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+            u32* nandReadPatch = ce9->patches->nand_read_arm9;
+            memcpy(0x02061ac4, nandReadPatch, 0x40);
+    	}    
+	}
+}
+
+static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+    u32 sdPatchEntry = 0;
+    
+	const char* romTid = getRomTid(ndsHeader);
+    
+    // Pokemon Dash USA
+	if (strcmp(romTid, "APDE") == 0) {
+		sdPatchEntry = 0x206CFE8;
+        // TODO : try to target 206CFE8, more similar to cardread
+        // r0 cardstruct 218A6E0 ptr 20D6120
+        // r1 src
+        // r2 dst
+        // r3 len
+        // return r0=number of time executed ?? 206D1A8
+	}
+    
+    if(sdPatchEntry) {   
+     	// Patch
+    	u32* pDashReadPatch = ce9->patches->pdash_read;
+    	memcpy(sdPatchEntry, pDashReadPatch, 0x40);   
+    }
+}
+
 static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	// Opera RAM patch
-	u32* operaRamOffset = findOperaRamOffset(ndsHeader, moduleParams);
-	if (!operaRamOffset) {
-		return;
+	extern int consoleModel;
+
+	// Opera RAM patch (ARM9)
+	*(u32*)0x02003D48 = 0x2400000;
+	*(u32*)0x02003D4C = 0x2400004;
+
+	*(u32*)0x02010FF0 = 0x2400000;
+	*(u32*)0x02010FF4 = 0x24000CE;
+
+	*(u32*)0x020112AC = 0x2400080;
+
+	*(u32*)0x020402BC = 0x24000C2;
+	*(u32*)0x020402C0 = 0x24000C0;
+	if (consoleModel > 0) {
+		*(u32*)0x020402CC = 0xD7FFFFE;
+		*(u32*)0x020402D0 = 0xD000000;
+		*(u32*)0x020402D4 = 0xD1FFFFF;
+		*(u32*)0x020402D8 = 0xD3FFFFF;
+		*(u32*)0x020402DC = 0xD7FFFFF;
+		*(u32*)0x020402E0 = 0xDFFFFFF;	// ???
+		toncset((char*)0xD000000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	} else {
+		*(u32*)0x020402CC = 0x2FFFFFE;
+		*(u32*)0x020402D0 = 0x2800000;
+		*(u32*)0x020402D4 = 0x29FFFFF;
+		*(u32*)0x020402D8 = 0x2BFFFFF;
+		*(u32*)0x020402DC = 0x2FFFFFF;
+		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
+		toncset((char*)0x2800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
 	}
-	extern u32 consoleModel;
-	// Patch to read from DSi RAM
-	for (int i = 0; i <= 5; i++) {
-		*(operaRamOffset + i) += 0x03800000;
-	}
+
+	// Opera RAM patch (ARM7)
+	*(u32*)0x0238C7BC = 0x2400000;
+	*(u32*)0x0238C7C0 = 0x24000CE;
+
+	//*(u32*)0x0238C950 = 0x2400000;
 }
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
@@ -663,13 +1284,16 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, u32 patchMpuSize) {
 
 	bool usesThumb;
+	bool slot2usesThumb = false;
 	int readType;
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
 	u32* cardPullOutOffset;
+
+	fixForDsiBios(ce9, ndsHeader);
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
@@ -689,23 +1313,43 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
-	patchDownloadplay(ndsHeader);
-  
-    patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
-    
-    patchReset(ce9, ndsHeader, moduleParams, usesThumb);
-	
+	//patchDownloadplay(ndsHeader);
+
+    //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
+
+	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+
+	if (gameOnFlashcard && !ROMinRAM) {
+		patchHeapPointer2(moduleParams, ndsHeader);
+	}
+
+  patchReset(ce9, ndsHeader, moduleParams, usesThumb);
+
 	randomPatch(ndsHeader, moduleParams);
 
 	randomPatch5First(ndsHeader, moduleParams);
-	
+
 	randomPatch5Second(ndsHeader, moduleParams);
-	
-	//operaRamPatch(ndsHeader, moduleParams);
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "UBRP") == 0) {
+		operaRamPatch(ndsHeader, moduleParams);
+	} /*else if (gbaRomFound) {
+		patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+
+		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+	}*/
+
+	nandSavePatch(ce9, ndsHeader, moduleParams);
+
+	patchCardReadPdash(ce9, ndsHeader);
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 

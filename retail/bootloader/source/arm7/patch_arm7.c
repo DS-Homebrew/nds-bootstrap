@@ -1,5 +1,6 @@
 #include <string.h> // memcpy
 #include <nds/system.h>
+#include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
 #include "find.h"
@@ -10,11 +11,14 @@
 
 //#define memcpy __builtin_memcpy
 
+extern u32 gameOnFlashcard;
+extern u32 saveOnFlashcard;
 extern u32 forceSleepPatch;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
@@ -39,40 +43,54 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 }
 
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	// swi 0x12 call
-	u32* swi12Offset = findSwi12Offset(ndsHeader);
-	if (swi12Offset) {
-		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = ce7->patches->swi02;
-		memcpy(swi12Offset, swi12Patch, 0x4);
+	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
+	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
+	if (!patchOffsetCache.a7Swi12Offset) {
+		swi12Offset = a7_findSwi12Offset(ndsHeader);
+		if (swi12Offset) {
+			patchOffsetCache.a7Swi12Offset = swi12Offset;
+		}
+	}
+	if (!patchOffsetCache.swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
+		if (swiGetPitchTableOffset) {
+			patchOffsetCache.swiGetPitchTableOffset = swiGetPitchTableOffset;
+		}
 	}
 
-	// swi get pitch table
-	u32* swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
-	if (swiGetPitchTableOffset) {
-		// Patch
-		u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-		memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+	if (!(REG_SCFG_ROM & BIT(9))) {
+		// swi 0x12 call
+		if (swi12Offset) {
+			// Patch to call swi 0x02 instead of 0x12
+			u32* swi12Patch = ce7->patches->swi02;
+			memcpy(swi12Offset, swi12Patch, 0x4);
+		}
+
+		// swi get pitch table
+		if (swiGetPitchTableOffset) {
+			// Patch
+			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+			memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+		}
 	}
 }
 
-static void patchSleep(const tNDSHeader* ndsHeader) {
-	bool usesThumb = false;
-
+static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
-	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
-	if (!sleepPatchOffset) {
-		dbg_printf("Trying thumb...\n");
-		sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
-		usesThumb = true;
+	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
+	if (!patchOffsetCache.sleepPatchOffset) {
+		sleepPatchOffset = findSleepPatchOffset(ndsHeader);
+		if (!sleepPatchOffset) {
+			dbg_printf("Trying thumb...\n");
+			sleepPatchOffset = (u32*)findSleepPatchOffsetThumb(ndsHeader);
+		}
+		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
-	if (sleepPatchOffset) {
-		// Patch
-		if (usesThumb) {
+	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
+		if (sleepPatchOffset) {
+			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
 			*((u16*)sleepPatchOffset + 3) = 0;
-		} else {
-			*(sleepPatchOffset + 2) = 0;
 		}
 	}
 }
@@ -91,7 +109,13 @@ static void patchSleep(const tNDSHeader* ndsHeader) {
 
 static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
-	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
+	u32* cardIrqEnableOffset = patchOffsetCache.a7CardIrqEnableOffset;
+	if (!patchOffsetCache.a7CardIrqEnableOffset) {
+		cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
+		if (cardIrqEnableOffset) {
+			patchOffsetCache.a7CardIrqEnableOffset = cardIrqEnableOffset;
+		}
+	}
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
@@ -102,7 +126,14 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 
 static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card check pull out
-	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
+	u32* cardCheckPullOutOffset = patchOffsetCache.cardCheckPullOutOffset;
+	if (!patchOffsetCache.cardCheckPullOutChecked) {
+		cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
+		if (cardCheckPullOutOffset) {
+			patchOffsetCache.cardCheckPullOutOffset = cardCheckPullOutOffset;
+		}
+		patchOffsetCache.cardCheckPullOutChecked = true;
+	}
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
 		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
@@ -116,34 +147,52 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ce7, ndsHeader, moduleParams);
-	}
+	fixForDsiBios(ce7, ndsHeader, moduleParams);
 
-	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
-		patchSleep(ndsHeader);
-	}
+	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);
 
-	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
-		return 0;
+    const char* romTid = getRomTid(ndsHeader);
+
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
+	|| ROMinRAM || !gameOnFlashcard) {
+		if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+			return 0;
+		}
+
+		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
-	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
-
 	u32 saveResult = 0;
-	if (isSdk5(moduleParams)) {
+    
+    if (
+        strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
+    ) {
+        saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+	} else if (isSdk5(moduleParams)) {
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);
 	} else {
-		saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-		if (!saveResult) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+		if (patchOffsetCache.savePatchType == 0) {
+			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 1;
+			}
 		}
-		if (!saveResult) {
+		if (!saveResult && patchOffsetCache.savePatchType == 1) {
+			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+			if (!saveResult) {
+				patchOffsetCache.savePatchType = 2;
+			}
+		}
+		if (!saveResult && patchOffsetCache.savePatchType == 2) {
 			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 		}
+	}
+	if (!saveResult) {
+		patchOffsetCache.savePatchType = 0;
 	}
 
 	dbg_printf("ERR_NONE\n\n");

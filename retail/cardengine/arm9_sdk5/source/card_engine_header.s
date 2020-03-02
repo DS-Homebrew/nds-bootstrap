@@ -6,20 +6,6 @@
 	.align	4
 	.arm
 
-.global card_engine_start
-.global card_engine_start_sync
-.global card_engine_end
-.global cardStruct0
-.global cacheStruct
-.global patches_offset
-.global moduleParams
-.global fileCluster
-.global saveCluster
-.global ROMinRAM
-.global dsiMode
-.global enableExceptionHandler
-.global consoleModel
-
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
@@ -30,11 +16,15 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
-intr_fifo_orig_return:
+intr_ipc_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 fileCluster:
+	.word	0x00000000
+saveCluster:
+	.word	0x00000000
+saveOnFlashcard:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
@@ -48,39 +38,59 @@ enableExceptionHandler:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
+irqTable:
+	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 card_engine_start:
 
-.global readCachedRef
 patches:
 .word	card_read_arm9
 .word	card_pull_out_arm9
-.word	0x0
 .word	card_id_arm9
 .word	card_dma_arm9
+.word	card_set_dma_arm9
+.word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   card_pull
-.word   cacheFlushRef
-.word   0x0 @sleepRef
+.word   slot2_exists_fix
 .word   0x0
+.word   cacheFlushRef
+.word   0x0 @cardEndReadDmaRef
+.word   0x0
+.word	swi02
 .global needFlushDCCache
 needFlushDCCache:
 .word   0x0
+.word   0x0
+.word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_pull_out_arm9
-.word	0x0
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word   thumb_card_set_dma_arm9
+.word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   thumb_card_pull
+.word   0x0
 .word   cacheFlushRef
-thumbSleepRef:
-.word   0x0 @sleepRef
+thumbCardEndReadDmaRef:
+.word   0x0 @cardEndReadDmaRef
 .word   0x0
 
+	.thumb
+@---------------------------------------------------------------------------------
+swi02:
+@---------------------------------------------------------------------------------
+	swi	#0x02
+	bx	lr
+@---------------------------------------------------------------------------------
+
+	.arm
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
@@ -135,24 +145,10 @@ cardReadRef2:
 @---------------------------------------------------------------------------------
 card_id_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
-
-	ldr		r6, cardReadRef3
-    ldr     r7, ce9location3
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_card_id	
-    
-
-	ldmfd   sp!, {r1-r11,pc}
+	ldr r0, cardIdData
 	bx      lr
-_blx_r6_stub_card_id:
-	bx	r6	
-.pool
-ce9location3:
-.word   ce9
-cardReadRef3:
-.word   cardId-ce9 
+cardIdData:
+.word  0xC2FF01C0
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -180,38 +176,69 @@ cardReadRef4:
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
+card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRef8
+    ldr     r7, ce9location8
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_card_set_dma	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+_blx_r6_stub_card_set_dma:
+	bx	r6	
+.pool
+ce9location8:
+.word   ce9
+cardReadRef8:
+.word   cardSetDma-ce9 
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 	bx      lr
+@	stmfd   sp!, {lr}
+@	sub     sp, sp, #4
+@	ldr		r6, cardPullOutRef
+@    ldr     r7, ce9location5
+@    add     r6, r6, r7
+    
+@	bl		_blx_r6_stub_card_pull_out
+
+@	add     sp, sp, #4
+@	ldmfd   sp!, {lr}
+@	bx      lr
+@_blx_r6_stub_card_pull_out:
+@	bx	r6
+@.pool
+@ce9location5:
+@.word   ce9
+@cardPullOutRef:
+@.word   cardPullOut-ce9
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 card_pull:
 @---------------------------------------------------------------------------------
 	bx      lr
+
+@---------------------------------------------------------------------------------
+slot2_exists_fix:
+@---------------------------------------------------------------------------------
+	mov r0, #0x02400000
+
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, cardReadRef5
-    ldr     r7, ce9location5
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_card_id_thumb	
-    
-
-    pop	{r1-r7, pc}
+	ldr r0, cardIdDataT
 	bx      lr
-_blx_r6_stub_card_id_thumb:
-	bx	r6	
-.pool
-.align	4
-ce9location5:
-.word   ce9
-cardReadRef5:
-.word   cardId-ce9 
+cardIdDataT:
+.word  0xC2FF01C0
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -219,8 +246,8 @@ thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
     
-	ldr		r6, cardReadRef6
-    ldr     r7, ce9location6
+	ldr		r6, cardReadRef7
+    ldr     r7, ce9location7
     add     r6, r6, r7
 
 	bl		_blx_r6_stub_thumb_card_read_dma	
@@ -232,10 +259,32 @@ _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
 .align	4
-ce9location6:
+ce9location7:
 .word   ce9
-cardReadRef6:
+cardReadRef7:
 .word   cardReadDma-ce9 		
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+    
+	ldr		r6, cardReadRef9
+    ldr     r7, ce9location9
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_thumb_card_set_dma	
+
+    pop	{r1-r7, pc}
+_blx_r6_stub_thumb_card_set_dma:
+	bx	r6	
+.pool
+.align	4
+ce9location9:
+.word   ce9
+cardReadRef9:
+.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -250,19 +299,122 @@ thumb_card_pull:
 	bx      lr
     
 	.arm
+    
+ipcSyncHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_ipc
+	ldr 	r0,	intr_ipc_orig_return
+	bx  	r0
+    
+code_handler_start_ipc:
+	push	{r0-r12} 
+    ldr		r6, cardReadRef13
+    ldr     r7, ce9location13
+    add     r6, r6, r7
+	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+  
+	@ exit after return
+	b	arm9exit
+_blx_r6_stub_start_ipc:
+	bx	r6
 
-.global callSleepThumb
-.type	callSleepThumb STT_FUNC
-callSleepThumb:
-    push	{r1-r7, lr}
-    ldr     r6, thumbSleepRef
+arm9exit:
+	pop   	{r0-r12} 
+	pop  	{lr}
+	bx  lr
+    
+.pool
+ce9location13:
+.word   ce9
+cardReadRef13:
+.word   myIrqHandlerIPC-ce9  
+
+.global callEndReadDmaThumb
+.type	callEndReadDmaThumb STT_FUNC
+callEndReadDmaThumb:
+    push	{r1-r11, lr}
+    ldr     r6, thumbCardEndReadDmaRef
     add     r6, #1
-    bl		_blx_r6_stub_callSleepThumb	
-    pop	    {r1-r7, pc}
+    bl		_blx_r6_stub_callEndReadDmaThumb
+    pop	    {r1-r11, pc}
 	bx      lr
-_blx_r6_stub_callSleepThumb:
+_blx_r6_stub_callEndReadDmaThumb:
 	bx	r6	
 .pool
+
+.global setIrqMask
+.type	setIrqMask STT_FUNC
+setIrqMask:
+    LDR             R3, =0x4000208
+    MOV             R1, #0
+    LDRH            R2, [R3]
+    STRH            R1, [R3]
+    LDR             R1, [R3,#8]
+    STR             R0, [R3,#8]
+    LDRH            R0, [R3]
+    MOV             R0, R1
+    STRH            R2, [R3]
+    BX              LR
+.pool
+
+
+.global enableIrqMask
+.type	enableIrqMask STT_FUNC
+enableIrqMask:
+    LDR             R3, =0x4000208
+    MOV             R1, #0
+    LDRH            R2, [R3]
+    STRH            R1, [R3]
+    LDR             R1, [R3,#8]
+    ORR             R0, R1, R0
+    STR             R0, [R3,#8]
+    LDRH            R0, [R3]
+    MOV             R0, R1
+    STRH            R2, [R3]
+    BX              LR
+.pool
+
+.global disableIrqMask
+.type	disableIrqMask STT_FUNC
+disableIrqMask:
+    LDR             R12, =0x4000208
+    MOV             R2, #0
+    LDRH            R3, [R12]
+    MVN             R1, R0
+    STRH            R2, [R12]
+    LDR             R0, [R12,#8]
+    AND             R1, R0, R1
+    STR             R1, [R12,#8]
+    LDRH            R1, [R12]
+    STRH            R3, [R12]
+    BX              LR
+.pool
+    
+.global resetRequestIrqMask
+.type	resetRequestIrqMask STT_FUNC
+resetRequestIrqMask:
+    LDR             R3, =0x4000208
+    MOV             R1, #0
+    LDRH            R2, [R3]
+    STRH            R1, [R3]
+    LDR             R1, [R3,#0xC]
+    STR             R0, [R3,#0xC]
+    LDRH            R0, [R3]
+    MOV             R0, R1
+    STRH            R2, [R3]
+    BX              LR
+
+//---------------------------------------------------------------------------------
+.global  getDtcmBase
+.type	 getDtcmBase STT_FUNC
+/*---------------------------------------------------------------------------------
+	getDtcmBase
+---------------------------------------------------------------------------------*/
+getDtcmBase:
+	mrc	p15, 0, r0, c9, c1, 0
+	bx	lr
+
 
 //---------------------------------------------------------------------------------
 .global  IC_InvalidateAll

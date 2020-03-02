@@ -45,7 +45,7 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+//static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
 // Card check pull out
 static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
@@ -53,13 +53,14 @@ static const u32 cardCheckPullOutSignature2[4] = {0xE92D4018, 0xE24DD004, 0xE59F
 static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F002C, 0xE1D000B0}; // SDK 3
 
 // irq enable
-static const u32 irqEnableStartSignature1[4]    = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
-static const u32 irqEnableStartSignature4[4]    = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
-static const u32 irqEnableStartSignature4Alt[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u32 irqEnableStartSignature1[4]     = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
+static const u32 irqEnableStartSignature4[4]     = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
+static const u32 irqEnableStartSignature4Alt1[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u32 irqEnableStartSignature4Alt2[4] = {0xE92D4010, 0xE1A04000, 0xEB00122B, 0xE59F2030}; // SDK 5
 
 //static bool sdk5 = false;
 
-u32* findSwi12Offset(const tNDSHeader* ndsHeader) {
+u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
 
 	u32* swi12Offset = findOffset(
@@ -484,7 +485,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	return sleepPatchOffset;
 }
 
-u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
+/*u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
@@ -501,7 +502,7 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return ramClearOffset;
-}
+}*/
 
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardCheckPullOutOffset:\n");
@@ -554,12 +555,25 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
-            irqEnableStartSignature4Alt, 4
+            irqEnableStartSignature4Alt1, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable alt found: ");
+			dbg_printf("irq enable alt 1 found: ");
 		} else {
-			dbg_printf("irq enable alt not found\n");
+			dbg_printf("irq enable alt 1 not found\n");
+		}
+	}
+
+	if (!cardIrqEnableOffset) {
+		// SDK 5
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+            irqEnableStartSignature4Alt2, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable alt 2 found: ");
+		} else {
+			dbg_printf("irq enable alt 2 not found\n");
 		}
 	}
 

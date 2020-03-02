@@ -26,23 +26,30 @@
 #include "my_disc_io.h"
 #include "my_sdmmc.h"
 
+extern bool sdRead;
+
 // Export interface
-extern DISC_INTERFACE __myio_dsisd;
+extern DISC_INTERFACE __myio_dldi;
+extern NEW_DISC_INTERFACE __myio_dsisd;
 
 static inline bool CARD_StartUp(void) {
-	return __myio_dsisd.startup();
+	return sdRead ? __myio_dsisd.startup()
+					: __myio_dldi.startup();
 }
 
 static inline bool CARD_IsInserted(void) {
-	return __myio_dsisd.isInserted();
+	return sdRead ? __myio_dsisd.isInserted()
+					: __myio_dldi.isInserted();
 }
 
 static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset) {
-	return __myio_dsisd.readSector(sector, buffer, startOffset, endOffset);
+	return sdRead ? __myio_dsisd.readSector(sector, buffer, startOffset, endOffset)
+					: __myio_dldi.readSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
-	return __myio_dsisd.readSectors(sector, count, buffer, ndmaSlot);
+	return sdRead ? __myio_dsisd.readSectors(sector, count, buffer, ndmaSlot)
+					: __myio_dldi.readSectors(sector, count, buffer);
 }
 
 static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer, int ndmaSlot) {
@@ -54,11 +61,13 @@ static inline int CARD_CheckCommand(int cmd, int ndmaSlot) {
 }
 
 static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
-	return __myio_dsisd.writeSectors(sector, 1, buffer, ndmaSlot);
+	return sdRead ? __myio_dsisd.writeSectors(sector, 1, buffer, ndmaSlot)
+					: __myio_dldi.writeSectors(sector, 1, buffer);
 }
 
 static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
-	return __myio_dsisd.writeSectors(sector, count, buffer, ndmaSlot);
+	return sdRead ? __myio_dsisd.writeSectors(sector, count, buffer, ndmaSlot)
+					: __myio_dldi.writeSectors(sector, count, buffer);
 }
 
 #endif // CARD_H

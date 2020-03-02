@@ -23,10 +23,17 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	dbg_printf("\nArm7 (patch v2)\n");
 
 	// Find the relocation signature
-	u32 relocationStart = (u32)findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		relocateStartSignature, 1
-	);
+    u32 relocationStart = patchOffsetCache.relocateStartOffset;
+	if (!patchOffsetCache.relocateStartOffset) {
+		relocationStart = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			relocateStartSignature, 1
+		);
+
+		if (relocationStart) {
+			patchOffsetCache.relocateStartOffset = relocationStart;
+		}
+	}
 	if (!relocationStart) {
 		dbg_printf("Relocation start not found\n");
 		return 0;
@@ -34,10 +41,16 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	// Validate the relocation signature
 	u32 forwardedRelocStartAddr = relocationStart + 4;
-	if (!*(u32*)forwardedRelocStartAddr) {
+	while (!*(u32*)forwardedRelocStartAddr || *(u32*)forwardedRelocStartAddr < 0x02000000 || *(u32*)forwardedRelocStartAddr > 0x03000000) {
 		forwardedRelocStartAddr += 4;
 	}
 	u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
+    
+    dbg_printf("forwardedRelocStartAddr\n");
+    dbg_hexa(forwardedRelocStartAddr);   
+    dbg_printf("\nvAddrOfRelocSrc\n");
+    dbg_hexa(vAddrOfRelocSrc);
+    dbg_printf("\n");  
 
 	// Sanity checks
 	u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
@@ -46,10 +59,16 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		dbg_printf("Error in relocation checking method 1\n");
 		
 		// Found the beginning of the next function
-		u32 nextFunction = (u32)findOffset(
-			(u32*)relocationStart, ndsHeader->arm7binarySize,
-			  nextFunctiontSignature, 1
-		);
+		u32 nextFunction = patchOffsetCache.relocateValidateOffset;
+		if (!patchOffsetCache.relocateValidateOffset) {
+			nextFunction = (u32)findOffset(
+				(u32*)relocationStart, ndsHeader->arm7binarySize,
+				nextFunctiontSignature, 1
+			);
+			if (nextFunction) {
+				patchOffsetCache.relocateValidateOffset = nextFunction;
+			}
+		}
 	
 		   // Validate the relocation signature
 		forwardedRelocStartAddr = nextFunction - 0x14;
@@ -87,10 +106,17 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	dbg_printf("\n");
 
 	// Find the card read
-	u32 cardReadEndAddr = (u32)findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00400000, 
-		a7cardReadSignature, 2
-	);
+	u32 cardReadEndAddr = patchOffsetCache.a7CardReadEndOffset;
+	if (!patchOffsetCache.a7CardReadEndOffset) {
+		cardReadEndAddr = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00020000, 
+			a7cardReadSignature, 2
+		);
+		
+		if (cardReadEndAddr) {
+			patchOffsetCache.a7CardReadEndOffset = cardReadEndAddr;
+		}
+	}
 	if (!cardReadEndAddr) {
 		dbg_printf("[Error!] Card read addr not found\n");
 		return 0;

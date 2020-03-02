@@ -7,9 +7,16 @@
 
 typedef struct configuration {
     bool debug;
+    bool cacheFatTable;
 	char* ndsPath;
 	char* savPath;
+	char* gbaPath;
+	char* apPatchPath;
+	u32 romSize;
 	u32 saveSize;
+	u32 wideCheatSize;
+	u32 apPatchSize;
+	u32 cheatSize;
 	u8 language;
 	u8 dsiMode; // SDK 5
 	u32 donorSdkVer;
@@ -18,27 +25,20 @@ typedef struct configuration {
 	bool ceCached;	// SDK 1-4
 	u32 consoleModel;
 	int colorMode;
-	u32 loadingScreen;
-	bool loadingDarkTheme;
-	bool loadingSwapLcds;
-	char* loadingImagePath;
-	int loadingFrames;
-	int loadingFps;
-	bool loadingBar;
-	int loadingBarYpos;
-	u32 romread_LED;
+	u32 romRead_LED;
+	u32 dmaRomRead_LED;
 	bool boostCpu;
 	bool boostVram;
+	bool soundFreq;
 	bool gameSoftReset;
 	bool forceSleepPatch;
-	bool soundFix;
+	bool volumeFix;
+	bool preciseVolumeControl;
 	bool logging;
 	bool initDisc;
-	bool dldiPatchNds;
-	int argc;
-	const char** argv; //const char* argv[ARG_MAX];
-	u32* cheat_data; //u32 cheat_data[CHEAT_DATA_MAX_LEN]
-	u32 cheat_data_len;
+	bool sdFound;
+	bool gameOnFlashcard;
+	bool saveOnFlashcard;
 	u32 backlightMode;
 } configuration;
 

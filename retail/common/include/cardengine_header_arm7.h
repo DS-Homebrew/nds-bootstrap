@@ -41,11 +41,8 @@ typedef struct cardengineArm7Patches {
     u32* card_pull_out_arm9;
     u32* card_irq_enable_arm7;
     u32 vblankHandler;
-    u32 timer0Handler;
-    u32 timer1Handler;
-    u32 timer2Handler;
-    u32 timer3Handler;
     u32 fifoHandler;
+    u32 networkHandler;
     u32 card_pull;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     u32* swi02;
@@ -58,30 +55,28 @@ typedef struct cardengineArm7Patches {
 // ARM7 cardengine
 //
 typedef struct cardengineArm7 {
+    u32 ce7;
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
-    u32 intr_timer0_orig_return;
-    u32 intr_timer1_orig_return;
-    u32 intr_timer2_orig_return;
-    u32 intr_timer3_orig_return;
     u32 intr_fifo_orig_return;
+    u32 intr_network_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
+	u32 ramDumpCluster;
     u32 cardStruct;
+    u32 gameOnFlashcard;
+    u32 saveOnFlashcard;
     u32 language; //u8
-    u32 gottenSCFGExt;
     u32 dsiMode;
+    u32 dsiSD;
     u32 ROMinRAM;
     u32 consoleModel;
-    u32 romread_LED;
+    u32 romRead_LED;
+    u32 dmaRomRead_LED;
     u32 gameSoftReset;
-    u32 cheat_data_offset; //u32* cheat_data;
-    u32 cheat_data_len;
+	u32 preciseVolumeControl;
+    u32* cheat_data_offset; //u32* cheat_data;
 
 } __attribute__ ((__packed__)) cardengineArm7;
-
-inline u32* getCheatData(const cardengineArm7* ce7) {
-    return (u32*)((u32)ce7 + ce7->cheat_data_offset);
-}
 
 #endif // CARDENGINE_HEADER_ARM7_H

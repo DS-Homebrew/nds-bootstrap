@@ -37,7 +37,14 @@ u32 dbg_printf(const char* message) {
 
     nocashMessage(message);
 
+	extern bool sdRead;
+	extern bool dsiSD;
+	bool store_sdRead = sdRead;
+	sdRead = dsiSD;
+
 	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 0);
+
+	sdRead = store_sdRead;
 
 	_currentPos += strlen(message);
 

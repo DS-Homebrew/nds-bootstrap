@@ -28,6 +28,10 @@
 #include <unistd.h>
 #include <fat.h>
 
+#include "lzss.h"
+#include "tonccpy.h"
+#include "locations.h"
+
 #include "load_bin.h"
 
 #ifndef _NO_BOOTSTUB_
@@ -35,11 +39,10 @@
 #endif
 
 #include "nds_loader_arm9.h"
-#define LCDC_BANK_C (u16*)0x06840000
 #define LCDC_BANK_D (u16*)0x06860000
-#define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_C) + 1))
-#define INIT_DISC (*(((u32*)LCDC_BANK_C) + 2))
-#define WANT_TO_PATCH_DLDI (*(((u32*)LCDC_BANK_C) + 3))
+#define STORED_FILE_CLUSTER (*(((u32*)LCDC_BANK_D) + 1))
+#define INIT_DISC (*(((u32*)LCDC_BANK_D) + 2))
+#define WANT_TO_PATCH_DLDI (*(((u32*)LCDC_BANK_D) + 3))
 
 
 /*
@@ -68,10 +71,13 @@ dsiSD:
 #define ARG_START_OFFSET 16
 #define ARG_SIZE_OFFSET 20
 #define HAVE_DSISD_OFFSET 28
-#define LOADING_SCREEN_OFFSET 32
-#define RAM_DISK_CLUSTER_OFFSET 36
-#define RAM_DISK_SIZE_OFFSET 40
-#define ROM_FILE_TYPE_OFFSET 44
+#define LANGUAGE_OFFSET 32
+#define DSIMODE_OFFSET 36
+#define BOOSTVRAM_OFFSET 40
+#define RAM_DISK_CLUSTER_OFFSET 44
+#define RAM_DISK_SIZE_OFFSET 48
+#define ROM_FILE_TYPE_OFFSET 52
+#define ROM_IS_COMPRESSED_OFFSET 56
 
 
 typedef signed int addr_t;
@@ -274,7 +280,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int loadingScreen)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram)
 {
 	char* argStart;
 	u16* argData;
@@ -286,28 +292,27 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	irqDisable(IRQ_ALL);
 
-	// Direct CPU access to VRAM bank C
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	// Direct CPU access to VRAM bank D
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
-	vramcpy (LCDC_BANK_C, loader, loaderSize);
-	vramcpy (LCDC_BANK_D, imgTemplateBuffer, sizeof(imgTemplateBuffer));
+	tonccpy (LCDC_BANK_D, loader, loaderSize);
+	tonccpy ((u32*)0x02370000, imgTemplateBuffer, sizeof(imgTemplateBuffer));
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;
-	writeAddr ((data_t*) LCDC_BANK_C, STORED_FILE_CLUSTER_OFFSET, cluster);
+	writeAddr ((data_t*) LCDC_BANK_D, STORED_FILE_CLUSTER_OFFSET, cluster);
 	// INIT_DISC = initDisc;
-	writeAddr ((data_t*) LCDC_BANK_C, INIT_DISC_OFFSET, initDisc);
+	writeAddr ((data_t*) LCDC_BANK_D, INIT_DISC_OFFSET, initDisc);
 
 	/*if(argv[0][0]=='s' && argv[0][1]=='d') {
 		dldiPatchNds = false;
-		writeAddr ((data_t*) LCDC_BANK_C, HAVE_DSISD_OFFSET, 1);
+		writeAddr ((data_t*) LCDC_BANK_D, HAVE_DSISD_OFFSET, 1);
 	}*/
 
 	// WANT_TO_PATCH_DLDI = dldiPatchNds;
-	writeAddr ((data_t*) LCDC_BANK_C, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
+	writeAddr ((data_t*) LCDC_BANK_D, WANT_TO_PATCH_DLDI_OFFSET, dldiPatchNds);
 	// Give arguments to loader
-	argStart = (char*)LCDC_BANK_C + readAddr((data_t*)LCDC_BANK_C, ARG_START_OFFSET);
+	argStart = (char*)LCDC_BANK_D + readAddr((data_t*)LCDC_BANK_D, ARG_START_OFFSET);
 	argStart = (char*)(((int)argStart + 3) & ~3);	// Align to word
 	argData = (u16*)argStart;
 	argSize = 0;
@@ -337,18 +342,21 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	}
 	*argData = argTempVal;
 	
-	writeAddr ((data_t*) LCDC_BANK_C, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_C);
-	writeAddr ((data_t*) LCDC_BANK_C, ARG_SIZE_OFFSET, argSize);
-	writeAddr ((data_t*) LCDC_BANK_C, LOADING_SCREEN_OFFSET, loadingScreen);
-	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
-	writeAddr ((data_t*) LCDC_BANK_C, RAM_DISK_SIZE_OFFSET, ramDiskSize);
-	writeAddr ((data_t*) LCDC_BANK_C, ROM_FILE_TYPE_OFFSET, romToRamDisk);
+	writeAddr ((data_t*) LCDC_BANK_D, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_D);
+	writeAddr ((data_t*) LCDC_BANK_D, ARG_SIZE_OFFSET, argSize);
+	writeAddr ((data_t*) LCDC_BANK_D, LANGUAGE_OFFSET, language);
+	writeAddr ((data_t*) LCDC_BANK_D, DSIMODE_OFFSET, dsiMode);
+	writeAddr ((data_t*) LCDC_BANK_D, BOOSTVRAM_OFFSET, boostVram);
+	writeAddr ((data_t*) LCDC_BANK_D, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
+	writeAddr ((data_t*) LCDC_BANK_D, RAM_DISK_SIZE_OFFSET, ramDiskSize);
+	writeAddr ((data_t*) LCDC_BANK_D, ROM_FILE_TYPE_OFFSET, romToRamDisk);
+	writeAddr ((data_t*) LCDC_BANK_D, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
 
 		
 	if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
-		if (!dldiPatchLoader ((data_t*)LCDC_BANK_C, loaderSize, initDisc)) {
+		if (!dldiPatchLoader ((data_t*)LCDC_BANK_D, loaderSize, initDisc)) {
 			nocashMessage("return 3");
 			return 3;
 		}
@@ -360,8 +368,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	nocashMessage("Give the VRAM to the ARM7");
 	// Give the VRAM to the ARM7
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;  
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;  
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
 	
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
@@ -373,7 +380,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	
 	nocashMessage("resetARM7");
 
-	resetARM7(0x06000000);
+	resetARM7(0x06020000);
 	
 	nocashMessage("swiSoftReset");
 
@@ -381,7 +388,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, int argc, const char** argv, int loadingScreen)  {
+int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram) {
 	struct stat st;
 	struct stat stRam;
 	u32 clusterRam = 0;
@@ -390,7 +397,15 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	const char* args[1];
 
 	FILE *ramDiskTemplate;
-	if (romToRamDisk == 1) {
+	if (romToRamDisk == 3) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_GG.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 2) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_SMS.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 1) {
 		ramDiskTemplate = fopen("nitro:/imgTemplate_SNES.bin", "rb");
 		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
@@ -400,7 +415,20 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 		fclose(ramDiskTemplate);
 	}
 
-	
+	if (romIsCompressed) {
+		ramDiskTemplate = fopen(ramDiskFilename, "rb");
+		if (ramDiskTemplate) {
+			fread((void*)RAM_DISK_LOCATION_LZ77ROM, 1, ramDiskSize, ramDiskTemplate);
+			fclose(ramDiskTemplate);
+			if (romToRamDisk == 1) {
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_SNESROM);
+			} else if (romToRamDisk == 0 || romToRamDisk == 2 || romToRamDisk == 3) {
+				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_MDROM);
+			}
+		}
+	}
+
+
 	if (stat (filename, &st) < 0) {
 		return 1;
 	}
@@ -426,7 +454,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, true, true, argc, argv, loadingScreen);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram);
 }
 
 /*

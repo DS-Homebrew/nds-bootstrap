@@ -51,12 +51,17 @@ enum {
 	ARM9_MEMCLR,
 	ARM9_READY,
 	ARM9_BOOTBIN,
-	ARM9_DISPERR
+	ARM9_SCRNCLR,
+	ARM9_DISPSCRN,
+	ARM9_DISPERR,
+	ARM9_SETSCFG
 } ARM9_STATE;
 
 extern tNDSHeader* ndsHeader;
+extern bool isGSDD;
+extern bool arm9_isSdk5;
 extern bool dsiModeConfirmed;
-extern volatile bool arm9_boostVram;
+extern bool arm9_boostVram;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

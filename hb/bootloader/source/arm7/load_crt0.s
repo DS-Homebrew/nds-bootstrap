@@ -29,10 +29,13 @@
 	.global argStart
 	.global argSize
 	.global dsiSD
-	.global loadingScreen
+	.global language
+	.global dsiMode
+	.global boostVram
 	.global ramDiskCluster
 	.global ramDiskSize
 	.global romFileType
+	.global romIsCompressed
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -56,13 +59,19 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
-loadingScreen:
+language:
+	.word	0x00000000
+dsiMode:
+	.word	0x00000000
+boostVram:
 	.word	0x00000000
 ramDiskCluster:
 	.word	0x00000000
 ramDiskSize:
 	.word	0x00000000
 romFileType:
+	.word	0x00000000
+romIsCompressed:
 	.word	0x00000000
 
 startUp:

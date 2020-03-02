@@ -44,7 +44,6 @@
 
 extern vu32* myMemUncached(vu32*);
 
-extern vu32* dldiDataOffset;
 extern char ioType[4];
 extern vu32 word_command;
 extern vu32 word_params;
@@ -91,9 +90,9 @@ u32 getValue32() {
 
 void extendedMemory(bool yes) {
 	if (yes) {
-		REG_SCFG_EXT = 0x8300C000;
+		REG_SCFG_EXT += 0xC000;
 	} else {
-		REG_SCFG_EXT = 0x83000000;
+		REG_SCFG_EXT -= 0xC000;
 	}
 }
 
@@ -208,42 +207,49 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 }
 
 bool isArm7 = false;
+bool dsiMode = false;
 bool ramDisk = false;
 
 
 //---------------------------------------------------------------------------------
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
-		buffer -= 0xC00000;		// Move out of RAM disk location
-	} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
-		buffer -= 0x800000;		// Move out of RAM disk location
-	} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
-		buffer -= 0x400000;		// Move out of RAM disk location
+	if (dsiMode) {
+		memcpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
+	} else {
+		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
+			buffer -= 0xC00000;		// Move out of RAM disk location
+		} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
+			buffer -= 0x800000;		// Move out of RAM disk location
+		} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
+			buffer -= 0x400000;		// Move out of RAM disk location
+		}
+
+		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
+		memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
+		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
-
-	if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-	memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
-	if (!isArm7) extendedMemory(false);	// Disable extended memory mode
-
 	return true;
 }
 
 //---------------------------------------------------------------------------------
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
-	if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
-		buffer -= 0xC00000;		// Move out of RAM disk location
-	} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
-		buffer -= 0x800000;		// Move out of RAM disk location
-	} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
-		buffer -= 0x400000;		// Move out of RAM disk location
+	if (dsiMode) {
+		memcpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
+	} else {
+		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
+			buffer -= 0xC00000;		// Move out of RAM disk location
+		} else if (buffer >= (void*)0x02800000 && buffer < (void*)0x02C00000) {
+			buffer -= 0x800000;		// Move out of RAM disk location
+		} else if (buffer >= (void*)0x02400000 && buffer < (void*)0x02800000) {
+			buffer -= 0x400000;		// Move out of RAM disk location
+		}
+
+		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
+		memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
+		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
-
-	if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-	memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
-	if (!isArm7) extendedMemory(false);	// Disable extended memory mode
-
 	return true;
 }
 
@@ -255,8 +261,8 @@ returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {
 	//nocashMessage("startup");
-	isArm7 = (dldiDataOffset > (vu32*)0x02380000);
-
+	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
+	dsiMode = (REG_SCFG_ROM == 1);
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
 
 	if (ramDisk) {

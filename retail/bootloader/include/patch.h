@@ -50,6 +50,55 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
+typedef struct patchOffsetCacheContents {
+    u16 ver;
+    u16 type;
+	u32* a9Swi12Offset;
+	u32* moduleParamsOffset;
+    u32* heapPointerOffset;
+	u32 a9IsThumb;
+    u32* cardReadStartOffset;
+    u32* cardReadEndOffset;
+    u32* cardPullOutOffset;
+    u32* cardIdOffset;
+    u32 cardIdChecked;
+    u32* cardReadDmaOffset;
+    u32* cardEndReadDmaOffset;
+    u32 cardSetDmaChecked;
+    u32 cardReadDmaChecked;
+    u32 cardEndReadDmaChecked;
+    u32 patchMpuRegion;
+    u32* mpuStartOffset;
+    u32* mpuDataOffset;
+    u32* mpuInitCacheOffset;
+	u32* randomPatchOffset;
+	u32 randomPatchChecked;
+	u32* randomPatch5Offset;
+	u32 randomPatch5Checked;
+	u32* randomPatch5SecondOffset;
+	u32 randomPatch5SecondChecked;
+    u32* a9IrqHandlerOffset;
+	u32 a7IsThumb;
+	u32* a7Swi12Offset;
+	u32* swiGetPitchTableOffset;
+	u32* sleepPatchOffset;
+	u32* a7CardIrqEnableOffset;
+	u32* cardCheckPullOutOffset;
+	u32 cardCheckPullOutChecked;
+	u32* a7IrqHandlerOffset;
+	u32 savePatchType;
+	u32 relocateStartOffset;
+	u32 relocateValidateOffset;		// aka nextFunctionOffset
+	u32 a7CardReadEndOffset;
+	u32 a7JumpTableFuncOffset;
+	u32 a7JumpTableType;
+} patchOffsetCacheContents;
+
+extern u16 patchOffsetCacheFileVersion;
+extern patchOffsetCacheContents patchOffsetCache;
+
+extern bool patchOffsetCacheChanged;
+
 u32 generateA7Instr(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 void patchBinary(const tNDSHeader* ndsHeader);
@@ -57,6 +106,7 @@ u32 patchCardNdsArm9(
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	u32 ROMinRAM,
 	u32 patchMpuRegion,
 	u32 patchMpuSize
 );
@@ -80,8 +130,7 @@ u32 patchCardNds(
 );
 u32* patchHeapPointer(
     const module_params_t* moduleParams,
-    const tNDSHeader* ndsHeader, 
-    bool usesThumb
+    const tNDSHeader* ndsHeader
 );
 void relocate_ce9(
     u32 default_location, 

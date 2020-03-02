@@ -25,12 +25,23 @@
 	.global _start
 	.global storedFileCluster
 	.global initDisc
-	.global wantToPatchDLDI
-	.global argStart
-	.global argSize
+	.global gameOnFlashcard
+	.global saveOnFlashcard
 	.global dsiSD
 	.global saveFileCluster
+	.global gbaFileCluster
+	.global romSize
 	.global saveSize
+	.global wideCheatFileCluster
+	.global wideCheatSize
+	.global apPatchFileCluster
+	.global apPatchSize
+	.global cheatFileCluster
+	.global cheatSize
+	.global patchOffsetCacheFileCluster
+	.global cacheFatTable
+	.global fatTableFileCluster
+	.global ramDumpCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -38,17 +49,14 @@
 	.global patchMpuSize
 	.global ceCached
 	.global consoleModel
-	.global loadingScreen
-	.global darkTheme
-	.global swapLcds
-	.global loadingFrames
-	.global loadingFps
-	.global loadingBar
-	.global loadingBarYpos
-	.global romread_LED
+	.global romRead_LED
+	.global dmaRomRead_LED
 	.global boostVram
+	.global soundFreq
 	.global gameSoftReset
 	.global forceSleepPatch
+	.global volumeFix
+	.global preciseVolumeControl
 	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
@@ -62,12 +70,9 @@ storedFileCluster:
 	.word	0x0FFFFFFF		@ default BOOT.NDS
 initDisc:
 	.word	0x00000001		@ init the disc by default
-wantToPatchDLDI:
-	.word	0x00000000		@ by default patch the DLDI section of the loaded NDS
-@ Used for passing arguments to the loaded app
-argStart:
-	.word	_end - _start
-argSize:
+gameOnFlashcard:
+	.word	0x00000000
+saveOnFlashcard:
 	.word	0x00000000
 dldiOffset:
 	.word	0x00000000
@@ -75,8 +80,32 @@ dsiSD:
 	.word	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+gbaFileCluster:
+	.word	0x00000000		@ .gba file
+romSize:
+	.word	0x00000000		@ .nds file size
 saveSize:
-	.word	0x00000000		@ .sav file sive
+	.word	0x00000000		@ .sav file size
+wideCheatFileCluster:
+	.word	0x00000000
+wideCheatSize:
+	.word	0x00000000
+apPatchFileCluster:
+	.word	0x00000000
+apPatchSize:
+	.word	0x00000000
+cheatFileCluster:
+	.word	0x00000000
+cheatSize:
+	.word	0x00000000
+patchOffsetCacheFileCluster:
+	.word	0x00000000
+cacheFatTable:
+	.word	0x00000000
+fatTableFileCluster:
+	.word	0x00000000
+ramDumpCluster:
+	.word	0x00000000
 language:
 	.word	0x00000000
 dsiMode:
@@ -91,34 +120,24 @@ ceCached:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
-loadingScreen:
+romRead_LED:
 	.word	0x00000000
-darkTheme:
-	.word	0x00000000
-swapLcds:
-	.word	0x00000000
-loadingFrames:
-	.word	0x00000000
-loadingFps:
-	.word	0x00000000
-loadingBar:
-	.word	0x00000000
-loadingBarYpos:
-	.word	0x00000000
-romread_LED:
+dmaRomRead_LED:
 	.word	0x00000000
 boostVram:
+	.word	0x00000000
+soundFreq:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
 forceSleepPatch:
 	.word	0x00000000
+volumeFix:
+	.word	0x00000000
+preciseVolumeControl:
+	.word	0x00000000
 logging:
 	.word	0x00000000
-cardengine_arm7_offset:
-	.word   cardengine_arm7_bin - _start
-cardengine_arm9_offset:
-	.word   cardengine_arm9_bin - _start
 
 startUp:
 	mov	r0, #0x04000000
@@ -156,8 +175,6 @@ startUp:
 	ldr	r1, =_arm9_start
 	str	r1, [r0]
 
-	mov	r0, #0			@ int argc
-	mov	r1, #0			@ char *argv[]
 	ldr	r3, =arm7_main
 	bl	_blx_r3_stub		@ jump to user code
 
@@ -215,23 +232,6 @@ CIDLoop:
 	subs	r3, r3, #4
 	bne	CIDLoop
 	bx	lr
-
-.global fastCopy32
-.type	fastCopy32 STT_FUNC
-@ r0 : src, r1 : dst, r2 : len
-fastCopy32:
-	stmfd   sp!, {r3-r11,lr}
-	@ copy 512 bytes
-	mov     r10, r0
-	mov     r9, r1
-	mov     r8, r2
-loop_fastCopy32:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_fastCopy32
-	ldmfd   sp!, {r3-r11,lr}
-	bx      lr
 
 @---------------------------------------------------------------------------------
 	.align

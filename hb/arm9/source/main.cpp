@@ -19,16 +19,18 @@
 ------------------------------------------------------------------*/
 
 #include <nds.h>
+#include <nds/fifocommon.h>
 #include <fat.h>
 #include <limits.h>
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string>
+#include <vector>
 
-#include <nds/fifocommon.h>
+#include <easysave/ini.hpp>
 
 #include "nds_loader_arm9.h"
-#include "inifile.h"
 #include "nitrofs.h"
 
 using namespace std;
@@ -78,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int loadingScreen) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int language, int dsiMode, bool boostVram) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -116,10 +118,13 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 	}
 
 	int romFileType = -1;
+	bool romIsCompressed = false;
 	if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
 	|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".GEN") == 0))
 	{
 		romFileType = 0;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.gen") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.GEN") == 0));
 	}
 	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMC") == 0)
@@ -127,6 +132,24 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SFC") == 0))
 	{
 		romFileType = 1;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.smc") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMC") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sfc") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SFC") == 0));
+	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sms") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMS") == 0))
+	{
+		romFileType = 2;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sms") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMS") == 0));
+	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".gg") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".GG") == 0))
+	{
+		romFileType = 3;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".LZ77.GG") == 0));
 	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
@@ -137,7 +160,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, argarray.size(), (const char **)&argarray[0], loadingScreen);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -196,22 +219,14 @@ int main( int argc, char **argv) {
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
 
-        //printf("fat inited");    
-		CIniFile bootstrapini( "fat:/_nds/nds-bootstrap.ini" );
+  		easysave::ini config_file("fat:/_nds/nds-bootstrap.ini");
 
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","DEBUG",0) == 1) {	
-			debug=true;			
-
+		debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
+		if (debug)
 			consoleDemoInit();
-
-			//fifoSetValue32Handler(FIFO_USER_02,myFIFOValue32Handler,0);
-
-			//getSFCG_ARM9();
-			//getSFCG_ARM7();
-		}
 
 		std::string	bootstrapPath = argv[0];
         std::string	substr = "sd:/";
@@ -219,7 +234,7 @@ int main( int argc, char **argv) {
 
 		nitroFSInit(bootstrapPath.c_str());
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","RESETSLOT1",0) == 1) {
+		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1").c_str(), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
 				printf("Please insert a cartridge...\n");
 				do { swiWaitForVBlank(); } 
@@ -228,12 +243,23 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_04, 1);
 		}
 
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","BOOST_CPU",0) == 1) {	
+		// Language
+		int language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
+
+		// DSi Mode
+		int dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+
+		if (dsiMode>0 || (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
 			//REG_SCFG_CLK |= 0x1;
 		} else {
 			REG_SCFG_CLK = 0x80;
 			fifoSendValue32(FIFO_USER_07, 1);
+		}
+
+		bool boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
+		if (dsiMode>0 || boostVram) {	
+			dbg_printf("VRAM boosted\n");
 		}
 
 		fifoSendValue32(FIFO_USER_03, 1);
@@ -251,8 +277,7 @@ int main( int argc, char **argv) {
 			dbg_printf("No arguments passed!\n");
 		}
 
-
-		if(bootstrapini.GetInt("NDS-BOOTSTRAP","LOGGING",0) == 1) {			
+		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0)) {
 			static FILE * debugFile;
 			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
 			fprintf(debugFile, "DEBUG MODE\n");			
@@ -263,22 +288,24 @@ int main( int argc, char **argv) {
 			for (int i=0; i<50000; i++) {
 				fprintf(debugFile, "                                                                                                                                          \n");			
 			}
-			
 		} else {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
 
-		std::string	ndsPath = bootstrapini.GetString( "NDS-BOOTSTRAP", "NDS_PATH", "");
-        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0) ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
+		std::string	ndsPath(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH"));
+        if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0)
+			ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
-		std::string	homebrewArg = bootstrapini.GetString( "NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
+		std::string	homebrewArg(config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG"));
 		if (homebrewArg != "") {
-			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0) homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
+			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0)
+				homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
 		}
 
-		std::string	ramDrivePath = bootstrapini.GetString( "NDS-BOOTSTRAP", "RAM_DRIVE_PATH", "");
+		std::string	ramDrivePath(config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH"));
 		if (ramDrivePath != "") {
-			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0) ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
+			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0)
+				ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
 		}
 
 		std::string	romfolder = ndsPath;
@@ -293,7 +320,7 @@ int main( int argc, char **argv) {
 		{
 			filename.erase(0, last_slash_idx + 1);
 		}
-		
+
 		u32 ramDiskSize = getFileSize(ramDrivePath.c_str());
 		if (ramDiskSize > 0) {
 			chdir("fat:/");	// Change directory to root for RAM disk usage
@@ -304,7 +331,8 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, bootstrapini.GetInt("NDS-BOOTSTRAP","LOADING_SCREEN",0));
+
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode, boostVram);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
@@ -312,4 +340,3 @@ int main( int argc, char **argv) {
 
 	while(1) { swiWaitForVBlank(); }
 }
-

@@ -4,6 +4,7 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global ce7
 	.align	4
 	.arm
 
@@ -15,58 +16,66 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global ramDumpCluster
+.global gameOnFlashcard
+.global saveOnFlashcard
 .global language
-.global gottenSCFGExt
 .global dsiMode
+.global dsiSD
 .global ROMinRAM
 .global consoleModel
-.global romread_LED
+.global romRead_LED
+.global dmaRomRead_LED
 .global gameSoftReset
-.global soundFix
+.global preciseVolumeControl
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
 #define CACHE_LINE_SIZE	32
 
 
+ce7 :
+	.word	ce7
 patches_offset:
 	.word	patches
 intr_vblank_orig_return:
 	.word	0x00000000
-intr_timer0_orig_return:
-	.word	0x00000000
-intr_timer1_orig_return:
-	.word	0x00000000
-intr_timer2_orig_return:
-	.word	0x00000000
-intr_timer3_orig_return:
-	.word	0x00000000
 intr_fifo_orig_return:
+	.word	0x00000000
+intr_network_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
+ramDumpCluster:
+	.word	0x00000000
 cardStruct:
+	.word	0x00000000
+gameOnFlashcard:
+	.word	0x00000000
+saveOnFlashcard:
 	.word	0x00000000
 language:
 	.word	0x00000000
-gottenSCFGExt:
-	.word	0x00000000
 dsiMode:
+	.word	0x00000000
+dsiSD:
 	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
-romread_LED:
+romRead_LED:
+	.word	0x00000000
+dmaRomRead_LED:
 	.word	0x00000000
 gameSoftReset:
 	.word	0x00000000
-cheat_data_offset:    
-	.word	cheat_data - patches_offset
-cheat_data_len:
+preciseVolumeControl:
 	.word	0x00000000
+cheat_data_offset:    
+	.word	cheat_data
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -79,34 +88,6 @@ vblankHandler:
 	ldr 	r0,	intr_vblank_orig_return
 	bx  	r0
 
-timer0Handler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_timer0
-	ldr 	r0,	intr_timer0_orig_return
-	bx  	r0
-
-timer1Handler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_timer1
-	ldr 	r0,	intr_timer1_orig_return
-	bx  	r0
-
-timer2Handler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_timer2
-	ldr 	r0,	intr_timer2_orig_return
-	bx  	r0
-
-timer3Handler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_timer3
-	ldr 	r0,	intr_timer3_orig_return
-	bx  	r0
-
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -114,41 +95,16 @@ fifoHandler:
 	ldr 	r0,	intr_fifo_orig_return
 	bx  	r0
 
+networkHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_network
+	ldr 	r0,	intr_network_orig_return
+	bx  	r0
+
 code_handler_start_vblank:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-code_handler_start_timer0:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerTimer
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-code_handler_start_timer1:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerTimer
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-code_handler_start_timer2:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerTimer
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-code_handler_start_timer3:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerTimer
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
 	@ exit after return
@@ -160,6 +116,14 @@ code_handler_start_fifo:
 	bl	_blx_r3_stub		@ jump to myIrqHandler
   
   
+	@ exit after return
+	b	exit
+
+code_handler_start_network:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerNetwork
+	bl	_blx_r3_stub		@ jump to myIrqHandler
+	
 	@ exit after return
 	b	exit
 
@@ -202,11 +166,8 @@ patches:
 .word	card_pull_out_arm9
 .word	card_irq_enable_arm7
 .word	vblankHandler
-.word	timer0Handler
-.word	timer1Handler
-.word	timer2Handler
-.word	timer3Handler
 .word	fifoHandler
+.word	networkHandler
 .word   card_pull
 .word   arm7Functions
 .word   swi02

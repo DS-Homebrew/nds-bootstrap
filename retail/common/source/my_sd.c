@@ -116,16 +116,16 @@ bool my_sdio_Shutdown(void) {
 	return true;
 }
 
-const DISC_INTERFACE __myio_dsisd = {
+const NEW_DISC_INTERFACE __myio_dsisd = {
 	DEVICE_TYPE_DSI_SD,
 	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 	(FN_MEDIUM_STARTUP)&my_sdio_Startup,
 	(FN_MEDIUM_ISINSERTED)&my_sdio_IsInserted,
     (FN_MEDIUM_READSECTOR)&my_sdio_ReadSector,
-	(FN_MEDIUM_READSECTORS)&my_sdio_ReadSectors,
+	(FN_MEDIUM_NEW_READSECTORS)&my_sdio_ReadSectors,
     (FN_MEDIUM_READSECTORS_NONBLOCKING)&my_sdio_ReadSectors_nonblocking,
     (FN_MEDIUM_CHECK_COMMAND)&my_sdio_check_command,
-	(FN_MEDIUM_WRITESECTORS)&my_sdio_WriteSectors,
+	(FN_MEDIUM_NEW_WRITESECTORS)&my_sdio_WriteSectors,
 	(FN_MEDIUM_CLEARSTATUS)&my_sdio_ClearStatus,
 	(FN_MEDIUM_SHUTDOWN)&my_sdio_Shutdown
 };

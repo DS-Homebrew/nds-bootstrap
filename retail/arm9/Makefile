@@ -15,10 +15,8 @@ include $(DEVKITARM)/ds_rules
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source source/minini ../common/source_general
-INCLUDES	:=	include include/minini ../common/include
-DATA		:=	../data
-
+SOURCES		:=	source libeasysave/source/ini ../common/source_general
+INCLUDES	:=	include libeasysave/include ../common/include
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -65,7 +63,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+BINFILES	:=	
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C

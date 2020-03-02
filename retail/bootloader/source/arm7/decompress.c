@@ -18,6 +18,10 @@
 #include "module_params.h"
 #include "decompress.h"
 #include "debug_file.h"
+#include "locations.h"
+#include "tonccpy.h"
+
+static const unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION;
 
 /*static void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;
@@ -150,4 +154,148 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		// Not compressed
 		dbg_printf("This rom is not compressed\n");
 	}
+}
+
+u32 card_hash[0x412];
+
+u32 lookup(u32 *magic, u32 v)
+{
+	u32 a = (v >> 24) & 0xFF;
+	u32 b = (v >> 16) & 0xFF;
+	u32 c = (v >> 8) & 0xFF;
+	u32 d = (v >> 0) & 0xFF;
+
+	a = magic[a+18+0];
+	b = magic[b+18+256];
+	c = magic[c+18+512];
+	d = magic[d+18+768];
+
+	return d + (c ^ (b + a));
+}
+
+void encrypt(u32 *magic, u32 *arg1, u32 *arg2)
+{
+	u32 a,b,c;
+	a = *arg1;
+	b = *arg2;
+	for (int i=0; i<16; i++)
+	{
+		c = magic[i] ^ a;
+		a = b ^ lookup(magic, c);
+		b = c;
+	}
+	*arg2 = a ^ magic[16];
+	*arg1 = b ^ magic[17];
+}
+
+void decrypt(u32 *magic, u32 *arg1, u32 *arg2)
+{
+	u32 a,b,c;
+	a = *arg1;
+	b = *arg2;
+	for (int i=17; i>1; i--)
+	{
+		c = magic[i] ^ a;
+		a = b ^ lookup(magic, c);
+		b = c;
+	}
+	*arg1 = b ^ magic[0];
+	*arg2 = a ^ magic[1];
+}
+
+void update_hashtable(u32* magic, u8 arg1[8])
+{
+	for (int j=0;j<18;j++)
+	{
+		u32 r3=0;
+		for (int i=0;i<4;i++)
+		{
+			r3 <<= 8;
+			r3 |= arg1[(j*4 + i) & 7];
+		}
+		magic[j] ^= r3;
+	}
+
+	u32 tmp1 = 0;
+	u32 tmp2 = 0;
+	for (int i=0; i<18; i+=2)
+	{
+		encrypt(magic,&tmp1,&tmp2);
+		magic[i+0] = tmp1;
+		magic[i+1] = tmp2;
+	}
+	for (int i=0; i<0x400; i+=2)
+	{
+		encrypt(magic,&tmp1,&tmp2);
+		magic[i+18+0] = tmp1;
+		magic[i+18+1] = tmp2;
+	}
+}
+
+u32 arg2[3];
+
+void init2(u32 *magic, u32 a[3])
+{
+	encrypt(magic, a+2, a+1);
+	encrypt(magic, a+1, a+0);
+	update_hashtable(magic, (u8*)a);
+}
+
+void init1(u32 cardheader_gamecode)
+{
+	tonccpy(card_hash, encr_data, 4*(1024 + 18));
+	arg2[0] = *(u32 *)&cardheader_gamecode;
+	arg2[1] = (*(u32 *)&cardheader_gamecode) >> 1;
+	arg2[2] = (*(u32 *)&cardheader_gamecode) << 1;
+	init2(card_hash, arg2);
+	init2(card_hash, arg2);
+}
+
+// ARM9 decryption check values
+#define MAGIC30		0x72636E65
+#define MAGIC34		0x6A624F79
+
+/*
+ * decrypt_arm9
+ */
+bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
+{
+	// Decrypt NDS secure area
+	u32 *p = (u32*)dsiHeader->ndshdr.arm9destination;
+
+	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
+		return false;
+	}
+
+	u32 cardheader_gamecode = *(u32*)dsiHeader->ndshdr.gameCode;
+
+	init1(cardheader_gamecode);
+	decrypt(card_hash, p+1, p);
+	arg2[1] <<= 1;
+	arg2[2] >>= 1;	
+	init2(card_hash, arg2);
+	decrypt(card_hash, p+1, p);
+
+	if (p[0] == MAGIC30 && p[1] == MAGIC34)
+	{
+		*p++ = 0xE7FFDEFF;
+		*p++ = 0xE7FFDEFF;
+	}
+	else p+=2;
+	u32 size = 0x800 - 8;
+	while (size > 0)
+	{
+		decrypt(card_hash, p+1, p);
+		p += 2;
+		size -= 8;
+	}
+
+	return true;
+}
+
+bool decrypt_arm9(const tDSiHeader* dsiHeader)
+{
+	bool result = decrypt_arm9ntr(dsiHeader);
+
+	return result;
 }

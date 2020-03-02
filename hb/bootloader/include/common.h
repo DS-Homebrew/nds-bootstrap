@@ -51,20 +51,17 @@ enum {
 	ARM9_MEMCLR,
 	ARM9_READY,
 	ARM9_BOOTBIN,
-	ARM9_DISPERR
+	ARM9_DISPERR,
+	ARM9_SETSCFG,
+	ARM9_LOCKSCFG
 } ARM9_STATE;
 
+extern bool dsiModeConfirmed;
+extern bool arm9_boostVram;
 extern tNDSHeader* ndsHeader;
-extern volatile bool dldiAtArm7;
 extern volatile bool ram32MB;
 extern volatile int arm9_stateFlag;
 extern volatile u32 arm9_ramDiskCluster;
-extern volatile bool arm9_errorColor;
-extern volatile int arm9_screenMode;
-extern volatile int arm9_loadBarLength;
-//extern volatile bool arm9_animateLoadingCircle;
-extern volatile int screenBrightness;
-extern volatile bool fadeType;
 
 static inline void dmaFill(const void* src, void* dest, u32 size) {
 	DMA_SRC(3)  = (u32)src;

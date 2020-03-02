@@ -24,8 +24,17 @@
 
 #include "configuration.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 //#define LOAD_DEFAULT_NDS 0
 
-void runNds(const void* loader, u32 loaderSize, u32 cluster, u32 saveCluster, configuration* conf);
+void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, configuration* conf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // NDS_LOADER_ARM9_H

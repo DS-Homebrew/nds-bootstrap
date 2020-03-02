@@ -16,8 +16,8 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BUILD		:=	build
-SOURCES		:=	source
-INCLUDES	:=	include
+SOURCES		:=	source libeasysave/source/ini ../common/source_general
+INCLUDES	:=	include libeasysave/include ../common/include
 DATA		:=	../data
 #GRAPHICS	:=  graphics
 IMAGES		:=	graphics

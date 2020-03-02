@@ -37,31 +37,20 @@
 #include <nds/ipc.h>
 #include <nds/system.h>
 
-#include "locations.h"
 #include "common.h"
 #include "loading.h"
 
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
+bool isGSDD = false;
+bool arm9_isSdk5 = false;
 bool dsiModeConfirmed = false;
-volatile bool arm9_boostVram = false;
+bool arm9_boostVram = false;
+volatile bool screenFadedIn = false;
+volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
-volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-volatile int screenBrightness = 25;
-volatile bool fadeType = true;
-
-volatile bool arm9_darkTheme = false;
-volatile bool arm9_swapLcds = false;
-volatile int arm9_loadingFrames = 0;
-volatile int arm9_loadingFps = 0;
-volatile bool arm9_loadingBar = true;
-volatile int arm9_loadingBarYpos = 0;
-volatile bool arm9_errorColor = false;
-volatile int arm9_loadBarLength = 0;
-volatile bool arm9_animateLoadingCircle = false;
-bool displayScreen = false;
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -82,6 +71,27 @@ void initMBKARM9(void) {
 	REG_MBK8 = 0x07403700; // Same as DSiWare
 }
 
+void initMBKARM9_dsiEnhanced(void) {
+	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9 = 0x0000000F;
+
+	// WRAM-A fully mapped to ARM7
+	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
+
+	// WRAM-B fully mapped to ARM7 // inverted order
+	*(vu32*)REG_MBK2 = 0x0105090D;
+	*(vu32*)REG_MBK3 = 0x1115191D;
+
+	// WRAM-C fully mapped to arm7 // inverted order
+	*(vu32*)REG_MBK4 = 0x0105090D;
+	*(vu32*)REG_MBK5 = 0x1115191D;
+}
+
+// SDK 5
+static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
+	return (ndsHeader->unitCode == 0x02);
+}
+
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
 
@@ -95,43 +105,21 @@ void SetBrightness(u8 screen, s8 bright) {
 	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
-void drawRectangle (int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = color;	
-		}
+void fadeIn(void) {
+	for (int i = 25; i >= 0; i--) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
 }
 
-void drawRectangleGradient (int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			VRAM_A[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
-	}
-}
-
-void drawRectangleAddr (u16* addr, int x, int y, int sizeX, int sizeY, u16 color) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = color;	
-		}
-	}
-}
-
-void drawRectangleGradientAddr (u16* addr, int x, int y, int sizeX, int sizeY, int R, int G, int B) {
-	for (int iy = y; iy <= y+sizeY-1; iy++) {
-		for (int ix = x; ix <= x+sizeX-1; ix++) {
-			addr[iy*256+ix] = RGB15(R,G,B);	
-		}
-		// Darken color on next vertical line
-		if (R>0) R--;
-		if (G>0) G--;
-		if (B>0) B--;
+void fadeOut(void) {
+	for (int i = 0; i <= 25; i++) {
+		SetBrightness(0, i);
+		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
 }
 
@@ -144,7 +132,7 @@ Written by Darkain.
 Modified by Chishm:
  * Changed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void arm9_main(void) {
+void __attribute__((target("arm"))) arm9_main(void) {
  	register int i;
   
 	// Set shared ram to ARM7
@@ -191,9 +179,9 @@ void arm9_main(void) {
 
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
+	VRAM_C_CR = 0x80;
 	// Don't mess with the VRAM used for execution
-	//VRAM_C_CR = 0;
-	//VRAM_D_CR = 0x80;
+	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0x80;
 	VRAM_F_CR = 0x80;
 	VRAM_G_CR = 0x80;
@@ -204,15 +192,15 @@ void arm9_main(void) {
 	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_E, 272*1024);		// Banks E, F, G, H, I
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 
 	VRAM_A_CR = 0;
 	VRAM_B_CR = 0;
+	VRAM_C_CR = 0;
 	// Don't mess with the ARM7's VRAM
-	//VRAM_C_CR = 0;
 	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0;
 	VRAM_F_CR = 0;
@@ -223,8 +211,6 @@ void arm9_main(void) {
 
 	*(u16*)0x0400006C |= BIT(14);
 	*(u16*)0x0400006C &= BIT(15);
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -235,79 +221,73 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	REG_SCFG_EXT = 0x8300C000;
-	//REG_SCFG_EXT |= BIT(16);	// Access to New DMA Controller
-	if (arm9_boostVram) {
-		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-	}
-
-	screenBrightness = 25;
-	fadeType = true;
-
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
+		if (arm9_stateFlag == ARM9_SCRNCLR) {
+			if (screenFadedIn) {
+				fadeOut();
+				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
+				VRAM_A_CR = 0;
+				REG_POWERCNT = 0x820F;
+				SetBrightness(0, 0);
+				SetBrightness(1, 0);
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
+		if (arm9_stateFlag == ARM9_DISPSCRN) {
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+			}
+			if (!imageLoaded) {
+				arm9_pleaseWaitText();
+				imageLoaded = true;
+			}
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
 		if (arm9_stateFlag == ARM9_DISPERR) {
-			displayScreen = true;
-			if (arm9_stateFlag == ARM9_DISPERR) {
-				arm9_stateFlag = ARM9_READY;
+			if (!screenFadedIn) {
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
 			}
+			arm9_errorText();
+			if (!screenFadedIn) {
+				fadeIn();
+				screenFadedIn = true;
+			}
+			arm9_stateFlag = ARM9_READY;
 		}
-		if (displayScreen) {
-			if (fadeType) {
-				screenBrightness--;
-				if (screenBrightness < 0) screenBrightness = 0;
+		if (arm9_stateFlag == ARM9_SETSCFG) {
+			/*if (isGSDD) {       
+				REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
+			}*/
+			if (dsiModeConfirmed) {
+				if (arm9_isSdk5 && ROMisDsiEnhanced(ndsHeader)) {
+					initMBKARM9_dsiEnhanced();
+				}
+				REG_SCFG_EXT = 0x8307F100;
+				REG_SCFG_CLK = 0x84;
 			} else {
-				screenBrightness++;
-				if (screenBrightness > 25) screenBrightness = 25;
+				REG_SCFG_EXT = 0x8300C000;
+				if (arm9_boostVram) {
+					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+				}
+                REG_SCFG_EXT |= BIT(16);	// NDMA
+				// lock SCFG
+				REG_SCFG_EXT &= ~(1UL << 31);
 			}
-			SetBrightness(0, screenBrightness);
-			SetBrightness(1, screenBrightness);
-
-			switch (arm9_screenMode) {
-				case 0:
-				default:
-					arm9_regularLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText();
-					}
-					if (arm9_animateLoadingCircle) {
-						arm9_loadingCircle();
-					}
-					break;
-
-				case 1:
-					arm9_pong();
-					break;
-					
-				case 2:
-					arm9_ttt();
-					break;
-				case 3:
-					arm9_simpleLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText2();
-					}
-					break;
-				case 4:
-					arm9_flashcardlikeLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText3();
-					}
-					break;		
-			}
+			arm9_stateFlag = ARM9_READY;
 		}
-	}
-
-	if (dsiModeConfirmed) {
-		REG_SCFG_EXT = 0x8307F100;
-	} else {
-		// lock SCFG
-		REG_SCFG_EXT &= ~(1UL << 31);
 	}
 
 	REG_IME = 0;
 	REG_EXMEMCNT = 0xE880;
+
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
 

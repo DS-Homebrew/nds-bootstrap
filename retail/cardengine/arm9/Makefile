@@ -7,6 +7,14 @@ endif
 
 include $(DEVKITARM)/ds_rules
 
+ifeq ($(OS),Windows_NT)
+LZSS			?=	../../lzss.exe
+
+else
+
+LZSS			?=	lzss
+
+endif
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
@@ -23,15 +31,15 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-marm -mthumb-interwork -march=armv5te -mtune=arm946e-s
+ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Os\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9
+CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
@@ -58,7 +66,8 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
 export TARGET	:=	cardengine_arm9
-export OUTPUT	:=	$(CURDIR)/../../data/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
+export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -98,7 +107,9 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
- 
+	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
+	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...

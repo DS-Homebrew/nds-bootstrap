@@ -39,29 +39,16 @@
 
 #include "locations.h"
 #include "common.h"
-#include "loading.h"
-
-extern u32 ramDiskCluster;
 
 extern void arm9_clearCache(void);
 
-//tNDSHeader* ndsHeader = NULL;
-//bool dsiModeConfirmed = false;
-//extern u32 boostVram;
-volatile bool dldiAtArm7 = false;
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+bool dsiModeConfirmed = false;
+bool arm9_boostVram = false;
 volatile bool ram32MB = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 volatile u32 arm9_ramDiskCluster = 0;
-volatile int arm9_screenMode = 0; // 0 = Regular, 1 = Pong, 2 = Tic-Tac-Toe
-volatile int screenBrightness = 25;
-volatile bool fadeType = true;
-
-volatile bool arm9_errorColor = false;
-volatile int arm9_loadBarLength = 0;
-volatile bool arm9_loadBarDelay = false;
-volatile bool arm9_animateLoadingCircle = false;
-bool displayScreen = false;
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -80,19 +67,6 @@ void initMBKARM9(void) {
 	REG_MBK7 = 0x07C03740; // Same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
 	REG_MBK8 = 0x07403700; // Same as DSiWare
-}
-
-void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
-
-	if (bright < 0) {
-		mode = 2 << 14;
-		bright = -bright;
-	}
-	if (bright > 31) {
-		bright = 31;
-	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
 /*-------------------------------------------------------------------------
@@ -154,9 +128,9 @@ void arm9_main(void) {
 
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
+	VRAM_C_CR = 0x80;
 	// Don't mess with the VRAM used for execution
-	//VRAM_C_CR = 0;
-	//VRAM_D_CR = 0x80;
+	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0x80;
 	VRAM_F_CR = 0x80;
 	VRAM_G_CR = 0x80;
@@ -167,15 +141,15 @@ void arm9_main(void) {
 	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
 	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 256*1024);		// Banks A, B
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_E, 272*1024);		// Banks E, F, G, H, I
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 
 	VRAM_A_CR = 0;
 	VRAM_B_CR = 0;
+	VRAM_C_CR = 0;
 	// Don't mess with the ARM7's VRAM
-	//VRAM_C_CR = 0;
 	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0;
 	VRAM_F_CR = 0;
@@ -183,11 +157,6 @@ void arm9_main(void) {
 	VRAM_H_CR = 0;
 	VRAM_I_CR = 0;
 	REG_POWERCNT = 0x820F;
-
-	*(u16*)0x0400006C |= BIT(14);
-	*(u16*)0x0400006C &= BIT(15);
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -198,77 +167,24 @@ void arm9_main(void) {
 	//	: : "r" (0x02FFFE04)
 	//);
 
-	/*REG_SCFG_EXT = 0x8300C000;
-	if (boostVram) {
-		REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-	}*/
-
-	screenBrightness = 25;
-	fadeType = true;
-
 	// Set ARM9 state to ready and wait for it to change again
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
-		if (arm9_stateFlag == ARM9_DISPERR) {
-			displayScreen = true;
-			if (arm9_stateFlag == ARM9_DISPERR) {
-				arm9_stateFlag = ARM9_READY;
-			}
-		}
-		if (displayScreen) {
-			if (fadeType) {
-				screenBrightness--;
-				if (screenBrightness < 0) screenBrightness = 0;
+		if (arm9_stateFlag == ARM9_SETSCFG) {
+			if (dsiModeConfirmed) {
+				REG_SCFG_EXT = 0x8307F100;
 			} else {
-				screenBrightness++;
-				if (screenBrightness > 25) screenBrightness = 25;
+				REG_SCFG_EXT = 0x83000000;
+				if (arm9_boostVram) {
+					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
+				}
 			}
-			SetBrightness(0, screenBrightness);
-			SetBrightness(1, screenBrightness);
-
-			switch (arm9_screenMode) {
-				case 0:
-				default:
-					arm9_regularLoadingScreen();
-					if (arm9_errorColor) {
-						arm9_errorText();
-					}
-					if (arm9_animateLoadingCircle) {
-						arm9_loadingCircle();
-					}
-					if (!arm9_loadBarDelay) {
-						arm9_loadBarLength++;
-						if (!ram32MB) arm9_loadBarLength++;
-						if (arm9_loadBarLength > 239) arm9_loadBarLength = 239;
-					}
-					if (ram32MB) arm9_loadBarDelay = !arm9_loadBarDelay;
-					break;
-
-				case 1:
-					arm9_pong();
-					break;
-					
-				case 2:
-					arm9_ttt();
-					break;
-			}
+			arm9_stateFlag = ARM9_READY;
 		}
-	}
-
-	SetBrightness(0, 0);
-	SetBrightness(1, 0);
-
-	/*if (dsiModeConfirmed) {
-		REG_SCFG_EXT = 0x8307F100;
-	} else {
-		// lock SCFG
-		REG_SCFG_EXT &= ~(1UL << 31);
-	}*/
-
-	if (dldiAtArm7 && arm9_ramDiskCluster != 0) {
-		REG_SCFG_EXT = 0x0300C000;	// If DLDI is at arm7, then keep extended memory open at all times
-	} else {
-		REG_SCFG_EXT = (arm9_ramDiskCluster != 0) ? 0x83000000 : 0x03000000;
+		if (arm9_stateFlag == ARM9_LOCKSCFG) {
+			REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+			arm9_stateFlag = ARM9_READY;
+		}
 	}
 
 	REG_IME = 0;
@@ -277,7 +193,7 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = *(VoidFn*)(0x23FFE24);
+	VoidFn arm9code = *(VoidFn*)(0x2FFFE24);
 	arm9code();
 	
 	while (1);

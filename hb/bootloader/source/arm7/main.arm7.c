@@ -49,13 +49,14 @@ Helpful information:
 #undef ARM9
 #define ARM7
 #include <nds/arm7/audio.h>
+#include <nds/arm7/codec.h>
 
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
-#include "loading_screen.h"
 
 void arm7clearRAM();
 
@@ -68,9 +69,13 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern u32 language;
+extern u32 dsiMode;
+extern u32 boostVram;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
 extern u32 romFileType;
+extern u32 romIsCompressed;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -199,7 +204,14 @@ static void resetMemory_ARM7 (void)
 		TIMER_DATA(i) = 0;
 	}
 
-	arm7clearRAM();
+	arm7clearRAM();								// clear exclusive IWRAM
+	toncset((u32*)0x02000000, 0, 0x370000);	// clear most of EWRAM
+	toncset((u32*)0x02380000, 0, 0x70000);		// except before 0x023F4000, which has the arm9 code
+	if (romIsCompressed) {
+		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
+	} else {
+		toncset((u32*)0x02400000, 0, 0xC00000);	// clear other part of EWRAM
+	}
 
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -220,35 +232,192 @@ static void resetMemory_ARM7 (void)
 	} else {
 		boot_readFirmware(settingsOffset + 0x100, (u8*)(NDS_HEADER-0x180), 0x70);
 	}
+
+	if (language >= 0 && language < 6) {
+		// Change language
+		*(u8*)((u32)NDS_HEADER - 0x11C) = language;
+	}
 }
 
 
 static void loadBinary_ARM7 (aFile file)
 {
-	u32 ndsHeader[0x170>>2];
-
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead ((char*)ndsHeader, file, 0, 0x170, 0);
-	// read ARM9 info from NDS header
-	u32 ARM9_SRC = ndsHeader[0x020>>2];
-	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
-	u32 ARM9_LEN = ndsHeader[0x02C>>2];
-	// read ARM7 info from NDS header
-	u32 ARM7_SRC = ndsHeader[0x030>>2];
-	char* ARM7_DST = (char*)ndsHeader[0x038>>2];
-	u32 ARM7_LEN = ndsHeader[0x03C>>2];
+	fileRead ((char*)NDS_HEADER, file, 0, 0x170, 0);
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 0);
-	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 0);
+	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
+}
 
-	// first copy the header to its proper location, excluding
-	// the ARM9 start address, so as not to start it
-	*(vu32*)ARM9_START_ADDRESS_LOCATION = ndsHeader[0x024>>2];		// Store for later
-	ndsHeader[0x024>>2] = 0;
-	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEADER, 0x170);
+static void NDSTouchscreenMode(void) {
+	//unsigned char * *(unsigned char*)0x40001C0=		(unsigned char*)0x40001C0;
+	//unsigned char * *(unsigned char*)0x40001C0byte2=(unsigned char*)0x40001C1;
+	//unsigned char * *(unsigned char*)0x40001C2=	(unsigned char*)0x40001C2;
+	//unsigned char * I2C_DATA=	(unsigned char*)0x4004500;
+	//unsigned char * I2C_CNT=	(unsigned char*)0x4004501;
+
+	u8 volLevel;
+	
+	//if (fifoCheckValue32(FIFO_MAXMOD)) {
+	//	// special setting (when found special gamecode)
+	//	volLevel = 0xAC;
+	//} else {
+		// normal setting (for any other gamecodes)
+		volLevel = 0xA7;
+	//}
+
+	// Touchscreen
+	cdcReadReg (0x63, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcReadReg (CDC_SOUND, 0x28);
+	cdcReadReg (CDC_SOUND, 0x2A);
+	cdcReadReg (CDC_SOUND, 0x2E);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x0C);
+	cdcWriteReg(CDC_SOUND, 0x24, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x25, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x26, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x27, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x10);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x14);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x0B);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x02);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_CONTROL, 0x01, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x39, 0x66);
+	cdcReadReg (CDC_SOUND, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x81);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0xA1);
+	cdcWriteReg(CDC_CONTROL, 0x06, 0x15);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x83);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x83);
+	cdcReadReg (CDC_TOUCHCNT, 0x10);
+	cdcWriteReg(CDC_TOUCHCNT, 0x10, 0x08);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_CONTROL, 0x41, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x42, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_SOUND, 0x2F, 0x2B);
+	cdcWriteReg(CDC_SOUND, 0x30, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x31, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x32, 0x60);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x10);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x44);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
+	cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_SOUND, 0x26, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x27, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x03);
+	cdcWriteReg(CDC_TOUCHCNT, 0x03, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_SOUND, 0x22);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	
+	// Set remaining values
+	cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
+	cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
+	cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
+	cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
+	cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
+	cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
+	cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
+	cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
+	cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
+	cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
+	cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
+	cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
+	cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
+	cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
+	cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
+	cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
+
+	// Finish up!
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
+
+	// Power management
+	writePowerManagement(PM_READ_REGISTER, 0x00); //*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
+	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
 static void NTR_BIOS() {
@@ -268,8 +437,6 @@ static void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
-	// copy NDS ARM9 start address into the header, starting ARM9
-	*((vu32*)0x023FFE24) = *(vu32*)ARM9_START_ADDRESS_LOCATION;
 
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
@@ -278,7 +445,7 @@ static void startBinary_ARM7 (void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x23FFE34);
+	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
 }
 
@@ -317,7 +484,6 @@ int arm7_main (void) {
 
 	// Get ARM7 to clear RAM
 	nocashMessage("Getting ARM7 to clear RAM...\n");
-	debugOutput();
 
 	resetMemory_ARM7();
 
@@ -345,51 +511,83 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
-	dldiAtArm7 = checkArm7DLDI((u8*)((u32*)NDS_HEADER)[0x0E], ((u32*)NDS_HEADER)[0x0F]);
-
-	if (dldiAtArm7 && ramDiskCluster != 0) {
-		patchMemoryAddresses((tNDSHeader*)NDS_HEADER);
-	}
-
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[dldiAtArm7 ? 0x0E : 0x0A], ((u32*)NDS_HEADER)[dldiAtArm7 ? 0x0F : 0x0B], (ramDiskCluster != 0));
+		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 	}
 
-	NTR_BIOS();
+	if (dsiMode) {
+		dsiModeConfirmed = true;
+	} else {
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+		NTR_BIOS();
+	}
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
-	if (ramDiskCluster != 0) {
+	if (ramDiskCluster != 0 && ramDiskSize > 0) {
+		void* ramDiskLocation = (void*)(dsiMode ? RAM_DISK_LOCATION_DSIMODE : RAM_DISK_LOCATION);
 		arm9_ramDiskCluster = ramDiskCluster;
-		if (ramDiskSize < 0x01C01000) {
+		if (ramDiskSize < (dsiMode ? 0x01001000 : 0x01C01000)) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
-				memcpy ((char*)RAM_DISK_LOCATION, (char*)0x06020000, 0xEA00);
-				if (romFileType == 1) {
-					*(u32*)(RAM_DISK_LOCATION_SNESROMSIZE) = ramDiskSize;
-				} else if (romFileType == 0) {
-					*(u32*)(RAM_DISK_LOCATION_MDROMSIZE) = ramDiskSize;
+				tonccpy ((char*)ramDiskLocation, (char*)0x02370000, (romFileType == 1) ? RAM_DISK_SNESROM : RAM_DISK_MDROM);
+				toncset((u32*)0x02370000, 0, 0x10000);
+				if (romIsCompressed) {
+					u8* lz77RomSrc = (u8*)RAM_DISK_LOCATION_LZ77ROM;
+					u32 leng = (lz77RomSrc[1] | (lz77RomSrc[2] << 8) | (lz77RomSrc[3] << 16));
+					if (romFileType == 1) {
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = leng;
+					} else {
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = leng;
+					}
+					toncset((u32*)RAM_DISK_LOCATION_LZ77ROM, 0, 0x400000);	// clear compressed ROM
+				} else {
+					if (romFileType == 1) {
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESROMSIZE) = ramDiskSize;
+					} else {
+						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = ramDiskSize;
+					}
+					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 				}
-				fileRead((char*)((romFileType == 1) ? RAM_DISK_LOCATION_SNESROM : RAM_DISK_LOCATION_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 			} else {
-				fileRead((char*)RAM_DISK_LOCATION, ramDiskFile, 0, ramDiskSize, 0);
+				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
 			}
 		}
-		REG_SCFG_EXT = 0x12A03000;
-	} else if (!dldiAtArm7) {
+	} else {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds((tNDSHeader*)NDS_HEADER, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+	}
+
+	if (dsiMode) {
+		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory
+	}
+
+	arm9_boostVram = boostVram;
+
+	while (arm9_stateFlag != ARM9_READY);
+	arm9_stateFlag = ARM9_SETSCFG;
+	while (arm9_stateFlag != ARM9_READY);
+	if (!dsiMode && ramDiskSize == 0) {
+		u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		bool recentLibnds =
+			  (a9exe[0] == 0xE3A00301
+			&& a9exe[1] == 0xE5800208
+			&& a9exe[2] == 0xE3A00013
+			&& a9exe[3] == 0xE129F000);
+		if (recentLibnds) {
+			arm9_stateFlag = ARM9_LOCKSCFG;
+			while (arm9_stateFlag != ARM9_READY);
+		}
 	}
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-
-	fillLoadBarLength();
 
 	startBinary_ARM7();
 

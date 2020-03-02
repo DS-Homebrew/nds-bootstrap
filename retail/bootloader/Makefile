@@ -7,6 +7,14 @@ endif
 
 -include $(DEVKITARM)/ds_rules
 
+ifeq ($(OS),Windows_NT)
+LZSS			?=	../lzss.exe
+
+else
+
+LZSS			?=	lzss
+
+endif
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
@@ -22,9 +30,9 @@ SPECS		:=  specs
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=  -mthumb-interwork -march=armv4t
+ARCH	:=  -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Os\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
@@ -51,7 +59,8 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
 export TOPDIR	:=	$(CURDIR)
-export LOADBIN	:=	$(CURDIR)/../data/$(TARGET).bin
+export LOADBIN	:=	$(CURDIR)/../nitrofiles_dec/$(TARGET).bin
+export LOADBIN_CMP	:=	$(CURDIR)/../nitrofiles/$(TARGET).lz77
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -61,7 +70,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 #BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-BINFILES	:=	cardengine_arm7.bin cardengine_arm9.bin cardengine_arm9_reloc.bin cardengine_arm9_sdk5.bin
+BINFILES	:=	
  
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
@@ -83,7 +92,9 @@ export LD	:=	$(CC)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile 
- 
+	@cp $(LOADBIN) $(LOADBIN_CMP)
+	@$(LZSS) -ewf $(LOADBIN_CMP)
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
@@ -110,21 +121,13 @@ $(LOADELF)	:	$(OFILES)
 #	@echo $(notdir $<)
 #	$(bin2o)
 	
-cardengine_arm7.bin.o : $(CURDIR)/../../data/cardengine_arm7.bin
-	@echo $(notdir $<)
-	$(bin2o)
+#cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
 
-cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
-	@echo $(notdir $<)
-	$(bin2o)
-
-cardengine_arm9_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_reloc.bin
-	@echo $(notdir $<)
-	$(bin2o)
-
-cardengine_arm9_sdk5.bin.o : $(CURDIR)/../../data/cardengine_arm9_sdk5.bin
-	@echo $(notdir $<)
-	$(bin2o)
+#cardengine_arm9_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_reloc.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
 
 -include $(DEPENDS)
 
