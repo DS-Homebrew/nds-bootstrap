@@ -158,6 +158,7 @@ static const u32 resetSignature4[4]        = {0xE92D4070, 0xE1A06400, 0xE3A0500C
 static const u32 resetSignature5[4]        = {0xE92D4038, 0xE59F1054, 0xE1A05000, 0xE1D100B0}; // sdk5
 static const u32 resetSignature5Alt1[4]    = {0xE92D4010, 0xE59F104C, 0xE1A04000, 0xE1D100B0}; // sdk5
 static const u32 resetSignature5Alt2[4]    = {0xE92D4010, 0xE59F1088, 0xE1A04000, 0xE1D100B0}; // sdk5
+static const u32 resetSignature5Alt3[4]    = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0xE1D100B0}; // sdk5
 
 static const u32 resetConstant[1]        = {RESET_PARAM};
 static const u32 resetConstant5[1]       = {RESET_PARAM_SDK5};
@@ -1908,6 +1909,12 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				resetOffset = findOffset(
 					(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 					resetSignature5Alt2, 4
+				);
+			}
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+					resetSignature5Alt3, 4
 				);
 			}
 		}
