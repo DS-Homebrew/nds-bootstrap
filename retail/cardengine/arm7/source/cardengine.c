@@ -52,6 +52,7 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern module_params_t* moduleParams;
 extern u32 gameOnFlashcard;
@@ -93,6 +94,7 @@ static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 #endif
 static aFile ramDumpFile;
+static aFile srParamsFile;
 
 static int saveTimer = 0;
 
@@ -159,6 +161,7 @@ static void driveInitialize(void) {
 	}
 
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
+	srParamsFile = getFileFromCluster(srParamsCluster);
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -769,6 +772,8 @@ void myIrqHandlerVBlank(void) {
 	|| (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x52534554)) {
 		if (tryLockMutex(&saveMutex)) {
 			REG_MASTER_VOLUME = 0;
+			driveInitialize();
+			fileWrite((char*)RESET_PARAM, srParamsFile, 0, 0x20, -1);
 			if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			}

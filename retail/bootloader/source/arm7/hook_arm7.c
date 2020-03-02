@@ -31,14 +31,6 @@
 #include "find.h"
 #include "hook.h"
 
-// SDK 5
-/*extern u32 setDataMobicliplist[3];
-extern u32 setDataBWlist[7];
-extern u32 setDataBWlist_1[3];
-extern u32 setDataBWlist_2[3];
-extern u32 setDataBWlist_3[3];
-extern u32 setDataBWlist_4[3];*/
-
 static const int MAX_HANDLER_LEN = 50;
 
 static const u32 handlerStartSig[5] = {
@@ -95,6 +87,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,
@@ -217,6 +210,7 @@ int hookNdsRetailArm7(
 	ce7->intr_network_orig_return = *networkHandler;
 	ce7->moduleParams             = moduleParams;
 	ce7->fileCluster              = fileCluster;
+	ce7->srParamsCluster          = srParamsFileCluster;
 	ce7->ramDumpCluster           = ramDumpCluster;
 	ce7->gameOnFlashcard          = gameOnFlashcard;
 	ce7->saveOnFlashcard          = saveOnFlashcard;

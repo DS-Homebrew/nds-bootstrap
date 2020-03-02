@@ -42,6 +42,7 @@
 	.global cacheFatTable
 	.global fatTableFileCluster
 	.global ramDumpCluster
+	.global srParamsFileCluster
 	.global language
 	.global dsiMode
 	.global donorSdkVer
@@ -105,6 +106,8 @@ cacheFatTable:
 fatTableFileCluster:
 	.word	0x00000000
 ramDumpCluster:
+	.word	0x00000000
+srParamsFileCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000
