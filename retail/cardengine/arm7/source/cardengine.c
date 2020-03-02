@@ -765,7 +765,8 @@ void myIrqHandlerVBlank(void) {
 		ramDumpTimer = 0;
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0) {
+	if ((0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0)
+	|| (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x52534554)) {
 		if (tryLockMutex(&saveMutex)) {
 			REG_MASTER_VOLUME = 0;
 			if (consoleModel < 2) {

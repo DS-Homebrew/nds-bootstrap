@@ -928,6 +928,10 @@ void myIrqHandlerIPC(void) {
 
 void reset(u32 param) {
 	turnScreenRed();
+
+	sharedAddr[3] = 0x52534554;
+	waitForArm7();
+
 	//bgUpdate();    
 }
 
