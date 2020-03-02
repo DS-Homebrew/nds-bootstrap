@@ -166,7 +166,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
 	dbg_printf("soundFreq: %s\n", btoa(conf->soundFreq));
-	dbg_printf("gameSoftReset: %s\n", btoa(conf->gameSoftReset));
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));

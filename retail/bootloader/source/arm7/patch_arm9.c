@@ -485,16 +485,25 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     return false; 
 }
 
-static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
     const char* romTid = getRomTid(ndsHeader);
     
-    u32* reset = findResetOffset(ndsHeader,moduleParams,usesThumb);
+    u32* reset = patchOffsetCache.resetOffset;
 
-    if(reset) {
-      // Patch
-      u32* resetPatch = (usesThumb ? ce9->thumbPatches->reset_arm9 : ce9->patches->reset_arm9);
-      memcpy(reset, resetPatch, 0x40);
-    }
+    if (!patchOffsetCache.resetChecked) {
+		reset = findResetOffset(ndsHeader,moduleParams);
+		if (reset) patchOffsetCache.resetOffset = reset;
+		patchOffsetCache.resetChecked = true;
+	}
+
+	if (reset) {
+		// Patch
+		u32* resetPatch = ce9->patches->reset_arm9;
+		memcpy(reset, resetPatch, 0x40);
+	} else {
+		extern u32 gameSoftReset;
+		gameSoftReset = 0;
+	}
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
@@ -1342,7 +1351,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
 
-  patchReset(ce9, ndsHeader, moduleParams, usesThumb);
+	patchReset(ce9, ndsHeader, moduleParams);
 
 	randomPatch(ndsHeader, moduleParams);
 

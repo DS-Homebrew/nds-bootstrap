@@ -290,7 +290,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 gbaCluster, u32 wideCheatCluster, 
 	lc0->romRead_LED                 = conf->romRead_LED;
 	lc0->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	lc0->boostVram                   = conf->boostVram;
-	lc0->gameSoftReset               = conf->gameSoftReset;
 	lc0->forceSleepPatch             = conf->forceSleepPatch;
 	lc0->volumeFix                   = conf->volumeFix;
 	lc0->preciseVolumeControl        = conf->preciseVolumeControl;

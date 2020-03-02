@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 7;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 8;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -264,7 +264,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
-        
+
         *(u32*)0x02000B94 = 0xE1A00000; //nop
 
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
@@ -302,7 +302,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         PatchMem(KArm9,s32(ii+7),0xe28ff048); //adr pc, xxx  jump+48 (12*4)
         //6D3FC
         PatchMem(KArm9,s32(ii+28),0xe1a00000); //nop
-        
+
         // r0 : ROMCTRL
         // r1 : ROMCTRL
         // r2 : ...
@@ -312,33 +312,31 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         // r6 : LEN
         // ..
         // r10 : cardstruct
-        
+
         for(int i =0; i<64; i++) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
         }*/
-        
+
         *((u32*)0x02000BB0) = 0xE1A00000; //nop 
-    
+
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
-        
+
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
-    
+
     // Pokemon Dash
 	if (strcmp(romTid, "APDK") == 0) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}
-    
-    
+
     // Golden Sun
     if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }  
-    
+    }
 }
 
 u32 patchCardNds(
@@ -371,6 +369,8 @@ u32 patchCardNds(
 		patchOffsetCache.cardSetDmaChecked = 0;
 		patchOffsetCache.cardReadDmaChecked = 0;
 		patchOffsetCache.cardEndReadDmaChecked = 0;
+		patchOffsetCache.resetOffset = 0;
+		patchOffsetCache.resetChecked = 0;
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;

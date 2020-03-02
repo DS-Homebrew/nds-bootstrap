@@ -30,7 +30,6 @@ typedef struct configuration {
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;
-	bool gameSoftReset;
 	bool forceSleepPatch;
 	bool volumeFix;
 	bool preciseVolumeControl;

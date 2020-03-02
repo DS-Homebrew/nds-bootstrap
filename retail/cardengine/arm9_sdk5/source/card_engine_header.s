@@ -61,7 +61,7 @@ patches:
 .word   0x0 @cardEndReadDmaRef
 .word   0x0
 .word	swi02
-.word   0x0
+.word   reset_arm9
 needFlushDCCache:
 .word   0x0
 .word   0x0
@@ -80,7 +80,6 @@ thumbPatches:
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
-.word   0x0
 .word   0x0
 
 	.thumb
@@ -330,6 +329,30 @@ ce9location13:
 .word   ce9
 cardReadRef13:
 .word   myIrqHandlerIPC-ce9  
+
+@---------------------------------------------------------------------------------
+reset_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, cardReadRefRes
+    ldr     r7, ce9locationRes
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_reset	
+    
+
+	ldmfd   sp!, {r1-r11,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_reset:
+	bx	r6	
+.pool
+ce9locationRes:
+.word   ce9
+cardReadRefRes:
+.word   reset-ce9 
+@---------------------------------------------------------------------------------
 
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC

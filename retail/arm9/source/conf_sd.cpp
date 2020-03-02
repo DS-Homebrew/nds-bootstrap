@@ -98,9 +98,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// DMA ROM read LED
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED").c_str(), NULL, 0);
 
-	// Game soft reset
-	conf->gameSoftReset = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "GAME_SOFT_RESET").c_str(), NULL, 0);
-
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH").c_str(), NULL, 0);
 
