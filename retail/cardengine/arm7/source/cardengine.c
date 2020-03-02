@@ -115,7 +115,7 @@ static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 #endif
 static const char* romLocation = NULL;
 
-static void unlaunchSetHiyaBoot(void) {
+static void unlaunchSetFilename(void) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -737,10 +737,9 @@ void myIrqHandlerVBlank(void) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
-				if (consoleModel < 2) {
-					unlaunchSetHiyaBoot();
+				if (consoleModel >= 2) {
+					tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				}
-				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 				leaveCriticalSection(oldIME);
@@ -780,7 +779,7 @@ void myIrqHandlerVBlank(void) {
 			driveInitialize();
 			fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x20, -1);
 			if (consoleModel < 2) {
-				unlaunchSetHiyaBoot();
+				unlaunchSetFilename();
 			}
 			//tonccpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
