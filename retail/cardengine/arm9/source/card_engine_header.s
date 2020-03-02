@@ -83,7 +83,6 @@ thumbCardEndReadDmaRef:
 .word   terminateForPullOutRef
 .word   0x0
 
-
 	.thumb
 @---------------------------------------------------------------------------------
 swi02:

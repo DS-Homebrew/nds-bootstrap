@@ -61,7 +61,7 @@ patches:
 .word   0x0 @cardEndReadDmaRef
 .word   0x0
 .word	swi02
-.global needFlushDCCache
+.word   0x0
 needFlushDCCache:
 .word   0x0
 .word   0x0
@@ -80,6 +80,7 @@ thumbPatches:
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
+.word   0x0
 .word   0x0
 
 	.thumb
