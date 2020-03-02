@@ -154,7 +154,9 @@ static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000}
 // Reset
 static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
 static const u16 resetSignatureThumb2[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk2
+static const u32 resetSignature3[4]        = {0xE92D4010, 0xE59F106C, 0xE1A04000, 0xE1D100B0}; // sdk3
 // TODO complete with other sdks signatures
+static const u16 resetSignatureThumb3[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk3
 static const u32 resetSignature4[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk4
 static const u16 resetSignatureThumb4[4]        = {0x4030, 0xE92D, 0xD004, 0xE24D}; // sdk4
 static const u32 resetSignature5[4]        = {0xE92D4030, 0xE24DD004, 0xE59F109C, 0xE1A05000}; // sdk5
@@ -1873,18 +1875,22 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_printf("findResetOffset\n");
     u32* resetSignature = resetSignature2;
     u16* resetSignatureThumb = resetSignatureThumb2;
-          
-    if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) { 
+
+    if (moduleParams->sdk_version >= 0x3004000 && moduleParams->sdk_version < 0x4000000) { 
+        resetSignature = resetSignature3;
+        resetSignatureThumb = resetSignatureThumb3;
+    }
+    if (moduleParams->sdk_version > 0x4000000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
-        resetSignatureThumb = resetSignatureThumb4;         
+        resetSignatureThumb = resetSignatureThumb4;
     }
     if (moduleParams->sdk_version > 0x5000000) {
         resetSignature = resetSignature5;
         resetSignature = resetSignatureThumb5;     
     }
-    
+
     u32 * resetOffset = NULL;
-    
+
     if(usesThumb) {
   		resetOffset = findOffsetThumb(
       		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
