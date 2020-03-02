@@ -788,9 +788,7 @@ void myIrqHandlerVBlank(void) {
 				// Use different SR backend ID
 				*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
 				*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
-				while (*(u16*)(0x02000306) == 0) {	// Keep running, so that CRC16 isn't 0
-					*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);		// Unlaunch CRC16
-				}
+				*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 			}
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
