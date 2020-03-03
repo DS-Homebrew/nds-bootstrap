@@ -257,7 +257,7 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 
 u32 myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();	
+	int oldIME = enterCriticalSection();
 
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
