@@ -94,6 +94,14 @@ static bool dmaReadOnArm9 = false;
 
 void myIrqHandlerDMA(void);
 
+// Alternative to swiWaitForVBlank()
+static void waitFrames(int count) {
+	for (int i = 0; i < count; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+}
+
 #ifndef DLDI
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -919,6 +927,8 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
+	waitFrames(5);	// Wait for DSi screens to stabilize
+    int oldIME = enterCriticalSection();
 	*(u32*)RESET_PARAM = param;
 	sharedAddr[3] = 0x52534554;
 	while (1);
