@@ -119,6 +119,8 @@ bool gbaRomFound = false;
 static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
+static u32 softResetParams = 0;
+
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
@@ -764,13 +766,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
-	char zeroBuffer[0x4] = {0};
-
-	sdRead = (gameOnFlashcard == false);
-	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-	if (*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) != 0) {
-		fileWrite((char*)zeroBuffer, srParamsFile, 0, 0x4, -1);
+	if (softResetParams != 0xFFFFFFFF) {
+		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
 	}
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
@@ -811,8 +808,17 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
-	// ROM file
 	if (gameOnFlashcard) sdRead = false;
+
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4, -1);
+	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
+	if (softResetParamsFound) {
+		u32 clearBuffer = 0xFFFFFFFF;
+		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+	}
+
+	// ROM file
 	aFile* romFile = (aFile*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT);
 	*romFile = getFileFromCluster(storedFileCluster);
 
@@ -828,7 +834,7 @@ int arm7_main(void) {
 		errorOutput();
 		//return -1;
 	}*/
-	
+
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
@@ -851,7 +857,9 @@ int arm7_main(void) {
 	}
 
 	if (fatTableEmpty) {
-		pleaseWaitOutput();
+		if (!softResetParamsFound) {
+			pleaseWaitOutput();
+		}
 		buildFatTableCache(romFile, 0);
 	} else {
 		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x27C0000, sizeof(aFile));
