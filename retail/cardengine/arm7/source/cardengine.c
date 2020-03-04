@@ -64,7 +64,6 @@ extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
-extern u32 gameSoftReset;
 extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
@@ -98,6 +97,7 @@ static aFile srParamsFile;
 
 static int saveTimer = 0;
 
+static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -734,7 +734,7 @@ void myIrqHandlerVBlank(void) {
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
-			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
+			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				if (consoleModel >= 2) {
@@ -746,9 +746,9 @@ void myIrqHandlerVBlank(void) {
 			}
 			unlockMutex(&saveMutex);
 		}
-		softResetTimer++;
+		returnTimer++;
 	} else {
-		softResetTimer = 0;
+		returnTimer = 0;
 	}
 
 	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
@@ -771,8 +771,7 @@ void myIrqHandlerVBlank(void) {
 		ramDumpTimer = 0;
 	}
 
-	if ((0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT)) && !gameSoftReset && saveTimer == 0)
-	|| (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x52534554)) {
+	if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x52534554) {
 		if (tryLockMutex(&saveMutex)) {
 			REG_MASTER_VOLUME = 0;
 			int oldIME = enterCriticalSection();
@@ -782,7 +781,6 @@ void myIrqHandlerVBlank(void) {
 			if (consoleModel < 2) {
 				unlaunchSetFilename();
 			}
-			//tonccpy((u32*)0x02000300, dsiMode ? sr_data_srllastran_twltouch : sr_data_srllastran, 0x020); // SDK 5
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 			if (*(u32*)(ce7+0x11EF8) != 0) {
 				// Use different SR backend ID
@@ -795,6 +793,32 @@ void myIrqHandlerVBlank(void) {
 			leaveCriticalSection(oldIME);
 			unlockMutex(&saveMutex);
 		}
+	}
+
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
+		if (tryLockMutex(&saveMutex)) {
+			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
+				REG_MASTER_VOLUME = 0;
+				int oldIME = enterCriticalSection();
+				if (consoleModel < 2) {
+					unlaunchSetFilename();
+				}
+				tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+				if (*(u32*)(ce7+0x11EF8) != 0) {
+					// Use different SR backend ID
+					*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
+					*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
+					*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+				}
+				i2cWriteRegister(0x4A, 0x70, 0x01);
+				i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+				leaveCriticalSection(oldIME);
+			}
+			unlockMutex(&saveMutex);
+		}
+		softResetTimer++;
+	} else {
+		softResetTimer = 0;
 	}
 
 	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {

@@ -54,7 +54,6 @@
 	.global dmaRomRead_LED
 	.global boostVram
 	.global soundFreq
-	.global gameSoftReset
 	.global forceSleepPatch
 	.global volumeFix
 	.global preciseVolumeControl
@@ -131,8 +130,6 @@ boostVram:
 	.word	0x00000000
 soundFreq:
 	.word	0x00000000
-gameSoftReset:
-	.word	0x00000001
 forceSleepPatch:
 	.word	0x00000000
 volumeFix:

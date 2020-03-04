@@ -27,7 +27,6 @@
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
-.global gameSoftReset
 .global preciseVolumeControl
 
 #define ICACHE_SIZE	0x2000
@@ -72,8 +71,6 @@ consoleModel:
 romRead_LED:
 	.word	0x00000000
 dmaRomRead_LED:
-	.word	0x00000000
-gameSoftReset:
 	.word	0x00000000
 preciseVolumeControl:
 	.word	0x00000000

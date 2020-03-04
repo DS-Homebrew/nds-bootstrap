@@ -49,7 +49,6 @@ int hookNdsRetailArm7(
 	u32 consoleModel,
 	u32 romRead_LED,
 	u32 dmaRomRead_LED,
-	u32 gameSoftReset,
 	u32 preciseVolumeControl
 );
 int hookNdsRetailArm9(

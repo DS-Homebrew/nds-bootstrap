@@ -502,9 +502,6 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		// Patch
 		u32* resetPatch = ce9->patches->reset_arm9;
 		memcpy(reset, resetPatch, 0x40);
-	} else {
-		extern u32 gameSoftReset;
-		gameSoftReset = 0;
 	}
 }
 

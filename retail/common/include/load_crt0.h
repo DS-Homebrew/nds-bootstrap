@@ -39,7 +39,6 @@ typedef struct loadCrt0 {
     u32 dmaRomRead_LED;
     u32 boostVram;
     u32 soundFreq;
-    u32 gameSoftReset;
     u32 forceSleepPatch;
 	u32 volumeFix;
     u32 preciseVolumeControl;

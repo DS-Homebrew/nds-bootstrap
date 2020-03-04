@@ -105,7 +105,6 @@ extern u32 ceCached;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
-extern u32 gameSoftReset;
 //extern u32 forceSleepPatch;
 extern u32 volumeFix;
 extern u32 preciseVolumeControl;
@@ -1114,7 +1113,6 @@ int arm7_main(void) {
 			consoleModel,
 			romRead_LED,
 			dmaRomRead_LED,
-			gameSoftReset,
 			preciseVolumeControl
 		);
 		if (errorCode == ERR_NONE) {

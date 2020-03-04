@@ -102,7 +102,6 @@ int hookNdsRetailArm7(
 	u32 consoleModel,
 	u32 romRead_LED,
 	u32 dmaRomRead_LED,
-	u32 gameSoftReset,
 	u32 preciseVolumeControl
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
@@ -221,7 +220,6 @@ int hookNdsRetailArm7(
 	ce7->consoleModel             = consoleModel;
 	ce7->romRead_LED              = romRead_LED;
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
-	ce7->gameSoftReset            = gameSoftReset;
 	ce7->preciseVolumeControl     = preciseVolumeControl;
 
 	const char* romTid = getRomTid(ndsHeader);
