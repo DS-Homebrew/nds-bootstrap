@@ -1,66 +1,25 @@
-<!---
-##### THIS IS THE ISSUE TRACKER FOR nds-bootstrap.
-###### Keep in mind that nds-bootstrap is what loads the games from SD. If the issue is related to the frontend, open the issue here instead: (https://github.com/RocketRobz/TWiLightMenu/issues)
-###### Issues that don't attach any log file or any reproducible method will be closed.
-###### If you want to create a request, please delete all text after this message.
-###### Issues about asking for support for piracy will be closed.
+<!--
+### Use the latest version of nds-bootstrap when reporting compatibility issues.
+### Duplicate issues will be closed. Please keep this in mind before submitting one.
+### Delete everything in <!-- -- > beforehand
 -->
-### Your console
 
-Tell us which console you are using:
+**Your console:** <!-- What console are you using? -->
+**Launch Method:** <!-- What CFW are you using? How are you launching nds-bootstrap? Please be specific and include firmwares and versions-->
+**Version used:** <!-- Specify whether you used release or Nightly. If you use Nightly, please include the hash. Simply saying "latest" isn't helpful -->
+**Flashcart used:** <!-- Delete this line if you don't use B4DS/aren't loading games from your Slot-1 SD card. For those who are, specify said flashcart -->
+**Game tested/used/applicable:** <!-- Include MD5 hashes, Title IDs and anything that could be used to identify it. If it's homebrew, please link said homebrew here -->
 
-- [ ]  DS Phat/Lite
-- [ ]  DSi (XL)
-- [ ]  Old 3DS/2DS (XL)
-- [ ]  New 3DS/2DS (XL)
-
-### CFW and configuration
-
-Tell us which CFW do you have:
-
-DSi:
-
-- [ ]  (No CFW) DSiWarehax (such as Flipnote Lenny, Sudokuhax, etc.)
-- [ ]  (No CFW) Unlaunch only _[please specify version]_
-- [ ]  Unlaunch+HiyaCFW _[please specify versions of both]_
-
-3DS/2DS:
-
-- [ ]  Luma3DS
-- [ ]  Rei-Six
-- [ ]  Other/Older CFW [specify]
-
-### nds-bootstrap version
-
-Tell us which versions you are using:
-
-- [ ]  Release _[please specify version]_
-- [ ]  Nightly _[insert here commit hash]_
-
-### Your device
-
-Tell us which card you are using:
-
-- [ ]  SD Card
-- [ ]  (Slot-1) Flashcard
-
-### If this issue only affects a certain game, which game is it?
-
-Game goes here if applicable
-
-### Expected behaviour
-
-Tell us what should happen
-
-### Actual behaviour
-
-Tell us what happens instead
+**Expected Behavior:** <!--What should have happened-->
+**Actual Behavior:** <!--What actually happened?-->
 
 ### Steps to reproduce
 
-1.
-2.
-3.
+<!-- List here anything needed to reproduce this issue. Be sure to include the nds-bootstrap.ini file -->
+
+### Logs
+
+<!-- Please enable debug logging and add everything here -->
 
 ### Other notes
 
