@@ -509,6 +509,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
+	|| strncmp(romTid, "A24", 3) == 0
 	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0) {
 		return false;
@@ -1011,6 +1012,7 @@ int arm7_main(void) {
 		if (!dsiModeConfirmed) {
 			if (
 				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
+			 && strncmp(romTid, "A24", 3) != 0				// Pokemon Dash (Kiosk Demo)
 			) {
 				NTR_BIOS();
 			}

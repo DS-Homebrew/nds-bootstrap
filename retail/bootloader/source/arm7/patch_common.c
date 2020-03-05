@@ -326,6 +326,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
 
+    // Pokemon Dash (Kiosk Demo)
+	if (strcmp(romTid, "A24E") == 0) {
+        *(u32*)0x02000BB0 = 0xE1A00000; //nop
+	}
+
     // Pokemon Dash
 	if (strcmp(romTid, "APDK") == 0) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
