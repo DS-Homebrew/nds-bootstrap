@@ -907,7 +907,7 @@ int arm7_main(void) {
 			fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 		}
 	} else {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, 0);
+		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
 	}
 	if (gameOnFlashcard) {
 		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FF80);
