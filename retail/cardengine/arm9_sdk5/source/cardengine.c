@@ -80,6 +80,19 @@ static bool dmaLed = false;
 
 static u32 tempDmaParams[10] = {0};
 
+void SetBrightness(u8 screen, s8 bright) {
+	u16 mode = 1 << 14;
+
+	if (bright < 0) {
+		mode = 2 << 14;
+		bright = -bright;
+	}
+	if (bright > 31) {
+		bright = 31;
+	}
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+}
+
 // Alternative to swiWaitForVBlank()
 static void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
@@ -733,8 +746,13 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
-	waitFrames(5);	// Wait for DSi screens to stabilize
-    int oldIME = enterCriticalSection();
+	int oldIME = enterCriticalSection();
+	if (ce9->consoleModel < 2) {
+		// Make screens white
+		SetBrightness(0, 31);
+		SetBrightness(1, 31);
+		waitFrames(5);	// Wait for DSi screens to stabilize
+	}
 	*(u32*)RESET_PARAM_SDK5 = param;
 	sharedAddr[3] = 0x52534554;
 	while (1);
