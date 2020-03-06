@@ -940,13 +940,13 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
-	int oldIME = enterCriticalSection();
 	if (ce9->consoleModel < 2) {
 		// Make screens white
 		SetBrightness(0, 31);
 		SetBrightness(1, 31);
 		waitFrames(5);	// Wait for DSi screens to stabilize
 	}
+	int oldIME = enterCriticalSection();
 	*(u32*)RESET_PARAM = param;
 	sharedAddr[3] = 0x52534554;
 	while (1);
