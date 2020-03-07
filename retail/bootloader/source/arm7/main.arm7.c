@@ -1193,6 +1193,8 @@ int arm7_main(void) {
 
 	if (consoleModel < 2) {
 		i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
+	} else {
+		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 0);		// Press power button for auto-reset
 	}
 
 	while (arm9_stateFlag != ARM9_READY);
