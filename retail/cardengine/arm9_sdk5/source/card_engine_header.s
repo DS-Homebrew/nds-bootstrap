@@ -334,6 +334,7 @@ thumb_card_irq_enable:
     ldr     r7, ce9locationTIrq
     add     r6, r6, r7
 
+	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
 	bx  lr
 thumb_blx_r3_stub2:
