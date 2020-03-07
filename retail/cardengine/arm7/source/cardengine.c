@@ -44,6 +44,7 @@
 extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
+static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
 
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
@@ -115,7 +116,7 @@ static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 #endif
 static const char* romLocation = NULL;
 
-static void unlaunchSetFilename(void) {
+static void unlaunchSetFilename(bool boot) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -125,12 +126,27 @@ static void unlaunchSetFilename(void) {
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
 	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
-	for (int i = 0; i < 256; i++) {
-		*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11F00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
-		i2 += 2;
+	if (boot) {
+		for (int i = 0; i < (int)sizeof(bootNdsPath); i++) {
+			*(u8*)(0x02000838+i2) = bootNdsPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			i2 += 2;
+		}
+	} else {
+		for (int i = 0; i < 256; i++) {
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11F00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			i2 += 2;
+		}
 	}
 	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
+	}
+}
+
+// Alternative to swiWaitForVBlank()
+static void waitFrames(int count) {
+	for (int i = 0; i < count; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 	}
 }
 
@@ -369,10 +385,7 @@ static void nandWrite(void) {
     
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
-		if (saveTimer == 0) {
-			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		}
-		saveTimer = 1;
+		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, -1);
     	cardReadLED(false);
@@ -548,6 +561,7 @@ static void runCardEngineCheck(void) {
 	#endif	
 
     if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
+		sharedAddr[4] = 0x025AAB08;
 		IPC_SendSync(0x7);
 	}
 
@@ -586,10 +600,12 @@ static void runCardEngineCheck(void) {
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
               } else {
                     while(!resume_cardRead_arm9()) {} 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
               }
           }
@@ -600,7 +616,6 @@ static void runCardEngineCheck(void) {
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01);
     			nandRead();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-    			IPC_SendSync(0x8);
     		}
 
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02) {
@@ -608,7 +623,6 @@ static void runCardEngineCheck(void) {
                 dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC02);
     			nandWrite();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-    			IPC_SendSync(0x8);
     		}
 
             /*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FBC01) {
@@ -628,6 +642,7 @@ static void runCardEngineCheck(void) {
             //if(resume_cardRead_arm9()) {
 			    while(!resume_cardRead_arm9()) {} 
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+				sharedAddr[4] = 0x025AAB08;
                 IPC_SendSync(0x8);
             //} 
         }
@@ -739,6 +754,8 @@ void myIrqHandlerVBlank(void) {
 				int oldIME = enterCriticalSection();
 				if (consoleModel >= 2) {
 					tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				} else {
+					unlaunchSetFilename(true);
 				}
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
@@ -772,27 +789,24 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x52534554) {
-		if (tryLockMutex(&saveMutex)) {
-			REG_MASTER_VOLUME = 0;
-			int oldIME = enterCriticalSection();
-			driveInitialize();
-			sdRead = (gameOnFlashcard == false);
-			fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-			if (consoleModel < 2) {
-				unlaunchSetFilename();
-			}
-			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-			if (*(u32*)(ce7+0x11EF8) != 0) {
-				// Use different SR backend ID
-				*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
-				*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
-				*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
-			}
-			i2cWriteRegister(0x4A, 0x70, 0x01);
-			i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-			leaveCriticalSection(oldIME);
-			unlockMutex(&saveMutex);
+		REG_MASTER_VOLUME = 0;
+		int oldIME = enterCriticalSection();
+		driveInitialize();
+		sdRead = (gameOnFlashcard == false);
+		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
+		if (consoleModel < 2) {
+			unlaunchSetFilename(false);
 		}
+		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		if (*(u32*)(ce7+0x11EF8) != 0) {
+			// Use different SR backend ID
+			*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
+			*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
+			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+		}
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+		leaveCriticalSection(oldIME);
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
@@ -801,7 +815,7 @@ void myIrqHandlerVBlank(void) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				if (consoleModel < 2) {
-					unlaunchSetFilename();
+					unlaunchSetFilename(false);
 				}
 				tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 				if (*(u32*)(ce7+0x11EF8) != 0) {
@@ -819,6 +833,20 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer++;
 	} else {
 		softResetTimer = 0;
+	}
+
+	if ((saveTimer == 0) && (i2cReadRegister(0x4A, 0x10) & BIT(3))) {
+		REG_MASTER_VOLUME = 0;
+		int oldIME = enterCriticalSection();
+		if (consoleModel < 2) {
+			//unlaunchSetFilename(true);
+			sharedAddr[4] = 0x57534352;
+			IPC_SendSync(0x8);
+			waitFrames(5);							// Wait for DSi screens to stabilize
+		}
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+		leaveCriticalSection(oldIME);
 	}
 
 	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
@@ -853,7 +881,6 @@ void myIrqHandlerVBlank(void) {
 	if (saveTimer > 0) {
 		saveTimer++;
 		if (saveTimer == 60) {
-			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 			saveTimer = 0;
 		}
 	}
@@ -960,10 +987,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
   	if (tryLockMutex(&saveMutex)) {
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
-		if (saveTimer == 0) {
-			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		}
-		saveTimer = 1;
+		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
 		fileWrite(src, *savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}
@@ -989,10 +1013,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
   	if (tryLockMutex(&saveMutex)) {
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
-		if (saveTimer == 0) {
-			i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		}
-		saveTimer = 1;
+		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
 		fileWrite(src, *savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}

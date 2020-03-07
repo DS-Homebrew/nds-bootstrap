@@ -505,6 +505,26 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
+static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
+
+	// Card irq enable
+	u32* cardIrqEnableOffset = patchOffsetCache.a9CardIrqEnableOffset;
+	if (!patchOffsetCache.a9CardIrqEnableOffset) {
+		cardIrqEnableOffset = a9FindCardIrqEnableOffset(ndsHeader, moduleParams, &usesThumb);
+		if (cardIrqEnableOffset) {
+			patchOffsetCache.a9CardIrqEnableOffset = cardIrqEnableOffset;
+			patchOffsetCache.a9CardIrqIsThumb = usesThumb;
+		}
+	}
+	if (!cardIrqEnableOffset) {
+		return false;
+	}
+	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
+	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
+	return true;
+}
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
 	extern u32 gameOnFlashcard;
     const char* romTid = getRomTid(ndsHeader);
@@ -747,7 +767,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = 0x023DC000; // shrink heap by 16KB
+	*heapPointer = 0x023DBC00; // shrink heap by 17KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -832,7 +852,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *armSetDmaCardLocation = current_location;
 
-    u32* thumbReadDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbReadDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbReadDmaCardLocation) {
 		return;
 	}
@@ -844,7 +864,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *thumbReadDmaCardLocation = current_location;
 
-    u32* thumbSetDmaCardLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbSetDmaCardLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbSetDmaCardLocation) {
 		return;
 	}
@@ -892,7 +912,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *armWriteNandLocation = current_location;
 
-    u32* thumbWriteNandLocation =  findOffset(current_location, size, location_sig, 1);
+    u32* thumbWriteNandLocation = findOffset(current_location, size, location_sig, 1);
 	if (!thumbWriteNandLocation) {
 		return;
 	}
@@ -903,6 +923,30 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("\n\n");
 
     *thumbWriteNandLocation = current_location;
+
+    u32* armIrqEnableLocation = findOffset(current_location, size, location_sig, 1);
+	if (!armIrqEnableLocation) {
+		return;
+	}
+    dbg_printf("armIrqEnableLocation ");
+	dbg_hexa((u32)armIrqEnableLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armIrqEnableLocation);
+    dbg_printf("\n\n");
+
+    *armIrqEnableLocation = current_location;
+
+    u32* thumbIrqEnableLocation = findOffset(current_location, size, location_sig, 1);
+	if (!thumbIrqEnableLocation) {
+		return;
+	}
+    dbg_printf("thumbIrqEnableLocation ");
+	dbg_hexa((u32)thumbIrqEnableLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbIrqEnableLocation);
+    dbg_printf("\n\n");
+
+    *thumbIrqEnableLocation = current_location;
 
     u32* pdashReadLocation = findOffset(current_location, size, location_sig, 1);
 	if (!pdashReadLocation) {
@@ -974,6 +1018,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     ce9->thumbPatches = (cardengineArm9ThumbPatches*)((u32)ce9->thumbPatches - default_location + current_location);
     ce9->patches->card_read_arm9 = (u32*)((u32)ce9->patches->card_read_arm9 - default_location + current_location);
+    ce9->patches->card_irq_enable = (u32*)((u32)ce9->patches->card_irq_enable - default_location + current_location);
     ce9->patches->card_pull_out_arm9 = (u32*)((u32)ce9->patches->card_pull_out_arm9 - default_location + current_location);
     ce9->patches->card_id_arm9 = (u32*)((u32)ce9->patches->card_id_arm9 - default_location + current_location);
     ce9->patches->card_dma_arm9 = (u32*)((u32)ce9->patches->card_dma_arm9 - default_location + current_location);
@@ -988,6 +1033,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->ipcSyncHandlerRef = (u32*)((u32)ce9->patches->ipcSyncHandlerRef - default_location + current_location);
     ce9->patches->reset_arm9 = (u32*)((u32)ce9->patches->reset_arm9 - default_location + current_location);
     ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
+    ce9->thumbPatches->card_irq_enable = (u32*)((u32)ce9->thumbPatches->card_irq_enable - default_location + current_location);
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
     ce9->thumbPatches->card_id_arm9 = (u32*)((u32)ce9->thumbPatches->card_id_arm9 - default_location + current_location);
     ce9->thumbPatches->card_dma_arm9 = (u32*)((u32)ce9->thumbPatches->card_dma_arm9 - default_location + current_location);
@@ -1312,6 +1358,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	u32* cardPullOutOffset;
 
 	fixForDsiBios(ce9, ndsHeader);
+
+	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
 
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");

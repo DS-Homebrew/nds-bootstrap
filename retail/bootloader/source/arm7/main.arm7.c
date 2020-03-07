@@ -1056,8 +1056,8 @@ int arm7_main(void) {
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4000);
-			if (!dldiPatchBinary((data_t*)ce9Location, 0x4000)) {
+			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4400);
+			if (!dldiPatchBinary((data_t*)ce9Location, 0x4400)) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -1188,8 +1188,10 @@ int arm7_main(void) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
-	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// clear nds-bootstrap images and IPS patch
+	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
+
+	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;

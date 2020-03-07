@@ -47,6 +47,7 @@ card_engine_start:
 
 patches:
 .word	card_read_arm9
+.word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
@@ -68,6 +69,7 @@ needFlushDCCache:
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
+.word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
@@ -299,7 +301,53 @@ thumb_card_pull:
 	bx      lr
     
 	.arm
-    
+@---------------------------------------------------------------------------------
+card_irq_enable:
+@---------------------------------------------------------------------------------
+	push    {lr}
+	push	{r1-r12}
+
+	ldr		r6, cardReadRefIrq
+    ldr     r7, ce9locationIrq
+    add     r6, r6, r7
+
+	bl	_blx_r3_stub2
+	pop   	{r1-r12} 
+	pop  	{lr}
+	bx  lr
+_blx_r3_stub2:
+	bx	r6
+.pool
+ce9locationIrq:
+.word   ce9
+cardReadRefIrq:
+.word   myIrqEnable-ce9 
+@---------------------------------------------------------------------------------
+
+	.thumb
+@---------------------------------------------------------------------------------
+thumb_card_irq_enable:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr		r6, cardReadRefTIrq
+    ldr     r7, ce9locationTIrq
+    add     r6, r6, r7
+
+	pop	{r1-r7, pc}
+	bx  lr
+thumb_blx_r3_stub2:
+	bx	r6
+.pool
+.align	4
+ce9locationTIrq:
+.word   ce9
+cardReadRefTIrq:
+.word   myIrqEnable-ce9 
+@---------------------------------------------------------------------------------
+
+
+	.arm
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}

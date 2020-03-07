@@ -228,29 +228,24 @@ static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
+#endif
 
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
         u32* ipcSyncHandler = ce9->irqTable + 16;
-        ce9->intr_ipc_orig_return   = *ipcSyncHandler;
+        ce9->intr_ipc_orig_return = *ipcSyncHandler;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
 }
 
-static void enableIPCSYNC(void) {
-    // enable IPC_SYNC
-    REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;  
-    enableIrqMask(IRQ_IPC_SYNC);
+static void enableIPC_SYNC(void) {
+	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
+		REG_IE |= IRQ_IPC_SYNC;
+	}
 }
 
-static void disableIPCSYNC(void) {
-    // disable IPC_SYNC
-    REG_IPC_SYNC &= !IPC_SYNC_IRQ_ENABLE;  
-    disableIrqMask(IRQ_IPC_SYNC);
-}
-#endif
 
 static void clearIcache (void) {
       // Seems to have no effect
@@ -405,20 +400,9 @@ void cardSetDma(void) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     disableIrqMask(IRQ_CARD);
-    disableIrqMask(IRQ_CARD_LINE );
+    disableIrqMask(IRQ_CARD_LINE);
 
-	#ifndef DLDI
-	// reset IPC_SYNC IRQs     
-	resetRequestIrqMask(IRQ_IPC_SYNC);
-
-    int oldIME = enterCriticalSection();
-
-    hookIPC_SYNC();
-
-    leaveCriticalSection(oldIME); 
-
-    enableIPCSYNC();
-	#endif
+	enableIPC_SYNC();
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
@@ -810,6 +794,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 	
+	enableIPC_SYNC();
+
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
 	u32 src = cardStruct[0];
@@ -932,11 +918,23 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
-    if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
-        continueCardReadDmaArm7();
-        continueCardReadDmaArm9();
-    }
+	if (sharedAddr[4] == 0x025AAB08) {
+		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+			continueCardReadDmaArm7();
+			continueCardReadDmaArm9();
+		}
+		sharedAddr[4] = 0;
+	}
 #endif
+
+	if (sharedAddr[4] == 0x57534352) {
+		enterCriticalSection();
+		// Make screens white
+		SetBrightness(0, 31);
+		SetBrightness(1, 31);
+
+		while (1);
+	}
 }
 
 void reset(u32 param) {
@@ -946,8 +944,26 @@ void reset(u32 param) {
 		SetBrightness(1, 31);
 		waitFrames(5);	// Wait for DSi screens to stabilize
 	}
-	int oldIME = enterCriticalSection();
+	enterCriticalSection();
 	*(u32*)RESET_PARAM = param;
 	sharedAddr[3] = 0x52534554;
 	while (1);
+}
+
+u32 myIrqEnable(u32 irq) {	
+	int oldIME = enterCriticalSection();
+
+	#ifdef DEBUG
+	nocashMessage("myIrqEnable\n");
+	#endif
+
+	hookIPC_SYNC();
+
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	irq |= IRQ_IPC_SYNC;
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
+	REG_IE |= irq;
+	leaveCriticalSection(oldIME);
+	return irq_before;
 }
