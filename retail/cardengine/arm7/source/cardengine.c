@@ -756,6 +756,9 @@ void myIrqHandlerVBlank(void) {
 					tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 				} else {
 					unlaunchSetFilename(true);
+					sharedAddr[4] = 0x57534352;
+					IPC_SendSync(0x8);
+					waitFrames(5);							// Wait for DSi screens to stabilize
 				}
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
@@ -816,6 +819,9 @@ void myIrqHandlerVBlank(void) {
 				int oldIME = enterCriticalSection();
 				if (consoleModel < 2) {
 					unlaunchSetFilename(false);
+					sharedAddr[4] = 0x57534352;
+					IPC_SendSync(0x8);
+					waitFrames(5);							// Wait for DSi screens to stabilize
 				}
 				tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 				if (*(u32*)(ce7+0x11EF8) != 0) {
