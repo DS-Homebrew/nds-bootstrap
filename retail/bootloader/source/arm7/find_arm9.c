@@ -159,12 +159,13 @@ static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000}
 
 // Reset
 static const u32 resetSignature2[4]        = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
+static const u32 resetSignature2Alt[5]     = {0xE92D4000, 0xE24DD00C, 0xE59F0074, 0xE5900000, 0xE3500000}; // sdk2
 static const u32 resetSignature3[4]        = {0xE92D4010, 0xE59F106C, 0xE1A04000, 0xE1D100B0}; // sdk3
 static const u32 resetSignature3Alt[4]     = {0xE92D4010, 0xE59F1068, 0xE1A04000, 0xE1D100B0}; // sdk3
 static const u32 resetSignature4[4]        = {0xE92D4070, 0xE59F10A0, 0xE1A04000, 0xE1D100B0}; // sdk4
 static const u32 resetSignature4Alt[4]     = {0xE92D4010, 0xE59F1084, 0xE1A04000, 0xE1D100B0}; // sdk4
 static const u32 resetSignature5[4]        = {0xE92D4038, 0xE59F1054, 0xE1A05000, 0xE1D100B0}; // sdk5
-static const u32 resetSignature5Alt1[4]    = {0xE92D4010, 0xE59F104C, 0xE1A04000, 0xE1D100B0}; // sdk5
+static const u32 resetSignature5Alt1[4]    = {0xE92D4010, 0xE59F104C, 0xE1A04000, 0xE1D100B0}; // sdk2 and sdk5
 static const u32 resetSignature5Alt2[4]    = {0xE92D4010, 0xE59F1088, 0xE1A04000, 0xE1D100B0}; // sdk5
 static const u32 resetSignature5Alt3[4]    = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0xE1D100B0}; // sdk5
 
@@ -1962,7 +1963,18 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	);
 	
 	if (!resetOffset) {
-		if (moduleParams->sdk_version < 0x4008000) {
+		if (moduleParams->sdk_version > 0x2000000 && moduleParams->sdk_version < 0x3000000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+				resetSignature5Alt1, 4
+			);
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+					resetSignature2Alt, 5
+				);
+			}
+		} else if (moduleParams->sdk_version < 0x4008000) {
 			resetOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				resetSignature3, 4
