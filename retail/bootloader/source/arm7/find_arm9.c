@@ -1962,7 +1962,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	);
 	
 	if (!resetOffset) {
-		if (moduleParams->sdk_version > 0x2000000 && moduleParams->sdk_version < 0x3000000) {
+		if (moduleParams->sdk_version > 0x2000000 && moduleParams->sdk_version < 0x2008000) {
 			resetOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 				resetSignature5Alt1, 4
