@@ -132,7 +132,7 @@ int hookNdsRetailArm9(
 	ce9->enableExceptionHandler = enableExceptionHandler;
 	ce9->consoleModel           = consoleModel;
     
-    u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;
+    u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
  	if (!tableAddr) {
 		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
 	}
@@ -145,7 +145,7 @@ int hookNdsRetailArm9(
     dbg_printf("hookLocation arm9: ");
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
-	patchOffsetCache.a9IrqHandlerOffset = tableAddr;
+	patchOffsetCache.a9IrqHookOffset = tableAddr;
 
     /*u32* vblankHandler = hookLocation;
     u32* dma0Handler = hookLocation + 8;

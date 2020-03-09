@@ -847,20 +847,6 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
-	if ((saveTimer == 0) && (i2cReadRegister(0x4A, 0x10) & BIT(3))) {
-		REG_MASTER_VOLUME = 0;
-		int oldIME = enterCriticalSection();
-		if (consoleModel < 2) {
-			//unlaunchSetFilename(true);
-			sharedAddr[4] = 0x57534352;
-			IPC_SendSync(0x8);
-			waitFrames(5);							// Wait for DSi screens to stabilize
-		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
-		leaveCriticalSection(oldIME);
-	}
-
 	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
@@ -905,8 +891,26 @@ void myIrqHandlerVBlank(void) {
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		runCardEngineCheck();
+		if (!ipcSyncHooked) {
+			runCardEngineCheck();
+		}
 	}
+}
+
+void myIrqHandlerPower(void) {
+	if (saveTimer != 0) return;
+
+	REG_MASTER_VOLUME = 0;
+	int oldIME = enterCriticalSection();
+	if (consoleModel < 2) {
+		//unlaunchSetFilename(true);
+		sharedAddr[4] = 0x57534352;
+		IPC_SendSync(0x8);
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+	leaveCriticalSection(oldIME);
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -921,6 +925,7 @@ u32 myIrqEnable(u32 irq) {
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	REG_IE |= irq;
+	REG_AUXIE |= IRQ_I2C;
 	leaveCriticalSection(oldIME);
 	ipcSyncHooked = true;
 	return irq_before;

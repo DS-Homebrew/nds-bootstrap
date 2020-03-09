@@ -40,6 +40,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 typedef struct cardengineArm7Patches {
     u32* card_pull_out_arm9;
     u32* card_irq_enable_arm7;
+    u32* j_irqHandler;
     u32 vblankHandler;
     u32 fifoHandler;
     u32 networkHandler;
@@ -76,7 +77,7 @@ typedef struct cardengineArm7 {
     u32 dmaRomRead_LED;
 	u32 preciseVolumeControl;
     u32* cheat_data_offset; //u32* cheat_data;
-
+    u32* extraIrqTable_offset;
 } __attribute__ ((__packed__)) cardengineArm7;
 
 #endif // CARDENGINE_HEADER_ARM7_H

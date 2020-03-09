@@ -33,53 +33,40 @@
 
 static const int MAX_HANDLER_LEN = 50;
 
-static const u32 handlerStartSig[5] = {
+static const u32 handlerStartSig[3] = {
 	0xe92d4000, 	// push {lr}
 	0xe3a0c301, 	// mov  ip, #0x4000000
-	0xe28cce21,		// add  ip, ip, #0x210
-	0xe51c1008,		// ldr	r1, [ip, #-8]
-	0xe3510000		// cmp	r1, #0
+	0xe28cce21		// add  ip, ip, #0x210
 };
 
-static const u32 handlerEndSig[4] = {
-	0xe59f1008, 	// ldr  r1, [pc, #8]	(IRQ Vector table address)
-	0xe7910100,		// ldr  r0, [r1, r0, lsl #2]
-	0xe59fe004,		// ldr  lr, [pc, #4]	(IRQ return address)
+static const u32 handlerEndSig[1] = {
 	0xe12fff10		// bx   r0
 };
 
-static u32* hookInterruptHandler(const u32* start, size_t size) {
+static u32* findIrqHandlerOffset(const u32* start, size_t size) {
 	// Find the start of the handler
 	u32* addr = findOffset(
 		start, size,
-		handlerStartSig, 5
+		handlerStartSig, 3
 	);
 	if (!addr) {
 		return NULL;
 	}
 
+	return addr;
+}
+
+static u32* findIrqHandlerWordsOffset(u32* handlerOffset, const u32* start, size_t size) {
 	// Find the end of the handler
-	addr = findOffset(
-		addr, MAX_HANDLER_LEN*sizeof(u32),
-		handlerEndSig, 4
+	u32* addr = findOffset(
+		handlerOffset, MAX_HANDLER_LEN*sizeof(u32),
+		handlerEndSig, 1
 	);
 	if (!addr) {
 		return NULL;
 	}
 
-	// Now find the IRQ vector table
-	// Make addr point to the vector table address pointer within the IRQ handler
-	addr += sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
-
-	// Use relative and absolute addresses to find the location of the table in RAM
-	u32 tableAddr = addr[0];
-	u32 returnAddr = addr[1];
-	u32* actualReturnAddr = addr + 2;
-	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return actualTableAddr;
-	// 2     LCD V-Counter Match
+	return addr+1;
 }
 
 int hookNdsRetailArm7(
@@ -110,15 +97,37 @@ int hookNdsRetailArm7(
 		return ERR_NONE;
 	}
 
-	u32* hookLocation = patchOffsetCache.a7IrqHandlerOffset;
-	if (!hookLocation) {
-		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
+	if (!handlerLocation) {
+		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (handlerLocation) {
+			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
+		}
 	}
 
-	// SDK 5
-	bool sdk5 = isSdk5(moduleParams);
-	if (!hookLocation && sdk5) {
-		switch (ndsHeader->arm7binarySize) {
+	if (handlerLocation) {
+		// Patch
+		memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+	}
+
+	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
+	if (!wordsLocation) {
+		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (wordsLocation) {
+			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
+		}
+	}
+
+	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
+	if (!hookLocation) {
+		// Now find the IRQ vector table
+		if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
+			// Use relative and absolute addresses to find the location of the table in RAM
+			u32 tableAddr = wordsLocation[0];
+			u32 returnAddr = wordsLocation[1];
+			u32* actualReturnAddr = wordsLocation + 2;
+			hookLocation = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
+		} else switch (ndsHeader->arm7binarySize) {	// SDK 5
 			case 0x0001D5A8:
 				hookLocation = (u32*)0x239D280;		// DS WiFi Settings
 				break;
@@ -194,19 +203,26 @@ int hookNdsRetailArm7(
 		dbg_printf("ERR_HOOK\n");
 		return ERR_HOOK;
 	}
-    
+
+	*(ce7->extraIrqTable_offset - 2) = wordsLocation[0];
+	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
+		*(ce7->extraIrqTable_offset - 1) = wordsLocation[1];
+	} else {
+		*(ce7->extraIrqTable_offset - 1) = wordsLocation[3];
+	}
+
    	dbg_printf("hookLocation arm7: ");
 	dbg_hexa((u32)hookLocation);
 	dbg_printf("\n\n");
-	patchOffsetCache.a7IrqHandlerOffset = hookLocation;
+	patchOffsetCache.a7IrqHookOffset = hookLocation;
 
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
-	u32* networkHandler = hookLocation + 24;
+	//u32* networkHandler = hookLocation + 24;
 
 	ce7->intr_vblank_orig_return  = *vblankHandler;
 	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-	ce7->intr_network_orig_return = *networkHandler;
+	//ce7->intr_network_orig_return = *networkHandler;
 	ce7->moduleParams             = moduleParams;
 	ce7->fileCluster              = fileCluster;
 	ce7->srParamsCluster          = srParamsFileCluster;
