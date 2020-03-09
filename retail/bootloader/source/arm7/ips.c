@@ -9,7 +9,7 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int consoleModel) {
+void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, int consoleModel) {
 	const char* romTid = getRomTid(ndsHeader);
 	bool doLow = (strncmp(romTid, "VKG", 3) == 0);
 
@@ -19,7 +19,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool higherMem, int
 	void* rombyte = 0;
 	while (1) {
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
-		if (offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) {
+		if (offset >= ndsHeader->arm9romOffset && ((offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) || arm9Only)) {
 			// ARM9 binary
 			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {

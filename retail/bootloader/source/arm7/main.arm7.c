@@ -1163,7 +1163,7 @@ int arm7_main(void) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x40000) {
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
-			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
+			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
 			dbg_printf("AP-fix found and applied\n");
 		}
 	}

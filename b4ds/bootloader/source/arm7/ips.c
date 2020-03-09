@@ -12,14 +12,14 @@
 extern bool extendedMemory;
 extern bool dsDebugRam;
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
+void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only) {
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
 	void* rombyte = 0;
 	while (1) {
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
-		if (offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) {
+		if (offset >= ndsHeader->arm9romOffset && ((offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) || arm9Only)) {
 			// ARM9 binary
 			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
