@@ -276,7 +276,7 @@ void continueCardReadDmaArm9() {
         if(ndmaBusy(0)) return;
 
         dmaReadOnArm9 = false;
-        sharedAddr[3] = 0;        
+        sharedAddr[3] = 0;
 
         u32 commandRead=0x025FFB0A;
         u32 commandPool=0x025AAB08;
@@ -372,9 +372,10 @@ void continueCardReadDmaArm7() {
 
 		u32 page = (src / 512) * 512;
 
-		if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+			sharedAddr[3] = 0;
 			endCardReadDma();
-		} else {
+		} else {*/
 			u32 sector = (src/readSize)*readSize;
 
 			u32 len2 = len;
@@ -397,7 +398,7 @@ void continueCardReadDmaArm7() {
 
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
-		}
+		//}
     }
 }
 #endif
@@ -445,7 +446,7 @@ void cardSetDma(void) {
 
 	accessCounter++;  
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -456,7 +457,7 @@ void cardSetDma(void) {
 		checkArm7();
 
 		dmaReadOnArm7 = true;
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -501,7 +502,7 @@ void cardSetDma(void) {
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
 		}
-	}
+	//}
 	#endif
 }
 
@@ -515,7 +516,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	accessCounter++;
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
@@ -526,7 +527,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 		waitForArm7();
 
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -596,7 +597,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	}
+	//}
 #endif
 
 	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){

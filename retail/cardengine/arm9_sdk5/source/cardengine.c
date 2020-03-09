@@ -335,11 +335,12 @@ void continueCardReadDmaArm7() {
     	u8* dst = (u8*)dmaParams[4];
     	u32 len = dmaParams[5];   
         
-		u32 page = (src / 512) * 512;
+		/*u32 page = (src / 512) * 512;
 
 		if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+			sharedAddr[3] = 0;
 			endCardReadDma();
-		} else {
+		} else {*/
 			u32 sector = (src/readSize)*readSize;
 
 			u32 len2 = len;
@@ -362,7 +363,7 @@ void continueCardReadDmaArm7() {
 
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
-		}
+		//}
     }
 }
 #endif
@@ -409,7 +410,7 @@ void cardSetDma (u32 * params) {
 
 	accessCounter++;  
   
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -420,7 +421,7 @@ void cardSetDma (u32 * params) {
 		checkArm7();
 
 		dmaReadOnArm7 = true;
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -465,7 +466,7 @@ void cardSetDma (u32 * params) {
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
 		}
-	}
+	//}
 	#endif
 }
 
@@ -488,7 +489,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 
 	accessCounter++;
 
-	if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
@@ -499,7 +500,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 
 		waitForArm7();
 
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -554,7 +555,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
     			tonccpy(dst, (u8*)buffer+(src-sector), len2);
             //}
 
-			len = len - len2;
+			len -= len2;
 			if (len > 0) {
 				src = src + len2;
 				dst = (u8*)(dst + len2);
@@ -562,7 +563,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 				accessCounter++;
 			}
 		}
-	}
+	//}
 #endif
 	
 	return 0;
