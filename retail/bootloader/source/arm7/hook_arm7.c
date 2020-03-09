@@ -105,6 +105,11 @@ int hookNdsRetailArm7(
 		}
 	}
 
+	if (!handlerLocation) {
+		dbg_printf("ERR_HOOK\n");
+		return ERR_HOOK;
+	}
+
 	if (handlerLocation) {
 		// Patch
 		memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
@@ -197,11 +202,6 @@ int hookNdsRetailArm7(
 				hookLocation = (u32*)0x2392E74;
 				break;
 		}
-	}
-
-	if (!hookLocation) {
-		dbg_printf("ERR_HOOK\n");
-		return ERR_HOOK;
 	}
 
 	*(ce7->extraIrqTable_offset - 2) = wordsLocation[0];
