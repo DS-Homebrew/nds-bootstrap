@@ -74,8 +74,10 @@ dmaRomRead_LED:
 	.word	0x00000000
 preciseVolumeControl:
 	.word	0x00000000
-cheat_data_offset:    
+cheat_data_offset:
 	.word	cheat_data
+extraIrqTable_offset:
+	.word	extraIrqTable
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -143,28 +145,104 @@ exit:
 
 .pool
 
-.global fastCopy32
-.type	fastCopy32 STT_FUNC
-@ r0 : src, r1 : dst, r2 : len
-fastCopy32:
-	stmfd   sp!, {r3-r11,lr}
-	@ copy 512 bytes
-	mov     r10, r0
-	mov     r9, r1
-	mov     r8, r2
-loop_fastCopy32:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_fastCopy32
-	ldmfd   sp!, {r3-r11,lr}
-	bx      lr
+irqHandler:
+                STMFD           SP!, {LR}
+                MOV             R12, #0x4000000
+                ADD             R12, R12, #0x210
+                LDR             R1, [R12,#-8]
+                CMP             R1, #0
+                LDMEQFD         SP!, {PC}
+                LDMIA           R12, {R1,R2}
+                ANDS            R1, R1, R2
+                BEQ             loc_2384378
+                MOV             R3, #1
+                MOV             R0, #0
+
+loc_238435C:
+                ANDS            R2, R1, R3,LSL R0
+                ADDEQ           R0, R0, #1
+                BEQ             loc_238435C
+                STR             R2, [R12,#4]
+                LDR             R1, irqTable
+                LDR             R0, [R1,R0,LSL#2]
+                B               loc_23843A8
+@ ---------------------------------------------------------------------------
+
+loc_2384378:
+                ADD             R12, R12, #8
+                LDMIA           R12, {R1,R2}
+                ANDS            R1, R1, R2
+                LDMEQFD         SP!, {PC}
+                MOV             R3, #1
+                MOV             R0, #0
+
+loc_2384390:
+                ANDS            R2, R1, R3,LSL R0
+                ADDEQ           R0, R0, #1
+                BEQ             loc_2384390
+                STR             R2, [R12,#4]
+                LDR             R1, =extraIrqTable
+                LDR             R0, [R1,R0,LSL#2]
+
+loc_23843A8:
+                LDR             R2, =extraIrqTable0
+                STMIA           R2, {R4-R11,SP}
+                LDR             LR, irqRet
+                BX              R0
+@ End of function irqHandler
+
+@ ---------------------------------------------------------------------------
+.pool
+irqTable:
+	.word	0
+irqRet:
+	.word	0
+
+
+extraIrqTable:
+	.word	extraIrq_ret		@ GPIO18[0]
+	.word	extraIrq_ret		@ GPIO18[1]
+	.word	extraIrq_ret		@ GPIO18[2]
+	.word	extraIrq_ret		@ Unused (0)
+	.word	extraIrq_ret		@ GPIO33[0] unknown (related to "GPIO330" testpoint on mainboard?)
+	.word	extraIrq_ret		@ GPIO33[1] Headphone connect (HP#SP) (static state)
+	.word	i2cIRQHandler		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
+	.word	extraIrq_ret		@ GPIO33[3] sound enable output (ie. not a useful irq-input)
+	.word	extraIrq_ret		@ SD/MMC Controller   ;-Onboard eMMC and External SD Slot
+	.word	extraIrq_ret		@ SD Slot Data1 pin   ;-For SDIO hardware in External SD Slot
+	.word	extraIrq_ret		@ SDIO Controller     ;\Atheros Wifi Unit
+	.word	extraIrq_ret		@ SDIO Data1 pin      ;/
+	.word	extraIrq_ret		@ AES interrupt
+	.word	extraIrq_ret		@ I2C interrupt
+	.word	extraIrq_ret		@ Microphone Extended interrupt
+	.word	extraIrq_ret
+extraIrqTable0:
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+	.word	extraIrq_ret
+
+extraIrq_ret:
+	bx  lr
 
 card_engine_end:
 
 patches:
 .word	card_pull_out_arm9
 .word	card_irq_enable_arm7
+.word	j_irqHandler
 .word	vblankHandler
 .word	fifoHandler
 .word	networkHandler
@@ -186,6 +264,14 @@ swi02:
 @---------------------------------------------------------------------------------
 
 	.arm
+@---------------------------------------------------------------------------------
+j_irqHandler:
+@---------------------------------------------------------------------------------
+	ldr	r12, = irqHandler
+	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 j_twlGetPitchTable:
 @---------------------------------------------------------------------------------

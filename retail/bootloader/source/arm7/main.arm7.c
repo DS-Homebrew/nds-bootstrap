@@ -1191,11 +1191,7 @@ int arm7_main(void) {
 	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
 
-	if (consoleModel < 2) {
-		i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
-	} else {
-		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 0);		// Press power button for auto-reset
-	}
+	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;

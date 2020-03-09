@@ -81,7 +81,7 @@ typedef struct patchOffsetCacheContents {
 	u32 randomPatch5Checked;
 	u32* randomPatch5SecondOffset;
 	u32 randomPatch5SecondChecked;
-    u32* a9IrqHandlerOffset;
+    u32* a9IrqHookOffset;
 	u32 a7IsThumb;
 	u32* a7Swi12Offset;
 	u32* swiGetPitchTableOffset;
@@ -90,6 +90,8 @@ typedef struct patchOffsetCacheContents {
 	u32* cardCheckPullOutOffset;
 	u32 cardCheckPullOutChecked;
 	u32* a7IrqHandlerOffset;
+	u32* a7IrqHandlerWordsOffset;
+	u32* a7IrqHookOffset;
 	u32 savePatchType;
 	u32 relocateStartOffset;
 	u32 relocateValidateOffset;		// aka nextFunctionOffset
