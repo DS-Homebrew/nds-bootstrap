@@ -452,7 +452,7 @@ static bool start_cardRead_arm9(void) {
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
-	if(!fileReadNonBLocking((char*)dst, romFile, src, len, 0))
+	/*if(!fileReadNonBLocking((char*)dst, romFile, src, len, 0))
     {
         readOngoing = true;
         return false;    
@@ -463,7 +463,10 @@ static bool start_cardRead_arm9(void) {
         readOngoing = false;
         cardReadLED(false);    // After loading is done, turn off LED for card read indicator
         return true;    
-    }
+    }*/
+
+	fileRead((char*)dst, *romFile, src, len, 0);
+	cardReadLED(false);    // After loading is done, turn off LED for card read indicator
 
 	#ifdef DEBUG
 	dbg_printf("\nread \n");
@@ -473,6 +476,8 @@ static bool start_cardRead_arm9(void) {
 		dbg_printf("\n misaligned read : \n");
 	}
 	#endif
+
+	return true;
 }
 
 static bool resume_cardRead_arm9(void) {
@@ -577,8 +582,8 @@ static void runCardEngineCheck(void) {
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
   		driveInitialize();
   
-        if(!readOngoing)
-        {
+        //if(!readOngoing)
+        //{
     
     		//nocashMessage("runCardEngineCheck mutex ok");
     
@@ -598,16 +603,17 @@ static void runCardEngineCheck(void) {
           if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB08) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A)) {
 				sdRead = true;
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFB0A);
-              if(start_cardRead_arm9()) {
+              start_cardRead_arm9();
+              //if(start_cardRead_arm9()) {
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
-              } else {
+              /*} else {
                     while(!resume_cardRead_arm9()) {} 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
-              }
+              }*/
           }
 
 			#ifndef TWLSDK
@@ -638,14 +644,14 @@ static void runCardEngineCheck(void) {
     			asyncCardRead_arm9();
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}*/
-        } else {
+        /*} else {
             //if(resume_cardRead_arm9()) {
 			    while(!resume_cardRead_arm9()) {} 
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 				sharedAddr[4] = 0x025AAB08;
                 IPC_SendSync(0x8);
             //} 
-        }
+        }*/
   		unlockMutex(&cardEgnineCommandMutex);
   	}
 }
