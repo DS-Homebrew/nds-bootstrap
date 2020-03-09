@@ -199,6 +199,7 @@ void setExceptionHandler2() {
 #ifndef DLDI
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
+    int count = 0;
     /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
@@ -209,7 +210,13 @@ static void waitForArm7(void) {
             count--;
         }
     } else {*/
-        while (sharedAddr[3] != (vu32)0);
+        while (sharedAddr[3] != (vu32)0) {
+           if(count==20000000) {
+                IPC_SendSync(0x4);
+                count=0;
+            }
+            count++;
+        }
     //}
 }
 #endif
