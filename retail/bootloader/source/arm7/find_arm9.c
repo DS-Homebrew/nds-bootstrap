@@ -25,6 +25,7 @@ static const u16 cardReadEndSignatureThumb5Alt1[5]  = {0x01A4, 0x0400, 0x0010, 0
 static const u32 cardReadStartSignature[1]          = {0xE92D4FF0};
 static const u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
 static const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
+static const u32 cardReadStartSignature5Alt[4]      = {0xE92D4010};													// SDK 5.5
 static const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
 static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
 static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
@@ -462,6 +463,18 @@ u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* ca
 		dbg_printf("ARM9 Card read start SDK 5 found: ");
 	} else {
 		dbg_printf("ARM9 Card read start SDK 5 not found\n");
+	}
+
+	if (!cardReadStartOffset) {
+		cardReadStartOffset = findOffsetBackwards(
+			(u32*)cardReadEndOffset, 0x120,
+			cardReadStartSignature5Alt, 1
+		);
+		if (cardReadStartOffset) {
+			dbg_printf("ARM9 Card read start SDK 5.5 found: ");
+		} else {
+			dbg_printf("ARM9 Card read start SDK 5.5 not found\n");
+		}
 	}
 
 	if (cardReadStartOffset) {
