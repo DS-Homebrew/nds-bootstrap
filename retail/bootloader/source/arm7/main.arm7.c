@@ -1009,14 +1009,14 @@ int arm7_main(void) {
 		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
 
 		const char* romTid = getRomTid(ndsHeader);
-		/*if (!dsiModeConfirmed) {
+		if (!dsiModeConfirmed) {
 			if (
 				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
 			 && strncmp(romTid, "A24", 3) != 0				// Pokemon Dash (Kiosk Demo)
 			) {
 				NTR_BIOS();
 			}
-		}*/
+		}
 
 		nocashMessage("Trying to patch the card...\n");
 

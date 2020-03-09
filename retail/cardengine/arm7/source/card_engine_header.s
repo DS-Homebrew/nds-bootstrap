@@ -181,12 +181,11 @@ loc_2384390:
                 ADDEQ           R0, R0, #1
                 BEQ             loc_2384390
                 STR             R2, [R12,#4]
-                LDR             R1, irqTable
-				SUB				R1, R1, #0x3C
+                LDR             R1, =extraIrqTable
                 LDR             R0, [R1,R0,LSL#2]
 
 loc_23843A8:
-                LDR             R2, =extraIrqTable
+                LDR             R2, =extraIrqTable0
                 STMIA           R2, {R4-R11,SP}
                 LDR             LR, irqRet
                 BX              R0
@@ -207,7 +206,7 @@ extraIrqTable:
 	.word	extraIrq_ret		@ Unused (0)
 	.word	extraIrq_ret		@ GPIO33[0] unknown (related to "GPIO330" testpoint on mainboard?)
 	.word	extraIrq_ret		@ GPIO33[1] Headphone connect (HP#SP) (static state)
-	.word	myIrqHandlerPower	@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
+	.word	i2cIRQHandler		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
 	.word	extraIrq_ret		@ GPIO33[3] sound enable output (ie. not a useful irq-input)
 	.word	extraIrq_ret		@ SD/MMC Controller   ;-Onboard eMMC and External SD Slot
 	.word	extraIrq_ret		@ SD Slot Data1 pin   ;-For SDIO hardware in External SD Slot
@@ -217,6 +216,7 @@ extraIrqTable:
 	.word	extraIrq_ret		@ I2C interrupt
 	.word	extraIrq_ret		@ Microphone Extended interrupt
 	.word	extraIrq_ret
+extraIrqTable0:
 	.word	extraIrq_ret
 	.word	extraIrq_ret
 	.word	extraIrq_ret
