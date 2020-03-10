@@ -17,6 +17,7 @@ static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
+static const u32 cardReadEndSignature3Alt[3]        = {0x04100010, 0x040001A4, 0xE92D4FF0}; // SDK 3
 static const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
 static const u32 cardReadEndSignatureAlt2[3]        = {0x040001A4, 0x040001A1, 0x04100010};
 static const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
@@ -247,6 +248,18 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 		dbg_printf("ARM9 Card read end (type 0) found: ");
 	} else {
 		dbg_printf("ARM9 Card read end (type 0) not found\n");
+	}
+
+	if (!cardReadEndOffset) {
+		cardReadEndOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			cardReadEndSignature3Alt, 3
+		);
+		if (cardReadEndOffset) {
+			dbg_printf("ARM9 Card read end (type 0) alt found: ");
+		} else {
+			dbg_printf("ARM9 Card read end (type 0) alt not found\n");
+		}
 	}
 
 	if (cardReadEndOffset) {
