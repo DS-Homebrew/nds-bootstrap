@@ -250,7 +250,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 		dbg_printf("ARM9 Card read end (type 0) not found\n");
 	}
 
-	if (!cardReadEndOffset) {
+	if (!cardReadEndOffset && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
 		cardReadEndOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignature3Alt, 3
