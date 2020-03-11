@@ -885,9 +885,7 @@ void myIrqHandlerVBlank(void) {
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		if (!ipcSyncHooked) {
-			runCardEngineCheck();
-		}
+		runCardEngineCheck();
 	}
 }
 
