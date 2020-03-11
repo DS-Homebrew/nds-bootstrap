@@ -332,15 +332,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		printf("Creating FAT table file.\n");
 		printf("Please wait...\n");
 
-		static const int BUFFER_SIZE = 512;
-		char buffer[BUFFER_SIZE];
-		toncset(buffer, 0, sizeof(buffer));
-
 		FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
-		for (int i = 0x80200; i > 0; i -= BUFFER_SIZE) {
-			fwrite(buffer, 1, sizeof(buffer), fatTableFile);
+		if (fatTableFile) {
+			fseek(fatTableFile, 0x80200 - 1, SEEK_SET);
+			fputc('\0', pFile);
+			fclose(fatTableFile);
 		}
-		fclose(fatTableFile);
 
 		consoleClear();
 	}
@@ -363,15 +360,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			printf("the lid, and open it again.\n");
 		} */
 
-		static const int BUFFER_SIZE = 4096;
-		char buffer[BUFFER_SIZE];
-		toncset(buffer, 0, sizeof(buffer));
-
 		FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
-		for (u32 i = 0x02000000; i > 0; i -= BUFFER_SIZE) {
-			fwrite(buffer, 1, sizeof(buffer), ramDumpFile);
+		if (ramDumpFile) {
+			fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
+			fputc('\0', pFile);
+			fclose(ramDumpFile);
 		}
-		fclose(ramDumpFile);
 
 		consoleClear();
 	}
