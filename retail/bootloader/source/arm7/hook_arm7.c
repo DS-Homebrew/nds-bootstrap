@@ -105,10 +105,10 @@ int hookNdsRetailArm7(
 		}
 	}
 
-	if (handlerLocation) {
+	if (!handlerLocation) {
 		// Patch
-		memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
-	} else {
+		//memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+	//} else {
 		dbg_printf("ERR_HOOK\n");
 		return ERR_HOOK;
 	}

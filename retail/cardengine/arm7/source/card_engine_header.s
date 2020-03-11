@@ -206,7 +206,7 @@ extraIrqTable:
 	.word	extraIrq_ret		@ Unused (0)
 	.word	extraIrq_ret		@ GPIO33[0] unknown (related to "GPIO330" testpoint on mainboard?)
 	.word	extraIrq_ret		@ GPIO33[1] Headphone connect (HP#SP) (static state)
-	.word	i2cIRQHandler		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
+	.word	extraIrq_ret		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
 	.word	extraIrq_ret		@ GPIO33[3] sound enable output (ie. not a useful irq-input)
 	.word	extraIrq_ret		@ SD/MMC Controller   ;-Onboard eMMC and External SD Slot
 	.word	extraIrq_ret		@ SD Slot Data1 pin   ;-For SDIO hardware in External SD Slot
