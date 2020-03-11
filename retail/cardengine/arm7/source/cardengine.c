@@ -841,6 +841,30 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
+	int cause = (i2cReadRegister(I2C_PM, I2CREGPM_PWRIF) & 0x3) | (i2cReadRegister(I2C_GPIO, 0x02)<<2);
+
+	switch (cause & 3) {
+	case 1: {
+		if (saveTimer != 0) return;
+
+		REG_MASTER_VOLUME = 0;
+		int oldIME = enterCriticalSection();
+		if (consoleModel < 2) {
+			//unlaunchSetFilename(true);
+			sharedAddr[4] = 0x57534352;
+			IPC_SendSync(0x8);
+			waitFrames(5);							// Wait for DSi screens to stabilize
+		}
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+		leaveCriticalSection(oldIME);
+		break;
+	}
+	case 2:
+		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);
+		break;
+	}
+
 	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
@@ -890,29 +914,6 @@ void myIrqHandlerVBlank(void) {
 }
 
 void i2cIRQHandler(void) {
-	int cause = (i2cReadRegister(I2C_PM, I2CREGPM_PWRIF) & 0x3) | (i2cReadRegister(I2C_GPIO, 0x02)<<2);
-
-	switch (cause & 3) {
-	case 1: {
-		if (saveTimer != 0) return;
-
-		REG_MASTER_VOLUME = 0;
-		int oldIME = enterCriticalSection();
-		if (consoleModel < 2) {
-			//unlaunchSetFilename(true);
-			sharedAddr[4] = 0x57534352;
-			IPC_SendSync(0x8);
-			waitFrames(5);							// Wait for DSi screens to stabilize
-		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
-		leaveCriticalSection(oldIME);
-		break;
-	}
-	case 2:
-		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);
-		break;
-	}
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -927,7 +928,7 @@ u32 myIrqEnable(u32 irq) {
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	REG_IE |= irq;
-	REG_AUXIE |= IRQ_I2C;
+	//REG_AUXIE |= IRQ_I2C;
 	leaveCriticalSection(oldIME);
 	ipcSyncHooked = true;
 	return irq_before;
