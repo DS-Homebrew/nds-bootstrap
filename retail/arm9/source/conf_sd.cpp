@@ -335,7 +335,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
 		if (fatTableFile) {
 			fseek(fatTableFile, 0x80200 - 1, SEEK_SET);
-			fputc('\0', pFile);
+			fputc('\0', fatTableFile);
 			fclose(fatTableFile);
 		}
 
@@ -363,7 +363,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
 		if (ramDumpFile) {
 			fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
-			fputc('\0', pFile);
+			fputc('\0', ramDumpFile);
 			fclose(ramDumpFile);
 		}
 
