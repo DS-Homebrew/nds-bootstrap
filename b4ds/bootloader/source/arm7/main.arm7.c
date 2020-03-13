@@ -447,7 +447,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
 	}
 
-	if (language != 6 && ndsHeader->reserved1[8] == 0x80) {
+	if (personalData->language != 6 && ndsHeader->reserved1[8] == 0x80) {
 		ndsHeader->reserved1[8] = 0;	// Patch iQue game to be region-free
 		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
 	}
