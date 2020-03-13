@@ -233,7 +233,7 @@ static void resetMemory_ARM7 (void)
 		boot_readFirmware(settingsOffset + 0x100, (u8*)(NDS_HEADER-0x180), 0x70);
 	}
 
-	if (language >= 0 && language < 6) {
+	if (language >= 0 && language <= 7) {
 		// Change language
 		*(u8*)((u32)NDS_HEADER - 0x11C) = language;
 	}
