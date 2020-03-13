@@ -735,7 +735,7 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if (language >= 0 && language < 6) {
+	if ((language >= 0 && language < 6) || (language == 7)) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
 		*(u8*)((u32)ndsHeader - 0x11C + 0x11) = language;

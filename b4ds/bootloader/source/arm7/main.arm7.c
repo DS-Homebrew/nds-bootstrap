@@ -442,7 +442,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 
-	if (language >= 0 && language < 6) {
+	if ((language >= 0 && language < 6) || (language == 7)) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
 		*(u8*)(personalData->language+0x11) = language;
