@@ -735,13 +735,9 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if ((language >= 0 && language < 6) || (language == 7)) {
+	if (language >= 0 && language <= 7) {
 		// Change language
 		*(u8*)((u32)ndsHeader - 0x11C) = language;
-		*(u8*)((u32)ndsHeader - 0x11C + 0x11) = language;
-	} else if (language == 6) {
-		*(u8*)((u32)ndsHeader - 0x11C) = 1;
-		*(u8*)((u32)ndsHeader - 0x11C + 0x11) = 6;
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
