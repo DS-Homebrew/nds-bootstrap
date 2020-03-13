@@ -395,7 +395,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	return ndsHeader;
 }
 
-static void my_readUserSettings(const tNDSHeader* ndsHeader) {
+static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	PERSONAL_DATA slot1;
 	PERSONAL_DATA slot2;
 
@@ -439,12 +439,21 @@ static void my_readUserSettings(const tNDSHeader* ndsHeader) {
 	}
 
 	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
-	
+
 	memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
-	
+
 	if (language >= 0 && language < 6) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
+		*(u8*)(personalData->language+0x11) = language;
+	} else if (language == 6) {
+		personalData->language = 1;
+		*(u8*)(personalData->language+0x11) = 6;
+	}
+	
+	if (language != 6 && ndsHeader->reserved1[8] == 0x80) {
+		ndsHeader->reserved1[8] = 0;	// Patch iQue game to be region-free
+		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x16E);	// Fix CRC
 	}
 }
 
