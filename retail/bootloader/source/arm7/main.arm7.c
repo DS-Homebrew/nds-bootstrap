@@ -112,6 +112,9 @@ extern u32 boostVram;
 extern u32 soundFreq;
 extern u32 logging;
 
+bool useTwlCfg = false;
+int twlCfgLang = 0;
+
 bool sdRead = true;
 
 bool gbaRomFound = false;
@@ -202,7 +205,7 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	arm7clearRAM();								// clear exclusive IWRAM
-	toncset((u32*)0x02000000, 0, 0x340000);	// clear part of EWRAM - except before nds-bootstrap images
+	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
 	toncset((u32*)0x02400000, 0, 0x3BB000);	// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
@@ -213,6 +216,9 @@ static void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	useTwlCfg = (*(u32*)0x0200043C == 0x0201209C);
+	twlCfgLang = *(u8*)0x02000406;
 }
 
 static void NDSTouchscreenMode(void) {
@@ -592,6 +598,10 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
 
 	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
+
+	if (useTwlCfg && language == -1) {
+		language = twlCfgLang;
+	}
 
 	if (language >= 0 && language <= 7) {
 		// Change language
