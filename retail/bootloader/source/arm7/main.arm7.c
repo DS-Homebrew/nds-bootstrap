@@ -217,7 +217,7 @@ static void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
-	useTwlCfg = (*(u32*)0x0200043C == 0x0201209C);
+	useTwlCfg = ((*(u8*)0x02000400 & 0x0F) && (*(u8*)0x02000404 == 0));
 	twlCfgLang = *(u8*)0x02000406;
 }
 
