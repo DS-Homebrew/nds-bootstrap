@@ -537,17 +537,19 @@ static bool resume_cardRead_arm9(void) {
 	#endif
     
     if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025AAB08) {
-        IPC_SendSync(0x7);
-    }	
+		sharedAddr[4] = 0x025AAB08;
+		IPC_SendSync(0x7);
+	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-  		initialize();
+  		driveInitialize();
   
 		if(readOngoing)
 		{
 			if(resume_cardRead_arm9()) {
 				*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-                IPC_SendSync(0x8);
+				sharedAddr[4] = 0x025AAB08;
+				IPC_SendSync(0x8);
 			} 
 		}
   		unlockMutex(&cardEgnineCommandMutex);
@@ -603,10 +605,12 @@ static void runCardEngineCheck(void) {
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
               } else {
-                    while(!resume_cardRead_arm9()) {} 
+                while (resume_cardRead_arm9());
+                //if (resume_cardRead_arm9()) { 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
+				//}
               }
           }
 
@@ -644,7 +648,7 @@ static void runCardEngineCheck(void) {
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 				sharedAddr[4] = 0x025AAB08;
                 IPC_SendSync(0x8);
-            //} 
+            //}
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
@@ -708,15 +712,17 @@ void myIrqHandlerFIFO(void) {
 }
 
 //---------------------------------------------------------------------------------
-void myIrqHandlerNetwork(void) {
+void myIrqHandlerNdma0(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerNetwork");
+	nocashMessage("myIrqHandlerNdma0");
 	#endif	
 	
 	calledViaIPC = false;
 
-	runCardEngineCheck();
+	//i2cWriteRegister(0x4A, 0x70, 0x01);
+	//i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+	//runCardEngineCheckResume();
 }
 
 
@@ -925,6 +931,7 @@ u32 myIrqEnable(u32 irq) {
 	
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
+	//irq |= BIT(28);
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	REG_IE |= irq;

@@ -42,7 +42,7 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-intr_network_orig_return:
+intr_ndma0_orig_return:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
@@ -97,11 +97,11 @@ fifoHandler:
 	ldr 	r0,	intr_fifo_orig_return
 	bx  	r0
 
-networkHandler:
+ndma0Handler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_network
-	ldr 	r0,	intr_network_orig_return
+	adr 	lr, code_handler_start_ndma0
+	ldr 	r0,	intr_ndma0_orig_return
 	bx  	r0
 
 code_handler_start_vblank:
@@ -121,9 +121,9 @@ code_handler_start_fifo:
 	@ exit after return
 	b	exit
 
-code_handler_start_network:
+code_handler_start_ndma0:
 	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerNetwork
+	ldr	r3, =myIrqHandlerNdma0
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
 	@ exit after return
@@ -245,7 +245,7 @@ patches:
 .word	j_irqHandler
 .word	vblankHandler
 .word	fifoHandler
-.word	networkHandler
+.word	ndma0Handler
 .word   card_pull
 .word   arm7Functions
 .word   swi02

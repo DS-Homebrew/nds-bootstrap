@@ -43,7 +43,7 @@ typedef struct cardengineArm7Patches {
     u32* j_irqHandler;
     u32 vblankHandler;
     u32 fifoHandler;
-    u32 networkHandler;
+    u32 ndma0Handler;
     u32 card_pull;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     u32* swi02;
@@ -60,7 +60,7 @@ typedef struct cardengineArm7 {
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
     u32 intr_fifo_orig_return;
-    u32 intr_network_orig_return;
+    u32 intr_ndma0_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
 	u32 srParamsCluster;

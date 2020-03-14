@@ -216,11 +216,11 @@ int hookNdsRetailArm7(
 
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
-	//u32* networkHandler = hookLocation + 24;
+	//u32* ndma0Handler = hookLocation + 28;
 
 	ce7->intr_vblank_orig_return  = *vblankHandler;
 	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-	//ce7->intr_network_orig_return = *networkHandler;
+	//ce7->intr_ndma0_orig_return   = *ndma0Handler;
 	ce7->moduleParams             = moduleParams;
 	ce7->fileCluster              = fileCluster;
 	ce7->srParamsCluster          = srParamsFileCluster;
@@ -236,13 +236,13 @@ int hookNdsRetailArm7(
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 	ce7->preciseVolumeControl     = preciseVolumeControl;
 
-	const char* romTid = getRomTid(ndsHeader);
+	//const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
 	*ipcSyncHandler = ce7->patches->fifoHandler;
 	/*if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		//*networkHandler = ce7->patches->networkHandler;
+		*ndma0Handler = ce7->patches->ndma0Handler;
 	}*/
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
