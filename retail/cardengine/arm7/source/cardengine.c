@@ -605,7 +605,7 @@ static void runCardEngineCheck(void) {
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
               } else {
-                while (!resume_cardRead_arm9());
+                while(!resume_cardRead_arm9()) {}
                 //if (resume_cardRead_arm9()) { 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 					sharedAddr[4] = 0x025AAB08;
