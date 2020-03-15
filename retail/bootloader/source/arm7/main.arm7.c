@@ -1053,11 +1053,11 @@ int arm7_main(void) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-		} else if ((ndsHeader->arm9destination >= 0x02004000) || (moduleParams->sdk_version < 0x2008000)) {
-			ce9Location = ((ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
+		} else if (((u32)ndsHeader->arm9destination >= 0x02004000) || (moduleParams->sdk_version < 0x2008000)) {
+			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
 						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION2;
-			if ((ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
-			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0) && (*(u8*)CARDENGINE_ARM9_CACHED_LOCATION1+0x1FFF == 0)) {
+			if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
+			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x1800);
