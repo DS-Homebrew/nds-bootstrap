@@ -1053,13 +1053,13 @@ int arm7_main(void) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-		} else if (ndsHeader->arm9destination == 0x02004000) {
-			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION0;
+		} else if ((ndsHeader->arm9destination >= 0x02004000) || (moduleParams->sdk_version < 0x2008000)) {
+			ce9Location = ((ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
+						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION0;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x1800);
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
 		} else if (ceCached) {
-			if (strncmp(romTid, "ACV", 3) == 0				// Castlevania DOS
-			 || strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
