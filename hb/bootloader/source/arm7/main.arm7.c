@@ -205,7 +205,7 @@ static void resetMemory_ARM7 (void)
 	}
 
 	arm7clearRAM();								// clear exclusive IWRAM
-	toncset((u32*)0x02000000, 0, 0x370000);	// clear most of EWRAM
+	toncset((u32*)0x02004000, 0, 0x36C000);	// clear most of EWRAM
 	toncset((u32*)0x02380000, 0, 0x70000);		// except before 0x023F4000, which has the arm9 code
 	if (romIsCompressed) {
 		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
@@ -231,6 +231,10 @@ static void resetMemory_ARM7 (void)
 		boot_readFirmware(settingsOffset + 0x000, (u8*)(NDS_HEADER-0x180), 0x70);
 	} else {
 		boot_readFirmware(settingsOffset + 0x100, (u8*)(NDS_HEADER-0x180), 0x70);
+	}
+
+	if ((*(u8*)0x02000400 & 0x0F) && (*(u8*)0x02000404 == 0) && language == -1) {
+		language = *(u8*)0x02000406;
 	}
 
 	if (language >= 0 && language <= 7) {
