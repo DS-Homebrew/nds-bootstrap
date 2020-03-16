@@ -599,7 +599,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 
-	if (useTwlCfg && language == -1) {
+	if (useTwlCfg && (language == 0xFF || language == -1)) {
 		language = twlCfgLang;
 	}
 
