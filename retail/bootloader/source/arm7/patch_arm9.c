@@ -252,13 +252,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
 	if (!patchOffsetCache.cardReadDmaChecked) {
 		cardReadDmaStartOffset = NULL;
-		u32* cardReadDmaEndOffset = NULL;
-		if (usesThumb) {
-			//dbg_printf("Trying thumb alt...\n");
+		u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
+		if (!cardReadDmaEndOffset && usesThumb) {
 			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
-		}
-		if (!cardReadDmaEndOffset) {
-			cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
 		}
 		if (usesThumb) {
 			cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
