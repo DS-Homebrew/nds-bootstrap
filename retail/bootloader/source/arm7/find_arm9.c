@@ -100,7 +100,6 @@ static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
-static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // irq enable
@@ -1504,29 +1503,6 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("Random patch found: ");
 	} else {
 		dbg_printf("Random patch not found\n");
-	}
-
-	if (randomPatchOffset) {
-		dbg_hexa((u32)randomPatchOffset);
-		dbg_printf("\n");
-	}
-
-	dbg_printf("\n");
-	return randomPatchOffset;
-}
-
-// SDK 5
-u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader) {
-	dbg_printf("findRandomPatchOffset5First:\n");
-
-	u32* randomPatchOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		randomPatchSignature5First, 4
-	);
-	if (randomPatchOffset) {
-		dbg_printf("Random patch SDK 5 first found: ");
-	} else {
-		dbg_printf("Random patch SDK 5 first not found\n");
 	}
 
 	if (randomPatchOffset) {

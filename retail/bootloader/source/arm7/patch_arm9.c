@@ -1169,30 +1169,6 @@ void patchDownloadplay(const tNDSHeader* ndsHeader)
 }
 
 // SDK 5
-static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return;
-	}
-
-	// Random patch SDK 5 first
-	u32* randomPatchOffset5First = patchOffsetCache.randomPatch5Offset;
-	if (!patchOffsetCache.randomPatch5Checked) {
-		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
-		if (randomPatchOffset5First) {
-			patchOffsetCache.randomPatch5Offset = randomPatchOffset5First;
-		}
-		patchOffsetCache.randomPatch5Checked = true;
-	}
-	if (!randomPatchOffset5First) {
-		return;
-	}
-	// Patch
-	*randomPatchOffset5First = 0xE3A00000;
-	//*(u32*)((u32)randomPatchOffset5First + 4) = 0xE12FFF1E;
-	*(randomPatchOffset5First + 1) = 0xE12FFF1E;
-}
-
-// SDK 5
 static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return;
@@ -1400,8 +1376,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchReset(ce9, ndsHeader, moduleParams);
 
 	randomPatch(ndsHeader, moduleParams);
-
-	randomPatch5First(ndsHeader, moduleParams);
 
 	randomPatch5Second(ndsHeader, moduleParams);
 
