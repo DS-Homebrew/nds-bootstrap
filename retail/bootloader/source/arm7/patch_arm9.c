@@ -380,7 +380,11 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         } else  {
             u32* armOffset = (u32*)offset;
             armOffset--;
-            *armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+			if (moduleParams < 0x2008000) {
+				*armOffset = 0xE92D4000; // STMFD SP!, {LR}
+			} else {
+				*armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+			}
             ce9->patches->cardEndReadDmaRef = armOffset;
         }  
       }  
