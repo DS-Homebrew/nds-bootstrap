@@ -275,10 +275,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return false;
-	}
-
 	bool dmaAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
 	static const char list[][4] = {
@@ -321,17 +317,17 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "CPU",  // Pokemon Platinum // works
         "IPK",  // Pokemon HeartGold // works
         "IPG",  // Pokemon SoulSilver // works
-        //"IRB",  // Pokemon Black // sdk5
-        //"IRA",  // Pokemon White // sdk5
-        //"IRE",  // Pokemon Black 2 // sdk5
-        //"IRD",  // Pokemon White 2 // sdk5
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
         "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
         //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         //"BXS",  // Sonic Colors // sdk5
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep function)
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
@@ -393,10 +389,6 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return false;
-	}
-
     dbg_printf("\npatchCardSetDma\n");           
 
 	bool dmaAllowed = false;
@@ -441,17 +433,17 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "CPU",  // Pokemon Platinum // works
         "IPK",  // Pokemon HeartGold // works
         "IPG",  // Pokemon SoulSilver // works
-        //"IRB",  // Pokemon Black // sdk5
-        //"IRA",  // Pokemon White // sdk5
-        //"IRE",  // Pokemon Black 2 // sdk5
-        //"IRD",  // Pokemon White 2 // sdk5
+        "IRB",  // Pokemon Black // sdk5
+        "IRA",  // Pokemon White // sdk5
+        "IRE",  // Pokemon Black 2 // sdk5
+        "IRD",  // Pokemon White 2 // sdk5
         "B3R",  // Pokemon Ranger: Guardian Signs // works
         "BR4",  // Runaway: A Twist of Fate // works, fixes sound cracking
         "BZ3",  // SaGa 3 // works
         //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         //"BXS",  // Sonic Colors // sdk5
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep method)
+        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep function)
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
