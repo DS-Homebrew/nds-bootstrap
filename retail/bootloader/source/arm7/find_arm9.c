@@ -39,6 +39,7 @@ static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
 static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
+static const u16 cardPullOutSignatureThumbElab[5] = {0xB508, 0x203F, 0x4008, 0x2811, 0xD10E};
 static const u16 cardPullOutSignatureThumb[4]     = {0xB508, 0x203F, 0x4008, 0x2811};
 static const u16 cardPullOutSignatureThumbAlt[4]  = {0xB500, 0xB081, 0x203F, 0x4001};
 static const u16 cardPullOutSignatureThumb5[4]    = {0xB510, 0x203F, 0x4008, 0x2811};                 // SDK 5
@@ -672,12 +673,24 @@ u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader) {
 	
 	u16* cardPullOutOffset = findOffsetThumb(
 		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-		cardPullOutSignatureThumb, 4
+		cardPullOutSignatureThumbElab, 5
 	);
 	if (cardPullOutOffset) {
-		dbg_printf("Card pull out handler thumb found: ");
+		dbg_printf("Card pull out handler thumb elaborate found: ");
 	} else {
-		dbg_printf("Card pull out handler thumb not found\n");
+		dbg_printf("Card pull out handler thumb elaborate not found\n");
+	}
+
+	if (!cardPullOutOffset) {
+		cardPullOutOffset = findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			cardPullOutSignatureThumb, 4
+		);
+		if (cardPullOutOffset) {
+			dbg_printf("Card pull out handler thumb short found: ");
+		} else {
+			dbg_printf("Card pull out handler thumb short found\n");
+		}
 	}
 
 	if (!cardPullOutOffset) {
