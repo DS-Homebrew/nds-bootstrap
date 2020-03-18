@@ -232,7 +232,7 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset;
 }
 
-u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset) {
 	dbg_printf("findCardReadEndOffsetType0:\n");
 
 	const char* romTid = getRomTid(ndsHeader);
@@ -240,7 +240,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	u32* cardReadEndOffset = NULL;
 	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+			(u32*)startOffset, 0x00300000,//ndsHeader->arm9binarySize,
 			cardReadEndSignature3Elab, 3
 		);
 		if (cardReadEndOffset) {
@@ -271,31 +271,18 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	return cardReadEndOffset;
 }
 
-u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset) {
 	dbg_printf("findCardReadEndOffsetType1:\n");
 
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x3800 for "WarioWare: DIY"
-		//readType = 1;
-		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination + 0x3800, 0x00300000,//ndsHeader->arm9binarySize,
-			cardReadEndSignatureAlt, 2
-		);
-	} else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
-		//readType = 1;
-		cardReadEndOffset = findOffset(
-			(u32*)((u8*)ndsHeader->arm9destination + 0x80000), 0x00300000,//ndsHeader->arm9binarySize,
-			cardReadEndSignatureAlt, 2
-		);
-	} else {
-		//readType = 1;
-		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
-			cardReadEndSignatureAlt, 2
-		);
-	}
+	//readType = 1;
+	cardReadEndOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		cardReadEndSignatureAlt, 2
+	);
+
 
 	if (!cardReadEndOffset) {
 		cardReadEndOffset = findOffset(
@@ -319,13 +306,13 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader) {
 	return cardReadEndOffset;
 }
 
-u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader) {
+u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset) {
 	dbg_printf("findCardReadEndOffsetThumb:\n");
 
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb, 4
 	);
 	if (cardReadEndOffset) {
@@ -344,7 +331,7 @@ u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return NULL;
 	}
@@ -354,7 +341,7 @@ u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5, 4
 	);
 	if (cardReadEndOffset) {
@@ -373,7 +360,7 @@ u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 }
 
 // SDK 5
-u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return NULL;
 	}
@@ -383,7 +370,7 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00300000,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, 0x00300000,//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5Alt1, 5
 	);
 	if (cardReadEndOffset) {

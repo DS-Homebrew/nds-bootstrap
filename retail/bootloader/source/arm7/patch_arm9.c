@@ -35,7 +35,7 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
-static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
+static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, bool useCache, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
 	int sdk5ReadType = 0; // SDK 5
@@ -43,9 +43,10 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	// Card read
 	// SDK 5
 	//dbg_printf("Trying SDK 5 thumb...\n");
-	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
-	if (!patchOffsetCache.cardReadEndOffset) {
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+    u32* cardReadEndOffset = 0;
+    if (useCache) cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
+	if (!patchOffsetCache.cardReadEndOffset || !useCache) {
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams, startOffset);
 		if (cardReadEndOffset) {
 			sdk5ReadType = 1;
 			usesThumb = true;
@@ -53,7 +54,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			// SDK 5
-			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams, startOffset);
 			if (cardReadEndOffset) {
 				sdk5ReadType = 0;
 				usesThumb = true;
@@ -62,18 +63,18 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying thumb...\n");
-			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader, startOffset);
 			if (cardReadEndOffset) {
 				usesThumb = true;
 				patchOffsetCache.a9IsThumb = usesThumb;
 			}
 		}
 		if (!cardReadEndOffset) {
-			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams, startOffset);
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
-			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
+			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, startOffset);
 			if (cardReadEndOffset) {
 				readType = 1;
 				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
@@ -84,7 +85,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 				}
 			}
 		}
-		if (cardReadEndOffset) {
+		if (cardReadEndOffset && useCache) {
 			patchOffsetCache.cardReadEndOffset = cardReadEndOffset;
 		}
 	}
@@ -95,8 +96,9 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardReadEndOffset) { // Not necessarily needed
 		return false;
 	}
-	u32* cardReadStartOffset = patchOffsetCache.cardReadStartOffset;
-	if (!patchOffsetCache.cardReadStartOffset) {
+    u32* cardReadStartOffset = 0;
+    if (useCache) cardReadStartOffset = patchOffsetCache.cardReadStartOffset;
+	if (!patchOffsetCache.cardReadStartOffset || !useCache) {
 		// SDK 5
 		//dbg_printf("Trying SDK 5 thumb...\n");
 		if (sdk5ReadType == 0) {
@@ -119,7 +121,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 				cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
 			}
 		}
-		if (cardReadStartOffset) {
+		if (cardReadStartOffset && useCache) {
 			patchOffsetCache.cardReadStartOffset = cardReadStartOffset;
 		}
 	}
@@ -144,6 +146,9 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
 	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+    dbg_printf("cardRead location : ");
+    dbg_hexa(cardReadStartOffset);
+    dbg_printf("\n\n");
 	return true;
 }
 
@@ -1347,8 +1352,21 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	fixForDsiBios(ce9, ndsHeader);
 
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
+    
+    const char* romTid = getRomTid(ndsHeader);
 
-	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
+    u32 startOffset = ndsHeader->arm9destination;
+    if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x3800 for "WarioWare: DIY"
+        startOffset = ndsHeader->arm9destination +  0x3800;
+    } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
+        startOffset = ndsHeader->arm9destination +  0x80000;        
+    }
+    
+    dbg_printf("startOffset : ");
+    dbg_hexa(startOffset);
+    dbg_printf("\n\n");
+
+	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, true, startOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
@@ -1388,8 +1406,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	randomPatch5Second(ndsHeader, moduleParams);
 
-	const char* romTid = getRomTid(ndsHeader);
-
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader, moduleParams);
 	} /*else if (gbaRomFound) {
@@ -1401,6 +1417,16 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
 	patchCardReadPdash(ce9, ndsHeader);
+    
+    if (strcmp(romTid, "V2GE") == 0) {
+        // try to patch card read a second time
+        dbg_printf("patch card read a second time\n");
+        dbg_printf("startOffset : 0x02040000\n\n");
+	   	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, false, 0x02040000)) {
+    		dbg_printf("ERR_LOAD_OTHR\n\n");
+    		return ERR_LOAD_OTHR;
+    	}
+	}
 
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
