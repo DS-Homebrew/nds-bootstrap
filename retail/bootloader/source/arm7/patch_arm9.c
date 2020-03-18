@@ -303,7 +303,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
-        //"BLF",  // Layton: Last Specter // sdk5
+        "BLF",  // Layton: Last Specter // sdk5
 		"YEL",  // Level5 Premium - Silver
 		"YEW",  // Level5 Premium - Gold
 		"B5P",  // Level5 Premium - Platinum
@@ -419,7 +419,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "A5F",  // Layton: Curious Village // works
         "YLT",  // Layton: Pandora's Box // works
         "C3J",  // Layton: Unwound Future // works
-        //"BLF",  // Layton: Last Specter // sdk5
+        "BLF",  // Layton: Last Specter // sdk5
 		"YEL",  // Level5 Premium - Silver
 		"YEW",  // Level5 Premium - Gold
 		"B5P",  // Level5 Premium - Platinum
