@@ -312,6 +312,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
         "APD",  // Pokemon Dash // works
+        "A24",  // Pokemon Dash (Kiosk Demo) // works
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
@@ -443,6 +444,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
         "APD",  // Pokemon Dash // works
+        "A24",  // Pokemon Dash (Kiosk Demo) // works
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
