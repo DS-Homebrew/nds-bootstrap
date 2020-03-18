@@ -284,7 +284,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "YBA",  // Bomberman 2 // works
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
-        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "ACV",  // Castlevania DOS // works
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         "AFF",  // FF3 // works
         "YF4",  // FF4 // works
@@ -311,7 +311,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
-        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "APD",  // Pokemon Dash // works
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
@@ -365,7 +365,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
           } else {
             u32* armOffset = (u32*)offset;
             armOffset--;
-			if (moduleParams < 0x2008000) {
+			if (*(armOffset - 16) == 0xE92D4000) {
 				armOffset--;
 				armOffset[0] = 0xE92D4000; // STMFD SP!, {LR}
 				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
@@ -406,7 +406,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "YBA",  // Bomberman 2 // works
         "TBR",  // Brave // sdk5
         "YR9",  // Castlevania OE // works
-        //"ACV",  // Castlevania DOS // black screen issue to be investigated
+        "ACV",  // Castlevania DOS // works
         "AMH",  // Metroid Prime Hunters // TODO : freeze issue to be investigated
         "AFF",  // FF3 // works
         "YF4",  // FF4 // works
@@ -433,7 +433,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
-        //"APD",  // Pokemon Dash // TODO : freeze issue to be investigated
+        "APD",  // Pokemon Dash // works
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
