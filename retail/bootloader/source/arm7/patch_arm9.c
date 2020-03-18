@@ -381,7 +381,9 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
             u32* armOffset = (u32*)offset;
             armOffset--;
 			if (moduleParams < 0x2008000) {
-				*armOffset = 0xE92D4000; // STMFD SP!, {LR}
+				armOffset--;
+				armOffset[0] = 0xE92D4000; // STMFD SP!, {LR}
+				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
 			} else {
 				*armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
 			}
