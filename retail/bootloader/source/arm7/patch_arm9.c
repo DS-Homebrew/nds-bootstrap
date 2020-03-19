@@ -152,19 +152,19 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
-static bool patchCardReadMvDK4(cardengineArm9* ce9, u32 startOffset) {
+/*static bool patchCardReadMvDK4(cardengineArm9* ce9, u32 startOffset) {
 	u32* cardReadStartOffset = findCardReadStartOffsetMvDK4(startOffset);
 	if (!cardReadStartOffset) {
 		return false;
 	}
 
-	u32* cardReadPatch = ce9->patches->card_read_arm9;
+	u32* cardReadPatch = ce9->patches->card_dma_arm9;
 	memcpy(cardReadStartOffset, cardReadPatch, 0x60);
-    dbg_printf("cardRead location : ");
+    dbg_printf("cardReadDma location : ");
     dbg_hexa(cardReadStartOffset);
     dbg_printf("\n\n");
 	return true;
-}
+}*/
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
@@ -197,6 +197,9 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull_out_arm9 : ce9->patches->card_pull_out_arm9);
 	memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
+    dbg_printf("cardPullOut location : ");
+    dbg_hexa(cardPullOutOffset);
+    dbg_printf("\n\n");
 }
 
 /*static void patchCardTerminateForPullOut(cardengineArm9* ce9, bool usesThumb, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32* cardPullOutOffset) {
@@ -256,14 +259,15 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 
 	if (cardIdStartOffset) {
-		dbg_printf("Found cardId\n\n");
-
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
 		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 	}
+    dbg_printf("cardId location : ");
+    dbg_hexa(cardIdStartOffset);
+    dbg_printf("\n\n");
 }
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -291,6 +295,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+    dbg_printf("cardReadDma location : ");
+    dbg_hexa(cardReadDmaStartOffset);
+    dbg_printf("\n\n");
 }
 
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -533,6 +540,9 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		u32* resetPatch = ce9->patches->reset_arm9;
 		memcpy(reset, resetPatch, 0x40);
 	}
+    dbg_printf("reset location : ");
+    dbg_hexa(reset);
+    dbg_printf("\n\n");
 }
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -552,6 +562,9 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 	}
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
 	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
+    dbg_printf("cardIrqEnable location : ");
+    dbg_hexa(cardIrqEnableOffset);
+    dbg_printf("\n\n");
 	return true;
 }
 
@@ -1386,9 +1399,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
     /*if (strncmp(romTid, "V2G", 3) == 0) {
-        // try to patch card read a second time
+        // try to patch card read DMA a second time
         dbg_printf("patch card read a second time\n");
-        dbg_printf("startOffset : 0x02040000\n\n");
+        dbg_printf("startOffset : 0x02030000\n\n");
 	   	if (!patchCardReadMvDK4(ce9, 0x02030000)) {
     		dbg_printf("ERR_LOAD_OTHR\n\n");
     		return ERR_LOAD_OTHR;
