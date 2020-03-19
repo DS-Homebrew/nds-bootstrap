@@ -539,6 +539,8 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		// Patch
 		u32* resetPatch = ce9->patches->reset_arm9;
 		memcpy(reset, resetPatch, 0x40);
+	} else {
+		return;
 	}
     dbg_printf("reset location : ");
     dbg_hexa(reset);
