@@ -152,6 +152,20 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
+static bool patchCardReadMvDK4(cardengineArm9* ce9, u32 startOffset) {
+	u32* cardReadStartOffset = findCardReadStartOffsetMvDK4(startOffset);
+	if (!cardReadStartOffset) {
+		return false;
+	}
+
+	u32* cardReadPatch = ce9->patches->card_read_arm9;
+	memcpy(cardReadStartOffset, cardReadPatch, 0x60);
+    dbg_printf("cardRead location : ");
+    dbg_hexa(cardReadStartOffset);
+    dbg_printf("\n\n");
+	return true;
+}
+
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
 	u32* cardPullOutOffset = patchOffsetCache.cardPullOutOffset;
@@ -1371,6 +1385,16 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
+    /*if (strncmp(romTid, "V2G", 3) == 0) {
+        // try to patch card read a second time
+        dbg_printf("patch card read a second time\n");
+        dbg_printf("startOffset : 0x02040000\n\n");
+	   	if (!patchCardReadMvDK4(ce9, 0x02030000)) {
+    		dbg_printf("ERR_LOAD_OTHR\n\n");
+    		return ERR_LOAD_OTHR;
+    	}
+	}*/
+
     // made obsolete by tonccpy
 	//patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
@@ -1418,16 +1442,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardReadPdash(ce9, ndsHeader);
     
-    if (strcmp(romTid, "V2GE") == 0) {
-        // try to patch card read a second time
-        dbg_printf("patch card read a second time\n");
-        dbg_printf("startOffset : 0x02040000\n\n");
-	   	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, false, 0x02040000)) {
-    		dbg_printf("ERR_LOAD_OTHR\n\n");
-    		return ERR_LOAD_OTHR;
-    	}
-	}
-
 	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
 	dbg_printf("ERR_NONE\n\n");
