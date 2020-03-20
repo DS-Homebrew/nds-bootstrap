@@ -114,6 +114,26 @@ static void waitFrames(int count) {
 	}
 }
 
+static int readCount = 0;
+static bool sleepMsEnabled = false;
+
+static void sleepMs(int ms) {
+	extern void callSleepThumb(int ms);
+
+	if (readCount >= 100) {
+		sleepMsEnabled = true;
+	}
+
+	if (!sleepMsEnabled) return;
+
+    if(ce9->patches->sleepRef) {
+        volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
+        (*sleepRef)(ms);
+    } else if(ce9->thumbPatches->sleepRef) {
+        callSleepThumb(ms);
+    }
+}
+
 #ifndef DLDI
 static int allocateCacheSlot(void) {
 	int slot = 0;
@@ -174,11 +194,13 @@ static void waitForArm7(void) {
         }
     } else {*/
         while (sharedAddr[3] != (vu32)0) {
-           if(count==20000000) {
+			if(ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+				sleepMs(1);
+			} else { if(count==20000000) {
                 IPC_SendSync(0x4);
                 count=0;
             }
-            count++;
+            count++; }
         }
     //}
 }
@@ -837,6 +859,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	waitForArm7();
 	// -------------------------------------*/
 	#endif
+
+	readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.

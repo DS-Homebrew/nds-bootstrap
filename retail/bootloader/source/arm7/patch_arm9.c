@@ -354,7 +354,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         //"BXS",  // Sonic Colors // sdk5
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep function)
+        "A3Y",  // Sonic Rush Adventure // works
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
@@ -472,8 +472,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "B6Z",  // MegaMan Zero Collection // works
         "ARZ",  // MegaMan ZX // works
         "YZX",  // MegaMan ZX Advent // works
-        "APD",  // Pokemon Dash // works
-        "A24",  // Pokemon Dash (Kiosk Demo) // works
+        //"APD",  // Pokemon Dash // works
+        //"A24",  // Pokemon Dash (Kiosk Demo) // works
         "ADA",  // Pokemon Diamond // works
         "APA",  // Pokemon Pearl // works
         "CPU",  // Pokemon Platinum // works
@@ -489,7 +489,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         //"YT7",  // SEGA Superstars Tennis // white screens
         "CSN",  // Sonic Chronicles: The Dark BrotherHood
         //"BXS",  // Sonic Colors // sdk5
-        "A3Y",  // Sonic Rush Adventure // works, but title screen has some flickers (if not using sleep function)
+        "A3Y",  // Sonic Rush Adventure // works
         "CB6",  // Space Bust-A-Move // works, fixes lags
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
@@ -509,17 +509,15 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	}
 
   if (dmaAllowed) {
-    u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
-	bool cardSetDmaUsed = patchOffsetCache.cardSetDmaUsed;
+    u32* setDmaoffset = patchOffsetCache.cardSetDmaOffset;
     if (!patchOffsetCache.cardSetDmaChecked) {
 		setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
 		if (setDmaoffset) {
-			patchOffsetCache.cardReadDmaOffset = setDmaoffset;
-			patchOffsetCache.cardSetDmaUsed = true;
+			patchOffsetCache.cardSetDmaOffset = setDmaoffset;
 		}
 		patchOffsetCache.cardSetDmaChecked = true;
     }
-    if(cardSetDmaUsed && setDmaoffset) {
+    if(setDmaoffset) {
       dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
     dbg_printf("cardSetDmaOffset location : ");
     dbg_hexa(setDmaoffset);
@@ -534,9 +532,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     return false; 
 }
 
-static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-    const char* romTid = getRomTid(ndsHeader);
-    
+static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
     u32* reset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
@@ -551,6 +547,44 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		memcpy(reset, resetPatch, 0x40);
 		dbg_printf("reset location : ");
 		dbg_hexa(reset);
+		dbg_printf("\n\n");
+	}
+}
+
+static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	bool sleepAllowed = false;
+    const char* romTid = getRomTid(ndsHeader);
+	static const char list[][4] = {
+		"B3R",  // Pokemon Ranger: Guardian Signs // works, fixes some screen flickers
+		"A3Y",  // Sonic Rush Adventure // works, fixes some screen flickers
+    };
+
+	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+		if (memcmp(romTid, list[i], 3) == 0) {
+			// Found a match.
+			sleepAllowed = true;
+			break;
+		}
+	}
+
+	if (!sleepAllowed) return;
+
+    u32* offset = patchOffsetCache.sleepFuncOffset;
+	if (!patchOffsetCache.sleepChecked) {
+		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb);
+		if (offset) {
+			patchOffsetCache.sleepFuncOffset = offset;
+		}
+		patchOffsetCache.sleepChecked = true;
+	}
+	if (offset) {
+		if (usesThumb) {
+			ce9->thumbPatches->sleepRef = offset;
+		} else {
+			ce9->patches->sleepRef = offset;
+		}
+		dbg_printf("sleep location : ");
+		dbg_hexa(offset);
 		dbg_printf("\n\n");
 	}
 }
@@ -1448,6 +1482,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
 	patchReset(ce9, ndsHeader, moduleParams);
+	
+	getSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	randomPatch(ndsHeader, moduleParams);
 

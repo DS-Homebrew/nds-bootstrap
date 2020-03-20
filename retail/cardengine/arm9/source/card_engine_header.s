@@ -62,6 +62,7 @@ patches:
 .word	slot2_read
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
+.word   0x0 @sleepRef
 .word   terminateForPullOutRef
 .word	swi02
 .word   reset_arm9
@@ -84,6 +85,8 @@ thumbPatches:
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
+thumbSleepRef:
+.word   0x0 @sleepRef
 .word   terminateForPullOutRef
 
 	.thumb
@@ -581,6 +584,19 @@ callEndReadDmaThumb:
     pop	    {r1-r11, pc}
 	bx      lr
 _blx_r6_stub_callEndReadDmaThumb:
+	bx	r6	
+.pool
+
+.global callSleepThumb
+.type	callSleepThumb STT_FUNC
+callSleepThumb:
+    push	{r1-r11, lr}
+    ldr     r6, thumbSleepRef
+    add     r6, #1
+    bl		_blx_r6_stub_callSleepThumb
+    pop	    {r1-r11, pc}
+	bx      lr
+_blx_r6_stub_callSleepThumb:
 	bx	r6	
 .pool
 

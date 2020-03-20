@@ -1617,14 +1617,9 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     } 
     
 	if (sleepOffset) {
-		dbg_printf("Sleep found: ");
+		dbg_printf("Sleep found\n");
 	} else {
 		dbg_printf("Sleep not found\n");
-	}
-
-	if (sleepOffset) {
-		dbg_hexa((u32)sleepOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
