@@ -510,12 +510,16 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 
   if (dmaAllowed) {
     u32* setDmaoffset = patchOffsetCache.cardReadDmaOffset;
+	bool cardSetDmaUsed = patchOffsetCache.cardSetDmaUsed;
     if (!patchOffsetCache.cardSetDmaChecked) {
 		setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
-		if (setDmaoffset) patchOffsetCache.cardReadDmaOffset = setDmaoffset;
+		if (setDmaoffset) {
+			patchOffsetCache.cardReadDmaOffset = setDmaoffset;
+			patchOffsetCache.cardSetDmaUsed = true;
+		}
 		patchOffsetCache.cardSetDmaChecked = true;
     }
-    if(setDmaoffset) {
+    if(cardSetDmaUsed && setDmaoffset) {
       dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
     dbg_printf("cardSetDmaOffset location : ");
     dbg_hexa(setDmaoffset);
