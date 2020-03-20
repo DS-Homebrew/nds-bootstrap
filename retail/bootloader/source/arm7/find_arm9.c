@@ -1652,16 +1652,11 @@ u32* findCardEndReadDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* 
     } 
     
     if (offset) {
-		dbg_printf("cardEndReadDma found: ");
+		dbg_printf("cardEndReadDma found\n");
 	} else {
 		dbg_printf("cardEndReadDma not found\n");
 	}
     
-    if (offset) {
-		dbg_hexa((u32)offset);
-		dbg_printf("\n");
-	}
-
     dbg_printf("\n");
 	return offset;
 }
@@ -1731,16 +1726,11 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 	}
 
     if (offset) {
-		dbg_printf("cardEndReadDma found: ");
+		dbg_printf("cardEndReadDma found\n");
 	} else {
 		dbg_printf("cardEndReadDma not found\n");
 	}
     
-    if (offset) {
-		dbg_hexa((u32)offset);
-		dbg_printf("\n");
-	}
-
     dbg_printf("\n");
 	return offset;
 }
@@ -1787,10 +1777,10 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
 			}
             if (startOffset!=NULL) {
                 dbg_printf("cardSetDmaSignatureStart found\n");
-             	dbg_hexa((u32)startOffset);
+             	/*dbg_hexa((u32)startOffset);
             	dbg_printf(" : ");
                 dbg_hexa(*startOffset);   
-                dbg_printf("\n");
+                dbg_printf("\n");*/
                 
                 return startOffset;
             }                          
@@ -1876,14 +1866,9 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	}
 
     if (offset) {
-		dbg_printf("cardSetDma found: ");
+		dbg_printf("cardSetDma found\n");
 	} else {
 		dbg_printf("cardSetDma not found\n");
-	}
-
-    if (offset) {
-		dbg_hexa((u32)offset);
-		dbg_printf("\n");
 	}
 
     dbg_printf("\n");

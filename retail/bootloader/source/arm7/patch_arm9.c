@@ -264,10 +264,10 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		dbg_printf("cardId location : ");
+		dbg_hexa(cardIdStartOffset);
+		dbg_printf("\n\n");
 	}
-    dbg_printf("cardId location : ");
-    dbg_hexa(cardIdStartOffset);
-    dbg_printf("\n\n");
 }
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -382,6 +382,9 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	  }
     if(offset) {
       dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");
+    dbg_printf("cardEndReadDmaOffset location : ");
+    dbg_hexa(offset);
+    dbg_printf("\n\n");
       if(!isSdk5(moduleParams)) {
         // SDK1-4        
         if(usesThumb) {
@@ -514,6 +517,9 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     }
     if(setDmaoffset) {
       dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
+    dbg_printf("cardSetDmaOffset location : ");
+    dbg_hexa(setDmaoffset);
+    dbg_printf("\n\n");
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	  memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
     
@@ -539,12 +545,10 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		// Patch
 		u32* resetPatch = ce9->patches->reset_arm9;
 		memcpy(reset, resetPatch, 0x40);
-	} else {
-		return;
+		dbg_printf("reset location : ");
+		dbg_hexa(reset);
+		dbg_printf("\n\n");
 	}
-    dbg_printf("reset location : ");
-    dbg_hexa(reset);
-    dbg_printf("\n\n");
 }
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
