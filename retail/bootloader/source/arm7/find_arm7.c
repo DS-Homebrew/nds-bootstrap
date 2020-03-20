@@ -433,7 +433,7 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSleepPatchOffset:\n");
 
 	u32* sleepPatchOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		sleepPatch, 2
 	);
 	if (sleepPatchOffset) {
@@ -455,7 +455,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSleepPatchOffsetThumb:\n");
 	
 	u16* sleepPatchOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		sleepPatchThumb, 2
 	);
 	if (sleepPatchOffset) {
@@ -466,7 +466,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	if (!sleepPatchOffset) {
 		sleepPatchOffset = findOffsetThumb(
-			(u16*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 			sleepPatchThumbAlt, 2
 		);
 		if (sleepPatchOffset) {
@@ -489,7 +489,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00030000,
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		ramClearSignature, 2
 	);
 	if (ramClearOffset) {
@@ -515,7 +515,7 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 
 	u32* cardCheckPullOutOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00020000,//ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		cardCheckPullOutSignature, 4
 	);
 	if (cardCheckPullOutOffset) {
@@ -542,7 +542,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 
 	u32* cardIrqEnableOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		irqEnableStartSignature, 4
 	);
 	if (cardIrqEnableOffset) {
@@ -554,7 +554,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset) {
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
             irqEnableStartSignature4Alt1, 4
 		);
 		if (cardIrqEnableOffset) {
@@ -567,7 +567,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset) {
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00020000,//, ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
             irqEnableStartSignature4Alt2, 4
 		);
 		if (cardIrqEnableOffset) {
