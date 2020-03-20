@@ -552,7 +552,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	bool sleepAllowed = false;
+	/*bool sleepAllowed = false;
     const char* romTid = getRomTid(ndsHeader);
 	static const char list[][4] = {
 		"B3R",  // Pokemon Ranger: Guardian Signs // works, fixes some screen flickers
@@ -567,7 +567,7 @@ static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-	if (!sleepAllowed) return;
+	if (!sleepAllowed) return;*/
 
     u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
@@ -590,7 +590,7 @@ static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 }
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-    const char* romTid = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "AWD", 3) == 0) return true;	// Fix corrupted 3D model bug
 
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
