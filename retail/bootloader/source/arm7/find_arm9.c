@@ -660,7 +660,7 @@ u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader) {
 		if (cardPullOutOffset) {
 			dbg_printf("Card pull out handler thumb short found\n");
 		} else {
-			dbg_printf("Card pull out handler thumb short found\n");
+			dbg_printf("Card pull out handler thumb short not found\n");
 		}
 	}
 
