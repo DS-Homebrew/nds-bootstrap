@@ -196,11 +196,11 @@ static void waitForArm7(void) {
         while (sharedAddr[3] != (vu32)0) {
 			if(ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 				sleepMs(1);
-			} else { if(count==20000000) {
+			}/* else { if(count==20000000) {
                 IPC_SendSync(0x4);
                 count=0;
             }
-            count++; }
+            count++; }*/
         }
     //}
 }
