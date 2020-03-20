@@ -102,6 +102,7 @@ extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
+extern u32 cacheBlockSize;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
@@ -123,6 +124,11 @@ static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 
 static u32 softResetParams = 0;
+
+static u32 generatedCacheBlockSize(void) {
+	if (cacheBlockSize == 1) return 0x8000;
+	return 0x4000;
+}
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -1060,27 +1066,27 @@ int arm7_main(void) {
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}
-			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x1800);
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 		} else if (ceCached) {
 			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x1800);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 			} else
 			ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
 			if(ce9Location) {
-					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x1800);
-					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
+					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x1800);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
 			}
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x1800);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
 		}
 
 		patchBinary(ndsHeader);
@@ -1138,6 +1144,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
+			generatedCacheBlockSize(),
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),

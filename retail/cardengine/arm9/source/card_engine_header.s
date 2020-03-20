@@ -30,6 +30,8 @@ cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
+cacheBlockSize:
+	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
 dsiMode:

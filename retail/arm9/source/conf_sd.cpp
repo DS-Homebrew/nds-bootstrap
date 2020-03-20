@@ -84,7 +84,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Card engine (arm9) cached
 	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
-    // conf->ceCached = true;
+
+	// Cache block size
+	conf->cacheBlockSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_BLOCK_SIZE").c_str(), NULL, 0);
 
 	// Console model
 	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);

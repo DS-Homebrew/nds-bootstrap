@@ -57,6 +57,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveOnFlashcard,
+	u32 cacheBlockSize,
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK5
 	u32 enableExceptionHandler,

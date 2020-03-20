@@ -79,7 +79,6 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
-static u32 readSize = _16KB_READ_SIZE;
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_16KB;
 #endif
@@ -141,8 +140,8 @@ static int getSlotForSector(u32 sector) {
 }
 
 static vu8* getCacheAddress(int slot) {
-	//return (vu32*)(cacheAddress + slot*readSize);
-	return (vu8*)(cacheAddress + slot*readSize);
+	//return (vu32*)(cacheAddress + slot*ce9->cacheBlockSize);
+	return (vu8*)(cacheAddress + slot*ce9->cacheBlockSize);
 }
 
 static void updateDescriptor(int slot, u32 sector) {
@@ -294,7 +293,7 @@ void continueCardReadDmaArm9() {
         dst = (u8*)(cardStruct[1]);
         len = cardStruct[2]; 
 
-        u32 sector = (src/readSize)*readSize;
+        u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
         if (len > 0) {
 			accessCounter++;  
@@ -313,7 +312,7 @@ void continueCardReadDmaArm9() {
 
         		// Write the command
         		sharedAddr[0] = (vu32)buffer;
-        		sharedAddr[1] = readSize;
+        		sharedAddr[1] = ce9->cacheBlockSize;
         		sharedAddr[2] = sector;
         		sharedAddr[3] = commandRead;
         
@@ -329,8 +328,8 @@ void continueCardReadDmaArm9() {
         		updateDescriptor(slot, sector);	
 
         		u32 len2 = len;
-        		if ((src - sector) + len2 > readSize) {
-        			len2 = sector - src + readSize;
+        		if ((src - sector) + len2 > ce9->cacheBlockSize) {
+        			len2 = sector - src + ce9->cacheBlockSize;
         		}
 
         		if (len2 > 512) {
@@ -372,15 +371,15 @@ void continueCardReadDmaArm7() {
 
 		u32 page = (src / 512) * 512;
 
-		/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 			sharedAddr[3] = 0;
 			endCardReadDma();
 		} else {*/
-			u32 sector = (src/readSize)*readSize;
+			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 			u32 len2 = len;
-			if ((src - sector) + len2 > readSize) {
-				len2 = sector - src + readSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
 			if (len2 > 512) {
@@ -423,7 +422,7 @@ void cardSetDma(void) {
 	#else
 	u32 commandRead=0x025FFB0A;
 	u32 commandPool=0x025AAB08;
-	u32 sector = (src/readSize)*readSize;
+	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
 
 	if (ce9->ROMinRAM) {
@@ -432,6 +431,10 @@ void cardSetDma(void) {
   			len2 -= src % 4;
   			len2 -= len2 % 32;
   		}
+
+        /*ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
+        while (ndmaBusy(0));
+		endCardReadDma();*/
 
   		// Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
@@ -446,7 +449,7 @@ void cardSetDma(void) {
 
 	accessCounter++;  
 
-	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -471,7 +474,7 @@ void cardSetDma(void) {
 
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = readSize;
+			sharedAddr[1] = ce9->cacheBlockSize;
 			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
@@ -485,8 +488,8 @@ void cardSetDma(void) {
 			updateDescriptor(slot, sector);	
 
 			u32 len2 = len;
-			if ((src - sector) + len2 > readSize) {
-				len2 = sector - src + readSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
 			if (len2 > 512) {
@@ -512,11 +515,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
-	u32 sector = (src/readSize)*readSize;
+	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
 
-	/*if (page == src && len > readSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
@@ -543,7 +546,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = readSize;
+				sharedAddr[1] = ce9->cacheBlockSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -555,8 +558,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 			updateDescriptor(slot, sector);	
 	
 			u32 len2 = len;
-			if ((src - sector) + len2 > readSize) {
-				len2 = sector - src + readSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
             /*if (isDma) {
@@ -593,7 +596,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				src = cardStruct[0];
 				dst = (u8*)cardStruct[1];
 				page = (src / 512) * 512;
-				sector = (src / readSize) * readSize;
+				sector = (src / ce9->cacheBlockSize) * ce9->cacheBlockSize;
 				accessCounter++;
 			}
 		}
@@ -762,7 +765,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (!ce9->ROMinRAM && strncmp(romTid, "UBR", 3) == 0) {
 			loadOverlaysFromRam = false;
 			cacheAddress = CACHE_ADRESS_START_low;
-			cacheSlots = CACHE_SLOTS_16KB_low;
+			cacheSlots = retail_CACHE_ADRESS_SIZE_low/ce9->cacheBlockSize;
 		} else {
 			if (ce9->dsiMode) {
 				romLocation = ROM_SDK5_LOCATION;
@@ -774,10 +777,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 
 			if (ce9->consoleModel > 0) {
-				cacheSlots = (ce9->dsiMode ? dev_CACHE_SLOTS_16KB_SDK5 : dev_CACHE_SLOTS_16KB);
+				cacheSlots = (ce9->dsiMode ? dev_CACHE_ADRESS_SIZE_SDK5 : dev_CACHE_ADRESS_SIZE)/ce9->cacheBlockSize;
 			} else {
 				//cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_16KB_low : retail_CACHE_SLOTS_16KB);
-				cacheSlots = retail_CACHE_SLOTS_16KB;
+				cacheSlots = retail_CACHE_ADRESS_SIZE/ce9->cacheBlockSize;
 			}
 
 			if (!ce9->ROMinRAM) {
@@ -786,8 +789,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				}
 
 				if (ce9->consoleModel>0 ? overlaysSize<=0x1800000 : overlaysSize<=0x800000) {
-					for (int i = 0; i < overlaysSize; i += readSize) {
-						cacheAddress += readSize;
+					for (int i = 0; i < overlaysSize; i += ce9->cacheBlockSize) {
+						cacheAddress += ce9->cacheBlockSize;
 						cacheSlots--;
 					}
 				} else {

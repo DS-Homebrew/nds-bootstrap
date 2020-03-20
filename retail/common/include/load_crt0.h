@@ -34,6 +34,7 @@ typedef struct loadCrt0 {
     u32 patchMpuRegion;
     u32 patchMpuSize;
     u32 ceCached; // SDK 1-4
+    u32 cacheBlockSize;
     u32 consoleModel;
     u32 romRead_LED;
     u32 dmaRomRead_LED;
