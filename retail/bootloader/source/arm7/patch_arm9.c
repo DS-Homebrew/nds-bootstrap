@@ -590,6 +590,9 @@ static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 }
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+    const char* romTid = getRomTid(ndsHeader);
+	if (strncmp(romTid, "AWD", 3) == 0) return true;	// Fix corrupted 3D model bug
+
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
 
 	// Card irq enable
