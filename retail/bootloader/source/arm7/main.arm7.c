@@ -1061,7 +1061,7 @@ int arm7_main(void) {
 			}
 		} else if (((u32)ndsHeader->arm9destination == 0x02004000) || (moduleParams->sdk_version < 0x2008000)) {
 			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
-						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION2;
+						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION1;
 			if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
