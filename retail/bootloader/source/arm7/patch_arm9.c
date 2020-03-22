@@ -1485,8 +1485,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
 	patchReset(ce9, ndsHeader, moduleParams);
-	
-	getSleep(ce9, ndsHeader, moduleParams, usesThumb);
+
+	//getSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	randomPatch(ndsHeader, moduleParams);
 
