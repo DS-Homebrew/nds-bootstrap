@@ -254,20 +254,18 @@ static void waitForArm7(void) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
                 sleep(1);
-                IPC_SendSync(0xEE24);
+                IPC_SendSync(0x4);
                 count=1000;
             }
             count--;
         }
     } else {*/
         while (sharedAddr[3] != (vu32)0) {
-			/*if(ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
-				sleepMs(1);
-			} else { if(count==20000000) {
+			/*if(count==20000000) {
                 IPC_SendSync(0x4);
                 count=0;
             }
-            count++; }*/
+            count++;*/
         }
     //}
 }
@@ -292,7 +290,6 @@ void triggerAsyncPrefetch(sector) {
 		if(slot==-1) {
 			addToAsyncQueue(sector);
 			// send a command to the arm7 to fill the main RAM cache
-			//u32 commandRead = 0x020ff800;
 			u32 commandRead = (dmaLed ? 0x020FF80A : 0x020FF808);
 
 			slot = allocateCacheSlot();
