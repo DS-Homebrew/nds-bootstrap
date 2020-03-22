@@ -79,6 +79,12 @@ static u32* cacheDescriptor = (u32*)0x02710000;
 static u32* cacheCounter = (u32*)0x02712000;
 static u32 accessCounter = 0;
 
+static u32 asyncSector = 0;
+static u32 asyncQueue[5];
+static int aQHead = 0;
+static int aQTail = 0;
+static int aQSize = 0;
+
 static u32 cacheAddress = CACHE_ADRESS_START;
 static u16 cacheSlots = retail_CACHE_SLOTS_16KB;
 #endif
@@ -115,7 +121,7 @@ static void waitFrames(int count) {
 }
 
 static int readCount = 0;
-static bool sleepMsEnabled = false;
+/*static bool sleepMsEnabled = false;
 
 static void sleepMs(int ms) {
 	extern void callSleepThumb(int ms);
@@ -132,7 +138,7 @@ static void sleepMs(int ms) {
     } else if(ce9->thumbPatches->sleepRef) {
         callSleepThumb(ms);
     }
-}
+}*/
 
 #ifndef DLDI
 static int allocateCacheSlot(void) {
@@ -168,6 +174,31 @@ static void updateDescriptor(int slot, u32 sector) {
 	*(cacheDescriptor+slot) = sector;
 	*(cacheCounter+slot) = accessCounter;
 }
+
+void addToAsyncQueue(sector) {
+	asyncQueue[aQHead] = sector;
+	aQHead++;
+	aQSize++;
+	if(aQHead>4) {
+		aQHead=0;
+	}
+	if(aQSize>5) {
+		aQSize=5;
+		aQTail++;
+		if(aQTail>4) aQTail=0;
+	}
+}
+
+u32 popFromAsyncQueueHead() {	
+	if(aQSize>0) {
+	
+		aQHead--;
+		if(aQHead == -1) aQHead = 4;
+		aQSize--;
+		
+		return asyncQueue[aQHead];
+	} else return 0;
+}
 #endif
 
 /*static void sleep(u32 ms) {
@@ -182,7 +213,7 @@ static void updateDescriptor(int slot, u32 sector) {
 
 static void waitForArm7(void) {
     IPC_SendSync(0x4);
-    int count = 0;
+    //int count = 0;
     /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
         while (sharedAddr[3] != (vu32)0) {
            if(count==0) {
@@ -194,9 +225,9 @@ static void waitForArm7(void) {
         }
     } else {*/
         while (sharedAddr[3] != (vu32)0) {
-			if(ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+			/*if(ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 				sleepMs(1);
-			}/* else { if(count==20000000) {
+			} else { if(count==20000000) {
                 IPC_SendSync(0x4);
                 count=0;
             }
@@ -206,7 +237,66 @@ static void waitForArm7(void) {
 }
 
 #ifndef DLDI
-static inline 
+void triggerAsyncPrefetch(sector) {	
+	if(asyncSector == 0) {
+		int slot = getSlotForSector(sector);
+		// read max 32k via the WRAM cache
+		// do it only if there is no async command ongoing
+		if(slot==-1) {
+			addToAsyncQueue(sector);
+			// send a command to the arm7 to fill the main RAM cache
+			//u32 commandRead = 0x020ff800;
+			u32 commandRead = (dmaLed ? 0x020FF80A : 0x020FF808);
+
+			slot = allocateCacheSlot();
+
+			vu8* buffer = getCacheAddress(slot);
+
+			cacheDescriptor[slot] = sector;
+			cacheCounter[slot] = 0x0FFFFFFF; // async marker
+			asyncSector = sector;		
+
+			// write the command
+			sharedAddr[0] = buffer;
+			sharedAddr[1] = ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			IPC_SendSync(0x4);
+
+			// do it asynchronously
+			/*waitForArm7();*/
+		}	
+	}	
+}
+
+void processAsyncCommand() {
+	if(asyncSector != 0) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			// get back the data from arm7
+			if(sharedAddr[3] == (vu32)0) {
+				updateDescriptor(slot, asyncSector);
+				asyncSector = 0;
+			}			
+		}	
+	}
+}
+
+void getAsyncSector() {
+	if(asyncSector != 0) {
+		int slot = getSlotForSector(asyncSector);
+		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+			// get back the data from arm7
+			waitForArm7();
+
+			updateDescriptor(slot, asyncSector);
+			asyncSector = 0;
+		}	
+	}	
+}
+
+static inline
 /*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
 \brief copies from source to destination on one of the 4 available channels in half words.  
 This function returns immediately after starting the transfer.
@@ -326,11 +416,9 @@ void continueCardReadDmaArm9() {
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
         		// Send a command to the ARM7 to fill the RAM cache
-
         		slot = allocateCacheSlot();
 
         		buffer = getCacheAddress(slot);
-
 
         		// Write the command
         		sharedAddr[0] = (vu32)buffer;
@@ -471,6 +559,8 @@ void cardSetDma(void) {
 
 	accessCounter++;  
 
+	processAsyncCommand();
+
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		sharedAddr[0] = (vu32)dst;
@@ -488,8 +578,9 @@ void cardSetDma(void) {
 		vu8* buffer = getCacheAddress(slot);
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
-			// Send a command to the ARM7 to fill the RAM cache
+			getAsyncSector();
 
+			// Send a command to the ARM7 to fill the RAM cache
 			slot = allocateCacheSlot();
 
 			buffer = getCacheAddress(slot);
@@ -541,6 +632,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	accessCounter++;
 
+	processAsyncCommand();
+
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
@@ -557,8 +650,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
+			u32 nextSector = sector+ce9->cacheBlockSize;
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
+				getAsyncSector();
+
 				// Send a command to the ARM7 to fill the RAM cache
 				commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
@@ -572,13 +668,30 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
-				//REG_IME = 0;
 				waitForArm7();
-				//REG_IME = 1;
+
+				updateDescriptor(slot, sector);	
+	
+				triggerAsyncPrefetch(nextSector);
+			} else {
+				if(cacheCounter[slot] == 0x0FFFFFFF) {
+					// prefetch successfull
+					getAsyncSector();
+					
+					triggerAsyncPrefetch(nextSector);
+				} else {
+					int i;
+					for(i=0; i<5; i++) {
+						if(asyncQueue[i]==sector) {
+							// prefetch successfull
+							triggerAsyncPrefetch(nextSector);
+							break;
+						}
+					}
+				}
+				updateDescriptor(slot, sector);
 			}
 
-			updateDescriptor(slot, sector);	
-	
 			u32 len2 = len;
 			if ((src - sector) + len2 > ce9->cacheBlockSize) {
 				len2 = sector - src + ce9->cacheBlockSize;

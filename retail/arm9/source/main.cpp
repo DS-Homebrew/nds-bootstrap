@@ -159,7 +159,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("ceCached: %s\n", btoa(conf->ceCached));
-	dbg_printf("cacheBlockSize: %s\n", conf->cacheBlockSize==1 ? "8000" : "4000");
+	//dbg_printf("cacheBlockSize: %s\n", conf->cacheBlockSize==1 ? "8000" : "4000");
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);

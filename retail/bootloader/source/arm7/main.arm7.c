@@ -126,8 +126,9 @@ static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 static u32 softResetParams = 0;
 
 static u32 generatedCacheBlockSize(void) {
-	if (cacheBlockSize == 1) return 0x8000;
-	return 0x4000;
+	/*if (cacheBlockSize == 1) return 0x8000;
+	return 0x4000;*/
+	return 0x8000;
 }
 
 static void initMBK(void) {

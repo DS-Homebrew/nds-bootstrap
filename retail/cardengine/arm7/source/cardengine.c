@@ -614,6 +614,22 @@ static void runCardEngineCheck(void) {
               }
           }
 
+          if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF808) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF80A)) {
+				sdRead = true;
+              dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF80A);
+              if(start_cardRead_arm9()) {
+                    *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+					sharedAddr[4] = 0x025AAB08;
+                    IPC_SendSync(0x8);
+              } else {
+                if (resume_cardRead_arm9()) { 
+                    *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
+					sharedAddr[4] = 0x025AAB08;
+                    IPC_SendSync(0x8);
+				}
+              }
+          }
+
 			#ifndef TWLSDK
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
 				sdRead = true;
@@ -643,12 +659,12 @@ static void runCardEngineCheck(void) {
     			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
     		}*/
         } else {
-            //if(resume_cardRead_arm9()) {
-			    while(!resume_cardRead_arm9()) {} 
+            if(resume_cardRead_arm9()) {
+			    //while(!resume_cardRead_arm9()) {} 
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 				sharedAddr[4] = 0x025AAB08;
                 IPC_SendSync(0x8);
-            //}
+            }
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
@@ -987,6 +1003,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
+		while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		fileRead(dst, *savFile, src, len, -1);
@@ -1012,6 +1029,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
+		while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1038,6 +1056,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
+		while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1173,6 +1192,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
+		while (readOngoing) {}
 		driveInitialize();
 		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
