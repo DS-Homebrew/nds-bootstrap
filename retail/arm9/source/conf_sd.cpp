@@ -204,7 +204,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
     // Load ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x3000, cebin);
+		fread(lz77ImageBuffer, 1, 0x2000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM9_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
@@ -213,8 +213,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
     // Load reloc ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_reloc.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x3000, cebin);
+		fread(lz77ImageBuffer, 1, 0x2000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION);
+		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
+	}
+	fclose(cebin);
+
+    // Load reloc ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_reloc_pf.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x2000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);

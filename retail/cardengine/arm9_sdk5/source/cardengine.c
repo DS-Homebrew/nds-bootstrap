@@ -67,11 +67,13 @@ static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5] = {0xFFFFFFFF};
 static u32 cacheCounter[dev_CACHE_SLOTS_16KB_SDK5];
 static u32 accessCounter = 0;
 
+#if ASYNCPF
 static u32 asyncSector = 0;
 static u32 asyncQueue[5];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
+#endif
 
 static u32 cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 static u16 cacheSlots = retail_CACHE_SLOTS_16KB_SDK5;
@@ -134,6 +136,7 @@ static void sleepMs(int ms) {
 }*/
 
 #ifndef DLDI
+#if ASYNCPF
 void addToAsyncQueue(sector) {
 	asyncQueue[aQHead] = sector;
 	aQHead++;
@@ -158,6 +161,7 @@ u32 popFromAsyncQueueHead() {
 		return asyncQueue[aQHead];
 	} else return 0;
 }
+#endif
 
 static inline 
 bool ndmaBusy(uint8 ndmaSlot) {
@@ -279,6 +283,7 @@ void endCardReadDma() {
 
 static u32 * dmaParams = NULL;
 #ifndef DLDI
+#ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
@@ -337,6 +342,7 @@ void getAsyncSector() {
 		}	
 	}	
 }
+#endif
 
 static int currentLen=0;
 static bool dmaReadOnArm7 = false;
@@ -518,7 +524,9 @@ void cardSetDma (u32 * params) {
 
 	accessCounter++;  
   
+	#ifdef ASYNCPF
 	processAsyncCommand();
+	#endif
 
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
@@ -537,7 +545,9 @@ void cardSetDma (u32 * params) {
 		vu8* buffer = getCacheAddress(slot);
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
+			#ifdef ASYNCPF
 			getAsyncSector();
+			#endif
 
 			// Send a command to the ARM7 to fill the RAM cache
 			slot = allocateCacheSlot();
@@ -600,7 +610,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 
 	accessCounter++;
 
+	#ifdef ASYNCPF
 	processAsyncCommand();
+	#endif
 
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
@@ -621,7 +633,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 			u32 nextSector = sector+ce9->cacheBlockSize;
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
+				#ifdef ASYNCPF
 				getAsyncSector();
+				#endif
 
 				// Send a command to the ARM7 to fill the RAM cache
 				commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
@@ -640,8 +654,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 
 				updateDescriptor(slot, sector);	
 	
+				#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
+				#endif
 			} else {
+				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
@@ -657,6 +674,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 						}
 					}
 				}
+				#endif
 				updateDescriptor(slot, sector);
 			}
 

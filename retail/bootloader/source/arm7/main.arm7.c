@@ -1067,7 +1067,11 @@ int arm7_main(void) {
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}
-			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
+			if (strncmp(romTid, "AMH", 3) == 0) {
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
+			} else {
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
+			}
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 		} else if (ceCached) {
 			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
