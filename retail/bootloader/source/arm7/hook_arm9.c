@@ -117,6 +117,7 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 saveOnFlashcard,
 	u32 cacheBlockSize,
+	u32 asyncPrefetch,
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
@@ -129,6 +130,7 @@ int hookNdsRetailArm9(
 	ce9->saveCluster            = saveCluster;
 	ce9->saveOnFlashcard        = saveOnFlashcard;
 	ce9->cacheBlockSize         = cacheBlockSize;
+	ce9->asyncPrefetch          = asyncPrefetch;
 	ce9->ROMinRAM               = ROMinRAM;
 	ce9->dsiMode                = dsiMode; // SDK 5
 	ce9->enableExceptionHandler = enableExceptionHandler;

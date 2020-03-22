@@ -1146,6 +1146,7 @@ int arm7_main(void) {
 			savFile->firstCluster,
 			saveOnFlashcard,
 			generatedCacheBlockSize(),
+			(strncmp(romTid, "AMH", 3) == 0),
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),
