@@ -77,6 +77,7 @@ static bool driveInited = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 static bool dmaLed = false;
+static bool saveInRam = false;
 
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
@@ -209,6 +210,9 @@ static void driveInitialize(void) {
 	dbg_hexa(saveCluster);	
 	dbg_printf("\n");
 	#endif
+	
+	const char* romTid = getRomTid(ndsHeader);
+	saveInRam = (strncmp(romTid, "AMH", 3) == 0);
 
 	driveInited = true;
 }
@@ -1001,7 +1005,11 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
-		fileRead(dst, *savFile, src, len, -1);
+		if (saveInRam) {
+			tonccpy(dst, (char*)0x02400000 + src, len);
+		} else {
+			fileRead(dst, *savFile, src, len, -1);
+		}
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -1028,6 +1036,9 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
+		if (saveInRam) {
+			tonccpy((char*)0x02400000 + dst, src, len);
+		}
 		fileWrite(src, *savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}
@@ -1055,6 +1066,9 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
+		if (saveInRam) {
+			tonccpy((char*)0x02400000 + dst, src, len);
+		}
 		fileWrite(src, *savFile, dst, len, -1);
   		unlockMutex(&saveMutex);
 	}
