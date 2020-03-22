@@ -554,8 +554,7 @@ void cardSetDma(void) {
 
 	accessCounter++;  
 
-	if (ce9->asyncPrefetch)
-		processAsyncCommand();
+	processAsyncCommand();
 
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
@@ -574,8 +573,7 @@ void cardSetDma(void) {
 		vu8* buffer = getCacheAddress(slot);
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
-			if (ce9->asyncPrefetch)
-				getAsyncSector();
+			getAsyncSector();
 
 			// Send a command to the ARM7 to fill the RAM cache
 			slot = allocateCacheSlot();
@@ -629,8 +627,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	accessCounter++;
 
-	if (ce9->asyncPrefetch)
-		processAsyncCommand();
+	processAsyncCommand();
 
 	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
@@ -670,10 +667,8 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				updateDescriptor(slot, sector);	
 	
-				if (ce9->asyncPrefetch)
-					triggerAsyncPrefetch(nextSector);
+				triggerAsyncPrefetch(nextSector);
 			} else {
-			  if (ce9->asyncPrefetch) {
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
@@ -689,7 +684,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 						}
 					}
 				}
-			  }
 				updateDescriptor(slot, sector);
 			}
 

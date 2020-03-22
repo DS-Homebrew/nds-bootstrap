@@ -69,7 +69,6 @@ typedef struct cardengineArm9 {
     u32 cardStruct0;
     u32 cacheStruct;
     u32 cacheBlockSize;
-    u32 asyncPrefetch;
     u32 ROMinRAM;
     u32 dsiMode;
     u32 enableExceptionHandler;
