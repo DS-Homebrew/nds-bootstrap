@@ -1075,6 +1075,7 @@ int arm7_main(void) {
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 		} else if (ceCached) {
 			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
