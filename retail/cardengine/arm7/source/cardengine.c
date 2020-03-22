@@ -571,15 +571,6 @@ static void runCardEngineCheck(void) {
 		IPC_SendSync(0x7);
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
-	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
-	|| (!ROMinRAM && !gameOnFlashcard)) {
-		/* Proceed below */
-	} else {
-		return;
-	}
-
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
   		driveInitialize();
   

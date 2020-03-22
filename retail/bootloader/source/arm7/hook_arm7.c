@@ -236,14 +236,14 @@ int hookNdsRetailArm7(
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 	ce7->preciseVolumeControl     = preciseVolumeControl;
 
-	//const char* romTid = getRomTid(ndsHeader);
 	*vblankHandler = ce7->patches->vblankHandler;
-	*ipcSyncHandler = ce7->patches->fifoHandler;
-	/*if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	const char* romTid = getRomTid(ndsHeader);
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		*ndma0Handler = ce7->patches->ndma0Handler;
-	}*/
+		*ipcSyncHandler = ce7->patches->fifoHandler;
+		//*ndma0Handler = ce7->patches->ndma0Handler;
+	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);

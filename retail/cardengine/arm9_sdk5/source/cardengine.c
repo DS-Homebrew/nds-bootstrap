@@ -373,7 +373,11 @@ void continueCardReadDmaArm9() {
 
         u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
-        if (len > 0) {
+		#ifdef ASYNCPF
+		processAsyncCommand();
+		#endif
+
+		if (len > 0) {
 			accessCounter++;  
 
             // Read via the main RAM cache
@@ -381,6 +385,10 @@ void continueCardReadDmaArm9() {
         	vu8* buffer = getCacheAddress(slot);
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
+				#ifdef ASYNCPF
+				getAsyncSector();
+				#endif
+
         		// Send a command to the ARM7 to fill the RAM cache
         		slot = allocateCacheSlot();
         
@@ -401,6 +409,23 @@ void continueCardReadDmaArm9() {
                 return;
 
         	} else {
+				#ifdef ASYNCPF
+				if(cacheCounter[slot] == 0x0FFFFFFF) {
+					// prefetch successfull
+					getAsyncSector();
+
+					triggerAsyncPrefetch(nextSector);
+				} else {
+					int i;
+					for(i=0; i<5; i++) {
+						if(asyncQueue[i]==sector) {
+							// prefetch successfull
+							triggerAsyncPrefetch(nextSector);
+							break;
+						}
+					}
+				}
+				#endif
         		updateDescriptor(slot, sector);	
         
         		u32 len2 = len;
@@ -427,7 +452,7 @@ void continueCardReadDmaArm9() {
           //resetRequestIrqMask(IRQ_DMA0 << dma);
           //disableDMA(dma); 
           endCardReadDma();
-       } 
+		}
     }
 }
 
@@ -507,18 +532,10 @@ void cardSetDma (u32 * params) {
   			len2 -= len2 % 32;
   		}
 
-        /*ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
-        while (ndmaBusy(0));
-		endCardReadDma();*/
-
-  		// Copy via dma
+		// Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
-        dmaReadOnArm9 = true;
-        currentLen = len2;
-
-        sharedAddr[3] = commandPool;
-        IPC_SendSync(0x3);        
-
+        while (ndmaBusy(0));
+		endCardReadDma();
 		return;
 	}
 

@@ -488,7 +488,7 @@ void continueCardReadDmaArm9() {
           //resetRequestIrqMask(IRQ_DMA0 << dma);
           //disableDMA(dma); 
           endCardReadDma();
-       } 
+		}
     }
 }
 
@@ -569,18 +569,10 @@ void cardSetDma(void) {
   			len2 -= len2 % 32;
   		}
 
-        /*ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
-        while (ndmaBusy(0));
-		endCardReadDma();*/
-
-  		// Copy via dma
+		// Copy via dma
         ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
-        dmaReadOnArm9 = true;
-        currentLen = len2;
-
-        sharedAddr[3] = commandPool;
-        IPC_SendSync(0x3);        
-
+        while (ndmaBusy(0));
+		endCardReadDma();
 		return;
 	}
 
