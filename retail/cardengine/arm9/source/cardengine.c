@@ -120,6 +120,13 @@ static void waitFrames(int count) {
 	}
 }
 
+static void waitMs(int count) {
+	for (int i = 0; i < count; i++) {
+		while ((REG_VCOUNT % 32) != 31);
+		while ((REG_VCOUNT % 32) == 31);
+	}
+}
+
 static int readCount = 0;
 /*static bool sleepMsEnabled = false;
 
@@ -212,26 +219,16 @@ u32 popFromAsyncQueueHead() {
 
 
 static void waitForArm7(void) {
-    IPC_SendSync(0x4);
-    //int count = 0;
-    /*if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
-        while (sharedAddr[3] != (vu32)0) {
-           if(count==0) {
-                sleep(1);
-                IPC_SendSync(0x4);
-                count=1000;
-            }
-            count--;
-        }
-    } else {*/
-        while (sharedAddr[3] != (vu32)0) {
-			/*if(count==20000000) {
-                IPC_SendSync(0x4);
-                count=0;
-            }
-            count++;*/
-        }
-    //}
+	IPC_SendSync(0x4);
+	int count = 0;
+	while (sharedAddr[3] != (vu32)0) {
+		if (count==0) {
+			waitMs(1);
+			IPC_SendSync(0x4);
+			count=1000;
+		}
+		count--;
+	}
 }
 
 #ifndef DLDI
@@ -243,7 +240,8 @@ void triggerAsyncPrefetch(sector) {
 		if(slot==-1) {
 			addToAsyncQueue(sector);
 			// send a command to the arm7 to fill the main RAM cache
-			u32 commandRead = (dmaLed ? 0x020FF80A : 0x020FF808);
+			//u32 commandRead = (dmaLed ? 0x020FF80A : 0x020FF808);
+			u32 commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
 
 			slot = allocateCacheSlot();
 

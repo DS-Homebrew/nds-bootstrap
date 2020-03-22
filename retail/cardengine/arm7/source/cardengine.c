@@ -605,16 +605,16 @@ static void runCardEngineCheck(void) {
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
               } else {
-                while(!resume_cardRead_arm9()) {}
-                //if (resume_cardRead_arm9()) { 
+                //while(!resume_cardRead_arm9()) {}
+                if (resume_cardRead_arm9()) { 
                     *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 					sharedAddr[4] = 0x025AAB08;
                     IPC_SendSync(0x8);
-				//}
+				}
               }
           }
 
-          if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF808) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF80A)) {
+          /*if ((*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF808) || (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF80A)) {
 				sdRead = true;
               dmaLed = (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF80A);
               if(start_cardRead_arm9()) {
@@ -628,7 +628,7 @@ static void runCardEngineCheck(void) {
                     IPC_SendSync(0x8);
 				}
               }
-          }
+          }*/
 
 			#ifndef TWLSDK
             if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x025FFC01) {
@@ -653,18 +653,13 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}*/
 			#endif
-    
-    		/*if (*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) == (vu32)0x020FF800) {
-    			asyncCardRead_arm9();
-    			*(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
-    		}*/
         } else {
-            //if(resume_cardRead_arm9()) {
-			    while(!resume_cardRead_arm9()) {} 
+            if(resume_cardRead_arm9()) {
+			    //while(!resume_cardRead_arm9()) {} 
                 *(vu32*)(CARDENGINE_SHARED_ADDRESS+0xC) = 0;
 				sharedAddr[4] = 0x025AAB08;
                 IPC_SendSync(0x8);
-            //}
+            }
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
