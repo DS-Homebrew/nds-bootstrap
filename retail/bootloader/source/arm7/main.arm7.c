@@ -1067,7 +1067,7 @@ int arm7_main(void) {
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}
-			if (strncmp(romTid, "AMH", 3) == 0) {
+			if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
 			} else {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);

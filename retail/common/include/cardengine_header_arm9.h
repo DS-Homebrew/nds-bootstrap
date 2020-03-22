@@ -22,7 +22,6 @@ typedef struct cardengineArm9Patches {
     u32* slot2_read;
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;
-    u32* sleepRef;
     u32* terminateForPullOutRef;
     u32* swi02;
     u32* reset_arm9;
@@ -49,7 +48,6 @@ typedef struct cardengineArm9ThumbPatches {
     u32* slot2_read;
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;
-    u32* sleepRef;
     u32* terminateForPullOutRef;
 } __attribute__ ((__packed__)) cardengineArm9ThumbPatches;
 

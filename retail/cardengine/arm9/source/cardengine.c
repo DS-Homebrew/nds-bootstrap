@@ -408,14 +408,23 @@ void continueCardReadDmaArm9() {
 
         u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
+		#ifdef ASYNCPF
+		processAsyncCommand();
+		#endif
+
         if (len > 0) {
 			accessCounter++;  
 
             // Read via the main RAM cache
         	int slot = getSlotForSector(sector);
         	vu8* buffer = getCacheAddress(slot);
+			u32 nextSector = sector+ce9->cacheBlockSize;
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
+				#ifdef ASYNCPF
+				getAsyncSector();
+				#endif
+
         		// Send a command to the ARM7 to fill the RAM cache
         		slot = allocateCacheSlot();
 
@@ -436,6 +445,23 @@ void continueCardReadDmaArm9() {
                 return;
 
         	} else {
+				#ifdef ASYNCPF
+				if(cacheCounter[slot] == 0x0FFFFFFF) {
+					// prefetch successfull
+					getAsyncSector();
+
+					triggerAsyncPrefetch(nextSector);
+				} else {
+					int i;
+					for(i=0; i<5; i++) {
+						if(asyncQueue[i]==sector) {
+							// prefetch successfull
+							triggerAsyncPrefetch(nextSector);
+							break;
+						}
+					}
+				}
+				#endif
         		updateDescriptor(slot, sector);	
 
         		u32 len2 = len;
@@ -579,6 +605,7 @@ void cardSetDma(void) {
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
+		u32 nextSector = sector+ce9->cacheBlockSize;
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
 			#ifdef ASYNCPF
@@ -603,6 +630,23 @@ void cardSetDma(void) {
 
 			updateDescriptor(slot, sector);
 		} else {
+			#ifdef ASYNCPF
+			if(cacheCounter[slot] == 0x0FFFFFFF) {
+				// prefetch successfull
+				getAsyncSector();
+
+				triggerAsyncPrefetch(nextSector);
+			} else {
+				int i;
+				for(i=0; i<5; i++) {
+					if(asyncQueue[i]==sector) {
+						// prefetch successfull
+						triggerAsyncPrefetch(nextSector);
+						break;
+					}
+				}
+			}
+			#endif
 			updateDescriptor(slot, sector);	
 
 			u32 len2 = len;
@@ -689,7 +733,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
-					
+
 					triggerAsyncPrefetch(nextSector);
 				} else {
 					int i;

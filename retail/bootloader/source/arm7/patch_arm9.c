@@ -551,24 +551,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	/*bool sleepAllowed = false;
-    const char* romTid = getRomTid(ndsHeader);
-	static const char list[][4] = {
-		"B3R",  // Pokemon Ranger: Guardian Signs // works, fixes some screen flickers
-		"A3Y",  // Sonic Rush Adventure // works, fixes some screen flickers
-    };
-
-	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
-		if (memcmp(romTid, list[i], 3) == 0) {
-			// Found a match.
-			sleepAllowed = true;
-			break;
-		}
-	}
-
-	if (!sleepAllowed) return;*/
-
+/*static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb);
@@ -587,7 +570,7 @@ static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		dbg_hexa(offset);
 		dbg_printf("\n\n");
 	}
-}
+}*/
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
