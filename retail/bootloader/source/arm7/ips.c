@@ -10,8 +10,7 @@
 #include "tonccpy.h"
 
 extern u32 consoleModel;
-extern u32 extendedMemory;
-extern bool dsiModeConfirmed;
+extern bool extendedMemoryConfirmed;
 
 void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -32,7 +31,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
 			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
-			if (extendedMemory && ROMinRAM && !dsiModeConfirmed) {
+			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
 			} else if (consoleModel == 0 && higherMem) {
 				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;

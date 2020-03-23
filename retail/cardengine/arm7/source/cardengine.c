@@ -230,7 +230,7 @@ static void initialize(void) {
 	#endif
 
 	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (extendedMemory && ROMinRAM) {
+	if (extendedMemory) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
 		romLocation = (char*)(ROM_LOCATION_EXT);
 	}

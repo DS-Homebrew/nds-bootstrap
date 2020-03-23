@@ -198,13 +198,13 @@ void cardSetDma(u32 * params) {
 
 	// Copy via dma
 	int oldIME = 0;
-	if (ce9->extendedMemory && !ce9->dsiMode) {
+	if (ce9->extendedMemory) {
 		oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 	}
 	ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
 	while (ndmaBusy(0));
-	if (ce9->extendedMemory && !ce9->dsiMode) {
+	if (ce9->extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 	}
@@ -352,12 +352,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	int oldIME = 0;
-	if (ce9->extendedMemory && !ce9->dsiMode) {
+	if (ce9->extendedMemory) {
 		oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 	}
 	tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
-	if (ce9->extendedMemory && !ce9->dsiMode) {
+	if (ce9->extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 	}

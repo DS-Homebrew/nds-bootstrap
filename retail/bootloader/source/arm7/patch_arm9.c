@@ -13,7 +13,6 @@
 
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
-extern u32 extendedMemory;
 
 extern bool gbaRomFound;
 

@@ -523,19 +523,26 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+	bool res = false;
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "A24", 3) == 0
 	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0) {
-		return false;
-	} else if (extendedMemory && !dsiModeConfirmed) {
-		return ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01C00000)
-			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00C00000));
-	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
+		res = false;
+	} else {
+		res = ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00800000));
+
+	  if (!res && extendedMemory && !dsiModeConfirmed) {
+		res = ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01C00000)
+			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00C00000));
+		extendedMemoryConfirmed = res;
+	  }
+	}
+	return res;
 }
 
 static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode, bool isDSiWare) {
@@ -638,13 +645,14 @@ static void NTR_BIOS() {
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load ROM into RAM
 	u32 romLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (extendedMemory) {
+	if (extendedMemoryConfirmed) {
 		romLocation = (u32)ROM_LOCATION_EXT;
 	}
 	fileRead((char*)romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
 	dbg_printf("ROM loaded into RAM\n");
-	if (extendedMemory) dbg_printf("Complete 28MB used\n");
+	if (extendedMemoryConfirmed) dbg_printf("Complete 28MB used\n");
+	dbg_printf("\n");
 
 	if (!isSdk5(moduleParams)) {
 		if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
@@ -1056,7 +1064,7 @@ int arm7_main(void) {
 
 		if (isSdk5(moduleParams)) {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
-			if (extendedMemory && ROMinRAM) {
+			if (extendedMemoryConfirmed) {
 				ce9Location = (((u32)ndsHeader->arm9destination == 0x02004000) ? CARDENGINE_ARM9_CACHED_LOCATION1 : CARDENGINE_ARM9_CACHED_LOCATION);
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1200);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1200);
@@ -1109,7 +1117,7 @@ int arm7_main(void) {
 				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x2000);
 			}
 		} else {
-			if (extendedMemory && ROMinRAM) {
+			if (extendedMemoryConfirmed) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1200);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1200);
@@ -1157,7 +1165,7 @@ int arm7_main(void) {
 			language,
 			dsiModeConfirmed,
 			dsiSD,
-			extendedMemory,
+			extendedMemoryConfirmed,
 			ROMinRAM,
 			consoleModel,
 			romRead_LED,
@@ -1178,7 +1186,7 @@ int arm7_main(void) {
 			savFile->firstCluster,
 			saveOnFlashcard,
 			generatedCacheBlockSize(),
-			extendedMemory,
+			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),
@@ -1190,13 +1198,11 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
-			if (extendedMemory && !dsiModeConfirmed) {
+			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
 				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 			}
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
-
-			arm9_extendedMemory = (extendedMemory && ROMinRAM);
 		} else {
 			if (strncmp(romTid, "UBR", 3) != 0) {
 				loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
