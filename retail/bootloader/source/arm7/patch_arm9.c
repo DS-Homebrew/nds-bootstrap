@@ -795,7 +795,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2400); // shrink heap by 9 KB (or for SDK5, 12 KB)
+	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2000); // shrink heap by 8 KB (or for SDK5, 12 KB)
 
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -841,7 +841,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (gameOnFlashcard ? 0x023DBC00 : 0x023DD000); // shrink heap by 17KB or 12KB
+	*heapPointer = (gameOnFlashcard ? 0x023DBC00 : 0x023DE000); // shrink heap by 17KB or 8KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);

@@ -219,14 +219,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-    // Load reloc ce9 binary
-	/*cebin = fopen("nitro:/cardengine_arm9_reloc_pf.lz77", "rb");
+    // Load ROMinRAM ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_romInRam.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x2000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
-	fclose(cebin);*/
+	fclose(cebin);
 
 	if (conf->gameOnFlashcard) {
 		// Load DLDI ce9 binary
