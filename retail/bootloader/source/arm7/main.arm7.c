@@ -1097,11 +1097,10 @@ int arm7_main(void) {
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x2000);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
 				allowPatchHeapPointer2 = true;
-			} else
-			ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
+			} else {
+				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
+			}
 			if(ce9Location) {
 				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x2000);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
