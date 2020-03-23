@@ -103,6 +103,7 @@ extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 cacheBlockSize;
+bool extendedMemory = true;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
@@ -126,10 +127,11 @@ static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 static u32 softResetParams = 0;
 
 static u32 generatedCacheBlockSize(void) {
-	/*if (cacheBlockSize == 1) return 0x8000;
-	return 0x4000;*/
-	return 0x8000;
+	if (cacheBlockSize == 1) return 0x8000;
+	return 0x4000;
 }
+
+bool allowPatchHeapPointer2 = false;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -213,7 +215,8 @@ static void resetMemory_ARM7(void) {
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x74000);		// clear part of EWRAM - except before 0x023F4000, which has the arm9 code
+	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
 	toncset((u32*)0x02400000, 0, 0x3BB000);	// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
@@ -526,6 +529,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0) {
 		return false;
+	} else if (extendedMemory && !dsiModeConfirmed) {
+		return ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01C00000)
+			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) <= 0x00C00000));
 	} else return ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) <= 0x01800000)
@@ -631,13 +637,18 @@ static void NTR_BIOS() {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load ROM into RAM
-	fileRead((char*)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION), file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
+	u32 romLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	if (extendedMemory) {
+		romLocation = (u32)ROM_LOCATION_EXT;
+	}
+	fileRead((char*)romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
 	dbg_printf("ROM loaded into RAM\n");
+	if (extendedMemory) dbg_printf("Complete 28MB used\n");
 
 	if (!isSdk5(moduleParams)) {
-		if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-			*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+			*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -664,8 +675,8 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
 
 		if (!isSdk5(moduleParams)) {
-			if(*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-				*(u32*)((ROM_LOCATION-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
 			}
 		}
 	}
@@ -984,6 +995,7 @@ int arm7_main(void) {
 			dbg_printf("\n");
 			errorOutput();
 		}
+		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
 	} else {
 		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
 			gbaRomFound = true;
@@ -1016,6 +1028,11 @@ int arm7_main(void) {
 				NTR_BIOS();
 			}
 		}
+
+		allowPatchHeapPointer2 = 
+		  ((strncmp(romTid, "B3R", 3) == 0)
+		|| gameOnFlashcard
+		|| (isSdk5(moduleParams) && extendedMemory && (u32)ndsHeader->arm9destination != 0x02004000));
 
 		nocashMessage("Trying to patch the card...\n");
 
@@ -1067,33 +1084,42 @@ int arm7_main(void) {
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}
-			if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
+			/*if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
-			} else {
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
-			}
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
+			} else {*/
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+			//}
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 		} else if (ceCached) {
 			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
 			)
 			{
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+				allowPatchHeapPointer2 = true;
 			} else
 			ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
 			if(ce9Location) {
-					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x2000);
-					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
+					tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
 			}
 		} else {
+			if (extendedMemory) {
+				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 0x3000);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x3000);
+				allowPatchHeapPointer2 = true;
+			} else
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x2000);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)CARDENGINE_ARM9_BUFFERED_LOCATION, 0x3000);
 		}
+
+		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
@@ -1131,6 +1157,7 @@ int arm7_main(void) {
 			language,
 			dsiModeConfirmed,
 			dsiSD,
+			extendedMemory,
 			ROMinRAM,
 			consoleModel,
 			romRead_LED,
@@ -1151,6 +1178,7 @@ int arm7_main(void) {
 			savFile->firstCluster,
 			saveOnFlashcard,
 			generatedCacheBlockSize(),
+			extendedMemory,
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(ndsHeader),
@@ -1162,7 +1190,13 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
+			if (extendedMemory && !dsiModeConfirmed) {
+				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
+				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
+			}
 			loadROMintoRAM(ndsHeader, moduleParams, *romFile);
+
+			arm9_extendedMemory = (extendedMemory && ROMinRAM);
 		} else {
 			if (strncmp(romTid, "UBR", 3) != 0) {
 				loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
@@ -1176,15 +1210,10 @@ int arm7_main(void) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x40000) {
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
-			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), consoleModel);
+			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);
 			dbg_printf("AP-fix found and applied\n");
 		}
 	}
-
-	toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
-
-    
-
 
 	arm9_boostVram = boostVram;
 	arm9_isSdk5 = isSdk5(moduleParams);

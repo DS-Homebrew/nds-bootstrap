@@ -831,7 +831,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 			overlaysSize = i;
 		}
 
-		if (ce9->consoleModel>0 ? overlaysSize<=0x1000000 : overlaysSize<=0x700000) {} else {
+		if (overlaysSize > (ce9->consoleModel>0 ? 0x1000000 : 0x700000)) {
 			loadOverlaysFromRam = false;
 		}
 		#else
@@ -853,7 +853,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 				overlaysSize = i;
 			}
 
-			if (ce9->consoleModel>0 ? overlaysSize<=0x1000000 : overlaysSize<=0x700000) {
+			if (overlaysSize <= (ce9->consoleModel>0 ? 0x1000000 : 0x700000)) {
 				for (int i = 0; i < overlaysSize; i += ce9->cacheBlockSize) {
 					cacheAddress += ce9->cacheBlockSize;
 					cacheSlots--;

@@ -32,6 +32,8 @@ cacheStruct:
 	.word	0x00000000
 cacheBlockSize:
 	.word	0x00000000
+extendedMemory:
+	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000
 dsiMode:

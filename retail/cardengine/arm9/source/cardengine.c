@@ -92,6 +92,10 @@ static u16 cacheSlots = retail_CACHE_SLOTS_16KB;
 #endif
 static u32 overlaysSize = 0;
 
+u32 overlayMaxSize(void) {
+	return (ce9->consoleModel>0 ? 0x1800000 : 0x800000);
+}
+
 static bool flagsSet = false;
 static bool loadOverlaysFromRam = true;
 static bool isDma = false;
@@ -570,8 +574,17 @@ void cardSetDma(void) {
   		}
 
 		// Copy via dma
+		int oldIME = 0;
+		if (ce9->extendedMemory && !ce9->dsiMode) {
+			oldIME = enterCriticalSection();
+			REG_SCFG_EXT += 0xC000;
+		}
         ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
         while (ndmaBusy(0));
+		if (ce9->extendedMemory && !ce9->dsiMode) {
+			REG_SCFG_EXT -= 0xC000;
+			leaveCriticalSection(oldIME);
+		}
 		endCardReadDma();
 		return;
 	}
@@ -819,7 +832,16 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Copy directly
+			int oldIME = 0;
+			if (ce9->extendedMemory && ce9->ROMinRAM && !ce9->dsiMode) {
+				oldIME = enterCriticalSection();
+				REG_SCFG_EXT += 0xC000;
+			}
 			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+			if (ce9->extendedMemory && ce9->ROMinRAM && !ce9->dsiMode) {
+				REG_SCFG_EXT -= 0xC000;
+				leaveCriticalSection(oldIME);
+			}
 		//}
 		// Update cardi common
 		cardStruct[0] = src + len;
@@ -938,7 +960,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				overlaysSize = i;
 			}
 
-			if (ce9->consoleModel>0 ? overlaysSize<=0x1800000 : overlaysSize<=0x800000) {} else {
+			if (overlaysSize > overlayMaxSize()) {
 				loadOverlaysFromRam = false;
 			}
 
@@ -958,6 +980,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					romLocation = retail_CACHE_ADRESS_START_SDK5;
 					cacheAddress = retail_CACHE_ADRESS_START_SDK5;
 				}*/
+			} else if (ce9->extendedMemory && ce9->ROMinRAM) {
+				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
+				romLocation = ROM_LOCATION_EXT;
 			}
 
 			if (ce9->consoleModel > 0) {
@@ -972,7 +997,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 					overlaysSize = i;
 				}
 
-				if (ce9->consoleModel>0 ? overlaysSize<=0x1800000 : overlaysSize<=0x800000) {
+				if (overlaysSize <= overlayMaxSize()) {
 					for (int i = 0; i < overlaysSize; i += ce9->cacheBlockSize) {
 						cacheAddress += ce9->cacheBlockSize;
 						cacheSlots--;
@@ -982,15 +1007,17 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 				}
 			}
 
-			debug8mbMpuFix();
+			//if (!ce9->extendedMemory) {
+				debug8mbMpuFix();
+			//}
 		}
 
 		//ndsHeader->romSize += 0x1000;
 
-		if (ce9->enableExceptionHandler && ce9==CARDENGINE_ARM9_LOCATION) {
+		//if (ce9->enableExceptionHandler && ce9==CARDENGINE_ARM9_LOCATION) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
-		}
+		//}
 		#endif
 		
 		flagsSet = true;

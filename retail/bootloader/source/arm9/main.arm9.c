@@ -47,6 +47,7 @@ bool isGSDD = false;
 bool arm9_isSdk5 = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
+bool arm9_extendedMemory = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -278,8 +279,13 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 				}
                 REG_SCFG_EXT |= BIT(16);	// NDMA
-				// lock SCFG
-				REG_SCFG_EXT &= ~(1UL << 31);
+				if (arm9_extendedMemory) {
+					// Switch to 4MB mode
+					REG_SCFG_EXT -= 0xC000;
+				} else {
+					// lock SCFG
+					REG_SCFG_EXT &= ~(1UL << 31);
+				}
 			}
 			arm9_stateFlag = ARM9_READY;
 		}

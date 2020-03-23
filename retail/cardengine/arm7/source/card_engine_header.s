@@ -23,6 +23,7 @@
 .global language
 .global dsiMode
 .global dsiSD
+.global extendedMemory
 .global ROMinRAM
 .global consoleModel
 .global romRead_LED
@@ -63,6 +64,8 @@ language:
 dsiMode:
 	.word	0x00000000
 dsiSD:
+	.word	0x00000000
+extendedMemory:
 	.word	0x00000000
 ROMinRAM:
 	.word	0x00000000

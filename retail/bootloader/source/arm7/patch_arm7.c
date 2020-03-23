@@ -193,11 +193,11 @@ u32 patchCardNdsArm7(
 	}
 	if (!saveResult) {
 		patchOffsetCache.savePatchType = 0;
-	} else if (strncmp(romTid, "AMH", 3) == 0) {
+	} /*else if (strncmp(romTid, "AMH", 3) == 0) {
 		extern u32 dsiSD;
 		aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
-		fileRead((char*)0x02400000, *savFile, 0, 0x80000, 0);
-	}
+		fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
+	}*/
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

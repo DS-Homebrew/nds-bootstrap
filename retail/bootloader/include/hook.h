@@ -45,6 +45,7 @@ int hookNdsRetailArm7(
 	u32 language,
 	u32 dsiMode, // SDK5
 	u32 dsiSD,
+	u32 extendedMemory,
 	u32 ROMinRAM,
 	u32 consoleModel,
 	u32 romRead_LED,
@@ -58,6 +59,7 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 saveOnFlashcard,
 	u32 cacheBlockSize,
+	u32 extendedMemory,
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK5
 	u32 enableExceptionHandler,

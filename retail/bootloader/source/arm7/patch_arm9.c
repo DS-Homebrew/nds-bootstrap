@@ -13,6 +13,7 @@
 
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
+extern bool extendedMemory;
 
 extern bool gbaRomFound;
 
@@ -794,7 +795,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2000); // shrink heap by 8 KB (or for SDK5, 12 KB)
+	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2400); // shrink heap by 9 KB (or for SDK5, 12 KB)
 
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -805,11 +806,10 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 }
 
 void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	extern bool allowPatchHeapPointer2;
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (moduleParams->sdk_version <= 0x2007FFF
-	|| (!gameOnFlashcard && (strncmp(romTid, "B3R", 3) != 0))
-	|| isSdk5(moduleParams)) {
+	if (moduleParams->sdk_version <= 0x2007FFF || !allowPatchHeapPointer2) {
 		return;
 	}
 
@@ -841,7 +841,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (gameOnFlashcard ? 0x023DBC00 : 0x023DE000); // shrink heap by 17KB or 8KB
+	*heapPointer = (gameOnFlashcard ? 0x023DBC00 : 0x023DD000); // shrink heap by 17KB or 12KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -1464,7 +1464,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	if (!ROMinRAM) {
+	if (!ROMinRAM || extendedMemory) {
 		patchHeapPointer2(moduleParams, ndsHeader);
 	}
 

@@ -71,6 +71,7 @@ typedef struct cardengineArm7 {
     u32 language; //u8
     u32 dsiMode;
     u32 dsiSD;
+    u32 extendedMemory;
     u32 ROMinRAM;
     u32 consoleModel;
     u32 romRead_LED;

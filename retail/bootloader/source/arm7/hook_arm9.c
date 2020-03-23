@@ -117,6 +117,7 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 saveOnFlashcard,
 	u32 cacheBlockSize,
+	u32 extendedMemory,
 	u32 ROMinRAM,
 	u32 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
@@ -129,14 +130,17 @@ int hookNdsRetailArm9(
 	ce9->saveCluster            = saveCluster;
 	ce9->saveOnFlashcard        = saveOnFlashcard;
 	ce9->cacheBlockSize         = cacheBlockSize;
+	ce9->extendedMemory         = extendedMemory;
 	ce9->ROMinRAM               = ROMinRAM;
 	ce9->dsiMode                = dsiMode; // SDK 5
 	ce9->enableExceptionHandler = enableExceptionHandler;
 	ce9->consoleModel           = consoleModel;
     
+	extern u32 iUncompressedSize;
+
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
  	if (!tableAddr) {
-		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
+		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
 	}
    
     if (!tableAddr) {
