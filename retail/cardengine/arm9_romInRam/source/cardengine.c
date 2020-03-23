@@ -167,6 +167,8 @@ static void clearIcache (void) {
       leaveCriticalSection(oldIME);*/
 }
 
+static u32 * dmaParams = NULL;
+
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
         volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
@@ -176,7 +178,7 @@ void endCardReadDma() {
     }    
 }
 
-void cardSetDma(void) {
+void cardSetDma(u32 * params) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     disableIrqMask(IRQ_CARD);
@@ -184,10 +186,9 @@ void cardSetDma(void) {
 
 	enableIPC_SYNC();
 
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel     
+	u32 src = (isSdk5(ce9->moduleParams) ? params[3] : cardStruct[0]);
+	u8* dst = (isSdk5(ce9->moduleParams) ? params[4] : (u8*)(cardStruct[1]));
+	u32 len = (isSdk5(ce9->moduleParams) ? params[5] : cardStruct[2]);
 
   	u32 len2 = len;
   	if (len2 > 512) {
@@ -224,13 +225,17 @@ bool isNotTcm(u32 address, u32 len) {
     && (address+len < base || address+len> base+0x4000);     
 }  
 
-u32 cardReadDma() {
+u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
     
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel
+	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
+	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
+    u32 dma = (isSdk5(ce9->moduleParams) ? dma0 : cardStruct[3]); // dma channel
+
+	dmaParams[3] = src;
+	dmaParams[4] = (u32)dst;
+	dmaParams[5] = len;
 
     if(dma >= 0 
         && dma <= 3 
@@ -251,7 +256,7 @@ u32 cardReadDma() {
 
             cacheFlush();
 
-            cardSetDma();
+            cardSetDma(dmaParams);
 
             return true;
 		} else {
