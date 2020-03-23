@@ -24,6 +24,7 @@ typedef struct configuration {
 	u32 patchMpuSize;
 	bool ceCached;	// SDK 1-4
 	int cacheBlockSize;
+	bool extendedMemory;
 	u32 consoleModel;
 	int colorMode;
 	u32 romRead_LED;

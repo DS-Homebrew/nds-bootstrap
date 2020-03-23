@@ -88,6 +88,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Cache block size
 	conf->cacheBlockSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_BLOCK_SIZE").c_str(), NULL, 0);
 
+	// Extended memory
+	conf->extendedMemory = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY").c_str(), NULL, 0);
+
 	// Console model
 	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
 

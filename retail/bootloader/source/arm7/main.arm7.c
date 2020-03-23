@@ -103,7 +103,7 @@ extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 cacheBlockSize;
-bool extendedMemory = true;
+extern u32 extendedMemory;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;

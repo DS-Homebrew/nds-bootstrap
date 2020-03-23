@@ -50,6 +50,7 @@
 	.global patchMpuSize
 	.global ceCached
 	.global cacheBlockSize
+	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
@@ -122,6 +123,8 @@ patchMpuSize:
 ceCached:
 	.word	0x00000000
 cacheBlockSize:
+	.word	0x00000000
+extendedMemory:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000

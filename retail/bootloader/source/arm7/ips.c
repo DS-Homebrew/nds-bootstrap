@@ -10,7 +10,7 @@
 #include "tonccpy.h"
 
 extern u32 consoleModel;
-extern bool extendedMemory;
+extern u32 extendedMemory;
 extern bool dsiModeConfirmed;
 
 void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
