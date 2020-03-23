@@ -807,7 +807,6 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 
 void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern bool allowPatchHeapPointer2;
-	const char* romTid = getRomTid(ndsHeader);
 
 	if (moduleParams->sdk_version <= 0x2007FFF || !allowPatchHeapPointer2) {
 		return;
@@ -1464,9 +1463,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	if (!ROMinRAM || extendedMemory) {
-		patchHeapPointer2(moduleParams, ndsHeader);
-	}
+	patchHeapPointer2(moduleParams, ndsHeader);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 
