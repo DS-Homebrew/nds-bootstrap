@@ -288,6 +288,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 			patchOffsetCache.cardReadDmaOffset = cardReadDmaStartOffset;
 		}
 		patchOffsetCache.cardReadDmaChecked = true;
+		patchOffsetCacheChanged = true;
 	}
 	if (!cardReadDmaStartOffset) {
 		return;
@@ -1450,9 +1451,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+	//if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	}
+	//}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 
@@ -1460,7 +1461,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
-	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	//patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchHeapPointer2(moduleParams, ndsHeader);
 
