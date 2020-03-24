@@ -167,7 +167,7 @@ static void clearIcache (void) {
       leaveCriticalSection(oldIME);*/
 }
 
-static u32 * dmaParams = NULL;
+static u32 dmaParams[8] = {0};
 
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
