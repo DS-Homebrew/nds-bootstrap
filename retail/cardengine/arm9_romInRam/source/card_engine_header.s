@@ -24,25 +24,17 @@ fileCluster:
 	.word	0x00000000
 saveCluster:
 	.word	0x00000000
-saveOnFlashcard:
-	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
 	.word	0x00000000
-cacheBlockSize:
-	.word	0x00000000
-extendedMemory:
-	.word	0x00000000
-ROMinRAM:
-	.word	0x00000000
-dsiMode:
-	.word	0x00000000
-enableExceptionHandler:
+valueBits:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
 irqTable:
+	.word	0x00000000
+romLocation:
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

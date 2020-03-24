@@ -20,7 +20,6 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
-#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -30,10 +29,17 @@
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
-#include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+
+#define saveOnFlashcard BIT(0)
+#define extendedMemory BIT(1)
+#define ROMinRAM BIT(2)
+#define dsiMode BIT(3)
+#define enableExceptionHandler BIT(4)
+#define overlaysInRam BIT(5)
+
 #ifdef DLDI
 #include "my_fat.h"
 #include "card_dldionly.h"
@@ -65,8 +71,6 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-
-static u32 romLocation = ROM_LOCATION;
 #ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
@@ -86,18 +90,8 @@ static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;
 #endif
-
-static u32 cacheAddress = CACHE_ADRESS_START;
-static u16 cacheSlots = retail_CACHE_SLOTS_16KB;
 #endif
-static u32 overlaysSize = 0;
-
-u32 overlayMaxSize(void) {
-	return (ce9->consoleModel>0 ? 0x1800000 : 0x800000);
-}
-
 static bool flagsSet = false;
-static bool loadOverlaysFromRam = true;
 static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
@@ -157,9 +151,9 @@ static void sleepMs(int ms) {
 static int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for (int i = 0; i < cacheSlots; i++) {
-		if (*(cacheCounter+i) <= lowerCounter) {
-			lowerCounter = *(cacheCounter+i);
+	for (int i = 0; i < ce9->cacheSlots; i++) {
+		if (cacheCounter[i] <= lowerCounter) {
+			lowerCounter = cacheCounter[i];
 			slot = i;
 			if (!lowerCounter) {
 				break;
@@ -170,8 +164,8 @@ static int allocateCacheSlot(void) {
 }
 
 static int getSlotForSector(u32 sector) {
-	for (int i = 0; i < cacheSlots; i++) {
-		if (*(cacheDescriptor+i) == sector) {
+	for (int i = 0; i < ce9->cacheSlots; i++) {
+		if (cacheDescriptor[i] == sector) {
 			return i;
 		}
 	}
@@ -179,13 +173,13 @@ static int getSlotForSector(u32 sector) {
 }
 
 static vu8* getCacheAddress(int slot) {
-	//return (vu32*)(cacheAddress + slot*ce9->cacheBlockSize);
-	return (vu8*)(cacheAddress + slot*ce9->cacheBlockSize);
+	//return (vu32*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
+	return (vu8*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
 }
 
 static void updateDescriptor(int slot, u32 sector) {
-	*(cacheDescriptor+slot) = sector;
-	*(cacheCounter+slot) = accessCounter;
+	cacheDescriptor[slot] = sector;
+	cacheCounter[slot] = accessCounter;
 }
 
 #ifdef ASYNCPF
@@ -422,7 +416,9 @@ void continueCardReadDmaArm9() {
             // Read via the main RAM cache
         	int slot = getSlotForSector(sector);
         	vu8* buffer = getCacheAddress(slot);
+			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
+			#endif
         	// Read max CACHE_READ_SIZE via the main RAM cache
         	if (slot == -1) {
 				#ifdef ASYNCPF
@@ -587,7 +583,9 @@ void cardSetDma(void) {
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
+		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
+		#endif
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
 			#ifdef ASYNCPF
@@ -683,7 +681,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
+			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
+			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
 				#ifdef ASYNCPF
@@ -801,7 +801,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len;
-			sharedAddr[2] = (romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+			sharedAddr[2] = (ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -809,7 +809,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			#endif
 
 			// Copy directly
-			tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+			tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 		//}
 		// Update cardi common
 		cardStruct[0] = src + len;
@@ -912,64 +912,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
 		}
-
+		#endif
 		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) == 0) {
-			loadOverlaysFromRam = false;
-		} else {
-			if (ce9->dsiMode) {
-				romLocation = ROM_SDK5_LOCATION;
-				if (ce9->consoleModel == 0) {
-					romLocation = retail_CACHE_ADRESS_START_SDK5;
-				}
-			}
-
-			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-				overlaysSize = i;
-			}
-
-			if (overlaysSize > overlayMaxSize()) {
-				loadOverlaysFromRam = false;
-			}
-
-			debug8mbMpuFix();
-		}
-		#else
-		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) == 0) {
-			loadOverlaysFromRam = false;
-			cacheAddress = CACHE_ADRESS_START_low;
-			cacheSlots = retail_CACHE_ADRESS_SIZE_low/ce9->cacheBlockSize;
-		} else {
-			if (ce9->dsiMode) {
-				romLocation = ROM_SDK5_LOCATION;
-				cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				/*if (ce9->consoleModel == 0) {
-					romLocation = retail_CACHE_ADRESS_START_SDK5;
-					cacheAddress = retail_CACHE_ADRESS_START_SDK5;
-				}*/
-			}
-
-			if (ce9->consoleModel > 0) {
-				cacheSlots = (ce9->dsiMode ? dev_CACHE_ADRESS_SIZE_SDK5 : dev_CACHE_ADRESS_SIZE)/ce9->cacheBlockSize;
-			} else {
-				//cacheSlots = (ce9->dsiMode ? retail_CACHE_SLOTS_16KB_low : retail_CACHE_SLOTS_16KB);
-				cacheSlots = retail_CACHE_ADRESS_SIZE/ce9->cacheBlockSize;
-			}
-
-			for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-				overlaysSize = i;
-			}
-
-			if (overlaysSize <= overlayMaxSize()) {
-				for (int i = 0; i < overlaysSize; i += ce9->cacheBlockSize) {
-					cacheAddress += ce9->cacheBlockSize;
-					cacheSlots--;
-				}
-			} else {
-				loadOverlaysFromRam = false;
-			}
-
+		if (strncmp(romTid, "UBR", 3) != 0) {
 			debug8mbMpuFix();
 		}
 
@@ -979,8 +924,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
 		//}
-		#endif
-		
+
 		flagsSet = true;
 	}
 	
@@ -1022,7 +966,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(cardStruct, cacheStruct, dst, src, len, page);
 	}
 
@@ -1043,7 +987,7 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->saveOnFlashcard) {
+	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileRead(memory, *savFile, flash, len, -1);
 #endif
@@ -1064,7 +1008,7 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->saveOnFlashcard) {
+	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileWrite(memory, *savFile, flash, len, -1);
 #endif

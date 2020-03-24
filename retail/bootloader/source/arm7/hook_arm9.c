@@ -7,7 +7,15 @@
 #include "common.h"
 #include "patch.h"
 #include "find.h"
+#include "nds_header.h"
 #include "cardengine_header_arm9.h"
+
+#define b_saveOnFlashcard BIT(0)
+#define b_extendedMemory BIT(1)
+#define b_ROMinRAM BIT(2)
+#define b_dsiMode BIT(3)
+#define b_enableExceptionHandler BIT(4)
+#define b_overlaysInRam BIT(5)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -128,14 +136,83 @@ int hookNdsRetailArm9(
 	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
-	ce9->saveOnFlashcard        = saveOnFlashcard;
-	ce9->cacheBlockSize         = cacheBlockSize;
-	ce9->extendedMemory         = extendedMemory;
-	ce9->ROMinRAM               = ROMinRAM;
-	ce9->dsiMode                = dsiMode; // SDK 5
-	ce9->enableExceptionHandler = enableExceptionHandler;
+	if (saveOnFlashcard) {
+		ce9->valueBits |= b_saveOnFlashcard;
+	}
+	if (extendedMemory) {
+		ce9->valueBits |= b_extendedMemory;
+	}
+	if (ROMinRAM) {
+		ce9->valueBits |= b_ROMinRAM;
+	}
+	if (dsiMode) {
+		ce9->valueBits |= b_dsiMode; // SDK 5
+	}
+	if (enableExceptionHandler) {
+		ce9->valueBits |= b_enableExceptionHandler;
+	}
 	ce9->consoleModel           = consoleModel;
-    
+	if (extendedMemory) {
+		ce9->romLocation = ROM_LOCATION_EXT;
+	} else if (consoleModel > 0) {
+		ce9->romLocation = ((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	} else {
+		ce9->romLocation = ROM_LOCATION;
+	}
+
+	if (!ROMinRAM) {
+		bool runOverlayCheck = true;
+		ce9->cacheBlockSize = cacheBlockSize;
+		const char* romTid = getRomTid(ndsHeader);
+		if (isSdk5(moduleParams)) {
+			if (consoleModel > 0) {
+				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;
+				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
+				ce9->cacheSlots = dev_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
+			} else if ((strncmp(romTid, "BKW", 3) == 0)
+					|| (strncmp(romTid, "VKG", 3) == 0)) {
+				ce9->romLocation = CACHE_ADRESS_START_low;
+				ce9->cacheAddress = CACHE_ADRESS_START_low;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
+			} else {
+				ce9->romLocation = CACHE_ADRESS_START;
+				ce9->cacheAddress = CACHE_ADRESS_START;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
+			}
+		} else {
+			if (strncmp(romTid, "UBR", 3) == 0) {
+				runOverlayCheck = false;
+				ce9->romLocation = CACHE_ADRESS_START_low;
+				ce9->cacheAddress = CACHE_ADRESS_START_low;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
+			} else {
+				ce9->romLocation = (dsiMode ? dev_CACHE_ADRESS_START_SDK5 : CACHE_ADRESS_START);
+				ce9->cacheAddress = ce9->romLocation;
+
+				if (consoleModel > 0) {
+					ce9->cacheSlots = (dsiMode ? dev_CACHE_ADRESS_SIZE_SDK5 : dev_CACHE_ADRESS_SIZE)/cacheBlockSize;
+				} else {
+					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE/cacheBlockSize;
+				}
+
+			}
+		}
+	  if (runOverlayCheck) {
+		u32 overlaysSize = 0;
+		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
+			overlaysSize = i;
+		}
+
+		if (overlaysSize <= (consoleModel>0 ? 0x1800000 : 0x800000)) {
+			for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
+				ce9->cacheAddress += cacheBlockSize;
+				ce9->cacheSlots--;
+			}
+			ce9->valueBits |= b_overlaysInRam;
+		}
+	  }
+	}
+
 	extern u32 iUncompressedSize;
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;

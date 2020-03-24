@@ -63,16 +63,24 @@ typedef struct cardengineArm9 {
     const module_params_t* moduleParams;
     u32 fileCluster;
     u32 saveCluster;
-    u32 saveOnFlashcard;
     u32 cardStruct0;
     u32 cacheStruct;
-    u32 cacheBlockSize;
-    u32 extendedMemory;
-    u32 ROMinRAM;
-    u32 dsiMode;
-    u32 enableExceptionHandler;
-    u32 consoleModel;
+	u32 valueBits;
+	/*
+		0: saveOnFlashcard
+		1: extendedMemory
+		2: ROMinRAM
+		3: dsiMode
+		4: enableExceptionHandler
+		5: overlaysInRam
+	*/
+	u32 consoleModel;
     u32* irqTable;
+    u32 romLocation;
+	// Below not used for ROMs in RAM
+    u32 cacheAddress;
+    u16 cacheSlots;
+    u16 cacheBlockSize;
 } __attribute__ ((__packed__)) cardengineArm9;
 
 #endif // CARDENGINE_HEADER_ARM9_H

@@ -1096,9 +1096,9 @@ int arm7_main(void) {
 			/*if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
 			} else {*/
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x2000);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
 			//}
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
 		} else if (ceCached) {
 			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
@@ -1110,11 +1110,11 @@ int arm7_main(void) {
 				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
 			}
 			if(ce9Location) {
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x2000);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x2000);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x2000);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
 			}
 		} else {
 			if (extendedMemoryConfirmed) {
@@ -1124,7 +1124,7 @@ int arm7_main(void) {
 				allowPatchHeapPointer2 = true;
 			} else
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x2000);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
 		}
 
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);

@@ -20,7 +20,6 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
-#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -35,10 +34,12 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
-#define THRESHOLD_CACHE_FLUSH 0x500
-
-#define END_FLAG   0
-#define BUSY_FLAG   4  
+#define saveOnFlashcard BIT(0)
+#define extendedMemory BIT(1)
+#define ROMinRAM BIT(2)
+#define dsiMode BIT(3)
+#define enableExceptionHandler BIT(4)
+#define overlaysInRam BIT(5)
 
 //extern void user_exception(void);
 
@@ -47,8 +48,6 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-
-static u32 romLocation = ROM_LOCATION;
 
 static bool flagsSet = false;
 static bool isDma = false;
@@ -198,13 +197,13 @@ void cardSetDma(u32 * params) {
 
 	// Copy via dma
 	int oldIME = 0;
-	if (ce9->extendedMemory) {
+	if (ce9->valueBits & extendedMemory) {
 		oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 	}
-	ndmaCopyWordsAsynch(0, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
+	ndmaCopyWordsAsynch(0, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
 	while (ndmaBusy(0));
-	if (ce9->extendedMemory) {
+	if (ce9->valueBits & extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 	}
@@ -300,11 +299,8 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		} else {
 			debug8mbMpuFix();
 		}
-		if (ce9->dsiMode || (!ce9->extendedMemory && isSdk5(ce9->moduleParams))) {
-			romLocation = ROM_SDK5_LOCATION;
-		} else if (ce9->extendedMemory) {
+		if (ce9->valueBits & extendedMemory) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
-			romLocation = ROM_LOCATION_EXT;
 		}
 
 		//if (ce9->enableExceptionHandler && ce9==CARDENGINE_ARM9_LOCATION) {
@@ -352,12 +348,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	int oldIME = 0;
-	if (ce9->extendedMemory) {
+	if (ce9->valueBits & extendedMemory) {
 		oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 	}
-	tonccpy(dst, (u8*)((romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
-	if (ce9->extendedMemory) {
+	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+	if (ce9->valueBits & extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 	}
@@ -377,7 +373,7 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->saveOnFlashcard) {
+	if (ce9->valueBits & saveOnFlashcard) {
 		return 0;
 	}
 
@@ -395,7 +391,7 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->saveOnFlashcard) {
+	if (ce9->valueBits & saveOnFlashcard) {
 		return 0;
 	}
 
