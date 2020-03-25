@@ -1068,7 +1068,7 @@ int arm7_main(void) {
 		if (isSdk5(moduleParams)) {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			if (extendedMemoryConfirmed) {
-				ce9Location = (((u32)ndsHeader->arm9destination == 0x02004000) ? CARDENGINE_ARM9_CACHED_LOCATION1 : CARDENGINE_ARM9_CACHED_LOCATION);
+				ce9Location = (((u32)ndsHeader->arm9destination == 0x02004000) ? CARDENGINE_ARM9_CACHED_LOCATION1 : CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM);
 				if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && ((u32)ndsHeader->arm9destination == 0x02004000))
 					ce9Location = CARDENGINE_ARM9_CACHED_LOCATION3;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1000);
@@ -1109,7 +1109,7 @@ int arm7_main(void) {
 			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
 			)
 			{
-				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+				ce9Location = (ROMinRAM ? CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM : CARDENGINE_ARM9_CACHED_LOCATION);
 				allowPatchHeapPointer2 = true;
 			} else {
 				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader, ROMinRAM);
@@ -1123,7 +1123,7 @@ int arm7_main(void) {
 			}
 		} else {
 			if (extendedMemoryConfirmed) {
-				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
+				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1000);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1000);
 				allowPatchHeapPointer2 = true;
