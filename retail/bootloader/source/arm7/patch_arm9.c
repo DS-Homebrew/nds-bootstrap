@@ -779,7 +779,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
 }*/
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
@@ -808,7 +808,11 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6 KB (or for SDK5, 12 KB)
+	if (ROMinRAM) {
+		*heapPointer += 0x1000; // shrink heap by 4KB
+	} else {
+		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6KB (or for SDK5, 12KB)
+	}
 
     dbg_printf("new heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -818,7 +822,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     return oldheapPointer;
 }
 
-void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	extern bool allowPatchHeapPointer2;
 
 	if (moduleParams->sdk_version <= 0x2007FFF || !allowPatchHeapPointer2) {
@@ -853,7 +857,11 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (gameOnFlashcard ? 0x023DC000 : 0x023DE000); // shrink heap by 16KB or 8KB
+	if (ROMinRAM) {
+		*heapPointer = 0x023DF000; // shrink heap by 4KB
+	} else {
+		*heapPointer = (gameOnFlashcard ? 0x023DC000 : 0x023DE000); // shrink heap by 16KB or 8KB
+	}
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -1476,7 +1484,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	patchHeapPointer2(moduleParams, ndsHeader);
+	patchHeapPointer2(moduleParams, ndsHeader, ROMinRAM);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 

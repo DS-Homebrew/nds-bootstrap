@@ -1112,7 +1112,7 @@ int arm7_main(void) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
 				allowPatchHeapPointer2 = true;
 			} else {
-				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader);
+				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			}
 			if(ce9Location) {
 				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
