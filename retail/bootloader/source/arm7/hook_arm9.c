@@ -15,7 +15,8 @@
 #define b_ROMinRAM BIT(2)
 #define b_dsiMode BIT(3)
 #define b_enableExceptionHandler BIT(4)
-#define b_overlaysInRam BIT(5)
+#define b_isSdk5 BIT(5)
+#define b_overlaysInRam BIT(6)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -133,7 +134,6 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
-	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	if (saveOnFlashcard) {
@@ -150,6 +150,9 @@ int hookNdsRetailArm9(
 	}
 	if (enableExceptionHandler) {
 		ce9->valueBits |= b_enableExceptionHandler;
+	}
+	if (isSdk5(moduleParams)) {
+		ce9->valueBits |= b_isSdk5;
 	}
 	ce9->consoleModel           = consoleModel;
 	if (extendedMemory) {

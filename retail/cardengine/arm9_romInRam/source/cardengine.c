@@ -29,7 +29,6 @@
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
-#include "module_params.h"
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
@@ -39,7 +38,8 @@
 #define ROMinRAM BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
-#define overlaysInRam BIT(5)
+#define isSdk5 BIT(5)
+#define overlaysInRam BIT(6)
 
 //extern void user_exception(void);
 
@@ -185,9 +185,9 @@ void cardSetDma(u32 * params) {
 
 	enableIPC_SYNC();
 
-	u32 src = (isSdk5(ce9->moduleParams) ? params[3] : cardStruct[0]);
-	u8* dst = (isSdk5(ce9->moduleParams) ? params[4] : (u8*)(cardStruct[1]));
-	u32 len = (isSdk5(ce9->moduleParams) ? params[5] : cardStruct[2]);
+	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? params[4] : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 
   	u32 len2 = len;
   	if (len2 > 512) {
@@ -196,16 +196,16 @@ void cardSetDma(u32 * params) {
   	}
 
 	// Copy via dma
-	int oldIME = 0;
+	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
-		oldIME = enterCriticalSection();
+		REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
 	}
 	ndmaCopyWordsAsynch(0, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
 	while (ndmaBusy(0));
 	if (ce9->valueBits & extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
-		leaveCriticalSection(oldIME);
+		REG_IME = oldIME;
 	}
 	endCardReadDma();
 }
@@ -227,10 +227,10 @@ bool isNotTcm(u32 address, u32 len) {
 u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
     
-	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
-	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
-    u32 dma = (isSdk5(ce9->moduleParams) ? dma0 : cardStruct[3]); // dma channel
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+    u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
 
 	dmaParams[3] = src;
 	dmaParams[4] = (u32)dst;
@@ -294,7 +294,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		if (isSdk5(ce9->moduleParams)) {
+		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		} else {
 			debug8mbMpuFix();
@@ -315,9 +315,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
-	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
-	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 
 	readCount++;
 
@@ -331,15 +331,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	int oldIME = 0;
+	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
-		oldIME = enterCriticalSection();
+		if (!(ce9->valueBits & isSdk5)) REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
 	}
 	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 	if (ce9->valueBits & extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
-		leaveCriticalSection(oldIME);
+		if (!(ce9->valueBits & isSdk5)) REG_IME = oldIME;
 	}
 
     isDma=false;

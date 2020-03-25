@@ -18,8 +18,6 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_ipc_orig_return:
 	.word	0x00000000
-moduleParams:
-	.word	0x00000000
 fileCluster:
 	.word	0x00000000
 saveCluster:
@@ -579,38 +577,6 @@ _blx_r6_stub_callEndReadDmaThumb:
 .pool
 
 	.thumb
-.global setIrqMask
-.type	setIrqMask STT_FUNC
-setIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#8]
-    STR             R0, [R3,#8]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
-.pool
-
-
-.global enableIrqMask
-.type	enableIrqMask STT_FUNC
-enableIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#8]
-    ORR             R0, R1, R0
-    STR             R0, [R3,#8]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
-.pool
-
 .global disableIrqMask
 .type	disableIrqMask STT_FUNC
 disableIrqMask:
@@ -627,20 +593,6 @@ disableIrqMask:
     BX              LR
 .pool
     
-.global resetRequestIrqMask
-.type	resetRequestIrqMask STT_FUNC
-resetRequestIrqMask:
-    LDR             R3, =0x4000208
-    MOV             R1, #0
-    LDRH            R2, [R3]
-    STRH            R1, [R3]
-    LDR             R1, [R3,#0xC]
-    STR             R0, [R3,#0xC]
-    LDRH            R0, [R3]
-    MOV             R0, R1
-    STRH            R2, [R3]
-    BX              LR
-
 	.arm
 //---------------------------------------------------------------------------------
 .global  getDtcmBase

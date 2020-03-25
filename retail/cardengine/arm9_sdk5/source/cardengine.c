@@ -38,7 +38,8 @@
 #define ROMinRAM BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
-#define overlaysInRam BIT(5)
+#define isSdk5 BIT(5)
+#define overlaysInRam BIT(6)
 
 #ifdef DLDI
 #include "my_fat.h"
