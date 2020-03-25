@@ -1050,7 +1050,7 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
-	if (sharedAddr[4] == 0x025AAB08) {
+	if (sharedAddr[4] == (vu32)0x025AAB08) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
@@ -1059,7 +1059,7 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
-	if (sharedAddr[4] == 0x57534352) {
+	if (sharedAddr[4] == (vu32)0x57534352) {
 		enterCriticalSection();
 		// Make screens white
 		SetBrightness(0, 31);

@@ -568,7 +568,7 @@ static void runCardEngineCheck(void) {
 	#endif	
 
     if (sharedAddr[3] == (vu32)0x025AAB08) {
-		sharedAddr[4] = 0x025AAB08;
+		sharedAddr[4] = (vu32)0x025AAB08;
 		IPC_SendSync(0x7);
 	}
 
@@ -598,13 +598,13 @@ static void runCardEngineCheck(void) {
               dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
+					sharedAddr[4] = (vu32)0x025AAB08;
                     IPC_SendSync(0x8);
               } else {
                 //while(!resume_cardRead_arm9()) {}
                 if (resume_cardRead_arm9()) { 
                     sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
+					sharedAddr[4] = (vu32)0x025AAB08;
                     IPC_SendSync(0x8);
 				}
               }
@@ -653,7 +653,7 @@ static void runCardEngineCheck(void) {
             if(resume_cardRead_arm9()) {
 			    //while(!resume_cardRead_arm9()) {} 
                 sharedAddr[3] = 0;
-				sharedAddr[4] = 0x025AAB08;
+				sharedAddr[4] = (vu32)0x025AAB08;
                 IPC_SendSync(0x8);
             }
         }
@@ -994,7 +994,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) {}
+		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		if (saveInRam) {
@@ -1024,7 +1024,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) {}
+		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1054,7 +1054,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	}
 
   	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) {}
+		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = (saveOnFlashcard ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1193,7 +1193,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
-		while (readOngoing) {}
+		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = (gameOnFlashcard ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator

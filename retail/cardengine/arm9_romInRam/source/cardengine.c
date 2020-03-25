@@ -319,22 +319,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
 
-	#ifdef DEBUG
-	u32 commandRead;
-
-	// send a log command for debug purpose
-	// -------------------------------------
-	commandRead = 0x026ff800;
-
-	sharedAddr[0] = dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
-
-	waitForArm7();
-	// -------------------------------------*/
-	#endif
-
 	readCount++;
 
 	if (src == 0) {
@@ -363,14 +347,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	return 0; 
 }
 
-void cardPullOut(void) {
-	/*if (*(vu32*)(0x027FFB30) != 0) {
+/*void cardPullOut(void) {
+	if (*(vu32*)(0x027FFB30) != 0) {
 		/*volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
         (*terminateForPullOutRef);
 		sharedAddr[3] = 0x5245424F;
 		waitForArm7();
-	}*/
-}
+	}
+}*/
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {

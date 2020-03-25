@@ -1066,6 +1066,8 @@ int arm7_main(void) {
 			ce9Location = CARDENGINE_ARM9_SDK5_LOCATION;
 			if (extendedMemoryConfirmed) {
 				ce9Location = (((u32)ndsHeader->arm9destination == 0x02004000) ? CARDENGINE_ARM9_CACHED_LOCATION1 : CARDENGINE_ARM9_CACHED_LOCATION);
+				if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && ((u32)ndsHeader->arm9destination == 0x02004000))
+					ce9Location = CARDENGINE_ARM9_CACHED_LOCATION3;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1200);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1200);
 				allowPatchHeapPointer2 = ((u32)ndsHeader->arm9destination != 0x02004000);
