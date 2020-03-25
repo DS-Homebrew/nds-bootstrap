@@ -15,14 +15,22 @@ extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
 
 extern bool gbaRomFound;
+extern bool dsiModeConfirmed;
 
 static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	bool ROMisDsiEnhanced = (ndsHeader->unitCode > 0);
+
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
+	u32* dsiModeCheckOffset = patchOffsetCache.dsiModeCheckOffset;
 	if (!patchOffsetCache.a9Swi12Offset) {
 		swi12Offset = a9_findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
 			patchOffsetCache.a9Swi12Offset = swi12Offset;
 		}
+	}
+	if (!patchOffsetCache.dsiModeCheckOffset && ROMisDsiEnhanced) {
+		dsiModeCheckOffset = findDsiModeCheckOffset(ndsHeader);
+		if (dsiModeCheckOffset) patchOffsetCache.dsiModeCheckOffset = dsiModeCheckOffset;
 	}
 
 	if (!(REG_SCFG_ROM & BIT(1))) {
@@ -31,6 +39,11 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			// Patch to call swi 0x02 instead of 0x12
 			u32* swi12Patch = ce9->patches->swi02;
 			memcpy(swi12Offset, swi12Patch, 0x4);
+		}
+		if (dsiModeCheckOffset && !dsiModeConfirmed && ROMisDsiEnhanced) {
+			// Patch to return as DS BIOS
+			dsiModeCheckOffset[0] = 0xE3A00001;	// mov r0, #1
+			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
 		}
 	}
 }

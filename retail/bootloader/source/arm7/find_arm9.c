@@ -15,6 +15,9 @@ static const u16 swi12Signature[2] = {0xDF12, 0x4770}; // LZ77UnCompReadByCallba
 // Module params
 static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
+// DSi mode check
+static const u32 dsiModeCheckSignature[4]           = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001}; // SDK 5
+
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
 static const u32 cardReadEndSignature3Elab[3]       = {0x04100010, 0x040001A4, 0xE92D4FF0}; // SDK 3
@@ -233,6 +236,26 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	}
 
 	return moduleParamsOffset;
+}
+
+u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findDsiModeCheckOffset\n");
+
+    u32 * offset = NULL;
+
+  	offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		dsiModeCheckSignature, 4
+	);
+
+	if (offset) {
+		dbg_printf("DSi mode check found\n");
+	} else {
+		dbg_printf("DSi mode check not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset) {
