@@ -651,7 +651,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	fileRead((char*)romLocation, file, 0x4000 + ndsHeader->arm9binarySize, getRomSizeNoArm9(ndsHeader), 0);
 
 	dbg_printf("ROM loaded into RAM\n");
-	if (extendedMemoryConfirmed) dbg_printf("Complete 28MB used\n");
+	if (extendedMemoryConfirmed) {
+		dbg_printf("Complete ");
+		dbg_printf(consoleModel==0 ? "12MB" : "28MB");
+		dbg_printf(" used\n");
+	}
 	dbg_printf("\n");
 
 	if (!isSdk5(moduleParams)) {
