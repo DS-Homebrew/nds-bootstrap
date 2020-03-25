@@ -1047,10 +1047,9 @@ int arm7_main(void) {
 			ce7Location = CARDENGINE_ARM7_LOCATION_ALT;
 		}
 
-		bool useSdk5ce7 =
-		   ((isSdk5(moduleParams) && !dsiSD)
-		 || (isSdk5(moduleParams) && REG_SCFG_EXT == 0)
-		 || (isSdk5(moduleParams) && dsiModeConfirmed));
+		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
+		   (!dsiSD || (REG_SCFG_EXT == 0) || dsiModeConfirmed)
+		);
 
 		if (useSdk5ce7) {
 			ce7Location = CARDENGINE_ARM7_SDK5_LOCATION;
