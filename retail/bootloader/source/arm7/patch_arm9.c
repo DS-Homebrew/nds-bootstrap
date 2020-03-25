@@ -840,7 +840,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (gameOnFlashcard ? 0x023DBC00 : 0x023DE000); // shrink heap by 17KB or 8KB
+	*heapPointer = (gameOnFlashcard ? 0x023DC000 : 0x023DE000); // shrink heap by 16KB or 8KB
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
