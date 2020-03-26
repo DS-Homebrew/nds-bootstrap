@@ -144,6 +144,17 @@ static void unlaunchSetFilename(bool boot) {
 	}
 }
 
+static void readSrBackendId(void) {
+	// Use SR backend ID
+	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
+	*(u16*)(0x02000304) = 0x1801;
+	*(u32*)(0x02000308) = *(u32*)(ce7+0x11EF8);
+	*(u32*)(0x0200030C) = *(u32*)(ce7+0x11EFC);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
+	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+}
+
 // Alternative to swiWaitForVBlank()
 static void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
@@ -766,9 +777,19 @@ void myIrqHandlerVBlank(void) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				if (consoleModel >= 2) {
-					tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+					if (*(u32*)(ce7+0x11EF8) == 0) {
+						tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+					} else {
+						// Use different SR backend ID
+						readSrBackendId();
+					}
 				} else {
-					unlaunchSetFilename(true);
+					if (*(u32*)(ce7+0x11EF8) == 0) {
+						unlaunchSetFilename(false);
+					} else {
+						// Use different SR backend ID
+						readSrBackendId();
+					}
 					sharedAddr[4] = 0x57534352;
 					IPC_SendSync(0x8);
 					waitFrames(5);							// Wait for DSi screens to stabilize
@@ -810,14 +831,14 @@ void myIrqHandlerVBlank(void) {
 		driveInitialize();
 		sdRead = (gameOnFlashcard == false);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-		if (*(u32*)(ce7+0x11EF8) != 0) {
-			// Use different SR backend ID
-			*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
-			*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
-			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
-		} else if (consoleModel < 2) {
+		if (consoleModel < 2 && *(u32*)(ce7+0x11EF8) == 0) {
 			unlaunchSetFilename(false);
+		}
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
 		}
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
@@ -830,17 +851,20 @@ void myIrqHandlerVBlank(void) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				if (consoleModel < 2) {
-					unlaunchSetFilename(false);
+					if (*(u32*)(ce7+0x11EF8) == 0) {
+						unlaunchSetFilename(false);
+					}
 					sharedAddr[4] = 0x57534352;
 					IPC_SendSync(0x8);
 					waitFrames(5);							// Wait for DSi screens to stabilize
 				}
-				tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-				if (*(u32*)(ce7+0x11EF8) != 0) {
+				u32 clearBuffer = 0;
+				fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+				if (*(u32*)(ce7+0x11EF8) == 0) {
+					tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+				} else {
 					// Use different SR backend ID
-					*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
-					*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
-					*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+					readSrBackendId();
 				}
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
