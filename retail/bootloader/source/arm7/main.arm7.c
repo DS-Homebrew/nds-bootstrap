@@ -118,6 +118,7 @@ bool useTwlCfg = false;
 int twlCfgLang = 0;
 
 bool sdRead = true;
+bool useSdk5ce7 = false;
 
 bool gbaRomFound = false;
 
@@ -1008,6 +1009,7 @@ int arm7_main(void) {
 			errorOutput();
 		}
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
+		useSdk5ce7 = true;
 	} else {
 		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
 			gbaRomFound = true;
@@ -1047,7 +1049,7 @@ int arm7_main(void) {
 			ce7Location = CARDENGINE_ARM7_LOCATION_ALT;
 		}
 
-		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
+		useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
 		   (!dsiSD || (REG_SCFG_EXT == 0) || dsiModeConfirmed)
 		);
 
@@ -1237,14 +1239,31 @@ int arm7_main(void) {
 		initMBK_dsiEnhanced();
 	}
 
-	if (!dsiModeConfirmed && !isDSiWare) {
-		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}
-
 	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
+
+	if (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0)) {
+		u32 clearBuffer = 0;
+		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+		if (*(u32*)(ce7Location+0x11EF8) != 0) {
+			// Use SR backend ID
+			*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
+			*(u16*)(0x02000304) = 0x1801;
+			*(u32*)(0x02000308) = *(u32*)(ce7Location+0x11EF8);
+			*(u32*)(0x0200030C) = *(u32*)(ce7Location+0x11EFC);
+			*(u32*)(0x02000310) = *(u32*)(ce7Location+0x11EF8);
+			*(u32*)(0x02000314) = *(u32*)(ce7Location+0x11EFC);
+			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+		}
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+	}
+
+	if (!dsiModeConfirmed && !isDSiWare) {
+		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	}
 
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
