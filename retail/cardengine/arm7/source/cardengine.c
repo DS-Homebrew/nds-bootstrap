@@ -810,15 +810,14 @@ void myIrqHandlerVBlank(void) {
 		driveInitialize();
 		sdRead = (gameOnFlashcard == false);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-		if (consoleModel < 2) {
-			unlaunchSetFilename(false);
-		}
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		if (*(u32*)(ce7+0x11EF8) != 0) {
 			// Use different SR backend ID
 			*(u32*)(0x02000310) = *(u32*)(ce7+0x11EF8);
 			*(u32*)(0x02000314) = *(u32*)(ce7+0x11EFC);
 			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+		} else if (consoleModel < 2) {
+			unlaunchSetFilename(false);
 		}
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
