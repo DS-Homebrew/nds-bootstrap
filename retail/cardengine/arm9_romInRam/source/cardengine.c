@@ -331,6 +331,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
+	if ((ce9->valueBits & extendedMemory) && dst >= 0x02400000 && dst < 0x02700000) {
+		dst -= 0x400000;	// Do not overwrite ROM
+	}
+
 	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
 		if (!(ce9->valueBits & isSdk5)) REG_IME = 0;
