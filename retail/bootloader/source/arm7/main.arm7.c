@@ -118,7 +118,7 @@ bool useTwlCfg = false;
 int twlCfgLang = 0;
 
 bool sdRead = true;
-bool useSdk5ce7 = false;
+bool rebootConsole = false;
 
 bool gbaRomFound = false;
 
@@ -1009,7 +1009,6 @@ int arm7_main(void) {
 			errorOutput();
 		}
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
-		useSdk5ce7 = true;
 	} else {
 		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
 			gbaRomFound = true;
@@ -1049,7 +1048,7 @@ int arm7_main(void) {
 			ce7Location = CARDENGINE_ARM7_LOCATION_ALT;
 		}
 
-		useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
+		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
 		   (!dsiSD || (REG_SCFG_EXT == 0) || dsiModeConfirmed)
 		);
 
@@ -1058,6 +1057,8 @@ int arm7_main(void) {
 			tonccpy((char*)ROM_FILE_LOCATION_SDK5, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
+
+		rebootConsole = (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0));
 
 		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x12000);
 		if (gameOnFlashcard || saveOnFlashcard) {
@@ -1204,6 +1205,7 @@ int arm7_main(void) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
+	  if (!rebootConsole) {
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
@@ -1226,6 +1228,7 @@ int arm7_main(void) {
 			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);
 			dbg_printf("AP-fix found and applied\n");
 		}
+	  }
 	}
 
 	arm9_boostVram = boostVram;
@@ -1244,7 +1247,7 @@ int arm7_main(void) {
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
-	if (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0)) {
+	if (rebootConsole) {
 		u32 clearBuffer = 0;
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
 		if (*(u32*)(ce7Location+0x11EF8) != 0) {
