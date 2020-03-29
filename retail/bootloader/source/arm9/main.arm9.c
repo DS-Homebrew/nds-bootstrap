@@ -40,6 +40,8 @@
 #include "common.h"
 #include "loading.h"
 
+#define REG_MBK_CACHE_START	0x4004044
+
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
@@ -48,10 +50,19 @@ bool arm9_isSdk5 = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 bool extendedMemoryConfirmed = false;
+bool moreMemory = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
+
+void transferToArm7(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
+}
+
+void transferToArm9(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
+}
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -280,6 +291,11 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				}
                 REG_SCFG_EXT |= BIT(16);	// NDMA
 				if (extendedMemoryConfirmed) {
+					if (moreMemory) {
+						for (int i = 0; i < 16; i++) {
+							transferToArm9(i);
+						}
+					}
 					// Switch to 4MB mode
 					REG_SCFG_EXT -= 0xC000;
 				} else {

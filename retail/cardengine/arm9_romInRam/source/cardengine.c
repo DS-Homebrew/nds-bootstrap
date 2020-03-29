@@ -318,6 +318,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	u32 len2 = 0;
 
 	readCount++;
 
@@ -334,14 +335,33 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if ((ce9->valueBits & extendedMemory) && dst >= 0x02400000 && dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}
+	
+	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+	if (newSrc >= 0x0E000000) {
+		newSrc = (u32)(ROM_LOCATION_EXT_P2-0x4000-ndsHeader->arm9binarySize)+src;
+	} else if (newSrc+len > 0x0E000000) {
+		for (int i = 0; i <= len; i++) {
+			len--;
+			len2++;
+			if (newSrc+len == 0x0E000000) break;
+		}
+	}
 
 	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
+		// Open extra memory
 		if (!(ce9->valueBits & isSdk5)) REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
 	}
-	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+
+	tonccpy(dst, (u8*)newSrc, len);
+	if (len2 > 0) {
+		newSrc = (u32)(ROM_LOCATION_EXT_P2-0x4000-ndsHeader->arm9binarySize)+src+len;
+		tonccpy(dst+len, (u8*)newSrc, len2);
+	}
+
 	if (ce9->valueBits & extendedMemory) {
+		// Close extra memory
 		REG_SCFG_EXT -= 0xC000;
 		if (!(ce9->valueBits & isSdk5)) REG_IME = oldIME;
 	}
