@@ -1161,7 +1161,7 @@ u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset) {
 	//if (usesThumb) {
 	
 	u16* cardReadDmaStartOffset = findOffsetBackwardsThumb(
-		(u16*)cardReadDmaEndOffset, 0x100,
+		(u16*)cardReadDmaEndOffset, 0x200,
 		cardReadDmaStartSignatureThumb1, 1
 	);
 	if (cardReadDmaStartOffset) {
