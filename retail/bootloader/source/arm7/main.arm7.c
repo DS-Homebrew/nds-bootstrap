@@ -672,7 +672,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	dbg_printf("ROM loaded into RAM\n");
 	if (extendedMemoryConfirmed) {
 		dbg_printf("Complete ");
-		dbg_printf(consoleModel==0 ? "12.5MB" : "28.5MB");
+		if (romSize >= romSizeLimit) {
+			dbg_printf(consoleModel==0 ? "12.5MB" : "28.5MB");
+		} else {
+			dbg_printf(consoleModel==0 ? "12MB" : "28MB");
+		}
 		dbg_printf(" used\n");
 	}
 	dbg_printf("\n");
