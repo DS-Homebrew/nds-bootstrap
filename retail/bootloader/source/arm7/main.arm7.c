@@ -538,8 +538,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < 0x01C80000)
-			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) < 0x00C80000));
+		res = ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
 	  }
 	}
