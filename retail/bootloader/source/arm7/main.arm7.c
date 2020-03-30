@@ -658,13 +658,15 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 		tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
 		romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
+		tonccpy((char*)ce7Location+0x18000, savFile->fatTableCache, 0x28000);
+		savFile->fatTableCache = (u32*)((char*)ce7Location+0x18000);
 
 		fileRead((char*)romLocation, *romFile, 0x4000 + ndsHeader->arm9binarySize, romSizeLimit, 0);
 		fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, 0x4000 + ndsHeader->arm9binarySize + romSizeLimit, romSize-romSizeLimit, 0);
 
 		toncset((char*)IMAGES_LOCATION-0x40000, 0, 0x80000);
 		romFile->fatTableCached = false;
-		savFile->fatTableCached = false;
+		//savFile->fatTableCached = false;
 	} else {
 		fileRead((char*)romLocation, *romFile, 0x4000 + ndsHeader->arm9binarySize, romSize, 0);
 	}
