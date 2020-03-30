@@ -244,12 +244,15 @@ static void resetMemory_ARM7 (void)
 }
 
 
+static u8 dsiFlags = 0;
+
 static void loadBinary_ARM7 (aFile file)
 {
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead ((char*)NDS_HEADER, file, 0, 0x170, 0);
+	fileRead((char*)NDS_HEADER, file, 0, 0x170, 0);
+	fileRead((char*)&dsiFlags, file, 0x1BF, 1, -1);
 
 	// Load binaries into memory
 	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
@@ -521,11 +524,14 @@ int arm7_main (void) {
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 	}
 
+	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+	}
+
 	if (dsiMode) {
 		dsiModeConfirmed = true;
 	} else {
-		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
 		NTR_BIOS();
 	}
 
