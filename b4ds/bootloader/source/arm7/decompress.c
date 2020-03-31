@@ -329,7 +329,7 @@ static const unsigned char encr_data[] =
 	}
 }*/
 
-//static u32 iUncompressedSize = 0;
+u32 iUncompressedSize = 0;
 static u32 iFixedAddr = 0;
 static u32 iFixedData = 0;
 
@@ -410,11 +410,12 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		// Compressed
 		dbg_printf("This rom is compressed\n");
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-		decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
+		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
 		moduleParams->compressed_static_end = 0;
 	} else {
 		// Not compressed
 		dbg_printf("This rom is not compressed\n");
+		iUncompressedSize = ndsHeader->arm9binarySize;
 	}
 }
 
