@@ -129,7 +129,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadStartOffset) {
 			if (readType == 0) {
-				cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+				cardReadStartOffset = findCardReadStartOffsetType0(moduleParams, cardReadEndOffset);
 			} else {
 				cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
 			}
@@ -288,7 +288,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
 	if (!patchOffsetCache.cardReadDmaChecked) {
 		cardReadDmaStartOffset = NULL;
-		u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
+		u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader, moduleParams);
 		if (!cardReadDmaEndOffset && usesThumb) {
 			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
 		}
@@ -412,7 +412,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			bool lrOnly = false;
             for (int i = 0; i <= 16; i++) {
                 armOffsetStartFunc--;
-				if (*armOffsetStartFunc==0xE92D4000) {
+				if (*armOffsetStartFunc==0xE92D4000 || *armOffsetStartFunc==0xE92D4030) {
 					lrOnly = true;
 					break;
 				}
@@ -420,7 +420,7 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
             armOffset--;
 			if (lrOnly) {
 				armOffset--;
-				armOffset[0] = 0xE92D4000; // STMFD SP!, {LR}
+				armOffset[0] = *armOffsetStartFunc; // STMFD SP!, {LR}  or  STMFD SP!, {R4,R5,LR}
 				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
 			} else {
 				*armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
