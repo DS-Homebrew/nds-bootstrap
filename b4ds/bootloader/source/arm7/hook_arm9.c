@@ -132,9 +132,11 @@ int hookNdsRetailArm9(
 	ce9->maxClusterCacheSize    = maxClusterCacheSize;
 	ce9->fatTableAddr           = fatTableAddr;
 
+	extern u32 iUncompressedSize;
+
     u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;
  	if (!tableAddr) {
-		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, 0x00300000);
+		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
 	}
 
     if (!tableAddr) {
