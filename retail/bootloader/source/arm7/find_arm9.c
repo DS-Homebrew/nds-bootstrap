@@ -1171,9 +1171,9 @@ u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* 
 				cardReadDmaStartSignatureSdk2Alt, 1
 			);
 			if (cardReadDmaStartOffset) {
-				dbg_printf("Card read DMA start SDK2 alt found\n");
+				dbg_printf("Card read DMA start SDK 2 alt found\n");
 			} else {
-				dbg_printf("Card read DMA start SDK2 alt not found\n");
+				dbg_printf("Card read DMA start SDK 2 alt not found\n");
 			}
 		}
 

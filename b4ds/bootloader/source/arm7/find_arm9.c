@@ -186,7 +186,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 		}
 	}
 
-	if (strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4008000 || moduleParams->sdk_version > 0x5000000)) {
+	if (!cardReadEndOffset && strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4008000 || moduleParams->sdk_version > 0x5000000)) {
 		cardReadEndOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			cardReadEndSignature, 2
@@ -1086,6 +1086,18 @@ u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* 
 			dbg_printf("Card read DMA start found: ");
 		} else {
 			dbg_printf("Card read DMA start not found\n");
+		}
+
+		if (!cardReadDmaStartOffset && moduleParams->sdk_version < 0x2008000) {
+			cardReadDmaStartOffset = findOffsetBackwards(
+				(u32*)cardReadDmaEndOffset, 0x200,
+				cardReadDmaStartSignatureSdk2Alt, 1
+			);
+			if (cardReadDmaStartOffset) {
+				dbg_printf("Card read DMA start SDK 2 alt found\n");
+			} else {
+				dbg_printf("Card read DMA start SDK 2 alt not found\n");
+			}
 		}
 
 		if (!cardReadDmaStartOffset) {
