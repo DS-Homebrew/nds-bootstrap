@@ -15,14 +15,18 @@ static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
+static const u32 cardReadEndSignature3Elab[3]       = {0x04100010, 0x040001A4, 0xE92D4FF0}; // SDK 3
 static const u32 cardReadEndSignatureAlt[2]         = {0x040001A4, 0x04100010};
+static const u32 cardReadEndSignatureSdk2Alt[3]     = {0x040001A4, 0x04100010, 0xE92D000F}; // SDK 2
 static const u32 cardReadEndSignatureAlt2[3]        = {0x040001A4, 0x040001A1, 0x04100010};
 static const u16 cardReadEndSignatureThumb[4]       = {0x01A4, 0x0400, 0x0200, 0x0000};
 static const u16 cardReadEndSignatureThumb5[4]      = {0x01A4, 0x0400, 0xFE00, 0xFFFF};                                 // SDK 5
 static const u16 cardReadEndSignatureThumb5Alt1[5]  = {0x01A4, 0x0400, 0x0010, 0x0410, 0xB510};                         // SDK 5
 static const u32 cardReadStartSignature[1]          = {0xE92D4FF0};
-static const u32 cardReadStartSignatureAlt[1]       = {0xE92D4070};
+static const u32 cardReadStartSignatureAlt[1]       = {0xE92D47F0};
+static const u32 cardReadStartSignatureAlt2[1]      = {0xE92D4070};
 static const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
+static const u32 cardReadStartSignature5Alt[4]      = {0xE92D4010};													// SDK 5.5
 static const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
 static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
 static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
@@ -32,6 +36,7 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 
 // Card pull out
 static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
+static const u32 cardPullOutSignature2Alt[4]      = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xE59D0014}; // SDK 2
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
 static const u32 cardPullOutSignature5Alt[4]      = {0xE92D4038, 0xE201003F, 0xE3500011, 0x1A000011}; // SDK 5
@@ -63,14 +68,16 @@ static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
 // Card read DMA
-static const u32 cardReadDmaEndSignature[2]         = {0x01FF8000, 0x000001FF};
-static const u16 cardReadDmaEndSignatureThumbAlt[4] = {0x8000, 0x01FF, 0x0000, 0x0200};
-static const u32 cardReadDmaStartSignature[1]       = {0xE92D4FF8};
-static const u32 cardReadDmaStartSignatureAlt1[1]   = {0xE92D47F0};
-static const u32 cardReadDmaStartSignatureAlt2[1]   = {0xE92D4FF0};
-static const u32 cardReadDmaStartSignature5[1]      = {0xE92D43F8}; // SDK 5
-static const u16 cardReadDmaStartSignatureThumb1[1] = {0xB5F0}; // SDK <= 2
-static const u16 cardReadDmaStartSignatureThumb3[1] = {0xB5F8}; // SDK >= 3
+static const u32 cardReadDmaEndSignature[2]          = {0x01FF8000, 0x000001FF};
+static const u32 cardReadDmaEndSignatureSdk2Alt[2]   = {0x01FF8000, 0xE92D4030}; // SDK 2
+static const u16 cardReadDmaEndSignatureThumbAlt[4]  = {0x8000, 0x01FF, 0x0000, 0x0200};
+static const u32 cardReadDmaStartSignature[1]        = {0xE92D4FF8};
+static const u32 cardReadDmaStartSignatureSdk2Alt[1] = {0xE92D4070};
+static const u32 cardReadDmaStartSignatureAlt1[1]    = {0xE92D47F0};
+static const u32 cardReadDmaStartSignatureAlt2[1]    = {0xE92D4FF0};
+static const u32 cardReadDmaStartSignature5[1]       = {0xE92D43F8}; // SDK 5
+static const u16 cardReadDmaStartSignatureThumb1[1]  = {0xB5F0}; // SDK <= 2
+static const u16 cardReadDmaStartSignatureThumb3[1]  = {0xB5F8}; // SDK >= 3
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -79,6 +86,7 @@ static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE35
 
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
+static const u32 irqEnableStartSignature2Alt[4]     = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xEBFFFFDB};					// SDK 2
 static const u32 irqEnableStartSignature4[4]        = {0xE59F3024, 0xE3A01000, 0xE1D320B0, 0xE1C310B0};					// SDK >= 4
 static const u32 irqEnableStartSignatureThumb[5]    = {0x4D07B430, 0x2100882C, 0x4B068029, 0x1C11681A, 0x60194301};		// SDK <= 3
 static const u32 irqEnableStartSignatureThumbAlt[4] = {0x4C07B418, 0x88232100, 0x32081C22, 0x68118021};					// SDK >= 3
@@ -154,16 +162,40 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
+	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
+		cardReadEndOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardReadEndSignature3Elab, 3
+		);
+		if (cardReadEndOffset) {
+			dbg_printf("ARM9 Card read end (type 0) elaborate found: ");
+		} else {
+			dbg_printf("ARM9 Card read end (type 0) elaborate not found\n");
+		}
+	}
+
+	if (!cardReadEndOffset && moduleParams->sdk_version < 0x2008000) {
+		cardReadEndOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardReadEndSignatureSdk2Alt, 3
+		);
+		if (cardReadEndOffset) {
+			dbg_printf("ARM9 Card read end SDK 2 alt found: ");
+		} else {
+			dbg_printf("ARM9 Card read end SDK 2 alt not found\n");
+		}
+	}
+
 	if (strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4008000 || moduleParams->sdk_version > 0x5000000)) {
 		cardReadEndOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			cardReadEndSignature, 2
 		);
-	}
-	if (cardReadEndOffset) {
-		dbg_printf("ARM9 Card read end (type 0) found: ");
-	} else {
-		dbg_printf("ARM9 Card read end (type 0) not found\n");
+		if (cardReadEndOffset) {
+			dbg_printf("ARM9 Card read end (type 0) short found: ");
+		} else {
+			dbg_printf("ARM9 Card read end (type 0) short not found\n");
+		}
 	}
 
 	if (cardReadEndOffset) {
@@ -305,7 +337,7 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 	return cardReadEndOffset;
 }
 
-u32* findCardReadStartOffsetType0(const u32* cardReadEndOffset) {
+u32* findCardReadStartOffsetType0(const module_params_t* moduleParams, const u32* cardReadEndOffset) {
 	if (!cardReadEndOffset) {
 		return NULL;
 	}
@@ -322,6 +354,18 @@ u32* findCardReadStartOffsetType0(const u32* cardReadEndOffset) {
 		dbg_printf("ARM9 Card read start (type 0) found: ");
 	} else {
 		dbg_printf("ARM9 Card read start (type 0) not found\n");
+	}
+
+	if (!cardReadStartOffset && moduleParams->sdk_version < 0x2008000) {
+		cardReadStartOffset = findOffsetBackwards(
+			cardReadEndOffset, 0x118,
+			cardReadStartSignatureAlt, 1
+		);
+		if (cardReadStartOffset) {
+			dbg_printf("ARM9 Card read start alt 1 (type 0) found: ");
+		} else {
+			dbg_printf("ARM9 Card read start alt 1 (type 0) not found\n");
+		}
 	}
 
 	if (cardReadStartOffset) {
@@ -343,12 +387,12 @@ u32* findCardReadStartOffsetType1(const u32* cardReadEndOffset) {
 	//if (readType == 1) {
 	u32* cardReadStartOffset = findOffsetBackwards(
 		cardReadEndOffset, 0x118,
-		cardReadStartSignatureAlt, 1
+		cardReadStartSignatureAlt2, 1
 	);
 	if (cardReadStartOffset) {
-		dbg_printf("ARM9 Card read start alt (type 1) found: ");
+		dbg_printf("ARM9 Card read start alt 2 (type 1) found: ");
 	} else {
-		dbg_printf("ARM9 Card read start alt (type 1) not found\n");
+		dbg_printf("ARM9 Card read start alt 2 (type 1) not found\n");
 	}
 
 	if (cardReadStartOffset) {
@@ -380,6 +424,18 @@ u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* ca
 		dbg_printf("ARM9 Card read start SDK 5 found: ");
 	} else {
 		dbg_printf("ARM9 Card read start SDK 5 not found\n");
+	}
+
+	if (!cardReadStartOffset) {
+		cardReadStartOffset = findOffsetBackwards(
+			(u32*)cardReadEndOffset, 0x120,
+			cardReadStartSignature5Alt, 1
+		);
+		if (cardReadStartOffset) {
+			dbg_printf("ARM9 Card read start SDK 5.5 found: ");
+		} else {
+			dbg_printf("ARM9 Card read start SDK 5.5 not found\n");
+		}
 	}
 
 	if (cardReadStartOffset) {
@@ -531,6 +587,19 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 				dbg_printf("Card pull out handler found: ");
 			} else {
 				dbg_printf("Card pull out handler not found\n");
+			}
+		}
+
+		if (!cardPullOutOffset && moduleParams->sdk_version < 0x2008000) {
+			// SDK 2
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardPullOutSignature2Alt, 4
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler SDK 2 alt found: ");
+			} else {
+				dbg_printf("Card pull out handler SDK 2 alt not found\n");
 			}
 		}
 
@@ -929,7 +998,7 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	return cardIdStartOffset;
 }
 
-u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader) {
+u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardReadDmaEndOffset:\n");
 
 	u32* cardReadDmaEndOffset = findOffset(
@@ -940,6 +1009,18 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("Card read DMA end found: ");
 	} else {
 		dbg_printf("Card read DMA end not found\n");
+	}
+
+	if (!cardReadDmaEndOffset && moduleParams->sdk_version < 0x2008000) {
+		cardReadDmaEndOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardReadDmaEndSignatureSdk2Alt, 2
+		);
+		if (cardReadDmaEndOffset) {
+			dbg_printf("Card read DMA end SDK 2 alt found: ");
+		} else {
+			dbg_printf("Card read DMA end SDK 2 alt not found\n");
+		}
 	}
 
 	if (cardReadDmaEndOffset) {
@@ -1098,15 +1179,27 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		dbg_printf("irq enable not found\n");
 	}
 
+	if (!cardIrqEnableOffset && moduleParams->sdk_version < 0x2008000) {
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//, ndsHeader->arm9binarySize,
+            irqEnableStartSignature2Alt, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable SDK 2 alt found: ");
+		} else {
+			dbg_printf("irq enable SDK 2 alt not found\n");
+		}
+	}
+
 	if (!cardIrqEnableOffset && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//, ndsHeader->arm9binarySize,
             irqEnableStartSignature4, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable SDK4 found: ");
+			dbg_printf("irq enable SDK 4 found: ");
 		} else {
-			dbg_printf("irq enable SDK4 not found\n");
+			dbg_printf("irq enable SDK 4 not found\n");
 		}
 	}
 

@@ -93,7 +93,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadStartOffset) {
 			if (readType == 0) {
-				cardReadStartOffset = findCardReadStartOffsetType0(cardReadEndOffset);
+				cardReadStartOffset = findCardReadStartOffsetType0(moduleParams, cardReadEndOffset);
 			} else {
 				cardReadStartOffset = findCardReadStartOffsetType1(cardReadEndOffset);
 			}
@@ -219,13 +219,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
 	if (!patchOffsetCache.cardReadDmaChecked) {
 		cardReadDmaStartOffset = NULL;
-		u32* cardReadDmaEndOffset = NULL;
-		if (usesThumb) {
-			//dbg_printf("Trying thumb alt...\n");
+		u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader, moduleParams);
+		if (!cardReadDmaEndOffset && usesThumb) {
 			cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
-		}
-		if (!cardReadDmaEndOffset) {
-			cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader);
 		}
 		if (usesThumb) {
 			cardReadDmaStartOffset = (u32*)findCardReadDmaStartOffsetThumb((u16*)cardReadDmaEndOffset);
