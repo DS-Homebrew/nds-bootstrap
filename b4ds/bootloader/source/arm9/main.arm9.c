@@ -112,7 +112,7 @@ Written by Darkain.
 Modified by Chishm:
  * Changed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void arm9_main(void) {
+void __attribute__((target("arm"))) arm9_main(void) {
  	register int i;
   
 	// Set shared ram to ARM7
