@@ -578,10 +578,10 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 
 		*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
 
-		if (!isDSiWare) {
+		/*if (!isDSiWare) {
 			// Clear out Digest offsets/lengths
 			toncset((char*)dsiHeader+0x1E0, 0, 0x28);
-		}
+		}*/
 	}
 
 	return ndsHeader;
@@ -769,13 +769,13 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		u8* deviceListAddr = (u8*)((u8*)0x02FFE1D4);
+		u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
 		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
 		const char *ndsPath = "nand:/dsiware.nds";
-		tonccpy(deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
+		tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
 
-		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);		// Make a duplicate of DSi header
+		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
 		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
 
 		*(u32*)(0x02FFA680) = 0x02FD4D80;
