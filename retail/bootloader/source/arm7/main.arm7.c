@@ -179,6 +179,11 @@ static void initMBK_dsiEnhanced(void) {
 	REG_MBK6 = 0x00403000;
 }
 
+void memset_addrs_arm7(u32 start, u32 end)
+{
+	toncset((u32*)start, 0, ((int)end - (int)start));
+}
+
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
 Clears all of the NDS's RAM that is visible to the ARM7
@@ -187,8 +192,8 @@ Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
 static void resetMemory_ARM7(void) {
-	register int i;
-	
+	int i, reg;
+
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -207,6 +212,7 @@ static void resetMemory_ARM7(void) {
 		DMA_DEST(i) = 0;
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
+		for(reg=0; reg<0x1c; reg+=4)*((u32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
 
 	// Clear out FIFO
@@ -214,7 +220,13 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
-	arm7clearRAM();								// clear exclusive IWRAM
+	//if(dsiMode) {
+		memset_addrs_arm7(0x03000000, 0x0380FFC0);
+		memset_addrs_arm7(0x0380FFD0, 0x03800000 + 0x10000);
+	/*} else {
+		memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
+	}*/
+
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
@@ -224,6 +236,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
+	REG_AUXIE = 0;
+	REG_AUXIF = ~0;
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
