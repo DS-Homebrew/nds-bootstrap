@@ -282,7 +282,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				if (arm9_isSdk5 && ROMisDsiEnhanced(ndsHeader)) {
 					initMBKARM9_dsiEnhanced();
 				}
-				REG_SCFG_EXT = 0x8307F100;
+				REG_SCFG_EXT = 0x8307D100;
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;
 			} else {
