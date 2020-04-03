@@ -283,7 +283,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					initMBKARM9_dsiEnhanced();
 				}
 				REG_SCFG_EXT = 0x8307F100;
-				REG_SCFG_CLK = 0x84;
+				REG_SCFG_CLK = 0x87;
+				REG_SCFG_RST = 1;
 			} else {
 				REG_SCFG_EXT = 0x8300C000;
 				if (arm9_boostVram) {
