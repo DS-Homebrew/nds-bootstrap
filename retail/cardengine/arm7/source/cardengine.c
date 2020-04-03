@@ -113,8 +113,10 @@ static int saveMutex = 0;
 
 #ifdef TWLSDK
 static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 #else
 static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 #endif
 static const char* romLocation = NULL;
 
@@ -237,12 +239,14 @@ static void initialize(void) {
 	#ifndef TWLSDK
 	if (isSdk5(moduleParams)) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 	}
 	#endif
 
 	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemory) {
-		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
+		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
+		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
 		romLocation = (char*)(ROM_LOCATION_EXT);
 	}
 
@@ -761,7 +765,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (language >= 0 && language <= 7) {
 		// Change language
-		*(u8*)((u32)ndsHeader - 0x11C) = language;
+		personalData->language = language;
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();

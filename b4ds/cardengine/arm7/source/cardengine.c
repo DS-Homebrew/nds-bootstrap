@@ -65,6 +65,7 @@ static bool volumeAdjustActivated = false;*/
 static int saveMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
+static PERSONAL_DATA* personalData = NULL;
 //static const char* romLocation = NULL;
 
 /*static void unlaunchSetHiyaBoot(void) {
@@ -97,9 +98,10 @@ static void initialize(void) {
 		return;
 	}
 
-	toncset((u32*)0x023DA000, 0, 0x1000);	// Clear arm9 side of bootloader
+	//toncset((u32*)0x023DA000, 0, 0x1000);	// Clear arm9 side of bootloader
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
+	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
 
 	initialized = true;
 }
@@ -116,7 +118,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (language >= 0 && language <= 7) {
 		// Change language
-		*(u8*)((u32)ndsHeader - 0x11C) = language;
+		personalData->language = language;
 	}
 
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
