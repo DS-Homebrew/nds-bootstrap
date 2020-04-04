@@ -231,6 +231,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+	// Load touch fix for SM64DS (U) v1.0
+	cebin = fopen("nitro:/arm7fix.bin", "rb");
+	if (cebin) {
+		fread((u8*)ARM7_FIX_BUFFERED_LOCATION, 1, 0x140, cebin);
+	}
+	fclose(cebin);
+
 	if (conf->gameOnFlashcard) {
 		// Load DLDI ce9 binary
 		cebin = fopen("nitro:/cardengine_arm9_dldi.lz77", "rb");

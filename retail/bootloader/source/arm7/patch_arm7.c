@@ -1,4 +1,3 @@
-#include <string.h> // memcpy
 #include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
@@ -6,10 +5,9 @@
 #include "find.h"
 #include "common.h"
 #include "locations.h"
+#include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
-
-//#define memcpy __builtin_memcpy
 
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
@@ -63,14 +61,14 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		if (swi12Offset) {
 			// Patch to call swi 0x02 instead of 0x12
 			u32* swi12Patch = ce7->patches->swi02;
-			memcpy(swi12Offset, swi12Patch, 0x4);
+			tonccpy(swi12Offset, swi12Patch, 0x4);
 		}
 
 		// swi get pitch table
 		if (swiGetPitchTableOffset) {
 			// Patch
 			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-			memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}
 }
@@ -120,7 +118,7 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		return false;
 	}
 	u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	return true;
 }
 
@@ -136,7 +134,7 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }
 
@@ -152,6 +150,14 @@ u32 patchCardNdsArm7(
 	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);
+
+	// Touch fix for SM64DS (U) v1.0
+	if (ndsHeader->arm7binarySize == 0x24B64
+	 && *(u32*)0x023825E4 == 0xE92D4030
+	 && *(u32*)0x023825E8 == 0xE24DD004) {
+		tonccpy((char*)0x023825E4, (char*)ARM7_FIX_BUFFERED_LOCATION, 0x140);
+	}
+	toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 
     const char* romTid = getRomTid(ndsHeader);
 
