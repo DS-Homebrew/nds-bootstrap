@@ -789,7 +789,7 @@ void myIrqHandlerVBlank(void) {
 					}
 				} else {
 					if (*(u32*)(ce7+0x11EF8) == 0) {
-						unlaunchSetFilename(false);
+						unlaunchSetFilename(true);
 					} else {
 						// Use different SR backend ID
 						readSrBackendId();
