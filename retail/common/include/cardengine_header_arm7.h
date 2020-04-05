@@ -48,6 +48,7 @@ typedef struct cardengineArm7Patches {
     cardengineArm7PatchesArm7Functions* arm7Functions;
     u32* swi02;
     u32* j_twlGetPitchTable;
+    u32* j_twlGetPitchTableThumb;
     u32* getPitchTableStub;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
 } __attribute__ ((__packed__)) cardengineArm7Patches;

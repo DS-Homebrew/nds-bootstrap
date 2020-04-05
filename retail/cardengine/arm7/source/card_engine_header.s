@@ -253,6 +253,7 @@ patches:
 .word   arm7Functions
 .word   swi02
 .word   j_twlGetPitchTable
+.word   j_twlGetPitchTableThumb
 .word   getPitchTableStub
 .word   arm7FunctionsThumb
 .pool
@@ -292,6 +293,125 @@ twlGetPitchTable:
 	lsls	r0, r0, #0x10
 	lsrs	r0, r0, #0x10
 	bx	lr
+@---------------------------------------------------------------------------------
+
+	.thumb
+@---------------------------------------------------------------------------------
+j_twlGetPitchTableThumb:
+@---------------------------------------------------------------------------------
+	push	{r4-r6, lr}
+	ldr	r6, =twlGetPitchTableBranch
+	bl	_blx_r6_stub
+	pop             {r4-r6}
+	pop             {r3}
+	bx  r3
+_blx_r6_stub:
+	bx	r6
+.pool
+
+	.arm
+@---------------------------------------------------------------------------------
+twlGetPitchTableBranch:
+@---------------------------------------------------------------------------------
+sub_2386E60:                             @ CODE XREF: sub_2387560+2C4?p
+                STMFD           SP!, {R4-R6,LR}
+                MOV             R5, R0
+                RSB             R0, R1, #0
+                MOV             R4, #0
+                B               loc_2386E7C
+@ ---------------------------------------------------------------------------
+
+loc_2386E74:                             @ CODE XREF: sub_2386E60+20?j
+                SUB             R4, R4, #1
+                ADD             R0, R0, #0x300
+
+loc_2386E7C:                             @ CODE XREF: sub_2386E60+10?j
+                CMP             R0, #0
+                BLT             loc_2386E74
+                B               loc_2386E90
+@ ---------------------------------------------------------------------------
+
+loc_2386E88:                             @ CODE XREF: sub_2386E60+34?j
+                ADD             R4, R4, #1
+                SUB             R0, R0, #0x300
+
+loc_2386E90:                             @ CODE XREF: sub_2386E60+24?j
+                CMP             R0, #0x300
+                BGE             loc_2386E88
+                BL              twlGetPitchTable
+                ADDS            R3, R0, #0x10000
+                MOV             R0, R5,ASR#31
+                UMULL           R2, R1, R3, R5
+                MOV             R12, #0
+                MLA             R1, R3, R0, R1
+                ADC             R3, R12, #0
+                SUB             R0, R4, #0x10
+                MLA             R1, R3, R5, R1
+                CMP             R0, #0
+                MOV             R4, #0x10000
+                BGT             loc_2386EE8
+                RSB             R3, R0, #0
+                MOV             R4, R2,LSR R3
+                RSB             R0, R3, #0x20
+                ORR             R4, R4, R1,LSL R0
+                SUB             R0, R3, #0x20
+                MOV             R3, R1,LSR R3
+                ORR             R4, R4, R1,LSR R0
+                B               loc_2386F44
+@ ---------------------------------------------------------------------------
+
+loc_2386EE8:                             @ CODE XREF: sub_2386E60+64?j
+                CMP             R0, #0x20
+                BGE             loc_2386F3C
+                RSB             R5, R0, #0x20
+                SUB             LR, R12, #1
+                MOV             R6, LR,LSL R5
+                RSB             R3, R5, #0x20
+                ORR             R6, R6, LR,LSR R3
+                SUB             R3, R5, #0x20
+                ORR             R6, R6, LR,LSL R3
+                AND             R3, R1, R6
+                AND             R6, R2, LR,LSL R5
+                CMP             R3, R12
+                CMPEQ           R6, R12
+                SUBNE           R0, R4, #1
+                BNE             loc_2386F74
+                MOV             R3, R1,LSL R0
+                ORR             R3, R3, R2,LSR R5
+                SUB             R1, R0, #0x20
+                MOV             R4, R2,LSL R0
+                ORR             R3, R3, R2,LSL R1
+                B               loc_2386F44
+@ ---------------------------------------------------------------------------
+
+loc_2386F3C:                             @ CODE XREF: sub_2386E60+8C?j
+                SUB             R0, R4, #1
+                B               loc_2386F74
+@ ---------------------------------------------------------------------------
+
+loc_2386F44:                             @ CODE XREF: sub_2386E60+84?j
+                                        @ sub_2386E60+D8?j
+                MOV             R0, #0x10
+                CMP             R3, #0
+                CMPEQ           R4, #0x10
+                MOV             R1, #0
+                MOVCC           R4, R0
+                BCC             loc_2386F6C
+                LDR             R0, =0xFFFF
+                CMP             R3, R1
+                CMPEQ           R4, R0
+                MOVHI           R4, R0
+
+loc_2386F6C:                             @ CODE XREF: sub_2386E60+F8?j
+                MOV             R0, R4,LSL#16
+                MOV             R0, R0,LSR#16
+
+loc_2386F74:                             @ CODE XREF: sub_2386E60+C0?j
+                                        @ sub_2386E60+E0?j
+                LDMFD           SP!, {R4-R6,LR}
+                BX              LR
+@ End of function sub_2386E60
+.pool
 @---------------------------------------------------------------------------------
 
 	.thumb

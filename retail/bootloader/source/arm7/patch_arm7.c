@@ -42,6 +42,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
+	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
 	if (!patchOffsetCache.a7Swi12Offset) {
 		swi12Offset = a7_findSwi12Offset(ndsHeader);
@@ -50,7 +51,11 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		}
 	}
 	if (!patchOffsetCache.swiGetPitchTableOffset) {
-		swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
+		if (useGetPitchTableBranch) {
+			swiGetPitchTableOffset = findSwiGetPitchTableThumbBranchOffset(ndsHeader);
+		} else {
+			swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
+		}
 		if (swiGetPitchTableOffset) {
 			patchOffsetCache.swiGetPitchTableOffset = swiGetPitchTableOffset;
 		}
@@ -67,8 +72,12 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		// swi get pitch table
 		if (swiGetPitchTableOffset) {
 			// Patch
-			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			if (useGetPitchTableBranch) {
+				tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
+			} else if (!patchOffsetCache.a7IsThumb) {
+				u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+				tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			}
 		}
 	}
 }
@@ -145,8 +154,6 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	fixForDsiBios(ce7, ndsHeader, moduleParams);
-
 	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);
@@ -204,6 +211,8 @@ u32 patchCardNdsArm7(
 		aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
 		fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
 	}*/
+
+	fixForDsiBios(ce7, ndsHeader, moduleParams);
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
