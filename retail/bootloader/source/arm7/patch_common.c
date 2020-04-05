@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 16;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 17;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -396,6 +396,7 @@ u32 patchCardNds(
 		patchOffsetCache.a7IsThumb = 0;
 		patchOffsetCache.a7Swi12Offset = 0;
 		patchOffsetCache.swiGetPitchTableOffset = 0;
+		patchOffsetCache.swiGetPitchTableChecked = 0;
 		patchOffsetCache.sleepPatchOffset = 0;
 		patchOffsetCache.a7CardIrqEnableOffset = 0;
 		patchOffsetCache.cardCheckPullOutOffset = 0;

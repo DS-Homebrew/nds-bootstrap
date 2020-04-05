@@ -89,6 +89,7 @@ typedef struct patchOffsetCacheContents {
 	u32 a7IsThumb;
 	u32* a7Swi12Offset;
 	u32* swiGetPitchTableOffset;
+	u32 swiGetPitchTableChecked;
 	u32* sleepPatchOffset;
 	u32* a7CardIrqEnableOffset;
 	u32* cardCheckPullOutOffset;

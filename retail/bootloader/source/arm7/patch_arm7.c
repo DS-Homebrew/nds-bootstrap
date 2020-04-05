@@ -50,7 +50,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 			patchOffsetCache.a7Swi12Offset = swi12Offset;
 		}
 	}
-	if (!patchOffsetCache.swiGetPitchTableOffset) {
+	if (!patchOffsetCache.swiGetPitchTableChecked) {
 		if (useGetPitchTableBranch) {
 			swiGetPitchTableOffset = findSwiGetPitchTableThumbBranchOffset(ndsHeader);
 		} else {
@@ -59,6 +59,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		if (swiGetPitchTableOffset) {
 			patchOffsetCache.swiGetPitchTableOffset = swiGetPitchTableOffset;
 		}
+		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
 
 	if (!(REG_SCFG_ROM & BIT(9))) {
