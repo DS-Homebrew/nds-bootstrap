@@ -8,7 +8,8 @@
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 
-static const u16 swiGetPitchTableSignatureThumb[4]  = {0xB570, 0x1C05, 0x2400, 0x4248};
+static const u16 swiGetPitchTableSignatureThumb[4]    = {0xB570, 0x1C05, 0x2400, 0x4248};
+static const u16 swiGetPitchTableSignatureThumbAlt[4] = {0xB570, 0x1C05, 0x4248, 0x2103};
 static const u32 swiGetPitchTableSignature1[4]      = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
 static const u32 swiGetPitchTableSignature1Alt1[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BB9};
 static const u32 swiGetPitchTableSignature1Alt2[4]  = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004BC9};
@@ -91,6 +92,13 @@ u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader) {
 		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		swiGetPitchTableSignatureThumb, 4
 	);
+	if (!offset) {
+		offset = findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			swiGetPitchTableSignatureThumbAlt, 4
+		);
+	}
+
 	if (offset) {
 		dbg_printf("swiGetPitchTable thumb branch found: ");
 	} else {
