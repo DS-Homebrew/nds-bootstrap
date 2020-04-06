@@ -108,7 +108,7 @@ arm9_reset_sdk5:
 	mcr	p15, 0, r0, c1, c0, 0
 
 
-	adr	r12, mpu_initial_data
+	adr	r12, mpu_initial_data_sdk5
 	ldmia	r12, {r0-r10}
 
 	mcr	p15, 0, r0, c2, c0, 0
@@ -173,4 +173,17 @@ mpu_initial_data:
 	.word 0xffff001d  @ p15,0,c6,c6,0,r8    ;PU Protection Unit Data/Unified Region 6
 	.word 0x027ff017  @ p15,0,c6,c7,0,r9    ;PU Protection Unit Data/Unified Region 7 4KB
 	.word 0x0300000a  @ p15,0,c9,c1,0,r10   ;TCM Data TCM Base and Virtual Size
+
+mpu_initial_data_sdk5:
+	.word 0x00000042  @ p15,0,c2,c0,0..1,r0 ;PU Cachability Bits for Data/Unified+Instruction Protection Region
+	.word 0x00000002  @ p15,0,c3,c0,0,r1    ;PU Write-Bufferability Bits for Data Protection Regions
+	.word 0x15111011  @ p15,0,c5,c0,2,r2    ;PU Extended Access Permission Data/Unified Protection Region
+	.word 0x05100011  @ p15,0,c5,c0,3,r3    ;PU Extended Access Permission Instruction Protection Region
+	.word 0x04000033  @ p15,0,c6,c0,0,r4    ;PU Protection Unit Data/Unified Region 0
+	.word 0x02000031  @ p15,0,c6,c1,0,r5    ;PU Protection Unit Data/Unified Region 1 32MB
+	.word 0x08000033  @ p15,0,c6,c3,0,r6    ;PU Protection Unit Data/Unified Region 3
+	.word 0x02fe001b  @ p15,0,c6,c4,0,r7    ;PU Protection Unit Data/Unified Region 4
+	.word 0xffff001d  @ p15,0,c6,c6,0,r8    ;PU Protection Unit Data/Unified Region 6
+	.word 0x02ffc01b  @ p15,0,c6,c7,0,r9    ;PU Protection Unit Data/Unified Region 7 4KB
+	.word 0x02fe000a  @ p15,0,c9,c1,0,r10   ;TCM Data TCM Base and Virtual Size
 itcm_reset_code_end:
