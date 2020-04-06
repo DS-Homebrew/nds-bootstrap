@@ -43,6 +43,8 @@
 #define REG_MBK_CACHE_START	0x4004044
 
 extern void arm9_clearCache(void);
+extern void arm9_reset(void);
+extern void arm9_reset_sdk5(void);
 
 tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
@@ -308,15 +310,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 		}
 	}
 
-	REG_IME = 0;
-	REG_EXMEMCNT = 0xE880;
-
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
 
-	// Start ARM9
-	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();
-	
-	while (1);
+	arm9_isSdk5 ? arm9_reset_sdk5() : arm9_reset();
 }

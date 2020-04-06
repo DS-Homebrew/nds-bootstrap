@@ -74,6 +74,8 @@
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 extern void arm7clearRAM(void);
+extern void arm7_reset(void);
+extern void arm7_reset_sdk5(void);
 
 //extern u32 _start;
 extern u32 storedFileCluster;
@@ -751,11 +753,6 @@ Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(void) {
-	REG_IME = 0;
-
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
-
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
@@ -763,8 +760,7 @@ static void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	arm9_isSdk5 ? arm7_reset_sdk5() : arm7_reset();
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
