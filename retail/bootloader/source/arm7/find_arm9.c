@@ -272,7 +272,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	u32* cardReadEndOffset = NULL;
 	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
 		cardReadEndOffset = findOffset(
-			(u32*)startOffset, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignature3Elab, 3
 		);
 		if (cardReadEndOffset) {
@@ -284,7 +284,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 
 	if (!cardReadEndOffset && moduleParams->sdk_version < 0x2008000) {
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignatureSdk2Alt, 3
 		);
 		if (cardReadEndOffset) {
@@ -296,7 +296,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 
 	if (!cardReadEndOffset && strncmp(romTid, "UOR", 3) != 0 && (moduleParams->sdk_version < 0x4008000 || moduleParams->sdk_version > 0x5000000)) {
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignature, 2
 		);
 		if (cardReadEndOffset) {
@@ -323,14 +323,14 @@ u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset) {
 	u32* cardReadEndOffset = NULL;
 	//readType = 1;
 	cardReadEndOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 		cardReadEndSignatureAlt, 2
 	);
 
 
 	if (!cardReadEndOffset) {
 		cardReadEndOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignatureAlt2, 3
 		);
 	}
@@ -356,7 +356,7 @@ u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset) {
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)startOffset, iUncompressedSize,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb, 4
 	);
 	if (cardReadEndOffset) {
@@ -385,7 +385,7 @@ u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)startOffset, iUncompressedSize,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5, 4
 	);
 	if (cardReadEndOffset) {
@@ -414,7 +414,7 @@ u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_
 	//usesThumb = true;
 
 	u16* cardReadEndOffset = findOffsetThumb(
-		(u16*)startOffset, iUncompressedSize,//ndsHeader->arm9binarySize,
+		(u16*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 		cardReadEndSignatureThumb5Alt1, 5
 	);
 	if (cardReadEndOffset) {
