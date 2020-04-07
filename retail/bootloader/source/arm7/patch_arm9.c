@@ -373,8 +373,8 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
-        "A8Q",  // Theme Park // works
-        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing */
+        "A8Q",  // Theme Park // works */
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
 		//"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
     };
@@ -508,8 +508,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
         "ASF",  // Star Fox Command // works
         "YG4",  // Suikoden: Tierkreis // works
         "YUT",  // Ultimate Mortal Kombat
-        "A8Q",  // Theme Park // works
-        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing */
+        "A8Q",  // Theme Park // works */
+        "AH9",  // Tony Hawk's American Sk8land // works, fixes crashing
         "AWA",  // Wario: Master of Disguise // works
 		//"BYY",  // Yu-Gi-Oh! 5Ds World Championship 2011 - Over the Nexus // sdk5
     };
