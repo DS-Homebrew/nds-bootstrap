@@ -157,16 +157,19 @@ static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C0
 static const u16 sleepConstantValue = {0x82EA}; 
 
 // Init Heap
-static const u32 initHeapEndSignature1[2]             = {0x27FF000, 0x37F8000};
-static const u32 initHeapEndSignature5[2]             = {0x2FFF000, 0x37F8000};
-static const u32 initHeapEndFuncSignature[1]          = {0xE12FFF1E};
-static const u32 initHeapEndFunc2Signature[2]         = {0xE12FFF1E, 0x023E0000};
-static const u32 initHeapEndFuncSignatureAlt[1]       = {0xE8BD8008};
-static const u32 initHeapEndFunc2SignatureAlt1[2]     = {0xE8BD8008, 0x023E0000};
-static const u32 initHeapEndFunc2SignatureAlt2[2]     = {0xE8BD8010, 0x023E0000};
-static const u16 initHeapEndFuncSignatureThumb[1]     = {0xBD08};
-static const u32 initHeapEndFunc2SignatureThumb[2]    = {0xBD082000, 0x023E0000};
-static const u32 initHeapEndFunc2SignatureThumbAlt[2] = {0xBD082010, 0x023E0000};
+static const u32 initHeapEndSignature1[2]              = {0x27FF000, 0x37F8000};
+static const u32 initHeapEndSignature5[2]              = {0x2FFF000, 0x37F8000};
+static const u32 initHeapEndFuncSignature[1]           = {0xE12FFF1E};
+static const u32 initHeapEndFunc2Signature[2]          = {0xE12FFF1E, 0x023E0000};
+static const u32 initHeapEndFuncSignatureAlt[1]        = {0xE8BD8008};
+static const u32 initHeapEndFunc2SignatureAlt1[2]      = {0xE8BD8008, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureAlt2[2]      = {0xE8BD8010, 0x023E0000};
+static const u16 initHeapEndFuncSignatureThumb[1]      = {0xBD08};
+static const u16 initHeapEndFuncSignatureThumbAlt[1]   = {0x4718};
+static const u32 initHeapEndFunc2SignatureThumb[2]     = {0xBD082000, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
 
 // Reset
 static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
@@ -1468,6 +1471,12 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 			(u16*)initHeapEnd, 0x40,
 			initHeapEndFuncSignatureThumb, 1
 		);
+		if (!initEndFuncThumb) {
+			initEndFuncThumb = findOffsetBackwardsThumb(
+				(u16*)initHeapEnd, 0x40,
+				initHeapEndFuncSignatureThumbAlt, 1
+			);
+		}
         heapPointer = (u32*)((u16*)initEndFuncThumb+1);
 	}
     
@@ -1505,7 +1514,19 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 	if (!initEndFunc) {
 		initEndFunc = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureThumbAlt, 2
+			initHeapEndFunc2SignatureThumbAlt1, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFunc2SignatureThumbAlt2, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFunc2SignatureThumbAlt3, 2
 		);
 	}
     u32* heapPointer = initEndFunc + 1;

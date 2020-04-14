@@ -116,9 +116,11 @@ static const u32 initHeapEndFuncSignatureAlt[1]        = {0xE8BD8008};
 static const u32 initHeapEndFunc2SignatureAlt1[2]      = {0xE8BD8008, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureAlt2[2]      = {0xE8BD8010, 0x023E0000};
 static const u16 initHeapEndFuncSignatureThumb[1]      = {0xBD08};
+static const u16 initHeapEndFuncSignatureThumbAlt[1]   = {0x4718};
 static const u32 initHeapEndFunc2SignatureThumb[2]     = {0xBD082000, 0x023E0000};
-static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0xBD082010, 0x023E0000};
-static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD102000, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
+static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
 
 
 extern u32 iUncompressedSize;
@@ -1405,6 +1407,12 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 			(u16*)initHeapEnd, 0x40,
 			initHeapEndFuncSignatureThumb, 1
 		);
+		if (!initEndFuncThumb) {
+			initEndFuncThumb = findOffsetBackwardsThumb(
+				(u16*)initHeapEnd, 0x40,
+				initHeapEndFuncSignatureThumbAlt, 1
+			);
+		}
         heapPointer = (u32*)((u16*)initEndFuncThumb+1);
 	}
     
@@ -1449,6 +1457,12 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 		initEndFunc = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			initHeapEndFunc2SignatureThumbAlt2, 2
+		);
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFunc2SignatureThumbAlt3, 2
 		);
 	}
     u32* heapPointer = initEndFunc + 1;
