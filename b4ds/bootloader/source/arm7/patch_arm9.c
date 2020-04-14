@@ -403,34 +403,8 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     
 	u32 shrinkSize = 0;
 	switch (ndsHeader->deviceSize) {
-		case 0x00:
-			shrinkSize = 0x10;	// 0x20000
-			break;
-		case 0x01:
-			shrinkSize = 0x20;	// 0x40000
-			break;
-		case 0x02:
-			shrinkSize = 0x40;	// 0x80000
-			break;
-		case 0x03:
-			shrinkSize = 0x80;	// 0x100000
-			break;
-		case 0x04:
-			shrinkSize = 0x100;	// 0x200000
-			break;
-		case 0x05:
-			shrinkSize = 0x200;	// 0x400000
-			break;
-		case 0x06:
-			shrinkSize = 0x400;	// 0x800000
-			break;
-		case 0x07:
-			shrinkSize = 0x800;	// 0x1000000
-			break;
-		case 0x08:
-			shrinkSize = 0x1000;	// 0x2000000
-			break;
 		case 0x09:
+		default:
 			shrinkSize = 0x2000;	// 0x4000000
 			break;
 		case 0x0A:
