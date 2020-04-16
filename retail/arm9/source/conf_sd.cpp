@@ -61,6 +61,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SAV path
 	conf->savPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "SAV_PATH").c_str());
 
+	// Donor NDS path
+	conf->donorPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR_NDS_PATH").c_str());
+
 	// GBA path
 	conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
 

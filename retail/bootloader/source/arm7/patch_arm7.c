@@ -155,6 +155,23 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
+	if (ndsHeader->arm7binarySize == 0x27618
+	|| ndsHeader->arm7binarySize == 0x2762C) {
+		// Replace incompatible ARM7 binary
+		extern u32 donorFileCluster;
+		aFile donorRomFile = getFileFromCluster(donorFileCluster);
+		if (donorFileCluster == 0 || donorRomFile.firstCluster == CLUSTER_FREE) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
+		u32 arm7src = 0;
+		u32 arm7size = 0;
+		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
+		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
+		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, -1);
+		*(u32*)0x02FFFE3C = arm7size;
+	}
+
 	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);

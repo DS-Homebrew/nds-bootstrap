@@ -29,6 +29,7 @@
 	.global saveOnFlashcard
 	.global dsiSD
 	.global saveFileCluster
+	.global donorFileCluster
 	.global gbaFileCluster
 	.global romSize
 	.global saveSize
@@ -82,6 +83,8 @@ dsiSD:
 	.word	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+donorFileCluster:
+	.word	0x00000000		@ donor .nds file
 gbaFileCluster:
 	.word	0x00000000		@ .gba file
 romSize:

@@ -10,6 +10,7 @@ typedef struct configuration {
     bool cacheFatTable;
 	char* ndsPath;
 	char* savPath;
+	char* donorPath;
 	char* gbaPath;
 	char* apPatchPath;
 	u32 romSize;
