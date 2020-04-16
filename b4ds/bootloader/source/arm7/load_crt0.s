@@ -30,6 +30,7 @@
 	.global argStart
 	.global argSize
 	.global saveFileCluster
+	.global donorFileCluster
 	.global saveSize
 	.global apPatchFileCluster
 	.global apPatchSize
@@ -62,6 +63,8 @@ dldiOffset:
 	.word	0x00000000
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+donorFileCluster:
+	.word	0x00000000		@ donor .nds file
 saveSize:
 	.word	0x00000000		@ .sav file size
 apPatchFileCluster:

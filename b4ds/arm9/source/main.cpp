@@ -145,6 +145,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	dbg_printf("donorPath: \"%s\"\n", conf->donorPath);
 	if (debug) {
 		dopause();
 	}
@@ -332,9 +333,11 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stDonor;
 	struct stat stApPatch;
 	struct stat stPatchOffsetCache;
 	u32 clusterSav = 0;
+	u32 clusterDonor = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterPatchOffsetCache = 0;
 
@@ -346,6 +349,10 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 	
+	if (stat(conf->donorPath, &stDonor) >= 0) {
+		clusterDonor = stDonor.st_ino;
+	}
+
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
 		clusterApPatch = stApPatch.st_ino;
 	}
@@ -357,7 +364,7 @@ static int runNdsFile(configuration* conf) {
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, clusterApPatch, clusterPatchOffsetCache, conf);
+	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, clusterApPatch, clusterPatchOffsetCache, conf);
 
 	return 0;
 }

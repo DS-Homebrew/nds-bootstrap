@@ -148,6 +148,8 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+extern void rsetA7Cache(void);
+
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
@@ -170,6 +172,12 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, -1);
 		*(u32*)0x02FFFE3C = arm7size;
+	}
+
+	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
+		rsetA7Cache();
+		patchOffsetCache.a7BinSize = ndsHeader->arm7binarySize;
+		patchOffsetCacheChanged = true;
 	}
 
 	patchSleepMode(ndsHeader);

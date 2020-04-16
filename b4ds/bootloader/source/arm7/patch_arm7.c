@@ -101,15 +101,36 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }*/
 
+extern void rsetA7Cache(void);
+
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
-	/*if (REG_SCFG_ROM != 0x703) {
-		fixForDsiBios(ce7, ndsHeader, moduleParams);
-	}*/
+	if (ndsHeader->arm7binarySize == 0x27618
+	|| ndsHeader->arm7binarySize == 0x2762C) {
+		// Replace incompatible ARM7 binary
+		extern u32 donorFileCluster;
+		aFile donorRomFile = getFileFromCluster(donorFileCluster);
+		if (donorFileCluster == 0 || donorRomFile.firstCluster == CLUSTER_FREE) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
+		u32 arm7src = 0;
+		u32 arm7size = 0;
+		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4);
+		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
+		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
+		*(u32*)0x02FFFE3C = arm7size;
+	}
+
+	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
+		rsetA7Cache();
+		patchOffsetCache.a7BinSize = ndsHeader->arm7binarySize;
+		patchOffsetCacheChanged = true;
+	}
 
 	patchSleepMode(ndsHeader);
 
@@ -152,6 +173,10 @@ u32 patchCardNdsArm7(
 	if (!saveResult) {
 		patchOffsetCache.savePatchType = 0;
 	}
+
+	/*if (REG_SCFG_ROM != 0x703) {
+		fixForDsiBios(ce7, ndsHeader, moduleParams);
+	}*/
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

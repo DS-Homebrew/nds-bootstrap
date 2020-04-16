@@ -86,6 +86,7 @@ typedef struct patchOffsetCacheContents {
 	u32* randomPatch5SecondOffset;
 	u32 randomPatch5SecondChecked;
     u32* a9IrqHookOffset;
+	u32 a7BinSize;
 	u32 a7IsThumb;
 	u32* a7Swi12Offset;
 	u32* swiGetPitchTableOffset;

@@ -32,7 +32,7 @@ extern "C"
 
 //#define LOAD_DEFAULT_NDS 0
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, configuration* conf);
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, configuration* conf);
 
 #ifdef __cplusplus
 }

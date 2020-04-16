@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 19;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 20;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -344,6 +344,34 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     }
 }
 
+static bool rsetA7CacheDone = false;
+
+void rsetA7Cache(void)
+{
+	if (rsetA7CacheDone) return;
+
+	patchOffsetCache.a7BinSize = 0;
+	patchOffsetCache.a7IsThumb = 0;
+	patchOffsetCache.a7Swi12Offset = 0;
+	patchOffsetCache.swiGetPitchTableOffset = 0;
+	patchOffsetCache.swiGetPitchTableChecked = 0;
+	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.a7CardIrqEnableOffset = 0;
+	patchOffsetCache.cardCheckPullOutOffset = 0;
+	patchOffsetCache.cardCheckPullOutChecked = 0;
+	patchOffsetCache.a7IrqHandlerOffset = 0;
+	patchOffsetCache.a7IrqHandlerWordsOffset = 0;
+	patchOffsetCache.a7IrqHookOffset = 0;
+	patchOffsetCache.savePatchType = 0;
+	patchOffsetCache.relocateStartOffset = 0;
+	patchOffsetCache.relocateValidateOffset = 0;
+	patchOffsetCache.a7CardReadEndOffset = 0;
+	patchOffsetCache.a7JumpTableFuncOffset = 0;
+	patchOffsetCache.a7JumpTableType = 0;
+
+	rsetA7CacheDone = true;
+}
+
 u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
@@ -393,23 +421,7 @@ u32 patchCardNds(
 		patchOffsetCache.randomPatch5SecondOffset = 0;
 		patchOffsetCache.randomPatch5SecondChecked = 0;
 		patchOffsetCache.a9IrqHookOffset = 0;
-		patchOffsetCache.a7IsThumb = 0;
-		patchOffsetCache.a7Swi12Offset = 0;
-		patchOffsetCache.swiGetPitchTableOffset = 0;
-		patchOffsetCache.swiGetPitchTableChecked = 0;
-		patchOffsetCache.sleepPatchOffset = 0;
-		patchOffsetCache.a7CardIrqEnableOffset = 0;
-		patchOffsetCache.cardCheckPullOutOffset = 0;
-		patchOffsetCache.cardCheckPullOutChecked = 0;
-		patchOffsetCache.a7IrqHandlerOffset = 0;
-		patchOffsetCache.a7IrqHandlerWordsOffset = 0;
-		patchOffsetCache.a7IrqHookOffset = 0;
-		patchOffsetCache.savePatchType = 0;
-		patchOffsetCache.relocateStartOffset = 0;
-		patchOffsetCache.relocateValidateOffset = 0;
-		patchOffsetCache.a7CardReadEndOffset = 0;
-		patchOffsetCache.a7JumpTableFuncOffset = 0;
-		patchOffsetCache.a7JumpTableType = 0;
+		rsetA7Cache();
 	}
 
 	bool sdk5 = isSdk5(moduleParams);

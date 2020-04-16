@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 11;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 12;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -341,6 +341,28 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     
 }
 
+static bool rsetA7CacheDone = false;
+
+void rsetA7Cache(void)
+{
+	if (rsetA7CacheDone) return;
+
+	patchOffsetCache.a7BinSize = 0;
+	patchOffsetCache.a7IsThumb = 0;
+	patchOffsetCache.ramClearOffset = 0;
+	patchOffsetCache.ramClearChecked = 0;
+	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.a7IrqHandlerOffset = 0;
+	patchOffsetCache.savePatchType = 0;
+	patchOffsetCache.relocateStartOffset = 0;
+	patchOffsetCache.relocateValidateOffset = 0;
+	patchOffsetCache.a7CardReadEndOffset = 0;
+	patchOffsetCache.a7JumpTableFuncOffset = 0;
+	patchOffsetCache.a7JumpTableType = 0;
+
+	rsetA7CacheDone = true;
+}
+
 u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
@@ -384,17 +406,7 @@ u32 patchCardNds(
 		patchOffsetCache.randomPatch5SecondOffset = 0;
 		patchOffsetCache.randomPatch5SecondChecked = 0;
 		patchOffsetCache.a9IrqHandlerOffset = 0;
-		patchOffsetCache.a7IsThumb = 0;
-		patchOffsetCache.ramClearOffset = 0;
-		patchOffsetCache.ramClearChecked = 0;
-		patchOffsetCache.sleepPatchOffset = 0;
-		patchOffsetCache.a7IrqHandlerOffset = 0;
-		patchOffsetCache.savePatchType = 0;
-		patchOffsetCache.relocateStartOffset = 0;
-		patchOffsetCache.relocateValidateOffset = 0;
-		patchOffsetCache.a7CardReadEndOffset = 0;
-		patchOffsetCache.a7JumpTableFuncOffset = 0;
-		patchOffsetCache.a7JumpTableType = 0;
+		rsetA7Cache();
 	}
 
 	bool sdk5 = isSdk5(moduleParams);
@@ -406,10 +418,7 @@ u32 patchCardNds(
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
-
-		dbg_printf("ERR_NONE");
-		return ERR_NONE;
+		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
 	}
 
 	dbg_printf("ERR_LOAD_OTHR");
