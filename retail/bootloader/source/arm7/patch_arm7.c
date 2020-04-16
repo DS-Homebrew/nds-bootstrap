@@ -158,7 +158,8 @@ u32 patchCardNdsArm7(
 	u32 saveFileCluster
 ) {
 	if (ndsHeader->arm7binarySize == 0x27618
-	|| ndsHeader->arm7binarySize == 0x2762C) {
+	|| ndsHeader->arm7binarySize == 0x2762C
+	|| ndsHeader->arm7binarySize == 0x29CEC) {
 		// Replace incompatible ARM7 binary
 		extern u32 donorFileCluster;
 		aFile donorRomFile = getFileFromCluster(donorFileCluster);
