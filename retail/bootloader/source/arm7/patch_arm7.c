@@ -52,7 +52,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 	}
 	if (!patchOffsetCache.swiGetPitchTableChecked) {
 		if (useGetPitchTableBranch) {
-			swiGetPitchTableOffset = findSwiGetPitchTableThumbBranchOffset(ndsHeader);
+			swiGetPitchTableOffset = (u32*)findSwiGetPitchTableThumbBranchOffset(ndsHeader);
 		} else {
 			swiGetPitchTableOffset = findSwiGetPitchTableOffset(ndsHeader, moduleParams);
 		}
