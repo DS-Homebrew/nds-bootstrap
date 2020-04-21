@@ -113,6 +113,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 srParamsFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool dsDebugRam,
@@ -125,6 +126,7 @@ int hookNdsRetailArm9(
 	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->expansionPakFound      = expansionPakFound;
 	ce9->extendedMemory         = extendedMemory;
 	ce9->dsDebugRam             = dsDebugRam;

@@ -24,6 +24,8 @@ fileCluster:
 	.word	0x00000000
 saveCluster:
 	.word	0x00000000
+srParamsCluster:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 expansionPakFound:
@@ -88,6 +90,7 @@ patches:
 .word   card_pull
 .word   cacheFlushRef
 .word   terminateForPullOutRef
+.word   reset_arm9
 needFlushDCCache:
 .word   0x0
 .word	ipcSyncHandler
@@ -203,7 +206,6 @@ nand_read_arm9:
 	ldr		r6, =nandRead
 
 	bl		_blx_r6_stub_nand_read	
-    
 
 	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
@@ -221,7 +223,6 @@ nand_write_arm9:
 	ldr		r6, =nandWrite
 
 	bl		_blx_r6_stub_nand_write
-    
 
 	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
@@ -240,7 +241,6 @@ thumb_nand_read_arm9:
 	ldr		r6, =nandRead
 
 	bl		_blx_r6_stub_thumb_nand_read	
-    
 
 	pop	{r1-r7, pc}
 	mov r0, #0
@@ -259,7 +259,6 @@ thumb_nand_write_arm9:
 	ldr		r6, =nandWrite
 
 	bl		_blx_r6_stub_thumb_nand_write
-    
 
 	pop	{r1-r7, pc}
 	mov r0, #0
@@ -302,6 +301,23 @@ thumb_blx_r3_stub2:
 
 
 	.arm
+@---------------------------------------------------------------------------------
+reset_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, =reset
+
+	bl		_blx_r6_stub_reset
+
+	ldmfd   sp!, {r1-r11,pc}
+	mov r0, #0
+	bx      lr
+_blx_r6_stub_reset:
+	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 cacheFlush:

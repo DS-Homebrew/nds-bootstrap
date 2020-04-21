@@ -122,6 +122,25 @@ static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000
 static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
 
+// Reset
+static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
+static const u32 resetSignature2Alt1[4] = {0xE92D000F, 0xE92D4010, 0xEB000026, 0xE3500000}; // sdk2
+static const u32 resetSignature2Alt2[4] = {0xE92D4010, 0xE59F1078, 0xE1A04000, 0xE1D100B0}; // sdk2
+static const u32 resetSignature3[4]     = {0xE92D4010, 0xE59F106C, 0xE1A04000, 0xE1D100B0}; // sdk3
+static const u32 resetSignature3Alt[4]  = {0xE92D4010, 0xE59F1068, 0xE1A04000, 0xE1D100B0}; // sdk3
+static const u32 resetSignature4[4]     = {0xE92D4070, 0xE59F10A0, 0xE1A04000, 0xE1D100B0}; // sdk4
+static const u32 resetSignature4Alt[4]  = {0xE92D4010, 0xE59F1084, 0xE1A04000, 0xE1D100B0}; // sdk4
+static const u32 resetSignature5[4]     = {0xE92D4038, 0xE59F1054, 0xE1A05000, 0xE1D100B0}; // sdk5
+static const u32 resetSignature5Alt1[4] = {0xE92D4010, 0xE59F104C, 0xE1A04000, 0xE1D100B0}; // sdk2 and sdk5
+static const u32 resetSignature5Alt2[4] = {0xE92D4010, 0xE59F1088, 0xE1A04000, 0xE1D100B0}; // sdk5
+static const u32 resetSignature5Alt3[4] = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0xE1D100B0}; // sdk5
+
+static const u32 resetConstant[1]       = {RESET_PARAM};
+static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
+
+// Panic
+// TODO : could be a good idea to catch the call to Panic function and store the message somewhere
+
 
 extern u32 iUncompressedSize;
 
@@ -1496,29 +1515,6 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-u32* findRandomPatchOffset5First(const tNDSHeader* ndsHeader) {
-	dbg_printf("findRandomPatchOffset5First:\n");
-
-	u32* randomPatchOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		randomPatchSignature5First, 4
-	);
-	if (randomPatchOffset) {
-		dbg_printf("Random patch SDK 5 first found: ");
-	} else {
-		dbg_printf("Random patch SDK 5 first not found\n");
-	}
-
-	if (randomPatchOffset) {
-		dbg_hexa((u32)randomPatchOffset);
-		dbg_printf("\n");
-	}
-
-	dbg_printf("\n");
-	return randomPatchOffset;
-}
-
-// SDK 5
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRandomPatchOffset5Second:\n");
 
@@ -1539,4 +1535,119 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return randomPatchOffset;
+}
+
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findResetOffset\n");
+    u32* resetSignature = resetSignature2;
+
+    if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
+        resetSignature = resetSignature4;
+    }
+    if (moduleParams->sdk_version > 0x5000000) {
+        resetSignature = resetSignature5;
+    }
+
+    u32 * resetOffset = NULL;
+
+  	resetOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		resetSignature, 4
+	);
+	
+	if (!resetOffset) {
+		if (moduleParams->sdk_version > 0x2000000 && moduleParams->sdk_version < 0x2008000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				resetSignature5Alt1, 4
+			);
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+					resetSignature2Alt1, 4
+				);
+			}
+		} else if (moduleParams->sdk_version < 0x4008000) {
+			if (moduleParams->sdk_version > 0x2008000 && moduleParams->sdk_version < 0x3000000) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+					resetSignature2Alt2, 4
+				);
+			}
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+					resetSignature3, 4
+				);
+			}
+			if (moduleParams->sdk_version > 0x3000000) {
+				if (!resetOffset) {
+					resetOffset = findOffset(
+						(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+						resetSignature3Alt, 4
+					);
+				}
+			}
+		} else if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				resetSignature4Alt, 4
+			);
+		} else if (moduleParams->sdk_version > 0x5000000) {
+			resetOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				resetSignature5Alt1, 4
+			);
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+					resetSignature5Alt2, 4
+				);
+			}
+			if (!resetOffset) {
+				resetOffset = findOffset(
+					(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+					resetSignature5Alt3, 4
+				);
+			}
+		}
+	}
+    
+    if (resetOffset) {
+		dbg_printf("Reset found: ");
+        dbg_hexa((u32)resetOffset);
+		dbg_printf("\n");
+    } 
+    
+    while(resetOffset!=NULL) {
+    	u32* resetEndOffset = findOffsetThumb(
+    		resetOffset, 0x200,
+    		(isSdk5(moduleParams) ? resetConstant5 : resetConstant), 1
+    	);
+        if (resetEndOffset) {
+    		dbg_printf("Reset constant found: ");
+            dbg_hexa((u32)resetEndOffset);
+    		dbg_printf("\n");
+            break;
+        } 
+        
+      	resetOffset = findOffset(
+				resetOffset+1, iUncompressedSize,//ndsHeader->arm9binarySize,
+				resetSignature, 4
+			);
+        if (resetOffset) {
+		    dbg_printf("Reset found: ");
+            dbg_hexa((u32)resetOffset);
+    		dbg_printf("\n");
+        } 
+    } 
+    
+	if (resetOffset) {
+		dbg_printf("Reset found\n");
+	} else {
+		dbg_printf("Reset not found\n");
+	}
+
+	dbg_printf("\n");
+	return resetOffset;
 }

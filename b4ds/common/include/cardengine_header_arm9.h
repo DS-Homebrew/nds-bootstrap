@@ -19,6 +19,7 @@ typedef struct cardengineArm9Patches {
     u32* card_pull;
     u32* cacheFlushRef;
     u32* readCachedRef;
+    u32* reset_arm9;
     u32 needFlushDCCache;
     u32* ipcSyncHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
@@ -54,6 +55,7 @@ typedef struct cardengineArm9 {
     const module_params_t* moduleParams;
     u32 fileCluster;
     u32 saveCluster;
+    u32 srParamsCluster;
     u32 cardStruct0;
     u32 expansionPakFound;
     u32 extendedMemory;

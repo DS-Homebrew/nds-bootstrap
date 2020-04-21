@@ -18,6 +18,7 @@ typedef struct loadCrt0 {
     u32 apPatchFileCluster;
     u32 apPatchSize;
     u32 patchOffsetCacheFileCluster;
+	u32 srParamsFileCluster;
     u32 language; //u8
     u32 donorSdkVer;
     u32 patchMpuRegion;

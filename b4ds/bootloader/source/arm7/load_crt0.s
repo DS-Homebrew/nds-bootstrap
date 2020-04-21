@@ -35,6 +35,7 @@
 	.global apPatchFileCluster
 	.global apPatchSize
 	.global patchOffsetCacheFileCluster
+	.global srParamsFileCluster
 	.global language
 	.global donorSdkVer
 	.global patchMpuRegion
@@ -72,6 +73,8 @@ apPatchFileCluster:
 apPatchSize:
 	.word	0x00000000
 patchOffsetCacheFileCluster:
+	.word	0x00000000
+srParamsFileCluster:
 	.word	0x00000000
 language:
 	.word	0x00000000

@@ -43,6 +43,7 @@
 u8 lz77ImageBuffer[0x10000];
 
 std::string patchOffsetCacheFilePath;
+std::string srParamsFilePath;
 
 /* typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -336,10 +337,12 @@ static int runNdsFile(configuration* conf) {
 	struct stat stDonor;
 	struct stat stApPatch;
 	struct stat stPatchOffsetCache;
+	struct stat stSrParams;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterPatchOffsetCache = 0;
+	u32 clusterSrParams = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -361,10 +364,14 @@ static int runNdsFile(configuration* conf) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 
+	if (stat(srParamsFilePath.c_str(), &stSrParams) >= 0) {
+		clusterSrParams = stSrParams.st_ino;
+	}
+
 	//bool havedsiSD = false;
 	//bool havedsiSD = (argv[0][0] == 's' && argv[0][1] == 'd');
 
-	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, clusterApPatch, clusterPatchOffsetCache, conf);
+	runNds((loadCrt0*)load_bin, load_bin_size, st.st_ino, clusterSav, clusterDonor, clusterApPatch, clusterPatchOffsetCache, clusterSrParams, conf);
 
 	return 0;
 }

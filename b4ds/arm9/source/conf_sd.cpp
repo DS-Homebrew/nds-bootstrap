@@ -20,6 +20,7 @@
 #include "locations.h"
 
 extern std::string patchOffsetCacheFilePath;
+extern std::string srParamsFilePath;
 
 extern u8 lz77ImageBuffer[0x10000];
 
@@ -162,6 +163,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (std::string::npos != last_slash_idx)
 	{
 		romFilename.erase(0, last_slash_idx + 1);
+	}
+
+	srParamsFilePath = "fat:/_nds/nds-bootstrap/B4DS-softResetParams.bin";
+	
+	if (access(srParamsFilePath.c_str(), F_OK) != 0) {
+		u32 buffer = 0xFFFFFFFF;
+
+		FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "wb");
+		fwrite(&buffer, sizeof(u32), 1, srParamsFile);
+		fclose(srParamsFile);
 	}
 
 	patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/B4DS-patchOffsetCache/"+romFilename;

@@ -180,6 +180,7 @@ extern u32 saveSize;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 patchOffsetCacheFileCluster;
+extern u32 srParamsFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
@@ -192,6 +193,8 @@ extern u32 boostVram;
 
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
+
+static u32 softResetParams = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -534,6 +537,10 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
+	if (softResetParams != 0xFFFFFFFF) {
+		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
+	}
+
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 }
 
@@ -556,18 +563,25 @@ int arm7_main(void) {
 		//return -1;
 	}
 
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4);
+	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
+	if (softResetParamsFound) {
+		u32 clearBuffer = 0xFFFFFFFF;
+		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4);
+	}
+
 	// ROM file
-	aFile* romFile = malloc(32);
-	*romFile = getFileFromCluster(storedFileCluster);
+	aFile romFile = getFileFromCluster(storedFileCluster);
 
 	const char* bootName = "BOOT.NDS";
 
 	// Invalid file cluster specified
-	if ((romFile->firstCluster < CLUSTER_FIRST) || (romFile->firstCluster >= CLUSTER_EOF)) {
-		*romFile = getBootFileCluster(bootName);
+	if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
+		romFile = getBootFileCluster(bootName);
 	}
 
-	if (romFile->firstCluster == CLUSTER_FREE) {
+	if (romFile.firstCluster == CLUSTER_FREE) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		errorOutput();
 		//return -1;
@@ -576,8 +590,7 @@ int arm7_main(void) {
 	nocashMessage("status1");
 
 	// Sav file
-	aFile* savFile = malloc(32);
-	*savFile = getFileFromCluster(saveFileCluster);
+	aFile savFile = getFileFromCluster(saveFileCluster);
 	
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
@@ -591,7 +604,7 @@ int arm7_main(void) {
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
 
-	loadBinary_ARM7(&dsiHeaderTemp, *romFile, dsiMode, &dsiModeConfirmed);
+	loadBinary_ARM7(&dsiHeaderTemp, romFile, dsiMode, &dsiModeConfirmed);
 	
 	nocashMessage("Loading the header...\n");
 
@@ -745,14 +758,15 @@ int arm7_main(void) {
 	}
 
 	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
-		loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
 	}
 
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		moduleParams,
-		romFile->firstCluster,
-		savFile->firstCluster,
+		romFile.firstCluster,
+		savFile.firstCluster,
+		srParamsFileCluster,
 		expansionPakFound,
 		extendedMemory,
 		dsDebugRam,

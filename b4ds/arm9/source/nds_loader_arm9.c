@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, configuration* conf) {
+void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, u32 srParamsCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -257,6 +257,7 @@ void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 
 	loader->apPatchFileCluster          = apPatchCluster;
 	loader->apPatchSize                 = conf->apPatchSize;
 	loader->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
+	loader->srParamsFileCluster         = srParamsCluster;
 	loader->language                    = conf->language;
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;

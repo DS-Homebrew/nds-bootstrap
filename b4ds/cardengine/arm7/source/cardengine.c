@@ -121,6 +121,11 @@ void myIrqHandlerVBlank(void) {
 		personalData->language = language;
 	}
 
+	/*if (sharedAddr[3] == (vu32)0x52534554) {
+		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
+		sharedAddr[3] = 0;
+	}*/
+
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 			if (consoleModel < 2) {

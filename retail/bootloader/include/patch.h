@@ -81,8 +81,6 @@ typedef struct patchOffsetCacheContents {
     u32* mpuInitCacheOffset;
 	u32* randomPatchOffset;
 	u32 randomPatchChecked;
-	u32* randomPatch5Offset;
-	u32 randomPatch5Checked;
 	u32* randomPatch5SecondOffset;
 	u32 randomPatch5SecondChecked;
     u32* a9IrqHookOffset;

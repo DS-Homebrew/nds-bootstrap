@@ -241,6 +241,25 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
 }
 
+static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
+    u32* reset = patchOffsetCache.resetOffset;
+
+    if (!patchOffsetCache.resetChecked) {
+		reset = findResetOffset(ndsHeader,moduleParams);
+		if (reset) patchOffsetCache.resetOffset = reset;
+		patchOffsetCache.resetChecked = true;
+	}
+
+	if (reset) {
+		// Patch
+		u32* resetPatch = ce9->patches->reset_arm9;
+		memcpy(reset, resetPatch, 0x40);
+		dbg_printf("reset location : ");
+		dbg_hexa(reset);
+		dbg_printf("\n\n");
+	}
+}
+
 static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
 
@@ -672,30 +691,6 @@ void patchDownloadplay(const tNDSHeader* ndsHeader)
 }
 
 // SDK 5
-static void randomPatch5First(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
-		return;
-	}
-
-	// Random patch SDK 5 first
-	u32* randomPatchOffset5First = patchOffsetCache.randomPatch5Offset;
-	if (!patchOffsetCache.randomPatch5Checked) {
-		randomPatchOffset5First = findRandomPatchOffset5First(ndsHeader);
-		if (randomPatchOffset5First) {
-			patchOffsetCache.randomPatch5Offset = randomPatchOffset5First;
-		}
-		patchOffsetCache.randomPatch5Checked = true;
-	}
-	if (!randomPatchOffset5First) {
-		return;
-	}
-	// Patch
-	*randomPatchOffset5First = 0xE3A00000;
-	//*(u32*)((u32)randomPatchOffset5First + 4) = 0xE12FFF1E;
-	*(randomPatchOffset5First + 1) = 0xE12FFF1E;
-}
-
-// SDK 5
 static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return;
@@ -855,10 +850,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchHeapPointer2(ce9, moduleParams, ndsHeader);
 
+	patchReset(ce9, ndsHeader, moduleParams);
+
 	randomPatch(ndsHeader, moduleParams);
 
-	randomPatch5First(ndsHeader, moduleParams);
-	
 	randomPatch5Second(ndsHeader, moduleParams);
 
     const char* romTid = getRomTid(ndsHeader);

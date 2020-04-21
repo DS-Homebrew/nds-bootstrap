@@ -51,6 +51,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static aFile romFile;
 static aFile savFile;
+static aFile srParamsFile;
 
 static int cardReadCount = 0;
 
@@ -156,6 +157,8 @@ static void initialize(void) {
 		savFile = getFileFromCluster(ce9->saveCluster);
 		buildFatTableCache(&savFile);
 
+		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
+
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		} else {
@@ -255,6 +258,13 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return 0;
 }
 
+
+void reset(u32 param) {
+	setDeviceOwner();
+	fileWrite(&param, srParamsFile, 0, 4);
+	sharedAddr[3] = 0x52534554;
+	while (1);
+}
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
