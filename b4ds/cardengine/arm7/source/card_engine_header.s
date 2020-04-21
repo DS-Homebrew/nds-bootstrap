@@ -208,27 +208,3 @@ cardIdDataT:
 .word  0xC2FF01C0
 
 	.pool
-
-	.arm
-.global lockMutex
-.type	lockMutex STT_FUNC
-@ r0 : mutex adr
-lockMutex:
-  mov r1, r0    
-  mov r2, #1
-mutex_loop:
-  swp r0,r2, [r1]
-  cmp r0,r2
-  beq mutex_loop    
-  mov r0, #1	
-  bx  lr
-
-
-
-.global unlockMutex
-.type	unlockMutex STT_FUNC
-@ r0 : mutex adr
-unlockMutex:  
-	mov r1, #0
-	str r1, [r0]
-	bx  lr

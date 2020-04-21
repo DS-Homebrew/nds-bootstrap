@@ -39,10 +39,6 @@
 
 //#define memcpy __builtin_memcpy
 
-extern int tryLockMutex(int* addr);
-extern int lockMutex(int* addr);
-extern int unlockMutex(int* addr);
-
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 language;
@@ -62,7 +58,7 @@ static bool volumeAdjustActivated = false;*/
 //static bool ndmaUsed = false;
 
 //static int cardEgnineCommandMutex = 0;
-static int saveMutex = 0;
+//static int saveMutex = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -121,10 +117,10 @@ void myIrqHandlerVBlank(void) {
 		personalData->language = language;
 	}
 
-	/*if (sharedAddr[3] == (vu32)0x52534554) {
+	if (sharedAddr[3] == (vu32)0x52534554) {
 		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
 		sharedAddr[3] = 0;
-	}*/
+	}
 
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
@@ -215,20 +211,17 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-  	if (lockMutex(&saveMutex)) {
-		// Send a command to the ARM9 to read the save
-		u32 commandSaveRead = 0x53415652;
+	// Send a command to the ARM9 to read the save
+	u32 commandSaveRead = 0x53415652;
 
-		// Write the command
-		sharedAddr[0] = src;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (vu32)dst;
-		sharedAddr[3] = commandSaveRead;
+	// Write the command
+	sharedAddr[0] = src;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (vu32)dst;
+	sharedAddr[3] = commandSaveRead;
 
-		waitForArm9();
+	waitForArm9();
 
-  		unlockMutex(&saveMutex);
-	}
 	return true;
 }
 
@@ -244,20 +237,17 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-  	if (lockMutex(&saveMutex)) {
-		// Send a command to the ARM9 to write the save
-		u32 commandSaveWrite = 0x53415657;
+	// Send a command to the ARM9 to write the save
+	u32 commandSaveWrite = 0x53415657;
 
-		// Write the command
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (vu32)src;
-		sharedAddr[3] = commandSaveWrite;
+	// Write the command
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (vu32)src;
+	sharedAddr[3] = commandSaveWrite;
 
-		waitForArm9();
+	waitForArm9();
 
-  		unlockMutex(&saveMutex);
-	}
 	return true;
 }
 
@@ -273,20 +263,17 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-  	if (lockMutex(&saveMutex)) {
-		// Send a command to the ARM9 to write the save
-		u32 commandSaveWrite = 0x53415657;
+	// Send a command to the ARM9 to write the save
+	u32 commandSaveWrite = 0x53415657;
 
-		// Write the command
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (vu32)src;
-		sharedAddr[3] = commandSaveWrite;
+	// Write the command
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (vu32)src;
+	sharedAddr[3] = commandSaveWrite;
 
-		waitForArm9();
+	waitForArm9();
 
-  		unlockMutex(&saveMutex);
-	}
 	return true;
 }
 
