@@ -704,8 +704,8 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
-	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchSize <= 0x30000) {
+	if (apPatchFileCluster != 0 && apPatchSize > 0 && apPatchSize <= 0x30000) {
+		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
 		applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9));
 		dbg_printf("AP-fix found and applied\n");
