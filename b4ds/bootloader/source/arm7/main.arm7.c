@@ -718,7 +718,6 @@ int arm7_main(void) {
 	toncset((u32*)IMAGES_LOCATION, 0, 0x30000);	// clear nds-bootstrap images and IPS patch
 	clearScreen();
 
-	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
