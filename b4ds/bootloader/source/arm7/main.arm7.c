@@ -48,6 +48,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/arm7/i2c.h>
 #include <nds/debug.h>
+#include <nds/ipc.h>
 
 #include <nds/arm9/dldi.h>
 
@@ -56,7 +57,7 @@
 #include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
-//#include "dldi_patcher.h"
+#include "dldi_patcher.h"
 #include "ips.h"
 #include "patch.h"
 #include "find.h"
@@ -66,100 +67,8 @@
 #include "locations.h"
 #include "loading_screen.h"
 
-#define STORED_FILE_CLUSTER_OFFSET 4 
-#define INIT_DISC_OFFSET 8
-#define WANT_TO_PATCH_DLDI_OFFSET 12
-#define ARG_START_OFFSET 16
-#define ARG_SIZE_OFFSET 20
-#define HAVE_DSISD_OFFSET 28
-#define DSIMODE_OFFSET 32
-
 typedef signed int addr_t;
 typedef unsigned char data_t;
-
-#define FIX_ALL	0x01
-#define FIX_GLUE	0x02
-#define FIX_GOT	0x04
-#define FIX_BSS	0x08
-
-enum DldiOffsets {
-	DO_magicString = 0x00,			// "\xED\xA5\x8D\xBF Chishm"
-	DO_magicToken = 0x00,			// 0xBF8DA5ED
-	DO_magicShortString = 0x04,		// " Chishm"
-	DO_version = 0x0C,
-	DO_driverSize = 0x0D,
-	DO_fixSections = 0x0E,
-	DO_allocatedSpace = 0x0F,
-
-	DO_friendlyName = 0x10,
-
-	DO_text_start = 0x40,			// Data start
-	DO_data_end = 0x44,				// Data end
-	DO_glue_start = 0x48,			// Interworking glue start	-- Needs address fixing
-	DO_glue_end = 0x4C,				// Interworking glue end
-	DO_got_start = 0x50,			// GOT start					-- Needs address fixing
-	DO_got_end = 0x54,				// GOT end
-	DO_bss_start = 0x58,			// bss start					-- Needs setting to zero
-	DO_bss_end = 0x5C,				// bss end
-
-	// IO_INTERFACE data
-	DO_ioType = 0x60,
-	DO_features = 0x64,
-	DO_startup = 0x68,	
-	DO_isInserted = 0x6C,	
-	DO_readSectors = 0x70,	
-	DO_writeSectors = 0x74,
-	DO_clearStatus = 0x78,
-	DO_shutdown = 0x7C,
-	DO_code = 0x80
-};
-
-static addr_t readAddr (data_t *mem, addr_t offset) {
-	return ((addr_t*)mem)[offset/sizeof(addr_t)];
-}
-
-static void writeAddr (data_t *mem, addr_t offset, addr_t value) {
-	((addr_t*)mem)[offset/sizeof(addr_t)] = value;
-}
-
-static void vramcpy (void* dst, const void* src, int len)
-{
-	u16* dst16 = (u16*)dst;
-	u16* src16 = (u16*)src;
-	
-	//dmaCopy(src, dst, len);
-
-	for ( ; len > 0; len -= 2) {
-		*dst16++ = *src16++;
-	}
-}	
-
-static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLen, size_t searchLen) {
-	const int* dataChunk = (const int*) data;
-	int searchChunk = ((const int*)search)[0];
-	addr_t i;
-	addr_t dataChunkEnd = (addr_t)(dataLen / sizeof(int));
-
-	for ( i = 0; i < dataChunkEnd; i++) {
-		if (dataChunk[i] == searchChunk) {
-			if ((i*sizeof(int) + searchLen) > dataLen) {
-				return -1;
-			}
-			if (memcmp (&data[i*sizeof(int)], search, searchLen) == 0) {
-				return i*sizeof(int);
-			}
-		}
-	}
-
-	return -1;
-}
-
-// Normal DLDI uses "\xED\xA5\x8D\xBF Chishm"
-// Bootloader string is different to avoid being patched
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
-
-#define DEVICE_TYPE_DLDI 0x49444C44
-
 
 //#define memcpy __builtin_memcpy
 
@@ -223,6 +132,11 @@ static void initMBK(void) {
 	REG_MBK8 = 0x07403700; // same as DSiWare
 }
 
+void memset_addrs_arm7(u32 start, u32 end)
+{
+	toncset((u32*)start, 0, ((int)end - (int)start));
+}
+
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
 Clears all of the NDS's RAM that is visible to the ARM7
@@ -253,7 +167,12 @@ static void resetMemory_ARM7(void) {
 		TIMER_DATA(i) = 0;
 	}
 
-	arm7clearRAM();
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02000000, 0, 0x350000);
 	toncset((u32*)0x02380000, 0, 0x5A000);
 	toncset((u32*)0x023DB000, 0, 0x5000);
@@ -587,7 +506,7 @@ int arm7_main(void) {
 		//return -1;
 	}
 
-	nocashMessage("status1");
+	//nocashMessage("status1");
 
 	// Sav file
 	aFile savFile = getFileFromCluster(saveFileCluster);
