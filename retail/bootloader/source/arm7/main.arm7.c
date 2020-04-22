@@ -51,6 +51,8 @@
 #include <nds/debug.h>
 #include <nds/ipc.h>
 
+#define REG_GPIO_WIFI *(vu16*)0x4004C04
+
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "debug_file.h"
@@ -1039,6 +1041,8 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
+	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
+
 	if (isDSiWare) {
 		if (ndsHeader->reserved1[7] & BIT(1)) {
 			nocashMessage("DSiWare is modcrypted");
@@ -1066,6 +1070,7 @@ int arm7_main(void) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
+			REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
 		}
 
 		// If possible, set to load ROM into RAM
