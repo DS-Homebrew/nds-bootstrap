@@ -13,6 +13,7 @@ typedef struct loadCrt0 {
     u32 wantToPatchDLDI;
     u32 dldiOffset;
     u32 saveFileCluster;
+	u32 donorFile2Cluster;
 	u32 donorFileCluster;
     u32 saveSize;
     u32 apPatchFileCluster;

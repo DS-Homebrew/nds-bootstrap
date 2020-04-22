@@ -105,17 +105,22 @@ extern void rsetA7Cache(void);
 
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
-	const tNDSHeader* ndsHeader,
+	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
-	if (ndsHeader->arm7binarySize == 0x27618
+	if (ndsHeader->arm7binarySize == 0x24DA8
+	|| ndsHeader->arm7binarySize == 0x24F50
+	|| ndsHeader->arm7binarySize == 0x27618
 	|| ndsHeader->arm7binarySize == 0x2762C
 	|| ndsHeader->arm7binarySize == 0x29CEC) {
+		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8 || ndsHeader->arm7binarySize == 0x24F50);
+
 		// Replace incompatible ARM7 binary
-		extern u32 donorFileCluster;
-		aFile donorRomFile = getFileFromCluster(donorFileCluster);
-		if (donorFileCluster == 0 || donorRomFile.firstCluster == CLUSTER_FREE) {
+		extern u32 donorFile2Cluster;	// SDK2
+		extern u32 donorFileCluster;	// SDK5
+		aFile donorRomFile = getFileFromCluster(belowSdk5 ? donorFile2Cluster : donorFileCluster);
+		if (donorRomFile.firstCluster == CLUSTER_FREE) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
 		}
@@ -124,7 +129,8 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4);
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
-		*(u32*)0x02FFFE3C = arm7size;
+		ndsHeader->arm7binarySize = arm7size;
+		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
 	}
 
 	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {

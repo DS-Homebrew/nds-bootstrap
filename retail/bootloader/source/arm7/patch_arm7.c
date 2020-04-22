@@ -159,10 +159,11 @@ u32 patchCardNdsArm7(
 	u32 saveFileCluster
 ) {
 	if (ndsHeader->arm7binarySize == 0x24DA8
+	|| ndsHeader->arm7binarySize == 0x24F50
 	|| ndsHeader->arm7binarySize == 0x27618
 	|| ndsHeader->arm7binarySize == 0x2762C
 	|| ndsHeader->arm7binarySize == 0x29CEC) {
-		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8);
+		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8 || ndsHeader->arm7binarySize == 0x24F50);
 
 		// Replace incompatible ARM7 binary
 		extern u32 donorFile2Cluster;	// SDK2
