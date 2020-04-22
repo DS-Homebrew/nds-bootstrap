@@ -42,6 +42,7 @@
 #include <nds/arm7/codec.h>
 #include <nds/dma.h>
 #include <nds/system.h>
+#include <nds/bios.h>
 #include <nds/input.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>

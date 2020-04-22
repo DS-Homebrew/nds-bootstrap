@@ -122,7 +122,7 @@ u32 patchCardNdsArm9(
 );
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
-	const tNDSHeader* ndsHeader,
+	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
 	u32 saveFileCluster
@@ -130,7 +130,7 @@ u32 patchCardNdsArm7(
 u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
-	const tNDSHeader* ndsHeader,
+	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,

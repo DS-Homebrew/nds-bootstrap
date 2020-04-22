@@ -375,7 +375,7 @@ void rsetA7Cache(void)
 u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
-	const tNDSHeader* ndsHeader,
+	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,

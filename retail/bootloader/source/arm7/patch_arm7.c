@@ -1,4 +1,5 @@
 #include <nds/system.h>
+#include <nds/bios.h>
 #include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
@@ -152,7 +153,7 @@ extern void rsetA7Cache(void);
 
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
-	const tNDSHeader* ndsHeader,
+	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
 	u32 saveFileCluster
@@ -176,7 +177,8 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, -1);
-		*(u32*)(belowSdk5 ? 0x027FFE3C : 0x02FFFE3C) = arm7size;
+		ndsHeader->arm7binarySize = arm7size;
+		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
 	}
 
 	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
