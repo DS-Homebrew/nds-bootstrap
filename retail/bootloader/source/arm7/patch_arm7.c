@@ -157,13 +157,17 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	if (ndsHeader->arm7binarySize == 0x27618
+	if (ndsHeader->arm7binarySize == 0x24DA8
+	|| ndsHeader->arm7binarySize == 0x27618
 	|| ndsHeader->arm7binarySize == 0x2762C
 	|| ndsHeader->arm7binarySize == 0x29CEC) {
+		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8);
+
 		// Replace incompatible ARM7 binary
-		extern u32 donorFileCluster;
-		aFile donorRomFile = getFileFromCluster(donorFileCluster);
-		if (donorFileCluster == 0 || donorRomFile.firstCluster == CLUSTER_FREE) {
+		extern u32 donorFile2Cluster;	// SDK2
+		extern u32 donorFileCluster;	// SDK5
+		aFile donorRomFile = getFileFromCluster(belowSdk5 ? donorFile2Cluster : donorFileCluster);
+		if (donorRomFile.firstCluster == CLUSTER_FREE) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
 		}
@@ -172,7 +176,7 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, -1);
-		*(u32*)0x02FFFE3C = arm7size;
+		*(u32*)(belowSdk5 ? 0x027FFE3C : 0x02FFFE3C) = arm7size;
 	}
 
 	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
