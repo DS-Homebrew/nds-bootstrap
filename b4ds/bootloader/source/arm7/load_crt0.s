@@ -30,6 +30,7 @@
 	.global argStart
 	.global argSize
 	.global saveFileCluster
+	.global donorFileE2Cluster
 	.global donorFile2Cluster
 	.global donorFileCluster
 	.global saveSize
@@ -65,10 +66,12 @@ dldiOffset:
 	.word	0x00000000
 saveFileCluster:
 	.word	0x00000000		@ .sav file
+donorFileE2Cluster:
+	.word	0x00000000		@ Early SDK2 donor .nds file
 donorFile2Cluster:
-	.word	0x00000000		@ donor SDK2 .nds file
+	.word	0x00000000		@ Late SDK2 donor .nds file
 donorFileCluster:
-	.word	0x00000000		@ donor SDK5 .nds file
+	.word	0x00000000		@ SDK5 donor .nds file
 saveSize:
 	.word	0x00000000		@ .sav file size
 apPatchFileCluster:

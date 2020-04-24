@@ -9,6 +9,7 @@ typedef struct configuration {
     bool debug;
 	char* ndsPath;
 	char* savPath;
+	char* donorE2Path;
 	char* donor2Path;
 	char* donorPath;
 	char* apPatchPath;

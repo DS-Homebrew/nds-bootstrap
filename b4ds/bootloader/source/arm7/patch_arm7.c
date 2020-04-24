@@ -1,4 +1,3 @@
-#include <string.h> // memcpy
 #include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
@@ -8,8 +7,6 @@
 #include "locations.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
-
-//#define memcpy __builtin_memcpy
 
 extern u32 _io_dldi_features;
 
@@ -109,17 +106,25 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
-	if (ndsHeader->arm7binarySize == 0x24DA8
-	|| ndsHeader->arm7binarySize == 0x24F50
-	|| ndsHeader->arm7binarySize == 0x27618
-	|| ndsHeader->arm7binarySize == 0x2762C
-	|| ndsHeader->arm7binarySize == 0x29CEC) {
-		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8 || ndsHeader->arm7binarySize == 0x24F50);
-
+	if (ndsHeader->arm7binarySize == 0x23CAC
+	 || ndsHeader->arm7binarySize == 0x24DA8
+	 || ndsHeader->arm7binarySize == 0x24F50
+	 || ndsHeader->arm7binarySize == 0x27618
+	 || ndsHeader->arm7binarySize == 0x2762C
+	 || ndsHeader->arm7binarySize == 0x29CEC) {
 		// Replace incompatible ARM7 binary
-		extern u32 donorFile2Cluster;	// SDK2
-		extern u32 donorFileCluster;	// SDK5
-		aFile donorRomFile = getFileFromCluster(belowSdk5 ? donorFile2Cluster : donorFileCluster);
+		aFile donorRomFile;
+		if (ndsHeader->arm7binarySize == 0x23CAC) {
+			extern u32 donorFileE2Cluster;	// Early SDK2
+			donorRomFile = getFileFromCluster(donorFileE2Cluster);
+		} else if (ndsHeader->arm7binarySize == 0x24DA8
+				 || ndsHeader->arm7binarySize == 0x24F50) {
+			extern u32 donorFile2Cluster;	// SDK2
+			donorRomFile = getFileFromCluster(donorFile2Cluster);
+		} else {
+			extern u32 donorFileCluster;	// SDK5
+			donorRomFile = getFileFromCluster(donorFileCluster);
+		}
 		if (donorRomFile.firstCluster == CLUSTER_FREE) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
@@ -143,7 +148,7 @@ u32 patchCardNdsArm7(
 
 	patchRamClear(ndsHeader, moduleParams);
 
-	const char* romTid = getRomTid(ndsHeader);
+	//const char* romTid = getRomTid(ndsHeader);
 
 	/*if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
@@ -153,11 +158,11 @@ u32 patchCardNdsArm7(
 
 	u32 saveResult = 0;
 
-    if (
+    /*if (
         strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
     ) {
         saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
-	} else if (isSdk5(moduleParams)) {
+	} else*/ if (isSdk5(moduleParams)) {
 		// SDK 5
 		saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
 	} else {
