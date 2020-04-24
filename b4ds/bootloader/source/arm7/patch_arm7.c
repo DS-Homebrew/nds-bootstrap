@@ -1,4 +1,5 @@
 #include <nds/system.h>
+#include <nds/bios.h>
 #include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
