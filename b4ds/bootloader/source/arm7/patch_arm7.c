@@ -19,7 +19,7 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
-u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster); // SDK 5
+u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -159,7 +159,7 @@ u32 patchCardNdsArm7(
         saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 	} else if (isSdk5(moduleParams)) {
 		// SDK 5
-		saveResult = savePatchV5(ce7, ndsHeader, moduleParams, saveFileCluster);
+		saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
 	} else {
 		if (patchOffsetCache.savePatchType == 0) {
 			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
