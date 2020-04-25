@@ -51,6 +51,8 @@ Helpful information:
 #include <nds/arm7/audio.h>
 #include <nds/arm7/codec.h>
 
+#define REG_GPIO_WIFI *(vu16*)0x4004C04
+
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
@@ -514,6 +516,8 @@ int arm7_main (void) {
 		return -1;
 	}
 
+	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
+
 	// Load the NDS file
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
@@ -533,6 +537,7 @@ int arm7_main (void) {
 		dsiModeConfirmed = true;
 	} else {
 		NTR_BIOS();
+		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
 	}
 
 	// Pass command line arguments to loaded program
