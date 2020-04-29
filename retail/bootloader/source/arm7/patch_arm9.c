@@ -560,7 +560,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		u32* resetPatch = ce9->patches->reset_arm9;
 		memcpy(reset, resetPatch, 0x40);
 		dbg_printf("reset location : ");
-		dbg_hexa(reset);
+		dbg_hexa((u32)reset);
 		dbg_printf("\n\n");
 	}
 }
@@ -1286,68 +1286,68 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 
 static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
     u32 sdPatchEntry = 0;
-    
+
 	const char* romTid = getRomTid(ndsHeader);
-    
-    // WarioWare D.I.Y. (USA)
+
+    // WarioWare: D.I.Y. (USA)
 	if (strcmp(romTid, "UORE") == 0) {
 		sdPatchEntry = 0x2002c04; 
 	}
-    // WarioWare D.I.Y. (Europe)"
+    // WarioWare: Do It Yourself (Europe)
     if (strcmp(romTid, "UORP") == 0) {
 		sdPatchEntry = 0x2002ca4; 
 	}
-    // WarioWare D.I.Y. (Japan)
+    // Made in Ore (Japan)
     if (strcmp(romTid, "UORJ") == 0) {
 		sdPatchEntry = 0x2002be4; 
 	}
-    
+
     if(sdPatchEntry) {   
       //u32 gNandInit(void* data)
-      *((u32*)(sdPatchEntry+0x50c+0)) = 0xe3a00001; //mov r0, #1
-      *((u32*)(sdPatchEntry+0x50c+4)) = 0xe12fff1e; //bx lr
-      
+      *(u32*)((u8*)sdPatchEntry+0x50C) = 0xe3a00001; //mov r0, #1
+      *(u32*)((u8*)sdPatchEntry+0x510) = 0xe12fff1e; //bx lr
+
       //u32 gNandWait(void)
-      *((u32*)(sdPatchEntry+0xc9c+0)) = 0xe12fff1e; //bx lr
-      
+      *(u32*)((u8*)sdPatchEntry+0xC9C) = 0xe12fff1e; //bx lr
+
       //u32 gNandState(void)
-      *((u32*)(sdPatchEntry+0xeb0+0)) = 0xe3a00003; //mov r0, #3
-      *((u32*)(sdPatchEntry+0xeb0+4)) = 0xe12fff1e; //bx lr
-      
+      *(u32*)((u8*)sdPatchEntry+0xEB0) = 0xe3a00003; //mov r0, #3
+      *(u32*)((u8*)sdPatchEntry+0xEB4) = 0xe12fff1e; //bx lr
+
       //u32 gNandError(void)
-      *((u32*)(sdPatchEntry+0xec8+0)) = 0xe3a00000; //mov r0, #0
-      *((u32*)(sdPatchEntry+0xec8+4)) = 0xe12fff1e; //bx lr
+      *(u32*)((u8*)sdPatchEntry+0xEC8) = 0xe3a00000; //mov r0, #0
+      *(u32*)((u8*)sdPatchEntry+0xECC) = 0xe12fff1e; //bx lr
 
       //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandWritePatch = ce9->patches->nand_write_arm9;
-      memcpy(sdPatchEntry+0x958, nandWritePatch, 0x40);
-         
+      memcpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
+
       //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandReadPatch = ce9->patches->nand_read_arm9;
-      memcpy(sdPatchEntry+0xd24, nandReadPatch, 0x40);
-    } else {  
+      memcpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
+    } else {
         // Jam with the Band (Europe)
         if (strcmp(romTid, "UXBP") == 0) {
           	//u32 gNandInit(void* data)
-            *((u32*)(0x020613cc+0)) = 0xe3a00001; //mov r0, #1
-            *((u32*)(0x020613cc+4)) = 0xe12fff1e; //bx lr
-            
+            *(u32*)(0x020613CC) = 0xe3a00001; //mov r0, #1
+            *(u32*)(0x020613D0) = 0xe12fff1e; //bx lr
+
             //u32 gNandResume(void)
-            *((u32*)(0x02061a4c+0)) = 0xe3a00000; //mov r0, #0
-            *((u32*)(0x02061a4c+4)) = 0xe12fff1e; //bx lr
-            
+            *(u32*)(0x02061A4C) = 0xe3a00000; //mov r0, #0
+            *(u32*)(0x02061A50) = 0xe12fff1e; //bx lr
+
             //u32 gNandError(void)
-            *((u32*)(0x02061c24+0)) = 0xe3a00000; //mov r0, #0
-            *((u32*)(0x02061c24+4)) = 0xe12fff1e; //bx lr
-      
+            *(u32*)(0x02061C24) = 0xe3a00000; //mov r0, #0
+            *(u32*)(0x02061C28) = 0xe12fff1e; //bx lr
+
             //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            memcpy(0x0206176c, nandWritePatch, 0x40);
-               
+            memcpy((u32*)0x0206176C, nandWritePatch, 0x40);
+
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            memcpy(0x02061ac4, nandReadPatch, 0x40);
-    	}    
+            memcpy((u32*)0x02061AC4, nandReadPatch, 0x40);
+    	}
 	}
 }
 
