@@ -645,7 +645,7 @@ int arm7_main(void) {
 			fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
 		}
 		switch (ndsHeader->deviceSize) {
-			case 0x00:
+			/*case 0x00:
 				fatTableSize = 0x10;	// 0x20000
 				break;
 			case 0x01:
@@ -671,8 +671,9 @@ int arm7_main(void) {
 				break;
 			case 0x08:
 				fatTableSize = 0x1000;	// 0x2000000
-				break;
+				break;*/
 			case 0x09:
+			default:
 				fatTableSize = 0x2000;	// 0x4000000
 				break;
 			case 0x0A:

@@ -135,9 +135,9 @@ static void initialize(void) {
 			while (1);
 		}
 
-		if (ce9->expansionPakFound) {
+		//if (ce9->expansionPakFound) {
 			clusterCacheSize = ce9->maxClusterCacheSize;
-		} else if (ndsHeader->romSize > 0) {
+		/*} else if (ndsHeader->romSize > 0) {
 			u32 shrinksize = 0;
 			for (u32 i = 0; i <= (ndsHeader->romSize)/0x2000; i += 4) {
 				shrinksize = i;
@@ -146,16 +146,18 @@ static void initialize(void) {
 				shrinksize = ce9->maxClusterCacheSize;
 			}
 			clusterCacheSize = shrinksize;
-		}
+		}*/
 
 		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
 
 		romFile = getFileFromCluster(ce9->fileCluster);
 		buildFatTableCache(&romFile);
 
-		clusterCacheSize = ce9->maxClusterCacheSize;
+		//clusterCacheSize = ce9->maxClusterCacheSize;
 		savFile = getFileFromCluster(ce9->saveCluster);
-		buildFatTableCache(&savFile);
+		if (ce9->expansionPakFound) {
+			buildFatTableCache(&savFile);
+		}
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
