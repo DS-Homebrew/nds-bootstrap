@@ -54,6 +54,7 @@
 
 #include "tonccpy.h"
 #include "my_fat.h"
+#include "debug_file.h"
 #include "nds_header.h"
 #include "module_params.h"
 #include "decompress.h"
@@ -392,7 +393,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
-static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
+/*static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
@@ -400,7 +401,7 @@ static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
 	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
 	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
 	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
-}
+}*/
 
 /*-------------------------------------------------------------------------
 startBinary_ARM7
@@ -640,7 +641,9 @@ int arm7_main(void) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
 	} else {
-		fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
+		if (moduleParams->sdk_version >= 0x2008000) {
+			fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
+		}
 		switch (ndsHeader->deviceSize) {
 			case 0x00:
 				fatTableSize = 0x10;	// 0x20000
