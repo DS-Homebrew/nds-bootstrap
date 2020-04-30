@@ -201,14 +201,9 @@ u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
 		swi12Signature, 2
 	);
 	if (swi12Offset) {
-		dbg_printf("swi 0x12 call found: ");
+		dbg_printf("swi 0x12 call found\n");
 	} else {
 		dbg_printf("swi 0x12 call not found\n");
-	}
-
-	if (swi12Offset) {
-		dbg_hexa((u32)swi12Offset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");

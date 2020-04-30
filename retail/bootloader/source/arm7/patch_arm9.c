@@ -46,6 +46,15 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
 		}
 	}
+
+    dbg_printf("swi12 location : ");
+    dbg_hexa((u32)swi12Offset);
+    dbg_printf("\n\n");
+	if (ROMisDsiEnhanced) {
+		dbg_printf("dsiModeCheck location : ");
+		dbg_hexa((u32)dsiModeCheckOffset);
+		dbg_printf("\n\n");
+	}
 }
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, bool useCache, u32 startOffset) {

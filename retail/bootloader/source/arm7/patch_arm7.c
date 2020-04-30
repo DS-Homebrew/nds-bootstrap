@@ -82,6 +82,13 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 			}
 		}
 	}
+
+    dbg_printf("swi12 location : ");
+    dbg_hexa((u32)swi12Offset);
+    dbg_printf("\n\n");
+    dbg_printf(useGetPitchTableBranch ? "swiGetPitchTableBranch location : " : "swiGetPitchTable location : ");
+    dbg_hexa((u32)swiGetPitchTableOffset);
+    dbg_printf("\n\n");
 }
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
