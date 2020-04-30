@@ -10,7 +10,9 @@ typedef struct configuration {
     bool cacheFatTable;
 	char* ndsPath;
 	char* savPath;
+	char* donorE2Path;
 	char* donor2Path;
+	char* donor3Path;
 	char* donorPath;
 	char* gbaPath;
 	char* apPatchPath;

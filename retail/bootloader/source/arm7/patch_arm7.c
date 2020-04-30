@@ -12,6 +12,7 @@
 
 extern u32 gameOnFlashcard;
 extern u32 saveOnFlashcard;
+extern u32 dsiSD;
 extern u32 forceSleepPatch;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -165,17 +166,43 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
-	if (ndsHeader->arm7binarySize == 0x24DA8
-	|| ndsHeader->arm7binarySize == 0x24F50
-	|| ndsHeader->arm7binarySize == 0x27618
-	|| ndsHeader->arm7binarySize == 0x2762C
-	|| ndsHeader->arm7binarySize == 0x29CEC) {
-		bool belowSdk5 = (ndsHeader->arm7binarySize == 0x24DA8 || ndsHeader->arm7binarySize == 0x24F50);
-
+	if ((ndsHeader->arm7binarySize == 0x23708 && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x2378C && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x237F0 && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x23CAC && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x2434C && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x2484C && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x249DC && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x249E8 && !dsiSD)
+	 || ndsHeader->arm7binarySize == 0x24DA8
+	 || ndsHeader->arm7binarySize == 0x24F50
+	 || (ndsHeader->arm7binarySize == 0x25D04 && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x25D94 && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x25FFC && !dsiSD)
+	 || ndsHeader->arm7binarySize == 0x27618
+	 || ndsHeader->arm7binarySize == 0x2762C
+	 || ndsHeader->arm7binarySize == 0x29CEC) {
 		// Replace incompatible ARM7 binary
-		extern u32 donorFile2Cluster;	// SDK2
-		extern u32 donorFileCluster;	// SDK5
-		aFile donorRomFile = getFileFromCluster(belowSdk5 ? donorFile2Cluster : donorFileCluster);
+		aFile donorRomFile;
+		if (ndsHeader->arm7binarySize == 0x23CAC) {
+			extern u32 donorFileE2Cluster;	// Early SDK2
+			donorRomFile = getFileFromCluster(donorFileE2Cluster);
+		} else if (ndsHeader->arm7binarySize == 0x24DA8
+				 || ndsHeader->arm7binarySize == 0x24F50) {
+			extern u32 donorFile2Cluster;	// SDK2
+			donorRomFile = getFileFromCluster(donorFile2Cluster);
+		} else if (ndsHeader->arm7binarySize == 0x2434C
+				 || ndsHeader->arm7binarySize == 0x2484C
+				 || ndsHeader->arm7binarySize == 0x249DC
+				 || ndsHeader->arm7binarySize == 0x25D04
+				 || ndsHeader->arm7binarySize == 0x25D94
+				 || ndsHeader->arm7binarySize == 0x25FFC) {
+			extern u32 donorFile3Cluster;	// SDK3-4
+			donorRomFile = getFileFromCluster(donorFile3Cluster);
+		} else {
+			extern u32 donorFileCluster;	// SDK5
+			donorRomFile = getFileFromCluster(donorFileCluster);
+		}
 		if (donorRomFile.firstCluster == CLUSTER_FREE) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
@@ -222,7 +249,7 @@ u32 patchCardNdsArm7(
 	u32 saveResult = 0;
     
     if (
-        strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
+        (strncmp(romTid, "ATK", 3) == 0) && dsiSD  // Kirby: Canvas Curse
     ) {
         saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 	} else if (isSdk5(moduleParams)) {
