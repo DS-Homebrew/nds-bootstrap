@@ -273,9 +273,16 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool ds
 
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-	if (dsiHeaderTemp->ndshdr.arm7binarySize != 0x23CAC
+	if (dsiHeaderTemp->ndshdr.arm7binarySize != 0x23708
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2378C
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x23CAC
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2434C
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2484C
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x249E8
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x24DA8
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x24F50
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25D04
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25FFC
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x27618
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2762C
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x29CEC) {

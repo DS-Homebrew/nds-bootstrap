@@ -32,6 +32,7 @@
 	.global saveFileCluster
 	.global donorFileE2Cluster
 	.global donorFile2Cluster
+	.global donorFile3Cluster
 	.global donorFileCluster
 	.global saveSize
 	.global apPatchFileCluster
@@ -70,6 +71,8 @@ donorFileE2Cluster:
 	.word	0x00000000		@ Early SDK2 donor .nds file
 donorFile2Cluster:
 	.word	0x00000000		@ Late SDK2 donor .nds file
+donorFile3Cluster:
+	.word	0x00000000		@ SDK3-4 donor .nds file
 donorFileCluster:
 	.word	0x00000000		@ SDK5 donor .nds file
 saveSize:

@@ -107,9 +107,16 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
-	if (ndsHeader->arm7binarySize == 0x23CAC
+	if (ndsHeader->arm7binarySize == 0x23708
+	 || ndsHeader->arm7binarySize == 0x2378C
+	 || ndsHeader->arm7binarySize == 0x23CAC
+	 || ndsHeader->arm7binarySize == 0x2434C
+	 || ndsHeader->arm7binarySize == 0x2484C
+	 || ndsHeader->arm7binarySize == 0x249E8
 	 || ndsHeader->arm7binarySize == 0x24DA8
 	 || ndsHeader->arm7binarySize == 0x24F50
+	 || ndsHeader->arm7binarySize == 0x25D04
+	 || ndsHeader->arm7binarySize == 0x25FFC
 	 || ndsHeader->arm7binarySize == 0x27618
 	 || ndsHeader->arm7binarySize == 0x2762C
 	 || ndsHeader->arm7binarySize == 0x29CEC) {
@@ -122,6 +129,12 @@ u32 patchCardNdsArm7(
 				 || ndsHeader->arm7binarySize == 0x24F50) {
 			extern u32 donorFile2Cluster;	// SDK2
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
+		} else if (ndsHeader->arm7binarySize == 0x2434C
+				 || ndsHeader->arm7binarySize == 0x2484C
+				 || ndsHeader->arm7binarySize == 0x25D04
+				 || ndsHeader->arm7binarySize == 0x25FFC) {
+			extern u32 donorFile3Cluster;	// SDK3-4
+			donorRomFile = getFileFromCluster(donorFile3Cluster);
 		} else {
 			extern u32 donorFileCluster;	// SDK5
 			donorRomFile = getFileFromCluster(donorFileCluster);

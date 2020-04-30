@@ -57,6 +57,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Late SDK2 Donor NDS path
 	conf->donor2Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR2_NDS_PATH").c_str());
 
+	// SDK3-4 Donor NDS path
+	conf->donor3Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR3_NDS_PATH").c_str());
+
 	// SDK5 Donor NDS path
 	conf->donorPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR_NDS_PATH").c_str());
 
