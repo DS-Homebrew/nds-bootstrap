@@ -109,6 +109,7 @@ u32 patchCardNdsArm7(
 ) {
 	if (ndsHeader->arm7binarySize == 0x23708
 	 || ndsHeader->arm7binarySize == 0x2378C
+	 || ndsHeader->arm7binarySize == 0x237F0
 	 || ndsHeader->arm7binarySize == 0x23CAC
 	 || ndsHeader->arm7binarySize == 0x2434C
 	 || ndsHeader->arm7binarySize == 0x2484C
