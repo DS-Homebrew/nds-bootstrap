@@ -112,6 +112,7 @@ u32 patchCardNdsArm7(
 	 || ndsHeader->arm7binarySize == 0x23CAC
 	 || ndsHeader->arm7binarySize == 0x2434C
 	 || ndsHeader->arm7binarySize == 0x2484C
+	 || ndsHeader->arm7binarySize == 0x249DC
 	 || ndsHeader->arm7binarySize == 0x249E8
 	 || ndsHeader->arm7binarySize == 0x24DA8
 	 || ndsHeader->arm7binarySize == 0x24F50
@@ -131,6 +132,7 @@ u32 patchCardNdsArm7(
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x2434C
 				 || ndsHeader->arm7binarySize == 0x2484C
+				 || ndsHeader->arm7binarySize == 0x249DC
 				 || ndsHeader->arm7binarySize == 0x25D04
 				 || ndsHeader->arm7binarySize == 0x25FFC) {
 			extern u32 donorFile3Cluster;	// SDK3-4
