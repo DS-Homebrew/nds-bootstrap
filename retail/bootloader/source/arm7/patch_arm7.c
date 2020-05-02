@@ -194,6 +194,7 @@ u32 patchCardNdsArm7(
 		} else if (ndsHeader->arm7binarySize == 0x2434C
 				 || ndsHeader->arm7binarySize == 0x2484C
 				 || ndsHeader->arm7binarySize == 0x249DC
+				 || ndsHeader->arm7binarySize == 0x249E8
 				 || ndsHeader->arm7binarySize == 0x25D04
 				 || ndsHeader->arm7binarySize == 0x25D94
 				 || ndsHeader->arm7binarySize == 0x25FFC) {
