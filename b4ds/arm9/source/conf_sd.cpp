@@ -63,6 +63,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDK5 Donor NDS path
 	conf->donorPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR_NDS_PATH").c_str());
 
+	// SDK5 (TWL) Donor NDS path
+	conf->donorTwlPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
+
 	// AP-patch path
 	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
 

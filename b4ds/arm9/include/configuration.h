@@ -13,6 +13,7 @@ typedef struct configuration {
 	char* donor2Path;
 	char* donor3Path;
 	char* donorPath;
+	char* donorTwlPath;
 	char* apPatchPath;
 	u32 romSize;
 	u32 saveSize;

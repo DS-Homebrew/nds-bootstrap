@@ -17,6 +17,7 @@ typedef struct loadCrt0 {
 	u32 donorFile2Cluster;
 	u32 donorFile3Cluster;
 	u32 donorFileCluster;
+	u32 donorFileTwlCluster;
     u32 saveSize;
     u32 apPatchFileCluster;
     u32 apPatchSize;

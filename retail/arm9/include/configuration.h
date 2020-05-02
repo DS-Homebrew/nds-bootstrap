@@ -14,6 +14,7 @@ typedef struct configuration {
 	char* donor2Path;
 	char* donor3Path;
 	char* donorPath;
+	char* donorTwlPath;
 	char* gbaPath;
 	char* apPatchPath;
 	u32 romSize;

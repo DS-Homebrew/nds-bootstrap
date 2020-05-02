@@ -33,6 +33,7 @@
 	.global donorFile2Cluster
 	.global donorFile3Cluster
 	.global donorFileCluster
+	.global donorFileTwlCluster
 	.global gbaFileCluster
 	.global romSize
 	.global saveSize
@@ -93,7 +94,9 @@ donorFile2Cluster:
 donorFile3Cluster:
 	.word	0x00000000		@ SDK3-4 donor .nds file
 donorFileCluster:
-	.word	0x00000000		@ SDK5 donor .nds file
+	.word	0x00000000		@ SDK5 (NTR) donor .nds file
+donorFileTwlCluster:
+	.word	0x00000000		@ SDK5 (TWL) donor .nds file
 gbaFileCluster:
 	.word	0x00000000		@ .gba file
 romSize:
