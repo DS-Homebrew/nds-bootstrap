@@ -689,7 +689,8 @@ int arm7_main(void) {
 				break;
 		}
 		if (moduleParams->sdk_version <= 0x2007FFF) {
-			fatTableAddr = 0x023E8000;
+			fatTableAddr = 0x023E2000;
+			fatTableSize = 0x10000;
 		} else if (!ceCached) {
 			fatTableAddr = 0x023D8000;
 		}
