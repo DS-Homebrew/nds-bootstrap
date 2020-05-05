@@ -75,12 +75,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Donor SDK version
 	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER").c_str(), NULL, 0);
 
-	// Patch MPU region
-	conf->patchMpuRegion = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_REGION").c_str(), NULL, 0);
-
-	// Patch MPU size
-	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
-
 	// Card engine (arm9) cached
 	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
 

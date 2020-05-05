@@ -135,31 +135,19 @@ static void initialize(void) {
 			while (1);
 		}
 
-		//if (ce9->expansionPakFound) {
-			clusterCacheSize = ce9->maxClusterCacheSize;
-		/*} else if (ndsHeader->romSize > 0) {
-			u32 shrinksize = 0;
-			for (u32 i = 0; i <= (ndsHeader->romSize)/0x2000; i += 4) {
-				shrinksize = i;
-			}
-			if (shrinksize > ce9->maxClusterCacheSize) {
-				shrinksize = ce9->maxClusterCacheSize;
-			}
-			clusterCacheSize = shrinksize;
-		}*/
+		clusterCacheSize = ce9->maxClusterCacheSize;
 
 		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
 
 		romFile = getFileFromCluster(ce9->fileCluster);
-		buildFatTableCache(&romFile);
-
-		//clusterCacheSize = ce9->maxClusterCacheSize;
 		savFile = getFileFromCluster(ce9->saveCluster);
-		if (ce9->expansionPakFound) {
-			buildFatTableCache(&savFile);
-		}
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
+
+		if (ce9->expansionPakFound) {
+			buildFatTableCache(&romFile);
+			buildFatTableCache(&savFile);
+		}
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -220,9 +208,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	setDeviceOwner();
 
-	cardReadCount++;
-
 	initialize();
+
+	cardReadCount++;
+	if (cardReadCount==2 && !ce9->expansionPakFound) {
+		buildFatTableCache(&romFile);
+		buildFatTableCache(&savFile);
+	}
+
 	enableIPC_SYNC();
 
 	vu32* cardStruct = (vu32*)(ce9->cardStruct0);

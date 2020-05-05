@@ -94,8 +94,6 @@ extern u32 srParamsFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
-extern u32 patchMpuRegion;
-extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 boostVram;
 //extern u32 forceSleepPatch;
@@ -238,9 +236,9 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }*/
 
 // SDK 5
-static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
+/*static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
-}
+}*/
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool dsiMode, bool* dsiModeConfirmedPtr) {
 	nocashMessage("loadBinary_ARM7");
@@ -607,8 +605,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		patchMpuRegion,
-		patchMpuSize,
+		2,
+		1,
 		saveFileCluster,
 		saveSize
 	);
@@ -642,58 +640,12 @@ int arm7_main(void) {
 	} else if (extendedMemory) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
+	} else if (strncmp(getRomTid(ndsHeader), "AMC", 3) == 0) {
+		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
+		fatTableSize = 0x2000;
 	} else {
-		if (moduleParams->sdk_version >= 0x2008000) {
-			fatTableAddr = (((isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader)) || (ndsHeader->deviceSize >= 0x0B) || !ceCached) ? 0x02380000 : (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize));
-		}
-		switch (ndsHeader->deviceSize) {
-			/*case 0x00:
-				fatTableSize = 0x10;	// 0x20000
-				break;
-			case 0x01:
-				fatTableSize = 0x20;	// 0x40000
-				break;
-			case 0x02:
-				fatTableSize = 0x40;	// 0x80000
-				break;
-			case 0x03:
-				fatTableSize = 0x80;	// 0x100000
-				break;
-			case 0x04:
-				fatTableSize = 0x100;	// 0x200000
-				break;
-			case 0x05:
-				fatTableSize = 0x200;	// 0x400000
-				break;
-			case 0x06:
-				fatTableSize = 0x400;	// 0x800000
-				break;
-			case 0x07:
-				fatTableSize = 0x800;	// 0x1000000
-				break;
-			case 0x08:
-				fatTableSize = 0x1000;	// 0x2000000
-				break;*/
-			case 0x09:
-			default:
-				fatTableSize = 0x2000;	// 0x4000000
-				break;
-			case 0x0A:
-				fatTableSize = 0x4000;	// 0x8000000
-				break;
-			case 0x0B:
-				fatTableSize = 0x8000;	// 0x10000000
-				break;
-			case 0x0C:
-				fatTableSize = 0x10000;	// 0x20000000
-				break;
-		}
-		if (moduleParams->sdk_version <= 0x2007FFF) {
-			fatTableAddr = 0x023E2000;
-			fatTableSize = 0x10000;
-		} else if (!ceCached) {
-			fatTableAddr = 0x023D8000;
-		}
+		fatTableAddr = 0x023E2000;
+		fatTableSize = 0x16000;
 	}
 
 	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {

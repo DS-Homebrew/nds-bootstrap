@@ -160,8 +160,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
-	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
-	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));

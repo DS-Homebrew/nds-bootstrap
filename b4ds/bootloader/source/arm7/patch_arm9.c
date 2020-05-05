@@ -281,12 +281,8 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
-		patchOffsetCache.patchMpuRegion = 0;
-		patchOffsetCache.mpuStartOffset = 0;
-		patchOffsetCache.mpuDataOffset = 0;
-		patchOffsetCache.mpuInitCacheOffset = 0;
-		patchOffsetCacheChanged = true;
+	if (moduleParams->sdk_version <= 0x2007FFF) {
+		return;
 	}
 
 	// Find the mpu init
@@ -379,7 +375,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}
 	}
 
-	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
 	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;

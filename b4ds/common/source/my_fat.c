@@ -875,6 +875,8 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length)
 }
 
 void buildFatTableCache (aFile * file) {
+	if (file->fatTableCached) return;
+
     #ifdef DEBUG
 	nocashMessage("buildFatTableCache");
     #endif
