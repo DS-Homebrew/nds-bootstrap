@@ -622,10 +622,14 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+	if (isSdk5(moduleParams) && patchMpuRegion==2) {
+		return;
+	}
+
 	extern u32 gameOnFlashcard;
     const char* romTid = getRomTid(ndsHeader);
 
-	if (moduleParams->sdk_version > 0x5000000 && !gameOnFlashcard
+	if (isSdk5(moduleParams) && !gameOnFlashcard
 	&& strncmp(romTid, "KPF", 3) != 0	// Pop Island: Paperfield
 	) {
 		return;
