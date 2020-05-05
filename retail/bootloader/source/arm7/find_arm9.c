@@ -125,8 +125,8 @@ static const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 3
 static const u32 mpuInitRegion1Data4[1]     = {0x200002D}; // SDK >= 4
 //static const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
 static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
-static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK != 3 (Previously: SDK <= 2)
-static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK 3 (Previously: SDK >= 3)
+static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK <= 2
+static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 
@@ -1355,9 +1355,10 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 
 	const u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	const u32* mpuInitRegion2Data = mpuInitRegion2Data1;
-	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+	if (moduleParams->sdk_version >= 0x2008000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
-	} else if (moduleParams->sdk_version > 0x4000000) {
+	}
+	if (moduleParams->sdk_version > 0x4000000) {
 		mpuInitRegion1Data = mpuInitRegion1Data4;
 	}
 
