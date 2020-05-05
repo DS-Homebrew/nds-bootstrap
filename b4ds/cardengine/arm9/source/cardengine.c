@@ -144,10 +144,10 @@ static void initialize(void) {
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
-		if (ce9->expansionPakFound) {
+		//if (ce9->expansionPakFound) {
 			buildFatTableCache(&romFile);
 			buildFatTableCache(&savFile);
-		}
+		//}
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -208,14 +208,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	setDeviceOwner();
 
-	initialize();
-
 	cardReadCount++;
-	if (cardReadCount==2 && !ce9->expansionPakFound) {
-		buildFatTableCache(&romFile);
-		buildFatTableCache(&savFile);
-	}
 
+	initialize();
 	enableIPC_SYNC();
 
 	vu32* cardStruct = (vu32*)(ce9->cardStruct0);
