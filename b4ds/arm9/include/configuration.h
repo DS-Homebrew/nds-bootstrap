@@ -20,6 +20,8 @@ typedef struct configuration {
 	u32 apPatchSize;
 	u8 language;
 	u32 donorSdkVer;
+	u32 patchMpuRegion;
+	u32 patchMpuSize;
 	bool ceCached;	// SDK 1-4
 	bool boostCpu;
 	bool boostVram;

@@ -94,6 +94,8 @@ extern u32 srParamsFileCluster;
 extern u32 language;
 extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
+extern u32 patchMpuRegion;
+extern u32 patchMpuSize;
 extern u32 ceCached;
 extern u32 boostVram;
 //extern u32 forceSleepPatch;
@@ -605,8 +607,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		2,
-		1,
+		extendedMemory ? patchMpuRegion : 2,
+		extendedMemory ? patchMpuSize : 1,
 		saveFileCluster,
 		saveSize
 	);

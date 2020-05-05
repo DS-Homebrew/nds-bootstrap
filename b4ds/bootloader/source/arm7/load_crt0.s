@@ -42,6 +42,8 @@
 	.global srParamsFileCluster
 	.global language
 	.global donorSdkVer
+	.global patchMpuRegion
+	.global patchMpuSize
 	.global ceCached
 	.global boostVram
 	.global forceSleepPatch
@@ -90,6 +92,10 @@ language:
 	.word	0x00000000
 donorSdkVer:
 	.word	0x00000000		@ donor SDK version
+patchMpuRegion:
+	.word	0x00000000
+patchMpuSize:
+	.word	0x00000000
 ceCached:
 	.word	0x00000000
 boostVram:
