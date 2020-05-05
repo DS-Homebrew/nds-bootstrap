@@ -144,7 +144,7 @@ static void initialize(void) {
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
-		if (ce9->expansionPakFound) {
+		if (!isSdk5(ce9->moduleParams) || ce9->expansionPakFound || ce9->extendedMemory) {
 			buildFatTableCache(&romFile);
 			buildFatTableCache(&savFile);
 		}
@@ -211,7 +211,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 
 	cardReadCount++;
-	if (cardReadCount==2 && !ce9->expansionPakFound) {
+	if (cardReadCount==2 && !ce9->expansionPakFound && !ce9->extendedMemory && isSdk5(ce9->moduleParams)) {
 		buildFatTableCache(&romFile);
 		buildFatTableCache(&savFile);
 	}
