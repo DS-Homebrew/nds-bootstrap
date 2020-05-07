@@ -153,7 +153,7 @@ static void initialize(void) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} else if (ce9->extendedMemory) {
+		} else {
 			debug8mbMpuFix();
 		}
 
@@ -208,7 +208,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 
 	cardReadCount++;
-	if (!fatTablesCreated && cardReadCount==2 && !ce9->expansionPakFound && !ce9->extendedMemory && isSdk5(ce9->moduleParams)) {
+	if (!fatTablesCreated && cardReadCount==2) {
 		int oldIME = enterCriticalSection();
 
 		buildFatTableCache(&romFile);
