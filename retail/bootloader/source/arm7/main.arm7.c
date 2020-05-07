@@ -782,7 +782,8 @@ static void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	arm9_isSdk5 ? arm7_reset_sdk5() : arm7_reset();
+	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+	arm7code();
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {

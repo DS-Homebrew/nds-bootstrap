@@ -313,5 +313,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
 
-	arm9_isSdk5 ? arm9_reset_sdk5() : arm9_reset();
+	// Start ARM9
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();
 }
