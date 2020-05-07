@@ -145,7 +145,7 @@ static void initialize(void) {
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
-		if (ce9->moduleParams->sdk_version < 0x2008000 || ce9->expansionPakFound || ce9->extendedMemory) {
+		if (!isSdk5(ce9->moduleParams) || ce9->expansionPakFound || ce9->extendedMemory) {
 			buildFatTableCache(&romFile);
 			buildFatTableCache(&savFile);
 			fatTablesCreated = true;
