@@ -1318,6 +1318,8 @@ int arm7_main(void) {
 			*(u32*)(0x0200030C) = *(u32*)(ce7Location+0x11EFC);
 			*(u32*)(0x02000310) = *(u32*)(ce7Location+0x11EF8);
 			*(u32*)(0x02000314) = *(u32*)(ce7Location+0x11EFC);
+			*(u32*)(0x02000318) = 0x17;
+			*(u32*)(0x0200031C) = 0;
 			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 		}
 		i2cWriteRegister(0x4A, 0x70, 0x01);
