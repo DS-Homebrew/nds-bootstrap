@@ -1288,7 +1288,7 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 
 	u32* mpuStartOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
 		mpuInitRegionSignature, 1
 	);
 	if (mpuStartOffset) {
