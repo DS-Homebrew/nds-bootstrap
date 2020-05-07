@@ -642,9 +642,12 @@ int arm7_main(void) {
 	} else if (extendedMemory) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
+	} else if (strncmp(getRomTid(ndsHeader), "AMC", 3) == 0) {
+		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
+		fatTableSize = 0x2000;
 	} else {
-		fatTableAddr = 0x023E4000;
-		fatTableSize = 0x14000;
+		fatTableAddr = 0x023E2000;
+		fatTableSize = 0x16000;
 	}
 
 	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
