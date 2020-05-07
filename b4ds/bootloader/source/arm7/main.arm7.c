@@ -642,9 +642,17 @@ int arm7_main(void) {
 	} else if (extendedMemory) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
-	} else if (strncmp(getRomTid(ndsHeader), "AMC", 3) == 0) {
+	} else if ((strncmp(getRomTid(ndsHeader), "AMC", 3) == 0)
+			 || (strncmp(getRomTid(ndsHeader), "A8N", 3) == 0)
+			 || (strncmp(getRomTid(ndsHeader), "ADA", 3) == 0)
+			 || (strncmp(getRomTid(ndsHeader), "APA", 3) == 0)) {
 		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
 		fatTableSize = 0x2000;
+	} else if ((strncmp(getRomTid(ndsHeader), "CPU", 3) == 0)
+			 || (strncmp(getRomTid(ndsHeader), "IPG", 3) == 0)
+			 || (strncmp(getRomTid(ndsHeader), "IPK", 3) == 0)) {
+		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
+		fatTableSize = 0x4000;
 	} else {
 		fatTableAddr = 0x023E2000;
 		fatTableSize = 0x16000;
