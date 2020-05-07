@@ -65,6 +65,7 @@ static inline void setDeviceOwner(void) {
 }
 
 static bool initialized = false;
+static bool fatTablesCreated = false;
 static bool loadOverlaysFromRam = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
@@ -147,11 +148,12 @@ static void initialize(void) {
 		if (!isSdk5(ce9->moduleParams) || ce9->expansionPakFound || ce9->extendedMemory) {
 			buildFatTableCache(&romFile);
 			buildFatTableCache(&savFile);
+			fatTablesCreated = true;
 		}
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} else {
+		} else if (ce9->extendedMemory) {
 			debug8mbMpuFix();
 		}
 
@@ -198,11 +200,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-//Currently used for NSMBDS romhacks
-/*void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}*/
-
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 
@@ -211,9 +208,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 
 	cardReadCount++;
-	if (cardReadCount==2 && !ce9->expansionPakFound && !ce9->extendedMemory && isSdk5(ce9->moduleParams)) {
+	if (!fatTablesCreated && cardReadCount==2 && !ce9->expansionPakFound && !ce9->extendedMemory && isSdk5(ce9->moduleParams)) {
+		int oldIME = enterCriticalSection();
+
 		buildFatTableCache(&romFile);
 		buildFatTableCache(&savFile);
+
+		leaveCriticalSection(oldIME);
+		fatTablesCreated = true;
 	}
 
 	enableIPC_SYNC();
