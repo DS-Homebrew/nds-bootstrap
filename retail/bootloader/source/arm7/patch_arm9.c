@@ -640,6 +640,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
 		patchOffsetCache.mpuInitCacheOffset = 0;
+		patchOffsetCache.mpuInitOffset = 0;
 		patchOffsetCacheChanged = true;
 	}
 
@@ -701,42 +702,47 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	dbg_hexa(patchMpuSize);
 	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
-	u32* mpuInitOffset = mpuStartOffset;
-	while (mpuInitOffset && patchMpuSize) {
-		u32 patchSize = ndsHeader->arm9binarySize;
-		if (patchMpuSize > 1) {
-			patchSize = patchMpuSize;
-		}
+	u32* mpuInitOffset = patchOffsetCache.mpuInitOffset;
+	if (!mpuInitOffset) {
+		mpuInitOffset = (u32*)mpuStartOffset;
+	}
+	extern u32 iUncompressedSize;
+	u32 patchSize = iUncompressedSize;
+	if (patchMpuSize > 1) {
+		patchSize = patchMpuSize;
+	}
+	if (mpuInitOffset == mpuStartOffset) {
 		mpuInitOffset = findOffset(
 			//(u32*)((u32)mpuStartOffset + 4), patchSize,
 			mpuInitOffset + 1, patchSize,
 			mpuInitRegionSignature, 1
 		);
-		if (mpuInitOffset) {
-			dbg_printf("Mpu init: ");
-			dbg_hexa((u32)mpuInitOffset);
-			dbg_printf("\n\n");
+	}
+	if (mpuInitOffset) {
+		dbg_printf("Mpu init: ");
+		dbg_hexa((u32)mpuInitOffset);
+		dbg_printf("\n\n");
 
-			*mpuInitOffset = 0xE1A00000; // nop
+		*mpuInitOffset = 0xE1A00000; // nop
 
-			// Try to find it
-			/*for (int i = 0; i < 0x100; i++) {
-				mpuDataOffset += i;
-				if ((*mpuDataOffset & 0xFFFFFF00) == 0x02000000) {
-					*mpuDataOffset = PAGE_32M | 0x02000000 | 1;
-					break;
-				}
-				if (i == 100) {
-					*mpuStartOffset = 0xE1A00000;
-				}
-			}*/
-		}
+		// Try to find it
+		/*for (int i = 0; i < 0x100; i++) {
+			mpuDataOffset += i;
+			if ((*mpuDataOffset & 0xFFFFFF00) == 0x02000000) {
+				*mpuDataOffset = PAGE_32M | 0x02000000 | 1;
+				break;
+			}
+			if (i == 100) {
+				*mpuStartOffset = 0xE1A00000;
+			}
+		}*/
 	}
 
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
 	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
+	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
 /*static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {

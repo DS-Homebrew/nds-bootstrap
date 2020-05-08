@@ -223,14 +223,14 @@ u32 popFromAsyncQueueHead() {
 
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
-	int count = 0;
+	//int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
-		if (count==0) {
+		//if (count==0) {
 			waitMs(1);
-			IPC_SendSync(0x4);
-			count=1000;
-		}
-		count--;
+			//IPC_SendSync(0x4);
+			//count=1000;
+		//}
+		//count--;
 	}
 }
 
