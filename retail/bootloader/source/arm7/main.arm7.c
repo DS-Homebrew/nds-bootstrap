@@ -123,7 +123,7 @@ bool useTwlCfg = false;
 int twlCfgLang = 0;
 
 bool sdRead = true;
-bool rebootConsole = false;
+//bool rebootConsole = false;
 
 bool gbaRomFound = false;
 
@@ -917,11 +917,14 @@ int arm7_main(void) {
 		//return -1;
 	}*/
 
+	u32 currentFatTableVersion = 1;
+
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
 		fileRead((char*)0x27C0000, fatTableFile, 0, 0x400, -1);
 	}
+	u32 fatTableVersion = *(u32*)(0x27C0100);
 	bool fatTableEmpty = (*(u32*)(0x27C0200) == 0);
 
 	if (*(u32*)(0x27C0040) != storedFileCluster
@@ -937,6 +940,10 @@ int arm7_main(void) {
 			fatTableEmpty = true;
 		}
 	}
+	
+	if (fatTableVersion != currentFatTableVersion) {
+		fatTableEmpty = true;
+	}
 
 	if (fatTableEmpty) {
 		if (!softResetParamsFound) {
@@ -947,7 +954,6 @@ int arm7_main(void) {
 		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x27C0000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
-		romFile->fatTableCache = (u32*)0x2700000;	// Change fatTableCache addr for ce9 usage
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 	}
 
@@ -983,16 +989,13 @@ int arm7_main(void) {
 			*(u32*)(0x27C0048) = saveFileCluster;
 			*(u32*)(0x27C004C) = saveSize;
 		}
+		*(u32*)(0x27C0100) = currentFatTableVersion;
 		if (cacheFatTable) {
 			fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
-			fileWrite((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
+			fileWrite((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 		}
 	} else {
-		fileRead((char*)0x3700000, fatTableFile, 0x200, 0x80000, -1);
-	}
-	if (gameOnFlashcard) {
-		tonccpy((char*)0x2700000, (char*)0x3700000, 0x7FF80);
-		romFile->fatTableCache = (u32*)0x3700000;	// Revert back for ce7 usage
+		fileRead((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 	}
 
 	toncset((u32*)0x027C0000, 0, 0x400);
@@ -1119,7 +1122,7 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
 
-		rebootConsole = (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0));
+		//rebootConsole = (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0));
 
 		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINE_ARM7_BUFFERED_LOCATION), 0x12000);
 		if (gameOnFlashcard || saveOnFlashcard) {
@@ -1266,7 +1269,7 @@ int arm7_main(void) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
-	  if (!rebootConsole) {
+	  //if (!rebootConsole) {
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
@@ -1289,7 +1292,7 @@ int arm7_main(void) {
 			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);
 			dbg_printf("AP-fix found and applied\n");
 		}
-	  }
+	  //}
 	}
 
 	arm9_boostVram = boostVram;
@@ -1308,7 +1311,7 @@ int arm7_main(void) {
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
-	if (rebootConsole) {
+	/*if (rebootConsole) {
 		u32 clearBuffer = 0;
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
 		if (*(u32*)(ce7Location+0x11EF8) != 0) {
@@ -1325,13 +1328,12 @@ int arm7_main(void) {
 		}
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-	}
+	}*/
 
 	if (!dsiModeConfirmed && !isDSiWare) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
-	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
