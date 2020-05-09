@@ -45,6 +45,7 @@ extern u32 _io_dldi_features;
 extern vu32* volatile cardStruct0;
 
 extern u32* lastClusterCacheUsed;
+extern u32 clusterCache;
 extern u32 clusterCacheSize;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
@@ -136,16 +137,16 @@ static void initialize(void) {
 			while (1);
 		}
 
-		clusterCacheSize = ce9->maxClusterCacheSize;
-
 		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
+		clusterCache = ce9->fatTableAddr;
+		clusterCacheSize = ce9->maxClusterCacheSize;
 
 		romFile = getFileFromCluster(ce9->fileCluster);
 		savFile = getFileFromCluster(ce9->saveCluster);
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
-		if (!isSdk5(ce9->moduleParams) || ce9->expansionPakFound || ce9->extendedMemory) {
+		if (ce9->moduleParams->sdk_version < 0x2008000 || ce9->expansionPakFound || ce9->extendedMemory) {
 			buildFatTableCache(&romFile);
 			buildFatTableCache(&savFile);
 			fatTablesCreated = true;

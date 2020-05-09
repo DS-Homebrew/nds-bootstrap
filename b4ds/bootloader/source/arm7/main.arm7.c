@@ -654,8 +654,8 @@ int arm7_main(void) {
 		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
 		fatTableSize = 0x4000;
 	} else {
-		fatTableAddr = 0x023E2000;
-		fatTableSize = 0x16000;
+		fatTableAddr = 0x023E4000;
+		fatTableSize = 0x14000;
 	}
 
 	if (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {

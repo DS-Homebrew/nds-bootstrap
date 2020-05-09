@@ -208,6 +208,7 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 //u32 lastOneCacheUsed = -1;
 
 u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32 clusterCache = CLUSTER_CACHE;
 u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 
 
@@ -887,23 +888,13 @@ void buildFatTableCache (aFile * file) {
 	file->fatTableCache = lastClusterCacheUsed;
 
 	// Follow cluster list until desired one is found
-	if ((*(vu32*)(0x08240000) == 1) && (memcmp((char*)0x027FFE0C, "UBRP", 4) != 0)) {
-		while ((file->currentCluster != CLUSTER_EOF) && (file->firstCluster != CLUSTER_FREE))
-		{
-			*lastClusterCacheUsed = file->currentCluster;
-			file->currentOffset+=discBytePerClus;
-			file->currentCluster = FAT_NextCluster (file->currentCluster);
-			lastClusterCacheUsed++;
-		}
-	} else {
-		while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-			&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+clusterCacheSize)
-		{
-			*lastClusterCacheUsed = file->currentCluster;
-			file->currentOffset+=discBytePerClus;
-			file->currentCluster = FAT_NextCluster (file->currentCluster);
-			lastClusterCacheUsed++;
-		}
+	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
+		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
+	{
+		*lastClusterCacheUsed = file->currentCluster;
+		file->currentOffset+=discBytePerClus;
+		file->currentCluster = FAT_NextCluster (file->currentCluster);
+		lastClusterCacheUsed++;
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
