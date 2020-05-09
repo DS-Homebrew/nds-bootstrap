@@ -140,7 +140,6 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Sound/Mic frequency
 	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ").c_str(), NULL, 0);
-
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
@@ -363,7 +362,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
 	}
 
-	if (conf->cacheFatTable && access(fatTableFilePath.c_str(), F_OK) != 0) {
+	if (conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
 		consoleDemoInit();
 		printf("Creating FAT table file.\n");
 		printf("Please wait...\n");
