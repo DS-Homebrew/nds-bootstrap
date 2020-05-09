@@ -1124,7 +1124,7 @@ int arm7_main(void) {
 		}
 
 		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
-		   (!dsiSD || (REG_SCFG_EXT == 0) || dsiModeConfirmed)
+		   (!dsiSD || dsiModeConfirmed)
 		);
 
 		if (useSdk5ce7) {
