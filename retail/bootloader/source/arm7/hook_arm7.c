@@ -31,6 +31,14 @@
 #include "find.h"
 #include "hook.h"
 
+#define b_gameOnFlashcard BIT(0)
+#define b_saveOnFlashcard BIT(1)
+#define b_extendedMemory BIT(2)
+#define b_ROMinRAM BIT(3)
+#define b_dsiMode BIT(4)
+#define b_dsiSD BIT(5)
+#define b_preciseVolumeControl BIT(6)
+
 static const int MAX_HANDLER_LEN = 50;
 
 static const u32 handlerStartSig[3] = {
@@ -226,17 +234,31 @@ int hookNdsRetailArm7(
 	ce7->fileCluster              = fileCluster;
 	ce7->srParamsCluster          = srParamsFileCluster;
 	ce7->ramDumpCluster           = ramDumpCluster;
-	ce7->gameOnFlashcard          = gameOnFlashcard;
-	ce7->saveOnFlashcard          = saveOnFlashcard;
+	if (gameOnFlashcard) {
+		ce7->valueBits |= b_gameOnFlashcard;
+	}
+	if (saveOnFlashcard) {
+		ce7->valueBits |= b_saveOnFlashcard;
+	}
+	if (extendedMemory) {
+		ce7->valueBits |= b_extendedMemory;
+	}
+	if (ROMinRAM) {
+		ce7->valueBits |= b_ROMinRAM;
+	}
+	if (dsiMode) {
+		ce7->valueBits |= b_dsiMode; // SDK 5
+	}
+	if (dsiSD) {
+		ce7->valueBits |= b_dsiSD;
+	}
+	if (preciseVolumeControl) {
+		ce7->valueBits |= b_preciseVolumeControl;
+	}
 	ce7->language                 = language;
-	ce7->dsiMode                  = dsiMode; // SDK 5
-	ce7->dsiSD                    = dsiSD;
-	ce7->extendedMemory           = extendedMemory;
-	ce7->ROMinRAM                 = ROMinRAM;
 	ce7->consoleModel             = consoleModel;
 	ce7->romRead_LED              = romRead_LED;
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
-	ce7->preciseVolumeControl     = preciseVolumeControl;
 
 	*vblankHandler = ce7->patches->vblankHandler;
 	const char* romTid = getRomTid(ndsHeader);

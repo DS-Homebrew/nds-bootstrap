@@ -67,17 +67,20 @@ typedef struct cardengineArm7 {
 	u32 srParamsCluster;
 	u32 ramDumpCluster;
     u32 cardStruct;
-    u32 gameOnFlashcard;
-    u32 saveOnFlashcard;
+	u32 valueBits;
+	/*
+		0: gameOnFlashcard
+		1: saveOnFlashcard
+		2: extendedMemory
+		3: ROMinRAM
+		4: dsiMode
+		5: dsiSD
+		6: preciseVolumeControl
+	*/
     u32 language; //u8
-    u32 dsiMode;
-    u32 dsiSD;
-    u32 extendedMemory;
-    u32 ROMinRAM;
     u32 consoleModel;
     u32 romRead_LED;
     u32 dmaRomRead_LED;
-	u32 preciseVolumeControl;
     u32* cheat_data_offset; //u32* cheat_data;
     u32* extraIrqTable_offset;
 } __attribute__ ((__packed__)) cardengineArm7;
