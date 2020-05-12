@@ -32,7 +32,6 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "nds_header.h"
-#include "tonccpy.h"
 
 //static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 //static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};

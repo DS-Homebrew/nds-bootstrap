@@ -40,7 +40,6 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 typedef struct cardengineArm7Patches {
     u32* card_pull_out_arm9;
     u32 vblankHandler;
-    u32 cardStructArm9;
     u32 card_pull;
     u32 cacheFlushRef;
     u32 readCachedRef;

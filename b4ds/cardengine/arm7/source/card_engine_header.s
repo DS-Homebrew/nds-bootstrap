@@ -17,8 +17,6 @@
 .global language
 .global dsiMode
 .global ROMinRAM
-.global consoleModel
-.global gameSoftReset
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -76,15 +74,12 @@ card_engine_end:
 patches:
 .word	card_pull_out_arm9
 .word	vblankHandler
-.word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
 .word   readCachedRef
 .word   arm7Functions
 .word   arm7FunctionsThumb
 
-cardStructArm9:
-.word    0x00000000     
 cacheFlushRef:
 .word    0x00000000  
 readCachedRef:
