@@ -18,17 +18,11 @@
 .global saveCluster
 .global srParamsCluster
 .global ramDumpCluster
-.global gameOnFlashcard
-.global saveOnFlashcard
+.global valueBits
 .global language
-.global dsiMode
-.global dsiSD
-.global extendedMemory
-.global ROMinRAM
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
-.global preciseVolumeControl
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -55,27 +49,15 @@ ramDumpCluster:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000
-gameOnFlashcard:
-	.word	0x00000000
-saveOnFlashcard:
+valueBits:
 	.word	0x00000000
 language:
-	.word	0x00000000
-dsiMode:
-	.word	0x00000000
-dsiSD:
-	.word	0x00000000
-extendedMemory:
-	.word	0x00000000
-ROMinRAM:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
 romRead_LED:
 	.word	0x00000000
 dmaRomRead_LED:
-	.word	0x00000000
-preciseVolumeControl:
 	.word	0x00000000
 cheat_data_offset:
 	.word	cheat_data

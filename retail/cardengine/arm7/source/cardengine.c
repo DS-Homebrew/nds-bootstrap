@@ -41,6 +41,14 @@
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
 #include "sr_data_srllastran.h" // For rebooting the game
 
+#define gameOnFlashcard BIT(0)
+#define saveOnFlashcard BIT(1)
+#define extendedMemory BIT(2)
+#define ROMinRAM BIT(3)
+#define dsiMode BIT(4)
+#define b_dsiSD BIT(5)
+#define preciseVolumeControl BIT(6)
+
 extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
@@ -56,20 +64,15 @@ extern u32 saveCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern module_params_t* moduleParams;
-extern u32 gameOnFlashcard;
-extern u32 saveOnFlashcard;
+extern u32 valueBits;
 extern u32 language;
-extern u32 dsiMode;
-extern u32 dsiSD;
-extern u32 extendedMemory;
-extern u32 ROMinRAM;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
-extern u32 preciseVolumeControl;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
+bool dsiSD = false;
 bool sdRead = true;
 
 static bool initialized = false;
@@ -179,15 +182,16 @@ static void driveInitialize(void) {
 		return;
 	}
 
-	if (dsiSD) {
+	if (valueBits & b_dsiSD) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
 			SD_Init();
 		}
+		dsiSD = true;
 		sdRead = true;				// Switch to SD
 		FAT_InitFiles(false, 0);
 	}
-	if ((gameOnFlashcard && !ROMinRAM) || saveOnFlashcard) {
+	if (((valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) || (valueBits & saveOnFlashcard)) {
 		sdRead = false;			// Switch to flashcard
 		FAT_InitFiles(false, 0);
 		sdRead = true;				// Switch to SD
@@ -245,8 +249,8 @@ static void initialize(void) {
 	}
 	#endif
 
-	romLocation = (char*)((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (extendedMemory) {
+	romLocation = (char*)(((valueBits & dsiMode) || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	if (valueBits & extendedMemory) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
 		romLocation = (char*)(ROM_LOCATION_EXT);
@@ -771,7 +775,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
-	if (!ROMinRAM && isSdEjected()) {
+	if (!(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
@@ -811,13 +815,13 @@ void myIrqHandlerVBlank(void) {
 		returnTimer = 0;
 	}
 
-	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
 		if (tryLockMutex(&cardEgnineCommandMutex)) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				driveInitialize();
-				sdRead = dsiSD;
+				sdRead = (valueBits & b_dsiSD);
 				sharedAddr[3] = 0x52414D44;
 				fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
 				sharedAddr[3] = 0;
@@ -835,7 +839,7 @@ void myIrqHandlerVBlank(void) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
-		sdRead = (gameOnFlashcard == false);
+		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
 		if (consoleModel < 2 && *(u32*)(ce7+0x11EF8) == 0) {
 			unlaunchSetFilename(false);
@@ -907,7 +911,7 @@ void myIrqHandlerVBlank(void) {
 		break;
 	}
 
-	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
+	if (consoleModel < 2 && (valueBits & preciseVolumeControl) && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -948,9 +952,9 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
-	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
-	|| (!ROMinRAM && !gameOnFlashcard)) {
+	if ((strncmp(romTid, "UOR", 3) == 0 && !(valueBits & saveOnFlashcard))
+	|| (strncmp(romTid, "UXB", 3) == 0 && !(valueBits & saveOnFlashcard))
+	|| (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard))) {
 		runCardEngineCheck();
 	}
 }
@@ -1018,14 +1022,14 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!saveOnFlashcard && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		//while (readOngoing) {}
 		driveInitialize();
-		sdRead = (saveOnFlashcard ? false : true);
+		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {
@@ -1048,14 +1052,14 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (!saveOnFlashcard && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		//while (readOngoing) {}
 		driveInitialize();
-		sdRead = (saveOnFlashcard ? false : true);
+		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
@@ -1078,14 +1082,14 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!saveOnFlashcard && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
   	if (tryLockMutex(&saveMutex)) {
 		//while (readOngoing) {}
 		driveInitialize();
-		sdRead = (saveOnFlashcard ? false : true);
+		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
@@ -1119,7 +1123,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 
-	if (!saveOnFlashcard && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
@@ -1219,12 +1223,12 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (ROMinRAM) {
+	if (valueBits & ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
 		//while (readOngoing) {}
 		driveInitialize();
-		sdRead = (gameOnFlashcard ? false : true);
+		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
 		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
