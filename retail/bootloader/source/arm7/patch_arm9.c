@@ -828,7 +828,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
     dbg_printf("\n\n");
 
 	if (ROMinRAM) {
-		*heapPointer += 0x1000; // shrink heap by 4KB
+		*heapPointer += 0x1400; // shrink heap by 5KB
 	} else {
 		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6KB (or for SDK5, 12KB)
 	}
@@ -877,7 +877,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
     dbg_printf("\n\n");
 
 	if (ROMinRAM) {
-		*heapPointer = 0x023DF000; // shrink heap by 4KB
+		*heapPointer = (u32)CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
 	} else {
 		*heapPointer = (gameOnFlashcard ? 0x023DC000 : 0x023DE000); // shrink heap by 16KB or 8KB
 	}
