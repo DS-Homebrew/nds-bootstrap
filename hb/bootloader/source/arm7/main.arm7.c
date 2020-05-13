@@ -207,8 +207,9 @@ static void resetMemory_ARM7 (void)
 	}
 
 	arm7clearRAM();								// clear exclusive IWRAM
-	toncset((u32*)0x02004000, 0, 0x36C000);	// clear most of EWRAM
-	toncset((u32*)0x02380000, 0, 0x70000);		// except before 0x023F4000, which has the arm9 code
+	toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
+	toncset((u32*)0x02380000, 0, 0x60000);
+	toncset((u32*)0x023F1000, 0, 0xF000);
 	if (romIsCompressed) {
 		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
 	} else {
@@ -549,8 +550,8 @@ int arm7_main (void) {
 		if (ramDiskSize < (dsiMode ? 0x01001000 : 0x01C01000)) {
 			aFile ramDiskFile = getFileFromCluster(ramDiskCluster);
 			if (romFileType != -1) {
-				tonccpy ((char*)ramDiskLocation, (char*)0x02370000, (romFileType == 1) ? RAM_DISK_SNESROM : RAM_DISK_MDROM);
-				toncset((u32*)0x02370000, 0, 0x10000);
+				tonccpy ((char*)ramDiskLocation, (char*)0x023E0000, (romFileType == 1) ? RAM_DISK_SNESROM : RAM_DISK_MDROM);
+				toncset((u32*)0x023E0000, 0, 0x10000);
 				if (romIsCompressed) {
 					u8* lz77RomSrc = (u8*)RAM_DISK_LOCATION_LZ77ROM;
 					u32 leng = (lz77RomSrc[1] | (lz77RomSrc[2] << 8) | (lz77RomSrc[3] << 16));

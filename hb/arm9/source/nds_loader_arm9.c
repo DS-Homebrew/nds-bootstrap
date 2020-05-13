@@ -292,11 +292,12 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 
 	irqDisable(IRQ_ALL);
 
+	tonccpy ((u32*)0x023E0000, imgTemplateBuffer, sizeof(imgTemplateBuffer));
+
 	// Direct CPU access to VRAM bank D
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
 	tonccpy (LCDC_BANK_D, loader, loaderSize);
-	tonccpy ((u32*)0x02370000, imgTemplateBuffer, sizeof(imgTemplateBuffer));
 
 	// Set the parameters for the loader
 	// STORED_FILE_CLUSTER = cluster;
