@@ -570,7 +570,9 @@ int arm7_main (void) {
 					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);
 				}
 			} else {
+				//buildFatTableCache(&ramDiskFile, 0);
 				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
+				//toncset((u32*)0x023A0000, 0, 0x40000);
 			}
 		}
 	} else {
