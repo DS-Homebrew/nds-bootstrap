@@ -629,9 +629,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	extern u32 gameOnFlashcard;
     const char* romTid = getRomTid(ndsHeader);
 
-	if (isSdk5(moduleParams) && !gameOnFlashcard
-	&& strncmp(romTid, "KPF", 3) != 0	// Pop Island: Paperfield
-	) {
+	if (isSdk5(moduleParams) && !gameOnFlashcard) {
 		return;
 	}
 
