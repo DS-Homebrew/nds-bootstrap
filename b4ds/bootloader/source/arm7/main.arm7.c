@@ -479,7 +479,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
+	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
+	 || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}

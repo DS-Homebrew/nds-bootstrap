@@ -568,6 +568,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	|| strncmp(romTid, "A24", 3) == 0
 	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0
+	|| (consoleModel == 0 && strncmp(romTid, "KPP", 3) == 0)
 	|| (consoleModel == 0 && strncmp(romTid, "KPF", 3) == 0)) {
 		res = false;
 	} else {
@@ -868,7 +869,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (!dsiModeConfirmed && 
-		(strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
+		(strncmp(romTid, "KPP", 3) == 0 	// Pop Island
+	  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
 	)
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
