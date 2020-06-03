@@ -151,13 +151,6 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0)
 						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".LZ77.GG") == 0));
 	}
-	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".pce") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".PCE") == 0))
-	{
-		romFileType = 4;
-		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.pce") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.PCE") == 0));
-	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
 		dbg_printf("no nds file specified\n");
