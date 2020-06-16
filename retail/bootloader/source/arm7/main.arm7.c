@@ -1060,6 +1060,13 @@ int arm7_main(void) {
 			errorOutput();
 		}
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
+	} else {
+		*(u32*)0x03708000 = 0x54455354;
+		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
+			tonccpy((char*)0x03700000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
+			romFile->fatTableCache += 0x01000000;
+			savFile->fatTableCache += 0x01000000;
+		}
 	}
 	toncset((u32*)0x02800000, 0, 0x500000);	// clear buffered binaries
 
