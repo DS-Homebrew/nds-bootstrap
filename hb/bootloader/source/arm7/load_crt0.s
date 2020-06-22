@@ -34,6 +34,8 @@
 	.global boostVram
 	.global ramDiskCluster
 	.global ramDiskSize
+	.global cfgCluster
+	.global cfgSize
 	.global romFileType
 	.global romIsCompressed
 @---------------------------------------------------------------------------------
@@ -68,6 +70,10 @@ boostVram:
 ramDiskCluster:
 	.word	0x00000000
 ramDiskSize:
+	.word	0x00000000
+cfgCluster:
+	.word	0x00000000
+cfgSize:
 	.word	0x00000000
 romFileType:
 	.word	0x00000000

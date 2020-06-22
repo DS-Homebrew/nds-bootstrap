@@ -76,8 +76,10 @@ dsiSD:
 #define BOOSTVRAM_OFFSET 40
 #define RAM_DISK_CLUSTER_OFFSET 44
 #define RAM_DISK_SIZE_OFFSET 48
-#define ROM_FILE_TYPE_OFFSET 52
-#define ROM_IS_COMPRESSED_OFFSET 56
+#define CFG_CLUSTER_OFFSET 52
+#define CFG_SIZE_OFFSET 56
+#define ROM_FILE_TYPE_OFFSET 60
+#define ROM_IS_COMPRESSED_OFFSET 64
 
 
 typedef signed int addr_t;
@@ -280,7 +282,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram)
 {
 	char* argStart;
 	u16* argData;
@@ -350,6 +352,8 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_D, BOOSTVRAM_OFFSET, boostVram);
 	writeAddr ((data_t*) LCDC_BANK_D, RAM_DISK_CLUSTER_OFFSET, ramDiskCluster);
 	writeAddr ((data_t*) LCDC_BANK_D, RAM_DISK_SIZE_OFFSET, ramDiskSize);
+	writeAddr ((data_t*) LCDC_BANK_D, CFG_CLUSTER_OFFSET, cfgCluster);
+	writeAddr ((data_t*) LCDC_BANK_D, CFG_SIZE_OFFSET, cfgSize);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_FILE_TYPE_OFFSET, romToRamDisk);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
 
@@ -389,16 +393,22 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram) {
+int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram) {
 	struct stat st;
 	struct stat stRam;
+	struct stat stCfg;
 	u32 clusterRam = 0;
+	u32 clusterCfg = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
 
 	FILE *ramDiskTemplate;
-	if (romToRamDisk == 3) {
+	if (romToRamDisk == 4) {
+		ramDiskTemplate = fopen("nitro:/imgTemplate_PCE.bin", "rb");
+		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	} else if (romToRamDisk == 3) {
 		ramDiskTemplate = fopen("nitro:/imgTemplate_GG.bin", "rb");
 		if (ramDiskTemplate) fread(imgTemplateBuffer, 1, sizeof(imgTemplateBuffer), ramDiskTemplate);
 		fclose(ramDiskTemplate);
@@ -423,7 +433,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 			fclose(ramDiskTemplate);
 			if (romToRamDisk == 1) {
 				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_SNESROM);
-			} else if (romToRamDisk == 0 || romToRamDisk == 2 || romToRamDisk == 3) {
+			} else if (romToRamDisk == 0 || romToRamDisk == 2 || romToRamDisk == 3 || romToRamDisk == 4) {
 				LZ77_Decompress((u8*)RAM_DISK_LOCATION_LZ77ROM, (u8*)RAM_DISK_LOCATION+RAM_DISK_MDROM);
 			}
 		}
@@ -436,6 +446,10 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	
 	if (stat(ramDiskFilename, &stRam) >= 0) {
 		clusterRam = stRam.st_ino;
+	}
+
+	if (stat(cfgFilename, &stCfg) >= 0) {
+		clusterCfg = stCfg.st_ino;
 	}
 
 	if (argc <= 0 || !argv) {
@@ -455,7 +469,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, u32 ramDiskSi
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram);
 }
 
 /*

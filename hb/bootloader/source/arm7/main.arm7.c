@@ -76,6 +76,8 @@ extern u32 dsiMode;
 extern u32 boostVram;
 extern u32 ramDiskCluster;
 extern u32 ramDiskSize;
+extern u32 cfgCluster;
+extern u32 cfgSize;
 extern u32 romFileType;
 extern u32 romIsCompressed;
 
@@ -568,6 +570,12 @@ int arm7_main (void) {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = ramDiskSize;
 					}
 					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);
+				}
+				if (romFileType == 1 && cfgSize > 0) {
+					// Load snemul.cfg
+					*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESCFGSIZE) = cfgSize;
+					aFile cfgFile = getFileFromCluster(cfgCluster);
+					fileRead((char*)RAM_DISK_SNESCFG, cfgFile, 0, cfgSize, 0);
 				}
 			} else {
 				//buildFatTableCache(&ramDiskFile, 0);

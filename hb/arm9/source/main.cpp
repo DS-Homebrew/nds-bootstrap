@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, int language, int dsiMode, bool boostVram) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, u32 cfgSize, int language, int dsiMode, bool boostVram) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -151,6 +151,13 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0)
 						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".LZ77.GG") == 0));
 	}
+	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".pce") == 0)
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".PCE") == 0))
+	{
+		romFileType = 4;
+		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.pce") == 0)
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.PCE") == 0));
+	}
 
 	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
 		dbg_printf("no nds file specified\n");
@@ -160,7 +167,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), ramDiskSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -326,13 +333,15 @@ int main( int argc, char **argv) {
 			chdir("fat:/");	// Change directory to root for RAM disk usage
 		}
 
+		u32 cfgSize = getFileSize("fat:/snemul.cfg");
+
 		dbg_printf("Running %s\n", ndsPath.c_str());
 		if (ramDiskSize > 0) {
 			dbg_printf("RAM disk: %s\n", ramDrivePath.c_str());
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, language, dsiMode, boostVram);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, cfgSize, language, dsiMode, boostVram);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

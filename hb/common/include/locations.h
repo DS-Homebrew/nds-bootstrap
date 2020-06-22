@@ -16,6 +16,8 @@
 #define RAM_DISK_MDROM                 0xDE00
 #define RAM_DISK_SNESROMSIZE           0xDE7C
 #define RAM_DISK_SNESROM               0xEA00
+#define RAM_DISK_SNESCFGSIZE           0x92FC
+#define RAM_DISK_SNESCFG               0x40EE00
 #define RAM_DISK_LOCATION_LZ77ROM      0x0C900000
 #define RAM_DISK_LOCATION_DSIMODE      0x0D000000
 
