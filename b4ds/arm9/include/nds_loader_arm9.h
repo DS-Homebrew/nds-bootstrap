@@ -22,20 +22,21 @@
 #ifndef NDS_LOADER_ARM9_H
 #define NDS_LOADER_ARM9_H
 
-#include "configuration.h"
-#include "load_crt0.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-//#define LOAD_DEFAULT_NDS 0
+#define LOAD_DEFAULT_NDS 0
 
-void runNds(loadCrt0* loader, u32 loaderSize, u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, u32 donor3Cluster, u32 donorCluster, u32 donorTwlCluster, u32 apPatchCluster, u32 patchOffsetCacheCluster, u32 srParamsCluster, configuration* conf);
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram);
+
+int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram);
+
+bool installBootStub(bool havedsiSD);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // NDS_LOADER_ARM9_H
+#endif // NDS_LOADER_ARM7_H
