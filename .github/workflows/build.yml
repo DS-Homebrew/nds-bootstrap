@@ -36,7 +36,7 @@ jobs:
       - name: "Pack 7z Package"
         run: |
           mkdir bin/TWiLightMenu/
-          printf $COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver
+          printf "$COMMIT_TAG >> bin/TWiLightMenu/nightly-bootstrap.ver"
           mv bin/ nds-bootstrap/
           7z a nds-bootstrap.7z nds-bootstrap/
 
