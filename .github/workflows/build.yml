@@ -1,4 +1,4 @@
-name: Build TWiLight Menu++
+name: Build nds-bootstrap
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - name: "Install tools"
         run: |
           sudo apt-get update
-          sudo apt-get install p7zip-full
+          sudo apt-get install p7zip-full -y
 
           curl -L https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
           sudo chmod +x lzss
