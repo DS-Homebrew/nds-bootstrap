@@ -77,7 +77,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 			// Patch
 			if (useGetPitchTableBranch) {
 				tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
-			} else if (!patchOffsetCache.a7IsThumb) {
+			} else if (!patchOffsetCache.a7IsThumb || isSdk5(moduleParams)) {
 				u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 				tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 			}
