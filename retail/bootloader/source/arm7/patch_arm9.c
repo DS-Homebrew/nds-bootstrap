@@ -597,7 +597,9 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "AWD", 3) == 0) return true;	// Fix corrupted 3D model bug
+	// Skip for Rare games
+	if (strncmp(romTid, "AWD", 3) == 0	// Diddy Kong Racing - Fix corrupted 3D model bug
+	|| strncmp(romTid, "CP3", 3) == 0) return true;	// Viva Pinata - Fix touch and model rendering bug
 
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
 
