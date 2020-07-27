@@ -11,7 +11,7 @@ trigger:
 name:  $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
 
 pool:
-  vmImage: 'Ubuntu-16.04'
+  vmImage: 'Ubuntu-18.04'
 
 variables:
   CURRENT_DATE: $[format('{0:yyyyMMdd\-HHmmss}', pipeline.startTime)]
@@ -23,7 +23,7 @@ steps:
     curl -L https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
     curl -L https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb -o pacman.deb
     sudo apt update
-    sudo apt install p7zip-full haveged
+    sudo apt install p7zip-full gpg haveged
     sudo dpkg -i pacman.deb
     sudo dkp-pacman -Sy
     sudo dkp-pacman -S nds-dev --noconfirm
