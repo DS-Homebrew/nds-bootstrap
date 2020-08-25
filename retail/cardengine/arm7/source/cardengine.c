@@ -959,8 +959,8 @@ void myIrqHandlerVBlank(void) {
 	}
 }
 
-/*void i2cIRQHandler(void) {
-}*/
+void i2cIRQHandler(void) {
+}
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();	
