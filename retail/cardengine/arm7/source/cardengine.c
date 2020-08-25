@@ -48,6 +48,7 @@
 #define dsiMode BIT(4)
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
+#define powerCodeOnVBlank BIT(7)
 
 extern u32 ce7;
 
@@ -122,6 +123,8 @@ static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 #endif
 static const char* romLocation = NULL;
+
+void i2cIRQHandler(void);
 
 static void unlaunchSetFilename(bool boot) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
@@ -887,6 +890,10 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
+	if (valueBits & powerCodeOnVBlank) {
+		i2cIRQHandler();
+	}
+
 	if (consoleModel < 2 && (valueBits & preciseVolumeControl) && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
@@ -936,7 +943,6 @@ void myIrqHandlerVBlank(void) {
 }
 
 void i2cIRQHandler(void) {
-	
 	int cause = (i2cReadRegister(I2C_PM, I2CREGPM_PWRIF) & 0x3) | (i2cReadRegister(I2C_GPIO, 0x02)<<2);
 
 	switch (cause & 3) {
@@ -960,7 +966,6 @@ void i2cIRQHandler(void) {
 		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);
 		break;
 	}
-
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -976,7 +981,9 @@ u32 myIrqEnable(u32 irq) {
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	REG_IE |= irq;
-	//REG_AUXIE |= IRQ_I2C;
+	if (!(valueBits & powerCodeOnVBlank)) {
+		REG_AUXIE |= IRQ_I2C;
+	}
 	leaveCriticalSection(oldIME);
 	ipcSyncHooked = true;
 	return irq_before;

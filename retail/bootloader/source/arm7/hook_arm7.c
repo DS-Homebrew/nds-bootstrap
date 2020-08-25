@@ -38,6 +38,7 @@
 #define b_dsiMode BIT(4)
 #define b_dsiSD BIT(5)
 #define b_preciseVolumeControl BIT(6)
+#define b_powerCodeOnVBlank BIT(7)
 
 static const int MAX_HANDLER_LEN = 50;
 
@@ -114,9 +115,15 @@ int hookNdsRetailArm7(
 		}
 	}
 
+	const char* romTid = getRomTid(ndsHeader);
+
 	if (handlerLocation) {
-		// Patch
-		memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+		if (strncmp(romTid, "YGX", 3) == 0) {
+			ce7->valueBits |= b_powerCodeOnVBlank;
+		} else {
+			// Patch
+			memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+		}
 	} else {
 		dbg_printf("ERR_HOOK\n");
 		return ERR_HOOK;
@@ -261,7 +268,6 @@ int hookNdsRetailArm7(
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	const char* romTid = getRomTid(ndsHeader);
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
