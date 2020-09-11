@@ -21,21 +21,11 @@ variables:
 steps:
 - script: |
     curl -L https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
-    curl -L https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb -o pacman.deb
-    sudo apt update
-    sudo apt install p7zip-full gpg haveged
-    sudo dpkg -i pacman.deb
-    sudo dkp-pacman -Sy
-    sudo dkp-pacman -S nds-dev --noconfirm
     sudo chmod +x lzss
-    sudo mv lzss /opt/devkitpro/tools/bin
-  displayName: 'Setup devkitPro'
+  displayName: 'Get lzss'
   
 - script: |
-    export DEVKITPRO="/opt/devkitpro"
-    export DEVKITARM="/opt/devkitpro/devkitARM"
-    make package-nightly
-
+    docker run -v `pwd`:`pwd` -w `pwd` devkitpro/devkitarm /bin/bash -c "sudo mv lzss /opt/devkitpro/tools/bin && make package-nightly"
     echo '##vso[task.setvariable variable=COMMIT_TAG]'$(git log --format=%h -1)
     echo '##vso[task.setvariable variable=COMMIT_MESSAGE]'$(git log --pretty=format:"%an - %s" -1)
   displayName: 'Build nds-bootstrap'
