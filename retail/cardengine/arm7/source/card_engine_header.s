@@ -61,8 +61,8 @@ dmaRomRead_LED:
 	.word	0x00000000
 cheat_data_offset:
 	.word	cheat_data
-extraIrqTable_offset:
-	.word	extraIrqTable
+irqTable_offset:
+	.word	irqTable
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

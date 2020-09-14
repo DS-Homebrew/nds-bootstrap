@@ -218,11 +218,11 @@ int hookNdsRetailArm7(
 		}
 	}
 
-	*(ce7->extraIrqTable_offset - 2) = wordsLocation[0];
+	*(ce7->irqTable_offset) = wordsLocation[0];
 	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
-		*(ce7->extraIrqTable_offset - 1) = wordsLocation[1];
+		*(ce7->irqTable_offset + 1) = wordsLocation[1];
 	} else {
-		*(ce7->extraIrqTable_offset - 1) = wordsLocation[3];
+		*(ce7->irqTable_offset + 1) = wordsLocation[3];
 	}
 
    	dbg_printf("hookLocation arm7: ");
