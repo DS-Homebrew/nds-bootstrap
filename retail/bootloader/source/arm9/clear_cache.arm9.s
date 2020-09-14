@@ -17,10 +17,11 @@
 @ Clears ICache and Dcache, and resets the protection units
 @ Originally written by Darkain, modified by Chishm
 
-.arm
-.global arm9_clearCache
+#include "../../include/asminc.h"
 
-arm9_clearCache:
+.arm
+
+BEGIN_ASM_FUNC arm9_clearCache
 	@ Clean and flush cache
 	mov r1, #0                   
 	outer_loop:                  
