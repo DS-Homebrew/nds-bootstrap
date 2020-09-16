@@ -3,16 +3,20 @@ name: Build nds-bootstrap
 on:
   push:
     branches: ["*"]
+    paths-ignore:
+      - 'README.md'
   pull_request:
     branches: ["*"]
+    paths-ignore:
+      - 'README.md'
   release:
     types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: devkitpro/devkitarm:20200528
-    name: "Build with Docker using devKitARM r54"
+    container: devkitpro/devkitarm:20200730
+    name: "Build with Docker using devKitARM r55"
     outputs:
       commit_tag: ${{ steps.make-cias.outputs.commit_tag }}
       commit_message: ${{ steps.make-cias.outputs.commit_message }}
@@ -61,13 +65,22 @@ jobs:
       current_date: ${{ steps.commit.outputs.current_date }}
       twlbot_commit: ${{ steps.commit.outputs.twlbot_commit }}
     steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@v1
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: "build"
           path: "build"
+      - name: Upload to ${{ github.repository }} release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          ID=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)
+          for file in ${{ github.workspace }}/build/*; do
+            AUTH_HEADER="Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+            CONTENT_LENGTH="Content-Length: $(stat -c%s $file)"
+            CONTENT_TYPE="Content-Type: application/7z-x-compressed"
+            UPLOAD_URL="https://uploads.github.com/repos/${{ github.repository }}/releases/$ID/assets?name=$(basename $file)"
+            curl -XPOST -H "$AUTH_HEADER" -H "$CONTENT_LENGTH" -H "$CONTENT_TYPE" --upload-file "$file" "$UPLOAD_URL"
+          done
       - name: "Commit and push to TWLBot/Builds"
         id: "commit"
         run: |
@@ -82,7 +95,7 @@ jobs:
           git stage .
           git commit -m "nds-bootstrap | $COMMIT_TAG"
           git tag v$CURRENT_DATE
-          git push origin v$CURRENT_DATE
+          git push origin v$CURRENT_DATE master
           echo "::set-output name=twlbot_commit::$(git log --format=%H -1)"
       - name: Release to TWLBot/Builds
         run: |
@@ -104,39 +117,25 @@ jobs:
             curl -XPOST -H "$AUTH_HEADER" -H "$CONTENT_LENGTH" -H "$CONTENT_TYPE" --upload-file "$file" "$UPLOAD_URL"
           done
 
-  send_webhook_success:
+  send_webhook:
     runs-on: ubuntu-latest
     needs: [publish_build_twlbot, build]
-    name: "Send Discord success webhook"
-    if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
+    name: "Send Discord webhook"
+    if: ${{ !startsWith(github.ref, 'refs/pull') }}
     env:
       COMMIT_TAG: ${{ needs.build.outputs.commite_tag }}
       COMMIT_MESSAGE: ${{ needs.build.outputs.commit_message }}
       CURRENT_DATE: ${{ needs.publish_build_twlbot.outputs.current_date }}
       TWLBOT_COMMIT: ${{ needs.publish_build_twlbot.outputs.twlbot_commit }}
     steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@v1
       - name: "Send success webhook"
+        if: ${{ success() }}
         run: |
           curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-ghactions.sh
           chmod +x send.sh
           ./send.sh success ${{ secrets.WEBHOOK_URL }}
-
-  send_webhook_failure:
-    runs-on: ubuntu-latest
-    needs: [publish_build_twlbot, build]
-    name: "Send Discord failure webhook"
-    if: ${{ failure() && !startsWith(github.ref, 'refs/pull') }}
-    env:
-      COMMIT_TAG: ${{ needs.build.outputs.commite_tag }}
-      COMMIT_MESSAGE: ${{ needs.build.outputs.commit_message }}
-      CURRENT_DATE: ${{ needs.publish_build_twlbot.outputs.current_date }}
-      TWLBOT_COMMIT: ${{ needs.publish_build_twlbot.outputs.twlbot_commit }}
-    steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@v1
       - name: "Send failure webhook"
+        if: ${{ failure() }}
         run: |
           curl -o send.sh https://raw.githubusercontent.com/DS-Homebrew/discord-webhooks/master/send-ghactions.sh
           chmod +x send.sh
