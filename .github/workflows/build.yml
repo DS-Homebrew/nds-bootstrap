@@ -57,9 +57,11 @@ jobs:
           printf "Release $COMMIT_TAG\n" >> bin/release-bootstrap.ver
           cd bin
           7z a nds-bootstrap.7z .
+          7z a nds-bootstrap.zip .
 
           mkdir -p ~/artifacts
           cp nds-bootstrap.7z ~/artifacts
+          cp nds-bootstrap.zip ~/artifacts
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v2
         with:
