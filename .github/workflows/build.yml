@@ -18,12 +18,12 @@ jobs:
     container: devkitpro/devkitarm
     name: Build with Docker using devkitARM
     outputs:
-      commit_tag: ${{ steps.build.outputs.commit_tag }}
-      commit_hash: ${{ steps.build.outputs.commit_hash }}
-      author_name: ${{ steps.build.outputs.author_name }}
-      committer_name: ${{ steps.build.outputs.committer_name }}
-      commit_subject: ${{ steps.build.outputs.commit_subject }}
-      commit_message: ${{ steps.build.outputs.commit_message }}
+      commit_tag: ${{ steps.vars.outputs.commit_tag }}
+      commit_hash: ${{ steps.vars.outputs.commit_hash }}
+      author_name: ${{ steps.vars.outputs.author_name }}
+      committer_name: ${{ steps.vars.outputs.committer_name }}
+      commit_subject: ${{ steps.vars.outputs.commit_subject }}
+      commit_message: ${{ steps.vars.outputs.commit_message }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v1
@@ -35,25 +35,28 @@ jobs:
           curl -L https://cdn.discordapp.com/attachments/283769550611152897/615767904926826498/lzss -o lzss
           sudo chmod +x lzss
           sudo mv lzss /opt/devkitpro/tools/bin
-      - name: Build
-        id: build
-        run: |
-          make package-nightly
-
-          echo ::set-output name=commit_tag::$(git describe --abbrev=0 --tags)
-          echo ::set-output name=commit_hash::$(git log --format=%h -1)
-
-          # Webhook info
-          echo ::set-output name=author_name::$(git log -1 "$GITHUB_SHA" --pretty="%aN")
-          echo ::set-output name=committer_name::$(git log -1 "$GITHUB_SHA" --pretty="%cN")
-          echo ::set-output name=commit_subject::$(git log -1 "$GITHUB_SHA" --pretty="%s")
-          echo ::set-output name=commit_message::$(git log -1 "$GITHUB_SHA" --pretty="%b")
-      - name: Pack 7z Package
+      - name: Build nightly
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        run: make package-nightly
+      - name: Build release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: make package-release
+      - name: Pack 7z nightly
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
         run: |
           mkdir bin/TWiLightMenu/
-          printf "$COMMIT_TAG\n" >> bin/TWiLightMenu/nightly-bootstrap.ver
+          printf "$COMMIT_HASH\n" >> bin/TWiLightMenu/nightly-bootstrap.ver
           mv bin/ nds-bootstrap/
           7z a nds-bootstrap.7z nds-bootstrap/
+
+          mkdir -p ~/artifacts
+          cp nds-bootstrap.7z ~/artifacts
+      - name: Pack 7z release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          printf "Release $COMMIT_TAG\n" >> bin/release-bootstrap.ver
+          cd bin
+          7z a nds-bootstrap.7z .
 
           mkdir -p ~/artifacts
           cp nds-bootstrap.7z ~/artifacts
@@ -62,6 +65,17 @@ jobs:
         with:
           path: ~/artifacts/*
           name: build
+      - name: Set variables
+        id: vars
+        run: |
+          echo ::set-output name=commit_tag::$(git describe --abbrev=0 --tags)
+          echo ::set-output name=commit_hash::$(git log --format=%h -1)
+
+          # Webhook info
+          echo ::set-output name=author_name::$(git log -1 "$GITHUB_SHA" --pretty="%aN")
+          echo ::set-output name=committer_name::$(git log -1 "$GITHUB_SHA" --pretty="%cN")
+          echo ::set-output name=commit_subject::$(git log -1 "$GITHUB_SHA" --pretty="%s")
+          echo ::set-output name=commit_message::$(git log -1 "$GITHUB_SHA" --pretty="%b")
 
   # Only run this for non-PR jobs.
   publish_build:
