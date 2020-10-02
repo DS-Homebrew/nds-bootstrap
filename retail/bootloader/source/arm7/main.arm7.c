@@ -88,9 +88,11 @@ extern u32 saveOnFlashcard;
 extern u32 dsiSD;
 extern u32 saveFileCluster;
 extern u32 gbaFileCluster;
+extern u32 gbaSaveFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
 extern u32 gbaRomSize;
+extern u32 gbaSaveSize;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
@@ -1313,6 +1315,11 @@ int arm7_main(void) {
 			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
 			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
 			fileRead((char*)0x0D000000, *gbaFile, 0, gbaRomSize, 0);
+			aFile* gbaSavFile = (aFile*)(dsiSD ? GBA_SAV_FILE_LOCATION : GBA_SAV_FILE_LOCATION_ALT);
+			*gbaSavFile = getFileFromCluster(gbaSaveFileCluster);
+			if (gbaSavFile->firstCluster != CLUSTER_FREE && gbaSaveSize <= 0x10000) {
+				fileRead((char*)0x02600000, *gbaSavFile, 0, gbaSaveSize, 0);
+			}
 			dbg_printf("GBA ROM loaded\n");
 		}
 

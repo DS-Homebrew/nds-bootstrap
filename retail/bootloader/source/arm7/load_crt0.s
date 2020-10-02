@@ -35,9 +35,11 @@
 	.global donorFileCluster
 	.global donorFileTwlCluster
 	.global gbaFileCluster
+	.global gbaSaveFileCluster
 	.global romSize
 	.global saveSize
 	.global gbaRomSize
+	.global gbaSaveSize
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
@@ -100,12 +102,16 @@ donorFileTwlCluster:
 	.word	0x00000000		@ SDK5 (TWL) donor .nds file
 gbaFileCluster:
 	.word	0x00000000		@ .gba file
+gbaSaveFileCluster:
+	.word	0x00000000		@ .GBA .sav file
 romSize:
 	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
 gbaRomSize:
 	.word	0x00000000		@ .gba file size
+gbaSaveSize:
+	.word	0x00000000		@ GBA .sav file size
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:

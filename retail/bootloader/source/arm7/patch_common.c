@@ -359,6 +359,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 }
 
 void patchSlot2Addr(const tNDSHeader* ndsHeader) {
+	extern u32 gbaAddrToDsi[];
+
 	if (!gbaRomFound) {
 		return;
 	}
@@ -381,6 +383,55 @@ void patchSlot2Addr(const tNDSHeader* ndsHeader) {
 		for (u32 addr = 0x020CA234; addr <= 0x020CA2C0; addr += 4) {
 			*(u32*)addr += 0x05000000;
 		}
+		return;
+	}
+
+	if (strcmp(romTid, "CPUE") == 0 && ndsHeader->romversion == 0) {	// Pokemon Platinum Version
+		*(u32*)0x020D0A60 = gbaAddrToDsi[0];
+		*(u32*)0x020D0AA8 = gbaAddrToDsi[0];
+		*(u32*)0x020D0B0C = 0x0D0000CE;
+		*(u32*)0x020D0C68 = gbaAddrToDsi[1];
+		*(u32*)0x020D0CB0 = 0x02610000;
+		*(u32*)0x020D1248 = 0x0D000080;
+		*(u32*)0x020D14D4 = gbaAddrToDsi[2];
+		*(u32*)0x020D14E0 = 0x02605555;
+		*(u32*)0x020D14E4 = 0x02602AAA;
+		*(u32*)0x020D1560 = gbaAddrToDsi[3];
+		*(u32*)0x020D15E8 = 0x02605555;
+		*(u32*)0x020D15EC = 0x02602AAA;
+		*(u32*)0x020D15F0 = 0x02600001;
+		*(u32*)0x020D172C = 0x02605555;
+		*(u32*)0x020D17E0 = 0x02605555;
+		*(u32*)0x020D1880 = gbaAddrToDsi[4];
+		*(u32*)0x020D19A4 = gbaAddrToDsi[5];
+		*(u32*)0x020D1B90 = gbaAddrToDsi[2];
+		*(u32*)0x020D1BDC = 0x02605555;
+		*(u32*)0x020D1BE0 = 0x02602AAA;
+		*(u32*)0x020D1C20 = gbaAddrToDsi[6];
+		*(u32*)0x020D1D00 = 0x02605555;
+		*(u32*)0x020D1D04 = 0x02602AAA;
+		*(u32*)0x020D1E4C = gbaAddrToDsi[7];
+		*(u32*)0x020D1EC4 = 0x02605555;
+		*(u32*)0x020D1EC8 = 0x02602AAA;
+		*(u32*)0x020D21A4 = gbaAddrToDsi[2];
+		*(u32*)0x020D21F0 = 0x02605555;
+		*(u32*)0x020D21F4 = 0x02602AAA;
+		*(u32*)0x020D22B0 = gbaAddrToDsi[8];
+		*(u32*)0x020D2324 = 0x02605555;
+		*(u32*)0x020D2328 = 0x02602AAA;
+		*(u32*)0x020D2378 = 0x02605555;
+		*(u32*)0x020D237C = 0x02602AAA;
+		*(u32*)0x020D23DC = gbaAddrToDsi[9];
+		*(u32*)0x020D2784 = gbaAddrToDsi[2];
+		*(u32*)0x020D27D0 = 0x02605555;
+		*(u32*)0x020D27D4 = 0x02602AAA;
+		*(u32*)0x020D28CC = gbaAddrToDsi[5];
+		*(u32*)0x020D2954 = 0x02605555;
+		*(u32*)0x020D295C = 0x02602AAA;
+		*(u32*)0x020D29Ac = 0x02605555;
+		*(u32*)0x020D29B0 = 0x02602AAA;
+		*(u32*)0x020D2A90 = gbaAddrToDsi[10];
+		*(u32*)0x020D2CC4 = gbaAddrToDsi[11];
 		return;
 	}
 

@@ -385,6 +385,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stSav;
 	struct stat stDonor[5];
 	struct stat stGba;
+	struct stat stGbaSav;
 	struct stat stWideCheat;
 	struct stat stApPatch;
 	struct stat stCheat;
@@ -395,6 +396,7 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterSav = 0;
 	u32 clusterDonor[5] = {0};
 	u32 clusterGba = 0;
+	u32 clusterGbaSav = 0;
 	u32 clusterWideCheat = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterCheat = 0;
@@ -435,6 +437,10 @@ static int runNdsFile(configuration* conf) {
 		clusterGba = stGba.st_ino;
 	}
 
+	if (stat(conf->gbaSavPath, &stGbaSav) >= 0) {
+		clusterGbaSav = stGbaSav.st_ino;
+	}
+
 	if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 		clusterWideCheat = stWideCheat.st_ino;
 	}
@@ -463,7 +469,7 @@ static int runNdsFile(configuration* conf) {
 		clusterSrParams = stSrParams.st_ino;
 	}
 
-	runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, conf);
+	runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, conf);
 
 	return 0;
 }

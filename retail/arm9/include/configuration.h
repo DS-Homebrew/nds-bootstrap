@@ -16,10 +16,12 @@ typedef struct configuration {
 	char* donorPath;
 	char* donorTwlPath;
 	char* gbaPath;
+	char* gbaSavPath;
 	char* apPatchPath;
 	u32 romSize;
 	u32 saveSize;
 	u32 gbaRomSize;
+	u32 gbaSaveSize;
 	u32 wideCheatSize;
 	u32 apPatchSize;
 	u32 cheatSize;
