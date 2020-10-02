@@ -117,14 +117,14 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (handlerLocation) {
-		if (strncmp(romTid, "YGX", 3) == 0) {
+	if (!handlerLocation) {
+	/*	if (strncmp(romTid, "YGX", 3) == 0) {
 			ce7->valueBits |= b_powerCodeOnVBlank;
 		} else {
 			// Patch
 			memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
 		}
-	} else {
+	} else {*/
 		dbg_printf("ERR_HOOK\n");
 		return ERR_HOOK;
 	}

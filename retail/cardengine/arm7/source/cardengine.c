@@ -926,6 +926,7 @@ void myIrqHandlerVBlank(void) {
 	if (saveTimer > 0) {
 		saveTimer++;
 		if (saveTimer == 60) {
+			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 			saveTimer = 0;
 		}
 	}
@@ -1068,7 +1069,8 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
-		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
+		saveTimer = 1;
+		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}
@@ -1098,7 +1100,8 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
-		saveTimer = 1;		// When we're saving, power button does nothing, in order to prevent corruption.
+		saveTimer = 1;
+		i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}
