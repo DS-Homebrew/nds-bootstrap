@@ -1307,7 +1307,7 @@ int arm7_main(void) {
 		}
 
 	  //if (!rebootConsole) {
-		if (gbaRomFound) {
+		if (gbaRomFound && !extendedMemoryConfirmed) {
 			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
 			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
 			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
