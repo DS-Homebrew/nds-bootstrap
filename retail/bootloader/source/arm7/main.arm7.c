@@ -1312,6 +1312,7 @@ int arm7_main(void) {
 			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
 			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
 			fileRead((char*)0x0D000000, *gbaFile, 0, gbaRomSize, 0);
+			dbg_printf("GBA ROM loaded\n");
 		}
 
 		if (ROMinRAM) {
