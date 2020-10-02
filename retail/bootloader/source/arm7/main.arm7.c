@@ -1121,6 +1121,7 @@ int arm7_main(void) {
 			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
 			*gbaFile = getFileFromCluster(gbaFileCluster);
 			gbaRomFound = (gbaFile->firstCluster != CLUSTER_FREE);
+			patchSlot2Addr(ndsHeader);
 		}
 
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {

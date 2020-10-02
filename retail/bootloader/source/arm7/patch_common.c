@@ -35,6 +35,7 @@ patchOffsetCacheContents patchOffsetCache;
 bool patchOffsetCacheChanged = false;
 
 extern bool logging;
+extern bool gbaRomFound;
 
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -355,6 +356,35 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }
+}
+
+void patchSlot2Addr(const tNDSHeader* ndsHeader) {
+	if (!gbaRomFound) {
+		return;
+	}
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "ARZE") == 0) {	// MegaMan ZX
+		for (u32 addr = 0x0203740C; addr <= 0x02044790; addr += 4) {
+			if (*(u32*)addr >= 0x08000000 && *(u32*)addr < 0x08020000) {
+				*(u32*)addr += 0x05000000;
+			}
+		}
+		*(u32*)0x0203A260 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203A708 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203AFC0 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203C178 = 0x0D010001;	// Originally 0xC010001, for some weird reason
+		*(u32*)0x0203D448 = 0x0D010001;	// Originally 0xC010001, for some weird reason
+		*(u32*)0x0203D678 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x02041D64 = 0x0D010000;	// Originally 0xC010000, for some weird reason
+		for (u32 addr = 0x020CA234; addr <= 0x020CA2C0; addr += 4) {
+			*(u32*)addr += 0x05000000;
+		}
+		return;
+	}
+
+	gbaRomFound = false;	// Do not load GBA ROM
 }
 
 static bool rsetA7CacheDone = false;
