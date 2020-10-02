@@ -867,12 +867,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
-	//if (gbaRomFound) {
+	if (gbaRomFound) {
 		*(u16*)0x027FFC30 = *(u16*)0x0D0000BE;
 		tonccpy((u8*)0x027FFC32, (u8*)0x0D0000B5, 3);
 		*(u16*)0x027FFC36 = *(u16*)0x0D0000B0;
 		*(u32*)0x027FFC38 = *(u32*)0x0D0000AC;
-	//}
+	}
 
 	if (softResetParams != 0xFFFFFFFF) {
 		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
