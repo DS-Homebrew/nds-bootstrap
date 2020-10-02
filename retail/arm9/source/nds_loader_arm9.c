@@ -274,6 +274,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	lc0->gbaFileCluster              = gbaCluster;
 	lc0->romSize                     = conf->romSize;
 	lc0->saveSize                    = conf->saveSize;
+	lc0->gbaRomSize                  = conf->gbaRomSize;
 	lc0->wideCheatFileCluster        = wideCheatCluster;
 	lc0->wideCheatSize               = conf->wideCheatSize;
 	lc0->apPatchFileCluster          = apPatchCluster;

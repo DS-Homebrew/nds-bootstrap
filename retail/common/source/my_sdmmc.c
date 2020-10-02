@@ -554,7 +554,7 @@ static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd, int ndmaSlo
       	}
         *(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48064000; 
         return true;
-	} else return false;        
+	} else return false;
 }
 
 static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, int ndmaSlot)
@@ -825,7 +825,7 @@ int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndma
         nocashMessage("command sent");
         while(!sdmmc_check_command_ndma(&handleSD,0x33C12,ndmaSlot)) {}
         nocashMessage("command checked");
-	}          
+	}
 	return get_error(&handleSD);
 }
 

@@ -37,6 +37,7 @@
 	.global gbaFileCluster
 	.global romSize
 	.global saveSize
+	.global gbaRomSize
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
@@ -103,6 +104,8 @@ romSize:
 	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
+gbaRomSize:
+	.word	0x00000000		@ .gba file size
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:

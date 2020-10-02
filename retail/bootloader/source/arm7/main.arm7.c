@@ -90,6 +90,7 @@ extern u32 saveFileCluster;
 extern u32 gbaFileCluster;
 extern u32 romSize;
 extern u32 saveSize;
+extern u32 gbaRomSize;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
@@ -562,24 +563,25 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+	bool eight = (consoleModel==0 || gbaRomFound);
 	bool res = false;
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "A24", 3) == 0
-	|| (consoleModel == 0 && strncmp(romTid, "UBR", 3) == 0)
+	|| (eight && strncmp(romTid, "UBR", 3) == 0)
 	|| strncmp(romTid, "UOR", 3) == 0
-	|| (consoleModel == 0 && strncmp(romTid, "KPP", 3) == 0)
-	|| (consoleModel == 0 && strncmp(romTid, "KPF", 3) == 0)) {
+	|| (eight && strncmp(romTid, "KPP", 3) == 0)
+	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
 		res = false;
 	} else {
-		res = ((dsiModeConfirmed && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < 0x01800000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel == 0 && getRomSizeNoArm9(ndsHeader) < 0x00800000));
+		res = ((dsiModeConfirmed && !eight && getRomSizeNoArm9(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArm9(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && !eight && getRomSizeNoArm9(ndsHeader) < 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && eight && getRomSizeNoArm9(ndsHeader) < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((consoleModel > 0 && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
-			|| (consoleModel == 0 && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
+		res = ((!eight && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (eight && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
 	  }
 	}
@@ -864,7 +866,13 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc30 : 0x027ffc30)) = 0xFFFF;
+
+	//if (gbaRomFound) {
+		*(u16*)0x027FFC30 = *(u16*)0x0D0000BE;
+		tonccpy((u8*)0x027FFC32, (u8*)0x0D0000B5, 3);
+		*(u16*)0x027FFC36 = *(u16*)0x0D0000B0;
+		*(u32*)0x027FFC38 = *(u32*)0x0D0000AC;
+	//}
 
 	if (softResetParams != 0xFFFFFFFF) {
 		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
@@ -1027,15 +1035,6 @@ int arm7_main(void) {
 
 	toncset((u32*)0x027C0000, 0, 0x400);
 
-	// GBA file
-	/*aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
-	*gbaFile = getFileFromCluster(gbaFileCluster);
-	if (gbaFile->firstCluster != CLUSTER_FREE) {
-		gbaRomFound = true;
-		fileRead((char*)0x02400000, *gbaFile, 0, 0xC0, -1);
-		fileRead((char*)0x024000CE, *gbaFile, 0x1FFFE, 2, -1);
-	}*/
-
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
@@ -1108,7 +1107,6 @@ int arm7_main(void) {
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
 	} else {
 		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
-			gbaRomFound = true;
 			toncset((char*)0x02400000, 0xFF, 0xC0);
 			*(u8*)0x024000B2 = 0;
 			*(u8*)0x024000B3 = 0;
@@ -1118,6 +1116,11 @@ int arm7_main(void) {
 			*(u8*)0x024000B7 = 0x24;
 			*(u16*)0x024000BE = 0x7FFF;
 			*(u16*)0x024000CE = 0x7FFF;
+		} else // GBA file
+		if (consoleModel > 0 && !dsiModeConfirmed && !isSdk5(moduleParams) && gbaRomSize <= 0x1000000) {
+			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
+			*gbaFile = getFileFromCluster(gbaFileCluster);
+			gbaRomFound = (gbaFile->firstCluster != CLUSTER_FREE);
 		}
 
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
@@ -1304,6 +1307,13 @@ int arm7_main(void) {
 		}
 
 	  //if (!rebootConsole) {
+		if (gbaRomFound) {
+			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
+			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
+			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
+			fileRead((char*)0x0D000000, *gbaFile, 0, gbaRomSize, 0);
+		}
+
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);

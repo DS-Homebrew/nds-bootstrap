@@ -746,6 +746,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 /*static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
+	if (isSdk5(moduleParams)) {
+		return;
+	}
+
 	// Slot-2 exist
 	//u32* slot2ExistEndOffset = patchOffsetCache.slot2ExistEndOffset;
 	u32* slot2ExistEndOffset = NULL;
@@ -762,10 +766,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 	// Patch
 	if (usesThumb) {
-		*(slot2ExistEndOffset + 3) = 0x02400000;
-		*(slot2ExistEndOffset + 4) = 0x024000CE;
+		*(slot2ExistEndOffset + 3) = 0x0D000000;
+		*(slot2ExistEndOffset + 4) = 0x0D0000CE;
 	} else {
-		*(slot2ExistEndOffset + 3) = 0x024000CE;
+		*(slot2ExistEndOffset + 3) = 0x0D0000CE;
 
 		int instancesPatched = 0;
 		for (int i = 0x100/4; i > 0; i--) {
@@ -1393,7 +1397,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
     }
 }
 
-static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void operaRamPatch(const tNDSHeader* ndsHeader) {
 	extern int consoleModel;
 
 	// Opera RAM patch (ARM9)
@@ -1430,6 +1434,31 @@ static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* mo
 	*(u32*)0x0238C7C0 = 0x24000CE;
 
 	//*(u32*)0x0238C950 = 0x2400000;
+}
+
+static void patchSlot2Addr(const tNDSHeader* ndsHeader) {
+    const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "ARZE") == 0) {	// MegaMan ZX
+		for (u32 addr = 0x0203740C; addr <= 0x02044790; addr += 4) {
+			if (*(u32*)addr >= 0x08000000 && *(u32*)addr < 0x08020000) {
+				*(u32*)addr += 0x05000000;
+			}
+		}
+		*(u32*)0x0203A260 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203A708 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203AFC0 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x0203C178 = 0x0D010001;	// Originally 0xC010001, for some weird reason
+		*(u32*)0x0203D448 = 0x0D010001;	// Originally 0xC010001, for some weird reason
+		*(u32*)0x0203D678 = 0x0D000800;	// Originally 0xC000800, for some weird reason
+		*(u32*)0x02041D64 = 0x0D010000;	// Originally 0xC010000, for some weird reason
+		for (u32 addr = 0x020CA234; addr <= 0x020CA2C0; addr += 4) {
+			*(u32*)addr += 0x05000000;
+		}
+		return;
+	}
+
+	gbaRomFound = false;	// Do not load GBA ROM
 }
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
@@ -1514,12 +1543,14 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
-		operaRamPatch(ndsHeader, moduleParams);
-	} /*else if (gbaRomFound) {
-		patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
+		operaRamPatch(ndsHeader);
+	} else if (gbaRomFound) {
+		patchSlot2Addr(ndsHeader);
+
+		//patchSlot2Exist(ce9, ndsHeader, moduleParams, &slot2usesThumb);
 
 		//patchSlot2Read(ce9, ndsHeader, moduleParams, &slot2usesThumb);
-	}*/
+	}
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
