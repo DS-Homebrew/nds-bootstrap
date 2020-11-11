@@ -1134,9 +1134,23 @@ int arm7_main(void) {
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0) {
 			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 				// Enable Slot-1 for games that use IR
-				enableSlot1();
+				while((REG_SCFG_MC & 0x0c) == 0x0c) swiDelay(1 * BASE_DELAY);
+
+				if(!(REG_SCFG_MC & 0x0c)) {
+
+					REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 4;
+					swiDelay(10 * BASE_DELAY);
+					REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 8;
+					swiDelay(10 * BASE_DELAY);
+				}
 			} else {
-				disableSlot1();
+				while((REG_SCFG_MC & 0x0c) == 0x0c) swiDelay(1 * BASE_DELAY);
+
+				if((REG_SCFG_MC & 0x0c) == 8) {
+
+					REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 0x0c;
+					while((REG_SCFG_MC & 0x0c) != 0) swiDelay(1 * BASE_DELAY);
+				}
 			}
 		}
 
