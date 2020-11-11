@@ -142,6 +142,8 @@ static u32 generatedCacheBlockSize(void) {
 	return 0x4000;
 }
 
+u32 newArm7binarySize = 0;
+
 bool allowPatchHeapPointer2 = false;
 
 static void initMBK(void) {

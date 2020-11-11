@@ -15,6 +15,8 @@ extern u32 saveOnFlashcard;
 extern u32 dsiSD;
 extern u32 forceSleepPatch;
 
+extern u32 newArm7binarySize;
+
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -167,6 +169,8 @@ u32 patchCardNdsArm7(
 	u32 ROMinRAM,
 	u32 saveFileCluster
 ) {
+	newArm7binarySize = ndsHeader->arm7binarySize;
+
 	if ((ndsHeader->arm7binarySize == 0x22B40 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x22BCC && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x23708 && !dsiSD)
@@ -216,17 +220,14 @@ u32 patchCardNdsArm7(
 			return ERR_LOAD_OTHR;
 		}
 		u32 arm7src = 0;
-		u32 arm7size = 0;
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
-		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
-		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, -1);
-		ndsHeader->arm7binarySize = arm7size;
-		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
+		fileRead((char*)&newArm7binarySize, donorRomFile, 0x3C, 0x4, -1);
+		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, newArm7binarySize, -1);
 	}
 
-	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
+	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 		rsetA7Cache();
-		patchOffsetCache.a7BinSize = ndsHeader->arm7binarySize;
+		patchOffsetCache.a7BinSize = newArm7binarySize;
 		patchOffsetCacheChanged = true;
 	}
 
@@ -235,7 +236,7 @@ u32 patchCardNdsArm7(
 	//patchRamClear(ndsHeader, moduleParams);
 
 	// Touch fix for SM64DS (U) v1.0
-	if (ndsHeader->arm7binarySize == 0x24B64
+	if (newArm7binarySize == 0x24B64
 	 && *(u32*)0x023825E4 == 0xE92D4030
 	 && *(u32*)0x023825E8 == 0xE24DD004) {
 		tonccpy((char*)0x023825E4, (char*)ARM7_FIX_BUFFERED_LOCATION, 0x140);

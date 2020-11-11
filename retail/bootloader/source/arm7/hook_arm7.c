@@ -40,6 +40,8 @@
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 
+extern u32 newArm7binarySize;
+
 static const int MAX_HANDLER_LEN = 50;
 
 static const u32 handlerStartSig[3] = {
@@ -103,13 +105,13 @@ int hookNdsRetailArm7(
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
-	if (ndsHeader->arm7binarySize < 0x1000) {
+	if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
 	}
 
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
 	if (!handlerLocation) {
-		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (handlerLocation) {
 			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
 		}
@@ -131,7 +133,7 @@ int hookNdsRetailArm7(
 
 	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
 	if (!wordsLocation) {
-		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (wordsLocation) {
 			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
 		}
@@ -146,7 +148,7 @@ int hookNdsRetailArm7(
 			u32 returnAddr = wordsLocation[1];
 			u32* actualReturnAddr = wordsLocation + 2;
 			hookLocation = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-		} else switch (ndsHeader->arm7binarySize) {	// SDK 5
+		} else switch (newArm7binarySize) {	// SDK 5
 			case 0x0001D5A8:
 				hookLocation = (u32*)0x239D280;		// DS WiFi Settings
 				break;
