@@ -338,8 +338,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	
 	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+	if (src > ndsHeader->arm7romOffset) {
+		newSrc -= ndsHeader->arm7binarySize;
+	}
 	if (newSrc >= romEnd1st) {
 		newSrc = (u32)(ROM_LOCATION_EXT_P2-0x4000-ndsHeader->arm9binarySize)+src;
+		if (src > ndsHeader->arm7romOffset) {
+			newSrc -= ndsHeader->arm7binarySize;
+		}
 	} else if (newSrc+len > romEnd1st) {
 		for (int i = 0; i <= len; i++) {
 			len--;

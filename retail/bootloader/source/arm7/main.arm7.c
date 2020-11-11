@@ -479,8 +479,10 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
-	return ndsHeader->romSize - 0x4000 - ndsHeader->arm9binarySize;
+static u32 overlaysSize = 0;
+
+static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
+	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }
 
 // SDK 5
@@ -600,14 +602,14 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
 		res = false;
 	} else {
-		res = ((dsiModeConfirmed && !eight && getRomSizeNoArm9(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArm9(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && !eight && getRomSizeNoArm9(ndsHeader) < 0x01800000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && eight && getRomSizeNoArm9(ndsHeader) < 0x00800000));
+		res = ((dsiModeConfirmed && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && eight && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((!eight && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
-			|| (eight && getRomSizeNoArm9(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
+		res = ((!eight && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (eight && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
 	  }
 	}
@@ -711,14 +713,43 @@ static void NTR_BIOS() {
 	}
 }
 
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+	// Load overlays into RAM
+	if (consoleModel>0
+	? overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x1000000 : 0x1800000))
+	: overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x700000 : 0x800000)))
+	{
+		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+		if (extendedMemoryConfirmed) {
+			overlaysLocation = (u32)ROM_LOCATION_EXT;
+		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
+			overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
+
+			const char* romTid = getRomTid(ndsHeader);
+			if (strncmp(romTid, "VKG", 3) == 0) {
+				overlaysLocation = (u32)CACHE_ADRESS_START_low;
+			}
+		}
+		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
+
+		if (!isSdk5(moduleParams)) {
+			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
+				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
+			}
+		}
+	}
+}
+
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
 	// Load ROM into RAM
 	u32 romLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
 		romLocation = (u32)ROM_LOCATION_EXT;
 	}
+	romLocation += overlaysSize;
 
-	u32 romSize = getRomSizeNoArm9(ndsHeader);
+	u32 romOffset = ndsHeader->arm7romOffset + ndsHeader->arm7binarySize;
+	u32 romSize = getRomSizeNoArmBins(ndsHeader);
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (romSize >= romSizeLimit) {
 		extern bool moreMemory;
@@ -729,8 +760,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		tonccpy((char*)ce7Location+0x18000, savFile->fatTableCache, 0x28000);
 		savFile->fatTableCache = (u32*)((char*)ce7Location+0x18000);
 
-		fileRead((char*)romLocation, *romFile, 0x4000 + ndsHeader->arm9binarySize, romSizeLimit, 0);
-		fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, 0x4000 + ndsHeader->arm9binarySize + romSizeLimit, romSize-romSizeLimit, 0);
+		fileRead((char*)romLocation, *romFile, romOffset, romSizeLimit, 0);
+		fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSize-romSizeLimit, 0);
 
 		toncset((char*)IMAGES_LOCATION-0x40000, 0, 0x80000);
 		romFile->fatTableCached = false;
@@ -743,7 +774,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 			tonccpy((char*)ce7Location+0x18000, savFile->fatTableCache, 0x28000);
 			savFile->fatTableCache = (u32*)((char*)ce7Location+0x18000);
 		}
-		fileRead((char*)romLocation, *romFile, 0x4000 + ndsHeader->arm9binarySize, romSize, 0);
+		fileRead((char*)romLocation, *romFile, romOffset, romSize, 0);
 		if (extendedMemoryConfirmed) {
 			toncset((char*)IMAGES_LOCATION-0x40000, 0, 0x80000);
 			romFile->fatTableCached = false;
@@ -761,41 +792,6 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		dbg_printf(" used\n");
 	}
 	dbg_printf("\n");
-
-	if (!isSdk5(moduleParams)) {
-		if(*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-			*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
-		}
-	}
-}
-
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
-	// Load overlays into RAM
-	u32 overlaysSize = 0;
-	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-		overlaysSize = i;
-	}
-	if (consoleModel>0
-	? overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x1000000 : 0x1800000))
-	: overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x700000 : 0x800000)))
-	{
-		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-		if (consoleModel == 0 && isSdk5(moduleParams)) {
-			overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
-
-			const char* romTid = getRomTid(ndsHeader);
-			if (strncmp(romTid, "VKG", 3) == 0) {
-				overlaysLocation = (u32)CACHE_ADRESS_START_low;
-			}
-		}
-		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
-
-		if (!isSdk5(moduleParams)) {
-			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
-			}
-		}
-	}
 }
 
 static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
@@ -1118,6 +1114,14 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
+	// Calculate overlay pack size
+	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+		overlaysSize++;
+	}
+    /*dbg_printf("overlaysSize: ");
+    dbg_hexa(overlaysSize);
+    dbg_printf("\n");*/
+
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
@@ -1356,6 +1360,9 @@ int arm7_main(void) {
 			dbg_printf("GBA ROM loaded\n");
 		}
 
+		if (strncmp(romTid, "UBR", 3) != 0) {
+			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+		}
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
@@ -1363,9 +1370,6 @@ int arm7_main(void) {
 			}
 			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile);
 		} else {
-			if (strncmp(romTid, "UBR", 3) != 0) {
-				loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
-			}
 			if (romRead_LED==1 || dmaRomRead_LED==1) {
 				// Turn WiFi LED off
 				i2cWriteRegister(0x4A, 0x30, 0x12);

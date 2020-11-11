@@ -433,8 +433,8 @@ static void startBinary_ARM7(const vu32* tempArm9StartAddress) {
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
-	for (int i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-		overlaysSize = i;
+	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+		overlaysSize++;
 	}
 	if (overlaysSize < 0x780000)
 	{

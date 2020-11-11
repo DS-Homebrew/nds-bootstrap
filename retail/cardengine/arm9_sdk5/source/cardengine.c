@@ -763,6 +763,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 }
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
+	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+	if (src > ndsHeader->arm7romOffset) {
+		newSrc -= ndsHeader->arm7binarySize;
+	}
+
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -770,7 +775,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = ((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src);
+	sharedAddr[2] = newSrc;
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
@@ -778,7 +783,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	#endif
 
 	// Copy directly
-	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src), len);
+	tonccpy(dst, (u8*)newSrc, len);
 
 	return 0;
 }
