@@ -751,7 +751,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	u32 romOffset = ndsHeader->arm7romOffset + ndsHeader->arm7binarySize;
 	u32 romSize = getRomSizeNoArmBins(ndsHeader);
-	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
+	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000)-overlaysSize;
 	if (romSize >= romSizeLimit) {
 		extern bool moreMemory;
 		moreMemory = true;
