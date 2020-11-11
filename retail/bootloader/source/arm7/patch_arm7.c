@@ -103,7 +103,8 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 		}
 		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
-	if (REG_SCFG_EXT == 0 || forceSleepPatch || REG_SCFG_MC == 0x11) {
+	if (REG_SCFG_EXT == 0 || (REG_SCFG_MC & BIT(0)) || (!(REG_SCFG_MC & BIT(2)) && !(REG_SCFG_MC & BIT(3)))
+	 || forceSleepPatch) {
 		if (sleepPatchOffset) {
 			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
