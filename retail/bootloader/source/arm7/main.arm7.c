@@ -134,6 +134,7 @@ bool gbaRomFound = false;
 
 static u32 ce7Location = CARDENGINE_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
+u32 overlaysSize = 0;
 
 static u32 softResetParams = 0;
 
@@ -480,8 +481,6 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
-
-static u32 overlaysSize = 0;
 
 static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
