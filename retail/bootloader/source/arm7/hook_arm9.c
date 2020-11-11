@@ -202,10 +202,7 @@ int hookNdsRetailArm9(
 			}
 		}
 	  if (runOverlayCheck) {
-		u32 overlaysSize = 0;
-		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i <= ndsHeader->arm7romOffset; i++) {
-			overlaysSize = i;
-		}
+		extern u32 overlaysSize;
 
 		if (overlaysSize <= (consoleModel>0 ? 0x1800000 : 0x800000)) {
 			for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
