@@ -52,6 +52,8 @@
 #include <nds/debug.h>
 #include <nds/ipc.h>
 
+#define BASE_DELAY (100)
+
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
@@ -253,6 +255,9 @@ static void resetMemory_ARM7(void) {
 	useTwlCfg = ((*(u8*)0x02000400 & 0x0F) && (*(u8*)0x02000401 == 0) && (*(u8*)0x02000402 == 0) && (*(u8*)0x02000404 == 0));
 	twlCfgLang = *(u8*)0x02000406;
 }
+
+extern void enableSlot1();
+extern void disableSlot1();
 
 static void NDSTouchscreenMode(void) {
 	u8 volLevel;
@@ -1124,6 +1129,15 @@ int arm7_main(void) {
 			*gbaFile = getFileFromCluster(gbaFileCluster);
 			gbaRomFound = (gbaFile->firstCluster != CLUSTER_FREE);
 			patchSlot2Addr(ndsHeader);
+		}
+
+		if (!gameOnFlashcard && REG_SCFG_EXT != 0) {
+			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
+				// Enable Slot-1 for games that use IR
+				enableSlot1();
+			} else {
+				disableSlot1();
+			}
 		}
 
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
