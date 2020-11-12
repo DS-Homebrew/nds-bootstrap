@@ -601,7 +601,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	|| strncmp(romTid, "UOR", 3) == 0
 	|| (eight && strncmp(romTid, "KPP", 3) == 0)
 	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
-		res = false;
+		// Do nothing
 	} else {
 		res = ((dsiModeConfirmed && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
