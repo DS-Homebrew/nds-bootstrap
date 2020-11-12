@@ -195,13 +195,18 @@ void cardSetDma(u32 * params) {
   		len2 -= len2 % 32;
   	}
 
+	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+	if (src > ndsHeader->arm7romOffset) {
+		newSrc -= ndsHeader->arm7binarySize;
+	}
+
 	// Copy via dma
 	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
 		REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
 	}
-	ndmaCopyWordsAsynch(0, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src), dst, len2);
+	ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
 	while (ndmaBusy(0));
 	if (ce9->valueBits & extendedMemory) {
 		REG_SCFG_EXT -= 0xC000;
