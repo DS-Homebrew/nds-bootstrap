@@ -1155,7 +1155,7 @@ int arm7_main(void) {
 			patchSlot2Addr(ndsHeader);
 		}
 
-		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && (REG_SCFG_MC & BIT(3))) {
+		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
 			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
