@@ -347,12 +347,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		newSrc -= ndsHeader->arm7binarySize;
 	}
 	if (newSrc >= romEnd1st) {
-		newSrc = (u32)(ROM_LOCATION_EXT_P2-0x4000-ndsHeader->arm9binarySize)+src;
+		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src;
 		if (src > ndsHeader->arm7romOffset) {
 			newSrc -= ndsHeader->arm7binarySize;
 		}
 	} else if (newSrc+len > romEnd1st) {
-		for (int i = 0; i <= len; i++) {
+		u32 oldLen = len;
+		for (int i = 0; i < oldLen; i++) {
 			len--;
 			len2++;
 			if (newSrc+len == romEnd1st) break;
@@ -368,7 +370,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	tonccpy(dst, (u8*)newSrc, len);
 	if (len2 > 0) {
-		newSrc = (u32)(ROM_LOCATION_EXT_P2-0x4000-ndsHeader->arm9binarySize)+src+len;
+		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
+		if (src > ndsHeader->arm7romOffset) {
+			newSrc -= ndsHeader->arm7binarySize;
+		}
 		tonccpy(dst+len, (u8*)newSrc, len2);
 	}
 
