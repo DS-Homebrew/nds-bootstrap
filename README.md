@@ -25,19 +25,23 @@ B4DS (nds-bootstrap for DS-mode flashcards) only supports some DS ROMs. You can 
 
 # Compiling
 
-In order to compile this on your own, you will need [devkitPro](https://devkitpro.org/) with the devkitARM toolchain, plus the necessary tools and libraries, as well as lzss from [here](https://www.romhacking.net/download/utilities/826/), which goes in the `retail` folder. devkitPro includes `dkp-pacman` for easy installation of all components:
+If your goal is to get the latest nightly, feel free to get it from our auto compiler, handled by TWLBot. Also, if you push your test commits to a GitHub forks, you could have GitHub Actions run on every commit instead. If, however, you'd like to compile this locally, you will need to install devkitARM with the necessary Nintendo DS development libraries. To learn how to set up, please check the [devkitPro wiki](https://devkitpro.org/wiki/Getting_Started).
 
 ```
  $ dkp-pacman -Syu devkitARM devkitarm-rules general-tools dstools ndstool libnds libfat-nds
 ```
 
-Once everything is downloaded and installed, `git clone` this repository, navigate to the folder, and run `make` to compile nds-bootstrap. If there is an error, let us know.
+You will also need to setup lzss, which can be done by installing gcc (`sudo apt-get install gcc`) and compiling lzss.c to the devKitARM binary directory (`sudo gcc lzss.c -o /opt/devkitpro/tools/bin/lzss`)
+
+Once the development environment is ready, clone this repository using git (`git clone`), navigate to the cloned repo and run `make` to compile nds-bootstrap.
+
+If you need help manually compiling, please let us know on our [Discord Server](https://discord.gg/yD3spjv). The issues tab on our GitHub repository is mainly for running the applications themselves, rather than development.
 
 # Frontends
 A frontend isn't required to be used as nds-bootstrap uses an ini file to load its parameters. However, it is very much recommended.
 
 ## [TWiLight Menu++](https://github.com/DS-Homebrew/TWiLightMenu)
 
-TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz). It has 5 customizable themes to choose from (the DSi Menu, the 3DS Home Menu, SEGA Saturn menu, the R4 kernel, and the Acekard theme, based on the AKAIO firmware).
+TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz) & co. It has 7 customizable launchers to choose from with the ability to launch emulators and other homebrew.
 
 It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-boostrap for you, with customizable per game settings.
