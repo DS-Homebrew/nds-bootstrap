@@ -1236,7 +1236,8 @@ int arm7_main(void) {
 				errorOutput();
 			}
 			allowPatchHeapPointer2 = true;
-		} else if (((u32)ndsHeader->arm9destination == 0x02004000) || (moduleParams->sdk_version < 0x2008000)) {
+		} else if ((((u32)ndsHeader->arm9destination == 0x02004000) || (moduleParams->sdk_version < 0x2008000))
+				&& (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
 			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
 						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION1;
 			if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
