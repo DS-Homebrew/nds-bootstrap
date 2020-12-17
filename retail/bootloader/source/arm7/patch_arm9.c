@@ -11,8 +11,8 @@
 
 //#define memcpy __builtin_memcpy // memcpy
 
-extern u32 gameOnFlashcard;
-extern u32 saveOnFlashcard;
+extern u16 gameOnFlashcard;
+extern u16 saveOnFlashcard;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
@@ -628,7 +628,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		return;
 	}
 
-	extern u32 gameOnFlashcard;
     const char* romTid = getRomTid(ndsHeader);
 
 	if (isSdk5(moduleParams) && !gameOnFlashcard) {

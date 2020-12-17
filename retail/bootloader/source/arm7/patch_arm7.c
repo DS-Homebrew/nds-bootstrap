@@ -10,10 +10,13 @@
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
-extern u32 gameOnFlashcard;
-extern u32 saveOnFlashcard;
+extern u16 gameOnFlashcard;
+extern u16 saveOnFlashcard;
+extern u32 donorOnFlashcard;
 extern u32 dsiSD;
 extern u32 forceSleepPatch;
+
+extern bool sdRead;
 
 extern u32 newArm7binarySize;
 
@@ -192,10 +195,12 @@ u32 patchCardNdsArm7(
 		// Replace incompatible ARM7 binary
 		aFile donorRomFile;
 		if (ndsHeader->arm7binarySize == 0x23CAC) {
+			sdRead = ((donorOnFlashcard & BIT(1)) ? false : dsiSD);
 			extern u32 donorFileE2Cluster;	// Early SDK2
 			donorRomFile = getFileFromCluster(donorFileE2Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x24DA8
 				 || ndsHeader->arm7binarySize == 0x24F50) {
+			sdRead = ((donorOnFlashcard & BIT(2)) ? false : dsiSD);
 			extern u32 donorFile2Cluster;	// SDK2
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x2434C
@@ -205,13 +210,16 @@ u32 patchCardNdsArm7(
 				 || ndsHeader->arm7binarySize == 0x25D04
 				 || ndsHeader->arm7binarySize == 0x25D94
 				 || ndsHeader->arm7binarySize == 0x25FFC) {
+			sdRead = ((donorOnFlashcard & BIT(3)) ? false : dsiSD);
 			extern u32 donorFile3Cluster;	// SDK3-4
 			donorRomFile = getFileFromCluster(donorFile3Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x22B40
 				 || ndsHeader->arm7binarySize == 0x22BCC) {
+			sdRead = ((donorOnFlashcard & BIT(5)) ? false : dsiSD);
 			extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 			donorRomFile = getFileFromCluster(donorFileTwlCluster);
 		} else {
+			sdRead = ((donorOnFlashcard & BIT(4)) ? false : dsiSD);
 			extern u32 donorFileCluster;	// SDK5 (NTR)
 			donorRomFile = getFileFromCluster(donorFileCluster);
 		}
@@ -223,6 +231,7 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
 		fileRead((char*)&newArm7binarySize, donorRomFile, 0x3C, 0x4, -1);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, newArm7binarySize, -1);
+		sdRead = (gameOnFlashcard ? false : dsiSD);
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {

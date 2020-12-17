@@ -492,7 +492,7 @@ int main(int argc, char** argv) {
 		free(conf->ndsPath);
 		free(conf->savPath);
 		free(conf);
-		
+
 		stop();
 	}
 

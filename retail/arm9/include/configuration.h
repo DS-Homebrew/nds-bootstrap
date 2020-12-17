@@ -48,6 +48,7 @@ typedef struct configuration {
 	bool sdFound;
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
+	u32 donorOnFlashcard;
 	u32 backlightMode;
 } configuration;
 

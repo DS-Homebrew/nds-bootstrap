@@ -177,6 +177,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+	conf->donorOnFlashcard = 0;
+	if (conf->donorE2Path[0] == 'f' && conf->donorE2Path[1] == 'a' && conf->donorE2Path[2] == 't') {
+		conf->donorOnFlashcard |= BIT(1);
+	}
+	if (conf->donor2Path[0] == 'f' && conf->donor2Path[1] == 'a' && conf->donor2Path[2] == 't') {
+		conf->donorOnFlashcard |= BIT(2);
+	}
+	if (conf->donor3Path[0] == 'f' && conf->donor3Path[1] == 'a' && conf->donor3Path[2] == 't') {
+		conf->donorOnFlashcard |= BIT(3);
+	}
+	if (conf->donorPath[0] == 'f' && conf->donorPath[1] == 'a' && conf->donorPath[2] == 't') {
+		conf->donorOnFlashcard |= BIT(4);
+	}
+	if (conf->donorTwlPath[0] == 'f' && conf->donorTwlPath[1] == 'a' && conf->donorTwlPath[2] == 't') {
+		conf->donorOnFlashcard |= BIT(5);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);

@@ -27,6 +27,7 @@
 	.global initDisc
 	.global gameOnFlashcard
 	.global saveOnFlashcard
+	.global donorOnFlashcard
 	.global dsiSD
 	.global saveFileCluster
 	.global donorFileE2Cluster
@@ -81,8 +82,10 @@ storedFileCluster:
 initDisc:
 	.word	0x00000001		@ init the disc by default
 gameOnFlashcard:
-	.word	0x00000000
+	.hword	0x0000
 saveOnFlashcard:
+	.hword	0x0000
+donorOnFlashcard:
 	.word	0x00000000
 dldiOffset:
 	.word	0x00000000
