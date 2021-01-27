@@ -801,7 +801,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
 }*/
 
-u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
+u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
@@ -814,7 +814,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 		heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
 	}
     if (!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
-        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("ERROR: Wrong lo heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa(*heapPointer);
 		dbg_printf("\n\n");
@@ -826,7 +826,7 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old heap pointer: ");
+    dbg_printf("old lo heap pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
@@ -836,18 +836,16 @@ u32* patchHeapPointer(const module_params_t* moduleParams, const tNDSHeader* nds
 		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6KB (or for SDK5, 12KB)
 	}
 
-    dbg_printf("new heap pointer: ");
+    dbg_printf("new lo heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Heap Shrink Sucessfull\n\n");
+    dbg_printf("Lo Heap Shrink Sucessfull\n\n");
 
     return oldheapPointer;
 }
 
-void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
-	extern bool allowPatchHeapPointer2;
-
-	if (moduleParams->sdk_version <= 0x2007FFF || !allowPatchHeapPointer2) {
+u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
+	if (moduleParams->sdk_version <= 0x2007FFF) {
 		return;
 	}
 
@@ -863,7 +861,7 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
 	}
     if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
-        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("ERROR: Wrong hi heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa(*heapPointer);    
 		dbg_printf("\n\n");
@@ -875,20 +873,22 @@ void patchHeapPointer2(const module_params_t* moduleParams, const tNDSHeader* nd
 
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old heap end pointer: ");
+    dbg_printf("old hi heap end pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
 	if (ROMinRAM) {
 		*heapPointer = (u32)CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
 	} else {
-		*heapPointer = (gameOnFlashcard ? 0x023DC000 : 0x023DE000); // shrink heap by 16KB or 8KB
+		*heapPointer = (gameOnFlashcard ? CARDENGINE_ARM9_DLDI_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION); // shrink heap by 16KB or 8KB
 	}
 
-    dbg_printf("new heap 2 pointer: ");
+    dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Heap 2 Shrink Sucessfull\n\n");
+    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
+
+    return oldheapPointer;
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
@@ -1505,8 +1505,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-
-	patchHeapPointer2(moduleParams, ndsHeader, ROMinRAM);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 

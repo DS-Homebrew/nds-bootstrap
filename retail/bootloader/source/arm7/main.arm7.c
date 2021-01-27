@@ -145,8 +145,6 @@ static u32 generatedCacheBlockSize(void) {
 
 u32 newArm7binarySize = 0;
 
-bool allowPatchHeapPointer2 = false;
-
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
@@ -1218,7 +1216,9 @@ int arm7_main(void) {
 					ce9Location = CARDENGINE_ARM9_CACHED_LOCATION3;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1400);
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
-				allowPatchHeapPointer2 = ((u32)ndsHeader->arm9destination != 0x02004000);
+				if ((u32)ndsHeader->arm9destination != 0x02004000) {
+					patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
+				}
 			} else if (gameOnFlashcard && !ROMinRAM) {
 				tonccpy((u32*)CARDENGINE_ARM9_SDK5_LOCATION, (u32*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 				if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
@@ -1235,7 +1235,7 @@ int arm7_main(void) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-			allowPatchHeapPointer2 = true;
+			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 		} else if ((((u32)ndsHeader->arm9destination == 0x02004000) || (moduleParams->sdk_version < 0x2008000))
 				&& (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
 			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
@@ -1251,14 +1251,14 @@ int arm7_main(void) {
 			//}
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
 		} else if (ceCached) {
-			if (strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
+			if (ceCached == 2
+			|| strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
 			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
 			)
 			{
-				ce9Location = (ROMinRAM ? CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM : CARDENGINE_ARM9_CACHED_LOCATION);
-				allowPatchHeapPointer2 = true;
+				ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			} else {
-				ce9Location = (u32)patchHeapPointer(moduleParams, ndsHeader, ROMinRAM);
+				ce9Location = (u32)patchLoHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			}
 			if(ce9Location) {
 				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
@@ -1267,13 +1267,11 @@ int arm7_main(void) {
 				ce9Location = CARDENGINE_ARM9_LOCATION;
 				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
 			}
+		} else if (extendedMemoryConfirmed) {
+			ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
+			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1400);
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
 		} else {
-			if (extendedMemoryConfirmed) {
-				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1400);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
-				allowPatchHeapPointer2 = true;
-			} else
 			ce9Location = CARDENGINE_ARM9_LOCATION;
 			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
 		}

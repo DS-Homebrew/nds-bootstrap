@@ -140,7 +140,12 @@ u32 patchCardNds(
 	u32 saveFileCluster,
 	u32 saveSize
 );
-u32* patchHeapPointer(
+u32* patchLoHeapPointer(
+    const module_params_t* moduleParams,
+    const tNDSHeader* ndsHeader,
+	bool ROMinRAM
+);
+u32* patchHiHeapPointer(
     const module_params_t* moduleParams,
     const tNDSHeader* ndsHeader,
 	bool ROMinRAM
