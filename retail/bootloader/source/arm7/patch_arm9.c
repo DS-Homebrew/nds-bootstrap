@@ -888,7 +888,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 
-    return oldheapPointer;
+    return heapPointer;
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
