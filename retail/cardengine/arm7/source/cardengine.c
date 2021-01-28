@@ -784,8 +784,23 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-//	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_DOWN))) {
+// xonn83 mod: swap screens using key combo
+	if ( 0 == (REG_KEYINPUT & (KEY_L | LEY_R | KEY_DOWN))) {
+		if (tryLockMutex(&saveMutex)) {
+			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
+				lcdSwap();
+				returnTimer = 0;
+			}
+			unlockMutex(&saveMutex);
+		}
+		returnTimer++;
+	} else {
+		returnTimer = 0;
+	}
+
+// xonn83 end mod	
+	
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
