@@ -223,7 +223,6 @@ u32 popFromAsyncQueueHead() {
 
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
-	lcdSwap();
 	//int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
 		//if (count==0) {
@@ -1085,6 +1084,7 @@ void reset(u32 param) {
 }
 
 u32 myIrqEnable(u32 irq) {	
+	lcdSwap();
 	int oldIME = enterCriticalSection();
 
 	#ifdef DEBUG

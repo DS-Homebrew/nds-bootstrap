@@ -49,9 +49,6 @@
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
-// xonn83 mod: swap screens using key combo
-#define	MEMORY_POWERCNT	*(vu16*)0x4000304
-// xonn83 end mod
 
 extern u32 ce7;
 
@@ -794,11 +791,7 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60 * 2) {
-				int oldIME = enterCriticalSection();
-				unsigned short var_swap = 0x8000;
-				MEMORY_POWERCNT ^= var_swap;
-				swapTimer = 0;
-				leaveCriticalSection(oldIME);
+				//?
 			}
 			unlockMutex(&saveMutex);
 		}
@@ -806,7 +799,6 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		swapTimer = 0;
 	}
-
 // xonn83 end mod	
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
