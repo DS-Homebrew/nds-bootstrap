@@ -788,7 +788,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 // xonn83 mod: swap screens using key combo
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN))) {
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
 				short var_swap = BIT(15);
