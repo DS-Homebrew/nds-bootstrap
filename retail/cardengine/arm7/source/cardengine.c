@@ -795,7 +795,7 @@ void myIrqHandlerVBlank(void) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60 * 2) {
 				int oldIME = enterCriticalSection();
-				unsigned short var_swap = BIT(15);
+				unsigned short var_swap = 0x8000;
 				MEMORY_POWERCNT ^= var_swap;
 				swapTimer = 0;
 				leaveCriticalSection(oldIME);
