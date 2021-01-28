@@ -791,9 +791,11 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
+				int oldIME = enterCriticalSection();
 				short var_swap = BIT(15);
 				MEMORY_POWERCNT ^= var_swap;
 				returnTimer = 0;
+				leaveCriticalSection(oldIME);
 			}
 			unlockMutex(&saveMutex);
 		}
