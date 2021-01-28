@@ -108,6 +108,9 @@ static aFile srParamsFile;
 static int saveTimer = 0;
 
 static int returnTimer = 0;
+// xonn83 mod: swap screens using key combo
+static int swapTimer = 0;
+// xonn83 end mod
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -790,18 +793,18 @@ void myIrqHandlerVBlank(void) {
 // xonn83 mod: swap screens using key combo
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
-			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
+			if (swapTimer == 60 * 2) {
 				int oldIME = enterCriticalSection();
-				short var_swap = BIT(15);
+				unsigned short var_swap = BIT(15);
 				MEMORY_POWERCNT ^= var_swap;
-				returnTimer = 0;
+				swapTimer = 0;
 				leaveCriticalSection(oldIME);
 			}
 			unlockMutex(&saveMutex);
 		}
-		returnTimer++;
+		swapTimer++;
 	} else {
-		returnTimer = 0;
+		swapTimer = 0;
 	}
 
 // xonn83 end mod	
