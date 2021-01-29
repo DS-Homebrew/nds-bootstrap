@@ -100,7 +100,7 @@ static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
 void myIrqHandlerDMA(void){
-	if (REG_KEYCNT & & (KEY_L | KEY_R | KEY_UP)){
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))){
 		lcdSwap();
 	}
 }
