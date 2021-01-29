@@ -27,7 +27,6 @@
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
-#include <nds/fifocommon.h>
 
 #include "tonccpy.h"
 #include "my_sdmmc.h"
@@ -791,7 +790,7 @@ void myIrqHandlerVBlank(void) {
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (swapTimer == 60 * 2) {
-			fifoSendValue32(FIFO_USER_01, (u32)12345678);
+			i2cWriteRegister(0x4A,0x11,(i2cReadRegister(0x4A, 0x11)^0x8000));
 			swapTimer = 0;
 		}
 		swapTimer++;
