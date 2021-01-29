@@ -18,7 +18,7 @@
 
 #include <string.h>
 //xonn83
-#include <nds.h>
+#include <nds/input.h>
 //xonn83
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
