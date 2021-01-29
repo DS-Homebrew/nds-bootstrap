@@ -144,6 +144,12 @@ static void myFIFOValue32Handler(u32 value, void* userdata) {
 	printf("ARM7 data %lX\n", value);
 }
 
+static void myFIFOValue32Handler2(u32 value, void* userdata) {
+	if (value == 12345678){
+		lcdSwap();
+	}
+}
+
 static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
@@ -199,7 +205,7 @@ static int runNdsFile(configuration* conf) {
 			swiWaitForVBlank();
 		}*/
 	}
-
+	fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler2, NULL);
 	// ROM read LED
 	switch(conf->romRead_LED) {
 		case 0:
