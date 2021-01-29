@@ -1105,9 +1105,9 @@ u32 myIrqEnable(u32 irq) {
 	return irq_before;
 }
 
+//xonn83
 void myIrqHandlerVBlank(void) {
-	// xonn83 mod: swap screens using key combo
-	if ( KEYS_ADDRESS & 0x70 == 0x70) { //L+R+UP
+	if ( (KEYS_ADDRESS & 0x70) == 0x70) { //L+R+UP
 		if (swapTimer == 60 * 2) {
 			lcdSwap();
 			swapTimer = 0;
@@ -1115,7 +1115,6 @@ void myIrqHandlerVBlank(void) {
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	}
-	// xonn83 end mod
-	
+	}	
 }
+//xonn83
