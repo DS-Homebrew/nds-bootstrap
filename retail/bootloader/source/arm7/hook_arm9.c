@@ -230,6 +230,7 @@ int hookNdsRetailArm9(
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
 	patchOffsetCache.a9IrqHookOffset = tableAddr;
+	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 
     u32* vblankHandler = hookLocation;
 	/*
