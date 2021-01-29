@@ -17,10 +17,6 @@
 */
 
 #include <string.h>
-
-#include <nds.h>
-#include <nds/arm9/input.h>
-
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
@@ -1091,7 +1087,6 @@ void reset(u32 param) {
 }
 
 u32 myIrqEnable(u32 irq) {	
-	lcdSwap();
 	int oldIME = enterCriticalSection();
 
 	#ifdef DEBUG
@@ -1111,8 +1106,9 @@ u32 myIrqEnable(u32 irq) {
 
 void myIrqHandlerVBlank(void) {
 	// xonn83 mod: swap screens using key combo
-	scanKeys();
-	if ( 0 == (keysDown() & (KEY_L | KEY_R | KEY_UP))) {
+	//scanKeys();
+	//if ( 0 == (keysDown() & (KEY_L | KEY_R | KEY_UP))) {
+	if (1)
 		if (swapTimer == 60 * 2) {
 			lcdSwap();
 			swapTimer = 0;
