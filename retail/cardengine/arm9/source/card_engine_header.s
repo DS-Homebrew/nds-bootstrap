@@ -69,6 +69,8 @@ needFlushDCCache:
 .word   0x0
 .word   pdash_read
 .word   ipcSyncHandler
+.word	vblankHandler
+.word	
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_irq_enable

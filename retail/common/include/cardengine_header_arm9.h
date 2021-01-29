@@ -28,6 +28,7 @@ typedef struct cardengineArm9Patches {
     u32 needFlushDCCache;
     u32* pdash_read;
     u32* ipcSyncHandlerRef;
+	u32* vblankHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 
