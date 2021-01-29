@@ -241,6 +241,7 @@ int hookNdsRetailArm9(
     u32* ipcSyncHandler = hookLocation + 16;
     u32* cardCompletionIrq = hookLocation + 19;*/
     
+	ce9->intr_vblank_orig_return  = *vblankHandler;
     ce9->irqTable   = tableAddr;
 
 	nocashMessage("ERR_NONE");

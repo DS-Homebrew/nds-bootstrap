@@ -99,11 +99,9 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
-void myIrqHandlerDMA(void){
-	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))){
-		lcdSwap();
-	}
-}
+static int swapTimer = 0;
+
+void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
@@ -1105,4 +1103,14 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
+}
+
+void myIrqHandlerVBlank(void) {
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))){
+		if(swapTimer == 60){
+			lcdSwap();
+			swapTimer = 0;
+		}
+		swapTimer++;
+	}
 }
