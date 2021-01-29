@@ -242,7 +242,6 @@ static void waitForArm7(void) {
 #ifndef DLDI
 #ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
-	lcdSwap();
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
 		// read max 32k via the WRAM cache
@@ -994,6 +993,7 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+	lcdSwap();
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileRead(memory, *savFile, flash, len, -1);
