@@ -100,7 +100,9 @@ static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
 void myIrqHandlerDMA(void){
-	scanKeys();
+	if (REG_KEYCNT & & (KEY_L | KEY_R | KEY_UP)){
+		lcdSwap();
+	}
 }
 
 void SetBrightness(u8 screen, s8 bright) {
