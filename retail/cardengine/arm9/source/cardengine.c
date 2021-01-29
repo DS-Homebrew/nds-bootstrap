@@ -17,6 +17,9 @@
 */
 
 #include <string.h>
+//xonn83
+#include <nds.h>
+//xonn83
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
@@ -26,9 +29,6 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
-//xonn83
-#include <nds/input.h>
-//xonn83
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
