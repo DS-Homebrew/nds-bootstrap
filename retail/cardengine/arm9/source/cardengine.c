@@ -97,9 +97,6 @@ static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
-// xonn83 mod: swap screens using key combo
-static int swapTimer = 0;
-// xonn83 end mod
 
 void myIrqHandlerDMA(void);
 
@@ -1103,19 +1100,3 @@ u32 myIrqEnable(u32 irq) {
 	leaveCriticalSection(oldIME);
 	return irq_before;
 }
-
-//xonn83
-void myIrqHandlerVBlank(void) {
-	//uint16 k_addr = (*(vuint16*)0x04000130);
-	//if ( (k_addr & 0x70) == 0x70) { //L+R+UP
-	if(1){
-		if (swapTimer == 60 * 2) {
-			lcdSwap();
-			swapTimer = 0;
-		}
-		swapTimer++;
-	} else {
-		swapTimer = 0;
-	}	
-}
-//xonn83

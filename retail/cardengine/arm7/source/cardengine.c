@@ -110,6 +110,10 @@ static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
+// xonn83 mod: swap screens using key combo
+static int swapTimer = 0;
+// xonn83 end mod
+
 //static bool ndmaUsed = false;
 
 static int cardEgnineCommandMutex = 0;
@@ -783,6 +787,16 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
+	
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
+		if (swapTimer == 60 * 2) {
+			fifoSendValue32(FIFO_USER_01, (u32)12345678);
+			swapTimer = 0;
+		}
+		swapTimer++;
+	} else {
+		swapTimer = 0;
+	}	
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
