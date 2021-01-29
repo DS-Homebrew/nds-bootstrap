@@ -242,6 +242,7 @@ static void waitForArm7(void) {
 #ifndef DLDI
 #ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
+	lcdSwap();
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
 		// read max 32k via the WRAM cache
