@@ -27,7 +27,7 @@
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
-#include <nf_lib.h>
+#include <nds.h>
 
 #include "tonccpy.h"
 #include "my_sdmmc.h"
