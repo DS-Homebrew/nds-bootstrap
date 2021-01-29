@@ -17,6 +17,9 @@
 */
 
 #include <string.h>
+//xonn83
+#include <nds.h>
+//xonn83
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
@@ -1108,9 +1111,9 @@ u32 myIrqEnable(u32 irq) {
 void myIrqHandlerVBlank(void) {
 	// xonn83 mod: swap screens using key combo
 	if ( 0 == (keysDown() & (KEY_L | KEY_R | KEY_UP))) {
-			if (swapTimer == 60 * 2) {
-				lcdSwap();
-			}
+		if (swapTimer == 60 * 2) {
+			lcdSwap();
+			swapTimer = 0;
 		}
 		swapTimer++;
 	} else {
