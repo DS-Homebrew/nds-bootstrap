@@ -790,7 +790,7 @@ void myIrqHandlerVBlank(void) {
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (swapTimer == 60 * 2) {
-			i2cWriteRegister(0x4A,0x11,(i2cReadRegister(0x4A, 0x11)^0x8000));
+			i2cWriteRegister(0x4A,0x11,(i2cReadRegister(0x4A, 0x11)^0x80));
 			swapTimer = 0;
 		}
 		swapTimer++;
