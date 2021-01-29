@@ -55,7 +55,6 @@
 #define _512KB_READ_SIZE 0x80000
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
-#define KEYS_ADDRESS	 (*(vuint16*)0x04000130)
 
 #define ICACHE_SIZE      0x2000      
 #define DCACHE_SIZE      0x1000      
@@ -1107,7 +1106,8 @@ u32 myIrqEnable(u32 irq) {
 
 //xonn83
 void myIrqHandlerVBlank(void) {
-	if ( (KEYS_ADDRESS & 0x70) == 0x70) { //L+R+UP
+	uint16 k_addr = (*(vuint16*)0x04000130);
+	if ( (k_addr & 0x70) == 0x70) { //L+R+UP
 		if (swapTimer == 60 * 2) {
 			lcdSwap();
 			swapTimer = 0;
