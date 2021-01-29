@@ -16,6 +16,10 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
+@xonn83
+intr_vblank_orig_return_arm9:
+	.word	0x00000000
+@xonn83
 intr_ipc_orig_return:
 	.word	0x00000000
 fileCluster:
@@ -733,5 +737,25 @@ inner_loop:
 	ldmfd   sp!, {r0-r11,lr}
 	bx      lr
 	.pool
+	
+@xonn83
+vblankHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_vblank_arm9
+	ldr 	r0,	intr_vblank_orig_return_arm9
+	bx  	r0
+	
+code_handler_start_vblank_arm9:
+	push	{r0-r12} 
+	ldr	r3, =myIrqHandlerVBlank
+	bl	_blx_r3_stub3		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+	
+_blx_r3_stub3:
+	bx	r3
+@xonn83
 
 card_engine_end:

@@ -105,9 +105,6 @@ static aFile srParamsFile;
 static int saveTimer = 0;
 
 static int returnTimer = 0;
-// xonn83 mod: swap screens using key combo
-static int swapTimer = 0;
-// xonn83 end mod
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -786,20 +783,6 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
-
-// xonn83 mod: swap screens using key combo
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
-		if (tryLockMutex(&saveMutex)) {
-			if (swapTimer == 60 * 2) {
-				//?
-			}
-			unlockMutex(&saveMutex);
-		}
-		swapTimer++;
-	} else {
-		swapTimer = 0;
-	}
-// xonn83 end mod	
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
