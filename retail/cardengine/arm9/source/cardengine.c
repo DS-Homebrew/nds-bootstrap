@@ -20,13 +20,13 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
-#include <nds/arm9/input.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
+#include <nds/input.h>
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
