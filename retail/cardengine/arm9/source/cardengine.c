@@ -26,6 +26,8 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
+#include <nds.h>
+#include <stdio.h>
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
