@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/input.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -98,7 +99,9 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
-void myIrqHandlerDMA(void);
+void myIrqHandlerDMA(void){
+	scanKeys();
+}
 
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
