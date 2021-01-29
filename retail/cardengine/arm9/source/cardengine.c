@@ -1106,8 +1106,9 @@ u32 myIrqEnable(u32 irq) {
 
 //xonn83
 void myIrqHandlerVBlank(void) {
-	uint16 k_addr = (*(vuint16*)0x04000130);
-	if ( (k_addr & 0x70) == 0x70) { //L+R+UP
+	//uint16 k_addr = (*(vuint16*)0x04000130);
+	//if ( (k_addr & 0x70) == 0x70) { //L+R+UP
+	if(1){
 		if (swapTimer == 60 * 2) {
 			lcdSwap();
 			swapTimer = 0;
