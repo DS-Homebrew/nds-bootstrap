@@ -18,8 +18,6 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_ipc_orig_return:
 	.word	0x00000000
-intr_vblank_orig_return:
-	.word	0x00000000
 fileCluster:
 	.word	0x00000000
 saveCluster:
@@ -65,12 +63,10 @@ patches:
 .word   terminateForPullOutRef
 .word	swi02
 .word   reset_arm9
-.word	vblankHandler
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
 .word   ipcSyncHandler
-.word	
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_irq_enable
@@ -537,32 +533,11 @@ code_handler_start_ipc:
 	b	arm9exit
 _blx_r6_stub_start_ipc:
 	bx	r6
-	
-vblankHandler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_vblank
-	ldr 	r0,	intr_vblank_orig_return
-	bx  	r0
-
-code_handler_start_vblank:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	arm9exit
 
 arm9exit:
 	pop   	{r0-r12} 
 	pop  	{lr}
 	bx  lr
-	
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3
-@---------------------------------------------------------------------------------
     
 .pool
 ce9location13:

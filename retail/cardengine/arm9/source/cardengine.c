@@ -26,7 +26,6 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
-#include <nds/input.h>
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
@@ -98,8 +97,6 @@ static bool isDma = false;
 static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
-
-static int swapTimer = 0;
 
 void myIrqHandlerDMA(void);
 
@@ -991,7 +988,6 @@ void cardPullOut(void) {
 }
 
 u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	lcdSwap();
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileRead(memory, *savFile, flash, len, -1);
@@ -1103,14 +1099,4 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
-}
-
-void myIrqHandlerVBlank(void) {
-	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))){
-		if(swapTimer == 60){
-			lcdSwap();
-			swapTimer = 0;
-		}
-		swapTimer++;
-	}
 }

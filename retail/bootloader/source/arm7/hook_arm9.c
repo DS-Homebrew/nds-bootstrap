@@ -230,10 +230,8 @@ int hookNdsRetailArm9(
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
 	patchOffsetCache.a9IrqHookOffset = tableAddr;
-	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 
-    u32* vblankHandler = hookLocation;
-	/*
+    /*u32* vblankHandler = hookLocation;
     u32* dma0Handler = hookLocation + 8;
     u32* dma1Handler = hookLocation + 9;
     u32* dma2Handler = hookLocation + 10;
@@ -241,7 +239,6 @@ int hookNdsRetailArm9(
     u32* ipcSyncHandler = hookLocation + 16;
     u32* cardCompletionIrq = hookLocation + 19;*/
     
-	ce9->intr_vblank_orig_return  = *vblankHandler;
     ce9->irqTable   = tableAddr;
 
 	nocashMessage("ERR_NONE");
