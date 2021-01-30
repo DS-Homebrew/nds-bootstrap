@@ -788,9 +788,11 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
+				int oldIME = enterCriticalSection();
 				swapTimer = 0;
-				sharedAddr[4] = 0;
+				sharedAddr[4] = 0x50000000;
 				IPC_SendSync(0x8);
+				leaveCriticalSection(oldIME);
 			}
 		}
 		unlockMutex(&saveMutex);

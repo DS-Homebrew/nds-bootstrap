@@ -1060,7 +1060,7 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
-	if (sharedAddr[4] == (vu32)0) {
+	if (sharedAddr[4] == (vu32)0x50000000) {
 		lcdSwap();
 	}
 
