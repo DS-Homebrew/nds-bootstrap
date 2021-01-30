@@ -1060,6 +1060,10 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
+	if (sharedAddr[4] == (vu32)0) {
+		lcdSwap();
+	}
+
 	if (sharedAddr[4] == (vu32)0x57534352) {
 		enterCriticalSection();
 		// Make screens white
