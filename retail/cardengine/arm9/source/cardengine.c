@@ -1062,12 +1062,11 @@ void myIrqHandlerIPC(void) {
 
 	//if (sharedAddr[4] == (vu32)0x57534352) {
 	SetBrightness(0, 31);
-	if (IPC_GetSync() == 7){
-		SetBrightness(1, 31);
+	if (0){
 		lcdSwap();
 		REG_IPC_SYNC ^= IPC_SYNC_IRQ_REQUEST; //disable IPC
 	}
-	/*
+	
 	if (sharedAddr[4] == (vu32)0x57534352) {
 		enterCriticalSection();
 		// Make screens white
@@ -1076,7 +1075,7 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}	
-	*/
+	SetBrightness(1, 31);
 }
 void reset(u32 param) {
 	if (ce9->consoleModel < 2) {
