@@ -791,7 +791,7 @@ void myIrqHandlerVBlank(void) {
 				int oldIME = enterCriticalSection();
 				swapTimer = 0;
 				sharedAddr[4] = 0x57534352;
-				IPC_SendSync(0x8);
+				IPC_SendSync(0);
 				waitFrames(5);
 				leaveCriticalSection(oldIME);
 			}
