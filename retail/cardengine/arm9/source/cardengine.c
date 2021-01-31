@@ -1060,7 +1060,7 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
-	if (sharedAddr[4] == (vu32)0x50000000) {
+	if (sharedAddr[4] == (vu32)0x57534352) {
 		int oldIME = enterCriticalSection();
 		lcdSwap();
 		leaveCriticalSection(oldIME);
