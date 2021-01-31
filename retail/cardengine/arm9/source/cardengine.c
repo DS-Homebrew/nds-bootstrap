@@ -1067,7 +1067,7 @@ void myIrqHandlerIPC(void) {
 		lcdSwap();
 		REG_IPC_SYNC ^= IPC_SYNC_IRQ_REQUEST; //disable IPC
 	}
-	
+	/*
 	if (sharedAddr[4] == (vu32)0x57534352) {
 		enterCriticalSection();
 		// Make screens white
@@ -1076,6 +1076,7 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}	
+	*/
 }
 void reset(u32 param) {
 	if (ce9->consoleModel < 2) {

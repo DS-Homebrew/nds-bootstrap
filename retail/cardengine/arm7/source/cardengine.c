@@ -790,6 +790,7 @@ void myIrqHandlerVBlank(void) {
 			if (swapTimer == 60){
 				int oldIME = enterCriticalSection();
 				swapTimer = 0;
+				sharedAddr[4] == (vu32)0x57534352;
 				IPC_SendSync(7);
 				leaveCriticalSection(oldIME);
 			}
