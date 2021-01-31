@@ -1062,7 +1062,7 @@ void myIrqHandlerIPC(void) {
 
 	//if (sharedAddr[4] == (vu32)0x57534352) {
 	SetBrightness(0, 31);
-	if ((REG_IPC_SYNC & 0xf00) == 0x1){
+	if ((REG_IPC_SYNC & 0x0f00) == 0x0700){
 		SetBrightness(1, 31);
 		lcdSwap();
 		REG_IPC_SYNC ^= IPC_SYNC_IRQ_REQUEST; //disable IPC

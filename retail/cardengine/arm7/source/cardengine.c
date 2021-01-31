@@ -790,7 +790,7 @@ void myIrqHandlerVBlank(void) {
 			if (swapTimer == 60){
 				int oldIME = enterCriticalSection();
 				swapTimer = 0;
-				IPC_SendSync(1);
+				IPC_SendSync(7);
 				leaveCriticalSection(oldIME);
 			}
 		}
