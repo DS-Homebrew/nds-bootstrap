@@ -1061,8 +1061,10 @@ void myIrqHandlerIPC(void) {
 #endif
 
 	if (sharedAddr[4] == (vu32)0x57534352) {
+		int oldIME = enterCriticalSection();
 		lcdSwap();
 		REG_IPC_SYNC ^= IPC_SYNC_IRQ_REQUEST; //disable IPC
+		leaveCriticalSection(oldIME);
 	}
 	/*
 	if (sharedAddr[4] == (vu32)0x57534352) {
