@@ -1074,8 +1074,8 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
-}
 */
+}
 void reset(u32 param) {
 	if (ce9->consoleModel < 2) {
 		// Make screens white
