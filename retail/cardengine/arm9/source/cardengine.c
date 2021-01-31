@@ -1061,7 +1061,7 @@ void myIrqHandlerIPC(void) {
 #endif
 
 	//if (sharedAddr[4] == (vu32)0x57534352) {
-	if ((REG_IPC_SYNC & 0xf00) == 0x1)
+	if ((REG_IPC_SYNC & 0xf00) == 0x1){
 		lcdSwap();
 		REG_IPC_SYNC ^= IPC_SYNC_IRQ_REQUEST; //disable IPC
 	}
