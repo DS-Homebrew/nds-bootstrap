@@ -1066,7 +1066,7 @@ void myIrqHandlerIPC(void) {
 		sharedAddr[4] = 0;
 		leaveCriticalSection(oldIME);
 	}
-	
+/*	
 	if ((sharedAddr[4] == (vu32)0x57534352) && (IPC_GetSync() == 0x8)){
 		enterCriticalSection();
 		// Make screens white
@@ -1075,6 +1075,7 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
+*/
 }
 void reset(u32 param) {
 	if (ce9->consoleModel < 2) {
