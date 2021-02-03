@@ -787,7 +787,7 @@ void myIrqHandlerVBlank(void) {
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
 		if (tryLockMutex(&saveMutex)) {
-			if (swapTimer == 60){
+			if (swapTimer == 30){
 				int oldIME = enterCriticalSection();
 				swapTimer = 0;
 				IPC_SendSync(0x7);
