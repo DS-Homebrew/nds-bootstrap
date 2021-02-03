@@ -115,6 +115,10 @@ void SetBrightness(u8 screen, s8 bright) {
 
 // Alternative to swiWaitForVBlank()
 static void waitFrames(int count) {
+	if (IPC_GetSync() == 0x7){
+		lcdSwap();
+	}
+	
 	for (int i = 0; i < count; i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
@@ -1060,10 +1064,6 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
-	if ((sharedAddr[4] == (vu32)0x57534352) && (IPC_GetSync() == 0x7)){
-		lcdSwap();
-		sharedAddr[4] = 0;
-	}
 	
 	if ((sharedAddr[4] == (vu32)0x57534352) && (IPC_GetSync() == 0x8)){
 		enterCriticalSection();
