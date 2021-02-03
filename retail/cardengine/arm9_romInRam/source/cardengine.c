@@ -454,7 +454,11 @@ void myIrqHandlerIPC(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
-
+	
+	if (IPC_GetSync() == 0x7){
+		lcdSwap();
+	}
+	
 	if (sharedAddr[4] == 0x57534352) {
 		enterCriticalSection();
 		// Make screens white

@@ -174,9 +174,6 @@ static int getSlotForSector(u32 sector) {
 }
 
 static vu8* getCacheAddress(int slot) {
-	//if (IPC_GetSync() == 0x7){
-		lcdSwap();
-	//}
 	//return (vu32*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
 	return (vu8*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
 }
