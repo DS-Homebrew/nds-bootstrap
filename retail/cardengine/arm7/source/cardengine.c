@@ -332,6 +332,52 @@ static void cardReadLED(bool on) {
 	}
 }*/
 
+extern void inGameMenu(void);
+
+void forceGameReboot(void) {
+	if (consoleModel < 2) {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			unlaunchSetFilename(false);
+		}
+		sharedAddr[4] = 0x57534352;
+		IPC_SendSync(0x8);
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+	u32 clearBuffer = 0;
+	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+	if (*(u32*)(ce7+0x11EF8) == 0) {
+		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+	} else {
+		// Use different SR backend ID
+		readSrBackendId();
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+}
+
+void returnToLoader(void) {
+	if (consoleModel >= 2) {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+	} else {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			unlaunchSetFilename(true);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+		sharedAddr[4] = 0x57534352;
+		IPC_SendSync(0x8);
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+}
+
 static void log_arm9(void) {
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
@@ -769,7 +815,7 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif*/
 	
-	cheat_engine_start();
+	//cheat_engine_start();	// Currently disabled for the game to boot
 
 	calledViaIPC = false;
 
@@ -803,7 +849,7 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				REG_MASTER_VOLUME = 0;
+				/*REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
 				if (consoleModel >= 2) {
 					if (*(u32*)(ce7+0x11EF8) == 0) {
@@ -825,7 +871,8 @@ void myIrqHandlerVBlank(void) {
 				}
 				i2cWriteRegister(0x4A, 0x70, 0x01);
 				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
-				leaveCriticalSection(oldIME);
+				leaveCriticalSection(oldIME);*/
+				inGameMenu();
 			}
 			unlockMutex(&saveMutex);
 		}
@@ -879,24 +926,7 @@ void myIrqHandlerVBlank(void) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
-				if (consoleModel < 2) {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						unlaunchSetFilename(false);
-					}
-					sharedAddr[4] = 0x57534352;
-					IPC_SendSync(0x8);
-					waitFrames(5);							// Wait for DSi screens to stabilize
-				}
-				u32 clearBuffer = 0;
-				fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-				if (*(u32*)(ce7+0x11EF8) == 0) {
-					tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-				} else {
-					// Use different SR backend ID
-					readSrBackendId();
-				}
-				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+				forceGameReboot();
 				leaveCriticalSection(oldIME);
 			}
 			unlockMutex(&saveMutex);
