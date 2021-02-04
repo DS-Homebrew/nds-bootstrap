@@ -68,6 +68,7 @@
 	.global forceSleepPatch
 	.global volumeFix
 	.global preciseVolumeControl
+	.global macroMode
 	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
@@ -168,6 +169,8 @@ forceSleepPatch:
 volumeFix:
 	.word	0x00000000
 preciseVolumeControl:
+	.word	0x00000000
+macroMode:
 	.word	0x00000000
 logging:
 	.word	0x00000000

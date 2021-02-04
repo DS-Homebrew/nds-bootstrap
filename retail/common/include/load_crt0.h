@@ -53,6 +53,7 @@ typedef struct loadCrt0 {
     u32 forceSleepPatch;
 	u32 volumeFix;
     u32 preciseVolumeControl;
+    u32 macroMode;
     u32 logging;
 } __attribute__ ((__packed__)) loadCrt0;
 

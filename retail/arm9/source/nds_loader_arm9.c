@@ -304,6 +304,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	lc0->forceSleepPatch             = conf->forceSleepPatch;
 	lc0->volumeFix                   = conf->volumeFix;
 	lc0->preciseVolumeControl        = conf->preciseVolumeControl;
+	lc0->macroMode                   = conf->macroMode;
 	lc0->logging                     = conf->logging;
 
 	free(conf);

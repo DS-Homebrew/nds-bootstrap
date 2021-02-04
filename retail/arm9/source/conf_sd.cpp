@@ -130,8 +130,8 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Logging
 	conf->logging = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0);
 
-	// Backlight mode
-	conf->backlightMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "BACKLIGHT_MODE").c_str(), NULL, 0);
+	// Macro mode
+	conf->macroMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "MACRO_MODE").c_str(), NULL, 0);
 
 	// Boost CPU
 	// If DSi mode, then always boost CPU
@@ -327,7 +327,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
 
-	FILE* bootstrapImages = fopen(wideCheatFound ? "nitro:/bootloader_wideImages.lz77" : "nitro:/bootloader_images.lz77", "rb");
+	FILE* bootstrapImages = fopen(wideCheatFound&&!conf->macroMode ? "nitro:/bootloader_wideImages.lz77" : "nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
 		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);

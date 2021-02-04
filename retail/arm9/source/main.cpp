@@ -181,7 +181,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("gameOnFlashcard: %s\n", btoa(conf->gameOnFlashcard));
 	dbg_printf("saveOnFlashcard: %s\n", btoa(conf->saveOnFlashcard));
-	dbg_printf("backlightMode: %lX\n", conf->backlightMode);
+	dbg_printf("macroMode: %s\n", btoa(conf->macroMode));
 }
 
 static int runNdsFile(configuration* conf) {
@@ -355,7 +355,7 @@ static int runNdsFile(configuration* conf) {
 			dopause();
 		} else {
 			consoleDemoInit();
-			printf("No NDS file specified\n");
+			iprintf("No NDS file specified\n");
 		}
 		return -1;
 	}
@@ -365,20 +365,8 @@ static int runNdsFile(configuration* conf) {
 		dopause();
 	}
 
-	switch(conf->backlightMode) {
-		case 0:
-		default:
-			break;
-		case 1:
-			powerOff(PM_BACKLIGHT_BOTTOM);
-			break;
-		case 2:
-			powerOff(PM_BACKLIGHT_TOP);
-			break;
-		case 3:
-			powerOff(PM_BACKLIGHT_TOP);
-			powerOff(PM_BACKLIGHT_BOTTOM);
-			break;
+	if (conf->macroMode) {
+		powerOff(PM_BACKLIGHT_TOP);
 	}
 
 	struct stat st;
@@ -484,7 +472,7 @@ int main(int argc, char** argv) {
 		status = runNdsFile(conf);
 		if (status != 0) {
 			powerOff(PM_BACKLIGHT_TOP);
-			debug ? dbg_printf("Start failed. Error %i\n", status) : printf("Start failed. Error %i\n", status);
+			debug ? dbg_printf("Start failed. Error %i\n", status) : iprintf("Start failed. Error %i\n", status);
 		}
 	}
 

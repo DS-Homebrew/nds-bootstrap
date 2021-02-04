@@ -30,7 +30,7 @@ typedef struct configuration {
 	u32 donorSdkVer;
 	u32 patchMpuRegion;
 	u32 patchMpuSize;
-	bool ceCached;	// SDK 1-4
+	int ceCached;	// SDK 1-4
 	int cacheBlockSize;
 	int extendedMemory;
 	u32 consoleModel;
@@ -49,7 +49,7 @@ typedef struct configuration {
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
 	u32 donorOnFlashcard;
-	u32 backlightMode;
+	bool macroMode;
 } configuration;
 
 #endif // CONFIGURATION_H

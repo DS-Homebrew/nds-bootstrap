@@ -120,6 +120,7 @@ extern u32 dmaRomRead_LED;
 //extern u32 forceSleepPatch;
 extern u32 volumeFix;
 extern u32 preciseVolumeControl;
+extern u32 macroMode;
 extern u32 boostVram;
 extern u32 soundFreq;
 extern u32 logging;
@@ -923,6 +924,8 @@ int arm7_main(void) {
 	nocashMessage("Getting ARM7 to clear RAM...\n");
 	resetMemory_ARM7();
 
+	arm9_macroMode = macroMode;
+
 	// Init card
 	if (dsiSD) {
 		if (!FAT_InitFiles(true, 0)) {
@@ -1436,6 +1439,11 @@ int arm7_main(void) {
 		sdRead = dsiSD;
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
+	}
+
+	if (macroMode) {
+		u32 temp = readPowerManagement(PM_CONTROL_REG) & (~(PM_BACKLIGHT_TOP & 0xFFFF));
+		writePowerManagement(PM_CONTROL_REG, temp);
 	}
 
 	startBinary_ARM7();
