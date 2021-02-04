@@ -50,6 +50,8 @@
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 
+#define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+
 extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
@@ -785,7 +787,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP | KEY_X))) {
+	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
