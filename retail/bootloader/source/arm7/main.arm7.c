@@ -1170,6 +1170,10 @@ int arm7_main(void) {
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
 			REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+			if (macroMode) {
+				u32 temp = readPowerManagement(PM_CONTROL_REG) & (~(PM_BACKLIGHT_TOP & 0xFFFF));
+				writePowerManagement(PM_CONTROL_REG, temp);
+			}
 		}
 
 		// If possible, set to load ROM into RAM
@@ -1439,11 +1443,6 @@ int arm7_main(void) {
 		sdRead = dsiSD;
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
-	}
-
-	if (macroMode) {
-		u32 temp = readPowerManagement(PM_CONTROL_REG) & (~(PM_BACKLIGHT_TOP & 0xFFFF));
-		writePowerManagement(PM_CONTROL_REG, temp);
 	}
 
 	startBinary_ARM7();
