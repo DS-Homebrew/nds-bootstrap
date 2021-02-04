@@ -785,13 +785,11 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP))) {
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP | KEY_X))) {
 		if (tryLockMutex(&saveMutex)) {
-			if (swapTimer == 30){
-				int oldIME = enterCriticalSection();
+			if (swapTimer == 60){
 				swapTimer = 0;
 				IPC_SendSync(0x7);
-				leaveCriticalSection(oldIME);
 			}
 		}
 		unlockMutex(&saveMutex);
