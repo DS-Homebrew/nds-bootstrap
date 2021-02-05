@@ -16,6 +16,8 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
+intr_vblank_orig_return:
+	.word	0x00000000
 intr_ipc_orig_return:
 	.word	0x00000000
 fileCluster:
@@ -60,6 +62,7 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
+.word   0x0
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9

@@ -849,30 +849,7 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				/*REG_MASTER_VOLUME = 0;
-				int oldIME = enterCriticalSection();
-				if (consoleModel >= 2) {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-					} else {
-						// Use different SR backend ID
-						readSrBackendId();
-					}
-				} else {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						unlaunchSetFilename(true);
-					} else {
-						// Use different SR backend ID
-						readSrBackendId();
-					}
-					sharedAddr[4] = 0x57534352;
-					IPC_SendSync(0x8);
-					waitFrames(5);							// Wait for DSi screens to stabilize
-				}
-				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
-				leaveCriticalSection(oldIME);*/
-				inGameMenu();
+				(moduleParams->sdk_version < 0x2008000) ? returnToLoader() : inGameMenu();
 			}
 			unlockMutex(&saveMutex);
 		}

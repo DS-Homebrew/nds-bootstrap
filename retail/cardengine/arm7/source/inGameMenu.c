@@ -1,14 +1,9 @@
-#include <string.h>
 #include <nds/ndstypes.h>
-#include <nds/fifomessages.h>
 #include <nds/ipc.h>
 #include <nds/interrupts.h>
-#include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
-#include <nds/memory.h> // tNDSHeader
-#include <nds/debug.h>
 
 #include "locations.h"
 #include "cardengine.h"
@@ -16,12 +11,15 @@
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
+extern vu32* volatile sharedAddr;
+
 extern void forceGameReboot(void);
 extern void returnToLoader(void);
 
 static int cursorPosition = 0;
 
 void inGameMenu(void) {
+	sharedAddr[4] = 0x554E454D;	// 'MENU'
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
 	bool exit = false;
@@ -56,7 +54,10 @@ void inGameMenu(void) {
 		}
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-		if (exit) break;
+		if (exit) {
+			sharedAddr[4] = 0x54495845;	// 'EXIT'
+			break;
+		}
 	}
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

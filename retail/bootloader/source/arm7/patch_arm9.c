@@ -833,7 +833,7 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	if (ROMinRAM) {
 		*heapPointer += 0x1400; // shrink heap by 5KB
 	} else {
-		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x1800); // shrink heap by 6KB (or for SDK5, 12KB)
+		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2400); // shrink heap by 9KB (or for SDK5, 12KB)
 	}
 
     dbg_printf("new lo heap pointer: ");

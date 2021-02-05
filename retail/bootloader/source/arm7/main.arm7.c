@@ -1237,8 +1237,8 @@ int arm7_main(void) {
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4400);
-			if (!dldiPatchBinary((data_t*)ce9Location, 0x4400)) {
+			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x5000);
+			if (!dldiPatchBinary((data_t*)ce9Location, 0x5000)) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -1247,16 +1247,17 @@ int arm7_main(void) {
 				&& (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
 			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
 						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION1;
-			if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
+			/*if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
-			}
+			}*/
 			/*if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
 			} else {*/
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
+				u16 size = (ROMinRAM ? 0x1400 : 0x2400);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
 			//}
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
 		} else if (ceCached) {
 			if (ceCached == 2
 			|| strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
@@ -1267,12 +1268,13 @@ int arm7_main(void) {
 			} else {
 				ce9Location = (u32)patchLoHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			}
+			u16 size = (ROMinRAM ? 0x1400 : 0x2400);
 			if(ce9Location) {
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 			}
 		} else if (extendedMemoryConfirmed) {
 			ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
@@ -1280,7 +1282,8 @@ int arm7_main(void) {
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
+			u16 size = (ROMinRAM ? 0x1400 : 0x2400);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 		}
 
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);

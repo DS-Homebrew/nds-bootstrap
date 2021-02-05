@@ -344,8 +344,11 @@ static inline bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -1044,6 +1047,18 @@ u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {
 }
 
 //---------------------------------------------------------------------------------
+void myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+
+	if (sharedAddr[4] == 0x554E454D) {
+		inGameMenu();
+	}
+}
+
+//---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
@@ -1051,7 +1066,7 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
-	if (sharedAddr[4] == (vu32)0x025AAB08) {
+	if (sharedAddr[4] == 0x025AAB08) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
@@ -1064,7 +1079,7 @@ void myIrqHandlerIPC(void) {
 		lcdSwap();
 	}
 	
-	if ((sharedAddr[4] == (vu32)0x57534352) && (IPC_GetSync() == 0x8)){
+	if (sharedAddr[4] == 0x57534352){
 		enterCriticalSection();
 		// Make screens white
 		SetBrightness(0, 31);
