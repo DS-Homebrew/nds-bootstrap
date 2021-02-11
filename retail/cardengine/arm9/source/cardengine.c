@@ -1064,7 +1064,7 @@ void myIrqHandlerIPC(void) {
 		lcdSwap();
 	}
 	
-	if ((sharedAddr[4] == (vu32)0x57534352) && (IPC_GetSync() == 0x8)){
+	if (sharedAddr[4] == (vu32)0x57534352){
 		enterCriticalSection();
 		// Make screens white
 		SetBrightness(0, 31);
