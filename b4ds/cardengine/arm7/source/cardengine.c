@@ -33,6 +33,8 @@
 #include "cardengine.h"
 #include "nds_header.h"
 
+#define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+
 //static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 //static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
@@ -58,6 +60,7 @@ static bool volumeAdjustActivated = false;*/
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
+static int swapTimer = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -121,6 +124,16 @@ void myIrqHandlerVBlank(void) {
 		sharedAddr[3] = 0;
 	}
 
+	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+		if (swapTimer == 60){
+			swapTimer = 0;
+			IPC_SendSync(0x7);
+		}
+		swapTimer++;
+	}else{
+		swapTimer = 0;
+	}
+	
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 			if (consoleModel < 2) {
