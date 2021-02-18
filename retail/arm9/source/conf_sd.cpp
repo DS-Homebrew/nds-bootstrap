@@ -268,21 +268,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	cebin = fopen("nitro:/default_font.bin", "rb");
 	if (cebin) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
-		char text1[] = "Return to game";
-		char text2[] = "Reset game";
-		char text3[] = "Return to loader";
-		for (int i = 0; i < (int)sizeof(text1); i++) {
-			u8 text = text1[i];
-			tonccpy((u8*)INGAME_TEXT_LOCATION+(i*sizeof(u16)), &text, 1);
-		}
-		for (int i = 0; i < (int)sizeof(text2); i++) {
-			u8 text = text2[i];
-			tonccpy((u8*)INGAME_TEXT_LOCATION+32+(i*sizeof(u16)), &text, 1);
-		}
-		for (int i = 0; i < (int)sizeof(text3); i++) {
-			u8 text = text3[i];
-			tonccpy((u8*)INGAME_TEXT_LOCATION+64+(i*sizeof(u16)), &text, 1);
-		}
+		char16_t text1[] = u"Return to game";
+		char16_t text2[] = u"Reset game";
+		char16_t text3[] = u"Return to loader";
+		tonccpy((u16*)INGAME_TEXT_LOCATION, &text1, sizeof(text1));
+		tonccpy((u16*)INGAME_TEXT_LOCATION + 32, &text2, sizeof(text2));
+		tonccpy((u16*)INGAME_TEXT_LOCATION + 64, &text3, sizeof(text3));
 	}
 	fclose(cebin);
 

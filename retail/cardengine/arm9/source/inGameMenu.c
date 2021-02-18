@@ -34,11 +34,10 @@ void inGameMenu(void) {
 	BG_MAP_RAM(4)[0] = '>';
 	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX, 0x2000);	// Backup the original graphics
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
-	for (int i = 2; i < 18; i++) {
-		BG_MAP_RAM(4)[i] = (u16*)INGAME_TEXT_LOCATION+i; // Display text 1
-		BG_MAP_RAM(4)[32+i] = (u16*)INGAME_TEXT_LOCATION+32+i; // Display text 2
-		BG_MAP_RAM(4)[64+i] = (u16*)INGAME_TEXT_LOCATION+64+i; // Display text 3
-	}
+
+	tonccpy(BG_MAP_RAM(4)+2, (u16*)INGAME_TEXT_LOCATION, 16*sizeof(u16)); // Display text 1
+	tonccpy(BG_MAP_RAM(4)+32+2, (u16*)INGAME_TEXT_LOCATION + 32, 16*sizeof(u16)); // Display text 2
+	tonccpy(BG_MAP_RAM(4)+64+2, (u16*)INGAME_TEXT_LOCATION + 64, 16*sizeof(u16)); // Display text 3
 
 	u8 prevPosition = 0;
 	while (IPC_GetSync() != 0xA) {
