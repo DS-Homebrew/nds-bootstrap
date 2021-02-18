@@ -21,43 +21,37 @@ void inGameMenu(void) {
 	//u16 bg3cnt = REG_BG3CNT;
 
 	REG_DISPCNT = 0x10100;
-	REG_BG0CNT = 1 << 8;
+	REG_BG0CNT = 4 << 8;
 	//REG_BG1CNT = 0;
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
 
-	tonccpy((u16*)0x0277FE00, BG_PALETTE, 256*sizeof(u16));	// Backup the palette
+	tonccpy((u16*)0x026F8000, BG_MAP_RAM(4), 0x800);	// Backup BG_MAP_RAM
+	toncset(BG_MAP_RAM(4), 0, 0x800);	// Clear BG_MAP_RAM
+	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256*sizeof(u16));	// Backup the palette
 
 	*(u32*)BG_PALETTE = 0xFFFF0000; // First palette black, second white
-	BG_MAP_RAM(1)[0] = 1;
-	/*u8 smile[] = {
-		0x00,0x11,0x11,0x00,
-		0x10,0x11,0x11,0x01,
-		0x11,0x12,0x21,0x11,
-		0x11,0x11,0x11,0x11,
-		0x11,0x11,0x11,0x11,
-		0x21,0x11,0x11,0x12,
-		0x10,0x22,0x22,0x01,
-		0x00,0x11,0x11,0x00,
-	};*/
+	BG_MAP_RAM(4)[0] = '>';
 	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX, 0x2000);	// Backup the original graphics
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
-	//tonccpy(BG_GFX + (sizeof(smile) / 2), smile, sizeof(smile));
-	tonccpy(BG_MAP_RAM(1)+2, (u8*)INGAME_TEXT_LOCATION, 16); // Load text 1
-	tonccpy(BG_MAP_RAM(1)+32+2, (u8*)INGAME_TEXT_LOCATION+32, 16); // Load text 2
-	tonccpy(BG_MAP_RAM(1)+64+2, (u8*)INGAME_TEXT_LOCATION+64, 16); // Load text 3
+	for (int i = 2; i < 18; i++) {
+		BG_MAP_RAM(4)[i] = (u16)(u8*)INGAME_TEXT_LOCATION+i; // Display text 1
+		BG_MAP_RAM(4)[32+i] = (u16)(u8*)INGAME_TEXT_LOCATION+32+i; // Display text 2
+		BG_MAP_RAM(4)[64+i] = (u16)(u8*)INGAME_TEXT_LOCATION+64+i; // Display text 3
+	}
 
 	u8 prevPosition = 0;
 	while (IPC_GetSync() != 0xA) {
 		int cursorPosition = 0x20 * IPC_GetSync();
 		if(prevPosition != cursorPosition) {
-			BG_MAP_RAM(1)[prevPosition] = 0;
-			BG_MAP_RAM(1)[cursorPosition] = 1;
+			BG_MAP_RAM(4)[prevPosition] = 0;
+			BG_MAP_RAM(4)[cursorPosition] = '>';
 			prevPosition = cursorPosition;
 		}
 	}
 
-	tonccpy(BG_PALETTE, (u16*)0x0277FE00, 256*sizeof(u16));	// Restore the palette
+	tonccpy(BG_MAP_RAM(4), (u16*)0x026F8000, 0x800);	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256*sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
 	REG_DISPCNT = dspcnt;
