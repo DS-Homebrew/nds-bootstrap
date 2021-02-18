@@ -26,8 +26,8 @@ void inGameMenu(void) {
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
 
-	tonccpy((u16*)0x026F8000, BG_MAP_RAM(4), 0x800);	// Backup BG_MAP_RAM
-	toncset(BG_MAP_RAM(4), 0, 0x800);	// Clear BG_MAP_RAM
+	tonccpy((u16*)0x026FFB00, BG_MAP_RAM(4), 0x300);	// Backup BG_MAP_RAM
+	toncset(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
 	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256*sizeof(u16));	// Backup the palette
 
 	*(u32*)BG_PALETTE = 0xFFFF0000; // First palette black, second white
@@ -39,17 +39,18 @@ void inGameMenu(void) {
 	tonccpy(BG_MAP_RAM(4)+32+2, (u16*)INGAME_TEXT_LOCATION + 32, 16*sizeof(u16)); // Display text 2
 	tonccpy(BG_MAP_RAM(4)+64+2, (u16*)INGAME_TEXT_LOCATION + 64, 16*sizeof(u16)); // Display text 3
 
-	u8 prevPosition = 0;
+	u8 prevPositionOnScreen = 0;
 	while (IPC_GetSync() != 0xA) {
-		int cursorPosition = 0x20 * IPC_GetSync();
-		if(prevPosition != cursorPosition) {
-			BG_MAP_RAM(4)[prevPosition] = 0;
-			BG_MAP_RAM(4)[cursorPosition] = '>';
-			prevPosition = cursorPosition;
+		int cursorPosition = IPC_GetSync();
+		int cursorPositionOnScreen = 0x20 * IPC_GetSync();
+		if(prevPositionOnScreen != cursorPositionOnScreen && cursorPosition >= 0 && cursorPosition < 4) {
+			BG_MAP_RAM(4)[prevPositionOnScreen] = 0;
+			BG_MAP_RAM(4)[cursorPositionOnScreen] = '>';
+			prevPositionOnScreen = cursorPositionOnScreen;
 		}
 	}
 
-	tonccpy(BG_MAP_RAM(4), (u16*)0x026F8000, 0x800);	// Restore BG_MAP_RAM
+	tonccpy(BG_MAP_RAM(4), (u16*)0x026FFB00, 0x300);	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256*sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
