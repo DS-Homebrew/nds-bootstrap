@@ -1054,7 +1054,7 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 
 	if (sharedAddr[4] == 0x554E454D) {
-		while (sharedAddr[4] != 0x54495845);
+		inGameMenu();
 	}
 }
 
