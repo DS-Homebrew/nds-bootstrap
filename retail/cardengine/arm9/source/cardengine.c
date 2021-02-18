@@ -1086,6 +1086,10 @@ void myIrqHandlerIPC(void) {
 		SetBrightness(1, 31);
 		while (1);
 	}
+
+	if (IPC_GetSync() == 0x9) {
+		inGameMenu();
+	}
 }
 
 void reset(u32 param) {

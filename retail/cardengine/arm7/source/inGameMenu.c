@@ -20,6 +20,7 @@ static int cursorPosition = 0;
 
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D;	// 'MENU'
+	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
 	bool exit = false;
@@ -54,8 +55,10 @@ void inGameMenu(void) {
 		}
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
+		IPC_SendSync(cursorPosition);
 		if (exit) {
 			sharedAddr[4] = 0x54495845;	// 'EXIT'
+			IPC_SendSync(0xA);
 			break;
 		}
 	}
