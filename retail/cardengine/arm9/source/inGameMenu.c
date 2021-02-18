@@ -26,8 +26,7 @@ void inGameMenu(void) {
 	REG_DISPCNT = 0x10100;
 	REG_BG0CNT = 1 << 8;
 
-	BG_PALETTE[0] = 0x0000;
-	BG_PALETTE[1] = 0xFFFF;
+	*(u32*)BG_PALETTE = 0xFFFF0000; // First palette black, second white
 	BG_MAP_RAM(1)[0] = 1;
 	u8 smile[] = {
 		0x00,0x11,0x11,0x00,
