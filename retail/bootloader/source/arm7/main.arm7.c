@@ -242,7 +242,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
-	toncset((u32*)0x02400000, 0, 0x3B9C00);	// clear part of EWRAM - except before ce7 and ce9 binaries
+	toncset((u32*)0x02400000, 0, 0x37C000);	// clear part of EWRAM - except before in-game menu font
+	toncset((u32*)0x02780000, 0, 0x39C00);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
@@ -981,20 +982,20 @@ int arm7_main(void) {
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x27C0000, fatTableFile, 0, 0x400, -1);
+		fileRead((char*)0x2770000, fatTableFile, 0, 0x400, -1);
 	}
-	u32 fatTableVersion = *(u32*)(0x27C0100);
-	bool fatTableEmpty = (*(u32*)(0x27C0200) == 0);
+	u32 fatTableVersion = *(u32*)(0x2770100);
+	bool fatTableEmpty = (*(u32*)(0x2770200) == 0);
 
-	if (*(u32*)(0x27C0040) != storedFileCluster
-	|| *(u32*)(0x27C0044) != romSize)
+	if (*(u32*)(0x2770040) != storedFileCluster
+	|| *(u32*)(0x2770044) != romSize)
 	{
 		fatTableEmpty = true;
 	}
 
 	if (!gameOnFlashcard) {
-		if (*(u32*)(0x27C0048) != saveFileCluster
-		|| *(u32*)(0x27C004C) != saveSize)
+		if (*(u32*)(0x2770048) != saveFileCluster
+		|| *(u32*)(0x277004C) != saveSize)
 		{
 			fatTableEmpty = true;
 		}
@@ -1010,7 +1011,7 @@ int arm7_main(void) {
 		}
 		buildFatTableCache(romFile, 0);
 	} else {
-		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x27C0000, sizeof(aFile));
+		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2770000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
@@ -1030,7 +1031,7 @@ int arm7_main(void) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 			} else {
-				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x27C0020, sizeof(aFile));
+				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x2770020, sizeof(aFile));
 			}
 		}
 	}
@@ -1038,26 +1039,26 @@ int arm7_main(void) {
 	if (gameOnFlashcard) sdRead = false;
 
 	if (fatTableEmpty) {
-		tonccpy((char*)0x27C0000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
+		tonccpy((char*)0x2770000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 		if (!gameOnFlashcard) {
-			tonccpy((char*)0x27C0020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)0x2770020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
-		*(u32*)(0x27C0040) = storedFileCluster;
-		*(u32*)(0x27C0044) = romSize;
+		*(u32*)(0x2770040) = storedFileCluster;
+		*(u32*)(0x2770044) = romSize;
 		if (!gameOnFlashcard) {
-			*(u32*)(0x27C0048) = saveFileCluster;
-			*(u32*)(0x27C004C) = saveSize;
+			*(u32*)(0x2770048) = saveFileCluster;
+			*(u32*)(0x277004C) = saveSize;
 		}
-		*(u32*)(0x27C0100) = currentFatTableVersion;
+		*(u32*)(0x2770100) = currentFatTableVersion;
 		if (cacheFatTable) {
-			fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
+			fileWrite((char*)0x2770000, fatTableFile, 0, 0x200, -1);
 			fileWrite((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 		}
 	} else {
 		fileRead((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 	}
 
-	toncset((u32*)0x027C0000, 0, 0x400);
+	toncset((u32*)0x02770000, 0, 0x400);
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);

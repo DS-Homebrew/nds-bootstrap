@@ -24,6 +24,8 @@
 
 #define IMAGES_LOCATION    0x02340000
 
+#define INGAME_FONT_LOCATION                         0x0277C000
+#define INGAME_TEXT_LOCATION                         0x0277E000
 #define BLOWFISH_LOCATION                            0x027B9C00
 //#define DSI_BLOWFISH_LOCATION                        0x027EA800
 #define ARM7_FIX_BUFFERED_LOCATION                   0x027BAE00

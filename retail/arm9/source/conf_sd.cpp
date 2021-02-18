@@ -264,6 +264,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+	// Load font and text for in-game menu
+	cebin = fopen("nitro:/default_font.bin", "rb");
+	if (cebin) {
+		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
+		const char* text = "Return to game";
+		tonccpy((u8*)INGAME_TEXT_LOCATION, text, 14);
+		text = "Reset game";
+		tonccpy((u8*)INGAME_TEXT_LOCATION+32, text, 10);
+		text = "Return to loader";
+		tonccpy((u8*)INGAME_TEXT_LOCATION+64, text, 16);
+	}
+	fclose(cebin);
+
 	// Load touch fix for SM64DS (U) v1.0
 	cebin = fopen("nitro:/arm7fix.bin", "rb");
 	if (cebin) {
