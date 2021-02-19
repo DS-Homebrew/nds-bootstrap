@@ -40,7 +40,7 @@ void drawMainMenu(void) {
 	toncset16(BG_MAP_RAM(4), 0, 0x300);
 
 	// Print labels
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 7; i++) {
 		print(2, i, (char*)INGAME_TEXT_LOCATION + i * 0x10, 0);
 	}
 
@@ -108,11 +108,9 @@ void inGameMenu(void) {
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
 
-	REG_POWERCNT &= ~POWER_SWAP_LCDS;
-
-	tonccpy((u16*)0x026FFB00, BG_MAP_RAM(4), 0x300 * 2);	// Backup BG_MAP_RAM
+	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	toncset16(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
-	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256*sizeof(u16));	// Backup the palette
+	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256 * sizeof(u16));	// Backup the palette
 
 	*(u32*)BG_PALETTE          = 0xFFFF0000; // First palette black, second white
 	*(u32*)(BG_PALETTE + 0x10) = 0xEB5A0000; // Black, light gray
@@ -147,7 +145,7 @@ void inGameMenu(void) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
-			if (cursorPosition < 5)
+			if (cursorPosition < 6)
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
 			switch(cursorPosition) {
@@ -157,11 +155,14 @@ void inGameMenu(void) {
 				case 1:
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
-				case 4:
+				case 2:
+					sharedAddr[4] = 0x444D4152; // RAMD
+					break;
+				case 5:
 					ramViewer();
 					drawMainMenu();
 					break;
-				case 5:
+				case 6:
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:

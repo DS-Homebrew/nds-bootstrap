@@ -14,6 +14,7 @@
 extern vu32* volatile sharedAddr;
 
 extern void forceGameReboot(void);
+extern void dumpRam(void);
 extern void returnToLoader(void);
 
 static int cursorPosition = 0;
@@ -41,6 +42,9 @@ void inGameMenu(void) {
 			break;
 		case 0x54495551: // QUIT
 			returnToLoader();
+			break;
+		case 0x444D4152: // RAMD
+			dumpRam();
 			break;
 	}
 

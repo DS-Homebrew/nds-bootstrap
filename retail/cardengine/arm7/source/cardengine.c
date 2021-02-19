@@ -378,6 +378,22 @@ void returnToLoader(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 }
 
+void dumpRam(void) {
+	driveInitialize();
+	sdRead = (valueBits & b_dsiSD);
+	sharedAddr[3] = 0x52414D44;
+	// Dump RAM
+	if (valueBits & dsiMode) {
+		// Dump full RAM
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);
+	} else {
+		// Dump RAM used in DS mode
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, -1);
+		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, -1);
+	}
+	sharedAddr[3] = 0;
+}
+
 static void log_arm9(void) {
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
@@ -811,11 +827,11 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	/*#ifdef DEBUG
+	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
-	#endif*/
+	#endif
 	
-	//cheat_engine_start();	// Currently disabled for the game to boot
+	cheat_engine_start();
 
 	calledViaIPC = false;
 
@@ -849,7 +865,7 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				(moduleParams->sdk_version < 0x2008000) ? returnToLoader() : inGameMenu();
+				(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
 			}
 			unlockMutex(&saveMutex);
 		}
@@ -863,11 +879,7 @@ void myIrqHandlerVBlank(void) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
-				driveInitialize();
-				sdRead = (valueBits & b_dsiSD);
-				sharedAddr[3] = 0x52414D44;
-				fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
-				sharedAddr[3] = 0;
+				dumpRam();
 				leaveCriticalSection(oldIME);
 				REG_MASTER_VOLUME = 127;
 			}

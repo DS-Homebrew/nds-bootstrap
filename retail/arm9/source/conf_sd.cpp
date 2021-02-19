@@ -270,10 +270,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
 		tonccpy((char*)INGAME_TEXT_LOCATION, "Return to Game", 15);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Options...", 10);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Cheats...", 10);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "RAM Viewer...", 14);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "Quit Game", 10);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 11);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 10);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...", 10);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "RAM Viewer...", 14);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x60, "Quit Game", 10);
 	}
 	fclose(cebin);
 

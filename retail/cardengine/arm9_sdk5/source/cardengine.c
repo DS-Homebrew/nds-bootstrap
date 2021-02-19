@@ -914,11 +914,9 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-#ifndef DLDI
-	if (sharedAddr[4] == 0x554E454D) {
+	/*if (sharedAddr[4] == 0x554E454D) {
 		inGameMenu();
-	}
-#endif
+	}*/
 }
 
 //---------------------------------------------------------------------------------
@@ -950,6 +948,10 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
+
+	/*if (IPC_GetSync() == 0x9) {
+		inGameMenu();
+	}*/
 }
 
 void reset(u32 param) {
