@@ -46,7 +46,7 @@ void drawMainMenu(void) {
 
 	// Print info
 	print(0x20 - 14, 0x18 - 3, "nds-bootstrap", 1);
-	print(0x20 - 8, 0x18 - 2, "nightly", 1); // TODO: Get version number / commit hash or so
+	// print(0x20 - 8, 0x18 - 2, "nightly", 1); // TODO: Get version number / commit hash or so
 }
 
 void ramViewer(void) {
@@ -107,6 +107,8 @@ void inGameMenu(void) {
 	//REG_BG1CNT = 0;
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
+
+	REG_POWERCNT &= ~POWER_SWAP_LCDS;
 
 	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	toncset16(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
