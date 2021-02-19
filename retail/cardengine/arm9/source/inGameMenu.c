@@ -249,8 +249,8 @@ void inGameMenu(void) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM(4), (u16*)0x026FFB00, 0x300 * 2);	// Restore BG_MAP_RAM
-	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256*sizeof(u16));	// Restore the palette
+	tonccpy(BG_MAP_RAM(4), (u16*)0x026FF800, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
 	REG_DISPCNT = dispcnt;
