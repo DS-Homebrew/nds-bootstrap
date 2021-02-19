@@ -2,6 +2,7 @@
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/input.h>
+#include <nds/system.h>
 #include <nds/arm9/video.h>
 #include <nds/arm9/background.h>
 
@@ -41,13 +42,39 @@ void ramViewer(void) {
 	vu32 *address = sharedAddr;
 
 	print(11, 0, "RAM Viewer", 0);
-	printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
-	for(int i = 0; i < 23; i++) {
-		printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 2);
-		printHex(5, i + 1, *(address + (i * 2)), 4, 1);
-		printHex(14, i + 1, *(address + (i * 2) + 1), 4, 1);
-		printN(23, i + 1, (char*)(address + (i * 2)), 8, 0);
+	while(1) {
+		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
+
+		for(int i = 0; i < 23; i++) {
+			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 2);
+			printHex(5, i + 1, *(address + (i * 2)), 4, 1);
+			printHex(14, i + 1, *(address + (i * 2) + 1), 4, 1);
+			printN(23, i + 1, (char*)(address + (i * 2)), 8, 0);
+		}
+
+		// Prevent key repeat
+		for(int i = 0; i < 10 && KEYS; i++) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
+
+		do {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)));
+
+		if (KEYS & KEY_UP) {
+			address -= 2;
+		} else if (KEYS & KEY_DOWN) {
+			address += 2;
+		} else if (KEYS & KEY_LEFT) {
+			address -= 2 * 23;
+		} else if (KEYS & KEY_RIGHT) {
+			address += 2 * 23;
+		} else if (KEYS & KEY_B) {
+			return;
+		}
 	}
 }
 
@@ -109,6 +136,12 @@ void inGameMenu(void) {
 					break;
 				case 3:
 					ramViewer();
+
+					// Redraw menu
+					toncset16(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
+					tonccpy(BG_MAP_RAM(4)+2, (u16*)INGAME_TEXT_LOCATION, 16*sizeof(u16)); // Display text 1
+					tonccpy(BG_MAP_RAM(4)+32+2, (u16*)INGAME_TEXT_LOCATION + 32, 16*sizeof(u16)); // Display text 2
+					tonccpy(BG_MAP_RAM(4)+64+2, (u16*)INGAME_TEXT_LOCATION + 64, 16*sizeof(u16)); // Display text 3
 					break;
 			}
 		} else if (KEYS & KEY_B) {
