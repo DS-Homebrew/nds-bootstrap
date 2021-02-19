@@ -26,8 +26,8 @@ void inGameMenu(void) {
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
 
-	tonccpy((u16*)0x026FFB00, BG_MAP_RAM(4), 0x300);	// Backup BG_MAP_RAM
-	toncset(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
+	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300*sizeof(u16));	// Backup BG_MAP_RAM
+	toncset(BG_MAP_RAM(4), 0, 0x300*sizeof(u16));	// Clear BG_MAP_RAM
 	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256*sizeof(u16));	// Backup the palette
 
 	*(u32*)BG_PALETTE = 0xFFFF0000; // First palette black, second white
@@ -50,7 +50,7 @@ void inGameMenu(void) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM(4), (u16*)0x026FFB00, 0x300);	// Restore BG_MAP_RAM
+	tonccpy(BG_MAP_RAM(4), (u16*)0x026FF800, 0x300*sizeof(u16));	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256*sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
