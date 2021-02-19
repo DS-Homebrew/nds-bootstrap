@@ -14,6 +14,7 @@
 extern vu32* volatile sharedAddr;
 
 extern void forceGameReboot(void);
+extern void dumpRam(void);
 extern void returnToLoader(void);
 
 static int cursorPosition = 0;
@@ -32,10 +33,11 @@ void inGameMenu(void) {
 			while (0 == (REG_KEYINPUT & KEY_UP));
 		} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
 			cursorPosition++;
-			if (cursorPosition > 2) cursorPosition = 2;
+			if (cursorPosition > 3) cursorPosition = 3;
 			while (0 == (REG_KEYINPUT & KEY_DOWN));
 		}
 		if (0 == (REG_KEYINPUT & KEY_A)) {
+			while (0 == (REG_KEYINPUT & KEY_A));
 			switch (cursorPosition) {
 				case 0:
 				default:
@@ -44,6 +46,10 @@ void inGameMenu(void) {
 					forceGameReboot();
 					break;
 				case 2:
+					cursorPosition = 0;
+					dumpRam();
+					break;
+				case 3:
 					returnToLoader();
 					break;
 			}
@@ -52,14 +58,16 @@ void inGameMenu(void) {
 		if (0 == (REG_KEYINPUT & KEY_B)) {
 			cursorPosition = 0;
 			exit = true;
+			while (0 == (REG_KEYINPUT & KEY_B));
 		}
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-		IPC_SendSync(cursorPosition);
 		if (exit) {
 			sharedAddr[4] = 0x54495845;	// 'EXIT'
 			IPC_SendSync(0xA);
 			break;
+		} else {
+			IPC_SendSync(cursorPosition);
 		}
 	}
 	leaveCriticalSection(oldIME);

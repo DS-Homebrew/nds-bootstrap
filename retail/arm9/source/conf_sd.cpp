@@ -270,10 +270,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
 		char16_t text1[] = u"Return to game";
 		char16_t text2[] = u"Reset game";
-		char16_t text3[] = u"Return to loader";
+		char16_t text3[] = u"Dump RAM";
+		char16_t text4[] = u"Return to loader";
 		tonccpy((u16*)INGAME_TEXT_LOCATION, &text1, sizeof(text1));
 		tonccpy((u16*)INGAME_TEXT_LOCATION + 32, &text2, sizeof(text2));
 		tonccpy((u16*)INGAME_TEXT_LOCATION + 64, &text3, sizeof(text3));
+		tonccpy((u16*)INGAME_TEXT_LOCATION + 96, &text4, sizeof(text4));
 	}
 	fclose(cebin);
 

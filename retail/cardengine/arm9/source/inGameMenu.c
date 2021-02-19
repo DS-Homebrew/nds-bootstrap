@@ -38,6 +38,7 @@ void inGameMenu(void) {
 	tonccpy(BG_MAP_RAM(4)+2, (u16*)INGAME_TEXT_LOCATION, 16*sizeof(u16)); // Display text 1
 	tonccpy(BG_MAP_RAM(4)+32+2, (u16*)INGAME_TEXT_LOCATION + 32, 16*sizeof(u16)); // Display text 2
 	tonccpy(BG_MAP_RAM(4)+64+2, (u16*)INGAME_TEXT_LOCATION + 64, 16*sizeof(u16)); // Display text 3
+	tonccpy(BG_MAP_RAM(4)+96+2, (u16*)INGAME_TEXT_LOCATION + 96, 16*sizeof(u16)); // Display text 4
 
 	u8 prevPositionOnScreen = 0;
 	while (IPC_GetSync() != 0xA) {
