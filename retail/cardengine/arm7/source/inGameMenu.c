@@ -32,7 +32,7 @@ void inGameMenu(void) {
 			while (0 == (REG_KEYINPUT & KEY_UP));
 		} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
 			cursorPosition++;
-			if (cursorPosition > 2) cursorPosition = 2;
+			if (cursorPosition > 3) cursorPosition = 3;
 			while (0 == (REG_KEYINPUT & KEY_DOWN));
 		}
 		if (0 == (REG_KEYINPUT & KEY_A)) {
