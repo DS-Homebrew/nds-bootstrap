@@ -19,6 +19,7 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 #include "locations.h"
+#include "version.h"
 
 static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
 
@@ -288,6 +289,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x50, "133 MHz", 8);
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58, "    Off", 8);
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x60, "     On", 8);
+
+		tonccpy((char*)VERSION_NUMBER_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
 	}
 	fclose(cebin);
 

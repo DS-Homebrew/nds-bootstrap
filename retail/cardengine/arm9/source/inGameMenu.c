@@ -11,10 +11,9 @@
 #include "tonccpy.h"
 
 extern vu32* volatile sharedAddr;
+#define KEYS sharedAddr[5]
 
 extern s8 mainScreen;
-
-#define KEYS sharedAddr[5]
 
 void print(int x, int y, const char *str, int palette) {
 	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
@@ -56,7 +55,7 @@ void drawMainMenu(void) {
 
 	// Print info
 	print(0x20 - 14, 0x18 - 3, "nds-bootstrap", 1);
-	print(0x20 - 8, 0x18 - 2, "nightly", 1); // TODO: Get version number / commit hash or so
+	print(0x20 - strlen((char*)VERSION_NUMBER_LOCATION) - 1, 0x18 - 2, (char*)VERSION_NUMBER_LOCATION, 1);
 }
 
 void optionsMenu(void) {
