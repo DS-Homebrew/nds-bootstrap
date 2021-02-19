@@ -849,7 +849,7 @@ void myIrqHandlerVBlank(void) {
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (tryLockMutex(&saveMutex)) {
 			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				(moduleParams->sdk_version < 0x2008000) ? returnToLoader() : inGameMenu();
+				(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
 			}
 			unlockMutex(&saveMutex);
 		}
