@@ -827,11 +827,11 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	/*#ifdef DEBUG
+	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
-	#endif*/
+	#endif
 	
-	//cheat_engine_start();	// Currently disabled for the game to boot
+	cheat_engine_start();
 
 	calledViaIPC = false;
 
