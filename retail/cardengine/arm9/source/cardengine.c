@@ -98,6 +98,8 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
+s8 mainScreen = 0;
+
 void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -1076,7 +1078,9 @@ void myIrqHandlerIPC(void) {
 #endif
 
 	if (IPC_GetSync() == 0x7){
-		lcdSwap();
+		mainScreen++;
+		if(mainScreen > 2)
+			mainScreen = 0;
 	}
 	
 	if (sharedAddr[4] == 0x57534352){
@@ -1090,6 +1094,11 @@ void myIrqHandlerIPC(void) {
 	if (IPC_GetSync() == 0x9) {
 		inGameMenu();
 	}
+
+	if(mainScreen == 1)
+		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+	else if(mainScreen == 2)
+		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {

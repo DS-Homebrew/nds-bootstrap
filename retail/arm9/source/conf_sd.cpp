@@ -268,13 +268,26 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	cebin = fopen("nitro:/default_font.bin", "rb");
 	if (cebin) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
-		tonccpy((char*)INGAME_TEXT_LOCATION, "Return to Game", 15);
+
+		tonccpy((char*)INGAME_TEXT_LOCATION,        "Return to Game", 15);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 11);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 10);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 9);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 11);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...", 10);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "RAM Viewer...", 14);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x60, "Quit Game", 10);
+
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION,        "Main Screen", 12);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x10, "Clock Speed", 12);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x20, "VRAM Boost", 11);
+
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x30, "   Auto", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x38, " Bottom", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x40, "    Top", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x48, " 67 MHz", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x50, "133 MHz", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58, "    Off", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x60, "     On", 8);
 	}
 	fclose(cebin);
 
