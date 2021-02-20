@@ -270,6 +270,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
 
+		((u16*)INGAME_PALETTE_LOCATION)[0x01] = 0xFFFF; // White
+		((u16*)INGAME_PALETTE_LOCATION)[0x11] = 0xDEF7; // Light gray
+		((u16*)INGAME_PALETTE_LOCATION)[0x21] = 0xF355; // Light blue
+		((u16*)INGAME_PALETTE_LOCATION)[0x31] = 0x801B; // Red
+		((u16*)INGAME_PALETTE_LOCATION)[0x41] = 0x8360; // Lime
+
 		tonccpy((char*)INGAME_TEXT_LOCATION,        "Return to Game", 15);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 9);

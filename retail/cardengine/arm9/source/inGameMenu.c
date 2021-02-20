@@ -105,10 +105,9 @@ void optionsMenu(void) {
 			if(cursorPosition < 2)
 				cursorPosition++;
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
-			bool dir = KEYS & KEY_LEFT;
 			switch(cursorPosition) {
 				case 0:
-					mainScreen += dir ? -1 : 1;
+					(KEYS & KEY_LEFT) ? mainScreen-- : mainScreen++;
 					if(mainScreen > 2)
 						mainScreen = 0;
 					else if(mainScreen < 0)
@@ -137,7 +136,7 @@ void jumpToAddress(void) {
 		toncset16(BG_MAP_RAM(4) + 0x20 * 9 + 6, '-', 19);
 		print(8, 10, (char*)INGAME_TITLES_LOCATION + 0x40, 0);
 		printHex(11, 12, (u32)address, 4, 2);
-		BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] &= ~(0xF << 12);
+		BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
 		toncset16(BG_MAP_RAM(4) + 0x20 * 13 + 6, '-', 19);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
@@ -175,14 +174,16 @@ void ramViewer(void) {
 			printN(23, i + 1, (char*)(address + (i * 2)), 8, 0);
 		}
 
+		// Change color of selected byte
 		if(mode > 0) {
+			// Hex
 			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
-			BG_MAP_RAM(4)[loc] &= ~(0xF << 12);
-			BG_MAP_RAM(4)[loc + 1] &= ~(0xF << 12);
-			if(mode == 2) {
-				BG_MAP_RAM(4)[loc] |= 2 << 12;
-				BG_MAP_RAM(4)[loc + 1] |= 0x2 << 12;
-			}
+			BG_MAP_RAM(4)[loc] = (BG_MAP_RAM(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM(4)[loc + 1] = (BG_MAP_RAM(4)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
+
+			// Text
+			loc = 0x20 * (1 + (cursorPosition / 8)) + 23 + (cursorPosition % 8);
+			BG_MAP_RAM(4)[loc] = (BG_MAP_RAM(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
@@ -206,7 +207,7 @@ void ramViewer(void) {
 			}
 		} else if(mode == 1) {
 			if (KEYS & KEY_UP) {
-				if(cursorPosition > 8)
+				if(cursorPosition >= 8)
 					cursorPosition -= 8;
 				else
 					address -= 2;
@@ -268,16 +269,12 @@ void inGameMenu(void) {
 
 	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
-	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256 * sizeof(u16));	// Backup the palette
 
-	*(u32*)BG_PALETTE          = 0xFFFF0000; // First palette black, second white
-	*(u32*)(BG_PALETTE + 0x10) = 0xEB5A0000; // Black, light gray
-	*(u32*)(BG_PALETTE + 0x20) = 0xF3550000; // Black, light blue
+	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256 * sizeof(u16));	// Backup the palette
+	tonccpy(BG_PALETTE, (u16*)INGAME_PALETTE_LOCATION, 0x200);
 
 	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX, 0x2000);	// Backup the original graphics
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
-
-	drawMainMenu();
 
 	// Wait a frame so the key check is ready
 	while (REG_VCOUNT != 191);
@@ -285,6 +282,7 @@ void inGameMenu(void) {
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {
+		drawMainMenu();
 		drawCursor(cursorPosition);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
@@ -308,11 +306,9 @@ void inGameMenu(void) {
 					break;
 				case 3:
 					optionsMenu();
-					drawMainMenu();
 					break;
 				case 5:
 					ramViewer();
-					drawMainMenu();
 					break;
 				case 6:
 					sharedAddr[4] = 0x54495551; // QUIT
