@@ -15,6 +15,9 @@ extern vu32* volatile sharedAddr;
 
 extern s8 mainScreen;
 
+// For RAM viewer, global so it's persistant
+vu32 *address = 0;
+
 void print(int x, int y, const char *str, int palette) {
 	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
 	while(*str)
@@ -63,7 +66,7 @@ void optionsMenu(void) {
 	toncset16(BG_MAP_RAM(4), 0, 0x300);
 
 	// Print labels
-	for(int i = 0; i < 7; i++) {
+	for(int i = 0; i < 3; i++) {
 		print(2, i, (char*)INGAME_OPTIONS_TEXT_LOCATION + i * 0x10, 0);
 	}
 
@@ -76,7 +79,7 @@ void optionsMenu(void) {
 		// Clock speed
 		print(0x20 - 8, 1, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x48 + (8 * (REG_SCFG_CLK & 1)), 0);
 		// VRAM boost
-		print(0x20 - 8, 2, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58 + (8 * (REG_SCFG_EXT & BIT(13))), 0);
+		print(0x20 - 8, 2, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58 + (8 * ((REG_SCFG_EXT & BIT(13)) >> 13)), 0);
 
 		// Prevent key repeat
 		for(int i = 0; i < 10 && KEYS; i++) {
@@ -120,14 +123,49 @@ void optionsMenu(void) {
 	}
 }
 
+u32 *jumpToAddress(u32 *address) {
+	toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+
+	u8 cursorPosition = 0;
+	while(1) {
+		toncset16(BG_MAP_RAM(4) + 0x20 * 9 + 6, '-', 19);
+		print(8, 10, "Jump to Address", 0);
+		printHex(11, 12, (u32)address, 4, 2);
+		BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] &= ~(0xF << 12);
+		toncset16(BG_MAP_RAM(4) + 0x20 * 13 + 6, '-', 19);
+
+		// Prevent key repeat
+		for(int i = 0; i < 10 && KEYS; i++) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
+
+		do {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B)));
+
+		if(KEYS & KEY_UP) {
+			address += 4 << (cursorPosition * 4);
+		} else if(KEYS & KEY_DOWN) {
+			address -= 4 << (cursorPosition * 4);
+		} else if(KEYS & KEY_LEFT) {
+			if(cursorPosition < 6)
+				cursorPosition++;
+		} else if(KEYS & KEY_RIGHT) {
+			if(cursorPosition > 0)
+				cursorPosition--;
+		} else if(KEYS & (KEY_A | KEY_B)) {
+			return address;
+		}
+	}
+}
+
 void ramViewer(void) {
-	toncset16(BG_MAP_RAM(4), 0, 0x300);
-
-	vu32 *address = sharedAddr;
-
-	print(11, 0, "RAM Viewer", 0);
+	toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
 
 	while(1) {
+		print(11, 0, "RAM Viewer", 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
@@ -146,7 +184,7 @@ void ramViewer(void) {
 		do {
 			while (REG_VCOUNT != 191);
 			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)));
+		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B | KEY_Y)));
 
 		if (KEYS & KEY_UP) {
 			address -= 2;
@@ -158,6 +196,9 @@ void ramViewer(void) {
 			address += 2 * 23;
 		} else if (KEYS & KEY_B) {
 			return;
+		} else if(KEYS & KEY_Y) {
+			address = jumpToAddress(address);
+			toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
 		}
 	}
 }

@@ -17,8 +17,6 @@ extern void forceGameReboot(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 
-static int cursorPosition = 0;
-
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
