@@ -164,15 +164,28 @@ u32 *jumpToAddress(u32 *address) {
 void ramViewer(void) {
 	toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
 
+	u8 cursorPosition = 0, mode = 0;
 	while(1) {
 		print(11, 0, "RAM Viewer", 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
 			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 2);
-			printHex(5, i + 1, *(address + (i * 2)), 4, 1);
-			printHex(14, i + 1, *(address + (i * 2) + 1), 4, 1);
+			for(int j = 0; j < 4; j++)
+				printHex(5 + (j * 2), i + 1, *(((u8*)address) + (i * 8) + j), 1, 1);
+			for(int j = 0; j < 4; j++)
+				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1);
 			printN(23, i + 1, (char*)(address + (i * 2)), 8, 0);
+		}
+
+		if(mode > 0) {
+			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
+			BG_MAP_RAM(4)[loc] &= ~(0xF << 12);
+			BG_MAP_RAM(4)[loc + 1] &= ~(0xF << 12);
+			if(mode == 2) {
+				BG_MAP_RAM(4)[loc] |= 2 << 12;
+				BG_MAP_RAM(4)[loc + 1] |= 0x2 << 12;
+			}
 		}
 
 		// Prevent key repeat
@@ -184,21 +197,62 @@ void ramViewer(void) {
 		do {
 			while (REG_VCOUNT != 191);
 			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B | KEY_Y)));
+		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y)));
 
-		if (KEYS & KEY_UP) {
-			address -= 2;
-		} else if (KEYS & KEY_DOWN) {
-			address += 2;
-		} else if (KEYS & KEY_LEFT) {
-			address -= 2 * 23;
-		} else if (KEYS & KEY_RIGHT) {
-			address += 2 * 23;
-		} else if (KEYS & KEY_B) {
-			return;
-		} else if(KEYS & KEY_Y) {
-			address = jumpToAddress(address);
-			toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+		if(mode == 0) {
+			if (KEYS & KEY_UP) {
+				address -= 2;
+			} else if (KEYS & KEY_DOWN) {
+				address += 2;
+			} else if (KEYS & KEY_LEFT) {
+				address -= 2 * 23;
+			} else if (KEYS & KEY_RIGHT) {
+				address += 2 * 23;
+			} else if (KEYS & KEY_A) {
+				mode = 1;
+			} else if (KEYS & KEY_B) {
+				return;
+			} else if(KEYS & KEY_Y) {
+				address = jumpToAddress(address);
+				toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+			}
+		} else if(mode == 1) {
+			if (KEYS & KEY_UP) {
+				if(cursorPosition > 8)
+					cursorPosition -= 8;
+				else
+					address -= 2;
+			} else if (KEYS & KEY_DOWN) {
+				if(cursorPosition < 8 * 22)
+					cursorPosition += 8;
+				else
+					address += 2;
+			} else if (KEYS & KEY_LEFT) {
+				if(cursorPosition > 0)
+					cursorPosition--;
+			} else if (KEYS & KEY_RIGHT) {
+				if(cursorPosition < 8 * 23 - 1)
+					cursorPosition++;
+			} else if (KEYS & KEY_A) {
+				mode = 2;
+			} else if (KEYS & KEY_B) {
+				mode = 0;
+			} else if(KEYS & KEY_Y) {
+				address = jumpToAddress(address);
+				toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+			}
+		} else if(mode == 2) {
+			if (KEYS & KEY_UP) {
+				((u8 *)address)[cursorPosition]++;
+			} else if (KEYS & KEY_DOWN) {
+				((u8 *)address)[cursorPosition]--;
+			} else if (KEYS & KEY_LEFT) {
+				((u8 *)address)[cursorPosition] += 0x10;
+			} else if (KEYS & KEY_RIGHT) {
+				((u8 *)address)[cursorPosition] -= 0x10;
+			} else if (KEYS & (KEY_A | KEY_B)) {
+				mode = 1;
+			}
 		}
 	}
 }
