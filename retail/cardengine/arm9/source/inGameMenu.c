@@ -129,7 +129,7 @@ void optionsMenu(void) {
 	}
 }
 
-u32 *jumpToAddress(u32 *address) {
+void jumpToAddress(void) {
 	clearScreen();
 
 	u8 cursorPosition = 0;
@@ -153,7 +153,7 @@ u32 *jumpToAddress(u32 *address) {
 			if(cursorPosition > 0)
 				cursorPosition--;
 		} else if(KEYS & (KEY_A | KEY_B)) {
-			return address;
+			return;
 		}
 	}
 }
@@ -201,7 +201,7 @@ void ramViewer(void) {
 			} else if (KEYS & KEY_B) {
 				return;
 			} else if(KEYS & KEY_Y) {
-				address = jumpToAddress(address);
+				jumpToAddress();
 				clearScreen();
 			}
 		} else if(mode == 1) {
@@ -226,7 +226,7 @@ void ramViewer(void) {
 			} else if (KEYS & KEY_B) {
 				mode = 0;
 			} else if(KEYS & KEY_Y) {
-				address = jumpToAddress(address);
+				jumpToAddress();
 				clearScreen();
 			}
 		} else if(mode == 2) {
