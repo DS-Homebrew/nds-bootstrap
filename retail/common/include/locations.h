@@ -27,7 +27,7 @@
 #define INGAME_FONT_LOCATION                         0x026FC000
 #define INGAME_TEXT_LOCATION                         0x026FE000
 #define INGAME_OPTIONS_TEXT_LOCATION                 0x026FE100
-#define VERSION_NUMBER_LOCATION                      0x026FE200
+#define INGAME_TITLES_LOCATION                       0x026FE200
 
 #define BLOWFISH_LOCATION                            0x027B9C00
 //#define DSI_BLOWFISH_LOCATION                        0x027EA800

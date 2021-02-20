@@ -38,6 +38,23 @@ void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	}
 }
 
+void waitKeys(u16 keys) {
+	// Prevent key repeat for 10 frames
+	for(int i = 0; i < 10 && KEYS; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+
+	do {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	} while(!(KEYS & keys));
+}
+
+void clearScreen(void) {
+
+}
+
 void drawCursor(u8 line) {
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
@@ -48,8 +65,7 @@ void drawCursor(u8 line) {
 }
 
 void drawMainMenu(void) {
-	// Clear screen
-	toncset16(BG_MAP_RAM(4), 0, 0x300);
+	clearScreen();
 
 	// Print labels
 	for(int i = 0; i < 7; i++) {
@@ -57,13 +73,12 @@ void drawMainMenu(void) {
 	}
 
 	// Print info
-	print(0x20 - 14, 0x18 - 3, "nds-bootstrap", 1);
-	print(0x20 - strlen((char*)VERSION_NUMBER_LOCATION) - 1, 0x18 - 2, (char*)VERSION_NUMBER_LOCATION, 1);
+	print(0x20 - 14, 0x18 - 3, (char*)INGAME_TITLES_LOCATION + 0x20, 1);
+	print(0x20 - strlen((char*)INGAME_TITLES_LOCATION) - 1, 0x18 - 2, (char*)INGAME_TITLES_LOCATION, 1);
 }
 
 void optionsMenu(void) {
-	// Clear screen
-	toncset16(BG_MAP_RAM(4), 0, 0x300);
+	clearScreen();
 
 	// Print labels
 	for(int i = 0; i < 3; i++) {
@@ -81,16 +96,7 @@ void optionsMenu(void) {
 		// VRAM boost
 		print(0x20 - 8, 2, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58 + (8 * ((REG_SCFG_EXT & BIT(13)) >> 13)), 0);
 
-		// Prevent key repeat
-		for(int i = 0; i < 10 && KEYS; i++) {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		}
-
-		do {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)));
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
 		if (KEYS & KEY_UP) {
 			if(cursorPosition > 0)
@@ -124,26 +130,17 @@ void optionsMenu(void) {
 }
 
 u32 *jumpToAddress(u32 *address) {
-	toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+	clearScreen();
 
 	u8 cursorPosition = 0;
 	while(1) {
 		toncset16(BG_MAP_RAM(4) + 0x20 * 9 + 6, '-', 19);
-		print(8, 10, "Jump to Address", 0);
+		print(8, 10, (char*)INGAME_TITLES_LOCATION + 0x40, 0);
 		printHex(11, 12, (u32)address, 4, 2);
 		BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] &= ~(0xF << 12);
 		toncset16(BG_MAP_RAM(4) + 0x20 * 13 + 6, '-', 19);
 
-		// Prevent key repeat
-		for(int i = 0; i < 10 && KEYS; i++) {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		}
-
-		do {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B)));
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
 		if(KEYS & KEY_UP) {
 			address += 4 << (cursorPosition * 4);
@@ -162,11 +159,11 @@ u32 *jumpToAddress(u32 *address) {
 }
 
 void ramViewer(void) {
-	toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+	clearScreen();
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		print(11, 0, "RAM Viewer", 0);
+		print(11, 0, (char*)INGAME_TITLES_LOCATION + 0x30, 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
@@ -188,16 +185,7 @@ void ramViewer(void) {
 			}
 		}
 
-		// Prevent key repeat
-		for(int i = 0; i < 10 && KEYS; i++) {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		}
-
-		do {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y)));
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
 
 		if(mode == 0) {
 			if (KEYS & KEY_UP) {
@@ -214,7 +202,7 @@ void ramViewer(void) {
 				return;
 			} else if(KEYS & KEY_Y) {
 				address = jumpToAddress(address);
-				toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+				clearScreen();
 			}
 		} else if(mode == 1) {
 			if (KEYS & KEY_UP) {
@@ -239,7 +227,7 @@ void ramViewer(void) {
 				mode = 0;
 			} else if(KEYS & KEY_Y) {
 				address = jumpToAddress(address);
-				toncset16(BG_MAP_RAM(4), 0, 0x300); // Clear screen
+				clearScreen();
 			}
 		} else if(mode == 2) {
 			if (KEYS & KEY_UP) {
@@ -279,7 +267,7 @@ void inGameMenu(void) {
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
 
 	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
-	toncset16(BG_MAP_RAM(4), 0, 0x300);	// Clear BG_MAP_RAM
+	clearScreen();
 	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256 * sizeof(u16));	// Backup the palette
 
 	*(u32*)BG_PALETTE          = 0xFFFF0000; // First palette black, second white
@@ -299,13 +287,7 @@ void inGameMenu(void) {
 	while (sharedAddr[4] == 0x554E454D) {
 		drawCursor(cursorPosition);
 
-		// Prevent key repeat
-		while(KEYS & (KEY_UP | KEY_DOWN | KEY_A | KEY_B));
-
-		do {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		} while(!(KEYS & (KEY_UP | KEY_DOWN | KEY_A | KEY_B)));
+		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
 
 		if (KEYS & KEY_UP) {
 			if (cursorPosition > 0)

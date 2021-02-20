@@ -970,9 +970,9 @@ void myIrqHandlerVBlank(void) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
-	if ((strncmp(romTid, "UOR", 3) == 0 && !(valueBits & saveOnFlashcard))
-	|| (strncmp(romTid, "UXB", 3) == 0 && !(valueBits & saveOnFlashcard))
+	u32 romTid = *(u32*)getRomTid(ndsHeader) & 0x00FFFFFF;
+	if ((romTid == 0x00524F55 /*"UOR"*/ && !(valueBits & saveOnFlashcard))
+	|| (romTid == 0x00425855 /*"UXB"*/ && !(valueBits & saveOnFlashcard))
 	|| (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard))) {
 		runCardEngineCheck();
 	}

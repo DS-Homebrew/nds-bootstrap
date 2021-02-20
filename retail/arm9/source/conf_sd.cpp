@@ -290,7 +290,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58, "    Off", 8);
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x60, "     On", 8);
 
-		tonccpy((char*)VERSION_NUMBER_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
+		tonccpy((char*)INGAME_TITLES_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x20, "nds-bootstrap", 14);
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x30, "RAM Viewer", 11);
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x40, "Jump to Address", 16);
+
 	}
 	fclose(cebin);
 
