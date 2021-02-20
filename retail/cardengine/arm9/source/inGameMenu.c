@@ -52,7 +52,7 @@ void waitKeys(u16 keys) {
 }
 
 void clearScreen(void) {
-
+	toncset16(BG_MAP_RAM(4), 0, 0x300);
 }
 
 void drawCursor(u8 line) {

@@ -103,16 +103,16 @@ s8 mainScreen = 0;
 void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
+	u8 mode = 1;
 
 	if (bright < 0) {
-		mode = 2 << 14;
+		mode = 2;
 		bright = -bright;
 	}
 	if (bright > 31) {
 		bright = 31;
 	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
 
 // Alternative to swiWaitForVBlank()
