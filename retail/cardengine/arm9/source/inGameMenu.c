@@ -303,6 +303,7 @@ void inGameMenu(void) {
 					break;
 				case 2:
 					sharedAddr[4] = 0x444D4152; // RAMD
+					while (sharedAddr[4] == 0x444D4152);
 					break;
 				case 3:
 					optionsMenu();

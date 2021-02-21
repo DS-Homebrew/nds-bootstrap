@@ -46,6 +46,8 @@ void inGameMenu(void) {
 			break;
 	}
 
+	sharedAddr[4] = 0x54495845; // EXIT
+
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;
 }

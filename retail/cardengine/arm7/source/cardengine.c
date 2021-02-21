@@ -380,7 +380,7 @@ void returnToLoader(void) {
 void dumpRam(void) {
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	sharedAddr[3] = 0x52414D44;
+	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
 	if (valueBits & dsiMode) {
 		// Dump full RAM

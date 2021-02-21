@@ -559,7 +559,7 @@ void cardSetDma(void) {
     u32 dma = cardStruct[3]; // dma channel     
 
 	#ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
@@ -659,7 +659,7 @@ void cardSetDma(void) {
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page) {
 #ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
@@ -1055,7 +1055,7 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 
 	if (sharedAddr[4] == 0x554E454D) {
-		inGameMenu();
+		while (sharedAddr[4] != 0x54495845);
 	}
 }
 
