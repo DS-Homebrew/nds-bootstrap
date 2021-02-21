@@ -296,7 +296,10 @@ void inGameMenu(void) {
 		} else if (KEYS & KEY_A) {
 			switch(cursorPosition) {
 				case 0:
-					waitKeys(KEY_A);
+					do {
+						while (REG_VCOUNT != 191);
+						while (REG_VCOUNT == 191);
+					} while(KEYS & KEY_A);
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
 				case 1:
@@ -319,7 +322,10 @@ void inGameMenu(void) {
 					break;
 			}
 		} else if (KEYS & KEY_B) {
-			waitKeys(KEY_B);
+			do {
+				while (REG_VCOUNT != 191);
+				while (REG_VCOUNT == 191);
+			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
 		}
 	}
