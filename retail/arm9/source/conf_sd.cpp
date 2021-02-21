@@ -19,6 +19,7 @@
 #include "conf_sd.h"
 #include "nitrofs.h"
 #include "locations.h"
+#include "version.h"
 
 static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
 
@@ -268,14 +269,38 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	cebin = fopen("nitro:/default_font.bin", "rb");
 	if (cebin) {
 		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
-		char16_t text1[] = u"Return to game";
-		char16_t text2[] = u"Reset game";
-		char16_t text3[] = u"Dump RAM";
-		char16_t text4[] = u"Return to loader";
-		tonccpy((u16*)INGAME_TEXT_LOCATION, &text1, sizeof(text1));
-		tonccpy((u16*)INGAME_TEXT_LOCATION + 32, &text2, sizeof(text2));
-		tonccpy((u16*)INGAME_TEXT_LOCATION + 64, &text3, sizeof(text3));
-		tonccpy((u16*)INGAME_TEXT_LOCATION + 96, &text4, sizeof(text4));
+
+		((u16*)INGAME_PALETTE_LOCATION)[0x01] = 0xFFFF; // White
+		((u16*)INGAME_PALETTE_LOCATION)[0x11] = 0xDEF7; // Light gray
+		((u16*)INGAME_PALETTE_LOCATION)[0x21] = 0xF355; // Light blue
+		((u16*)INGAME_PALETTE_LOCATION)[0x31] = 0x801B; // Red
+		((u16*)INGAME_PALETTE_LOCATION)[0x41] = 0x8360; // Lime
+
+		tonccpy((char*)INGAME_TEXT_LOCATION,        "Return to Game", 15);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 9);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 11);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...", 10);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "RAM Viewer...", 14);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x60, "Quit Game", 10);
+
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION,        "Main Screen", 12);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x10, "Clock Speed", 12);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x20, "VRAM Boost", 11);
+
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x30, "   Auto", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x38, " Bottom", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x40, "    Top", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x48, " 67 MHz", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x50, "133 MHz", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58, "    Off", 8);
+		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x60, "     On", 8);
+
+		tonccpy((char*)INGAME_TITLES_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x20, "nds-bootstrap", 14);
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x30, "RAM Viewer", 11);
+		tonccpy((char*)INGAME_TITLES_LOCATION + 0x40, "Jump to Address", 16);
+
 	}
 	fclose(cebin);
 

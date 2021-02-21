@@ -17,59 +17,35 @@ extern void forceGameReboot(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 
-static int cursorPosition = 0;
-
 void inGameMenu(void) {
-	sharedAddr[4] = 0x554E454D;	// 'MENU'
+	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
-	bool exit = false;
-	while (0 == (REG_KEYINPUT & KEY_DOWN) || 0 == (REG_KEYINPUT & KEY_B));	// Prevent going straight to the next option
-	while (1) {
-		if (0 == (REG_KEYINPUT & KEY_UP)) {
-			cursorPosition--;
-			if (cursorPosition < 0) cursorPosition = 0;
-			while (0 == (REG_KEYINPUT & KEY_UP));
-		} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
-			cursorPosition++;
-			if (cursorPosition > 3) cursorPosition = 3;
-			while (0 == (REG_KEYINPUT & KEY_DOWN));
-		}
-		if (0 == (REG_KEYINPUT & KEY_A)) {
-			while (0 == (REG_KEYINPUT & KEY_A));
-			switch (cursorPosition) {
-				case 0:
-				default:
-					break;
-				case 1:
-					forceGameReboot();
-					break;
-				case 2:
-					cursorPosition = 0;
-					dumpRam();
-					break;
-				case 3:
-					returnToLoader();
-					break;
-			}
-			exit = true;
-		}
-		if (0 == (REG_KEYINPUT & KEY_B)) {
-			cursorPosition = 0;
-			exit = true;
-			while (0 == (REG_KEYINPUT & KEY_B));
-		}
+
+	while (sharedAddr[4] == 0x554E454D) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-		if (exit) {
-			sharedAddr[4] = 0x54495845;	// 'EXIT'
-			IPC_SendSync(0xA);
-			break;
-		} else {
-			IPC_SendSync(cursorPosition);
-		}
+
+		sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
+		sharedAddr[5] |= (~REG_EXTKEYINPUT & 0x3) << 10;
 	}
+
+	switch (sharedAddr[4]) {
+		case 0x54495845: // EXIT
+		default:
+			break;
+		case 0x54455352: // RSET
+			forceGameReboot();
+			break;
+		case 0x54495551: // QUIT
+			returnToLoader();
+			break;
+		case 0x444D4152: // RAMD
+			dumpRam();
+			break;
+	}
+
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;
 }

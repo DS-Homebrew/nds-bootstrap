@@ -98,19 +98,21 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
+s8 mainScreen = 0;
+
 void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
+	u8 mode = 1;
 
 	if (bright < 0) {
-		mode = 2 << 14;
+		mode = 2;
 		bright = -bright;
 	}
 	if (bright > 31) {
 		bright = 31;
 	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
 
 // Alternative to swiWaitForVBlank()
@@ -781,7 +783,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	//}
 #endif
 
-	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
+	if(*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x004A4C43) { // "CLJ"
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
 
@@ -917,8 +919,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//return -1;
 		}
 		#endif
-		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) != 0) {
+		if (*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x00524255) { // "UBR"
 			debug8mbMpuFix();
 		}
 
@@ -1076,7 +1077,9 @@ void myIrqHandlerIPC(void) {
 #endif
 
 	if (IPC_GetSync() == 0x7){
-		lcdSwap();
+		mainScreen++;
+		if(mainScreen > 2)
+			mainScreen = 0;
 	}
 	
 	if (sharedAddr[4] == 0x57534352){
@@ -1090,6 +1093,11 @@ void myIrqHandlerIPC(void) {
 	if (IPC_GetSync() == 0x9) {
 		inGameMenu();
 	}
+
+	if(mainScreen == 1)
+		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+	else if(mainScreen == 2)
+		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {
