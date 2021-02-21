@@ -107,7 +107,6 @@ static aFile srParamsFile;
 static int saveTimer = 0;
 
 static int swapTimer = 0;
-static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -862,16 +861,8 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
-		if (tryLockMutex(&saveMutex)) {
-			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
-			}
-			unlockMutex(&saveMutex);
-		}
-		returnTimer++;
-	} else {
-		returnTimer = 0;
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_DOWN | KEY_SELECT))) {
+		(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
 	}
 
 	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
