@@ -16,7 +16,7 @@ extern vu32* volatile sharedAddr;
 extern s8 mainScreen;
 
 // For RAM viewer, global so it's persistant
-vu32 *address = 0;
+vu32 *address = (vu32*)0x02000000;
 
 void print(int x, int y, const char *str, int palette) {
 	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
