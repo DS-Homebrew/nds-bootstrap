@@ -263,6 +263,9 @@ void inGameMenu(void) {
 	//REG_BG2CNT = 0;
 	//REG_BG3CNT = 0;
 
+	REG_BG0VOFS = 0;
+	REG_BG0HOFS = 0;
+
 	// If main screen is on auto, then force the bottom
 	if(mainScreen == 0)
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
