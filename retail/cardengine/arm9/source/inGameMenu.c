@@ -14,6 +14,7 @@ extern vu32* volatile sharedAddr;
 #define KEYS sharedAddr[5]
 
 extern s8 mainScreen;
+extern void SetBrightness(u8 screen, s8 bright);
 
 // For RAM viewer, global so it's persistant
 vu32 *address = (vu32*)0x02000000;
@@ -257,6 +258,8 @@ void inGameMenu(void) {
 
 	u16 powercnt = REG_POWERCNT;
 
+	u16 masterBright = *(u16*)0x0400006C;
+
 	REG_DISPCNT = 0x10100;
 	REG_BG0CNT = 4 << 8;
 	//REG_BG1CNT = 0;
@@ -269,6 +272,8 @@ void inGameMenu(void) {
 	// If main screen is on auto, then force the bottom
 	if(mainScreen == 0)
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+
+	SetBrightness(0, 0);
 
 	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
@@ -336,6 +341,8 @@ void inGameMenu(void) {
 	tonccpy(BG_MAP_RAM(4), (u16*)0x026FF800, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
+
+	*(u16*)0x0400006C = masterBright;
 
 	REG_DISPCNT = dispcnt;
 	REG_BG0CNT = bg0cnt;
