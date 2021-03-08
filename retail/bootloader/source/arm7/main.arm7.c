@@ -1238,23 +1238,22 @@ int arm7_main(void) {
 				errorOutput();
 			}
 			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-		} else if (((u32)ndsHeader->arm9destination == 0x02004000) && (strncmp(ndsHeader->makercode, "4Q", 2) != 0) && ROMinRAM) {
+		} else if (((u32)ndsHeader->arm9destination == 0x02004000) && (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			/*if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
 			}*/
-			/*if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
-			} else {*/
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
-			//}
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1C00);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
+			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
+			if (ROMinRAM) {
+				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
+			}
 		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed && !extendedMemoryConfirmed) {
 			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
-			u16 size = (ROMinRAM ? 0x1C00 : 0x3000);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
 			if(ce9Location) {
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION), size);
 				if (ROMinRAM) {
 					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
 				}
@@ -1268,7 +1267,7 @@ int arm7_main(void) {
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1C00);
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			u16 size = (ROMinRAM ? 0x1C00 : 0x3000);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
 			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 		}
 

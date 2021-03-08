@@ -33,7 +33,7 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -Os\
+CFLAGS	:=	-g -Wall -O2\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
@@ -65,7 +65,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardengine_arm9_reloc
+export TARGET	:=	cardengine_arm9_cached
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)

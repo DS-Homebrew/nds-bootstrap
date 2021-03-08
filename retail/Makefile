@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm7_alt cardengine_arm7_sdk5 cardengine_arm9 cardengine_arm9_reloc cardengine_arm9_dldi cardengine_arm9_sdk5 cardengine_arm9_sdk5_dldi cardengine_arm9_romInRam
+bootloader: $(DATA) cardengine_arm7 cardengine_arm7_alt cardengine_arm7_sdk5 cardengine_arm9_igm cardengine_arm9 cardengine_arm9_cached cardengine_arm9_reloc cardengine_arm9_dldi cardengine_arm9_sdk5 cardengine_arm9_sdk5_dldi cardengine_arm9_romInRam
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -178,8 +178,16 @@ cardengine_arm7_sdk5: $(DATA)
 	@$(MAKE) -C cardengine/arm7_sdk5
 
 #---------------------------------------------------------------------------------		
+cardengine_arm9_igm: $(DATA)
+	@$(MAKE) -C cardengine/arm9_igm
+
+#---------------------------------------------------------------------------------		
 cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_cached: $(DATA)
+	@$(MAKE) -C cardengine/arm9_cached
 
 #---------------------------------------------------------------------------------		
 cardengine_arm9_reloc: $(DATA)
@@ -215,7 +223,9 @@ clean:
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm7_alt clean
 	@$(MAKE) -C cardengine/arm7_sdk5 clean
+	@$(MAKE) -C cardengine/arm9_igm clean
 	@$(MAKE) -C cardengine/arm9 clean
+	@$(MAKE) -C cardengine/arm9_cached clean
 	@$(MAKE) -C cardengine/arm9_reloc clean
 	@$(MAKE) -C cardengine/arm9_dldi clean
 	@$(MAKE) -C cardengine/arm9_sdk5 clean
