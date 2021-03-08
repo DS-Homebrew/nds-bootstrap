@@ -1271,7 +1271,7 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 		}
 
-		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);
+		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x45000);
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(

@@ -265,6 +265,7 @@ bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 	u32 *p = (u32*)dsiHeader->ndshdr.arm9destination;
 
 	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
+		toncset(encr_data, 0, 0x1048);
 		return false;
 	}
 
@@ -291,6 +292,7 @@ bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 		size -= 8;
 	}
 
+	toncset(encr_data, 0, 0x1048);
 	return true;
 }
 
