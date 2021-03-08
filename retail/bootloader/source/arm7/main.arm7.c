@@ -236,7 +236,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
-	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu font
+	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu data
 	toncset((u32*)0x02700000, 0, 0xB9C00);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
@@ -1250,7 +1250,6 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1400);
 			//}
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
-		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed) {
 		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed && !extendedMemoryConfirmed) {
 			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
 			u16 size = (ROMinRAM ? 0x1400 : 0x3000);
