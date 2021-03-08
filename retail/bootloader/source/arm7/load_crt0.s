@@ -58,7 +58,6 @@
 	.global patchMpuRegion
 	.global patchMpuSize
 	.global ceCached
-	.global cacheBlockSize
 	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
@@ -149,8 +148,6 @@ patchMpuRegion:
 patchMpuSize:
 	.word	0x00000000
 ceCached:
-	.word	0x00000000
-cacheBlockSize:
 	.word	0x00000000
 extendedMemory:
 	.word	0x00000000

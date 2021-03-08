@@ -295,7 +295,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	lc0->patchMpuRegion              = conf->patchMpuRegion;
 	lc0->patchMpuSize                = conf->patchMpuSize;
 	lc0->ceCached                    = conf->ceCached; // SDK 1-4
-	lc0->cacheBlockSize              = conf->cacheBlockSize;
 	lc0->extendedMemory              = conf->extendedMemory;
 	lc0->consoleModel                = conf->consoleModel;
 	lc0->romRead_LED                 = conf->romRead_LED;

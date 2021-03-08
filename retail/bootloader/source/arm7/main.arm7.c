@@ -112,7 +112,6 @@ extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
 extern u32 ceCached;
-extern u32 cacheBlockSize;
 extern u32 extendedMemory;
 extern u32 consoleModel;
 extern u32 romRead_LED;
@@ -138,11 +137,6 @@ static u32 ce9Location = CARDENGINE_ARM9_LOCATION;
 u32 overlaysSize = 0;
 
 static u32 softResetParams = 0;
-
-static u32 generatedCacheBlockSize(void) {
-	if (cacheBlockSize == 1) return 0x8000;
-	return 0x4000;
-}
 
 u32 newArm7binarySize = 0;
 
@@ -1336,7 +1330,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			generatedCacheBlockSize(),
+			0x8000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

@@ -104,9 +104,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Card engine (arm9) cached
 	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
 
-	// Cache block size
-	conf->cacheBlockSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_BLOCK_SIZE").c_str(), NULL, 0);
-
 	// Extended memory
 	conf->extendedMemory = strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY").c_str(), NULL, 0);
 
