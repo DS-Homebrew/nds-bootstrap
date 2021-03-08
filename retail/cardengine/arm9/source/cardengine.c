@@ -1082,7 +1082,8 @@ void myIrqHandlerIPC(void) {
 			mainScreen = 0;
 	}
 	
-	if (sharedAddr[4] == 0x57534352){
+
+	if (sharedAddr[4] == (vu32)0x57534352){
 		enterCriticalSection();
 		// Make screens white
 		SetBrightness(0, 31);

@@ -123,6 +123,10 @@ void myIrqHandlerIPC(void) {
 
 		sharedAddr[3] = 0;
 	}
+
+	if (IPC_GetSync() == 0x7){
+		lcdSwap();
+	}
 }
 
 //Currently used for NSMBDS romhacks
