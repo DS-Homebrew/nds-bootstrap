@@ -242,7 +242,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
-	toncset((u32*)0x02400000, 0, 0x3BAE00);	// clear part of EWRAM - except before ce7 and ce9 binaries
+	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu font
+	toncset((u32*)0x02700000, 0, 0xB9C00);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
@@ -981,20 +982,20 @@ int arm7_main(void) {
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x27C0000, fatTableFile, 0, 0x400, -1);
+		fileRead((char*)0x2770000, fatTableFile, 0, 0x400, -1);
 	}
-	u32 fatTableVersion = *(u32*)(0x27C0100);
-	bool fatTableEmpty = (*(u32*)(0x27C0200) == 0);
+	u32 fatTableVersion = *(u32*)(0x2770100);
+	bool fatTableEmpty = (*(u32*)(0x2770200) == 0);
 
-	if (*(u32*)(0x27C0040) != storedFileCluster
-	|| *(u32*)(0x27C0044) != romSize)
+	if (*(u32*)(0x2770040) != storedFileCluster
+	|| *(u32*)(0x2770044) != romSize)
 	{
 		fatTableEmpty = true;
 	}
 
 	if (!gameOnFlashcard) {
-		if (*(u32*)(0x27C0048) != saveFileCluster
-		|| *(u32*)(0x27C004C) != saveSize)
+		if (*(u32*)(0x2770048) != saveFileCluster
+		|| *(u32*)(0x277004C) != saveSize)
 		{
 			fatTableEmpty = true;
 		}
@@ -1010,7 +1011,7 @@ int arm7_main(void) {
 		}
 		buildFatTableCache(romFile, 0);
 	} else {
-		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x27C0000, sizeof(aFile));
+		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2770000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
@@ -1030,7 +1031,7 @@ int arm7_main(void) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 			} else {
-				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x27C0020, sizeof(aFile));
+				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x2770020, sizeof(aFile));
 			}
 		}
 	}
@@ -1038,26 +1039,26 @@ int arm7_main(void) {
 	if (gameOnFlashcard) sdRead = false;
 
 	if (fatTableEmpty) {
-		tonccpy((char*)0x27C0000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
+		tonccpy((char*)0x2770000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 		if (!gameOnFlashcard) {
-			tonccpy((char*)0x27C0020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)0x2770020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
-		*(u32*)(0x27C0040) = storedFileCluster;
-		*(u32*)(0x27C0044) = romSize;
+		*(u32*)(0x2770040) = storedFileCluster;
+		*(u32*)(0x2770044) = romSize;
 		if (!gameOnFlashcard) {
-			*(u32*)(0x27C0048) = saveFileCluster;
-			*(u32*)(0x27C004C) = saveSize;
+			*(u32*)(0x2770048) = saveFileCluster;
+			*(u32*)(0x277004C) = saveSize;
 		}
-		*(u32*)(0x27C0100) = currentFatTableVersion;
+		*(u32*)(0x2770100) = currentFatTableVersion;
 		if (cacheFatTable) {
-			fileWrite((char*)0x27C0000, fatTableFile, 0, 0x200, -1);
+			fileWrite((char*)0x2770000, fatTableFile, 0, 0x200, -1);
 			fileWrite((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 		}
 	} else {
 		fileRead((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 	}
 
-	toncset((u32*)0x027C0000, 0, 0x400);
+	toncset((u32*)0x02770000, 0, 0x400);
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
@@ -1237,42 +1238,35 @@ int arm7_main(void) {
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINE_ARM9_DLDI_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x4400);
-			if (!dldiPatchBinary((data_t*)ce9Location, 0x4400)) {
+			tonccpy((u32*)CARDENGINE_ARM9_DLDI_LOCATION, (u32*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 0x5000);
+			if (!dldiPatchBinary((data_t*)ce9Location, 0x5000)) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
 			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-		} else if ((((u32)ndsHeader->arm9destination == 0x02004000) || (moduleParams->sdk_version < 0x2008000))
-				&& (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
-			ce9Location = (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000))
-						? CARDENGINE_ARM9_CACHED_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION1;
-			if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
+		} else if (((u32)ndsHeader->arm9destination == 0x02004000) && (strncmp(ndsHeader->makercode, "4Q", 2) != 0) && ROMinRAM) {
+			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
+			/*if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
 			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
 				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
-			}
+			}*/
 			/*if ((strncmp(romTid, "AMH", 3) == 0) && (consoleModel == 0)) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_RELOC_PF_BUFFERED_LOCATION, 0x2000);
 			} else {*/
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1400);
 			//}
-			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
-		} else if (ceCached) {
-			if (ceCached == 2
-			|| strncmp(romTid, "A2L", 3) == 0				// Anno 1701: Dawn of Discovery
-			|| strncmp(romTid, "B3R", 3) == 0				// Pokemon Ranger: Guardian Signs
-			)
-			{
-				ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-			} else {
-				ce9Location = (u32)patchLoHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-			}
+			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
+		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed) {
+			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
+			u16 size = (ROMinRAM ? 0x1400 : 0x3000);
 			if(ce9Location) {
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), 0x1800);
-				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1800);
+				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
+				if (ROMinRAM) {
+					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
+				}
 			} else {         
 				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
+				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 			}
 		} else if (extendedMemoryConfirmed) {
 			ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
@@ -1280,7 +1274,8 @@ int arm7_main(void) {
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
 		} else {
 			ce9Location = CARDENGINE_ARM9_LOCATION;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), 0x1800);
+			u16 size = (ROMinRAM ? 0x1400 : 0x3000);
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 		}
 
 		toncset((u32*)CARDENGINE_ARM7_BUFFERED_LOCATION, 0, 0x35000);

@@ -98,19 +98,21 @@ static bool dmaLed = false;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
+s8 mainScreen = 0;
+
 void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
+	u8 mode = 1;
 
 	if (bright < 0) {
-		mode = 2 << 14;
+		mode = 2;
 		bright = -bright;
 	}
 	if (bright > 31) {
 		bright = 31;
 	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+	*(u16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
 
 // Alternative to swiWaitForVBlank()
@@ -344,8 +346,11 @@ static inline bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -554,7 +559,7 @@ void cardSetDma(void) {
     u32 dma = cardStruct[3]; // dma channel     
 
 	#ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
@@ -654,7 +659,7 @@ void cardSetDma(void) {
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len, u32 page) {
 #ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
@@ -778,7 +783,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	//}
 #endif
 
-	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
+	if(*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x004A4C43) { // "CLJ"
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
 
@@ -914,8 +919,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//return -1;
 		}
 		#endif
-		const char* romTid = getRomTid(ndsHeader);
-		if (strncmp(romTid, "UBR", 3) != 0) {
+		if (*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x00524255) { // "UBR"
 			debug8mbMpuFix();
 		}
 
@@ -1044,6 +1048,18 @@ u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {
 }
 
 //---------------------------------------------------------------------------------
+void myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+
+	if (sharedAddr[4] == 0x554E454D) {
+		while (sharedAddr[4] != 0x54495845);
+	}
+}
+
+//---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
@@ -1051,7 +1067,7 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
-	if (sharedAddr[4] == (vu32)0x025AAB08) {
+	if (sharedAddr[4] == 0x025AAB08) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
@@ -1061,9 +1077,12 @@ void myIrqHandlerIPC(void) {
 #endif
 
 	if (IPC_GetSync() == 0x7){
-		lcdSwap();
+		mainScreen++;
+		if(mainScreen > 2)
+			mainScreen = 0;
 	}
 	
+
 	if (sharedAddr[4] == (vu32)0x57534352){
 		enterCriticalSection();
 		// Make screens white
@@ -1071,6 +1090,15 @@ void myIrqHandlerIPC(void) {
 		SetBrightness(1, 31);
 		while (1);
 	}
+
+	if (IPC_GetSync() == 0x9) {
+		inGameMenu();
+	}
+
+	if(mainScreen == 1)
+		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+	else if(mainScreen == 2)
+		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {

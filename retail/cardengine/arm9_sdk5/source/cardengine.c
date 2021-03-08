@@ -198,8 +198,11 @@ static inline bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -520,7 +523,7 @@ void cardSetDma (u32 * params) {
 	u32 len = dmaParams[5];
 
 	#ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
@@ -645,7 +648,7 @@ static void clearIcache (void) {
 
 static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 #ifdef DLDI
-	while (sharedAddr[3]==0x52414D44);	// Wait during a RAM dump
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 commandRead;
@@ -905,6 +908,18 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 }
 
 //---------------------------------------------------------------------------------
+void myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+
+	/*if (sharedAddr[4] == 0x554E454D) {
+		inGameMenu();
+	}*/
+}
+
+//---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
@@ -933,6 +948,10 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
+
+	/*if (IPC_GetSync() == 0x9) {
+		inGameMenu();
+	}*/
 }
 
 void reset(u32 param) {

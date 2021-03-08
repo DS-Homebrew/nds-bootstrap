@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINE_ARM9_DLDI_LOCATION, LENGTH = 16K /* Main RAM */
+	vram	: ORIGIN = CARDENGINE_ARM9_DLDI_LOCATION, LENGTH = 20K /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

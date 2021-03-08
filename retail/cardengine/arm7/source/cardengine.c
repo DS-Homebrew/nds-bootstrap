@@ -107,7 +107,6 @@ static aFile srParamsFile;
 static int saveTimer = 0;
 
 static int swapTimer = 0;
-static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -331,6 +330,68 @@ static void cardReadLED(bool on) {
 		}
 	}
 }*/
+
+extern void inGameMenu(void);
+
+void forceGameReboot(void) {
+	if (consoleModel < 2) {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			unlaunchSetFilename(false);
+		}
+		sharedAddr[4] = 0x57534352;
+		IPC_SendSync(0x8);
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+	u32 clearBuffer = 0;
+	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+	if (*(u32*)(ce7+0x11EF8) == 0) {
+		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+	} else {
+		// Use different SR backend ID
+		readSrBackendId();
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+}
+
+void returnToLoader(void) {
+	if (consoleModel >= 2) {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+	} else {
+		if (*(u32*)(ce7+0x11EF8) == 0) {
+			unlaunchSetFilename(true);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+		sharedAddr[4] = 0x57534352;
+		IPC_SendSync(0x8);
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+}
+
+void dumpRam(void) {
+	driveInitialize();
+	sdRead = (valueBits & b_dsiSD);
+	sharedAddr[3] = 0x444D4152;
+	// Dump RAM
+	if (valueBits & dsiMode) {
+		// Dump full RAM
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);
+	} else {
+		// Dump RAM used in DS mode
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, -1);
+		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, -1);
+	}
+	sharedAddr[3] = 0;
+}
 
 static void log_arm9(void) {
 	#ifdef DEBUG
@@ -765,9 +826,9 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	/*#ifdef DEBUG
+	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
-	#endif*/
+	#endif
 	
 	cheat_engine_start();
 
@@ -800,38 +861,8 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
-		if (tryLockMutex(&saveMutex)) {
-			if ((returnTimer == 60 * 2) && (saveTimer == 0)) {
-				REG_MASTER_VOLUME = 0;
-				int oldIME = enterCriticalSection();
-				if (consoleModel >= 2) {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-					} else {
-						// Use different SR backend ID
-						readSrBackendId();
-					}
-				} else {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						unlaunchSetFilename(true);
-					} else {
-						// Use different SR backend ID
-						readSrBackendId();
-					}
-					sharedAddr[4] = 0x57534352;
-					IPC_SendSync(0x8);
-					waitFrames(5);							// Wait for DSi screens to stabilize
-				}
-				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
-				leaveCriticalSection(oldIME);
-			}
-			unlockMutex(&saveMutex);
-		}
-		returnTimer++;
-	} else {
-		returnTimer = 0;
+	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_DOWN | KEY_SELECT))) {
+		(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
 	}
 
 	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
@@ -839,11 +870,7 @@ void myIrqHandlerVBlank(void) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
-				driveInitialize();
-				sdRead = (valueBits & b_dsiSD);
-				sharedAddr[3] = 0x52414D44;
-				fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);	// Dump RAM
-				sharedAddr[3] = 0;
+				dumpRam();
 				leaveCriticalSection(oldIME);
 				REG_MASTER_VOLUME = 127;
 			}
@@ -879,24 +906,7 @@ void myIrqHandlerVBlank(void) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
-				if (consoleModel < 2) {
-					if (*(u32*)(ce7+0x11EF8) == 0) {
-						unlaunchSetFilename(false);
-					}
-					sharedAddr[4] = 0x57534352;
-					IPC_SendSync(0x8);
-					waitFrames(5);							// Wait for DSi screens to stabilize
-				}
-				u32 clearBuffer = 0;
-				fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-				if (*(u32*)(ce7+0x11EF8) == 0) {
-					tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-				} else {
-					// Use different SR backend ID
-					readSrBackendId();
-				}
-				i2cWriteRegister(0x4A, 0x70, 0x01);
-				i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+				forceGameReboot();
 				leaveCriticalSection(oldIME);
 			}
 			unlockMutex(&saveMutex);
@@ -951,9 +961,9 @@ void myIrqHandlerVBlank(void) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
-	if ((strncmp(romTid, "UOR", 3) == 0 && !(valueBits & saveOnFlashcard))
-	|| (strncmp(romTid, "UXB", 3) == 0 && !(valueBits & saveOnFlashcard))
+	u32 romTid = *(u32*)getRomTid(ndsHeader) & 0x00FFFFFF;
+	if ((romTid == 0x00524F55 /*"UOR"*/ && !(valueBits & saveOnFlashcard))
+	|| (romTid == 0x00425855 /*"UXB"*/ && !(valueBits & saveOnFlashcard))
 	|| (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard))) {
 		runCardEngineCheck();
 	}

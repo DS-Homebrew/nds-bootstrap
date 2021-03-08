@@ -16,6 +16,8 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
+intr_vblank_orig_return:
+	.word	0x00000000
 intr_ipc_orig_return:
 	.word	0x00000000
 fileCluster:
@@ -66,6 +68,7 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
+.word   vblankHandler
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
@@ -98,9 +101,7 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, cardReadRef1
-    ldr     r7, ce9location1
-    add     r6, r6, r7
+	ldr		r6, =cardRead
     
 	bl		_blx_r6_stub_card_read
 
@@ -117,19 +118,13 @@ terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000
-ce9location1:
-.word   ce9
-cardReadRef1:
-.word   cardRead-ce9
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push	{r3-r7, lr}
 
-	ldr		r6, cardReadRef2
-    ldr     r7, ce9location2
-    add     r6, r6, r7
+	ldr		r6, =cardRead
 
 	bl		_blx_r6_stub_thumb_card_read	
 
@@ -139,10 +134,6 @@ _blx_r6_stub_thumb_card_read:
 	bx	r6	
 .pool
 .align	4
-ce9location2:
-.word   ce9
-cardReadRef2:
-.word   cardRead-ce9
  	
 	.arm
 @---------------------------------------------------------------------------------
@@ -161,21 +152,14 @@ card_dma_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRef4
-    ldr     r7, ce9location4
-    add     r6, r6, r7
+	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_card_read_dma	
-    
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_card_read_dma:
 	bx	r6	
 .pool
-ce9location4:
-.word   ce9
-cardReadRef4:
-.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -183,21 +167,14 @@ card_set_dma_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRef14
-    ldr     r7, ce9location14
-    add     r6, r6, r7
+	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_card_set_dma	
-    
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_card_set_dma:
 	bx	r6	
 .pool
-ce9location14:
-.word   ce9
-cardReadRef14:
-.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -206,9 +183,7 @@ card_pull_out_arm9:
 	bx      lr
 @	stmfd   sp!, {lr}
 @	sub     sp, sp, #4
-@	ldr		r6, cardPullOutRef
-@    ldr     r7, ce9location5
-@    add     r6, r6, r7
+@	ldr		r6, =cardPullOut
     
 @	bl		_blx_r6_stub_card_pull_out
 
@@ -218,10 +193,6 @@ card_pull_out_arm9:
 @_blx_r6_stub_card_pull_out:
 @	bx	r6
 @.pool
-@ce9location5:
-@.word   ce9
-@cardPullOutRef:
-@.word   cardPullOut-ce9
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -239,10 +210,8 @@ slot2_read:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r7,lr}
 
-	ldr		r6, cardReadRefS2R
-    ldr     r7, ce9locationS2R
-    add     r6, r6, r7
-    
+	ldr		r6, =slot2Read
+
 	bl		_blx_r6_stub_slot2_read
 
 	ldmfd   sp!, {r4-r7,pc}
@@ -250,10 +219,6 @@ slot2_read:
 _blx_r6_stub_slot2_read:
 	bx	r6
 .pool
-ce9locationS2R:
-.word   ce9
-cardReadRefS2R:
-.word   slot2Read-ce9
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
@@ -269,10 +234,8 @@ cardIdDataT:
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
-    
-	ldr		r6, cardReadRef7
-    ldr     r7, ce9location7
-    add     r6, r6, r7
+
+	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_thumb_card_read_dma	
 
@@ -281,20 +244,14 @@ _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
 .align	4
-ce9location7:
-.word   ce9
-cardReadRef7:
-.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 thumb_card_set_dma_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
-    
-	ldr		r6, cardReadRef15
-    ldr     r7, ce9location15
-    add     r6, r6, r7
+
+	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_thumb_card_set_dma	
 
@@ -303,10 +260,6 @@ _blx_r6_stub_thumb_card_set_dma:
 	bx	r6	
 .pool
 .align	4
-ce9location15:
-.word   ce9
-cardReadRef15:
-.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 	.arm
@@ -315,12 +268,9 @@ nand_read_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r3-r9,lr}
 
-	ldr		r6, cardReadRef8
-    ldr     r7, ce9location8
-    add     r6, r6, r7
+	ldr		r6, =nandRead
 
-	bl		_blx_r6_stub_nand_read	
-    
+	bl		_blx_r6_stub_nand_read
 
 	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
@@ -328,10 +278,6 @@ nand_read_arm9:
 _blx_r6_stub_nand_read:
 	bx	r6	
 .pool
-ce9location8:
-.word   ce9
-cardReadRef8:
-.word   nandRead-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -339,12 +285,9 @@ nand_write_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r3-r9,lr}
 
-	ldr		r6, cardReadRef9
-    ldr     r7, ce9location9
-    add     r6, r6, r7
+	ldr		r6, =nandWrite
 
 	bl		_blx_r6_stub_nand_write
-    
 
 	ldmfd   sp!, {r3-r9,pc}
 	mov r0, #0
@@ -352,10 +295,6 @@ nand_write_arm9:
 _blx_r6_stub_nand_write:
 	bx	r6	
 .pool
-ce9location9:
-.word   ce9
-cardReadRef9:
-.word   nandWrite-ce9 
 @---------------------------------------------------------------------------------
 
 	.thumb    
@@ -364,12 +303,9 @@ thumb_nand_read_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
 
-	ldr		r6, cardReadRef10
-    ldr     r7, ce9location10
-    add     r6, r6, r7
+	ldr		r6, =nandRead
 
-	bl		_blx_r6_stub_thumb_nand_read	
-    
+	bl		_blx_r6_stub_thumb_nand_read
 
 	pop	{r1-r7, pc}
 	mov r0, #0
@@ -378,10 +314,6 @@ _blx_r6_stub_thumb_nand_read:
 	bx	r6	
 .pool
 .align	4
-ce9location10:
-.word   ce9
-cardReadRef10:
-.word   nandRead-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -389,12 +321,9 @@ thumb_nand_write_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
 
-	ldr		r6, cardReadRef11
-    ldr     r7, ce9location11
-    add     r6, r6, r7
+	ldr		r6, =nandWrite
 
 	bl		_blx_r6_stub_thumb_nand_write
-    
 
 	pop	{r1-r7, pc}
 	mov r0, #0
@@ -403,10 +332,6 @@ _blx_r6_stub_thumb_nand_write:
 	bx	r6	
 .pool
 .align	4
-ce9location11:
-.word   ce9
-cardReadRef11:
-.word   nandWrite-ce9 
 @---------------------------------------------------------------------------------
 
 	.arm
@@ -416,9 +341,7 @@ card_irq_enable:
 	push    {lr}
 	push	{r1-r12}
 
-	ldr		r3, cardReadRefIrq
-    ldr     r4, ce9locationIrq
-    add     r3, r3, r4
+	ldr		r3, =myIrqEnable
 
 	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
@@ -427,10 +350,6 @@ card_irq_enable:
 _blx_r3_stub2:
 	bx	r3
 .pool
-ce9locationIrq:
-.word   ce9
-cardReadRefIrq:
-.word   myIrqEnable-ce9 
 @---------------------------------------------------------------------------------
 
 	.thumb
@@ -439,9 +358,7 @@ thumb_card_irq_enable:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
 
-	ldr		r3, cardReadRefTIrq
-    ldr     r4, ce9locationTIrq
-    add     r3, r3, r4
+	ldr		r3, =myIrqEnable
 
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
@@ -450,10 +367,6 @@ thumb_blx_r3_stub2:
 	bx	r3
 .pool
 .align	4
-ce9locationTIrq:
-.word   ce9
-cardReadRefTIrq:
-.word   myIrqEnable-ce9 
 @---------------------------------------------------------------------------------
 
 
@@ -465,19 +378,13 @@ pdash_read:
     @mov     r2, r6 @LEN
     @mov     r3, r10 @cardStruct
     add     r0, r0, #0x2C    
-    ldr		r6, cardReadRef12
-    ldr     r7, ce9location12
-    add     r6, r6, r7
+    ldr		r6, =cardReadPDash
 	bl		_blx_r6_stub_pdash   
     pop	    {r1-r11, pc}
     bx      lr
 _blx_r6_stub_pdash:
 	bx	r6	
-.pool     
-ce9location12:
-.word   ce9
-cardReadRef12:
-.word   cardReadPDash-ce9 
+.pool
 
 	.thumb   
 @---------------------------------------------------------------------------------
@@ -496,9 +403,7 @@ thumb_slot2_read:
 @---------------------------------------------------------------------------------
 	push	{r4-r7, lr}
 
-	ldr		r6, cardReadRefTS2R
-    ldr     r7, ce9locationTS2R
-    add     r6, r6, r7
+	ldr		r6, =slot2Read
 
 	bl		_blx_r6_stub_thumb_slot2_read	
 
@@ -509,12 +414,15 @@ _blx_r6_stub_thumb_slot2_read:
 	bx	r6	
 .pool
 .align	4
-ce9locationTS2R:
-.word   ce9
-cardReadRefTS2R:
-.word   slot2Read-ce9
 	.arm
     
+vblankHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_vblank
+	ldr 	r0,	intr_vblank_orig_return
+	bx  	r0
+
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -522,11 +430,17 @@ ipcSyncHandler:
 	ldr 	r0,	intr_ipc_orig_return
 	bx  	r0
     
+code_handler_start_vblank:
+	push	{r0-r12} 
+    ldr		r6, =myIrqHandlerVBlank
+	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
 code_handler_start_ipc:
 	push	{r0-r12} 
-    ldr		r6, cardReadRef13
-    ldr     r7, ce9location13
-    add     r6, r6, r7
+    ldr		r6, =myIrqHandlerIPC
 	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
   
 	@ exit after return
@@ -540,22 +454,15 @@ arm9exit:
 	bx  lr
     
 .pool
-ce9location13:
-.word   ce9
-cardReadRef13:
-.word   myIrqHandlerIPC-ce9  
 
 @---------------------------------------------------------------------------------
 reset_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRefRes
-    ldr     r7, ce9locationRes
-    add     r6, r6, r7
+	ldr		r6, =reset
 
 	bl		_blx_r6_stub_reset	
-    
 
 	ldmfd   sp!, {r1-r11,pc}
 	mov r0, #0
@@ -563,10 +470,6 @@ reset_arm9:
 _blx_r6_stub_reset:
 	bx	r6	
 .pool
-ce9locationRes:
-.word   ce9
-cardReadRefRes:
-.word   reset-ce9 
 @---------------------------------------------------------------------------------
 
 .global callEndReadDmaThumb
