@@ -1251,6 +1251,7 @@ int arm7_main(void) {
 			//}
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1400);
 		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed) {
+		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed && !extendedMemoryConfirmed) {
 			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
 			u16 size = (ROMinRAM ? 0x1400 : 0x3000);
 			if(ce9Location) {
