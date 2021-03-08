@@ -801,7 +801,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	memcpy(slot2ReadOffset, slot2ReadPatch, 0x40);
 }*/
 
-u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
+/*u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
@@ -842,7 +842,7 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("Lo Heap Shrink Sucessfull\n\n");
 
     return oldheapPointer;
-}
+}*/
 
 u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	if (moduleParams->sdk_version <= 0x2007FFF) {

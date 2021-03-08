@@ -102,7 +102,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
 
 	// Card engine (arm9) cached
-	conf->ceCached = strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
+	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
 
 	// Cache block size
 	conf->cacheBlockSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_BLOCK_SIZE").c_str(), NULL, 0);
@@ -241,7 +241,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
     // Load ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x2000, cebin);
+		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM9_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
@@ -250,7 +250,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
     // Load reloc ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_reloc.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x2000, cebin);
+		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
@@ -315,7 +315,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load DLDI ce9 binary
 		cebin = fopen("nitro:/cardengine_arm9_dldi.lz77", "rb");
 		if (cebin) {
-			fread(lz77ImageBuffer, 1, 0x7000, cebin);
+			fread(lz77ImageBuffer, 1, 0x5000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION);
 			//fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
 		}

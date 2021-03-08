@@ -30,7 +30,7 @@ typedef struct configuration {
 	u32 donorSdkVer;
 	u32 patchMpuRegion;
 	u32 patchMpuSize;
-	int ceCached;	// SDK 1-4
+	bool ceCached;	// SDK 1-4
 	int cacheBlockSize;
 	int extendedMemory;
 	u32 consoleModel;
