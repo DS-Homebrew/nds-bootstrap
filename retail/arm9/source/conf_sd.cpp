@@ -280,9 +280,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 9);
 		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 11);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...(TBA)", 15);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "RAM Viewer...", 14);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x60, "Quit Game", 10);
+		//tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...(TBA)", 15);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "RAM Viewer...", 14);
+		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "Quit Game", 10);
 
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION,        "Main Screen", 12);
 		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x10, "Clock Speed", 12);

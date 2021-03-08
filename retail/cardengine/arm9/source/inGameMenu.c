@@ -69,7 +69,7 @@ void drawMainMenu(void) {
 	clearScreen();
 
 	// Print labels
-	for(int i = 0; i < 7; i++) {
+	for(int i = 0; i < 6; i++) {
 		print(2, i, (char*)INGAME_TEXT_LOCATION + i * 0x10, 0);
 	}
 
@@ -299,7 +299,7 @@ void inGameMenu(void) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
-			if (cursorPosition < 6)
+			if (cursorPosition < 5)
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
 			switch(cursorPosition) {
@@ -320,10 +320,11 @@ void inGameMenu(void) {
 				case 3:
 					optionsMenu();
 					break;
-				case 5:
+				// To be added: Cheats...
+				case 4:
 					ramViewer();
 					break;
-				case 6:
+				case 5:
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
