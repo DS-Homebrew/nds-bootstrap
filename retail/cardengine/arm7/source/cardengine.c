@@ -862,7 +862,7 @@ void myIrqHandlerVBlank(void) {
 	}
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_DOWN | KEY_SELECT))) {
-		(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000) ? returnToLoader() : inGameMenu();
+		(moduleParams->sdk_version < 0x2008000)||(moduleParams->sdk_version > 0x5000000)||(valueBits & extendedMemory) ? returnToLoader() : inGameMenu();
 	}
 
 	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {

@@ -235,6 +235,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
     
+    // Load in-game menu ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_igm.bin", "rb");
+	if (cebin) {
+		fread((u8*)INGAME_MENU_LOCATION, 1, 0x2000, cebin);
+	}
+	fclose(cebin);
+
     // Load ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
 	if (cebin) {

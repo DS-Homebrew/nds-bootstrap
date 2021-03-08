@@ -62,7 +62,7 @@ patches:
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
-.word   0x0
+.word   vblankHandler
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
@@ -512,6 +512,13 @@ cardReadRefTS2R:
 .word   slot2Read-ce9
 	.arm
     
+vblankHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_vblank
+	ldr 	r0,	intr_vblank_orig_return
+	bx  	r0
+
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -519,6 +526,16 @@ ipcSyncHandler:
 	ldr 	r0,	intr_ipc_orig_return
 	bx  	r0
     
+code_handler_start_vblank:
+	push	{r0-r12} 
+    ldr		r6, cardReadRef13V
+    ldr     r7, ce9location13
+    add     r6, r6, r7
+	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	
+	@ exit after return
+	b	exit
+
 code_handler_start_ipc:
 	push	{r0-r12} 
     ldr		r6, cardReadRef13
@@ -539,6 +556,8 @@ arm9exit:
 .pool
 ce9location13:
 .word   ce9
+cardReadRef13V:
+.word   myIrqHandlerVBlank-ce9  
 cardReadRef13:
 .word   myIrqHandlerIPC-ce9  
 

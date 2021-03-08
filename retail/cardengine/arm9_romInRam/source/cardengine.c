@@ -53,6 +53,8 @@ static bool flagsSet = false;
 static bool isDma = false;
 static bool dmaLed = false;
 
+s8 mainScreen = 0;
+
 void myIrqHandlerDMA(void);
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -143,8 +145,11 @@ bool ndmaBusy(uint8 ndmaSlot) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
+        ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -449,6 +454,18 @@ u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {
 }
 
 //---------------------------------------------------------------------------------
+void myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+
+	if (sharedAddr[4] == 0x554E454D) {
+		while (sharedAddr[4] != 0x54495845);
+	}
+}
+
+//---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
@@ -456,7 +473,9 @@ void myIrqHandlerIPC(void) {
 	#endif	
 	
 	if (IPC_GetSync() == 0x7){
-		lcdSwap();
+		mainScreen++;
+		if(mainScreen > 2)
+			mainScreen = 0;
 	}
 	
 	if (sharedAddr[4] == 0x57534352) {
@@ -467,6 +486,16 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
+
+	if (IPC_GetSync() == 0x9 && !(ce9->valueBits & isSdk5) && !(ce9->valueBits & extendedMemory)) {
+		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION;
+		(*inGameMenu)(&mainScreen);
+	}
+
+	if(mainScreen == 1)
+		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+	else if(mainScreen == 2)
+		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {

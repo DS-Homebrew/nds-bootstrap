@@ -1092,7 +1092,8 @@ void myIrqHandlerIPC(void) {
 	}
 
 	if (IPC_GetSync() == 0x9) {
-		inGameMenu();
+		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION;
+		(*inGameMenu)(&mainScreen);
 	}
 
 	if(mainScreen == 1)
