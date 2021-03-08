@@ -624,15 +624,7 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (isSdk5(moduleParams) && patchMpuRegion==2) {
-		return;
-	}
-
     const char* romTid = getRomTid(ndsHeader);
-
-	if (isSdk5(moduleParams) && !gameOnFlashcard) {
-		return;
-	}
 
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
