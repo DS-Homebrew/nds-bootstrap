@@ -1251,6 +1251,9 @@ int arm7_main(void) {
 			}
 		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed && !extendedMemoryConfirmed) {
 			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
+			if (ROMinRAM && moduleParams->sdk_version < 0x2008000) {
+				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
+			}
 			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
 			if(ce9Location) {
 				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION), size);
@@ -1262,7 +1265,7 @@ int arm7_main(void) {
 				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 			}
 		} else if (extendedMemoryConfirmed) {
-			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
+			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1C00);
 		} else {
