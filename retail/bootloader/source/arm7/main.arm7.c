@@ -1262,7 +1262,7 @@ int arm7_main(void) {
 				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 			}
 		} else if (extendedMemoryConfirmed) {
-			ce9Location = (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
+			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 			relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,0x1C00);
 		} else {
