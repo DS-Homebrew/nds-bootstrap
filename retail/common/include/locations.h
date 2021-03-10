@@ -24,12 +24,7 @@
 
 #define IMAGES_LOCATION    0x02340000
 
-#define INGAME_MENU_LOCATION                         0x026F0000
-#define INGAME_FONT_LOCATION                         0x026FC000
-#define INGAME_PALETTE_LOCATION                      0x026FE000
-#define INGAME_TEXT_LOCATION                         0x026FE200
-#define INGAME_OPTIONS_TEXT_LOCATION                 0x026FE300
-#define INGAME_TITLES_LOCATION                       0x026FE400
+#define INGAME_MENU_LOCATION                         0x026F8000
 
 #define LOADER_RETURN_LOCATION                       0x027CD000
 #define LOADER_RETURN_SDK5_LOCATION                  0x027DF800
