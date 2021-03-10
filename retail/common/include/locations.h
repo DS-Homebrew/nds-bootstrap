@@ -31,6 +31,7 @@
 #define INGAME_OPTIONS_TEXT_LOCATION                 0x026FE300
 #define INGAME_TITLES_LOCATION                       0x026FE400
 
+#define LOADER_RETURN_LOCATION                       0x026F2000
 #define BLOWFISH_LOCATION                            0x027B9C00
 //#define DSI_BLOWFISH_LOCATION                        0x027EA800
 #define ARM7_FIX_BUFFERED_LOCATION                   0x027BAE00
