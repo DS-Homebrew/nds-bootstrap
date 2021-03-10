@@ -86,7 +86,9 @@ $RECYCLE.BIN/
 #*.d
 
 # Build folders
-data/
+retail/data/
+b4ds/data/
+hb/data/
 bin/
 build/
 
