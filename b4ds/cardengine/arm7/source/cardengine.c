@@ -43,6 +43,7 @@
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 language;
+extern u32* languageAddr;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -61,6 +62,7 @@ static bool volumeAdjustActivated = false;*/
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
 static int swapTimer = 0;
+static int languageTimer = 0;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -117,6 +119,11 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language;
+		if (languageAddr > 0 && languageTimer < 60*3) {
+			// Extra measure for specific games
+			*languageAddr = language;
+			languageTimer++;
+		}
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {

@@ -338,20 +338,19 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	}
-    
+
     // Pokemon Dash
 	if (strcmp(romTid, "APDK") == 0) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}
-    
-    
+
+
     // Golden Sun
     if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }  
-    
+    }
 }
 
 static bool rsetA7CacheDone = false;

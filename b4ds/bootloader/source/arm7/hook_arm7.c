@@ -22,6 +22,8 @@
 #include <nds/debug.h>
 
 //#include "my_fat.h"
+#include "debug_file.h"
+#include "nds_header.h"
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "common.h"
@@ -360,10 +362,17 @@ int hookNdsRetailArm7(
 		nocashMessage("ACCEL_IPC_2010_OK");
 	}*/
 
+	const char* romTid = getRomTid(ndsHeader);
+
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
 	ce7->language                = language;
+	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
+		ce7->languageAddr = (u32*)0x020DC5DC;
+	} else if (strcmp(romTid, "AWIP") == 0) { // Hotel Dusk (EUR)
+		ce7->languageAddr = (u32*)0x02100BBC;
+	}
 
 	*vblankHandler = ce7->patches->vblankHandler;
 

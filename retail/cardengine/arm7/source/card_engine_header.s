@@ -20,6 +20,7 @@
 .global ramDumpCluster
 .global valueBits
 .global language
+.global languageAddr
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
@@ -52,6 +53,8 @@ cardStruct:
 valueBits:
 	.word	0x00000000
 language:
+	.word	0x00000000
+languageAddr:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000

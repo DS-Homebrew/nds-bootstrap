@@ -15,8 +15,7 @@
 .global moduleParams
 .global saveCluster
 .global language
-.global dsiMode
-.global ROMinRAM
+.global languageAddr
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -32,6 +31,8 @@ moduleParams:
 cardStruct:
 	.word	0x00000000
 language:
+	.word	0x00000000
+languageAddr:
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

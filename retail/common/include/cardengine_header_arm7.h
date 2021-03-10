@@ -78,6 +78,7 @@ typedef struct cardengineArm7 {
 		6: preciseVolumeControl
 	*/
     u32 language; //u8
+    u32* languageAddr;
     u32 consoleModel;
     u32 romRead_LED;
     u32 dmaRomRead_LED;

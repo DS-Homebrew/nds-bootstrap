@@ -69,6 +69,7 @@ extern u32 ramDumpCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
 extern u32 language;
+extern u32* languageAddr;
 extern u32 consoleModel;
 extern u32 romRead_LED;
 extern u32 dmaRomRead_LED;
@@ -106,6 +107,7 @@ static aFile srParamsFile;
 
 static int saveTimer = 0;
 
+static int languageTimer = 0;
 static int swapTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
@@ -839,6 +841,11 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language;
+		if (languageAddr > 0 && languageTimer < 60*3) {
+			// Extra measure for specific games
+			*languageAddr = language;
+			languageTimer++;
+		}
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();

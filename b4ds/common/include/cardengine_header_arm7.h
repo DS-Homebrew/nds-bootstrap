@@ -55,8 +55,8 @@ typedef struct cardengineArm7 {
     u32 intr_vblank_orig_return;
     const module_params_t* moduleParams;
     u32 cardStruct;
-    u32 language;
-
+    u32 language; //u8
+    u32* languageAddr;
 } __attribute__ ((__packed__)) cardengineArm7;
 
 #endif // CARDENGINE_HEADER_ARM7_H
