@@ -29,19 +29,19 @@ static void SetBrightness(u8 screen, s8 bright) {
 static vu32 *address = (vu32*)0x02000000;
 
 static void print(int x, int y, const char *str, int palette) {
-	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
 	while(*str)
 		*(dst++) = *(str++) | palette << 12;
 }
 
 static void printN(int x, int y, const char *str, int len, int palette) {
-	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
 	for(int i = 0; i < len; i++)
 		*(dst++) = *(str++) | palette << 12;
 }
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
-	u16 *dst = BG_MAP_RAM(4) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
 	for(int i = bytes * 2 - 1; i >= 0; i--) {
 		*(dst + i) = ((val & 0xF) >= 0xA ? 'A' + (val & 0xF) - 0xA : '0' + (val & 0xF)) | palette << 12;
 		val >>= 4;
@@ -62,16 +62,16 @@ static void waitKeys(u16 keys) {
 }
 
 static void clearScreen(void) {
-	toncset16(BG_MAP_RAM(4), 0, 0x300);
+	toncset16(BG_MAP_RAM_SUB(4), 0, 0x300);
 }
 
 static void drawCursor(u8 line) {
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
-		BG_MAP_RAM(4)[i * 0x20] = 0;
+		BG_MAP_RAM_SUB(4)[i * 0x20] = 0;
 
 	// Set cursor on the selected line
-	BG_MAP_RAM(4)[line * 0x20] = '>';
+	BG_MAP_RAM_SUB(4)[line * 0x20] = '>';
 }
 
 static void drawMainMenu(void) {
@@ -143,11 +143,11 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		toncset16(BG_MAP_RAM(4) + 0x20 * 9 + 6, '-', 19);
+		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 9 + 6, '-', 19);
 		print(8, 10, (char*)INGAME_TITLES_LOCATION + 0x40, 0);
 		printHex(11, 12, (u32)address, 4, 2);
-		BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
-		toncset16(BG_MAP_RAM(4) + 0x20 * 13 + 6, '-', 19);
+		BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
+		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 13 + 6, '-', 19);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -188,12 +188,12 @@ static void ramViewer(void) {
 		if(mode > 0) {
 			// Hex
 			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
-			BG_MAP_RAM(4)[loc] = (BG_MAP_RAM(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
-			BG_MAP_RAM(4)[loc + 1] = (BG_MAP_RAM(4)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(4)[loc] = (BG_MAP_RAM_SUB(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(4)[loc + 1] = (BG_MAP_RAM_SUB(4)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
 
 			// Text
 			loc = 0x20 * (1 + (cursorPosition / 8)) + 23 + (cursorPosition % 8);
-			BG_MAP_RAM(4)[loc] = (BG_MAP_RAM(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(4)[loc] = (BG_MAP_RAM_SUB(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
@@ -259,39 +259,39 @@ static void ramViewer(void) {
 void inGameMenu(s8* mainScreen) {
 	int oldIME = enterCriticalSection();
 
-	u32 dispcnt = REG_DISPCNT;
-	u16 bg0cnt = REG_BG0CNT;
-	//u16 bg1cnt = REG_BG1CNT;
-	//u16 bg2cnt = REG_BG2CNT;
-	//u16 bg3cnt = REG_BG3CNT;
+	u32 dispcnt = REG_DISPCNT_SUB;
+	u16 bg0cnt = REG_BG0CNT_SUB;
+	//u16 bg1cnt = REG_BG1CNT_SUB;
+	//u16 bg2cnt = REG_BG2CNT_SUB;
+	//u16 bg3cnt = REG_BG3CNT_SUB;
 
 	u16 powercnt = REG_POWERCNT;
 
 	u16 masterBright = *(vu16*)0x0400006C;
 
-	REG_DISPCNT = 0x10100;
-	REG_BG0CNT = 4 << 8;
-	//REG_BG1CNT = 0;
-	//REG_BG2CNT = 0;
-	//REG_BG3CNT = 0;
+	REG_DISPCNT_SUB = 0x10100;
+	REG_BG0CNT_SUB = 4 << 8;
+	//REG_BG1CNT_SUB = 0;
+	//REG_BG2CNT_SUB = 0;
+	//REG_BG3CNT_SUB = 0;
 
-	REG_BG0VOFS = 0;
-	REG_BG0HOFS = 0;
+	REG_BG0VOFS_SUB = 0;
+	REG_BG0HOFS_SUB = 0;
 
 	// If main screen is on auto, then force the bottom
 	if(*mainScreen == 0)
-		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+		REG_POWERCNT |= POWER_SWAP_LCDS;
 
-	SetBrightness(0, 0);
+	SetBrightness(1, 0);
 
-	tonccpy((u16*)0x026FF800, BG_MAP_RAM(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
+	tonccpy((u16*)0x026FF800, BG_MAP_RAM_SUB(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
 
-	tonccpy((u16*)0x026FFE00, BG_PALETTE, 256 * sizeof(u16));	// Backup the palette
-	tonccpy(BG_PALETTE, (u16*)INGAME_PALETTE_LOCATION, 0x200);
+	tonccpy((u16*)0x026FFE00, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
+	tonccpy(BG_PALETTE_SUB, (u16*)INGAME_PALETTE_LOCATION, 0x200);
 
-	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX, 0x2000);	// Backup the original graphics
-	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
+	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX_SUB, 0x2000);	// Backup the original graphics
+	tonccpy(BG_GFX_SUB, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
 
 	// Wait a frame so the key check is ready
 	while (REG_VCOUNT != 191);
@@ -348,17 +348,17 @@ void inGameMenu(s8* mainScreen) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM(4), (u16*)0x026FF800, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
-	tonccpy(BG_PALETTE, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
-	tonccpy(BG_GFX, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
+	tonccpy(BG_MAP_RAM_SUB(4), (u16*)0x026FF800, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE_SUB, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
+	tonccpy(BG_GFX_SUB, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
 	*(vu16*)0x0400006C = masterBright;
 
-	REG_DISPCNT = dispcnt;
-	REG_BG0CNT = bg0cnt;
-	//REG_BG1CNT = bg1cnt;
-	//REG_BG2CNT = bg2cnt;
-	//REG_BG3CNT = bg3cnt;
+	REG_DISPCNT_SUB = dispcnt;
+	REG_BG0CNT_SUB = bg0cnt;
+	//REG_BG1CNT_SUB = bg1cnt;
+	//REG_BG2CNT_SUB = bg2cnt;
+	//REG_BG3CNT_SUB = bg3cnt;
 
 	REG_POWERCNT = powercnt;
 
