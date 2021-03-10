@@ -267,7 +267,7 @@ void inGameMenu(s8* mainScreen) {
 
 	u16 powercnt = REG_POWERCNT;
 
-	u16 masterBright = *(vu16*)0x0400006C;
+	u16 masterBright = *(vu16*)0x0400106C;
 
 	REG_DISPCNT_SUB = 0x10100;
 	REG_BG0CNT_SUB = 4 << 8;
@@ -352,7 +352,7 @@ void inGameMenu(s8* mainScreen) {
 	tonccpy(BG_PALETTE_SUB, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
 	tonccpy(BG_GFX_SUB, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
 
-	*(vu16*)0x0400006C = masterBright;
+	*(vu16*)0x0400106C = masterBright;
 
 	REG_DISPCNT_SUB = dispcnt;
 	REG_BG0CNT_SUB = bg0cnt;
