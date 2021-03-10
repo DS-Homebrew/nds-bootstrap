@@ -33,7 +33,7 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Os\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
@@ -66,7 +66,8 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
 export TARGET	:=	cardengine_arm9_igm
-export OUTPUT	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
+export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -106,6 +107,8 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
+	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
 
 #---------------------------------------------------------------------------------
 clean:
@@ -127,6 +130,12 @@ $(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 cardengine.ld:	$(CURDIR)/../cardengine.ld.in
 	$(CPP) -P $(INCLUDE) $< $@
 
+
+#---------------------------------------------------------------------------------
+%.bin.o	:	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
 
 #---------------------------------------------------------------------------------
 %.bin	:	%.elf

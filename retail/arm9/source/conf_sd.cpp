@@ -218,7 +218,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
 		tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
 		tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 	}
@@ -229,16 +228,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION, 1, 0x12000, cebin);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
-	}
-	fclose(cebin);
-
-    // Load in-game menu ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_igm.bin", "rb");
-	if (cebin) {
-		fread((u8*)INGAME_MENU_LOCATION, 1, 0x2000, cebin);
 	}
 	fclose(cebin);
 
@@ -247,7 +238,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM9_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);
 
@@ -256,7 +246,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);
 
@@ -265,7 +254,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);
 
@@ -274,46 +262,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x2000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);
 
-	// Load font and text for in-game menu
-	cebin = fopen("nitro:/default_font.bin", "rb");
+    // Load in-game menu ce9 binary
+	cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
 	if (cebin) {
-		fread((u8*)INGAME_FONT_LOCATION, 1, 0x2000, cebin);
+		fread(lz77ImageBuffer, 1, 0x4000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
 
-		((u16*)INGAME_PALETTE_LOCATION)[0x01] = 0xFFFF; // White
-		((u16*)INGAME_PALETTE_LOCATION)[0x11] = 0xDEF7; // Light gray
-		((u16*)INGAME_PALETTE_LOCATION)[0x21] = 0xF355; // Light blue
-		((u16*)INGAME_PALETTE_LOCATION)[0x31] = 0x801B; // Red
-		((u16*)INGAME_PALETTE_LOCATION)[0x41] = 0x8360; // Lime
-
-		tonccpy((char*)INGAME_TEXT_LOCATION,        "Return to Game", 15);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x10, "Reset Game", 11);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x20, "Dump RAM", 9);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x30, "Options...", 11);
-		//tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "Cheats...(TBA)", 15);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x40, "RAM Viewer...", 14);
-		tonccpy((char*)INGAME_TEXT_LOCATION + 0x50, "Quit Game", 10);
-
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION,        "Main Screen", 12);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x10, "Clock Speed", 12);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x20, "VRAM Boost", 11);
-
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x30, "   Auto", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x38, " Bottom", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x40, "    Top", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x48, " 67 MHz", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x50, "133 MHz", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58, "    Off", 8);
-		tonccpy((char*)INGAME_OPTIONS_TEXT_LOCATION + 0x60, "     On", 8);
-
-		tonccpy((char*)INGAME_TITLES_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
-		tonccpy((char*)INGAME_TITLES_LOCATION + 0x20, "nds-bootstrap", 14);
-		tonccpy((char*)INGAME_TITLES_LOCATION + 0x30, "RAM Viewer", 11);
-		tonccpy((char*)INGAME_TITLES_LOCATION + 0x40, "Jump to Address", 16);
-
+		tonccpy((char*)INGAME_MENU_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
 	}
 	fclose(cebin);
 
@@ -330,7 +288,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x5000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION);
-			//fread((void*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
 		}
 		fclose(cebin);
 	}
@@ -347,7 +304,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION);
-		//fread((void*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION, 1, 0x3000, cebin);
 	}
 	fclose(cebin);
 
@@ -357,7 +313,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x7000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
-			//fread((void*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 1, 0x7000, cebin);
 		}
 		fclose(cebin);
 	}

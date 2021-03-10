@@ -9,6 +9,42 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#include "default_font_bin.h"
+
+static char bgBak[0x2000];
+static u16 bgMapBak[0x300];
+static u16 palBak[256];
+
+static u16 igmPal[256] = {0};
+static const char *menuText[] =
+{
+	"Return to Game",
+	"Reset Game",
+	"Dump RAM",
+	"Options...",
+	//"Cheats...(TBA)",
+	"RAM Viewer...",
+	"Quit Game"
+};
+static const char *optionsText[] =
+{
+	"Main Screen",
+	"Clock Speed",
+	"VRAM Boost",
+
+	"   Auto",
+	" Bottom",
+	"    Top",
+	" 67 MHz",
+	"133 MHz",
+	"    Off",
+	"     On"
+};
+
+static const char *ndsBootstrapText = "nds-bootstrap";
+static const char *ramViewerText = "RAM Viewer";
+static const char *jumpAddressText = "Jump to Address";
+
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
 
@@ -79,12 +115,12 @@ static void drawMainMenu(void) {
 
 	// Print labels
 	for(int i = 0; i < 6; i++) {
-		print(2, i, (char*)INGAME_TEXT_LOCATION + i * 0x10, 0);
+		print(2, i, (char*)menuText[i], 0);
 	}
 
 	// Print info
-	print(0x20 - 14, 0x18 - 3, (char*)INGAME_TITLES_LOCATION + 0x20, 1);
-	print(0x20 - strlen((char*)INGAME_TITLES_LOCATION) - 1, 0x18 - 2, (char*)INGAME_TITLES_LOCATION, 1);
+	print(0x20 - 14, 0x18 - 3, (char*)ndsBootstrapText, 1);
+	print(0x20 - strlen((char*)INGAME_MENU_LOCATION) - 1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
 }
 
 static void optionsMenu(s8* mainScreen) {
@@ -92,7 +128,7 @@ static void optionsMenu(s8* mainScreen) {
 
 	// Print labels
 	for(int i = 0; i < 3; i++) {
-		print(2, i, (char*)INGAME_OPTIONS_TEXT_LOCATION + i * 0x10, 0);
+		print(2, i, (char*)optionsText[i], 0);
 	}
 
 	u8 cursorPosition = 0;
@@ -100,11 +136,11 @@ static void optionsMenu(s8* mainScreen) {
 		drawCursor(cursorPosition);
 
 		// Main screen
-		print(0x20 - 8, 0, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x30 + (8 * *mainScreen), 0);
+		print(0x20 - 8, 0, (char*)optionsText[3 + (*mainScreen)] , 0);
 		// Clock speed
-		print(0x20 - 8, 1, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x48 + (8 * (REG_SCFG_CLK & 1)), 0);
+		print(0x20 - 8, 1, (char*)optionsText[6 + (REG_SCFG_CLK & 1)], 0);
 		// VRAM boost
-		print(0x20 - 8, 2, (char*)INGAME_OPTIONS_TEXT_LOCATION + 0x58 + (8 * ((REG_SCFG_EXT & BIT(13)) >> 13)), 0);
+		print(0x20 - 8, 2, (char*)optionsText[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
@@ -144,7 +180,7 @@ static void jumpToAddress(void) {
 	u8 cursorPosition = 0;
 	while(1) {
 		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 9 + 6, '-', 19);
-		print(8, 10, (char*)INGAME_TITLES_LOCATION + 0x40, 0);
+		print(8, 10, (char*)jumpAddressText, 0);
 		printHex(11, 12, (u32)address, 4, 2);
 		BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
 		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 13 + 6, '-', 19);
@@ -172,7 +208,7 @@ static void ramViewer(void) {
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		print(11, 0, (char*)INGAME_TITLES_LOCATION + 0x30, 0);
+		print(11, 0, (char*)ramViewerText, 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
@@ -284,14 +320,20 @@ void inGameMenu(s8* mainScreen) {
 
 	SetBrightness(1, 0);
 
-	tonccpy((u16*)0x026FF800, BG_MAP_RAM_SUB(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
+	tonccpy(&bgMapBak, BG_MAP_RAM_SUB(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
 
-	tonccpy((u16*)0x026FFE00, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
-	tonccpy(BG_PALETTE_SUB, (u16*)INGAME_PALETTE_LOCATION, 0x200);
+	igmPal[0x01] = 0xFFFF; // White
+	igmPal[0x11] = 0xDEF7; // Light gray
+	igmPal[0x21] = 0xF355; // Light blue
+	igmPal[0x31] = 0x801B; // Red
+	igmPal[0x41] = 0x8360; // Lime
 
-	tonccpy((u8*)INGAME_FONT_LOCATION-0x2000, BG_GFX_SUB, 0x2000);	// Backup the original graphics
-	tonccpy(BG_GFX_SUB, (u8*)INGAME_FONT_LOCATION, 0x2000); // Load font
+	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
+	tonccpy(BG_PALETTE_SUB, &igmPal, 0x200);
+
+	tonccpy(&bgBak, BG_GFX_SUB, 0x2000);	// Backup the original graphics
+	tonccpy(BG_GFX_SUB, default_font_bin, 0x2000); // Load font
 
 	// Wait a frame so the key check is ready
 	while (REG_VCOUNT != 191);
@@ -348,9 +390,9 @@ void inGameMenu(s8* mainScreen) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM_SUB(4), (u16*)0x026FF800, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
-	tonccpy(BG_PALETTE_SUB, (u16*)0x026FFE00, 256 * sizeof(u16));	// Restore the palette
-	tonccpy(BG_GFX_SUB, (u8*)INGAME_FONT_LOCATION-0x2000, 0x2000);	// Restore the original graphics
+	tonccpy(BG_MAP_RAM_SUB(4), &bgMapBak, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE_SUB, &palBak, 256 * sizeof(u16));	// Restore the palette
+	tonccpy(BG_GFX_SUB, &bgBak, 0x2000);	// Restore the original graphics
 
 	*(vu16*)0x0400106C = masterBright;
 
