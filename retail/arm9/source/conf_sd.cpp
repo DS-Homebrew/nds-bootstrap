@@ -212,9 +212,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&srBackendId, sizeof(u32), 2, cebin);
 	}
 	fclose(cebin);
-    
-	tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
-	tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardengine_arm7.lz77" : "nitro:/cardengine_arm7_alt.lz77", "rb");
@@ -222,18 +219,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM7_BUFFERED_LOCATION, 1, 0x12000, cebin);
+		tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+		tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
-    
+
 	// Load SDK5 ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION);
 		//fread((void*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION, 1, 0x12000, cebin);
+		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
-    
+
     // Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_igm.bin", "rb");
 	if (cebin) {

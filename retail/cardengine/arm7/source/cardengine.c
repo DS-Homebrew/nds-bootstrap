@@ -147,7 +147,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11F00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x12000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -160,10 +160,10 @@ static void readSrBackendId(void) {
 	// Use SR backend ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
-	*(u32*)(0x02000308) = *(u32*)((u32)LOADER_RETURN_LOCATION+0x100);
-	*(u32*)(0x0200030C) = *(u32*)((u32)LOADER_RETURN_LOCATION+0x104);
-	*(u32*)(0x02000310) = *(u32*)((u32)LOADER_RETURN_LOCATION+0x100);
-	*(u32*)(0x02000314) = *(u32*)((u32)LOADER_RETURN_LOCATION+0x104);
+	*(u32*)(0x02000308) = *(u32*)(ce7+0x12100);
+	*(u32*)(0x0200030C) = *(u32*)(ce7+0x12104);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x12100);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x12104);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -337,7 +337,7 @@ extern void inGameMenu(void);
 
 void forceGameReboot(void) {
 	if (consoleModel < 2) {
-		if (*(u32*)((u32)LOADER_RETURN_LOCATION+0x100) == 0) {
+		if (*(u32*)(ce7+0x12100) == 0) {
 			unlaunchSetFilename(false);
 		}
 		sharedAddr[4] = 0x57534352;
@@ -346,7 +346,7 @@ void forceGameReboot(void) {
 	}
 	u32 clearBuffer = 0;
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-	if (*(u32*)((u32)LOADER_RETURN_LOCATION+0x100) == 0) {
+	if (*(u32*)(ce7+0x12100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -358,11 +358,11 @@ void forceGameReboot(void) {
 
 void returnToLoader(void) {
 	if (consoleModel >= 2) {
-		if (*(u32*)((u32)LOADER_RETURN_LOCATION+0x100) == 0) {
+		if (*(u32*)(ce7+0x12100) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
 	} else {
-		if (*(u32*)((u32)LOADER_RETURN_LOCATION+0x100) == 0) {
+		if (*(u32*)(ce7+0x12100) == 0) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
