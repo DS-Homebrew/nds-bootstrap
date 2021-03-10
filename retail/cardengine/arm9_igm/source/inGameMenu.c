@@ -242,9 +242,9 @@ static void ramViewer(void) {
 			}
 		} else if(mode == 2) {
 			if (KEYS & KEY_UP) {
-				((u8 *)address)[cursorPosition]++;
-			} else if (KEYS & KEY_DOWN) {
 				((u8 *)address)[cursorPosition]--;
+			} else if (KEYS & KEY_DOWN) {
+				((u8 *)address)[cursorPosition]++;
 			} else if (KEYS & KEY_LEFT) {
 				((u8 *)address)[cursorPosition] += 0x10;
 			} else if (KEYS & KEY_RIGHT) {
