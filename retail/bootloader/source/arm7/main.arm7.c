@@ -1236,8 +1236,9 @@ int arm7_main(void) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed &&
-		  (strncmp(romTid, "ADM", 3) != 0)) {
+		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed
+		 && (strncmp(romTid, "ADM", 3) != 0)
+		) {
 			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION), size);
