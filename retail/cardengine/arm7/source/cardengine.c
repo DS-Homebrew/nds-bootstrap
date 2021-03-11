@@ -655,8 +655,7 @@ static void runCardEngineCheck(void) {
 	#endif	
 
     if (sharedAddr[3] == (vu32)0x025AAB08) {
-		sharedAddr[4] = (vu32)0x025AAB08;
-		IPC_SendSync(0x7);
+		IPC_SendSync(0x8);
 	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
@@ -667,6 +666,8 @@ static void runCardEngineCheck(void) {
     
     		//nocashMessage("runCardEngineCheck mutex ok");
     
+            dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
+
   		/*if (sharedAddr[3] == (vu32)0x5245424F) {
   			i2cWriteRegister(0x4A, 0x70, 0x01);
   			i2cWriteRegister(0x4A, 0x11, 0x01);
@@ -676,23 +677,20 @@ static void runCardEngineCheck(void) {
 				sdRead = true;
     			log_arm9();
     			sharedAddr[3] = 0;
-                IPC_SendSync(0x8);
+                //IPC_SendSync(0x8);
     		}
     
     
           if ((sharedAddr[3] == (vu32)0x025FFB08) || (sharedAddr[3] == (vu32)0x025FFB0A)) {
 				sdRead = true;
-              dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     sharedAddr[3] = 0;
-					sharedAddr[4] = (vu32)0x025AAB08;
-                    IPC_SendSync(0x8);
+                    if (dmaLed) IPC_SendSync(0x8);
               } else {
                 while(!resume_cardRead_arm9()) {}
                 //if (resume_cardRead_arm9()) { 
                     sharedAddr[3] = 0;
-					sharedAddr[4] = (vu32)0x025AAB08;
-                    IPC_SendSync(0x8);
+                    if (dmaLed) IPC_SendSync(0x8);
 				//}
               }
           }
@@ -740,8 +738,7 @@ static void runCardEngineCheck(void) {
             //if(resume_cardRead_arm9()) {
 			    while(!resume_cardRead_arm9()) {} 
                 sharedAddr[3] = 0;
-				sharedAddr[4] = (vu32)0x025AAB08;
-                IPC_SendSync(0x8);
+                if (dmaLed) IPC_SendSync(0x8);
             //}
         }
   		unlockMutex(&cardEgnineCommandMutex);
@@ -965,9 +962,9 @@ void myIrqHandlerVBlank(void) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
 
-	u32 romTid = *(u32*)getRomTid(ndsHeader) & 0x00FFFFFF;
-	if ((romTid == 0x00524F55 /*"UOR"*/ && !(valueBits & saveOnFlashcard))
-	|| (romTid == 0x00425855 /*"UXB"*/ && !(valueBits & saveOnFlashcard))
+	const char* romTid = getRomTid(ndsHeader);
+	if ((strncmp(romTid, "UOR", 3)==0 && !(valueBits & saveOnFlashcard))
+	|| (strncmp(romTid, "UXB", 3)==0 && !(valueBits & saveOnFlashcard))
 	|| (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard))) {
 		runCardEngineCheck();
 	}

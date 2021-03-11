@@ -1067,12 +1067,11 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
-	if (sharedAddr[4] == 0x025AAB08) {
+	if (IPC_GetSync() == 0x8) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
-		sharedAddr[4] = 0;
 	}
 #endif
 
