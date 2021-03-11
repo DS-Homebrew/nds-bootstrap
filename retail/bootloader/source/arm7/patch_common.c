@@ -40,6 +40,19 @@ extern bool gbaRomFound;
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
+	// Animal Crossing: Wild World
+	/*if (strncmp(romTid, "ADM", 3) == 0) {
+		int instancesPatched = 0;
+		u32 addrOffset = 0x02000000;
+		while (instancesPatched < 3) {
+			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
+				*(u32*)addrOffset += 0x400000;
+				instancesPatched++;
+			}
+			addrOffset += 4;
+		}
+	}*/
+
 	// The World Ends With You (USA/Europe)
 	if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
 		*(u32*)0x203E7B0 = 0;
