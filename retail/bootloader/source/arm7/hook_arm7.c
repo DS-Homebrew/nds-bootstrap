@@ -39,6 +39,7 @@
 #define b_dsiSD BIT(5)
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
+#define b_runCardEngineCheck BIT(8)
 
 extern u32 newArm7binarySize;
 
@@ -280,6 +281,7 @@ int hookNdsRetailArm7(
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 		//*ndma0Handler = ce7->patches->ndma0Handler;
+		ce7->valueBits |= b_runCardEngineCheck;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);

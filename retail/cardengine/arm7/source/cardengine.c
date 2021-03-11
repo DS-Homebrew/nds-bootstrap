@@ -49,6 +49,7 @@
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
+#define b_runCardEngineCheck BIT(8)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -962,10 +963,7 @@ void myIrqHandlerVBlank(void) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
-	if ((strncmp(romTid, "UOR", 3)==0 && !(valueBits & saveOnFlashcard))
-	|| (strncmp(romTid, "UXB", 3)==0 && !(valueBits & saveOnFlashcard))
-	|| (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard))) {
+	if (valueBits & b_runCardEngineCheck) {
 		runCardEngineCheck();
 	}
 }
