@@ -736,8 +736,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000
-	|| (strncmp(romTid, "ADM", 3) == 0)) {
+	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
