@@ -783,7 +783,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	//}
 #endif
 
-	if(*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x004A4C43) { // "CLJ"
+	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
 
@@ -919,7 +919,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//return -1;
 		}
 		#endif
-		if (*(u32*)getRomTid(ndsHeader) & 0x00FFFFFF == 0x00524255) { // "UBR"
+		if (strncmp(getRomTid(ndsHeader), "UBR", 3) != 0) {
 			debug8mbMpuFix();
 		}
 
