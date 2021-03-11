@@ -101,9 +101,7 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, cardReadRef1
-    ldr     r7, ce9location1
-    add     r6, r6, r7
+	ldr		r6, =cardRead
     
 	bl		_blx_r6_stub_card_read
 
@@ -118,19 +116,13 @@ cacheFlushRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000
-ce9location1:
-.word   ce9
-cardReadRef1:
-.word   cardRead-ce9  
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push	{r3-r7, lr}
 
-	ldr		r6, cardReadRef2
-    ldr     r7, ce9location2
-    add     r6, r6, r7
+	ldr		r6, =cardRead
 
 	bl		_blx_r6_stub_thumb_card_read	
 
@@ -140,10 +132,6 @@ _blx_r6_stub_thumb_card_read:
 	bx	r6	
 .pool
 .align	4
-ce9location2:
-.word   ce9
-cardReadRef2:
-.word   cardRead-ce9 	
 	.arm
 @---------------------------------------------------------------------------------
 
@@ -159,25 +147,18 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
+    stmfd   sp!, {r4-r11,lr}
 
-	ldr		r6, cardReadRef4
-    ldr     r7, ce9location4
-    add     r6, r6, r7
+	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_card_read_dma	
-    
 
-	ldmfd   sp!, {r1-r11,pc}
+	ldmfd   sp!, {r4-r11,pc}
 	mov r0, #0
 	bx      lr
 _blx_r6_stub_card_read_dma:
 	bx	r6	
 .pool
-ce9location4:
-.word   ce9
-cardReadRef4:
-.word   cardReadDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -185,21 +166,14 @@ card_set_dma_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRef8
-    ldr     r7, ce9location8
-    add     r6, r6, r7
+	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_card_set_dma	
-    
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_card_set_dma:
 	bx	r6	
 .pool
-ce9location8:
-.word   ce9
-cardReadRef8:
-.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -249,35 +223,27 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
+    push	{r4-r7, lr}
     
-	ldr		r6, cardReadRef7
-    ldr     r7, ce9location7
-    add     r6, r6, r7
+	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_thumb_card_read_dma	
 
-    pop	{r1-r7, pc}
+    pop	{r4-r7, pc}
     mov r0, #0
 	bx      lr
 _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
-.align	4
-ce9location7:
-.word   ce9
-cardReadRef7:
-.word   cardReadDma-ce9 		
+.align	4	
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 thumb_card_set_dma_arm9:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
-    
-	ldr		r6, cardReadRef9
-    ldr     r7, ce9location9
-    add     r6, r6, r7
+
+	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_thumb_card_set_dma	
 
@@ -286,10 +252,6 @@ _blx_r6_stub_thumb_card_set_dma:
 	bx	r6	
 .pool
 .align	4
-ce9location9:
-.word   ce9
-cardReadRef9:
-.word   cardSetDma-ce9 
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -310,9 +272,7 @@ card_irq_enable:
 	push    {lr}
 	push	{r1-r12}
 
-	ldr		r6, cardReadRefIrq
-    ldr     r7, ce9locationIrq
-    add     r6, r6, r7
+	ldr		r6, =myIrqEnable
 
 	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
@@ -321,10 +281,6 @@ card_irq_enable:
 _blx_r3_stub2:
 	bx	r6
 .pool
-ce9locationIrq:
-.word   ce9
-cardReadRefIrq:
-.word   myIrqEnable-ce9 
 @---------------------------------------------------------------------------------
 
 	.thumb
@@ -333,9 +289,7 @@ thumb_card_irq_enable:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
 
-	ldr		r6, cardReadRefTIrq
-    ldr     r7, ce9locationTIrq
-    add     r6, r6, r7
+	ldr		r6, =myIrqEnable
 
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
@@ -344,10 +298,6 @@ thumb_blx_r3_stub2:
 	bx	r6
 .pool
 .align	4
-ce9locationTIrq:
-.word   ce9
-cardReadRefTIrq:
-.word   myIrqEnable-ce9 
 @---------------------------------------------------------------------------------
 
 
@@ -368,9 +318,7 @@ ipcSyncHandler:
     
 code_handler_start_vblank:
 	push	{r0-r12} 
-    ldr		r6, cardReadRef13v
-    ldr     r7, ce9location13
-    add     r6, r6, r7
+    ldr		r6, =myIrqHandlerVBlank
 	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
 	
 	@ exit after return
@@ -378,9 +326,7 @@ code_handler_start_vblank:
 
 code_handler_start_ipc:
 	push	{r0-r12} 
-    ldr		r6, cardReadRef13
-    ldr     r7, ce9location13
-    add     r6, r6, r7
+    ldr		r6, =myIrqHandlerIPC
 	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
   
 	@ exit after return
@@ -394,24 +340,15 @@ arm9exit:
 	bx  lr
     
 .pool
-ce9location13:
-.word   ce9
-cardReadRef13v:
-.word   myIrqHandlerVBlank-ce9  
-cardReadRef13:
-.word   myIrqHandlerIPC-ce9  
 
 @---------------------------------------------------------------------------------
 reset_arm9:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, cardReadRefRes
-    ldr     r7, ce9locationRes
-    add     r6, r6, r7
+	ldr		r6, =reset
 
 	bl		_blx_r6_stub_reset	
-    
 
 	ldmfd   sp!, {r1-r11,pc}
 	mov r0, #0
@@ -419,10 +356,6 @@ reset_arm9:
 _blx_r6_stub_reset:
 	bx	r6	
 .pool
-ce9locationRes:
-.word   ce9
-cardReadRefRes:
-.word   reset-ce9 
 @---------------------------------------------------------------------------------
 
 .global callEndReadDmaThumb
