@@ -146,7 +146,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
-	dbg_printf("ceCached: %s\n", btoa(conf->ceCached));
 	dbg_printf("extendedMemory: %s\n", btoa(conf->extendedMemory));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	dbg_printf("colorMode: %lX\n", conf->colorMode);

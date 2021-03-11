@@ -623,14 +623,15 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 	return true;
 }
 
+static bool mpuInitCachePatched = false;
+
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-    const char* romTid = getRomTid(ndsHeader);
+	if (patchMpuRegion == 2) return;
 
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
-		patchOffsetCache.mpuInitCacheOffset = 0;
 		patchOffsetCache.mpuInitOffset = 0;
 		patchOffsetCacheChanged = true;
 	}
@@ -654,11 +655,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		switch (patchMpuRegion) {
 			case 0:
 				mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
-				break;
-			case 2:
-				mpuNewDataAccess  = 0x15111111;
-				mpuNewInstrAccess = 0x5111111;
-				mpuAccessOffset   = 6;
 				break;
 			case 3:
 				mpuInitRegionNewData = PAGE_8M | 0x03000000 | 1;
@@ -686,6 +682,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 	if (mpuInitCacheOffset) {
 		*mpuInitCacheOffset = 0xE3A00046;
+		mpuInitCachePatched = true;
+		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 	}
 
 	// Patch out all further mpu reconfiguration
@@ -732,8 +730,89 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
-	patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
+}
+
+static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) return;
+
+	// Find the mpu init
+	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset2;
+	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset2;
+	if (!patchOffsetCache.mpuStartOffset2) {
+		mpuStartOffset = findMpuStartOffset(ndsHeader, 2);
+	}
+	if (!patchOffsetCache.mpuDataOffset2) {
+		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
+	}
+	if (mpuDataOffset) {
+		// Change the region 2 configuration (Makes loading slow, so new code is used)
+
+		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
+		u32 mpuNewDataAccess = 0x15111111;
+		u32 mpuNewInstrAccess = 0x5111111;
+		int mpuAccessOffset = 6;
+
+		*mpuDataOffset = mpuInitRegionNewData;
+
+		if (mpuNewInstrAccess) {
+			mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+		}
+		if (mpuNewDataAccess) {
+			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+		}*/
+		*mpuDataOffset = 0x27FF017; // SDK 5 value
+	}
+
+	// Find the mpu cache init
+	u32* mpuInitCacheOffset = patchOffsetCache.mpuInitCacheOffset;
+	if (!mpuInitCachePatched) {
+		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
+	}
+	if (mpuInitCacheOffset) {
+		*mpuInitCacheOffset = 0xE3A00046;
+		mpuInitCachePatched = true;
+		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
+	}
+
+	// Patch out all further mpu reconfiguration
+	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(2);
+	u32* mpuInitOffset = patchOffsetCache.mpuInitOffset2;
+	if (!mpuInitOffset) {
+		mpuInitOffset = (u32*)mpuStartOffset;
+	}
+	extern u32 iUncompressedSize;
+	u32 patchSize = iUncompressedSize;
+	if (mpuInitOffset == mpuStartOffset) {
+		mpuInitOffset = findOffset(
+			//(u32*)((u32)mpuStartOffset + 4), patchSize,
+			mpuInitOffset + 1, patchSize,
+			mpuInitRegionSignature, 1
+		);
+	}
+	if (mpuInitOffset) {
+		dbg_printf("Mpu2 init: ");
+		dbg_hexa((u32)mpuInitOffset);
+		dbg_printf("\n\n");
+
+		*mpuInitOffset = 0xE1A00000; // nop
+
+		// Try to find it
+		/*for (int i = 0; i < 0x100; i++) {
+			mpuDataOffset += i;
+			if ((*mpuDataOffset & 0xFFFFFF00) == 0x02000000) {
+				*mpuDataOffset = PAGE_32M | 0x02000000 | 1;
+				break;
+			}
+			if (i == 100) {
+				*mpuStartOffset = 0xE1A00000;
+			}
+		}*/
+	}
+
+	patchOffsetCache.mpuStartOffset2 = mpuStartOffset;
+	patchOffsetCache.mpuDataOffset2 = mpuDataOffset;
+	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
 }
 
 /*static void patchSlot2Exist(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool *usesThumb) {
@@ -1491,6 +1570,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	patchMpu2(ndsHeader, moduleParams);
 
 	//patchDownloadplay(ndsHeader);
 
@@ -1503,7 +1583,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//getSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	randomPatch(ndsHeader, moduleParams);
-
 	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {

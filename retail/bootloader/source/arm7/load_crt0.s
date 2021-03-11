@@ -57,7 +57,6 @@
 	.global donorSdkVer
 	.global patchMpuRegion
 	.global patchMpuSize
-	.global ceCached
 	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
@@ -146,8 +145,6 @@ donorSdkVer:
 patchMpuRegion:
 	.word	0x00000000
 patchMpuSize:
-	.word	0x00000000
-ceCached:
 	.word	0x00000000
 extendedMemory:
 	.word	0x00000000

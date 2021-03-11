@@ -101,9 +101,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Patch MPU size
 	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
 
-	// Card engine (arm9) cached
-	conf->ceCached = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARDENGINE_CACHED").c_str(), NULL, 0);
-
 	// Extended memory
 	conf->extendedMemory = strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY").c_str(), NULL, 0);
 
@@ -246,14 +243,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION);
-	}
-	fclose(cebin);
-
-    // Load reloc ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_reloc.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x3000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 

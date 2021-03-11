@@ -111,7 +111,6 @@ extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
-extern u32 ceCached;
 extern u32 extendedMemory;
 extern u32 consoleModel;
 extern u32 romRead_LED;
@@ -1237,32 +1236,12 @@ int arm7_main(void) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-		} else if (((u32)ndsHeader->arm9destination == 0x02004000) && (strncmp(ndsHeader->makercode, "4Q", 2) != 0)) {
-			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
-			/*if (((u32)ndsHeader->arm9destination < 0x02004000) && (moduleParams->sdk_version < 0x2008000)
-			&& (*(u32*)CARDENGINE_ARM9_CACHED_LOCATION1 == 0)) {
-				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION1;
-			}*/
+		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed) {
+			ce9Location = CARDENGINE_ARM9_CACHED_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
-			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_RELOC_BUFFERED_LOCATION), size);
+			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION), size);
 			if (ROMinRAM) {
 				relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
-			}
-		} else if ((ceCached || moduleParams->sdk_version < 0x2008000) && !dsiModeConfirmed && !extendedMemoryConfirmed) {
-			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION;
-			if (ROMinRAM && moduleParams->sdk_version < 0x2008000) {
-				ce9Location = CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
-			}
-			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
-			if(ce9Location) {
-				tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION), size);
-				if (ROMinRAM) {
-					relocate_ce9(CARDENGINE_ARM9_LOCATION,ce9Location,size);
-				}
-			} else {         
-				ce9Location = CARDENGINE_ARM9_LOCATION;
-				tonccpy((u32*)CARDENGINE_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINE_ARM9_BUFFERED_LOCATION), size);
 			}
 		} else if (extendedMemoryConfirmed) {
 			ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
