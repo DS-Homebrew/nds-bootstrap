@@ -190,10 +190,6 @@ cardengine_arm9_cached: $(DATA)
 	@$(MAKE) -C cardengine/arm9_cached
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_reloc: $(DATA)
-	@$(MAKE) -C cardengine/arm9_reloc
-
-#---------------------------------------------------------------------------------		
 cardengine_arm9_dldi: $(DATA)
 	@$(MAKE) -C cardengine/arm9_dldi
 
@@ -226,7 +222,6 @@ clean:
 	@$(MAKE) -C cardengine/arm9_igm clean
 	@$(MAKE) -C cardengine/arm9 clean
 	@$(MAKE) -C cardengine/arm9_cached clean
-	@$(MAKE) -C cardengine/arm9_reloc clean
 	@$(MAKE) -C cardengine/arm9_dldi clean
 	@$(MAKE) -C cardengine/arm9_sdk5 clean
 	@$(MAKE) -C cardengine/arm9_sdk5_dldi clean
