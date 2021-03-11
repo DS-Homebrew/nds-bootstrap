@@ -901,11 +901,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ROMinRAM) {
-		*heapPointer += 0x1400; // shrink heap by 5KB
-	} else {
-		*heapPointer += (isSdk5(moduleParams) ? 0x3000 : 0x2C00); // shrink heap by 11KB (or for SDK5, 12KB)
-	}
+	*heapPointer += 0x2000; // shrink heap by 8KB
 
     dbg_printf("new lo heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
@@ -948,11 +944,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ROMinRAM) {
-		*heapPointer = (u32)CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
-	} else {
-		*heapPointer = (gameOnFlashcard ? CARDENGINE_ARM9_DLDI_LOCATION : CARDENGINE_ARM9_CACHED_LOCATION); // shrink heap by 16KB or 11KB
-	}
+	*heapPointer = (u32)CARDENGINE_ARM9_CACHED_LOCATION_ROMINRAM;
 
     dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
