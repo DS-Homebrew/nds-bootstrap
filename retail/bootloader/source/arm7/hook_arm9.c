@@ -17,6 +17,7 @@
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
 #define b_overlaysInRam BIT(6)
+#define b_cacheFlushFlag BIT(7)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -212,6 +213,10 @@ int hookNdsRetailArm9(
 			ce9->valueBits |= b_overlaysInRam;
 		}
 	  }
+
+		if(strncmp(romTid, "CLJ", 3) == 0) {
+			ce9->valueBits |= b_cacheFlushFlag;
+		}
 	}
 
 	extern u32 iUncompressedSize;

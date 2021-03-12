@@ -40,6 +40,7 @@
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
+#define cacheFlushFlag BIT(7)
 
 #ifdef DLDI
 #include "my_fat.h"
@@ -783,7 +784,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	//}
 #endif
 
-	if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0) {
+	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
 
