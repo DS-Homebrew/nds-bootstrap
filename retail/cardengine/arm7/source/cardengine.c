@@ -337,6 +337,7 @@ static void cardReadLED(bool on) {
 extern void inGameMenu(void);
 
 void forceGameReboot(void) {
+	u32 clearBuffer = 0;
 	if (consoleModel < 2) {
 		if (*(u32*)(ce7+0x12100) == 0) {
 			unlaunchSetFilename(false);
@@ -345,7 +346,8 @@ void forceGameReboot(void) {
 		IPC_SendSync(0x8);
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
-	u32 clearBuffer = 0;
+	driveInitialize();
+	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
 	if (*(u32*)(ce7+0x12100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);

@@ -295,6 +295,9 @@ static void ramViewer(void) {
 void inGameMenu(s8* mainScreen) {
 	int oldIME = enterCriticalSection();
 
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+
 	u32 dispcnt = REG_DISPCNT_SUB;
 	u16 bg0cnt = REG_BG0CNT_SUB;
 	//u16 bg1cnt = REG_BG1CNT_SUB;
@@ -403,6 +406,8 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG3CNT_SUB = bg3cnt;
 
 	REG_POWERCNT = powercnt;
+
+	REG_EXMEMCNT = exmemcnt;
 
 	leaveCriticalSection(oldIME);
 }
