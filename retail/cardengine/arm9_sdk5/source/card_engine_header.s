@@ -154,8 +154,6 @@ card_dma_arm9:
 	bl		_blx_r6_stub_card_read_dma	
 
 	ldmfd   sp!, {r4-r11,pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_card_read_dma:
 	bx	r6	
 .pool
@@ -230,8 +228,6 @@ thumb_card_dma_arm9:
 	bl		_blx_r6_stub_thumb_card_read_dma	
 
     pop	{r4-r7, pc}
-    mov r0, #0
-	bx      lr
 _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
