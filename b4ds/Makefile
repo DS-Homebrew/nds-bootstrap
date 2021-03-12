@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -176,6 +176,10 @@ cardengine_arm9: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9_8kb: $(DATA)
 	@$(MAKE) -C cardengine/arm9_8kb
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_extmem: $(DATA)
+	@$(MAKE) -C cardengine/arm9_extmem
 
 #---------------------------------------------------------------------------------
 #$(BUILD):

@@ -582,26 +582,28 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	//tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	if (extendedMemory) {
+		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+	} else {
+		extern u32 _dldi_start;
+		u32 dldiStart = (u32)(_dldi_start+0x40);
+		u32 dldiEnd = (u32)(_dldi_start+0x44);
+		u16 dldiSize = 0;
+		for (u32 i = dldiStart; i <= dldiEnd; i += 4) {
+			dldiSize += 4;
+		}
 
-	extern u32 _dldi_start;
-	u32 dldiStart = (u32)(_dldi_start+0x40);
-	u32 dldiEnd = (u32)(_dldi_start+0x44);
-	u16 dldiSize = 0;
-	for (u32 i = dldiStart; i <= dldiEnd; i += 4) {
-		dldiSize += 4;
+		if (dldiSize >= 0x2000 && dldiSize < 0x3000) {
+			ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_12KB;
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_12KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 0x5000);
+		} else if (dldiSize < 0x2000) {
+			ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_8KB;
+			tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_8KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 0x4000);
+		}
+		toncset((u32*)0x023E0000, 0, 0x10000);
 	}
 
-	if (dldiSize >= 0x2000 && dldiSize < 0x3000) {
-		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_12KB;
-		tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_12KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 0x5000);
-	} else if (dldiSize < 0x2000) {
-		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_8KB;
-		tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_8KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 0x4000);
-	}
-	toncset((u32*)0x023E0000, 0, 0x10000);
-
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x5000)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");
@@ -614,8 +616,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		extendedMemory ? patchMpuRegion : 2,
-		extendedMemory ? patchMpuSize : 1,
+		patchMpuRegion,
+		patchMpuSize,
 		saveFileCluster,
 		saveSize
 	);
@@ -653,12 +655,12 @@ int arm7_main(void) {
 			 || (strncmp(getRomTid(ndsHeader), "A8N", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "ADA", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "APA", 3) == 0)) {
-		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
+		fatTableAddr = (u32)patchLoHeapPointer(moduleParams, ndsHeader, saveSize);
 		fatTableSize = 0x2000;
 	} else if ((strncmp(getRomTid(ndsHeader), "CPU", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "IPG", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "IPK", 3) == 0)) {
-		fatTableAddr = (u32)patchHeapPointer(moduleParams, ndsHeader, saveSize);
+		fatTableAddr = (u32)patchLoHeapPointer(moduleParams, ndsHeader, saveSize);
 		fatTableSize = 0x4000;
 	} else {
 		fatTableAddr = 0x023E4000;

@@ -73,6 +73,9 @@ typedef struct patchOffsetCacheContents {
     u32* mpuDataOffset;
     u32* mpuInitCacheOffset;
     u32* mpuInitOffset;
+    u32* mpuStartOffset2;
+    u32* mpuDataOffset2;
+    u32* mpuInitOffset2;
 	u32* randomPatchOffset;
 	u32 randomPatchChecked;
 	u32* randomPatch5SecondOffset;
@@ -123,7 +126,7 @@ u32 patchCardNds(
 	u32 saveFileCluster,
 	u32 saveSize
 );
-u32* patchHeapPointer(
+u32* patchLoHeapPointer(
     const module_params_t* moduleParams,
     const tNDSHeader* ndsHeader,
 	u32 saveSize

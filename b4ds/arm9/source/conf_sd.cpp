@@ -134,19 +134,31 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
     
-	// Load ce9 binary 1
-	cebin = fopen("nitro:/cardengine_arm9.bin", "rb");
-	if (cebin) {
-		fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 1, 0x5000, cebin);
+	*(vu32*)(0x02000000) = 0x314D454D;
+	*(vu32*)(0x02400000) = 0x324D454D;
+
+	if (REG_SCFG_EXT != 0 || ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D))) {
+		// Load ce9 binary
+		cebin = fopen("nitro:/cardengine_arm9_extmem.bin", "rb");
+		if (cebin) {
+			fread((void*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM, 1, 0x6000, cebin);
+		}
+		fclose(cebin);
+	} else {
+		// Load ce9 binary 1
+		cebin = fopen("nitro:/cardengine_arm9.bin", "rb");
+		if (cebin) {
+			fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 1, 0x5000, cebin);
+		}
+		fclose(cebin);
+
+		// Load ce9 binary 2
+		cebin = fopen("nitro:/cardengine_arm9_8kb.bin", "rb");
+		if (cebin) {
+			fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 1, 0x4000, cebin);
+		}
+		fclose(cebin);
 	}
-	fclose(cebin);
-    
-	// Load ce9 binary 2
-	cebin = fopen("nitro:/cardengine_arm9_8kb.bin", "rb");
-	if (cebin) {
-		fread((void*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 1, 0x4000, cebin);
-	}
-	fclose(cebin);
     
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
