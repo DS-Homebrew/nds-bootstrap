@@ -37,34 +37,21 @@
 #include <nds/ipc.h>
 #include <nds/system.h>
 
+#include "locations.h"
 #include "common.h"
 #include "loading.h"
 
-#define REG_MBK_CACHE_START	0x4004044
-
 extern void arm9_clearCache(void);
-extern void arm9_reset(void);
-extern void arm9_reset_sdk5(void);
 
 tNDSHeader* ndsHeader = NULL;
-bool isGSDD = false;
-bool arm9_isSdk5 = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
-bool extendedMemoryConfirmed = false;
-bool moreMemory = false;
+bool extendedMemory2 = false;
+bool dsDebugRam = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
-
-void transferToArm7(int slot) {
-	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
-}
-
-void transferToArm9(int slot) {
-	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
-}
 
 void initMBKARM9(void) {
 	// Default DSiWare settings
@@ -83,27 +70,6 @@ void initMBKARM9(void) {
 	REG_MBK7 = 0x07C03740; // Same as DSiWare
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
 	REG_MBK8 = 0x07403700; // Same as DSiWare
-}
-
-void initMBKARM9_dsiEnhanced(void) {
-	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9 = 0x0000000F;
-
-	// WRAM-A fully mapped to ARM7
-	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-
-	// WRAM-B fully mapped to ARM7 // inverted order
-	*(vu32*)REG_MBK2 = 0x0105090D;
-	*(vu32*)REG_MBK3 = 0x1115191D;
-
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x0105090D;
-	*(vu32*)REG_MBK5 = 0x1115191D;
-}
-
-// SDK 5
-static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
-	return (ndsHeader->unitCode == 0x02);
 }
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -154,6 +120,18 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	REG_EXMEMCNT = 0xE880;
 
 	initMBKARM9();
+
+	extendedMemory2 = (REG_SCFG_EXT != 0);
+	if (extendedMemory2) {
+		REG_SCFG_EXT = 0x8300C000;
+	} else {
+		*(vu32*)(0x02000000) = 0x314D454D;
+		*(vu32*)(0x02400000) = 0x324D454D;
+		if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+			extendedMemory2 = true;
+			dsDebugRam = true;
+		}
+	}
 
 	arm9_stateFlag = ARM9_START;
 
@@ -277,38 +255,22 @@ void __attribute__((target("arm"))) arm9_main(void) {
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
-			/*if (isGSDD) {       
-				REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-			}*/
-			if (dsiModeConfirmed) {
-				if (arm9_isSdk5 && ROMisDsiEnhanced(ndsHeader)) {
-					initMBKARM9_dsiEnhanced();
-				}
-				REG_SCFG_EXT = 0x8307F100;
-				REG_SCFG_CLK = 0x87;
-				REG_SCFG_RST = 1;
-			} else {
-				REG_SCFG_EXT = 0x8300C000;
-				if (arm9_boostVram) {
-					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-				}
-                REG_SCFG_EXT |= BIT(16);	// NDMA
-				if (extendedMemoryConfirmed) {
-					if (moreMemory) {
-						for (int i = 0; i < 16; i++) {
-							transferToArm9(i);
-						}
-					}
-					// Switch to 4MB mode
-					REG_SCFG_EXT -= 0xC000;
-				} else {
-					// lock SCFG
-					REG_SCFG_EXT &= ~(1UL << 31);
-				}
+			if (arm9_boostVram) {
+				REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 			}
+			// lock SCFG
+			REG_SCFG_EXT &= ~(1UL << 31);
+
 			arm9_stateFlag = ARM9_READY;
 		}
 	}
+
+	/*if (dsiModeConfirmed) {
+		REG_SCFG_EXT = 0x8307F100;
+	} else {
+		// lock SCFG
+		REG_SCFG_EXT &= ~(1UL << 31);
+	}*/
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);

@@ -1,24 +1,10 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
-#include <nds/system.h>
-#include "debug_file.h"
+#include "patch.h"
 #include "hook.h"
 #include "common.h"
-#include "patch.h"
-#include "find.h"
-#include "nds_header.h"
 #include "cardengine_header_arm9.h"
-
-#define b_saveOnFlashcard BIT(0)
-#define b_extendedMemory BIT(1)
-#define b_ROMinRAM BIT(2)
-#define b_dsiMode BIT(3)
-#define b_enableExceptionHandler BIT(4)
-#define b_isSdk5 BIT(5)
-#define b_overlaysInRam BIT(6)
-#define b_cacheFlushFlag BIT(7)
-
 
 static const int MAX_HANDLER_LEN = 50;
 static const int MAX_HANDLER_LEN_ALT = 0x200;
@@ -92,7 +78,9 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     		return NULL;
         }
     }
-     
+    
+    
+    
     dbg_printf("handlerEndSig\n");
     dbg_hexa(addr2);
     dbg_printf("\n");
@@ -125,116 +113,43 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 saveOnFlashcard,
-	u32 cacheBlockSize,
-	u32 extendedMemory,
-	u32 ROMinRAM,
-	u32 dsiMode, // SDK 5
-	u32 enableExceptionHandler,
-	u32 consoleModel
+	u32 srParamsFileCluster,
+	bool expansionPakFound,
+	bool extendedMemory,
+	bool dsDebugRam,
+	u32 overlaysSize,
+	u32 maxClusterCacheSize,
+    u32 fatTableAddr
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	ce9->moduleParams           = moduleParams;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
-	if (saveOnFlashcard) {
-		ce9->valueBits |= b_saveOnFlashcard;
-	}
-	if (extendedMemory) {
-		ce9->valueBits |= b_extendedMemory;
-	}
-	if (ROMinRAM) {
-		ce9->valueBits |= b_ROMinRAM;
-	}
-	if (dsiMode) {
-		ce9->valueBits |= b_dsiMode; // SDK 5
-	}
-	if (enableExceptionHandler) {
-		ce9->valueBits |= b_enableExceptionHandler;
-	}
-	if (isSdk5(moduleParams)) {
-		ce9->valueBits |= b_isSdk5;
-	}
-	ce9->consoleModel           = consoleModel;
-	if (extendedMemory) {
-		ce9->romLocation = ROM_LOCATION_EXT;
-	} else if (consoleModel > 0) {
-		ce9->romLocation = ((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	} else {
-		ce9->romLocation = ROM_LOCATION;
-	}
-
-	if (!ROMinRAM) {
-		extern bool gbaRomFound;
-		bool runOverlayCheck = true;
-		ce9->cacheBlockSize = cacheBlockSize;
-		const char* romTid = getRomTid(ndsHeader);
-		if (isSdk5(moduleParams)) {
-			if (consoleModel > 0) {
-				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;
-				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				ce9->cacheSlots = dev_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
-			} else if ((strncmp(romTid, "BKW", 3) == 0)
-					|| (strncmp(romTid, "VKG", 3) == 0)) {
-				ce9->romLocation = CACHE_ADRESS_START_low;
-				ce9->cacheAddress = CACHE_ADRESS_START_low;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
-			} else {
-				ce9->romLocation = CACHE_ADRESS_START;
-				ce9->cacheAddress = CACHE_ADRESS_START;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
-			}
-		} else {
-			if (strncmp(romTid, "UBR", 3) == 0) {
-				runOverlayCheck = false;
-				ce9->romLocation = CACHE_ADRESS_START_low;
-				ce9->cacheAddress = CACHE_ADRESS_START_low;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
-			} else {
-				ce9->romLocation = (dsiMode ? dev_CACHE_ADRESS_START_SDK5 : CACHE_ADRESS_START);
-				ce9->cacheAddress = ce9->romLocation;
-
-				if (consoleModel > 0 && !gbaRomFound) {
-					ce9->cacheSlots = (dsiMode ? dev_CACHE_ADRESS_SIZE_SDK5 : dev_CACHE_ADRESS_SIZE)/cacheBlockSize;
-				} else {
-					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE/cacheBlockSize;
-				}
-
-			}
-		}
-	  if (runOverlayCheck) {
-		extern u32 overlaysSize;
-
-		if (overlaysSize <= (consoleModel>0 ? 0x1800000 : 0x800000)) {
-			for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
-				ce9->cacheAddress += cacheBlockSize;
-				ce9->cacheSlots--;
-			}
-			ce9->valueBits |= b_overlaysInRam;
-		}
-	  }
-
-		if(strncmp(romTid, "CLJ", 3) == 0) {
-			ce9->valueBits |= b_cacheFlushFlag;
-		}
-	}
+	ce9->srParamsCluster        = srParamsFileCluster;
+	ce9->expansionPakFound      = expansionPakFound;
+	ce9->extendedMemory         = extendedMemory;
+	ce9->dsDebugRam             = dsDebugRam;
+	ce9->overlaysSize           = overlaysSize;
+	ce9->maxClusterCacheSize    = maxClusterCacheSize;
+	ce9->fatTableAddr           = fatTableAddr;
 
 	extern u32 iUncompressedSize;
 
-    u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
+    u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;
  	if (!tableAddr) {
 		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
 	}
-   
+
     if (!tableAddr) {
 		dbg_printf("ERR_HOOK_9\n");
 		return ERR_HOOK;
 	}
-    
+
     dbg_printf("hookLocation arm9: ");
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");
-	patchOffsetCache.a9IrqHookOffset = tableAddr;
+	patchOffsetCache.a9IrqHandlerOffset = tableAddr;
 
     /*u32* vblankHandler = hookLocation;
     u32* dma0Handler = hookLocation + 8;
@@ -244,7 +159,7 @@ int hookNdsRetailArm9(
     u32* ipcSyncHandler = hookLocation + 16;
     u32* cardCompletionIrq = hookLocation + 19;*/
     
-    ce9->irqTable   = tableAddr;
+    ce9->irqTable = tableAddr;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

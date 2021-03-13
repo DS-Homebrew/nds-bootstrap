@@ -124,6 +124,32 @@ static void myFIFOValue32Handler(u32 value, void* userdata) {
 	printf("ARM7 data %lX\n", value);
 }
 
+static inline void debugConfB4DS(configuration* conf) {
+	dbg_printf("debug: %s\n", btoa(conf->debug));
+	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
+	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
+	dbg_printf("donorE2Path: \"%s\"\n", conf->donorE2Path);
+	dbg_printf("donor2Path: \"%s\"\n", conf->donor2Path);
+	dbg_printf("donor3Path: \"%s\"\n", conf->donor3Path);
+	dbg_printf("donorPath: \"%s\"\n", conf->donorPath);
+	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
+	if (debug) {
+		dopause();
+	}
+	dbg_printf("saveSize: %lX\n", conf->saveSize);
+	dbg_printf("language: %hhX\n", conf->language);
+	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
+	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
+	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
+	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
+	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
+	dbg_printf("logging: %s\n", btoa(conf->logging));
+	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
+}
+
 static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
@@ -168,135 +194,139 @@ static int runNdsFile(configuration* conf) {
 	if (debug) {
 		consoleDemoInit();
 
-		fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
+		if (REG_SCFG_EXT != 0) {
+			fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
 
-		getSFCG_ARM9();
-		getSFCG_ARM7();
+			getSFCG_ARM9();
+			getSFCG_ARM7();
 
-		/*for (int i = 0; i < 60; i++) {
-			swiWaitForVBlank();
-		}*/
-	}
-
-	// ROM read LED
-	switch(conf->romRead_LED) {
-		case 0:
-		default:
-			break;
-		case 1:
-			dbg_printf("Using WiFi LED\n");
-			break;
-		case 2:
-			dbg_printf("Using Power LED\n");
-			break;
-		case 3:
-			dbg_printf("Using Camera LED\n");
-			break;
-	}
-
-	// DMA ROM read LED
-	switch(conf->dmaRomRead_LED) {
-		case 0:
-		default:
-			break;
-		case 1:
-			dbg_printf("DMA: Using WiFi LED\n");
-			break;
-		case 2:
-			dbg_printf("DMA: Using Power LED\n");
-			break;
-		case 3:
-			dbg_printf("DMA: Using Camera LED\n");
-			break;
-	}
-
-	// adjust TSC[1:26h] and TSC[1:27h]
-	// for certain gamecodes
-	FILE* f_nds_file = fopen(conf->ndsPath, "rb");
-
-	char romTid[5];
-	fseek(f_nds_file, offsetof(sNDSHeaderTitleCodeOnly, gameCode), SEEK_SET);
-	fread(romTid, 1, 4, f_nds_file);
-	fclose(f_nds_file);
-
-	static const char list[][4] = {
-		"ABX",	// NTR-ABXE Bomberman Land Touch!
-		"YO9",	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
-		"ALH",	// NTR-ALHE Flushed Away
-		"ACC",	// NTR-ACCE Cooking Mama
-		"YCQ",	// NTR-YCQE Cooking Mama 2 - Dinner with Friends
-		"YYK",	// NTR-YYKE Trauma Center - Under the Knife 2
-		"AZW",	// NTR-AZWE WarioWare - Touched!
-		"AKA",	// NTR-AKAE Rub Rabbits!, The
-		"AN9",	// NTR-AN9E Little Mermaid - Ariel's Undersea Adventure, The
-		"AKE",	// NTR-AKEJ Keroro Gunsou - Enshuu da Yo! Zenin Shuugou Part 2
-		"YFS",	// NTR-YFSJ Frogman Show - DS Datte, Shouganaijanai, The
-		"YG8",	// NTR-YG8E Yu-Gi-Oh! World Championship 2008
-		"AY7",	// NTR-AY7E Yu-Gi-Oh! World Championship 2007
-		"YON",	// NTR-YONJ Minna no DS Seminar - Kantan Ongakuryoku
-		"A5H",	// NTR-A5HE Interactive Storybook DS - Series 2
-		"A5I",	// NTR-A5IE Interactive Storybook DS - Series 3
-		"AMH",	// NTR-AMHE Metroid Prime Hunters
-		"A3T",	// NTR-A3TE Tak - The Great Juju Challenge
-		"YBO",	// NTR-YBOE Boogie
-		"ADA",	// NTR-ADAE PKMN Diamond
-		"APA",	// NTR-APAE PKMN Pearl
-		"CPU",	// NTR-CPUE PKMN Platinum
-		"APY",	// NTR-APYE Puyo Pop Fever
-		"AWH",	// NTR-AWHE Bubble Bobble Double Shot
-		"AXB",	// NTR-AXBJ Daigassou! Band Brothers DX
-		"A4U",	// NTR-A4UJ Wi-Fi Taiou - Morita Shogi
-		"A8N",	// NTR-A8NE Planet Puzzle League
-		"ABJ",	// NTR-ABJE Harvest Moon DS - Island of Happiness
-		"ABN",	// NTR-ABNE Bomberman Story DS
-		"ACL",	// NTR-ACLE Custom Robo Arena
-		"ART",	// NTR-ARTJ Shin Lucky Star Moe Drill - Tabidachi
-		"AVT",	// NTR-AVTJ Kou Rate Ura Mahjong Retsuden Mukoubuchi - Goburei, Shuuryou desu ne
-		"AWY",	// NTR-AWYJ Wi-Fi Taiou - Gensen Table Game DS
-		"AXJ",	// NTR-AXJE Dungeon Explorer - Warriors of Ancient Arts
-		"AYK",	// NTR-AYKJ Wi-Fi Taiou - Yakuman DS
-		"YB2",	// NTR-YB2E Bomberman Land Touch! 2
-		"YB3",	// NTR-YB3E Harvest Moon DS - Sunshine Islands
-		"YCH",	// NTR-YCHJ Kousoku Card Battle - Card Hero
-		"YFE",	// NTR-YFEE Fire Emblem - Shadow Dragon
-		"YGD",	// NTR-YGDE Diary Girl
-		"YKR",	// NTR-YKRJ Culdcept DS
-		"YRM",	// NTR-YRME My Secret World by Imagine
-		"YW2",	// NTR-YW2E Advance Wars - Days of Ruin
-		"AJU",	// NTR-AJUJ Jump! Ultimate Stars
-		"ACZ",	// NTR-ACZE Cars
-		"AHD",	// NTR-AHDE Jam Sessions
-		"ANR",	// NTR-ANRE Naruto - Saikyou Ninja Daikesshu 3
-		"YT3",	// NTR-YT3E Tamagotchi Connection - Corner Shop 3
-		"AVI",	// NTR-AVIJ Kodomo no Tame no Yomi Kikase - Ehon de Asobou 1-Kan
-		"AV2",	// NTR-AV2J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 2-Kan
-		"AV3",	// NTR-AV3J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 3-Kan
-		"AV4",	// NTR-AV4J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 4-Kan
-		"AV5",	// NTR-AV5J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 5-Kan
-		"AV6",	// NTR-AV6J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 6-Kan
-		"YNZ",	// NTR-YNZE Petz - Dogz Fashion
-	};
-
-	for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
-		if (memcmp(romTid, list[i], 3) == 0) {
-			// Found a match.
-			conf->volumeFix = true; // Special setting (when found special gamecode)
-			break;
+			/*for (int i = 0; i < 60; i++) {
+				swiWaitForVBlank();
+			}*/
 		}
 	}
 
-	// Boost CPU
-	if (conf->boostCpu) {
-		dbg_printf("CPU boosted\n");
-		setCpuClock(true); // libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
-	} else {
-		setCpuClock(false); //REG_SCFG_CLK = 0x80;
-		fifoSendValue32(FIFO_USER_06, 1);
-	}
+	if (REG_SCFG_EXT != 0) {
+		// ROM read LED
+		switch(conf->romRead_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				dbg_printf("Using WiFi LED\n");
+				break;
+			case 2:
+				dbg_printf("Using Power LED\n");
+				break;
+			case 3:
+				dbg_printf("Using Camera LED\n");
+				break;
+		}
 
-	// Boost VRAM
-	if (conf->boostVram) {
-		dbg_printf("VRAM boosted\n");
+		// DMA ROM read LED
+		switch(conf->dmaRomRead_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				dbg_printf("DMA: Using WiFi LED\n");
+				break;
+			case 2:
+				dbg_printf("DMA: Using Power LED\n");
+				break;
+			case 3:
+				dbg_printf("DMA: Using Camera LED\n");
+				break;
+		}
+
+		// adjust TSC[1:26h] and TSC[1:27h]
+		// for certain gamecodes
+		FILE* f_nds_file = fopen(conf->ndsPath, "rb");
+
+		char romTid[5];
+		fseek(f_nds_file, offsetof(sNDSHeaderTitleCodeOnly, gameCode), SEEK_SET);
+		fread(romTid, 1, 4, f_nds_file);
+		fclose(f_nds_file);
+
+		static const char list[][4] = {
+			"ABX",	// NTR-ABXE Bomberman Land Touch!
+			"YO9",	// NTR-YO9J Bokura no TV Game Kentei - Pikotto! Udedameshi
+			"ALH",	// NTR-ALHE Flushed Away
+			"ACC",	// NTR-ACCE Cooking Mama
+			"YCQ",	// NTR-YCQE Cooking Mama 2 - Dinner with Friends
+			"YYK",	// NTR-YYKE Trauma Center - Under the Knife 2
+			"AZW",	// NTR-AZWE WarioWare - Touched!
+			"AKA",	// NTR-AKAE Rub Rabbits!, The
+			"AN9",	// NTR-AN9E Little Mermaid - Ariel's Undersea Adventure, The
+			"AKE",	// NTR-AKEJ Keroro Gunsou - Enshuu da Yo! Zenin Shuugou Part 2
+			"YFS",	// NTR-YFSJ Frogman Show - DS Datte, Shouganaijanai, The
+			"YG8",	// NTR-YG8E Yu-Gi-Oh! World Championship 2008
+			"AY7",	// NTR-AY7E Yu-Gi-Oh! World Championship 2007
+			"YON",	// NTR-YONJ Minna no DS Seminar - Kantan Ongakuryoku
+			"A5H",	// NTR-A5HE Interactive Storybook DS - Series 2
+			"A5I",	// NTR-A5IE Interactive Storybook DS - Series 3
+			"AMH",	// NTR-AMHE Metroid Prime Hunters
+			"A3T",	// NTR-A3TE Tak - The Great Juju Challenge
+			"YBO",	// NTR-YBOE Boogie
+			"ADA",	// NTR-ADAE PKMN Diamond
+			"APA",	// NTR-APAE PKMN Pearl
+			"CPU",	// NTR-CPUE PKMN Platinum
+			"APY",	// NTR-APYE Puyo Pop Fever
+			"AWH",	// NTR-AWHE Bubble Bobble Double Shot
+			"AXB",	// NTR-AXBJ Daigassou! Band Brothers DX
+			"A4U",	// NTR-A4UJ Wi-Fi Taiou - Morita Shogi
+			"A8N",	// NTR-A8NE Planet Puzzle League
+			"ABJ",	// NTR-ABJE Harvest Moon DS - Island of Happiness
+			"ABN",	// NTR-ABNE Bomberman Story DS
+			"ACL",	// NTR-ACLE Custom Robo Arena
+			"ART",	// NTR-ARTJ Shin Lucky Star Moe Drill - Tabidachi
+			"AVT",	// NTR-AVTJ Kou Rate Ura Mahjong Retsuden Mukoubuchi - Goburei, Shuuryou desu ne
+			"AWY",	// NTR-AWYJ Wi-Fi Taiou - Gensen Table Game DS
+			"AXJ",	// NTR-AXJE Dungeon Explorer - Warriors of Ancient Arts
+			"AYK",	// NTR-AYKJ Wi-Fi Taiou - Yakuman DS
+			"YB2",	// NTR-YB2E Bomberman Land Touch! 2
+			"YB3",	// NTR-YB3E Harvest Moon DS - Sunshine Islands
+			"YCH",	// NTR-YCHJ Kousoku Card Battle - Card Hero
+			"YFE",	// NTR-YFEE Fire Emblem - Shadow Dragon
+			"YGD",	// NTR-YGDE Diary Girl
+			"YKR",	// NTR-YKRJ Culdcept DS
+			"YRM",	// NTR-YRME My Secret World by Imagine
+			"YW2",	// NTR-YW2E Advance Wars - Days of Ruin
+			"AJU",	// NTR-AJUJ Jump! Ultimate Stars
+			"ACZ",	// NTR-ACZE Cars
+			"AHD",	// NTR-AHDE Jam Sessions
+			"ANR",	// NTR-ANRE Naruto - Saikyou Ninja Daikesshu 3
+			"YT3",	// NTR-YT3E Tamagotchi Connection - Corner Shop 3
+			"AVI",	// NTR-AVIJ Kodomo no Tame no Yomi Kikase - Ehon de Asobou 1-Kan
+			"AV2",	// NTR-AV2J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 2-Kan
+			"AV3",	// NTR-AV3J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 3-Kan
+			"AV4",	// NTR-AV4J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 4-Kan
+			"AV5",	// NTR-AV5J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 5-Kan
+			"AV6",	// NTR-AV6J Kodomo no Tame no Yomi Kikase - Ehon de Asobou 6-Kan
+			"YNZ",	// NTR-YNZE Petz - Dogz Fashion
+		};
+
+		for (unsigned int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+			if (memcmp(romTid, list[i], 3) == 0) {
+				// Found a match.
+				conf->volumeFix = true; // Special setting (when found special gamecode)
+				break;
+			}
+		}
+
+		// Boost CPU
+		if (conf->boostCpu) {
+			dbg_printf("CPU boosted\n");
+			setCpuClock(true); // libnds sets TWL clock speeds on arm7/arm9 scfg_clk at boot now. No changes needed.
+		} else {
+			setCpuClock(false); //REG_SCFG_CLK = 0x80;
+			fifoSendValue32(FIFO_USER_06, 1);
+		}
+
+		// Boost VRAM
+		if (conf->boostVram) {
+			dbg_printf("VRAM boosted\n");
+		}
 	}
 
 	fifoSendValue32(FIFO_USER_03, 1);
@@ -321,7 +351,7 @@ static int runNdsFile(configuration* conf) {
 		remove(logFilePath);
 	}
 
-	debugConf(conf);
+	(REG_SCFG_EXT != 0) ? debugConf(conf) : debugConfB4DS(conf);
 
 	if ((extention(conf->ndsPath, ".nds") != 0)
 	&& (extention(conf->ndsPath, ".dsi") != 0)
@@ -399,40 +429,42 @@ static int runNdsFile(configuration* conf) {
 		clusterDonor[4] = stDonor[4].st_ino;
 	}
 
-	if (stat(conf->gbaPath, &stGba) >= 0) {
-		clusterGba = stGba.st_ino;
-	}
-
-	if (stat(conf->gbaSavPath, &stGbaSav) >= 0) {
-		clusterGbaSav = stGbaSav.st_ino;
-	}
-
-	if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
-		clusterWideCheat = stWideCheat.st_ino;
-	}
-
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
 		clusterApPatch = stApPatch.st_ino;
-	}
-
-	if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
-		clusterCheat = stCheat.st_ino;
 	}
 
 	if (stat(patchOffsetCacheFilePath.c_str(), &stPatchOffsetCache) >= 0) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 
-	if (conf->cacheFatTable && stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
-		clusterFatTable = stFatTable.st_ino;
-	}
-
-	if (stat(ramDumpPath.c_str(), &stRamDump) >= 0) {
-		clusterRamDump = stRamDump.st_ino;
-	}
-
 	if (stat(srParamsFilePath.c_str(), &stSrParams) >= 0) {
 		clusterSrParams = stSrParams.st_ino;
+	}
+
+	if (REG_SCFG_EXT != 0) {
+		if (stat(conf->gbaPath, &stGba) >= 0) {
+			clusterGba = stGba.st_ino;
+		}
+
+		if (stat(conf->gbaSavPath, &stGbaSav) >= 0) {
+			clusterGbaSav = stGbaSav.st_ino;
+		}
+
+		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
+			clusterWideCheat = stWideCheat.st_ino;
+		}
+
+		if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
+			clusterCheat = stCheat.st_ino;
+		}
+
+		if (conf->cacheFatTable && stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
+			clusterFatTable = stFatTable.st_ino;
+		}
+
+		if (stat(ramDumpPath.c_str(), &stRamDump) >= 0) {
+			clusterRamDump = stRamDump.st_ino;
+		}
 	}
 
 	runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, conf);
@@ -442,7 +474,7 @@ static int runNdsFile(configuration* conf) {
 
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
-	conf->initDisc = false;
+	conf->initDisc = (REG_SCFG_EXT == 0);
 
 	int status = loadFromSD(conf, argv[0]);
 

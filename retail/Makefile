@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader cardengine_arm7 cardengine_arm7_alt cardengine_arm7_sdk5 cardengine_arm9_igm cardengine_arm9 cardengine_arm9_cached cardengine_arm9_dldi cardengine_arm9_sdk5 cardengine_arm9_sdk5_dldi cardengine_arm9_romInRam clean
+.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam clean
 
 all:	$(OUTPUT)
 
@@ -158,52 +158,72 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader
+arm9/$(TARGET).elf:	bootloader bootloaderi
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm7_alt cardengine_arm7_sdk5 cardengine_arm9_igm cardengine_arm9 cardengine_arm9_cached cardengine_arm9_dldi cardengine_arm9_sdk5 cardengine_arm9_sdk5_dldi cardengine_arm9_romInRam
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem
 	@$(MAKE) -C bootloader
+
+#---------------------------------------------------------------------------------		
+bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam
+	@$(MAKE) -C bootloaderi
 
 #---------------------------------------------------------------------------------		
 cardengine_arm7: $(DATA)
 	@$(MAKE) -C cardengine/arm7
 
 #---------------------------------------------------------------------------------		
-cardengine_arm7_alt: $(DATA)
-	@$(MAKE) -C cardengine/arm7_alt
-
-#---------------------------------------------------------------------------------		
-cardengine_arm7_sdk5: $(DATA)
-	@$(MAKE) -C cardengine/arm7_sdk5
-
-#---------------------------------------------------------------------------------		
-cardengine_arm9_igm: $(DATA)
-	@$(MAKE) -C cardengine/arm9_igm
-
-#---------------------------------------------------------------------------------		
 cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_cached: $(DATA)
-	@$(MAKE) -C cardengine/arm9_cached
+cardengine_arm9_8kb: $(DATA)
+	@$(MAKE) -C cardengine/arm9_8kb
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_dldi: $(DATA)
-	@$(MAKE) -C cardengine/arm9_dldi
+cardengine_arm9_extmem: $(DATA)
+	@$(MAKE) -C cardengine/arm9_extmem
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_sdk5: $(DATA)
-	@$(MAKE) -C cardengine/arm9_sdk5
+cardenginei_arm7: $(DATA)
+	@$(MAKE) -C cardenginei/arm7
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_sdk5_dldi: $(DATA)
-	@$(MAKE) -C cardengine/arm9_sdk5_dldi
+cardenginei_arm7_alt: $(DATA)
+	@$(MAKE) -C cardenginei/arm7_alt
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_romInRam: $(DATA)
-	@$(MAKE) -C cardengine/arm9_romInRam
+cardenginei_arm7_sdk5: $(DATA)
+	@$(MAKE) -C cardenginei/arm7_sdk5
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_igm: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_igm
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9: $(DATA)
+	@$(MAKE) -C cardenginei/arm9
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_cached: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_cached
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_dldi: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_dldi
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_sdk5: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_sdk5
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_sdk5_dldi: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_sdk5_dldi
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm9_romInRam: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_romInRam
 
 #---------------------------------------------------------------------------------
 #$(BUILD):
@@ -217,16 +237,21 @@ clean:
 	@$(MAKE) -C arm7 clean
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
-	@$(MAKE) -C cardengine/arm7_alt clean
-	@$(MAKE) -C cardengine/arm7_sdk5 clean
-	@$(MAKE) -C cardengine/arm9_igm clean
 	@$(MAKE) -C cardengine/arm9 clean
-	@$(MAKE) -C cardengine/arm9_cached clean
-	@$(MAKE) -C cardengine/arm9_dldi clean
-	@$(MAKE) -C cardengine/arm9_sdk5 clean
-	@$(MAKE) -C cardengine/arm9_sdk5_dldi clean
-	@$(MAKE) -C cardengine/arm9_romInRam clean
+	@$(MAKE) -C cardengine/arm9_8kb clean
+	@$(MAKE) -C cardengine/arm9_extmem clean
+	@$(MAKE) -C cardenginei/arm7 clean
+	@$(MAKE) -C cardenginei/arm7_alt clean
+	@$(MAKE) -C cardenginei/arm7_sdk5 clean
+	@$(MAKE) -C cardenginei/arm9_igm clean
+	@$(MAKE) -C cardenginei/arm9 clean
+	@$(MAKE) -C cardenginei/arm9_cached clean
+	@$(MAKE) -C cardenginei/arm9_dldi clean
+	@$(MAKE) -C cardenginei/arm9_sdk5 clean
+	@$(MAKE) -C cardenginei/arm9_sdk5_dldi clean
+	@$(MAKE) -C cardenginei/arm9_romInRam clean
 	@$(MAKE) -C bootloader clean
+	@$(MAKE) -C bootloaderi clean
 		
 $(DATA):
 	@mkdir -p $(DATA)

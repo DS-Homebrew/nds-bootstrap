@@ -209,60 +209,63 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(ndsFile);*/
 
+	FILE* cebin;
+
+  if (REG_SCFG_EXT != 0) {
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
-	FILE* cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
+	cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
 	if (cebin) {
 		fread(&srBackendId, sizeof(u32), 2, cebin);
 	}
 	fclose(cebin);
 
 	// Load ce7 binary
-	cebin = fopen(conf->sdFound ? "nitro:/cardengine_arm7.lz77" : "nitro:/cardengine_arm7_alt.lz77", "rb");
+	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 		tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
 		tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
 
 	// Load SDK5 ce7 binary
-	cebin = fopen("nitro:/cardengine_arm7_sdk5.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm7_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM7_SDK5_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
 
     // Load ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 
     // Load mem-cached ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_cached.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_cached.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_CACHED_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 
     // Load ROMinRAM ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_romInRam.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x2000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_ROMINRAM_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 
     // Load in-game menu ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
@@ -280,10 +283,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (conf->gameOnFlashcard) {
 		// Load DLDI ce9 binary
-		cebin = fopen("nitro:/cardengine_arm9_dldi.lz77", "rb");
+		cebin = fopen("nitro:/cardenginei_arm9_dldi.lz77", "rb");
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x5000, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_DLDI_BUFFERED_LOCATION);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_DLDI_BUFFERED_LOCATION);
 		}
 		fclose(cebin);
 	}
@@ -296,19 +299,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load SDK5 ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_sdk5.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_BUFFERED_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 
 	if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary
-		cebin = fopen("nitro:/cardengine_arm9_sdk5_dldi.lz77", "rb");
+		cebin = fopen("nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x7000, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
 		}
 		fclose(cebin);
 	}
@@ -337,6 +340,54 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
 	}
 	fclose(bootstrapImages);
+
+  } else {
+	// Load ce7 binary
+	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+	if (cebin) {
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x800, cebin);
+	}
+	fclose(cebin);
+
+	*(vu32*)(0x02000000) = 0x314D454D;
+	*(vu32*)(0x02400000) = 0x324D454D;
+
+	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+		// Load ce9 binary
+		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x7000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM);
+		}
+		fclose(cebin);
+	} else {
+		// Load ce9 binary 1
+		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x6000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED1);
+		}
+		fclose(cebin);
+
+		// Load ce9 binary 2
+		cebin = fopen("nitro:/cardengine_arm9_8kb.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x5000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED2);
+		}
+		fclose(cebin);
+	}
+	conf->romSize = getFileSize(conf->ndsPath);
+	conf->saveSize = getFileSize(conf->savPath);
+	conf->apPatchSize = getFileSize(conf->apPatchPath);
+
+	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
+	if (bootstrapImages) {
+		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
+	}
+	fclose(bootstrapImages);
+  }
 
 	const char *typeToReplace = ".nds";
 	if (extention(conf->ndsPath, ".dsi")) {
@@ -382,52 +433,54 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
-	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
-		fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
-	}
-
-	if (conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
-		consoleDemoInit();
-		printf("Creating FAT table file.\n");
-		printf("Please wait...\n");
-
-		FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
-		if (fatTableFile) {
-			fseek(fatTableFile, 0x80200 - 1, SEEK_SET);
-			fputc('\0', fatTableFile);
-			fclose(fatTableFile);
+	if (REG_SCFG_EXT != 0) {	// Not for B4DS
+		fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
+		if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		}
 
-		consoleClear();
-	}
+		if (conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
+			consoleDemoInit();
+			printf("Creating FAT table file.\n");
+			printf("Please wait...\n");
 
-	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-	if (!conf->sdFound) {
-		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
-	}
+			FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
+			if (fatTableFile) {
+				fseek(fatTableFile, 0x80200 - 1, SEEK_SET);
+				fputc('\0', fatTableFile);
+				fclose(fatTableFile);
+			}
 
-	if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
-		consoleDemoInit();
-		printf("Creating RAM dump file.\n");
-		printf("Please wait...\n");
-		/* printf("\n");
-		if (conf->consoleModel >= 2) {
-			printf("If this takes a while, press\n");
-			printf("HOME, then press B.\n");
-		} else {
-			printf("If this takes a while, close\n");
-			printf("the lid, and open it again.\n");
-		} */
-
-		FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
-		if (ramDumpFile) {
-			fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
-			fputc('\0', ramDumpFile);
-			fclose(ramDumpFile);
+			consoleClear();
 		}
 
-		consoleClear();
+		ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
+		if (!conf->sdFound) {
+			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
+		}
+
+		if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
+			consoleDemoInit();
+			printf("Creating RAM dump file.\n");
+			printf("Please wait...\n");
+			/* printf("\n");
+			if (conf->consoleModel >= 2) {
+				printf("If this takes a while, press\n");
+				printf("HOME, then press B.\n");
+			} else {
+				printf("If this takes a while, close\n");
+				printf("the lid, and open it again.\n");
+			} */
+
+			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
+			if (ramDumpFile) {
+				fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
+				fputc('\0', ramDumpFile);
+				fclose(ramDumpFile);
+			}
+
+			consoleClear();
+		}
 	}
 
 	return 0;

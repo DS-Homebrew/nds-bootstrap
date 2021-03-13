@@ -107,13 +107,16 @@ build/
 #!.vscode/tasks.json
 #!.vscode/launch.json
 #!.vscode/extensions.json
-b4ds/nitrofiles/cardengine_arm7*.bin
-b4ds/nitrofiles/cardengine_arm9*.bin
 retail/nitrofiles/cardengine_arm7*.bin
 retail/nitrofiles/cardengine_arm9*.bin
+retail/nitrofiles/cardenginei_arm7*.bin
+retail/nitrofiles/cardenginei_arm9*.bin
 retail/nitrofiles_dec/cardengine_arm7*.bin
 retail/nitrofiles_dec/cardengine_arm9*.bin
+retail/nitrofiles_dec/cardenginei_arm7*.bin
+retail/nitrofiles_dec/cardenginei_arm9*.bin
 retail/nitrofiles_dec/load.bin
+retail/nitrofiles_dec/loadi.bin
 
 retail/arm9/include/version.h
 

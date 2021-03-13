@@ -202,7 +202,13 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #define CLUSTER_CACHE      0x2700000 // Main RAM
 #define CLUSTER_CACHE_SIZE 0x7FF80 // 512K
 
+#ifndef B4DS
 static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+#else
+u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32 clusterCache = CLUSTER_CACHE;
+u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
+#endif
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -548,6 +554,7 @@ aFile getFileFromCluster (u32 cluster) {
 	return file;
 }
 
+#ifndef _NO_SDMMC
 static readContext context;
 
 /*-----------------------------------------------------------------
@@ -757,7 +764,8 @@ bool resumeFileRead()
       
     }  
 	return false;
-} 
+}
+#endif
 
 /*-----------------------------------------------------------------
 fileRead(buffer, cluster, startOffset, length)
@@ -1089,6 +1097,8 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 }
 
 void buildFatTableCache (aFile * file, int ndmaSlot) {
+	if (file->fatTableCached) return;
+
     #ifdef DEBUG
 	nocashMessage("buildFatTableCache");
     #endif
@@ -1100,7 +1110,11 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
+#ifndef B4DS
 		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
+#else
+		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
+#endif
 	{
 		*lastClusterCacheUsed = file->currentCluster;
 		file->currentOffset+=discBytePerClus;

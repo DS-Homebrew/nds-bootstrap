@@ -1,3 +1,4 @@
+#ifndef _NO_SDMMC
 #include "my_disc_io.h"
 #include "my_sdmmc.h"
 
@@ -129,3 +130,4 @@ const NEW_DISC_INTERFACE __myio_dsisd = {
 	(FN_MEDIUM_CLEARSTATUS)&my_sdio_ClearStatus,
 	(FN_MEDIUM_SHUTDOWN)&my_sdio_Shutdown
 };
+#endif

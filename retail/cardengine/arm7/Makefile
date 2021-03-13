@@ -8,14 +8,6 @@ endif
 
 include $(DEVKITARM)/ds_rules
 
-ifeq ($(OS),Windows_NT)
-LZSS			?=	../../lzss.exe
-
-else
-
-LZSS			?=	lzss
-
-endif
 #---------------------------------------------------------------------------------
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
@@ -24,7 +16,7 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	source ../../common/source ../../common/source_general
+SOURCES			:=	source ../../common/source_general
 INCLUDES		:=	include ../../common/include
 DATA			:=	data
 
@@ -34,13 +26,13 @@ DATA			:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork -march=armv4t
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Os\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM7
+CFLAGS	+=	$(INCLUDE) -DARM7 -DB4DS -DNO_CARDID -DNO_TONCCPY
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
@@ -49,7 +41,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notd
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lnds7
+LIBS	:= 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -66,8 +58,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
 export TARGET	:=	cardengine_arm7
-export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
-export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -107,8 +98,6 @@ endif
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
-	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
 
 #---------------------------------------------------------------------------------
 clean:

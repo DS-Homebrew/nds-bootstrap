@@ -23,7 +23,7 @@ endif
 TARGET		:=	load
 BUILD		:=	build
 SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../common/source ../common/source_general
-INCLUDES	:=	include build ../common/include
+INCLUDES	:=	include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
  
@@ -37,7 +37,7 @@ CFLAGS	:=	-g -Wall -Os\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99
+CFLAGS	+=	$(INCLUDE) -DARM7 -D_NO_SDMMC -DB4DS -std=gnu99
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
@@ -117,18 +117,6 @@ $(LOADELF)	:	$(OFILES)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 	
 	
-#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
-#	@echo $(notdir $<)
-#	$(bin2o)
-	
-#cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
-#	@echo $(notdir $<)
-#	$(bin2o)
-
-#cardengine_arm9_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_reloc.bin
-#	@echo $(notdir $<)
-#	$(bin2o)
-
 -include $(DEPENDS)
 
 

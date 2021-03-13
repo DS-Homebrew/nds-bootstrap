@@ -31,127 +31,239 @@
 #include "find.h"
 #include "hook.h"
 
-#define b_gameOnFlashcard BIT(0)
-#define b_saveOnFlashcard BIT(1)
-#define b_extendedMemory BIT(2)
-#define b_ROMinRAM BIT(3)
-#define b_dsiMode BIT(4)
-#define b_dsiSD BIT(5)
-#define b_preciseVolumeControl BIT(6)
-#define b_powerCodeOnVBlank BIT(7)
-#define b_runCardEngineCheck BIT(8)
+// SDK 5
+/*extern u32 setDataMobicliplist[3];
+extern u32 setDataBWlist[7];
+extern u32 setDataBWlist_1[3];
+extern u32 setDataBWlist_2[3];
+extern u32 setDataBWlist_3[3];
+extern u32 setDataBWlist_4[3];*/
 
-extern u32 newArm7binarySize;
+/*extern unsigned long cheat_engine_size;
+extern unsigned long intr_orig_return_offset;
 
-static const int MAX_HANDLER_LEN = 50;
+extern const u8 cheat_engine_start[];*/
 
-static const u32 handlerStartSig[3] = {
+static const u32 handlerStartSig[5] = {
 	0xe92d4000, 	// push {lr}
 	0xe3a0c301, 	// mov  ip, #0x4000000
-	0xe28cce21		// add  ip, ip, #0x210
+	0xe28cce21,		// add  ip, ip, #0x210
+	0xe51c1008,		// ldr	r1, [ip, #-8]
+	0xe3510000		// cmp	r1, #0
 };
 
-static const u32 handlerEndSig[1] = {
+static const u32 handlerEndSig[4] = {
+	0xe59f1008, 	// ldr  r1, [pc, #8]	(IRQ Vector table address)
+	0xe7910100,		// ldr  r0, [r1, r0, lsl #2]
+	0xe59fe004,		// ldr  lr, [pc, #4]	(IRQ return address)
 	0xe12fff10		// bx   r0
 };
 
-static u32* findIrqHandlerOffset(const u32* start, size_t size) {
+/*
+// interruptDispatcher.s jump_intr:
+static const u32 homebrewSig[5] = {
+	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
+	0xE3510000, // cmp    r1, #0
+	0x1A000001, // bne    got_handler
+	0xE1A01000, // mov    r1, r0
+	0xEAFFFFF6  // b    no_handler
+};
+
+// interruptDispatcher.s jump_intr:
+// Patch
+static const u32 homebrewSigPatched[5] = {
+	0xE59F1008, // ldr    r1, =0x3900010   @ my custom handler
+	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
+	0xE501F004, // str    r0, [r1,#-4]     @ irqsig 
+	0xEA000000, // b      got_handler
+	0x03780010  // DCD 	  0x03780010       
+};
+ 
+// Accelerator patch for IPC_SYNC v2007
+static const u32 homebrewAccelSig2007[4] = {
+	0x2401B510   , // .
+	               // MOVS    R4, #1
+	0xD0064220   , // .
+				// .
+	0x881A4B10   , // ...
+	0x430A2108   , // ...
+};
+
+static const u32 homebrewAccelSig2007Patched[4] = {
+	0x47104A00   , // LDR     R2, =0x03780020
+	               // BX      R2
+	0x03780020   , // 
+				   // 
+	0x881A4B10   , // ...
+	0x430A2108   , // ...
+};
+
+// Accelerator patch for IPC_SYNC v2010 (libnds 1.4.8)
+static const u32 homebrewAccelSig2010[4] = {
+	0x07C3B500   , // .
+	               // MOVS    R4, #1
+	0x4B13D506   , // .
+				// .
+	0x22088819   , // ...
+	0x0412430A   , // ...
+};
+
+static const u32 homebrewAccelSig2010Patched[4] = {
+	0x47104A00   , // LDR     R2, =0x03780020
+	               // BX      R2
+	0x03780020   , // 
+				   // 
+	0x22088819   , // ...
+	0x0412430A   , // ...
+};
+*/
+
+static const int MAX_HANDLER_LEN = 50;
+
+/*static u32* hookInterruptHandlerHomebrew(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
 	// Find the start of the handler
-	u32* addr = findOffset(
-		start, size,
-		handlerStartSig, 3
-	);
-	if (!addr) {
+	while (addr < end) {
+		if ((addr[0] == homebrewSig[0]) && 
+			(addr[1] == homebrewSig[1]) && 
+			(addr[2] == homebrewSig[2]) && 
+			(addr[3] == homebrewSig[3]) && 
+			(addr[4] == homebrewSig[4])) 
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
 		return NULL;
 	}
 
+	// patch the program
+	addr[0] = homebrewSigPatched[0];
+	addr[1] = homebrewSigPatched[1];
+	addr[2] = homebrewSigPatched[2];
+	addr[3] = homebrewSigPatched[3];
+	addr[4] = homebrewSigPatched[4];
+
+	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
 
-static u32* findIrqHandlerWordsOffset(u32* handlerOffset, const u32* start, size_t size) {
-	// Find the end of the handler
+static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig2007[0]) && 
+			(addr[1] == homebrewAccelSig2007[1]) && 
+			(addr[2] == homebrewAccelSig2007[2]) && 
+			(addr[3] == homebrewAccelSig2007[3])) 
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	// patch the program
+	addr[0] = homebrewAccelSig2007Patched[0];
+	addr[1] = homebrewAccelSig2007Patched[1];
+	addr[2] = homebrewAccelSig2007Patched[2];
+	addr[3] = homebrewAccelSig2007Patched[3];
+
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}
+
+
+static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig2010[0]) && 
+			(addr[1] == homebrewAccelSig2010[1]) && 
+			(addr[2] == homebrewAccelSig2010[2]) && 
+			(addr[3] == homebrewAccelSig2010[3])) 
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	// patch the program
+	addr[0] = homebrewAccelSig2010Patched[0];
+	addr[1] = homebrewAccelSig2010Patched[1];
+	addr[2] = homebrewAccelSig2010Patched[2];
+	addr[3] = homebrewAccelSig2010Patched[3];
+
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return addr;
+}*/
+
+static u32* hookInterruptHandler(const u32* start, size_t size) {
+	// Find the start of the handler
 	u32* addr = findOffset(
-		handlerOffset, MAX_HANDLER_LEN*sizeof(u32),
-		handlerEndSig, 1
+		start, size,
+		handlerStartSig, 5
 	);
 	if (!addr) {
 		return NULL;
 	}
 
-	return addr+1;
+	// Find the end of the handler
+	addr = findOffset(
+		addr, MAX_HANDLER_LEN*sizeof(u32),
+		handlerEndSig, 4
+	);
+	if (!addr) {
+		return NULL;
+	}
+
+	// Now find the IRQ vector table
+	// Make addr point to the vector table address pointer within the IRQ handler
+	addr += sizeof(handlerEndSig)/sizeof(handlerEndSig[0]);
+
+	// Use relative and absolute addresses to find the location of the table in RAM
+	u32 tableAddr = addr[0];
+	u32 returnAddr = addr[1];
+	u32* actualReturnAddr = addr + 2;
+	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
+
+	// The first entry in the table is for the Vblank handler, which is what we want
+	return actualTableAddr;
+	// 2     LCD V-Counter Match
 }
 
 int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 fileCluster,
-	u32 srParamsFileCluster,
-	u32 ramDumpCluster,
-	u32 wideCheatFileCluster,
-	u32 wideCheatSize,
-	u32 cheatFileCluster,
-	u32 cheatSize,
-    u32 gameOnFlashcard,
-    u32 saveOnFlashcard,
-	u32 language,
-	u32 dsiMode, // SDK 5
-	u32 dsiSD,
-	u32 extendedMemory,
-	u32 ROMinRAM,
-	u32 consoleModel,
-	u32 romRead_LED,
-	u32 dmaRomRead_LED,
-	u32 preciseVolumeControl
+	u32 language
 ) {
-	dbg_printf("hookNdsRetailArm7\n");
 
-	if (newArm7binarySize < 0x1000) {
-		return ERR_NONE;
-	}
+	nocashMessage("hookNdsRetailArm7");
 
-	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
-	if (!handlerLocation) {
-		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
-		if (handlerLocation) {
-			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
-		}
-	}
-
-	const char* romTid = getRomTid(ndsHeader);
-
-	if (!handlerLocation) {
-	/*	if (strncmp(romTid, "YGX", 3) == 0) {
-			ce7->valueBits |= b_powerCodeOnVBlank;
-		} else {
-			// Patch
-			memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
-		}
-	} else {*/
-		dbg_printf("ERR_HOOK\n");
-		return ERR_HOOK;
-	}
-
-	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
-	if (!wordsLocation) {
-		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
-		if (wordsLocation) {
-			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
-		}
-	}
-
-	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
+	u32* hookLocation = patchOffsetCache.a7IrqHandlerOffset;
 	if (!hookLocation) {
-		// Now find the IRQ vector table
-		if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
-			// Use relative and absolute addresses to find the location of the table in RAM
-			u32 tableAddr = wordsLocation[0];
-			u32 returnAddr = wordsLocation[1];
-			u32* actualReturnAddr = wordsLocation + 2;
-			hookLocation = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-		} else switch (newArm7binarySize) {	// SDK 5
+		hookLocation = hookInterruptHandler((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	}
+
+	// SDK 5
+	bool sdk5 = isSdk5(moduleParams);
+	if (!hookLocation && sdk5) {
+		switch (ndsHeader->arm7binarySize) {
 			case 0x0001D5A8:
-				hookLocation = (u32*)0x239D280;		// DS WiFi Settings
+				hookLocation = (u32*)0x239D280;		// DS wiFi Settings
 				break;
 
 			case 0x00022B40:
@@ -221,83 +333,49 @@ int hookNdsRetailArm7(
 		}
 	}
 
-	*(ce7->irqTable_offset) = wordsLocation[0];
-	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
-		*(ce7->irqTable_offset + 1) = wordsLocation[1];
-	} else {
-		*(ce7->irqTable_offset + 1) = wordsLocation[3];
+	if (!hookLocation) {
+		nocashMessage("ERR_HOOK");
+		return ERR_HOOK;
 	}
 
    	dbg_printf("hookLocation arm7: ");
 	dbg_hexa((u32)hookLocation);
 	dbg_printf("\n\n");
-	patchOffsetCache.a7IrqHookOffset = hookLocation;
+	patchOffsetCache.a7IrqHandlerOffset = hookLocation;
 
 	u32* vblankHandler = hookLocation;
-	u32* ipcSyncHandler = hookLocation + 16;
-	//u32* ndma0Handler = hookLocation + 28;
+	//u32* ipcSyncHandler = hookLocation + 16;
 
-	ce7->intr_vblank_orig_return  = *vblankHandler;
-	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-	//ce7->intr_ndma0_orig_return   = *ndma0Handler;
-	ce7->moduleParams             = moduleParams;
-	ce7->fileCluster              = fileCluster;
-	ce7->srParamsCluster          = srParamsFileCluster;
-	ce7->ramDumpCluster           = ramDumpCluster;
-	if (gameOnFlashcard) {
-		ce7->valueBits |= b_gameOnFlashcard;
+	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_2007_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_2007_OK");
 	}
-	if (saveOnFlashcard) {
-		ce7->valueBits |= b_saveOnFlashcard;
-	}
-	if (extendedMemory) {
-		ce7->valueBits |= b_extendedMemory;
-	}
-	if (ROMinRAM) {
-		ce7->valueBits |= b_ROMinRAM;
-	}
-	if (dsiMode) {
-		ce7->valueBits |= b_dsiMode; // SDK 5
-	}
-	if (dsiSD) {
-		ce7->valueBits |= b_dsiSD;
-	}
-	if (preciseVolumeControl) {
-		ce7->valueBits |= b_preciseVolumeControl;
-	}
-	ce7->language                 = language;
+
+	hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+
+	if (!hookAccel) {
+		nocashMessage("ACCEL_IPC_2010_ERR");
+	} else {
+		nocashMessage("ACCEL_IPC_2010_OK");
+	}*/
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	ce7->intr_vblank_orig_return = *vblankHandler;
+	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->moduleParams            = moduleParams;
+	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
 	} else if (strcmp(romTid, "AWIP") == 0) { // Hotel Dusk (EUR)
 		ce7->languageAddr = (u32*)0x02100BBC;
 	}
-	ce7->consoleModel             = consoleModel;
-	ce7->romRead_LED              = romRead_LED;
-	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
-	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
-	|| (!ROMinRAM && !gameOnFlashcard)) {
-		*ipcSyncHandler = ce7->patches->fifoHandler;
-		//*ndma0Handler = ce7->patches->ndma0Handler;
-		ce7->valueBits |= b_runCardEngineCheck;
-	}
 
-	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
-	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	if (wideCheatSize+cheatSize <= 0x8000) {
-		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
-		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
-			cheatDataOffset += wideCheatSize;
-			*(cheatDataOffset + 3) = 0xCF;
-		}
-		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
-		}
-	}
-
-	dbg_printf("ERR_NONE\n");
+	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }

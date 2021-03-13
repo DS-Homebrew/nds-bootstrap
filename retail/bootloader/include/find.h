@@ -27,18 +27,15 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 }
 
 // ARM9
-u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
-u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader);
-u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
-u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset);
-u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset);
-u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
-u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
+u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader);
+u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader);
+u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
+u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
 u32* findCardReadStartOffsetType0(const module_params_t* moduleParams, const u32* cardReadEndOffset);
 u32* findCardReadStartOffsetType1(const u32* cardReadEndOffset);
 u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* cardReadEndOffset); // SDK 5
-u32* findCardReadStartOffsetMvDK4(u32 startOffset);
 u16* findCardReadStartOffsetThumb(const u16* cardReadEndOffset);
 u16* findCardReadStartOffsetThumb5Type0(const module_params_t* moduleParams, const u16* cardReadEndOffset); // SDK 5
 u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, const u16* cardReadEndOffset); // SDK 5
@@ -48,7 +45,6 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader);
 u16* findCardPullOutOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
 u16* findCardPullOutOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
-u32* findCardTerminateForPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 //u32* findForceToPowerOffOffset(const tNDSHeader* ndsHeader);
 u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32* cardReadEndOffset);
 u16* findCardIdEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u16* cardReadEndOffset);
@@ -58,7 +54,7 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* cardReadDmaEndOffset);
 u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset);
-u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
+u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
 u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
@@ -67,21 +63,14 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
-//u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findSlot2ExistEndOffset(const tNDSHeader* ndsHeader, bool *usesThumb);
-u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb);
-u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
-u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
-u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader);
-u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader);
+u32* findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
-//u32* findRamClearOffset(const tNDSHeader* ndsHeader);
+u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 #endif // FIND_H

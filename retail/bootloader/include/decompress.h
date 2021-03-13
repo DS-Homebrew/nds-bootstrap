@@ -6,6 +6,6 @@
 #include "module_params.h"
 
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams);
-bool decrypt_arm9(const tDSiHeader* dsiHeader);
+bool decrypt_arm9(const tNDSHeader* ndsHeader);
 
 #endif // DECOMPRESS_H

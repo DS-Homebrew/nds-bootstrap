@@ -23,8 +23,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source ../../common/source_general
-INCLUDES	:=	include ../../common/include
+SOURCES		:=	source source_ext ../../common/source ../../common/source_general
+INCLUDES	:=	include ../../common/include ../../common/include_fat
 DATA		:=	data
 
 
@@ -39,7 +39,7 @@ CFLAGS	:=	-g -Wall -Os\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID
+CFLAGS	+=	$(INCLUDE) -DARM9 -DB4DS -D_NO_SDMMC -DNO_CARDID
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
@@ -49,7 +49,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project (order is important)
 #---------------------------------------------------------------------------------
-LIBS	:=
+LIBS	:=	
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

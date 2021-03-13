@@ -27,33 +27,15 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 25;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 15;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
 
 bool patchOffsetCacheChanged = false;
 
-extern bool logging;
-extern bool gbaRomFound;
-
 void patchBinary(const tNDSHeader* ndsHeader) {
-	extern u16 gameOnFlashcard;
 	const char* romTid = getRomTid(ndsHeader);
-
-	// Animal Crossing: Wild World
-	if (strncmp(romTid, "ADM", 3) == 0 && !gameOnFlashcard) {
-		int instancesPatched = 0;
-		u32 addrOffset = (u32)ndsHeader->arm9destination;
-		while (instancesPatched < 3) {
-			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x1000;
-				instancesPatched++;
-			}
-			addrOffset += 4;
-			if (addrOffset > (u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) break;
-		}
-	}
 
 	// The World Ends With You (USA/Europe)
 	if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
@@ -293,7 +275,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
-
+        
         *(u32*)0x02000B94 = 0xE1A00000; //nop
 
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
@@ -331,7 +313,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         PatchMem(KArm9,s32(ii+7),0xe28ff048); //adr pc, xxx  jump+48 (12*4)
         //6D3FC
         PatchMem(KArm9,s32(ii+28),0xe1a00000); //nop
-
+        
         // r0 : ROMCTRL
         // r1 : ROMCTRL
         // r2 : ...
@@ -341,23 +323,18 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         // r6 : LEN
         // ..
         // r10 : cardstruct
-
+        
         for(int i =0; i<64; i++) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
         }*/
-
+        
         *((u32*)0x02000BB0) = 0xE1A00000; //nop 
-
+    
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
-
+        
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
-	}
-
-    // Pokemon Dash (Kiosk Demo)
-	if (strcmp(romTid, "A24E") == 0) {
-        *(u32*)0x02000BB0 = 0xE1A00000; //nop
 	}
 
     // Pokemon Dash
@@ -365,101 +342,13 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}
 
+
     // Golden Sun
     if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }
-}
-
-void patchSlot2Addr(const tNDSHeader* ndsHeader) {
-	extern u32 gbaAddrToDsi[];
-
-	if (!gbaRomFound) {
-		return;
-	}
-
-	const char* romTid = getRomTid(ndsHeader);
-
-	if (strcmp(romTid, "ARZE") == 0) {	// MegaMan ZX
-		for (u32 addr = 0x0203740C; addr <= 0x02044790; addr += 4) {
-			if (*(u32*)addr >= 0x08000000 && *(u32*)addr < 0x08020000) {
-				*(u32*)addr += 0x05000000;
-			}
-		}
-		*(u32*)0x0203A260 = 0x0D000800;	// Originally 0xC000800, for some weird reason
-		*(u32*)0x0203A708 = 0x0D000800;	// Originally 0xC000800, for some weird reason
-		*(u32*)0x0203AFC0 = 0x0D000800;	// Originally 0xC000800, for some weird reason
-		*(u32*)0x0203C178 = 0x0D010001;	// Originally 0xC010001, for some weird reason
-		*(u32*)0x0203D448 = 0x0D010001;	// Originally 0xC010001, for some weird reason
-		*(u32*)0x0203D678 = 0x0D000800;	// Originally 0xC000800, for some weird reason
-		*(u32*)0x02041D64 = 0x0D010000;	// Originally 0xC010000, for some weird reason
-		for (u32 addr = 0x020CA234; addr <= 0x020CA2C0; addr += 4) {
-			*(u32*)addr += 0x05000000;
-		}
-		return;
-	}
-
-	if (strcmp(romTid, "CPUE") == 0 && ndsHeader->romversion == 0) {	// Pokemon Platinum Version
-		*(u32*)0x020D0A60 = gbaAddrToDsi[0];
-		*(u32*)0x020D0AA8 = gbaAddrToDsi[0];
-		*(u32*)0x020D0B0C = 0x0D0000CE;
-		*(u32*)0x020D0C68 = gbaAddrToDsi[1];
-		*(u32*)0x020D0CB0 = 0x02610000;
-		*(u32*)0x020D1248 = 0x0D000080;
-		*(u32*)0x020D14D4 = gbaAddrToDsi[2];
-		*(u32*)0x020D14E0 = 0x02605555;
-		*(u32*)0x020D14E4 = 0x02602AAA;
-		*(u32*)0x020D1560 = gbaAddrToDsi[3];
-		*(u32*)0x020D15E8 = 0x02605555;
-		*(u32*)0x020D15EC = 0x02602AAA;
-		*(u32*)0x020D15F0 = 0x02600001;
-		*(u32*)0x020D172C = 0x02605555;
-		*(u32*)0x020D17E0 = 0x02605555;
-		*(u32*)0x020D1880 = gbaAddrToDsi[4];
-		*(u32*)0x020D1884 = gbaAddrToDsi[5];
-		*(u32*)0x020D19A4 = gbaAddrToDsi[6];
-		*(u32*)0x020D19A8 = gbaAddrToDsi[7];
-		*(u32*)0x020D1B90 = gbaAddrToDsi[2];
-		*(u32*)0x020D1BDC = 0x02605555;
-		*(u32*)0x020D1BE0 = 0x02602AAA;
-		*(u32*)0x020D1C20 = gbaAddrToDsi[8];
-		*(u32*)0x020D1C24 = gbaAddrToDsi[9];
-		*(u32*)0x020D1D00 = 0x02605555;
-		*(u32*)0x020D1D04 = 0x02602AAA;
-		*(u32*)0x020D1E4C = gbaAddrToDsi[10];
-		*(u32*)0x020D1E50 = gbaAddrToDsi[11];
-		*(u32*)0x020D1EC4 = 0x02605555;
-		*(u32*)0x020D1EC8 = 0x02602AAA;
-		*(u32*)0x020D21A4 = gbaAddrToDsi[2];
-		*(u32*)0x020D21F0 = 0x02605555;
-		*(u32*)0x020D21F4 = 0x02602AAA;
-		*(u32*)0x020D22B0 = gbaAddrToDsi[12];
-		*(u32*)0x020D22B4 = gbaAddrToDsi[13];
-		*(u32*)0x020D2324 = 0x02605555;
-		*(u32*)0x020D2328 = 0x02602AAA;
-		*(u32*)0x020D2378 = 0x02605555;
-		*(u32*)0x020D237C = 0x02602AAA;
-		*(u32*)0x020D23DC = gbaAddrToDsi[14];
-		*(u32*)0x020D23E0 = gbaAddrToDsi[15];
-		*(u32*)0x020D2784 = gbaAddrToDsi[2];
-		*(u32*)0x020D27D0 = 0x02605555;
-		*(u32*)0x020D27D4 = 0x02602AAA;
-		*(u32*)0x020D28CC = gbaAddrToDsi[6];
-		*(u32*)0x020D28D0 = gbaAddrToDsi[7];
-		*(u32*)0x020D2954 = 0x02605555;
-		*(u32*)0x020D295C = 0x02602AAA;
-		*(u32*)0x020D29Ac = 0x02605555;
-		*(u32*)0x020D29B0 = 0x02602AAA;
-		*(u32*)0x020D2A90 = gbaAddrToDsi[16];
-		*(u32*)0x020D2A94 = gbaAddrToDsi[17];
-		*(u32*)0x020D2CC4 = gbaAddrToDsi[18];
-		*(u32*)0x020D2CC8 = gbaAddrToDsi[19];
-		return;
-	}
-
-	gbaRomFound = false;	// Do not load GBA ROM
 }
 
 static bool rsetA7CacheDone = false;
@@ -470,16 +359,10 @@ void rsetA7Cache(void)
 
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
-	patchOffsetCache.a7Swi12Offset = 0;
-	patchOffsetCache.swiGetPitchTableOffset = 0;
-	patchOffsetCache.swiGetPitchTableChecked = 0;
+	patchOffsetCache.ramClearOffset = 0;
+	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
-	patchOffsetCache.a7CardIrqEnableOffset = 0;
-	patchOffsetCache.cardCheckPullOutOffset = 0;
-	patchOffsetCache.cardCheckPullOutChecked = 0;
 	patchOffsetCache.a7IrqHandlerOffset = 0;
-	patchOffsetCache.a7IrqHandlerWordsOffset = 0;
-	patchOffsetCache.a7IrqHookOffset = 0;
 	patchOffsetCache.savePatchType = 0;
 	patchOffsetCache.relocateStartOffset = 0;
 	patchOffsetCache.relocateValidateOffset = 0;
@@ -497,19 +380,17 @@ u32 patchCardNds(
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
 	u32 patchMpuSize,
-	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 0) {
+	 || patchOffsetCache.type != 1) {
 		pleaseWaitOutput();
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
-		patchOffsetCache.a9Swi12Offset = 0;
-		patchOffsetCache.dsiModeCheckOffset = 0;
+		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.heapPointer2Offset = 0;
 		patchOffsetCache.a9IsThumb = 0;
 		patchOffsetCache.cardReadStartOffset = 0;
 		patchOffsetCache.cardReadEndOffset = 0;
@@ -518,16 +399,10 @@ u32 patchCardNds(
 		patchOffsetCache.cardIdChecked = 0;
 		patchOffsetCache.cardReadDmaOffset = 0;
 		patchOffsetCache.cardReadDmaChecked = 0;
-		patchOffsetCache.cardSetDmaOffset = 0;
-		patchOffsetCache.cardSetDmaChecked = 0;
-		patchOffsetCache.cardEndReadDmaOffset = 0;
-		patchOffsetCache.cardEndReadDmaChecked = 0;
 		patchOffsetCache.a9CardIrqEnableOffset = 0;
 		patchOffsetCache.a9CardIrqIsThumb = 0;
 		patchOffsetCache.resetOffset = 0;
 		patchOffsetCache.resetChecked = 0;
-		patchOffsetCache.sleepFuncOffset = 0;
-		patchOffsetCache.sleepChecked = 0;
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
@@ -540,7 +415,7 @@ u32 patchCardNds(
 		patchOffsetCache.randomPatchChecked = 0;
 		patchOffsetCache.randomPatch5SecondOffset = 0;
 		patchOffsetCache.randomPatch5SecondChecked = 0;
-		patchOffsetCache.a9IrqHookOffset = 0;
+		patchOffsetCache.a9IrqHandlerOffset = 0;
 		rsetA7Cache();
 	}
 
@@ -549,10 +424,11 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ROMinRAM, patchMpuRegion, patchMpuSize);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	
+	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);
+		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
 	}
 
 	dbg_printf("ERR_LOAD_OTHR");

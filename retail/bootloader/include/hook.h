@@ -33,37 +33,20 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 fileCluster,
-	u32 srParamsFileCluster,
-	u32 ramDumpCluster,
-	u32 wideCheatFileCluster,
-	u32 wideCheatSize,
-	u32 cheatFileCluster,
-	u32 cheatSize,
-    u32 gameOnFlashcard,
-    u32 saveOnFlashcard,
-	u32 language,
-	u32 dsiMode, // SDK5
-	u32 dsiSD,
-	u32 extendedMemory,
-	u32 ROMinRAM,
-	u32 consoleModel,
-	u32 romRead_LED,
-	u32 dmaRomRead_LED,
-	u32 preciseVolumeControl
+	u32 language
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 saveOnFlashcard,
-	u32 cacheBlockSize,
-	u32 extendedMemory,
-	u32 ROMinRAM,
-	u32 dsiMode, // SDK5
-	u32 enableExceptionHandler,
-	u32 consoleModel
+	u32 srParamsFileCluster,
+	bool expansionPakFound,
+	bool extendedMemory,
+	bool dsDebugRam,
+	u32 overlaysSize,
+	u32 maxClusterCacheSize,
+    u32 fatTableAddr
 );
 
 #endif // HOOK_H

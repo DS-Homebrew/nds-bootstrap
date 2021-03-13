@@ -34,6 +34,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
     u32 cardId;
 } __attribute__ ((__packed__)) cardengineArm7PatchesArm7FunctionsThumb;
 
+#ifndef B4DS
 //
 // ARM7 cardengine patches
 //
@@ -85,5 +86,31 @@ typedef struct cardengineArm7 {
     u32* cheat_data_offset; //u32* cheat_data;
     u32* irqTable_offset;
 } __attribute__ ((__packed__)) cardengineArm7;
+#else
+//
+// ARM7 cardengine patches
+//
+typedef struct cardengineArm7Patches {
+    u32* card_pull_out_arm9;
+    u32 vblankHandler;
+    u32 card_pull;
+    u32 cacheFlushRef;
+    u32 readCachedRef;
+    cardengineArm7PatchesArm7Functions* arm7Functions;
+    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
+} __attribute__ ((__packed__)) cardengineArm7Patches;
+
+//
+// ARM7 cardengine
+//
+typedef struct cardengineArm7 {
+    cardengineArm7Patches* patches;
+    u32 intr_vblank_orig_return;
+    const module_params_t* moduleParams;
+    u32 cardStruct;
+    u32 language; //u8
+    u32* languageAddr;
+} __attribute__ ((__packed__)) cardengineArm7;
+#endif
 
 #endif // CARDENGINE_HEADER_ARM7_H

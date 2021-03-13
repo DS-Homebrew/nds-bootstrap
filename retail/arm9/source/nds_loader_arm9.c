@@ -45,7 +45,7 @@
 //#define LCDC_BANK_C (u16*)0x06840000
 
 extern u8 lz77ImageBuffer[0x12000];
-void* loader[0x20000];
+void* loaderBin[0x20000];
 
 loadCrt0* lc0 = (loadCrt0*)LOAD_CRT0_LOCATION;
 
@@ -237,10 +237,10 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	nocashMessage("runNds");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen("nitro:/load.lz77", "rb");
+	FILE* bootloaderBin = fopen(REG_SCFG_EXT!=0 ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
 	if (bootloaderBin) {
 		fread(lz77ImageBuffer, 1, (int)sizeof(lz77ImageBuffer), bootloaderBin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)loader);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
 		fclose(bootloaderBin);
 	} else {
 		return;
@@ -251,62 +251,64 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	// Direct CPU access to VRAM bank D
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
-	// Load the loader into the correct address
-	tonccpy(lc0, loader, 0x20000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
-
 	// Set the parameters for the loader
 
 	free(conf->ndsPath);
 	free(conf->savPath);
 
-	lc0->storedFileCluster = cluster;
-	lc0->initDisc          = conf->initDisc;
-	lc0->gameOnFlashcard   = conf->gameOnFlashcard;
-	lc0->saveOnFlashcard   = conf->saveOnFlashcard;
-	lc0->donorOnFlashcard  = conf->donorOnFlashcard;
-	lc0->a9ScfgRom         = REG_SCFG_ROM;
-	lc0->dsiSD             = conf->sdFound;
+	loadCrt0* loader = (loadCrt0*)loaderBin;
 
-	lc0->saveFileCluster             = saveCluster;
-	lc0->donorFileE2Cluster          = donorE2Cluster;
-	lc0->donorFile2Cluster           = donor2Cluster;
-	lc0->donorFile3Cluster           = donor3Cluster;
-	lc0->donorFileCluster            = donorCluster;
-	lc0->donorFileTwlCluster         = donorTwlCluster;
-	lc0->gbaFileCluster              = gbaCluster;
-	lc0->gbaSaveFileCluster          = gbaSavCluster;
-	lc0->romSize                     = conf->romSize;
-	lc0->saveSize                    = conf->saveSize;
-	lc0->gbaRomSize                  = conf->gbaRomSize;
-	lc0->gbaSaveSize                 = conf->gbaSaveSize;
-	lc0->wideCheatFileCluster        = wideCheatCluster;
-	lc0->wideCheatSize               = conf->wideCheatSize;
-	lc0->apPatchFileCluster          = apPatchCluster;
-	lc0->apPatchSize                 = conf->apPatchSize;
-	lc0->cheatFileCluster            = cheatCluster;
-	lc0->cheatSize                   = conf->cheatSize;
-	lc0->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
-	lc0->cacheFatTable               = conf->cacheFatTable;
-	lc0->fatTableFileCluster         = fatTableCluster;
-	lc0->ramDumpCluster              = ramDumpCluster;
-	lc0->srParamsFileCluster         = srParamsCluster;
-	lc0->language                    = conf->language;
-	lc0->dsiMode                     = conf->dsiMode; // SDK 5
-	lc0->donorSdkVer                 = conf->donorSdkVer;
-	lc0->patchMpuRegion              = conf->patchMpuRegion;
-	lc0->patchMpuSize                = conf->patchMpuSize;
-	lc0->extendedMemory              = conf->extendedMemory;
-	lc0->consoleModel                = conf->consoleModel;
-	lc0->romRead_LED                 = conf->romRead_LED;
-	lc0->dmaRomRead_LED              = conf->dmaRomRead_LED;
-	lc0->boostVram                   = conf->boostVram;
-	lc0->forceSleepPatch             = conf->forceSleepPatch;
-	lc0->volumeFix                   = conf->volumeFix;
-	lc0->preciseVolumeControl        = conf->preciseVolumeControl;
-	lc0->macroMode                   = conf->macroMode;
-	lc0->logging                     = conf->logging;
+	loader->storedFileCluster = cluster;
+	loader->initDisc          = conf->initDisc;
+	loader->gameOnFlashcard   = conf->gameOnFlashcard;
+	loader->saveOnFlashcard   = conf->saveOnFlashcard;
+	loader->donorOnFlashcard  = conf->donorOnFlashcard;
+	loader->a9ScfgRom         = REG_SCFG_ROM;
+	loader->dsiSD             = conf->sdFound;
+
+	loader->saveFileCluster             = saveCluster;
+	loader->donorFileE2Cluster          = donorE2Cluster;
+	loader->donorFile2Cluster           = donor2Cluster;
+	loader->donorFile3Cluster           = donor3Cluster;
+	loader->donorFileCluster            = donorCluster;
+	loader->donorFileTwlCluster         = donorTwlCluster;
+	loader->gbaFileCluster              = gbaCluster;
+	loader->gbaSaveFileCluster          = gbaSavCluster;
+	loader->romSize                     = conf->romSize;
+	loader->saveSize                    = conf->saveSize;
+	loader->gbaRomSize                  = conf->gbaRomSize;
+	loader->gbaSaveSize                 = conf->gbaSaveSize;
+	loader->wideCheatFileCluster        = wideCheatCluster;
+	loader->wideCheatSize               = conf->wideCheatSize;
+	loader->apPatchFileCluster          = apPatchCluster;
+	loader->apPatchSize                 = conf->apPatchSize;
+	loader->cheatFileCluster            = cheatCluster;
+	loader->cheatSize                   = conf->cheatSize;
+	loader->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
+	loader->cacheFatTable               = conf->cacheFatTable;
+	loader->fatTableFileCluster         = fatTableCluster;
+	loader->ramDumpCluster              = ramDumpCluster;
+	loader->srParamsFileCluster         = srParamsCluster;
+	loader->language                    = conf->language;
+	loader->dsiMode                     = conf->dsiMode; // SDK 5
+	loader->donorSdkVer                 = conf->donorSdkVer;
+	loader->patchMpuRegion              = conf->patchMpuRegion;
+	loader->patchMpuSize                = conf->patchMpuSize;
+	loader->extendedMemory              = conf->extendedMemory;
+	loader->consoleModel                = conf->consoleModel;
+	loader->romRead_LED                 = conf->romRead_LED;
+	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
+	loader->boostVram                   = conf->boostVram;
+	loader->forceSleepPatch             = conf->forceSleepPatch;
+	loader->volumeFix                   = conf->volumeFix;
+	loader->preciseVolumeControl        = conf->preciseVolumeControl;
+	loader->macroMode                   = conf->macroMode;
+	loader->logging                     = conf->logging;
 
 	free(conf);
+
+	// Load the loader into the correct address
+	tonccpy(lc0, loader, 0x20000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card

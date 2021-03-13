@@ -1,6 +1,7 @@
 #ifndef SDMMC_H
 #define SDMMC_H
 
+#ifndef _NO_SDMMC
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -185,5 +186,6 @@ static inline void setckl(u32 data)
 	sdmmc_write16(REG_SDCLKCTL, data & 0xFF);
 	sdmmc_write16(REG_SDCLKCTL, 1u<<8 | (data & 0x2FF));
 }
+#endif
 
 #endif // SDMMC_H

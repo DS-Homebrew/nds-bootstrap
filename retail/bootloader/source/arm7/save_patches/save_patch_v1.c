@@ -1,4 +1,5 @@
 #include <nds/ndstypes.h>
+#include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
 #include "find.h"
@@ -222,6 +223,8 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	*cardRead = ce7->patches->arm7Functions->cardRead;
 
 	// different patch for card id
+	u32* cardIdPatch = (u32*)ce7->patches->arm7Functions->cardId;
+	cardIdPatch[2] = getChipId(ndsHeader, moduleParams);
 	u32* cardId = (u32*)(JumpTableFunc + 0xAC);
 	dbg_printf("Card id:\t");
 	dbg_hexa((u32)cardId);

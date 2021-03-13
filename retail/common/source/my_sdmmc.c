@@ -22,6 +22,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#ifndef _NO_SDMMC
 #include <stddef.h> // NULL
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
@@ -1064,3 +1065,4 @@ int my_sdmmc_get_cid(bool isNand, u32 *info)
 
 	return 0;
 }
+#endif

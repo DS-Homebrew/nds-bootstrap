@@ -9,13 +9,10 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-extern u32 consoleModel;
-extern bool extendedMemoryConfirmed;
+extern bool extendedMemory;
+extern bool dsDebugRam;
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
-	const char* romTid = getRomTid(ndsHeader);
-	bool doLow = (strncmp(romTid, "VKG", 3) == 0);
-
+void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only) {
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
@@ -30,16 +27,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
-			if (extendedMemoryConfirmed) {
-				rombyte = (void*)ROM_LOCATION_EXT;
-			} else if (consoleModel == 0 && higherMem) {
-				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;
-
-				if (doLow) {
-					rombyte = (void*)CACHE_ADRESS_START_low;
-				}
-			}
+			rombyte = (void*)(extendedMemory&&!dsDebugRam ? 0x0C800000 : 0x09000000);
 			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
 		}
 		ipson += 3;
