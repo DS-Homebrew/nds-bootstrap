@@ -237,7 +237,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
 	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu data
 	toncset((u32*)0x02700000, 0, 0xB9C00);		// clear part of EWRAM - except before ce7 and ce9 binaries
-	toncset((u32*)0x027F8000, 0, 0x8000);		// clear part of EWRAM
+	toncset((u32*)0x027F8000, 0, 0x508000);	// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
@@ -1086,11 +1086,11 @@ int arm7_main(void) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
 			tonccpy((char*)0x03700000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
+			toncset((char*)0x02700000, 0, 0x80000);
 			romFile->fatTableCache = (u32)romFile->fatTableCache+0x01000000;
 			savFile->fatTableCache = (u32)savFile->fatTableCache+0x01000000;
 		}
 	}
-	toncset((u32*)0x02800000, 0, 0x500000);	// clear buffered binaries
 
 	nocashMessage("Loading the header...\n");
 
