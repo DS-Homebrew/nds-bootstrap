@@ -13,7 +13,8 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u32 donorOnFlashcard;
-extern u32 dsiSD;
+extern u16 a9ScfgRom;
+extern u16 dsiSD;
 extern u32 forceSleepPatch;
 
 extern bool sdRead;
@@ -69,7 +70,7 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
 
-	if (!(REG_SCFG_ROM & BIT(9))) {
+	if ((u8)a9ScfgRom == 1 && !(REG_SCFG_ROM & BIT(9))) {
 		// swi 0x12 call
 		if (swi12Offset) {
 			// Patch to call swi 0x02 instead of 0x12

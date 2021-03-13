@@ -2,6 +2,7 @@
 #include <unistd.h>
 //#include <stdio.h>
 #include <nds.h>
+#include <nds/arm9/dldi.h>
 #include <string>
 #include <string.h>
 #include <limits.h> // PATH_MAX
@@ -22,6 +23,8 @@
 #include "version.h"
 
 static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
+
+extern const DISC_INTERFACE __my_io_dsisd;
 
 extern std::string patchOffsetCacheFilePath;
 extern std::string fatTableFilePath;
@@ -141,23 +144,22 @@ static void load_conf(configuration* conf, const char* fn) {
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
-	if (!fatInitDefault()) {
+	fatMountSimple("sd", &__my_io_dsisd);
+	fatMountSimple("fat", dldiGetInternal());
+
+	conf->sdFound = (access("sd:/", F_OK) == 0);
+	bool flashcardFound = (access("fat:/", F_OK) == 0);
+
+	if (!conf->sdFound && !flashcardFound) {
 		consoleDemoInit();
-		printf("fatInitDefault failed!\n");
+		printf("FAT init failed!\n");
 		return -1;
 	}
 	nocashMessage("fatInitDefault");
 
-	if (!isDSiMode()) {
-		consoleDemoInit();
-		printf("This edition of nds-bootstrap\n");
-		printf("can only be used in DSi mode.\n");
-		return -1;
-	}
-
 	if ((strncmp (bootstrapPath, "sd:/", 4) != 0) && (strncmp (bootstrapPath, "fat:/", 5) != 0)) {
 		//bootstrapPath = "sd:/_nds/nds-bootstrap-release.nds";
-		bootstrapPath = "sd:/_nds/nds-bootstrap-nightly.nds";
+		bootstrapPath = conf->sdFound ? "sd:/_nds/nds-bootstrap-nightly.nds" : "fat:/_nds/nds-bootstrap-nightly.nds";
 	}
 	if (!nitroFSInit(bootstrapPath)) {
 		consoleDemoInit();
@@ -165,9 +167,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
-	conf->sdFound = (access("sd:/", F_OK) == 0);
-	bool flashcardFound = (access("fat:/", F_OK) == 0);
-
 	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
@@ -201,6 +200,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
+
+	/*char romTid[5];
+	FILE* ndsFile = fopen(conf->ndsPath, "rb");
+	if (ndsFile) {
+		fseek(ndsFile, 0xC, SEEK_SET);
+		fread(&romTid, 4, 1, ndsFile);
+	}
+	fclose(ndsFile);*/
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
@@ -396,9 +403,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-	/*if (!conf->sdFound) {
+	if (!conf->sdFound) {
 		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
-	}*/
+	}
 
 	if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
 		consoleDemoInit();

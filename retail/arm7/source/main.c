@@ -43,6 +43,8 @@ redistribute it freely, subject to the following restrictions:
 
 //static vu32* wordCommandAddr;
 
+void my_installSystemFIFO(void);
+
 void VcountHandler(void) {
 	inputGetAndSend();
 }
@@ -68,15 +70,17 @@ int main(void) {
 
 	SetYtrigger(80);
 
-	installSystemFIFO();
+	my_installSystemFIFO();
 
 	irqSet(IRQ_VCOUNT, VcountHandler);
 
 	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
 
-	i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 0);		// Press power button for auto-reset
-	//i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
-	//i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
+	if (isDSiMode()) {
+		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 0);		// Press power button for auto-reset
+		//i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
+		//i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
+	}
 
 	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 
