@@ -975,20 +975,20 @@ int arm7_main(void) {
 	// FAT table file
 	aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
 	if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
-		fileRead((char*)0x2770000, fatTableFile, 0, 0x400, -1);
+		fileRead((char*)0x2670000, fatTableFile, 0, 0x400, -1);
 	}
-	u32 fatTableVersion = *(u32*)(0x2770100);
-	bool fatTableEmpty = (*(u32*)(0x2770200) == 0);
+	u32 fatTableVersion = *(u32*)(0x2670100);
+	bool fatTableEmpty = (*(u32*)(0x2670200) == 0);
 
-	if (*(u32*)(0x2770040) != storedFileCluster
-	|| *(u32*)(0x2770044) != romSize)
+	if (*(u32*)(0x2670040) != storedFileCluster
+	|| *(u32*)(0x2670044) != romSize)
 	{
 		fatTableEmpty = true;
 	}
 
 	if (!gameOnFlashcard) {
-		if (*(u32*)(0x2770048) != saveFileCluster
-		|| *(u32*)(0x277004C) != saveSize)
+		if (*(u32*)(0x2670048) != saveFileCluster
+		|| *(u32*)(0x267004C) != saveSize)
 		{
 			fatTableEmpty = true;
 		}
@@ -1004,7 +1004,7 @@ int arm7_main(void) {
 		}
 		buildFatTableCache(romFile, 0);
 	} else {
-		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2770000, sizeof(aFile));
+		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2670000, sizeof(aFile));
 	}
 	if (gameOnFlashcard) {
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
@@ -1024,7 +1024,7 @@ int arm7_main(void) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
 			} else {
-				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x2770020, sizeof(aFile));
+				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x2670020, sizeof(aFile));
 			}
 		}
 	}
@@ -1032,26 +1032,26 @@ int arm7_main(void) {
 	if (gameOnFlashcard) sdRead = false;
 
 	if (fatTableEmpty) {
-		tonccpy((char*)0x2770000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
+		tonccpy((char*)0x2670000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 		if (!gameOnFlashcard) {
-			tonccpy((char*)0x2770020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)0x2670020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
-		*(u32*)(0x2770040) = storedFileCluster;
-		*(u32*)(0x2770044) = romSize;
+		*(u32*)(0x2670040) = storedFileCluster;
+		*(u32*)(0x2670044) = romSize;
 		if (!gameOnFlashcard) {
-			*(u32*)(0x2770048) = saveFileCluster;
-			*(u32*)(0x277004C) = saveSize;
+			*(u32*)(0x2670048) = saveFileCluster;
+			*(u32*)(0x267004C) = saveSize;
 		}
-		*(u32*)(0x2770100) = currentFatTableVersion;
+		*(u32*)(0x2670100) = currentFatTableVersion;
 		if (cacheFatTable) {
-			fileWrite((char*)0x2770000, fatTableFile, 0, 0x200, -1);
+			fileWrite((char*)0x2670000, fatTableFile, 0, 0x200, -1);
 			fileWrite((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 		}
 	} else {
 		fileRead((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, -1);
 	}
 
-	toncset((u32*)0x02770000, 0, 0x400);
+	toncset((u32*)0x02670000, 0, 0x400);
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
