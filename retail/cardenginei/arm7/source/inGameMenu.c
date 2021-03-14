@@ -17,6 +17,8 @@ extern void forceGameReboot(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 
+volatile int timeTilBatteryLevelRefresh = 7;
+
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
@@ -29,6 +31,11 @@ void inGameMenu(void) {
 
 		sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 		sharedAddr[5] |= (~REG_EXTKEYINPUT & 0x3) << 10;
+		timeTilBatteryLevelRefresh++;
+		if (timeTilBatteryLevelRefresh == 8) {
+			*(u8*)(INGAME_MENU_LOCATION+0x7FFF) = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
+			timeTilBatteryLevelRefresh = 0;
+		}
 	}
 
 	switch (sharedAddr[4]) {
@@ -47,6 +54,7 @@ void inGameMenu(void) {
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT
+	timeTilBatteryLevelRefresh = 7;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

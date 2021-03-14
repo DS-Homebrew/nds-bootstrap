@@ -84,6 +84,32 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	}
 }
 
+static void printBattery(void) {
+	u32 batteryLevel = *(u8*)(INGAME_MENU_LOCATION+0x7FFF);
+	const char* bars = "    ";
+	if (batteryLevel & BIT(7)) {
+		bars = " ]- ";	// Charging
+	} else
+	switch(batteryLevel) {
+		default:
+			break;
+		case 0x1:
+		case 0x3:
+			bars = "   |";
+			break;
+		case 0x7:
+			bars = "  ||";
+			break;
+		case 0xB:
+			bars = " |||";
+			break;
+		case 0xF:
+			bars = "||||";
+			break;
+	}
+	print(0x20 - 6, 0x18 - 2, bars, 2);
+}
+
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && KEYS; i++) {
@@ -94,6 +120,21 @@ static void waitKeys(u16 keys) {
 	do {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
+	} while(!(KEYS & keys));
+}
+
+static void waitKeysBattery(u16 keys) {
+	// Prevent key repeat for 10 frames
+	for(int i = 0; i < 10 && KEYS; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+		printBattery();
+	}
+
+	do {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+		printBattery();
 	} while(!(KEYS & keys));
 }
 
@@ -119,8 +160,9 @@ static void drawMainMenu(void) {
 	}
 
 	// Print info
-	print(0x20 - 14, 0x18 - 3, (char*)ndsBootstrapText, 1);
-	print(0x20 - strlen((char*)INGAME_MENU_LOCATION) - 1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
+	print(1, 0x18 - 3, (char*)ndsBootstrapText, 1);
+	print(1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
+	print(0x20 - 7, 0x18 - 2, "(    )", 2);
 }
 
 static void optionsMenu(s8* mainScreen) {
@@ -347,7 +389,7 @@ void inGameMenu(s8* mainScreen) {
 		drawMainMenu();
 		drawCursor(cursorPosition);
 
-		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
+		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
 
 		if (KEYS & KEY_UP) {
 			if (cursorPosition > 0)
