@@ -11,7 +11,6 @@ typedef struct loadCrt0 {
     u32 initDisc;
     u16 gameOnFlashcard;
     u16 saveOnFlashcard;
-    u32 donorOnFlashcard;
     u32 dldiOffset;
     u16 a9ScfgRom;
     u16 dsiSD;

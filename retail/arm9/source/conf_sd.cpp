@@ -174,22 +174,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
-	conf->donorOnFlashcard = 0;
-	if (conf->donorE2Path[0] == 'f' && conf->donorE2Path[1] == 'a' && conf->donorE2Path[2] == 't') {
-		conf->donorOnFlashcard |= BIT(1);
-	}
-	if (conf->donor2Path[0] == 'f' && conf->donor2Path[1] == 'a' && conf->donor2Path[2] == 't') {
-		conf->donorOnFlashcard |= BIT(2);
-	}
-	if (conf->donor3Path[0] == 'f' && conf->donor3Path[1] == 'a' && conf->donor3Path[2] == 't') {
-		conf->donorOnFlashcard |= BIT(3);
-	}
-	if (conf->donorPath[0] == 'f' && conf->donorPath[1] == 'a' && conf->donorPath[2] == 't') {
-		conf->donorOnFlashcard |= BIT(4);
-	}
-	if (conf->donorTwlPath[0] == 'f' && conf->donorTwlPath[1] == 'a' && conf->donorTwlPath[2] == 't') {
-		conf->donorOnFlashcard |= BIT(5);
-	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
@@ -204,15 +188,64 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 
-	/*char romTid[5];
+	u32 ndsArm7Size = 0;
 	FILE* ndsFile = fopen(conf->ndsPath, "rb");
 	if (ndsFile) {
-		fseek(ndsFile, 0xC, SEEK_SET);
-		fread(&romTid, 4, 1, ndsFile);
+		fseek(ndsFile, 0x3C, SEEK_SET);
+		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 	}
-	fclose(ndsFile);*/
+	fclose(ndsFile);
 
-	FILE* cebin;
+	FILE* cebin = NULL;
+
+	bool usingB4DS = (!dsiFeatures() && conf->gameOnFlashcard);
+	bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
+
+	// Load donor ROM's arm7 binary, if needed
+	switch (ndsArm7Size) {
+		case 0x22B40:
+		case 0x22BCC:
+			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorTwlPath, "rb");
+			break;
+		case 0x23708:
+		case 0x2378C:
+		case 0x237F0:
+			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
+			break;
+		case 0x23CAC:
+			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
+			break;
+		case 0x24DA8:
+		case 0x24F50:
+			cebin = fopen(conf->donor2Path, "rb");
+			break;
+		case 0x2434C:
+		case 0x2484C:
+		case 0x249DC:
+		case 0x25D04:
+		case 0x25D94:
+		case 0x25FFC:
+			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donor3Path, "rb");
+			break;
+		case 0x27618:
+		case 0x2762C:
+		case 0x29CEC:
+			cebin = fopen(conf->donorPath, "rb");
+			break;
+		default:
+			break;
+	}
+
+	if (cebin) {
+		u32 donorArm7Offset = 0;
+		fseek(cebin, 0x30, SEEK_SET);
+		fread(&donorArm7Offset, sizeof(u32), 1, cebin);
+		fseek(cebin, 0x3C, SEEK_SET);
+		fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, cebin);
+		fseek(cebin, donorArm7Offset, SEEK_SET);
+		fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, cebin);
+		fclose(cebin);
+	}
 
   if (dsiFeatures()) {
 	u32 srBackendId[2] = {0};

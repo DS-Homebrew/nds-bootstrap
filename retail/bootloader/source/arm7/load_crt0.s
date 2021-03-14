@@ -27,7 +27,6 @@
 	.global initDisc
 	.global gameOnFlashcard
 	.global saveOnFlashcard
-	.global donorOnFlashcard
 	.global a9ScfgRom
 	.global dsiSD
 	.global saveFileCluster
@@ -85,8 +84,6 @@ gameOnFlashcard:
 	.hword	0x0000
 saveOnFlashcard:
 	.hword	0x0000
-donorOnFlashcard:
-	.word	0x00000000
 dldiOffset:
 	.word	0x00000000
 a9ScfgRom:

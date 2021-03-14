@@ -46,7 +46,6 @@ typedef struct configuration {
 	bool sdFound;
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
-	u32 donorOnFlashcard;
 	bool macroMode;
 } configuration;
 

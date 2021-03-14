@@ -263,7 +263,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->initDisc          = conf->initDisc;
 	loader->gameOnFlashcard   = conf->gameOnFlashcard;
 	loader->saveOnFlashcard   = conf->saveOnFlashcard;
-	loader->donorOnFlashcard  = conf->donorOnFlashcard;
 	loader->a9ScfgRom         = REG_SCFG_ROM;
 	loader->dsiSD             = conf->sdFound;
 
