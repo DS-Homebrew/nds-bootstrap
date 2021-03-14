@@ -380,6 +380,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 	}
+
+	// Load DS blowfish
+	cebin = fopen("nitro:/encr_data.bin", "rb");
+	if (cebin) {
+		fread((void*)BLOWFISH_LOCATION_B4DS, 1, 0x1048, cebin);
+	}
+	fclose(cebin);
+
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
