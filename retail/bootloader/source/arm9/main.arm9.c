@@ -44,7 +44,6 @@
 extern void arm9_clearCache(void);
 
 tNDSHeader* ndsHeader = NULL;
-bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 bool extendedMemory2 = false;
 bool dsDebugRam = false;
@@ -264,13 +263,6 @@ void __attribute__((target("arm"))) arm9_main(void) {
 			arm9_stateFlag = ARM9_READY;
 		}
 	}
-
-	/*if (dsiModeConfirmed) {
-		REG_SCFG_EXT = 0x8307F100;
-	} else {
-		// lock SCFG
-		REG_SCFG_EXT &= ~(1UL << 31);
-	}*/
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);

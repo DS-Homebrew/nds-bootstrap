@@ -92,7 +92,6 @@ extern u32 apPatchSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
 extern u32 language;
-extern u32 dsiMode; // SDK 5
 extern u32 donorSdkVer;
 extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
@@ -241,7 +240,7 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
 }*/
 
-static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file, bool dsiMode, bool* dsiModeConfirmedPtr) {
+static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
@@ -307,19 +306,13 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, bool dsiMode) {
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 
 	// Copy the header to its proper location
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
 	*ndsHeader = dsiHeaderTemp->ndshdr;
-	if (dsiMode) {
-		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
-		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
-		tDSiHeader* dsiHeader = (tDSiHeader*)((u32)ndsHeader - (u32)__NDSHeader + (u32)__DSiHeader); // __DSiHeader
-		*dsiHeader = *dsiHeaderTemp;
-	}
 
 	return ndsHeader;
 }
@@ -530,7 +523,7 @@ int arm7_main(void) {
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
 
-	loadBinary_ARM7(&dsiHeaderTemp, romFile, dsiMode, &dsiModeConfirmed);
+	loadBinary_ARM7(&dsiHeaderTemp, romFile);
 	
 	nocashMessage("Loading the header...\n");
 
@@ -547,7 +540,7 @@ int arm7_main(void) {
 	}
 	dbg_printf("\n");
 
-	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 

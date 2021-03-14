@@ -12,6 +12,7 @@
 #include <nds/debug.h>*/
 #include <fat.h>
 #include <easysave/ini.hpp>
+#include "myDSiMode.h"
 #include "lzss.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -92,8 +93,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
-	// DSi mode
-	conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+	if (isDSiMode()) {
+		// DSi mode
+		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+	}
 
 	// Donor SDK version
 	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER").c_str(), NULL, 0);
@@ -211,7 +214,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* cebin;
 
-  if (REG_SCFG_EXT != 0) {
+  if (dsiFeatures()) {
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
 	cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
@@ -433,7 +436,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	if (REG_SCFG_EXT != 0) {	// Not for B4DS
+	if (dsiFeatures()) {	// Not for B4DS
 		fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
 			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;

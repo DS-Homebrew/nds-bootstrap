@@ -14,6 +14,7 @@
 #include <nds/system.h>
 #include <nds/debug.h>*/
 
+#include "myDSiMode.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
@@ -168,7 +169,9 @@ static inline void debugConf(configuration* conf) {
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
-	dbg_printf("dsiMode: %i\n", conf->dsiMode);
+	if (isDSiMode()) {
+		dbg_printf("dsiMode: %i\n", conf->dsiMode);
+	}
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
@@ -194,7 +197,7 @@ static int runNdsFile(configuration* conf) {
 	if (debug) {
 		consoleDemoInit();
 
-		if (REG_SCFG_EXT != 0) {
+		if (dsiFeatures()) {
 			fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
 
 			getSFCG_ARM9();
@@ -206,7 +209,7 @@ static int runNdsFile(configuration* conf) {
 		}
 	}
 
-	if (REG_SCFG_EXT != 0) {
+	if (dsiFeatures()) {
 		// ROM read LED
 		switch(conf->romRead_LED) {
 			case 0:
@@ -351,7 +354,7 @@ static int runNdsFile(configuration* conf) {
 		remove(logFilePath);
 	}
 
-	(REG_SCFG_EXT != 0) ? debugConf(conf) : debugConfB4DS(conf);
+	(dsiFeatures()) ? debugConf(conf) : debugConfB4DS(conf);
 
 	if ((extention(conf->ndsPath, ".nds") != 0)
 	&& (extention(conf->ndsPath, ".dsi") != 0)
@@ -441,7 +444,7 @@ static int runNdsFile(configuration* conf) {
 		clusterSrParams = stSrParams.st_ino;
 	}
 
-	if (REG_SCFG_EXT != 0) {
+	if (dsiFeatures()) {
 		if (stat(conf->gbaPath, &stGba) >= 0) {
 			clusterGba = stGba.st_ino;
 		}

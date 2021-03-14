@@ -31,6 +31,7 @@
 //#include <nds/arm9/dldi.h>
 #include <nds/debug.h>
 
+#include "myDSiMode.h"
 #include "lzss.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -237,7 +238,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	nocashMessage("runNds");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen(REG_SCFG_EXT!=0 ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
+	FILE* bootloaderBin = fopen(dsiFeatures() ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
 	if (bootloaderBin) {
 		fread(lz77ImageBuffer, 1, (int)sizeof(lz77ImageBuffer), bootloaderBin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);

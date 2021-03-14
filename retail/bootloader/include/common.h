@@ -59,7 +59,6 @@
 //};
 
 extern tNDSHeader* ndsHeader;
-extern bool dsiModeConfirmed;
 extern bool arm9_boostVram;
 extern bool extendedMemory2;
 extern bool dsDebugRam;
