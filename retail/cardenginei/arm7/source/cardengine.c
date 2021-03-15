@@ -69,11 +69,11 @@ extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
-extern u32 language;
 extern u32* languageAddr;
-extern u32 consoleModel;
-extern u32 romRead_LED;
-extern u32 dmaRomRead_LED;
+extern u8 language;
+extern u8 consoleModel;
+extern u8 romRead_LED;
+extern u8 dmaRomRead_LED;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 

@@ -52,20 +52,21 @@ cardStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
-language:
-	.word	0x00000000
 languageAddr:
 	.word	0x00000000
+language:
+	.byte	0
 consoleModel:
-	.word	0x00000000
+	.byte	0
 romRead_LED:
-	.word	0x00000000
+	.byte	0
 dmaRomRead_LED:
-	.word	0x00000000
+	.byte	0
 cheat_data_offset:
 	.word	cheat_data
 irqTable_offset:
 	.word	irqTable
+.align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

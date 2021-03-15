@@ -78,11 +78,11 @@ typedef struct cardengineArm7 {
 		5: dsiSD
 		6: preciseVolumeControl
 	*/
-    u32 language; //u8
     u32* languageAddr;
-    u32 consoleModel;
-    u32 romRead_LED;
-    u32 dmaRomRead_LED;
+    u8 language;
+    u8 consoleModel;
+    u8 romRead_LED;
+    u8 dmaRomRead_LED;
     u32* cheat_data_offset; //u32* cheat_data;
     u32* irqTable_offset;
 } __attribute__ ((__packed__)) cardengineArm7;
