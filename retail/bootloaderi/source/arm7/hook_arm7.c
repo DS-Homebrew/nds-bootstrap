@@ -26,6 +26,7 @@
 #include "nds_header.h"
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
+#include "value_bits.h"
 #include "common.h"
 #include "patch.h"
 #include "find.h"
@@ -92,17 +93,18 @@ int hookNdsRetailArm7(
 	u32 wideCheatSize,
 	u32 cheatFileCluster,
 	u32 cheatSize,
-    u32 gameOnFlashcard,
-    u32 saveOnFlashcard,
+	u32 apPatchFileCluster,
+	u32 apPatchSize,
+    u8 gameOnFlashcard,
+    u8 saveOnFlashcard,
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,
 	u8 extendedMemory,
-	u32 ROMinRAM,
+	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
-	u8 dmaRomRead_LED,
-	bool preciseVolumeControl
+	u8 dmaRomRead_LED
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -286,8 +288,15 @@ int hookNdsRetailArm7(
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	if (wideCheatSize+cheatSize <= 0x8000) {
+	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x8000) {
 		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
+		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
+			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
+			cheatDataOffset += apPatchSize;
+			*(cheatDataOffset + 3) = 0xCF;
+			dbg_printf("AP-fix found and applied\n");
+		}
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
 			cheatDataOffset += wideCheatSize;

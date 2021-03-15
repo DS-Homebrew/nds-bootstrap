@@ -186,9 +186,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->preciseVolumeControl) {
 		conf->valueBits |= BIT(4);
 	}
-	/*if (extention(conf->apPatchPath, ".bin") == 0) {
+	if (extention(conf->apPatchPath, ".bin")) {
 		conf->valueBits |= BIT(5);
-	}*/
+	}
 	if (conf->macroMode) {
 		conf->valueBits |= BIT(6);
 	}

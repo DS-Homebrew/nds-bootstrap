@@ -40,29 +40,30 @@ int hookNdsRetailArm7(
 	u32 wideCheatSize,
 	u32 cheatFileCluster,
 	u32 cheatSize,
-    u32 gameOnFlashcard,
-    u32 saveOnFlashcard,
+	u32 apPatchFileCluster,
+	u32 apPatchSize,
+    u8 gameOnFlashcard,
+    u8 saveOnFlashcard,
 	u8 language,
 	u8 dsiMode, // SDK5
 	u8 dsiSD,
 	u8 extendedMemory,
-	u32 ROMinRAM,
+	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
-	u8 dmaRomRead_LED,
-	bool preciseVolumeControl
+	u8 dmaRomRead_LED
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 saveOnFlashcard,
+	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
-	u32 ROMinRAM,
+	u8 ROMinRAM,
 	u8 dsiMode, // SDK5
-	u32 enableExceptionHandler,
+	u8 enableExceptionHandler,
 	u8 consoleModel
 );
 

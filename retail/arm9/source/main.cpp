@@ -357,11 +357,11 @@ static int runNdsFile(configuration* conf) {
 
 	(dsiFeatures()) ? debugConf(conf) : debugConfB4DS(conf);
 
-	if ((extention(conf->ndsPath, ".nds") != 0)
-	&& (extention(conf->ndsPath, ".dsi") != 0)
-	&& (extention(conf->ndsPath, ".ids") != 0)
-	&& (extention(conf->ndsPath, ".srl") != 0)
-	&& (extention(conf->ndsPath, ".app") != 0)) {
+	if ((!extention(conf->ndsPath, ".nds"))
+	&& (!extention(conf->ndsPath, ".dsi"))
+	&& (!extention(conf->ndsPath, ".ids"))
+	&& (!extention(conf->ndsPath, ".srl"))
+	&& (!extention(conf->ndsPath, ".app"))) {
 		if (debug) {
 			dbg_printf("No NDS file specified\n");
 			dopause();

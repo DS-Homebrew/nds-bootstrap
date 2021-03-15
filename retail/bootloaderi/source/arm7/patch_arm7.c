@@ -14,7 +14,7 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
-extern u16 dsiSD;
+extern u8 dsiSD;
 
 extern bool sdRead;
 

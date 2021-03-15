@@ -125,12 +125,12 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u32 saveOnFlashcard,
+	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
-	u32 ROMinRAM,
+	u8 ROMinRAM,
 	u8 dsiMode, // SDK 5
-	u32 enableExceptionHandler,
+	u8 enableExceptionHandler,
 	u8 consoleModel
 ) {
 	nocashMessage("hookNdsRetailArm9");

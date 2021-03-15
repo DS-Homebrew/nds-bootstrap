@@ -1281,6 +1281,8 @@ int arm7_main(void) {
 			wideCheatSize,
 			cheatFileCluster,
 			cheatSize,
+			apPatchFileCluster,
+			apPatchSize,
 			gameOnFlashcard,
 			saveOnFlashcard,
 			language,
@@ -1290,8 +1292,7 @@ int arm7_main(void) {
 			ROMinRAM,
 			consoleModel,
 			romRead_LED,
-			dmaRomRead_LED,
-			preciseVolumeControl
+			dmaRomRead_LED
 		);
 		if (errorCode == ERR_NONE) {
 			nocashMessage("Card hook successful");
@@ -1348,7 +1349,7 @@ int arm7_main(void) {
 			}
 		}
 
-		if (apPatchFileCluster != 0 && apPatchSize > 0 && apPatchSize <= 0x30000) {
+		if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
 			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);

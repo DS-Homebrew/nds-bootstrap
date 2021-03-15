@@ -665,7 +665,7 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
 
-	if (apPatchFileCluster != 0 && apPatchSize > 0 && apPatchSize <= 0x30000) {
+	if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
 		applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9));
