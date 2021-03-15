@@ -162,7 +162,8 @@ static void drawMainMenu(void) {
 	// Print info
 	print(1, 0x18 - 3, (char*)ndsBootstrapText, 1);
 	print(1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
-	print(0x20 - 7, 0x18 - 2, "(    )", 2);
+	print(0x20 - 7, 0x18 - 2, "(", 2);
+	print(0x20 - 2, 0x18 - 2, ")", 2);
 }
 
 static void optionsMenu(s8* mainScreen) {
