@@ -174,6 +174,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+
 	if (conf->cacheFatTable) {
 		conf->valueBits |= BIT(0);
 	}
@@ -209,9 +210,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 
+	char romTid[5] = {0};
 	u32 ndsArm7Size = 0;
 	FILE* ndsFile = fopen(conf->ndsPath, "rb");
 	if (ndsFile) {
+		fseek(ndsFile, 0xC, SEEK_SET);
+		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 	}
@@ -269,6 +273,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures()) {
+	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard && strncmp(romTid, "I", 1) != 0) {
+		disableSlot1();
+	}
+
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
 	cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
