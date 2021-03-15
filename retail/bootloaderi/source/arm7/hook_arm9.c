@@ -127,11 +127,11 @@ int hookNdsRetailArm9(
 	u32 saveCluster,
 	u32 saveOnFlashcard,
 	u32 cacheBlockSize,
-	u32 extendedMemory,
+	u8 extendedMemory,
 	u32 ROMinRAM,
-	u32 dsiMode, // SDK 5
+	u8 dsiMode, // SDK 5
 	u32 enableExceptionHandler,
-	u32 consoleModel
+	u8 consoleModel
 ) {
 	nocashMessage("hookNdsRetailArm9");
 

@@ -70,6 +70,7 @@
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "value_bits.h"
 #include "loading_screen.h"
 
 #include "deviceList.h"					// Modified to read from SD instead of NAND
@@ -88,7 +89,7 @@ extern u32 initDisc;
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
-extern u16 dsiSD;
+extern u8 dsiSD;
 extern u32 saveFileCluster;
 extern u32 gbaFileCluster;
 extern u32 gbaSaveFileCluster;
@@ -103,26 +104,19 @@ extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
-extern u32 cacheFatTable;
 extern u32 fatTableFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
-extern u32 language;
-extern u32 dsiMode; // SDK 5
-extern u32 donorSdkVer;
-extern u32 patchMpuRegion;
-extern u32 patchMpuSize;
-extern u32 extendedMemory;
-extern u32 consoleModel;
-extern u32 romRead_LED;
-extern u32 dmaRomRead_LED;
-//extern u32 forceSleepPatch;
-extern u32 volumeFix;
-extern u32 preciseVolumeControl;
-extern u32 macroMode;
-extern u32 boostVram;
-extern u32 soundFreq;
-extern u32 logging;
+extern u8 patchMpuSize;
+extern u8 patchMpuRegion;
+extern u8 language;
+extern u8 dsiMode; // SDK 5
+extern u8 donorSdkVer;
+extern u8 extendedMemory;
+extern u8 consoleModel;
+extern u8 romRead_LED;
+extern u8 dmaRomRead_LED;
+extern u8 soundFreq;
 
 bool useTwlCfg = false;
 int twlCfgLang = 0;

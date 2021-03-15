@@ -13,7 +13,8 @@ typedef struct loadCrt0 {
     u16 saveOnFlashcard;
     u32 dldiOffset;
     u16 a9ScfgRom;
-    u16 dsiSD;
+    u8 dsiSD;
+    u8 valueBits;
     u32 saveFileCluster;
 	u32 donorFileE2Cluster;
 	u32 donorFile2Cluster;
@@ -33,26 +34,19 @@ typedef struct loadCrt0 {
     u32 cheatFileCluster;
     u32 cheatSize;
     u32 patchOffsetCacheFileCluster;
-    u32 cacheFatTable;
     u32 fatTableFileCluster;
     u32 ramDumpCluster;
 	u32 srParamsFileCluster;
-    u32 language; //u8
-    u32 dsiMode; // SDK 5
-    u32 donorSdkVer;
-    u32 patchMpuRegion;
     u32 patchMpuSize;
-    u32 extendedMemory;
-    u32 consoleModel;
-    u32 romRead_LED;
-    u32 dmaRomRead_LED;
-    u32 boostVram;
-    u32 soundFreq;
-    u32 forceSleepPatch;
-	u32 volumeFix;
-    u32 preciseVolumeControl;
-    u32 macroMode;
-    u32 logging;
+    u8 patchMpuRegion;
+    u8 language;
+    u8 dsiMode; // SDK 5
+    u8 donorSdkVer;
+    u8 extendedMemory;
+    u8 consoleModel;
+    u8 romRead_LED;
+    u8 dmaRomRead_LED;
+    u8 soundFreq;
 } __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H

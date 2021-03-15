@@ -5,13 +5,12 @@
 #include "patch.h"
 #include "find.h"
 #include "common.h"
+#include "value_bits.h"
 #include "locations.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
 extern u32 _io_dldi_features;
-
-extern u32 forceSleepPatch;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);

@@ -66,6 +66,7 @@
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "value_bits.h"
 #include "loading_screen.h"
 
 typedef signed int addr_t;
@@ -81,23 +82,16 @@ extern void arm7clearRAM(void);
 extern u32 storedFileCluster;
 extern u32 romSize;
 extern u32 initDisc;
-//extern u32 wantToPatchDLDI;
-//extern u32 argStart;
-//extern u32 argSize;
-//extern u32 dsiSD;
 extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
-extern u32 language;
-extern u32 donorSdkVer;
-extern u32 patchMpuRegion;
 extern u32 patchMpuSize;
-extern u32 boostVram;
-//extern u32 forceSleepPatch;
-extern u32 logging;
+extern u8 patchMpuRegion;
+extern u8 language;
+extern u8 donorSdkVer;
 
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;

@@ -265,6 +265,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->saveOnFlashcard   = conf->saveOnFlashcard;
 	loader->a9ScfgRom         = REG_SCFG_ROM;
 	loader->dsiSD             = conf->sdFound;
+	loader->valueBits         = conf->valueBits;
 
 	loader->saveFileCluster             = saveCluster;
 	loader->donorFileE2Cluster          = donorE2Cluster;
@@ -285,7 +286,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->cheatFileCluster            = cheatCluster;
 	loader->cheatSize                   = conf->cheatSize;
 	loader->patchOffsetCacheFileCluster = patchOffsetCacheCluster;
-	loader->cacheFatTable               = conf->cacheFatTable;
 	loader->fatTableFileCluster         = fatTableCluster;
 	loader->ramDumpCluster              = ramDumpCluster;
 	loader->srParamsFileCluster         = srParamsCluster;
@@ -298,12 +298,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
-	loader->boostVram                   = conf->boostVram;
-	loader->forceSleepPatch             = conf->forceSleepPatch;
-	loader->volumeFix                   = conf->volumeFix;
-	loader->preciseVolumeControl        = conf->preciseVolumeControl;
-	loader->macroMode                   = conf->macroMode;
-	loader->logging                     = conf->logging;
 
 	free(conf);
 

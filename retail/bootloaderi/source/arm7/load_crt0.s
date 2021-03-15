@@ -29,6 +29,7 @@
 	.global saveOnFlashcard
 	.global a9ScfgRom
 	.global dsiSD
+	.global valueBits
 	.global saveFileCluster
 	.global donorFileE2Cluster
 	.global donorFile2Cluster
@@ -45,29 +46,23 @@
 	.global wideCheatSize
 	.global apPatchFileCluster
 	.global apPatchSize
+	.global apPatchIsCheat
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
-	.global cacheFatTable
 	.global fatTableFileCluster
 	.global ramDumpCluster
 	.global srParamsFileCluster
+	.global patchMpuSize
+	.global patchMpuRegion
 	.global language
 	.global dsiMode
 	.global donorSdkVer
-	.global patchMpuRegion
-	.global patchMpuSize
 	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
-	.global boostVram
 	.global soundFreq
-	.global forceSleepPatch
-	.global volumeFix
-	.global preciseVolumeControl
-	.global macroMode
-	.global logging
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -89,7 +84,9 @@ dldiOffset:
 a9ScfgRom:
 	.hword	0
 dsiSD:
-	.hword	0
+	.byte	0
+valueBits:
+	.byte	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
 donorFileE2Cluster:
@@ -128,46 +125,33 @@ cheatSize:
 	.word	0x00000000
 patchOffsetCacheFileCluster:
 	.word	0x00000000
-cacheFatTable:
-	.word	0x00000000
 fatTableFileCluster:
 	.word	0x00000000
 ramDumpCluster:
 	.word	0x00000000
 srParamsFileCluster:
 	.word	0x00000000
-language:
-	.word	0x00000000
-dsiMode:
-	.word	0x00000000
-donorSdkVer:
-	.word	0x00000000		@ donor SDK version
-patchMpuRegion:
-	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000
+patchMpuRegion:
+	.byte	0
+language:
+	.byte	0
+dsiMode:
+	.byte	0
+donorSdkVer:
+	.byte	0		@ donor SDK version
 extendedMemory:
-	.word	0x00000000
+	.byte	0
 consoleModel:
-	.word	0x00000000
+	.byte	0
 romRead_LED:
-	.word	0x00000000
+	.byte	0
 dmaRomRead_LED:
-	.word	0x00000000
-boostVram:
-	.word	0x00000000
+	.byte	0
 soundFreq:
-	.word	0x00000000
-forceSleepPatch:
-	.word	0x00000000
-volumeFix:
-	.word	0x00000000
-preciseVolumeControl:
-	.word	0x00000000
-macroMode:
-	.word	0x00000000
-logging:
-	.word	0x00000000
+	.byte	0
+.align 4
 
 startUp:
 	mov	r0, #0x04000000

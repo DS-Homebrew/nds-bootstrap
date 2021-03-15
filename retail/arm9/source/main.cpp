@@ -313,6 +313,7 @@ static int runNdsFile(configuration* conf) {
 			if (memcmp(romTid, list[i], 3) == 0) {
 				// Found a match.
 				conf->volumeFix = true; // Special setting (when found special gamecode)
+				conf->valueBits |= BIT(3);
 				break;
 			}
 		}

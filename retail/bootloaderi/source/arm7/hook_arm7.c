@@ -94,15 +94,15 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
     u32 gameOnFlashcard,
     u32 saveOnFlashcard,
-	u32 language,
-	u32 dsiMode, // SDK 5
-	u32 dsiSD,
-	u32 extendedMemory,
+	u8 language,
+	u8 dsiMode, // SDK 5
+	u8 dsiSD,
+	u8 extendedMemory,
 	u32 ROMinRAM,
-	u32 consoleModel,
-	u32 romRead_LED,
-	u32 dmaRomRead_LED,
-	u32 preciseVolumeControl
+	u8 consoleModel,
+	u8 romRead_LED,
+	u8 dmaRomRead_LED,
+	bool preciseVolumeControl
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 

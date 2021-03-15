@@ -27,14 +27,15 @@ typedef struct configuration {
 	u32 cheatSize;
 	u8 language;
 	u8 dsiMode; // SDK 5
-	u32 donorSdkVer;
-	u32 patchMpuRegion;
+	u8 valueBits;
+	u8 donorSdkVer;
+	u8 patchMpuRegion;
 	u32 patchMpuSize;
 	int extendedMemory;
-	u32 consoleModel;
+	u8 consoleModel;
 	int colorMode;
-	u32 romRead_LED;
-	u32 dmaRomRead_LED;
+	u8 romRead_LED;
+	u8 dmaRomRead_LED;
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;

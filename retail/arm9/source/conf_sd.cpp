@@ -174,6 +174,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+	if (conf->cacheFatTable) {
+		conf->valueBits |= BIT(0);
+	}
+	if (conf->boostVram) {
+		conf->valueBits |= BIT(1);
+	}
+	if (conf->forceSleepPatch) {
+		conf->valueBits |= BIT(2);
+	}
+	if (conf->preciseVolumeControl) {
+		conf->valueBits |= BIT(4);
+	}
+	/*if (extention(conf->apPatchPath, ".bin") == 0) {
+		conf->valueBits |= BIT(5);
+	}*/
+	if (conf->macroMode) {
+		conf->valueBits |= BIT(6);
+	}
+	if (conf->logging) {
+		conf->valueBits |= BIT(7);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
