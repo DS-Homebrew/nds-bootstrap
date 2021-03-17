@@ -231,7 +231,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
 	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu data
-	toncset((u32*)0x02700000, 0, 0xB9C00);		// clear part of EWRAM - except before ce7 and ce9 binaries
+	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x508000);	// clear part of EWRAM
 	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
@@ -1225,14 +1225,14 @@ int arm7_main(void) {
 				tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x3000);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
-			ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION;
-			tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
+			ce9Location = CARDENGINEI_ARM9_CACHED_MID_LOCATION;
+			tonccpy((u32*)CARDENGINEI_ARM9_CACHED_MID_LOCATION, (u32*)CARDENGINEI_ARM9_DLDI_BUFFERED_LOCATION, 0x7000);
 			if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
 		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed) {
-			ce9Location = CARDENGINEI_ARM9_CACHED_END_LOCATION;
+			ce9Location = strncmp(romTid, "ADM", 3)==0 ? CARDENGINEI_ARM9_CACHED_END_LOCATION : CARDENGINEI_ARM9_CACHED_MID_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION), size);
 			if (ROMinRAM) {
