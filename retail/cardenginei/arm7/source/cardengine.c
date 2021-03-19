@@ -674,6 +674,21 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
 
+			switch (sharedAddr[4]) {
+				case 0x53445231:
+					cardReadLED(true);
+					sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
+					cardReadLED(false);
+					sharedAddr[3] = 0;
+					break;
+				case 0x53445244:
+					cardReadLED(true);
+					sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+					cardReadLED(false);
+					sharedAddr[3] = 0;
+					break;
+			}
+
     		if (sharedAddr[3] == (vu32)0x026FF800) {
 				sdRead = true;
     			log_arm9();
@@ -962,9 +977,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
-	}
-
-	if (valueBits & b_runCardEngineCheck) {
+	} else if (valueBits & b_runCardEngineCheck) {
 		runCardEngineCheck();
 	}
 }
