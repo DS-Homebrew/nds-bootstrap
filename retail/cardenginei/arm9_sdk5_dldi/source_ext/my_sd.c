@@ -33,13 +33,6 @@ void	DC_InvalidateRange(const void *base, u32 size);
 
 extern vu32* volatile sharedAddr;
 
-static void waitMs(int count) {
-	for (int i = 0; i < count; i++) {
-		while ((REG_VCOUNT % 32) != 31);
-		while ((REG_VCOUNT % 32) == 31);
-	}
-}
-
 /*-----------------------------------------------------------------
 startUp
 Initialize the interface, geting it into an idle, ready state
@@ -86,9 +79,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	DC_InvalidateRange(buffer, 512);
 
     IPC_SendSync(0x4);
-	while (sharedAddr[4] == commandRead) {
-		waitMs(1);
-	}
+	while (sharedAddr[4] == commandRead);
 	return sharedAddr[4] == 0;
 }
 
@@ -114,9 +105,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	DC_InvalidateRange(buffer, numSectors * 512);
 
     IPC_SendSync(0x4);
-	while (sharedAddr[4] == commandRead) {
-		waitMs(1);
-	}
+	while (sharedAddr[4] == commandRead);
 	return sharedAddr[4] == 0;
 }
 
