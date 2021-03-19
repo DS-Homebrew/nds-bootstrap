@@ -69,6 +69,8 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	nocashMessage("readSector internal");
 	#endif
 
+	DC_InvalidateRange(buffer, 512);
+
 	u32 commandRead = 0x53445231;
 
 	sharedAddr[0] = sector;
@@ -76,7 +78,6 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[2] = startOffset;
 	sharedAddr[3] = endOffset;
 	sharedAddr[4] = commandRead;
-	DC_InvalidateRange(buffer, 512);
 
     IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead);
@@ -95,6 +96,8 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	nocashMessage("readSectors internal");
 	#endif
 
+	DC_InvalidateRange(buffer, numSectors * 512);
+
 	u32 commandRead = 0x53445244;
 
 	sharedAddr[0] = sector;
@@ -102,7 +105,6 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
-	DC_InvalidateRange(buffer, numSectors * 512);
 
     IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead);
