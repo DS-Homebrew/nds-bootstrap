@@ -1496,14 +1496,14 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
-	patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	//patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 
 	//getSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
-	//randomPatch(ndsHeader, moduleParams);
-	//randomPatch5Second(ndsHeader, moduleParams);
+	randomPatch(ndsHeader, moduleParams);
+	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader);

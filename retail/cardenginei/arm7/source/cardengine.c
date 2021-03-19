@@ -518,7 +518,7 @@ static void nandWrite(void) {
 
 static bool readOngoing = false;
 
-static bool start_cardRead_arm9(void) {
+/*static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
 	u32 dst = sharedAddr[0];
 	u32 len = sharedAddr[1];
@@ -581,7 +581,7 @@ static bool resume_cardRead_arm9(void) {
     {
         return false;    
     }
-}
+}*/
 
 /*static void asyncCardRead_arm9(void) {
 	u32 src = *(vu32*)(sharedAddr + 2);
@@ -683,7 +683,9 @@ static void runCardEngineCheck(void) {
 					break;
 				case 0x53445244:
 					cardReadLED(true);
+					//my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
 					sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+					//readOngoing = true;
 					cardReadLED(false);
 					sharedAddr[3] = 0;
 					break;
@@ -697,7 +699,7 @@ static void runCardEngineCheck(void) {
     		}
     
     
-          if ((sharedAddr[3] == (vu32)0x025FFB08) || (sharedAddr[3] == (vu32)0x025FFB0A)) {
+          /*if ((sharedAddr[3] == (vu32)0x025FFB08) || (sharedAddr[3] == (vu32)0x025FFB0A)) {
 				sdRead = true;
 			  dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
@@ -709,22 +711,6 @@ static void runCardEngineCheck(void) {
                     sharedAddr[3] = 0;
                     if (dmaLed) IPC_SendSync(0x8);
 				//}
-              }
-          }
-
-          /*if ((sharedAddr[3] == (vu32)0x020FF808) || (sharedAddr[3] == (vu32)0x020FF80A)) {
-				sdRead = true;
-              dmaLed = (sharedAddr[3] == (vu32)0x020FF80A);
-              if(start_cardRead_arm9()) {
-                    sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
-                    IPC_SendSync(0x8);
-              } else {
-                if (resume_cardRead_arm9()) { 
-                    sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
-                    IPC_SendSync(0x8);
-				}
               }
           }*/
 
@@ -753,9 +739,9 @@ static void runCardEngineCheck(void) {
 			#endif
         } else {
             //if(resume_cardRead_arm9()) {
-			    while(!resume_cardRead_arm9()) {} 
+			    /*while(!resume_cardRead_arm9()) {} 
                 sharedAddr[3] = 0;
-                if (dmaLed) IPC_SendSync(0x8);
+                if (dmaLed) IPC_SendSync(0x8);*/
             //}
         }
   		unlockMutex(&cardEgnineCommandMutex);
@@ -980,6 +966,14 @@ void myIrqHandlerVBlank(void) {
 	} else if (valueBits & b_runCardEngineCheck) {
 		runCardEngineCheck();
 	}
+	/*if (readOngoing) {
+		if (my_sdmmc_sdcard_check_command(0x33C12, 0)) {
+			sharedAddr[4] = 0;
+			cardReadLED(false);
+			readOngoing = false;
+			sharedAddr[3] = 0;
+		}
+	}*/
 }
 
 void i2cIRQHandler(void) {
