@@ -306,7 +306,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
     // Load ce9 binary
-	cebin = fopen("nitro:/cardenginei_arm9.lz77", "rb");
+	/*cebin = fopen("nitro:/cardenginei_arm9.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
@@ -319,7 +319,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION);
 	}
-	fclose(cebin);
+	fclose(cebin);*/
 
     // Load ROMinRAM ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
@@ -346,7 +346,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (conf->gameOnFlashcard) {
+	//if (conf->gameOnFlashcard) {
 		// Load DLDI ce9 binary
 		cebin = fopen("nitro:/cardenginei_arm9_dldi.lz77", "rb");
 		if (cebin) {
@@ -354,7 +354,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_DLDI_BUFFERED_LOCATION);
 		}
 		fclose(cebin);
-	}
+	//}
 
 	// Load DS blowfish
 	cebin = fopen("nitro:/encr_data.bin", "rb");
