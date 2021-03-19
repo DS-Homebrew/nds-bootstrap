@@ -835,9 +835,9 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 }
 
 //Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}
+//void __attribute__((target("arm"))) debug8mbMpuFix(){
+//	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+//}
 
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
@@ -921,9 +921,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			//return -1;
 		}
 		#endif
-		if (strncmp(getRomTid(ndsHeader), "UBR", 3) != 0) {
-			debug8mbMpuFix();
-		}
+		//if (strncmp(getRomTid(ndsHeader), "UBR", 3) != 0) {
+		//	debug8mbMpuFix();
+		//}
 
 		//ndsHeader->romSize += 0x1000;
 
