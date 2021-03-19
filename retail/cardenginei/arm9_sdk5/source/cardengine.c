@@ -854,6 +854,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	if (!flagsSet) {
 		setExceptionHandler2();
 		#ifdef DLDI
+		sdRead = true;
 		if (!FAT_InitFiles(false, 0)) {
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
