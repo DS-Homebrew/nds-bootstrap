@@ -380,10 +380,13 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         if(usesThumb) {
             u16* thumbOffset = (u16*)offset;
             while(*thumbOffset!=0xB508) { // push	{r3, lr}
-                *thumbOffset = 0x46C0; // NOP
                 thumbOffset--;
             }
             ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
+            thumbOffset[1] = 0x46C0; // NOP
+            thumbOffset[2] = 0x46C0; // NOP
+            thumbOffset[3] = 0x46C0; // NOP
+            thumbOffset[4] = 0x46C0; // NOP
         } else  {
             u32* armOffset = (u32*)offset;
             armOffset--;
