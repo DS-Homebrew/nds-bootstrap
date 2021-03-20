@@ -42,10 +42,10 @@
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
 
-#ifdef DLDI
+//#ifdef DLDI
 #include "my_fat.h"
 #include "card.h"
-#endif
+//#endif
 
 #define _16KB_READ_SIZE  0x4000
 #define _32KB_READ_SIZE  0x8000
@@ -73,10 +73,9 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-#ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
-
+#ifdef DLDI
 bool sdRead = false;
 #else
 /*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
@@ -672,18 +671,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	processAsyncCommand();
 	#endif
 
-	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		// Read directly at ARM7 level
-		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
-
-		sharedAddr[0] = (vu32)dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
-
-		waitForArm7();
-
-	} else {*/
+	if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		fileRead((char*)dst, *romFile, src, len, 0);
+	} else {
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -697,20 +687,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				getAsyncSector();
 				#endif
 
-				// Send a command to the ARM7 to fill the RAM cache
-				commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
-
 				slot = allocateCacheSlot();
 
 				buffer = getCacheAddress(slot);
 
-				// Write the command
-				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = sector;
-				sharedAddr[3] = commandRead;
-
-				waitForArm7();
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 				updateDescriptor(slot, sector);	
 	
@@ -743,30 +724,23 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
-            /*if (isDma) {
-                // Copy via dma
-  				dmaCopyWordsAsynchIrq(dma, (u8*)buffer+(src-sector), dst, len2);
-                while (dmaBusy(dma)) {
-                    sleep(1);
-                }        
-            } else {*/
-    			#ifdef DEBUG
-    			// Send a log command for debug purpose
-    			// -------------------------------------
-   				commandRead = 0x026ff800;
+    		#ifdef DEBUG
+    		// Send a log command for debug purpose
+    		// -------------------------------------
+   			commandRead = 0x026ff800;
     
-    			sharedAddr[0] = dst;
-    			sharedAddr[1] = len2;
-    			sharedAddr[2] = buffer+src-sector;
-    			sharedAddr[3] = commandRead;
+    		sharedAddr[0] = dst;
+    		sharedAddr[1] = len2;
+    		sharedAddr[2] = buffer+src-sector;
+    		sharedAddr[3] = commandRead;
     
-    			waitForArm7();
-    			// -------------------------------------*/
-    			#endif
+    		waitForArm7();
+    		// -------------------------------------*/
+    		#endif
     
-    			// Copy directly
-    			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-            //}
+    		// Copy directly
+    		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+
     		// Update cardi common
     		cardStruct[0] = src + len2;
     		cardStruct[1] = (vu32)(dst + len2);
@@ -781,7 +755,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	//}
+	}
 #endif
 
 	if (ce9->valueBits & cacheFlushFlag) {
@@ -914,13 +888,12 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		#ifdef DLDI
-		sdRead = true;
+		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
 		}
-		#endif
+		//#endif
 		//if (strncmp(getRomTid(ndsHeader), "UBR", 3) != 0) {
 		//	debug8mbMpuFix();
 		//}

@@ -47,7 +47,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
 			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x1000;
+				*(u32*)addrOffset -= 0x2000;
 				instancesPatched++;
 			}
 			addrOffset += 4;
