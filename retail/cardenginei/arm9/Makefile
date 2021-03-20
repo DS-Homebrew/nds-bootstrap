@@ -39,7 +39,7 @@ CFLAGS	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID
+CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID -DUNCACHED
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
