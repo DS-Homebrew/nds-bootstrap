@@ -23,8 +23,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source ../../common/source_general
-INCLUDES	:=	include ../../common/include
+SOURCES		:=	source source_ext ../../common/source_general
+INCLUDES	:=	include include_ext ../../common/include
 DATA		:=	data
 
 

@@ -41,10 +41,10 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 
-#ifdef DLDI
+//#ifdef DLDI
 #include "my_fat.h"
 #include "card.h"
-#endif
+//#endif
 
 #define _16KB_READ_SIZE  0x4000
 #define _32KB_READ_SIZE  0x8000
@@ -63,10 +63,9 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-#ifdef DLDI
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 //static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
-
+#ifdef DLDI
 bool sdRead = false;
 #else
 static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5] = {0xFFFFFFFF};
@@ -662,18 +661,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 	processAsyncCommand();
 	#endif
 
-	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		// Read directly at ARM7 level
-		commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
-
-		sharedAddr[0] = (vu32)dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
-
-		waitForArm7();
-
-	} else {*/
+	if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+		fileRead((char*)dst, *romFile, src, len, 0);
+	} else {
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -687,20 +677,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 				getAsyncSector();
 				#endif
 
-				// Send a command to the ARM7 to fill the RAM cache
-				commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
-
 				slot = allocateCacheSlot();
 
 				buffer = getCacheAddress(slot);
 
-				// Write the command
-				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = sector;
-				sharedAddr[3] = commandRead;
-
-				waitForArm7();
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 				updateDescriptor(slot, sector);	
 	
@@ -747,16 +728,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 			// -------------------------------------*/
 			#endif
 
-            /*if (isDma) {
-                // Copy via dma
-  				dmaCopyWordsAsynch(dma, (u8*)buffer+(src-sector), dst, len2);
-                while (dmaBusy(dma)) {
-                    sleep(1);
-                }
-            } else {*/
-    			// Copy directly
-    			tonccpy(dst, (u8*)buffer+(src-sector), len2);
-            //}
+    		// Copy directly
+    		tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
 			len -= len2;
 			if (len > 0) {
@@ -766,7 +739,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 				accessCounter++;
 			}
 		}
-	//}
+	}
 #endif
 	
 	return 0;
