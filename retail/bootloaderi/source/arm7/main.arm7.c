@@ -1307,7 +1307,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			0x4000,
+			0x2000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,
