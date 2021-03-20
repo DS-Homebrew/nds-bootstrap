@@ -322,12 +322,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
     // Load ROMinRAM ce9 binary
-	/*cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x2000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION);
 	}
-	fclose(cebin);*/
+	fclose(cebin);
 
     // Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
