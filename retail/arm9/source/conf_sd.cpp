@@ -364,12 +364,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load SDK5 ce9 binary
-	/*cebin = fopen("nitro:/cardenginei_arm9_sdk5.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 	}
-	fclose(cebin);*/
+	fclose(cebin);
 
 	//if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary

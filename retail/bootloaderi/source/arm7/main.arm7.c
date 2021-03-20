@@ -1222,7 +1222,7 @@ int arm7_main(void) {
 					errorOutput();
 				}
 			} else {
-				tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x3000);
+				tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINEI_ARM9_CACHED_MID_LOCATION;
@@ -1248,7 +1248,7 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINEI_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_BUFFERED_LOCATION), size);
 		}
 
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x43000);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x46000);
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(

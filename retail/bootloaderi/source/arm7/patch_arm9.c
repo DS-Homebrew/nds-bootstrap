@@ -323,7 +323,11 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
     dbg_printf("\n\n");
 }
 
-static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (isSdk5(moduleParams)) {
+		return false;
+	}
+
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
 		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
@@ -378,11 +382,17 @@ static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			*armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
             ce9->patches->cardEndReadDmaRef = armOffset;
         }  
-      }  
+      }
+	  return true;
     }
+	return false;
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (isSdk5(moduleParams)) {
+		return false;
+	}
+
     dbg_printf("\npatchCardSetDma\n");           
 
 	bool dmaAllowed = false;
@@ -1496,14 +1506,14 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
-	//patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		randomPatch(ndsHeader, moduleParams);
+		randomPatch5Second(ndsHeader, moduleParams);
+	}
 
 	patchReset(ce9, ndsHeader, moduleParams);
 
 	//getSleep(ce9, ndsHeader, moduleParams, usesThumb);
-
-	randomPatch(ndsHeader, moduleParams);
-	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader);

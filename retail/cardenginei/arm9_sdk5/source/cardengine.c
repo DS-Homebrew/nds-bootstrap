@@ -478,12 +478,12 @@ void continueCardReadDmaArm7() {
     	u8* dst = (u8*)dmaParams[4];
     	u32 len = dmaParams[5];   
         
-		/*u32 page = (src / 512) * 512;
+		u32 page = (src / 512) * 512;
 
 		if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 			sharedAddr[3] = 0;
 			endCardReadDma();
-		} else {*/
+		} else {
 			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 			u32 len2 = len;
@@ -506,7 +506,7 @@ void continueCardReadDmaArm7() {
 
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
-		//}
+		}
     }
 }
 #endif
@@ -558,7 +558,7 @@ void cardSetDma (u32 * params) {
 	processAsyncCommand();
 	#endif
 
-	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
 		// Read directly at ARM7 level
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -569,7 +569,7 @@ void cardSetDma (u32 * params) {
 		checkArm7();
 
 		dmaReadOnArm7 = true;
-	} else {*/
+	} else {
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -634,7 +634,7 @@ void cardSetDma (u32 * params) {
 			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
 		}
-	//}
+	}
 	#endif
 }
 
@@ -826,13 +826,12 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		setExceptionHandler2();
-		#ifdef DLDI
-		sdRead = true;
+		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
 		}
-		#endif
+		//#endif
 		//if (ce9->enableExceptionHandler) {
 			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 			//setExceptionHandler(user_exception);
