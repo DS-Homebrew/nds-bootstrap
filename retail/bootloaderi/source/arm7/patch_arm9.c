@@ -391,7 +391,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
             ce9->patches->cardEndReadDmaRef = armOffset;
         }  
       }  
+	  return true;
     }
+	return false;
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
