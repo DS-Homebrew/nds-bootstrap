@@ -309,6 +309,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 		if (cardReadDmaStartOffset) {
 			patchOffsetCache.cardReadDmaOffset = cardReadDmaStartOffset;
 		}
+		if (cardReadDmaEndOffset) {
+			patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
+		}
 		patchOffsetCache.cardReadDmaChecked = true;
 		patchOffsetCacheChanged = true;
 	}
@@ -326,7 +329,16 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 static void patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
-		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb);
+		if (!patchOffsetCache.cardReadDmaEndOffset) {
+			u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader, moduleParams);
+			if (!cardReadDmaEndOffset && usesThumb) {
+				cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+			}
+			if (cardReadDmaEndOffset) {
+				patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
+			}
+		}
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb,patchOffsetCache.cardReadDmaEndOffset);
 		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
 		patchOffsetCache.cardEndReadDmaChecked = true;
 	  }
