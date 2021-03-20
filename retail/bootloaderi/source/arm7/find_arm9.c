@@ -101,6 +101,7 @@ static const u32 cardSetDmaSignatureValue2[1]       = {0x40001A4};
 static const u16 cardSetDmaSignatureStartThumb3[4]  = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
 static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
 static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
+static const u32 cardSetDmaSignatureStart3[3]       = {0xE92D4010, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
 static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
@@ -1956,6 +1957,12 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
   		offset = findOffsetBackwardsThumb(
       		cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb3, 4
+        );
+	}
+	if (!offset && !usesThumb && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+  		offset = findOffsetBackwards(
+      		cardSetDmaEndOffset, 0x60,
+            cardSetDmaSignatureStart3, 3
         );
 	}
 

@@ -360,7 +360,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			bool lrOnly = false;
             for (int i = 0; i <= 16; i++) {
                 armOffsetStartFunc--;
-				if (*armOffsetStartFunc==0xE92D4000 || *armOffsetStartFunc==0xE92D4030) {
+				if (*armOffsetStartFunc==0xE92D4000 || *armOffsetStartFunc==0xE92D4030 || *armOffsetStartFunc==0xE92D40F0) {
+					//dbg_printf("\narmOffsetStartFunc : ");
+					//dbg_hexa(*armOffsetStartFunc);
 					lrOnly = true;
 					break;
 				}
@@ -368,7 +370,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
             armOffset--;
 			if (lrOnly) {
 				armOffset--;
-				armOffset[0] = *armOffsetStartFunc; // STMFD SP!, {LR}  or  STMFD SP!, {R4,R5,LR}
+				armOffset[0] = *armOffsetStartFunc; // "STMFD SP!, {LR}", "STMFD SP!, {R4,R5,LR}", or "STMFD SP!, {R4-R7,LR}"
 				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
 			} else {
 				*armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
