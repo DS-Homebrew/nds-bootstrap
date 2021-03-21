@@ -5,77 +5,18 @@
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
+extern u32 vAddrOfRelocSrc;
+
 //
 // Subroutine function signatures ARM7
 //
-
-static const u32 relocateStartSignature[1]    = {0x3381C0DE}; //  33 81 C0 DE  DE C0 81 33 00 00 00 00 is the marker for the beggining of the relocated area :-)
-static const u32 relocateStartSignatureAlt[1] = {0x2106C0DE};
-
-static const u32 relocateValidateSignature[1] = {0x400010C};
 
 static const u32 a7JumpTableSignatureUniversal[3]      = {0xE592000C, 0xE5921010, 0xE5922014};
 static const u32 a7JumpTableSignatureUniversal_2[3]    = {0xE593000C, 0xE5931010, 0xE5932014};
 static const u16 a7JumpTableSignatureUniversalThumb[4] = {0x6822, 0x68D0, 0x6911, 0x6952};
 
 u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster) {
-    //dbg_printf("\nArm7 (patch vAll)\n");
 	dbg_printf("\nArm7 (patch v5)\n");
-
-	// Find the relocation signature
-    u32 relocationStart = patchOffsetCache.relocateStartOffset;
-	if (!patchOffsetCache.relocateStartOffset) {
-		relocationStart = (u32)findOffset(
-			(u32*)ndsHeader->arm7destination, 0x800,
-			relocateStartSignature, 1
-		);
-		if (!relocationStart) {
-			dbg_printf("Relocation start not found. Trying alt\n");
-			relocationStart = (u32)findOffset(
-				(u32*)ndsHeader->arm7destination, 0x800,
-				relocateStartSignatureAlt, 1
-			);
-			if (relocationStart>0) relocationStart += 0x28;
-		}
-
-		if (relocationStart) {
-			patchOffsetCache.relocateStartOffset = relocationStart;
-		}
-	}
-    if (!relocationStart) {
-        dbg_printf("Relocation start alt not found\n");
-		return 0;
-    }
-
-	// Validate the relocation signature
-    u32 vAddrOfRelocSrc = relocationStart + 0x8;
-    // sanity checks
-    u32 relocationCheck = patchOffsetCache.relocateValidateOffset;
-	if (!patchOffsetCache.relocateValidateOffset) {
-		relocationCheck = (u32)findOffset(
-			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			relocateValidateSignature, 1
-		);
-		if (relocationCheck) {
-			patchOffsetCache.relocateValidateOffset = relocationCheck;
-		}
-	}
-    u32 relocationCheck2 =
-        *(u32*)(relocationCheck - 0x4);
-
-    if (relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000 > relocationCheck2) {
-        dbg_printf("Error in relocation checking\n");
-        dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000);
-        dbg_hexa(relocationCheck2);
-        
-		vAddrOfRelocSrc =  relocationCheck + 0xC - relocationCheck2 + 0x37F8000;
-        dbg_printf("vAddrOfRelocSrc\n");
-        dbg_hexa(vAddrOfRelocSrc); 
-    }
-
-    dbg_printf("Relocation src: ");
-	dbg_hexa(vAddrOfRelocSrc);
-	dbg_printf("\n");
 
 	bool usesThumb = patchOffsetCache.a7IsThumb;
 

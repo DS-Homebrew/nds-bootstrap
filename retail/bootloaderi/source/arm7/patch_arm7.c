@@ -47,18 +47,27 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
+u32 vAddrOfRelocSrc = 0;
+u32 relocDestAtSharedMem = 0;
+
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM) {
 	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
 	if (!patchOffsetCache.swiHaltOffset) {
-		swiHaltOffset = findSwiHaltOffset(ndsHeader, moduleParams);
+		swiHaltOffset = patchOffsetCache.a7IsThumb ? (u32*)findSwiHaltThumbOffset(ndsHeader, moduleParams) : findSwiHaltOffset(ndsHeader, moduleParams);
 		if (swiHaltOffset) {
 			patchOffsetCache.swiHaltOffset = swiHaltOffset;
 		}
 	}
 	if (swiHaltOffset && !ROMinRAM) {
 		// Patch
-		u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
-		tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+		if (patchOffsetCache.a7IsThumb) {
+			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
+			const u16* swiHaltPatch = generateA7InstrThumb(srcAddr, ce7->patches->j_newSwiHaltThumb);
+			tonccpy(swiHaltOffset, swiHaltPatch, 0x4);
+		} else {
+			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
+			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+		}
 	}
 
     dbg_printf("swiHalt location : ");
@@ -223,8 +232,6 @@ u32 patchCardNdsArm7(
 		patchOffsetCacheChanged = true;
 	}
 
-	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
-
 	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);
@@ -249,39 +256,43 @@ u32 patchCardNdsArm7(
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
-	u32 saveResult = 0;
-    
-    if (
-        (strncmp(romTid, "ATK", 3) == 0) && dsiSD  // Kirby: Canvas Curse
-    ) {
-        saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
-	} else if (isSdk5(moduleParams)) {
-		// SDK 5
-		saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
-	} else {
-		if (patchOffsetCache.savePatchType == 0) {
-			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-			if (!saveResult) {
-				patchOffsetCache.savePatchType = 1;
+	if (a7GetReloc(ndsHeader, moduleParams)) {
+		u32 saveResult = 0;
+		
+		if (
+			(strncmp(romTid, "ATK", 3) == 0) && dsiSD  // Kirby: Canvas Curse
+		) {
+			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+		} else if (isSdk5(moduleParams)) {
+			// SDK 5
+			saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
+		} else {
+			if (patchOffsetCache.savePatchType == 0) {
+				saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+				if (!saveResult) {
+					patchOffsetCache.savePatchType = 1;
+				}
+			}
+			if (!saveResult && patchOffsetCache.savePatchType == 1) {
+				saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+				if (!saveResult) {
+					patchOffsetCache.savePatchType = 2;
+				}
+			}
+			if (!saveResult && patchOffsetCache.savePatchType == 2) {
+				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 			}
 		}
-		if (!saveResult && patchOffsetCache.savePatchType == 1) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
-			if (!saveResult) {
-				patchOffsetCache.savePatchType = 2;
-			}
-		}
-		if (!saveResult && patchOffsetCache.savePatchType == 2) {
-			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
-		}
+		if (!saveResult) {
+			patchOffsetCache.savePatchType = 0;
+		} /*else if (strncmp(romTid, "AMH", 3) == 0) {
+			extern u32 dsiSD;
+			aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
+			fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
+		}*/
 	}
-	if (!saveResult) {
-		patchOffsetCache.savePatchType = 0;
-	} /*else if (strncmp(romTid, "AMH", 3) == 0) {
-		extern u32 dsiSD;
-		aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
-		fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
-	}*/
+
+	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
 
 	fixForDsiBios(ce7, ndsHeader, moduleParams);
 
