@@ -395,7 +395,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			*armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
             ce9->patches->cardEndReadDmaRef = armOffset;
         }  
-      }  
+	  }
 	  return true;
     }
 	return false;

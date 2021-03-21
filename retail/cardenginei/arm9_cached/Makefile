@@ -23,8 +23,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	../arm9/source ../../common/source_general
-INCLUDES	:=	../arm9/include ../../common/include
+SOURCES		:=	../arm9/source ../arm9/source_ext ../../common/source_general
+INCLUDES	:=	../arm9/include ../arm9/include_ext ../../common/include
 DATA		:=	data
 
 
@@ -33,7 +33,7 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -Os\
+CFLAGS	:=	-g -Wall -O2\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)

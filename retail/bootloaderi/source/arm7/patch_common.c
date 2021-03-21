@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 27;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 28;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -47,7 +47,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
 			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x1000;
+				*(u32*)addrOffset -= 0x2000;
 				instancesPatched++;
 			}
 			addrOffset += 4;
@@ -470,6 +470,7 @@ void rsetA7Cache(void)
 
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
+	patchOffsetCache.swiHaltOffset = 0;
 	patchOffsetCache.a7Swi12Offset = 0;
 	patchOffsetCache.swiGetPitchTableOffset = 0;
 	patchOffsetCache.swiGetPitchTableChecked = 0;

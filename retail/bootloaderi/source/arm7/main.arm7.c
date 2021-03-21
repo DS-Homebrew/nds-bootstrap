@@ -704,9 +704,9 @@ static void NTR_BIOS() {
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
-	if (consoleModel>0
+	if (/*consoleModel>0
 	? overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x1000000 : 0x1800000))
-	: overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x700000 : 0x800000)))
+	:*/ overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x700000 : 0x800000)))
 	{
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 		if (extendedMemoryConfirmed) {
@@ -1001,9 +1001,9 @@ int arm7_main(void) {
 	} else {
 		tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2670000, sizeof(aFile));
 	}
-	if (gameOnFlashcard) {
+	//if (gameOnFlashcard) {
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
-	}
+	//}
 
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 
@@ -1012,9 +1012,9 @@ int arm7_main(void) {
 	*savFile = getFileFromCluster(saveFileCluster);
 
 	if (savFile->firstCluster != CLUSTER_FREE) {
-		if (saveOnFlashcard) {
+		//if (saveOnFlashcard) {
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
-		}
+		//}
 		if (!gameOnFlashcard) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, 0);		// Bugged, if ROM is being loaded from flashcard
@@ -1077,7 +1077,7 @@ int arm7_main(void) {
 			errorOutput();
 		}
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
-	} else if (!gameOnFlashcard) {
+	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
 			tonccpy((char*)0x03700000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
@@ -1085,7 +1085,7 @@ int arm7_main(void) {
 			romFile->fatTableCache = (u32)romFile->fatTableCache+0x01000000;
 			savFile->fatTableCache = (u32)savFile->fatTableCache+0x01000000;
 		}
-	}
+	}*/
 
 	nocashMessage("Loading the header...\n");
 
@@ -1222,7 +1222,7 @@ int arm7_main(void) {
 					errorOutput();
 				}
 			} else {
-				tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x3000);
+				tonccpy((u32*)CARDENGINEI_ARM9_CACHED_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINEI_ARM9_CACHED_MID_LOCATION;
@@ -1233,7 +1233,7 @@ int arm7_main(void) {
 			}
 		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed) {
 			ce9Location = strncmp(romTid, "ADM", 3)==0 ? CARDENGINEI_ARM9_CACHED_END_LOCATION : CARDENGINEI_ARM9_CACHED_MID_LOCATION;
-			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x3000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION), size);
 			if (ROMinRAM) {
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION,ce9Location,size);
@@ -1244,11 +1244,11 @@ int arm7_main(void) {
 			relocate_ce9(CARDENGINEI_ARM9_LOCATION,ce9Location,0x1C00);
 		} else {
 			ce9Location = CARDENGINEI_ARM9_LOCATION;
-			u16 size = (ROMinRAM ? 0x1C00 : 0x2000);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x3000);
 			tonccpy((u32*)CARDENGINEI_ARM9_LOCATION, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_BUFFERED_LOCATION), size);
 		}
 
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x43000);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
@@ -1307,7 +1307,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			0x8000,
+			strncmp(romTid, "B3R", 3)==0 ? 0x8000 : 0x4000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

@@ -371,7 +371,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (conf->gameOnFlashcard) {
+	//if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary
 		cebin = fopen("nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
 		if (cebin) {
@@ -379,7 +379,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
 		}
 		fclose(cebin);
-	}
+	//}
 
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";

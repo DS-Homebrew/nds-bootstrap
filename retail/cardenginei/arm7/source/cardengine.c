@@ -83,9 +83,10 @@ bool sdRead = true;
 static bool initialized = false;
 static bool driveInited = false;
 //static bool initializedIRQ = false;
+static bool haltIsRunning = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
-static bool dmaLed = false;
+//static bool dmaLed = false;
 static bool saveInRam = false;
 
 #ifdef TWLSDK
@@ -148,7 +149,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x12000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x13000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -161,10 +162,10 @@ static void readSrBackendId(void) {
 	// Use SR backend ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
-	*(u32*)(0x02000308) = *(u32*)(ce7+0x12100);
-	*(u32*)(0x0200030C) = *(u32*)(ce7+0x12104);
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x12100);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x12104);
+	*(u32*)(0x02000308) = *(u32*)(ce7+0x13100);
+	*(u32*)(0x0200030C) = *(u32*)(ce7+0x13104);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x13100);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x13104);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -267,7 +268,7 @@ static void initialize(void) {
 	initialized = true;
 }
 
-static void cardReadLED(bool on) {
+static void cardReadLED(bool on, bool dmaLed) {
 	if (consoleModel < 2) {
 		if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
 		if (on) {
@@ -339,7 +340,7 @@ extern void inGameMenu(void);
 void forceGameReboot(void) {
 	u32 clearBuffer = 0;
 	if (consoleModel < 2) {
-		if (*(u32*)(ce7+0x12100) == 0) {
+		if (*(u32*)(ce7+0x13100) == 0) {
 			unlaunchSetFilename(false);
 		}
 		sharedAddr[4] = 0x57534352;
@@ -349,7 +350,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-	if (*(u32*)(ce7+0x12100) == 0) {
+	if (*(u32*)(ce7+0x13100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -361,11 +362,11 @@ void forceGameReboot(void) {
 
 void returnToLoader(void) {
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0x12100) == 0) {
+		if (*(u32*)(ce7+0x13100) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
 	} else {
-		if (*(u32*)(ce7+0x12100) == 0) {
+		if (*(u32*)(ce7+0x13100) == 0) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
@@ -449,9 +450,9 @@ static void nandRead(void) {
     
     if (tryLockMutex(&saveMutex)) {
 		initialize();
-	    cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileRead(memory, *savFile, flash, len, -1);
-    	cardReadLED(false);
+    	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
 }
@@ -481,9 +482,9 @@ static void nandWrite(void) {
   	if (tryLockMutex(&saveMutex)) {
 		initialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
-	    cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, -1);
-    	cardReadLED(false);
+    	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
 }
@@ -543,7 +544,7 @@ static bool start_cardRead_arm9(void) {
 	dbg_hexa(marker);	
 	#endif
 
-	cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+	cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
@@ -556,7 +557,7 @@ static bool start_cardRead_arm9(void) {
     else
     {
         readOngoing = false;
-        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator
         return true;    
     }
 
@@ -574,7 +575,7 @@ static bool resume_cardRead_arm9(void) {
     if(resumeFileRead())
     {
         readOngoing = false;
-        cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+        cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator
         return true;    
     } 
     else
@@ -583,73 +584,24 @@ static bool resume_cardRead_arm9(void) {
     }
 }
 
-/*static void asyncCardRead_arm9(void) {
-	u32 src = *(vu32*)(sharedAddr + 2);
-	u32 dst = *(vu32*)(sharedAddr);
-	u32 len = *(vu32*)(sharedAddr + 1);
-	#ifdef DEBUG
-	u32 marker = *(vu32*)(sharedAddr + 3);
-
-	dbg_printf("\nasync card read received\n");
-
-	if (calledViaIPC) {
-		dbg_printf("\ntriggered via IPC\n");
+static inline void sdmmcHandler(void) {
+	switch (sharedAddr[4]) {
+		case 0x53445231:
+			cardReadLED(true, false);
+			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
+			cardReadLED(false, false);
+			sharedAddr[3] = 0;
+			break;
+		case 0x53445244:
+			cardReadLED(true, false);
+			//my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			//readOngoing = true;
+			cardReadLED(false, false);
+			sharedAddr[3] = 0;
+			break;
 	}
-
-	dbg_printf("\nstr : \n");
-	dbg_hexa((u32)cardStruct);
-	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	dbg_printf("\nmarker : \n");
-	dbg_hexa(marker);	
-	#endif
-
-	asyncCardReadLED(true);    // When a file is loading, turn on LED for async card read indicator
-	#ifdef DEBUG
-	nocashMessage("fileRead romFile");
-	#endif
-	fileRead((char*)dst, *romFile, src, len, 0);
-	asyncCardReadLED(false);    // After loading is done, turn off LED for async card read indicator
-
-	#ifdef DEBUG
-	dbg_printf("\nread \n");
-	if (is_aligned(dst, 4) || is_aligned(len, 4)) {
-		dbg_printf("\n aligned read : \n");
-	} else {
-		dbg_printf("\n misaligned read : \n");
-	}
-	#endif
-}*/
-
-/*static void runCardEngineCheckResume(void) {
-	//dbg_printf("runCardEngineCheckResume\n");
-	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheckResume");
-	#endif
-    
-    if (sharedAddr[3] == (vu32)0x025AAB08) {
-		sharedAddr[4] = 0x025AAB08;
-		IPC_SendSync(0x7);
-	}
-
-  	if (tryLockMutex(&cardEgnineCommandMutex)) {
-  		driveInitialize();
-  
-		if(readOngoing)
-		{
-			if(resume_cardRead_arm9()) {
-				sharedAddr[3] = 0;
-				sharedAddr[4] = 0x025AAB08;
-				IPC_SendSync(0x8);
-			} 
-		}
-  		unlockMutex(&cardEgnineCommandMutex);
-  	}
-}*/
+}
 
 static void runCardEngineCheck(void) {
 	//dbg_printf("runCardEngineCheck\n");
@@ -674,6 +626,10 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
 
+			if (!haltIsRunning) {
+				sdmmcHandler();
+			}
+
     		if (sharedAddr[3] == (vu32)0x026FF800) {
 				sdRead = true;
     			log_arm9();
@@ -681,49 +637,32 @@ static void runCardEngineCheck(void) {
                 //IPC_SendSync(0x8);
     		}
     
-    
           if ((sharedAddr[3] == (vu32)0x025FFB08) || (sharedAddr[3] == (vu32)0x025FFB0A)) {
 				sdRead = true;
-			  dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
+			  //dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
               if(start_cardRead_arm9()) {
                     sharedAddr[3] = 0;
-                    if (dmaLed) IPC_SendSync(0x8);
+                    /*if (dmaLed)*/ IPC_SendSync(0x8);
               } else {
                 while(!resume_cardRead_arm9()) {}
                 //if (resume_cardRead_arm9()) { 
                     sharedAddr[3] = 0;
-                    if (dmaLed) IPC_SendSync(0x8);
+                    /*if (dmaLed)*/ IPC_SendSync(0x8);
 				//}
               }
           }
 
-          /*if ((sharedAddr[3] == (vu32)0x020FF808) || (sharedAddr[3] == (vu32)0x020FF80A)) {
-				sdRead = true;
-              dmaLed = (sharedAddr[3] == (vu32)0x020FF80A);
-              if(start_cardRead_arm9()) {
-                    sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
-                    IPC_SendSync(0x8);
-              } else {
-                if (resume_cardRead_arm9()) { 
-                    sharedAddr[3] = 0;
-					sharedAddr[4] = 0x025AAB08;
-                    IPC_SendSync(0x8);
-				}
-              }
-          }*/
-
 			#ifndef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
 				sdRead = true;
-                dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
+                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
     			nandRead();
     			sharedAddr[3] = 0;
     		}
 
             if (sharedAddr[3] == (vu32)0x025FFC02) {
 				sdRead = true;
-                dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
+                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
     			nandWrite();
     			sharedAddr[3] = 0;
     		}
@@ -740,57 +679,12 @@ static void runCardEngineCheck(void) {
             //if(resume_cardRead_arm9()) {
 			    while(!resume_cardRead_arm9()) {} 
                 sharedAddr[3] = 0;
-                if (dmaLed) IPC_SendSync(0x8);
+                /*if (dmaLed)*/ IPC_SendSync(0x8);
             //}
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
 }
-
-/*static void runCardEngineCheckAlt(void) {
-	//dbg_printf("runCardEngineCheck\n");
-	#ifdef DEBUG		
-	nocashMessage("runCardEngineCheck");
-	#endif	
-
-  	if (lockMutex(&cardEgnineCommandMutex)) {
-  		driveInitialize();
-  
-      if(!readOngoing)
-      { 
-  
-  		//nocashMessage("runCardEngineCheck mutex ok");
-  
-  		if (sharedAddr[3] == (vu32)0x026FF800) {
-  			log_arm9();
-  			sharedAddr[3] = 0;
-            IPC_SendSync(0x8);
-  		}
-  
-  
-      		if (sharedAddr[3] == (vu32)0x025FFB08) {
-      			if(start_cardRead_arm9()) {
-                    sharedAddr[3] = 0;
-                    IPC_SendSync(0x8);
-                } else {
-                    while(!resume_cardRead_arm9()) {} 
-                    sharedAddr[3] = 0;
-                    IPC_SendSync(0x8);
-                } 			
-      		}
-  
-  		//if (sharedAddr[3] == (vu32)0x020FF800) {
-  		//	asyncCardRead_arm9();
-  		//	sharedAddr[3] = 0;
-  		//}
-      } else {
-          while(!resume_cardRead_arm9()) {} 
-          sharedAddr[3] = 0; 
-          IPC_SendSync(0x8);
-      }
-  		unlockMutex(&cardEgnineCommandMutex);
-  	}
-}*/
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerFIFO(void) {
@@ -802,6 +696,18 @@ void myIrqHandlerFIFO(void) {
 	calledViaIPC = true;
 	
 	runCardEngineCheck();
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerHalt(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerHalt");
+	#endif	
+	
+	haltIsRunning = true;
+	
+	sdmmcHandler();
 }
 
 //---------------------------------------------------------------------------------
@@ -829,8 +735,6 @@ void myIrqHandlerVBlank(void) {
 	#endif
 	
 	cheat_engine_start();
-
-	calledViaIPC = false;
 
 	initialize();
 
@@ -962,11 +866,18 @@ void myIrqHandlerVBlank(void) {
 
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
-	}
-
-	if (valueBits & b_runCardEngineCheck) {
+	} else if (valueBits & b_runCardEngineCheck) {
+		calledViaIPC = false;
 		runCardEngineCheck();
 	}
+	/*if (readOngoing) {
+		if (my_sdmmc_sdcard_check_command(0x33C12, 0)) {
+			sharedAddr[4] = 0;
+			cardReadLED(false);
+			readOngoing = false;
+			sharedAddr[3] = 0;
+		}
+	}*/
 }
 
 void i2cIRQHandler(void) {
@@ -1266,14 +1177,14 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
-		cardReadLED(true);    // When a file is loading, turn on LED for card read indicator
+		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
 		fileRead(dst, *romFile, src, len, 0);
 		//ndmaUsed = true;
-		cardReadLED(false);    // After loading is done, turn off LED for card read indicator
+		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
 	}
 	
 	return true;
