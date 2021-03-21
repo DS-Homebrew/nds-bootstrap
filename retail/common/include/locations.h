@@ -37,7 +37,7 @@
 #define INGAME_MENU_LOCATION                         0x026F8000
 
 #define LOADER_RETURN_LOCATION                       0x027C9000
-#define LOADER_RETURN_SDK5_LOCATION                  0x027DD800
+#define LOADER_RETURN_SDK5_LOCATION                  0x027DC800
 #define BLOWFISH_LOCATION_B4DS                       0x023ECE00
 #define BLOWFISH_LOCATION                            0x027B4C00
 //#define DSI_BLOWFISH_LOCATION                        0x027EA800
