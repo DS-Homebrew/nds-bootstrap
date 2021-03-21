@@ -250,6 +250,7 @@ clean:
 	@$(MAKE) -C cardenginei/arm9_igm clean
 	@$(MAKE) -C cardenginei/arm9 clean
 	@$(MAKE) -C cardenginei/arm9_cached clean
+	@$(MAKE) -C cardenginei/arm9_cached_end clean
 	@$(MAKE) -C cardenginei/arm9_dldi clean
 	@$(MAKE) -C cardenginei/arm9_sdk5 clean
 	@$(MAKE) -C cardenginei/arm9_sdk5_dldi clean
