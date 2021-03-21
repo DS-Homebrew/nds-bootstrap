@@ -47,6 +47,25 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
+static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM) {
+	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
+	if (!patchOffsetCache.swiHaltOffset) {
+		swiHaltOffset = findSwiHaltOffset(ndsHeader, moduleParams);
+		if (swiHaltOffset) {
+			patchOffsetCache.swiHaltOffset = swiHaltOffset;
+		}
+	}
+	if (swiHaltOffset && !ROMinRAM) {
+		// Patch
+		u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
+		tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+	}
+
+    dbg_printf("swiHalt location : ");
+    dbg_hexa((u32)swiHaltOffset);
+    dbg_printf("\n\n");
+}
+
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
@@ -203,6 +222,8 @@ u32 patchCardNdsArm7(
 		patchOffsetCache.a7BinSize = newArm7binarySize;
 		patchOffsetCacheChanged = true;
 	}
+
+	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
 
 	patchSleepMode(ndsHeader);
 
