@@ -75,6 +75,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
+u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader);
 u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
