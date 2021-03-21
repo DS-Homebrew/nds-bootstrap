@@ -260,21 +260,31 @@ u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 	dbg_printf("findSwiHaltThumbOffset:\n");
 
 	u32 swiHaltOffset = 0;
-	u32 dispStatAddr = (u32)findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00001000,//, ndsHeader->arm7binarySize,
-		swiHaltConstSignature, 1
-	);
-	if (!dispStatAddr) {
-		dispStatAddr = (u32)findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00001000,//, ndsHeader->arm7binarySize,
-			swiHaltConstSignatureAlt, 1
-		);
-	}
-	if (dispStatAddr) {
+	if (isSdk5(moduleParams)) {
+		extern u32 vAddrOfRelocSrc;
+
 		swiHaltOffset =
-			(u32)findOffsetBackwardsThumb((u16*)dispStatAddr, 0x40,
+			(u32)findOffsetThumb((u16*)vAddrOfRelocSrc, 0x200,
 				swiHaltCmpSignature, 1
 		);
+	}
+	if (!swiHaltOffset) {
+		u32 dispStatAddr = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00001000,//, ndsHeader->arm7binarySize,
+			swiHaltConstSignature, 1
+		);
+		if (!dispStatAddr) {
+			dispStatAddr = (u32)findOffset(
+				(u32*)ndsHeader->arm7destination, 0x00001000,//, ndsHeader->arm7binarySize,
+				swiHaltConstSignatureAlt, 1
+			);
+		}
+		if (dispStatAddr) {
+			swiHaltOffset =
+				(u32)findOffsetBackwardsThumb((u16*)dispStatAddr, 0x40,
+					swiHaltCmpSignature, 1
+			);
+		}
 	}
 	if (swiHaltOffset) {
 		swiHaltOffset -= 8;
