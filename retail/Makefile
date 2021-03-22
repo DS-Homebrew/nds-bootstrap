@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam clean
+.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam clean
 
 all:	$(OUTPUT)
 
@@ -166,7 +166,7 @@ bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengi
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
-bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam
+bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_dldi cardenginei_arm9_romInRam
 	@$(MAKE) -C bootloaderi
 
 #---------------------------------------------------------------------------------		
@@ -196,6 +196,10 @@ cardenginei_arm7_alt: $(DATA)
 #---------------------------------------------------------------------------------		
 cardenginei_arm7_sdk5: $(DATA)
 	@$(MAKE) -C cardenginei/arm7_sdk5
+
+#---------------------------------------------------------------------------------		
+cardenginei_arm7_cheat: $(DATA)
+	@$(MAKE) -C cardenginei/arm7_cheat
 
 #---------------------------------------------------------------------------------		
 cardenginei_arm9_igm: $(DATA)

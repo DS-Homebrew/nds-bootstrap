@@ -34,6 +34,7 @@
 
 #define DONOR_ROM_ARM7_LOCATION                      0x02680000
 #define DONOR_ROM_ARM7_SIZE_LOCATION                 0x026B0000
+#define CHEAT_ENGINE_LOCATION	                     0x026E0000
 #define INGAME_MENU_LOCATION                         0x026F8000
 
 #define LOADER_RETURN_LOCATION                       0x027C9000

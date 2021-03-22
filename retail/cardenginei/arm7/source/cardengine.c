@@ -50,6 +50,7 @@
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
+#define builtInCheatEngine BIT(9)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -733,8 +734,13 @@ void myIrqHandlerVBlank(void) {
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
 	#endif
-	
-	cheat_engine_start();
+
+	if (valueBits & builtInCheatEngine) {
+		cheat_engine_start();
+	} else {
+		volatile void (*cheatEngine)() = (volatile void*)CHEAT_ENGINE_LOCATION+4;
+		(*cheatEngine)();
+	}
 
 	initialize();
 

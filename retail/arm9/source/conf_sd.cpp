@@ -223,53 +223,54 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* cebin = NULL;
 
-	bool usingB4DS = (!dsiFeatures() && conf->gameOnFlashcard);
-	bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
+	if (dsiFeatures()) {
+		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
 
-	// Load donor ROM's arm7 binary, if needed
-	switch (ndsArm7Size) {
-		case 0x22B40:
-		case 0x22BCC:
-			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorTwlPath, "rb");
-			break;
-		case 0x23708:
-		case 0x2378C:
-		case 0x237F0:
-			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
-			break;
-		case 0x23CAC:
-			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
-			break;
-		case 0x24DA8:
-		case 0x24F50:
-			cebin = fopen(conf->donor2Path, "rb");
-			break;
-		case 0x2434C:
-		case 0x2484C:
-		case 0x249DC:
-		case 0x25D04:
-		case 0x25D94:
-		case 0x25FFC:
-			if (usingB4DS || hasCycloDSi) cebin = fopen(conf->donor3Path, "rb");
-			break;
-		case 0x27618:
-		case 0x2762C:
-		case 0x29CEC:
-			cebin = fopen(conf->donorPath, "rb");
-			break;
-		default:
-			break;
-	}
+		// Load donor ROM's arm7 binary, if needed
+		switch (ndsArm7Size) {
+			case 0x22B40:
+			case 0x22BCC:
+				if (hasCycloDSi) cebin = fopen(conf->donorTwlPath, "rb");
+				break;
+			case 0x23708:
+			case 0x2378C:
+			case 0x237F0:
+				if (hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
+				break;
+			case 0x23CAC:
+				if (hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
+				break;
+			case 0x24DA8:
+			case 0x24F50:
+				cebin = fopen(conf->donor2Path, "rb");
+				break;
+			case 0x2434C:
+			case 0x2484C:
+			case 0x249DC:
+			case 0x25D04:
+			case 0x25D94:
+			case 0x25FFC:
+				if (hasCycloDSi) cebin = fopen(conf->donor3Path, "rb");
+				break;
+			case 0x27618:
+			case 0x2762C:
+			case 0x29CEC:
+				cebin = fopen(conf->donorPath, "rb");
+				break;
+			default:
+				break;
+		}
 
-	if (cebin) {
-		u32 donorArm7Offset = 0;
-		fseek(cebin, 0x30, SEEK_SET);
-		fread(&donorArm7Offset, sizeof(u32), 1, cebin);
-		fseek(cebin, 0x3C, SEEK_SET);
-		fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, cebin);
-		fseek(cebin, donorArm7Offset, SEEK_SET);
-		fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, cebin);
-		fclose(cebin);
+		if (cebin) {
+			u32 donorArm7Offset = 0;
+			fseek(cebin, 0x30, SEEK_SET);
+			fread(&donorArm7Offset, sizeof(u32), 1, cebin);
+			fseek(cebin, 0x3C, SEEK_SET);
+			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, cebin);
+			fseek(cebin, donorArm7Offset, SEEK_SET);
+			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, cebin);
+			fclose(cebin);
+		}
 	}
 
   if (dsiFeatures()) {
@@ -302,6 +303,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
+	}
+	fclose(cebin);
+
+	// Load external cheat engine binary
+	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+	if (cebin) {
+		fread((u8*)CHEAT_ENGINE_LOCATION, 1, 0x400, cebin);
 	}
 	fclose(cebin);
 

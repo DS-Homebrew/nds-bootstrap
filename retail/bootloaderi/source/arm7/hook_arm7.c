@@ -27,6 +27,7 @@
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "value_bits.h"
+#include "locations.h"
 #include "common.h"
 #include "patch.h"
 #include "find.h"
@@ -41,6 +42,7 @@
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
+#define b_builtInCheatEngine BIT(9)
 
 extern u32 newArm7binarySize;
 
@@ -267,6 +269,9 @@ int hookNdsRetailArm7(
 	if (preciseVolumeControl) {
 		ce7->valueBits |= b_preciseVolumeControl;
 	}
+	if (extendedMemoryConfirmed) {
+		ce7->valueBits |= b_builtInCheatEngine;
+	}
 	ce7->language                 = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
@@ -290,7 +295,9 @@ int hookNdsRetailArm7(
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x8000) {
-		char* cheatDataOffset = (char*)ce7->cheat_data_offset;
+		u32 cheatEngineSize = *(u32*)CHEAT_ENGINE_LOCATION;
+		cheatEngineSize += 4;
+		char* cheatDataOffset = extendedMemoryConfirmed ? (char*)ce7->cheat_data_offset : (char*)CHEAT_ENGINE_LOCATION+cheatEngineSize;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
 			cheatDataOffset += apPatchSize;
