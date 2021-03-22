@@ -579,7 +579,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 consoleModel) {
+static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	bool eight = (consoleModel==0 || gbaRomFound);
 	bool res = false;
 	const char* romTid = getRomTid(ndsHeader);
@@ -1166,7 +1166,7 @@ int arm7_main(void) {
 		}
 
 		// If possible, set to load ROM into RAM
-		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams, consoleModel);
+		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams);
 
 		const char* romTid = getRomTid(ndsHeader);
 		if (!dsiModeConfirmed) {
