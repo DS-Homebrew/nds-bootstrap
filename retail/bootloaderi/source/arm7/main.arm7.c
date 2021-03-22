@@ -585,7 +585,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "A24", 3) == 0
-	|| strncmp(romTid, "UBR", 3) == 0
+	|| (strncmp(romTid, "UBR", 3) == 0 && !eight)
 	|| strncmp(romTid, "UOR", 3) == 0
 	|| (eight && strncmp(romTid, "KPP", 3) == 0)
 	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
@@ -1127,7 +1127,7 @@ int arm7_main(void) {
 		toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x35000);
 	} else {
-		if (strcmp(getRomTid(ndsHeader), "UBRP") == 0) {
+		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
 			*(u8*)0x024000B2 = 0;
 			*(u8*)0x024000B3 = 0;
@@ -1336,7 +1336,7 @@ int arm7_main(void) {
 			dbg_printf("GBA ROM loaded\n");
 		}
 
-		if (strncmp(romTid, "UBR", 3) != 0) {
+		if (consoleModel > 0 || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
 		}
 		if (ROMinRAM) {
