@@ -794,10 +794,10 @@ void myIrqHandlerVBlank(void) {
 		driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-		if (consoleModel < 2 && *(u32*)(ce7+0x11EF8) == 0) {
+		if (consoleModel < 2 && *(u32*)(ce7+0x13100) == 0) {
 			unlaunchSetFilename(false);
 		}
-		if (*(u32*)(ce7+0x11EF8) == 0) {
+		if (*(u32*)(ce7+0x13100) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID
