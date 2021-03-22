@@ -579,18 +579,21 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+	/*dbg_printf("Console model: ");
+	dbg_hexa(consoleModel);
+	dbg_printf("\nromTid: ");
+	dbg_printf(romTid);
+	dbg_printf("\n");*/
+
 	bool eight = (consoleModel==0 || gbaRomFound);
 	bool res = false;
-	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "APD", 3) == 0
-	|| strncmp(romTid, "A24", 3) == 0
-	|| (strncmp(romTid, "UBR", 3) == 0 && !eight)
-	|| strncmp(romTid, "UOR", 3) == 0
-	|| (eight && strncmp(romTid, "KPP", 3) == 0)
-	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
-		// Do nothing
-	} else {
+	if (strncmp(romTid, "APD", 3) != 0
+	&& strncmp(romTid, "A24", 3) != 0
+	&& (strncmp(romTid, "UBR", 3) != 0 && eight)
+	&& strncmp(romTid, "UOR", 3) != 0
+	&& (strncmp(romTid, "KPP", 3) != 0 && !eight)
+	&& (strncmp(romTid, "KPF", 3) != 0 && !eight)) {
 		res = ((dsiModeConfirmed && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
@@ -702,7 +705,7 @@ static void NTR_BIOS() {
 	}
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
 	if (/*consoleModel>0
 	? overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x1000000 : 0x1800000))
@@ -714,7 +717,6 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
 
-			const char* romTid = getRomTid(ndsHeader);
 			if (strncmp(romTid, "VKG", 3) == 0) {
 				overlaysLocation = (u32)CACHE_ADRESS_START_low;
 			}
@@ -783,9 +785,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	dbg_printf("\n");
 }
 
-static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-
+static bool supportsExceptionHandler(const char* romTid) {
 	// ExceptionHandler2 (red screen) blacklist
 	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
 	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
@@ -1165,9 +1165,6 @@ int arm7_main(void) {
 			}
 		}
 
-		// If possible, set to load ROM into RAM
-		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, moduleParams);
-
 		const char* romTid = getRomTid(ndsHeader);
 		if (!dsiModeConfirmed) {
 			if (
@@ -1177,6 +1174,9 @@ int arm7_main(void) {
 				NTR_BIOS();
 			}
 		}
+
+		// If possible, set to load ROM into RAM
+		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, romTid, moduleParams);
 
 		nocashMessage("Trying to patch the card...\n");
 
@@ -1316,7 +1316,7 @@ int arm7_main(void) {
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,
-			supportsExceptionHandler(ndsHeader),
+			supportsExceptionHandler(romTid),
 			consoleModel
 		);
 
@@ -1339,7 +1339,7 @@ int arm7_main(void) {
 		}
 
 		if (consoleModel > 0 || strncmp(romTid, "UBR", 3) != 0) {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
+			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
