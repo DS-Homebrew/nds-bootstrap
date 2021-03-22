@@ -373,7 +373,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
     }
 }
 
-void patchSlot2Addr(const tNDSHeader* ndsHeader) {
+/*void patchSlot2Addr(const tNDSHeader* ndsHeader) {
 	extern u32 gbaAddrToDsi[];
 
 	if (!gbaRomFound) {
@@ -460,7 +460,7 @@ void patchSlot2Addr(const tNDSHeader* ndsHeader) {
 	}
 
 	gbaRomFound = false;	// Do not load GBA ROM
-}
+}*/
 
 static bool rsetA7CacheDone = false;
 

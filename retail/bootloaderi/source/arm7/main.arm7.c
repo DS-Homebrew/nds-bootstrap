@@ -122,9 +122,8 @@ bool useTwlCfg = false;
 int twlCfgLang = 0;
 
 bool sdRead = true;
-//bool rebootConsole = false;
 
-bool gbaRomFound = false;
+//bool gbaRomFound = false;
 
 static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
@@ -586,22 +585,25 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	dbg_printf(romTid);
 	dbg_printf("\n");*/
 
-	bool eight = (consoleModel==0 || gbaRomFound);
 	bool res = false;
-	if (strncmp(romTid, "APD", 3) != 0
-	&& strncmp(romTid, "A24", 3) != 0
-	&& (strncmp(romTid, "UBR", 3) != 0 && eight)
-	&& strncmp(romTid, "UOR", 3) != 0
-	&& (strncmp(romTid, "KPP", 3) != 0 && !eight)
-	&& (strncmp(romTid, "KPF", 3) != 0 && !eight)) {
-		res = ((dsiModeConfirmed && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && !eight && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && eight && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
+	if ((strncmp(romTid, "UBR", 3) == 0 && consoleModel>0)
+	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
+	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
+	|| (strncmp(romTid, "APD", 3) != 0
+	 && strncmp(romTid, "A24", 3) != 0
+	 && strncmp(romTid, "UBR", 3) != 0
+	 && strncmp(romTid, "UOR", 3) != 0
+	 && strncmp(romTid, "KPP", 3) != 0
+	 && strncmp(romTid, "KPF", 3) != 0)
+	) {
+		res = ((dsiModeConfirmed && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((!eight && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
-			|| (eight && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
+		res = ((consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
 	  }
 	}
@@ -878,12 +880,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
-	if (gbaRomFound) {
+	/*if (gbaRomFound) {
 		*(u16*)0x027FFC30 = *(u16*)0x0D0000BE;
 		tonccpy((u8*)0x027FFC32, (u8*)0x0D0000B5, 3);
 		*(u16*)0x027FFC36 = *(u16*)0x0D0000B0;
 		*(u32*)0x027FFC38 = *(u32*)0x0D0000AC;
-	}
+	}*/
 
 	if (softResetParams != 0xFFFFFFFF) {
 		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
@@ -1137,13 +1139,13 @@ int arm7_main(void) {
 			*(u8*)0x024000B7 = 0x24;
 			*(u16*)0x024000BE = 0x7FFF;
 			*(u16*)0x024000CE = 0x7FFF;
-		} else // GBA file
+		} /*else // GBA file
 		if (consoleModel > 0 && !dsiModeConfirmed && !isSdk5(moduleParams) && gbaRomSize <= 0x1000000) {
 			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
 			*gbaFile = getFileFromCluster(gbaFileCluster);
 			gbaRomFound = (gbaFile->firstCluster != CLUSTER_FREE);
 			patchSlot2Addr(ndsHeader);
-		}
+		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
 			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
@@ -1324,8 +1326,7 @@ int arm7_main(void) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
-	  //if (!rebootConsole) {
-		if (gbaRomFound && !extendedMemoryConfirmed) {
+		/*if (gbaRomFound && !extendedMemoryConfirmed) {
 			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
 			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
 			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
@@ -1336,7 +1337,7 @@ int arm7_main(void) {
 				fileRead((char*)0x02600000, *gbaSavFile, 0, gbaSaveSize, 0);
 			}
 			dbg_printf("GBA ROM loaded\n");
-		}
+		}*/
 
 		if (consoleModel > 0 || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
