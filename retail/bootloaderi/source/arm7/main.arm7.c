@@ -585,7 +585,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const module_params_
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "APD", 3) == 0
 	|| strncmp(romTid, "A24", 3) == 0
-	|| strncmp(romTid, "UBR", 3) == 0
+	|| (strncmp(romTid, "UBR", 3) == 0 && !eight)
 	|| strncmp(romTid, "UOR", 3) == 0
 	|| (eight && strncmp(romTid, "KPP", 3) == 0)
 	|| (eight && strncmp(romTid, "KPF", 3) == 0)) {
