@@ -27,9 +27,7 @@
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "value_bits.h"
-#include "locations.h"
 #include "common.h"
-#include "tonccpy.h"
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
@@ -294,8 +292,6 @@ int hookNdsRetailArm7(
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x8000) {
 		u32 cheatEngineOffset = (u32)ce7-0x8400;
-		tonccpy((char*)cheatEngineOffset, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
-		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E0;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);

@@ -1203,6 +1203,8 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		}
+		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 		if (isSdk5(moduleParams)) {
 			ce9Location = CARDENGINEI_ARM9_SDK5_LOCATION;
