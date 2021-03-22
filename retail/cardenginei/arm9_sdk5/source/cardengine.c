@@ -257,12 +257,12 @@ static void updateDescriptor(int slot, u32 sector) {
 void user_exception(void);
 
 //---------------------------------------------------------------------------------
-void setExceptionHandler2() {
+/*void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)0x23EFFFC ;
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION ;
 	EXCEPTION_VECTOR = enterException ;
 	*exceptionC = user_exception;
-}
+}*/
 
 #ifndef DLDI
 static void waitForArm7(void) {
@@ -826,7 +826,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		setExceptionHandler2();
+		//setExceptionHandler2();
 		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {
 			//nocashMessage("!FAT_InitFiles");
