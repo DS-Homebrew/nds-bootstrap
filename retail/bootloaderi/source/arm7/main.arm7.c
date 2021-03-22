@@ -587,6 +587,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && consoleModel>0)
+	|| (strncmp(romTid, "UOR", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "APD", 3) != 0
