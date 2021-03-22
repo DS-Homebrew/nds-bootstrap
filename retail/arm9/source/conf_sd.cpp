@@ -309,7 +309,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
-		fread((u8*)CHEAT_ENGINE_LOCATION, 1, 0x400, cebin);
+		fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
 	}
 	fclose(cebin);
 

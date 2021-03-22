@@ -85,7 +85,6 @@ typedef struct cardengineArm7 {
     u8 consoleModel;
     u8 romRead_LED;
     u8 dmaRomRead_LED;
-    u32* cheat_data_offset; //u32* cheat_data;
     u32* irqTable_offset;
 } __attribute__ ((__packed__)) cardengineArm7;
 #else

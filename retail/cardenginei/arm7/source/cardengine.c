@@ -50,7 +50,6 @@
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define builtInCheatEngine BIT(9)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -150,7 +149,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x13000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xA000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -163,10 +162,10 @@ static void readSrBackendId(void) {
 	// Use SR backend ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
-	*(u32*)(0x02000308) = *(u32*)(ce7+0x13100);
-	*(u32*)(0x0200030C) = *(u32*)(ce7+0x13104);
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x13100);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x13104);
+	*(u32*)(0x02000308) = *(u32*)(ce7+0xA100);
+	*(u32*)(0x0200030C) = *(u32*)(ce7+0xA104);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0xA100);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0xA104);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -341,7 +340,7 @@ extern void inGameMenu(void);
 void forceGameReboot(void) {
 	u32 clearBuffer = 0;
 	if (consoleModel < 2) {
-		if (*(u32*)(ce7+0x13100) == 0) {
+		if (*(u32*)(ce7+0xA100) == 0) {
 			unlaunchSetFilename(false);
 		}
 		sharedAddr[4] = 0x57534352;
@@ -351,7 +350,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-	if (*(u32*)(ce7+0x13100) == 0) {
+	if (*(u32*)(ce7+0xA100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -363,11 +362,11 @@ void forceGameReboot(void) {
 
 void returnToLoader(void) {
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0x13100) == 0) {
+		if (*(u32*)(ce7+0xA100) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
 	} else {
-		if (*(u32*)(ce7+0x13100) == 0) {
+		if (*(u32*)(ce7+0xA100) == 0) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
@@ -735,10 +734,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (valueBits & builtInCheatEngine) {
-		cheat_engine_start();
-	} else {
-		volatile void (*cheatEngine)() = (volatile void*)CHEAT_ENGINE_LOCATION+4;
+	if (*(u32*)((u32)ce7-(0x8400+0x3E0)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
 		(*cheatEngine)();
 	}
 
@@ -800,10 +797,10 @@ void myIrqHandlerVBlank(void) {
 		driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, -1);
-		if (consoleModel < 2 && *(u32*)(ce7+0x13100) == 0) {
+		if (consoleModel < 2 && *(u32*)(ce7+0xA100) == 0) {
 			unlaunchSetFilename(false);
 		}
-		if (*(u32*)(ce7+0x13100) == 0) {
+		if (*(u32*)(ce7+0xA100) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID

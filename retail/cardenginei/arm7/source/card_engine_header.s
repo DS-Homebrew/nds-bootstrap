@@ -62,8 +62,6 @@ romRead_LED:
 	.byte	0
 dmaRomRead_LED:
 	.byte	0
-cheat_data_offset:
-	.word	cheat_data
 irqTable_offset:
 	.word	irqTable
 .align	4

@@ -1196,9 +1196,9 @@ int arm7_main(void) {
 
 		//rebootConsole = (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0));
 
-		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0x13800);
+		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0xA400);
 		if (gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, 0x13800)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, 0xA400)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -1376,25 +1376,6 @@ int arm7_main(void) {
 	clearScreen();
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
-
-	/*if (rebootConsole) {
-		u32 clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
-		if (*(u32*)(ce7Location+0x11EF8) != 0) {
-			// Use SR backend ID
-			*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
-			*(u16*)(0x02000304) = 0x1801;
-			*(u32*)(0x02000308) = *(u32*)(ce7Location+0x11EF8);
-			*(u32*)(0x0200030C) = *(u32*)(ce7Location+0x11EFC);
-			*(u32*)(0x02000310) = *(u32*)(ce7Location+0x11EF8);
-			*(u32*)(0x02000314) = *(u32*)(ce7Location+0x11EFC);
-			*(u32*)(0x02000318) = 0x17;
-			*(u32*)(0x0200031C) = 0;
-			*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
-		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-	}*/
 
 	if (!dsiModeConfirmed && !isDSiWare) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG

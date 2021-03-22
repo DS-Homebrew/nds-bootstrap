@@ -29,6 +29,7 @@
 #include "value_bits.h"
 #include "locations.h"
 #include "common.h"
+#include "tonccpy.h"
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
@@ -269,9 +270,6 @@ int hookNdsRetailArm7(
 	if (preciseVolumeControl) {
 		ce7->valueBits |= b_preciseVolumeControl;
 	}
-	if (extendedMemoryConfirmed) {
-		ce7->valueBits |= b_builtInCheatEngine;
-	}
 	ce7->language                 = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
@@ -295,9 +293,10 @@ int hookNdsRetailArm7(
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x8000) {
-		u32 cheatEngineSize = *(u32*)CHEAT_ENGINE_LOCATION;
-		cheatEngineSize += 4;
-		char* cheatDataOffset = extendedMemoryConfirmed ? (char*)ce7->cheat_data_offset : (char*)CHEAT_ENGINE_LOCATION+cheatEngineSize;
+		u32 cheatEngineOffset = (u32)ce7-0x8400;
+		tonccpy((char*)cheatEngineOffset, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E0;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
 			cheatDataOffset += apPatchSize;

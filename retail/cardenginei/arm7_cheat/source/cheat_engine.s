@@ -458,6 +458,8 @@ exit:
 
 .pool
 
+	.word 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+
 cheat_data:
 
 cheat_engine_end:
