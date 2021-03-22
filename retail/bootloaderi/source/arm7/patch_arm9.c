@@ -359,8 +359,25 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
         // SDK1-4        
         if(usesThumb) {
             u16* thumbOffset = (u16*)offset;
+            u16* thumbOffsetStartFunc = (u16*)offset;
+			bool lrOnly = false;
+            for (int i = 0; i <= 18; i++) {
+                thumbOffsetStartFunc--;
+				if (*thumbOffsetStartFunc==0xB5F0) {
+					//dbg_printf("\nthumbOffsetStartFunc : ");
+					//dbg_hexa(*thumbOffsetStartFunc);
+					lrOnly = true;
+					break;
+				}
+            }
             thumbOffset--;
-            *thumbOffset = 0xB5F8; // push	{r3-r7, lr} 
+			if (lrOnly) {
+				thumbOffset--;
+				thumbOffset[0] = *thumbOffsetStartFunc; // push	{r4-r7, lr}
+				thumbOffset[1] = 0xB081; // SUB SP, SP, #4
+			} else {
+				*thumbOffset = 0xB5F8; // push	{r3-r7, lr}
+			}
             ce9->thumbPatches->cardEndReadDmaRef = thumbOffset;
           } else {
             u32* armOffset = (u32*)offset;
