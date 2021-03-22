@@ -534,25 +534,6 @@ void cardSetDma (u32 * params) {
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
 
-	if (ce9->valueBits & ROMinRAM) {
-  		u32 len2 = len;
-  		if (len2 > 512) {
-  			len2 -= src % 4;
-  			len2 -= len2 % 32;
-  		}
-
-		u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
-		if (src > ndsHeader->arm7romOffset) {
-			newSrc -= ndsHeader->arm7binarySize;
-		}
-
-		// Copy via dma
-        ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
-        while (ndmaBusy(0));
-		endCardReadDma();
-		return;
-	}
-
 	accessCounter++;  
   
 	#ifdef ASYNCPF
@@ -876,11 +857,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 		return cardReadRAM(dst, src, len);
 	}
 
-	#ifdef DLDI
 	return cardReadNormal(dst, src, len, page);
-	#else
-	return (ce9->valueBits & ROMinRAM) ? cardReadRAM(dst, src, len) : cardReadNormal(dst, src, len, page);
-	#endif
 }
 
 //---------------------------------------------------------------------------------

@@ -1221,6 +1221,9 @@ int arm7_main(void) {
 					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
 				}
+			} else if (ROMinRAM) {
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
+				relocate_ce9(CARDENGINEI_ARM9_LOCATION,ce9Location,0x1C00);
 			} else {
 				tonccpy((u32*)CARDENGINEI_ARM9_SDK5_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 			}
