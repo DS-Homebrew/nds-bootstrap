@@ -42,6 +42,7 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 
 // Card pull out
 static const u32 cardPullOutSignature1[4]         = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011}; // SDK <= 3
+static const u32 cardPullOutSignature1Elab[5]     = {0xE92D4000, 0xE24DD004, 0xE201003F, 0xE3500011, 0x1A00000F}; // SDK 2
 static const u32 cardPullOutSignature2Alt[4]      = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xE59D0014}; // SDK 2
 static const u32 cardPullOutSignature4[4]         = {0xE92D4008, 0xE201003F, 0xE3500011, 0x1A00000D}; // SDK >= 4
 static const u32 cardPullOutSignature5[4]         = {0xE92D4010, 0xE201003F, 0xE3500011, 0x1A000012}; // SDK 5
@@ -663,7 +664,20 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 			}
 		}
 	} else {
-		if (moduleParams->sdk_version < 0x4000000) {
+		if (moduleParams->sdk_version > 0x2008000 && moduleParams->sdk_version < 0x3000000) {
+			// SDK 2
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardPullOutSignature1Elab, 5
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler SDK 2 elaborate found\n");
+			} else {
+				dbg_printf("Card pull out handler SDK 2 elaborate not found\n");
+			}
+		}
+
+		if (!cardPullOutOffset && moduleParams->sdk_version < 0x4000000) {
 			cardPullOutOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 				cardPullOutSignature1, 4
