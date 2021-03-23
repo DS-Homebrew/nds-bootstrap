@@ -58,7 +58,13 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			patchOffsetCache.swiHaltOffset = swiHaltOffset;
 		}
 	}
-	if (swiHaltOffset && !gameOnFlashcard && !ROMinRAM) {
+
+	const char* romTid = getRomTid(ndsHeader);
+	bool nandSaveOnFlashcard = (saveOnFlashcard
+	&& (strncmp(romTid, "UOR", 3) == 0
+	 || strncmp(romTid, "UXB", 3) == 0));
+
+	if (swiHaltOffset && (!gameOnFlashcard || !nandSaveOnFlashcard) && !ROMinRAM) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
