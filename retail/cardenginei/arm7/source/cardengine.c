@@ -544,7 +544,7 @@ static bool start_cardRead_arm9(void) {
 	dbg_hexa(marker);	
 	#endif
 
-	driveInitialize();
+	//driveInitialize();
 	cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
