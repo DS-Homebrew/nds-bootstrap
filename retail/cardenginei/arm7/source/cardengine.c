@@ -646,21 +646,6 @@ static void runCardEngineCheck(void) {
                 //IPC_SendSync(0x8);
     		}
     
-          if ((sharedAddr[3] == (vu32)0x025FFB08) || (sharedAddr[3] == (vu32)0x025FFB0A)) {
-				sdRead = true;
-			  //dmaLed = (sharedAddr[3] == (vu32)0x025FFB0A);
-              if(start_cardRead_arm9()) {
-                    sharedAddr[3] = 0;
-                    /*if (dmaLed)*/ IPC_SendSync(0x8);
-              } else {
-                while(!resume_cardRead_arm9()) {}
-                //if (resume_cardRead_arm9()) { 
-                    sharedAddr[3] = 0;
-                    /*if (dmaLed)*/ IPC_SendSync(0x8);
-				//}
-              }
-          }
-
 			#ifndef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
 				sdRead = !(valueBits & saveOnFlashcard);
@@ -684,12 +669,6 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}*/
 			#endif
-        } else {
-            //if(resume_cardRead_arm9()) {
-			    while(!resume_cardRead_arm9()) {} 
-                sharedAddr[3] = 0;
-                /*if (dmaLed)*/ IPC_SendSync(0x8);
-            //}
         }
   		unlockMutex(&cardEgnineCommandMutex);
   	}
@@ -716,7 +695,22 @@ void myIrqHandlerHalt(void) {
 	
 	haltIsRunning = true;
 	
-	sdmmcHandler();
+	if (!readOngoing) {
+		sdmmcHandler();
+
+		if (sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+			sdRead = true;
+			if(start_cardRead_arm9() || resume_cardRead_arm9()) {
+				sharedAddr[3] = 0;
+				IPC_SendSync(0x8);
+			}
+		}
+	} else {
+		if (resume_cardRead_arm9()) { 
+			sharedAddr[3] = 0;
+			IPC_SendSync(0x8);
+        }
+	}
 }
 
 //---------------------------------------------------------------------------------
