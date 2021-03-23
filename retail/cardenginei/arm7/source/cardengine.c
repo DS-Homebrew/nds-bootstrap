@@ -398,7 +398,7 @@ void dumpRam(void) {
 }
 
 static void log_arm9(void) {
-	driveInitialize();
+	//driveInitialize();
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
