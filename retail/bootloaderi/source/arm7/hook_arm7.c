@@ -279,8 +279,8 @@ int hookNdsRetailArm7(
 	ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
 	*vblankHandler = ce7->patches->vblankHandler;
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
-	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
+	if ((strncmp(romTid, "UOR", 3) == 0)
+	|| (strncmp(romTid, "UXB", 3) == 0)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
 		//*ndma0Handler = ce7->patches->ndma0Handler;
