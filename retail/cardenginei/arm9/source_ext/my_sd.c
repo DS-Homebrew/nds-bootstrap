@@ -145,16 +145,17 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	nocashMessage("writeSectors internal");
 	#endif
 
-	u32 commandRead = 0x53445752;
+	/*u32 commandWrite = 0x53445752;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[3] = ndmaSlot;
-	sharedAddr[4] = commandRead;
+	sharedAddr[4] = commandWrite;
 
-	while (sharedAddr[4] == commandRead);
-	return sharedAddr[4] == 0;
+	while (sharedAddr[4] == commandWrite);
+	return sharedAddr[4] == 0;*/
+	return false;
 }
 
 

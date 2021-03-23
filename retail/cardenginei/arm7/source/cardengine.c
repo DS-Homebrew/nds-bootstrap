@@ -601,12 +601,12 @@ static inline void sdmmcHandler(void) {
 			cardReadLED(false, false);
 			sharedAddr[3] = 0;
 			break;
-		case 0x53445752:
+		/*case 0x53445752:
 			cardReadLED(true, true);
 			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
 			cardReadLED(false, true);
 			sharedAddr[3] = 0;
-			break;
+			break;*/
 	}
 }
 
