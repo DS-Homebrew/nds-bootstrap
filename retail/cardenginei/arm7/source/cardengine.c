@@ -449,7 +449,7 @@ static void nandRead(void) {
 	#endif
 
     if (tryLockMutex(&saveMutex)) {
-		//driveInitialize();
+		driveInitialize();
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileRead(memory, *savFile, flash, len, -1);
     	cardReadLED(false, true);
@@ -480,7 +480,7 @@ static void nandWrite(void) {
 	#endif
 
   	if (tryLockMutex(&saveMutex)) {
-		//driveInitialize();
+		driveInitialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, -1);
@@ -621,7 +621,9 @@ static void runCardEngineCheck(void) {
 	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-		driveInitialize();
+		if (!(valueBits & gameOnFlashcard)) {
+			driveInitialize();
+		}
 
         if(!readOngoing)
         {
@@ -633,7 +635,7 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
 
-			if (!haltIsRunning) {
+			if (!haltIsRunning && !(valueBits & gameOnFlashcard)) {
 				sdmmcHandler();
 			}
 
