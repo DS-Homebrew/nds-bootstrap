@@ -191,6 +191,8 @@ static void driveInitialize(void) {
 		return;
 	}
 
+	bool sdReadBak = sdRead;
+
 	if (valueBits & b_dsiSD) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
@@ -240,8 +242,7 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
-	//const char* romTid = getRomTid(ndsHeader);
-	//saveInRam = (strncmp(romTid, "AMH", 3) == 0);
+	sdRead = sdReadBak;
 
 	driveInited = true;
 }
@@ -397,6 +398,7 @@ void dumpRam(void) {
 }
 
 static void log_arm9(void) {
+	driveInitialize();
 	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
@@ -445,11 +447,9 @@ static void nandRead(void) {
 	dbg_printf("\nmarker : \n");
 	dbg_hexa(marker);
 	#endif
-    
-	
-    
+
     if (tryLockMutex(&saveMutex)) {
-		initialize();
+		//driveInitialize();
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileRead(memory, *savFile, flash, len, -1);
     	cardReadLED(false, true);
@@ -478,9 +478,9 @@ static void nandWrite(void) {
 	dbg_printf("\nmarker : \n");
 	dbg_hexa(marker);
 	#endif
-    
+
   	if (tryLockMutex(&saveMutex)) {
-		initialize();
+		//driveInitialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, -1);
@@ -544,6 +544,7 @@ static bool start_cardRead_arm9(void) {
 	dbg_hexa(marker);	
 	#endif
 
+	driveInitialize();
 	cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
@@ -600,6 +601,12 @@ static inline void sdmmcHandler(void) {
 			cardReadLED(false, false);
 			sharedAddr[3] = 0;
 			break;
+		case 0x53445752:
+			cardReadLED(true, true);
+			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			cardReadLED(false, true);
+			sharedAddr[3] = 0;
+			break;
 	}
 }
 
@@ -614,8 +621,8 @@ static void runCardEngineCheck(void) {
 	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-  		driveInitialize();
-  
+		driveInitialize();
+
         if(!readOngoing)
         {
     
@@ -631,7 +638,7 @@ static void runCardEngineCheck(void) {
 			}
 
     		if (sharedAddr[3] == (vu32)0x026FF800) {
-				sdRead = true;
+				sdRead = (valueBits & b_dsiSD);
     			log_arm9();
     			sharedAddr[3] = 0;
                 //IPC_SendSync(0x8);
@@ -654,14 +661,14 @@ static void runCardEngineCheck(void) {
 
 			#ifndef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
-				sdRead = true;
+				sdRead = !(valueBits & saveOnFlashcard);
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
     			nandRead();
     			sharedAddr[3] = 0;
     		}
 
             if (sharedAddr[3] == (vu32)0x025FFC02) {
-				sdRead = true;
+				sdRead = !(valueBits & saveOnFlashcard);
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
     			nandWrite();
     			sharedAddr[3] = 0;
@@ -911,20 +918,20 @@ void i2cIRQHandler(void) {
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();	
-	
+
 	#ifdef DEBUG		
 	nocashMessage("myIrqEnable\n");
 	#endif	
-	
+
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	//irq |= BIT(28);
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	REG_IE |= irq;
-	if (!(valueBits & powerCodeOnVBlank)) {
-		REG_AUXIE |= IRQ_I2C;
-	}
+	//if (!(valueBits & powerCodeOnVBlank)) {
+	//	REG_AUXIE |= IRQ_I2C;
+	//}
 	leaveCriticalSection(oldIME);
 	ipcSyncHooked = true;
 	return irq_before;
