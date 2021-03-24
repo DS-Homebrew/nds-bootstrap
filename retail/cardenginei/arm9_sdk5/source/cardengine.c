@@ -119,7 +119,7 @@ static void waitMs(int count) {
 	}
 }
 
-static int readCount = 0;
+//static int readCount = 0;
 /*static bool sleepMsEnabled = false;
 
 static void sleepMs(int ms) {
@@ -474,15 +474,15 @@ void cardSetDma (u32 * params) {
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
 
-	cardRead(0, (u8*)dmaParams[4], dmaParams[3], dmaParams[5]);
-	endCardReadDma();
-
-	/*enableIPC_SYNC();
-
 	dmaParams = params;
 	u32 src = dmaParams[3];
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];
+
+	cardRead(0, dst, src, len);
+	endCardReadDma();
+
+	/*enableIPC_SYNC();
 
 	#ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
@@ -770,7 +770,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	// -------------------------------------
 	#endif
 
-	readCount++;
+	//readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
