@@ -327,6 +327,12 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
+	) return false;
+
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
 		if (!patchOffsetCache.cardReadDmaEndOffset) {
@@ -419,6 +425,12 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
+	) return false;
+
 	dbg_printf("\npatchCardSetDma\n");           
 
     u32* setDmaoffset = patchOffsetCache.cardSetDmaOffset;
