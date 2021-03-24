@@ -353,7 +353,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		patchOffsetCache.cardEndReadDmaChecked = true;
 	  }
     if(offset) {
-      dbg_printf("\nNDMA CARD READ ARM9 METHOD ACTIVE\n");
+      dbg_printf("\nNDMA CARD READ METHOD ACTIVE\n");
     dbg_printf("cardEndReadDmaOffset location : ");
     dbg_hexa(offset);
     dbg_printf("\n\n");
@@ -450,7 +450,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 		patchOffsetCache.cardSetDmaChecked = true;
     }
     if(setDmaoffset) {
-      dbg_printf("\nNDMA CARD SET ARM9 METHOD ACTIVE\n");       
+      dbg_printf("\nNDMA CARD SET METHOD ACTIVE\n");       
     dbg_printf("cardSetDmaOffset location : ");
     dbg_hexa(setDmaoffset);
     dbg_printf("\n\n");
