@@ -599,9 +599,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	processAsyncCommand();
 	#endif
 
-	if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
+	/*if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -684,7 +684,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	}
+	//}
 #endif
 
 	if (ce9->valueBits & cacheFlushFlag) {

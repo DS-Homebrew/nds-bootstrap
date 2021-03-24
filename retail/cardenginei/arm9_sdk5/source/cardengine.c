@@ -575,7 +575,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
-	u32 commandRead;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -584,9 +583,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	processAsyncCommand();
 	#endif
 
-	if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
+	/*if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
-	} else {
+	} else {*/
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -664,9 +663,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				accessCounter++;
 			}
 		}
-	}
+	//}
 #endif
-	
+
 	return 0;
 }
 
