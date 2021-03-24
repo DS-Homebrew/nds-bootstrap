@@ -3,6 +3,8 @@
 #include "my_disc_io.h"
 #include "my_sdmmc.h"
 
+extern bool isDma;
+
 /*! \fn DC_FlushAll()
 	\brief flush the entire data cache to memory.
 */
@@ -72,7 +74,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	DC_InvalidateRange(buffer, 512);
 	#endif
 
-	u32 commandRead = 0x53445231;
+	u32 commandRead = isDma ? 0x53444D31 : 0x53445231;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = (vu32)buffer;
@@ -100,7 +102,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	DC_InvalidateRange(buffer, numSectors * 512);
 	#endif
 
-	u32 commandRead = 0x53445244;
+	u32 commandRead = isDma ? 0x53444D41 : 0x53445244;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
@@ -123,6 +125,21 @@ int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer
 	#ifdef DEBUG
 	nocashMessage("my_sdio_ReadSectors_nonblocking");
 	#endif
+
+	/*#ifndef UNCACHED
+	DC_InvalidateRange(buffer, numSectors * 512);
+	#endif
+
+	u32 commandRead = 0x53415244;
+
+	sharedAddr[0] = sector;
+	sharedAddr[1] = numSectors;
+	sharedAddr[2] = (vu32)buffer;
+	sharedAddr[3] = ndmaSlot;
+	sharedAddr[4] = commandRead;
+
+	while (sharedAddr[4] == commandRead);
+	return sharedAddr[4];*/
 	return false;
 }
 
@@ -130,6 +147,15 @@ bool  my_sdio_check_command(int cmd, int ndmaSlot) {
 	#ifdef DEBUG
 	nocashMessage("my_sdio_check_command");
 	#endif
+
+	/*u32 commandCheck = 0x53444348;
+
+	sharedAddr[0] = cmd;
+	sharedAddr[1] = ndmaSlot;
+	sharedAddr[4] = commandCheck;
+
+	while (sharedAddr[4] == commandCheck);
+	return sharedAddr[4];*/
 	return false;
 }
 

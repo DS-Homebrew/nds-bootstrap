@@ -26,6 +26,7 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
+#include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
@@ -84,8 +85,7 @@ static int aQSize = 0;
 #endif
 
 static bool flagsSet = false;
-static bool isDma = false;
-static bool dmaLed = false;
+bool isDma = false;
 
 static u32 tempDmaParams[8] = {0};
 
@@ -166,31 +166,6 @@ u32 popFromAsyncQueueHead() {
 	} else return 0;
 }
 #endif
-
-static inline 
-bool ndmaBusy(uint8 ndmaSlot) {
-	return	*(u32*)(0x400411C+(ndmaSlot*0x1C)) & BIT(31) == 0x80000000;
-}
-
-static inline 
-/*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
-\brief copies from source to destination on one of the 4 available channels in half words.  
-This function returns immediately after starting the transfer.
-\param channel the dma channel to use (0 - 3).  
-\param src the source to copy from
-\param dest the destination to copy to
-\param size the size in bytes of the data to copy.  Will be truncated to the nearest word (4 bytes)
-*/
-void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
-	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;	
-	
-    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
-	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90070000;
-}
 
 static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
@@ -351,7 +326,7 @@ void getAsyncSector() {
 }
 #endif
 
-static int currentLen=0;
+/*static int currentLen=0;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
 
@@ -360,10 +335,6 @@ void continueCardReadDmaArm9() {
         if(ndmaBusy(0)) return;
 
         dmaReadOnArm9 = false;
-        sharedAddr[3] = 0;        
-
-        u32 commandRead=0x025FFB0A;
-        u32 commandPool=0x025AAB08;
 
         u32 src = dmaParams[3];
     	u8* dst = (u8*)dmaParams[4];
@@ -401,20 +372,13 @@ void continueCardReadDmaArm9() {
 
         		// Send a command to the ARM7 to fill the RAM cache
         		slot = allocateCacheSlot();
-        
+
         		buffer = getCacheAddress(slot);
 
-        		// Write the command
-        		sharedAddr[0] = (vu32)buffer;
-        		sharedAddr[1] = ce9->cacheBlockSize;
-        		sharedAddr[2] = sector;
-        		sharedAddr[3] = commandRead;
+				fileReadNonBLocking((char*)buffer, romFile, sector, ce9->cacheBlockSize, 0);
 
-                // do not wait for arm7 and return immediately
-        		checkArm7();
-                
                 dmaReadOnArm7 = true;
-                
+
                 updateDescriptor(slot, sector);	
                 return;
 
@@ -452,12 +416,9 @@ void continueCardReadDmaArm9() {
                 ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
                 dmaReadOnArm9 = true;
                 currentLen= len2;
- 
-                sharedAddr[3] = commandPool;               
-                IPC_SendSync(0x3);        
             }  
-        }
-        if (len==0) {
+			IPC_SendSync(0x3);
+        } else {
           //disableIrqMask(IRQ_DMA0 << dma);
           //resetRequestIrqMask(IRQ_DMA0 << dma);
           //disableDMA(dma); 
@@ -468,23 +429,19 @@ void continueCardReadDmaArm9() {
 
 void continueCardReadDmaArm7() {
     if(dmaReadOnArm7) {
-        if(!checkArm7()) return;
-        
+        if(!resumeFileRead()) return;
+
         dmaReadOnArm7 = false;
-        
+
         vu32* volatile cardStruct = ce9->cardStruct0;
-        u32 commandPool=0x025AAB08;
-        
+
         u32 src = dmaParams[3];
     	u8* dst = (u8*)dmaParams[4];
     	u32 len = dmaParams[5];   
         
-		u32 page = (src / 512) * 512;
-
-		/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-			sharedAddr[3] = 0;
+		if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
 			endCardReadDma();
-		} else {*/
+		} else {
 			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 			u32 len2 = len;
@@ -505,19 +462,22 @@ void continueCardReadDmaArm7() {
 			dmaReadOnArm9 = true;
 			currentLen= len2;
 
-			sharedAddr[3] = commandPool;
 			IPC_SendSync(0x3);
 		}
-    //}
-}
+    }
+}*/
 #endif
 
 void cardSetDma (u32 * params) {
+	isDma = true;
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
 
-	enableIPC_SYNC();
+	cardRead(0, (u8*)dmaParams[4], dmaParams[3], dmaParams[5]);
+	endCardReadDma();
+
+	/*enableIPC_SYNC();
 
 	dmaParams = params;
 	u32 src = dmaParams[3];
@@ -529,10 +489,7 @@ void cardSetDma (u32 * params) {
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
-    u32 commandRead=0x025FFB0A;
-    u32 commandPool=0x025AAB08;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-	u32 page = (src / 512) * 512;
 
 	accessCounter++;  
   
@@ -540,18 +497,11 @@ void cardSetDma (u32 * params) {
 	processAsyncCommand();
 	#endif
 
-	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
-		// Read directly at ARM7 level
-		sharedAddr[0] = (vu32)dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandRead;
-
-		// do not wait for arm7 and return immediately
-		checkArm7();
+	if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
+		fileReadNonBLocking((char*)dst, romFile, src, len, 0);
 
 		dmaReadOnArm7 = true;
-	} else {*/
+	} else {
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -566,14 +516,7 @@ void cardSetDma (u32 * params) {
 
 			buffer = getCacheAddress(slot);
 
-			// Write the command
-			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
-
-			// do not wait for arm7 and return immediately
-			checkArm7();
+			fileReadNonBLocking((char*)buffer, romFile, sector, ce9->cacheBlockSize, 0);
 
 			dmaReadOnArm7 = true;
 
@@ -612,24 +555,22 @@ void cardSetDma (u32 * params) {
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
 			currentLen = len2;
-
-			sharedAddr[3] = commandPool;
-			IPC_SendSync(0x3);
 		}
-	//}
-	#endif
+	}
+	IPC_SendSync(0x3);
+	#endif*/
 }
 
-static void clearIcache (void) {
+//static void clearIcache (void) {
       // Seems to have no effect
       // disable interrupt
       /*int oldIME = enterCriticalSection();
       IC_InvalidateAll();
       // restore interrupt
       leaveCriticalSection(oldIME);*/
-}
+//}
 
-static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
+static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
@@ -643,9 +584,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 	processAsyncCommand();
 	#endif
 
-	/*if (page == src && len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000 && (u32)dst % 4 == 0) {
+	if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
-	} else {*/
+	} else {
 		// Read via the main RAM cache
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
@@ -707,11 +648,13 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
-			// -------------------------------------*/
+			// -------------------------------------
 			#endif
 
     		// Copy directly
-    		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+			isDma
+				? ndmaCopyWords(0, (u8*)buffer+(src-sector), dst, len2)
+				: tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
 			len -= len2;
 			if (len > 0) {
@@ -721,18 +664,13 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len, u32 page) {
 				accessCounter++;
 			}
 		}
-	//}
+	}
 #endif
 	
 	return 0;
 }
 
 static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
-	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
-	if (src > ndsHeader->arm7romOffset) {
-		newSrc -= ndsHeader->arm7binarySize;
-	}
-
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -748,7 +686,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	#endif
 
 	// Copy directly
-	tonccpy(dst, (u8*)newSrc, len);
+	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 
 	return 0;
 }
@@ -759,7 +697,7 @@ bool isNotTcm(u32 address, u32 len) {
     address > 0x02000000
     // test data not in DTCM
     && (address < base || address> base+0x4000)
-    && (address+len < base || address+len> base+0x4000);     
+    && (address+len < base || address+len> base+0x4000);
 }  
 
 u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
@@ -777,11 +715,8 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         && !(((int)len) & 511)
         && !(((int)src) & 511)
 	) {
-		dmaLed = true;
-
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
-			isDma = true;
 			// new dma method
 
             cacheFlush();
@@ -789,17 +724,14 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
             cardSetDma(tempDmaParams);
 
             return true;
-		} else {
-			isDma = false;
+		} /*else {
 			dma=4;
             clearIcache();
-		}
-    } else {
-		dmaLed = false;
-        isDma = false;
+		}*/
+    } /*else {
         dma=4;
         clearIcache();
-    }
+    }*/
 
     return 0;
 }
@@ -822,8 +754,6 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	}
 
 	enableIPC_SYNC();
-
-	u32 page = (src / 512) * 512;
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -857,7 +787,11 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 		return cardReadRAM(dst, src, len);
 	}
 
-	return cardReadNormal(dst, src, len, page);
+	int ret = cardReadNormal(dst, src, len);
+
+    isDma=false;
+
+	return ret; 
 }
 
 //---------------------------------------------------------------------------------
@@ -879,14 +813,14 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
 
-#ifndef DLDI
-	if (IPC_GetSync() == 0x8) {
+/*#ifndef DLDI
+	if (IPC_GetSync() == 0x3) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
 	}
-#endif
+#endif*/
 
 	if (IPC_GetSync() == 0x7){
 		mainScreen++;

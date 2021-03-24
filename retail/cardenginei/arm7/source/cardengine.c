@@ -517,7 +517,9 @@ static void nandWrite(void) {
 }*/
 #endif
 
-static bool readOngoing = false;
+/*static bool readOngoing = false;
+//static int currentCmd=0, currentNdmaSlot=0;
+static int timeTillDmaLedOff = 0;
 
 static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
@@ -583,29 +585,41 @@ static bool resume_cardRead_arm9(void) {
     {
         return false;    
     }
-}
+}*/
 
 static inline void sdmmcHandler(void) {
 	switch (sharedAddr[4]) {
 		case 0x53445231:
-			cardReadLED(true, false);
+		case 0x53444D31: {
+			bool isDma = sharedAddr[4]==0x53444D31;
+			cardReadLED(true, isDma);
 			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
-			cardReadLED(false, false);
-			sharedAddr[3] = 0;
-			break;
+			cardReadLED(false, isDma);
+		}	break;
 		case 0x53445244:
-			cardReadLED(true, false);
-			//my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+		case 0x53444D41: {
+			bool isDma = sharedAddr[4]==0x53444D41;
+			cardReadLED(true, isDma);
 			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
-			//readOngoing = true;
-			cardReadLED(false, false);
-			sharedAddr[3] = 0;
+			cardReadLED(false, isDma);
+		}	break;
+		/*case 0x53444348:
+			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
+			//currentCmd = sharedAddr[0];
+			//currentNdmaSlot = sharedAddr[1];
 			break;
-		/*case 0x53445752:
+		case 0x53415244:
+			cardReadLED(true, true);
+			sharedAddr[4] = my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			//currentCmd = sharedAddr[4];
+			//currentNdmaSlot = sharedAddr[3];
+			timeTillDmaLedOff = 0;
+			readOngoing = true;
+			break;
+		case 0x53445752:
 			cardReadLED(true, true);
 			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
 			cardReadLED(false, true);
-			sharedAddr[3] = 0;
 			break;*/
 	}
 }
@@ -616,17 +630,17 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-    if (sharedAddr[3] == (vu32)0x025AAB08) {
-		IPC_SendSync(0x8);
-	}
+    /*if (IPC_GetSync() == 0x3) {
+		IPC_SendSync(0x3);
+	}*/
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
 		if (!(valueBits & gameOnFlashcard)) {
 			driveInitialize();
 		}
 
-        if(!readOngoing)
-        {
+        //if(!readOngoing)
+        //{
     
     		//nocashMessage("runCardEngineCheck mutex ok");
     
@@ -669,7 +683,7 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}*/
 			#endif
-        }
+        //}
   		unlockMutex(&cardEgnineCommandMutex);
   	}
 }
@@ -692,25 +706,18 @@ void myIrqHandlerHalt(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerHalt");
 	#endif	
-	
-	haltIsRunning = true;
-	
-	if (!readOngoing) {
-		sdmmcHandler();
 
-		if (sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
-			sdRead = true;
-			if(start_cardRead_arm9() || resume_cardRead_arm9()) {
-				sharedAddr[3] = 0;
-				IPC_SendSync(0x8);
-			}
+	haltIsRunning = true;
+
+	sdmmcHandler();
+
+	/*if (readOngoing) {
+		timeTillDmaLedOff++;
+		if (timeTillDmaLedOff > 10) {
+			readOngoing = false;
+			cardReadLED(false, true);
 		}
-	} else {
-		if (resume_cardRead_arm9()) { 
-			sharedAddr[3] = 0;
-			IPC_SendSync(0x8);
-        }
-	}
+	}*/
 }
 
 //---------------------------------------------------------------------------------
