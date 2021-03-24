@@ -335,6 +335,8 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "CP3", 3) == 0
 	 || strncmp(romTid, "BO5", 3) == 0
 	 || strncmp(romTid, "Y8L", 3) == 0
+	 || strncmp(romTid, "B8I", 3) == 0
+	 || strncmp(romTid, "TAM", 3) == 0
 	 || gameOnFlashcard) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -437,6 +439,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "CP3", 3) == 0
 	 || strncmp(romTid, "BO5", 3) == 0
 	 || strncmp(romTid, "Y8L", 3) == 0
+	 || strncmp(romTid, "B8I", 3) == 0
+	 || strncmp(romTid, "TAM", 3) == 0
 	 || gameOnFlashcard) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
@@ -512,6 +516,8 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata - Fix touch and model rendering bug
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
+	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time - Fix white screen on boot
+	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man - Fix white screen on boot
 	) return true;
 
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
