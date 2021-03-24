@@ -101,6 +101,7 @@ static const u32 cardSetDmaSignatureValue1[1]       = {0x4100010};
 static const u32 cardSetDmaSignatureValue2[1]       = {0x40001A4};
 static const u16 cardSetDmaSignatureStartThumb3[4]  = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
 static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+static const u32 cardSetDmaSignatureStart2Early[4]  = {0xE92D4000, 0xE24DD004, 0xE59FC054, 0xE59F1054};
 static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
 static const u32 cardSetDmaSignatureStart3[3]       = {0xE92D4010, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
@@ -1906,8 +1907,12 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     
     //u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
     u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
+	int cardSetDmaSignatureStartLen = 3;
 
-    if (moduleParams->sdk_version < 0x4000000) {
+    if (moduleParams->sdk_version < 0x2008000) {
+		cardSetDmaSignatureStart = cardSetDmaSignatureStart2Early;
+		cardSetDmaSignatureStartLen = 4;
+    } else if (moduleParams->sdk_version < 0x4000000) {
 		cardSetDmaSignatureStart = cardSetDmaSignatureStart2;
     }
 
@@ -1962,8 +1967,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     } else {
         dbg_printf("cardSetDmaSignatureStart used: ");
   		offset = findOffsetBackwards(
-      		cardSetDmaEndOffset, 0x60,
-            cardSetDmaSignatureStart, 3
+      		cardSetDmaEndOffset, 0x80,
+            cardSetDmaSignatureStart, cardSetDmaSignatureStartLen
         );
     }
 
