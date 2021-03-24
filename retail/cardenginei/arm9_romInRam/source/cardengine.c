@@ -175,7 +175,7 @@ void cardSetDma(u32 * params) {
 		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		REG_SCFG_EXT -= 0xC000;
 		REG_IME = oldIME;
-		IPC_SendSync(0x3);
+		endCardReadDma();
 	} else {
 		u32 commandRead=0x025FFB0A;
 
@@ -438,7 +438,7 @@ void myIrqHandlerIPC(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
-	
+
 	if (IPC_GetSync() == 0x3) {
 		endCardReadDma();
 	}
@@ -448,7 +448,7 @@ void myIrqHandlerIPC(void) {
 		if(mainScreen > 2)
 			mainScreen = 0;
 	}
-	
+
 	if (sharedAddr[4] == 0x57534352) {
 		enterCriticalSection();
 		// Make screens white

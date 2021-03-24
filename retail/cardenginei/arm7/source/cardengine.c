@@ -631,10 +631,10 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-    if (IPC_GetSync() == 0x3) {
+    /*if (IPC_GetSync() == 0x3) {
 		IPC_SendSync(0x3);
 		return;
-	}
+	}*/
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
 		if (!(valueBits & gameOnFlashcard)) {
