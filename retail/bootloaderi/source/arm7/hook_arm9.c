@@ -214,7 +214,7 @@ int hookNdsRetailArm9(
 		}
 	  }
 
-		if(strncmp(romTid, "CLJ", 3) == 0) {
+		if(strncmp(romTid, "CLJ", 3) == 0 && dsiModeConfirmed) {
 			ce9->valueBits |= b_cacheFlushFlag;
 		}
 	}
