@@ -1909,7 +1909,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
 	int cardSetDmaSignatureStartLen = 3;
 
-    if (moduleParams->sdk_version < 0x2008000) {
+    if (moduleParams->sdk_version < 0x2004000) {
 		cardSetDmaSignatureStart = cardSetDmaSignatureStart2Early;
 		cardSetDmaSignatureStartLen = 4;
     } else if (moduleParams->sdk_version < 0x4000000) {

@@ -26,7 +26,7 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
-#include "ndma.h"
+//#include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
@@ -342,17 +342,17 @@ void endCardReadDma() {
     }    
 }
 
-/*#ifndef DLDI
+#ifndef DLDI
 static int currentLen=0;
 
 void continueCardReadDmaArm9() {
-    if(dmaReadOnArm9) {
+    //if(dmaReadOnArm9) {
         vu32* volatile cardStruct = ce9->cardStruct0;
         u32	dma = cardStruct[3]; // dma channel
 
-        if(ndmaBusy(0)) return;
+        //dmaReadOnArm9 = false;
 
-        dmaReadOnArm9 = false;
+		u32 commandRead=0x025FFB0A;
 
         u32 src = cardStruct[0];
         u8* dst = (u8*)(cardStruct[1]);
@@ -393,59 +393,66 @@ void continueCardReadDmaArm9() {
 
         		buffer = getCacheAddress(slot);
 
-				fileReadNonBLocking((char*)buffer, romFile, sector, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-                dmaReadOnArm7 = true;
+                //dmaReadOnArm7 = true;
 
-                updateDescriptor(slot, sector);	
-                return;
+                //updateDescriptor(slot, sector);	
+                //return;
 
-        	} else {
-				#ifdef ASYNCPF
-				if(cacheCounter[slot] == 0x0FFFFFFF) {
-					// prefetch successfull
-					getAsyncSector();
+        	}
+			#ifdef ASYNCPF
+			if(cacheCounter[slot] == 0x0FFFFFFF) {
+				// prefetch successfull
+				getAsyncSector();
 
-					triggerAsyncPrefetch(nextSector);
-				} else {
-					int i;
-					for(i=0; i<5; i++) {
-						if(asyncQueue[i]==sector) {
-							// prefetch successfull
-							triggerAsyncPrefetch(nextSector);
-							break;
-						}
+				triggerAsyncPrefetch(nextSector);
+			} else {
+				int i;
+				for(i=0; i<5; i++) {
+					if(asyncQueue[i]==sector) {
+						// prefetch successfull
+						triggerAsyncPrefetch(nextSector);
+						break;
 					}
 				}
-				#endif
-        		updateDescriptor(slot, sector);	
+			}
+			#endif
+        	updateDescriptor(slot, sector);	
 
-        		u32 len2 = len;
-        		if ((src - sector) + len2 > ce9->cacheBlockSize) {
-        			len2 = sector - src + ce9->cacheBlockSize;
-        		}
+        	u32 len2 = len;
+        	if ((src - sector) + len2 > ce9->cacheBlockSize) {
+        		len2 = sector - src + ce9->cacheBlockSize;
+        	}
 
-        		if (len2 > 512) {
-        			len2 -= src % 4;
-        			len2 -= len2 % 32;
-        		}
+        	if (len2 > 512) {
+        		len2 -= src % 4;
+        		len2 -= len2 % 32;
+        	}
 
-        		// Copy via dma
-                ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
-                dmaReadOnArm9 = true;
-                currentLen= len2;
-            }  
-			IPC_SendSync(0x3);
+            currentLen = len2;
+
+			// Copy via dma
+			// Write the command
+			sharedAddr[0] = (vu32)dst;
+			sharedAddr[1] = len2;
+			sharedAddr[2] = (vu32)buffer+(src-sector);
+			sharedAddr[4] = commandRead;
+
+            //ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+            //dmaReadOnArm9 = true;
+			//IPC_SendSync(0x3);
         } else {
           //disableIrqMask(IRQ_DMA0 << dma);
           //resetRequestIrqMask(IRQ_DMA0 << dma);
-          //disableDMA(dma); 
+          //disableDMA(dma);
+		  isDma = false;
           endCardReadDma();
 		}
-    }
+    //}
 }
 
-void continueCardReadDmaArm7() {
+/*void continueCardReadDmaArm7() {
     if(dmaReadOnArm7) {
         if(!resumeFileRead()) return;
 
@@ -484,21 +491,18 @@ void continueCardReadDmaArm7() {
 			IPC_SendSync(0x3);
 		}
 	}
-}
-#endif*/
+}*/
+#endif
 
 void cardSetDma(void) {
 	isDma = true;
 
-	//vu32* volatile cardStruct = ce9->cardStruct0;
+	vu32* volatile cardStruct = ce9->cardStruct0;
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
 
-	cardRead(NULL);
-	endCardReadDma();
-
-	/*enableIPC_SYNC();
+	enableIPC_SYNC();
 
 	u32 src = cardStruct[0];
 	u8* dst = (u8*)(cardStruct[1]);
@@ -510,6 +514,7 @@ void cardSetDma(void) {
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
+	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
 
@@ -519,11 +524,11 @@ void cardSetDma(void) {
 	processAsyncCommand();
 	#endif
 
-	if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
+	/*if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
 		fileReadNonBLocking((char*)dst, romFile, src, len, 0);
 
 		dmaReadOnArm7 = true;
-	} else {
+	} else */
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
@@ -541,49 +546,56 @@ void cardSetDma(void) {
 
 			buffer = getCacheAddress(slot);
 
-			fileReadNonBLocking((char*)buffer, romFile, sector, ce9->cacheBlockSize, 0);
+			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-			dmaReadOnArm7 = true;
+			//dmaReadOnArm7 = true;
 
-			updateDescriptor(slot, sector);
+			//updateDescriptor(slot, sector);
+		} 
+		#ifdef ASYNCPF
+		if(cacheCounter[slot] == 0x0FFFFFFF) {
+			// prefetch successfull
+			getAsyncSector();
+
+			triggerAsyncPrefetch(nextSector);
 		} else {
-			#ifdef ASYNCPF
-			if(cacheCounter[slot] == 0x0FFFFFFF) {
-				// prefetch successfull
-				getAsyncSector();
-
-				triggerAsyncPrefetch(nextSector);
-			} else {
-				int i;
-				for(i=0; i<5; i++) {
-					if(asyncQueue[i]==sector) {
-						// prefetch successfull
-						triggerAsyncPrefetch(nextSector);
-						break;
-					}
+			int i;
+			for(i=0; i<5; i++) {
+				if(asyncQueue[i]==sector) {
+					// prefetch successfull
+					triggerAsyncPrefetch(nextSector);
+					break;
 				}
 			}
-			#endif
-			updateDescriptor(slot, sector);	
-
-			u32 len2 = len;
-			if ((src - sector) + len2 > ce9->cacheBlockSize) {
-				len2 = sector - src + ce9->cacheBlockSize;
-			}
-
-			if (len2 > 512) {
-				len2 -= src % 4;
-				len2 -= len2 % 32;
-			}
-
-			// Copy via dma
-			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
-			dmaReadOnArm9 = true;
-			currentLen = len2;
 		}
-	}
-	IPC_SendSync(0x3);
-	#endif*/
+		#endif
+		updateDescriptor(slot, sector);	
+
+		u32 len2 = len;
+		if ((src - sector) + len2 > ce9->cacheBlockSize) {
+			len2 = sector - src + ce9->cacheBlockSize;
+		}
+
+		if (len2 > 512) {
+			len2 -= src % 4;
+			len2 -= len2 % 32;
+		}
+
+		currentLen = len2;
+
+		// Copy via dma
+		//dmaReadOnArm9 = true;
+
+		// Write the command
+		sharedAddr[0] = (vu32)dst;
+		sharedAddr[1] = len2;
+		sharedAddr[2] = (vu32)buffer+(src-sector);
+		sharedAddr[4] = commandRead;
+
+		//ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+		//IPC_SendSync(0x3);
+	//}
+	#endif
 }
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
@@ -621,7 +633,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-				updateDescriptor(slot, sector);	
+				//updateDescriptor(slot, sector);	
 	
 				#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
@@ -644,8 +656,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 					}
 				}
 				#endif
-				updateDescriptor(slot, sector);
+				//updateDescriptor(slot, sector);
 			}
+			updateDescriptor(slot, sector);
 
 			u32 len2 = len;
 			if ((src - sector) + len2 > ce9->cacheBlockSize) {
@@ -667,9 +680,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     		#endif
     
     		// Copy directly
-			isDma
+			/*isDma
 				? ndmaCopyWords(0, (u8*)buffer+(src-sector), dst, len2)
-				: tonccpy(dst, (u8*)buffer+(src-sector), len2);
+				:*/ tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
     		// Update cardi common
     		cardStruct[0] = src + len2;
@@ -949,14 +962,14 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
 
-/*#ifndef DLDI
+#ifndef DLDI
 	if (IPC_GetSync() == 0x3) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
-			continueCardReadDmaArm7();
+			//continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
 	}
-#endif*/
+#endif
 
 	if (IPC_GetSync() == 0x7){
 		mainScreen++;

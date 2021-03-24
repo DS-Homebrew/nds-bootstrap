@@ -26,6 +26,7 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
+#include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
@@ -78,7 +79,7 @@ static void waitFrames(int count) {
 	}
 }
 
-static int readCount = 0;
+//static int readCount = 0;
 /*static bool sleepMsEnabled = false;
 
 static void sleepMs(int ms) {
@@ -101,45 +102,6 @@ static void sleepMs(int ms) {
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0);
-}
-
-static inline
-/*! \fn void ndmaCopyWordsAsynch(uint8 channel, const void* src, void* dest, uint32 size)
-\brief copies from source to destination on one of the 4 available channels in half words.  
-This function returns immediately after starting the transfer.
-\param channel the dma channel to use (0 - 3).  
-\param src the source to copy from
-\param dest the destination to copy to
-\param size the size in bytes of the data to copy.  Will be truncated to the nearest word (4 bytes)
-*/
-void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
-	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = size/4;	
-	
-    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
-	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x90070000;
-}
-
-/*static inline 
-void ndmaCopyWordsAsynchTimer1(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = src;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = dest;
-
-    *(u32*)(0x400410C+(ndmaSlot*0x1C)) = size/4;
-	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
-	
-    *(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x1;
-	
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x81070000;
-} */
-
-static inline 
-bool ndmaBusy(uint8 ndmaSlot) {
-	return	*(u32*)(0x400411C+(ndmaSlot*0x1C)) & BIT(31) == 0x80000000;
 }
 
 static bool IPC_SYNC_hooked = false;
@@ -206,18 +168,23 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
+		int oldIME = REG_IME;
 		REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
-	}
-	ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
-	while (ndmaBusy(0));
-	if (ce9->valueBits & extendedMemory) {
+		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		REG_SCFG_EXT -= 0xC000;
 		REG_IME = oldIME;
+		IPC_SendSync(0x3);
+	} else {
+		u32 commandRead=0x025FFB0A;
+
+		// Write the command
+		sharedAddr[0] = (vu32)dst;
+		sharedAddr[1] = len2;
+		sharedAddr[2] = (vu32)newSrc;
+		sharedAddr[4] = commandRead;
 	}
-	endCardReadDma();
 }
 
 //Currently used for NSMBDS romhacks
@@ -330,7 +297,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	u32 len2 = 0;
 
-	readCount++;
+	//readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
@@ -369,7 +336,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	int oldIME = REG_IME;
 	if (ce9->valueBits & extendedMemory) {
 		// Open extra memory
-		if (!(ce9->valueBits & isSdk5)) REG_IME = 0;
+		REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;
 	}
 
@@ -386,7 +353,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ce9->valueBits & extendedMemory) {
 		// Close extra memory
 		REG_SCFG_EXT -= 0xC000;
-		if (!(ce9->valueBits & isSdk5)) REG_IME = oldIME;
+		REG_IME = oldIME;
 	}
 
     isDma=false;
@@ -472,6 +439,10 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
 	
+	if (IPC_GetSync() == 0x3) {
+		endCardReadDma();
+	}
+
 	if (IPC_GetSync() == 0x7){
 		mainScreen++;
 		if(mainScreen > 2)

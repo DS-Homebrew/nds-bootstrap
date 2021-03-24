@@ -329,9 +329,13 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
-	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
-	) return false;
+	if (strncmp(romTid, "AJS", 3) == 0
+	 || strncmp(romTid, "AJU", 3) == 0
+	 || strncmp(romTid, "AWD", 3) == 0
+	 || strncmp(romTid, "CP3", 3) == 0
+	 || strncmp(romTid, "BO5", 3) == 0
+	 || strncmp(romTid, "Y8L", 3) == 0
+	 || gameOnFlashcard) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -427,9 +431,13 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
-	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
-	) return false;
+	if (strncmp(romTid, "AJS", 3) == 0
+	 || strncmp(romTid, "AJU", 3) == 0
+	 || strncmp(romTid, "AWD", 3) == 0
+	 || strncmp(romTid, "CP3", 3) == 0
+	 || strncmp(romTid, "BO5", 3) == 0
+	 || strncmp(romTid, "Y8L", 3) == 0
+	 || gameOnFlashcard) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
 
@@ -498,8 +506,8 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
+	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars - Fix white screen on boot
+	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars - Fix white screen on boot
 	 || strncmp(romTid, "AWD", 3) == 0	// Diddy Kong Racing - Fix corrupted 3D model bug
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata - Fix touch and model rendering bug
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn

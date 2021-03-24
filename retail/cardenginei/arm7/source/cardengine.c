@@ -28,6 +28,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
+#include "ndma.h"
 #include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
@@ -517,8 +518,8 @@ static void nandWrite(void) {
 }*/
 #endif
 
-/*static bool readOngoing = false;
-//static int currentCmd=0, currentNdmaSlot=0;
+static bool readOngoing = false;
+/*//static int currentCmd=0, currentNdmaSlot=0;
 static int timeTillDmaLedOff = 0;
 
 static bool start_cardRead_arm9(void) {
@@ -630,9 +631,10 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-    /*if (IPC_GetSync() == 0x3) {
+    if (IPC_GetSync() == 0x3) {
 		IPC_SendSync(0x3);
-	}*/
+		return;
+	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
 		if (!(valueBits & gameOnFlashcard)) {
@@ -710,6 +712,17 @@ void myIrqHandlerHalt(void) {
 	haltIsRunning = true;
 
 	sdmmcHandler();
+
+	if (sharedAddr[4] == (vu32)0x025FFB0A) {	// Card read DMA
+		if (!readOngoing) {
+			ndmaCopyWordsAsynch(0, (u8*)sharedAddr[2], (u8*)sharedAddr[0], sharedAddr[1]);
+			readOngoing = true;
+		} else if (!ndmaBusy(0)) {
+			readOngoing = false;
+			sharedAddr[4] = 0;
+			IPC_SendSync(0x3);
+		}
+	}
 
 	/*if (readOngoing) {
 		timeTillDmaLedOff++;
