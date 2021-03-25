@@ -13,6 +13,7 @@
 
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
+extern u8 cardReadDMA;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
@@ -337,7 +338,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0
 	 || strncmp(romTid, "B8I", 3) == 0
 	 || strncmp(romTid, "TAM", 3) == 0
-	 || gameOnFlashcard) return false;
+	 || gameOnFlashcard || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -353,6 +354,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb,patchOffsetCache.cardReadDmaEndOffset);
 		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
 		patchOffsetCache.cardEndReadDmaChecked = true;
+		patchOffsetCacheChanged = true;
 	  }
     if(offset) {
       dbg_printf("\nNDMA CARD READ METHOD ACTIVE\n");
@@ -441,7 +443,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0
 	 || strncmp(romTid, "B8I", 3) == 0
 	 || strncmp(romTid, "TAM", 3) == 0
-	 || gameOnFlashcard) return false;
+	 || gameOnFlashcard || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
 
@@ -452,6 +454,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 			patchOffsetCache.cardSetDmaOffset = setDmaoffset;
 		}
 		patchOffsetCache.cardSetDmaChecked = true;
+		patchOffsetCacheChanged = true;
     }
     if(setDmaoffset) {
       dbg_printf("\nNDMA CARD SET METHOD ACTIVE\n");       
@@ -1163,6 +1166,7 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 				patchOffsetCache.randomPatchOffset = randomPatchOffset;
 			}
 			patchOffsetCache.randomPatchChecked = true;
+			patchOffsetCacheChanged = true;
 		}
 		if (randomPatchOffset) {
 			// Patch
@@ -1280,6 +1284,7 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 			patchOffsetCache.randomPatch5SecondOffset = randomPatchOffset5Second;
 		}
 		patchOffsetCache.randomPatch5SecondChecked = true;
+		patchOffsetCacheChanged = true;
 	}
 	if (!randomPatchOffset5Second) {
 		return;

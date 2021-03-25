@@ -36,6 +36,7 @@ typedef struct configuration {
 	int colorMode;
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
+	bool cardReadDMA;
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;

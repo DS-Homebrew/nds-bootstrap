@@ -298,6 +298,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
+	loader->cardReadDMA                 = conf->cardReadDMA;
 
 	free(conf);
 

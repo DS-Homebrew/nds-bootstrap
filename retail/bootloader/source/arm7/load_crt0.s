@@ -46,6 +46,7 @@
 	.global wideCheatSize
 	.global apPatchFileCluster
 	.global apPatchSize
+	.global apPatchIsCheat
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
@@ -61,6 +62,7 @@
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
+	.global cardReadDMA
 	.global soundFreq
 @---------------------------------------------------------------------------------
 	.align	4
@@ -147,6 +149,8 @@ consoleModel:
 romRead_LED:
 	.byte	0
 dmaRomRead_LED:
+	.byte	0
+cardReadDMA:
 	.byte	0
 soundFreq:
 	.byte	0
