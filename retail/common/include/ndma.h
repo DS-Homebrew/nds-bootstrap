@@ -15,7 +15,9 @@ void ndmaCopyWords(uint8 ndmaSlot, const void* src, void* dest, uint32 size) {
 	u32 addr[5] = {0x4004104, 0x4004108, 0x4004110, 0x4004114, 0x400411C};
 	if (ndmaSlot > 0)
 	for (int a = 0; a < 5; a++) {
-		addr[a] += 0x1C*(ndmaSlot+1);
+		for (int s = 0; s < ndmaSlot; s++) {
+			addr[a] += 0x1C;
+		}
 	}
 
 	*(vu32*)addr[0] = (u32)src;
@@ -43,7 +45,9 @@ void ndmaCopyWordsAsynch(uint8 ndmaSlot, const void* src, void* dest, uint32 siz
 	u32 addr[5] = {0x4004104, 0x4004108, 0x4004110, 0x4004114, 0x400411C};
 	if (ndmaSlot > 0)
 	for (int a = 0; a < 5; a++) {
-		addr[a] += 0x1C*(ndmaSlot+1);
+		for (int s = 0; s < ndmaSlot; s++) {
+			addr[a] += 0x1C;
+		}
 	}
 
 	*(vu32*)addr[0] = (u32)src;
@@ -63,11 +67,11 @@ bool ndmaBusy(uint8 ndmaSlot) {
 		default:
 			return	(*(vu32*)(0x400411C) & BIT(31)) == 0x80000000;
 		case 1:
-			return	(*(vu32*)(0x4004130) & BIT(31)) == 0x80000000;
+			return	(*(vu32*)(0x4004138) & BIT(31)) == 0x80000000;
 		case 2:
-			return	(*(vu32*)(0x400414C) & BIT(31)) == 0x80000000;
+			return	(*(vu32*)(0x4004154) & BIT(31)) == 0x80000000;
 		case 3:
-			return	(*(vu32*)(0x4004160) & BIT(31)) == 0x80000000;
+			return	(*(vu32*)(0x4004170) & BIT(31)) == 0x80000000;
 	}
 }
 
