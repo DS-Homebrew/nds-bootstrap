@@ -240,6 +240,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x237F0:
 				if (hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
 				break;
+			case 0x235DC:
 			case 0x23CAC:
 				if (hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
 				break;

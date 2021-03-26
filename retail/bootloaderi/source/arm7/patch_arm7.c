@@ -204,6 +204,7 @@ u32 patchCardNdsArm7(
 
 	if ((ndsHeader->arm7binarySize == 0x22B40 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x22BCC && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x235DC && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x23708 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x2378C && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x237F0 && !dsiSD)
@@ -260,7 +261,7 @@ u32 patchCardNdsArm7(
 		u32 saveResult = 0;
 		
 		if (
-			(strncmp(romTid, "ATK", 3) == 0) && dsiSD  // Kirby: Canvas Curse
+			(newArm7binarySize==0x235DC||newArm7binarySize==0x23CAC) && dsiSD
 		) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
