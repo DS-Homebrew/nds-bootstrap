@@ -265,7 +265,7 @@ int hookNdsRetailArm7(
 	if (dsiSD) {
 		ce7->valueBits |= b_dsiSD;
 	}
-	if (preciseVolumeControl) {
+	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
 		ce7->valueBits |= b_preciseVolumeControl;
 	}
 	ce7->language                 = language;

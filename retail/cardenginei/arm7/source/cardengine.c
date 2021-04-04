@@ -853,7 +853,7 @@ void myIrqHandlerVBlank(void) {
 		i2cIRQHandler();
 	}
 
-	if (consoleModel < 2 && (valueBits & preciseVolumeControl) && romRead_LED == 0 && dmaRomRead_LED == 0) {
+	if (valueBits & preciseVolumeControl) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
