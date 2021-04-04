@@ -887,12 +887,12 @@ void cardPullOut(void) {
 	}*/
 }
 
-u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileRead(memory, *savFile, flash, len, -1);
 #endif
-		return 0;
+		return true;
 	}
 
     // Send a command to the ARM7 to read the nand save
@@ -905,15 +905,15 @@ u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[3] = commandNandRead;
 
 	waitForArm7();
-    return 0; 
+    return true; 
 }
 
-u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
 		fileWrite(memory, *savFile, flash, len, -1);
 #endif
-		return 0;
+		return true;
 	}
 
 	// Send a command to the ARM7 to write the nand save
@@ -926,7 +926,7 @@ u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[3] = commandNandWrite;
 
 	waitForArm7();
-    return 0; 
+    return true; 
 }
 
 u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {

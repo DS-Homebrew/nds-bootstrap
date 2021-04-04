@@ -248,16 +248,16 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	return cardReadNormal(dst, src, len);
 }
 
-u32 nandRead(void* memory,void* flash,u32 len,u32 dma) {
+bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
 	fileRead(memory, savFile, (u32)flash, len, -1);
-    return 0; 
+    return true; 
 }
 
-u32 nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
 	fileWrite(memory, savFile, (u32)flash, len, -1);
-	return 0;
+	return true;
 }
 
 
