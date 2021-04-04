@@ -154,6 +154,7 @@ static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2
 static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
+static const u32 sleepSignature4Alt[4]     = {0xE92D4030, 0xE24DD034, 0xE1A05000, 0xE28D0008}; // sdk4
 static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA802}; // sdk4
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
 static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C05}; // sdk5
@@ -1679,7 +1680,7 @@ u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
 	return operaRamOffset;
 }*/
 
-u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
 	dbg_printf("findSleepOffset\n");
     u32* sleepSignature = sleepSignature2;
     u16* sleepSignatureThumb = sleepSignatureThumb2;
@@ -1700,6 +1701,9 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
       		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             sleepSignatureThumb, 4
         );
+		if (sleepOffset) {
+			*usesThumbPtr = true;
+		}
   	} else {
   		sleepOffset = findOffset(
       		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
@@ -1707,12 +1711,21 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
         );
   	}
     
-    if (sleepOffset) {
-		dbg_printf("Sleep found: ");
-        dbg_hexa((u32)sleepOffset);
-		dbg_printf("\n");
-    } 
-    
+	if (!sleepOffset && !usesThumb && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) {
+  		sleepOffset = findOffset(
+      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+            sleepSignature4Alt, 4
+        );
+	}
+
+	if (!sleepOffset && usesThumb) {
+		// Try search for ARM signature, as some THUMB games have the function in ARM
+  		sleepOffset = findOffset(
+      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+            sleepSignature, 4
+        );
+	}
+
     while(sleepOffset!=NULL) {
     	u32* sleepEndOffset = findOffsetThumb(
     		sleepOffset, 0x200,
@@ -1736,11 +1749,6 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
                 sleepSignature, 4
             );
       	}
-        if (sleepOffset) {
-		    dbg_printf("Sleep found: ");
-            dbg_hexa((u32)sleepOffset);
-    		dbg_printf("\n");
-        } 
     } 
     
 	if (sleepOffset) {

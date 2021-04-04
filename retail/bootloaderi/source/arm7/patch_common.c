@@ -529,6 +529,7 @@ u32 patchCardNds(
 		patchOffsetCache.resetOffset = 0;
 		patchOffsetCache.resetChecked = 0;
 		patchOffsetCache.sleepFuncOffset = 0;
+		//patchOffsetCache.sleepFuncIsThumb = 0;
 		patchOffsetCache.sleepChecked = 0;
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;

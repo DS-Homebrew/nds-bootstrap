@@ -489,17 +489,17 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-/*static void getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+/*static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
     u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
-		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb);
+		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
 		if (offset) {
 			patchOffsetCache.sleepFuncOffset = offset;
 		}
 		patchOffsetCache.sleepChecked = true;
 	}
 	if (offset) {
-		if (usesThumb) {
+		if (patchOffsetCache.sleepFuncIsThumb) {
 			ce9->thumbPatches->sleepRef = offset;
 		} else {
 			ce9->patches->sleepRef = offset;
@@ -508,6 +508,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		dbg_hexa(offset);
 		dbg_printf("\n\n");
 	}
+	return offset ? true : false;
 }*/
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1131,7 +1132,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
-    ce9->patches->terminateForPullOutRef = (u32*)((u32)ce9->patches->terminateForPullOutRef - default_location + current_location);
+    ce9->patches->sleepRef = (u32*)((u32)ce9->patches->sleepRef - default_location + current_location);
     ce9->patches->pdash_read = (u32*)((u32)ce9->patches->pdash_read - default_location + current_location);
     ce9->patches->ipcSyncHandlerRef = (u32*)((u32)ce9->patches->ipcSyncHandlerRef - default_location + current_location);
     ce9->patches->reset_arm9 = (u32*)((u32)ce9->patches->reset_arm9 - default_location + current_location);
@@ -1146,7 +1147,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
-    ce9->thumbPatches->terminateForPullOutRef = (u32*)((u32)ce9->thumbPatches->terminateForPullOutRef - default_location + current_location);
+    ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1483,13 +1484,17 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+	/*if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	}
-	if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {
-		randomPatch(ndsHeader, moduleParams);
-		randomPatch5Second(ndsHeader, moduleParams);
-	}
+	} else {*/
+		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+		}
+		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+			randomPatch(ndsHeader, moduleParams);
+			randomPatch5Second(ndsHeader, moduleParams);
+		}
+	//}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);
@@ -1499,8 +1504,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchReset(ce9, ndsHeader, moduleParams);
-
-	//getSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader);
