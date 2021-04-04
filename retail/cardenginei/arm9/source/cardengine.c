@@ -123,7 +123,7 @@ static void waitFrames(int count) {
 	}
 }
 
-static void waitMs(int count) {
+/*static void waitMs(int count) {
 	for (int i = 0; i < count; i++) {
 		while ((REG_VCOUNT % 32) != 31);
 		while ((REG_VCOUNT % 32) == 31);
@@ -131,11 +131,9 @@ static void waitMs(int count) {
 }
 
 static int readCount = 0;
-/*static bool sleepMsEnabled = false;
+static bool sleepMsEnabled = false;
 
-static void sleepMs(int ms) {
-	extern void callSleepThumb(int ms);
-
+void sleepMs(int ms) {
 	if (readCount >= 100) {
 		sleepMsEnabled = true;
 	}
@@ -146,6 +144,7 @@ static void sleepMs(int ms) {
         volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
         (*sleepRef)(ms);
     } else if(ce9->thumbPatches->sleepRef) {
+		extern void callSleepThumb(int ms);
         callSleepThumb(ms);
     }
 }*/
@@ -228,7 +227,7 @@ static void waitForArm7(void) {
 	//int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
 		//if (count==0) {
-			waitMs(1);
+			//waitMs(1);
 			//IPC_SendSync(0x4);
 			//count=1000;
 		//}
@@ -859,7 +858,7 @@ int cardRead(u32* cacheStruct) {
 	// -------------------------------------*/
 	#endif
 
-	readCount++;
+	//readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.

@@ -112,19 +112,17 @@ static void waitFrames(int count) {
 	}
 }
 
-static void waitMs(int count) {
+/*static void waitMs(int count) {
 	for (int i = 0; i < count; i++) {
 		while ((REG_VCOUNT % 32) != 31);
 		while ((REG_VCOUNT % 32) == 31);
 	}
 }
 
-//static int readCount = 0;
-/*static bool sleepMsEnabled = false;
+static int readCount = 0;
+static bool sleepMsEnabled = false;
 
-static void sleepMs(int ms) {
-	extern void callSleepThumb(int ms);
-
+void sleepMs(int ms) {
 	if (readCount >= 100) {
 		sleepMsEnabled = true;
 	}
@@ -135,6 +133,7 @@ static void sleepMs(int ms) {
         volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
         (*sleepRef)(ms);
     } else if(ce9->thumbPatches->sleepRef) {
+		extern void callSleepThumb(int ms);
         callSleepThumb(ms);
     }
 }*/
