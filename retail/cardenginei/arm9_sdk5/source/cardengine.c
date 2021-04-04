@@ -26,7 +26,7 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
-//#include "ndma.h"
+#include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "nds_header.h"
@@ -421,7 +421,9 @@ void continueCardReadDmaArm9() {
 			sharedAddr[2] = (vu32)buffer+(src-sector);
 			sharedAddr[4] = commandRead;
 
-            //ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+			if (dst > 0x02700000) {
+				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+			}
             //dmaReadOnArm9 = true;
 			//IPC_SendSync(0x3);
         } else {
@@ -571,7 +573,9 @@ void cardSetDma (u32 * params) {
 		sharedAddr[2] = (vu32)buffer+(src-sector);
 		sharedAddr[4] = commandRead;
 
-		//ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+		if (dst > 0x02700000) {
+			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+		}
 		//IPC_SendSync(0x3);
 	//}
 	#endif
