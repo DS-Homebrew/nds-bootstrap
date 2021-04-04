@@ -436,7 +436,7 @@ code_handler_start_vblank:
 	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
 	
 	@ exit after return
-	b	exit
+	b	arm9exit
 
 code_handler_start_ipc:
 	push	{r0-r12} 
