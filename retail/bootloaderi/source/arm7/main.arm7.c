@@ -1072,7 +1072,9 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
 	bool isDSiWare = false;
-	if (ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4))) {
+	if ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
+	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0))
+	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
 	} else if (dsiMode == 2) {
