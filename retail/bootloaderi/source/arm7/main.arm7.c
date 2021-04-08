@@ -818,11 +818,18 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
-		tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
+		if (isDSiWare) {
+			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
+			tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
-		const char *ndsPath = "nand:/dsiware.nds";
-		tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, sizeof(ndsPath));
+			dbg_printf("Device list address: ");
+			dbg_hexa((u32)deviceListAddr);
+			dbg_printf("\n");
+
+			const char *ndsPath = "nand:/dsiware.nds";
+			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);
+			//*(u8*)((u32)deviceListAddr+0x3C5) = 0x5C;
+		}
 
 		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
 		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
