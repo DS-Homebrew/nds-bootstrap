@@ -160,22 +160,17 @@ static void initMBK(void) {
 	REG_MBK8 = 0x07403700; // same as DSiWare
 }
 
-static void initMBK_dsiEnhanced(void) {
+static void initMBK_dsiMode(void) {
 	// This function has no effect with ARM7 SCFG locked
-
-	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9 = 0x0000000F;
-
-	// WRAM-B fully mapped to ARM7 // inverted order
-	*(vu32*)REG_MBK2 = 0x0105090D;
-	*(vu32*)REG_MBK3 = 0x1115191D;
-
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x0105090D;
-	*(vu32*)REG_MBK5 = 0x1115191D;
-
-	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
-	REG_MBK6 = 0x00403000;
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE1A0;
+	REG_MBK7 = *(u32*)0x02FFE1A4;
+	REG_MBK8 = *(u32*)0x02FFE1A8;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
 }
 
 void memset_addrs_arm7(u32 start, u32 end)
@@ -820,12 +815,13 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	if (ROMsupportsDsiMode(ndsHeader)) {
 		if (isDSiWare) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
-			tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 
 			dbg_printf("Device list address: ");
 			dbg_hexa((u32)deviceListAddr);
 			dbg_printf("\n");
 
+			toncset(deviceListAddr, 0, 0x400);
+			tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
 			const char *ndsPath = "nand:/dsiware.nds";
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);
 			//*(u8*)((u32)deviceListAddr+0x3C5) = 0x5C;
@@ -1388,8 +1384,8 @@ int arm7_main(void) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
 	}*/
 
-	if (isSdk5(moduleParams) && ROMisDsiEnhanced(ndsHeader) && dsiModeConfirmed) {
-		initMBK_dsiEnhanced();
+	if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+		initMBK_dsiMode();
 	}
 
 	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch

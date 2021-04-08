@@ -85,25 +85,21 @@ void initMBKARM9(void) {
 	REG_MBK8 = 0x07403700; // Same as DSiWare
 }
 
-void initMBKARM9_dsiEnhanced(void) {
-	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9 = 0x0000000F;
-
-	// WRAM-A fully mapped to ARM7
-	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-
-	// WRAM-B fully mapped to ARM7 // inverted order
-	*(vu32*)REG_MBK2 = 0x0105090D;
-	*(vu32*)REG_MBK3 = 0x1115191D;
-
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x0105090D;
-	*(vu32*)REG_MBK5 = 0x1115191D;
+void initMBKARM9_dsiMode(void) {
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE194;
+	REG_MBK7 = *(u32*)0x02FFE198;
+	REG_MBK8 = *(u32*)0x02FFE19C;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
 }
 
 // SDK 5
-static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
-	return (ndsHeader->unitCode == 0x02);
+static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
+	return (ndsHeader->unitCode > 0);
 }
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -281,8 +277,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				REG_MBK6 = 0x080037C0;  // WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
 			}*/
 			if (dsiModeConfirmed) {
-				if (arm9_isSdk5 && ROMisDsiEnhanced(ndsHeader)) {
-					initMBKARM9_dsiEnhanced();
+				if (arm9_isSdk5 && ROMsupportsDsiMode(ndsHeader)) {
+					initMBKARM9_dsiMode();
 				}
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x87;
