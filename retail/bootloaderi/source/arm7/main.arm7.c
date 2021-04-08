@@ -834,6 +834,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF00C) = 0x0000007F;
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000;
+
+		if (dsiModeConfirmed) {
+			i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
+			i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
+		}
 	}
 
 	if (isDSiWare) {
@@ -1129,7 +1134,8 @@ int arm7_main(void) {
 			errorOutput();
 		}
 		toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x35000);
+		toncset((u32*)0x02600000, 0, 0x100000);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
 	} else {
 		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
