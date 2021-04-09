@@ -57,8 +57,9 @@ void myFIFOValue32Handler(u32 value, void* userdata) {
 }
 
 int main(void) {
-	// Switch to NTR Mode
-	//REG_SCFG_ROM = 0x703;
+	// Grab from DS header in GBA slot
+	*(u16*)0x02FFFC36 = *(u16*)0x0800015E;	// Header CRC16
+	*(u32*)0x02FFFC38 = *(u32*)0x0800000C;	// Game Code
 
 	// read User Settings from firmware
 	readUserSettings();

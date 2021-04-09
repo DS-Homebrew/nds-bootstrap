@@ -24,6 +24,7 @@
 
 #ifndef _NO_SDMMC
 #include <stddef.h> // NULL
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
 #include <nds/debug.h>
@@ -362,7 +363,6 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
     
     nocashMessage("main loop");
 
-	//u16 status0 = 0;
 	while(1)
 	{
 		volatile u16 status1 = sdmmc_read16(REG_SDSTATUS1);
@@ -463,15 +463,15 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
             nocashMessage("cmd busy");
             break;
 		} 
-        else 
+        else if (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)
         {
             // command is finished already without going busy : return
             // not supposed to happen
             // needed for no$gba only
-            /*status0 = sdmmc_read16(REG_SDSTATUS0);
+            u16 status0 = sdmmc_read16(REG_SDSTATUS0);
             nocashMessage("already finished");
             if((status0 & flags) == flags)
-            break;*/
+            break;
 		}		
 	}
 	//ctx->stat0 = sdmmc_read16(REG_SDSTATUS0);
