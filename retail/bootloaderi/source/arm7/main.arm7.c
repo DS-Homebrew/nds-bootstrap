@@ -623,7 +623,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
 		*dsiHeader = *dsiHeaderTemp;
 
-		*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
+		*(u32*)((u32)dsiHeader+0x1B8) |= BIT(18);	// SD access
 
 		/*if (!isDSiWare) {
 			// Clear out Digest offsets/lengths
