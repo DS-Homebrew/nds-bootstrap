@@ -505,18 +505,6 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	  memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
     
-	  if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		setDmaoffset = patchOffsetCache.cardReadHashOffset+7;
-
-		if (setDmaoffset) {
-			cardSetDmaPatch = ce9->patches->card_set_dma_arm9;
-			memcpy(setDmaoffset, cardSetDmaPatch, 0x2C);
-		}
-
-		dbg_printf("cardSetDmaHash location : ");
-		dbg_hexa(setDmaoffset);
-		dbg_printf("\n\n");
-	  }
       return true;  
     }
 

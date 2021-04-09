@@ -102,7 +102,6 @@ card_read_arm9:
 	bl		_blx_r6_stub_card_read
 
 	ldmfd   sp!, {r4-r11,pc}
-	bx      lr
 _blx_r6_stub_card_read:
 	bx	r6
 .pool
@@ -131,7 +130,6 @@ thumb_card_read_arm9:
 	bl		_blx_r6_stub_thumb_card_read	
 
 	pop	{r3-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_card_read:
 	bx	r6	
 .pool
