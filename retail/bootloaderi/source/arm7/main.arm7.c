@@ -838,6 +838,24 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000;
 
+		*(u8*)(0x02FFFC24) = 0x04;
+		*(u8*)(0x02FFFC26) = 0x73;
+		*(u8*)(0x02FFFC27) = 0x01;
+		*(u8*)(0x02FFFC28) = 0x73;
+
+		// Set region flag
+		if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 1;
+		} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 2;
+		} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 3;
+		} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 4;
+		} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 5;
+		}
+
 		if (dsiModeConfirmed) {
 			i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
 			i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
