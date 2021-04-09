@@ -901,7 +901,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
 	}
 
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = (ROMsupportsDsiMode(ndsHeader)&&dsiModeConfirmed ? 3 : 1);						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (!dsiModeConfirmed && 
@@ -909,7 +909,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
 	)
 	{
-		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
+		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
 }
 
@@ -1076,7 +1076,7 @@ int arm7_main(void) {
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
 	bool isDSiWare = false;
 	if ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
-	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0))
+	/*|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0)*/)
 	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
@@ -1086,10 +1086,10 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	if (dsiModeConfirmed) {
-		if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
+		/*if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
-		}
+		}*/
 		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;

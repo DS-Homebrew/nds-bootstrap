@@ -110,6 +110,7 @@ static aFile srParamsFile;
 
 static int saveTimer = 0;
 
+//static int bootIndicatorTimer = 0;
 static int languageTimer = 0;
 static int swapTimer = 0;
 static int softResetTimer = 0;
@@ -260,6 +261,9 @@ static void initialize(void) {
 	}
 	#endif
 
+	if (isSdk5(moduleParams)) {
+		*(u16*)0x02fffc40 = 1;	// Change boot indicator to Slot-1 card
+	}
 	romLocation = (char*)(((valueBits & dsiMode) || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (valueBits & extendedMemory) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;

@@ -58,6 +58,25 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
+static void patchCardHashInit(void) {
+	u32* cardHashInitOffset = patchOffsetCache.cardHashInitOffset;
+	if (!patchOffsetCache.cardHashInitOffset) {
+		cardHashInitOffset = findCardHashInitOffset();
+		if (cardHashInitOffset) {
+			patchOffsetCache.cardHashInitOffset = cardHashInitOffset;
+			patchOffsetCacheChanged = true;
+		}
+	}
+
+	if (cardHashInitOffset) {
+		*cardHashInitOffset = 0xE12FFF1E;	// bx lr
+	}
+
+    dbg_printf("cardHashInit location : ");
+    dbg_hexa((u32)cardHashInitOffset);
+    dbg_printf("\n\n");
+}
+
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, bool useCache, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
@@ -172,6 +191,28 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_printf("cardRead location : ");
     dbg_hexa(cardReadStartOffset);
     dbg_printf("\n\n");
+
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		cardReadStartOffset = patchOffsetCache.cardReadHashOffset;
+		if (!patchOffsetCache.cardReadHashOffset) {
+			cardReadStartOffset = findCardReadHashOffset();
+			if (cardReadStartOffset) {
+				patchOffsetCache.cardReadHashOffset = cardReadStartOffset;
+				patchOffsetCacheChanged = true;
+			} else {
+				return false;
+			}
+		}
+
+		if (cardReadStartOffset) {
+			cardReadPatch = ce9->patches->card_read_arm9;
+			memcpy(cardReadStartOffset, cardReadPatch, 0x2C);
+		}
+
+		dbg_printf("cardReadHash location : ");
+		dbg_hexa(cardReadStartOffset);
+		dbg_printf("\n\n");
+	}
 	return true;
 }
 
@@ -358,7 +399,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	  }
     if(offset) {
       dbg_printf("\nNDMA CARD READ METHOD ACTIVE\n");
-    dbg_printf("cardEndReadDmaOffset location : ");
+    dbg_printf("cardEndReadDma location : ");
     dbg_hexa(offset);
     dbg_printf("\n\n");
       if(!isSdk5(moduleParams)) {
@@ -458,12 +499,24 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     }
     if(setDmaoffset) {
       dbg_printf("\nNDMA CARD SET METHOD ACTIVE\n");       
-    dbg_printf("cardSetDmaOffset location : ");
+    dbg_printf("cardSetDma location : ");
     dbg_hexa(setDmaoffset);
     dbg_printf("\n\n");
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	  memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
     
+	  if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		setDmaoffset = patchOffsetCache.cardReadHashOffset+7;
+
+		if (setDmaoffset) {
+			cardSetDmaPatch = ce9->patches->card_set_dma_arm9;
+			memcpy(setDmaoffset, cardSetDmaPatch, 0x2C);
+		}
+
+		dbg_printf("cardSetDmaHash location : ");
+		dbg_hexa(setDmaoffset);
+		dbg_printf("\n\n");
+	  }
       return true;  
     }
 
@@ -1441,8 +1494,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	fixForDsiBios(ce9, ndsHeader);
 
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		patchCardHashInit();
+	}
+
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
-    
+
     const char* romTid = getRomTid(ndsHeader);
 
     u32 startOffset = ndsHeader->arm9destination;
@@ -1451,7 +1508,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
         startOffset = ndsHeader->arm9destination + 0x80000;        
     }
-    
+
     dbg_printf("startOffset : ");
     dbg_hexa(startOffset);
     dbg_printf("\n\n");

@@ -15,8 +15,11 @@ static const u16 swi12Signature[2] = {0xDF12, 0x4770}; // LZ77UnCompReadByCallba
 // Module params
 static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
 
-// DSi mode check
-static const u32 dsiModeCheckSignature[4]           = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001}; // SDK 5
+// DSi mode check (SDK 5)
+static const u32 dsiModeCheckSignature[4]           = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
+
+// Card hash init (SDK 5)
+static const u32 cardHashInitSignature[4]           = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
@@ -37,6 +40,7 @@ static const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
 static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
 static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
 static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                                                         // SDK 5
+static const u32 cardReadHashSignature[3]           = {0xE92D4010, 0xE59F000C, 0xE1A04003};                             // SDK 5
 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -251,9 +255,7 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findDsiModeCheckOffset\n");
 
-    u32 * offset = NULL;
-
-  	offset = findOffset(
+    u32* offset = findOffset(
 		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 		dsiModeCheckSignature, 4
 	);
@@ -262,6 +264,24 @@ u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("DSi mode check found\n");
 	} else {
 		dbg_printf("DSi mode check not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findCardHashInitOffset(void) {
+	dbg_printf("findCardHashInitOffset\n");
+
+    u32* offset = findOffset(
+		*(u32*)0x02FFE1C8, *(u32*)0x02FFE1CC,//ndsHeader->arm9binarySize,
+		cardHashInitSignature, 4
+	);
+
+	if (offset) {
+		dbg_printf("Card hash init found\n");
+	} else {
+		dbg_printf("Card hash init not found\n");
 	}
 
 	dbg_printf("\n");
@@ -633,6 +653,24 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 
 	dbg_printf("\n");
 	return cardReadStartOffset;
+}
+
+u32* findCardReadHashOffset(void) {
+	dbg_printf("findCardReadHashOffset\n");
+
+    u32* offset = findOffset(
+		*(u32*)0x02FFE1C8, *(u32*)0x02FFE1CC,//ndsHeader->arm9binarySize,
+		cardReadHashSignature, 3
+	);
+
+	if (offset) {
+		dbg_printf("Card read hash init found\n");
+	} else {
+		dbg_printf("Card read hash init not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
