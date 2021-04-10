@@ -390,7 +390,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
     dbg_printf("\n\n");
 }
 
-static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0
@@ -401,7 +401,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0
 	 || strncmp(romTid, "B8I", 3) == 0
 	 || strncmp(romTid, "TAM", 3) == 0
-	 || gameOnFlashcard || !cardReadDMA) return false;
+	 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -495,7 +495,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	return false;
 }
 
-static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0
@@ -506,7 +506,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0
 	 || strncmp(romTid, "B8I", 3) == 0
 	 || strncmp(romTid, "TAM", 3) == 0
-	 || gameOnFlashcard || !cardReadDMA) return false;
+	 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
 
@@ -1561,10 +1561,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	/*if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {*/
-		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
-		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
