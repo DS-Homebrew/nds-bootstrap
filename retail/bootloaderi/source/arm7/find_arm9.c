@@ -202,6 +202,7 @@ static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
 
 extern u32 iUncompressedSize;
+extern u32 iUncompressedSizei;
 
 u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
@@ -275,13 +276,13 @@ u32* findCardHashInitOffset(void) {
 	dbg_printf("findCardHashInitOffset\n");
 
     u32* offset = findOffset(
-		*(u32*)0x02FFE1C8, *(u32*)0x02FFE1CC,//ndsHeader->arm9binarySize,
+		*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 		cardHashInitSignature, 3
 	);
 
 	if (!offset) {
 		offset = findOffset(
-			*(u32*)0x02FFE1C8, *(u32*)0x02FFE1CC,//ndsHeader->arm9binarySize,
+			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureAlt, 4
 		);
 	}

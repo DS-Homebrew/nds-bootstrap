@@ -206,7 +206,7 @@ static void resetMemory_ARM7(void) {
 		DMA_DEST(i) = 0;
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
-		for(reg=0; reg<0x1c; reg+=4)*((u32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
 
 	// Clear out FIFO
@@ -1127,6 +1127,8 @@ int arm7_main(void) {
     dbg_hexa(moduleParams->sdk_version);
     dbg_printf("\n"); 
 
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
+
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
@@ -1134,8 +1136,6 @@ int arm7_main(void) {
 		nocashMessage("Secure area already decrypted");
 	}
 	dbg_printf("\n");
-
-	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
 	// Calculate overlay pack size
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
