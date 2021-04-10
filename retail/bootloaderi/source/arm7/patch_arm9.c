@@ -58,7 +58,7 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
-static void patchCardHashInit(void) {
+static bool patchCardHashInit(void) {
 	u32* cardHashInitOffset = patchOffsetCache.cardHashInitOffset;
 	if (!patchOffsetCache.cardHashInitOffset) {
 		cardHashInitOffset = findCardHashInitOffset();
@@ -70,10 +70,32 @@ static void patchCardHashInit(void) {
 
 	if (cardHashInitOffset) {
 		*cardHashInitOffset = 0xE12FFF1E;	// bx lr
+	} else {
+		return false;
 	}
 
     dbg_printf("cardHashInit location : ");
     dbg_hexa((u32)cardHashInitOffset);
+    dbg_printf("\n\n");
+	return true;
+}
+
+static void patchCardRomInit(u32* cardReadEndOffset) {
+	u32* cardRomInitOffset = patchOffsetCache.cardRomInitOffset;
+	if (!patchOffsetCache.cardRomInitOffset) {
+		cardRomInitOffset = findCardRomInitOffset(cardReadEndOffset);
+		if (cardRomInitOffset) {
+			patchOffsetCache.cardRomInitOffset = cardRomInitOffset;
+			patchOffsetCacheChanged = true;
+		}
+	}
+
+	if (cardRomInitOffset) {
+		*(cardRomInitOffset + 5) = 0xE3500000;
+	}
+
+    dbg_printf("cardRomInit location : ");
+    dbg_hexa((u32)cardRomInitOffset);
     dbg_printf("\n\n");
 }
 
@@ -192,7 +214,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_hexa(cardReadStartOffset);
     dbg_printf("\n\n");
 
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		cardReadStartOffset = patchOffsetCache.cardReadHashOffset;
 		if (!patchOffsetCache.cardReadHashOffset) {
 			cardReadStartOffset = findCardReadHashOffset();
@@ -212,7 +234,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		dbg_printf("cardReadHash location : ");
 		dbg_hexa(cardReadStartOffset);
 		dbg_printf("\n\n");
-	}
+	}*/
 	return true;
 }
 
@@ -1483,7 +1505,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	fixForDsiBios(ce9, ndsHeader);
 
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		patchCardHashInit();
+		if (!patchCardHashInit()) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
@@ -1506,7 +1531,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
-    /*if (strncmp(romTid, "V2G", 3) == 0) {
+ 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		patchCardRomInit(cardReadEndOffset);
+	}
+
+   /*if (strncmp(romTid, "V2G", 3) == 0) {
         // try to patch card read DMA a second time
         dbg_printf("patch card read a second time\n");
         dbg_printf("startOffset : 0x02030000\n\n");

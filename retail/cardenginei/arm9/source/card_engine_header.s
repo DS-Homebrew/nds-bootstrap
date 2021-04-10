@@ -214,7 +214,6 @@ slot2_read:
 	bl		_blx_r6_stub_slot2_read
 
 	ldmfd   sp!, {r4-r7,pc}
-	bx      lr
 _blx_r6_stub_slot2_read:
 	bx	r6
 .pool
@@ -272,7 +271,6 @@ nand_read_arm9:
 	bl		_blx_r6_stub_nand_read
 
 	ldmfd   sp!, {r3-r9,pc}
-	bx      lr
 _blx_r6_stub_nand_read:
 	bx	r6	
 .pool
@@ -288,7 +286,6 @@ nand_write_arm9:
 	bl		_blx_r6_stub_nand_write
 
 	ldmfd   sp!, {r3-r9,pc}
-	bx      lr
 _blx_r6_stub_nand_write:
 	bx	r6	
 .pool
@@ -305,7 +302,6 @@ thumb_nand_read_arm9:
 	bl		_blx_r6_stub_thumb_nand_read
 
 	pop	{r1-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_nand_read:
 	bx	r6	
 .pool
@@ -322,7 +318,6 @@ thumb_nand_write_arm9:
 	bl		_blx_r6_stub_thumb_nand_write
 
 	pop	{r1-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_nand_write:
 	bx	r6	
 .pool
