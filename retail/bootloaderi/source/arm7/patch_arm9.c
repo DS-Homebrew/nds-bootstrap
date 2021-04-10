@@ -58,10 +58,10 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
-static bool patchCardHashInit(void) {
+static bool patchCardHashInit(bool usesThumb) {
 	u32* cardHashInitOffset = patchOffsetCache.cardHashInitOffset;
 	if (!patchOffsetCache.cardHashInitOffset) {
-		cardHashInitOffset = findCardHashInitOffset();
+		cardHashInitOffset = usesThumb ? (u32*)findCardHashInitOffsetThumb() : findCardHashInitOffset();
 		if (cardHashInitOffset) {
 			patchOffsetCache.cardHashInitOffset = cardHashInitOffset;
 			patchOffsetCacheChanged = true;
@@ -69,7 +69,11 @@ static bool patchCardHashInit(void) {
 	}
 
 	if (cardHashInitOffset) {
-		*cardHashInitOffset = 0xE12FFF1E;	// bx lr
+		if (usesThumb) {
+			*(u16*)cardHashInitOffset = 0x4770;	// bx lr
+		} else {
+			*cardHashInitOffset = 0xE12FFF1E;	// bx lr
+		}
 	} else {
 		return false;
 	}
@@ -80,10 +84,10 @@ static bool patchCardHashInit(void) {
 	return true;
 }
 
-static void patchCardRomInit(u32* cardReadEndOffset) {
+static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
 	u32* cardRomInitOffset = patchOffsetCache.cardRomInitOffset;
 	if (!patchOffsetCache.cardRomInitOffset) {
-		cardRomInitOffset = findCardRomInitOffset(cardReadEndOffset);
+		cardRomInitOffset = usesThumb ? (u32*)findCardRomInitOffsetThumb((u16*)cardReadEndOffset) : findCardRomInitOffset(cardReadEndOffset);
 		if (cardRomInitOffset) {
 			patchOffsetCache.cardRomInitOffset = cardRomInitOffset;
 			patchOffsetCacheChanged = true;
@@ -91,7 +95,12 @@ static void patchCardRomInit(u32* cardReadEndOffset) {
 	}
 
 	if (cardRomInitOffset) {
-		*(cardRomInitOffset + 5) = 0xE3500000;
+		if (usesThumb) {
+			u16* cardRomInitOffsetThumb = (u16*)cardRomInitOffset;
+			cardRomInitOffsetThumb[5] = 0x2800;
+		} else {
+			cardRomInitOffset[5] = 0xE3500000;
+		}
 	}
 
     dbg_printf("cardRomInit location : ");
@@ -1504,13 +1513,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	fixForDsiBios(ce9, ndsHeader);
 
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		if (!patchCardHashInit()) {
-			dbg_printf("ERR_LOAD_OTHR\n\n");
-			return ERR_LOAD_OTHR;
-		}
-	}
-
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
 
     const char* romTid = getRomTid(ndsHeader);
@@ -1532,7 +1534,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
  	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		patchCardRomInit(cardReadEndOffset);
+		patchCardRomInit(cardReadEndOffset, usesThumb);
+
+		if (!patchCardHashInit(usesThumb)) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
    /*if (strncmp(romTid, "V2G", 3) == 0) {

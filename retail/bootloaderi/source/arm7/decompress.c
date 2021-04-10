@@ -175,11 +175,11 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
     hdr_len = pak_buffer[pak_len - 5];
     if ((hdr_len < 0x08) || (hdr_len > 0x0B)) {
 		dbg_printf("Bad header length\n");
-		return 0;
+		return pak_len;
 	}
     if (pak_len <= hdr_len) {
 		dbg_printf("Bad length\n");
-		return 0;
+		return pak_len;
 	}
 	enc_len = *(unsigned int *)(pak_buffer + pak_len - 8) & 0x00FFFFFF;
     dec_len = pak_len - enc_len;
