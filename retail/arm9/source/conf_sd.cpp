@@ -265,7 +265,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fseek(ndsFile, 0x22C, SEEK_SET);
 		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 	}
-	fclose(ndsFile);
 
 	FILE* cebin = NULL;
 
@@ -335,6 +334,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((u32*)TARGETBUFFER7I, 1, ndsArm7ilen, ndsFile);
 		}
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
+		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
 
 		if (target[0x01C] & 2)
@@ -381,6 +381,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 	}
+	fclose(ndsFile);
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
@@ -519,6 +520,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(bootstrapImages);
 
   } else {
+	fclose(ndsFile);
+
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
