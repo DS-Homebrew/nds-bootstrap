@@ -641,10 +641,6 @@ static void runCardEngineCheck(void) {
 	}*/
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
-		if (!(valueBits & gameOnFlashcard)) {
-			driveInitialize();
-		}
-
         //if(!readOngoing)
         //{
     
@@ -765,8 +761,6 @@ void myIrqHandlerVBlank(void) {
 		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
 		(*cheatEngine)();
 	}
-
-	initialize();
 
 	if (language >= 0 && language <= 7) {
 		// Change language
@@ -942,6 +936,12 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqEnable\n");
 	#endif	
+
+	initialize();
+
+	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
+		driveInitialize();
+	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
