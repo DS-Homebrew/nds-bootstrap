@@ -236,7 +236,7 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 	return raw_len;
 }
 
-void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (
@@ -246,20 +246,32 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		|| strcmp(romTid, "YQUP") == 0 // Chrono Trigger (Europe)
 	) {
 		// Compressed
-		dbg_printf("This rom is compressed\n");
+		dbg_printf("arm9 is compressed\n");
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
-		if (dsiModeConfirmed && ndsHeader->unitCode > 0) {
-			u32 arm9ioffset = *(u32*)0x02FFE1C8;
-			iUncompressedSizei = decompressIBinary((unsigned char*)arm9ioffset, *(unsigned int*)0x02FFE1CC);
-		}
 		moduleParams->compressed_static_end = 0;
 	} else {
 		// Not compressed
-		dbg_printf("This rom is not compressed\n");
+		dbg_printf("arm9 is not compressed\n");
 		iUncompressedSize = ndsHeader->arm9binarySize;
-		if (dsiModeConfirmed && ndsHeader->unitCode > 0) {
+	}
+
+	if (ndsHeader->unitCode > 0) {
+		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+
+		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+		if (dsiModeConfirmed) {
+		if (ltdModuleParams->compressed_static_end) {
+			// Compressed
+			dbg_printf("arm9i is compressed\n");
+			u32 arm9ioffset = *(u32*)0x02FFE1C8;
+			iUncompressedSizei = decompressIBinary((unsigned char*)arm9ioffset, *(unsigned int*)0x02FFE1CC);
+			ltdModuleParams->compressed_static_end = 0;
+		} else {
+			// Not compressed
+			dbg_printf("arm9i is not compressed\n");
 			iUncompressedSizei = *(u32*)0x02FFE1CC;
+		}
 		}
 	}
 }

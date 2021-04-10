@@ -29,6 +29,7 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 // ARM9
 u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
+u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader);
 u32* findCardHashInitOffset(void);
 u16* findCardHashInitOffsetThumb(void);

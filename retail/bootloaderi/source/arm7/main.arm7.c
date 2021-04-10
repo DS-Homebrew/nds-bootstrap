@@ -1129,7 +1129,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
+	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
 	} else {
