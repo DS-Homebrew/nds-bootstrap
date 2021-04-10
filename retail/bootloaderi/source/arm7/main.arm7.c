@@ -226,8 +226,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
 	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu data
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
-	toncset((u32*)0x027F8000, 0, 0x508000);	// clear part of EWRAM
-	toncset((u32*)0x02D00000, 0, 0x2FE000);	// clear part of EWRAM
+	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
+	toncset((u32*)0x02C00000, 0, 0x3FE000);	// clear part of EWRAM
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -553,12 +553,12 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	}
 }
 
-static void loadIBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
+static void loadIBinary_ARM7(const tDSiHeader* dsiHeaderTemp) {
 	if (dsiHeaderTemp->arm9ibinarySize > 0) {
-		fileRead(dsiHeaderTemp->arm9idestination, file, (u32)dsiHeaderTemp->arm9iromOffset, dsiHeaderTemp->arm9ibinarySize, 0);
+		tonccpy(dsiHeaderTemp->arm9idestination, (u32*)TARGETBUFFER9I, dsiHeaderTemp->arm9ibinarySize);
 	}
 	if (dsiHeaderTemp->arm7ibinarySize > 0) {
-		fileRead(dsiHeaderTemp->arm7idestination, file, (u32)dsiHeaderTemp->arm7iromOffset, dsiHeaderTemp->arm7ibinarySize, 0);
+		tonccpy(dsiHeaderTemp->arm7idestination, (u32*)TARGETBUFFER7I, dsiHeaderTemp->arm7ibinarySize);
 	}
 }
 
@@ -821,8 +821,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			dbg_printf("\n");
 
 			toncset(deviceListAddr, 0, 0x400);
-			tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
-			const char *ndsPath = "nand:/dsiware.nds";
+			//tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
+			const char *ndsPath = "sdmc:/dsiware.nds";
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);
 			//*(u8*)((u32)deviceListAddr+0x3C5) = 0x5C;
 		}
@@ -838,13 +838,10 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000;
 
-		*(u8*)(0x02FFFC24) = 0x04;
-		*(u8*)(0x02FFFC26) = 0x73;
-		*(u8*)(0x02FFFC27) = 0x01;
-		*(u8*)(0x02FFFC28) = 0x73;
-
 		// Set region flag
-		if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0) {
+		if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
+			*(u8*)(0x02FFFD70) = 0;
+		} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0) {
 			*(u8*)(0x02FFFD70) = 1;
 		} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0) {
 			*(u8*)(0x02FFFD70) = 2;
@@ -863,7 +860,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 
 	if (isDSiWare) {
-		*(u16*)(0x02FFFC40) = 0x3;						// Boot Indicator (NAND/SD)
+		*(u16*)(0x02FFFC40) = 3;						// Boot Indicator (NAND/SD)
 		return;
 	}
 
@@ -1108,7 +1105,7 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
-		loadIBinary_ARM7(&dsiHeaderTemp, *romFile);
+		loadIBinary_ARM7(&dsiHeaderTemp);
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
@@ -1118,6 +1115,7 @@ int arm7_main(void) {
 			savFile->fatTableCache = (u32)savFile->fatTableCache+0x01000000;
 		}
 	}*/
+	toncset((u32*)TARGETBUFFER9I, 0, 0x400000);	// Clear buffered arm9i/7i binaries
 
 	nocashMessage("Loading the header...\n");
 
@@ -1150,12 +1148,10 @@ int arm7_main(void) {
 	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
 
 	if (isDSiWare) {
-		if (ndsHeader->reserved1[7] & BIT(1)) {
-			nocashMessage("DSiWare is modcrypted");
-			dbg_printf("DSiWare is modcrypted");
-			dbg_printf("\n");
-			errorOutput();
-		}
+		/*nocashMessage("DSiWare is modcrypted");
+		dbg_printf("DSiWare is modcrypted");
+		dbg_printf("\n");
+		errorOutput();*/
 		toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 		toncset((u32*)0x02600000, 0, 0x100000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);

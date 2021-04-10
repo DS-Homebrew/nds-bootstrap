@@ -23,6 +23,28 @@
 #include "locations.h"
 #include "version.h"
 
+#include "crypto.h"
+#include "f_xy.h"
+#include "dsi.h"
+#include "u128_math.h"
+
+#define TARGETBUFFERHEADER 0x02BFF000
+
+void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
+{
+	uint32_t len = size / 0x10;
+	u8 block[0x10];
+
+	while(len>0)
+	{
+		toncset(block, 0, 0x10);
+		dsi_crypt_ctr_block(ctx, buffer, block);
+		tonccpy(buffer, block, 0x10);
+		buffer+=0x10;
+		len--;
+	}
+}
+
 static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
 
 extern const DISC_INTERFACE __my_io_dsisd;
@@ -214,13 +236,34 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	char romTid[5] = {0};
+	u8 unitCode = 0;
 	u32 ndsArm7Size = 0;
+	u32 ndsArm9isrc = 0;
+	u32 ndsArm7isrc = 0;
+	u32 ndsArm9ilen = 0;
+	u32 ndsArm7ilen = 0;
+	u32 modcrypt1len = 0;
+	u32 modcrypt2len = 0;
 	FILE* ndsFile = fopen(conf->ndsPath, "rb");
 	if (ndsFile) {
 		fseek(ndsFile, 0xC, SEEK_SET);
 		fread(&romTid, 1, 4, ndsFile);
+		fseek(ndsFile, 0x12, SEEK_SET);
+		fread(&unitCode, 1, 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1C0, SEEK_SET);
+		fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1CC, SEEK_SET);
+		fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1D0, SEEK_SET);
+		fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1DC, SEEK_SET);
+		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x224, SEEK_SET);
+		fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x22C, SEEK_SET);
+		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 	}
 	fclose(ndsFile);
 
@@ -280,6 +323,63 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
   if (dsiFeatures()) {
 	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard && strncmp(romTid, "I", 1) != 0) {
 		disableSlot1();
+	}
+
+	if (conf->dsiMode > 0 && unitCode > 0) {
+		if (ndsArm9ilen) {
+			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
+			fread((u32*)TARGETBUFFER9I, 1, ndsArm9ilen, ndsFile);
+		}
+		if (ndsArm7ilen) {
+			fseek(ndsFile, ndsArm7isrc, SEEK_SET);
+			fread((u32*)TARGETBUFFER7I, 1, ndsArm7ilen, ndsFile);
+		}
+		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
+		fread(target, 1, 0x1000, ndsFile);
+
+		if (target[0x01C] & 2)
+		{
+			u8 key[16] = {0} ;
+			u8 keyp[16] = {0} ;
+			if (target[0x01C] & 4)
+			{
+				// Debug Key
+				tonccpy(key, target, 16) ;
+			} else
+			{
+				//Retail key
+				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
+				tonccpy(keyp, modcrypt_shared_key, 8) ;
+				for (int i=0;i<4;i++)
+				{
+					keyp[8+i] = target[0x0c+i] ;
+					keyp[15-i] = target[0x0c+i] ;
+				}
+				tonccpy(key, target+0x350, 16) ;
+				
+				u128_xor(key, keyp);
+				u128_add(key, DSi_KEY_MAGIC);
+		  u128_lrot(key, 42) ;
+			}
+
+			uint32_t rk[4];
+			tonccpy(rk, key, 16) ;
+			
+			dsi_context ctx;
+			dsi_set_key(&ctx, key);
+			dsi_set_ctr(&ctx, &target[0x300]);
+			if (modcrypt1len)
+			{
+				decrypt_modcrypt_area(&ctx, (u8*)TARGETBUFFER9I, modcrypt1len);
+			}
+
+			dsi_set_key(&ctx, key);
+			dsi_set_ctr(&ctx, &target[0x314]);
+			if (modcrypt2len)
+			{
+				decrypt_modcrypt_area(&ctx, (u8*)TARGETBUFFER7I, modcrypt2len);
+			}
+		}
 	}
 
 	u32 srBackendId[2] = {0};
