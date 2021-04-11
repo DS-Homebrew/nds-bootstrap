@@ -623,7 +623,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
 		*dsiHeader = *dsiHeaderTemp;
 
-		*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
+		//*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
 
 		toncset((char*)dsiHeader+0x220, 0, 0x10);	// Clear modcrypt bytes
 
@@ -1401,6 +1401,7 @@ int arm7_main(void) {
 
 	if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		initMBK_dsiMode();
+		REG_SCFG_EXT = 0x93FFFB06;
 	}
 
 	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
