@@ -97,7 +97,7 @@ static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
 	if (cardRomInitOffset) {
 		if (usesThumb) {
 			u16* cardRomInitOffsetThumb = (u16*)cardRomInitOffset;
-			cardRomInitOffsetThumb[5] = 0x2800;
+			cardRomInitOffsetThumb[6] = 0x2800;
 		} else {
 			cardRomInitOffset[5] = 0xE3500000;
 		}
