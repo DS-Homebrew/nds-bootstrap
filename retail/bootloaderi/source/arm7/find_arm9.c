@@ -20,9 +20,10 @@ static const u32 moduleParamsLtdSignature[2] = {0xDEC01463, 0x6314C0DE}; // SDK 
 static const u32 dsiModeCheckSignature[4] = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
 
 // Card hash init (SDK 5)
-static const u32 cardHashInitSignature[3]      = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
-static const u32 cardHashInitSignatureAlt[4]   = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
-static const u16 cardHashInitSignatureThumb[3] = {0xB5F0, 0xB083, 0x2000};
+static const u32 cardHashInitSignature[3]         = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
+static const u32 cardHashInitSignatureAlt[4]      = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
+static const u16 cardHashInitSignatureThumb[3]    = {0xB578, 0xB083, 0x2000};
+static const u16 cardHashInitSignatureThumbAlt[3] = {0xB5F0, 0xB083, 0x2000};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
@@ -339,6 +340,13 @@ u16* findCardHashInitOffsetThumb(void) {
 		*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 		cardHashInitSignatureThumb, 3
 	);
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			cardHashInitSignatureThumbAlt, 3
+		);
+	}
 
 	if (offset) {
 		dbg_printf("Card hash init found\n");
