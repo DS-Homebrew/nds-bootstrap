@@ -1256,6 +1256,9 @@ int arm7_main(void) {
 					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
 				}
+			} else if (ROMsupportsDsiMode(ndsHeader)) {
+				ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2-0x400;
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x2400);
 			} else {
 				tonccpy((u32*)CARDENGINEI_ARM9_SDK5_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 			}
