@@ -195,7 +195,7 @@ static void driveInitialize(void) {
 
 	bool sdReadBak = sdRead;
 
-	if (valueBits & b_dsiSD) {
+	if ((valueBits & b_dsiSD) && !(valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard)) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
 			SD_Init();
@@ -230,7 +230,7 @@ static void driveInitialize(void) {
 	}*/
 
 	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 3);
+	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
 	enableDebug(myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
@@ -596,6 +596,9 @@ static inline void sdmmcHandler(void) {
 	switch (sharedAddr[4]) {
 		case 0x53445231:
 		case 0x53444D31: {
+			//#ifdef DEBUG		
+			//dbg_printf("my_sdmmc_sdcard_readsector\n");
+			//#endif
 			bool isDma = sharedAddr[4]==0x53444D31;
 			cardReadLED(true, isDma);
 			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
@@ -603,6 +606,9 @@ static inline void sdmmcHandler(void) {
 		}	break;
 		case 0x53445244:
 		case 0x53444D41: {
+			//#ifdef DEBUG		
+			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
+			//#endif
 			bool isDma = sharedAddr[4]==0x53444D41;
 			cardReadLED(true, isDma);
 			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);

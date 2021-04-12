@@ -1251,7 +1251,7 @@ int arm7_main(void) {
 				}
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION,ce9Location,0x1C00);
 			} else if (gameOnFlashcard) {
-				tonccpy((u32*)CARDENGINEI_ARM9_SDK5_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION, 0x7000);
 				if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
 					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
@@ -1379,11 +1379,9 @@ int arm7_main(void) {
 				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 			}
 			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile);
-		} else {
-			if (romRead_LED==1 || dmaRomRead_LED==1) {
-				// Turn WiFi LED off
-				i2cWriteRegister(0x4A, 0x30, 0x12);
-			}
+		} else if (!gameOnFlashcard && (romRead_LED==1 || dmaRomRead_LED==1)) {
+			// Turn WiFi LED off
+			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
 
 		if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
