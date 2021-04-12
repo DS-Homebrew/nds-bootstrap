@@ -922,7 +922,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
-	 || patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x02FE0000 : 0x023E0000)) {
+	 || *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x02FE0000 : 0x023E0000)) {
 		patchOffsetCache.heapPointerOffset = 0;
 	} else {
 		heapPointer = patchOffsetCache.heapPointerOffset;

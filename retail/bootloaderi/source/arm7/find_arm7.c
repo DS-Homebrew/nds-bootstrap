@@ -22,6 +22,8 @@ static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 
+static const u32 scfgExtSignature[1] = {0x4004008};
+
 static const u16 swiGetPitchTableSignatureThumb[4]    = {0xB570, 0x1C05, 0x2400, 0x4248};
 static const u16 swiGetPitchTableSignatureThumbAlt[4] = {0xB570, 0x1C05, 0x4248, 0x2103};
 static const u32 swiGetPitchTableSignature1[4]      = {0xE59FC004, 0xE08FC00C, 0xE12FFF1C, 0x00004721};
@@ -312,6 +314,23 @@ u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return swi12Offset;
+}
+
+u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("a7_findScfgExtOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+		scfgExtSignature, 1
+	);
+	if (offset) {
+		dbg_printf("SCFG_EXT found\n");
+	} else {
+		dbg_printf("SCFG_EXT call not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader) {

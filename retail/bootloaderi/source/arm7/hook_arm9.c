@@ -179,6 +179,11 @@ int hookNdsRetailArm9(
 				ce9->romLocation = CACHE_ADRESS_START_low;
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
+			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+				runOverlayCheck = false;
+				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
+				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
 			} else {
 				ce9->romLocation = CACHE_ADRESS_START;
 				ce9->cacheAddress = CACHE_ADRESS_START;

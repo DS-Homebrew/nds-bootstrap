@@ -14,7 +14,7 @@ extern bool extendedMemoryConfirmed;
 
 void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
 	const char* romTid = getRomTid(ndsHeader);
-	bool doLow = (strncmp(romTid, "VKG", 3) == 0);
+	bool doLow = ((strncmp(romTid, "BKW", 3) == 0) || strncmp(romTid, "VKG", 3) == 0);
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -34,7 +34,7 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
 			} else if (consoleModel == 0 && higherMem) {
-				rombyte = (void*)retail_CACHE_ADRESS_START_SDK5;
+				rombyte = (void*)CACHE_ADRESS_START;
 
 				if (doLow) {
 					rombyte = (void*)CACHE_ADRESS_START_low;

@@ -716,9 +716,9 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 		if (extendedMemoryConfirmed) {
 			overlaysLocation = (u32)ROM_LOCATION_EXT;
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
-			overlaysLocation = (u32)retail_CACHE_ADRESS_START_SDK5;
+			overlaysLocation = (u32)CACHE_ADRESS_START;
 
-			if (strncmp(romTid, "VKG", 3) == 0) {
+			if (strncmp(romTid, "BKW", 3) == 0 || strncmp(romTid, "VKG", 3) == 0) {
 				overlaysLocation = (u32)CACHE_ADRESS_START_low;
 			}
 		}
@@ -1386,7 +1386,7 @@ int arm7_main(void) {
 			dbg_printf("GBA ROM loaded\n");
 		}*/
 
-		if (consoleModel > 0 || strncmp(romTid, "UBR", 3) != 0) {
+		if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 		if (ROMinRAM) {
@@ -1419,6 +1419,7 @@ int arm7_main(void) {
 	if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		initMBK_dsiMode();
 		REG_SCFG_EXT = 0x93FFFB06;
+		REG_SCFG_CLK = 0x187;
 	}
 
 	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
@@ -1426,7 +1427,7 @@ int arm7_main(void) {
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
-	if (!dsiModeConfirmed && !isDSiWare) {
+	if (!gameOnFlashcard) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 

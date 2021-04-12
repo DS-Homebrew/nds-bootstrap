@@ -89,13 +89,14 @@
 #define ROM_LOCATION          0x0C800000
 #define ROM_SDK5_LOCATION     0x0D000000
 
-#define CACHE_ADRESS_START             0x02800000
-#define CACHE_ADRESS_START_low         0x02480000
-#define retail_CACHE_ADRESS_START_SDK5 0x02800000	// Size is 0x700000
+#define CACHE_ADRESS_START               0x02800000
+#define CACHE_ADRESS_START_low           0x02480000
+#define retail_CACHE_ADRESS_START_TWLSDK 0x02F80000
 
-#define retail_CACHE_ADRESS_SIZE      0x800000
-#define retail_CACHE_ADRESS_SIZE_low  0x278000
-#define retail_CACHE_ADRESS_SIZE_SDK5 0x700000
+#define retail_CACHE_ADRESS_SIZE        0x800000
+#define retail_CACHE_ADRESS_SIZE_low    0x278000
+#define retail_CACHE_ADRESS_SIZE_SDK5   0x700000
+#define retail_CACHE_ADRESS_SIZE_TWLSDK 0x40000
 
 #define retail_CACHE_SLOTS_16KB      0x200
 #define retail_CACHE_SLOTS_32KB      0x100

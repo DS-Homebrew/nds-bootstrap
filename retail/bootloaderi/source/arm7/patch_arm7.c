@@ -75,6 +75,26 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
     dbg_printf("\n\n");
 }
 
+static void patchScfgExt(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode == 0) return;
+
+	u32* scfgExtOffset = patchOffsetCache.a7ScfgExtOffset;
+	if (!patchOffsetCache.a7ScfgExtOffset) {
+		scfgExtOffset = a7_findScfgExtOffset(ndsHeader);
+		if (scfgExtOffset) {
+			patchOffsetCache.a7ScfgExtOffset = scfgExtOffset;
+		}
+	}
+	if (scfgExtOffset && dsiModeConfirmed) {
+		*(u32*)0x2EFFFFC = 0x93FBFB06;
+		*scfgExtOffset = 0x2EFFFFC;
+	}
+
+    dbg_printf("SCFG_EXT location : ");
+    dbg_hexa((u32)scfgExtOffset);
+    dbg_printf("\n\n");
+}
+
 static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
@@ -232,6 +252,8 @@ u32 patchCardNdsArm7(
 		patchOffsetCache.a7BinSize = newArm7binarySize;
 		patchOffsetCacheChanged = true;
 	}
+
+	patchScfgExt(ndsHeader);
 
 	patchSleepMode(ndsHeader);
 
