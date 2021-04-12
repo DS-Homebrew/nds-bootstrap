@@ -184,6 +184,8 @@ static const u32 initHeapEndFunc2SignatureThumb[2]     = {0xBD082000, 0x023E0000
 static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
+static const u32 initHeapEndFuncISignature[2]          = {0x02FE0000, 0};
+static const u32 initHeapEndFuncISignatureAlt[2]       = {0x02FE0000, 0x1000};
 
 // Reset
 static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
@@ -1689,6 +1691,32 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 			initHeapEndFunc2SignatureThumbAlt3, 2
 		);
 	}
+	if (ndsHeader->unitCode > 0) {
+		bool dsiFunc = false;
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFuncISignature, 2
+			);
+			if (initEndFunc) dsiFunc = true;
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFuncISignatureAlt, 2
+			);
+			if (initEndFunc) dsiFunc = true;
+		}
+		if (dsiFunc) {
+			u32* heapPointer = initEndFunc;
+			
+			dbg_hexa((u32)heapPointer);
+			dbg_printf("\n");
+
+			return heapPointer;
+		}
+	}
+
     u32* heapPointer = initEndFunc + 1;
     
     dbg_hexa((u32)heapPointer);

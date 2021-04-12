@@ -477,22 +477,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load SDK5 ce9 binary
-	cebin = fopen(unitCode>0 ? "nitro:/cardenginei_arm9_twlsdk.lz77" : "nitro:/cardenginei_arm9_sdk5.lz77", "rb");
+	cebin = fopen(unitCode>0&&conf->dsiMode ? "nitro:/cardenginei_arm9_twlsdk.lz77" : "nitro:/cardenginei_arm9_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
 
-	//if (conf->gameOnFlashcard) {
+	if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary
-		cebin = fopen("nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
+		cebin = fopen(unitCode>0&&conf->dsiMode ? "nitro:/cardenginei_arm9_twlsdk_dldi.lz77" : "nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x7000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
 		}
 		fclose(cebin);
-	//}
+	}
 
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";

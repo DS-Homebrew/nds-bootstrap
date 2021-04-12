@@ -64,7 +64,7 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
 //static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 #ifdef DLDI
 bool sdRead = false;
