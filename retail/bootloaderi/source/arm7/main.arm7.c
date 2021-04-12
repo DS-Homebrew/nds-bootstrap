@@ -1427,7 +1427,8 @@ int arm7_main(void) {
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
-	if (!gameOnFlashcard) {
+	if ((!ROMsupportsDsiMode(ndsHeader) && !dsiModeConfirmed)
+	|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
