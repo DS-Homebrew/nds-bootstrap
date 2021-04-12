@@ -420,7 +420,7 @@ void continueCardReadDmaArm9() {
 			sharedAddr[2] = (vu32)buffer+(src-sector);
 			sharedAddr[4] = commandRead;
 
-			if (dst > 0x02700000) {
+			if (dst > 0x03000000) {
 				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			}
             //dmaReadOnArm9 = true;
@@ -572,7 +572,7 @@ void cardSetDma (u32 * params) {
 		sharedAddr[2] = (vu32)buffer+(src-sector);
 		sharedAddr[4] = commandRead;
 
-		if (dst > 0x02700000) {
+		if (dst > 0x03000000) {
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 		}
 		//IPC_SendSync(0x3);
@@ -594,6 +594,10 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
+	/*if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+		fileRead((char*)dst, *romFile, src, len, 0);
+		return 0;
+	}*/
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;

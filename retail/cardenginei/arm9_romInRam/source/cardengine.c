@@ -185,7 +185,7 @@ void cardSetDma(u32 * params) {
 		sharedAddr[2] = (vu32)newSrc;
 		sharedAddr[4] = commandRead;
 
-		if (dst > 0x02700000) {
+		if (dst > 0x03000000) {
 			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
 		}
 	}

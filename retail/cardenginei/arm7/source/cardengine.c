@@ -721,7 +721,7 @@ void myIrqHandlerHalt(void) {
 
 	if (sharedAddr[4] == (vu32)0x025FFB0A) {	// Card read DMA
 		if (!readOngoing) {
-			ndmaCopyWordsAsynch(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] > 0x02700000 ? 0 : sharedAddr[0]), sharedAddr[1]);
+			ndmaCopyWordsAsynch(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] > 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
 			readOngoing = true;
 		} else if (!ndmaBusy(0)) {
 			readOngoing = false;

@@ -438,7 +438,7 @@ void continueCardReadDmaArm9() {
 			sharedAddr[2] = (vu32)buffer+(src-sector);
 			sharedAddr[4] = commandRead;
 
-			if (dst > 0x02700000) {
+			if (dst > 0x03000000) {
 				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			}
             //dmaReadOnArm9 = true;
@@ -593,7 +593,7 @@ void cardSetDma(void) {
 		sharedAddr[2] = (vu32)buffer+(src-sector);
 		sharedAddr[4] = commandRead;
 
-		if (dst > 0x02700000) {
+		if (dst > 0x03000000) {
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 		}
 		//IPC_SendSync(0x3);
