@@ -625,7 +625,8 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 static bool mpuInitCachePatched = false;
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (patchMpuRegion == 2) return;
+	if (patchMpuRegion == 2
+	|| (ndsHeader->unitCode > 0 && dsiModeConfirmed)) return;
 
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
