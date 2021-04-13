@@ -88,11 +88,9 @@ static void patchScfgExt(const tNDSHeader* ndsHeader) {
 	if (scfgExtOffset && dsiModeConfirmed) {
 		*(u32*)0x2EFFFFC = 0x93FFFB06;
 		*scfgExtOffset = 0x2EFFFFC;
-		/*if (!gameOnFlashcard) {
-			*(u16*)0x2EFFFF0 = 0x0100;
-			*(scfgExtOffset + 5) = 0x2EFFFF0;
-			*(scfgExtOffset + 6) = 0x2EFFFF1;
-		}*/
+		*(u16*)0x2EFFFF0 = (ndsHeader->unitCode == 3 || gameOnFlashcard) ? 0x0101 : 0x0100;
+		*(scfgExtOffset + 5) = 0x2EFFFF0;
+		*(scfgExtOffset + 6) = 0x2EFFFF1;
 	}
 
     dbg_printf("SCFG_EXT location : ");
