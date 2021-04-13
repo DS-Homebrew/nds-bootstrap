@@ -75,7 +75,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
     dbg_printf("\n\n");
 }
 
-static void patchScfgExt(const tNDSHeader* ndsHeader) {
+static void patchScfgExt(const tNDSHeader* ndsHeader, u32 ROMinRAM) {
 	if (ndsHeader->unitCode == 0) return;
 
 	u32* scfgExtOffset = patchOffsetCache.a7ScfgExtOffset;
@@ -88,7 +88,7 @@ static void patchScfgExt(const tNDSHeader* ndsHeader) {
 	if (scfgExtOffset && dsiModeConfirmed) {
 		*(u32*)0x2EFFFFC = 0x93FFFB06;
 		*scfgExtOffset = 0x2EFFFFC;
-		*(u16*)0x2EFFFF0 = (ndsHeader->unitCode == 3 || gameOnFlashcard) ? 0x0101 : 0x0100;
+		*(u16*)0x2EFFFF0 = (ndsHeader->unitCode == 3 || gameOnFlashcard || ROMinRAM) ? 0x0101 : 0x0100;
 		*(scfgExtOffset + 5) = 0x2EFFFF0;
 		*(scfgExtOffset + 6) = 0x2EFFFF1;
 	}
@@ -256,7 +256,7 @@ u32 patchCardNdsArm7(
 		patchOffsetCacheChanged = true;
 	}
 
-	patchScfgExt(ndsHeader);
+	patchScfgExt(ndsHeader, ROMinRAM);
 
 	patchSleepMode(ndsHeader);
 

@@ -180,7 +180,6 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-				runOverlayCheck = false;
 				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
 				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
@@ -206,6 +205,9 @@ int hookNdsRetailArm9(
 				}
 
 			}
+		}
+		if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+			runOverlayCheck = false;
 		}
 	  if (runOverlayCheck) {
 		extern u32 overlaysSize;

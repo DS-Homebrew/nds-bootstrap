@@ -42,6 +42,33 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 
+/*! \fn DC_FlushAll()
+	\brief flush the entire data cache to memory.
+*/
+void	DC_FlushAll();
+
+
+/*! \fn DC_FlushRange(const void *base, u32 size)
+	\brief flush the data cache for a range of addresses to memory.
+	\param base base address of the region to flush.
+	\param size size of the region to flush.
+*/
+void	DC_FlushRange(const void *base, u32 size);
+
+
+/*! \fn DC_InvalidateAll()
+	\brief invalidate the entire data cache.
+*/
+void	DC_InvalidateAll();
+
+
+/*! \fn DC_InvalidateRange(const void *base, u32 size)
+	\brief invalidate the data cache for a range of addresses.
+	\param base base address of the region to invalidate
+	\param size size of the region to invalidate.
+*/
+void	DC_InvalidateRange(const void *base, u32 size);
+
 //extern void user_exception(void);
 
 extern cardengineArm9* volatile ce9;
@@ -299,7 +326,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-	u32 len2 = 0;
+	u32 lenExt = 0;
 
 	//readCount++;
 
@@ -332,7 +359,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		u32 oldLen = len;
 		for (int i = 0; i < oldLen; i++) {
 			len--;
-			len2++;
+			lenExt++;
 			if (newSrc+len == romEnd1st) break;
 		}
 	}
@@ -344,15 +371,19 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		REG_SCFG_EXT += 0xC000;
 	}
 
-	tonccpy(dst, (u8*)newSrc, len);
-	if (len2 > 0) {
-		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
-		if (src > ndsHeader->arm7romOffset) {
-			newSrc -= ndsHeader->arm7binarySize;
+	if ((ndsHeader->unitCode > 0) && (ce9->valueBits & dsiMode)) {
+		DC_InvalidateRange(dst, len);
+		ndmaCopyWords(0, (u8*)newSrc, dst, len);
+	} else 
+		tonccpy(dst, (u8*)newSrc, len);
+		if (lenExt > 0) {
+			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+			newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
+			if (src > ndsHeader->arm7romOffset) {
+				newSrc -= ndsHeader->arm7binarySize;
+			}
+			tonccpy(dst+len, (u8*)newSrc, lenExt);
 		}
-		tonccpy(dst+len, (u8*)newSrc, len2);
-	}
 
 	if (ce9->valueBits & extendedMemory) {
 		// Close extra memory
