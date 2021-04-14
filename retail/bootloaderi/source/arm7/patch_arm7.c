@@ -337,7 +337,7 @@ u32 patchCardNdsArm7(
 	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
 
 	fixForDsiBios(ce7, ndsHeader, moduleParams);
-	
+
 	patchSdCardReset(ce7, ndsHeader, moduleParams);
 
 	dbg_printf("ERR_NONE\n\n");

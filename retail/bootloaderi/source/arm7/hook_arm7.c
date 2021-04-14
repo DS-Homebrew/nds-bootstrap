@@ -223,13 +223,20 @@ int hookNdsRetailArm7(
 				break;
 		}
 	}
+	/*if (!hookLocation && ndsHeader->unitCode == 3) {
+		switch (*(u32*)0x02FFE1DC) {
+			case 0x7250C:
+				hookLocation = (u32*)0x2EED280;
+				break;
+		}
+	}*/
 
-	*(ce7->irqTable_offset) = wordsLocation[0];
+	/* *(ce7->irqTable_offset) = wordsLocation[0];
 	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
 		*(ce7->irqTable_offset + 1) = wordsLocation[1];
 	} else {
 		*(ce7->irqTable_offset + 1) = wordsLocation[3];
-	}
+	} */
 
    	dbg_printf("hookLocation arm7: ");
 	dbg_hexa((u32)hookLocation);

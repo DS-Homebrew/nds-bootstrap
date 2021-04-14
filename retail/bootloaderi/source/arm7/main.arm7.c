@@ -1109,10 +1109,10 @@ int arm7_main(void) {
 		}*/
 		loadIBinary_ARM7(&dsiHeaderTemp);
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			tonccpy((char*)0x02F00000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
+			tonccpy((char*)0x02E00000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
 			toncset((char*)0x02700000, 0, 0x80000);
-			romFile->fatTableCache = (u32)romFile->fatTableCache+0x800000;
-			savFile->fatTableCache = (u32)savFile->fatTableCache+0x800000;
+			romFile->fatTableCache = (u32)romFile->fatTableCache+0x700000;
+			savFile->fatTableCache = (u32)savFile->fatTableCache+0x700000;
 		}
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
@@ -1428,7 +1428,7 @@ int arm7_main(void) {
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
 	if ((!ROMsupportsDsiMode(ndsHeader) && !dsiModeConfirmed)
-	|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)) {
+	/*|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
