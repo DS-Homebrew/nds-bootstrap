@@ -945,6 +945,7 @@ u32 myIrqEnable(u32 irq) {
 
 	initialize();
 
+	REG_AUXIE &= ~(1UL << 8);
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
 		driveInitialize();
 	}
