@@ -599,9 +599,12 @@ static inline void sdmmcHandler(void) {
 			//#ifdef DEBUG		
 			//dbg_printf("my_sdmmc_sdcard_readsector\n");
 			//#endif
+			bool ROMsupportsDSiMode = ((ndsHeader->unitCode > 0) && (valueBits & dsiMode));
 			bool isDma = sharedAddr[4]==0x53444D31;
 			cardReadLED(true, isDma);
+			if (ROMsupportsDSiMode) REG_SCFG_EXT |= (1UL << 18);
 			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
+			if (ROMsupportsDSiMode) REG_SCFG_EXT &= ~(1UL << 18);
 			cardReadLED(false, isDma);
 		}	break;
 		case 0x53445244:
@@ -609,9 +612,12 @@ static inline void sdmmcHandler(void) {
 			//#ifdef DEBUG		
 			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
 			//#endif
+			bool ROMsupportsDSiMode = ((ndsHeader->unitCode > 0) && (valueBits & dsiMode));
 			bool isDma = sharedAddr[4]==0x53444D41;
 			cardReadLED(true, isDma);
+			if (ROMsupportsDSiMode) REG_SCFG_EXT |= (1UL << 18);
 			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			if (ROMsupportsDSiMode) REG_SCFG_EXT &= ~(1UL << 18);
 			cardReadLED(false, isDma);
 		}	break;
 		/*case 0x53444348:
@@ -946,7 +952,12 @@ u32 myIrqEnable(u32 irq) {
 	initialize();
 
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
+		//REG_SCFG_EXT |= (1UL << 18);
 		driveInitialize();
+		if ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)) {
+			REG_AUXIE &= ~(1UL << 8);
+			REG_SCFG_EXT &= ~(1UL << 18);
+		}
 	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
@@ -1004,7 +1015,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)))) {
 		return false;
 	}
 
@@ -1034,7 +1045,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)))) {
 		return false;
 	}
 
@@ -1065,7 +1076,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)))) {
 		return false;
 	}
 
@@ -1107,7 +1118,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)))) {
 		return false;
 	}
 

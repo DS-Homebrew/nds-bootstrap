@@ -86,9 +86,9 @@ static void patchScfgExt(const tNDSHeader* ndsHeader, u32 ROMinRAM) {
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
-		*(u32*)0x2EFFFFC = 0x93FFFB06;
+		*(u32*)0x2EFFFFC = 0x93FBFB06;
 		*scfgExtOffset = 0x2EFFFFC;
-		*(u16*)0x2EFFFF0 = (ndsHeader->unitCode == 3 || gameOnFlashcard || ROMinRAM) ? 0x0101 : 0x0100;
+		*(u16*)0x2EFFFF0 = 0x0101;
 		*(scfgExtOffset + 5) = 0x2EFFFF0;
 		*(scfgExtOffset + 6) = 0x2EFFFF1;
 	}
