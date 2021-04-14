@@ -78,6 +78,9 @@ static const u32 irqEnableStartSignature4[4]     = {0xE92D4010, 0xE1A04000, 0xEB
 static const u32 irqEnableStartSignature4Alt1[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
 static const u32 irqEnableStartSignature4Alt2[4] = {0xE92D4010, 0xE1A04000, 0xEB00122B, 0xE59F2030}; // SDK 5
 
+static const u32 sdCardResetSignatureType1[4] = {0xEBFFFE4E, 0xEBFFFF89, 0xEB000024, 0xE1A05000}; // SDK 5
+static const u32 sdCardResetSignatureType2[4] = {0xEBFFFE48, 0xEBFFFF82, 0xEB000025, 0xE1A05000}; // SDK 5
+
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
 	extern u32 relocDestAtSharedMem;
@@ -876,4 +879,32 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 
 	dbg_printf("\n");
 	return cardIrqEnableOffset;
+}
+
+u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findSdCardResetOffset:\n");
+
+	u32* sdCardResetOffset = findOffset(
+		(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+		sdCardResetSignatureType1, 4
+	);
+	if (sdCardResetOffset) {
+		dbg_printf("Card check pull out found: ");
+	} else {
+		sdCardResetOffset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+			sdCardResetSignatureType2, 4
+		);
+		if (!sdCardResetOffset) {
+			dbg_printf("Card check pull out not found\n");
+		}
+	}
+
+	if (sdCardResetOffset) {
+		dbg_hexa((u32)sdCardResetOffset);
+		dbg_printf("\n");
+	}
+
+	dbg_printf("\n");
+	return sdCardResetOffset;
 }

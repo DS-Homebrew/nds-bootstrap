@@ -214,6 +214,22 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+static void patchSdCardReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	// DSi SD Card reset
+	u32* sdCardResetOffset = 0; //patchOffsetCache.cardCheckPullOutOffset;
+	//u32* cardCheckPullOutOffset = patchOffsetCache.cardCheckPullOutOffset;
+	//if (!patchOffsetCache.cardCheckPullOutChecked) {
+		sdCardResetOffset = findSdCardResetOffset(ndsHeader, moduleParams);
+		if (sdCardResetOffset) {
+		//	patchOffsetCache.cardCheckPullOutOffset = cardCheckPullOutOffset;
+		}
+	//	patchOffsetCache.cardCheckPullOutChecked = true;
+	//}
+	if (sdCardResetOffset) {
+		*(sdCardResetOffset+2) = 0;
+	}
+}
+
 extern void rsetA7Cache(void);
 
 u32 patchCardNdsArm7(
@@ -321,6 +337,8 @@ u32 patchCardNdsArm7(
 	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
 
 	fixForDsiBios(ce7, ndsHeader, moduleParams);
+	
+	patchSdCardReset(ce7, ndsHeader, moduleParams);
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
