@@ -223,6 +223,11 @@ void __attribute__((target("arm"))) debug8mbMpuFix(){
 	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
+//Used for unlocking memory region 0x0C000000-0x0E000000
+void __attribute__((target("arm"))) mpuFix(){
+	asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C3,0");
+}
+
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -304,6 +309,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+			mpuFix();
 		} else {
 			debug8mbMpuFix();
 		}
@@ -371,19 +377,15 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		REG_SCFG_EXT += 0xC000;
 	}
 
-	if ((ndsHeader->unitCode > 0) && (ce9->valueBits & dsiMode)) {
-		DC_InvalidateRange(dst, len);
-		ndmaCopyWords(0, (u8*)newSrc, dst, len);
-	} else 
-		tonccpy(dst, (u8*)newSrc, len);
-		if (lenExt > 0) {
-			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-			newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
-			if (src > ndsHeader->arm7romOffset) {
-				newSrc -= ndsHeader->arm7binarySize;
-			}
-			tonccpy(dst+len, (u8*)newSrc, lenExt);
+	tonccpy(dst, (u8*)newSrc, len);
+	if (lenExt > 0) {
+		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
+		if (src > ndsHeader->arm7romOffset) {
+			newSrc -= ndsHeader->arm7binarySize;
 		}
+		tonccpy(dst+len, (u8*)newSrc, lenExt);
+	}
 
 	if (ce9->valueBits & extendedMemory) {
 		// Close extra memory

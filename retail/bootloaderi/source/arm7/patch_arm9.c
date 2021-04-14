@@ -657,7 +657,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
 				break;
 			case 3:
-				mpuInitRegionNewData = PAGE_8M | 0x03000000 | 1;
+				mpuInitRegionNewData = PAGE_32M | 0x08000000 | 1;
 				mpuNewInstrAccess    = 0x5111111;
 				mpuAccessOffset      = 5;
 				break;

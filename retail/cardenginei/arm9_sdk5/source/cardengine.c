@@ -713,6 +713,11 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
+//Used for unlocking memory region 0x0C000000-0x0E000000
+void __attribute__((target("arm"))) mpuFix(){
+	asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C3,0");
+}
+
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -761,6 +766,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		mpuFix();
 		//setExceptionHandler2();
 		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {

@@ -937,7 +937,7 @@ void i2cIRQHandler(void) {
 }
 
 u32 myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();	
+	int oldIME = enterCriticalSection();
 
 	#ifdef DEBUG		
 	nocashMessage("myIrqEnable\n");
@@ -1004,11 +1004,11 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
 		return false;
 	}
 
-  	if (tryLockMutex(&saveMutex)) {
+	if (tryLockMutex(&saveMutex)) {
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
@@ -1034,11 +1034,11 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
 		return false;
 	}
 
-  	if (tryLockMutex(&saveMutex)) {
+	if (tryLockMutex(&saveMutex)) {
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
@@ -1065,7 +1065,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
 		return false;
 	}
 
@@ -1107,7 +1107,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
+	if (!(valueBits & saveOnFlashcard) && (isSdEjected() || (ndsHeader->unitCode > 0) && (valueBits & dsiMode))) {
 		return false;
 	}
 
@@ -1210,6 +1210,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (valueBits & ROMinRAM) {
 		tonccpy(dst, romLocation + src, len);
 	} else {
+		if ((ndsHeader->unitCode > 0) && (valueBits & dsiMode)) return false;
 		//while (readOngoing) {}
 		driveInitialize();
 		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
