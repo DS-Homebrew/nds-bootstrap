@@ -5,9 +5,8 @@
 -->
 
 **Your console:** <!-- What console are you using? -->
-**Launch Method:** <!-- What CFW are you using? How are you launching nds-bootstrap? Please be specific and include firmwares and versions-->
+**Launch Method:** <!-- Is it launched via the SD card or a flashcart? Is SCFG locked or Unlocked? Please be specific and include firmwares and versions-->
 **Version used:** <!-- Specify whether you used release or Nightly. If you use Nightly, please include the hash. Simply saying "latest" isn't helpful -->
-**Flashcart used:** <!-- Delete this line if you don't use B4DS/aren't loading games from your Slot-1 SD card. For those who are, specify said flashcart -->
 **Game tested/used/applicable:** <!-- Include MD5 hashes, Title IDs and anything that could be used to identify it. If it's homebrew, please link said homebrew here -->
 
 **Expected Behavior:** <!--What should have happened-->
