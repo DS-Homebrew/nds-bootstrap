@@ -221,6 +221,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
     dbg_printf("cardRead location : ");
     dbg_hexa(cardReadStartOffset);
+    dbg_hexa((u32)ce9);
     dbg_printf("\n\n");
 
 	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
@@ -625,8 +626,10 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 static bool mpuInitCachePatched = false;
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (patchMpuRegion == 2
-	|| (ndsHeader->unitCode > 0 && dsiModeConfirmed)) return;
+	if (patchMpuRegion == 2) return;
+	if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+		patchMpuRegion = 2;
+	}
 
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
@@ -645,6 +648,9 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	if (!patchOffsetCache.mpuDataOffset) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
 	}
+	dbg_printf("patchMpuSize: ");
+	dbg_hexa(patchMpuSize);
+	dbg_printf("\n\n");
 	if (mpuDataOffset) {
 		// Change the region 1 configuration
 
@@ -661,6 +667,14 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				mpuNewInstrAccess    = 0x5111111;
 				mpuAccessOffset      = 5;
 				break;
+		}
+
+		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
+		if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+				mpuNewInstrAccess    = 0x15111111;
+				mpuNewDataAccess     = 0x15111111;
+				mpuInitRegionNewData = PAGE_1M | 0x02F00000 | 1;
+				mpuAccessOffset      = 3;
 		}
 
 		*mpuDataOffset = mpuInitRegionNewData;

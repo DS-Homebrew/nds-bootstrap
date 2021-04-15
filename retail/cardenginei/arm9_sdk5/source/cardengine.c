@@ -715,7 +715,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 //Used for unlocking memory region 0x0C000000-0x0E000000
 void __attribute__((target("arm"))) mpuFix(){
-	asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C3,0");
+	//asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C7,0");
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -818,6 +818,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	int ret = cardReadNormal(dst, src, len);
 
     isDma=false;
+    cacheFlush();
 
 	return ret; 
 }
