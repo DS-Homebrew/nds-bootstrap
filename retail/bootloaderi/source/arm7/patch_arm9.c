@@ -626,10 +626,8 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 static bool mpuInitCachePatched = false;
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (patchMpuRegion == 2) return;
-	if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
-		patchMpuRegion = 2;
-	}
+	if (patchMpuRegion == 2
+	|| (ndsHeader->unitCode > 0 && dsiModeConfirmed)) return;
 
 	if (patchOffsetCache.patchMpuRegion != patchMpuRegion) {
 		patchOffsetCache.patchMpuRegion = 0;
@@ -667,14 +665,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				mpuNewInstrAccess    = 0x5111111;
 				mpuAccessOffset      = 5;
 				break;
-		}
-
-		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
-		if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
-				mpuNewInstrAccess    = 0x15111111;
-				mpuNewDataAccess     = 0x15111111;
-				mpuInitRegionNewData = PAGE_1M | 0x02F00000 | 1;
-				mpuAccessOffset      = 3;
 		}
 
 		*mpuDataOffset = mpuInitRegionNewData;
@@ -748,7 +738,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+	if (moduleParams->sdk_version < 0x2008000 || (moduleParams->sdk_version > 0x5000000 && ndsHeader->unitCode == 0)) {
 		return;
 	}
 
@@ -762,7 +752,29 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
 	}
 	if (mpuDataOffset) {
-		// Change the region 2 configuration (Makes loading slow, so new code is used)
+		// Change the region 2 configuration
+
+		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
+		if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+			u32 mpuNewDataAccess     = 0x15111111;
+			u32 mpuNewInstrAccess    = 0x5111111;
+			u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
+			int mpuAccessOffset      = 3;
+
+			*mpuDataOffset = mpuInitRegionNewData;
+
+		//if (mpuAccessOffset) {
+			//if (mpuNewInstrAccess) {
+				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			//}
+			//if (mpuNewDataAccess) {
+				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+			//}
+		//}
+		} else {
+			//Original code made loading slow, so new code is used
+			*mpuDataOffset = 0x27FF017; // SDK 5 value
+		}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
 		u32 mpuNewDataAccess = 0x15111111;
@@ -777,7 +789,6 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		if (mpuNewDataAccess) {
 			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 		}*/
-		*mpuDataOffset = 0x27FF017; // SDK 5 value
 	}
 
 	// Find the mpu cache init

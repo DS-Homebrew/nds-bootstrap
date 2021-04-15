@@ -42,33 +42,6 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 
-/*! \fn DC_FlushAll()
-	\brief flush the entire data cache to memory.
-*/
-void	DC_FlushAll();
-
-
-/*! \fn DC_FlushRange(const void *base, u32 size)
-	\brief flush the data cache for a range of addresses to memory.
-	\param base base address of the region to flush.
-	\param size size of the region to flush.
-*/
-void	DC_FlushRange(const void *base, u32 size);
-
-
-/*! \fn DC_InvalidateAll()
-	\brief invalidate the entire data cache.
-*/
-void	DC_InvalidateAll();
-
-
-/*! \fn DC_InvalidateRange(const void *base, u32 size)
-	\brief invalidate the data cache for a range of addresses.
-	\param base base address of the region to invalidate
-	\param size size of the region to invalidate.
-*/
-void	DC_InvalidateRange(const void *base, u32 size);
-
 //extern void user_exception(void);
 
 extern cardengineArm9* volatile ce9;
@@ -160,6 +133,11 @@ static void clearIcache (void) {
       leaveCriticalSection(oldIME);*/
 }
 
+//Currently used for NSMBDS romhacks
+void __attribute__((target("arm"))) debug8mbMpuFix(){
+	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+}
+
 static u32 dmaParams[8] = {0};
 
 void endCardReadDma() {
@@ -216,16 +194,6 @@ void cardSetDma(u32 * params) {
 			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
 		}
 	}
-}
-
-//Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}
-
-//Used for unlocking memory region 0x0C000000-0x0E000000
-void __attribute__((target("arm"))) mpuFix(){
-	asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C3,0");
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -309,7 +277,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-			mpuFix();
 		} else {
 			debug8mbMpuFix();
 		}
