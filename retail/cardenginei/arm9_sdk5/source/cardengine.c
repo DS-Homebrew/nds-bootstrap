@@ -594,10 +594,10 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
-	/*if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 		fileRead((char*)dst, *romFile, src, len, 0);
 		return 0;
-	}*/
+	}
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -713,11 +713,6 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
-//Used for unlocking memory region 0x0C000000-0x0E000000
-void __attribute__((target("arm"))) mpuFix(){
-	//asm("LDR R0,=#0x08000035\n\tmcr p15, 0, r0, C6,C7,0");
-}
-
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -766,7 +761,6 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		mpuFix();
 		//setExceptionHandler2();
 		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0)) {
@@ -818,7 +812,6 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	int ret = cardReadNormal(dst, src, len);
 
     isDma=false;
-    cacheFlush();
 
 	return ret; 
 }
