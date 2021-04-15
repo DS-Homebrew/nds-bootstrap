@@ -1109,16 +1109,10 @@ int arm7_main(void) {
 		}*/
 		loadIBinary_ARM7(&dsiHeaderTemp);
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			/*if (consoleModel > 0) {
-				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
-			} else {*/
-				tonccpy((char*)0x02EFC000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7FC000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7FC000;
-			//}
+			tonccpy((char*)0x02E00000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
 			toncset((char*)0x02700000, 0, 0x80000);
+			romFile->fatTableCache = (u32)romFile->fatTableCache+0x700000;
+			savFile->fatTableCache = (u32)savFile->fatTableCache+0x700000;
 		}
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;

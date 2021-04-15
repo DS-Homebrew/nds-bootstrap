@@ -951,7 +951,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (u32)(ROMsupportsDsiMode ? 0x02EE0000 : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
+	*heapPointer = (u32)(ROMsupportsDsiMode ? 0x02E00000 : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
 
     dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
