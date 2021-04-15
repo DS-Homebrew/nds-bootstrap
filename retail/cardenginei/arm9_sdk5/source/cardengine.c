@@ -494,6 +494,10 @@ void cardSetDma (u32 * params) {
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
+	#ifdef TWLSDK
+	fileRead((char*)dst, *romFile, src, len, 0);
+	endCardReadDma();
+	#else
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
@@ -578,6 +582,7 @@ void cardSetDma (u32 * params) {
 		//IPC_SendSync(0x3);
 	//}
 	#endif
+	#endif
 }
 
 //static void clearIcache (void) {
@@ -594,10 +599,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		fileRead((char*)dst, *romFile, src, len, 0);
-		return 0;
-	}
+	#ifdef TWLSDK
+	fileRead((char*)dst, *romFile, src, len, 0);
+	#else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -687,6 +691,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	//}
+	#endif
 #endif
 
 	return 0;

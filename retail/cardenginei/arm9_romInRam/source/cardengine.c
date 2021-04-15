@@ -173,7 +173,10 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	if (ce9->valueBits & extendedMemory) {
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
+		endCardReadDma();
+	} else if (ce9->valueBits & extendedMemory) {
 		int oldIME = REG_IME;
 		REG_IME = 0;
 		REG_SCFG_EXT += 0xC000;

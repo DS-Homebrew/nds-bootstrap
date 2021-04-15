@@ -593,7 +593,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((dsiModeConfirmed && (!gameOnFlashcard || !ROMsupportsDsiMode(ndsHeader)) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+		res = ((dsiModeConfirmed && !ROMsupportsDsiMode(ndsHeader) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
