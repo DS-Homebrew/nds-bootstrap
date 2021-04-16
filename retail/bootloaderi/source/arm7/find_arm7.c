@@ -73,14 +73,16 @@ static const u32 cardCheckPullOutSignature2[4] = {0xE92D4018, 0xE24DD004, 0xE59F
 static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F002C, 0xE1D000B0}; // SDK 3
 
 // irq enable
-static const u32 irqEnableStartSignature1[4]     = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
-static const u32 irqEnableStartSignature4[4]     = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
-static const u32 irqEnableStartSignature4Alt1[4] = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
-static const u32 irqEnableStartSignature4Alt2[4] = {0xE92D4010, 0xE1A04000, 0xEB00122B, 0xE59F2030}; // SDK 5
+static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
+static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
+static const u32 irqEnableStartSignature4Alt1[4]  = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u32 irqEnableStartSignature4Alt2[4]  = {0xE92D4010, 0xE1A04000, 0xEB00122B, 0xE59F2030}; // SDK 5
+static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
-static const u32 sdCardResetSignatureType1[4] = {0xEBFFFE3D, 0xEBFFFF7E, 0xEB000028, 0xE1A05000}; // SDK 5
-static const u32 sdCardResetSignatureType2[4] = {0xEBFFFE4E, 0xEBFFFF89, 0xEB000024, 0xE1A05000}; // SDK 5
-static const u32 sdCardResetSignatureType3[4] = {0xEBFFFE48, 0xEBFFFF82, 0xEB000025, 0xE1A05000}; // SDK 5
+static const u32 sdCardResetSignatureType1[4]      = {0xEBFFFE3D, 0xEBFFFF7E, 0xEB000028, 0xE1A05000}; // SDK 5
+static const u32 sdCardResetSignatureType2[4]      = {0xEBFFFE4E, 0xEBFFFF89, 0xEB000024, 0xE1A05000}; // SDK 5
+static const u32 sdCardResetSignatureType3[4]      = {0xEBFFFE48, 0xEBFFFF82, 0xEB000025, 0xE1A05000}; // SDK 5
+static const u16 sdCardResetSignatureThumbType1[7] = {0xF7FF, 0xFDBC, 0xF7FF, 0xFF58, 0xF000, 0xF84A, 0x1C05}; // SDK 5
 
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
@@ -842,7 +844,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		irqEnableStartSignature, 4
 	);
 	if (cardIrqEnableOffset) {
-		dbg_printf("irq enable found: ");
+		dbg_printf("irq enable found\n");
 	} else {
 		dbg_printf("irq enable not found\n");
 	}
@@ -854,7 +856,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
             irqEnableStartSignature4Alt1, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable alt 1 found: ");
+			dbg_printf("irq enable alt 1 found\n");
 		} else {
 			dbg_printf("irq enable alt 1 not found\n");
 		}
@@ -867,15 +869,23 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
             irqEnableStartSignature4Alt2, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable alt 2 found: ");
+			dbg_printf("irq enable alt 2 found\n");
 		} else {
 			dbg_printf("irq enable alt 2 not found\n");
 		}
 	}
 
-	if (cardIrqEnableOffset) {
-		dbg_hexa((u32)cardIrqEnableOffset);
-		dbg_printf("\n");
+	if (!cardIrqEnableOffset && isSdk5(moduleParams)) {
+		// SDK 5
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+            irqEnableStartSignatureThumb5, 5
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb found\n");
+		} else {
+			dbg_printf("irq enable thumb not found\n");
+		}
 	}
 
 	dbg_printf("\n");
@@ -904,10 +914,15 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 		);
 	}
 
+	if (!sdCardResetOffset) {
+		sdCardResetOffset = (u32*)findOffsetThumb(
+			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+			sdCardResetSignatureThumbType1, 7
+		);
+	}
+
 	if (sdCardResetOffset) {
-		dbg_printf("SD Card reset found: ");
-		dbg_hexa((u32)sdCardResetOffset);
-		dbg_printf("\n");
+		dbg_printf("SD Card reset found\n");
 	} else {
 		dbg_printf("SD Card reset not found\n");
 	}

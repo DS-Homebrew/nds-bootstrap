@@ -193,8 +193,18 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
-	u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510);
+	if (usesThumb) {
+		u16* cardIrqEnablePatch = ce7->patches->thumb_card_irq_enable_arm7;
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
+	} else {
+		u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	}
+
+    dbg_printf("cardIrqEnable location : ");
+    dbg_hexa((u32)cardIrqEnableOffset);
+    dbg_printf("\n\n");
 	return true;
 }
 
@@ -228,6 +238,10 @@ static void patchSdCardReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, c
 	}
 	if (sdCardResetOffset) {
 		*(sdCardResetOffset+2) = 0;
+
+		dbg_printf("sdCardReset location : ");
+		dbg_hexa((u32)sdCardResetOffset);
+		dbg_printf("\n\n");
 	}
 }
 

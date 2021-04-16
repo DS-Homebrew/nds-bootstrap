@@ -41,6 +41,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
 typedef struct cardengineArm7Patches {
     u32* card_pull_out_arm9;
     u32* card_irq_enable_arm7;
+    u32* thumb_card_irq_enable_arm7;
     u32* j_irqHandler;
     u32 vblankHandler;
     u32 fifoHandler;
