@@ -128,6 +128,7 @@ bool sdRead = true;
 static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
 u32 overlaysSize = 0;
+u32 ioverlaysSize = 0;
 
 static u32 softResetParams = 0;
 
@@ -468,6 +469,10 @@ static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }
 
+static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
+	return (u32)dsiHeader->arm9iromOffset - dsiHeader->ndshdr.arm7romOffset - dsiHeader->ndshdr.arm7binarySize + overlaysSize;
+}
+
 // SDK 5
 static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
@@ -574,7 +579,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
 	/*dbg_printf("Console model: ");
 	dbg_hexa(consoleModel);
 	dbg_printf("\nromTid: ");
@@ -593,7 +598,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((dsiModeConfirmed && !ROMsupportsDsiMode(ndsHeader) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
+		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader) : getRomSizeNoArmBins(ndsHeader)) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
@@ -730,6 +735,13 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 			}
 		}
 	}
+}
+
+static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
+	// Load overlays into RAM
+	if (ioverlaysSize>0x700000) return;
+
+	fileRead((char*)ROM_SDK5_LOCATION+getIRomSizeNoArmBins(dsiHeader), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, 0);
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
@@ -1156,6 +1168,12 @@ int arm7_main(void) {
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
+	if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
+		// Calculate i-overlay pack size
+		for (u32 i = (u32)dsiHeaderTemp.arm9iromOffset+dsiHeaderTemp.arm9ibinarySize; i < (u32)dsiHeaderTemp.arm7iromOffset; i++) {
+			ioverlaysSize++;
+		}
+	}
     /*dbg_printf("overlaysSize: ");
     dbg_hexa(overlaysSize);
     dbg_printf("\n");*/
@@ -1222,7 +1240,7 @@ int arm7_main(void) {
 		}
 
 		// If possible, set to load ROM into RAM
-		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp.ndshdr, romTid, moduleParams);
+		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams);
 
 		nocashMessage("Trying to patch the card...\n");
 
@@ -1404,6 +1422,9 @@ int arm7_main(void) {
 				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 			}
 			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile);
+			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
+			}
 		} else if (!gameOnFlashcard && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);

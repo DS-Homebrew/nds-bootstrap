@@ -318,8 +318,6 @@ nand_read_arm9:
     
 
 	ldmfd   sp!, {r3-r9,pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_nand_read:
 	bx	r6	
 .pool
@@ -342,8 +340,6 @@ nand_write_arm9:
     
 
 	ldmfd   sp!, {r3-r9,pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_nand_write:
 	bx	r6	
 .pool
@@ -367,8 +363,6 @@ thumb_nand_read_arm9:
     
 
 	pop	{r1-r7, pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_thumb_nand_read:
 	bx	r6	
 .pool
@@ -392,8 +386,6 @@ thumb_nand_write_arm9:
     
 
 	pop	{r1-r7, pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_thumb_nand_write:
 	bx	r6	
 .pool
@@ -572,8 +564,6 @@ reset_arm9:
     
 
 	ldmfd   sp!, {r1-r11,pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_reset:
 	bx	r6	
 .pool

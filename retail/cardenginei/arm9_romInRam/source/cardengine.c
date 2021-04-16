@@ -172,6 +172,9 @@ void cardSetDma(u32 * params) {
 	if (src > ndsHeader->arm7romOffset) {
 		newSrc -= ndsHeader->arm7binarySize;
 	}
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
+		newSrc -= *(u32*)0x02FFE1CC;
+	}
 
 	// Copy via dma
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
@@ -327,6 +330,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
 	if (src > ndsHeader->arm7romOffset) {
 		newSrc -= ndsHeader->arm7binarySize;
+	}
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
+		newSrc -= *(u32*)0x02FFE1CC;
 	}
 	if (newSrc >= romEnd1st) {
 		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);

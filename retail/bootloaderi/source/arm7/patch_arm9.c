@@ -1239,11 +1239,15 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
+    ce9->patches->slot2_exists_fix = (u32*)((u32)ce9->patches->slot2_exists_fix - default_location + current_location);
+    ce9->patches->slot2_read = (u32*)((u32)ce9->patches->slot2_read - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
     ce9->patches->sleepRef = (u32*)((u32)ce9->patches->sleepRef - default_location + current_location);
-    ce9->patches->pdash_read = (u32*)((u32)ce9->patches->pdash_read - default_location + current_location);
-    ce9->patches->ipcSyncHandlerRef = (u32*)((u32)ce9->patches->ipcSyncHandlerRef - default_location + current_location);
+    ce9->patches->swi02 = (u32*)((u32)ce9->patches->swi02 - default_location + current_location);
     ce9->patches->reset_arm9 = (u32*)((u32)ce9->patches->reset_arm9 - default_location + current_location);
+    ce9->patches->pdash_read = (u32*)((u32)ce9->patches->pdash_read - default_location + current_location);
+    ce9->patches->vblankHandlerRef = (u32*)((u32)ce9->patches->vblankHandlerRef - default_location + current_location);
+    ce9->patches->ipcSyncHandlerRef = (u32*)((u32)ce9->patches->ipcSyncHandlerRef - default_location + current_location);
     ce9->thumbPatches->card_read_arm9 = (u32*)((u32)ce9->thumbPatches->card_read_arm9 - default_location + current_location);
     ce9->thumbPatches->card_irq_enable = (u32*)((u32)ce9->thumbPatches->card_irq_enable - default_location + current_location);
     ce9->thumbPatches->card_pull_out_arm9 = (u32*)((u32)ce9->thumbPatches->card_pull_out_arm9 - default_location + current_location);
@@ -1254,6 +1258,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->nand_write_arm9 = (u32*)((u32)ce9->thumbPatches->nand_write_arm9 - default_location + current_location);
     ce9->thumbPatches->cardStructArm9 = (u32*)((u32)ce9->thumbPatches->cardStructArm9 - default_location + current_location);
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
+    ce9->thumbPatches->slot2_read = (u32*)((u32)ce9->patches->slot2_read - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
     ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
 }
