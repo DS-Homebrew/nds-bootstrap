@@ -328,6 +328,7 @@ void getAsyncSector() {
 }
 #endif
 
+#ifndef TWLSDK
 static int currentLen=0;
 //static bool dmaReadOnArm7 = false;
 //static bool dmaReadOnArm9 = false;
@@ -478,6 +479,7 @@ void continueCardReadDmaArm9() {
     }
 }*/
 #endif
+#endif
 
 void cardSetDma (u32 * params) {
 	isDma = true;
@@ -559,13 +561,6 @@ void cardSetDma (u32 * params) {
 			len2 = sector - src + ce9->cacheBlockSize;
 		}
 
-		if (len2 > 512) {
-			len2 -= src % 4;
-			len2 -= len2 % 32;
-		}
-
-		currentLen = len2;
-
 		// Copy via dma
 		//dmaReadOnArm9 = true;
 
@@ -573,6 +568,13 @@ void cardSetDma (u32 * params) {
 		ndmaCopyWords(0, (u8*)buffer+(src-sector), dst, len2);
 		endCardReadDma();
 	#else
+		if (len2 > 512) {
+			len2 -= src % 4;
+			len2 -= len2 % 32;
+		}
+
+		currentLen = len2;
+
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len2;
@@ -840,12 +842,14 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 #ifndef DLDI
+#ifndef TWLSDK
 	if (IPC_GetSync() == 0x3) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			//continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
 	}
+#endif
 #endif
 
 	if (IPC_GetSync() == 0x7){
