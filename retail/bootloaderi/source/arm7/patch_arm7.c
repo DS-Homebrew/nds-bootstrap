@@ -215,16 +215,17 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 }
 
 static void patchSdCardReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) return;
+
 	// DSi SD Card reset
-	u32* sdCardResetOffset = 0; //patchOffsetCache.cardCheckPullOutOffset;
-	//u32* cardCheckPullOutOffset = patchOffsetCache.cardCheckPullOutOffset;
-	//if (!patchOffsetCache.cardCheckPullOutChecked) {
+	u32* sdCardResetOffset = patchOffsetCache.sdCardResetOffset;
+	if (!patchOffsetCache.sdCardResetOffset) {
 		sdCardResetOffset = findSdCardResetOffset(ndsHeader, moduleParams);
 		if (sdCardResetOffset) {
-		//	patchOffsetCache.cardCheckPullOutOffset = cardCheckPullOutOffset;
+			patchOffsetCache.sdCardResetOffset = sdCardResetOffset;
+			patchOffsetCacheChanged = true;
 		}
-	//	patchOffsetCache.cardCheckPullOutChecked = true;
-	//}
+	}
 	if (sdCardResetOffset) {
 		*(sdCardResetOffset+2) = 0;
 	}

@@ -57,6 +57,8 @@ static const u32 handlerEndSig[1] = {
 	0xe12fff10		// bx   r0
 };
 
+static const u32 irqListEndTwlSig[1] = {0x12345678};
+
 static u32* findIrqHandlerOffset(const u32* start, size_t size) {
 	// Find the start of the handler
 	u32* addr = findOffset(
@@ -81,6 +83,25 @@ static u32* findIrqHandlerWordsOffset(u32* handlerOffset, const u32* start, size
 	}
 
 	return addr+1;
+}
+
+static u32* findIrqListOffset(const u32* start, size_t size) {
+	// Find the start of the handler
+	u32* addr = findOffset(
+		start, size,
+		irqListEndTwlSig, 1
+	);
+	if (!addr) {
+		return NULL;
+	}
+
+	addr -= 1;
+	while (*addr == 0 || *addr == 0xFFFFFFFF) {
+		addr -= 1;
+	}
+	addr -= 0x7C/sizeof(u32);
+
+	return addr;
 }
 
 int hookNdsRetailArm7(
@@ -146,90 +167,95 @@ int hookNdsRetailArm7(
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	if (!hookLocation) {
 		// Now find the IRQ vector table
-		if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
+		if (ndsHeader->unitCode > 0) {
+			hookLocation = findIrqListOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
+			if (!hookLocation) {
+				switch (newArm7binarySize) {	// SDK 5
+					case 0x0001D5A8:
+						hookLocation = (u32*)0x239D280;		// DS WiFi Settings
+						break;
+
+					case 0x00022B40:
+						hookLocation = (u32*)0x238DED8;
+						break;
+
+					case 0x00022BCC:
+						hookLocation = (u32*)0x238DF60;
+						break;
+
+					case 0x00025664:
+						hookLocation = (u32*)0x23A5330;		// DSi-Exclusive cart games
+						break;
+
+					case 0x000257DC:
+						hookLocation = (u32*)0x23A54B8;		// DSi-Exclusive cart games
+						break;
+
+					case 0x00025860:
+						hookLocation = (u32*)0x23A5538;		// DSi-Exclusive cart games
+						break;
+
+					case 0x00026DF4:
+						hookLocation = (u32*)0x23A6AD4;		// DSi-Exclusive cart games
+						break;
+
+					case 0x00028F84:
+						hookLocation = (u32*)0x2391918;
+						break;
+
+					case 0x0002909C:
+						hookLocation = (u32*)0x2391A30;
+						break;
+
+					case 0x0002914C:
+					case 0x00029164:
+						hookLocation = (u32*)0x2391ADC;
+						break;
+
+					case 0x00029EE8:
+						hookLocation = (u32*)0x2391F70;
+						break;
+
+					case 0x0002A2EC:
+						hookLocation = (u32*)0x23921BC;
+						break;
+
+					case 0x0002A318:
+						hookLocation = (u32*)0x23921D8;
+						break;
+
+					case 0x0002AF18:
+						hookLocation = (u32*)0x239227C;
+						break;
+
+					case 0x0002B184:
+						hookLocation = (u32*)0x23924CC;
+						break;
+
+					case 0x0002B24C:
+						hookLocation = (u32*)0x2392578;
+						break;
+
+					case 0x0002C5B4:
+						hookLocation = (u32*)0x2392E74;
+						break;
+				}
+			}
+			/*if (!hookLocation && ndsHeader->unitCode == 3) {
+				switch (*(u32*)0x02FFE1DC) {
+					case 0x7250C:
+						hookLocation = (u32*)0x2EED280;
+						break;
+				}
+			}*/
+		} else if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
 			// Use relative and absolute addresses to find the location of the table in RAM
 			u32 tableAddr = wordsLocation[0];
 			u32 returnAddr = wordsLocation[1];
 			u32* actualReturnAddr = wordsLocation + 2;
 			hookLocation = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
-		} else switch (newArm7binarySize) {	// SDK 5
-			case 0x0001D5A8:
-				hookLocation = (u32*)0x239D280;		// DS WiFi Settings
-				break;
-
-			case 0x00022B40:
-				hookLocation = (u32*)0x238DED8;
-				break;
-
-			case 0x00022BCC:
-				hookLocation = (u32*)0x238DF60;
-				break;
-
-			case 0x00025664:
-				hookLocation = (u32*)0x23A5330;		// DSi-Exclusive cart games
-				break;
-
-			case 0x000257DC:
-				hookLocation = (u32*)0x23A54B8;		// DSi-Exclusive cart games
-				break;
-
-			case 0x00025860:
-				hookLocation = (u32*)0x23A5538;		// DSi-Exclusive cart games
-				break;
-
-			case 0x00026DF4:
-				hookLocation = (u32*)0x23A6AD4;		// DSi-Exclusive cart games
-				break;
-
-			case 0x00028F84:
-				hookLocation = (u32*)0x2391918;
-				break;
-
-			case 0x0002909C:
-				hookLocation = (u32*)0x2391A30;
-				break;
-
-			case 0x0002914C:
-			case 0x00029164:
-				hookLocation = (u32*)0x2391ADC;
-				break;
-
-			case 0x00029EE8:
-				hookLocation = (u32*)0x2391F70;
-				break;
-
-			case 0x0002A2EC:
-				hookLocation = (u32*)0x23921BC;
-				break;
-
-			case 0x0002A318:
-				hookLocation = (u32*)0x23921D8;
-				break;
-
-			case 0x0002AF18:
-				hookLocation = (u32*)0x239227C;
-				break;
-
-			case 0x0002B184:
-				hookLocation = (u32*)0x23924CC;
-				break;
-
-			case 0x0002B24C:
-				hookLocation = (u32*)0x2392578;
-				break;
-
-			case 0x0002C5B4:
-				hookLocation = (u32*)0x2392E74;
-				break;
 		}
 	}
-	/*if (!hookLocation && ndsHeader->unitCode == 3) {
-		switch (*(u32*)0x02FFE1DC) {
-			case 0x7250C:
-				hookLocation = (u32*)0x2EED280;
-				break;
-		}
-	}*/
 
 	/* *(ce7->irqTable_offset) = wordsLocation[0];
 	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {

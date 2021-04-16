@@ -104,6 +104,7 @@ typedef struct patchOffsetCacheContents {
 	u32* a7CardIrqEnableOffset;
 	u32* cardCheckPullOutOffset;
 	u32 cardCheckPullOutChecked;
+	u32* sdCardResetOffset;
 	u32* a7IrqHandlerOffset;
 	u32* a7IrqHandlerWordsOffset;
 	u32* a7IrqHookOffset;
