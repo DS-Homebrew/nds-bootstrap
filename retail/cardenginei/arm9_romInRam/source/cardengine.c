@@ -53,6 +53,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static bool flagsSet = false;
 static bool isDma = false;
 static bool dmaLed = false;
+static u32 romWordBak = 0;
 
 s8 mainScreen = 0;
 
@@ -185,6 +186,8 @@ void cardSetDma(u32 * params) {
 		REG_IME = oldIME;
 		endCardReadDma();
 	} else {
+		romWordBak = sharedAddr[4];
+
 		u32 commandRead=0x025FFB0A;
 
 		// Write the command
@@ -448,6 +451,7 @@ void myIrqHandlerIPC(void) {
 
 	if (IPC_GetSync() == 0x3) {
 		endCardReadDma();
+		sharedAddr[4] = romWordBak;
 	}
 
 	if (IPC_GetSync() == 0x7){

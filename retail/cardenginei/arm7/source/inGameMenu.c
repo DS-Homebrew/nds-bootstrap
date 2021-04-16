@@ -19,7 +19,16 @@ extern void returnToLoader(void);
 
 volatile int timeTilBatteryLevelRefresh = 7;
 
+static u32 romWordBak[6] = {0};
+
 void inGameMenu(void) {
+	romWordBak[0] = sharedAddr[-1];
+	romWordBak[1] = sharedAddr[0];
+	romWordBak[2] = sharedAddr[1];
+	romWordBak[3] = sharedAddr[2];
+	romWordBak[4] = sharedAddr[3];
+	romWordBak[5] = sharedAddr[4];
+
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
@@ -70,5 +79,11 @@ void inGameMenu(void) {
 	timeTilBatteryLevelRefresh = 7;
 
 	leaveCriticalSection(oldIME);
+	sharedAddr[-1] = romWordBak[0];
+	sharedAddr[0] = romWordBak[1];
+	sharedAddr[1] = romWordBak[2];
+	sharedAddr[2] = romWordBak[3];
+	sharedAddr[3] = romWordBak[4];
+	sharedAddr[4] = romWordBak[5];
 	REG_MASTER_VOLUME = 127;
 }
