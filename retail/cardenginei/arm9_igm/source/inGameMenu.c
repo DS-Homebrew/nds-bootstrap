@@ -381,9 +381,13 @@ void inGameMenu(s8* mainScreen) {
 	tonccpy(&bgBak, BG_GFX_SUB, 0x2000);	// Backup the original graphics
 	tonccpy(BG_GFX_SUB, default_font_bin, 0x2000); // Load font
 
-	// Wait a frame so the key check is ready
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
+	sharedAddr[-1] = 0x59444552; // 'REDY'
+
+	// Wait some frames so the key check is ready
+	for (int i = 0; i < 25; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {

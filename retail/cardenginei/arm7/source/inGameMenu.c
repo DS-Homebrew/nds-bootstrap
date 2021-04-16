@@ -25,6 +25,18 @@ void inGameMenu(void) {
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
 
+	int timeOut = 0;
+	while (sharedAddr[-1] != 0x59444552) { // 'REDY'
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+
+		timeOut++;
+		if (timeOut == 60*2) {
+			returnToLoader();
+			timeOut = 0;
+		}
+	}
+
 	while (sharedAddr[4] == 0x554E454D) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
@@ -54,6 +66,7 @@ void inGameMenu(void) {
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT
+	sharedAddr[-1] = 0;
 	timeTilBatteryLevelRefresh = 7;
 
 	leaveCriticalSection(oldIME);
