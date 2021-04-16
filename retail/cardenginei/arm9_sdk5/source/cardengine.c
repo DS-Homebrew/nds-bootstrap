@@ -69,10 +69,13 @@ static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
 #ifdef DLDI
 bool sdRead = false;
 #else
-/*static u32 cacheDescriptor[dev_CACHE_SLOTS_32KB] = {0xFFFFFFFF};
-static u32 cacheCounter[dev_CACHE_SLOTS_32KB];*/
+#ifdef TWLSDK
+static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB] = {0};
+static u32 cacheCounter[dev_CACHE_SLOTS_16KB];
+#else
 static u32* cacheDescriptor = (u32*)0x02790000;
 static u32* cacheCounter = (u32*)0x027A0000;
+#endif
 static u32 accessCounter = 0;
 
 #if ASYNCPF
@@ -494,10 +497,6 @@ void cardSetDma (u32 * params) {
 	fileRead((char*)dst, *romFile, src, len, 0);
 	endCardReadDma();
 	#else
-	#ifdef TWLSDK
-	fileRead((char*)dst, *romFile, src, len, 0);
-	endCardReadDma();
-	#else
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
@@ -570,6 +569,10 @@ void cardSetDma (u32 * params) {
 		// Copy via dma
 		//dmaReadOnArm9 = true;
 
+	#ifdef TWLSDK
+		ndmaCopyWords(0, (u8*)buffer+(src-sector), dst, len2);
+		endCardReadDma();
+	#else
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len2;
@@ -599,9 +602,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
-	#ifdef TWLSDK
-	fileRead((char*)dst, *romFile, src, len, 0);
-	#else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -691,7 +691,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	//}
-	#endif
 #endif
 
 	return 0;
