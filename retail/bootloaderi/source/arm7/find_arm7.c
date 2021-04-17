@@ -80,9 +80,10 @@ static const u32 irqEnableStartSignature4Alt2[4]  = {0xE92D4010, 0xE1A04000, 0xE
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
 // SD card reset (SDK 5)
-static const u32 sdCardResetSignatureType1[4]      = {0xEBFFFE3D, 0xEBFFFF7E, 0xEB000028, 0xE1A05000};
-static const u32 sdCardResetSignatureType2[4]      = {0xEBFFFE4E, 0xEBFFFF89, 0xEB000024, 0xE1A05000};
-static const u32 sdCardResetSignatureType3[4]      = {0xEBFFFE48, 0xEBFFFF82, 0xEB000025, 0xE1A05000};
+static const u32 sdCardResetSignatureType1[4]      = {0xEBFFFE57, 0xEBFFFF8E, 0xEB000024, 0xE1A05000};
+static const u32 sdCardResetSignatureType2[4]      = {0xEBFFFE3D, 0xEBFFFF7E, 0xEB000028, 0xE1A05000};
+static const u32 sdCardResetSignatureType3[4]      = {0xEBFFFE4E, 0xEBFFFF89, 0xEB000024, 0xE1A05000};
+static const u32 sdCardResetSignatureType4[4]      = {0xEBFFFE48, 0xEBFFFF82, 0xEB000025, 0xE1A05000};
 static const u16 sdCardResetSignatureThumbType1[7] = {0xF7FF, 0xFDBC, 0xF7FF, 0xFF58, 0xF000, 0xF84A, 0x1C05};
 static const u16 sdCardResetSignatureThumbType2[7] = {0xF7FF, 0xFD9C, 0xF7FF, 0xFF50, 0xF000, 0xF87A, 0x1C05};
 
@@ -914,6 +915,13 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 		sdCardResetOffset = findOffset(
 			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
 			sdCardResetSignatureType3, 4
+		);
+	}
+
+	if (!sdCardResetOffset) {
+		sdCardResetOffset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+			sdCardResetSignatureType4, 4
 		);
 	}
 

@@ -20,6 +20,7 @@ static const u32 moduleParamsLtdSignature[2] = {0xDEC01463, 0x6314C0DE}; // SDK 
 static const u32 dsiModeCheckSignature[4] = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
 
 // Card hash init (SDK 5)
+static const u32 cardHashInitSignatureEarly[4]    = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
 static const u32 cardHashInitSignature[3]         = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
 static const u32 cardHashInitSignatureAlt[4]      = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
 static const u32 cardHashInitSignatureAlt2[4]     = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
@@ -46,6 +47,9 @@ static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
 static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
 static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                                                         // SDK 5
 //static const u32 cardReadHashSignature[3]           = {0xE92D4010, 0xE59F000C, 0xE1A04003};                             // SDK 5
+
+// Card init (SDK 5)
+static const u32 cardRomInitSignatureEarly[2]     = {0xE92D4078, 0xE24DD00C};
 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -332,6 +336,13 @@ u32* findCardHashInitOffset(void) {
 		offset = findOffset(
 			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureAlt2, 4
+		);
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			*(u32*)0x02FFE028, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardHashInitSignatureEarly, 4
 		);
 	}
 
@@ -740,10 +751,17 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 u32* findCardRomInitOffset(const u32* cardReadEndOffset) {
 	dbg_printf("findCardRomInitOffset\n");
 
-    u32* offset = findOffset(
+	u32* offset = findOffset(
 		cardReadEndOffset+(0x300/sizeof(u32)), 0x200,//ndsHeader->arm9binarySize,
-		cardIdStartSignatureAlt2, 1
+		cardRomInitSignatureEarly, 2
 	);
+
+	if (!offset) {
+		offset = findOffset(
+			cardReadEndOffset+(0x300/sizeof(u32)), 0x200,//ndsHeader->arm9binarySize,
+			cardIdStartSignatureAlt2, 1
+		);
+	}
 
 	if (offset) {
 		dbg_printf("Card ROM init found\n");
