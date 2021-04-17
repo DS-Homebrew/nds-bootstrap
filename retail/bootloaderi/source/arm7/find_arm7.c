@@ -135,8 +135,9 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 		if (relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000 > relocationCheck2) {
 			dbg_printf("Error in relocation checking\n");
 			dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000);
+			dbg_printf(" ");
 			dbg_hexa(relocationCheck2);
-			
+
 			vAddrOfRelocSrc =  relocationCheck + 0xC - relocationCheck2 + 0x37F8000;
 			dbg_printf("vAddrOfRelocSrc\n");
 			dbg_hexa(vAddrOfRelocSrc); 
