@@ -1688,13 +1688,11 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 	u32* initEndFunc = NULL;
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		bool dsiEnhanced = false;
-		if (ndsHeader->unitCode != 3) {
-			initEndFunc = findOffset(
-				(u32*)ndsHeader->arm9destination, iUncompressedSize,
-				initHeapEndFuncISignatureEnhanced, 2
-			);
-			if (initEndFunc) dsiEnhanced = true;
-		}
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFuncISignatureEnhanced, 2
+		);
+		if (initEndFunc) dsiEnhanced = true;
 		if (!initEndFunc) {
 			initEndFunc = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,
