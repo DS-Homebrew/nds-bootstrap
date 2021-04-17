@@ -181,12 +181,11 @@ void cardSetDma(u32 * params) {
 		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		endCardReadDma();
 	} else if (ce9->valueBits & extendedMemory) {
-		int oldIME = REG_IME;
-		REG_IME = 0;
+		int oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		REG_SCFG_EXT -= 0xC000;
-		REG_IME = oldIME;
+		leaveCriticalSection(oldIME);
 		endCardReadDma();
 	} else {
 		romWordBak = sharedAddr[4];
@@ -349,10 +348,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 	}
 
-	int oldIME = REG_IME;
+	int oldIME = 0;
 	if (ce9->valueBits & extendedMemory) {
 		// Open extra memory
-		REG_IME = 0;
+		oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 	}
 
@@ -369,7 +368,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ce9->valueBits & extendedMemory) {
 		// Close extra memory
 		REG_SCFG_EXT -= 0xC000;
-		REG_IME = oldIME;
+		leaveCriticalSection(oldIME);
 	}
 
     isDma=false;
