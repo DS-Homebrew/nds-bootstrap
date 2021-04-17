@@ -185,6 +185,7 @@ static const u32 initHeapEndFunc2SignatureThumb[2]     = {0xBD082000, 0x023E0000
 static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
+static const u32 initHeapEndFuncISignatureEnhanced[2]  = {0xE3500000, 0x13A007BE};
 static const u32 initHeapEndFuncISignature[2]          = {0xE3A007BE, 0xE8BD8008};
 static const u32 initHeapEndFuncISignatureThumb[1]     = {0x048020BE};
 
@@ -1668,10 +1669,20 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 
 	u32* initEndFunc = NULL;
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFuncISignature, 2
-		);
+		bool dsiEnhanced = false;
+		if (ndsHeader->unitCode != 3) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFuncISignatureEnhanced, 2
+			);
+			if (initEndFunc) dsiEnhanced = true;
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFuncISignature, 2
+			);
+		}
 		if (!initEndFunc) {
 			initEndFunc = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,
@@ -1679,7 +1690,7 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 			);
 		}
 		if (initEndFunc) {
-			u32* heapPointer = initEndFunc;
+			u32* heapPointer = dsiEnhanced ? initEndFunc+1 : initEndFunc;
 			
 			dbg_hexa((u32)heapPointer);
 			dbg_printf("\n");
