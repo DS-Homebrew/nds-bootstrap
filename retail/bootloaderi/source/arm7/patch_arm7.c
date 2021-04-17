@@ -237,7 +237,8 @@ static void patchSdCardReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, c
 		}
 	}
 	if (sdCardResetOffset) {
-		*(sdCardResetOffset+2) = 0;
+		*((u16*)sdCardResetOffset+4) = 0;
+		*((u16*)sdCardResetOffset+5) = 0;
 
 		dbg_printf("sdCardReset location : ");
 		dbg_hexa((u32)sdCardResetOffset);

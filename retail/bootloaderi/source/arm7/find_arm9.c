@@ -20,12 +20,13 @@ static const u32 moduleParamsLtdSignature[2] = {0xDEC01463, 0x6314C0DE}; // SDK 
 static const u32 dsiModeCheckSignature[4] = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
 
 // Card hash init (SDK 5)
-static const u32 cardHashInitSignatureEarly[4]    = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
-static const u32 cardHashInitSignature[3]         = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
-static const u32 cardHashInitSignatureAlt[4]      = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
-static const u32 cardHashInitSignatureAlt2[4]     = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
-static const u16 cardHashInitSignatureThumb[3]    = {0xB578, 0xB083, 0x2000};
-static const u16 cardHashInitSignatureThumbAlt[3] = {0xB5F0, 0xB083, 0x2000};
+static const u32 cardHashInitSignatureEarly[4]      = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
+static const u32 cardHashInitSignature[3]           = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
+static const u32 cardHashInitSignatureAlt[4]        = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
+static const u32 cardHashInitSignatureAlt2[4]       = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
+static const u16 cardHashInitSignatureThumbEarly[4] = {0x301F, 0x1C04, 0x211F, 0x2000};
+static const u16 cardHashInitSignatureThumb[3]      = {0xB578, 0xB083, 0x2000};
+static const u16 cardHashInitSignatureThumbAlt[3]   = {0xB5F0, 0xB083, 0x2000};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
@@ -49,7 +50,8 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 //static const u32 cardReadHashSignature[3]           = {0xE92D4010, 0xE59F000C, 0xE1A04003};                             // SDK 5
 
 // Card init (SDK 5)
-static const u32 cardRomInitSignatureEarly[2]     = {0xE92D4078, 0xE24DD00C};
+static const u32 cardRomInitSignatureEarly[2]      = {0xE92D4078, 0xE24DD00C};
+static const u16 cardRomInitSignatureEarlyThumb[2] = {0xB578, 0xB083};
 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -368,6 +370,13 @@ u16* findCardHashInitOffsetThumb(void) {
 		offset = findOffsetThumb(
 			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureThumbAlt, 3
+		);
+	}
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			*(u32*)0x02FFE028, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardHashInitSignatureThumbEarly, 4
 		);
 	}
 
@@ -776,10 +785,17 @@ u32* findCardRomInitOffset(const u32* cardReadEndOffset) {
 u16* findCardRomInitOffsetThumb(const u16* cardReadEndOffset) {
 	dbg_printf("findCardRomInitOffsetThumb\n");
 
-    u16* offset = findOffsetThumb(
+	u16* offset = findOffsetThumb(
 		cardReadEndOffset+(0x200/sizeof(u16)), 0x180,//ndsHeader->arm9binarySize,
-		cardIdStartSignatureThumbAlt3, 1
+		cardRomInitSignatureEarlyThumb, 2
 	);
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			cardReadEndOffset+(0x200/sizeof(u16)), 0x180,//ndsHeader->arm9binarySize,
+			cardIdStartSignatureThumbAlt3, 1
+		);
+	}
 
 	if (offset) {
 		dbg_printf("Card ROM init found\n");

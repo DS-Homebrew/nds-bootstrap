@@ -69,7 +69,11 @@ static bool patchCardHashInit(bool usesThumb) {
 	}
 
 	if (cardHashInitOffset) {
-		if (usesThumb) {
+		if (usesThumb && cardHashInitOffset < *(u32*)0x02FFE1C8) {
+			u16* cardHashInitOffsetThumb = (u16*)cardHashInitOffset;
+			cardHashInitOffsetThumb[-2] = 0xB003;	// ADD SP, SP, #0xC
+			cardHashInitOffsetThumb[-1] = 0xBD78;	// POP {R3-R6,PC}
+		} else if (usesThumb) {
 			*(u16*)cardHashInitOffset = 0x4770;	// bx lr
 		} else if (cardHashInitOffset < *(u32*)0x02FFE1C8) {
 			*(cardHashInitOffset - 1) = 0xE3A00000;	// mov r0, #0
@@ -97,8 +101,10 @@ static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
 	}
 
 	if (cardRomInitOffset) {
-		if (usesThumb) {
-			u16* cardRomInitOffsetThumb = (u16*)cardRomInitOffset;
+		u16* cardRomInitOffsetThumb = (u16*)cardRomInitOffset;
+		if (usesThumb && cardRomInitOffsetThumb[0] == 0xB578) {
+			cardRomInitOffsetThumb[7] = 0x2800;
+		} else if (usesThumb) {
 			cardRomInitOffsetThumb[6] = 0x2800;
 		} else if (cardRomInitOffset[0] == 0xE92D4078 && cardRomInitOffset[1] == 0xE24DD00C) {
 			cardRomInitOffset[6] = 0xE3500000;
