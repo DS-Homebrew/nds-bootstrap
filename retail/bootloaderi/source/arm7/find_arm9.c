@@ -1663,8 +1663,10 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointer2Offset:\n");
     
+	extern bool dsiModeConfirmed;
+
 	u32* initEndFunc = NULL;
-	if (ndsHeader->unitCode > 0) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		initEndFunc = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			initHeapEndFuncISignature, 2
