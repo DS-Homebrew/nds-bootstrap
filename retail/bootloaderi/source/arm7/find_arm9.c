@@ -137,6 +137,7 @@ static const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 4
 static const u32 mpuInitRegion1Data5[1]     = {0x2000031}; // SDK 5
 //static const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
 static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
+static const u32 mpuInitRegion2SignatureElab[2] = {0xEE060F12, 0xE59F00B4};
 static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK <= 2
 static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5
@@ -1493,10 +1494,19 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 
-	u32* mpuStartOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,
-		mpuInitRegionSignature, 1
-	);
+	u32* mpuStartOffset = NULL;
+	if (patchMpuRegion == 2 && ndsHeader->unitCode == 3) {
+		mpuStartOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuInitRegion2SignatureElab, 2
+		);
+	}
+	if (!mpuStartOffset) {
+		mpuStartOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuInitRegionSignature, 1
+		);
+	}
 	if (mpuStartOffset) {
 		dbg_printf("Mpu init found: ");
 	} else {
