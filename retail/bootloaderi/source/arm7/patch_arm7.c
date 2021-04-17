@@ -86,11 +86,11 @@ static void patchScfgExt(const tNDSHeader* ndsHeader, u32 ROMinRAM) {
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
-		*(u32*)0x2EFBFFC = 0x93FFFB06;
-		*scfgExtOffset = 0x2EFBFFC;
-		*(u16*)0x2EFBFF0 = (ndsHeader->unitCode == 3 || REG_SCFG_EXT != 0) ? 0x0101 : 0x0100;
-		*(scfgExtOffset + 5) = 0x2EFBFF0;
-		*(scfgExtOffset + 6) = 0x2EFBFF1;
+		*(u32*)0x2EFFFFC = 0x93FFFB06;
+		*scfgExtOffset = 0x2EFFFFC;
+		*(u16*)0x2EFFFF0 = (ndsHeader->unitCode == 3 || REG_SCFG_EXT != 0) ? 0x0101 : 0x0100;
+		*(scfgExtOffset + 5) = 0x2EFFFF0;
+		*(scfgExtOffset + 6) = 0x2EFFFF1;
 	}
 
     dbg_printf("SCFG_EXT location : ");

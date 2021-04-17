@@ -1129,9 +1129,9 @@ int arm7_main(void) {
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
 			} else {*/
-				tonccpy((char*)0x02EFC000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7FC000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7FC000;
+				tonccpy((char*)0x02F00000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
+				romFile->fatTableCache = (u32)romFile->fatTableCache+0x800000;
+				savFile->fatTableCache = (u32)savFile->fatTableCache+0x800000;
 			//}
 			toncset((char*)0x02700000, 0, 0x80000);
 		}

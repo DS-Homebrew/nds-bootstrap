@@ -185,9 +185,7 @@ static const u32 initHeapEndFunc2SignatureThumb[2]     = {0xBD082000, 0x023E0000
 static const u32 initHeapEndFunc2SignatureThumbAlt1[2] = {0x46C04718, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000};
 static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
-static const u32 initHeapEndFuncISignature[2]          = {0x02FE0000, 0};
-static const u32 initHeapEndFuncISignatureAlt1[2]      = {0x02FE0000, 0x1000};
-static const u32 initHeapEndFuncISignatureAlt2[2]      = {0xE8BD8070, 0x02FE0000};
+static const u32 initHeapEndFuncISignature[2]          = {0xE3A007BE, 0xE8BD8008};
 
 // Reset
 static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
@@ -1665,75 +1663,61 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	dbg_printf("findHeapPointer2Offset:\n");
     
-	u32* initEndFunc = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,
-		initHeapEndFunc2Signature, 2
-	);
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureAlt1, 2
-		);
-	}
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureAlt2, 2
-		);
-	}
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureThumb, 2
-		);
-	}
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureThumbAlt1, 2
-		);
-	}
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureThumbAlt2, 2
-		);
-	}
-	if (!initEndFunc) {
-		initEndFunc = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			initHeapEndFunc2SignatureThumbAlt3, 2
-		);
-	}
+	u32* initEndFunc = NULL;
 	if (ndsHeader->unitCode > 0) {
-		bool dsiFunc = false;
-		if (!initEndFunc) {
-			initEndFunc = findOffset(
-				(u32*)ndsHeader->arm9destination, iUncompressedSize,
-				initHeapEndFuncISignature, 2
-			);
-			if (initEndFunc) dsiFunc = true;
-		}
-		if (!initEndFunc) {
-			initEndFunc = findOffset(
-				(u32*)ndsHeader->arm9destination, iUncompressedSize,
-				initHeapEndFuncISignatureAlt1, 2
-			);
-			if (initEndFunc) dsiFunc = true;
-		}
-		if (!initEndFunc) {
-			initEndFunc = findOffset(
-				(u32*)ndsHeader->arm9destination, iUncompressedSize,
-				initHeapEndFuncISignatureAlt2, 2
-			);
-		}
-		if (dsiFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFuncISignature, 2
+		);
+		if (initEndFunc) {
 			u32* heapPointer = initEndFunc;
 			
 			dbg_hexa((u32)heapPointer);
 			dbg_printf("\n");
 
 			return heapPointer;
+		}
+	}
+	if (!initEndFunc) {
+		initEndFunc = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initHeapEndFunc2Signature, 2
+		);
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureAlt1, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureAlt2, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureThumb, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureThumbAlt1, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureThumbAlt2, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFunc2SignatureThumbAlt3, 2
+			);
 		}
 	}
 

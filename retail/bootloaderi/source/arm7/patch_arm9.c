@@ -940,7 +940,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 }*/
 
 u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
-	if (moduleParams->sdk_version <= 0x2007FFF) {
+	if (moduleParams->sdk_version < 0x2008000) {
 		return;
 	}
 
@@ -949,7 +949,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
-	 || *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x02FE0000 : 0x023E0000)) {
+	 || *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)) {
 		patchOffsetCache.heapPointerOffset = 0;
 	} else {
 		heapPointer = patchOffsetCache.heapPointerOffset;
@@ -957,18 +957,12 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	if (!patchOffsetCache.heapPointerOffset) {
 		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
 	}
-    if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
-        dbg_printf("ERROR: Wrong hi heap pointer\n");
-        dbg_printf("heap pointer value: ");
-	    dbg_hexa(*heapPointer);
-		dbg_printf("\n\n");
-        return;
-    } else if (!patchOffsetCache.heapPointerOffset) {
-		if (*heapPointer == 0x023E0000 && ROMsupportsDsiMode) {
-			heapPointer = (u32*)heapPointer+2;
-		}
+    if(heapPointer) {
 		patchOffsetCache.heapPointerOffset = heapPointer;
 		patchOffsetCacheChanged = true;
+	} else {
+		dbg_printf("Heap pointer not found\n");
+		return NULL;
 	}
 
     u32* oldheapPointer = (u32*)*heapPointer;
@@ -977,7 +971,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (u32)(ROMsupportsDsiMode ? 0x02EE0000 : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
+	*heapPointer = (u32)(ROMsupportsDsiMode ? 0xE3A007BB /* MOV R0, #0x2EC0000 */ : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
 
     dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
