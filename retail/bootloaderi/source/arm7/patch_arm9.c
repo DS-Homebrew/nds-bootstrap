@@ -949,7 +949,8 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0
-	 || *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)) {
+	 || (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)
+	 && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x048020BE : 0x023E0000))) {
 		patchOffsetCache.heapPointerOffset = 0;
 	} else {
 		heapPointer = patchOffsetCache.heapPointerOffset;
@@ -971,7 +972,11 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (u32)(ROMsupportsDsiMode ? 0xE3A007BB /* MOV R0, #0x2EC0000 */ : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
+	if (*heapPointer == 0x048020BE && ROMsupportsDsiMode) {
+		*heapPointer = (u32)0x048020BB; /* MOVS R0, #0x2EC0000 */
+	} else {
+		*heapPointer = (u32)(ROMsupportsDsiMode ? 0xE3A007BB /* MOV R0, #0x2EC0000 */ : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM);
+	}
 
     dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
