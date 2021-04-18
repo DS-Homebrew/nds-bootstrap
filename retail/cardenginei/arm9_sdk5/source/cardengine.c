@@ -731,11 +731,6 @@ bool isNotTcm(u32 address, u32 len) {
 }  
 
 u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
-#ifdef TWLSDK
-	if (dmaDone) {
-		return false;
-	}
-#endif
 	tempDmaParams[3] = src;
 	tempDmaParams[4] = (u32)dst;
 	tempDmaParams[5] = len;
@@ -754,7 +749,12 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         && !(((int)len) & 511)
         && !(((int)src) & 511)
 	) {
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
+		isDma = true;
+#ifdef TWLSDK
+		if(!dmaDone && (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef))
+#else
+		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
+#endif
 		{
 			// new dma method
 
