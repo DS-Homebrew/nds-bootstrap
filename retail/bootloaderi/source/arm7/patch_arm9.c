@@ -58,10 +58,10 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	}
 }
 
-static bool patchCardHashInit(bool usesThumb) {
+static bool patchCardHashInit(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	u32* cardHashInitOffset = patchOffsetCache.cardHashInitOffset;
 	if (!patchOffsetCache.cardHashInitOffset) {
-		cardHashInitOffset = usesThumb ? (u32*)findCardHashInitOffsetThumb() : findCardHashInitOffset();
+		cardHashInitOffset = usesThumb ? (u32*)findCardHashInitOffsetThumb(ndsHeader, moduleParams) : findCardHashInitOffset(ndsHeader, moduleParams);
 		if (cardHashInitOffset) {
 			patchOffsetCache.cardHashInitOffset = cardHashInitOffset;
 			patchOffsetCacheChanged = true;
@@ -69,14 +69,19 @@ static bool patchCardHashInit(bool usesThumb) {
 	}
 
 	if (cardHashInitOffset) {
-		if (usesThumb && cardHashInitOffset < *(u32*)0x02FFE1C8) {
-			u16* cardHashInitOffsetThumb = (u16*)cardHashInitOffset;
-			cardHashInitOffsetThumb[-2] = 0xB003;	// ADD SP, SP, #0xC
-			cardHashInitOffsetThumb[-1] = 0xBD78;	// POP {R3-R6,PC}
+		if (cardHashInitOffset < *(u32*)0x02FFE1C8) {
+			if (usesThumb) {
+				u16* cardHashInitOffsetThumb = (u16*)cardHashInitOffset;
+				cardHashInitOffsetThumb[-2] = 0xB003;	// ADD SP, SP, #0xC
+				cardHashInitOffsetThumb[-1] = 0xBD78;	// POP {R3-R6,PC}
+			} else if (*cardHashInitOffset == 0xE280101F) {
+				cardHashInitOffset[-2] = 0xE28DD00C;	// ADD SP, SP, #0xC
+				cardHashInitOffset[-1] = 0xE8BD8078;	// LDMFD SP!, {R3-R6,PC}
+			} else {
+				cardHashInitOffset[-1] = 0xE3A00000;	// mov r0, #0
+			}
 		} else if (usesThumb) {
 			*(u16*)cardHashInitOffset = 0x4770;	// bx lr
-		} else if (cardHashInitOffset < *(u32*)0x02FFE1C8) {
-			*(cardHashInitOffset - 1) = 0xE3A00000;	// mov r0, #0
 		} else {
 			*cardHashInitOffset = 0xE12FFF1E;	// bx lr
 		}
@@ -1597,7 +1602,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
  	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		patchCardRomInit(cardReadEndOffset, usesThumb);
 
-		if (!patchCardHashInit(usesThumb)) {
+		if (!patchCardHashInit(ndsHeader, moduleParams, usesThumb)) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
 		}

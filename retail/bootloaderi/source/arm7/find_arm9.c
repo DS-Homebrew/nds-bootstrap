@@ -21,6 +21,7 @@ static const u32 dsiModeCheckSignature[4] = {0xE59F0014, 0xE5D00000, 0xE2000003,
 
 // Card hash init (SDK 5)
 static const u32 cardHashInitSignatureEarly[4]      = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
+static const u32 cardHashInitSignatureEarlyAlt[3]   = {0xE280101F, 0xE3A00000, 0xE3C1501F};
 static const u32 cardHashInitSignature[3]           = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
 static const u32 cardHashInitSignatureAlt[4]        = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
 static const u32 cardHashInitSignatureAlt2[4]       = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
@@ -319,33 +320,41 @@ u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader) {
 	return offset;
 }
 
-u32* findCardHashInitOffset(void) {
+u32* findCardHashInitOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardHashInitOffset\n");
 
-    u32* offset = findOffset(
-		*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
-		cardHashInitSignature, 3
-	);
-
-	if (!offset) {
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffset(
 			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
-			cardHashInitSignatureAlt, 4
+			cardHashInitSignature, 3
 		);
-	}
 
-	if (!offset) {
-		offset = findOffset(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
-			cardHashInitSignatureAlt2, 4
-		);
-	}
+		if (!offset) {
+			offset = findOffset(
+				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureAlt, 4
+			);
+		}
 
-	if (!offset) {
+		if (!offset) {
+			offset = findOffset(
+				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureAlt2, 4
+			);
+		}
+	} else {
 		offset = findOffset(
-			*(u32*)0x02FFE028, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureEarly, 4
 		);
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureEarlyAlt, 3
+			);
+		}
 	}
 
 	if (offset) {
@@ -358,24 +367,25 @@ u32* findCardHashInitOffset(void) {
 	return offset;
 }
 
-u16* findCardHashInitOffsetThumb(void) {
+u16* findCardHashInitOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardHashInitOffsetThumb\n");
 
-    u16* offset = findOffsetThumb(
-		*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
-		cardHashInitSignatureThumb, 3
-	);
-
-	if (!offset) {
+	u16* offset = NULL;
+	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffsetThumb(
 			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
-			cardHashInitSignatureThumbAlt, 3
+			cardHashInitSignatureThumb, 3
 		);
-	}
 
-	if (!offset) {
+		if (!offset) {
+			offset = findOffsetThumb(
+				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureThumbAlt, 3
+			);
+		}
+	} else {
 		offset = findOffsetThumb(
-			*(u32*)0x02FFE028, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureThumbEarly, 4
 		);
 	}
