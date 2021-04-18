@@ -776,6 +776,7 @@ u32 cardReadDma() {
         && !(((int)len) & 511)
         && !(((int)src) & 511)
 	) {
+		isDma = true;
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
 			// new dma method
