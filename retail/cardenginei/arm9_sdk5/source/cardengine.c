@@ -878,10 +878,12 @@ void myIrqHandlerIPC(void) {
 		while (1);
 	}
 
+#ifndef TWLSDK
 	if (IPC_GetSync() == 0x9) {
 		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x20;
 		(*inGameMenu)(&mainScreen);
 	}
+#endif
 
 	if(mainScreen == 1)
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;

@@ -799,7 +799,7 @@ void myIrqHandlerVBlank(void) {
 	}
 	
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_DOWN | KEY_SELECT))) {
-		(valueBits & extendedMemory) ? returnToLoader() : inGameMenu();
+		((valueBits & extendedMemory) || (ndsHeader->unitCode > 0 && (valueBits & dsiMode))) ? returnToLoader() : inGameMenu();
 	}
 
 	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
