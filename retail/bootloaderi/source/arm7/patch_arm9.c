@@ -526,18 +526,19 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && !ROMinRAM) {
 		return false;
-	}
-	const char* romTid = getRomTid(ndsHeader);
+	} else {
+		const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0
-	 || strncmp(romTid, "AJU", 3) == 0
-	 || strncmp(romTid, "AWD", 3) == 0
-	 || strncmp(romTid, "CP3", 3) == 0
-	 || strncmp(romTid, "BO5", 3) == 0
-	 || strncmp(romTid, "Y8L", 3) == 0
-	 || strncmp(romTid, "B8I", 3) == 0
-	 || strncmp(romTid, "TAM", 3) == 0
-	 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
+		if (strncmp(romTid, "AJS", 3) == 0
+		 || strncmp(romTid, "AJU", 3) == 0
+		 || strncmp(romTid, "AWD", 3) == 0
+		 || strncmp(romTid, "CP3", 3) == 0
+		 || strncmp(romTid, "BO5", 3) == 0
+		 || strncmp(romTid, "Y8L", 3) == 0
+		 || strncmp(romTid, "B8I", 3) == 0
+		 || strncmp(romTid, "TAM", 3) == 0
+		 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
+	}
 
 	dbg_printf("\npatchCardSetDma\n");           
 
