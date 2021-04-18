@@ -324,8 +324,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		disableSlot1();
 	}
 
-	bool scc = strncmp(romTid, "VSO", 3)==0;
-	if (conf->dsiMode > 0 && unitCode > 0 && !scc) {
+	if (conf->dsiMode > 0 && unitCode > 0) {
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)TARGETBUFFER9I, 1, ndsArm9ilen, ndsFile);
@@ -478,7 +477,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load SDK5 ce9 binary
-	cebin = fopen(unitCode>0&&conf->dsiMode&&!scc ? "nitro:/cardenginei_arm9_twlsdk.lz77" : "nitro:/cardenginei_arm9_sdk5.lz77", "rb");
+	cebin = fopen(unitCode>0&&conf->dsiMode ? "nitro:/cardenginei_arm9_twlsdk.lz77" : "nitro:/cardenginei_arm9_sdk5.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x3000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
@@ -487,7 +486,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (conf->gameOnFlashcard) {
 		// Load SDK5 DLDI ce9 binary
-		cebin = fopen(unitCode>0&&conf->dsiMode&&!scc ? "nitro:/cardenginei_arm9_twlsdk_dldi.lz77" : "nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
+		cebin = fopen(unitCode>0&&conf->dsiMode ? "nitro:/cardenginei_arm9_twlsdk_dldi.lz77" : "nitro:/cardenginei_arm9_sdk5_dldi.lz77", "rb");
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x7000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);

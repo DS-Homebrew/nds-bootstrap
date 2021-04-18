@@ -1109,10 +1109,7 @@ int arm7_main(void) {
 	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
-	} else*/
-	if (strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "VSO", 3) == 0) {
-		dsiModeConfirmed = false;
-	} else if (dsiMode == 2) {
+	} else*/ if (dsiMode == 2) {
 		dsiModeConfirmed = dsiMode;
 	} else {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
