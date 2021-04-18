@@ -1218,11 +1218,13 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
-			REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+			if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+				REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+			}
 			if (macroMode) {
 				u32 temp = readPowerManagement(PM_CONTROL_REG) & (~(PM_BACKLIGHT_TOP & 0xFFFF));
 				writePowerManagement(PM_CONTROL_REG, temp);
