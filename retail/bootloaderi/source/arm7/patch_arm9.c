@@ -524,7 +524,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && !ROMinRAM) {
+		return false;
+	} else {
 		const char* romTid = getRomTid(ndsHeader);
 
 		if (strncmp(romTid, "AJS", 3) == 0

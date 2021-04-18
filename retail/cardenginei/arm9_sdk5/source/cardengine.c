@@ -72,6 +72,8 @@ bool sdRead = false;
 #ifdef TWLSDK
 static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB] = {0};
 static u32 cacheCounter[dev_CACHE_SLOTS_16KB];
+
+static bool dmaDone = false;
 #else
 static u32* cacheDescriptor = (u32*)0x02790000;
 static u32* cacheCounter = (u32*)0x027A0000;
@@ -729,11 +731,20 @@ bool isNotTcm(u32 address, u32 len) {
 }  
 
 u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
+#ifdef TWLSDK
+	if (dmaDone) {
+		return false;
+	}
+#endif
 	tempDmaParams[3] = src;
 	tempDmaParams[4] = (u32)dst;
 	tempDmaParams[5] = len;
 
-    if(dma >= 0 
+#ifdef TWLSDK
+	dmaDone = true;
+#endif
+
+	if(dma >= 0 
         && dma <= 3 
         //&& func != NULL
         && len > 0
@@ -761,7 +772,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         clearIcache();
     }*/
 
-    return 0;
+    return false;
 }
 
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {

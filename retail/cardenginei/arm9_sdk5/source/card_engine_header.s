@@ -146,13 +146,13 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r4-r11,lr}
+    stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_card_read_dma	
 
-	ldmfd   sp!, {r4-r11,pc}
+	ldmfd   sp!, {r3-r9,pc}
 _blx_r6_stub_card_read_dma:
 	bx	r6	
 .pool
@@ -161,13 +161,13 @@ _blx_r6_stub_card_read_dma:
 @---------------------------------------------------------------------------------
 card_set_dma_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
+    stmfd   sp!, {r4-r6,lr}
 
 	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_card_set_dma	
 
-	ldmfd   sp!, {r1-r11,pc}
+	ldmfd   sp!, {r4-r6,pc}
 _blx_r6_stub_card_set_dma:
 	bx	r6	
 .pool
@@ -220,13 +220,13 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-    push	{r4-r7, lr}
+    push	{r3-r7, lr}
     
 	ldr		r6, =cardReadDma
 
 	bl		_blx_r6_stub_thumb_card_read_dma	
 
-    pop	{r4-r7, pc}
+    pop	{r3-r7, pc}
 _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
 .pool
@@ -236,13 +236,13 @@ _blx_r6_stub_thumb_card_read_dma:
 @---------------------------------------------------------------------------------
 thumb_card_set_dma_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
+    push	{r4-r6, lr}
 
 	ldr		r6, =cardSetDma
 
 	bl		_blx_r6_stub_thumb_card_set_dma	
 
-    pop	{r1-r7, pc}
+    pop	{r4-r6, pc}
 _blx_r6_stub_thumb_card_set_dma:
 	bx	r6	
 .pool
