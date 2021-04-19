@@ -524,7 +524,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && !ROMinRAM) {
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
+
+	if (ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM) {
 		return false;
 	}
 	const char* romTid = getRomTid(ndsHeader);
@@ -537,7 +539,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0
 	 || strncmp(romTid, "B8I", 3) == 0
 	 || strncmp(romTid, "TAM", 3) == 0
-	 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
+	 || (gameOnFlashcard && !ROMsupportsDsiMode && !ROMinRAM) || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
 

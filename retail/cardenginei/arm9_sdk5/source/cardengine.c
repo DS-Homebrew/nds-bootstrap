@@ -74,8 +74,6 @@ bool sdRead = false;
 #ifdef TWLSDK
 static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB] = {0};
 static u32 cacheCounter[dev_CACHE_SLOTS_16KB];
-
-static bool dmaDone = false;
 #else
 static u32* cacheDescriptor = (u32*)0x02790000;
 static u32* cacheCounter = (u32*)0x027A0000;
@@ -735,12 +733,10 @@ bool isNotTcm(u32 address, u32 len) {
 }  
 
 u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
+#ifndef TWLSDK
 	tempDmaParams[3] = src;
 	tempDmaParams[4] = (u32)dst;
 	tempDmaParams[5] = len;
-
-#ifdef TWLSDK
-	dmaDone = true;
 #endif
 
 	if(dma >= 0 
@@ -754,11 +750,8 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-#ifdef TWLSDK
-		if(!dmaDone && (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef))
-#else
+#ifndef TWLSDK
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
-#endif
 		{
 			// new dma method
 
@@ -771,6 +764,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 			dma=4;
             clearIcache();
 		}*/
+#endif
     } /*else {
         dma=4;
         clearIcache();
