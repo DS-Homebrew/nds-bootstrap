@@ -1585,10 +1585,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     const char* romTid = getRomTid(ndsHeader);
 
     u32 startOffset = ndsHeader->arm9destination;
-    if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x3800 for "WarioWare: DIY"
+    if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
         startOffset = ndsHeader->arm9destination + 0x3800;
-    } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x80000 for "Jam with the Band"
+    } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
         startOffset = ndsHeader->arm9destination + 0x80000;        
+    } else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
+        startOffset = ndsHeader->arm9destination + 0xE4000;        
     }
 
     dbg_printf("startOffset : ");
