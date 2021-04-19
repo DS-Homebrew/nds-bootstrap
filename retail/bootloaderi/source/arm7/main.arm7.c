@@ -761,8 +761,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 		tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
 		romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
-		tonccpy((char*)ce7Location+0x18000, savFile->fatTableCache, 0x28000);
-		savFile->fatTableCache = (u32*)((char*)ce7Location+0x18000);
+		tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
+		savFile->fatTableCache = (u32*)((char*)ce7Location+0xFC00);
 
 		fileRead((char*)romLocation, *romFile, romOffset, romSizeLimit, 0);
 		fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSize-romSizeLimit, 0);
@@ -775,8 +775,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 			// Move FAT tables to avoid being overwritten by the ROM
 			tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
 			romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
-			tonccpy((char*)ce7Location+0x18000, savFile->fatTableCache, 0x28000);
-			savFile->fatTableCache = (u32*)((char*)ce7Location+0x18000);
+			tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
+			savFile->fatTableCache = (u32*)((char*)ce7Location+0xFC00);
 		}
 		fileRead((char*)romLocation, *romFile, romOffset, romSize, 0);
 		if (extendedMemoryConfirmed) {
