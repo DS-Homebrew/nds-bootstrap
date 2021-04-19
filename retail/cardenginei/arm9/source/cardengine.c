@@ -123,14 +123,14 @@ static void waitFrames(int count) {
 	}
 }
 
-/*static void waitMs(int count) {
+static void waitMs(int count) {
 	for (int i = 0; i < count; i++) {
 		while ((REG_VCOUNT % 32) != 31);
 		while ((REG_VCOUNT % 32) == 31);
 	}
 }
 
-static int readCount = 0;
+/*static int readCount = 0;
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
@@ -227,7 +227,7 @@ static void waitForArm7(void) {
 	//int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
 		//if (count==0) {
-			//waitMs(1);
+			waitMs(1);
 			//IPC_SendSync(0x4);
 			//count=1000;
 		//}
