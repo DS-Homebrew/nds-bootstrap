@@ -178,7 +178,16 @@ void cardSetDma(u32 * params) {
 
 	// Copy via dma
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
+		int dma = 0;
+		for (int i = 0; i < 3; i++) {
+			if (!ndmaBusy(i)) break;
+			dma++;
+		}
+		if (dma == 4) {
+			tonccpy(dst, (u8*)newSrc, len2);
+		} else {
+			ndmaCopyWords(dma, (u8*)newSrc, dst, len2);
+		}
 		endCardReadDma();
 	} else if (ce9->valueBits & extendedMemory) {
 		int oldIME = enterCriticalSection();
