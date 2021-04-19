@@ -179,9 +179,8 @@ void cardSetDma(u32 * params) {
 	// Copy via dma
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 		int dma = 0;
-		for (int i = 0; i < 3; i++) {
-			if (!ndmaBusy(i)) break;
-			dma++;
+		for (dma = 0; dma < 4; dma++) {
+			if (!ndmaBusy(dma)) break;
 		}
 		if (dma == 4) {
 			tonccpy(dst, (u8*)newSrc, len2);
