@@ -430,7 +430,6 @@ static void log_arm9(void) {
 	#endif
 }
 
-#ifndef TWLSDK
 static void nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
@@ -520,7 +519,6 @@ static void nandWrite(void) {
 	fileRead((char*)dst, *gbaFile, src, len, -1);
 	cardReadLED(false);
 }*/
-#endif
 
 static bool readOngoing = false;
 /*//static int currentCmd=0, currentNdmaSlot=0;
@@ -668,7 +666,6 @@ static void runCardEngineCheck(void) {
                 //IPC_SendSync(0x8);
     		}
     
-			#ifndef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
 				sdRead = !(valueBits & saveOnFlashcard);
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
@@ -690,7 +687,6 @@ static void runCardEngineCheck(void) {
     			sharedAddr[3] = 0;
     			IPC_SendSync(0x8);
     		}*/
-			#endif
         //}
   		unlockMutex(&cardEgnineCommandMutex);
   	}

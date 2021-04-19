@@ -65,7 +65,9 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
-//static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
+#ifdef TWLSDK
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
+#endif
 #ifdef DLDI
 bool sdRead = false;
 #else
@@ -243,13 +245,13 @@ void user_exception(void);
 	*exceptionC = user_exception;
 }*/
 
-#ifndef DLDI
+#ifdef TWLSDK
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
 	//int count = 0;
 	while (sharedAddr[3] != (vu32)0) {
 		//if (count==0) {
-			waitMs(1);
+			//waitMs(1);
 			//IPC_SendSync(0x4);
 			//count=1000;
 		//}
@@ -831,6 +833,52 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
     isDma=false;
 
 	return ret; 
+}
+
+bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
+#ifdef TWLSDK
+	if (ce9->valueBits & saveOnFlashcard) {
+#ifdef DLDI
+		fileRead(memory, *savFile, flash, len, -1);
+#endif
+		return true;
+	}
+
+    // Send a command to the ARM7 to read the nand save
+	u32 commandNandRead = 0x025FFC01;
+
+	// Write the command
+	sharedAddr[0] = memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = flash;
+	sharedAddr[3] = commandNandRead;
+
+	waitForArm7();
+#endif
+    return true; 
+}
+
+bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+#ifdef TWLSDK
+	if (ce9->valueBits & saveOnFlashcard) {
+#ifdef DLDI
+		fileWrite(memory, *savFile, flash, len, -1);
+#endif
+		return true;
+	}
+
+	// Send a command to the ARM7 to write the nand save
+	u32 commandNandWrite = 0x025FFC02;
+
+	// Write the command
+	sharedAddr[0] = memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = flash;
+	sharedAddr[3] = commandNandWrite;
+
+	waitForArm7();
+#endif
+    return true; 
 }
 
 //---------------------------------------------------------------------------------

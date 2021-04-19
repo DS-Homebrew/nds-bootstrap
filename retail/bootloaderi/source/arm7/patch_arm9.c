@@ -1498,6 +1498,28 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
             memcpy((u32*)0x02061AC4, nandReadPatch, 0x40);
+    	} else
+        // Face Training (Europe)
+        if (strcmp(romTid, "USKV") == 0) {
+          	//u32 gNandInit(void* data)
+            *(u32*)(0x020E2AEC) = 0xe3a00001; //mov r0, #1
+            *(u32*)(0x020E2AF0) = 0xe12fff1e; //bx lr
+
+            //u32 gNandResume(void)
+            *(u32*)(0x020E2EC0) = 0xe3a00000; //mov r0, #0
+            *(u32*)(0x020E2EC4) = 0xe12fff1e; //bx lr
+
+            //u32 gNandError(void)
+            *(u32*)(0x020E3150) = 0xe3a00000; //mov r0, #0
+            *(u32*)(0x020E3154) = 0xe12fff1e; //bx lr
+
+            //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+            u32* nandWritePatch = ce9->patches->nand_write_arm9;
+            memcpy((u32*)0x020E2BF0, nandWritePatch, 0x40);
+
+            //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+            u32* nandReadPatch = ce9->patches->nand_read_arm9;
+            memcpy((u32*)0x020E2F3C, nandReadPatch, 0x40);
     	}
 	}
 }
