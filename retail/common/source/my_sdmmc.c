@@ -316,18 +316,26 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 	if (ndmaSlot < 0) ndmaSlot = 0;
 	if (ndmaSlot > 3) ndmaSlot = 3;
     
-    *((u32*)0x4004100) = 0x80020000; //use round robin arbitration method;
+ 	u32 addr[6] = {0x4004104, 0x4004108, 0x400410C, 0x4004110, 0x4004114, 0x400411C};
+	if (ndmaSlot > 0)
+	for (int a = 0; a < 6; a++) {
+		for (int s = 0; s < ndmaSlot; s++) {
+			addr[a] += 0x1C;
+		}
+	}
 
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
-	
-	*(u32*)(0x400410C+(ndmaSlot*0x1C)) = ctx->size;
-	
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
-	
-	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x10;
+   *((vu32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8064000;
+	*(vu32*)addr[0] = 0x0400490C;
+	*(vu32*)addr[1] = (u32)ctx->rData;
+	
+	*(vu32*)addr[2] = ctx->size;
+	
+	*(vu32*)addr[3] = 0x80;
+	
+	*(vu32*)addr[4] = 0x10;
+
+	*(vu32*)addr[5] = 0xC8064000;
 
 	//const bool getSDRESP = (cmd << 15) >> 31;
 	u16 flags = (cmd << 15) >> 31;

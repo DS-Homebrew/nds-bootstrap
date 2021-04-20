@@ -22,7 +22,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	loadi
 BUILD		:=	build
-SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../common/source ../common/source_general
+SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
