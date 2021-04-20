@@ -41,6 +41,16 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	extern u16 gameOnFlashcard;
 	const char* romTid = getRomTid(ndsHeader);
 
+	// Trauma Center: Under the Knife (USA)
+	if (strcmp(romTid, "AKDE") == 0) {
+		*(u32*)0x2007434 = 0x27FF017;
+	}
+
+	// Trauma Center: Under the Knife (Europe)
+	if (strcmp(romTid, "AKDP") == 0) {
+		*(u32*)0x20A6B90 = 0x27FF017;
+	}
+
 	// Animal Crossing: Wild World
 	if (strncmp(romTid, "ADM", 3) == 0 && !gameOnFlashcard) {
 		int instancesPatched = 0;
