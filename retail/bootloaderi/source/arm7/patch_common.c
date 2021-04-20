@@ -51,6 +51,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x20A6B90 = 0x27FF017;
 	}
 
+	// Chou Shittou Caduceus (Japan)
+	if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
+		*(u32*)0x20CCB18 = 0x27FF017;
+	}
+
 	// Animal Crossing: Wild World
 	if (strncmp(romTid, "ADM", 3) == 0 && !gameOnFlashcard) {
 		int instancesPatched = 0;
