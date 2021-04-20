@@ -40,6 +40,7 @@ typedef struct loadCrt0 {
     u32 patchMpuSize;
     u8 patchMpuRegion;
     u8 language;
+    u8 region; // SDK 5
     u8 dsiMode; // SDK 5
     u8 donorSdkVer;
     u8 extendedMemory;

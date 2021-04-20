@@ -110,6 +110,7 @@ extern u32 srParamsFileCluster;
 extern u8 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
+extern u8 region;
 extern u8 dsiMode; // SDK 5
 extern u8 donorSdkVer;
 extern u8 extendedMemory;
@@ -695,6 +696,9 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
+		if (ROMsupportsDsiMode(ndsHeader)) {
+			*(u8*)0x02000406 = language;
+		}
 	}
 
 	if (personalData->language != 6 && ndsHeader->reserved1[8] == 0x80) {
@@ -853,18 +857,37 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF014) = 0x02FF4000;
 
 		// Set region flag
-		if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 0;
-		} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 1;
-		} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 2;
-		} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 3;
-		} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 4;
-		} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
-			*(u8*)(0x02FFFD70) = 5;
+		if (region == 0xFE || region == -2) {
+			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 0;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "T", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 1;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "V", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 2;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 3;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 4;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
+				*(u8*)(0x02FFFD70) = 5;
+			}
+		} else if (region == 0xFF || region == -1) {
+			u8 country = *(u8*)0x02000405;
+			if (country == 0x01) {
+				*(u8*)(0x02FFFD70) = 0;	// Japan
+			} else if (country == 0xA0) {
+				*(u8*)(0x02FFFD70) = 4;	// China
+			} else if (country == 0x88) {
+				*(u8*)(0x02FFFD70) = 5;	// Korea
+			} else if (country == 0x41 || country == 0x5F) {
+				*(u8*)(0x02FFFD70) = 3;	// Australia
+			} else if ((country >= 0x08 && country <= 0x34) || country == 0x99 || country == 0xA8) {
+				*(u8*)(0x02FFFD70) = 1;	// USA
+			} else if (country >= 0x40 && country <= 0x70) {
+				*(u8*)(0x02FFFD70) = 2;	// Europe
+			}
+		} else {
+			*(u8*)(0x02FFFD70) = region;
 		}
 
 		if (dsiModeConfirmed) {

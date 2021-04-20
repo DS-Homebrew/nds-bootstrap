@@ -56,6 +56,7 @@
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
+	.global region
 	.global dsiMode
 	.global donorSdkVer
 	.global extendedMemory
@@ -137,6 +138,8 @@ patchMpuSize:
 patchMpuRegion:
 	.byte	0
 language:
+	.byte	0
+region:
 	.byte	0
 dsiMode:
 	.byte	0

@@ -115,6 +115,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
+	// Region
+	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION").c_str(), NULL, 0);
+
 	if (isDSiMode()) {
 		// DSi mode
 		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);

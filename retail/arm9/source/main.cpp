@@ -170,6 +170,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
 	if (isDSiMode()) {
+		dbg_printf("region: %hhX\n", conf->region);
 		dbg_printf("dsiMode: %i\n", conf->dsiMode);
 	}
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
