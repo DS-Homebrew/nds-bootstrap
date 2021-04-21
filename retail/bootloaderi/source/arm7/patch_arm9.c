@@ -591,6 +591,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "A3Y", 3) != 0 // Sonic Rush Adventure - Fix flickers during streamed music
+	 && strncmp(romTid, "COL", 3) != 0 // Mario & Sonic at the Olympic Winter Games - Make loading asynchrous for both card read types
 	 && strncmp(romTid, "BXS", 3) != 0 // Sonic Colors - Fix flickers during streamed music
 	) return false;
 
