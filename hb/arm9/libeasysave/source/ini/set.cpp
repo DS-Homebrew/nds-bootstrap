@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <iostream>
-
 #include "easysave/ini.hpp"
 
 using namespace easysave;
@@ -41,8 +39,7 @@ void ini::set(std::string section, std::string key_name, std::string key_data) {
   int key_index = m_match_key_index(section_index, key_name);
   if (key_index < 0) {
     // Key does not exist; we create it from scratch
-    std::cout << "Creating key in section " << m_sections[section_index]
-              << std::endl;
+    printf("Creating key in section %s\n", m_sections[section_index].c_str());
     m_keys.push_back((m_ini_key_t){section_index, key_name, key_data});
     return;
   }

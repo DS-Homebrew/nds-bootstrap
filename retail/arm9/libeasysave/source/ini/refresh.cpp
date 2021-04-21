@@ -96,7 +96,7 @@ size_t ini::refresh() {
     }
   }
 
-  // free(cline);
+  free(cline);
   fclose(file);
   return 0;
 }

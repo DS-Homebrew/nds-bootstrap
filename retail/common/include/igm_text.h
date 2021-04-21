@@ -14,4 +14,4 @@ struct IgmText {
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
-#endif // IGN_TEXT_H
+#endif // IGM_TEXT_H
