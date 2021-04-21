@@ -202,7 +202,7 @@ void setIgmString(const char *src, char *dst) {
 			codepoint = '?';
 		}
 
-		// Set string
+		// Add to string
 		if(codepoint < 127) { // ASCII
 			*(dst++) = codepoint;
 		} else if(codepoint >= u'｡' && codepoint <= u'ﾟ') { // Half-width Katakana
@@ -514,16 +514,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		setIgmString(lang.fetch("MENU", "RAM_VIEWER").c_str(), igmText->menu[4]);
 		setIgmString(lang.fetch("MENU", "QUIT_GAME").c_str(), igmText->menu[5]);
 
-		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN").c_str(), igmText->menu[0]);
-		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED").c_str(), igmText->menu[1]);
-		setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("OPTIONS", "AUTO").c_str(), igmText->menu[3]);
-		setIgmString(lang.fetch("OPTIONS", "BOTTOM").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("OPTIONS", "TOP").c_str(), igmText->menu[5]);
-		setIgmString(lang.fetch("OPTIONS", "67_MHZ").c_str(), igmText->menu[6]);
-		setIgmString(lang.fetch("OPTIONS", "133_MHZ").c_str(), igmText->menu[7]);
-		setIgmString(lang.fetch("OPTIONS", "OFF").c_str(), igmText->menu[8]);
-		setIgmString(lang.fetch("OPTIONS", "ON").c_str(), igmText->menu[9]);
+		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN").c_str(), igmText->options[0]);
+		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED").c_str(), igmText->options[1]);
+		setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST").c_str(), igmText->options[2]);
+		setIgmString(lang.fetch("OPTIONS", "AUTO").c_str(), igmText->options[3]);
+		setIgmString(lang.fetch("OPTIONS", "BOTTOM").c_str(), igmText->options[4]);
+		setIgmString(lang.fetch("OPTIONS", "TOP").c_str(), igmText->options[5]);
+		setIgmString(lang.fetch("OPTIONS", "67_MHZ").c_str(), igmText->options[6]);
+		setIgmString(lang.fetch("OPTIONS", "133_MHZ").c_str(), igmText->options[7]);
+		setIgmString(lang.fetch("OPTIONS", "OFF").c_str(), igmText->options[8]);
+		setIgmString(lang.fetch("OPTIONS", "ON").c_str(), igmText->options[9]);
 	}
 	fclose(cebin);
 

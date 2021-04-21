@@ -8,8 +8,8 @@ struct IgmText {
 	char ndsBootstrap[14];
 	char ramViewer[20];
 	char jumpAddress[20];
-	char menu[20][6];
-	char options[20][10];
+	char menu[6][20];
+	char options[10][20];
 };
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
