@@ -78,7 +78,7 @@ typedef struct patchOffsetCacheContents {
 	u32* resetOffset;
 	u32 resetChecked;
 	u32* sleepFuncOffset;
-	//u32 sleepFuncIsThumb;
+	u32 sleepFuncIsThumb;
 	u32 sleepChecked;
     u32 patchMpuRegion;
     u32* mpuStartOffset;
