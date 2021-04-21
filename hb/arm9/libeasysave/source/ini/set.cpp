@@ -28,6 +28,7 @@ SOFTWARE.
 
 using namespace easysave;
 
+/// Sets the value of a given key in a given section.
 void ini::set(std::string section, std::string key_name, std::string key_data) {
   int section_index = m_match_section_index(section);
   if (section_index < 0) {
@@ -39,7 +40,6 @@ void ini::set(std::string section, std::string key_name, std::string key_data) {
   int key_index = m_match_key_index(section_index, key_name);
   if (key_index < 0) {
     // Key does not exist; we create it from scratch
-    printf("Creating key in section %s\n", m_sections[section_index].c_str());
     m_keys.push_back((m_ini_key_t){section_index, key_name, key_data});
     return;
   }

@@ -28,6 +28,7 @@ SOFTWARE.
 
 using namespace easysave;
 
+/// Reloads INI file contents from disk. Returns non-zero on fail.
 size_t ini::refresh() {
   FILE *file = fopen(m_filename.c_str(), "r");
 

@@ -28,6 +28,7 @@ SOFTWARE.
 
 using namespace easysave;
 
+/// Writes INI data to the disk. Returns non-zero on fail.
 size_t ini::flush() {
   FILE *file = fopen(m_filename.c_str(), "w");
   // Loop through every section and dump its keys to a file
