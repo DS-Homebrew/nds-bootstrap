@@ -421,6 +421,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		const char* romTid = getRomTid(ndsHeader);
 
 		if (strncmp(romTid, "AJS", 3) == 0
+		 || strncmp(romTid, "AWI", 3) == 0
 		 || strncmp(romTid, "AJU", 3) == 0
 		 || strncmp(romTid, "AWD", 3) == 0
 		 || strncmp(romTid, "CP3", 3) == 0
@@ -532,6 +533,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0
+	 || strncmp(romTid, "AWI", 3) == 0
 	 || strncmp(romTid, "AJU", 3) == 0
 	 || strncmp(romTid, "AWD", 3) == 0
 	 || strncmp(romTid, "CP3", 3) == 0
@@ -585,7 +587,13 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-/*static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "A3Y", 3) != 0 // Sonic Rush Adventure - Fix flickers during streamed music
+	 && strncmp(romTid, "BXS", 3) != 0 // Sonic Colors - Fix flickers during streamed music
+	) return false;
+
     u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
@@ -605,7 +613,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		dbg_printf("\n\n");
 	}
 	return offset ? true : false;
-}*/
+}
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -1658,9 +1666,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	/*if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
+	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	} else {*/
+	} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
@@ -1668,7 +1676,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
-	//}
+	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);

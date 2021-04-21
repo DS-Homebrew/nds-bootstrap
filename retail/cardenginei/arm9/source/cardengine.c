@@ -130,7 +130,7 @@ static void waitMs(int count) {
 	}
 }
 
-/*static int readCount = 0;
+static int readCount = 0;
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
@@ -147,7 +147,7 @@ void sleepMs(int ms) {
 		extern void callSleepThumb(int ms);
         callSleepThumb(ms);
     }
-}*/
+}
 
 #ifndef DLDI
 static int allocateCacheSlot(void) {
@@ -859,7 +859,7 @@ int cardRead(u32* cacheStruct) {
 	// -------------------------------------*/
 	#endif
 
-	//readCount++;
+	readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.

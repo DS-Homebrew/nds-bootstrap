@@ -58,7 +58,15 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			patchOffsetCache.swiHaltOffset = swiHaltOffset;
 		}
 	}
-	if (swiHaltOffset && (!gameOnFlashcard || (ROMinRAM && !extendedMemoryConfirmed)) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed))) {
+
+	bool doPatch = (!gameOnFlashcard || (ROMinRAM && !extendedMemoryConfirmed)) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed));
+	const char* romTid = getRomTid(ndsHeader);
+	if (strncmp(romTid, "AWI", 3) == 0)	// Hotel Dusk: Room 215
+	{
+		doPatch = false;
+	}
+
+	if (swiHaltOffset && doPatch) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;

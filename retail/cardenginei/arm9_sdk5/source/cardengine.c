@@ -126,7 +126,7 @@ static void waitMs(int count) {
 }
 #endif
 
-/*static int readCount = 0;
+static int readCount = 0;
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
@@ -143,7 +143,7 @@ void sleepMs(int ms) {
 		extern void callSleepThumb(int ms);
         callSleepThumb(ms);
     }
-}*/
+}
 
 #ifndef DLDI
 #if ASYNCPF
@@ -808,7 +808,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	// -------------------------------------
 	#endif
 
-	//readCount++;
+	readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.

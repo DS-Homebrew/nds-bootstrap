@@ -84,11 +84,9 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[3] = endOffset;
 	sharedAddr[4] = commandRead;
 
-	#ifdef TWLSDK
 	IPC_SendSync(0x4);
-	#endif
 	while (sharedAddr[4] == commandRead) {
-		//sleepMs(1);
+		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;
 }
@@ -117,11 +115,9 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
 
-	#ifdef TWLSDK
 	IPC_SendSync(0x4);
-	#endif
 	while (sharedAddr[4] == commandRead) {
-		//sleepMs(1);
+		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;
 }

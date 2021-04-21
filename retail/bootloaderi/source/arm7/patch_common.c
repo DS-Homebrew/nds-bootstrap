@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 46;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 47;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -548,7 +548,7 @@ u32 patchCardNds(
 		patchOffsetCache.resetOffset = 0;
 		patchOffsetCache.resetChecked = 0;
 		patchOffsetCache.sleepFuncOffset = 0;
-		//patchOffsetCache.sleepFuncIsThumb = 0;
+		patchOffsetCache.sleepFuncIsThumb = 0;
 		patchOffsetCache.sleepChecked = 0;
 		patchOffsetCache.patchMpuRegion = 0;
 		patchOffsetCache.mpuStartOffset = 0;
