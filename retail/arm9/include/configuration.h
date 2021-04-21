@@ -26,6 +26,7 @@ typedef struct configuration {
 	u32 apPatchSize;
 	u32 cheatSize;
 	u8 language;
+	char* guiLanguage;
 	u8 region; // SDK 5
 	u8 dsiMode; // SDK 5
 	u8 valueBits;

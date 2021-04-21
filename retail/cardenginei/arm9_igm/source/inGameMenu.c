@@ -5,45 +5,18 @@
 #include <nds/arm9/background.h>
 #include <nds/arm9/video.h>
 
+#include "igm_text.h"
 #include "locations.h"
 #include "nds_header.h"
 #include "tonccpy.h"
 
-#include "default_font_bin.h"
+#include "font_bin.h"
 
 static char bgBak[0x2000];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 
 static u16 igmPal[256] = {0};
-static const char *menuText[] =
-{
-	"Return to Game",
-	"Reset Game",
-	"Dump RAM",
-	"Options...",
-	//"Cheats...(TBA)",
-	"RAM Viewer...",
-	"Quit Game"
-};
-static const char *optionsText[] =
-{
-	"Main Screen",
-	"Clock Speed",
-	"VRAM Boost",
-
-	"   Auto",
-	" Bottom",
-	"    Top",
-	" 67 MHz",
-	"133 MHz",
-	"    Off",
-	"     On"
-};
-
-static const char *ndsBootstrapText = "nds-bootstrap";
-static const char *ramViewerText = "RAM Viewer";
-static const char *jumpAddressText = "Jump to Address";
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
@@ -156,12 +129,12 @@ static void drawMainMenu(void) {
 
 	// Print labels
 	for(int i = 0; i < 6; i++) {
-		print(2, i, (char*)menuText[i], 0);
+		print(2, i, igmText->menu[i], 0);
 	}
 
 	// Print info
-	print(1, 0x18 - 3, (char*)ndsBootstrapText, 1);
-	print(1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
+	print(1, 0x18 - 3, igmText->ndsBootstrap, 1);
+	print(1, 0x18 - 2, igmText->version, 1);
 	print(0x20 - 7, 0x18 - 2, "(", 2);
 	print(0x20 - 2, 0x18 - 2, ")", 2);
 }
@@ -171,7 +144,7 @@ static void optionsMenu(s8* mainScreen) {
 
 	// Print labels
 	for(int i = 0; i < 3; i++) {
-		print(2, i, (char*)optionsText[i], 0);
+		print(2, i, igmText->options[i], 0);
 	}
 
 	u8 cursorPosition = 0;
@@ -179,11 +152,11 @@ static void optionsMenu(s8* mainScreen) {
 		drawCursor(cursorPosition);
 
 		// Main screen
-		print(0x20 - 8, 0, (char*)optionsText[3 + (*mainScreen)] , 0);
+		print(0x20 - 8, 0, igmText->options[3 + (*mainScreen)] , 0);
 		// Clock speed
-		print(0x20 - 8, 1, (char*)optionsText[6 + (REG_SCFG_CLK & 1)], 0);
+		print(0x20 - 8, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
 		// VRAM boost
-		print(0x20 - 8, 2, (char*)optionsText[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		print(0x20 - 8, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
@@ -223,7 +196,7 @@ static void jumpToAddress(void) {
 	u8 cursorPosition = 0;
 	while(1) {
 		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 9 + 6, '-', 19);
-		print(8, 10, (char*)jumpAddressText, 0);
+		print(8, 10, igmText->jumpAddress, 0);
 		printHex(11, 12, (u32)address, 4, 2);
 		BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
 		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 13 + 6, '-', 19);
@@ -251,7 +224,7 @@ static void ramViewer(void) {
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		print(11, 0, (char*)ramViewerText, 0);
+		print(11, 0, igmText->ramViewer, 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
@@ -379,7 +352,7 @@ void inGameMenu(s8* mainScreen) {
 	tonccpy(BG_PALETTE_SUB, &igmPal, 0x200);
 
 	tonccpy(&bgBak, BG_GFX_SUB, 0x2000);	// Backup the original graphics
-	tonccpy(BG_GFX_SUB, default_font_bin, 0x2000); // Load font
+	tonccpy(BG_GFX_SUB, font_bin, font_bin_size); // Load font
 
 	// Wait some frames so the key check is ready
 	for (int i = 0; i < 25; i++) {
