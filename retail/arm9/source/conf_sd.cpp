@@ -232,8 +232,6 @@ void setIgmString(const char *src, u16 *dst) {
 				*(dst++) = codepoint - 0x5D0 + 0x180;
 			else // Punctuation and Ligatures
 				*(dst++) = codepoint - 0x5F0 + 0x19B;
-		} else if(codepoint >= u'ㄱ' && codepoint <= u'ㅣ') { // Hangul
-				*(dst++) = codepoint - 0x3130 + 0x1A0;
 		} else { // Unsupported
 			*(dst++) = '?';
 		}
