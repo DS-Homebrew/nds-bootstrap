@@ -1,0 +1,7 @@
+"project_id_env": "BOOTSTRAP_CROWDIN_ID"
+"api_token_env": "CROWDIN_TOKEN"
+preserve_hierarchy: true
+
+files:
+  - source: /retail/nitrofiles/languages/en/*
+    translation: /retail/nitrofiles/languages/%two_letters_code%/%original_file_name%

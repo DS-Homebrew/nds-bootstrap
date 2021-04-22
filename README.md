@@ -9,6 +9,7 @@
   <a href="https://discord.gg/yD3spjv">
    <img src="https://img.shields.io/badge/Discord%20Server-%23nds--bootstrap-green.svg">
   </a>
+  <a title="Crowdin" target="_blank" href="https://crowdin.com/project/nds-bootstrap"><img src="https://badges.crowdin.net/nds-bootstrap/localized.svg"></a>
 </p>
 
 nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and homebrew to be natively utilised rather than using an emulator. nds-bootstrap works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcarts.
