@@ -4,14 +4,14 @@
 #include "locations.h"
 
 struct IgmText {
-	char version[20];
-	char ndsBootstrap[14];
-	char ramViewer[20];
-	char jumpAddress[20];
-	char menu[6][20];
-	char options[10][20];
+	u16 version[20];
+	u16 ndsBootstrap[14];
+	u16 ramViewer[20];
+	u16 jumpAddress[20];
+	u16 menu[6][20];
+	u16 options[10][20];
 };
 
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION - 788;
 
 #endif // IGM_TEXT_H
