@@ -14,6 +14,7 @@
 #include <easysave/ini.hpp>
 #include "myDSiMode.h"
 #include "lzss.h"
+#include "text.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "cheat_engine.h"
@@ -176,69 +177,6 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// GUI Language
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
-}
-
-void setIgmString(const char *src, u16 *dst) {
-	while(*src) {
-		// Get codepoint from UTF-8
-		u16 codepoint = 0;
-		if((*src & 0x80) == 0) {
-			codepoint = *(src++);
-		} else if((*src & 0xE0) == 0xC0) {
-			codepoint = ((*src++ & 0x1F) << 6);
-			if((*src & 0xC0) == 0x80) codepoint |= *src++ & 0x3F;
-		} else if((*src & 0xF0) == 0xE0) {
-			codepoint = (*src++ & 0xF) << 12;
-			if((*src & 0xC0) == 0x80) codepoint |= (*src++ & 0x3F) << 6;
-			if((*src & 0xC0) == 0x80) codepoint |=  *src++ & 0x3F;
-		} else if((*src & 0xF8) == 0xF0) {
-			codepoint = (*src++ & 0x7) << 18;
-			if((*src & 0xC0) == 0x80) codepoint |= (*src++ & 0x3F) << 12;
-			if((*src & 0xC0) == 0x80) codepoint |= (*src++ & 0x3F) << 6;
-			if((*src & 0xC0) == 0x80) codepoint |=  *src++ & 0x3F;
-		} else {
-			// Character isn't valid, use ?
-			src++;
-			codepoint = '?';
-		}
-
-		// Add to string
-		if(codepoint < 127) { // ASCII
-			*(dst++) = codepoint;
-		} else if(codepoint > 127 && codepoint < 0x250) { // Extended Latin
-			if(codepoint <= u'¿') { // Symbols at the Start of Latin-1 Supplement
-				*(dst++) = codepoint - 0xA0;
-			} else if(codepoint <= u'ğ') { // Latin-1 Supplement + start of Latin Extended-A
-				*(dst++) = codepoint;
-			} else if(codepoint <= u'ı') { // İ and ı
-				*(dst++) = codepoint - 0x30;
-			} else if(codepoint <= u'ń') { // Ł, ł, Ń, and ń
-				*(dst++) = codepoint - 0x38;
-			} else if(codepoint <= u'ş') { // Ő, ő, Ś, ś, Ş, and ş
-				*(dst++) = codepoint - 0x4E;
-			} else if(codepoint <= u'ű') { // Ű and ű
-				*(dst++) = codepoint - 0x6E;
-			} else if(codepoint <= u'ż') { // Ź, ź, Ż, and ż
-				*(dst++) = codepoint - 0x77;
-			} else if(codepoint <= u'ș') { // Latin Extended-B: Ș and ș
-				*(dst++) = codepoint - 0x102;
-			}
-		} else if(codepoint >= u'｡' && codepoint <= u'ﾟ') { // Half-width Katakana
-			*(dst++) = codepoint - 0xFF60 + 0x80;
-		} else if(codepoint >= u'Ѐ' && codepoint <= u'џ') { // Cyrillic
-			*(dst++) = codepoint - 0x400 + 0x120;
-		} else if(codepoint >= u'א' && codepoint <= u'״') { // Hebrew
-			if(codepoint <= u'ת') // Letters
-				*(dst++) = codepoint - 0x5D0 + 0x180;
-			else // Punctuation and Ligatures
-				*(dst++) = codepoint - 0x5F0 + 0x19B;
-		} else { // Unsupported
-			*(dst++) = '?';
-		}
-	}
-
-	// Null terminator
-	*dst = 0;
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
@@ -521,6 +459,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Set In-Game Menu strings
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
 		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
+		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
 
 		char path[40];
 		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);

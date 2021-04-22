@@ -46,6 +46,15 @@ static void print(int x, int y, const u16 *str, int palette) {
 		*(dst++) = *(str++) | palette << 12;
 }
 
+static void printRight(int x, int y, const u16 *str, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
+	const u16 *start = str;
+	while(*str)
+		str++;
+	while(str != start)
+		*(dst--) = *(--str) | palette << 12;
+}
+
 static void printChar(int x, int y, u16 c, int palette) {
 	BG_MAP_RAM_SUB(8)[y * 0x20 + x] = c | palette << 12;
 }
@@ -118,12 +127,13 @@ static void clearScreen(void) {
 }
 
 static void drawCursor(u8 line) {
+	u8 pos = igmText->rtl ? 0x1F : 0;
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
-		BG_MAP_RAM_SUB(8)[i * 0x20] = 0;
+		BG_MAP_RAM_SUB(8)[i * 0x20 + pos] = 0;
 
 	// Set cursor on the selected line
-	BG_MAP_RAM_SUB(8)[line * 0x20] = '>';
+	BG_MAP_RAM_SUB(8)[line * 0x20 + pos] = igmText->rtl ? '<' : '>';
 }
 
 static void drawMainMenu(void) {
@@ -131,7 +141,10 @@ static void drawMainMenu(void) {
 
 	// Print labels
 	for(int i = 0; i < 6; i++) {
-		print(2, i, igmText->menu[i], 0);
+		if(igmText->rtl)
+			printRight(0x1D, i, igmText->menu[i], 0);
+		else
+			print(2, i, igmText->menu[i], 0);
 	}
 
 	// Print info
@@ -146,19 +159,31 @@ static void optionsMenu(s8* mainScreen) {
 
 	// Print labels
 	for(int i = 0; i < 3; i++) {
-		print(2, i, igmText->options[i], 0);
+		if(igmText->rtl)
+			printRight(0x1D, i, igmText->options[i], 0);
+		else
+			print(2, i, igmText->options[i], 0);
 	}
 
 	u8 cursorPosition = 0;
 	while(1) {
 		drawCursor(cursorPosition);
 
-		// Main screen
-		print(0x20 - 8, 0, igmText->options[3 + (*mainScreen)] , 0);
-		// Clock speed
-		print(0x20 - 8, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
-		// VRAM boost
-		print(0x20 - 8, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		if(igmText->rtl) {
+			// Main screen
+			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
+			// Clock speed
+			print(1, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			// VRAM boost
+			print(1, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		} else {
+			// Main screen
+			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
+			// Clock speed
+			printRight(0x1E, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			// VRAM boost
+			printRight(0x1E, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
