@@ -467,13 +467,14 @@ _blx_r3_stub2:
 @---------------------------------------------------------------------------------
 thumb_card_irq_enable_arm7:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
+    push	{r4, lr}
 
 	ldr		r3, =myIrqEnable
 
 	bl	thumb_blx_r3_stub2
-	pop	{r1-r7, pc}
-	bx  lr
+	pop	{r4}
+	pop	{r3}
+	bx  r3
 thumb_blx_r3_stub2:
 	bx	r3
 .pool
