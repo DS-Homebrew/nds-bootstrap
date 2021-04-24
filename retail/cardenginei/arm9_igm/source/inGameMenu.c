@@ -378,7 +378,7 @@ void inGameMenu(s8* mainScreen) {
 
 	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
-		tonccpy(BG_PALETTE_SUB + i * 0x10, igmPal[i], 4);
+		tonccpy(BG_PALETTE_SUB + 1 + i * 0x10, igmPal[i], 4);
 	}
 
 	tonccpy(&bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
