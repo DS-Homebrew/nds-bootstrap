@@ -1,7 +1,7 @@
 #include "text.h"
 #include "tonccpy.h"
 
-const char16_t hanzi[] = u"主儲关出到加动動器回地址增定底开强戏戲时查游率界畫看端置自設跳轉转返退选速遊部重钟開關離面頂顶项频";
+const char16_t hanzi[] = u"主位儲关出到动動器回地址增定底开強强戏戲时時查檢游率界畫看移端置自至視設跳轉转返退选遊部重鐘钟開關離面頂頻顶项频";
 
 bool isStrongRTL(u16 c) {
 	return c >= 0x180 && c < 0x200;
