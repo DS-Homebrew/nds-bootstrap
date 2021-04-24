@@ -19,7 +19,13 @@ static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 
-static u16 igmPal[256] = {0};
+static u16 igmPal[][2] = {
+	{0xFFFF, 0xD6B5}, // White
+	{0xDEF7, 0xB9CE}, // Light gray
+	{0xF355, 0xC1EA}, // Light blue
+	{0x801B, 0x800E}, // Red
+	{0x8360, 0x81C0}, // Lime
+};
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
@@ -370,14 +376,10 @@ void inGameMenu(s8* mainScreen) {
 	tonccpy(&bgMapBak, BG_MAP_RAM_SUB(8), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
 
-	igmPal[0x01] = 0xFFFF; // White
-	igmPal[0x11] = 0xDEF7; // Light gray
-	igmPal[0x21] = 0xF355; // Light blue
-	igmPal[0x31] = 0x801B; // Red
-	igmPal[0x41] = 0x8360; // Lime
-
 	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
-	tonccpy(BG_PALETTE_SUB, &igmPal, 0x200);
+	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
+		tonccpy(BG_PALETTE_SUB + i * 0x10, igmPal[i], 4);
+	}
 
 	tonccpy(&bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
 	LZ77_Decompress((u8 *)font_lz77, (u8 *)BG_GFX_SUB); // Load font

@@ -1,6 +1,8 @@
 #include "text.h"
 #include "tonccpy.h"
 
+const char16_t hanzi[] = u"主儲关出到加动動器回地址增定底开强戏戲时查游率界畫看端置自設跳轉转返退选速遊部重钟開關離面頂顶项频";
+
 bool isStrongRTL(u16 c) {
 	return c >= 0x180 && c < 0x200;
 }
@@ -181,6 +183,13 @@ void setIgmString(const char *src, u16 *dst) {
 				*(dst++) = codepoint - 0x5D0 + 0x180;
 			else // Punctuation and Ligatures
 				*(dst++) = codepoint - 0x5F0 + 0x19B;
+		} else if(codepoint >= hanzi[0] && codepoint <= hanzi[sizeof(hanzi) / sizeof(hanzi[0]) - 2]) {
+			for(uint i = 0; i < sizeof(hanzi) / sizeof(hanzi[0]); i++) {
+				if(codepoint == hanzi[i]) {
+					*(dst++) = 0x1A0 + i;
+					break;
+				}
+			}
 		} else { // Unsupported
 			*(dst++) = '?';
 		}
