@@ -7,11 +7,10 @@
 
 #include "igm_text.h"
 #include "locations.h"
-#include "lzss.h"
 #include "nds_header.h"
 #include "tonccpy.h"
 
-#include "font_lz77.h"
+#include "font_bin.h"
 
 #define FONT_SIZE 0x3C00
 
@@ -377,12 +376,14 @@ void inGameMenu(s8* mainScreen) {
 	clearScreen();
 
 	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
+	toncset16(BG_PALETTE_SUB, 0, 256 * sizeof(u16));
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
-		tonccpy(BG_PALETTE_SUB + 1 + i * 0x10, igmPal[i], 4);
+		BG_PALETTE_SUB[1 + i * 0x10] = igmPal[i][0];
+		BG_PALETTE_SUB[2 + i * 0x10] = igmPal[i][1];
 	}
 
 	tonccpy(&bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
-	LZ77_Decompress((u8 *)font_lz77, (u8 *)BG_GFX_SUB); // Load font
+	tonccpy(BG_GFX_SUB, font_bin, FONT_SIZE); // Load font
 
 	// Wait some frames so the key check is ready
 	for (int i = 0; i < 25; i++) {

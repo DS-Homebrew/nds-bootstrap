@@ -38,7 +38,7 @@
 #define DONOR_ROM_ARM7_LOCATION                      0x02680000
 #define DONOR_ROM_ARM7_SIZE_LOCATION                 0x026B0000
 #define CHEAT_ENGINE_BUFFERED_LOCATION	             0x026E0000
-#define INGAME_MENU_LOCATION                         0x026F8000
+#define INGAME_MENU_LOCATION                         0x026F6000
 
 #define BLOWFISH_LOCATION_B4DS                       0x023ECE00
 #define BLOWFISH_LOCATION                            0x027B4C00
