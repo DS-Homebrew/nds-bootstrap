@@ -13,6 +13,6 @@ struct IgmText {
 	bool rtl;
 };
 
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION - sizeof(struct IgmText);
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 #endif // IGM_TEXT_H
