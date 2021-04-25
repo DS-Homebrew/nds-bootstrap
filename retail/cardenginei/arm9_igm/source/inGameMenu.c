@@ -5,45 +5,27 @@
 #include <nds/arm9/background.h>
 #include <nds/arm9/video.h>
 
+#include "igm_text.h"
 #include "locations.h"
+#include "lzss.h"
 #include "nds_header.h"
 #include "tonccpy.h"
 
-#include "default_font_bin.h"
+#include "font_lz77.h"
 
-static char bgBak[0x2000];
+#define FONT_SIZE 0x3C00
+
+static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 
-static u16 igmPal[256] = {0};
-static const char *menuText[] =
-{
-	"Return to Game",
-	"Reset Game",
-	"Dump RAM",
-	"Options...",
-	//"Cheats...(TBA)",
-	"RAM Viewer...",
-	"Quit Game"
+static u16 igmPal[][2] = {
+	{0xFFFF, 0xD6B5}, // White
+	{0xDEF7, 0xB9CE}, // Light gray
+	{0xF355, 0xC1EA}, // Light blue
+	{0x801B, 0x800E}, // Red
+	{0x8360, 0x81C0}, // Lime
 };
-static const char *optionsText[] =
-{
-	"Main Screen",
-	"Clock Speed",
-	"VRAM Boost",
-
-	"   Auto",
-	" Bottom",
-	"    Top",
-	" 67 MHz",
-	"133 MHz",
-	"    Off",
-	"     On"
-};
-
-static const char *ndsBootstrapText = "nds-bootstrap";
-static const char *ramViewerText = "RAM Viewer";
-static const char *jumpAddressText = "Jump to Address";
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
@@ -64,20 +46,27 @@ static void SetBrightness(u8 screen, s8 bright) {
 // For RAM viewer, global so it's persistant
 static vu32 *address = (vu32*)0x02000000;
 
-static void print(int x, int y, const char *str, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
+static void print(int x, int y, const u16 *str, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
 	while(*str)
 		*(dst++) = *(str++) | palette << 12;
 }
 
-static void printN(int x, int y, const char *str, int len, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
-	for(int i = 0; i < len; i++)
-		*(dst++) = *(str++) | palette << 12;
+static void printRight(int x, int y, const u16 *str, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
+	const u16 *start = str;
+	while(*str)
+		str++;
+	while(str != start)
+		*(dst--) = *(--str) | palette << 12;
+}
+
+static void printChar(int x, int y, u16 c, int palette) {
+	BG_MAP_RAM_SUB(8)[y * 0x20 + x] = c | palette << 12;
 }
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(4) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
 	for(int i = bytes * 2 - 1; i >= 0; i--) {
 		*(dst + i) = ((val & 0xF) >= 0xA ? 'A' + (val & 0xF) - 0xA : '0' + (val & 0xF)) | palette << 12;
 		val >>= 4;
@@ -86,28 +75,29 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 
 static void printBattery(void) {
 	u32 batteryLevel = *(u8*)(INGAME_MENU_LOCATION+0x7FFF);
-	const char* bars = "    ";
+	const u16 *bars = u"\3\3";
 	if (batteryLevel & BIT(7)) {
-		bars = " ]- ";	// Charging
-	} else
-	switch(batteryLevel) {
-		default:
-			break;
-		case 0x1:
-		case 0x3:
-			bars = "   |";
-			break;
-		case 0x7:
-			bars = "  ||";
-			break;
-		case 0xB:
-			bars = " |||";
-			break;
-		case 0xF:
-			bars = "||||";
-			break;
+		bars = u"\6\6";	// Charging
+	} else {
+		switch (batteryLevel) {
+			default:
+				break;
+			case 0x1:
+			case 0x3:
+				bars = u"\3\4";
+				break;
+			case 0x7:
+				bars = u"\3\5";
+				break;
+			case 0xB:
+				bars = u"\4\5";
+				break;
+			case 0xF:
+				bars = u"\5\5";
+				break;
+		}
 	}
-	print(0x20 - 6, 0x18 - 2, bars, 2);
+	print(0x20 - 4, 0x18 - 2, bars, 2);
 }
 
 static void waitKeys(u16 keys) {
@@ -126,29 +116,30 @@ static void waitKeys(u16 keys) {
 static void waitKeysBattery(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && KEYS; i++) {
+		printBattery();
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-		printBattery();
 	}
 
 	do {
+		printBattery();
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-		printBattery();
 	} while(!(KEYS & keys));
 }
 
 static void clearScreen(void) {
-	toncset16(BG_MAP_RAM_SUB(4), 0, 0x300);
+	toncset16(BG_MAP_RAM_SUB(8), 0, 0x300);
 }
 
 static void drawCursor(u8 line) {
+	u8 pos = igmText->rtl ? 0x1F : 0;
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
-		BG_MAP_RAM_SUB(4)[i * 0x20] = 0;
+		BG_MAP_RAM_SUB(8)[i * 0x20 + pos] = 0;
 
 	// Set cursor on the selected line
-	BG_MAP_RAM_SUB(4)[line * 0x20] = '>';
+	BG_MAP_RAM_SUB(8)[line * 0x20 + pos] = igmText->rtl ? '<' : '>';
 }
 
 static void drawMainMenu(void) {
@@ -156,14 +147,17 @@ static void drawMainMenu(void) {
 
 	// Print labels
 	for(int i = 0; i < 6; i++) {
-		print(2, i, (char*)menuText[i], 0);
+		if(igmText->rtl)
+			printRight(0x1D, i, igmText->menu[i], 0);
+		else
+			print(2, i, igmText->menu[i], 0);
 	}
 
 	// Print info
-	print(1, 0x18 - 3, (char*)ndsBootstrapText, 1);
-	print(1, 0x18 - 2, (char*)INGAME_MENU_LOCATION, 1);
-	print(0x20 - 7, 0x18 - 2, "(", 2);
-	print(0x20 - 2, 0x18 - 2, ")", 2);
+	print(1, 0x18 - 3, igmText->ndsBootstrap, 1);
+	print(1, 0x18 - 2, igmText->version, 1);
+	printChar(0x20 - 5, 0x18 - 2, '\2', 2);
+	printChar(0x20 - 2, 0x18 - 2, '\7', 2);
 }
 
 static void optionsMenu(s8* mainScreen) {
@@ -171,19 +165,31 @@ static void optionsMenu(s8* mainScreen) {
 
 	// Print labels
 	for(int i = 0; i < 3; i++) {
-		print(2, i, (char*)optionsText[i], 0);
+		if(igmText->rtl)
+			printRight(0x1D, i, igmText->options[i], 0);
+		else
+			print(2, i, igmText->options[i], 0);
 	}
 
 	u8 cursorPosition = 0;
 	while(1) {
 		drawCursor(cursorPosition);
 
-		// Main screen
-		print(0x20 - 8, 0, (char*)optionsText[3 + (*mainScreen)] , 0);
-		// Clock speed
-		print(0x20 - 8, 1, (char*)optionsText[6 + (REG_SCFG_CLK & 1)], 0);
-		// VRAM boost
-		print(0x20 - 8, 2, (char*)optionsText[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		if(igmText->rtl) {
+			// Main screen
+			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
+			// Clock speed
+			print(1, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			// VRAM boost
+			print(1, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		} else {
+			// Main screen
+			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
+			// Clock speed
+			printRight(0x1E, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			// VRAM boost
+			printRight(0x1E, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
@@ -222,11 +228,11 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 9 + 6, '-', 19);
-		print(8, 10, (char*)jumpAddressText, 0);
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 9 + 6, '-', 19);
+		print(8, 10, igmText->jumpAddress, 0);
 		printHex(11, 12, (u32)address, 4, 2);
-		BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(4)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
-		toncset16(BG_MAP_RAM_SUB(4) + 0x20 * 13 + 6, '-', 19);
+		BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 13 + 6, '-', 19);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -251,7 +257,7 @@ static void ramViewer(void) {
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		print(11, 0, (char*)ramViewerText, 0);
+		print(11, 0, igmText->ramViewer, 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
 
 		for(int i = 0; i < 23; i++) {
@@ -260,19 +266,20 @@ static void ramViewer(void) {
 				printHex(5 + (j * 2), i + 1, *(((u8*)address) + (i * 8) + j), 1, 1);
 			for(int j = 0; j < 4; j++)
 				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1);
-			printN(23, i + 1, (char*)(address + (i * 2)), 8, 0);
+			for(int j = 0; j < 8; j++)
+				printChar(23 + j, i + 1, (char)address[i * 2 + j], 0);
 		}
 
 		// Change color of selected byte
 		if(mode > 0) {
 			// Hex
 			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
-			BG_MAP_RAM_SUB(4)[loc] = (BG_MAP_RAM_SUB(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
-			BG_MAP_RAM_SUB(4)[loc + 1] = (BG_MAP_RAM_SUB(4)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc + 1] = (BG_MAP_RAM_SUB(8)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
 
 			// Text
 			loc = 0x20 * (1 + (cursorPosition / 8)) + 23 + (cursorPosition % 8);
-			BG_MAP_RAM_SUB(4)[loc] = (BG_MAP_RAM_SUB(4)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
@@ -352,7 +359,7 @@ void inGameMenu(s8* mainScreen) {
 	u16 masterBright = *(vu16*)0x0400106C;
 
 	REG_DISPCNT_SUB = 0x10100;
-	REG_BG0CNT_SUB = 4 << 8;
+	REG_BG0CNT_SUB = 8 << 8;
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
 	//REG_BG3CNT_SUB = 0;
@@ -366,20 +373,16 @@ void inGameMenu(s8* mainScreen) {
 
 	SetBrightness(1, 0);
 
-	tonccpy(&bgMapBak, BG_MAP_RAM_SUB(4), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
+	tonccpy(&bgMapBak, BG_MAP_RAM_SUB(8), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
 	clearScreen();
 
-	igmPal[0x01] = 0xFFFF; // White
-	igmPal[0x11] = 0xDEF7; // Light gray
-	igmPal[0x21] = 0xF355; // Light blue
-	igmPal[0x31] = 0x801B; // Red
-	igmPal[0x41] = 0x8360; // Lime
-
 	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
-	tonccpy(BG_PALETTE_SUB, &igmPal, 0x200);
+	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
+		tonccpy(BG_PALETTE_SUB + 1 + i * 0x10, igmPal[i], 4);
+	}
 
-	tonccpy(&bgBak, BG_GFX_SUB, 0x2000);	// Backup the original graphics
-	tonccpy(BG_GFX_SUB, default_font_bin, 0x2000); // Load font
+	tonccpy(&bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
+	LZ77_Decompress((u8 *)font_lz77, (u8 *)BG_GFX_SUB); // Load font
 
 	// Wait some frames so the key check is ready
 	for (int i = 0; i < 25; i++) {
@@ -438,9 +441,9 @@ void inGameMenu(s8* mainScreen) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM_SUB(4), &bgMapBak, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
+	tonccpy(BG_MAP_RAM_SUB(8), &bgMapBak, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE_SUB, &palBak, 256 * sizeof(u16));	// Restore the palette
-	tonccpy(BG_GFX_SUB, &bgBak, 0x2000);	// Restore the original graphics
+	tonccpy(BG_GFX_SUB, &bgBak, FONT_SIZE);	// Restore the original graphics
 
 	*(vu16*)0x0400106C = masterBright;
 

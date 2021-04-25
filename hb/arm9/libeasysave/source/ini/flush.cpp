@@ -24,15 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <fstream>
-
 #include "easysave/ini.hpp"
 
 using namespace easysave;
 
+/// Writes INI data to the disk. Returns non-zero on fail.
 size_t ini::flush() {
-  std::ofstream file;
-  file.open(m_filename);
+  FILE *file = fopen(m_filename.c_str(), "w");
   // Loop through every section and dump its keys to a file
   // TODO: Faster implementation, this is like O(n^2)
   for (size_t i = 0; i < m_sections.size(); i++) {
@@ -44,16 +42,20 @@ size_t ini::flush() {
         // section and mark it non-empty
         if (section_is_empty) {
           section_is_empty = false;
-          file << "[" << m_sections[i] << "]" << std::endl;
+          fwrite("[", 1, 1, file);
+          fwrite(m_sections[i].c_str(), 1, m_sections[i].size(), file);
+          fwrite("]\n", 1, 2, file);
         }
         // We do a fetch here to avoid duping quotes. Inefficient, and should be
         // redone! Maybe break off the stripping of quotes into a function that
         // also takes a key index?
-        file << m_keys[j].name << "=\""
-             << fetch(m_sections[m_keys[j].index], m_keys[j].name) << "\""
-             << std::endl;
+        fwrite(m_keys[j].name.c_str(), 1, m_keys[j].name.size(), file);
+        fwrite("=\"", 1, 2, file);
+        std::string temp = fetch(m_sections[m_keys[j].index], m_keys[j].name);
+        fwrite(temp.c_str(), 1, temp.size(), file);
+        fwrite("\"\n", 1, 2, file);
       }
   }
-  file.close();
+  fclose(file);
   return 0;
 }

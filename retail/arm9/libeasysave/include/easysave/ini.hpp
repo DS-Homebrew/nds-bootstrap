@@ -29,26 +29,36 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+/// This namespace is the 'root' of everything in the library.
 namespace easysave {
 
+/// An INI file object.
 class ini {
 public:
   // Constructors
+  /// Specify the filename and load file into memory.
   ini(std::string filename) {
     update_filename(filename);
     refresh();
   }
+  /// Uses 'config.ini' as the filename and loads the file into memory.
   ini() {
     update_filename("config.ini");
     refresh();
   }
 
   // Filename functions
+  /// Returns the filename of the INI object.
   std::string filename() const { return m_filename; }
+  /// Changes the filename of the INI object.
   void update_filename(std::string filename) { m_filename = filename; }
 
-  // Methods for fetching/setting keys
+  // Methods for fetching keys
   std::string fetch(std::string section, std::string key_name);
+  std::string fetch(std::string section, std::string key_name,
+                    std::string default_value);
+
+  // Method for setting keys
   void set(std::string section, std::string key_name, std::string key_data);
 
   // Functions for flushing to disk and refreshing from disk

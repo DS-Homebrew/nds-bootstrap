@@ -24,19 +24,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <fstream>
-#include <regex>
-
 #include "easysave/ini.hpp"
 
 using namespace easysave;
 
+/// Reloads INI file contents from disk. Returns non-zero on fail.
 size_t ini::refresh() {
-  std::ifstream file;
+  FILE *file = fopen(m_filename.c_str(), "r");
 
-  file.open(m_filename);
-
-  if (!file.is_open())
+  if (!file)
     return 1;
 
   // Clear out our variables
@@ -48,12 +44,15 @@ size_t ini::refresh() {
   int index = m_sections.size() - 1;
 
   // Loop through every line
-  while (!file.eof()) {
-    std::string line;
-    std::getline(file, line);
-
-    // Ensure there is no carriage return
-    line = std::regex_replace(line, std::regex("\r+$"), "");
+  char *cline = nullptr;
+  size_t len = 0;
+  while (__getline(&cline, &len, file) != -1) {
+    std::string line(cline);
+    // Ensure there is no carriage return or line feed
+    int lineEnd = line.size() - 1;
+    while(line[lineEnd] == '\r' || line[lineEnd] == '\n')
+      lineEnd--;
+    line = line.substr(0, lineEnd + 1);
 
     // Ignore if comment
     if (line[0] == ';')
@@ -82,13 +81,23 @@ size_t ini::refresh() {
                         line.substr(line.find('=') + 1, line.size())});
 
       // Remove leading and trailing whitespace
-      m_keys.back().name =
-          std::regex_replace(m_keys.back().name, std::regex("^ +| +$"), "");
-      m_keys.back().data =
-          std::regex_replace(m_keys.back().data, std::regex("^ +| +$"), "");
+      int start = 0, end = m_keys.back().name.size() - 1;
+      while(m_keys.back().name[start] == ' ')
+        start++;
+      while(m_keys.back().name[end] == ' ')
+        end--;
+      m_keys.back().name = m_keys.back().name.substr(start, end + 1 - start);
+
+      start = 0, end = m_keys.back().data.size() - 1;
+      while(m_keys.back().data[start] == ' ')
+        start++;
+      while(m_keys.back().data[end] == ' ')
+        end--;
+      m_keys.back().data = m_keys.back().data.substr(start, end + 1 - start);
     }
   }
 
-  file.close();
+  free(cline);
+  fclose(file);
   return 0;
 }

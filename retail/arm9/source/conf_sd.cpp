@@ -14,12 +14,14 @@
 #include <easysave/ini.hpp>
 #include "myDSiMode.h"
 #include "lzss.h"
+#include "text.h"
 #include "tonccpy.h"
 #include "hex.h"
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "conf_sd.h"
 #include "nitrofs.h"
+#include "igm_text.h"
 #include "locations.h"
 #include "version.h"
 
@@ -172,6 +174,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Sound/Mic frequency
 	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ").c_str(), NULL, 0);
+
+	// GUI Language
+	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
@@ -445,13 +450,42 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-    // Load in-game menu ce9 binary
+	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
 
-		tonccpy((char*)INGAME_MENU_LOCATION, VER_NUMBER, sizeof(VER_NUMBER));
+		// Set In-Game Menu strings
+		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
+		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
+		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
+
+		char path[40];
+		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
+		easysave::ini lang(path);
+
+		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
+		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
+
+		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
+		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
+		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[3]);
+		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[4]);
+		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[4]);
+		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[5]);
+
+		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
+		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
+		setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST", "VRAM Boost").c_str(), igmText->options[2]);
+		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
+		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
+		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
+		setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
+		setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
+		setIgmString(lang.fetch("OPTIONS", "OFF", "Off").c_str(), igmText->options[8]);
+		setIgmString(lang.fetch("OPTIONS", "ON", "On").c_str(), igmText->options[9]);
 	}
 	fclose(cebin);
 
