@@ -73,7 +73,7 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 }
 
 static void printBattery(void) {
-	u32 batteryLevel = *(u8*)(INGAME_MENU_LOCATION+0x7FFF);
+	u32 batteryLevel = *(u8*)(INGAME_MENU_LOCATION+0x9FFF);
 	const u16 *bars = u"\3\3";
 	if (batteryLevel & BIT(7)) {
 		bars = u"\6\6";	// Charging

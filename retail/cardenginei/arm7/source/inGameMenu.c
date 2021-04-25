@@ -53,7 +53,7 @@ void inGameMenu(void) {
 		sharedAddr[5] |= (~REG_EXTKEYINPUT & 0x3) << 10;
 		timeTilBatteryLevelRefresh++;
 		if (timeTilBatteryLevelRefresh == 8) {
-			*(u8*)(INGAME_MENU_LOCATION+0x7FFF) = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
+			*(u8*)(INGAME_MENU_LOCATION+0x9FFF) = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
 			timeTilBatteryLevelRefresh = 0;
 		}
 	}
