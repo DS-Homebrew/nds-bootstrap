@@ -266,7 +266,7 @@ static void ramViewer(void) {
 			for(int j = 0; j < 4; j++)
 				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1);
 			for(int j = 0; j < 8; j++)
-				printChar(23 + j, i + 1, (char)address[i * 2 + j], 0);
+				printChar(23 + j, i + 1, ((char*)address)[i * 8 + j], 0);
 		}
 
 		// Change color of selected byte
@@ -372,17 +372,17 @@ void inGameMenu(s8* mainScreen) {
 
 	SetBrightness(1, 0);
 
-	tonccpy(&bgMapBak, BG_MAP_RAM_SUB(8), 0x300 * sizeof(u16));	// Backup BG_MAP_RAM
+	tonccpy(bgMapBak, BG_MAP_RAM_SUB(8), sizeof(bgMapBak));	// Backup BG_MAP_RAM
 	clearScreen();
 
-	tonccpy(&palBak, BG_PALETTE_SUB, 256 * sizeof(u16));	// Backup the palette
-	toncset16(BG_PALETTE_SUB, 0, 256 * sizeof(u16));
+	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
+	toncset16(BG_PALETTE_SUB, 0, 256);
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
 		BG_PALETTE_SUB[1 + i * 0x10] = igmPal[i][0];
 		BG_PALETTE_SUB[2 + i * 0x10] = igmPal[i][1];
 	}
 
-	tonccpy(&bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
+	tonccpy(bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
 	tonccpy(BG_GFX_SUB, font_bin, FONT_SIZE); // Load font
 
 	// Wait some frames so the key check is ready
@@ -442,9 +442,9 @@ void inGameMenu(s8* mainScreen) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM_SUB(8), &bgMapBak, 0x300 * sizeof(u16));	// Restore BG_MAP_RAM
-	tonccpy(BG_PALETTE_SUB, &palBak, 256 * sizeof(u16));	// Restore the palette
-	tonccpy(BG_GFX_SUB, &bgBak, FONT_SIZE);	// Restore the original graphics
+	tonccpy(BG_MAP_RAM_SUB(8), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
+	tonccpy(BG_GFX_SUB, bgBak, FONT_SIZE);	// Restore the original graphics
 
 	*(vu16*)0x0400106C = masterBright;
 
