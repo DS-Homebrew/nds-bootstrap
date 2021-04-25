@@ -924,7 +924,7 @@ void myIrqHandlerIPC(void) {
 
 #ifndef TWLSDK
 	if (IPC_GetSync() == 0x9) {
-		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x200;
+		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
 		(*inGameMenu)(&mainScreen);
 	}
 #endif
