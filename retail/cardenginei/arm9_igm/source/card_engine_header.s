@@ -282,15 +282,9 @@ card_engine_start:
 @---------------------------------------------------------------------------------
 igm_arm9:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r4-r11,lr}
+	stmfd   sp!, {r1-r11,lr}
 
-	ldr		r6, =inGameMenu
-    
-	bl		_blx_r6_stub_igm
+	bl		inGameMenu
 
-	ldmfd   sp!, {r4-r11,pc}
-	bx      lr
-_blx_r6_stub_igm:
-	bx	r6
-.pool
+	ldmfd   sp!, {r1-r11,pc}
 card_engine_end:

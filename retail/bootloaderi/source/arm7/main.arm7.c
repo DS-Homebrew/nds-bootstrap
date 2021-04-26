@@ -1142,7 +1142,6 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
-		loadIBinary_ARM7(&dsiHeaderTemp);
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
 			/*if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
@@ -1153,8 +1152,9 @@ int arm7_main(void) {
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0x800000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0x800000;
 			//}
-			toncset((char*)INGAME_MENU_LOCATION, 0, 0x88000);
+			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
 		}
+		loadIBinary_ARM7(&dsiHeaderTemp);
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
