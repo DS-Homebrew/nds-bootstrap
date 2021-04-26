@@ -203,7 +203,7 @@ static void optionsMenu(s8 *mainScreen) {
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
 					if(*mainScreen > 2)
 						*mainScreen = 0;
-					else if(mainScreen < 0)
+					else if(*mainScreen < 0)
 						*mainScreen = 2;
 					break;
 				case 1:
