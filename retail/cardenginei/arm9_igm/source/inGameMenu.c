@@ -159,19 +159,18 @@ static void drawMainMenu(void) {
 	printChar(0x20 - 2, 0x18 - 2, '\7', 2);
 }
 
-static void optionsMenu(s8* mainScreen) {
-	clearScreen();
-
-	// Print labels
-	for(int i = 0; i < 3; i++) {
-		if(igmText->rtl)
-			printRight(0x1D, i, igmText->options[i], 0);
-		else
-			print(2, i, igmText->options[i], 0);
-	}
-
+static void optionsMenu(s8 *mainScreen) {
 	u8 cursorPosition = 0;
 	while(1) {
+		clearScreen();
+
+		// Print labels
+		for(int i = 0; i < 3; i++) {
+			if(igmText->rtl)
+				printRight(0x1D, i, igmText->options[i], 0);
+			else
+				print(2, i, igmText->options[i], 0);
+		}
 		drawCursor(cursorPosition);
 
 		if(igmText->rtl) {
@@ -201,7 +200,7 @@ static void optionsMenu(s8* mainScreen) {
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
 				case 0:
-					(KEYS & KEY_LEFT) ? *mainScreen-- : *mainScreen++;
+					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
 					if(*mainScreen > 2)
 						*mainScreen = 0;
 					else if(mainScreen < 0)

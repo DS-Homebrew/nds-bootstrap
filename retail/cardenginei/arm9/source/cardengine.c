@@ -964,10 +964,17 @@ void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerIPC");
-	#endif	
+	#endif
+
+	if (IPC_GetSync() == 0x0) {
+		if(mainScreen == 1)
+			REG_POWERCNT &= ~POWER_SWAP_LCDS;
+		else if(mainScreen == 2)
+			REG_POWERCNT |= POWER_SWAP_LCDS;
+	}
 
 #ifndef DLDI
-	if (IPC_GetSync() == 0x3) {
+	else if (IPC_GetSync() == 0x3) {
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			//continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
@@ -975,12 +982,16 @@ void myIrqHandlerIPC(void) {
 	}
 #endif
 
-	if (IPC_GetSync() == 0x7){
+	else if (IPC_GetSync() == 0x7){
 		mainScreen++;
 		if(mainScreen > 2)
 			mainScreen = 0;
 	}
-	
+
+	else if (IPC_GetSync() == 0x9) {
+		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
+		(*inGameMenu)(&mainScreen);
+	}
 
 	if (sharedAddr[4] == (vu32)0x57534352){
 		enterCriticalSection();
@@ -989,16 +1000,6 @@ void myIrqHandlerIPC(void) {
 		SetBrightness(1, 31);
 		while (1);
 	}
-
-	if (IPC_GetSync() == 0x9) {
-		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
-		(*inGameMenu)(&mainScreen);
-	}
-
-	if(mainScreen == 1)
-		REG_POWERCNT &= ~POWER_SWAP_LCDS;
-	else if(mainScreen == 2)
-		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {
