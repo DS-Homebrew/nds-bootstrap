@@ -240,11 +240,11 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 9 + 6, '-', 18);
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText->jumpAddress, 0);
 		printHex(11, 12, (u32)address, 4, 3);
 		BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
-		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 13 + 6, '-', 18);
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 13 + 5, '-', 20);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
