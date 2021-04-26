@@ -896,21 +896,37 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
 
+	switch (IPC_GetSync()) {
+		case 0x0: {
+			if(mainScreen == 1)
+				REG_POWERCNT &= ~POWER_SWAP_LCDS;
+			else if(mainScreen == 2)
+				REG_POWERCNT |= POWER_SWAP_LCDS;
+		}
+			break;
 #ifndef DLDI
 #ifndef TWLSDK
-	if (IPC_GetSync() == 0x3) {
+		case 0x3:
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			//continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
-	}
+			break;
 #endif
 #endif
-
-	if (IPC_GetSync() == 0x7){
-		mainScreen++;
-		if(mainScreen > 2)
-			mainScreen = 0;
+		case 0x7: {
+			mainScreen++;
+			if(mainScreen > 2)
+				mainScreen = 0;
+		}
+			break;
+#ifndef TWLSDK
+		case 0x9: {
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
+			(*inGameMenu)(&mainScreen);
+		}
+#endif
+			break;
 	}
 
 	if (sharedAddr[4] == 0x57534352) {
@@ -921,18 +937,6 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
-
-#ifndef TWLSDK
-	if (IPC_GetSync() == 0x9) {
-		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
-		(*inGameMenu)(&mainScreen);
-	}
-#endif
-
-	if(mainScreen == 1)
-		REG_POWERCNT &= ~POWER_SWAP_LCDS;
-	else if(mainScreen == 2)
-		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {

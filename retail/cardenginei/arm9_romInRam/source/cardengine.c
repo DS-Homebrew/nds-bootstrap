@@ -462,15 +462,33 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif	
 
-	if (IPC_GetSync() == 0x3) {
-		endCardReadDma();
-		sharedAddr[4] = romWordBak;
-	}
-
-	if (IPC_GetSync() == 0x7){
-		mainScreen++;
-		if(mainScreen > 2)
-			mainScreen = 0;
+	switch (IPC_GetSync()) {
+		case 0x0: {
+			if(mainScreen == 1)
+				REG_POWERCNT &= ~POWER_SWAP_LCDS;
+			else if(mainScreen == 2)
+				REG_POWERCNT |= POWER_SWAP_LCDS;
+		}
+			break;
+#ifndef DLDI
+		case 0x3:
+			endCardReadDma();
+			sharedAddr[4] = romWordBak;
+			break;
+#endif
+		case 0x7: {
+			mainScreen++;
+			if(mainScreen > 2)
+				mainScreen = 0;
+		}
+			break;
+		case 0x9: {
+			if (!(ce9->valueBits & extendedMemory)) {
+				volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
+				(*inGameMenu)(&mainScreen);
+			}
+		}
+			break;
 	}
 
 	if (sharedAddr[4] == 0x57534352) {
@@ -481,16 +499,6 @@ void myIrqHandlerIPC(void) {
 
 		while (1);
 	}
-
-	if (IPC_GetSync() == 0x9 && !(ce9->valueBits & extendedMemory)) {
-		volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
-		(*inGameMenu)(&mainScreen);
-	}
-
-	if(mainScreen == 1)
-		REG_POWERCNT &= ~POWER_SWAP_LCDS;
-	else if(mainScreen == 2)
-		REG_POWERCNT |= POWER_SWAP_LCDS;
 }
 
 void reset(u32 param) {
