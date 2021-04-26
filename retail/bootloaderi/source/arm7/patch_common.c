@@ -386,6 +386,38 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }
+
+	// Pop Island (USA)
+    if (strcmp(romTid, "KPPE") == 0) {
+        // Show "HELP" instead of "DEMO"
+        *(u32*)0x202E220 = 0xE1A00000; //nop
+        *(u32*)0x202E224 = 0xE1A00000; //nop
+        *(u32*)0x202E228 = 0xE1A00000; //nop
+    }
+
+	// Pop Island (Europe)
+    if (strcmp(romTid, "KPPP") == 0) {
+        // Show "HELP" instead of "DEMO"
+        *(u32*)0x202DC1C = 0xE1A00000; //nop
+        *(u32*)0x202DC20 = 0xE1A00000; //nop
+        *(u32*)0x202DC24 = 0xE1A00000; //nop
+    }
+
+	// Pop Island: Paperfield (USA)
+    if (strcmp(romTid, "KPFE") == 0) {
+        // Show "HELP" instead of "DEMO"
+        *(u32*)0x202E6C8 = 0xE1A00000; //nop
+        *(u32*)0x202E6CC = 0xE1A00000; //nop
+        *(u32*)0x202E6D0 = 0xE1A00000; //nop
+    }
+
+	// Pop Island: Paperfield (Europe)
+    if (strcmp(romTid, "KPFP") == 0) {
+        // Show "HELP" instead of "DEMO"
+        *(u32*)0x202E698 = 0xE1A00000; //nop
+        *(u32*)0x202E69C = 0xE1A00000; //nop
+        *(u32*)0x202E6A0 = 0xE1A00000; //nop
+    }
 }
 
 /*void patchSlot2Addr(const tNDSHeader* ndsHeader) {
