@@ -406,6 +406,7 @@ void inGameMenu(s8* mainScreen) {
 	while (sharedAddr[4] == 0x554E454D) {
 		drawMainMenu();
 		drawCursor(cursorPosition);
+		sharedAddr[5] = 0x59444552; // 'REDY'
 
 		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
 
