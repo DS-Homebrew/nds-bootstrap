@@ -987,7 +987,7 @@ void myIrqHandlerIPC(void) {
 		}
 			break;
 		case 0x9: {
-			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x400;
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x408;
 			(*inGameMenu)(&mainScreen);
 		}
 			break;

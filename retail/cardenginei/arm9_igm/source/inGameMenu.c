@@ -14,6 +14,9 @@
 
 #define FONT_SIZE 0x3C00
 
+extern u32 scfgExtBak;
+extern u16 scfgClkBak;
+
 static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
@@ -177,16 +180,16 @@ static void optionsMenu(s8 *mainScreen) {
 			// Main screen
 			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
 			// Clock speed
-			print(1, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			print(1, 1, igmText->options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
 			// VRAM boost
-			print(1, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+			print(1, 2, igmText->options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		} else {
 			// Main screen
 			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
 			// Clock speed
-			printRight(0x1E, 1, igmText->options[6 + (REG_SCFG_CLK & 1)], 0);
+			printRight(0x1E, 1, igmText->options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
 			// VRAM boost
-			printRight(0x1E, 2, igmText->options[8 + ((REG_SCFG_EXT & BIT(13)) >> 13)], 0);
+			printRight(0x1E, 2, igmText->options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);

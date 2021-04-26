@@ -2,6 +2,8 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global scfgExtBak
+	.global scfgClkBak
 	.align	4
 	.arm
 
@@ -268,6 +270,12 @@
 .word 0
 .word 0
 .word 0
+
+scfgExtBak:
+.word 0
+scfgClkBak:
+.hword 0
+.align 4
 
 card_engine_start:
 
