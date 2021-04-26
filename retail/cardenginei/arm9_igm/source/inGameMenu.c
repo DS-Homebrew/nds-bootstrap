@@ -199,13 +199,18 @@ static void optionsMenu(s8 *mainScreen) {
 				cursorPosition++;
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
-				case 0:
+				case 0: {
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
 					if(*mainScreen > 2)
 						*mainScreen = 0;
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
-					break;
+
+					if(*mainScreen == 1)
+						REG_POWERCNT &= ~POWER_SWAP_LCDS;
+					else if(*mainScreen == 2)
+						REG_POWERCNT |= POWER_SWAP_LCDS;
+				}	break;
 				case 1:
 					REG_SCFG_CLK ^= 1;
 					break;

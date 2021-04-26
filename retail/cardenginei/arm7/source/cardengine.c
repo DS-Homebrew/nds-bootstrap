@@ -904,9 +904,6 @@ void myIrqHandlerVBlank(void) {
 			sharedAddr[3] = 0;
 		}
 	}*/
-
-	// Update main screen
-	IPC_SendSync(0x0);
 }
 
 void i2cIRQHandler(void) {
