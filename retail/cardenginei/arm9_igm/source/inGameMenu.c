@@ -24,6 +24,7 @@ static u16 palBak[256];
 static u16 igmPal[][2] = {
 	{0xFFFF, 0xD6B5}, // White
 	{0xDEF7, 0xB9CE}, // Light gray
+	{0xCE73, 0xB18C}, // Darker gray
 	{0xF355, 0xC1EA}, // Light blue
 	{0x801B, 0x800E}, // Red
 	{0x8360, 0x81C0}, // Lime
@@ -52,6 +53,16 @@ static void print(int x, int y, const u16 *str, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
 	while(*str)
 		*(dst++) = *(str++) | palette << 12;
+}
+
+static void printCenter(int x, int y, const u16 *str, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(8) + y * 0x20 + x;
+	const u16 *start = str;
+	while(*str)
+		str++;
+	dst += (str - start) / 2;
+	while(str != start)
+		*(--dst) = *(--str) | palette << 12;
 }
 
 static void printRight(int x, int y, const u16 *str, int palette) {
@@ -99,7 +110,7 @@ static void printBattery(void) {
 				break;
 		}
 	}
-	print(0x20 - 4, 0x18 - 2, bars, 2);
+	print(0x20 - 4, 0x18 - 2, bars, 3);
 }
 
 static void waitKeys(u16 keys) {
@@ -158,8 +169,8 @@ static void drawMainMenu(void) {
 	// Print info
 	print(1, 0x18 - 3, igmText->ndsBootstrap, 1);
 	print(1, 0x18 - 2, igmText->version, 1);
-	printChar(0x20 - 5, 0x18 - 2, '\2', 2);
-	printChar(0x20 - 2, 0x18 - 2, '\7', 2);
+	printChar(0x20 - 5, 0x18 - 2, '\2', 3);
+	printChar(0x20 - 2, 0x18 - 2, '\7', 3);
 }
 
 static void optionsMenu(s8 *mainScreen) {
@@ -229,18 +240,18 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 9 + 6, '-', 19);
-		print(8, 10, igmText->jumpAddress, 0);
-		printHex(11, 12, (u32)address, 4, 2);
-		BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 3 << 12;
-		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 13 + 6, '-', 19);
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 9 + 6, '-', 18);
+		printCenter(15, 10, igmText->jumpAddress, 0);
+		printHex(11, 12, (u32)address, 4, 3);
+		BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(8)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
+		toncset16(BG_MAP_RAM_SUB(8) + 0x20 * 13 + 6, '-', 18);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
 		if(KEYS & KEY_UP) {
-			address += 4 << (cursorPosition * 4);
+			address = (vu32*)(((u32)address & ~(0xF0 << cursorPosition * 4)) | (((u32)address + (0x10 << (cursorPosition * 4))) & (0xF0 << cursorPosition * 4)));
 		} else if(KEYS & KEY_DOWN) {
-			address -= 4 << (cursorPosition * 4);
+			address = (vu32*)(((u32)address & ~(0xF0 << cursorPosition * 4)) | (((u32)address - (0x10 << (cursorPosition * 4))) & (0xF0 << cursorPosition * 4)));
 		} else if(KEYS & KEY_LEFT) {
 			if(cursorPosition < 6)
 				cursorPosition++;
@@ -258,15 +269,15 @@ static void ramViewer(void) {
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		print(11, 0, igmText->ramViewer, 0);
-		printHex(0, 0, (u32)(address) >> 0x10, 2, 2);
+		printCenter(14, 0, igmText->ramViewer, 0);
+		printHex(0, 0, (u32)(address) >> 0x10, 2, 3);
 
 		for(int i = 0; i < 23; i++) {
-			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 2);
+			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 3);
 			for(int j = 0; j < 4; j++)
-				printHex(5 + (j * 2), i + 1, *(((u8*)address) + (i * 8) + j), 1, 1);
+				printHex(5 + (j * 2), i + 1, *(((u8*)address) + (i * 8) + j), 1, 1 + j % 2);
 			for(int j = 0; j < 4; j++)
-				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1);
+				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1 + j % 2);
 			for(int j = 0; j < 8; j++)
 				printChar(23 + j, i + 1, ((char*)address)[i * 8 + j], 0);
 		}
@@ -275,32 +286,44 @@ static void ramViewer(void) {
 		if(mode > 0) {
 			// Hex
 			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
-			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
-			BG_MAP_RAM_SUB(8)[loc + 1] = (BG_MAP_RAM_SUB(8)[loc + 1] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc + 1] = (BG_MAP_RAM_SUB(8)[loc + 1] & ~(0xF << 12)) | (3 + mode) << 12;
 
 			// Text
 			loc = 0x20 * (1 + (cursorPosition / 8)) + 23 + (cursorPosition % 8);
-			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (2 + mode) << 12;
+			BG_MAP_RAM_SUB(8)[loc] = (BG_MAP_RAM_SUB(8)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
 
 		if(mode == 0) {
-			if (KEYS & KEY_UP) {
-				address -= 2;
-			} else if (KEYS & KEY_DOWN) {
-				address += 2;
-			} else if (KEYS & KEY_LEFT) {
-				address -= 2 * 23;
-			} else if (KEYS & KEY_RIGHT) {
-				address += 2 * 23;
-			} else if (KEYS & KEY_A) {
-				mode = 1;
-			} else if (KEYS & KEY_B) {
-				return;
-			} else if(KEYS & KEY_Y) {
-				jumpToAddress();
-				clearScreen();
+			if(KEYS & KEY_R && KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) {
+				if (KEYS & KEY_UP) {
+					address -= 0x400;
+				} else if (KEYS & KEY_DOWN) {
+					address += 0x400;
+				} else if (KEYS & KEY_LEFT) {
+					address -= 0x4000;
+				} else if (KEYS & KEY_RIGHT) {
+					address += 0x4000;
+				}
+			} else {
+				if (KEYS & KEY_UP) {
+					address -= 2;
+				} else if (KEYS & KEY_DOWN) {
+					address += 2;
+				} else if (KEYS & KEY_LEFT) {
+					address -= 2 * 23;
+				} else if (KEYS & KEY_RIGHT) {
+					address += 2 * 23;
+				} else if (KEYS & KEY_A) {
+					mode = 1;
+				} else if (KEYS & KEY_B) {
+					return;
+				} else if(KEYS & KEY_Y) {
+					jumpToAddress();
+					clearScreen();
+				}
 			}
 		} else if(mode == 1) {
 			if (KEYS & KEY_UP) {
