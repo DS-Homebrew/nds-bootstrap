@@ -29,8 +29,6 @@ static u16 igmPal[][2] = {
 	{0x8360, 0x81C0}, // Lime
 };
 
-static bool screenSwapped = false;
-
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
 
@@ -204,20 +202,13 @@ static void optionsMenu(s8 *mainScreen) {
 				cursorPosition++;
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
-				case 0: {
-					screenSwapped = true;
+				case 0:
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
-					if(*mainScreen > 2) {
+					if(*mainScreen > 2)
 						*mainScreen = 0;
-						screenSwapped = false;
-					} else if(*mainScreen < 0)
+					else if(*mainScreen < 0)
 						*mainScreen = 2;
-
-					if(*mainScreen == 1)
-						REG_POWERCNT &= ~POWER_SWAP_LCDS;
-					else if(*mainScreen == 2)
-						REG_POWERCNT |= POWER_SWAP_LCDS;
-				}	break;
+					break;
 				case 1:
 					REG_SCFG_CLK ^= 1;
 					break;
@@ -378,8 +369,7 @@ void inGameMenu(s8* mainScreen) {
 	REG_BG0HOFS_SUB = 0;
 
 	// If main screen is on auto, then force the bottom
-	if(*mainScreen == 0)
-		REG_POWERCNT |= POWER_SWAP_LCDS;
+	REG_POWERCNT |= POWER_SWAP_LCDS;
 
 	SetBrightness(1, 0);
 
@@ -466,13 +456,9 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG2CNT_SUB = bg2cnt;
 	//REG_BG3CNT_SUB = bg3cnt;
 
-	if (!screenSwapped) {
-		REG_POWERCNT = powercnt;
-	}
+	REG_POWERCNT = powercnt;
 
 	REG_EXMEMCNT = exmemcnt;
-
-	screenSwapped = false;
 
 	leaveCriticalSection(oldIME);
 }
