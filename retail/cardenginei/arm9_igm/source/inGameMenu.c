@@ -29,6 +29,8 @@ static u16 igmPal[][2] = {
 	{0x8360, 0x81C0}, // Lime
 };
 
+static bool screenSwapped = false;
+
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
 
@@ -203,10 +205,12 @@ static void optionsMenu(s8 *mainScreen) {
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
 				case 0: {
+					screenSwapped = true;
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
-					if(*mainScreen > 2)
+					if(*mainScreen > 2) {
 						*mainScreen = 0;
-					else if(*mainScreen < 0)
+						screenSwapped = false;
+					} else if(*mainScreen < 0)
 						*mainScreen = 2;
 
 					if(*mainScreen == 1)
@@ -461,9 +465,13 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG2CNT_SUB = bg2cnt;
 	//REG_BG3CNT_SUB = bg3cnt;
 
-	REG_POWERCNT = powercnt;
+	if (!screenSwapped) {
+		REG_POWERCNT = powercnt;
+	}
 
 	REG_EXMEMCNT = exmemcnt;
+
+	screenSwapped = false;
 
 	leaveCriticalSection(oldIME);
 }
