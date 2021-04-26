@@ -88,6 +88,7 @@ static bool haltIsRunning = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 //static bool dmaLed = false;
+static bool swapScreens = false;
 static bool saveInRam = false;
 
 #ifdef TWLSDK
@@ -785,7 +786,7 @@ void myIrqHandlerVBlank(void) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
-				IPC_SendSync(0x7);
+				swapScreens = true;
 			}
 		}
 		unlockMutex(&saveMutex);
@@ -904,6 +905,10 @@ void myIrqHandlerVBlank(void) {
 			sharedAddr[3] = 0;
 		}
 	}*/
+
+	// Update main screen or swap screens
+	IPC_SendSync(swapScreens ? 0x7 : 0x0);
+	swapScreens = false;
 }
 
 void i2cIRQHandler(void) {
