@@ -115,7 +115,7 @@ static void printBattery(void) {
 
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
-	for(int i = 0; i < 10 && KEYS; i++) {
+	for(int i = 0; i < 10 && (KEYS & keys); i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
@@ -128,7 +128,7 @@ static void waitKeys(u16 keys) {
 
 static void waitKeysBattery(u16 keys) {
 	// Prevent key repeat for 10 frames
-	for(int i = 0; i < 10 && KEYS; i++) {
+	for(int i = 0; i < 10 && (KEYS & keys); i++) {
 		printBattery();
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
@@ -409,17 +409,22 @@ void inGameMenu(s8* mainScreen) {
 	tonccpy(bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
 	tonccpy(BG_GFX_SUB, font_bin, FONT_SIZE); // Load font
 
-	// Wait some frames so the key check is ready
-	for (int i = 0; i < 25; i++) {
+	// Let ARM7 know the menu loaded
+	sharedAddr[5] = 0x59444552; // 'REDY'
+
+	// Wait for keys to be released
+	drawMainMenu();
+	drawCursor(0);
+	do {
+		printBattery();
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-	}
+	} while(KEYS & (KEY_DOWN | KEY_L | KEY_SELECT));
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {
 		drawMainMenu();
 		drawCursor(cursorPosition);
-		sharedAddr[5] = 0x59444552; // 'REDY'
 
 		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
 
