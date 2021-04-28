@@ -61,7 +61,8 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 
 	bool doPatch = (!gameOnFlashcard || (ROMinRAM && !extendedMemoryConfirmed)) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed));
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "AWI", 3) == 0)	// Hotel Dusk: Room 215
+	if (strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
+	 || strncmp(romTid, "AFF", 3) == 0)	// Final Fantasy III
 	{
 		doPatch = false;
 	}
