@@ -345,6 +345,7 @@ static void cardReadLED(bool on, bool dmaLed) {
 extern void inGameMenu(void);
 
 void forceGameReboot(void) {
+	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = 0;
 	u32 clearBuffer = 0;
 	if (consoleModel < 2) {
@@ -369,6 +370,7 @@ void forceGameReboot(void) {
 }
 
 void returnToLoader(void) {
+	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	if (consoleModel >= 2) {
 		if (*(u32*)(ce7+0xA100) == 0) {
