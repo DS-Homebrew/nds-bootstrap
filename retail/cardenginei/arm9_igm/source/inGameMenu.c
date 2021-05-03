@@ -275,9 +275,9 @@ static void ramViewer(void) {
 		for(int i = 0; i < 23; i++) {
 			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 3);
 			for(int j = 0; j < 4; j++)
-				printHex(5 + (j * 2), i + 1, *(((u8*)address) + (i * 8) + j), 1, 1 + j % 2);
+				printHex(5 + (j * 2), i + 1, ((u8*)address)[(i * 8) + j], 1, 1 + j % 2);
 			for(int j = 0; j < 4; j++)
-				printHex(14 + (j * 2), i + 1, *(((u8*)address) + 4 + (i * 8) + j), 1, 1 + j % 2);
+				printHex(14 + (j * 2), i + 1, ((u8*)address)[4 + (i * 8) + j], 1, 1 + j % 2);
 			for(int j = 0; j < 8; j++)
 				printChar(23 + j, i + 1, ((char*)address)[i * 8 + j], 0);
 		}
