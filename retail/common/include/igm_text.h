@@ -11,6 +11,7 @@ struct IgmText {
 	u16 menu[6][20];
 	u16 options[10][20];
 	bool rtl;
+	u16 hotkey;
 };
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;

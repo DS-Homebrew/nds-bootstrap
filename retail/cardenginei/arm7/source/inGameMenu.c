@@ -48,7 +48,7 @@ void inGameMenu(void) {
 
 	while (sharedAddr[4] == 0x554E454D) {
 		sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
-		sharedAddr[5] |= (~REG_EXTKEYINPUT & 0x3) << 10;
+		sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 		timeTilBatteryLevelRefresh++;
 		if (timeTilBatteryLevelRefresh == 8) {
 			*(u8*)(INGAME_MENU_LOCATION+0x9FFF) = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);

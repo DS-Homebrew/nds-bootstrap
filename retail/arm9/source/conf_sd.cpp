@@ -177,6 +177,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// GUI Language
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
+
+	// Hotkey
+	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY").c_str(), NULL, 16);
 }
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
@@ -460,6 +463,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
 		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
 		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
+
+		// Set In-Game Menu hotkey
+		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
 
 		char path[40];
 		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);

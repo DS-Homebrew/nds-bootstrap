@@ -419,7 +419,7 @@ void inGameMenu(s8* mainScreen) {
 		printBattery();
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-	} while(KEYS & (KEY_DOWN | KEY_L | KEY_SELECT));
+	} while(KEYS & igmText->hotkey);
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {
