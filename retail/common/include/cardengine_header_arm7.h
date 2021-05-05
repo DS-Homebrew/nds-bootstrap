@@ -87,6 +87,7 @@ typedef struct cardengineArm7 {
     u8 romRead_LED;
     u8 dmaRomRead_LED;
     u32* irqTable_offset;
+    u16 igmHotkey;
 } __attribute__ ((__packed__)) cardengineArm7;
 #else
 //

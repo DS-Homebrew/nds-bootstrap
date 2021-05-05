@@ -24,6 +24,7 @@
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
+.global igmHotkey
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -64,6 +65,8 @@ dmaRomRead_LED:
 	.byte	0
 irqTable_offset:
 	.word	irqTable
+igmHotkey:
+	.hword	0
 .align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

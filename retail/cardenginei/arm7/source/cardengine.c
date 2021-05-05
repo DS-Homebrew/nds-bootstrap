@@ -37,7 +37,6 @@
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
-#include "igm_text.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
@@ -76,6 +75,7 @@ extern u8 language;
 extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
+extern u16 igmHotkey;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
@@ -800,7 +800,7 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
-	if (0 == (REG_KEYINPUT & igmText->hotkey) && 0 == (REG_EXTKEYINPUT & (((igmText->hotkey >> 10) & 3) | ((igmText->hotkey >> 6) & 0xC0)))) {
+	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
 		((valueBits & extendedMemory) || (ndsHeader->unitCode > 0 && (valueBits & dsiMode))) ? returnToLoader() : inGameMenu();
 	}
 

@@ -17,6 +17,7 @@
 #include "text.h"
 #include "tonccpy.h"
 #include "hex.h"
+#include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
 #include "configuration.h"
 #include "conf_sd.h"
@@ -466,6 +467,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
+
+		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
+		cardengineArm7* ce7sdk5 = (cardengineArm7*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION;
+		ce7->igmHotkey = igmText->hotkey;
+		ce7sdk5->igmHotkey = igmText->hotkey;
 
 		char path[40];
 		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
