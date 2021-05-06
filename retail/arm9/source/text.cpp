@@ -2,6 +2,7 @@
 #include "tonccpy.h"
 
 const char16_t hanzi[] = u"主位儲关出到动動器回地址增定底开強强戏戲时時查檢游率界畫看移端置自至視設跳轉转返退选遊部重鐘钟開關離面頂頻顶项频";
+const char16_t hangul[] = u"가게기끔덤도돌동래럭로료리메면뷰상설셋소속아어위으이인임자정종주켬클프향화";
 
 bool isStrongRTL(u16 c) {
 	return c >= 0x180 && c < 0x200;
@@ -175,18 +176,27 @@ void setIgmString(const char *src, u16 *dst) {
 			}
 		} else if(codepoint >= u'｡' && codepoint <= u'ﾟ') { // Half-width Katakana
 			*(dst++) = codepoint - 0xFF60 + 0x80;
+		} else if(codepoint >= u'ΐ' && codepoint <= u'Ϗ') { // Greek
+			*(dst++) = codepoint - 0x390 + 0x120;
 		} else if(codepoint >= u'Ѐ' && codepoint <= u'џ') { // Cyrillic
-			*(dst++) = codepoint - 0x400 + 0x120;
+			*(dst++) = codepoint - 0x400 + 0x160;
 		} else if(codepoint >= u'א' && codepoint <= u'״') { // Hebrew
 			containsRTL = true;
 			if(codepoint <= u'ת') // Letters
-				*(dst++) = codepoint - 0x5D0 + 0x180;
+				*(dst++) = codepoint - 0x5D0 + 0x1C0;
 			else // Punctuation and Ligatures
-				*(dst++) = codepoint - 0x5F0 + 0x19B;
-		} else if(codepoint >= hanzi[0] && codepoint <= hanzi[sizeof(hanzi) / sizeof(hanzi[0]) - 2]) {
+				*(dst++) = codepoint - 0x5F0 + 0x1DB;
+		} else if(codepoint >= hanzi[0] && codepoint <= hanzi[sizeof(hanzi) / sizeof(hanzi[0]) - 2]) { // Hànzì
 			for(uint i = 0; i < sizeof(hanzi) / sizeof(hanzi[0]); i++) {
 				if(codepoint == hanzi[i]) {
-					*(dst++) = 0x1A0 + i;
+					*(dst++) = 0x1E0 + i;
+					break;
+				}
+			}
+		} else if(codepoint >= hangul[0] && codepoint <= hangul[sizeof(hangul) / sizeof(hangul[0]) - 2]) { // Hangul
+			for(uint i = 0; i < sizeof(hangul) / sizeof(hangul[0]); i++) {
+				if(codepoint == hangul[i]) {
+					*(dst++) = 0x21B + i;
 					break;
 				}
 			}
