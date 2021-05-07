@@ -87,51 +87,48 @@ static void enableIPC_SYNC(void) {
 }
 
 void myIrqHandlerIPC(void) {
-	if (sharedAddr[3] == 0x53415652) {
-		// Read save
-		setDeviceOwner();
+	switch (sharedAddr[3]) {
+		case 0x53415652: {
+			// Read save
+			setDeviceOwner();
 
-		u32 dst = *(vu32*)(sharedAddr+2);
-		u32 src = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
+			u32 dst = *(vu32*)(sharedAddr+2);
+			u32 src = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
 
-		fileRead((char*)dst, savFile, src, len, -1);
+			fileRead((char*)dst, savFile, src, len, -1);
 
-		sharedAddr[3] = 0;
-	}
-	if (sharedAddr[3] == 0x53415657) {
-		// Write save
-		setDeviceOwner();
+			sharedAddr[3] = 0;
+		} break;
+		case 0x53415657: {
+			// Write save
+			setDeviceOwner();
 
-		u32 src = *(vu32*)(sharedAddr+2);
-		u32 dst = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
+			u32 src = *(vu32*)(sharedAddr+2);
+			u32 dst = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
 
-		fileWrite((char*)src, savFile, dst, len, -1);
+			fileWrite((char*)src, savFile, dst, len, -1);
 
-		sharedAddr[3] = 0;
-	}
-	if (sharedAddr[3] == 0x524F4D52) {
-		// Read ROM (redirected from arm7)
-		setDeviceOwner();
+			sharedAddr[3] = 0;
+		} break;
+		case 0x524F4D52: {
+			// Read ROM (redirected from arm7)
+			setDeviceOwner();
 
-		u32 dst = *(vu32*)(sharedAddr+2);
-		u32 src = *(vu32*)(sharedAddr);
-		u32 len = *(vu32*)(sharedAddr+1);
+			u32 dst = *(vu32*)(sharedAddr+2);
+			u32 src = *(vu32*)(sharedAddr);
+			u32 len = *(vu32*)(sharedAddr+1);
 
-		fileRead((char*)dst, romFile, src, len, 0);
+			fileRead((char*)dst, romFile, src, len, 0);
 
-		sharedAddr[3] = 0;
+			sharedAddr[3] = 0;
+		} break;
 	}
 
 	if (IPC_GetSync() == 0x7){
 		lcdSwap();
 	}
-}
-
-//Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 }
 
 static void initialize(void) {
@@ -158,8 +155,6 @@ static void initialize(void) {
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		} else {
-			debug8mbMpuFix();
 		}
 
 		if (ce9->expansionPakFound || (ce9->extendedMemory && !ce9->dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {

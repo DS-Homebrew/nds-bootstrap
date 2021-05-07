@@ -60,7 +60,7 @@ code_handler_start_ipc:
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 	
 	@ exit after return
-	b	exit
+	b	arm9exit
 
 @---------------------------------------------------------------------------------
 _blx_r3_stub:
@@ -71,7 +71,7 @@ _blx_r3_stub:
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-exit:
+arm9exit:
 	pop   	{r0-r12} 
 	pop  	{lr}
 	bx  lr
@@ -118,7 +118,6 @@ card_read_arm9:
 	bl		_blx_r6_stub_card_read
 
 	ldmfd   sp!, {r4-r11,pc}
-	bx      lr
 _blx_r6_stub_card_read:
 	bx	r6
 .pool
@@ -141,7 +140,6 @@ thumb_card_read_arm9:
 	bl		_blx_r6_stub_thumb_card_read	
 
 	pop	{r3-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_card_read:
 	bx	r6	
 .pool
@@ -208,7 +206,6 @@ nand_read_arm9:
 	bl		_blx_r6_stub_nand_read	
 
 	ldmfd   sp!, {r3-r9,pc}
-	bx      lr
 _blx_r6_stub_nand_read:
 	bx	r6	
 .pool
@@ -224,7 +221,6 @@ nand_write_arm9:
 	bl		_blx_r6_stub_nand_write
 
 	ldmfd   sp!, {r3-r9,pc}
-	bx      lr
 _blx_r6_stub_nand_write:
 	bx	r6	
 .pool
@@ -241,7 +237,6 @@ thumb_nand_read_arm9:
 	bl		_blx_r6_stub_thumb_nand_read	
 
 	pop	{r1-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_nand_read:
 	bx	r6	
 .pool
@@ -258,7 +253,6 @@ thumb_nand_write_arm9:
 	bl		_blx_r6_stub_thumb_nand_write
 
 	pop	{r1-r7, pc}
-	bx      lr
 _blx_r6_stub_thumb_nand_write:
 	bx	r6	
 .pool
@@ -271,7 +265,9 @@ card_irq_enable:
 @---------------------------------------------------------------------------------
 	push    {lr}
 	push	{r1-r12}
+
 	ldr	r3, =myIrqEnable
+
 	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
 	pop  	{lr}
@@ -286,7 +282,9 @@ _blx_r3_stub2:
 thumb_card_irq_enable:
 @---------------------------------------------------------------------------------
     push	{r1-r7, lr}
+
 	ldr	r3, =myIrqEnable
+
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
 	bx  lr
@@ -307,8 +305,6 @@ reset_arm9:
 	bl		_blx_r6_stub_reset
 
 	ldmfd   sp!, {r1-r11,pc}
-	mov r0, #0
-	bx      lr
 _blx_r6_stub_reset:
 	bx	r6	
 .pool
