@@ -241,7 +241,6 @@ slot2_read:
 	bl		_blx_r6_stub_slot2_read
 
 	ldmfd   sp!, {r4-r7,pc}
-	bx      lr
 _blx_r6_stub_slot2_read:
 	bx	r6
 .pool
