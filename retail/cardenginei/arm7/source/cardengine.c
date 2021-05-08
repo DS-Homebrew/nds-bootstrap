@@ -51,6 +51,7 @@
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
+#define ipcEveryFrame BIT(9)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -90,6 +91,7 @@ static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 //static bool dmaLed = false;
 static bool swapScreens = false;
+static bool dmaSignal = false;
 static bool saveInRam = false;
 
 #ifdef TWLSDK
@@ -728,7 +730,11 @@ void myIrqHandlerHalt(void) {
 		} else if (!ndmaBusy(0)) {
 			readOngoing = false;
 			sharedAddr[4] = 0;
-			IPC_SendSync(0x3);
+			if (valueBits & ipcEveryFrame) {
+				dmaSignal = true;
+			} else {
+				IPC_SendSync(0x3);
+			}
 		}
 	}
 
@@ -791,6 +797,9 @@ void myIrqHandlerVBlank(void) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
+				if (!(valueBits & ipcEveryFrame)) {
+					IPC_SendSync(0x7);
+				}
 				swapScreens = true;
 			}
 		}
@@ -912,7 +921,14 @@ void myIrqHandlerVBlank(void) {
 	}*/
 
 	// Update main screen or swap screens
-	IPC_SendSync(swapScreens ? 0x7 : 0x0);
+	if (valueBits & ipcEveryFrame) {
+		if (dmaSignal) {
+			IPC_SendSync(0x3);
+			dmaSignal = false;
+		} else {
+			IPC_SendSync(swapScreens ? 0x7 : 0x0);
+		}
+	}
 	swapScreens = false;
 }
 
