@@ -134,7 +134,7 @@ static int readCount = 0;
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
-	if (readCount >= 100) {
+	if (readCount >= 200) {
 		sleepMsEnabled = true;
 	}
 

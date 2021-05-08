@@ -1951,11 +1951,21 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
         );
   	}
     
-	if (!sleepOffset && !usesThumb && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) {
+	if (!sleepOffset && !usesThumb && moduleParams->sdk_version > 0x3000000) {
   		sleepOffset = findOffset(
       		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             sleepSignature4Alt, 4
         );
+	}
+
+	if (!sleepOffset && usesThumb && moduleParams->sdk_version > 0x5000000) {
+  		sleepOffset = findOffsetThumb(
+      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+            sleepSignatureThumb4, 4
+        );
+		if (sleepOffset) {
+			*usesThumbPtr = true;
+		}
 	}
 
 	if (!sleepOffset && usesThumb) {

@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 48;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 49;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -390,11 +390,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
     // Golden Sun
-    if (strcmp(romTid, "BO5E") == 0) {
+    /*if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }
+    }*/
 
 	// Pop Island (USA)
     if (strcmp(romTid, "KPPE") == 0) {

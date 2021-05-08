@@ -41,7 +41,7 @@
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define b_builtInCheatEngine BIT(9)
+#define b_ipcEveryFrame BIT(9)
 
 extern u32 newArm7binarySize;
 
@@ -324,6 +324,12 @@ int hookNdsRetailArm7(
 		if (!ROMinRAM) {
 			ce7->valueBits |= b_runCardEngineCheck;
 		}
+	}
+
+	if (strncmp(romTid, "AH9", 3) != 0
+	 //&& strncmp(romTid, "C6C", 3) != 0
+	 && strncmp(romTid, "VDE", 3) != 0) {
+		ce7->valueBits |= b_ipcEveryFrame;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);

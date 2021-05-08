@@ -588,20 +588,14 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	// Work-around for buggy card read DMA and/or screen flickers during loading
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AFF", 3) != 0 // Final Fantasy III
-	 && strncmp(romTid, "A3Y", 3) != 0 // Sonic Rush Adventure - Fix flickers during streamed music
-	 && strncmp(romTid, "COL", 3) != 0 // Mario & Sonic at the Olympic Winter Games - Make loading asynchrous for both card read types
-	 && strncmp(romTid, "BXS", 3) != 0 // Sonic Colors - Fix flickers during streamed music
-	 && strncmp(romTid, "IRA", 3) != 0 // Pokemon White Version
-	 && strncmp(romTid, "IRB", 3) != 0 // Pokemon Black Version
-	 && strncmp(romTid, "IRD", 3) != 0 // Pokemon White Version 2 - Fix incorrect timing with title music
-	 && strncmp(romTid, "IRE", 3) != 0 // Pokemon Black Version 2 - Fix incorrect timing with title music
+	if (strncmp(romTid, "B3R", 3) == 0
+	|| !patchOffsetCache.cardIdOffset
 	) return false;
 
-    u32* offset = patchOffsetCache.sleepFuncOffset;
+	// Work-around for buggy card read DMA and/or screen flickers during loading
+   u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
 		if (offset) {
