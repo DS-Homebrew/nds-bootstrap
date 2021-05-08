@@ -24,15 +24,23 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
 	u32* dsiModeCheckOffset = patchOffsetCache.dsiModeCheckOffset;
+	u32* dsiModeCheck2Offset = patchOffsetCache.dsiModeCheck2Offset;
 	if (!patchOffsetCache.a9Swi12Offset) {
 		swi12Offset = a9_findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
 			patchOffsetCache.a9Swi12Offset = swi12Offset;
 		}
 	}
-	if (!patchOffsetCache.dsiModeCheckOffset && ROMisDsiEnhanced) {
-		dsiModeCheckOffset = findDsiModeCheckOffset(ndsHeader);
-		if (dsiModeCheckOffset) patchOffsetCache.dsiModeCheckOffset = dsiModeCheckOffset;
+	if (ROMisDsiEnhanced) {
+		if (!patchOffsetCache.dsiModeCheckOffset) {
+			dsiModeCheckOffset = findDsiModeCheckOffset(ndsHeader);
+			if (dsiModeCheckOffset) patchOffsetCache.dsiModeCheckOffset = dsiModeCheckOffset;
+		}
+		if (!patchOffsetCache.dsiModeCheck2Checked) {
+			dsiModeCheck2Offset = findDsiModeCheck2Offset(dsiModeCheckOffset, usesThumb);
+			if (dsiModeCheck2Offset) patchOffsetCache.dsiModeCheck2Offset = dsiModeCheck2Offset;
+			patchOffsetCache.dsiModeCheck2Checked = true;
+		}
 	}
 
 	// swi 0x12 call
@@ -47,25 +55,27 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 			dsiModeCheckOffset[7] = 0x2EFFFD0;
 			dbg_printf("Running DSi mode with DS BIOS\n");
 
-			u32* dsiModeCheck2Offset = patchOffsetCache.dsiModeCheck2Offset;
-			if (!patchOffsetCache.dsiModeCheck2Checked) {
-				dsiModeCheck2Offset = findDsiModeCheck2Offset(dsiModeCheckOffset, usesThumb);
-				if (dsiModeCheck2Offset) patchOffsetCache.dsiModeCheck2Offset = dsiModeCheck2Offset;
-				patchOffsetCache.dsiModeCheck2Checked = true;
-			}
 			if (dsiModeCheck2Offset) {
 				if (dsiModeCheck2Offset[0] == 0xE59F0014) {
 					dsiModeCheck2Offset[7] = 0x2EFFFD0;
 				} else {
 					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2EFFFD0;
 				}
-				dbg_printf("dsiModeCheck2 location : ");
-				dbg_hexa((u32)dsiModeCheck2Offset);
-				dbg_printf("\n\n");
 			}
 		} else if (!dsiModeConfirmed && !(REG_SCFG_ROM & BIT(1))) {
 			dsiModeCheckOffset[0] = 0xE3A00001;	// mov r0, #1
 			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
+
+			if (dsiModeCheck2Offset) {
+				if (dsiModeCheck2Offset[0] == 0xE59F0014 || !usesThumb) {
+					dsiModeCheck2Offset[0] = 0xE3A00001;	// mov r0, #1
+					dsiModeCheck2Offset[1] = 0xE12FFF1E;	// bx lr
+				} else {
+					u16* dsiModeCheck2OffsetThumb = (u16*)dsiModeCheck2Offset;
+					dsiModeCheck2OffsetThumb[0] = 0x2001;	// movs r0, #1
+					dsiModeCheck2OffsetThumb[1] = 0x4770;	// bx lr
+				}
+			}
 		}
 	}
 
@@ -76,6 +86,11 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 		dbg_printf("dsiModeCheck location : ");
 		dbg_hexa((u32)dsiModeCheckOffset);
 		dbg_printf("\n\n");
+		if (dsiModeCheck2Offset) {
+			dbg_printf("dsiModeCheck2 location : ");
+			dbg_hexa((u32)dsiModeCheck2Offset);
+			dbg_printf("\n\n");
+		}
 	}
 }
 
