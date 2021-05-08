@@ -26,7 +26,6 @@
 #include "locations.h"
 #include "version.h"
 
-#include "crypto.h"
 #include "f_xy.h"
 #include "dsi.h"
 #include "u128_math.h"
