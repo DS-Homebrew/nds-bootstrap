@@ -166,12 +166,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->macroMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "MACRO_MODE").c_str(), NULL, 0);
 
 	// Boost CPU
-	// If DSi mode, then always boost CPU
-	conf->dsiMode ? conf->boostCpu = true : conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0);
+	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0);
 
 	// Boost VRAM
-	// If DSi mode, then always boost VRAM
-	conf->dsiMode ? conf->boostVram = true : conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
+	conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
 
 	// Sound/Mic frequency
 	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ").c_str(), NULL, 0);
