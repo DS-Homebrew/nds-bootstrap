@@ -116,7 +116,7 @@ static void patchScfgExt(const tNDSHeader* ndsHeader, u32 ROMinRAM) {
     dbg_printf("\n\n");
 }
 
-static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
@@ -138,22 +138,24 @@ static void fixForDsiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
 
-	if ((u8)a9ScfgRom == 1 && !(REG_SCFG_ROM & BIT(9))) {
-		// swi 0x12 call
-		if (swi12Offset) {
-			// Patch to call swi 0x02 instead of 0x12
-			u32* swi12Patch = ce7->patches->swi02;
-			tonccpy(swi12Offset, swi12Patch, 0x4);
-		}
+	// swi 0x12 call
+	if (swi12Offset && !(REG_SCFG_ROM & BIT(9))) {
+		// Patch to call swi 0x02 instead of 0x12
+		u32* swi12Patch = ce7->patches->swi02;
+		tonccpy(swi12Offset, swi12Patch, 0x4);
+	}
 
-		// swi get pitch table
-		if (swiGetPitchTableOffset) {
-			// Patch
-			if (useGetPitchTableBranch) {
-				tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
-			} else if (!patchOffsetCache.a7IsThumb || isSdk5(moduleParams)) {
-				u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-				tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+	// swi get pitch table
+	if (swiGetPitchTableOffset && ((!(REG_SCFG_ROM & BIT(9)) && !dsiModeConfirmed) || ((u8)a9ScfgRom != 1 && dsiModeConfirmed))) {
+		// Patch
+		if (useGetPitchTableBranch) {
+			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
+		} else if (!patchOffsetCache.a7IsThumb || isSdk5(moduleParams)) {
+			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			if (isSdk5(moduleParams) && (u8)a9ScfgRom != 1 && dsiModeConfirmed) {
+				u16* swiGetPitchTableOffsetThumb = patchOffsetCache.swiGetPitchTableOffset;
+				tonccpy(swiGetPitchTableOffsetThumb+2, swiGetPitchTablePatch, 0xC);
 			}
 		}
 	}
@@ -370,7 +372,7 @@ u32 patchCardNdsArm7(
 
 	patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
 
-	fixForDsiBios(ce7, ndsHeader, moduleParams);
+	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
 	patchSdCardReset(ce7, ndsHeader, moduleParams);
 

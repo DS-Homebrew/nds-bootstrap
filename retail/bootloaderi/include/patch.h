@@ -57,6 +57,8 @@ typedef struct patchOffsetCacheContents {
 	u32* moduleParamsOffset;
 	u32* ltdModuleParamsOffset;
 	u32* dsiModeCheckOffset;
+	u32* dsiModeCheck2Offset;
+	u32 dsiModeCheck2Checked;
     u32* heapPointerOffset;
 	u32 a9IsThumb;
     u32* cardHashInitOffset;

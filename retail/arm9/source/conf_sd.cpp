@@ -120,7 +120,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Region
 	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION").c_str(), NULL, 0);
 
-	if (isDSiMode()) {
+	if (dsiFeatures()) {
 		// DSi mode
 		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
 	}

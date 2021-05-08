@@ -13,12 +13,13 @@
 
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
+extern u16 a9ScfgRom;
 extern u8 cardReadDMA;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
 
-static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
 	bool ROMisDsiEnhanced = (ndsHeader->unitCode > 0);
 
 	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
@@ -34,15 +35,35 @@ static void fixForDsiBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		if (dsiModeCheckOffset) patchOffsetCache.dsiModeCheckOffset = dsiModeCheckOffset;
 	}
 
-	if (!(REG_SCFG_ROM & BIT(1))) {
-		// swi 0x12 call
-		if (swi12Offset) {
-			// Patch to call swi 0x02 instead of 0x12
-			u32* swi12Patch = ce9->patches->swi02;
-			memcpy(swi12Offset, swi12Patch, 0x4);
-		}
-		if (dsiModeCheckOffset && !dsiModeConfirmed && ROMisDsiEnhanced) {
-			// Patch to return as DS BIOS
+	// swi 0x12 call
+	if (swi12Offset && (u8)a9ScfgRom == 1 && (!(REG_SCFG_ROM & BIT(1)) || dsiModeConfirmed)) {
+		// Patch to call swi 0x02 instead of 0x12
+		u32* swi12Patch = ce9->patches->swi02;
+		memcpy(swi12Offset, swi12Patch, 0x4);
+	}
+	if (dsiModeCheckOffset && ROMisDsiEnhanced) {
+		// Patch to return as DS BIOS
+		if (dsiModeConfirmed && (u8)a9ScfgRom != 1) {
+			dsiModeCheckOffset[7] = 0x2EFFFD0;
+			dbg_printf("Running DSi mode with DS BIOS\n");
+
+			u32* dsiModeCheck2Offset = patchOffsetCache.dsiModeCheck2Offset;
+			if (!patchOffsetCache.dsiModeCheck2Checked) {
+				dsiModeCheck2Offset = findDsiModeCheck2Offset(dsiModeCheckOffset, usesThumb);
+				if (dsiModeCheck2Offset) patchOffsetCache.dsiModeCheck2Offset = dsiModeCheck2Offset;
+				patchOffsetCache.dsiModeCheck2Checked = true;
+			}
+			if (dsiModeCheck2Offset) {
+				if (dsiModeCheck2Offset[0] == 0xE59F0014) {
+					dsiModeCheck2Offset[7] = 0x2EFFFD0;
+				} else {
+					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2EFFFD0;
+				}
+				dbg_printf("dsiModeCheck2 location : ");
+				dbg_hexa((u32)dsiModeCheck2Offset);
+				dbg_printf("\n\n");
+			}
+		} else if (!dsiModeConfirmed && !(REG_SCFG_ROM & BIT(1))) {
 			dsiModeCheckOffset[0] = 0xE3A00001;	// mov r0, #1
 			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
 		}
@@ -1612,8 +1633,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	u32* cardReadEndOffset;
 	u32* cardPullOutOffset;
 
-	fixForDsiBios(ce9, ndsHeader);
-
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
 
     const char* romTid = getRomTid(ndsHeader);
@@ -1636,7 +1655,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
- 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	fixForDifferentBios(ce9, ndsHeader, usesThumb);
+
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		patchCardRomInit(cardReadEndOffset, usesThumb);
 
 		if (!patchCardHashInit(ndsHeader, moduleParams, usesThumb)) {

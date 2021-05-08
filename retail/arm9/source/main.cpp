@@ -169,7 +169,7 @@ static inline void debugConf(configuration* conf) {
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
-	if (isDSiMode()) {
+	if (dsiFeatures()) {
 		dbg_printf("region: %hhX\n", conf->region);
 		dbg_printf("dsiMode: %i\n", conf->dsiMode);
 	}

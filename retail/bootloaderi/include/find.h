@@ -31,6 +31,7 @@ u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findDsiModeCheckOffset(const tNDSHeader* ndsHeader);
+u32* findDsiModeCheck2Offset(const u32* dsiModeCheckOffset, bool usesThumb);
 u32* findCardHashInitOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardHashInitOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
