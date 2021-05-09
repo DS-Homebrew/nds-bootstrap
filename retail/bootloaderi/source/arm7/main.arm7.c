@@ -423,8 +423,7 @@ static void NDSTouchscreenMode(void) {
 	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
-// Doesn't seem to work
-/*static void DSiTouchscreenMode(void) {
+static void DSiTouchscreenMode(void) {
 	// Touchscreen
 	cdcWriteReg(0, 0x01, 0x01);
 	cdcWriteReg(0, 0x39, 0x66);
@@ -484,7 +483,7 @@ static void NDSTouchscreenMode(void) {
 	// Finish up!
 	cdcReadReg (CDC_TOUCHCNT, 0x02);
 	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x00);
-}*/
+}
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
 	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
@@ -1263,7 +1262,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
+	REG_GPIO_WIFI &= ~BIT(8);	// New Atheros/DSi-Wifi mode
 
 	if (isDSiWare) {
 		/*nocashMessage("DSiWare is modcrypted");
@@ -1314,14 +1313,15 @@ int arm7_main(void) {
 			}
 		}
 
-		if ((u8)a9ScfgRom != 1 && dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+		/*if ((u8)a9ScfgRom != 1 && dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
 			*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
-		}
-
-		/*if ((u8)a9ScfgRom != 1 && dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (*(u8*)0x02FFE1BF & BIT(0))) {
-			DSiTouchscreenMode();	// Switch back to TWL touch mode
-			*(u16*)0x4000500 = 0x807F;
 		}*/
+
+		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (*(u8*)0x02FFE1BF & BIT(0))) {
+			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+			DSiTouchscreenMode();
+			*(u16*)0x4000500 = 0x807F;
+		}
 
 		const char* romTid = getRomTid(ndsHeader);
 		if (!dsiModeConfirmed) {
