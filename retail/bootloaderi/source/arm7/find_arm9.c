@@ -17,9 +17,10 @@ static const u32 moduleParamsSignature[2]    = {0xDEC00621, 0x2106C0DE};
 static const u32 moduleParamsLtdSignature[2] = {0xDEC01463, 0x6314C0DE}; // SDK 5
 
 // DSi mode check (SDK 5)
-static const u32 dsiModeCheckSignature[4]  = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
-static const u32 dsiModeCheck2Signature[4] = {0xE59F003C, 0xE590001C, 0xE3500000, 0x1A000009};
-static const u16 dsiModeCheck2SignatureThumb[4] = {0x4809, 0x69C0, 0x2800, 0xD10C};
+static const u32 dsiModeCheckSignature[4]          = {0xE59F0014, 0xE5D00000, 0xE2000003, 0xE3500001};
+static const u32 dsiModeCheck2Signature[4]         = {0xE59F003C, 0xE590001C, 0xE3500000, 0x1A000009};
+static const u16 dsiModeCheck2SignatureThumb[4]    = {0x4809, 0x69C0, 0x2800, 0xD10C};
+static const u16 dsiModeCheck2SignatureThumbAlt[4] = {0x4809, 0x69C0, 0x2800, 0xD10B};
 
 // Card hash init (SDK 5)
 static const u32 cardHashInitSignatureEarly[4]      = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
@@ -332,6 +333,12 @@ u32* findDsiModeCheck2Offset(const u32* dsiModeCheckOffset, bool usesThumb) {
 			(u16*)dsiModeCheckOffset+16, iUncompressedSize,//ndsHeader->arm9binarySize,
 			dsiModeCheck2SignatureThumb, 4
 		);
+		if (!offset) {
+			offset = findOffsetThumb(
+				(u16*)dsiModeCheckOffset+16, iUncompressedSize,//ndsHeader->arm9binarySize,
+				dsiModeCheck2SignatureThumbAlt, 4
+			);
+		}
 	} else {
 		offset = findOffset(
 			dsiModeCheckOffset+8, iUncompressedSize,//ndsHeader->arm9binarySize,
