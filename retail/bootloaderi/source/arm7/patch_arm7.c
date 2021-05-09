@@ -146,14 +146,14 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	}
 
 	// swi get pitch table
-	if (swiGetPitchTableOffset && ((!(REG_SCFG_ROM & BIT(9)) && !dsiModeConfirmed) || ((u8)a9ScfgRom != 1 && dsiModeConfirmed))) {
+	if (swiGetPitchTableOffset && ((!(REG_SCFG_ROM & BIT(9)) && !dsiModeConfirmed) || ((REG_SCFG_ROM & BIT(9)) && ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
 		// Patch
 		if (useGetPitchTableBranch) {
 			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
 		} else if (!patchOffsetCache.a7IsThumb || isSdk5(moduleParams)) {
 			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-			if (isSdk5(moduleParams) && (u8)a9ScfgRom != 1 && dsiModeConfirmed) {
+			if (isSdk5(moduleParams) && (REG_SCFG_ROM & BIT(9)) && dsiModeConfirmed) {
 				u16* swiGetPitchTableOffsetThumb = patchOffsetCache.swiGetPitchTableOffset;
 				tonccpy(swiGetPitchTableOffsetThumb+2, swiGetPitchTablePatch, 0xC);
 			}
