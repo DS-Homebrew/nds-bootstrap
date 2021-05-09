@@ -1313,14 +1313,14 @@ int arm7_main(void) {
 			}
 		}
 
-		/*if ((u8)a9ScfgRom != 1 && dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
-		}*/
-
-		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (*(u8*)0x02FFE1BF & BIT(0))) {
-			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
-			DSiTouchscreenMode();
-			*(u16*)0x4000500 = 0x807F;
+		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+			if ((u8)a9ScfgRom != 1 && cdcReadReg(CDC_SOUND, 0x22) != 0xF0) {
+				*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
+			} else if (*(u8*)0x02FFE1BF & BIT(0)) {
+				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+				DSiTouchscreenMode();
+				*(u16*)0x4000500 = 0x807F;
+			}
 		}
 
 		const char* romTid = getRomTid(ndsHeader);
