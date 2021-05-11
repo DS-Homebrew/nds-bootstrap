@@ -21,6 +21,10 @@ static const u32 swiHaltConstSignature[1] = {0x4000004};
 static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
+static const u16 swi24Signature[2] = {0xDF24,0x4770}; // SHA1_Init
+static const u16 swi25Signature[2] = {0xDF25,0x4770}; // SHA1_Update
+static const u16 swi26Signature[2] = {0xDF26,0x4770}; // SHA1_Finish
+static const u16 swi27Signature[2] = {0xDF27,0x4770}; // SHA1_Init_update_fin
 
 static const u32 scfgExtSignature[1] = {0x4004008};
 
@@ -78,6 +82,11 @@ static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE1DC30B0, 0xE
 static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
 static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
+
+// ARM7i start (SDK 5)
+static const u32 a7iStartSignatureConstant[3] = {0x6F696473, 0x616C775F, 0x0000006E}; // 'sdio_wlan'
+static const u32 a7iStartSignatureType1[5] = {0xE12FFF1E, 0xE92D47F8, 0xE24DD014, 0xE1A07000, 0xE5971000};
+static const u32 a7iStartSignatureType2[5] = {0xE12FFF1E, 0xE92D4FF0, 0xE24DD014, 0xE1A0A000, 0xE59A0000};
 
 // SD card reset (SDK 5)
 static const u32 sdCardResetSignatureType1[4]      = {0xEBFFFE57, 0xEBFFFF8E, 0xEB000024, 0xE1A05000};
@@ -327,6 +336,74 @@ u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return swi12Offset;
+}
+
+u16* a7_findSwi24Offset(void) {
+	dbg_printf("findSwi24Offset:\n");
+
+	u16* swi24Offset = findOffsetThumb(
+		(u16*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+		swi24Signature, 2
+	);
+	if (swi24Offset) {
+		dbg_printf("swi 0x24 call found\n");
+	} else {
+		dbg_printf("swi 0x24 call not found\n");
+	}
+
+	dbg_printf("\n");
+	return swi24Offset;
+}
+
+u16* a7_findSwi25Offset(void) {
+	dbg_printf("findSwi25Offset:\n");
+
+	u16* swi25Offset = findOffsetThumb(
+		(u16*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+		swi25Signature, 2
+	);
+	if (swi25Offset) {
+		dbg_printf("swi 0x25 call found\n");
+	} else {
+		dbg_printf("swi 0x25 call not found\n");
+	}
+
+	dbg_printf("\n");
+	return swi25Offset;
+}
+
+u16* a7_findSwi26Offset(void) {
+	dbg_printf("findSwi24Offset:\n");
+
+	u16* swi26Offset = findOffsetThumb(
+		(u16*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+		swi26Signature, 2
+	);
+	if (swi26Offset) {
+		dbg_printf("swi 0x26 call found\n");
+	} else {
+		dbg_printf("swi 0x26 call not found\n");
+	}
+
+	dbg_printf("\n");
+	return swi26Offset;
+}
+
+u16* a7_findSwi27Offset(void) {
+	dbg_printf("findSwi27Offset:\n");
+
+	u16* swi27Offset = findOffsetThumb(
+		(u16*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+		swi27Signature, 2
+	);
+	if (swi27Offset) {
+		dbg_printf("swi 0x27 call found\n");
+	} else {
+		dbg_printf("swi 0x27 call not found\n");
+	}
+
+	dbg_printf("\n");
+	return swi27Offset;
 }
 
 u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader) {
@@ -896,6 +973,47 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 
 	dbg_printf("\n");
 	return cardIrqEnableOffset;
+}
+
+u32* findA7iStartOffset(void) {
+	dbg_printf("findA7iStartOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)__DSiHeader->arm7idestination, 0x8000,
+		a7iStartSignatureConstant, 3
+	);
+	if (offset) {
+		offset = offset+3;
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+			a7iStartSignatureType1, 5
+		);
+		if (offset) {
+			offset = offset+1;
+		}
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, __DSiHeader->arm7ibinarySize,
+			a7iStartSignatureType2, 5
+		);
+		if (offset) {
+			offset = offset+1;
+		}
+	}
+
+	if (offset) {
+		dbg_printf("ARM7i start found\n");
+	} else {
+		dbg_printf("ARM7i start not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

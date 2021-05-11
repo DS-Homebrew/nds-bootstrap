@@ -87,6 +87,10 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader);
+u16* a7_findSwi24Offset(void);
+u16* a7_findSwi25Offset(void);
+u16* a7_findSwi26Offset(void);
+u16* a7_findSwi27Offset(void);
 u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader);
 u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
@@ -95,6 +99,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 //u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findA7iStartOffset(void);
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 #endif // FIND_H

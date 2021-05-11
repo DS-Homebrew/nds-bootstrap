@@ -229,7 +229,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02400000, 0, 0x200000);	// clear part of EWRAM - except before in-game menu data
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
-	toncset((u32*)0x02C00000, 0, 0x3FE000);	// clear part of EWRAM
+	memset_addrs_arm7(0x02C00000, 0x02ED0000);
+	memset_addrs_arm7(0x02EE0000, 0x02FFE000);
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
