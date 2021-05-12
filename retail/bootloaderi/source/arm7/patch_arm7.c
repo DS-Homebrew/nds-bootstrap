@@ -369,12 +369,14 @@ u32 patchCardNdsArm7(
 
 	if ((ndsHeader->arm7binarySize == 0x22B40 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x22BCC && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x2352C && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x235DC && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x23708 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x2378C && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x237F0 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x23CAC && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x2434C && !dsiSD)
+	 || (ndsHeader->arm7binarySize == 0x245C4 && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x2484C && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x249DC && !dsiSD)
 	 || (ndsHeader->arm7binarySize == 0x249E8 && !dsiSD)
@@ -428,7 +430,7 @@ u32 patchCardNdsArm7(
 		u32 saveResult = 0;
 		
 		if (
-			(newArm7binarySize==0x235DC||newArm7binarySize==0x23CAC) && dsiSD
+			(newArm7binarySize==0x2352C||newArm7binarySize==0x235DC||newArm7binarySize==0x23CAC||newArm7binarySize==0x245C4) && dsiSD
 		) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
@@ -464,7 +466,9 @@ u32 patchCardNdsArm7(
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
-	patchSdCardReset(ce7, ndsHeader, moduleParams);
+	if (!gameOnFlashcard || !saveOnFlashcard) {
+		patchSdCardReset(ce7, ndsHeader, moduleParams);
+	}
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

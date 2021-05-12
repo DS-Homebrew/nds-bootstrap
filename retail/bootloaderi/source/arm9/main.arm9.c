@@ -113,7 +113,7 @@ void SetBrightness(u8 screen, s8 bright) {
 	if (bright > 31) {
 		bright = 31;
 	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
 void fadeIn(void) {
@@ -190,8 +190,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
-	VRAM_C_CR = 0x80;
 	// Don't mess with the VRAM used for execution
+	//VRAM_C_CR = 0x80;
 	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0x80;
 	VRAM_F_CR = 0x80;
@@ -210,8 +210,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 
 	VRAM_A_CR = 0;
 	VRAM_B_CR = 0;
-	VRAM_C_CR = 0;
 	// Don't mess with the ARM7's VRAM
+	//VRAM_C_CR = 0;
 	//VRAM_D_CR = 0;
 	VRAM_E_CR = 0;
 	VRAM_F_CR = 0;

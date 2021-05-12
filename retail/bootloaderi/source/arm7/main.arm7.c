@@ -601,12 +601,14 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
 	if ((dsiHeaderTemp->ndshdr.arm7binarySize == 0x22B40 && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x22BCC && !dsiSD)
+	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2352C && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x235DC && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x23708 && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2378C && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x237F0 && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x23CAC && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2434C && !dsiSD)
+	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x245C4 && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2484C && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x249DC && !dsiSD)
 	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x249E8 && !dsiSD)
@@ -694,7 +696,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 
 		//*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
 
-		toncset((char*)dsiHeader+0x220, 0, 0x10);	// Clear modcrypt bytes
+		//toncset((char*)dsiHeader+0x220, 0, 0x10);	// Clear modcrypt bytes
 
 		/*if (!isDSiWare) {
 			// Clear out Digest offsets/lengths
@@ -894,30 +896,31 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		if (isDSiWare) {
+		//if (isDSiWare) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
 
 			dbg_printf("Device list address: ");
 			dbg_hexa((u32)deviceListAddr);
 			dbg_printf("\n");
 
-			toncset(deviceListAddr, 0, 0x400);
-			//tonccpy(deviceListAddr, deviceList_bin, deviceList_bin_len);
-			const char *ndsPath = "sdmc:/dsiware.nds";
-			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);
-			//*(u8*)((u32)deviceListAddr+0x3C5) = 0x5C;
-		}
+			tonccpy(deviceListAddr, (u32*)0x02EDF000, 0x400);
+			toncset((u32*)0x02EDF000, 0, 0x400);
+			/*const char *ndsPath = "sdmc:/DSIWARE.NDS";
+			const char *pubPath = "sdmc:/DSIWARE.PUB";
+			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
+			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
+		//}
 
 		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
 		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
 
-		*(u32*)(0x02FFA680) = 0x02FD4D80;
+		/* *(u32*)(0x02FFA680) = 0x02FD4D80;
 		*(u32*)(0x02FFA684) = 0x00000000;
 		*(u32*)(0x02FFA688) = 0x00001980;
 
 		*(u32*)(0x02FFF00C) = 0x0000007F;
 		*(u32*)(0x02FFF010) = 0x550E25B8;
-		*(u32*)(0x02FFF014) = 0x02FF4000;
+		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
 		// Set region flag
 		if (region == 0xFE || region == -2) {
@@ -1190,8 +1193,8 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
 	bool isDSiWare = false;
-	/*if ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
-	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0))
+	/*if (!gameOnFlashcard && ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
+	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0)))
 	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
@@ -1205,7 +1208,7 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
-		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !isDSiWare) {
 			/*if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
@@ -1239,7 +1242,9 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+	if (!isDSiWare) {
+		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
 	} else {
@@ -1266,13 +1271,20 @@ int arm7_main(void) {
 	REG_GPIO_WIFI &= ~BIT(8);	// New Atheros/DSi-Wifi mode
 
 	if (isDSiWare) {
-		/*nocashMessage("DSiWare is modcrypted");
-		dbg_printf("DSiWare is modcrypted");
-		dbg_printf("\n");
-		errorOutput();*/
-		toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
-		toncset((u32*)0x02600000, 0, 0x100000);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
+		toncset((u32*)0x02680000, 0, 0x180000);
+
+		if (*(u8*)0x02FFE1BF & BIT(0)) {
+			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+			DSiTouchscreenMode();
+		} else {
+			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+			NDSTouchscreenMode();
+			if (macroMode) {
+				u32 temp = readPowerManagement(PM_CONTROL_REG) & (~(PM_BACKLIGHT_TOP & 0xFFFF));
+				writePowerManagement(PM_CONTROL_REG, temp);
+			}
+		}
+		*(u16*)0x4000500 = 0x807F;
 	} else {
 		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
@@ -1531,7 +1543,6 @@ int arm7_main(void) {
 			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);
 			dbg_printf("AP-fix found and applied\n");
 		}
-	  //}
 	}
 
 	arm9_boostVram = boostVram;

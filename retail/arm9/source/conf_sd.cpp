@@ -58,7 +58,7 @@ extern std::string cheatFilePath;
 extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
 
-extern u8 lz77ImageBuffer[0x12000];
+extern u8 lz77ImageBuffer[0x20000];
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -276,6 +276,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	FILE* cebin = NULL;
+	bool donorLoaded = false;
 
 	if (dsiFeatures()) {
 		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
@@ -291,10 +292,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x237F0:
 				if (hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
 				break;
+			case 0x2352C:
 			case 0x235DC:
 			case 0x23CAC:
 				if (hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
 				break;
+			case 0x245C4:
 			case 0x24DA8:
 			case 0x24F50:
 				cebin = fopen(conf->donor2Path, "rb");
@@ -325,6 +328,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(cebin, donorArm7Offset, SEEK_SET);
 			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, cebin);
 			fclose(cebin);
+			donorLoaded = true;
 		}
 	}
 
@@ -399,6 +403,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&srBackendId, sizeof(u32), 2, cebin);
 	}
 	fclose(cebin);
+
+	if (!donorLoaded && unitCode > 0) {
+		// Load device list
+		cebin = fopen("nitro:/deviceList.bin", "rb");
+		if (cebin) {
+			fread((u8*)0x02EDF000, 1, 0x400, cebin);
+		}
+		fclose(cebin);
+	}
 
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
@@ -544,7 +557,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load DSi ARM7 BIOS
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (cebin) {
-			fread((u32*)0x02ED0000, 1, 0x10000, cebin);
+			fread((u32*)0x02ED0000, 1, 0xF000, cebin);
 
 			// Relocate addresses
 			*(u32*)0x02ED58A8 += 0x02ED0000;

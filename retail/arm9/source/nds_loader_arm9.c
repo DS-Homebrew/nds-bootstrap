@@ -45,8 +45,8 @@
 
 //#define LCDC_BANK_C (u16*)0x06840000
 
-extern u8 lz77ImageBuffer[0x12000];
-void* loaderBin[0x20000];
+extern u8 lz77ImageBuffer[0x20000];
+void* loaderBin[0x40000];
 
 loadCrt0* lc0 = (loadCrt0*)LOAD_CRT0_LOCATION;
 
@@ -250,6 +250,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	irqDisable(IRQ_ALL);
 
 	// Direct CPU access to VRAM bank D
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Set the parameters for the loader
@@ -304,11 +305,11 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	free(conf);
 
 	// Load the loader into the correct address
-	tonccpy(lc0, loader, 0x20000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
+	tonccpy(lc0, loader, 0x40000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
-		if (!dldiPatchLoader ((data_t*)lc0, 0x20000, conf->initDisc)) {
+		if (!dldiPatchLoader ((data_t*)lc0, 0x40000, conf->initDisc)) {
 			return;
 		}
 	}
@@ -318,6 +319,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
 	
 	// Reset into a passme loop
@@ -332,7 +334,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(0x06020000);	
+	resetARM7(0x06000000);	
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");

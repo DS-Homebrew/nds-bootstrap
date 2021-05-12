@@ -108,12 +108,14 @@ u32 patchCardNdsArm7(
 ) {
 	if (ndsHeader->arm7binarySize == 0x22B40
 	 || ndsHeader->arm7binarySize == 0x22BCC
+	 || ndsHeader->arm7binarySize == 0x2352C
 	 || ndsHeader->arm7binarySize == 0x235DC
 	 || ndsHeader->arm7binarySize == 0x23708
 	 || ndsHeader->arm7binarySize == 0x2378C
 	 || ndsHeader->arm7binarySize == 0x237F0
 	 || ndsHeader->arm7binarySize == 0x23CAC
 	 || ndsHeader->arm7binarySize == 0x2434C
+	 || ndsHeader->arm7binarySize == 0x245C4
 	 || ndsHeader->arm7binarySize == 0x2484C
 	 || ndsHeader->arm7binarySize == 0x249DC
 	 || ndsHeader->arm7binarySize == 0x249E8
@@ -127,11 +129,13 @@ u32 patchCardNdsArm7(
 	 || ndsHeader->arm7binarySize == 0x29CEC) {
 		// Replace incompatible ARM7 binary
 		aFile donorRomFile;
-		if (ndsHeader->arm7binarySize == 0x235DC
+		if (ndsHeader->arm7binarySize == 0x2352C
+		 || ndsHeader->arm7binarySize == 0x235DC
 		 || ndsHeader->arm7binarySize == 0x23CAC) {
 			extern u32 donorFileE2Cluster;	// Early SDK2
 			donorRomFile = getFileFromCluster(donorFileE2Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x24DA8
+		} else if (ndsHeader->arm7binarySize == 0x245C4
+				 || ndsHeader->arm7binarySize == 0x24DA8
 				 || ndsHeader->arm7binarySize == 0x24F50) {
 			extern u32 donorFile2Cluster;	// SDK2
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
