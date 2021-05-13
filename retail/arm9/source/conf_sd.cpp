@@ -404,7 +404,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (!donorLoaded && unitCode > 0) {
+	if (isDSiMode() && !donorLoaded && unitCode > 0) {
 		// Load device list
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
@@ -566,7 +566,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load DSi ARM7 BIOS
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (cebin) {
-			fread((u32*)0x02ED0000, 1, 0xF000, cebin);
+			fread((u32*)0x02ED0000, 1, 0x10000, cebin);
 
 			// Relocate addresses
 			*(u32*)0x02ED58A8 += 0x02ED0000;
