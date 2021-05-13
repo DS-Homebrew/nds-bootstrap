@@ -1196,8 +1196,8 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
 	bool isDSiWare = false;
-	if (!gameOnFlashcard && ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
-	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0)))
+	if ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
+	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0))
 	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
@@ -1273,7 +1273,7 @@ int arm7_main(void) {
 
 	REG_GPIO_WIFI &= ~BIT(8);	// New Atheros/DSi-Wifi mode
 
-	if (isDSiWare) {
+	if (!gameOnFlashcard && isDSiWare) {
 		toncset((u32*)0x02680000, 0, 0x180000);
 
 		if (*(u8*)0x02FFE1BF & BIT(0)) {
