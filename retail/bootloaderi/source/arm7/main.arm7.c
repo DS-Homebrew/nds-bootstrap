@@ -543,14 +543,14 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-/*static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
+static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode == 0x02);
 }
 
 // SDK 5
 static bool ROMisDsiExclusive(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode == 0x03);
-}*/
+}
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	nocashMessage("loadBinary_ARM7");
@@ -909,6 +909,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			const char *pubPath = "sdmc:/DSIWARE.PUB";
 			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
+
+			*(vu32*)0x400481C = 0;
+			*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ stat register (Data won't read without the correct bytes!)
 		}
 
 		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
@@ -1193,12 +1196,12 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
 	bool isDSiWare = false;
-	/*if (!gameOnFlashcard && ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
+	if (!gameOnFlashcard && ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
 	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0)))
 	{
 		dsiModeConfirmed = true;
 		isDSiWare = true;
-	} else*/ if (dsiMode == 2) {
+	} else if (dsiMode == 2) {
 		dsiModeConfirmed = dsiMode;
 	} else {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
