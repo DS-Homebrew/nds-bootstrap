@@ -155,7 +155,8 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
-	dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
+	dbg_printf("prvPath: \"%s\"\n", conf->prvPath);
+	//dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
 	if (debug) {
 		dopause();
 	}

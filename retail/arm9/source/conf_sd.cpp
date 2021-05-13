@@ -87,8 +87,11 @@ static void load_conf(configuration* conf, const char* fn) {
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
-	// SAV path
+	// SAV/PUB path
 	conf->savPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "SAV_PATH").c_str());
+
+	// PRV path
+	conf->prvPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "PRV_PATH").c_str());
 
 	// Early SDK2 Donor NDS path
 	conf->donorE2Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORE2_NDS_PATH").c_str());
@@ -414,14 +417,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
 			fread((u8*)0x02EDF000, 1, 0x400, cebin);
-			if (!conf->gameOnFlashcard && strlen(conf->ndsPath) < 62) {
-				tonccpy((char*)0x02EDF3C2, conf->ndsPath, strlen(conf->ndsPath));
-				*(char*)0x02EDF3C2 = 'm';
-				*(char*)0x02EDF3C3 = 'c';
-				tonccpy((char*)0x02EDF1B8, (char*)0x02EDF3C0, strlen(conf->ndsPath)+2);
-				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-3)) = 'p';
-				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-2)) = 'u';
-				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-1)) = 'b';
+			if (!conf->gameOnFlashcard) {
+				if (strlen(conf->ndsPath) < 62) {
+					tonccpy((char*)0x02EDF3C2, conf->ndsPath, strlen(conf->ndsPath));
+					*(char*)0x02EDF3C2 = 'm';
+					*(char*)0x02EDF3C3 = 'c';
+				}
+				if (strlen(conf->prvPath) < 62) {
+					tonccpy((char*)0x02EDF1BA, conf->prvPath, strlen(conf->prvPath));
+					*(char*)0x02EDF1BA = 'm';
+					*(char*)0x02EDF1BB = 'c';
+				}
+				if (strlen(conf->savPath) < 62) {
+					tonccpy((char*)0x02EDF20E, conf->savPath, strlen(conf->savPath));
+					*(char*)0x02EDF20E = 'm';
+					*(char*)0x02EDF20F = 'c';
+				}
 			}
 		}
 		fclose(cebin);

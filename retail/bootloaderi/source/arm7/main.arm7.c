@@ -72,8 +72,6 @@
 #include "value_bits.h"
 #include "loading_screen.h"
 
-#include "deviceList.h"					// Modified to read from SD instead of NAND
-
 //#define memcpy __builtin_memcpy
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
