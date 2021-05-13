@@ -14,21 +14,29 @@
 @   You should have received a copy of the GNU General Public License
 @   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nds/asminc.h>
 .arm
 
-@---------------------------------------------------------------------------------
-	.section ".init"
-@---------------------------------------------------------------------------------
 .global cheat_engine_start
 .global cheat_engine_end
+.global intr_orig_return_offset
+.global cheat_engine_size
+
 
 cheat_engine_size:
 	.word	cheat_engine_end - cheat_engine_start
 
+intr_orig_return_offset:
+	.word	intr_orig_return - cheat_engine_start
+
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-BEGIN_ASM_FUNC cheat_engine_start
+cheat_engine_start:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start
+	ldr 	r0,	intr_orig_return
+	bx  	r0
 
 code_handler_start:
 	stmdb	sp!,	{r0-r12} 
@@ -453,12 +461,14 @@ mem_copy_code_byte_loop:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 exit:	
-	ldmia	sp!,	{r0-r12}
+	ldmia	sp!,	{r0-r12} 
+	ldmia	sp!,	{lr}
 	bx		lr
 
-.pool
+intr_orig_return:
+	.word	0x00000000
 
-	.word 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+.pool
 
 cheat_data:
 

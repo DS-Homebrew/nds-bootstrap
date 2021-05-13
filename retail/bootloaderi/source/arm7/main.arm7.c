@@ -66,7 +66,6 @@
 #include "ips.h"
 #include "patch.h"
 #include "find.h"
-#include "cheat_patch.h"
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
@@ -910,12 +909,14 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
 
-			*(vu32*)0x400481C = 0;
-			*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ stat register (Data won't read without the correct bytes!)
+			*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
+			*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 		}
 
-		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
-		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
+		if (gameOnFlashcard || !isDSiWare) {
+			tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
+			tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
+		}
 
 		/* *(u32*)(0x02FFA680) = 0x02FD4D80;
 		*(u32*)(0x02FFA684) = 0x00000000;
@@ -1274,7 +1275,10 @@ int arm7_main(void) {
 	REG_GPIO_WIFI &= ~BIT(8);	// New Atheros/DSi-Wifi mode
 
 	if (!gameOnFlashcard && isDSiWare) {
-		toncset((u32*)0x02680000, 0, 0x180000);
+		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+
+		toncset((u32*)0x02680000, 0, 0x100000);
 
 		if (*(u8*)0x02FFE1BF & BIT(0)) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
@@ -1288,6 +1292,37 @@ int arm7_main(void) {
 			}
 		}
 		*(u16*)0x4000500 = 0x807F;
+
+		errorCode = hookNdsRetailArm7(
+			(cardengineArm7*)NULL,
+			ndsHeader,
+			moduleParams,
+			romFile->firstCluster,
+			srParamsFileCluster,
+			ramDumpCluster,
+			wideCheatFileCluster,
+			wideCheatSize,
+			cheatFileCluster,
+			cheatSize,
+			apPatchFileCluster,
+			apPatchSize,
+			gameOnFlashcard,
+			saveOnFlashcard,
+			language,
+			dsiModeConfirmed,
+			dsiSD,
+			extendedMemoryConfirmed,
+			0,
+			consoleModel,
+			romRead_LED,
+			dmaRomRead_LED
+		);
+		if (errorCode == ERR_NONE) {
+			nocashMessage("Card hook successful");
+		} else {
+			nocashMessage("Card hook failed");
+			errorOutput();
+		}
 	} else {
 		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
@@ -1460,7 +1495,6 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
-		cheatPatch((cardengineArm7*)ce7Location, ndsHeader);
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)ce7Location,
 			ndsHeader,

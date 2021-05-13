@@ -247,6 +247,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	char romTid[5] = {0};
 	u8 unitCode = 0;
 	u32 ndsArm7Size = 0;
+	u32 accessControl = 0;
 	u32 ndsArm9isrc = 0;
 	u32 ndsArm7isrc = 0;
 	u32 ndsArm9ilen = 0;
@@ -261,6 +262,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&unitCode, 1, 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1B4, SEEK_SET);
+		fread(&accessControl, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1C0, SEEK_SET);
 		fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1CC, SEEK_SET);
@@ -277,6 +280,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* cebin = NULL;
 	bool donorLoaded = false;
+	bool isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)))
+					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 
 	if (dsiFeatures()) {
 		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
@@ -337,7 +342,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		disableSlot1();
 	}
 
-	if (conf->dsiMode > 0 && unitCode > 0) {
+	if ((conf->dsiMode > 0 && unitCode > 0) || isDSiWare) {
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)TARGETBUFFER9I, 1, ndsArm9ilen, ndsFile);
@@ -422,6 +427,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
+  if (conf->gameOnFlashcard || !isDSiWare) {
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
 	if (cebin) {
@@ -537,13 +543,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
-	// Load DS blowfish
-	cebin = fopen("nitro:/encr_data.bin", "rb");
-	if (cebin) {
-		fread((void*)BLOWFISH_LOCATION, 1, 0x1048, cebin);
-	}
-	fclose(cebin);
-
 	// Load SDK5 ce9 binary
 	cebin = fopen(unitCode>0&&conf->dsiMode ? "nitro:/cardenginei_arm9_twlsdk.lz77" : "nitro:/cardenginei_arm9_sdk5.lz77", "rb");
 	if (cebin) {
@@ -561,6 +560,21 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 	}
+  } else {
+	// Load external cheat engine binary
+	cebin = fopen("nitro:/cardenginei_arm7_cheatonly.bin", "rb");
+	if (cebin) {
+		fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
+	}
+	fclose(cebin);
+  }
+
+	// Load DS blowfish
+	cebin = fopen("nitro:/encr_data.bin", "rb");
+	if (cebin) {
+		fread((void*)BLOWFISH_LOCATION, 1, 0x1048, cebin);
+	}
+	fclose(cebin);
 
 	if (!isDSiMode() && unitCode>0 && conf->dsiMode) {
 		// Load DSi ARM7 BIOS

@@ -130,6 +130,10 @@ int hookNdsRetailArm7(
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
+	bool isDSiWare = (ce7 == NULL);
+
+	if (isDSiWare) newArm7binarySize = ndsHeader->arm7binarySize;
+
 	if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
 	}
@@ -244,13 +248,13 @@ int hookNdsRetailArm7(
 			if (!hookLocation) {
 				hookLocation = findIrqListOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 			}
-			/*if (!hookLocation && ndsHeader->unitCode == 3) {
+			if (!hookLocation && ndsHeader->unitCode == 3) {
 				switch (*(u32*)0x02FFE1DC) {
 					case 0x7250C:
 						hookLocation = (u32*)0x2EED280;
 						break;
 				}
-			}*/
+			}
 		} else if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
 			// Use relative and absolute addresses to find the location of the table in RAM
 			u32 tableAddr = wordsLocation[0];
@@ -276,69 +280,81 @@ int hookNdsRetailArm7(
 	u32* ipcSyncHandler = hookLocation + 16;
 	//u32* ndma0Handler = hookLocation + 28;
 
-	ce7->intr_vblank_orig_return  = *vblankHandler;
-	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-	//ce7->intr_ndma0_orig_return   = *ndma0Handler;
-	ce7->moduleParams             = moduleParams;
-	ce7->fileCluster              = fileCluster;
-	ce7->srParamsCluster          = srParamsFileCluster;
-	ce7->ramDumpCluster           = ramDumpCluster;
-	if (gameOnFlashcard) {
-		ce7->valueBits |= b_gameOnFlashcard;
-	}
-	if (saveOnFlashcard) {
-		ce7->valueBits |= b_saveOnFlashcard;
-	}
-	if (extendedMemory) {
-		ce7->valueBits |= b_extendedMemory;
-	}
-	if (ROMinRAM) {
-		ce7->valueBits |= b_ROMinRAM;
-	}
-	if (dsiMode) {
-		ce7->valueBits |= b_dsiMode; // SDK 5
-	}
-	if (dsiSD) {
-		ce7->valueBits |= b_dsiSD;
-	}
-	if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
-		ce7->valueBits |= b_preciseVolumeControl;
-	}
-	ce7->language                 = language;
-	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
-		ce7->languageAddr = (u32*)0x020DC5DC;
-	} else if (strcmp(romTid, "AWIP") == 0) { // Hotel Dusk (EUR)
-		ce7->languageAddr = (u32*)0x02100BBC;
-	}
-	ce7->consoleModel             = consoleModel;
-	ce7->romRead_LED              = romRead_LED;
-	ce7->dmaRomRead_LED           = dmaRomRead_LED;
+	if (isDSiWare) {
+		u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
+		intr_vblank_orig_return += 0x2FFC008;
 
-	*vblankHandler = ce7->patches->vblankHandler;
-	if ((strncmp(romTid, "UOR", 3) == 0)
-	|| (strncmp(romTid, "UXB", 3) == 0)
-	|| (strncmp(romTid, "USK", 3) == 0)
-	|| (!gameOnFlashcard || ROMinRAM)) {
-		*ipcSyncHandler = ce7->patches->fifoHandler;
-		//*ndma0Handler = ce7->patches->ndma0Handler;
-		if (!ROMinRAM) {
-			ce7->valueBits |= b_runCardEngineCheck;
+		*(u32*)intr_vblank_orig_return = *vblankHandler;
+		*vblankHandler = 0x2FFC008;
+	} else {
+		ce7->intr_vblank_orig_return  = *vblankHandler;
+		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
+		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
+		ce7->moduleParams             = moduleParams;
+		ce7->fileCluster              = fileCluster;
+		ce7->srParamsCluster          = srParamsFileCluster;
+		ce7->ramDumpCluster           = ramDumpCluster;
+		if (gameOnFlashcard) {
+			ce7->valueBits |= b_gameOnFlashcard;
 		}
-	}
+		if (saveOnFlashcard) {
+			ce7->valueBits |= b_saveOnFlashcard;
+		}
+		if (extendedMemory) {
+			ce7->valueBits |= b_extendedMemory;
+		}
+		if (ROMinRAM) {
+			ce7->valueBits |= b_ROMinRAM;
+		}
+		if (dsiMode) {
+			ce7->valueBits |= b_dsiMode; // SDK 5
+		}
+		if (dsiSD) {
+			ce7->valueBits |= b_dsiSD;
+		}
+		if (consoleModel < 2 && preciseVolumeControl && romRead_LED == 0 && dmaRomRead_LED == 0) {
+			ce7->valueBits |= b_preciseVolumeControl;
+		}
+		ce7->language                 = language;
+		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
+			ce7->languageAddr = (u32*)0x020DC5DC;
+		} else if (strcmp(romTid, "AWIP") == 0) { // Hotel Dusk (EUR)
+			ce7->languageAddr = (u32*)0x02100BBC;
+		}
+		ce7->consoleModel             = consoleModel;
+		ce7->romRead_LED              = romRead_LED;
+		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
-	if (strncmp(romTid, "AH9", 3) != 0
-	 //&& strncmp(romTid, "C6C", 3) != 0
-	 && strncmp(romTid, "VDE", 3) != 0) {
-		ce7->valueBits |= b_ipcEveryFrame;
+		*vblankHandler = ce7->patches->vblankHandler;
+		if ((strncmp(romTid, "UOR", 3) == 0)
+		|| (strncmp(romTid, "UXB", 3) == 0)
+		|| (strncmp(romTid, "USK", 3) == 0)
+		|| (!gameOnFlashcard || ROMinRAM)) {
+			*ipcSyncHandler = ce7->patches->fifoHandler;
+			//*ndma0Handler = ce7->patches->ndma0Handler;
+			if (!ROMinRAM) {
+				ce7->valueBits |= b_runCardEngineCheck;
+			}
+		}
+
+		if (strncmp(romTid, "AH9", 3) != 0
+		 //&& strncmp(romTid, "C6C", 3) != 0
+		 && strncmp(romTid, "VDE", 3) != 0) {
+			ce7->valueBits |= b_ipcEveryFrame;
+		}
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x8000) {
+	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (isDSiWare ? 0x1C00 : 0x8000)) {
 		u32 cheatEngineOffset = (u32)ce7-0x8400;
-		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E0;
-		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
+		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+		if (isDSiWare) {
+			cheatEngineOffset = 0x2FFC000;
+			cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+		}
+		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
