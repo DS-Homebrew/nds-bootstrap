@@ -965,7 +965,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
-	if (isDSiWare) {
+	if (!gameOnFlashcard && isDSiWare) {
 		*(u16*)(0x02FFFC40) = 3;						// Boot Indicator (NAND/SD)
 		return;
 	}
@@ -1245,7 +1245,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	if (!isDSiWare) {
+	if (gameOnFlashcard || !isDSiWare) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
