@@ -57,7 +57,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Animal Crossing: Wild World
-	if (strncmp(romTid, "ADM", 3) == 0 && !gameOnFlashcard) {
+	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !gameOnFlashcard) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
