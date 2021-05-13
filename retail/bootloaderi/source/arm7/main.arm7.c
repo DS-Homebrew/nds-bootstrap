@@ -1305,12 +1305,12 @@ int arm7_main(void) {
 		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
-			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
+			/*if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
-			} else {
+			} else {*/
 				my_disableSlot1();
-			}
+			//}
 		}
 
 		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
