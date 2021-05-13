@@ -230,7 +230,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02C00000, 0x02ED0000);
-	memset_addrs_arm7(0x02EE0000, 0x02FFE000);
+	memset_addrs_arm7(0x02EE0000, 0x02FFD000);
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -896,7 +896,7 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		//if (isDSiWare) {
+		if (isDSiWare) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
 
 			dbg_printf("Device list address: ");
@@ -909,7 +909,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			const char *pubPath = "sdmc:/DSIWARE.PUB";
 			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
-		//}
+		}
 
 		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
 		tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header

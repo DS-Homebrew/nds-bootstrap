@@ -334,7 +334,7 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
-static void patchSdCardReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) return;
 
 	// DSi SD Card reset
@@ -467,7 +467,7 @@ u32 patchCardNdsArm7(
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
 	if (!gameOnFlashcard || !saveOnFlashcard) {
-		patchSdCardReset(ce7, ndsHeader, moduleParams);
+		patchSdCardReset(ndsHeader, moduleParams);
 	}
 
 	dbg_printf("ERR_NONE\n\n");

@@ -404,11 +404,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (!donorLoaded && unitCode > 0) {
+	if (!conf->gameOnFlashcard && !donorLoaded && unitCode > 0) {
 		// Load device list
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
 			fread((u8*)0x02EDF000, 1, 0x400, cebin);
+			if (strlen(conf->ndsPath) < 62) {
+				tonccpy((char*)0x02EDF3C2, conf->ndsPath, strlen(conf->ndsPath));
+				*(char*)0x02EDF3C2 = 'm';
+				*(char*)0x02EDF3C3 = 'c';
+				tonccpy((char*)0x02EDF1B8, (char*)0x02EDF3C0, strlen(conf->ndsPath)+2);
+				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-3)) = 'p';
+				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-2)) = 'u';
+				*(char*)(0x02EDF1BA+(strlen(conf->ndsPath)-1)) = 'b';
+			}
 		}
 		fclose(cebin);
 	}
