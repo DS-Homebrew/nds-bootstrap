@@ -1321,6 +1321,10 @@ int arm7_main(void) {
 			nocashMessage("Card hook failed");
 			errorOutput();
 		}
+
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		}
 	} else {
 		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
