@@ -275,6 +275,8 @@ static void initialize(void) {
 		romLocation = (char*)(ROM_LOCATION_EXT);
 	}
 
+	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+
 	initialized = true;
 }
 

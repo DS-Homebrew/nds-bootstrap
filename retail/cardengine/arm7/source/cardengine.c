@@ -98,7 +98,7 @@ static void initialize(void) {
 		return;
 	}
 
-	//toncset((u32*)0x023DA000, 0, 0x1000);	// Clear arm9 side of bootloader
+	memset((u8*)0x06000000, 0, 0x20000);	// Clear bootloader
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
