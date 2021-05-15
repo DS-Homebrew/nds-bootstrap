@@ -597,27 +597,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
-	if ((dsiHeaderTemp->ndshdr.arm7binarySize == 0x22B40 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x22BCC && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2352C && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x235DC && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x23708 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2378C && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x237F0 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x23CAC && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2434C && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x245C4 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x2484C && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x249DC && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x249E8 && !dsiSD)
-	 || dsiHeaderTemp->ndshdr.arm7binarySize == 0x24DA8
-	 || dsiHeaderTemp->ndshdr.arm7binarySize == 0x24F50
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x25D04 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x25D94 && !dsiSD)
-	 || (dsiHeaderTemp->ndshdr.arm7binarySize == 0x25FFC && !dsiSD)
-	 || dsiHeaderTemp->ndshdr.arm7binarySize == 0x27618
-	 || dsiHeaderTemp->ndshdr.arm7binarySize == 0x2762C
-	 || dsiHeaderTemp->ndshdr.arm7binarySize == 0x29CEC) {} else {
+	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
 		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 	}
 }

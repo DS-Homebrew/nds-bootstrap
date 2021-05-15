@@ -367,27 +367,7 @@ u32 patchCardNdsArm7(
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
 
-	if ((ndsHeader->arm7binarySize == 0x22B40 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x22BCC && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x2352C && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x235DC && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x23708 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x2378C && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x237F0 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x23CAC && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x2434C && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x245C4 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x2484C && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x249DC && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x249E8 && !dsiSD)
-	 || ndsHeader->arm7binarySize == 0x24DA8
-	 || ndsHeader->arm7binarySize == 0x24F50
-	 || (ndsHeader->arm7binarySize == 0x25D04 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x25D94 && !dsiSD)
-	 || (ndsHeader->arm7binarySize == 0x25FFC && !dsiSD)
-	 || ndsHeader->arm7binarySize == 0x27618
-	 || ndsHeader->arm7binarySize == 0x2762C
-	 || ndsHeader->arm7binarySize == 0x29CEC) {
+	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
