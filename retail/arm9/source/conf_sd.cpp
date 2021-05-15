@@ -87,6 +87,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
+	// APP path (SFN version of NDS path)
+	conf->appPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "APP_PATH").c_str());
+
 	// SAV/PUB path
 	conf->savPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "SAV_PATH").c_str());
 
@@ -418,8 +421,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			fread((u8*)0x02EDF000, 1, 0x400, cebin);
 			if (!conf->gameOnFlashcard) {
-				if (strlen(conf->ndsPath) < 62) {
-					tonccpy((char*)0x02EDF3C2, conf->ndsPath, strlen(conf->ndsPath));
+				if (strlen(conf->appPath) < 62) {
+					tonccpy((char*)0x02EDF3C2, conf->appPath, strlen(conf->appPath));
 					*(char*)0x02EDF3C2 = 'm';
 					*(char*)0x02EDF3C3 = 'c';
 				}
