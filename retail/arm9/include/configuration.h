@@ -31,6 +31,7 @@ typedef struct configuration {
 	char* guiLanguage;
 	u8 region; // SDK 5
 	u8 dsiMode; // SDK 5
+	u8 isDSiWare; // SDK 5
 	u8 valueBits;
 	u8 donorSdkVer;
 	u8 patchMpuRegion;

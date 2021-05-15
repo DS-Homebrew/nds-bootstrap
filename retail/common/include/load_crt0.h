@@ -42,6 +42,7 @@ typedef struct loadCrt0 {
     u8 language;
     u8 region; // SDK 5
     u8 dsiMode; // SDK 5
+    u8 isDSiWare; // SDK 5
     u8 donorSdkVer;
     u8 extendedMemory;
     u8 consoleModel;

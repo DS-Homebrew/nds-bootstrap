@@ -293,6 +293,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
 	loader->dsiMode                     = conf->dsiMode; // SDK 5
+	loader->isDSiWare                   = conf->isDSiWare; // SDK 5
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;

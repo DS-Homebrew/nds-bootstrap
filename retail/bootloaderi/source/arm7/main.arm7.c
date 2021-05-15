@@ -109,6 +109,7 @@ extern u8 patchMpuRegion;
 extern u8 language;
 extern u8 region;
 extern u8 dsiMode; // SDK 5
+extern u8 isDSiWare; // SDK 5
 extern u8 donorSdkVer;
 extern u8 extendedMemory;
 extern u8 consoleModel;
@@ -906,9 +907,6 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			const char *pubPath = "sdmc:/DSIWARE.PUB";
 			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
-
-			*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
-			*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 		}
 
 		if (gameOnFlashcard || !isDSiWare) {
@@ -1126,7 +1124,7 @@ int arm7_main(void) {
 	}
 
 	if (fatTableEmpty) {
-		if (!softResetParamsFound) {
+		if (!softResetParamsFound && (gameOnFlashcard || !isDSiWare)) {
 			pleaseWaitOutput();
 		}
 		buildFatTableCache(romFile, 0);
@@ -1194,12 +1192,9 @@ int arm7_main(void) {
 
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, *romFile);
-	bool isDSiWare = false;
-	if ((ROMisDsiExclusive(&dsiHeaderTemp.ndshdr) && (dsiHeaderTemp.access_control & BIT(4)))
-	|| (ROMisDsiEnhanced(&dsiHeaderTemp.ndshdr) && dsiMode && strncmp(getRomTid(&dsiHeaderTemp.ndshdr), "K", 1)==0))
+	if (isDSiWare)
 	{
 		dsiModeConfirmed = true;
-		isDSiWare = true;
 	} else if (dsiMode == 2) {
 		dsiModeConfirmed = dsiMode;
 	} else {
@@ -1619,6 +1614,11 @@ int arm7_main(void) {
 		sdRead = dsiSD;
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
+	}
+
+	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
+		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
+		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	}
 
 	startBinary_ARM7();

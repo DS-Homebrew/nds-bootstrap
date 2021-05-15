@@ -286,7 +286,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* cebin = NULL;
 	bool donorLoaded = false;
-	bool isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)))
+	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)))
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 
 	if (dsiFeatures()) {
@@ -348,7 +348,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		disableSlot1();
 	}
 
-	if ((conf->dsiMode > 0 && unitCode > 0) || isDSiWare) {
+	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)TARGETBUFFER9I, 1, ndsArm9ilen, ndsFile);
@@ -441,7 +441,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
-  if (conf->gameOnFlashcard || !isDSiWare) {
+  if (conf->gameOnFlashcard || !conf->isDSiWare) {
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
 	if (cebin) {

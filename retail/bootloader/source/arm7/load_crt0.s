@@ -58,6 +58,7 @@
 	.global language
 	.global region
 	.global dsiMode
+	.global isDSiWare
 	.global donorSdkVer
 	.global extendedMemory
 	.global consoleModel
@@ -142,6 +143,8 @@ language:
 region:
 	.byte	0
 dsiMode:
+	.byte	0
+isDSiWare:
 	.byte	0
 donorSdkVer:
 	.byte	0		@ donor SDK version
