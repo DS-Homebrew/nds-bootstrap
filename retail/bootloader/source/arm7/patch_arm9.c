@@ -121,6 +121,11 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
 	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+    dbg_printf("cardRead location : ");
+    dbg_hexa(cardReadStartOffset);
+    dbg_printf("\n");
+    dbg_hexa((u32)ce9);
+    dbg_printf("\n\n");
 	return true;
 }
 
@@ -155,6 +160,9 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
 	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4);
+    dbg_printf("cardPullOut location : ");
+    dbg_hexa(cardPullOutOffset);
+    dbg_printf("\n\n");
 }
 
 static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOutOffset) {
@@ -209,6 +217,9 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
 		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		dbg_printf("cardId location : ");
+		dbg_hexa(cardIdStartOffset);
+		dbg_printf("\n\n");
 	}
 }
 
@@ -237,6 +248,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
 	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+    dbg_printf("cardReadDma location : ");
+    dbg_hexa(cardReadDmaStartOffset);
+    dbg_printf("\n\n");
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
@@ -275,6 +289,9 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
 	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
+    dbg_printf("cardIrqEnable location : ");
+    dbg_hexa(cardIrqEnableOffset);
+    dbg_printf("\n\n");
 	return true;
 }
 
@@ -474,7 +491,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
 }
 
-u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 saveSize) {
+/*u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 saveSize) {
 	if (moduleParams->sdk_version < 0x2008000) {
 		return 0;
 	}
@@ -490,7 +507,7 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		heapPointer = findHeapPointerOffset(moduleParams, ndsHeader);
 	}
     if(!heapPointer || *heapPointer<0x02000000 || *heapPointer>0x03000000) {
-        dbg_printf("ERROR: Wrong heap pointer\n");
+        dbg_printf("ERROR: Wrong lo heap pointer\n");
         dbg_printf("heap pointer value: ");
 	    dbg_hexa(*heapPointer);    
 		dbg_printf("\n\n");
@@ -502,7 +519,7 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old heap pointer: ");
+    dbg_printf("old lo heap pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
     
@@ -515,23 +532,17 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		case 0x0A:
 			shrinkSize = 0x4000;	// 0x8000000
 			break;
-		/*case 0x0B:
-			shrinkSize = 0x8000;	// 0x10000000
-			break;
-		case 0x0C:
-			shrinkSize = 0x10000;	// 0x20000000
-			break;*/
 	}
 
 	*heapPointer += shrinkSize; // shrink heap by FAT table cache size
 
-    dbg_printf("new heap pointer: ");
+    dbg_printf("new lo heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Heap Shrink Sucessfull\n\n");
+    dbg_printf("Lo Heap Shrink Sucessfull\n\n");
 
     return oldheapPointer;
-}
+}*/
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
@@ -566,16 +577,16 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old heap end pointer: ");
+    dbg_printf("old hi heap end pointer: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
 	*heapPointer = expansionPakFound ? (u32)ce9 : 0x023C0000; // shrink heap by 128KB (or ce9 binary size, if expansion pak is found)
 
-    dbg_printf("new heap 2 pointer: ");
+    dbg_printf("new hi heap pointer: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Heap 2 Shrink Sucessfull\n\n");
+    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 }
 
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
