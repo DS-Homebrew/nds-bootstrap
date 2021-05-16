@@ -541,14 +541,14 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 }
 
 // SDK 5
-static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
+/*static bool ROMisDsiEnhanced(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode == 0x02);
 }
 
 // SDK 5
 static bool ROMisDsiExclusive(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode == 0x03);
-}
+}*/
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	nocashMessage("loadBinary_ARM7");

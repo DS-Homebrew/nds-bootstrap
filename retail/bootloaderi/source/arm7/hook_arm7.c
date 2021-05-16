@@ -337,8 +337,9 @@ int hookNdsRetailArm7(
 			}
 		}
 
-		if (strncmp(romTid, "AH9", 3) != 0
-		 //&& strncmp(romTid, "C6C", 3) != 0
+		if (strncmp(romTid, "ACV", 3) != 0
+		 && strncmp(romTid, "AH9", 3) != 0
+		// && strncmp(romTid, "ALK", 3) != 0
 		 && strncmp(romTid, "VDE", 3) != 0) {
 			ce7->valueBits |= b_ipcEveryFrame;
 		}
