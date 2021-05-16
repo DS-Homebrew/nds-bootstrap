@@ -54,7 +54,7 @@
 
 #define BASE_DELAY (100)
 
-#define REG_GPIO_WIFI *(vu16*)0x4004C04
+#define REG_GPIO_WIFI *(vu8*)0x4004C05
 
 #include "tonccpy.h"
 #include "my_fat.h"
