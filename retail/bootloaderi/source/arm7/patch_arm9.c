@@ -456,7 +456,8 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 		const char* romTid = getRomTid(ndsHeader);
 
-		if (strncmp(romTid, "AJS", 3) == 0
+		if (strncmp(romTid, "ACV", 3) == 0
+		 || strncmp(romTid, "AJS", 3) == 0
 		 || strncmp(romTid, "AWI", 3) == 0
 		 || strncmp(romTid, "AJU", 3) == 0
 		 || strncmp(romTid, "AWD", 3) == 0
@@ -568,7 +569,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	}
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0
+	if (strncmp(romTid, "ACV", 3) == 0
+	 || strncmp(romTid, "AJS", 3) == 0
 	 || strncmp(romTid, "AWI", 3) == 0
 	 || strncmp(romTid, "AJU", 3) == 0
 	 || strncmp(romTid, "AWD", 3) == 0
