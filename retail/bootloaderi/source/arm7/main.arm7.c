@@ -1435,7 +1435,7 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		} else if (!dsiModeConfirmed && !extendedMemoryConfirmed) {
-			ce9Location = strncmp(romTid, "ADM", 3)==0 ? CARDENGINEI_ARM9_CACHED_END_LOCATION : CARDENGINEI_ARM9_CACHED_MID_LOCATION;
+			ce9Location = strncmp(romTid, "ADM", 3)==0||strncmp(romTid, "A62", 3)==0 ? CARDENGINEI_ARM9_CACHED_END_LOCATION : CARDENGINEI_ARM9_CACHED_MID_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x4000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION), size);
 			if (ROMinRAM) {
