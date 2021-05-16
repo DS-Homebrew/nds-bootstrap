@@ -98,6 +98,8 @@ static u32 overlaysSize = 0;
 
 static u32 softResetParams = 0;
 
+bool expansionPakFound = false;
+
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
@@ -617,14 +619,14 @@ int arm7_main(void) {
 	u32 fatTableAddr = 0;
 	u32 fatTableSize = 0;
 	*(vu32*)(0x08240000) = 1;
-	bool expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
+	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
 	if (expansionPakFound) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
-	} else if ((strncmp(getRomTid(ndsHeader), "AMC", 3) == 0)
+	} /*else if ((strncmp(getRomTid(ndsHeader), "AMC", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "A8N", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "ADA", 3) == 0)
 			 || (strncmp(getRomTid(ndsHeader), "APA", 3) == 0)) {
@@ -635,9 +637,9 @@ int arm7_main(void) {
 			 || (strncmp(getRomTid(ndsHeader), "IPK", 3) == 0)) {
 		fatTableAddr = (u32)patchLoHeapPointer(moduleParams, ndsHeader, saveSize);
 		fatTableSize = 0x4000;
-	} else {
-		fatTableAddr = 0x023E4000;
-		fatTableSize = 0x14000;
+	}*/ else {
+		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
+		fatTableSize = 0x1B000;
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {

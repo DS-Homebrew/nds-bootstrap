@@ -475,7 +475,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 }
 
 u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 saveSize) {
-	if (moduleParams->sdk_version <= 0x2007FFF) {
+	if (moduleParams->sdk_version < 0x2008000) {
 		return 0;
 	}
 
@@ -534,10 +534,11 @@ u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 }
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	extern bool expansionPakFound;
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (extendedMemory2
-	|| moduleParams->sdk_version <= 0x2007FFF
+	|| moduleParams->sdk_version < 0x2008000
 	|| strncmp(romTid, "VSO", 3) == 0) {
 		return;
 	}
@@ -569,7 +570,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (u32)ce9; // shrink heap by 16KB or 20KB
+	*heapPointer = expansionPakFound ? (u32)ce9 : 0x023C0000; // shrink heap by 128KB (or ce9 binary size, if expansion pak is found)
 
     dbg_printf("new heap 2 pointer: ");
 	dbg_hexa((u32)*heapPointer);
