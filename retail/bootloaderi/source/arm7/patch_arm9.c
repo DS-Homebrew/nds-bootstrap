@@ -628,7 +628,8 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "B3R", 3) == 0
+	if (strncmp(romTid, "CLJ", 3) == 0
+	 || strncmp(romTid, "B3R", 3) == 0
 	|| !patchOffsetCache.cardIdOffset
 	) return false;
 
