@@ -37,6 +37,21 @@ bool patchOffsetCacheChanged = false;
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
+	// Trauma Center: Under the Knife (USA)
+	if (strcmp(romTid, "AKDE") == 0) {
+		*(u32*)0x2007434 = 0x27FF017;
+	}
+
+	// Trauma Center: Under the Knife (Europe)
+	if (strcmp(romTid, "AKDP") == 0) {
+		*(u32*)0x20A6B90 = 0x27FF017;
+	}
+
+	// Chou Shittou Caduceus (Japan)
+	if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
+		*(u32*)0x20CCB18 = 0x27FF017;
+	}
+
 	// The World Ends With You (USA/Europe)
 	if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
 		*(u32*)0x203E7B0 = 0;
@@ -344,11 +359,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 
     // Golden Sun
-    if (strcmp(romTid, "BO5E") == 0) {
+    /*if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }
+    }*/
 }
 
 static bool rsetA7CacheDone = false;
