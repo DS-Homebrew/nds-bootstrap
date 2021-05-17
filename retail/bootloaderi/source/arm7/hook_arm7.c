@@ -148,7 +148,7 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (!handlerLocation) {
+	if (!handlerLocation && !isDSiWare) {
 	/*	if (strncmp(romTid, "YGX", 3) == 0) {
 			ce7->valueBits |= b_powerCodeOnVBlank;
 		} else {
@@ -250,10 +250,17 @@ int hookNdsRetailArm7(
 			}
 			if (!hookLocation && ndsHeader->unitCode == 3) {
 				switch (*(u32*)0x02FFE1DC) {
+					case 0x6AFD4:
+						hookLocation = (u32*)0x2EE7360;
+						break;
 					case 0x7250C:
-						hookLocation = (u32*)0x2EED280;
+						hookLocation = (u32*)0x2EE5E10;
 						break;
 				}
+			}
+			if (!hookLocation && ndsHeader->unitCode == 3) {
+				dbg_printf("ERR_HOOK\n");
+				return ERR_HOOK;
 			}
 		} else if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
 			// Use relative and absolute addresses to find the location of the table in RAM
