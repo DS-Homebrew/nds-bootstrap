@@ -62,17 +62,17 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2EFFFD0;
 				}
 			}
-		} else if (!dsiModeConfirmed && !(REG_SCFG_ROM & BIT(1))) {
+		} else if (!dsiModeConfirmed && extendedMemoryConfirmed && !(REG_SCFG_ROM & BIT(1))) {
 			dsiModeCheckOffset[0] = 0xE3A00001;	// mov r0, #1
 			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
 
 			if (dsiModeCheck2Offset) {
 				if (dsiModeCheck2Offset[0] == 0xE59F0014 || !usesThumb) {
-					dsiModeCheck2Offset[0] = 0xE3A00001;	// mov r0, #1
+					dsiModeCheck2Offset[0] = 0xE3A00000;	// mov r0, #0
 					dsiModeCheck2Offset[1] = 0xE12FFF1E;	// bx lr
 				} else {
 					u16* dsiModeCheck2OffsetThumb = (u16*)dsiModeCheck2Offset;
-					dsiModeCheck2OffsetThumb[0] = 0x2001;	// movs r0, #1
+					dsiModeCheck2OffsetThumb[0] = 0x2000;	// movs r0, #0
 					dsiModeCheck2OffsetThumb[1] = 0x4770;	// bx lr
 				}
 			}
