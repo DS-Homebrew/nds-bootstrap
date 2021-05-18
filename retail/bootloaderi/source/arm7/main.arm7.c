@@ -1371,7 +1371,7 @@ int arm7_main(void) {
 		}
 
 		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
-		   (!dsiSD || dsiModeConfirmed)
+		   (!dsiSD || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed))
 		);
 
 		if (useSdk5ce7) {
