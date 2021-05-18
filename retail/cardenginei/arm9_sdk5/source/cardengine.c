@@ -126,23 +126,23 @@ static void waitMs(int count) {
 }
 #endif
 
-static int readCount = 0;
+//static int readCount = 0;
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
-	if (readCount >= 100) {
+	if (REG_IME != 0 && REG_IF != 0) {
 		sleepMsEnabled = true;
 	}
 
 	if (!sleepMsEnabled) return;
 
-    if(ce9->patches->sleepRef) {
-        volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
-        (*sleepRef)(ms);
-    } else if(ce9->thumbPatches->sleepRef) {
+	if(ce9->patches->sleepRef) {
+		volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
+		(*sleepRef)(ms);
+	} else if(ce9->thumbPatches->sleepRef) {
 		extern void callSleepThumb(int ms);
-        callSleepThumb(ms);
-    }
+		callSleepThumb(ms);
+	}
 }
 
 #ifndef DLDI
@@ -814,7 +814,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	// -------------------------------------
 	#endif
 
-	readCount++;
+	//readCount++;
 
 	if (src == 0) {
 		// If ROM read location is 0, do not proceed.
