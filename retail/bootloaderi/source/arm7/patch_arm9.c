@@ -561,6 +561,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	return false;
 }
 
+bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
@@ -599,7 +600,8 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     dbg_printf("\n\n");
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	  memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
-    
+	  setDmaPatched = true;
+
       return true;  
     }
 
@@ -628,8 +630,24 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "CLJ", 3) == 0
+	if (strncmp(romTid, "A5F", 3) == 0
 	 || strncmp(romTid, "B3R", 3) == 0
+	 || strncmp(romTid, "B5P", 3) == 0
+	 || strncmp(romTid, "BE8", 3) == 0
+	 || strncmp(romTid, "BEB", 3) == 0
+	 || strncmp(romTid, "BEE", 3) == 0
+	 || strncmp(romTid, "BEZ", 3) == 0
+	 || strncmp(romTid, "BLF", 3) == 0
+	 || strncmp(romTid, "BOE", 3) == 0
+	 || strncmp(romTid, "C3J", 3) == 0
+	 || strncmp(romTid, "CLJ", 3) == 0
+	 || strncmp(romTid, "Y49", 3) == 0
+	 || strncmp(romTid, "Y6Z", 3) == 0
+	 || strncmp(romTid, "Y9B", 3) == 0
+	 || strncmp(romTid, "YEE", 3) == 0
+	 || strncmp(romTid, "YEL", 3) == 0
+	 || strncmp(romTid, "YEW", 3) == 0
+	 || strncmp(romTid, "YLT", 3) == 0
 	|| !patchOffsetCache.cardIdOffset
 	) return false;
 

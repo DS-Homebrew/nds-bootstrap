@@ -344,9 +344,10 @@ int hookNdsRetailArm7(
 			}
 		}
 
-		if (strncmp(romTid, "AH9", 3) != 0
+		extern bool setDmaPatched;
+
+		if (!setDmaPatched
 		// && strncmp(romTid, "ALK", 3) != 0
-		 && strncmp(romTid, "CLJ", 3) != 0
 		 && strncmp(romTid, "VDE", 3) != 0) {
 			ce7->valueBits |= b_ipcEveryFrame;
 		}
