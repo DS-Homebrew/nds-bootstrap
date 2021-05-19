@@ -62,6 +62,7 @@ extern tNDSHeader* ndsHeader;
 extern bool arm9_boostVram;
 extern bool extendedMemory2;
 extern bool dsDebugRam;
+extern bool arm9_macroMode;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

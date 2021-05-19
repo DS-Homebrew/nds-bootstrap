@@ -32,6 +32,7 @@
 #include "module_params.h"
 #include "cardengine.h"
 #include "nds_header.h"
+#include "tonccpy.h"
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -98,7 +99,7 @@ static void initialize(void) {
 		return;
 	}
 
-	memset((u8*)0x06000000, 0, 0x20000);	// Clear bootloader
+	tonccpy((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);

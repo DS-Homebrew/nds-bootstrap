@@ -100,6 +100,8 @@ static u32 softResetParams = 0;
 
 bool expansionPakFound = false;
 
+//static char bootName[9] = {'B','O','O','T','.','N','D','S', 0};
+
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
@@ -169,9 +171,8 @@ static void resetMemory_ARM7(void) {
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
-	toncset((u32*)0x023DB000, 0, 0x5000);
-	toncset((u32*)0x023F0000, 0, 0xE000);
+	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x023F0000, 0, 0xD000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
 		toncset((u32*)0x02400000, 0, dsDebugRam ? 0x400000 : 0xC00000);
@@ -470,6 +471,8 @@ int arm7_main(void) {
 	nocashMessage("Getting ARM7 to clear RAM...\n");
 	resetMemory_ARM7();
 
+	arm9_macroMode = macroMode;
+
 	// Init card
 	if (!FAT_InitFiles(initDisc, 0)) {
 		nocashMessage("!FAT_InitFiles");
@@ -489,13 +492,14 @@ int arm7_main(void) {
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
 	}
 
+	// BOOT.NDS file
+	//aFile bootNdsFile = getBootFileCluster(bootName, 0);
+
 	// ROM file
 	aFile romFile = getFileFromCluster(storedFileCluster);
 
-	const char* bootName = "BOOT.NDS";
-
 	// Invalid file cluster specified
-	if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
+	/*if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
 		romFile = getBootFileCluster(bootName, 0);
 	}
 
@@ -503,7 +507,7 @@ int arm7_main(void) {
 		nocashMessage("fileCluster == CLUSTER_FREE");
 		errorOutput();
 		//return -1;
-	}
+	}*/
 
 	//nocashMessage("status1");
 
@@ -557,28 +561,11 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	if (extendedMemory2) {
-		ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
-	} else {
-		extern u32 __mydldi_start;
-		u32 dldiStart = (u32)(__mydldi_start+0x40);
-		u32 dldiEnd = (u32)(__mydldi_start+0x44);
-		u16 dldiSize = 0;
-		for (u32 i = dldiStart; i <= dldiEnd; i += 4) {
-			dldiSize += 4;
-		}
+	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x8000);
+	toncset((u32*)0x023E0000, 0, 0x10000);
 
-		if (dldiSize >= 0x2000 && dldiSize < 0x3000) {
-			ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_12KB;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_12KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED1, 0x5000);
-		} else if (dldiSize < 0x2000) {
-			ce9Location = CARDENGINE_ARM9_LOCATION_DLDI_8KB;
-			tonccpy((u32*)CARDENGINE_ARM9_LOCATION_DLDI_8KB, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED2, 0x4000);
-		}
-		toncset((u32*)0x023E0000, 0, 0x10000);
-	}
-
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x8000)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");
@@ -639,7 +626,7 @@ int arm7_main(void) {
 		fatTableSize = 0x4000;
 	}*/ else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = 0x1B000;
+		fatTableSize = 0x1A000;
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {

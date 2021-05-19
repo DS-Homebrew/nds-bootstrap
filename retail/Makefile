@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam clean
+.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_cached cardenginei_arm9_cached_end cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam clean
 
 all:	$(OUTPUT)
 
@@ -162,7 +162,7 @@ arm9/$(TARGET).elf:	bootloader bootloaderi
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_8kb cardengine_arm9_extmem
+bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_extmem
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -176,10 +176,6 @@ cardengine_arm7: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
-
-#---------------------------------------------------------------------------------		
-cardengine_arm9_8kb: $(DATA)
-	@$(MAKE) -C cardengine/arm9_8kb
 
 #---------------------------------------------------------------------------------		
 cardengine_arm9_extmem: $(DATA)
@@ -258,7 +254,6 @@ clean:
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
 	@$(MAKE) -C cardengine/arm9 clean
-	@$(MAKE) -C cardengine/arm9_8kb clean
 	@$(MAKE) -C cardengine/arm9_extmem clean
 	@$(MAKE) -C cardenginei/arm7 clean
 	@$(MAKE) -C cardenginei/arm7_alt clean

@@ -22,7 +22,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	load
 BUILD		:=	build
-SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 source/arm9/loading_screens ../common/source ../common/source_general
+SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
@@ -32,7 +32,7 @@ SPECS		:=  specs
 #---------------------------------------------------------------------------------
 ARCH	:=  -mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -Os\
+CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)

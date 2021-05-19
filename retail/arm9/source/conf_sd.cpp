@@ -633,38 +633,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x800, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0xC00, cebin);
 	}
 	fclose(cebin);
 
 	*(vu32*)(0x02000000) = 0x314D454D;
 	*(vu32*)(0x02400000) = 0x324D454D;
 
+	// Load ce9 binary
 	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
-		// Load ce9 binary
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
-		if (cebin) {
-			fread(lz77ImageBuffer, 1, 0x7000, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM);
-		}
-		fclose(cebin);
 	} else {
-		// Load ce9 binary 1
 		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
-		if (cebin) {
-			fread(lz77ImageBuffer, 1, 0x6000, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED1);
-		}
-		fclose(cebin);
-
-		// Load ce9 binary 2
-		cebin = fopen("nitro:/cardengine_arm9_8kb.lz77", "rb");
-		if (cebin) {
-			fread(lz77ImageBuffer, 1, 0x5000, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED2);
-		}
-		fclose(cebin);
 	}
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x7000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
+	}
+	fclose(cebin);
 
 	// Load DS blowfish
 	cebin = fopen("nitro:/encr_data.bin", "rb");
