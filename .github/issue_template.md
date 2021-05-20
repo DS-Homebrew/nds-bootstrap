@@ -18,7 +18,7 @@
 
 ### Logs
 
-<!-- Please enable debug logging and add everything here -->
+<!-- To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini`, then add everything here from `sd:/NDSBTSRP.LOG` -->
 
 ### Other notes
 
