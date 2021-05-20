@@ -631,6 +631,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "A5F", 3) == 0
+	 || strncmp(romTid, "B2K", 3) == 0
 	 || strncmp(romTid, "B3R", 3) == 0
 	 || strncmp(romTid, "B5P", 3) == 0
 	 || strncmp(romTid, "BE8", 3) == 0
