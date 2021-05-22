@@ -33,6 +33,10 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	u32 cheatFileCluster,
+	u32 cheatSize,
+	u32 apPatchFileCluster,
+	u32 apPatchSize,
 	u32 language
 );
 int hookNdsRetailArm9(

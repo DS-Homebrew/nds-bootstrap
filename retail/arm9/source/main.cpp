@@ -448,6 +448,10 @@ static int runNdsFile(configuration* conf) {
 		clusterSrParams = stSrParams.st_ino;
 	}
 
+	if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
+		clusterCheat = stCheat.st_ino;
+	}
+
 	if (dsiFeatures()) {
 		if (stat(conf->gbaPath, &stGba) >= 0) {
 			clusterGba = stGba.st_ino;
@@ -459,10 +463,6 @@ static int runNdsFile(configuration* conf) {
 
 		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
-		}
-
-		if (stat(cheatFilePath.c_str(), &stCheat) >= 0) {
-			clusterCheat = stCheat.st_ino;
 		}
 
 		if (conf->cacheFatTable && stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {

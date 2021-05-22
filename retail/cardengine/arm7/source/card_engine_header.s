@@ -4,6 +4,7 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global ce7
 	.align	4
 	.arm
 
@@ -22,6 +23,8 @@
 #define CACHE_LINE_SIZE	32
 
 
+ce7 :
+	.word	ce7
 patches_offset:
 	.word	patches
 intr_vblank_orig_return:

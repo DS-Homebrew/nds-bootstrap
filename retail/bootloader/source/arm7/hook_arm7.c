@@ -26,6 +26,7 @@
 #include "nds_header.h"
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
+#include "value_bits.h"
 #include "common.h"
 #include "patch.h"
 #include "find.h"
@@ -248,6 +249,10 @@ int hookNdsRetailArm7(
 	cardengineArm7* ce7,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	u32 cheatFileCluster,
+	u32 cheatSize,
+	u32 apPatchFileCluster,
+	u32 apPatchSize,
 	u32 language
 ) {
 
@@ -375,6 +380,22 @@ int hookNdsRetailArm7(
 	}
 
 	*vblankHandler = ce7->patches->vblankHandler;
+
+	aFile cheatFile = getFileFromCluster(cheatFileCluster);
+	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x2000) {
+		u32 cheatEngineOffset = (u32)ce7-0x2400;
+		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
+			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
+			cheatDataOffset += apPatchSize;
+			*(cheatDataOffset + 3) = 0xCF;
+			dbg_printf("AP-fix found and applied\n");
+		}
+		if (cheatFile.firstCluster != CLUSTER_FREE) {
+			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
+		}
+	}
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

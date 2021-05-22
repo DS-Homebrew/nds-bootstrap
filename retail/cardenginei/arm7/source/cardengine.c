@@ -773,7 +773,7 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (*(u32*)((u32)ce7-(0x8400+0x3E0)) != 0xCF000000) {
+	if (*(u32*)((u32)ce7-(0x8400+0x3E8)) != 0xCF000000) {
 		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
 		(*cheatEngine)();
 	}

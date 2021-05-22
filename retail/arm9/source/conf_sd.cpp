@@ -630,6 +630,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
   } else {
 	fclose(ndsFile);
 
+	// Load external cheat engine binary
+	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+	if (cebin) {
+		fread((u8*)CHEAT_ENGINE_LOCATION_B4DS, 1, 0x400, cebin);
+	}
+	fclose(cebin);
+
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
@@ -659,9 +666,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+	cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
+
 	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
+	conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {

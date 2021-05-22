@@ -73,7 +73,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 	if (ramClearOffset) {
 		*(ramClearOffset) = 0x023FC000;
-		*(ramClearOffset + 1) = 0x023FE000;
+		*(ramClearOffset + 1) = 0x023FC000;
 	}
 	patchOffsetCache.ramClearChecked = true;
 }

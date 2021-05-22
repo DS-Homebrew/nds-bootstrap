@@ -86,6 +86,8 @@ extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
+extern u32 cheatFileCluster;
+extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
 extern u32 patchMpuSize;
@@ -172,7 +174,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
-	toncset((u32*)0x023F0000, 0, 0xD000);
+	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
 		toncset((u32*)0x02400000, 0, dsDebugRam ? 0x400000 : 0xC00000);
@@ -594,6 +596,10 @@ int arm7_main(void) {
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		ndsHeader,
 		moduleParams,
+		cheatFileCluster,
+		cheatSize,
+		apPatchFileCluster,
+		apPatchSize,
 		language
 	);
 	if (errorCode == ERR_NONE) {

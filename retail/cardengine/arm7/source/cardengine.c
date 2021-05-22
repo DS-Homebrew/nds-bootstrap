@@ -36,6 +36,8 @@
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
+extern u32 ce7;
+
 //static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 //static char hiyaNdsPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
@@ -116,6 +118,11 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 
 	initialize();
+
+	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
+		(*cheatEngine)();
+	}
 
 	if (language >= 0 && language <= 7) {
 		// Change language
