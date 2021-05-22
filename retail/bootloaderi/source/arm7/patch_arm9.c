@@ -418,6 +418,34 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 }
 
+/*static void patchCardRefresh(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	if (moduleParams->sdk_version < 0x5000000) {
+		return;
+	}
+
+	// Card refresh
+	u32* cardRefreshOffset = patchOffsetCache.cardRefreshOffset;
+	if (!patchOffsetCache.cardRefreshOffset) {
+		cardRefreshOffset = findCardRefreshOffset(ndsHeader, moduleParams, usesThumb);
+		if (cardRefreshOffset) {
+			patchOffsetCache.cardRefreshOffset = cardRefreshOffset;
+		}
+	}
+
+	if (cardRefreshOffset) {
+        // Patch
+		if (usesThumb) {
+			u16* cardRefreshOffsetThumb = (u16*)cardRefreshOffset;
+			*cardRefreshOffsetThumb = 0x4770;	// bx lr
+		} else {
+			*cardRefreshOffset = 0xE12FFF1E;	// bx lr
+		}
+		dbg_printf("cardRefresh location : ");
+		dbg_hexa(cardRefreshOffset);
+		dbg_printf("\n\n");
+	}
+}*/
+
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Card read dma
 	u32* cardReadDmaStartOffset = patchOffsetCache.cardReadDmaOffset;
@@ -649,7 +677,8 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	 || strncmp(romTid, "YEL", 3) == 0
 	 || strncmp(romTid, "YEW", 3) == 0
 	 || strncmp(romTid, "YLT", 3) == 0
-	|| !patchOffsetCache.cardIdOffset
+	// || isSdk5(moduleParams)
+	 || !patchOffsetCache.cardIdOffset
 	) return false;
 
 	// Work-around for buggy card read DMA and/or screen flickers during loading
@@ -1725,6 +1754,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+
+	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
 	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);

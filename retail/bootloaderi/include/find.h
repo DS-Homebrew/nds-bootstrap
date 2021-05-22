@@ -61,6 +61,7 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 u16* findCardIdEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u16* cardReadEndOffset);
 u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardIdEndOffset);
 u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* cardIdEndOffset);
+//u32* findCardRefreshOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* cardReadDmaEndOffset);

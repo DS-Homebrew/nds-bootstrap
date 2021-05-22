@@ -96,6 +96,11 @@ static const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
 static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
+// Card refresh (SDK 5)
+/*static const u32 cardRefreshSignatureEarly[4] = {0x02FFFC00, 0x02FFFAE0, 0x040001A4, 0x04100010};
+static const u32 cardRefreshSignature[3]      = {0x02FFFC00, 0x040001A4, 0x04100010};
+static const u32 cardRefreshSignatureThumb[5] = {0x02FFFC00, 0x02FFFAE0, 0xF8FFFFFF, 0x040001A4, 0x04100010};*/
+
 // Card read DMA
 static const u32 cardReadDmaEndSignature[2]          = {0x01FF8000, 0x000001FF};
 static const u32 cardReadDmaEndSignatureSdk2Alt[2]   = {0x01FF8000, 0xE92D4030}; // SDK 2
@@ -1328,6 +1333,33 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	dbg_printf("\n");
 	return cardIdStartOffset;
 }
+
+/*u32* findCardRefreshOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCardRefreshOffset:\n");
+
+	u32* signature = cardRefreshSignatureEarly;
+	int signatureLen = 4;
+	if (usesThumb) {
+		signature = cardRefreshSignatureThumb;
+		signatureLen = 5;
+	} else if (moduleParams->sdk_version >= 0x5008000) {
+		signature = cardRefreshSignature;
+		signatureLen = 3;
+	}
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		signature, signatureLen
+	);
+	if (offset) {
+		dbg_printf("Card refresh found\n");
+	} else {
+		dbg_printf("Card refresh not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset+signatureLen;
+}*/
 
 u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardReadDmaEndOffset:\n");
