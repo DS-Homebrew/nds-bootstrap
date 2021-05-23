@@ -731,7 +731,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		}
 
-		if (conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
+		if ((conf->gameOnFlashcard || !conf->isDSiWare) && conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
 			consoleDemoInit();
 			printf("Creating FAT table file.\n");
 			printf("Please wait...\n");
