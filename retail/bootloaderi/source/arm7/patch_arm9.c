@@ -655,7 +655,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+/*static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "A5F", 3) == 0
@@ -702,7 +702,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		dbg_printf("\n\n");
 	}
 	return offset ? true : false;
-}
+}*/
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -1757,9 +1757,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
-		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	} else {
+	//if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
+	//	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	//} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
@@ -1767,7 +1767,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
-	}
+	//}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);
