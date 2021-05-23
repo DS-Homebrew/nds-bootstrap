@@ -30,8 +30,6 @@
 #include "dsi.h"
 #include "u128_math.h"
 
-#define TARGETBUFFERHEADER 0x02BFF000
-
 void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
 {
 	uint32_t len = size / 0x10;
@@ -255,8 +253,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 ndsArm7Size = 0;
 	u32 accessControl = 0;
 	u32 ndsArm9isrc = 0;
-	u32 ndsArm7isrc = 0;
+	u32 ndsArm9idst = 0;
 	u32 ndsArm9ilen = 0;
+	u32 ndsArm7isrc = 0;
+	u32 ndsArm7idst = 0;
 	u32 ndsArm7ilen = 0;
 	u32 modcrypt1len = 0;
 	u32 modcrypt2len = 0;
@@ -272,10 +272,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&accessControl, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1C0, SEEK_SET);
 		fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1C8, SEEK_SET);
+		fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1CC, SEEK_SET);
 		fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1D0, SEEK_SET);
 		fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1D8, SEEK_SET);
+		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1DC, SEEK_SET);
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
@@ -351,11 +355,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
-			fread((u32*)TARGETBUFFER9I, 1, ndsArm9ilen, ndsFile);
+			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
 		}
 		if (ndsArm7ilen) {
 			fseek(ndsFile, ndsArm7isrc, SEEK_SET);
-			fread((u32*)TARGETBUFFER7I, 1, ndsArm7ilen, ndsFile);
+			fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
 		}
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
@@ -394,14 +398,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			dsi_set_ctr(&ctx, &target[0x300]);
 			if (modcrypt1len)
 			{
-				decrypt_modcrypt_area(&ctx, (u8*)TARGETBUFFER9I, modcrypt1len);
+				decrypt_modcrypt_area(&ctx, (u8*)ndsArm9idst, modcrypt1len);
 			}
 
 			dsi_set_key(&ctx, key);
 			dsi_set_ctr(&ctx, &target[0x314]);
 			if (modcrypt2len)
 			{
-				decrypt_modcrypt_area(&ctx, (u8*)TARGETBUFFER7I, modcrypt2len);
+				decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, modcrypt2len);
 			}
 		}
 	}
@@ -419,22 +423,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load device list
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
-			fread((u8*)0x02EDF000, 1, 0x400, cebin);
+			fread((u8*)0x02EFF000, 1, 0x400, cebin);
 			if (!conf->gameOnFlashcard) {
 				if (strlen(conf->appPath) < 62) {
-					tonccpy((char*)0x02EDF3C2, conf->appPath, strlen(conf->appPath));
-					*(char*)0x02EDF3C2 = 'm';
-					*(char*)0x02EDF3C3 = 'c';
+					tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
+					*(char*)0x02EFF3C2 = 'm';
+					*(char*)0x02EFF3C3 = 'c';
 				}
 				if (strlen(conf->prvPath) < 62) {
-					tonccpy((char*)0x02EDF1BA, conf->prvPath, strlen(conf->prvPath));
-					*(char*)0x02EDF1BA = 'm';
-					*(char*)0x02EDF1BB = 'c';
+					tonccpy((char*)0x02EFF1BA, conf->prvPath, strlen(conf->prvPath));
+					*(char*)0x02EFF1BA = 'm';
+					*(char*)0x02EFF1BB = 'c';
 				}
 				if (strlen(conf->savPath) < 62) {
-					tonccpy((char*)0x02EDF20E, conf->savPath, strlen(conf->savPath));
-					*(char*)0x02EDF20E = 'm';
-					*(char*)0x02EDF20F = 'c';
+					tonccpy((char*)0x02EFF20E, conf->savPath, strlen(conf->savPath));
+					*(char*)0x02EFF20E = 'm';
+					*(char*)0x02EFF20F = 'c';
 				}
 			}
 		}
