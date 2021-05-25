@@ -114,9 +114,9 @@ static aFile srParamsFile;
 
 static int saveTimer = 0;
 
-//static int bootIndicatorTimer = 0;
 static int languageTimer = 0;
 static int swapTimer = 0;
+static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
@@ -795,6 +795,10 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
+	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
+		((valueBits & extendedMemory) || (ndsHeader->unitCode > 0 && (valueBits & dsiMode))) ? returnToLoader() : inGameMenu();
+	}
+
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
@@ -811,8 +815,13 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
-	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
-		((valueBits & extendedMemory) || (ndsHeader->unitCode > 0 && (valueBits & dsiMode))) ? returnToLoader() : inGameMenu();
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
+		if (returnTimer == 60 * 2) {
+			returnToLoader();
+		}
+		returnTimer++;
+	} else {
+		returnTimer = 0;
 	}
 
 	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
