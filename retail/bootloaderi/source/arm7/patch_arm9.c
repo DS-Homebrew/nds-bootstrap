@@ -766,15 +766,12 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		// Change the region 1 configuration
 
 		u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
-		u32 mpuNewDataAccess     = 0x15110111;
-		u32 mpuNewInstrAccess    = 0x5101011;
-		int mpuAccessOffset      = 7;
+		u32 mpuNewDataAccess     = 0;
+		u32 mpuNewInstrAccess    = 0;
+		int mpuAccessOffset      = 0;
 		switch (patchMpuRegion) {
 			case 0:
 				mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
-				mpuNewDataAccess     = 0;
-				mpuNewInstrAccess    = 0;
-				mpuAccessOffset      = 0;
 				break;
 			case 3:
 				mpuInitRegionNewData = PAGE_32M | 0x08000000 | 1;
