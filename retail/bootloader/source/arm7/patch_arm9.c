@@ -437,7 +437,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		if (mpuNewDataAccess) {
 			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 		}*/
-		*mpuDataOffset = 0x27FF017; // SDK 5 value
+		*mpuDataOffset = 0;
 	}
 
 	// Find the mpu cache init

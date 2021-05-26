@@ -886,7 +886,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		//}
 		} else {
 			//Original code made loading slow, so new code is used
-			*mpuDataOffset = 0x27FF017; // SDK 5 value
+			*mpuDataOffset = 0;
 		}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
