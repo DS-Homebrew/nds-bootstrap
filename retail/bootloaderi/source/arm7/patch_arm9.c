@@ -762,9 +762,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	if (!patchOffsetCache.mpuDataOffset) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
 	}
-	dbg_printf("patchMpuSize: ");
-	dbg_hexa(patchMpuSize);
-	dbg_printf("\n\n");
 	if (mpuDataOffset) {
 		// Change the region 1 configuration
 
