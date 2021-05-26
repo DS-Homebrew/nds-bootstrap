@@ -89,12 +89,12 @@
 
 #define CACHE_ADRESS_START               0x02800000
 #define CACHE_ADRESS_START_low           0x02480000
-#define retail_CACHE_ADRESS_START_TWLSDK 0x02EC0000
+#define retail_CACHE_ADRESS_START_TWLSDK 0x02E80000
 
 #define retail_CACHE_ADRESS_SIZE        0x7FC000
 #define retail_CACHE_ADRESS_SIZE_low    0x274000
 #define retail_CACHE_ADRESS_SIZE_SDK5   0x700000
-#define retail_CACHE_ADRESS_SIZE_TWLSDK 0x20000
+#define retail_CACHE_ADRESS_SIZE_TWLSDK 0x60000
 
 #define retail_CACHE_SLOTS_16KB      0x200
 #define retail_CACHE_SLOTS_32KB      0x100

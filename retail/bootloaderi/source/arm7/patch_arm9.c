@@ -1086,16 +1086,31 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		switch (*heapPointer) {
-			case 0x13A007BE:
-				*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
-				break;
-			case 0xE3A007BE:
-				*heapPointer = (u32)0xE3A007BB; /* MOV R0, #0x2EC0000 */
-				break;
-			case 0x048020BE:
-				*heapPointer = (u32)0x048020BB; /* MOVS R0, #0x2EC0000 */
-				break;
+		extern int consoleModel;
+		if (consoleModel > 0 || gameOnFlashcard) {
+			switch (*heapPointer) {
+				case 0x13A007BE:
+					*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
+					break;
+				case 0xE3A007BE:
+					*heapPointer = (u32)0xE3A007BB; /* MOV R0, #0x2EC0000 */
+					break;
+				case 0x048020BE:
+					*heapPointer = (u32)0x048020BB; /* MOVS R0, #0x2EC0000 */
+					break;
+			}
+		} else {
+			switch (*heapPointer) {
+				case 0x13A007BE:
+					*heapPointer = (u32)0x13A007BA; /* MOVNE R0, #0x2E80000 */
+					break;
+				case 0xE3A007BE:
+					*heapPointer = (u32)0xE3A007BA; /* MOV R0, #0x2E80000 */
+					break;
+				case 0x048020BE:
+					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
+					break;
+			}
 		}
 	} else {
 		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
