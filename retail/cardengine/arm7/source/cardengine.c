@@ -135,7 +135,13 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
+		if (*(vu16*)0x4004700 != 0) {
+			u8 readCommand = readPowerManagement(0x10);
+			readCommand |= BIT(0);
+			writePowerManagement(0x10, readCommand); // Reboot console
+		} else {
+			writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
+		}
 		sharedAddr[3] = 0;
 	}
 
