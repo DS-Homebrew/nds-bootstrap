@@ -51,6 +51,8 @@ u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM) {
+	extern bool setDmaPatched;
+
 	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
 	if (!patchOffsetCache.swiHaltOffset) {
 		swiHaltOffset = patchOffsetCache.a7IsThumb ? (u32*)findSwiHaltThumbOffset(ndsHeader, moduleParams) : findSwiHaltOffset(ndsHeader, moduleParams);
@@ -59,12 +61,14 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		}
 	}
 
-	bool doPatch = (!gameOnFlashcard || (ROMinRAM && !extendedMemoryConfirmed)) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed));
+	bool doPatch = ((!gameOnFlashcard && !ROMinRAM) || ((ROMinRAM && !extendedMemoryConfirmed && setDmaPatched) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed))));
 	const char* romTid = getRomTid(ndsHeader);
 	if ((u32)ce7 == CARDENGINEI_ARM7_SDK5_LOCATION
 	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
-	 || strncmp(romTid, "AFF", 3) == 0)	// Final Fantasy III
-	{
+	 || strncmp(romTid, "AFF", 3) == 0		// Final Fantasy III
+	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
+	 || strncmp(romTid, "CBB", 3) == 0		// Big Bang Mini
+	) {
 		doPatch = false;
 	}
 
