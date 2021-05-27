@@ -290,8 +290,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
 				}
                 REG_SCFG_EXT |= BIT(16);	// NDMA
-				*(u32*)((u32)INGAME_MENU_LOCATION+0x400) = REG_SCFG_EXT;
-				*(u16*)((u32)INGAME_MENU_LOCATION+0x404) = REG_SCFG_CLK;
+				*(u32*)((u32)INGAME_MENU_LOCATION+0x404) = REG_SCFG_EXT;
+				*(u16*)((u32)INGAME_MENU_LOCATION+0x408) = REG_SCFG_CLK;
 				if (extendedMemoryConfirmed) {
 					if (moreMemory) {
 						for (int i = 0; i < 16; i++) {

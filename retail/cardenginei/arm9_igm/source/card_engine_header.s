@@ -2,6 +2,7 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global sharedAddr
 	.global scfgExtBak
 	.global scfgClkBak
 	.align	4
@@ -271,6 +272,8 @@
 .word 0
 .word 0
 
+sharedAddr:
+.word 0
 scfgExtBak:
 .word 0
 scfgClkBak:

@@ -38,7 +38,7 @@
 
 extern cardengineArm9* volatile ce9;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 extern u32 _io_dldi_features;
 

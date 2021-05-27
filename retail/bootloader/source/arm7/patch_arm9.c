@@ -298,7 +298,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 static bool mpuInitCachePatched = false;
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (patchMpuRegion == 2) {
+	if (!extendedMemory2 || patchMpuRegion == 2) {
 		return;
 	}
 

@@ -46,7 +46,7 @@
 
 extern cardengineArm9* volatile ce9;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
@@ -292,6 +292,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
+			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		} else {
 			debug8mbMpuFix();
@@ -483,7 +484,8 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x9: {
 			if (!(ce9->valueBits & extendedMemory)) {
-				volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x408;
+				*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
+				volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
 				(*inGameMenu)(&mainScreen);
 			}
 		}

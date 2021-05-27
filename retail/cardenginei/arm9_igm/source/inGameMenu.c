@@ -16,6 +16,7 @@
 
 extern u32 scfgExtBak;
 extern u16 scfgClkBak;
+extern vu32* volatile sharedAddr;
 
 static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
@@ -30,7 +31,6 @@ static u16 igmPal[][2] = {
 	{0x8360, 0x81C0}, // Lime
 };
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 #define KEYS sharedAddr[5]
 
 static void SetBrightness(u8 screen, s8 bright) {

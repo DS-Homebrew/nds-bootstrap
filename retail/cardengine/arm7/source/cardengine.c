@@ -48,7 +48,7 @@ extern module_params_t* moduleParams;
 extern u32 language;
 extern u32* languageAddr;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static bool initialized = false;
 

@@ -61,7 +61,7 @@
 
 extern cardengineArm9* volatile ce9;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
@@ -929,7 +929,8 @@ void myIrqHandlerIPC(void) {
 			break;
 #ifndef TWLSDK
 		case 0x9: {
-			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x408;
+			*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
 			(*inGameMenu)(&mainScreen);
 		}
 #endif

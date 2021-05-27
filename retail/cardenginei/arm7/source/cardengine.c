@@ -78,7 +78,11 @@ extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u16 igmHotkey;
 
-vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
+#ifdef TWLSDK
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+#else
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+#endif
 
 bool dsiSD = false;
 bool sdRead = true;
@@ -260,6 +264,7 @@ static void initialize(void) {
 
 	#ifndef TWLSDK
 	if (isSdk5(moduleParams)) {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 	}
