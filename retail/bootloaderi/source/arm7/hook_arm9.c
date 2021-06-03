@@ -205,6 +205,9 @@ int hookNdsRetailArm9(
 		extern u32 overlaysSize;
 
 		if (overlaysSize <= /*(consoleModel>0 ? 0x1800000 :*/ 0x800000) {
+			if (cacheBlockSize == 0) {
+				ce9->cacheAddress += (overlaysSize/4)*4;
+			} else
 			for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
 				ce9->cacheSlots--;

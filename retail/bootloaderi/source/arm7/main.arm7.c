@@ -1509,7 +1509,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			strncmp(romTid, "B3R", 3)==0 ? 0x8000 : 0x4000,
+			/*strncmp(romTid, "B3R", 3)==0 ? 0x8000 : 0x4000*/0x10000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

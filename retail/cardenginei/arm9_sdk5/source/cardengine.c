@@ -71,6 +71,8 @@ static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
 #ifdef DLDI
 bool sdRead = false;
 #else
+//static u32 sdatAddr = 0;
+//static u32 sdatSize = 0;
 #ifdef TWLSDK
 static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB] = {0};
 static u32 cacheCounter[dev_CACHE_SLOTS_16KB];
@@ -91,22 +93,23 @@ static int aQSize = 0;
 
 static bool flagsSet = false;
 bool isDma = false;
+bool dmaCode = false;
 
 static u32 tempDmaParams[8] = {0};
 
 s8 mainScreen = 0;
 
 void SetBrightness(u8 screen, s8 bright) {
-	u16 mode = 1 << 14;
+	u8 mode = 1;
 
 	if (bright < 0) {
-		mode = 2 << 14;
+		mode = 2;
 		bright = -bright;
 	}
 	if (bright > 31) {
 		bright = 31;
 	}
-	*(u16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
+	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
 
 // Alternative to swiWaitForVBlank()
@@ -130,11 +133,11 @@ static void waitMs(int count) {
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
-	if (REG_IME != 0 && REG_IF != 0) {
-		sleepMsEnabled = true;
-	}
+	//if (REG_IME != 0 && REG_IF != 0) {
+	//	sleepMsEnabled = true;
+	//}
 
-	if (!sleepMsEnabled) return;
+	if (dmaCode || !sleepMsEnabled) return;
 
 	if(ce9->patches->sleepRef) {
 		volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
@@ -146,6 +149,18 @@ void sleepMs(int ms) {
 }
 
 #ifndef DLDI
+/*static void getSdatAddr(u32 sector, u32 buffer) {
+	if ((!ce9->patches->sleepRef && !ce9->thumbPatches->sleepRef) || sdatSize != 0) return;
+
+	for (u32 i = 0; i < ce9->cacheBlockSize; i+=4) {
+		if (*(u32*)(buffer+i) == 0x54414453 && *(u32*)(buffer+i+8) <= 0x20000000) {
+			sdatAddr = sector+i;
+			sdatSize = *(u32*)(buffer+i+8);
+			break;
+		}
+	}
+}*/
+
 #if ASYNCPF
 void addToAsyncQueue(sector) {
 	asyncQueue[aQHead] = sector;
@@ -493,6 +508,7 @@ void continueCardReadDmaArm9() {
 
 void cardSetDma (u32 * params) {
 	isDma = true;
+	dmaCode = true;
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
@@ -622,7 +638,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	processAsyncCommand();
 	#endif
 
-	/*if (len > ce9->cacheBlockSize && (u32)dst < 0x02700000 && (u32)dst > 0x02000000) {
+	//if (src >= sdatAddr && src < sdatAddr+sdatSize) {
+	//	sleepMsEnabled = true;
+	//}
+
+	/*if (len < ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst > 0x02000000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
 	} else {*/
 		// Read via the main RAM cache
@@ -643,8 +663,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				buffer = getCacheAddress(slot);
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				waitFrames(1);
 
-				updateDescriptor(slot, sector);	
+				//updateDescriptor(slot, sector);	
 	
 				#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
@@ -667,8 +688,11 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 					}
 				}
 				#endif
-				updateDescriptor(slot, sector);
+				//updateDescriptor(slot, sector);
 			}
+			updateDescriptor(slot, sector);	
+
+			//getSdatAddr(sector, (u32)buffer);
 
 			u32 len2 = len;
 			if ((src - sector) + len2 > ce9->cacheBlockSize) {
@@ -704,6 +728,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	//}
 #endif
+
+	//sleepMsEnabled = false;
 
 	return 0;
 }
@@ -825,6 +851,8 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
 	}
+
+	dmaCode = false;
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(dst, src, len);

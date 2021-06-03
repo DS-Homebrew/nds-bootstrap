@@ -62,14 +62,14 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 save
 	u32 srcAddr;
 
 	if (usesThumb) {
-		/* u32* cardRead = (u32*) (JumpTableFunc - 0xE);
-		dbg_printf("card read:\t");
-		dbg_hexa((u32)cardRead);
+		/* u32* cardId = (u32*) (JumpTableFunc - 0xE);
+		dbg_printf("card id:\t");
+		dbg_hexa((u32)cardId);
 		dbg_printf("\n");
 		srcAddr = JumpTableFunc - 0xE  - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		const u16* patchCardRead = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->cardRead);
-		cardRead[0] = patchCardRead[0];
-        cardRead[1] = patchCardRead[1]; */
+		const u16* patchCardId = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->cardId);
+		cardId[0] = patchCardId[0];
+        cardId[1] = patchCardId[1]; */
 
 		u16* eepromRead = (u16*) (JumpTableFunc + 0x8);
 		dbg_printf("Eeprom read:\t");
@@ -119,19 +119,35 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 save
 
 	} else {
 		if (*(u32*)(JumpTableFunc - 0x24) == 0xEBFFFFB3) {
-			u32* cardRead = (u32*) (JumpTableFunc - 0x24);
+			u32* cardId = (u32*) (JumpTableFunc - 0x24);
+			dbg_printf("card id:\t");
+			dbg_hexa((u32)cardId);
+			dbg_printf("\n");
+			srcAddr = JumpTableFunc - 0x24  - vAddrOfRelocSrc + relocDestAtSharedMem ;
+			u32 patchCardId = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardId);
+			*cardId=patchCardId;
+
+			u32* cardRead = (u32*) (JumpTableFunc - 0x14);
 			dbg_printf("card read:\t");
 			dbg_hexa((u32)cardRead);
 			dbg_printf("\n");
-			srcAddr = JumpTableFunc - 0x24  - vAddrOfRelocSrc + relocDestAtSharedMem ;
+			srcAddr = JumpTableFunc - 0x14  - vAddrOfRelocSrc + relocDestAtSharedMem ;
 			u32 patchCardRead = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardRead);
 			*cardRead=patchCardRead;
 		} else {
-			u32* cardRead = (u32*) (JumpTableFunc - 0x18);
+			u32* cardId = (u32*) (JumpTableFunc - 0x18);
+			dbg_printf("card id:\t");
+			dbg_hexa((u32)cardId);
+			dbg_printf("\n");
+			srcAddr = JumpTableFunc - 0x18  - vAddrOfRelocSrc + relocDestAtSharedMem ;
+			u32 patchCardId = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardId);
+			*cardId=patchCardId;
+
+			u32* cardRead = (u32*) (JumpTableFunc - 0x8);
 			dbg_printf("card read:\t");
 			dbg_hexa((u32)cardRead);
 			dbg_printf("\n");
-			srcAddr = JumpTableFunc - 0x18  - vAddrOfRelocSrc + relocDestAtSharedMem ;
+			srcAddr = JumpTableFunc - 0x8  - vAddrOfRelocSrc + relocDestAtSharedMem ;
 			u32 patchCardRead = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardRead);
 			*cardRead=patchCardRead;
 		}

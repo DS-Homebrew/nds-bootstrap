@@ -85,9 +85,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[4] = commandRead;
 
 	IPC_SendSync(0x4);
-	while (sharedAddr[4] == commandRead) {
-		//sleepMs(1);
-	}
+	while (sharedAddr[4] == commandRead);
 	return sharedAddr[4] == 0;
 }
 
@@ -116,9 +114,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[4] = commandRead;
 
 	IPC_SendSync(0x4);
-	while (sharedAddr[4] == commandRead) {
-		//sleepMs(1);
-	}
+	while (sharedAddr[4] == commandRead);
 	return sharedAddr[4] == 0;
 }
 
