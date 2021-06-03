@@ -655,7 +655,6 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				buffer = getCacheAddress(slot);
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-				waitFrames(1);
 
 				//updateDescriptor(slot, sector);	
 	

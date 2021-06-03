@@ -663,7 +663,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				buffer = getCacheAddress(slot);
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-				waitFrames(1);
 
 				//updateDescriptor(slot, sector);	
 	

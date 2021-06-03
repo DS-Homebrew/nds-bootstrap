@@ -38,11 +38,10 @@ romLocation:
 	.word	0x00000000
 cacheAddress:
 	.word	0x00000000
-cacheBlockSize:
-	.word	0
 cacheSlots:
 	.hword	0
-.align	4
+cacheBlockSize:
+	.hword	0
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
