@@ -66,6 +66,7 @@ static bool volumeAdjustActivated = false;*/
 //static int saveMutex = 0;
 static int swapTimer = 0;
 static int languageTimer = 0;
+static bool halfVolume = false;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -165,46 +166,29 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer++;
 	} else {
 		softResetTimer = 0;
-	}
+	}*/
 
-	if (consoleModel < 2 && romread_LED == 0) {
-		// Precise volume adjustment (for DSi)
-		if (volumeAdjustActivated) {
-			volumeAdjustDelay++;
-			if (volumeAdjustDelay == 30) {
-				volumeAdjustDelay = 0;
-				volumeAdjustActivated = false;
-			}
-		} else {
-			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-			u8 i2cNewVolLevel = i2cVolLevel;
-			if (REG_KEYINPUT & (KEY_SELECT | KEY_UP)) {} else {
-				i2cNewVolLevel++;
-			}
-			if (REG_KEYINPUT & (KEY_SELECT | KEY_DOWN)) {} else {
-				i2cNewVolLevel--;
-			}
-			if (i2cNewVolLevel == 0xFF) {
-				i2cNewVolLevel = 0;
-			} else if (i2cNewVolLevel > 0x1F) {
-				i2cNewVolLevel = 0x1F;
-			}
-			if (i2cNewVolLevel != i2cVolLevel) {
-				i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
-				volumeAdjustActivated = true;
-			}
-		}
+	if (0 == (REG_KEYINPUT & (KEY_SELECT | KEY_UP))) {
+		halfVolume = false;
+		REG_MASTER_VOLUME = 127;
+	}
+	if (0 == (REG_KEYINPUT & (KEY_SELECT | KEY_DOWN))) {
+		halfVolume = true;
 	}
 	
-	if (saveTimer > 0) {
+	if (halfVolume) {
+		REG_MASTER_VOLUME = 63;
+	}
+
+	/*if (saveTimer > 0) {
 		saveTimer++;
 		if (saveTimer == 60) {
 			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
 			saveTimer = 0;
 		}
-	}*/
+	}
 
-	/*if (sharedAddr[3] != 0) {
+	if (sharedAddr[3] != 0) {
 		saveReadTimeOut++;
 		if (saveReadTimeOut > 60) {
 			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
