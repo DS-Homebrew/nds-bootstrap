@@ -66,7 +66,6 @@ static inline void setDeviceOwner(void) {
 }
 
 static bool initialized = false;
-static bool fatTablesCreated = false;
 static bool loadOverlaysFromRam = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
@@ -147,11 +146,8 @@ static void initialize(void) {
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 
-		if (ce9->moduleParams->sdk_version < 0x2008000 || ce9->expansionPakFound || ce9->extendedMemory) {
-			buildFatTableCache(&romFile, 0);
-			buildFatTableCache(&savFile, 0);
-			fatTablesCreated = true;
-		}
+		buildFatTableCache(&romFile, 0);
+		buildFatTableCache(&savFile, 0);
 
 		if (isSdk5(ce9->moduleParams)) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -208,15 +204,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	initialize();
 
 	cardReadCount++;
-	if (!fatTablesCreated && cardReadCount==2) {
-		int oldIME = enterCriticalSection();
-
-		buildFatTableCache(&romFile, 0);
-		buildFatTableCache(&savFile, 0);
-
-		leaveCriticalSection(oldIME);
-		fatTablesCreated = true;
-	}
 
 	enableIPC_SYNC();
 
