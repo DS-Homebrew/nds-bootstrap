@@ -101,8 +101,6 @@ static void initialize(void) {
 		return;
 	}
 
-	tonccpy((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
-
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
 
@@ -119,8 +117,8 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
+	if (*(u32*)((u32)ce7-(0x2800+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x27FC;
 		(*cheatEngine)();
 	}
 
