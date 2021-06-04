@@ -474,9 +474,7 @@ static int runNdsFile(configuration* conf) {
 		}
 	}
 
-	runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, conf);
-
-	return 0;
+	return runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, conf);
 }
 
 int main(int argc, char** argv) {
@@ -489,7 +487,12 @@ int main(int argc, char** argv) {
 		status = runNdsFile(conf);
 		if (status != 0) {
 			powerOff(PM_BACKLIGHT_TOP);
-			debug ? dbg_printf("Start failed. Error %i\n", status) : iprintf("Start failed. Error %i\n", status);
+			if (debug) {
+				dbg_printf("Start failed. Error %i\n", status);
+			} else {
+				consoleDemoInit();
+				iprintf("Start failed. Error %i\n", status);
+			}
 		}
 	}
 

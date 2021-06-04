@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, u32 donor3Cluster, u32 donorCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, configuration* conf) {
+int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, u32 donor3Cluster, u32 donorCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -244,7 +244,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
 		fclose(bootloaderBin);
 	} else {
-		return;
+		return 2;
 	}
 
 	u32 bootloaderSize = dsiFeatures() ? 0x40000 : 0x20000;
@@ -315,7 +315,7 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
 		if (!dldiPatchLoader ((data_t*)lc0, bootloaderSize, conf->initDisc)) {
-			return;
+			return 3;
 		}
 	}
 
@@ -343,4 +343,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 	// swi soft reset
 	nocashMessage("swiSoftReset");
 	swiSoftReset();
+
+	return true;
 }
