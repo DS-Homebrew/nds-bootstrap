@@ -6,6 +6,15 @@
 #include "common.h"
 #include "cardengine_header_arm9.h"
 
+#define b_expansionPakFound BIT(0)
+#define b_extendedMemory BIT(1)
+#define b_ROMinRAM BIT(2)
+#define b_dsDebugRam BIT(3)
+#define b_isSdk5 BIT(5)
+#define b_overlaysInRam BIT(6)
+#define b_cacheFlushFlag BIT(7)
+
+
 static const int MAX_HANDLER_LEN = 50;
 static const int MAX_HANDLER_LEN_ALT = 0x200;
 
@@ -116,6 +125,7 @@ int hookNdsRetailArm9(
 	u32 srParamsFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
+	bool ROMinRAM,
 	bool dsDebugRam,
 	u32 overlaysSize,
 	u32 maxClusterCacheSize,
@@ -123,16 +133,42 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
-	ce9->moduleParams           = moduleParams;
+	const char* romTid = getRomTid(ndsHeader);
+	extern u32 romSizeLimit;
+
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
-	ce9->expansionPakFound      = expansionPakFound;
-	ce9->extendedMemory         = extendedMemory;
-	ce9->dsDebugRam             = dsDebugRam;
+	if (expansionPakFound) {
+		ce9->valueBits |= b_expansionPakFound;
+	}
+	if (extendedMemory) {
+		ce9->valueBits |= b_extendedMemory;
+	}
+	if (ROMinRAM) {
+		ce9->valueBits |= b_ROMinRAM;
+	}
+	if (dsDebugRam) {
+		ce9->valueBits |= b_dsDebugRam;
+	}
+	if (isSdk5(moduleParams)) {
+		ce9->valueBits |= b_isSdk5;
+	}
+	if ((expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize < romSizeLimit) {
+		ce9->valueBits |= b_overlaysInRam;
+	}
+	if (strncmp(romTid, "CLJ", 3) == 0) {
+		ce9->valueBits |= b_cacheFlushFlag;
+	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->maxClusterCacheSize    = maxClusterCacheSize;
 	ce9->fatTableAddr           = fatTableAddr;
+	if (extendedMemory && !dsDebugRam) {
+		ce9->romLocation = 0x0C800000;
+	} else {
+		extern u32 romLocation;
+		ce9->romLocation = romLocation;
+	}
 
 	extern u32 iUncompressedSize;
 

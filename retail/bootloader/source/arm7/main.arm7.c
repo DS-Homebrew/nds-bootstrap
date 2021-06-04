@@ -100,6 +100,8 @@ static u32 overlaysSize = 0;
 
 static u32 softResetParams = 0;
 
+u16 s2FlashcardId = 0;
+
 bool expansionPakFound = false;
 
 //static char bootName[9] = {'B','O','O','T','.','N','D','S', 0};
@@ -230,9 +232,9 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-/*static inline u32 getRomSizeNoArm9(const tNDSHeader* ndsHeader) {
-	return ndsHeader->romSize - 0x4000 - ndsHeader->arm9binarySize;
-}*/
+static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
+	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
+}
 
 // SDK 5
 /*static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
@@ -306,6 +308,29 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 		moduleParams = buildModuleParams(donorSdkVer);
 	}
 	return moduleParams;
+}
+
+u32 romLocation = 0x09000000;
+u32 romSizeLimit = 0x780000;
+
+static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) {
+	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
+		romLocation = 0x08000000;
+		romSizeLimit = 0x1F80000;
+	}
+
+	bool res = false;
+	if ((strncmp(romTid, "APD", 3) != 0
+	 && strncmp(romTid, "A24", 3) != 0
+	 && strncmp(romTid, "UBR", 3) != 0
+	 && strncmp(romTid, "UOR", 3) != 0
+	 && strncmp(romTid, "KPP", 3) != 0
+	 && strncmp(romTid, "KPF", 3) != 0)
+	) {
+		res = ((expansionPakFound || extendedMemory2&&!dsDebugRam) && getRomSizeNoArmBins(ndsHeader) < romSizeLimit);
+		dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
+	  }
+	return res;
 }
 
 static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams) {
@@ -408,12 +433,9 @@ static void startBinary_ARM7(void) {
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
-	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
-		overlaysSize++;
-	}
-	if (overlaysSize < 0x780000)
+	if (overlaysSize < romSizeLimit)
 	{
-		u32 overlaysLocation = (extendedMemory2&&!dsDebugRam ? 0x0C800000 : 0x09000000);
+		u32 overlaysLocation = (extendedMemory2&&!dsDebugRam ? 0x0C800000 : romLocation);
 		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
 
 		if (!isSdk5(moduleParams)) {
@@ -486,6 +508,8 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
+	s2FlashcardId = *(u16*)(0x020000C0);
+
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4, -1);
 	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
@@ -549,7 +573,14 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if ((strcmp(getRomTid(ndsHeader), "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
+	// Calculate overlay pack size
+	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+		overlaysSize++;
+	}
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if ((strcmp(romTid, "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
 		toncset((char*)0x02400000, 0xFF, 0xC0);
 		*(u8*)0x024000B2 = 0;
 		*(u8*)0x024000B3 = 0;
@@ -560,6 +591,12 @@ int arm7_main(void) {
 		*(u16*)0x024000BE = 0x7FFF;
 		*(u16*)0x024000CE = 0x7FFF;
 	}
+
+	*(vu32*)(0x08240000) = 1;
+	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(romTid, "UBRP") != 0));
+
+	// If possible, set to load ROM into RAM
+	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid);
 
 	nocashMessage("Trying to patch the card...\n");
 
@@ -611,31 +648,21 @@ int arm7_main(void) {
 
 	u32 fatTableAddr = 0;
 	u32 fatTableSize = 0;
-	*(vu32*)(0x08240000) = 1;
-	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(getRomTid(ndsHeader), "UBRP") != 0));
-	if (expansionPakFound) {
+	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
+		fatTableAddr = 0x09F80000;
+		fatTableSize = (s2FlashcardId==0x4353 ? 0x7FFFC : 0x80000);
+	} else if (expansionPakFound) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
 		fatTableAddr = 0x02700000;
 		fatTableSize = 0x80000;
-	} /*else if ((strncmp(getRomTid(ndsHeader), "AMC", 3) == 0)
-			 || (strncmp(getRomTid(ndsHeader), "A8N", 3) == 0)
-			 || (strncmp(getRomTid(ndsHeader), "ADA", 3) == 0)
-			 || (strncmp(getRomTid(ndsHeader), "APA", 3) == 0)) {
-		fatTableAddr = (u32)patchLoHeapPointer(moduleParams, ndsHeader, saveSize);
-		fatTableSize = 0x2000;
-	} else if ((strncmp(getRomTid(ndsHeader), "CPU", 3) == 0)
-			 || (strncmp(getRomTid(ndsHeader), "IPG", 3) == 0)
-			 || (strncmp(getRomTid(ndsHeader), "IPK", 3) == 0)) {
-		fatTableAddr = (u32)patchLoHeapPointer(moduleParams, ndsHeader, saveSize);
-		fatTableSize = 0x4000;
-	}*/ else {
+	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
 		fatTableSize = 0x1A000;
 	}
 
-	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
+	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
 		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
 	}
 
@@ -647,6 +674,7 @@ int arm7_main(void) {
 		srParamsFileCluster,
 		expansionPakFound,
 		extendedMemory2,
+		ROMinRAM,
 		dsDebugRam,
 		overlaysSize,
 		fatTableSize,

@@ -47,6 +47,7 @@ int hookNdsRetailArm9(
 	u32 srParamsFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
+	bool ROMinRAM,
 	bool dsDebugRam,
 	u32 overlaysSize,
 	u32 maxClusterCacheSize,

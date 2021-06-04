@@ -82,8 +82,8 @@ typedef struct cardengineArm9 {
     u32 romLocation;
 	// Below not used for ROMs in RAM
     u32 cacheAddress;
+    u32 cacheBlockSize;
     u16 cacheSlots;
-    u16 cacheBlockSize;
 } __attribute__ ((__packed__)) cardengineArm9;
 #else
 //
@@ -134,18 +134,24 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;
-    const module_params_t* moduleParams;
     u32 fileCluster;
     u32 saveCluster;
     u32 srParamsCluster;
     u32 cardStruct0;
-    u32 expansionPakFound;
-    u32 extendedMemory;
-    u32 dsDebugRam;
+	u32 valueBits;
+	/*
+		0: expansionPakFound
+		1: extendedMemory
+		2: ROMinRAM
+		3: dsDebugRam
+		5: isSdk5
+		6: overlaysInRam
+	*/
     u32 overlaysSize;
     u32 maxClusterCacheSize;
     u32 fatTableAddr;
     u32* irqTable;
+    u32 romLocation;
 } __attribute__ ((__packed__)) cardengineArm9;
 #endif
 

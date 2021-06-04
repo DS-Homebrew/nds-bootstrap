@@ -33,6 +33,17 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
+
+#define expansionPakFound BIT(0)
+#define extendedMemory BIT(1)
+#define ROMinRAM BIT(2)
+#define dsDebugRam BIT(3)
+#define isSdk5 BIT(5)
+#define overlaysInRam BIT(6)
+#define cacheFlushFlag BIT(7)
+
 #include "tonccpy.h"
 #include "my_fat.h"
 
@@ -56,17 +67,20 @@ static aFile srParamsFile;
 
 static int cardReadCount = 0;
 
+static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
+	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + ce9->overlaysSize;
+}
+
 static inline void setDeviceOwner(void) {
-	if (ce9->expansionPakFound || (_io_dldi_features & 0x00000010)) {
+	if ((ce9->valueBits & expansionPakFound) || (_io_dldi_features & FEATURE_SLOT_GBA)) {
 		sysSetCartOwner (BUS_OWNER_ARM9);
 	}
-	if (_io_dldi_features & 0x00000020) {
+	if (_io_dldi_features & FEATURE_SLOT_NDS) {
 		sysSetCardOwner (BUS_OWNER_ARM9);
 	}
 }
 
 static bool initialized = false;
-static bool loadOverlaysFromRam = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
 static bool IPC_SYNC_hooked = false;
@@ -149,14 +163,12 @@ static void initialize(void) {
 		buildFatTableCache(&romFile, 0);
 		buildFatTableCache(&savFile, 0);
 
-		if (isSdk5(ce9->moduleParams)) {
+		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
 
-		if (ce9->expansionPakFound || (ce9->extendedMemory && !ce9->dsDebugRam && strncmp(getRomTid(ndsHeader), "UBRP", 4) != 0)) {
-		  if (ce9->overlaysSize<0x780000) {
-			loadOverlaysFromRam = true;
-		  }
+		if (ce9->valueBits & ROMinRAM) {
+			fileRead((char*)ce9->romLocation+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset + ndsHeader->arm7binarySize, getRomSizeNoArmBins(ndsHeader), 0);
 		}
 
 		initialized = true;
@@ -176,7 +188,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	//nocashMessage("aaaaaaaaaa\n");
 	fileRead((char*)dst, romFile, src, len, 0);
 
-	if (!isSdk5(ce9->moduleParams) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
+	if (!(ce9->valueBits & isSdk5) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
 			if (*(u32*)(dst+i) == 0x4B434148) {
 				*(u32*)(dst+i) = 0xA00;
@@ -189,9 +201,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	//nocashMessage("end\n");
 
-	/*if(strncmp(getRomTid(ndsHeader), "CLJ", 3) == 0){
+	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
-	}*/
+	}
 	
 	return 0;
 }
@@ -209,21 +221,24 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	vu32* cardStruct = (vu32*)(ce9->cardStruct0);
 
-	u32 src = (isSdk5(ce9->moduleParams) ? src0 : cardStruct[0]);
-	u8* dst = (isSdk5(ce9->moduleParams) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = (isSdk5(ce9->moduleParams) ? len0 : cardStruct[2]);
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 
 	// Fix reads below 0x8000
 	if (src <= 0x8000){
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (loadOverlaysFromRam && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		if (ce9->extendedMemory && !ce9->dsDebugRam) {
-			tonccpy(dst, (u8*)((0x0C800000-0x4000-ndsHeader->arm9binarySize)+src),len);
-		} else {
-			tonccpy(dst, (u8*)((0x09000000-0x4000-ndsHeader->arm9binarySize)+src),len);
+	if (ce9->valueBits & ROMinRAM) {
+		u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+		if (src > ndsHeader->arm7romOffset) {
+			newSrc -= ndsHeader->arm7binarySize;
 		}
+		tonccpy(dst, (u8*)newSrc, len);
+		return 0;
+	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
 		return 0;
 	}
 
