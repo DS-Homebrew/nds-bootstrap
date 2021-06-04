@@ -139,7 +139,7 @@ int hookNdsRetailArm7(
 	}
 
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
-	if (!handlerLocation) {
+	if (!handlerLocation && !isDSiWare) {
 		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (handlerLocation) {
 			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
@@ -161,7 +161,7 @@ int hookNdsRetailArm7(
 	}
 
 	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
-	if (!wordsLocation) {
+	if (!wordsLocation && !isDSiWare) {
 		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (wordsLocation) {
 			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
