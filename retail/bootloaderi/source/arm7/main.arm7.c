@@ -54,7 +54,7 @@
 
 #define BASE_DELAY (100)
 
-#define REG_GPIO_WIFI *(vu8*)0x4004C05
+#define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
 #include "my_fat.h"
@@ -1245,7 +1245,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	REG_GPIO_WIFI &= ~BIT(8);	// New Atheros/DSi-Wifi mode
+	REG_GPIO_WIFI = 0;	// New Atheros/DSi-Wifi mode
 
 	if (!gameOnFlashcard && isDSiWare) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
@@ -1265,6 +1265,17 @@ int arm7_main(void) {
 			}
 		}
 		*(u16*)0x4000500 = 0x807F;
+
+		//if (*(u8*)0x02FFE1BF & BIT(2)) {
+			//const char* newBannerPath = "sdmc:/";
+			//toncset((char*)0x020925A0, 0, 0xE);
+			//tonccpy((char*)0x020925A0, newBannerPath, 6);
+			//toncset((char*)0x020A8D84, 0, 0xE);
+			//tonccpy((char*)0x020A8D84, newBannerPath, 6);
+			//const char* newBannerPath = "sdmc:/banner.sav";
+			//toncset((char*)0x02E9A828, 0, 0x1C);
+			//tonccpy((char*)0x02E9A834, newBannerPath, 16);
+		//}
 
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)NULL,
