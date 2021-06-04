@@ -249,19 +249,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 
 	u32 bootloaderSize = dsiFeatures() ? 0x40000 : 0x20000;
 
-	irqDisable(IRQ_ALL);
-
-	// Direct CPU access to VRAM banks C & D
-	if (dsiFeatures()) {
-		VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-	}
-	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
-
-	// Set the parameters for the loader
-
-	free(conf->ndsPath);
-	free(conf->savPath);
-
 	loadCrt0* loader = (loadCrt0*)loaderBin;
 
 	loader->storedFileCluster = cluster;
@@ -311,6 +298,17 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;
 	}
 
+	nocashMessage("irqDisable(IRQ_ALL);");
+	irqDisable(IRQ_ALL);
+
+	// Direct CPU access to VRAM banks C & D
+	if (dsiFeatures()) {
+		VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	}
+	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
+
+	// Set the parameters for the loader
+
 	// Load the loader into the correct address
 	tonccpy(lc0, loader, bootloaderSize); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
@@ -320,11 +318,6 @@ void runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster,
 			return;
 		}
 	}
-
-	free(conf);
-
-	nocashMessage("irqDisable(IRQ_ALL);");
-	irqDisable(IRQ_ALL);
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
