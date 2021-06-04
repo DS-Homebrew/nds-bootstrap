@@ -58,6 +58,7 @@
 #include <string.h>
 #include <errno.h>
 #include <nds.h>
+#include <nds/arm9/dldi.h>
 #include "myDSiMode.h"
 #include "nitrofs.h"
 #include "tonccpy.h"
@@ -145,7 +146,7 @@ nitroFSInit(const char *ndsfile)
     ndsFile = NULL;
 	bool headerFirst = ((strncmp((const char *)0x02FFFC38, __NDSHeader->gameCode, 4) == 0)
 				  && (*(u16*)0x02FFFC36 == __NDSHeader->headerCRC16));
-	if (!dsiFeatures() || headerFirst)
+	if ((!dsiFeatures() || headerFirst) && !(io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA))
 	{
 		sysSetCartOwner (BUS_OWNER_ARM9); //give us gba slot ownership
 		// We has gba rahm
