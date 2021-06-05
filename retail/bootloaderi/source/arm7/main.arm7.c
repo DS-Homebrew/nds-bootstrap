@@ -1245,8 +1245,6 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	REG_GPIO_WIFI = 0;	// New Atheros/DSi-Wifi mode
-
 	if (!gameOnFlashcard && isDSiWare) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
