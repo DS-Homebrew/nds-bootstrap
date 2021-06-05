@@ -77,10 +77,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	easysave::ini config_file(fn);
 
 	// Debug
-	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
+	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG", "0").c_str(), NULL, 0);
 
 	// Cache FAT table
-	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE").c_str(), NULL, 0);
+	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", "0").c_str(), NULL, 0);
 
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
@@ -119,63 +119,63 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
 
 	// Language
-	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
+	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);
 
 	// Region
-	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION").c_str(), NULL, 0);
+	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-2").c_str(), NULL, 0);
 
 	if (dsiFeatures()) {
 		// DSi mode
-		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE", "1").c_str(), NULL, 0);
 	}
 
 	// Donor SDK version
-	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER").c_str(), NULL, 0);
+	conf->donorSdkVer = strtol(config_file.fetch("NDS-BOOTSTRAP", "DONOR_SDK_VER", "0").c_str(), NULL, 0);
 
 	// Patch MPU region
-	conf->patchMpuRegion = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_REGION").c_str(), NULL, 0);
+	conf->patchMpuRegion = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_REGION", "0").c_str(), NULL, 0);
 
 	// Patch MPU size
-	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE").c_str(), NULL, 0);
+	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", "0").c_str(), NULL, 0);
 
 	// Extended memory
-	conf->extendedMemory = strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY").c_str(), NULL, 0);
+	conf->extendedMemory = strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY", "0").c_str(), NULL, 0);
 
 	// Console model
-	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
+	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL", "0").c_str(), NULL, 0);
 
 	// Color mode
-	conf->colorMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "COLOR_MODE").c_str(), NULL, 0);
+	conf->colorMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "COLOR_MODE", "0").c_str(), NULL, 0);
 
 	// ROM read LED
-	conf->romRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "ROMREAD_LED").c_str(), NULL, 0);
+	conf->romRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "ROMREAD_LED", "0").c_str(), NULL, 0);
 
 	// DMA ROM read LED
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED").c_str(), NULL, 0);
 
 	// Card read DMA
-	conf->cardReadDMA = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA").c_str(), NULL, 0);
+	conf->cardReadDMA = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
 
 	// Force sleep patch
-	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH").c_str(), NULL, 0);
+	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH", "0").c_str(), NULL, 0);
 
 	// Precise volume control
-	conf->preciseVolumeControl = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "PRECISE_VOLUME_CONTROL").c_str(), NULL, 0);
+	conf->preciseVolumeControl = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "PRECISE_VOLUME_CONTROL", "0").c_str(), NULL, 0);
 
 	// Logging
-	conf->logging = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0);
+	conf->logging = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING", "0").c_str(), NULL, 0);
 
 	// Macro mode
-	conf->macroMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "MACRO_MODE").c_str(), NULL, 0);
+	conf->macroMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "MACRO_MODE", "0").c_str(), NULL, 0);
 
 	// Boost CPU
-	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0);
+	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU", "0").c_str(), NULL, 0);
 
 	// Boost VRAM
-	conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
+	conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM", "0").c_str(), NULL, 0);
 
 	// Sound/Mic frequency
-	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ").c_str(), NULL, 0);
+	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ", "0").c_str(), NULL, 0);
 
 	// GUI Language
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
