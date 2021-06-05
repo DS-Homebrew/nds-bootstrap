@@ -82,8 +82,8 @@ typedef struct cardengineArm9 {
     u32 romLocation;
 	// Below not used for ROMs in RAM
     u32 cacheAddress;
-    u32 cacheBlockSize;
     u16 cacheSlots;
+    u16 cacheBlockSize;
 } __attribute__ ((__packed__)) cardengineArm9;
 #else
 //
