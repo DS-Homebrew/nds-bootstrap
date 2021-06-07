@@ -30,6 +30,7 @@ typedef struct configuration {
 	u8 language;
 	char* guiLanguage;
 	u8 region; // SDK 5
+	bool sdNand; // SDK 5
 	u8 dsiMode; // SDK 5
 	u8 isDSiWare; // SDK 5
 	u8 valueBits;

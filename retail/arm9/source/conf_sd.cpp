@@ -124,6 +124,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Region
 	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-2").c_str(), NULL, 0);
 
+	// SDNAND
+	conf->sdNand = strtol(config_file.fetch("NDS-BOOTSTRAP", "SDNAND", "0").c_str(), NULL, 0);
+
 	if (dsiFeatures()) {
 		// DSi mode
 		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE", "1").c_str(), NULL, 0);
@@ -424,6 +427,46 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
 			fread((u8*)0x02EFF000, 1, 0x400, cebin);
+			if (conf->sdNand) {
+				//*(u8*)0x02EFF055 = 0; // nand
+				//*(u8*)0x02EFF0A9 = 0; // nand2
+				bool shared1Found = (access("sd:/shared1", F_OK) == 0);
+				bool shared2Found = (access("sd:/shared2", F_OK) == 0);
+				if (shared1Found) {
+					*(u8*)0x02EFF0FD = 0x10;
+					*(char*)0x02EFF110 = 's';
+					*(char*)0x02EFF111 = 'd';
+					*(char*)0x02EFF112 = 'm';
+					*(char*)0x02EFF113 = 'c';
+				}
+				if (shared2Found) {
+					*(u8*)0x02EFF141 = 0x10;
+					*(char*)0x02EFF164 = 's';
+					*(char*)0x02EFF165 = 'd';
+					*(char*)0x02EFF166 = 'm';
+					*(char*)0x02EFF167 = 'c';
+				}
+				const char* photoPath = "sd:/photo";
+				mkdir(photoPath, 0777);
+				//if (access(photoPath, F_OK) == 0) {
+					*(u8*)0x02EFF1A5 = 0x10;
+					toncset((char*)0x02EFF1B8, 0, 0x40);
+					tonccpy((char*)0x02EFF1BA, photoPath, strlen(photoPath));
+					*(char*)0x02EFF1B8 = 's';
+					*(char*)0x02EFF1B9 = 'd';
+					*(char*)0x02EFF1BA = 'm';
+					*(char*)0x02EFF1BB = 'c';
+				//}
+				if (strncmp(romTid, "KGU", 3) == 0 && shared2Found) {
+					const char* filePath = "sdmc:/shared2/0000";
+					const char* share = "share";
+					*(char*)0x02EFF2A0 = 'C';
+					*(u8*)0x02EFF2A1 = 0x08;
+					*(u8*)0x02EFF2A2 = 0x06;
+					tonccpy((char*)0x02EFF2A4, share, strlen(share));
+					tonccpy((char*)0x02EFF2B4, filePath, strlen(filePath));
+				}
+			}
 			if (!conf->gameOnFlashcard) {
 				if (strlen(conf->appPath) < 62) {
 					tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
