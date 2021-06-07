@@ -431,14 +431,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					*(char*)0x02EFF3C3 = 'c';
 				}
 				if (strlen(conf->prvPath) < 62) {
-					tonccpy((char*)0x02EFF1BA, conf->prvPath, strlen(conf->prvPath));
-					*(char*)0x02EFF1BA = 'm';
-					*(char*)0x02EFF1BB = 'c';
-				}
-				if (strlen(conf->savPath) < 62) {
-					tonccpy((char*)0x02EFF20E, conf->savPath, strlen(conf->savPath));
+					tonccpy((char*)0x02EFF20E, conf->prvPath, strlen(conf->prvPath));
 					*(char*)0x02EFF20E = 'm';
 					*(char*)0x02EFF20F = 'c';
+				}
+				if (strlen(conf->savPath) < 62) {
+					tonccpy((char*)0x02EFF262, conf->savPath, strlen(conf->savPath));
+					*(char*)0x02EFF262 = 'm';
+					*(char*)0x02EFF263 = 'c';
 				}
 			}
 		}
