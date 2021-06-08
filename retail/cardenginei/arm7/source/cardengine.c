@@ -808,9 +808,9 @@ void myIrqHandlerVBlank(void) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
-				if (!(valueBits & ipcEveryFrame)) {
+				//if (!(valueBits & ipcEveryFrame)) {
 					IPC_SendSync(0x7);
-				}
+				//}
 				swapScreens = true;
 			}
 		}
@@ -937,7 +937,7 @@ void myIrqHandlerVBlank(void) {
 	}*/
 
 	// Update main screen or swap screens
-	if (valueBits & ipcEveryFrame) {
+	/*if (valueBits & ipcEveryFrame) {
 		if (dmaSignal) {
 			IPC_SendSync(0x3);
 			dmaSignal = false;
@@ -945,7 +945,7 @@ void myIrqHandlerVBlank(void) {
 			IPC_SendSync(swapScreens ? 0x7 : 0x0);
 		}
 	}
-	swapScreens = false;
+	swapScreens = false;*/
 }
 
 void i2cIRQHandler(void) {

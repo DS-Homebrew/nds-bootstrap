@@ -344,13 +344,13 @@ int hookNdsRetailArm7(
 			}
 		}
 
-		extern bool setDmaPatched;
+		/*extern bool setDmaPatched;
 
 		if (!setDmaPatched
 		// && strncmp(romTid, "ALK", 3) != 0
 		 && strncmp(romTid, "VDE", 3) != 0) {
 			ce7->valueBits |= b_ipcEveryFrame;
-		}
+		}*/
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
