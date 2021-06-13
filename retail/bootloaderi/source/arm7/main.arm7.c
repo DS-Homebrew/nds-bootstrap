@@ -927,6 +927,15 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		} else {
 			*(u8*)(0x02FFFD70) = region;
 		}
+		// Set bitmask for supported languages
+		u8 curRegion = *(u8*)0x02FFFD70;
+		if (curRegion == 1) {
+			*(u32*)(0x02FFFD68) = 0x26;
+		} else if (curRegion == 2 || curRegion == 3) {
+			*(u32*)(0x02FFFD68) = 0x3E;
+		} else if (curRegion == 4) {
+			*(u32*)(0x02FFFD68) = 0x42;
+		}
 
 		if (dsiModeConfirmed) {
 			i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
