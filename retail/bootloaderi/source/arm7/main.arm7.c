@@ -934,7 +934,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		} else if (curRegion == 2 || curRegion == 3) {
 			*(u32*)(0x02FFFD68) = 0x3E;
 		} else if (curRegion == 4) {
-			*(u32*)(0x02FFFD68) = 0x42;
+			*(u32*)(0x02FFFD68) = 0x40; //CHN
+		} else if (curRegion == 5) {
+			*(u32*)(0x02FFFD68) = 0x80; //KOR
+		} else if (curRegion == 0) {
+			*(u32*)(0x02FFFD68) = 0x01; //JAP
 		}
 
 		if (dsiModeConfirmed) {
