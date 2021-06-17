@@ -489,6 +489,11 @@ void inGameMenu(s8* mainScreen) {
 
 	REG_POWERCNT = powercnt;
 
+	if(*mainScreen == 1)
+		REG_POWERCNT &= ~POWER_SWAP_LCDS;
+	else if(*mainScreen == 2)
+		REG_POWERCNT |= POWER_SWAP_LCDS;
+
 	REG_EXMEMCNT = exmemcnt;
 
 	leaveCriticalSection(oldIME);
