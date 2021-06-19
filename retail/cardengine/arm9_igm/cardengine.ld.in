@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINE_ARM7_LOCATION, LENGTH = 3K /* Main RAM */
+	vram	: ORIGIN = INGAME_MENU_LOCATION_B4DS, LENGTH = 40K /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

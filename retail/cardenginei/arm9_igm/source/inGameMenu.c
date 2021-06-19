@@ -86,6 +86,7 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	}
 }
 
+#ifndef B4DS
 static void printBattery(void) {
 	u32 batteryLevel = *(u8*)(INGAME_MENU_LOCATION+0x9FFF);
 	const u16 *bars = u"\3\3";
@@ -112,6 +113,7 @@ static void printBattery(void) {
 	}
 	print(0x20 - 4, 0x18 - 2, bars, 3);
 }
+#endif
 
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
@@ -126,6 +128,7 @@ static void waitKeys(u16 keys) {
 	} while(!(KEYS & keys));
 }
 
+#ifndef B4DS
 static void waitKeysBattery(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && (KEYS & keys); i++) {
@@ -140,6 +143,7 @@ static void waitKeysBattery(u16 keys) {
 		while (REG_VCOUNT == 191);
 	} while(!(KEYS & keys));
 }
+#endif
 
 static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
@@ -187,6 +191,7 @@ static void optionsMenu(s8 *mainScreen) {
 		}
 		drawCursor(cursorPosition);
 
+		#ifndef B4DS
 		if(igmText->rtl) {
 			// Main screen
 			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
@@ -204,14 +209,28 @@ static void optionsMenu(s8 *mainScreen) {
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+		#else
+		if(igmText->rtl) {
+			// Main screen
+			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
+		} else {
+			// Main screen
+			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
+		}
 
+		waitKeys(KEY_LEFT | KEY_RIGHT | KEY_B);
+		#endif
+
+		#ifndef B4DS
 		if (KEYS & KEY_UP) {
 			if(cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
 			if(cursorPosition < 2)
 				cursorPosition++;
-		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
+		} else
+		#endif
+		if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
 				case 0:
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
@@ -220,12 +239,14 @@ static void optionsMenu(s8 *mainScreen) {
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
 					break;
+				#ifndef B4DS
 				case 1:
 					REG_SCFG_CLK ^= 1;
 					break;
 				case 2:
 					REG_SCFG_EXT ^= BIT(13);
 					break;
+				#endif
 				default:
 					break;
 			}
@@ -367,10 +388,12 @@ static void ramViewer(void) {
 }
 
 void inGameMenu(s8* mainScreen) {
+	#ifndef B4DS
 	int oldIME = enterCriticalSection();
 
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+	#endif
 
 	u32 dispcnt = REG_DISPCNT_SUB;
 	u16 bg0cnt = REG_BG0CNT_SUB;
@@ -419,7 +442,9 @@ void inGameMenu(s8* mainScreen) {
 	drawMainMenu();
 	drawCursor(0);
 	do {
+		#ifndef B4DS
 		printBattery();
+		#endif
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	} while(KEYS & igmText->hotkey);
@@ -429,7 +454,11 @@ void inGameMenu(s8* mainScreen) {
 		drawMainMenu();
 		drawCursor(cursorPosition);
 
+		#ifndef B4DS
 		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
+		#else
+		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
+		#endif
 
 		if (KEYS & KEY_UP) {
 			if (cursorPosition > 0)
@@ -494,7 +523,9 @@ void inGameMenu(s8* mainScreen) {
 	else if(*mainScreen == 2)
 		REG_POWERCNT |= POWER_SWAP_LCDS;
 
+	#ifndef B4DS
 	REG_EXMEMCNT = exmemcnt;
 
 	leaveCriticalSection(oldIME);
+	#endif
 }

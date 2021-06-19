@@ -123,6 +123,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 srParamsFileCluster,
+	u32 pageFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool ROMinRAM,
@@ -139,6 +140,7 @@ int hookNdsRetailArm9(
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
+	ce9->pageFileCluster        = pageFileCluster;
 	if (expansionPakFound) {
 		ce9->valueBits |= b_expansionPakFound;
 	}

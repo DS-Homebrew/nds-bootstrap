@@ -45,6 +45,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 srParamsFileCluster,
+	u32 pageFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool ROMinRAM,

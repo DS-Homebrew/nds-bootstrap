@@ -47,6 +47,7 @@ extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 language;
 extern u32* languageAddr;
+extern u16 igmHotkey;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
@@ -108,6 +109,19 @@ static void initialize(void) {
 	initialized = true;
 }
 
+extern void inGameMenu(void);
+
+void rebootConsole(void) {
+	if (*(vu16*)0x4004700 != 0) {
+		u8 readCommand = readPowerManagement(0x10);
+		readCommand |= BIT(0);
+		writePowerManagement(0x10, readCommand); // Reboot console
+	} else {
+		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
+	}
+	sharedAddr[3] = 0;
+}
+
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
@@ -118,8 +132,8 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if (*(u32*)((u32)ce7-(0x2800+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x27FC;
+	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
 		(*cheatEngine)();
 	}
 
@@ -133,15 +147,12 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
+	/*if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
+		inGameMenu();
+	}*/
+
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		if (*(vu16*)0x4004700 != 0) {
-			u8 readCommand = readPowerManagement(0x10);
-			readCommand |= BIT(0);
-			writePowerManagement(0x10, readCommand); // Reboot console
-		} else {
-			writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
-		}
-		sharedAddr[3] = 0;
+		rebootConsole();
 	}
 
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {

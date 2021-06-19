@@ -84,6 +84,7 @@ extern u32 romSize;
 extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
+extern u32 pageFileCluster;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
@@ -672,6 +673,7 @@ int arm7_main(void) {
 		romFile.firstCluster,
 		savFile.firstCluster,
 		srParamsFileCluster,
+		pageFileCluster,
 		expansionPakFound,
 		extendedMemory2,
 		ROMinRAM,

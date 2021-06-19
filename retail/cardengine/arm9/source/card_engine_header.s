@@ -26,6 +26,8 @@ saveCluster:
 	.word	0x00000000
 srParamsCluster:
 	.word	0x00000000
+pageFileCluster:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 valueBits:

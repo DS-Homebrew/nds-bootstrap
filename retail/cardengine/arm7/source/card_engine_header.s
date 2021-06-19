@@ -17,6 +17,7 @@
 .global saveCluster
 .global language
 .global languageAddr
+.global igmHotkey
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -37,6 +38,9 @@ language:
 	.word	0x00000000
 languageAddr:
 	.word	0x00000000
+igmHotkey:
+	.hword	0
+.align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

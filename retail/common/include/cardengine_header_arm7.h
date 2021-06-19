@@ -93,6 +93,20 @@ typedef struct cardengineArm7 {
     u32* irqTable_offset;
     u16 igmHotkey;
 } __attribute__ ((__packed__)) cardengineArm7;
+
+//
+// ARM7 cardengine
+//
+typedef struct cardengineArm7B4DS {
+    u32 ce7;
+    cardengineArm7Patches* patches;
+    u32 intr_vblank_orig_return;
+    const module_params_t* moduleParams;
+    u32 cardStruct;
+    u32 language; //u8
+    u32* languageAddr;
+    u16 igmHotkey;
+} __attribute__ ((__packed__)) cardengineArm7B4DS;
 #else
 //
 // ARM7 cardengine patches
@@ -118,6 +132,7 @@ typedef struct cardengineArm7 {
     u32 cardStruct;
     u32 language; //u8
     u32* languageAddr;
+    u16 igmHotkey;
 } __attribute__ ((__packed__)) cardengineArm7;
 #endif
 

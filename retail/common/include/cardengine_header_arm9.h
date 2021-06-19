@@ -133,10 +133,12 @@ typedef struct cardengineArm9 {
     u32 ce9;
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
+    u32 intr_vblank_orig_return;
     u32 intr_ipc_orig_return;
     u32 fileCluster;
     u32 saveCluster;
     u32 srParamsCluster;
+    u32 pageFileCluster;
     u32 cardStruct0;
 	u32 valueBits;
 	/*

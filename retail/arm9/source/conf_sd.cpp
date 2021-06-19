@@ -687,9 +687,68 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x800, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0xC00, cebin);
 	}
 	fclose(cebin);
+
+	// Load in-game menu ce9 binary
+	/*cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, 0x4000, cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION_B4DS);
+
+		igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
+
+		// Set In-Game Menu strings
+		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
+		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
+		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
+
+		// Set In-Game Menu hotkey
+		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
+
+		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION;
+		ce7->igmHotkey = igmText->hotkey;
+
+		char path[40];
+		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
+		easysave::ini lang(path);
+
+		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
+		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
+
+		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
+		//setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
+		//setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[3]);
+		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[4]);
+		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[4]);
+		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[5]);
+
+		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
+		//setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
+		//setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST", "VRAM Boost").c_str(), igmText->options[2]);
+		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
+		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
+		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
+		//setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
+		//setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
+		//setIgmString(lang.fetch("OPTIONS", "OFF", "Off").c_str(), igmText->options[8]);
+		//setIgmString(lang.fetch("OPTIONS", "ON", "On").c_str(), igmText->options[9]);
+
+		fclose(cebin);
+
+		if (access("fat:/_nds/pagefile.sys", F_OK) != 0) {
+			cebin = fopen("fat:/_nds/pagefile.sys", "wb");
+			fseek(cebin, 0x14000 - 1, SEEK_SET);
+			fputc('\0', cebin);
+			fclose(cebin);
+		}
+		cebin = fopen("fat:/_nds/pagefile.sys", "r+");
+		fwrite((u8*)INGAME_MENU_LOCATION_B4DS, 1, 0xA000, cebin);
+		fclose(cebin);
+		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);
+	}*/
 
 	*(vu32*)(0x02000000) = 0x314D454D;
 	*(vu32*)(0x02400000) = 0x324D454D;

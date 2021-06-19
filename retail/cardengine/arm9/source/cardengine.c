@@ -64,6 +64,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile romFile;
 static aFile savFile;
 static aFile srParamsFile;
+//static aFile pageFile;
 
 static int cardReadCount = 0;
 
@@ -86,8 +87,11 @@ static bool mariosHolidayPrimaryFixApplied = false;
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
+        //u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
+        //ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
+        //*vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -99,7 +103,23 @@ static void enableIPC_SYNC(void) {
 	}
 }
 
+s8 mainScreen = 0;
+
+//---------------------------------------------------------------------------------
+/*void myIrqHandlerVBlank(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerVBlank");
+	#endif	
+
+	if (sharedAddr[4] == 0x554E454D) {
+		while (sharedAddr[4] != 0x54495845);
+	}
+}*/
+
+//---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
+//---------------------------------------------------------------------------------
 	switch (sharedAddr[3]) {
 		case 0x53415652: {
 			// Read save
@@ -139,8 +159,35 @@ void myIrqHandlerIPC(void) {
 		} break;
 	}
 
-	if (IPC_GetSync() == 0x7){
-		lcdSwap();
+	switch (IPC_GetSync()) {
+		case 0x7: {
+			mainScreen++;
+			if(mainScreen > 2)
+				mainScreen = 0;
+
+			if(mainScreen == 1)
+				REG_POWERCNT &= ~POWER_SWAP_LCDS;
+			else if(mainScreen == 2)
+				REG_POWERCNT |= POWER_SWAP_LCDS;
+		}
+			break;
+		/*case 0x9: {
+			int oldIME = enterCriticalSection();
+			setDeviceOwner();
+
+			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000, -1);	// Backup part of game RAM to page file
+			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000, -1);	// Read in-game menu
+
+			*(u32*)(INGAME_MENU_LOCATION_B4DS+0x400) = (u32)sharedAddr;
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS+0x40C;
+			(*inGameMenu)(&mainScreen);
+
+			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000, -1);	// Store in-game menu
+			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000, -1);	// Restore part of game RAM from page file
+
+			leaveCriticalSection(oldIME);
+		}
+			break;*/
 	}
 }
 
@@ -159,6 +206,7 @@ static void initialize(void) {
 		savFile = getFileFromCluster(ce9->saveCluster);
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
+		//pageFile = getFileFromCluster(ce9->pageFileCluster);
 
 		buildFatTableCache(&romFile, 0);
 		buildFatTableCache(&savFile, 0);
