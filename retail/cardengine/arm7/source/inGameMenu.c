@@ -1,3 +1,4 @@
+#ifdef UNUSED
 #include <nds/ndstypes.h>
 #include <nds/ipc.h>
 #include <nds/interrupts.h>
@@ -43,3 +44,4 @@ void inGameMenu(void) {
 	//leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = volBak;
 }
+#endif

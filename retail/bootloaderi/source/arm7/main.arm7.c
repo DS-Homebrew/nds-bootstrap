@@ -1288,6 +1288,9 @@ int arm7_main(void) {
 			//tonccpy((char*)0x02E9A834, newBannerPath, 16);
 		//}
 
+		extern void patchUserDataAddr(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		patchUserDataAddr(ndsHeader, moduleParams);
+
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)NULL,
 			ndsHeader,

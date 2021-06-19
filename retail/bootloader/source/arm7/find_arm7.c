@@ -6,6 +6,10 @@
 // Subroutine function signatures ARM7
 //
 
+// User data address
+static const u32 userDataAddr1[1]      = {0x027FFC80};
+static const u32 userDataAddr5[1]      = {0x02FFFC80};
+
 // Sleep patch
 static const u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
 static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
@@ -25,7 +29,22 @@ static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xE
 static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
-//static bool sdk5 = false;
+u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findUserDataAddrOffset:\n");
+
+	u32* userDataAddrOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		isSdk5(moduleParams) ? userDataAddr5 : userDataAddr1, 1
+	);
+	if (userDataAddrOffset) {
+		dbg_printf("User data address found\n");
+	} else {
+		dbg_printf("User data address not found\n");
+	}
+
+	dbg_printf("\n");
+	return userDataAddrOffset;
+}
 
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSleepPatchOffset:\n");

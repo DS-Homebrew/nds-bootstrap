@@ -132,8 +132,8 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
+	if (*(u32*)((u32)ce7-(0x2800+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x27FC;
 		(*cheatEngine)();
 	}
 

@@ -68,6 +68,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 // ARM7
 u32* findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findRamClearOffset(const tNDSHeader* ndsHeader);

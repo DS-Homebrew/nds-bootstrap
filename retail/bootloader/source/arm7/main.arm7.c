@@ -390,7 +390,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
 
-	memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
+	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 
 	if (language >= 0 && language <= 7) {
 		// Change language

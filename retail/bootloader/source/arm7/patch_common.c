@@ -27,7 +27,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 16;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 17;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -390,6 +390,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.a7IsThumb = 0;
 	patchOffsetCache.ramClearOffset = 0;
 	patchOffsetCache.ramClearChecked = 0;
+	patchOffsetCache.userDataAddrOffset = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
 	patchOffsetCache.a7IrqHandlerOffset = 0;
 	patchOffsetCache.savePatchType = 0;

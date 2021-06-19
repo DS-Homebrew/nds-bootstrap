@@ -64,6 +64,10 @@ static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
 static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
+// User data address
+static const u32 userDataAddr1[1]      = {0x027FFC80};
+static const u32 userDataAddr5[1]      = {0x02FFFC80};
+
 // Sleep patch
 static const u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
 static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
@@ -821,6 +825,23 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	dbg_printf("\n");
 	return swiGetPitchTableOffset;
+}
+
+u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findUserDataAddrOffset:\n");
+
+	u32* userDataAddrOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		isSdk5(moduleParams) ? userDataAddr5 : userDataAddr1, 1
+	);
+	if (userDataAddrOffset) {
+		dbg_printf("User data address found\n");
+	} else {
+		dbg_printf("User data address not found\n");
+	}
+
+	dbg_printf("\n");
+	return userDataAddrOffset;
 }
 
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
