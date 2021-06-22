@@ -14,6 +14,7 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
+extern u8 asyncCardRead;
 extern u8 cardReadDMA;
 
 extern bool gbaRomFound;
@@ -494,7 +495,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		 || strncmp(romTid, "Y8L", 3) == 0
 		 || strncmp(romTid, "B8I", 3) == 0
 		 || strncmp(romTid, "TAM", 3) == 0
-		 || (gameOnFlashcard && !ROMinRAM) || !cardReadDMA) return false;
+		 || !cardReadDMA) return false;
 	}
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -655,10 +656,11 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-/*static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "A5F", 3) == 0
+	if (!asyncCardRead
+	 /*|| strncmp(romTid, "A5F", 3) == 0
 	 || strncmp(romTid, "B2K", 3) == 0
 	 || strncmp(romTid, "B3R", 3) == 0
 	 || strncmp(romTid, "B5P", 3) == 0
@@ -678,10 +680,10 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	 || strncmp(romTid, "YEW", 3) == 0
 	 || strncmp(romTid, "YLT", 3) == 0
 	// || isSdk5(moduleParams)
-	 || !patchOffsetCache.cardIdOffset
+	 || !patchOffsetCache.cardIdOffset*/
 	) return false;
 
-	// Work-around for buggy card read DMA and/or screen flickers during loading
+	// Work-around for lags and/or screen flickers during loading
    u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
@@ -702,7 +704,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		dbg_printf("\n\n");
 	}
 	return offset ? true : false;
-}*/
+}
 
 static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -1769,9 +1771,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	//if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
-	//	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	//} else {
+	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
+		isSdk5(moduleParams) ? patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) : patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
+	} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
@@ -1779,7 +1782,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
-	//}
+	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);

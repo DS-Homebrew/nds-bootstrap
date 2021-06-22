@@ -64,6 +64,7 @@
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
+	.global asyncCardRead
 	.global cardReadDMA
 	.global soundFreq
 @---------------------------------------------------------------------------------
@@ -155,6 +156,8 @@ consoleModel:
 romRead_LED:
 	.byte	0
 dmaRomRead_LED:
+	.byte	0
+asyncCardRead:
 	.byte	0
 cardReadDMA:
 	.byte	0

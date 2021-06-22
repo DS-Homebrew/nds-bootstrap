@@ -179,9 +179,10 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
 	dbg_printf("extendedMemory: %s\n", btoa(conf->extendedMemory));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
-	dbg_printf("colorMode: %lX\n", conf->colorMode);
+	//dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);
 	dbg_printf("dmaRomRead_LED: %lX\n", conf->dmaRomRead_LED);
+	dbg_printf("asyncCardRead: %s\n", btoa(conf->asyncCardRead));
 	dbg_printf("cardReadDMA: %s\n", btoa(conf->cardReadDMA));
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("boostVram: %s\n", btoa(conf->boostVram));

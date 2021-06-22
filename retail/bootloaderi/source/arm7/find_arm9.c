@@ -176,7 +176,7 @@ static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
 //static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
 
 // Threads management  
-/*static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
+static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2
 static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000, 0xE28D0008}; // sdk4
 static const u32 sleepSignature4Alt[4]     = {0xE92D4030, 0xE24DD034, 0xE1A05000, 0xE28D0008}; // sdk4
@@ -184,7 +184,7 @@ static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA80
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
 static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C05}; // sdk5
 
-static const u16 sleepConstantValue = {0x82EA};*/
+static const u16 sleepConstantValue = {0x82EA};
 
 // Init Heap
 static const u32 initHeapEndSignature1[2]              = {0x27FF000, 0x37F8000};
@@ -1994,7 +1994,7 @@ u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
 	return operaRamOffset;
 }*/
 
-/*u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
+u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
 	dbg_printf("findSleepOffset\n");
     u32* sleepSignature = sleepSignature2;
     u16* sleepSignatureThumb = sleepSignatureThumb2;
@@ -2083,7 +2083,7 @@ u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
 
 	dbg_printf("\n");
 	return sleepOffset;
-}*/
+}
 
 u32* findCardEndReadDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardEndReadDmaSdk5\n");

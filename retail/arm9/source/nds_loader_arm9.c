@@ -292,6 +292,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, 
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
+	loader->asyncCardRead               = conf->asyncCardRead;
 	loader->cardReadDMA                 = conf->cardReadDMA;
 
 	if (!dsiFeatures()) {

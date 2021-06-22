@@ -133,9 +133,9 @@ static void waitMs(int count) {
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
-	//if (REG_IME != 0 && REG_IF != 0) {
-	//	sleepMsEnabled = true;
-	//}
+	if (REG_IME != 0 && REG_IF != 0) {
+		sleepMsEnabled = true;
+	}
 
 	if (dmaCode || !sleepMsEnabled) return;
 
@@ -508,21 +508,28 @@ void continueCardReadDmaArm9() {
 
 void cardSetDma (u32 * params) {
 	isDma = true;
-	dmaCode = true;
-
-    disableIrqMask(IRQ_CARD);
-    disableIrqMask(IRQ_CARD_LINE);
-
-	enableIPC_SYNC();
 
 	dmaParams = params;
 	u32 src = dmaParams[3];
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];
 
+	#ifndef DLDI
+	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+		cardRead(0, dst, src, len);
+		endCardReadDma();
+		return;
+	}
+	dmaCode = true;
+
+    disableIrqMask(IRQ_CARD);
+    disableIrqMask(IRQ_CARD_LINE);
+
+	enableIPC_SYNC();
+	#endif
+
 	#ifdef DLDI
-	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, *romFile, src, len, 0);
+	cardRead(0, dst, src, len);
 	endCardReadDma();
 	#else
 	u32 commandRead=0x025FFB0A;

@@ -14,6 +14,7 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
+extern u8 asyncCardRead;
 extern u8 dsiSD;
 
 extern bool sdRead;
@@ -64,10 +65,11 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	bool doPatch = ((!gameOnFlashcard && !ROMinRAM) || ((ROMinRAM && !extendedMemoryConfirmed && setDmaPatched) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed))));
 	const char* romTid = getRomTid(ndsHeader);
 	if ((u32)ce7 == CARDENGINEI_ARM7_SDK5_LOCATION
-	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
-	 || strncmp(romTid, "AFF", 3) == 0		// Final Fantasy III
-	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
 	 || strncmp(romTid, "CBB", 3) == 0		// Big Bang Mini
+	 || strncmp(romTid, "AFF", 3) == 0		// Final Fantasy III
+	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
+	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
+	 || (strncmp(romTid, "AH9", 3) == 0 && asyncCardRead)		// Tony Hawk's American Sk8Land
 	) {
 		doPatch = false;
 	}
@@ -285,6 +287,8 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 void patchUserDataAddr(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (!isSdk5(moduleParams)) return;
+
 	u32* userDataAddrOffset = patchOffsetCache.userDataAddrOffset;
 	if (!patchOffsetCache.userDataAddrOffset) {
 		userDataAddrOffset = findUserDataAddrOffset(ndsHeader, moduleParams);

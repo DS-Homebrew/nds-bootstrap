@@ -39,9 +39,10 @@ typedef struct configuration {
 	u32 patchMpuSize;
 	int extendedMemory;
 	u8 consoleModel;
-	int colorMode;
+	//int colorMode;
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
+	bool asyncCardRead;
 	bool cardReadDMA;
 	bool boostCpu;
 	bool boostVram;

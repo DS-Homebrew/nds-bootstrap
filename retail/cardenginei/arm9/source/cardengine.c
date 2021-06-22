@@ -137,9 +137,9 @@ static void waitMs(int count) {
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
-	//if (REG_IME != 0 && REG_IF != 0) {
-	//	sleepMsEnabled = true;
-	//}
+	if (REG_IME != 0 && REG_IF != 0) {
+		sleepMsEnabled = true;
+	}
 
 	if (dmaCode || !sleepMsEnabled) return;
 
@@ -508,7 +508,6 @@ void continueCardReadDmaArm9() {
 		}
 	}
 }*/
-#endif
 
 void cardSetDma(void) {
 	isDma = true;
@@ -526,11 +525,6 @@ void cardSetDma(void) {
 	u32 len = cardStruct[2];
     u32 dma = cardStruct[3]; // dma channel     
 
-	#ifdef DLDI
-	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, *romFile, src, len, 0);
-	endCardReadDma();
-	#else
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	u32 page = (src / 512) * 512;
@@ -614,8 +608,10 @@ void cardSetDma(void) {
 		}
 		//IPC_SendSync(0x3);
 	//}
-	#endif
 }
+#else
+void cardSetDma(void) {}
+#endif
 
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
 #ifdef DLDI
@@ -803,14 +799,21 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
-		{
+        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
+			#ifndef DLDI
+			if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+			#endif
+				cardRead(NULL);
+				endCardReadDma();
+			#ifndef DLDI
+			} else {
 
-            cacheFlush();
+				cacheFlush();
 
-            cardSetDma();
-
+				cardSetDma();
+			}
+			#endif
             return true;
 		} /*else {
 			dma=4;

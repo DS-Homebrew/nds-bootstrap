@@ -48,6 +48,7 @@ typedef struct loadCrt0 {
     u8 consoleModel;
     u8 romRead_LED;
     u8 dmaRomRead_LED;
+    u8 asyncCardRead;
     u8 cardReadDMA;
     u8 soundFreq;
 } __attribute__ ((__packed__)) loadCrt0;
