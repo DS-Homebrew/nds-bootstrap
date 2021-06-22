@@ -495,7 +495,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 		 || strncmp(romTid, "Y8L", 3) == 0
 		 || strncmp(romTid, "B8I", 3) == 0
 		 || strncmp(romTid, "TAM", 3) == 0
-		 || !cardReadDMA) return false;
+		 || ((!gameOnFlashcard || ROMinRAM) && !cardReadDMA)) return false;
 	}
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -594,7 +594,8 @@ bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
-	if (ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM) {
+	if ((ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM)
+	 || (gameOnFlashcard && !isSdk5(moduleParams))) {
 		return false;
 	}
 	const char* romTid = getRomTid(ndsHeader);
@@ -656,32 +657,8 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	}
 }
 
-static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	const char* romTid = getRomTid(ndsHeader);
-
-	if (!asyncCardRead
-	 /*|| strncmp(romTid, "A5F", 3) == 0
-	 || strncmp(romTid, "B2K", 3) == 0
-	 || strncmp(romTid, "B3R", 3) == 0
-	 || strncmp(romTid, "B5P", 3) == 0
-	 || strncmp(romTid, "BE8", 3) == 0
-	 || strncmp(romTid, "BEB", 3) == 0
-	 || strncmp(romTid, "BEE", 3) == 0
-	 || strncmp(romTid, "BEZ", 3) == 0
-	 || strncmp(romTid, "BLF", 3) == 0
-	 || strncmp(romTid, "BOE", 3) == 0
-	 || strncmp(romTid, "C3J", 3) == 0
-	 || strncmp(romTid, "CLJ", 3) == 0
-	 || strncmp(romTid, "Y49", 3) == 0
-	 || strncmp(romTid, "Y6Z", 3) == 0
-	 || strncmp(romTid, "Y9B", 3) == 0
-	 || strncmp(romTid, "YEE", 3) == 0
-	 || strncmp(romTid, "YEL", 3) == 0
-	 || strncmp(romTid, "YEW", 3) == 0
-	 || strncmp(romTid, "YLT", 3) == 0
-	// || isSdk5(moduleParams)
-	 || !patchOffsetCache.cardIdOffset*/
-	) return false;
+static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+	if (gameOnFlashcard || ROMinRAM || !asyncCardRead) return false;
 
 	// Work-around for lags and/or screen flickers during loading
    u32* offset = patchOffsetCache.sleepFuncOffset;
@@ -1771,7 +1748,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb)) {
+	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 		isSdk5(moduleParams) ? patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) : patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
 	} else {

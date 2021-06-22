@@ -1089,6 +1089,8 @@ int arm7_main(void) {
 	}*/
 
 	if (gameOnFlashcard || !isDSiWare) {
+		if (gameOnFlashcard) sdRead = false;
+
 		u32 currentFatTableVersion = 1;
 
 		// FAT table file
