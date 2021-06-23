@@ -294,11 +294,6 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020030F4 = 0xE12FFF1E; //bx lr
 	}
 
-	// Jam with the Band (Europe)
-	if (strcmp(romTid, "UXBP") == 0) {
-		*(u32*)0x02061368 = 0xE12FFF1E; //bx lr
-	}
-
     // Pokemon Dash
 	if (strcmp(romTid, "APDJ") == 0) {
 		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
