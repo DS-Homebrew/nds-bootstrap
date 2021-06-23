@@ -892,13 +892,12 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustDelay = 0;
 				volumeAdjustActivated = false;
 			}
-		} else {
+		} else if (0==(REG_KEYINPUT & KEY_SELECT)) {
 			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
 			u8 i2cNewVolLevel = i2cVolLevel;
-			if (REG_KEYINPUT & (KEY_SELECT | KEY_UP)) {} else {
+			if (0==(REG_KEYINPUT & KEY_UP)) {
 				i2cNewVolLevel++;
-			}
-			if (REG_KEYINPUT & (KEY_SELECT | KEY_DOWN)) {} else {
+			} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
 				i2cNewVolLevel--;
 			}
 			if (i2cNewVolLevel == 0xFF) {
