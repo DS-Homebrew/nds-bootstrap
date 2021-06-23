@@ -251,7 +251,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), 0);
+	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp));
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -269,11 +269,11 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	) {
 		// Make the Pokemon game code ADAJ.
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
-		memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
+		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
 	if (dsiHeaderTemp->ndshdr.arm7binarySize != 0x22B40
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x22BCC
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2352C
@@ -295,7 +295,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x27618
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2762C
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x29CEC) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 	}
 }
 
@@ -328,7 +328,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((expansionPakFound || extendedMemory2&&!dsDebugRam) && getRomSizeNoArmBins(ndsHeader) < romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && getRomSizeNoArmBins(ndsHeader) < romSizeLimit);
 		dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 	  }
 	return res;
@@ -437,7 +437,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	if (overlaysSize < romSizeLimit)
 	{
 		u32 overlaysLocation = (extendedMemory2&&!dsDebugRam ? 0x0C800000 : romLocation);
-		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, 0);
+		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
 
 		if (!isSdk5(moduleParams)) {
 			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
@@ -499,24 +499,24 @@ int arm7_main(void) {
 	arm9_macroMode = macroMode;
 
 	// Init card
-	if (!FAT_InitFiles(initDisc, 0)) {
+	if (!FAT_InitFiles(initDisc)) {
 		nocashMessage("!FAT_InitFiles");
 		errorOutput();
 		//return -1;
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
 	}
 
 	s2FlashcardId = *(u16*)(0x020000C0);
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4, -1);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4);
 	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4);
 	}
 
 	// BOOT.NDS file
@@ -543,7 +543,7 @@ int arm7_main(void) {
 	
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	int errorCode;
@@ -690,12 +690,12 @@ int arm7_main(void) {
 	}*/
 
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
 	if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, 0);
+		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
 		applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9));
 		dbg_printf("AP-fix found and applied\n");
 	}

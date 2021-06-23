@@ -46,7 +46,11 @@ u32 dbg_printf(const char* message) {
 	sdRead = dsiSD;
 #endif
 
-	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 0);
+	#ifndef B4DS
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), sdRead ? false : true, 0);
+	#else
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message));
+	#endif
 
 #ifndef _NO_SDMMC
 	sdRead = store_sdRead;

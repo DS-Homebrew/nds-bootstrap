@@ -129,7 +129,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, savFile, src, len, -1);
+			fileRead((char*)dst, savFile, src, len);
 
 			sharedAddr[3] = 0;
 		} break;
@@ -141,7 +141,7 @@ void myIrqHandlerIPC(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileWrite((char*)src, savFile, dst, len, -1);
+			fileWrite((char*)src, savFile, dst, len);
 
 			sharedAddr[3] = 0;
 		} break;
@@ -153,7 +153,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, romFile, src, len, 0);
+			fileRead((char*)dst, romFile, src, len);
 
 			sharedAddr[3] = 0;
 		} break;
@@ -193,7 +193,7 @@ void myIrqHandlerIPC(void) {
 
 static void initialize(void) {
 	if (!initialized) {
-		if (!FAT_InitFiles(true, 0)) {
+		if (!FAT_InitFiles(true)) {
 			//nocashMessage("!FAT_InitFiles");
 			while (1);
 		}
@@ -208,15 +208,15 @@ static void initialize(void) {
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 		//pageFile = getFileFromCluster(ce9->pageFileCluster);
 
-		buildFatTableCache(&romFile, 0);
-		buildFatTableCache(&savFile, 0);
+		buildFatTableCache(&romFile);
+		buildFatTableCache(&savFile);
 
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
 
 		if (ce9->valueBits & ROMinRAM) {
-			fileRead((char*)ce9->romLocation+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset + ndsHeader->arm7binarySize, getRomSizeNoArmBins(ndsHeader), 0);
+			fileRead((char*)ce9->romLocation+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset + ndsHeader->arm7binarySize, getRomSizeNoArmBins(ndsHeader));
 		}
 
 		initialized = true;
@@ -234,7 +234,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, romFile, src, len, 0);
+	fileRead((char*)dst, romFile, src, len);
 
 	if (!(ce9->valueBits & isSdk5) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
@@ -295,20 +295,20 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
-	fileRead(memory, savFile, (u32)flash, len, -1);
+	fileRead(memory, savFile, (u32)flash, len);
     return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
-	fileWrite(memory, savFile, (u32)flash, len, -1);
+	fileWrite(memory, savFile, (u32)flash, len);
 	return true;
 }
 
 
 void reset(u32 param) {
 	setDeviceOwner();
-	fileWrite((char*)&param, srParamsFile, 0, 4, -1);
+	fileWrite((char*)&param, srParamsFile, 0, 4);
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }

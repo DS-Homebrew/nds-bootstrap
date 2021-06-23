@@ -63,15 +63,15 @@ typedef	struct
     int cmd;
 } readContext;
 
-bool FAT_InitFiles(bool initCard, int ndmaSlot);
-aFile getBootFileCluster(const char* bootName, int ndmaSlot);
+bool FAT_InitFiles(bool initCard, bool card2, int ndmaSlot);
+aFile getBootFileCluster(const char* bootName, bool card2, int ndmaSlot);
 aFile getFileFromCluster(u32 cluster);
-u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, bool card2, int ndmaSlot);
 bool fileReadNonBLocking(char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot);
 bool resumeFileRead();
-u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
-u32 FAT_ClustToSect(u32 cluster);
-void buildFatTableCache(aFile* file, int ndmaSlot);
+u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, bool card2, int ndmaSlot);
+u32 FAT_ClustToSect(u32 cluster, bool card2);
+void buildFatTableCache(aFile* file, bool card2, int ndmaSlot);
 
 /* ROM Header Region Information Structure */
 

@@ -387,13 +387,13 @@ int hookNdsRetailArm7(
 		u32 cheatEngineOffset = (u32)ce7-0x2800;
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
+			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
+			fileRead(cheatDataOffset, cheatFile, 0, cheatSize);
 		}
 	}
 

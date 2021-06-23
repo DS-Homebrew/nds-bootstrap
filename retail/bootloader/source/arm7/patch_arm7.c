@@ -182,9 +182,9 @@ u32 patchCardNdsArm7(
 		}
 		u32 arm7src = 0;
 		u32 arm7size = 0;
-		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4, -1);
-		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4, -1);
-		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size, 0);
+		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4);
+		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
+		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
 		ndsHeader->arm7binarySize = arm7size;
 		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
 	}
