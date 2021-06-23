@@ -366,18 +366,18 @@ int hookNdsRetailArm7(
 			cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		}
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, sdRead ? false : true, 0);
+			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, !sdRead, 0);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");
 		}
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, sdRead ? false : true, 0);
+			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, !sdRead, 0);
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, sdRead ? false : true, 0);
+			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, !sdRead, 0);
 		}
 	}
 
