@@ -122,6 +122,7 @@ void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
 	switch (sharedAddr[3]) {
 		case 0x53415652: {
+			u16 exmemcnt = REG_EXMEMCNT;
 			// Read save
 			setDeviceOwner();
 
@@ -132,8 +133,10 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)dst, savFile, src, len);
 
 			sharedAddr[3] = 0;
+			REG_EXMEMCNT  = exmemcnt;
 		} break;
 		case 0x53415657: {
+			u16 exmemcnt = REG_EXMEMCNT;
 			// Write save
 			setDeviceOwner();
 
@@ -144,8 +147,10 @@ void myIrqHandlerIPC(void) {
 			fileWrite((char*)src, savFile, dst, len);
 
 			sharedAddr[3] = 0;
+			REG_EXMEMCNT  = exmemcnt;
 		} break;
 		case 0x524F4D52: {
+			u16 exmemcnt = REG_EXMEMCNT;
 			// Read ROM (redirected from arm7)
 			setDeviceOwner();
 
@@ -156,6 +161,7 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)dst, romFile, src, len);
 
 			sharedAddr[3] = 0;
+			REG_EXMEMCNT  = exmemcnt;
 		} break;
 	}
 
@@ -223,7 +229,7 @@ static void initialize(void) {
 	}
 }
 
-static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
+static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -252,15 +258,12 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
-	
-	return 0;
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
-	//nocashMessage("\narm9 cardRead\n");
+	u16 exmemcnt = REG_EXMEMCNT;
 
 	setDeviceOwner();
-
 	initialize();
 
 	cardReadCount++;
@@ -284,13 +287,14 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			newSrc -= ndsHeader->arm7binarySize;
 		}
 		tonccpy(dst, (u8*)newSrc, len);
-		return 0;
 	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
-		return 0;
+	} else {
+		cardReadNormal(dst, src, len);
 	}
 
-	return cardReadNormal(dst, src, len);
+	REG_EXMEMCNT = exmemcnt;
+	return 0;
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
@@ -315,6 +319,7 @@ void reset(u32 param) {
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
 
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
@@ -324,6 +329,8 @@ u32 myIrqEnable(u32 irq) {
 	initialize();
 
 	hookIPC_SYNC();
+
+	REG_EXMEMCNT = exmemcnt;
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
