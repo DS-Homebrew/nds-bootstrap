@@ -60,7 +60,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchUserDataAddr(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (!isSdk5(moduleParams)) return;
+	if (moduleParams->sdk_version < 0x5008000) return;
 
 	u32* userDataAddrOffset = patchOffsetCache.userDataAddrOffset;
 	if (!patchOffsetCache.userDataAddrOffset) {
