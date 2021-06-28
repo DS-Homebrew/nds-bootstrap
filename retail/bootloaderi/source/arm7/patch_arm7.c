@@ -409,8 +409,6 @@ u32 patchCardNdsArm7(
 
 	patchScfgExt(ndsHeader, ROMinRAM);
 
-	patchUserDataAddr(ndsHeader, moduleParams);
-
 	patchSleepMode(ndsHeader);
 
 	//patchRamClear(ndsHeader, moduleParams);

@@ -137,14 +137,14 @@ void myIrqHandlerVBlank(void) {
 		(*cheatEngine)();
 	}
 
-	if (language >= 0 && language <= 7) {
+	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
 		personalData->language = language;
-		if (languageAddr > 0 && languageTimer < 60*3) {
+		if (languageAddr > 0) {
 			// Extra measure for specific games
 			*languageAddr = language;
-			languageTimer++;
 		}
+		languageTimer++;
 	}
 
 	/*if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
