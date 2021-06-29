@@ -47,7 +47,7 @@ u32 dbg_printf(const char* message) {
 #endif
 
 	#ifndef B4DS
-	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), sdRead ? false : true, 0);
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), !sdRead, 0);
 	#else
 	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message));
 	#endif
