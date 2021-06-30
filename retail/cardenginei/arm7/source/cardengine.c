@@ -368,7 +368,7 @@ void forceGameReboot(void) {
 	}
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
-	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, sdRead ? false : true, -1);
+	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
 	if (*(u32*)(ce7+0xA100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
@@ -408,11 +408,11 @@ void dumpRam(void) {
 	// Dump RAM
 	if (valueBits & dsiMode) {
 		// Dump full RAM
-		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), sdRead ? false : true, -1);
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
 	} else {
 		// Dump RAM used in DS mode
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, sdRead ? false : true, -1);
-		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, sdRead ? false : true, -1);
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
 	}
 	sharedAddr[3] = 0;
 }
@@ -470,7 +470,7 @@ static void nandRead(void) {
     if (tryLockMutex(&saveMutex)) {
 		driveInitialize();
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileRead(memory, *savFile, flash, len, sdRead ? false : true, -1);
+		fileRead(memory, *savFile, flash, len, !sdRead, -1);
     	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
@@ -502,7 +502,7 @@ static void nandWrite(void) {
 		driveInitialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileWrite(memory, *savFile, flash, len, sdRead ? false : true, -1);
+		fileWrite(memory, *savFile, flash, len, !sdRead, -1);
     	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
@@ -850,7 +850,7 @@ void myIrqHandlerVBlank(void) {
 		int oldIME = enterCriticalSection();
 		driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
-		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, sdRead ? false : true, -1);
+		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, !sdRead, -1);
 		if (consoleModel < 2 && *(u32*)(ce7+0xA100) == 0) {
 			unlaunchSetFilename(false);
 		}
@@ -1053,7 +1053,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {
-			fileRead(dst, *savFile, src, len, sdRead ? false : true, -1);
+			fileRead(dst, *savFile, src, len, !sdRead, -1);
 		}
   		unlockMutex(&saveMutex);
 	}
@@ -1085,7 +1085,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}
-		fileWrite(src, *savFile, dst, len, sdRead ? false : true, -1);
+		fileWrite(src, *savFile, dst, len, !sdRead, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -1116,7 +1116,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}
-		fileWrite(src, *savFile, dst, len, sdRead ? false : true, -1);
+		fileWrite(src, *savFile, dst, len, !sdRead, -1);
   		unlockMutex(&saveMutex);
 	}
 	return true;
@@ -1256,7 +1256,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
-		fileRead(dst, *romFile, src, len, sdRead ? false : true, 0);
+		fileRead(dst, *romFile, src, len, !sdRead, 0);
 		//ndmaUsed = true;
 		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
 	}
