@@ -1572,9 +1572,13 @@ int arm7_main(void) {
 
 		if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+			dbg_printf("AP-fix found\n");
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
-			applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM);
-			dbg_printf("AP-fix found and applied\n");
+			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM)) {
+				dbg_printf("AP-fix applied\n");
+			} else {
+				dbg_printf("Failed to apply AP-fix\n");
+			}
 		}
 	}
 

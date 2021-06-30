@@ -12,7 +12,11 @@
 extern bool extendedMemory;
 extern bool dsDebugRam;
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only) {
+	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
+		return false;
+	}
+
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
@@ -51,4 +55,5 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only) {
 			break;
 		}
 	}
+	return true;
 }

@@ -12,7 +12,11 @@
 extern u32 consoleModel;
 extern bool extendedMemoryConfirmed;
 
-void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
+	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
+		return false;
+	}
+
 	const char* romTid = getRomTid(ndsHeader);
 	bool doLow = (strncmp(romTid, "BKW", 3) == 0 || strncmp(romTid, "VKG", 3) == 0);
 
@@ -63,4 +67,5 @@ void applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			break;
 		}
 	}
+	return true;
 }
