@@ -207,7 +207,7 @@ int discBytePerClus;
 #endif
 
 enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32}
-#ifndef B4DS
+#ifdef TWOCARD
 discFileSystem[2];
 #else
 discFileSystem;
