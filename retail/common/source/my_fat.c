@@ -194,7 +194,6 @@ int discData[2];
 int discBytePerSec[2];
 int discSecPerClus[2];
 int discBytePerClus[2];
-int discFileSystem[2];
 #else
 int discRootDir;
 int discRootDirClus;
@@ -205,13 +204,14 @@ int discData;
 int discBytePerSec;
 int discSecPerClus;
 int discBytePerClus;
-int discFileSystem;
 #endif
 
-#define FS_UNKNOWN 0
-#define FS_FAT12 1
-#define FS_FAT16 2
-#define FS_FAT32 3
+enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32}
+#ifndef B4DS
+discFileSystem[2];
+#else
+discFileSystem;
+#endif
 
 // Global sector buffer to save on stack space
 unsigned char globalBuffer[BYTES_PER_SECTOR];
