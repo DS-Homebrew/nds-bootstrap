@@ -40,7 +40,7 @@ CFLAGS	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM7 -DTWLSDK
+CFLAGS	+=	$(INCLUDE) -DARM7 -DTWLSDK -DTWOCARD
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)

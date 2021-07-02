@@ -1050,7 +1050,7 @@ int arm7_main(void) {
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", !sdRead, 0));
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", 0));
 	}
 
 	if (gameOnFlashcard) sdRead = false;

@@ -407,7 +407,7 @@ void continueCardReadDmaArm9() {
 
         		buffer = getCacheAddress(slot);
 
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
                 //dmaReadOnArm7 = true;
 
@@ -557,7 +557,7 @@ void cardSetDma(void) {
 
 			buffer = getCacheAddress(slot);
 
-			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 			//dmaReadOnArm7 = true;
 
@@ -616,7 +616,7 @@ void cardSetDma(void) {}
 static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, *romFile, src, len, true, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -650,7 +650,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				buffer = getCacheAddress(slot);
 
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 				//updateDescriptor(slot, sector);	
 	
@@ -844,11 +844,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		#ifdef DLDI
-		if (!FAT_InitFiles(false, true, 0))
-		#else
-		if (!FAT_InitFiles(false, false, 0))
-		#endif
+		if (!FAT_InitFiles(false, 0))
 		{
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
@@ -928,7 +924,7 @@ void cardPullOut(void) {
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileRead(memory, *savFile, flash, len, true, -1);
+		fileRead(memory, *savFile, flash, len, -1);
 #endif
 		return true;
 	}
@@ -949,7 +945,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileWrite(memory, *savFile, flash, len, true, -1);
+		fileWrite(memory, *savFile, flash, len, -1);
 #endif
 		return true;
 	}

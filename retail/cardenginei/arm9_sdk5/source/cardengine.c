@@ -403,7 +403,7 @@ void continueCardReadDmaArm9() {
 
         		buffer = getCacheAddress(slot);
 
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
                 //dmaReadOnArm7 = true;
 
@@ -564,7 +564,7 @@ void cardSetDma (u32 * params) {
 
 			buffer = getCacheAddress(slot);
 
-			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 			//dmaReadOnArm7 = true;
 
@@ -635,7 +635,7 @@ void cardSetDma (u32 * params) {
 static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, *romFile, src, len, true, 0);
+	fileRead((char*)dst, *romFile, src, len, 0);
 #else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -669,7 +669,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				buffer = getCacheAddress(slot);
 
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, false, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
 				//updateDescriptor(slot, sector);	
 	
@@ -816,11 +816,7 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	if (!flagsSet) {
 		//setExceptionHandler2();
 		//#ifdef DLDI
-		#ifdef DLDI
-		if (!FAT_InitFiles(false, true, 0))
-		#else
-		if (!FAT_InitFiles(false, false, 0))
-		#endif
+		if (!FAT_InitFiles(false, 0))
 		{
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
@@ -880,7 +876,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef TWLSDK
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileRead(memory, *savFile, flash, len, true, -1);
+		fileRead(memory, *savFile, flash, len, -1);
 #endif
 		return true;
 	}
@@ -903,7 +899,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef TWLSDK
 	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileWrite(memory, *savFile, flash, len, true, -1);
+		fileWrite(memory, *savFile, flash, len, -1);
 #endif
 		return true;
 	}
