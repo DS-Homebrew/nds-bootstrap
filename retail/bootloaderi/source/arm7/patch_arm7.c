@@ -68,6 +68,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	 || strncmp(romTid, "CBB", 3) == 0		// Big Bang Mini
 	 || strncmp(romTid, "AFF", 3) == 0		// Final Fantasy III
 	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
+	 || strncmp(romTid, "YLU", 3) == 0		// Last Window: The Secret of Cape West
 	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
 	 || (strncmp(romTid, "AH9", 3) == 0 && asyncCardRead)		// Tony Hawk's American Sk8Land
 	) {
