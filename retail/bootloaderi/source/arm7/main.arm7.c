@@ -1072,6 +1072,10 @@ int arm7_main(void) {
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
+		clearBuffer = 0;
+		fileWrite((char*)&clearBuffer, srParamsFile, 0x4, 0x4, !sdRead, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0x8, 0x4, !sdRead, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0xC, 0x4, !sdRead, -1);
 	}
 
 	// ROM file
