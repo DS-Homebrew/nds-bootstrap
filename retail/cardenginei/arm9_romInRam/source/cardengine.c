@@ -515,7 +515,7 @@ void reset(u32 param) {
 		waitFrames(5);	// Wait for DSi screens to stabilize
 	}
 	enterCriticalSection();
-	*(u32*)RESET_PARAM = param;
+	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }

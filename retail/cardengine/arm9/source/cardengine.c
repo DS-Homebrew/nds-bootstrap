@@ -312,7 +312,8 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 void reset(u32 param) {
 	setDeviceOwner();
-	fileWrite((char*)&param, srParamsFile, 0, 4);
+	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
+	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }
