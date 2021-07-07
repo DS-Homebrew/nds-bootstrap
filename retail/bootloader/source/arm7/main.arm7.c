@@ -100,6 +100,7 @@ static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 
 static u32 softResetParams[4] = {0};
+u32 srlAddr = 0;
 
 u16 s2FlashcardId = 0;
 
@@ -251,7 +252,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp));
+	srlAddr = softResetParams[3];
+	fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
+	if (dsiHeaderTemp->ndshdr.arm9romOffset < 0x02000000 || dsiHeaderTemp->ndshdr.arm9romOffset > 0x02004000) {
+		// Invalid SRL
+		srlAddr = 0;
+		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
+	}
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -273,7 +280,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	}
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
 	if (dsiHeaderTemp->ndshdr.arm7binarySize != 0x22B40
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x22BCC
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2352C
@@ -295,7 +302,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x27618
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2762C
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x29CEC) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 	}
 }
 
@@ -616,6 +623,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
+  if (srlAddr == 0) {
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -707,6 +715,7 @@ int arm7_main(void) {
 			dbg_printf("Failed to apply AP-fix\n");
 		}
 	}
+  }
 
 	arm9_boostVram = boostVram;
 

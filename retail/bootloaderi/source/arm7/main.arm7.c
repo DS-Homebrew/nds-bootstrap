@@ -130,6 +130,7 @@ u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
 
 static u32 softResetParams[4] = {0};
+u32 srlAddr = 0;
 
 u32 newArm7binarySize = 0;
 
@@ -560,7 +561,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	fileRead((char*)dsiHeaderTemp, file, 0, sizeof(*dsiHeaderTemp), !sdRead, 0);
+	srlAddr = softResetParams[3];
+	fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+	if (dsiHeaderTemp->ndshdr.arm9romOffset < 0x02000000 || dsiHeaderTemp->ndshdr.arm9romOffset > 0x02004000) {
+		// Invalid SRL
+		srlAddr = 0;
+		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+	}
 
 	// Fix Pokemon games needing header data.
 	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
@@ -597,9 +604,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
     
 
 	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
 	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
 	}
 }
 
@@ -1476,6 +1483,7 @@ int arm7_main(void) {
 
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
 
+	  if (srlAddr == 0) {
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
@@ -1584,6 +1592,7 @@ int arm7_main(void) {
 				dbg_printf("Failed to apply AP-fix\n");
 			}
 		}
+	  }
 	}
 
 	arm9_boostVram = boostVram;
