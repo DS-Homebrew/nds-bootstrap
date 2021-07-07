@@ -248,6 +248,7 @@ u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
+	extern u32 srlAddr;
 	u32* moduleParamsOffset = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0) {
@@ -255,7 +256,7 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	} else {
 		moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 	}
-	if (!moduleParamsOffset) {
+	if (srlAddr > 0 || !moduleParamsOffset) {
 		moduleParamsOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
 			moduleParamsSignature, 2
