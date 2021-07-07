@@ -129,7 +129,7 @@ static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
 u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
 
-static u32 softResetParams = 0;
+static u32 softResetParams[4] = {0};
 
 u32 newArm7binarySize = 0;
 
@@ -1000,8 +1000,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)0x027FFC38 = *(u32*)0x0D0000AC;
 	}*/
 
-	if (softResetParams != 0xFFFFFFFF) {
-		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
+	if (softResetParams[0] != 0xFFFFFFFF) {
+		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
+		resetParamLoc[0] = softResetParams[0];
+		resetParamLoc[1] = softResetParams[1];
+		resetParamLoc[2] = softResetParams[2];
+		resetParamLoc[3] = softResetParams[3];
 	}
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
@@ -1056,8 +1060,8 @@ int arm7_main(void) {
 	if (gameOnFlashcard) sdRead = false;
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4, !sdRead, -1);
-	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10, !sdRead, -1);
+	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);

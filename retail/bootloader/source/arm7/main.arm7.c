@@ -99,7 +99,7 @@ extern u8 donorSdkVer;
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 
-static u32 softResetParams = 0;
+static u32 softResetParams[4] = {0};
 
 u16 s2FlashcardId = 0;
 
@@ -470,8 +470,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
-	if (softResetParams != 0xFFFFFFFF) {
-		*(u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM) = softResetParams;
+	if (softResetParams[0] != 0xFFFFFFFF) {
+		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
+		resetParamLoc[0] = softResetParams[0];
+		resetParamLoc[1] = softResetParams[1];
+		resetParamLoc[2] = softResetParams[2];
+		resetParamLoc[3] = softResetParams[3];
 	}
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
@@ -512,8 +516,8 @@ int arm7_main(void) {
 	s2FlashcardId = *(u16*)(0x020000C0);
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&softResetParams, srParamsFile, 0, 0x4);
-	bool softResetParamsFound = (softResetParams != 0xFFFFFFFF);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10);
+	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4);
