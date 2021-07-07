@@ -850,7 +850,7 @@ void myIrqHandlerVBlank(void) {
 		int oldIME = enterCriticalSection();
 		driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
-		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x4, !sdRead, -1);
+		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2 && *(u32*)(ce7+0xA900) == 0) {
 			unlaunchSetFilename(false);
 		}
