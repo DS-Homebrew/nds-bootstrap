@@ -254,7 +254,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
 	srlAddr = softResetParams[3];
 	fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
-	if ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000) {
+	if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
 		// Invalid SRL
 		srlAddr = 0;
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
