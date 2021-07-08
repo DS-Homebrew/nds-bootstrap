@@ -556,11 +556,6 @@ int arm7_main(void) {
 	// Sav file
 	aFile savFile = getFileFromCluster(saveFileCluster);
 	
-	// File containing cached patch offsets
-	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
-
 	int errorCode;
 
 	tDSiHeader dsiHeaderTemp;
@@ -570,6 +565,13 @@ int arm7_main(void) {
 
 	loadBinary_ARM7(&dsiHeaderTemp, romFile);
 	
+	// File containing cached patch offsets
+	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
+	if (srlAddr == 0) {
+		fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	}
+	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+
 	nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
@@ -627,7 +629,6 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-  if (srlAddr == 0) {
 	patchBinary(ndsHeader);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -705,7 +706,7 @@ int arm7_main(void) {
 		errorOutput();
 	}*/
 
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+	if (srlAddr == 0 && (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged)) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
@@ -719,7 +720,6 @@ int arm7_main(void) {
 			dbg_printf("Failed to apply AP-fix\n");
 		}
 	}
-  }
 
 	arm9_boostVram = boostVram;
 
