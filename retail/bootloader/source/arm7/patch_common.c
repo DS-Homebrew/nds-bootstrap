@@ -408,10 +408,11 @@ u32 patchCardNds(
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
+	extern u32 srlAddr;
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
-		pleaseWaitOutput();
+		if (srlAddr == 0) pleaseWaitOutput();
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
 		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS
 		patchOffsetCache.heapPointer2Offset = 0;
