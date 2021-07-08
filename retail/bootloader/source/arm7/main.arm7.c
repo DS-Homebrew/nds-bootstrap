@@ -709,7 +709,7 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
-	if (apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
+	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
