@@ -570,18 +570,17 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	}
 
 	// Fix Pokemon games needing header data.
-	//fileRead((char*)0x027FF000, file, 0, 0x170, 3);
-	//tonccpy((char*)0x027FF000, &dsiHeaderTemp.ndshdr, sizeof(dsiHeaderTemp.ndshdr));
 	tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
 	*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
 
-	const char* romTid = getRomTid(&dsiHeaderTemp->ndshdr);
+	char baseTid[5] = {0};
+	fileRead((char*)&baseTid, file, 0xC, 4, !sdRead, 0);
 	if (
-		strncmp(romTid, "ADA", 3) == 0    // Diamond
-		|| strncmp(romTid, "APA", 3) == 0 // Pearl
-		|| strncmp(romTid, "CPU", 3) == 0 // Platinum
-		|| strncmp(romTid, "IPK", 3) == 0 // HG
-		|| strncmp(romTid, "IPG", 3) == 0 // SS
+		strncmp(baseTid, "ADA", 3) == 0    // Diamond
+		|| strncmp(baseTid, "APA", 3) == 0 // Pearl
+		|| strncmp(baseTid, "CPU", 3) == 0 // Platinum
+		|| strncmp(baseTid, "IPK", 3) == 0 // HG
+		|| strncmp(baseTid, "IPG", 3) == 0 // SS
 	) {
 		// Make the Pokemon game code ADAJ.
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
