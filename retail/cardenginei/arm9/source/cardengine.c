@@ -1048,6 +1048,7 @@ void reset(u32 param) {
 	}
 	enterCriticalSection();
 	*(u32*)RESET_PARAM = param;
+	cacheFlush();
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }

@@ -516,6 +516,7 @@ void reset(u32 param) {
 	}
 	enterCriticalSection();
 	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
+	cacheFlush();
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }
