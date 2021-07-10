@@ -355,16 +355,22 @@ int hookNdsRetailArm7(
 		}*/
 	}
 
+	u32 cheatEngineOffset = (u32)ce7-0x8400;
+	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+	if (isDSiWare) {
+		cheatEngineOffset = 0x2FFC000;
+		cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+		*(u32*)((u32)cheatDataOffset) = 0x22FFFCE4;
+		cheatDataOffset += 4;
+		*(u32*)((u32)cheatDataOffset) = language;
+		cheatDataOffset += 4;
+		*(cheatDataOffset + 3) = 0xCF;
+	}
+
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (isDSiWare ? 0x1C00 : 0x8000)) {
-		u32 cheatEngineOffset = (u32)ce7-0x8400;
-		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
-		if (isDSiWare) {
-			cheatEngineOffset = 0x2FFC000;
-			cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
-		}
+	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (isDSiWare ? 0x1BF0 : 0x8000)) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, !sdRead, 0);
 			cheatDataOffset += apPatchSize;
