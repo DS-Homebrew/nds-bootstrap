@@ -499,10 +499,12 @@ void myIrqHandlerIPC(void) {
 
 	if (sharedAddr[4] == 0x57534352) {
 		enterCriticalSection();
-		// Make screens white
-		SetBrightness(0, 31);
-		SetBrightness(1, 31);
-
+		if (ce9->consoleModel < 2) {
+			// Make screens white
+			SetBrightness(0, 31);
+			SetBrightness(1, 31);
+		}
+		cacheFlush();
 		while (1);
 	}
 }
