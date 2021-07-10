@@ -287,26 +287,6 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }
 
-void patchUserDataAddr(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5008000) return;
-
-	u32* userDataAddrOffset = patchOffsetCache.userDataAddrOffset;
-	if (!patchOffsetCache.userDataAddrOffset) {
-		userDataAddrOffset = findUserDataAddrOffset(ndsHeader, moduleParams);
-		if (userDataAddrOffset) {
-			patchOffsetCache.userDataAddrOffset = userDataAddrOffset;
-		}
-	}
-	if (userDataAddrOffset) {
-		// Patch
-		*userDataAddrOffset = 0;
-	}
-
-    dbg_printf("userDataAddr location : ");
-    dbg_hexa((u32)userDataAddrOffset);
-    dbg_printf("\n\n");
-}
-
 /*static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return;
