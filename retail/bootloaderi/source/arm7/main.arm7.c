@@ -1565,9 +1565,11 @@ int arm7_main(void) {
 			dbg_printf("GBA ROM loaded\n");
 		}*/
 
-		
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
+				if (isSdk5(moduleParams)) {
+					tonccpy((u32*)0x02FFFA40, (u32*)UNPATCHED_FUNCTION_LOCATION, 0x40);
+				}
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
 				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 			}
