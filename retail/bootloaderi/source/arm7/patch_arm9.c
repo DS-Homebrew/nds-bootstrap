@@ -785,6 +785,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
 	}
 	if (mpuInitCacheOffset) {
+		unpatchedFuncs->mpuInitCacheOffset = mpuInitCacheOffset;
+		unpatchedFuncs->mpuInitCacheOld = *mpuInitCacheOffset;
 		*mpuInitCacheOffset = 0xE3A00046;
 		mpuInitCachePatched = true;
 		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
@@ -900,7 +902,9 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	if (!mpuInitCachePatched) {
 		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
 	}
-	if (mpuInitCacheOffset) {
+	if (mpuInitCacheOffset && !mpuInitCachePatched) {
+		unpatchedFuncs->mpuInitCacheOffset = mpuInitCacheOffset;
+		unpatchedFuncs->mpuInitCacheOld = *mpuInitCacheOffset;
 		*mpuInitCacheOffset = 0xE3A00046;
 		mpuInitCachePatched = true;
 		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;

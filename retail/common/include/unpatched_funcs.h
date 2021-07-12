@@ -9,7 +9,9 @@ typedef struct unpatchedFunctions {
     module_params_t* moduleParams;
 	u32* mpuDataOffset;
 	u32* mpuDataOffset2;
+	u32* mpuInitCacheOffset;
 	u32 mpuInitRegionOldData;
+	u32 mpuInitCacheOld;
 	int mpuAccessOffset;
     u32 mpuOldInstrAccess;
     u32 mpuOldDataAccess;

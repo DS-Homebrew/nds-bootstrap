@@ -1029,6 +1029,10 @@ u32 myIrqEnable(u32 irq) {
 		}
 	}
 
+	if (unpatchedFuncs->mpuInitCacheOffset) {
+		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
+	}
+
 	if (unpatchedFuncs->mpuDataOffset2) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
 	}
