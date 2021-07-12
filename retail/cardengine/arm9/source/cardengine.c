@@ -338,11 +338,13 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset) {
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
-		if (unpatchedFuncs->mpuOldInstrAccess) {
-			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
-		}
-		if (unpatchedFuncs->mpuOldDataAccess) {
-			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+		if (unpatchedFuncs->mpuAccessOffset) {
+			if (unpatchedFuncs->mpuOldInstrAccess) {
+				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+			}
+			if (unpatchedFuncs->mpuOldDataAccess) {
+				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+			}
 		}
 	}
 
