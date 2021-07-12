@@ -1102,7 +1102,8 @@ int arm7_main(void) {
 	}*/
 
 	if (gameOnFlashcard || !isDSiWare) {
-		u32 currentFatTableVersion = 2;
+		u32 currentFatTableVersion = 3;
+		extern u32 currentClusterCacheSize;
 
 		// FAT table file
 		aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
@@ -1164,13 +1165,15 @@ int arm7_main(void) {
 			*(u32*)(0x2670044) = romSize;
 			*(u32*)(0x2670048) = saveFileCluster;
 			*(u32*)(0x267004C) = saveSize;
+			*(u32*)(0x2670050) = currentClusterCacheSize;
 			*(u32*)(0x2670100) = currentFatTableVersion;
 			if (cacheFatTable) {
 				fileWrite((char*)0x2670000, fatTableFile, 0, 0x200, !sdRead, -1);
-				fileWrite((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, !sdRead, -1);
+				fileWrite((char*)0x2700000, fatTableFile, 0x200, currentClusterCacheSize, !sdRead, -1);
 			}
 		} else {
-			fileRead((char*)0x2700000, fatTableFile, 0x200, 0x7FF80, !sdRead, -1);
+			currentClusterCacheSize = *(u32*)(0x2670050);
+			fileRead((char*)0x2700000, fatTableFile, 0x200, currentClusterCacheSize, !sdRead, -1);
 		}
 
 		toncset((u32*)0x02670000, 0, 0x400);

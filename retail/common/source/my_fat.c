@@ -221,6 +221,7 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 
 #ifndef B4DS
 static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32 currentClusterCacheSize = 0;
 #else
 u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 u32 clusterCache = CLUSTER_CACHE;
@@ -1475,6 +1476,9 @@ void buildFatTableCache (aFile * file)
 		file->currentCluster = FAT_NextCluster (file->currentCluster);
 #endif
 		lastClusterCacheUsed++;
+#ifndef B4DS
+		currentClusterCacheSize += 4;
+#endif
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
