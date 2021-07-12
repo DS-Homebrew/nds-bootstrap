@@ -44,7 +44,11 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 					rombyte = (void*)CACHE_ADRESS_START_low;
 				}
 			}
-			rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
+			if (ROMinRAM) {
+				rombyte -= (ndsHeader->arm9binarySize-0x4000);
+			} else {
+				rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
+			}
 		}
 		ipson += 3;
 		if (ipsbyte[ipson] * 256 + ipsbyte[ipson + 1] == 0) {

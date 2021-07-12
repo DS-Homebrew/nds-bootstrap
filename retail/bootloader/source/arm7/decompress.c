@@ -16,6 +16,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include "nds_header.h"
 #include "module_params.h"
+#include "unpatched_funcs.h"
 #include "decompress.h"
 #include "debug_file.h"
 #include "locations.h"
@@ -138,6 +139,7 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {
 	const char* romTid = getRomTid(ndsHeader);
+	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 	if (
 		moduleParams->compressed_static_end
@@ -146,13 +148,15 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		|| strcmp(romTid, "YQUP") == 0 // Chrono Trigger (Europe)
 	) {
 		// Compressed
-		dbg_printf("This rom is compressed\n");
+		dbg_printf("arm9 is compressed\n");
+		unpatchedFuncs->compressed_static_end = moduleParams->compressed_static_end;
+		unpatchedFuncs->moduleParams = moduleParams;
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
 		moduleParams->compressed_static_end = 0;
 	} else {
 		// Not compressed
-		dbg_printf("This rom is not compressed\n");
+		dbg_printf("arm9 is not compressed\n");
 		iUncompressedSize = ndsHeader->arm9binarySize;
 	}
 }

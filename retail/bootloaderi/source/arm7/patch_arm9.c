@@ -6,6 +6,7 @@
 #include "find.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "tonccpy.h"
 
@@ -732,6 +733,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCacheChanged = true;
 	}
 
+	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
 	// Find the mpu init
 	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset;
 	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset;
@@ -759,13 +762,18 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				break;
 		}
 
+		unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
 		*mpuDataOffset = mpuInitRegionNewData;
 
 		if (mpuAccessOffset) {
+			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
+			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
 			if (mpuNewInstrAccess) {
+				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
 			}
 			if (mpuNewDataAccess) {
+				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			}
 		}
@@ -834,6 +842,8 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		return;
 	}
 
+	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
 	// Find the mpu init
 	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset2;
 	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset2;
@@ -865,6 +875,8 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		//}
 		} else {
 			//Original code made loading slow, so new code is used
+			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+			unpatchedFuncs->mpuOldDataAccess2 = *mpuDataOffset;
 			*mpuDataOffset = 0;
 		}
 

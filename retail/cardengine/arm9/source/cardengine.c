@@ -32,6 +32,7 @@
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+#include "unpatched_funcs.h"
 
 #define FEATURE_SLOT_GBA			0x00000010
 #define FEATURE_SLOT_NDS			0x00000020
@@ -51,6 +52,8 @@ extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
+static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
 extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
@@ -68,8 +71,8 @@ static aFile srParamsFile;
 
 static int cardReadCount = 0;
 
-static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
-	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + ce9->overlaysSize;
+static inline u32 getRomSizeNoArm9Bin(const tNDSHeader* ndsHeader) {
+	return ndsHeader->romSize - ndsHeader->arm7romOffset + ce9->overlaysSize;
 }
 
 static inline void setDeviceOwner(void) {
@@ -222,7 +225,8 @@ static void initialize(void) {
 		}
 
 		if (ce9->valueBits & ROMinRAM) {
-			fileRead((char*)ce9->romLocation+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset + ndsHeader->arm7binarySize, getRomSizeNoArmBins(ndsHeader));
+			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-0x4000);
+			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader));
 		}
 
 		initialized = true;
@@ -282,10 +286,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	if (ce9->valueBits & ROMinRAM) {
-		u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
-		if (src > ndsHeader->arm7romOffset) {
-			newSrc -= ndsHeader->arm7binarySize;
-		}
+		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 		tonccpy(dst, (u8*)newSrc, len);
 	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
@@ -328,6 +329,26 @@ u32 myIrqEnable(u32 irq) {
 
 	setDeviceOwner();
 	initialize();
+
+	if (unpatchedFuncs->compressed_static_end) {
+		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
+		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+	}
+
+	if (unpatchedFuncs->mpuDataOffset) {
+		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
+
+		if (unpatchedFuncs->mpuOldInstrAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+		}
+		if (unpatchedFuncs->mpuOldDataAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+		}
+	}
+
+	if (unpatchedFuncs->mpuDataOffset2) {
+		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
+	}
 
 	hookIPC_SYNC();
 

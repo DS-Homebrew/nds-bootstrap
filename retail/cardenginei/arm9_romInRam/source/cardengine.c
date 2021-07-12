@@ -33,6 +33,7 @@
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+#include "unpatched_funcs.h"
 
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
@@ -45,6 +46,8 @@
 //extern void user_exception(void);
 
 extern cardengineArm9* volatile ce9;
+
+static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
@@ -168,10 +171,7 @@ void cardSetDma(u32 * params) {
   		len2 -= len2 % 32;
   	}
 
-	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
-	if (src > ndsHeader->arm7romOffset) {
-		newSrc -= ndsHeader->arm7binarySize;
-	}
+	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
@@ -335,19 +335,13 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 	
 	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
-	u32 newSrc = (u32)(ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
-	if (src > ndsHeader->arm7romOffset) {
-		newSrc -= ndsHeader->arm7binarySize;
-	}
+	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
 	if (newSrc >= romEnd1st) {
 		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src;
-		if (src > ndsHeader->arm7romOffset) {
-			newSrc -= ndsHeader->arm7binarySize;
-		}
+		newSrc = (u32)(newSrc-0x8000)+src;
 	} else if (newSrc+len > romEnd1st) {
 		u32 oldLen = len;
 		for (int i = 0; i < oldLen; i++) {
@@ -367,10 +361,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	tonccpy(dst, (u8*)newSrc, len);
 	if (lenExt > 0) {
 		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-		newSrc = (u32)(newSrc-0x4000-ndsHeader->arm9binarySize)+src+len;
-		if (src > ndsHeader->arm7romOffset) {
-			newSrc -= ndsHeader->arm7binarySize;
-		}
+		newSrc = (u32)(newSrc-0x8000)+src+len;
 		tonccpy(dst+len, (u8*)newSrc, lenExt);
 	}
 
@@ -529,6 +520,26 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (unpatchedFuncs->compressed_static_end) {
+		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
+		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+	}
+
+	if (unpatchedFuncs->mpuDataOffset) {
+		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
+
+		if (unpatchedFuncs->mpuOldInstrAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+		}
+		if (unpatchedFuncs->mpuOldDataAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+		}
+	}
+
+	if (unpatchedFuncs->mpuDataOffset2) {
+		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
+	}
 
 	hookIPC_SYNC();
 

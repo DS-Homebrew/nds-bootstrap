@@ -490,8 +490,8 @@ static module_params_t* buildModuleParams(u32 donorSdkVer) {
 	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
 	u32* moduleParamsOffset = malloc(0x100);
 
-	//memset(moduleParamsOffset, 0, sizeof(module_params_t));
-	memset(moduleParamsOffset, 0, 0x100);
+	//toncset(moduleParamsOffset, 0, sizeof(module_params_t));
+	toncset(moduleParamsOffset, 0, 0x100);
 
 	module_params_t* moduleParams = (module_params_t*)(moduleParamsOffset - 7);
 
@@ -795,11 +795,10 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	if (extendedMemoryConfirmed) {
 		romLocation = (u32)ROM_LOCATION_EXT;
 	}
-	romLocation += overlaysSize;
 
-	u32 romOffset = ndsHeader->arm7romOffset + ndsHeader->arm7binarySize;
-	u32 romSize = getRomSizeNoArmBins(ndsHeader);
-	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000)-overlaysSize;
+	u32 romOffset = 0x8000;
+	u32 romSize = ndsHeader->romSize-0x8000;
+	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000)-0x8000;
 	if (romSize >= romSizeLimit) {
 		extern bool moreMemory;
 		moreMemory = true;
@@ -1566,9 +1565,7 @@ int arm7_main(void) {
 			dbg_printf("GBA ROM loaded\n");
 		}*/
 
-		if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
-			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
-		}
+		
 		if (ROMinRAM) {
 			if (extendedMemoryConfirmed) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
@@ -1578,7 +1575,10 @@ int arm7_main(void) {
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
-		} else if (!gameOnFlashcard && (romRead_LED==1 || dmaRomRead_LED==1)) {
+		} else if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
+			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
+		}
+		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}

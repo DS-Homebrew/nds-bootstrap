@@ -26,6 +26,7 @@
 #include <nds/ipc.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
+#include "module_params.h"
 #include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -33,6 +34,7 @@
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
+#include "unpatched_funcs.h"
 
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
@@ -72,6 +74,8 @@
 extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+
+static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
@@ -1062,6 +1066,26 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (unpatchedFuncs->compressed_static_end) {
+		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
+		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+	}
+
+	if (unpatchedFuncs->mpuDataOffset) {
+		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
+
+		if (unpatchedFuncs->mpuOldInstrAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+		}
+		if (unpatchedFuncs->mpuOldDataAccess) {
+			unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+		}
+	}
+
+	if (unpatchedFuncs->mpuDataOffset2) {
+		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
+	}
 
 	hookIPC_SYNC();
 

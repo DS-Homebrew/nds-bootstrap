@@ -5,6 +5,7 @@
 #include "find.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "tonccpy.h"
 
@@ -310,6 +311,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCacheChanged = true;
 	}
 
+	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
 	// Find the mpu init
 	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset;
 	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset;
@@ -331,19 +334,24 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
 				break;
 			case 3:
-				mpuInitRegionNewData = PAGE_8M | 0x03000000 | 1;
+				mpuInitRegionNewData = PAGE_32M | 0x08000000 | 1;
 				mpuNewInstrAccess    = 0x5111111;
 				mpuAccessOffset      = 5;
 				break;
 		}
 
+		unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
 		*mpuDataOffset = mpuInitRegionNewData;
 
 		if (mpuAccessOffset) {
+			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
+			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
 			if (mpuNewInstrAccess) {
+				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
 			}
 			if (mpuNewDataAccess) {
+				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			}
 		}
@@ -412,6 +420,8 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		return;
 	}
 
+	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
 	// Find the mpu init
 	u32* mpuStartOffset = patchOffsetCache.mpuStartOffset2;
 	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset2;
@@ -437,6 +447,8 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		if (mpuNewDataAccess) {
 			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 		}*/
+		unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+		unpatchedFuncs->mpuOldDataAccess2 = *mpuDataOffset;
 		*mpuDataOffset = 0;
 	}
 

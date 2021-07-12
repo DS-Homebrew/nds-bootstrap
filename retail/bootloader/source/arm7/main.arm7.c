@@ -438,11 +438,14 @@ static void startBinary_ARM7(void) {
 	arm7code();
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
 		u32 overlaysLocation = (extendedMemory2&&!dsDebugRam ? 0x0C800000 : romLocation);
+		if (ROMinRAM) {
+			overlaysLocation += (ndsHeader->arm9binarySize-0x4000);
+		}
 		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
 
 		if (!isSdk5(moduleParams)) {
@@ -680,7 +683,7 @@ int arm7_main(void) {
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
-		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
+		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile, ROMinRAM);
 	}
 
 	errorCode = hookNdsRetailArm9(
@@ -713,7 +716,7 @@ int arm7_main(void) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9))) {
+		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");
