@@ -234,9 +234,9 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
+/*static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
-}
+}*/
 
 // SDK 5
 /*static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
@@ -334,7 +334,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && getRomSizeNoArmBins(ndsHeader) < romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->romSize-0x8000) < romSizeLimit);
 		dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 	  }
 	return res;
