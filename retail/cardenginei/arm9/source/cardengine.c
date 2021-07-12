@@ -1093,6 +1093,8 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
 	}
 
+	toncset((char*)unpatchedFuncs, 0, 0x40);
+
 	hookIPC_SYNC();
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		

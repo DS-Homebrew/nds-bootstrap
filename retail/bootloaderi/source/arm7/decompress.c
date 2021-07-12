@@ -268,6 +268,8 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		if (ltdModuleParams->compressed_static_end) {
 			// Compressed
 			dbg_printf("arm9i is compressed\n");
+			unpatchedFuncs->ltd_compressed_static_end = ltdModuleParams->compressed_static_end;
+			unpatchedFuncs->ltdModuleParams = ltdModuleParams;
 			u32 arm9ioffset = *(u32*)0x02FFE1C8;
 			iUncompressedSizei = decompressIBinary((unsigned char*)arm9ioffset, *(unsigned int*)0x02FFE1CC);
 			ltdModuleParams->compressed_static_end = 0;

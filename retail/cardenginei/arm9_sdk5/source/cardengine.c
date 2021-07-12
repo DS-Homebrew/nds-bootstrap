@@ -64,7 +64,7 @@ extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
-static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
@@ -1018,6 +1018,11 @@ u32 myIrqEnable(u32 irq) {
 		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
 	}
 
+	if (unpatchedFuncs->ltd_compressed_static_end) {
+		ltd_module_params_t* ltdModuleParams = unpatchedFuncs->ltdModuleParams;
+		ltdModuleParams->compressed_static_end = unpatchedFuncs->ltd_compressed_static_end;
+	}
+
 	if (unpatchedFuncs->mpuDataOffset) {
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
@@ -1038,6 +1043,8 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset2) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
 	}
+
+	toncset((char*)unpatchedFuncs, 0, 0x40);
 
 	hookIPC_SYNC();
 

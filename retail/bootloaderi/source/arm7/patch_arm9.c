@@ -865,13 +865,18 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 			u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
 			int mpuAccessOffset      = 3;
 
+			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
+			unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
 			*mpuDataOffset = mpuInitRegionNewData;
 
 		//if (mpuAccessOffset) {
+			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
 			//if (mpuNewInstrAccess) {
+				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
 			//}
 			//if (mpuNewDataAccess) {
+				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			//}
 		//}

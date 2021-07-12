@@ -521,9 +521,18 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
+	if (ce9->valueBits & isSdk5) {
+		unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+	}
+
 	if (unpatchedFuncs->compressed_static_end) {
 		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
 		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+	}
+
+	if (unpatchedFuncs->ltd_compressed_static_end) {
+		ltd_module_params_t* ltdModuleParams = unpatchedFuncs->ltdModuleParams;
+		ltdModuleParams->compressed_static_end = unpatchedFuncs->ltd_compressed_static_end;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {
@@ -546,6 +555,8 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset2) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
 	}
+
+	toncset((char*)unpatchedFuncs, 0, 0x40);
 
 	hookIPC_SYNC();
 

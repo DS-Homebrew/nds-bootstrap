@@ -40,6 +40,7 @@
 #define INGAME_MENU_LOCATION                         0x026F6000
 #define INGAME_MENU_LOCATION_B4DS                    0x023E6000
 #define UNPATCHED_FUNCTION_LOCATION                  0x027FFA40
+#define UNPATCHED_FUNCTION_LOCATION_SDK5             0x02FFFA40
 
 #define BLOWFISH_LOCATION_B4DS                       0x023ECE00
 #define BLOWFISH_LOCATION                            0x027B4C00
