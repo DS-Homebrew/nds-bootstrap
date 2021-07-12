@@ -340,11 +340,11 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				break;
 		}
 
+		unpatchedFuncs->mpuDataOffset = mpuDataOffset;
 		unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
 		*mpuDataOffset = mpuInitRegionNewData;
 
 		if (mpuAccessOffset) {
-			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
 			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
 			if (mpuNewInstrAccess) {
 				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
