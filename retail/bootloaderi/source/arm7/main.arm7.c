@@ -651,6 +651,12 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		extendedMemoryConfirmed = res;
 	  }
 	}
+	if ((strncmp(romTid, "HND", 3) == 0)
+	|| (strncmp(romTid, "HNE", 3) == 0))
+	{
+		extendedMemoryConfirmed = true;
+		return extendedMemoryConfirmed;
+	}
 	return res;
 }
 
