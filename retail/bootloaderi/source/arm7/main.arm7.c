@@ -640,14 +640,14 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader)+ioverlaysSize : (ndsHeader->romSize-0x8000)) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000) < 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000) < 0x01800000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && (ndsHeader->romSize-0x8000) < 0x00800000));
+		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader)+ioverlaysSize : (ndsHeader->romSize-0x8000)+0x88) < 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < 0x01000000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && (ndsHeader->romSize-0x8000)+0x88 < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((consoleModel>0 && (ndsHeader->romSize-0x8000) < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
-			|| (consoleModel==0 && (ndsHeader->romSize-0x8000) < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
+		res = ((consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (consoleModel==0 && (ndsHeader->romSize-0x8000)+0x88 < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
 	  }
 	}
@@ -803,7 +803,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 
 	u32 romOffset = 0x8000;
-	u32 romSize = ndsHeader->romSize-0x8000;
+	u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (romSize >= romSizeLimit) {
 		extern bool moreMemory;

@@ -893,16 +893,6 @@ int cardRead(u32* cacheStruct) {
 
 	//readCount++;
 
-	if (src == 0) {
-		// If ROM read location is 0, do not proceed.
-		return 0;
-	}
-
-	// Fix reads below 0x8000
-	if (src <= 0x8000){
-		src = 0x8000 + (src & 0x1FF);
-	}
-
 	dmaCode = false;
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {

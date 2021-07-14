@@ -320,16 +320,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	//readCount++;
 
-	if (src == 0) {
-		// If ROM read location is 0, do not proceed.
-		return 0;
-	}
-
-	// Fix reads below 0x8000
-	if (src <= 0x8000){
-		src = 0x8000 + (src & 0x1FF);
-	}
-
 	if ((ce9->valueBits & extendedMemory) && dst >= 0x02400000 && dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}

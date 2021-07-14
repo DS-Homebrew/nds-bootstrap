@@ -226,7 +226,7 @@ static void initialize(void) {
 
 		if (ce9->valueBits & ROMinRAM) {
 			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-0x4000);
-			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader));
+			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
 		}
 
 		initialized = true;
@@ -279,11 +279,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-
-	// Fix reads below 0x8000
-	if (src <= 0x8000){
-		src = 0x8000 + (src & 0x1FF);
-	}
 
 	if (ce9->valueBits & ROMinRAM) {
 		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
@@ -355,6 +350,8 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset2) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
 	}
+
+	toncset((char*)unpatchedFuncs, 0, 0x40);
 
 	hookIPC_SYNC();
 

@@ -334,7 +334,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->romSize-0x8000) < romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->romSize-0x8000)+0x88 < romSizeLimit);
 		dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 	  }
 	return res;
