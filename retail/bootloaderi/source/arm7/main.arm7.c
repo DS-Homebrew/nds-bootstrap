@@ -1341,7 +1341,8 @@ int arm7_main(void) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
 	} else {
-		if (strncmp(getRomTid(ndsHeader), "UBR", 3) == 0) {
+		const char* romTid = getRomTid(ndsHeader);
+		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
 			*(u8*)0x024000B2 = 0;
 			*(u8*)0x024000B3 = 0;
@@ -1392,7 +1393,6 @@ int arm7_main(void) {
 			}
 		}
 
-		const char* romTid = getRomTid(ndsHeader);
 		if (!dsiModeConfirmed) {
 			if (
 				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
