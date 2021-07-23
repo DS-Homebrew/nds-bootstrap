@@ -376,13 +376,13 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
     // Pokemon HeartGold & SoulSilver
-	if (strcmp(romTid, "IPKJ") == 0 || strcmp(romTid, "IPGJ") == 0) {
+	/*if (strcmp(romTid, "IPKJ") == 0 || strcmp(romTid, "IPGJ") == 0) {
         *(u32*)0x20DD9E4 = 0xE1A00000; //nop
 	} else if (strcmp(romTid, "IPKK") == 0 || strcmp(romTid, "IPGK") == 0) {
         *(u32*)0x20DE860 = 0xE1A00000; //nop
 	} else if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
         *(u32*)0x20DE16C = 0xE1A00000; //nop
-	}
+	}*/
 
     // Golden Sun
     /*if (strcmp(romTid, "BO5E") == 0) {
