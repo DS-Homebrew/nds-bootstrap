@@ -44,6 +44,7 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
+#define cardReadFix BIT(8)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -894,6 +895,11 @@ int cardRead(u32* cacheStruct) {
 	//readCount++;
 
 	dmaCode = false;
+
+	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
+		// Fix reads below 0x8000
+		src = 0x8000 + (src & 0x1FF);
+	}
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(cardStruct, cacheStruct, dst, src, len);

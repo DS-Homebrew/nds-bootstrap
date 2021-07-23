@@ -18,6 +18,7 @@
 #define b_isSdk5 BIT(5)
 #define b_overlaysInRam BIT(6)
 #define b_cacheFlushFlag BIT(7)
+#define b_cardReadFix BIT(8)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -218,6 +219,10 @@ int hookNdsRetailArm9(
 
 		if(strncmp(romTid, "CLJ", 3) == 0 && dsiModeConfirmed) {
 			ce9->valueBits |= b_cacheFlushFlag;
+		}
+
+		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
+			ce9->valueBits |= b_cardReadFix;
 		}
 	}
 

@@ -44,6 +44,7 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
+#define cardReadFix BIT(8)
 
 #include "tonccpy.h"
 #include "my_fat.h"
@@ -279,6 +280,11 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+
+	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
+		// Fix reads below 0x8000
+		src = 0x8000 + (src & 0x1FF);
+	}
 
 	if (ce9->valueBits & ROMinRAM) {
 		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
