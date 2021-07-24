@@ -296,7 +296,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* cebin = NULL;
 	bool donorLoaded = false;
-	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)))
+	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 
 	if (dsiFeatures()) {
@@ -354,7 +354,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures()) {
-	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard && strncmp(romTid, "I", 1) != 0) {
+	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard && romTid[0] != 'I') {
 		disableSlot1();
 	}
 
