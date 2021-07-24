@@ -41,6 +41,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm7/codec.h>
 #include <nds/dma.h>
+#include <nds/card.h>
 #include <nds/system.h>
 #include <nds/bios.h>
 #include <nds/input.h>
@@ -254,6 +255,7 @@ void my_enableSlot1() {
 		REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 8;
 		swiDelay(10 * BASE_DELAY);
 	}
+    REG_ROMCTRL = 0x20000000; // set ROMCTRL=20000000h
 }
 
 void my_disableSlot1() {
@@ -1361,8 +1363,7 @@ int arm7_main(void) {
 		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
-			//if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
-			if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) { // Pokemon HGSS
+			if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
 			} else {
