@@ -1,7 +1,7 @@
 <p align="center">
  <img src="https://i.imgur.com/BFIu7xX.png"><br>
   <a href="https://gbatemp.net/threads/nds-bootstrap-loader-run-commercial-nds-backups-from-an-sd-card.454323/">
-   <img src="https://img.shields.io/badge/GBATemp-Thread-blue.svg">
+   <img src="https://img.shields.io/badge/GBAtemp-Thread-blue.svg">
   </a>
   <a href="https://dev.azure.com/DS-Homebrew/Builds/_build?definitionId=12">
    <img src="https://dev.azure.com/DS-Homebrew/Builds/_apis/build/status/ahezard.nds-bootstrap?branchName=master" height="20">
@@ -12,15 +12,15 @@
   <a title="Crowdin" target="_blank" href="https://crowdin.com/project/nds-bootstrap"><img src="https://badges.crowdin.net/nds-bootstrap/localized.svg"></a>
 </p>
 
-nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and homebrew to be natively utilised rather than using an emulator. nds-bootstrap works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcarts.
+nds-bootstrap is an open-source application that allows Nintendo DS/DSi ROMs and homebrew to be natively utilised rather than using an emulator. nds-bootstrap works on Nintendo DSi/3DS SD cards through CFW and on Nintendo DS through flashcards.
 
 # ROM Compatibility
 
-nds-bootstrap supports most DS ROMs, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues).
+nds-bootstrap supports most DS/DSi ROMs, with a few exceptions. You can enhance your gaming experience with cheats and faster load times than general cartridges (for games that support those features). Game saving is supported too and will be saved in the `.sav` extention, and `.pub` or `.prv` for DSiWare. If you find a bug, please report it in the [issues tab](https://github.com/ahezard/nds-bootstrap/issues). ROM compatibility is recorded in the [compatibility list](https://docs.google.com/spreadsheets/d/1LRTkXOUXraTMjg1eedz_f7b5jiuyMv2x6e_jY_nyHSc/edit#gid=0).
 
 Anti-Piracy patches can be loaded via IPS files, but they are not included inside the software itself.
 
-nds-bootstrap also supports many homebrew applications, including games like DSCraft.
+nds-bootstrap also supports many homebrew applications, including games like DScraft.
 
 B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked SCFG or DS Phat/lite) only supports some DS ROMs. You can increase compatibility by inserting a DS Memory Expansion Pak.
 
