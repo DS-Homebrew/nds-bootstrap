@@ -31,6 +31,16 @@ static u16 igmPal[][2] = {
 	{0x8360, 0x81C0}, // Lime
 };
 
+// Header for a 256x192 16 bit (RGBA 5551) BMP
+const static u8 bmpHeader[] = {
+	0x42, 0x4D, 0x46, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46, 0x00,
+	0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0xC0, 0x00,
+	0x00, 0x00, 0x01, 0x00, 0x10, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x80,
+	0x01, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7C, 0x00, 0x00, 0xE0, 0x03,
+	0x00, 0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 #define KEYS sharedAddr[5]
 
 static void SetBrightness(u8 screen, s8 bright) {
@@ -149,6 +159,43 @@ static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
 }
 
+static void screenshot(void) {
+	// Maybe TODO: Add selecting bank, C is likely to be safe but can be used for 3D textures so sometimes another bank will be better
+	u8 vramCr = VRAM_C_CR;
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+
+	// TODO: Save VRAM bank to temp file
+
+	// TODO: Fix lines 36 - 39 being missed, unless that's just a no$gba bug
+	REG_DISPCAPCNT = DCAP_BANK(DCAP_BANK_VRAM_C) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
+	while(REG_DISPCAPCNT & DCAP_ENABLE);
+
+	// Show on sub screen, remove when adding BMP saving
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+	REG_DISPCNT_SUB &= ~BIT(8);
+	REG_DISPCNT_SUB |= BIT(11);
+	*(vu16*)0x04001030 = 1 << 8; // clear rotation/scaling
+	*(vu16*)0x04001032 = 0;
+	*(vu16*)0x04001034 = 0;
+	*(vu16*)0x04001036 = 1 << 8;
+	*(vu16*)0x04001038 = 0;
+	*(vu16*)0x0400103C = 0;
+
+	// TODO: save to BMP, these file functions don't work here, but are what needs to happen
+	// VRAM_C_CR = vram_cr_temp;
+	// FILE *file = fopen("/photo.bmp", "wb"); // TODO: Save either using date & time or incrementing numbers
+	// if(file) {
+	// 	fwrite(bmpHeader, 1, sizeof(bmpHeader), file);
+
+	// 	// Write image data, upside down as that's how BMPs want it
+	// 	for(int i = 191; i >= 0; i--) {
+	// 		fwrite(VRAM_C + (i * 256), 2, 256, file);
+	// 	}
+	// }
+
+	// TODO: Restore VRAM bank from temp file
+}
+
 static void drawCursor(u8 line) {
 	u8 pos = igmText->rtl ? 0x1F : 0;
 	// Clear other cursors
@@ -163,7 +210,7 @@ static void drawMainMenu(void) {
 	clearScreen();
 
 	// Print labels
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 7; i++) {
 		if(igmText->rtl)
 			printRight(0x1D, i, igmText->menu[i], 0);
 		else
@@ -399,17 +446,17 @@ void inGameMenu(s8* mainScreen) {
 	u16 bg0cnt = REG_BG0CNT_SUB;
 	//u16 bg1cnt = REG_BG1CNT_SUB;
 	//u16 bg2cnt = REG_BG2CNT_SUB;
-	//u16 bg3cnt = REG_BG3CNT_SUB;
+	u16 bg3cnt = REG_BG3CNT_SUB;
 
 	u16 powercnt = REG_POWERCNT;
 
 	u16 masterBright = *(vu16*)0x0400106C;
 
-	REG_DISPCNT_SUB = 0x10100;
+	REG_DISPCNT_SUB = 0x10105;
 	REG_BG0CNT_SUB = 9 << 8;
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
-	//REG_BG3CNT_SUB = 0;
+	REG_BG3CNT_SUB = (1 << 14) | BIT(7) | BIT(2);
 
 	REG_BG0VOFS_SUB = 0;
 	REG_BG0HOFS_SUB = 0;
@@ -479,17 +526,20 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case 2:
+					screenshot();
+					break;
+				case 3:
 					sharedAddr[4] = 0x444D4152; // RAMD
 					while (sharedAddr[4] == 0x444D4152);
 					break;
-				case 3:
+				case 4:
 					optionsMenu(mainScreen);
 					break;
 				// To be added: Cheats...
-				case 4:
+				case 5:
 					ramViewer();
 					break;
-				case 5:
+				case 6:
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
@@ -514,7 +564,7 @@ void inGameMenu(s8* mainScreen) {
 	REG_BG0CNT_SUB = bg0cnt;
 	//REG_BG1CNT_SUB = bg1cnt;
 	//REG_BG2CNT_SUB = bg2cnt;
-	//REG_BG3CNT_SUB = bg3cnt;
+	REG_BG3CNT_SUB = bg3cnt;
 
 	REG_POWERCNT = powercnt;
 

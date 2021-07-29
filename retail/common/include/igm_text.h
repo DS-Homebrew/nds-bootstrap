@@ -8,7 +8,7 @@ struct IgmText {
 	u16 ndsBootstrap[14];
 	u16 ramViewer[20];
 	u16 jumpAddress[20];
-	u16 menu[6][20];
+	u16 menu[7][20];
 	u16 options[10][20];
 	bool rtl;
 	u16 hotkey;

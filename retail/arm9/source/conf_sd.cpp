@@ -571,11 +571,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
 		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
-		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[3]);
-		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "SCREENSHOT", "Screenshot").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[3]);
+		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[4]);
+		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[6]);
 
 		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
 		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
