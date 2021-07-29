@@ -189,7 +189,7 @@ static void screenshot(void) {
 
 		clearScreen();
 		printCenter(15, 0, igmText->selectBank, 0);
-		printHex(15, 1, vramBank, 1, 3);
+		printChar(15, 1, 'A' + vramBank, 3);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -359,7 +359,7 @@ static void jumpToAddress(void) {
 		} else if(KEYS & KEY_DOWN) {
 			address = (vu32*)(((u32)address & ~(0xF0 << cursorPosition * 4)) | (((u32)address - (0x10 << (cursorPosition * 4))) & (0xF0 << cursorPosition * 4)));
 		} else if(KEYS & KEY_LEFT) {
-			if(cursorPosition < 7)
+			if(cursorPosition < 6)
 				cursorPosition++;
 		} else if(KEYS & KEY_RIGHT) {
 			if(cursorPosition > 0)
@@ -549,7 +549,7 @@ void inGameMenu(s8* mainScreen) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
-			if (cursorPosition < 5)
+			if (cursorPosition < 6)
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
 			switch(cursorPosition) {
