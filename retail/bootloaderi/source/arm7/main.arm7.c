@@ -105,6 +105,7 @@ extern u32 patchOffsetCacheFileCluster;
 extern u32 fatTableFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
+extern u32 screenshotCluster;
 extern u8 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -255,7 +256,9 @@ void my_enableSlot1() {
 		REG_SCFG_MC = (REG_SCFG_MC & ~0x0c) | 8;
 		swiDelay(10 * BASE_DELAY);
 	}
-    REG_ROMCTRL = 0x20000000; // set ROMCTRL=20000000h
+	// IR enable
+	REG_AUXSPICNT = CARD_CR1_ENABLE|CARD_CR1_IRQ;
+	REG_ROMCTRL = 0x20000000;
 }
 
 void my_disableSlot1() {
@@ -1315,6 +1318,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			srParamsFileCluster,
 			ramDumpCluster,
+			screenshotCluster,
 			wideCheatFileCluster,
 			wideCheatSize,
 			cheatFileCluster,
@@ -1521,6 +1525,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			srParamsFileCluster,
 			ramDumpCluster,
+			screenshotCluster,
 			wideCheatFileCluster,
 			wideCheatSize,
 			cheatFileCluster,

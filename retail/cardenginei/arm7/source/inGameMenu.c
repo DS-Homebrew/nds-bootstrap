@@ -16,6 +16,7 @@ extern vu32* volatile sharedAddr;
 extern void forceGameReboot(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
+extern void saveScreenshot(void);
 
 volatile int timeTilBatteryLevelRefresh = 7;
 
@@ -37,7 +38,8 @@ void inGameMenu(void) {
 		}
 	}
 
-	while (sharedAddr[4] == 0x554E454D) {
+	if (sharedAddr[4] == 0x554E454D) {
+	  while (1) {
 		sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 		sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 		timeTilBatteryLevelRefresh++;
@@ -48,21 +50,29 @@ void inGameMenu(void) {
 
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-	}
 
-	switch (sharedAddr[4]) {
-		case 0x54495845: // EXIT
-		default:
+		switch (sharedAddr[4]) {
+			case 0x54495845: // EXIT
+			default:
+				break;
+			case 0x54455352: // RSET
+				forceGameReboot();
+				break;
+			case 0x54495551: // QUIT
+				returnToLoader();
+				break;
+			case 0x444D4152: // RAMD
+				dumpRam();
+				break;
+			case 0x544F4853: // SHOT
+				saveScreenshot();
+				sharedAddr[4] = 0x554E454D;
+				break;
+		}
+		if (sharedAddr[4] != 0x554E454D) {
 			break;
-		case 0x54455352: // RSET
-			forceGameReboot();
-			break;
-		case 0x54495551: // QUIT
-			returnToLoader();
-			break;
-		case 0x444D4152: // RAMD
-			dumpRam();
-			break;
+		}
+	  }
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT

@@ -22,6 +22,7 @@ static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
+static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
 
 static u16 igmPal[][2] = {
 	{0xFFFF, 0xD6B5}, // White
@@ -161,19 +162,19 @@ static void clearScreen(void) {
 }
 
 static void screenshot(void) {
-	// Maybe TODO: Add selecting bank, C is likely to be safe but can be used for 3D textures so sometimes another bank will be better
-	u8 vramCr = VRAM_C_CR;
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-
 	// Backup VRAM bank C
-	tonccpy(&vramBak, VRAM_C, 0x20000);
+	u8 vramCr = VRAM_C_CR;
+	tonccpy(vramBak, VRAM_C, 96K);
+
+	// Maybe TODO: Add selecting bank, C is likely to be safe but can be used for 3D textures so sometimes another bank will be better
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 
 	// TODO: Fix lines 36 - 39 being missed, unless that's just a no$gba bug
 	REG_DISPCAPCNT = DCAP_BANK(DCAP_BANK_VRAM_C) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
 
 	// Show on sub screen, remove when adding BMP saving
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+	/*VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
 	REG_DISPCNT_SUB &= ~BIT(8);
 	REG_DISPCNT_SUB |= BIT(11);
 	*(vu16*)0x04001030 = 1 << 8; // clear rotation/scaling
@@ -181,22 +182,33 @@ static void screenshot(void) {
 	*(vu16*)0x04001034 = 0;
 	*(vu16*)0x04001036 = 1 << 8;
 	*(vu16*)0x04001038 = 0;
-	*(vu16*)0x0400103C = 0;
+	*(vu16*)0x0400103C = 0;*/
 
-	// TODO: save to BMP, these file functions don't work here, but are what needs to happen
-	// VRAM_C_CR = vram_cr_temp;
-	// FILE *file = fopen("/photo.bmp", "wb"); // TODO: Save either using date & time or incrementing numbers
-	// if(file) {
-	// 	fwrite(bmpHeader, 1, sizeof(bmpHeader), file);
+	tonccpy(bmpBuffer, &bmpHeader, sizeof(bmpHeader));
 
-	// 	// Write image data, upside down as that's how BMPs want it
-	// 	for(int i = 191; i >= 0; i--) {
-	// 		fwrite(VRAM_C + (i * 256), 2, 256, file);
-	// 	}
-	// }
+	// Write image data, upside down as that's how BMPs want it
+	int iF = 0;
+	for(int i = 191; i >= 0; i--) {
+		tonccpy((u8*)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16)), VRAM_C + (i * 256), 256*sizeof(u16));
+		for (int x = 0; x < 256; x++) {
+			u16 val = *(u16*)((u32)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16))+(x*sizeof(u16)));
+			u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
+			tonccpy((u8*)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16))+(x*sizeof(u16)), &newVal, sizeof(u16));
+		}
+		iF += 256;
+	}
 
 	// Restore VRAM bank C
-	tonccpy(VRAM_C, &vramBak, 0x20000);
+	VRAM_C_CR = vramCr;
+	tonccpy(VRAM_C, vramBak, 96K);
+
+	for(int i = 0; i < font_bin_size; i++) {	// Reload font
+		u8 val = font_bin[i];
+		BG_GFX_SUB[i] = (val & 0x3) | ((val & 0xC) << 2) | ((val & 0x30) << 4) | ((val & 0xC0) << 6);
+	}
+
+	sharedAddr[4] = 0x544F4853;
+	while (sharedAddr[4] == 0x544F4853);
 }
 
 static void drawCursor(u8 line) {

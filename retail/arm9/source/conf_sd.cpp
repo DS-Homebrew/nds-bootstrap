@@ -55,6 +55,7 @@ extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
+extern std::string screenshotPath;
 
 extern u8 lz77ImageBuffer[0x20000];
 
@@ -884,6 +885,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+		}
+
+		screenshotPath = "sd:/_nds/nds-bootstrap/screenshot.bmp";
+		if (!conf->sdFound) {
+			ramDumpPath = "fat:/_nds/nds-bootstrap/screenshot.bmp";
+		}
+
+		if (access(screenshotPath.c_str(), F_OK) != 0) {
+			FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+			if (screenshotFile) {
+				fseek(screenshotFile, 0x18046 - 1, SEEK_SET);
+				fputc('\0', screenshotFile);
+				fclose(screenshotFile);
+			}
 		}
 	}
 
