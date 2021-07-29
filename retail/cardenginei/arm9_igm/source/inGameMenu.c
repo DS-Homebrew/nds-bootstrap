@@ -21,6 +21,7 @@ extern vu32* volatile sharedAddr;
 static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
+static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
 
 static u16 igmPal[][2] = {
 	{0xFFFF, 0xD6B5}, // White
@@ -164,7 +165,8 @@ static void screenshot(void) {
 	u8 vramCr = VRAM_C_CR;
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 
-	// TODO: Save VRAM bank to temp file
+	// Backup VRAM bank C
+	tonccpy(&vramBak, VRAM_C, 0x20000);
 
 	// TODO: Fix lines 36 - 39 being missed, unless that's just a no$gba bug
 	REG_DISPCAPCNT = DCAP_BANK(DCAP_BANK_VRAM_C) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
@@ -193,7 +195,8 @@ static void screenshot(void) {
 	// 	}
 	// }
 
-	// TODO: Restore VRAM bank from temp file
+	// Restore VRAM bank C
+	tonccpy(VRAM_C, &vramBak, 0x20000);
 }
 
 static void drawCursor(u8 line) {
