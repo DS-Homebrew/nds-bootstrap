@@ -202,6 +202,7 @@ static void screenshot(void) {
 		} else if(KEYS & KEY_A) {
 			break;
 		} else if(KEYS & KEY_B) {
+			VRAM_x_CR(vramBank) = vramCr;
 			return;
 		}
 	}
