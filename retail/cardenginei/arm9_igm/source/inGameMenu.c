@@ -161,35 +161,35 @@ static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
 }
 
+#define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * bank)))
+#define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
+
 static void screenshot(void) {
-	// Backup VRAM bank C
-	u8 vramCr = VRAM_C_CR;
-	tonccpy(vramBak, VRAM_C, 96K);
+	u8 vramBank = 3;
+	if((VRAM_D_CR & 1) == 0) {
+		vramBank = 3;
+	} else if((VRAM_C_CR & 1) == 0) {
+		vramBank = 2;
+	} else if((VRAM_B_CR & 7) == 0) {
+		vramBank = 1;
+	} else if((VRAM_A_CR & 7) == 0) {
+		vramBank = 0;
+	}
 
-	// Maybe TODO: Add selecting bank, C is likely to be safe but can be used for 3D textures so sometimes another bank will be better
-	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+	// Backup VRAM bank
+	u8 vramCr = ((vu8*)0x04000240)[vramBank];
+	VRAM_x_CR(vramBank) = VRAM_ENABLE; // LCD
+	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
 
-	// TODO: Fix lines 36 - 39 being missed, unless that's just a no$gba bug
-	REG_DISPCAPCNT = DCAP_BANK(DCAP_BANK_VRAM_C) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
+	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
-
-	// Show on sub screen, remove when adding BMP saving
-	/*VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
-	REG_DISPCNT_SUB &= ~BIT(8);
-	REG_DISPCNT_SUB |= BIT(11);
-	*(vu16*)0x04001030 = 1 << 8; // clear rotation/scaling
-	*(vu16*)0x04001032 = 0;
-	*(vu16*)0x04001034 = 0;
-	*(vu16*)0x04001036 = 1 << 8;
-	*(vu16*)0x04001038 = 0;
-	*(vu16*)0x0400103C = 0;*/
 
 	tonccpy(bmpBuffer, &bmpHeader, sizeof(bmpHeader));
 
 	// Write image data, upside down as that's how BMPs want it
 	int iF = 0;
 	for(int i = 191; i >= 0; i--) {
-		tonccpy((u8*)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16)), VRAM_C + (i * 256), 256*sizeof(u16));
+		tonccpy((u8*)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16)), VRAM_x(vramBank) + (i * 256), 256*sizeof(u16));
 		for (int x = 0; x < 256; x++) {
 			u16 val = *(u16*)((u32)bmpBuffer+sizeof(bmpHeader)+(iF*sizeof(u16))+(x*sizeof(u16)));
 			u16 newVal = ((val>>10)&31) | (val&31<<5) | (val&31)<<10 | BIT(15);
@@ -198,14 +198,9 @@ static void screenshot(void) {
 		iF += 256;
 	}
 
-	// Restore VRAM bank C
-	VRAM_C_CR = vramCr;
-	tonccpy(VRAM_C, vramBak, 96K);
-
-	for(int i = 0; i < font_bin_size; i++) {	// Reload font
-		u8 val = font_bin[i];
-		BG_GFX_SUB[i] = (val & 0x3) | ((val & 0xC) << 2) | ((val & 0x30) << 4) | ((val & 0xC0) << 6);
-	}
+	// Restore VRAM bank
+	tonccpy(VRAM_x(vramBank), vramBak, 0x18000);
+	VRAM_x_CR(vramBank) = vramCr;
 
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853);
