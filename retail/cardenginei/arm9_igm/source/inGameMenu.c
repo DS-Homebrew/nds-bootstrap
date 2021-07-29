@@ -165,7 +165,7 @@ static void clearScreen(void) {
 #define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
 
 static void screenshot(void) {
-	u8 vramBank = 3;
+	u8 vramBank = 2;
 	if((VRAM_D_CR & 1) == 0) {
 		vramBank = 3;
 	} else if((VRAM_C_CR & 1) == 0) {
@@ -176,9 +176,37 @@ static void screenshot(void) {
 		vramBank = 0;
 	}
 
+	u8 vramCr = VRAM_x_CR(vramBank);
+
+	// Select bank
+	u8 cursorPosition = vramBank;
+	while(1) {
+		// Configure VRAM
+		VRAM_x_CR(vramBank) = vramCr; // LCD
+		vramCr = VRAM_x_CR(cursorPosition);
+		VRAM_x_CR(cursorPosition) = VRAM_ENABLE; // LCD
+		vramBank = cursorPosition;
+
+		clearScreen();
+		printCenter(15, 0, igmText->selectBank, 0);
+		printHex(15, 1, vramBank, 1, 3);
+
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
+
+		if (KEYS & (KEY_UP | KEY_LEFT)) {
+			if(vramBank > 0)
+				cursorPosition--;
+		} else if (KEYS & (KEY_DOWN | KEY_RIGHT)) {
+			if(vramBank < 3)
+				cursorPosition++;
+		} else if(KEYS & KEY_A) {
+			break;
+		} else if(KEYS & KEY_B) {
+			return;
+		}
+	}
+
 	// Backup VRAM bank
-	u8 vramCr = ((vu8*)0x04000240)[vramBank];
-	VRAM_x_CR(vramBank) = VRAM_ENABLE; // LCD
 	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
 
 	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
@@ -331,7 +359,7 @@ static void jumpToAddress(void) {
 		} else if(KEYS & KEY_DOWN) {
 			address = (vu32*)(((u32)address & ~(0xF0 << cursorPosition * 4)) | (((u32)address - (0x10 << (cursorPosition * 4))) & (0xF0 << cursorPosition * 4)));
 		} else if(KEYS & KEY_LEFT) {
-			if(cursorPosition < 6)
+			if(cursorPosition < 7)
 				cursorPosition++;
 		} else if(KEYS & KEY_RIGHT) {
 			if(cursorPosition > 0)
