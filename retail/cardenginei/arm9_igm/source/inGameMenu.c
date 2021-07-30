@@ -188,8 +188,10 @@ static void screenshot(void) {
 		vramBank = cursorPosition;
 
 		clearScreen();
-		printCenter(15, 0, igmText->selectBank, 0);
-		printChar(15, 1, 'A' + vramBank, 3);
+		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 9 + 5, '-', 20);
+		printCenter(15, 10, igmText->selectBank, 0);
+		printChar(15, 12, 'A' + vramBank, 3);
+		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
