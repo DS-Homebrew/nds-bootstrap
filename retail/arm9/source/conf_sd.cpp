@@ -897,6 +897,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (access(screenshotPath.c_str(), F_OK) != 0) {
 			char buffer[2][0x100] = {{0}};
 
+			consoleDemoInit();
+			printf("Creating screenshots.tar\n");
+			printf("Please wait...\n");
+
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
 				fread(buffer[0], 1, 0x100, headerFile);
@@ -917,6 +921,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fclose(headerFile);
 			}
 
+			consoleClear();
 			igmText->currentScreenshot = 0;
 		} else {
 			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
