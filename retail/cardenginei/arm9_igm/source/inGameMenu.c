@@ -487,6 +487,7 @@ void inGameMenu(s8* mainScreen) {
 	//u16 bg2cnt = REG_BG2CNT_SUB;
 	//u16 bg3cnt = REG_BG3CNT_SUB;
 
+	u8 vramCCr = VRAM_C_CR;
 	u8 vramHCr = VRAM_H_CR;
 
 	u16 powercnt = REG_POWERCNT;
@@ -499,6 +500,8 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG2CNT_SUB = 0;
 	//REG_BG3CNT_SUB = 0;
 
+	if(VRAM_C_CR & 4) // If VRAM C is mapped to sub bg, unmap it
+		VRAM_C_CR = VRAM_C_LCD;
 	VRAM_H_CR = VRAM_ENABLE | VRAM_H_SUB_BG;
 
 	REG_BG0VOFS_SUB = 0;
@@ -609,6 +612,7 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG2CNT_SUB = bg2cnt;
 	//REG_BG3CNT_SUB = bg3cnt;
 
+	VRAM_C_CR = vramCCr;
 	VRAM_H_CR = vramHCr;
 
 	REG_POWERCNT = powercnt;
