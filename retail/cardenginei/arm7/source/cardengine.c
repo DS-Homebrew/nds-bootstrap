@@ -421,10 +421,16 @@ void dumpRam(void) {
 	sharedAddr[3] = 0;
 }
 
+static int screenshots = 0;
+
 void saveScreenshot(void) {
+	if (screenshots >= 50) return;
+
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0, 0x18046, !sdRead, -1);
+	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200+(screenshots*0x18400), 0x18046, !sdRead, -1);
+
+	screenshots++;
 }
 
 static void log_arm9(void) {

@@ -888,17 +888,32 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			consoleClear();
 		}
 
-		screenshotPath = "sd:/_nds/nds-bootstrap/screenshot.bmp";
+		screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
 		if (!conf->sdFound) {
-			ramDumpPath = "fat:/_nds/nds-bootstrap/screenshot.bmp";
+			ramDumpPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 		}
 
 		if (access(screenshotPath.c_str(), F_OK) != 0) {
-			FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
-			if (screenshotFile) {
-				fseek(screenshotFile, 0x18046 - 1, SEEK_SET);
-				fputc('\0', screenshotFile);
-				fclose(screenshotFile);
+			char buffer[2][0x100] = {{0}};
+
+			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
+			if (headerFile) {
+				fread(buffer[0], 1, 0x100, headerFile);
+				FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+				if (screenshotFile) {
+					fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
+					fputc('\0', screenshotFile);
+
+					for (int i = 0; i < 50; i++) {
+						fseek(screenshotFile, i*0x18400, SEEK_SET);
+						fread(buffer[1], 1, 0x100, headerFile);
+						fwrite(buffer[1], 1, 0x100, screenshotFile);
+						fwrite(buffer[0], 1, 0x100, screenshotFile);
+					}
+
+					fclose(screenshotFile);
+				}
+				fclose(headerFile);
 			}
 		}
 	}
