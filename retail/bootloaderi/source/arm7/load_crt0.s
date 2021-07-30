@@ -53,6 +53,7 @@
 	.global fatTableFileCluster
 	.global ramDumpCluster
 	.global srParamsFileCluster
+	.global screenshotCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -134,6 +135,8 @@ fatTableFileCluster:
 ramDumpCluster:
 	.word	0x00000000
 srParamsFileCluster:
+	.word	0x00000000
+screenshotCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

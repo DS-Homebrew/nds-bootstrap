@@ -113,6 +113,7 @@ int hookNdsRetailArm7(
 	u32 fileCluster,
 	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
+	u32 screenshotCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,
 	u32 cheatFileCluster,
@@ -303,6 +304,7 @@ int hookNdsRetailArm7(
 		ce7->fileCluster              = fileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
 		ce7->ramDumpCluster           = ramDumpCluster;
+		ce7->screenshotCluster        = screenshotCluster;
 		if (gameOnFlashcard) {
 			ce7->valueBits |= b_gameOnFlashcard;
 		}

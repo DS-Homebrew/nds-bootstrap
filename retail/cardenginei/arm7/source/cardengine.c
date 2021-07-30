@@ -37,6 +37,7 @@
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
+#include "igm_text.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
@@ -69,6 +70,7 @@ extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
+extern u32 screenshotCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
 extern u32* languageAddr;
@@ -115,6 +117,7 @@ static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 static aFile ramDumpFile;
 static aFile srParamsFile;
+static aFile screenshotFile;
 
 static int saveTimer = 0;
 
@@ -220,6 +223,7 @@ static void driveInitialize(void) {
 
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
 	srParamsFile = getFileFromCluster(srParamsCluster);
+	screenshotFile = getFileFromCluster(screenshotCluster);
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -416,6 +420,16 @@ void dumpRam(void) {
 		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
 	}
 	sharedAddr[3] = 0;
+}
+
+void saveScreenshot(void) {
+	if (igmText->currentScreenshot >= 50) return;
+
+	driveInitialize();
+	sdRead = (valueBits & b_dsiSD);
+	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200+(igmText->currentScreenshot*0x18400), 0x18046, !sdRead, -1);
+
+	igmText->currentScreenshot++;
 }
 
 static void log_arm9(void) {

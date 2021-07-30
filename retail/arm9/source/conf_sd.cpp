@@ -55,6 +55,7 @@ extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
+extern std::string screenshotPath;
 
 extern u8 lz77ImageBuffer[0x20000];
 
@@ -568,14 +569,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
 		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
+		setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
+		setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
 
 		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
 		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
-		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[3]);
-		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "SCREENSHOT", "Screenshot...").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[3]);
+		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[4]);
+		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[6]);
 
 		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
 		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
@@ -883,6 +887,58 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+		}
+
+		screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
+		if (!conf->sdFound) {
+			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
+		}
+
+		if (access(screenshotPath.c_str(), F_OK) != 0) {
+			char buffer[2][0x100] = {{0}};
+
+			consoleDemoInit();
+			printf("Creating screenshots.tar\n");
+			printf("Please wait...\n");
+
+			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
+			if (headerFile) {
+				fread(buffer[0], 1, 0x100, headerFile);
+				FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+				if (screenshotFile) {
+					fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
+					fputc('\0', screenshotFile);
+
+					for (int i = 0; i < 50; i++) {
+						fseek(screenshotFile, i*0x18400, SEEK_SET);
+						fread(buffer[1], 1, 0x100, headerFile);
+						fwrite(buffer[1], 1, 0x100, screenshotFile);
+						fwrite(buffer[0], 1, 0x100, screenshotFile);
+					}
+
+					fclose(screenshotFile);
+				}
+				fclose(headerFile);
+			}
+
+			consoleClear();
+			igmText->currentScreenshot = 0;
+		} else {
+			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
+			igmText->currentScreenshot = 50;
+			if (screenshotFile) {
+				fseek(screenshotFile, 0x200, SEEK_SET);
+				for (int i = 0; i < 50; i++) {
+					if(fgetc(screenshotFile) != 'B') {
+						igmText->currentScreenshot = i;
+						break;
+					}
+
+					fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
+				}
+
+				fclose(screenshotFile);
+			}
 		}
 	}
 

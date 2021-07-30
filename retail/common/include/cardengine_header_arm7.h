@@ -74,6 +74,7 @@ typedef struct cardengineArm7 {
     u32 fileCluster;
 	u32 srParamsCluster;
 	u32 ramDumpCluster;
+	u32 screenshotCluster;
     u32 cardStruct;
 	u32 valueBits;
 	/*

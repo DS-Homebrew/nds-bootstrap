@@ -21,6 +21,8 @@ extern vu32* volatile sharedAddr;
 static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
+static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
+static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
 
 static u16 igmPal[][2] = {
 	{0xFFFF, 0xD6B5}, // White
@@ -29,6 +31,16 @@ static u16 igmPal[][2] = {
 	{0xF355, 0xC1EA}, // Light blue
 	{0x801B, 0x800E}, // Red
 	{0x8360, 0x81C0}, // Lime
+};
+
+// Header for a 256x192 16 bit (RGBA 565) BMP
+const static u8 bmpHeader[] = {
+	0x42, 0x4D, 0x46, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46, 0x00,
+	0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0xC0, 0x00,
+	0x00, 0x00, 0x01, 0x00, 0x10, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x80,
+	0x01, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x00, 0x00, 0xE0, 0x07,
+	0x00, 0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 #define KEYS sharedAddr[5]
@@ -76,6 +88,14 @@ static void printRight(int x, int y, const u16 *str, int palette) {
 
 static void printChar(int x, int y, u16 c, int palette) {
 	BG_MAP_RAM_SUB(9)[y * 0x20 + x] = c | palette << 12;
+}
+
+static void printDec(int x, int y, u32 val, int digits, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	for(int i = digits - 1; i >= 0; i--) {
+		*(dst + i) = ('0' + (val % 10)) | palette << 12;
+		val /= 10;
+	}
 }
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
@@ -149,6 +169,87 @@ static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
 }
 
+#define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * bank)))
+#define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
+
+static void screenshot(void) {
+	u8 vramBank = 2;
+	if((VRAM_D_CR & 1) == 0) {
+		vramBank = 3;
+	} else if((VRAM_C_CR & 1) == 0) {
+		vramBank = 2;
+	} else if((VRAM_B_CR & 7) == 0) {
+		vramBank = 1;
+	} else if((VRAM_A_CR & 7) == 0) {
+		vramBank = 0;
+	}
+
+	u8 vramCr = VRAM_x_CR(vramBank);
+
+	// Select bank
+	u8 cursorPosition = vramBank;
+	while(1) {
+		// Configure VRAM
+		VRAM_x_CR(vramBank) = vramCr; // LCD
+		vramCr = VRAM_x_CR(cursorPosition);
+		VRAM_x_CR(cursorPosition) = VRAM_ENABLE; // LCD
+		vramBank = cursorPosition;
+
+		clearScreen();
+		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 9 + 5, '-', 20);
+		printCenter(15, 10, igmText->selectBank, 0);
+		printChar(15, 12, 'A' + vramBank, 3);
+		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
+		print(6, 14, igmText->count, 0);
+		u8 color = igmText->currentScreenshot == 50 ? 4 : 5;
+		printDec(19, 14, igmText->currentScreenshot, 2, color);
+		printChar(21, 14, '/', color);
+		printDec(22, 14, 50, 2, color);
+
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
+
+		if (KEYS & (KEY_UP | KEY_LEFT)) {
+			if(vramBank > 0)
+				cursorPosition--;
+		} else if (KEYS & (KEY_DOWN | KEY_RIGHT)) {
+			if(vramBank < 3)
+				cursorPosition++;
+		} else if(KEYS & KEY_A) {
+			break;
+		} else if(KEYS & KEY_B) {
+			VRAM_x_CR(vramBank) = vramCr;
+			return;
+		}
+	}
+
+	// Backup VRAM bank
+	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
+
+	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
+	while(REG_DISPCAPCNT & DCAP_ENABLE);
+
+	tonccpy(bmpBuffer, &bmpHeader, sizeof(bmpHeader));
+
+	// Write image data, upside down as that's how BMPs want it
+	int iF = 0;
+	u16 *bmp = bmpBuffer + sizeof(bmpHeader) / sizeof(u16);
+	for(int i = 191; i >= 0; i--) {
+		tonccpy(bmp + iF, VRAM_x(vramBank) + (i * 256), 256 * sizeof(u16));
+		for (int x = 0; x < 256; x++) {
+			u16 val = bmp[iF + x];
+			toncset16(bmp + iF + x, ((val >> 10) & 31) | ((val & (31 << 5)) << 1) | ((val & 31) << 11), 1);
+		}
+		iF += 256;
+	}
+
+	// Restore VRAM bank
+	tonccpy(VRAM_x(vramBank), vramBak, 0x18000);
+	VRAM_x_CR(vramBank) = vramCr;
+
+	sharedAddr[4] = 0x544F4853;
+	while (sharedAddr[4] == 0x544F4853);
+}
+
 static void drawCursor(u8 line) {
 	u8 pos = igmText->rtl ? 0x1F : 0;
 	// Clear other cursors
@@ -163,7 +264,7 @@ static void drawMainMenu(void) {
 	clearScreen();
 
 	// Print labels
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 7; i++) {
 		if(igmText->rtl)
 			printRight(0x1D, i, igmText->menu[i], 0);
 		else
@@ -401,6 +502,9 @@ void inGameMenu(s8* mainScreen) {
 	//u16 bg2cnt = REG_BG2CNT_SUB;
 	//u16 bg3cnt = REG_BG3CNT_SUB;
 
+	u8 vramCCr = VRAM_C_CR;
+	u8 vramHCr = VRAM_H_CR;
+
 	u16 powercnt = REG_POWERCNT;
 
 	u16 masterBright = *(vu16*)0x0400106C;
@@ -410,6 +514,10 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
 	//REG_BG3CNT_SUB = 0;
+
+	if(VRAM_C_CR & 4) // If VRAM C is mapped to sub bg, unmap it
+		VRAM_C_CR = VRAM_C_LCD;
+	VRAM_H_CR = VRAM_ENABLE | VRAM_H_SUB_BG;
 
 	REG_BG0VOFS_SUB = 0;
 	REG_BG0HOFS_SUB = 0;
@@ -464,7 +572,7 @@ void inGameMenu(s8* mainScreen) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
-			if (cursorPosition < 5)
+			if (cursorPosition < 6)
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
 			switch(cursorPosition) {
@@ -479,17 +587,20 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case 2:
+					screenshot();
+					break;
+				case 3:
 					sharedAddr[4] = 0x444D4152; // RAMD
 					while (sharedAddr[4] == 0x444D4152);
 					break;
-				case 3:
+				case 4:
 					optionsMenu(mainScreen);
 					break;
 				// To be added: Cheats...
-				case 4:
+				case 5:
 					ramViewer();
 					break;
-				case 5:
+				case 6:
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
@@ -515,6 +626,9 @@ void inGameMenu(s8* mainScreen) {
 	//REG_BG1CNT_SUB = bg1cnt;
 	//REG_BG2CNT_SUB = bg2cnt;
 	//REG_BG3CNT_SUB = bg3cnt;
+
+	VRAM_C_CR = vramCCr;
+	VRAM_H_CR = vramHCr;
 
 	REG_POWERCNT = powercnt;
 

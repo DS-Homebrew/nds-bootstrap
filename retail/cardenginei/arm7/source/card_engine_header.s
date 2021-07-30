@@ -18,6 +18,7 @@
 .global saveCluster
 .global srParamsCluster
 .global ramDumpCluster
+.global screenshotCluster
 .global valueBits
 .global language
 .global languageAddr
@@ -48,6 +49,8 @@ fileCluster:
 srParamsCluster:
 	.word	0x00000000
 ramDumpCluster:
+	.word	0x00000000
+screenshotCluster:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000

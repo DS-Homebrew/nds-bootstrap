@@ -36,6 +36,7 @@ int hookNdsRetailArm7(
 	u32 fileCluster,
 	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
+	u32 screenshotCluster,
 	u32 wideCheatFileCluster,
 	u32 wideCheatSize,
 	u32 cheatFileCluster,
