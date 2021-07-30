@@ -450,7 +450,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 		}*/
 		unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-		unpatchedFuncs->mpuOldDataAccess2 = *mpuDataOffset;
+		unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
 		*mpuDataOffset = 0;
 	}
 

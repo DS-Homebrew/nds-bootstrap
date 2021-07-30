@@ -15,8 +15,7 @@ struct IgmText {
 	bool rtl;
 	u16 hotkey;
 	u8 currentScreenshot;
+	u8 battery;
 };
-
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 #endif // IGM_TEXT_H

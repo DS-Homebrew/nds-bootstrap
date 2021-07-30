@@ -86,6 +86,8 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 #endif
 
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
+
 bool dsiSD = false;
 bool sdRead = true;
 
@@ -285,6 +287,10 @@ static void initialize(void) {
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
 		romLocation = (char*)(ROM_LOCATION_EXT);
 	}
+
+	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
+	}*/
 
 	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 

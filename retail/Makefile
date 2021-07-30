@@ -206,6 +206,10 @@ cardenginei_arm9_igm: $(DATA)
 	@$(MAKE) -C cardenginei/arm9_igm
 
 #---------------------------------------------------------------------------------		
+cardenginei_arm9_igm_twlsdk: $(DATA)
+	@$(MAKE) -C cardenginei/arm9_igm_twlsdk
+
+#---------------------------------------------------------------------------------		
 cardenginei_arm9: $(DATA)
 	@$(MAKE) -C cardenginei/arm9
 
@@ -261,6 +265,7 @@ clean:
 	@$(MAKE) -C cardenginei/arm7_cheat clean
 	@$(MAKE) -C cardenginei/arm7_cheatonly clean
 	@$(MAKE) -C cardenginei/arm9_igm clean
+	@$(MAKE) -C cardenginei/arm9_igm_twlsdk clean
 	@$(MAKE) -C cardenginei/arm9 clean
 	@$(MAKE) -C cardenginei/arm9_cached clean
 	@$(MAKE) -C cardenginei/arm9_cached_end clean

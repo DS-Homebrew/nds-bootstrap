@@ -5,6 +5,7 @@
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 
+#include "igm_text.h"
 #include "locations.h"
 #include "cardengine.h"
 #include "nds_header.h"
@@ -13,6 +14,8 @@
 
 extern vu32* volatile sharedAddr;
 extern bool returnToMenu;
+
+extern struct IgmText *igmText;
 
 extern void forceGameReboot(void);
 extern void dumpRam(void);
@@ -46,7 +49,7 @@ void inGameMenu(void) {
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 			timeTilBatteryLevelRefresh++;
 			if (timeTilBatteryLevelRefresh == 8) {
-				*(u8*)(INGAME_MENU_LOCATION+0x9FFF) = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
+				igmText->battery = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
 				timeTilBatteryLevelRefresh = 0;
 			}
 
