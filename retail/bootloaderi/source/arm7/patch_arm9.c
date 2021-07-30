@@ -840,7 +840,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || (moduleParams->sdk_version > 0x5000000 && ndsHeader->unitCode == 0)) {
+	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -859,14 +859,14 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		// Change the region 2 configuration
 
 		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
-		if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+		/*if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
 			u32 mpuNewDataAccess     = 0x15111111;
 			u32 mpuNewInstrAccess    = 0x5111111;
 			u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
 			int mpuAccessOffset      = 3;
 
-			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
-			unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
+			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
 			*mpuDataOffset = mpuInitRegionNewData;
 
 		//if (mpuAccessOffset) {
@@ -880,12 +880,12 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			//}
 		//}
-		} else {
+		} else {*/
 			//Original code made loading slow, so new code is used
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-			unpatchedFuncs->mpuOldDataAccess2 = *mpuDataOffset;
+			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
 			*mpuDataOffset = 0;
-		}
+		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
 		u32 mpuNewDataAccess = 0x15111111;

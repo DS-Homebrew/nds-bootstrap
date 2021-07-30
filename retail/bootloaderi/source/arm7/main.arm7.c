@@ -1222,6 +1222,7 @@ int arm7_main(void) {
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0x800000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0x800000;
 			//}
+			//tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
 		}
 	} else {
