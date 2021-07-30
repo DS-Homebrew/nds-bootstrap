@@ -134,6 +134,8 @@ static bool volumeAdjustActivated = false;
 static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
+bool returnToMenu = false;
+
 #ifdef TWLSDK
 static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
@@ -815,7 +817,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) || returnToMenu) {
 		((valueBits & extendedMemory) || (ndsHeader->unitCode > 0 && (valueBits & dsiMode))) ? returnToLoader() : inGameMenu();
 	}
 

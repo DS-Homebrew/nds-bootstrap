@@ -196,15 +196,25 @@ static void screenshot(void) {
 		vramBank = cursorPosition;
 
 		clearScreen();
+
 		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText->selectBank, 0);
 		printChar(15, 12, 'A' + vramBank, 3);
 		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
-		print(6, 14, igmText->count, 0);
+
 		u8 color = igmText->currentScreenshot == 50 ? 4 : 5;
-		printDec(19, 14, igmText->currentScreenshot, 2, color);
-		printChar(21, 14, '/', color);
-		printDec(22, 14, 50, 2, color);
+		if(igmText->rtl) {
+			printDec(6, 14, igmText->currentScreenshot, 2, color);
+			printChar(8, 14, '/', color);
+			printDec(9, 14, 50, 2, color);
+			printRight(23, 14, igmText->count, 0);
+		} else {
+			print(6, 14, igmText->count, 0);
+			printDec(19, 14, igmText->currentScreenshot, 2, color);
+			printChar(21, 14, '/', color);
+			printDec(22, 14, 50, 2, color);
+
+		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -563,7 +573,7 @@ void inGameMenu(s8* mainScreen) {
 		drawCursor(cursorPosition);
 
 		#ifndef B4DS
-		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
+		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B | KEY_R);
 		#else
 		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
 		#endif
@@ -612,6 +622,12 @@ void inGameMenu(s8* mainScreen) {
 				while (REG_VCOUNT == 191);
 			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
+		} else if (KEYS & KEY_R) {
+			do {
+				while (REG_VCOUNT != 191);
+				while (REG_VCOUNT == 191);
+			} while(KEYS & KEY_R);
+			sharedAddr[4] = 0x50455453; // STEP
 		}
 	}
 
