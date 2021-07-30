@@ -890,7 +890,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
 		if (!conf->sdFound) {
-			ramDumpPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
+			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 		}
 
 		if (access(screenshotPath.c_str(), F_OK) != 0) {
