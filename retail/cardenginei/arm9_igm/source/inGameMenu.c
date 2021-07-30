@@ -485,7 +485,7 @@ void inGameMenu(s8* mainScreen) {
 	u16 bg0cnt = REG_BG0CNT_SUB;
 	//u16 bg1cnt = REG_BG1CNT_SUB;
 	//u16 bg2cnt = REG_BG2CNT_SUB;
-	u16 bg3cnt = REG_BG3CNT_SUB;
+	//u16 bg3cnt = REG_BG3CNT_SUB;
 
 	u8 vramHCr = VRAM_H_CR;
 
@@ -493,11 +493,11 @@ void inGameMenu(s8* mainScreen) {
 
 	u16 masterBright = *(vu16*)0x0400106C;
 
-	REG_DISPCNT_SUB = 0x10105;
+	REG_DISPCNT_SUB = 0x10100;
 	REG_BG0CNT_SUB = 9 << 8;
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
-	REG_BG3CNT_SUB = (1 << 14) | BIT(7) | BIT(2);
+	//REG_BG3CNT_SUB = 0;
 
 	VRAM_H_CR = VRAM_ENABLE | VRAM_H_SUB_BG;
 
@@ -607,7 +607,7 @@ void inGameMenu(s8* mainScreen) {
 	REG_BG0CNT_SUB = bg0cnt;
 	//REG_BG1CNT_SUB = bg1cnt;
 	//REG_BG2CNT_SUB = bg2cnt;
-	REG_BG3CNT_SUB = bg3cnt;
+	//REG_BG3CNT_SUB = bg3cnt;
 
 	VRAM_H_CR = vramHCr;
 
