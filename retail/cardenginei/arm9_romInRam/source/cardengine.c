@@ -288,12 +288,19 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 
+void __attribute__((target("arm"))) openDebugRam() {
+	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
 			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+			if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+				openDebugRam();
+			}
 		} else {
 			debug8mbMpuFix();
 		}
@@ -470,9 +477,15 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x9: {
 			if (!(ce9->valueBits & extendedMemory)) {
-				*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
-				volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
-				(*inGameMenu)(&mainScreen);
+				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+					*(u32*)(INGAME_MENU_LOCATION_TWLSDK+0x400) = (u32)sharedAddr;
+					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK+0x40C;
+					(*inGameMenu)(&mainScreen);
+				} else {
+					*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
+					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
+					(*inGameMenu)(&mainScreen);
+				}
 			}
 		}
 			break;
@@ -543,7 +556,7 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset2) {
-		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
+		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
 	toncset((char*)unpatchedFuncs, 0, 0x40);

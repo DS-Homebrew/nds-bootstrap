@@ -14,6 +14,12 @@
 
 #define FONT_SIZE 0x4800
 
+#ifdef TWLSDK
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
+#else
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
+#endif
+
 extern u32 scfgExtBak;
 extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;

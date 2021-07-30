@@ -814,9 +814,18 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
     return false;
 }
 
+#ifdef TWLSDK
+void __attribute__((target("arm"))) openDebugRam() {
+	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
+}
+#endif
+
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		#ifdef TWLSDK
+		openDebugRam();
+		#endif
 		//setExceptionHandler2();
 		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0))
@@ -960,13 +969,16 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-#ifndef TWLSDK
 		case 0x9: {
+#ifdef TWLSDK
+//			*(u32*)(INGAME_MENU_LOCATION_TWLSDK+0x400) = (u32)sharedAddr;
+//			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK+0x40C;
+#else
 			*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
 			(*inGameMenu)(&mainScreen);
-		}
 #endif
+		}
 			break;
 	}
 
@@ -1031,7 +1043,7 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset2) {
-		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuOldDataAccess2;
+		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
 	toncset((char*)unpatchedFuncs, 0, 0x40);
