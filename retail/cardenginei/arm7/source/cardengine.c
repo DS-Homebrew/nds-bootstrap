@@ -37,6 +37,7 @@
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
+#include "igm_text.h"
 
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
@@ -421,16 +422,14 @@ void dumpRam(void) {
 	sharedAddr[3] = 0;
 }
 
-static int screenshots = 0;
-
 void saveScreenshot(void) {
-	if (screenshots >= 50) return;
+	if (igmText->currentScreenshot >= 50) return;
 
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200+(screenshots*0x18400), 0x18046, !sdRead, -1);
+	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200+(igmText->currentScreenshot*0x18400), 0x18046, !sdRead, -1);
 
-	screenshots++;
+	igmText->currentScreenshot++;
 }
 
 static void log_arm9(void) {

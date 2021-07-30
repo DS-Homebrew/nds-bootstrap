@@ -90,6 +90,14 @@ static void printChar(int x, int y, u16 c, int palette) {
 	BG_MAP_RAM_SUB(9)[y * 0x20 + x] = c | palette << 12;
 }
 
+static void printDec(int x, int y, u32 val, int digits, int palette) {
+	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	for(int i = digits - 1; i >= 0; i--) {
+		*(dst + i) = ('0' + (val % 10)) | palette << 12;
+		val /= 10;
+	}
+}
+
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
 	for(int i = bytes * 2 - 1; i >= 0; i--) {
@@ -192,6 +200,11 @@ static void screenshot(void) {
 		printCenter(15, 10, igmText->selectBank, 0);
 		printChar(15, 12, 'A' + vramBank, 3);
 		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
+		print(6, 14, igmText->count, 0);
+		u8 color = igmText->currentScreenshot == 50 ? 4 : 5;
+		printDec(19, 14, igmText->currentScreenshot, 2, color);
+		printChar(21, 14, '/', color);
+		printDec(22, 14, 50, 2, color);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 

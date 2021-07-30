@@ -570,6 +570,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
 		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
 		setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
+		setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
 
 		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
 		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
@@ -914,6 +915,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					fclose(screenshotFile);
 				}
 				fclose(headerFile);
+			}
+
+			igmText->currentScreenshot = 0;
+		} else {
+			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
+			igmText->currentScreenshot = 50;
+			if (screenshotFile) {
+				fseek(screenshotFile, 0x200, SEEK_SET);
+				for (int i = 0; i < 50; i++) {
+					if(fgetc(screenshotFile) != 'B') {
+						igmText->currentScreenshot = i;
+						break;
+					}
+
+					fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
+				}
+
+				fclose(screenshotFile);
 			}
 		}
 	}
