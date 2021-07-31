@@ -659,7 +659,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (gameOnFlashcard || ROMinRAM || !asyncCardRead) return false;
+	if ((ndsHeader->unitCode > 0 && dsiModeConfirmed) || gameOnFlashcard || ROMinRAM || !asyncCardRead) return false;
 
 	// Work-around for lags and/or screen flickers during loading
    u32* offset = patchOffsetCache.sleepFuncOffset;
