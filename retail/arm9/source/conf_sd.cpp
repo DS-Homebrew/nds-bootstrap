@@ -944,5 +944,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
+	if (!conf->isDSiWare) {
+		// Update modified date
+		FILE *savFile = fopen(conf->savPath, "r+");
+		if (savFile) {
+			u8 buffer = 0;
+			fread(&buffer, 1, 1, savFile);
+			fseek(savFile, 0, SEEK_SET);
+			fwrite(&buffer, 1, 1, savFile);
+			fclose(savFile);
+		}
+	}
+
 	return 0;
 }
