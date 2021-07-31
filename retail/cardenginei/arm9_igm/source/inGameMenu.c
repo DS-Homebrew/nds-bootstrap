@@ -542,6 +542,7 @@ void inGameMenu(s8* mainScreen) {
 	REG_POWERCNT |= POWER_SWAP_LCDS;
 
 	SetBrightness(1, 0);
+	REG_BLDY_SUB = 0; // Register is write only, can't back up
 
 	tonccpy(bgMapBak, BG_MAP_RAM_SUB(9), sizeof(bgMapBak));	// Backup BG_MAP_RAM
 	clearScreen();
