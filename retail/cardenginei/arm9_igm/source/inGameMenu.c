@@ -12,7 +12,7 @@
 
 #include "font_bin.h"
 
-#define FONT_SIZE 0x4800
+#define FONT_SIZE 0x4A00
 
 #ifdef TWLSDK
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
@@ -30,13 +30,13 @@ static u16 palBak[256];
 static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
 static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
 
-static u16 igmPal[][2] = {
-	{0xFFFF, 0xD6B5}, // White
-	{0xDEF7, 0xB9CE}, // Light gray
-	{0xCE73, 0xB18C}, // Darker gray
-	{0xF355, 0xC1EA}, // Light blue
-	{0x801B, 0x800E}, // Red
-	{0x8360, 0x81C0}, // Lime
+static u16 igmPal[] = {
+	0xFFFF, // White
+	0xDEF7, // Light gray
+	0xCE73, // Darker gray
+	0xF355, // Light blue
+	0x801B, // Red
+	0x8360, // Lime
 };
 
 // Header for a 256x192 16 bit (RGBA 565) BMP
@@ -549,15 +549,16 @@ void inGameMenu(s8* mainScreen) {
 
 	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
 	toncset16(BG_PALETTE_SUB, 0, 256);
-	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
-		BG_PALETTE_SUB[1 + i * 0x10] = igmPal[i][0];
-		BG_PALETTE_SUB[2 + i * 0x10] = igmPal[i][1];
+	for(int i = 0; i < sizeof(igmPal); i++) {
+		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}
 
 	tonccpy(bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
-	for(int i = 0; i < font_bin_size; i++) {	// Load font from 2bpp to 4bpp
+	for(int i = 0; i < font_bin_size; i++) {	// Load font from 1bpp to 4bpp
 		u8 val = font_bin[i];
-		BG_GFX_SUB[i] = (val & 0x3) | ((val & 0xC) << 2) | ((val & 0x30) << 4) | ((val & 0xC0) << 6);
+		BG_GFX_SUB[i * 2]     = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
+		val >>= 4;
+		BG_GFX_SUB[i * 2 + 1] = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
 	}
 
 	// Let ARM7 know the menu loaded
