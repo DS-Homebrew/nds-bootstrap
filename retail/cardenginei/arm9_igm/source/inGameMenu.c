@@ -175,10 +175,11 @@ static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
 }
 
-#define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * bank)))
+#define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
 #define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
 
 static void screenshot(void) {
+	// Try to find the safest bank to capture to
 	u8 vramBank = 2;
 	if((VRAM_D_CR & 1) == 0) {
 		vramBank = 3;
@@ -188,6 +189,13 @@ static void screenshot(void) {
 		vramBank = 1;
 	} else if((VRAM_A_CR & 7) == 0) {
 		vramBank = 0;
+	}
+
+	// Use capture mode B if no banks are mapped for main engine
+	u8 captureMode = DCAP_MODE_B;
+	for(int i = 0; i < 7; i++) {
+		if(VRAM_x_CR(i) & 1)
+			captureMode = DCAP_MODE_A;
 	}
 
 	u8 vramCr = VRAM_x_CR(vramBank);
@@ -241,7 +249,7 @@ static void screenshot(void) {
 	// Backup VRAM bank
 	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
 
-	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_ENABLE;
+	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_MODE(captureMode) | DCAP_ENABLE;
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
 
 	tonccpy(bmpBuffer, &bmpHeader, sizeof(bmpHeader));
