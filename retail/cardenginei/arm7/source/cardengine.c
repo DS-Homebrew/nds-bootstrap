@@ -435,9 +435,14 @@ void saveScreenshot(void) {
 
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200+(igmText->currentScreenshot*0x18400), 0x18046, !sdRead, -1);
+	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
 
-	igmText->currentScreenshot++;
+	// Skip until next blank slot
+	char magic;
+	do {
+		igmText->currentScreenshot++;
+		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, !sdRead, -1);
+	} while(magic == 'B' && igmText->currentScreenshot < 50);
 }
 
 static void log_arm9(void) {

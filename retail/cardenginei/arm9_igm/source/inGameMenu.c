@@ -230,7 +230,7 @@ static void screenshot(void) {
 		} else if (KEYS & (KEY_DOWN | KEY_RIGHT)) {
 			if(vramBank < 3)
 				cursorPosition++;
-		} else if(KEYS & KEY_A) {
+		} else if(KEYS & KEY_A && igmText->currentScreenshot < 50) {
 			break;
 		} else if(KEYS & KEY_B) {
 			VRAM_x_CR(vramBank) = vramCr;
