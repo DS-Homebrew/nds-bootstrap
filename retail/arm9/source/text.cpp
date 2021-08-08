@@ -196,7 +196,7 @@ void setIgmString(const char *src, u16 *dst) {
 		} else if(codepoint >= hangul[0] && codepoint <= hangul[sizeof(hangul) / sizeof(hangul[0]) - 2]) { // Hangul
 			for(uint i = 0; i < sizeof(hangul) / sizeof(hangul[0]); i++) {
 				if(codepoint == hangul[i]) {
-					*(dst++) = 0x21B + i;
+					*(dst++) = 0x1E0 + (sizeof(hanzi) / sizeof(hanzi[0]) - 1) + i;
 					break;
 				}
 			}
