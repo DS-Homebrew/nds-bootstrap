@@ -118,6 +118,7 @@ extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u8 soundFreq;
+extern u8 irCard;
 
 bool useTwlCfg = false;
 int twlCfgLang = 0;
@@ -1368,7 +1369,7 @@ int arm7_main(void) {
 		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
-			if (strncmp(romTid, "I", 1) == 0) {
+			if (irCard) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
 			} else {

@@ -378,7 +378,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
-			if (headerData[0xC] != 'I') {
+			conf->irCard = (headerData[0xC] == 'I');
+			if (!conf->irCard) {
 				disableSlot1();
 			}
 		}
