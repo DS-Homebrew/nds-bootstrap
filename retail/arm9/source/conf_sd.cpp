@@ -357,8 +357,31 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures()) {
-	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard && romTid[0] != 'I') {
-		disableSlot1();
+	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
+		if (romTid[0] != 'I') {
+			disableSlot1();
+		} else {
+			enableSlot1();
+
+			sysSetCardOwner(BUS_OWNER_ARM9);
+
+			// Dummy command sent after card reset
+			cardParamCommand (CARD_CMD_DUMMY, 0,
+				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+				NULL, 0);
+
+			char headerData[0x200];
+			// Read the header
+			cardParamCommand (CARD_CMD_HEADER_READ, 0,
+				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+				(u32*)headerData, 0x200/sizeof(u32));
+
+			sysSetCardOwner(BUS_OWNER_ARM7);
+
+			if (headerData[0xC] != 'I') {
+				disableSlot1();
+			}
+		}
 	}
 
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
