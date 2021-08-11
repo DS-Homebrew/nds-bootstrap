@@ -41,7 +41,7 @@ If your goal is to get a build of the latest commit, you can download that from 
 4. Run `make package-nightly` to compile nds-bootstrap
    - The output files will be in the `bin` folder
 
-If you need help compiling, please ask for help in our [Discord server](https://discord.gg/yD3spjv) or a [GitHub Discussion](discussions).
+If you need help compiling, please ask for help in our [Discord server](https://discord.gg/yD3spjv) or a [GitHub Discussion](https://github.com/DS-Homebrew/nds-bootstrap/discussions).
 
 # Frontends
 
