@@ -37,8 +37,9 @@ If your goal is to get a build of the latest commit, you can download that from 
    (Note: Command will vary by OS, `sudo` may not be needed and it may be just `pacman` instead)
 2. Clone this repository using git (`git clone https://github.com/DS-Homebrew/nds-bootstrap.git`) and navigate to the cloned repo
 3. Compile `lzss.c` to a directory in your PATH using a C compiler such as GCC (`gcc lzss.c -o /usr/local/bin/lzss`)
-   - On Windows it must instead be `lzss.exe` in the root of the repository.
-4. Run `make` to compile nds-bootstrap.
+   - On Windows it must instead be `lzss.exe` in the root of the repository
+4. Run `make package-nightly` to compile nds-bootstrap
+   - The output files will be in the `bin` folder
 
 If you need help compiling, please ask for help in our [Discord server](https://discord.gg/yD3spjv) or a [GitHub Discussion](discussions).
 
