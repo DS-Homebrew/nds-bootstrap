@@ -2,7 +2,7 @@
 #include "tonccpy.h"
 
 const char16_t hanzi[] = u"主位儲关出到动動区器回图圖地址块增定底开強强戏截戲择擇数數时時查檢游率界畫目看移端置自至視計設跳轉转返退选遊選部重鐘钟開關離面頂頻顶项频";
-const char16_t hangul[] = u"가게기끔덤도돌동래럭로료리린메면뱅뷰상샷선설셋소속스아어위으이인임자정종주켬크크클택프향화";
+const char16_t hangul[] = u"가게기끔덤도돌동래럭로료리린메면뱅뷰상샷선설셋소속스아어위으이인임자정종주켬크클택프향화";
 
 bool isStrongRTL(u16 c) {
 	return c >= 0x180 && c < 0x200;
@@ -196,7 +196,7 @@ void setIgmString(const char *src, u16 *dst) {
 		} else if(codepoint >= hangul[0] && codepoint <= hangul[sizeof(hangul) / sizeof(hangul[0]) - 2]) { // Hangul
 			for(uint i = 0; i < sizeof(hangul) / sizeof(hangul[0]); i++) {
 				if(codepoint == hangul[i]) {
-					*(dst++) = 0x21B + i;
+					*(dst++) = 0x1E0 + (sizeof(hanzi) / sizeof(hanzi[0]) - 1) + i;
 					break;
 				}
 			}

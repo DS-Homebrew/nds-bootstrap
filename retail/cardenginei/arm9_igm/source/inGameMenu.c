@@ -68,13 +68,13 @@ static void SetBrightness(u8 screen, s8 bright) {
 static vu32 *address = (vu32*)0x02000000;
 
 static void print(int x, int y, const u16 *str, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	while(*str)
 		*(dst++) = *(str++) | palette << 12;
 }
 
 static void printCenter(int x, int y, const u16 *str, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	const u16 *start = str;
 	while(*str)
 		str++;
@@ -84,7 +84,7 @@ static void printCenter(int x, int y, const u16 *str, int palette) {
 }
 
 static void printRight(int x, int y, const u16 *str, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	const u16 *start = str;
 	while(*str)
 		str++;
@@ -93,11 +93,11 @@ static void printRight(int x, int y, const u16 *str, int palette) {
 }
 
 static void printChar(int x, int y, u16 c, int palette) {
-	BG_MAP_RAM_SUB(9)[y * 0x20 + x] = c | palette << 12;
+	BG_MAP_RAM_SUB(15)[y * 0x20 + x] = c | palette << 12;
 }
 
 static void printDec(int x, int y, u32 val, int digits, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	for(int i = digits - 1; i >= 0; i--) {
 		*(dst + i) = ('0' + (val % 10)) | palette << 12;
 		val /= 10;
@@ -105,7 +105,7 @@ static void printDec(int x, int y, u32 val, int digits, int palette) {
 }
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
-	u16 *dst = BG_MAP_RAM_SUB(9) + y * 0x20 + x;
+	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	for(int i = bytes * 2 - 1; i >= 0; i--) {
 		*(dst + i) = ((val & 0xF) >= 0xA ? 'A' + (val & 0xF) - 0xA : '0' + (val & 0xF)) | palette << 12;
 		val >>= 4;
@@ -172,7 +172,7 @@ static void waitKeysBattery(u16 keys) {
 #endif
 
 static void clearScreen(void) {
-	toncset16(BG_MAP_RAM_SUB(9), 0, 0x300);
+	toncset16(BG_MAP_RAM_SUB(15), 0, 0x300);
 }
 
 #define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
@@ -211,10 +211,10 @@ static void screenshot(void) {
 
 		clearScreen();
 
-		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 9 + 5, '-', 20);
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText->selectBank, 0);
 		printChar(15, 12, 'A' + vramBank, 3);
-		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
 
 		u8 color = igmText->currentScreenshot == 50 ? 4 : 5;
 		if(igmText->rtl) {
@@ -278,10 +278,10 @@ static void drawCursor(u8 line) {
 	u8 pos = igmText->rtl ? 0x1F : 0;
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
-		BG_MAP_RAM_SUB(9)[i * 0x20 + pos] = 0;
+		BG_MAP_RAM_SUB(15)[i * 0x20 + pos] = 0;
 
 	// Set cursor on the selected line
-	BG_MAP_RAM_SUB(9)[line * 0x20 + pos] = igmText->rtl ? '<' : '>';
+	BG_MAP_RAM_SUB(15)[line * 0x20 + pos] = igmText->rtl ? '<' : '>';
 }
 
 static void drawMainMenu(void) {
@@ -386,11 +386,11 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 9 + 5, '-', 20);
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText->jumpAddress, 0);
 		printHex(11, 12, (u32)address, 4, 3);
-		BG_MAP_RAM_SUB(9)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(9)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
-		toncset16(BG_MAP_RAM_SUB(9) + 0x20 * 13 + 5, '-', 20);
+		BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -432,12 +432,12 @@ static void ramViewer(void) {
 		if(mode > 0) {
 			// Hex
 			u16 loc = 0x20 * (1 + (cursorPosition / 8)) + 5 + ((cursorPosition % 8) * 2) + (cursorPosition % 8 >= 4);
-			BG_MAP_RAM_SUB(9)[loc] = (BG_MAP_RAM_SUB(9)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
-			BG_MAP_RAM_SUB(9)[loc + 1] = (BG_MAP_RAM_SUB(9)[loc + 1] & ~(0xF << 12)) | (3 + mode) << 12;
+			BG_MAP_RAM_SUB(15)[loc] = (BG_MAP_RAM_SUB(15)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
+			BG_MAP_RAM_SUB(15)[loc + 1] = (BG_MAP_RAM_SUB(15)[loc + 1] & ~(0xF << 12)) | (3 + mode) << 12;
 
 			// Text
 			loc = 0x20 * (1 + (cursorPosition / 8)) + 23 + (cursorPosition % 8);
-			BG_MAP_RAM_SUB(9)[loc] = (BG_MAP_RAM_SUB(9)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
+			BG_MAP_RAM_SUB(15)[loc] = (BG_MAP_RAM_SUB(15)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
@@ -534,7 +534,7 @@ void inGameMenu(s8* mainScreen) {
 	u16 masterBright = *(vu16*)0x0400106C;
 
 	REG_DISPCNT_SUB = 0x10100;
-	REG_BG0CNT_SUB = 9 << 8;
+	REG_BG0CNT_SUB = BG_MAP_BASE(15) | BG_TILE_BASE(0) | BgSize_T_256x256;
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
 	//REG_BG3CNT_SUB = 0;
@@ -552,7 +552,7 @@ void inGameMenu(s8* mainScreen) {
 	SetBrightness(1, 0);
 	REG_BLDY_SUB = 0; // Register is write only, can't back up
 
-	tonccpy(bgMapBak, BG_MAP_RAM_SUB(9), sizeof(bgMapBak));	// Backup BG_MAP_RAM
+	tonccpy(bgMapBak, BG_MAP_RAM_SUB(15), sizeof(bgMapBak));	// Backup BG_MAP_RAM
 	clearScreen();
 
 	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
@@ -647,7 +647,7 @@ void inGameMenu(s8* mainScreen) {
 		}
 	}
 
-	tonccpy(BG_MAP_RAM_SUB(9), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
 	tonccpy(BG_GFX_SUB, bgBak, FONT_SIZE);	// Restore the original graphics
 
