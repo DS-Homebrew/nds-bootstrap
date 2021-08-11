@@ -193,7 +193,7 @@ static void screenshot(void) {
 
 	// Use capture mode B if no banks are mapped for main engine
 	u8 captureMode = DCAP_MODE_B;
-	for(int i = 0; i < 7; i++) {
+	for(int i = 0; i < 4; i++) {
 		if(VRAM_x_CR(i) & 1)
 			captureMode = DCAP_MODE_A;
 	}
