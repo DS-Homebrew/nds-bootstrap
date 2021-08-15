@@ -271,7 +271,10 @@ static void screenshot(void) {
 	VRAM_x_CR(vramBank) = vramCr;
 
 	sharedAddr[4] = 0x544F4853;
-	while (sharedAddr[4] == 0x544F4853);
+	while (sharedAddr[4] == 0x544F4853) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
 }
 
 static void drawCursor(u8 line) {
@@ -534,7 +537,7 @@ void inGameMenu(s8* mainScreen) {
 	u16 masterBright = *(vu16*)0x0400106C;
 
 	REG_DISPCNT_SUB = 0x10100;
-	REG_BG0CNT_SUB = BG_MAP_BASE(15) | BG_TILE_BASE(0) | BgSize_T_256x256;
+	REG_BG0CNT_SUB = (u16)(BG_MAP_BASE(15) | BG_TILE_BASE(0) | BgSize_T_256x256);
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
 	//REG_BG3CNT_SUB = 0;
@@ -557,7 +560,7 @@ void inGameMenu(s8* mainScreen) {
 
 	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
 	toncset16(BG_PALETTE_SUB, 0, 256);
-	for(int i = 0; i < sizeof(igmPal); i++) {
+	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
 		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}
 
