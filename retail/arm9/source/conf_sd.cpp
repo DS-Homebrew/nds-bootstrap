@@ -379,8 +379,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
 			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
-			conf->irCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
-			if (!conf->irCard) {
+			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
+			if (!conf->specialCard) {
 				disableSlot1();
 			}
 		}

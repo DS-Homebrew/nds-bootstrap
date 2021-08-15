@@ -52,7 +52,7 @@ typedef struct loadCrt0 {
     u8 asyncCardRead;
     u8 cardReadDMA;
     u8 soundFreq;
-    u8 irCard;
+    u8 specialCard;
 } __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H

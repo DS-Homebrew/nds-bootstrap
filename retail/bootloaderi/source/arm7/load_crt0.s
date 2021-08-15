@@ -68,7 +68,7 @@
 	.global asyncCardRead
 	.global cardReadDMA
 	.global soundFreq
-	.global irCard
+	.global specialCard
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -167,7 +167,7 @@ cardReadDMA:
 	.byte	0
 soundFreq:
 	.byte	0
-irCard:
+specialCard:
 	.byte	0
 .align 4
 
