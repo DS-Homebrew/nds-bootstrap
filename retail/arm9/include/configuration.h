@@ -57,7 +57,7 @@ typedef struct configuration {
 	bool saveOnFlashcard;
 	bool macroMode;
 	u16 hotkey;
-	bool irCard;
+	bool specialCard;
 } configuration;
 
 #endif // CONFIGURATION_H

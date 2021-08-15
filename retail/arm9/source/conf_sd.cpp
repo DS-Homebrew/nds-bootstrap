@@ -358,7 +358,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
   if (dsiFeatures()) {
 	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
-		if (romTid[0] != 'I') {
+		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) {
 			disableSlot1();
 		} else {
 			enableSlot1();
@@ -378,8 +378,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
-			conf->irCard = (headerData[0xC] == 'I');
-			if (!conf->irCard) {
+			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
+			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
+			if (!conf->specialCard) {
 				disableSlot1();
 			}
 		}
