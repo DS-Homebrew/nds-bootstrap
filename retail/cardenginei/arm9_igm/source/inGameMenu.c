@@ -271,7 +271,10 @@ static void screenshot(void) {
 	VRAM_x_CR(vramBank) = vramCr;
 
 	sharedAddr[4] = 0x544F4853;
-	while (sharedAddr[4] == 0x544F4853);
+	while (sharedAddr[4] == 0x544F4853) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
 }
 
 static void drawCursor(u8 line) {
