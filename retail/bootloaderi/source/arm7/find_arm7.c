@@ -517,7 +517,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
-			swiGetPitchTableSignature1Alt4, 3
+			swiGetPitchTableSignature1Alt4, 4
 		);
 		if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 4 found\n");
@@ -578,6 +578,17 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 9 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//ndsHeader->arm7binarySize,
+			swiGetPitchTableSignature1Alt10, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 10 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 10 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
