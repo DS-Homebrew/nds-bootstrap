@@ -602,12 +602,12 @@ int arm7_main (void) {
 			 && addr[i+3] == bootloaderSignature[3])
 			{
 				toncset(addr + i, 0, 0x9C98);
-				tonccpy(addr + i, (char*)0x06000000, 0x7200);
-				tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x7200);
+				tonccpy(addr + i, (char*)0x06000000, 0x8000);
+				tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 				break;
 			}
 		}
-		toncset((char*)0x06000000, 0, 0x7200);
+		toncset((char*)0x06000000, 0, 0x8000);
 	}
 
 	if (dsiMode) {

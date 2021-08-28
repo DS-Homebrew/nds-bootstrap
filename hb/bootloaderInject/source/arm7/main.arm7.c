@@ -320,7 +320,7 @@ int arm7_main (void) {
 		 && addr[i+3] == bootloaderSignature[3])
 		{
 			toncset(addr + i, 0, 0x9C98);
-			tonccpy(addr + i, (char*)BOOT_INJECT_LOCATION, 0x7200);
+			tonccpy(addr + i, (char*)BOOT_INJECT_LOCATION, 0x8000);
 			break;
 		}
 	}
