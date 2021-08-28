@@ -92,7 +92,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	load.bin bootstub.bin
+BINFILES	:=	load.bin loadInject.bin bootstub.bin
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: sdengine bootloader bootstub BootStrap clean
-.PHONY: all dist release nightly bootloader bootstub BootStrap dldi/dsisd.dldi sdengine clean
+.PHONY: all dist release nightly bootloader bootloaderInject bootstub BootStrap dldi/dsisd.dldi sdengine clean
 
 all:	$(OUTPUT)
 
@@ -160,12 +160,16 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootstub dldi/dsisd.dldi
+arm9/$(TARGET).elf:	bootloader bootloaderInject bootstub dldi/dsisd.dldi
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
 bootloader: $(DATA) sdengine
 	@$(MAKE) -C bootloader
+
+#---------------------------------------------------------------------------------		
+bootloaderInject: $(DATA) sdengine
+	@$(MAKE) -C bootloaderInject
 
 #---------------------------------------------------------------------------------	
 bootstub: $(DATA)
@@ -192,6 +196,7 @@ clean:
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C sdengine clean
 	@$(MAKE) -C bootloader clean
+	@$(MAKE) -C bootloaderInject clean
 	@$(MAKE) -C bootstub clean
 	@$(MAKE) -C dldi clean
 		

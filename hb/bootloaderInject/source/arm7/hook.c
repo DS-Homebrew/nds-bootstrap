@@ -30,6 +30,8 @@ extern vu32* myMemUncached(vu32*);
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
+extern const u8 cheat_engine_start[];
+
 /*// libnds v1.5.12 2016
 static const u32 homebrewStartSig_2016[1] = {
 	0x04000208, 	// DCD 0x4000208
@@ -249,8 +251,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		nocashMessage("ACCEL_IPC_OK");
 	}
 
-	tonccpy (sdEngineLocation, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
-	tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
+	tonccpy (sdEngineLocation, (u32*)SDENGINE_BUFFER_WRAM_LOCATION, 0x4000);
 
 	sdEngineLocation[1] = (u32)myMemUncached(wordCommandAddr);
 

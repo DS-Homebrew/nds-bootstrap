@@ -1,3 +1,5 @@
+#ifndef NO_TONCCPY
+
 #include "tonccpy.h"
 //# tonccpy.c
 
@@ -134,3 +136,4 @@ void __toncset(void *dst, u32 fill, uint size)
         *dst32= (*dst32 &~ mask) | (fill & mask);
     }
 }
+#endif

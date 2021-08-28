@@ -211,7 +211,7 @@ static void resetMemory_ARM7 (void)
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
 	toncset((u32*)0x02380000, 0, 0x60000);
-	toncset((u32*)0x023F1000, 0, 0xF000);
+	toncset((u32*)0x023F1000, 0, 0x9000);
 	if (romIsCompressed) {
 		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
 	} else {
@@ -589,6 +589,24 @@ int arm7_main (void) {
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
 		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+
+		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+
+		// Find and inject bootloader
+		u32* addr = (u32*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+			if (addr[i]   == bootloaderSignature[0]
+			 && addr[i+1] == bootloaderSignature[1]
+			 && addr[i+2] == bootloaderSignature[2]
+			 && addr[i+3] == bootloaderSignature[3])
+			{
+				toncset(addr + i, 0, 0x9C98);
+				tonccpy(addr + i, (char*)0x06000000, 0x7200);
+				tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x7200);
+				break;
+			}
+		}
+		toncset((char*)0x06000000, 0, 0x7200);
 	}
 
 	if (dsiMode) {
