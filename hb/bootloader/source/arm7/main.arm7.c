@@ -212,6 +212,7 @@ static void resetMemory_ARM7 (void)
 	toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
 	toncset((u32*)0x02380000, 0, 0x60000);
 	toncset((u32*)0x023F1000, 0, 0x9000);
+	toncset((u32*)0x023FE000, 0, 0x2000);
 	if (romIsCompressed) {
 		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
 	} else {
