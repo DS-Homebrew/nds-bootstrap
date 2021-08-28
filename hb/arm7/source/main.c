@@ -77,7 +77,9 @@ void dsi_resetSlot1() {
 //---------------------------------------------------------------------------------
 int main(void) {
 //---------------------------------------------------------------------------------
-	nocashMessage("main arm7");
+	// Grab from DS header in GBA slot
+	*(u16*)0x02FFFC36 = *(u16*)0x0800015E;	// Header CRC16
+	*(u32*)0x02FFFC38 = *(u32*)0x0800000C;	// Game Code
 
 	irqInit();
 	fifoInit();

@@ -214,15 +214,13 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int main( int argc, char **argv) {
 
-	nocashMessage("main arm9");
-    
     //consoleDemoInit();
 
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
 
     //printf("fat init ...");    
-	
+
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
 
@@ -243,7 +241,7 @@ int main( int argc, char **argv) {
 
 		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1").c_str(), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
-				printf("Please insert a cartridge...\n");
+				iprintf("Please insert a cartridge...\n");
 				do { swiWaitForVBlank(); } 
 				while (REG_SCFG_MC == 0x11);
 			}

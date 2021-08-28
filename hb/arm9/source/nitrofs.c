@@ -8,7 +8,7 @@
 		* also thx to wintermute's input realized:
 			* if you dont give ndstool the -o wifilogo.bmp option it will run on emulators in gba mode
 			* you then dont need the gba's LOADEROFFSET, so it was set to 0x000
-	
+
 	2008-05-21  v0.3 - newer and more improved
 		* fixed some issues with ftell() (again was fseek's fault u_u;;)
 		* fixed possible error in detecting sc.gba files when using dldi
@@ -41,19 +41,26 @@
 
 	2009-08-08 v0.8.Turbo - fix fix fix
 		* fixed problem with some cards where the header would be loaded to GBA ram even if running 
-                  in NDS mode causing nitroFSInit() to think it was a valid GBA cart header and attempt to 
-           	  read from GBA SLOT instead of SLOT 1. Fixed this by making it check that filename is not NULL
+				  in NDS mode causing nitroFSInit() to think it was a valid GBA cart header and attempt to 
+		   	  read from GBA SLOT instead of SLOT 1. Fixed this by making it check that filename is not NULL
  		  and then to try FAT/SLOT1 first. The NULL option allows forcing nitroFS to use gba.
-    
-    2018-09-05 v0.9 - modernize devoptab (by RonnChyran)
-        * Updated for libsysbase change in devkitARM r46 and above. 
 
+	2018-09-05 v0.9 - modernize devoptab (by RonnChyran)
+		* Updated for libsysbase change in devkitARM r46 and above. 
+
+	2020-08-20 v0.10 - modernize GBA SLOT support (by RocketRobz)
+		* Updated GBA SLOT detection to check for game code and header CRC. 
+
+	2020-08-24 v0.11 - SDNAND support (by RocketRobz)
+		* Added support for being mounted from SDNAND, if app is launched by hiyaCFW.
 */
 
 #include <string.h>
 #include <errno.h>
 #include <nds.h>
+#include <nds/arm9/dldi.h>
 #include "nitrofs.h"
+#include "tonccpy.h"
 
 //This seems to be a typo! memory.h has REG_EXEMEMCNT
 #ifndef REG_EXMEMCNT
@@ -110,7 +117,7 @@ inline ssize_t nitroSubRead(off_t *npos, void *ptr, size_t len)
     }
     else
     {                                             //reading from gbarom
-        memcpy(ptr, *npos + (void *)GBAROM, len); //len isnt checked here because other checks exist in the callers (hopefully)
+        tonccpy(ptr, *npos + (void *)GBAROM, len); //len isnt checked here because other checks exist in the callers (hopefully)
     }
     if (len > 0)
         *npos += len;
@@ -136,57 +143,60 @@ nitroFSInit(const char *ndsfile)
     chdirpathid = NITROROOT;
     ndsFileLastpos = 0;
     ndsFile = NULL;
-    if (ndsfile != NULL)
-    {
-        if ((ndsFile = fopen(ndsfile, "rb")))
-        {
-            nitroSubRead(&pos, romstr, strlen(LOADERSTR));
-            if (strncmp(romstr, LOADERSTR, strlen(LOADERSTR)) == 0)
-            {
-                nitroSubSeek(&pos, LOADEROFFSET + FNTOFFSET, SEEK_SET);
-                nitroSubRead(&pos, &fntOffset, sizeof(fntOffset));
-                nitroSubSeek(&pos, LOADEROFFSET + FATOFFSET, SEEK_SET);
-                nitroSubRead(&pos, &fatOffset, sizeof(fatOffset));
-                fatOffset += LOADEROFFSET;
-                fntOffset += LOADEROFFSET;
-                hasLoader = true;
-            }
-            else
-            {
-                nitroSubSeek(&pos, FNTOFFSET, SEEK_SET);
-                nitroSubRead(&pos, &fntOffset, sizeof(fntOffset));
-                nitroSubSeek(&pos, FATOFFSET, SEEK_SET);
-                nitroSubRead(&pos, &fatOffset, sizeof(fatOffset));
-                hasLoader = false;
-            }
-            setvbuf(ndsFile, NULL, _IONBF, 0); //we dont need double buffs u_u
-            AddDevice(&nitroFSdevoptab);
-            return (1);
-        }
-    }
-    REG_EXMEMCNT &= ~ARM7_OWNS_CARD; //give us gba slot ownership
-    if (strncmp(((const char *)GBAROM) + LOADERSTROFFSET, LOADERSTR, strlen(LOADERSTR)) == 0)
-    { // We has gba rahm
-        printf("yes i think this is GBA?!\n");
-        if (strncmp(((const char *)GBAROM) + LOADERSTROFFSET + LOADEROFFSET, LOADERSTR, strlen(LOADERSTR)) == 0)
-        { //Look for second magic string, if found its a sc.nds or nds.gba
-            printf("sc/gba\n");
-            fntOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FNTOFFSET + LOADEROFFSET)) + LOADEROFFSET;
-            fatOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FATOFFSET + LOADEROFFSET)) + LOADEROFFSET;
-            hasLoader = true;
-            AddDevice(&nitroFSdevoptab);
-            return (1);
-        }
-        else
-        { //Ok, its not a .gba build, so must be emulator
-            printf("gba, must be emu\n");
-            fntOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FNTOFFSET));
-            fatOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FATOFFSET));
-            hasLoader = false;
-            AddDevice(&nitroFSdevoptab);
-            return (1);
-        }
-    }
+	bool headerFirst = ((strncmp((const char *)0x02FFFC38, __NDSHeader->gameCode, 4) == 0)
+				  && (*(u16*)0x02FFFC36 == __NDSHeader->headerCRC16));
+	if (headerFirst)
+	{
+		sysSetCartOwner (BUS_OWNER_ARM9); //give us gba slot ownership
+		// We has gba rahm
+		//printf("yes i think this is GBA?!\n");
+		if (strncmp(((const char *)GBAROM) + LOADERSTROFFSET, LOADERSTR, strlen(LOADERSTR)) == 0)
+		{ //Look for second magic string, if found its a sc.nds or nds.gba
+			//printf("sc/gba\n");
+			fntOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FNTOFFSET + LOADEROFFSET)) + LOADEROFFSET;
+			fatOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FATOFFSET + LOADEROFFSET)) + LOADEROFFSET;
+			hasLoader = true;
+			AddDevice(&nitroFSdevoptab);
+			return (1);
+		}
+		else if (headerFirst)
+		{ //Ok, its not a .gba build, so must be emulator
+			//printf("gba, must be emu\n");
+			fntOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FNTOFFSET));
+			fatOffset = ((u32) * (u32 *)(((const char *)GBAROM) + FATOFFSET));
+			hasLoader = false;
+			AddDevice(&nitroFSdevoptab);
+			return (1);
+		}
+	}
+	if (ndsfile != NULL)
+	{
+		if ((ndsFile = fopen(ndsfile, "rb")))
+		{
+			nitroSubRead(&pos, romstr, strlen(LOADERSTR));
+			if (strncmp(romstr, LOADERSTR, strlen(LOADERSTR)) == 0)
+			{
+				nitroSubSeek(&pos, LOADEROFFSET + FNTOFFSET, SEEK_SET);
+				nitroSubRead(&pos, &fntOffset, sizeof(fntOffset));
+				nitroSubSeek(&pos, LOADEROFFSET + FATOFFSET, SEEK_SET);
+				nitroSubRead(&pos, &fatOffset, sizeof(fatOffset));
+				fatOffset += LOADEROFFSET;
+				fntOffset += LOADEROFFSET;
+				hasLoader = true;
+			}
+			else
+			{
+				nitroSubSeek(&pos, FNTOFFSET, SEEK_SET);
+				nitroSubRead(&pos, &fntOffset, sizeof(fntOffset));
+				nitroSubSeek(&pos, FATOFFSET, SEEK_SET);
+				nitroSubRead(&pos, &fatOffset, sizeof(fatOffset));
+				hasLoader = false;
+			}
+			setvbuf(ndsFile, NULL, _IONBF, 0); //we dont need double buffs u_u
+			AddDevice(&nitroFSdevoptab);
+			return (1);
+		}
+	}
     return (0);
 }
 
