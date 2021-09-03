@@ -580,7 +580,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Set In-Game Menu strings
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
 		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
-		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
+		igmText->rtl = (strcmp(conf->guiLanguage, "he") == 0 || strcmp(conf->guiLanguage, "ar") == 0);
 
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
@@ -736,7 +736,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Set In-Game Menu strings
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
 		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
-		igmText->rtl = strcmp(conf->guiLanguage, "he") == 0;
+		igmText->rtl = (strcmp(conf->guiLanguage, "he") == 0 || strcmp(conf->guiLanguage, "ar") == 0);
 
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
