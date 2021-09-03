@@ -94,6 +94,7 @@ constexpr char16_t arabicPresentationForms[][3] = {
 	{u'ﻳ', u'ﻴ', u'ﻲ'}, // Yeh
 };
 
+// Can't do a binary search as the map isn't fully sorted (so the image looks better)
 u16 getIndex(char16_t c) {
 	for(uint i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
 		if(c == map[i]) {
