@@ -13,7 +13,7 @@
 #include "font_bin.h"
 
 // Needs to be font_bin_size * 4, but needs to be statically defined
-#define FONT_SIZE 0x5A00
+#define FONT_SIZE 0x5C00
 
 #ifdef TWLSDK
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
