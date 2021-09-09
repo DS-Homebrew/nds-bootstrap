@@ -591,7 +591,7 @@ int arm7_main (void) {
 
 		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 
-		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		/*u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
 		// Find and inject bootloader
 		u32* addr = (u32*)ndsHeader->arm9destination;
@@ -607,7 +607,7 @@ int arm7_main (void) {
 				break;
 			}
 		}
-		toncset((char*)0x06000000, 0, 0x8000);
+		toncset((char*)0x06000000, 0, 0x8000);*/
 	}
 
 	if (dsiMode) {
