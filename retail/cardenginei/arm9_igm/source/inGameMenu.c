@@ -12,7 +12,8 @@
 
 #include "font_bin.h"
 
-#define FONT_SIZE 0x4A00
+// Needs to be font_bin_size * 4, but needs to be statically defined
+#define FONT_SIZE 0x5C00
 
 #ifdef TWLSDK
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
@@ -536,7 +537,7 @@ void inGameMenu(s8* mainScreen) {
 
 	u16 masterBright = *(vu16*)0x0400106C;
 
-	REG_DISPCNT_SUB = 0x10100;
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE;
 	REG_BG0CNT_SUB = (u16)(BG_MAP_BASE(15) | BG_TILE_BASE(0) | BgSize_T_256x256);
 	//REG_BG1CNT_SUB = 0;
 	//REG_BG2CNT_SUB = 0;
