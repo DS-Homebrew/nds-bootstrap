@@ -24,10 +24,11 @@
 #include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
+#include "tonccpy.h"
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 16;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 17;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -413,35 +414,12 @@ u32 patchCardNds(
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
 		if (srlAddr == 0) pleaseWaitOutput();
+		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
+		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS
-		patchOffsetCache.heapPointer2Offset = 0;
-		patchOffsetCache.a9IsThumb = 0;
-		patchOffsetCache.cardReadStartOffset = 0;
-		patchOffsetCache.cardReadEndOffset = 0;
-		patchOffsetCache.cardPullOutOffset = 0;
-		patchOffsetCache.cardIdOffset = 0;
-		patchOffsetCache.cardIdChecked = 0;
-		patchOffsetCache.cardReadDmaOffset = 0;
-		patchOffsetCache.cardReadDmaChecked = 0;
-		patchOffsetCache.a9CardIrqEnableOffset = 0;
-		patchOffsetCache.a9CardIrqIsThumb = 0;
-		patchOffsetCache.resetOffset = 0;
-		patchOffsetCache.resetChecked = 0;
-		patchOffsetCache.patchMpuRegion = 0;
-		patchOffsetCache.mpuStartOffset = 0;
-		patchOffsetCache.mpuDataOffset = 0;
-		patchOffsetCache.mpuInitCacheOffset = 0;
-		patchOffsetCache.mpuInitOffset = 0;
-		patchOffsetCache.mpuStartOffset2 = 0;
-		patchOffsetCache.mpuDataOffset2 = 0;
-		patchOffsetCache.mpuInitOffset2 = 0;
-		patchOffsetCache.randomPatchOffset = 0;
-		patchOffsetCache.randomPatchChecked = 0;
-		patchOffsetCache.randomPatch5SecondOffset = 0;
-		patchOffsetCache.randomPatch5SecondChecked = 0;
-		patchOffsetCache.a9IrqHandlerOffset = 0;
-		rsetA7Cache();
+		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
+		rsetA7CacheDone = true;
 	}
 
 	bool sdk5 = isSdk5(moduleParams);
