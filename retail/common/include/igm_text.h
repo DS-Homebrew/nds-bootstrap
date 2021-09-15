@@ -1,8 +1,6 @@
 #ifndef IGM_TEXT_H
 #define IGM_TEXT_H
 
-#include "locations.h"
-
 struct IgmText {
 	u16 version[20];
 	u16 ndsBootstrap[14];
