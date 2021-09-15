@@ -550,6 +550,24 @@ void rsetA7Cache(void)
 	rsetA7CacheDone = true;
 }
 
+void rsetPatchCache(bool dsiWare)
+{
+	extern u32 srlAddr;
+
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 0) {
+		if (srlAddr == 0 && !dsiWare) pleaseWaitOutput();
+		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
+		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
+		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
+		patchOffsetCache.ltdModuleParamsOffset = ltdModuleParamsOffset;
+		rsetA7CacheDone = true;
+	}
+}
+
 u32 patchCardNds(
 	cardengineArm7* ce7,
 	cardengineArm9* ce9,
@@ -562,20 +580,7 @@ u32 patchCardNds(
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
-	extern u32 srlAddr;
-
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 0) {
-		if (srlAddr == 0) pleaseWaitOutput();
-		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
-		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		patchOffsetCache.ltdModuleParamsOffset = ltdModuleParamsOffset;
-		rsetA7CacheDone = true;
-	}
+	rsetPatchCache(false);
 
 	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {

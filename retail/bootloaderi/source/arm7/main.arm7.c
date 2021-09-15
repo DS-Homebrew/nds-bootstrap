@@ -1313,6 +1313,9 @@ int arm7_main(void) {
 			//tonccpy((char*)0x02E9A834, newBannerPath, 16);
 		//}
 
+		extern void rsetPatchCache(bool dsiWare);
+		rsetPatchCache(true);
+
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)NULL,
 			ndsHeader,
