@@ -927,11 +927,11 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-#ifndef TWLSDK
+//#ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
 	}
-#endif
+//#endif
 }
 
 //---------------------------------------------------------------------------------
@@ -971,13 +971,13 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x9: {
 #ifdef TWLSDK
-//			*(u32*)(INGAME_MENU_LOCATION_TWLSDK+0x400) = (u32)sharedAddr;
-//			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK+0x40C;
+			*(u32*)(INGAME_MENU_LOCATION_TWLSDK+0x400) = (u32)sharedAddr;
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK+0x40C;
 #else
 			*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
-			(*inGameMenu)(&mainScreen);
 #endif
+			(*inGameMenu)(&mainScreen);
 		}
 			break;
 	}

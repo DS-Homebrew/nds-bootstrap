@@ -828,8 +828,20 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory) && (ndsHeader->unitCode == 0 || !(valueBits & dsiMode))) || returnToMenu) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory)) || returnToMenu) {
+#ifdef TWLSDK
+		if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+			igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
+			sharedAddr[5] = 0x59444552; // Write 'REDY' in ce7, to fix lock-up when accessing in-game menu in DSi mode
+			i2cWriteRegister(0x4A, 0x12, 0x00);
+		}
+#endif
 		inGameMenu();
+#ifdef TWLSDK
+		if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+			i2cWriteRegister(0x4A, 0x12, 0x01);
+		}
+#endif
 	}
 
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {

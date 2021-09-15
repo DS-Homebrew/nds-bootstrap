@@ -572,7 +572,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load in-game menu ce9 binary
-	cebin = fopen(/*(conf->dsiMode > 0 && unitCode > 0) ? "nitro:/cardenginei_arm9_igm_twlsdk.lz77" :*/ "nitro:/cardenginei_arm9_igm.lz77", "rb");
+	cebin = fopen((conf->dsiMode > 0 && unitCode > 0) ? "nitro:/cardenginei_arm9_igm_twlsdk.lz77" : "nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
