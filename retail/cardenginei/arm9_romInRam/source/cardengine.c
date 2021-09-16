@@ -138,9 +138,9 @@ static void clearIcache (void) {
 }
 
 //Currently used for NSMBDS romhacks
-void __attribute__((target("arm"))) debug8mbMpuFix(){
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}
+//void __attribute__((target("arm"))) debug8mbMpuFix(){
+//	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+//}
 
 static u32 dmaParams[8] = {0};
 
@@ -301,9 +301,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 				openDebugRam();
 			}
-		} else {
+		}/* else {
 			debug8mbMpuFix();
-		}
+		}*/
 		if (ce9->valueBits & extendedMemory) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		}
