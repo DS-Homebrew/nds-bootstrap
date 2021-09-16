@@ -321,9 +321,9 @@ u32 romLocation = 0x09000000;
 u32 romSizeLimit = 0x780000;
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) {
-	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
+	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
-		romSizeLimit = 0x1F80000;
+		romSizeLimit = (s2FlashcardId == 0x5A45) ? 0xF80000 : 0x1F80000;
 	}
 
 	bool res = false;
@@ -671,6 +671,9 @@ int arm7_main(void) {
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = 0x09F80000;
 		fatTableSize = (s2FlashcardId==0x4353 ? 0x7FFFC : 0x80000);
+	} else if (s2FlashcardId == 0x5A45) {
+		fatTableAddr = 0x08F80000;
+		fatTableSize = 0x80000;
 	} else if (expansionPakFound) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
