@@ -713,12 +713,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x800, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0xC00, cebin);
 	}
 	fclose(cebin);
 
 	// Load in-game menu ce9 binary
-	/*cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
+	cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION_B4DS);
@@ -744,12 +744,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
 
 		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
-		//setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
-		//setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[3]);
-		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[4]);
-		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[5]);
+		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[1]);
+		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[2]);
+		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[3]);
 
 		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
 		//setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
@@ -774,7 +772,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fwrite((u8*)INGAME_MENU_LOCATION_B4DS, 1, 0xA000, cebin);
 		fclose(cebin);
 		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);
-	}*/
+	}
 
 	*(vu32*)(0x02000000) = 0x314D454D;
 	*(vu32*)(0x02400000) = 0x324D454D;

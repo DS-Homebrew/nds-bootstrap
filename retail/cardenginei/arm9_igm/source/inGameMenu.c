@@ -18,7 +18,11 @@
 #ifdef TWLSDK
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 #else
+#ifdef B4DS
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
+#else
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
+#endif
 #endif
 
 extern u32 scfgExtBak;
@@ -28,8 +32,6 @@ extern vu32* volatile sharedAddr;
 static char bgBak[FONT_SIZE];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
-static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
-static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
 
 static u16 igmPal[] = {
 	0xFFFF, // White
@@ -40,6 +42,10 @@ static u16 igmPal[] = {
 	0x8360, // Lime
 };
 
+#ifndef B4DS
+static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
+static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
+
 // Header for a 256x192 16 bit (RGBA 565) BMP
 const static u8 bmpHeader[] = {
 	0x42, 0x4D, 0x46, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46, 0x00,
@@ -49,6 +55,7 @@ const static u8 bmpHeader[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x00, 0x00, 0xE0, 0x07,
 	0x00, 0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+#endif
 
 #define KEYS sharedAddr[5]
 
@@ -179,6 +186,7 @@ static void clearScreen(void) {
 #define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
 #define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
 
+#ifndef B4DS
 static void screenshot(void) {
 	// Try to find the safest bank to capture to
 	u8 vramBank = 2;
@@ -278,6 +286,7 @@ static void screenshot(void) {
 		while (REG_VCOUNT == 191);
 	}
 }
+#endif
 
 static void drawCursor(u8 line) {
 	u8 pos = igmText->rtl ? 0x1F : 0;
@@ -293,7 +302,11 @@ static void drawMainMenu(void) {
 	clearScreen();
 
 	// Print labels
+	#ifndef B4DS
 	for(int i = 0; i < 7; i++) {
+	#else
+	for(int i = 0; i < 4; i++) {
+	#endif
 		if(igmText->rtl)
 			printRight(0x1D, i, igmText->menu[i], 0);
 		else
@@ -303,8 +316,10 @@ static void drawMainMenu(void) {
 	// Print info
 	print(1, 0x18 - 3, igmText->ndsBootstrap, 1);
 	print(1, 0x18 - 2, igmText->version, 1);
+	#ifndef B4DS
 	printChar(0x20 - 5, 0x18 - 2, '\2', 3);
 	printChar(0x20 - 2, 0x18 - 2, '\7', 3);
+	#endif
 }
 
 static void optionsMenu(s8 *mainScreen) {
@@ -603,9 +618,14 @@ void inGameMenu(s8* mainScreen) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 		} else if (KEYS & KEY_DOWN) {
+			#ifndef B4DS
 			if (cursorPosition < 6)
+			#else
+			if (cursorPosition < 3)
+			#endif
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
+			#ifndef B4DS
 			switch(cursorPosition) {
 				case 0:
 					do {
@@ -637,19 +657,45 @@ void inGameMenu(s8* mainScreen) {
 				default:
 					break;
 			}
+			#else
+			switch(cursorPosition) {
+				case 0:
+					do {
+						while (REG_VCOUNT != 191);
+						while (REG_VCOUNT == 191);
+					} while(KEYS & KEY_A);
+					sharedAddr[4] = 0x54495845; // EXIT
+					break;
+				case 1:
+					optionsMenu(mainScreen);
+					break;
+				// To be added: Cheats...
+				case 2:
+					ramViewer();
+					break;
+				case 3:
+					sharedAddr[4] = 0x54495551; // QUIT
+					break;
+				default:
+					break;
+			}
+			#endif
 		} else if (KEYS & KEY_B) {
 			do {
 				while (REG_VCOUNT != 191);
 				while (REG_VCOUNT == 191);
 			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
-		} else if (KEYS & KEY_R) {
+		}
+		#ifndef B4DS
+		else if (KEYS & KEY_R) {
 			do {
 				while (REG_VCOUNT != 191);
 				while (REG_VCOUNT == 191);
 			} while(KEYS & KEY_R);
 			sharedAddr[4] = 0x50455453; // STEP
 		}
+		#endif
 	}
 
 	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM

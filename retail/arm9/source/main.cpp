@@ -480,11 +480,11 @@ static int runNdsFile(configuration* conf) {
 		if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 			clusterScreenshot = stScreenshot.st_ino;
 		}
-	} /*else {
+	} else {
 		if (stat("fat:/_nds/pagefile.sys", &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
 		}
-	}*/
+	}
 
 	return runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, conf);
 }
