@@ -68,7 +68,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile romFile;
 static aFile savFile;
 static aFile srParamsFile;
-//static aFile pageFile;
+static aFile pageFile;
 
 static int cardReadCount = 0;
 
@@ -181,23 +181,23 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-		/*case 0x9: {
+		case 0x9: {
 			int oldIME = enterCriticalSection();
 			setDeviceOwner();
 
-			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000, -1);	// Backup part of game RAM to page file
-			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000, -1);	// Read in-game menu
+			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
 
 			*(u32*)(INGAME_MENU_LOCATION_B4DS+0x400) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS+0x40C;
 			(*inGameMenu)(&mainScreen);
 
-			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000, -1);	// Store in-game menu
-			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000, -1);	// Restore part of game RAM from page file
+			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
+			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
 			leaveCriticalSection(oldIME);
 		}
-			break;*/
+			break;
 	}
 }
 
@@ -216,7 +216,7 @@ static void initialize(void) {
 		savFile = getFileFromCluster(ce9->saveCluster);
 
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
-		//pageFile = getFileFromCluster(ce9->pageFileCluster);
+		pageFile = getFileFromCluster(ce9->pageFileCluster);
 
 		buildFatTableCache(&romFile);
 		buildFatTableCache(&savFile);
@@ -357,7 +357,7 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
-	toncset((char*)unpatchedFuncs, 0, 0x40);
+	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
 

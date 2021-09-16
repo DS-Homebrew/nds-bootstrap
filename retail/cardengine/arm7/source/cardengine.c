@@ -68,6 +68,7 @@ static bool volumeAdjustActivated = false;*/
 static int swapTimer = 0;
 static int languageTimer = 0;
 static bool halfVolume = false;
+bool returnToMenu = false;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -132,8 +133,8 @@ void myIrqHandlerVBlank(void) {
 
 	initialize();
 
-	if (*(u32*)((u32)ce7-(0x2800+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x27FC;
+	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
 		(*cheatEngine)();
 	}
 
@@ -147,9 +148,9 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
-	/*if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
+	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
 		inGameMenu();
-	}*/
+	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
 		rebootConsole();
