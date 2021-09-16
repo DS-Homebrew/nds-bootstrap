@@ -774,6 +774,11 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 //	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 //}
 
+// Required for proper access to the extra DSi RAM
+void __attribute__((target("arm"))) debugRamMpuFix() {
+	asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
+}
+
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -1090,6 +1095,8 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	toncset((char*)unpatchedFuncs, 0, 0x40);
+
+	debugRamMpuFix();
 
 	hookIPC_SYNC();
 

@@ -93,7 +93,7 @@
 #define ROM_LOCATION          0x0C800000
 #define ROM_SDK5_LOCATION     0x0D000000
 
-#define CACHE_ADRESS_START               0x02800000
+#define CACHE_ADRESS_START               0x0C800000
 #define CACHE_ADRESS_START_low           0x02480000
 #define retail_CACHE_ADRESS_START_TWLSDK 0x02EC0000
 
