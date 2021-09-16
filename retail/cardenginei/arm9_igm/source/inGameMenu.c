@@ -253,18 +253,19 @@ static void screenshot(void) {
 	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_MODE(captureMode) | DCAP_ENABLE;
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
 
-	tonccpy(bmpBuffer, &bmpHeader, sizeof(bmpHeader));
+	tonccpy(bmpBuffer, bmpHeader, sizeof(bmpHeader));
+
+	// ABGR 1555 -> RGB 565
+	for (int i = 0; i < 256 * 192; i++) {
+		u16 val = VRAM_x(vramBank)[i];
+		VRAM_x(vramBank)[i] = ((val >> 10) & 31) | ((val & (31 << 5)) << 1) | ((val & 31) << 11);
+	}
 
 	// Write image data, upside down as that's how BMPs want it
-	int iF = 0;
 	u16 *bmp = bmpBuffer + sizeof(bmpHeader) / sizeof(u16);
 	for(int i = 191; i >= 0; i--) {
-		tonccpy(bmp + iF, VRAM_x(vramBank) + (i * 256), 256 * sizeof(u16));
-		for (int x = 0; x < 256; x++) {
-			u16 val = bmp[iF + x];
-			toncset16(bmp + iF + x, ((val >> 10) & 31) | ((val & (31 << 5)) << 1) | ((val & 31) << 11), 1);
-		}
-		iF += 256;
+		tonccpy(bmp, VRAM_x(vramBank) + (i * 256), 256 * sizeof(u16));
+		bmp += 256;
 	}
 
 	// Restore VRAM bank
