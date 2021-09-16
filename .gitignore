@@ -107,6 +107,7 @@ build/
 #!.vscode/tasks.json
 #!.vscode/launch.json
 #!.vscode/extensions.json
+hb/nitrofiles/sdengine.bin
 retail/nitrofiles/cardengine_arm7*.bin
 retail/nitrofiles/cardengine_arm9*.bin
 retail/nitrofiles/cardenginei_arm7*.bin
