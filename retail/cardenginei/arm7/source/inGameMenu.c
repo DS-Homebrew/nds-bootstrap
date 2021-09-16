@@ -33,8 +33,8 @@ void inGameMenu(void) {
 
 	int timeOut = 0;
 	while (sharedAddr[5] != 0x59444552) { // 'REDY'
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(1000);
+		while (REG_VCOUNT == 191) swiDelay(1000);
 
 		timeOut++;
 		if (timeOut == 60*2) {
@@ -53,8 +53,8 @@ void inGameMenu(void) {
 				timeTilBatteryLevelRefresh = 0;
 			}
 
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
+			while (REG_VCOUNT != 191) swiDelay(1000);
+			while (REG_VCOUNT == 191) swiDelay(1000);
 
 			switch (sharedAddr[4]) {
 				case 0x54495845: // EXIT
