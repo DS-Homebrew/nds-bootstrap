@@ -284,6 +284,9 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;
+				if (!ROMsupportsDsiMode(ndsHeader)) {
+					transferToArm9(15);
+				}
 			} else {
 				REG_SCFG_EXT = 0x8300C000;
 				if (arm9_boostVram) {
@@ -301,6 +304,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					// Switch to 4MB mode
 					REG_SCFG_EXT -= 0xC000;
 				} else {
+					transferToArm9(15);
 					// lock SCFG
 					REG_SCFG_EXT &= ~(1UL << 31);
 				}

@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 54;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 55;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -39,36 +39,21 @@ extern bool logging;
 extern bool gbaRomFound;
 
 void patchBinary(const tNDSHeader* ndsHeader) {
-	extern u16 gameOnFlashcard;
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
-		*(u32*)0x2007434 = 0x27FF017;
+		*(u32*)0x2007434 = 0;
 	}
 
 	// Trauma Center: Under the Knife (Europe)
 	if (strcmp(romTid, "AKDP") == 0) {
-		*(u32*)0x20A6B90 = 0x27FF017;
+		*(u32*)0x20A6B90 = 0;
 	}
 
 	// Chou Shittou Caduceus (Japan)
 	if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
-		*(u32*)0x20CCB18 = 0x27FF017;
-	}
-
-	// Animal Crossing: Wild World
-	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !gameOnFlashcard) {
-		int instancesPatched = 0;
-		u32 addrOffset = (u32)ndsHeader->arm9destination;
-		while (instancesPatched < 3) {
-			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x2000;
-				instancesPatched++;
-			}
-			addrOffset += 4;
-			if (addrOffset > (u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) break;
-		}
+		*(u32*)0x20CCB18 = 0;
 	}
 
 	// The World Ends With You (USA/Europe)

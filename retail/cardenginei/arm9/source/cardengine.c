@@ -1090,11 +1090,15 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
 	}
 
+	if (unpatchedFuncs->mpuDataOffsetAlt) {
+		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
+	}
+
 	if (unpatchedFuncs->mpuDataOffset2) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
-	toncset((char*)unpatchedFuncs, 0, 0x40);
+	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	debugRamMpuFix();
 

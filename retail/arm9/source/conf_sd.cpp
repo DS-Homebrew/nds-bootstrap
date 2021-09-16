@@ -555,14 +555,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-    // Load mem-cached ce9 binary
-	cebin = fopen(strncmp(romTid, "ADM", 3)==0||strncmp(romTid, "A62", 3)==0 ? "nitro:/cardenginei_arm9_cached_end.lz77" : "nitro:/cardenginei_arm9_cached.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x3000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_CACHED_BUFFERED_LOCATION);
-	}
-	fclose(cebin);
-
     // Load ROMinRAM ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
 	if (cebin) {

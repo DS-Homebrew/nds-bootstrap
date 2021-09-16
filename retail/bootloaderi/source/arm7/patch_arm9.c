@@ -833,6 +833,22 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
+	if (!isSdk5(moduleParams)) {
+		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
+		if (!patchOffsetCache.mpuDataOffsetAlt) {
+			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
+			if (mpuDataOffsetAlt) {
+				patchOffsetCache.mpuDataOffsetAlt = mpuDataOffsetAlt;
+			}
+		}
+		if (mpuDataOffsetAlt) {
+			unpatchedFuncs->mpuDataOffsetAlt = mpuDataOffsetAlt;
+			unpatchedFuncs->mpuInitRegionOldDataAlt = *mpuDataOffsetAlt;
+
+			*mpuDataOffsetAlt = PAGE_32M | 0x02000000 | 1;
+		}
+	}
+
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset = mpuDataOffset;
@@ -884,7 +900,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 			//Original code made loading slow, so new code is used
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			*mpuDataOffset = 0;
+			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
