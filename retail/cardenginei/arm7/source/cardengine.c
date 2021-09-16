@@ -832,7 +832,6 @@ void myIrqHandlerVBlank(void) {
 #ifdef TWLSDK
 		if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 			igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
-			sharedAddr[5] = 0x59444552; // Write 'REDY' in ce7, to fix lock-up when accessing in-game menu in DSi mode
 			i2cWriteRegister(0x4A, 0x12, 0x00);
 		}
 #endif
