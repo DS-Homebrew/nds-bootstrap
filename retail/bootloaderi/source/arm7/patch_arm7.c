@@ -162,7 +162,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	}
 
 	// swi get pitch table
-	if (swiGetPitchTableOffset && ((!(REG_SCFG_ROM & BIT(9)) && !dsiModeConfirmed) || ((REG_SCFG_ROM & BIT(9)) && ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
+	if (swiGetPitchTableOffset && (!(REG_SCFG_ROM & BIT(9)) || ((REG_SCFG_ROM & BIT(9)) && ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
 		// Patch
 		if (useGetPitchTableBranch) {
 			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
