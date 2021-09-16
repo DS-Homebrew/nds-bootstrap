@@ -14,7 +14,6 @@ struct IgmText {
 	bool rtl;
 	u16 hotkey;
 	u8 currentScreenshot;
-	u8 battery;
 };
 
 #ifdef __cplusplus

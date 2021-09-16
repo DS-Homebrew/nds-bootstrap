@@ -115,11 +115,12 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 
 #ifndef B4DS
 static void printBattery(void) {
+	u8 batteryLevel = (u8)sharedAddr[6];
 	const u16 *bars = u"\3\3";
-	if (igmText->battery & BIT(7)) {
+	if (batteryLevel & BIT(7)) {
 		bars = u"\6\6";	// Charging
 	} else {
-		switch (igmText->battery) {
+		switch (batteryLevel) {
 			default:
 				break;
 			case 0x1:
