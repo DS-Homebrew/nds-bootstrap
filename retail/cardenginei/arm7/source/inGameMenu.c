@@ -22,7 +22,7 @@ extern void dumpRam(void);
 extern void returnToLoader(void);
 extern void saveScreenshot(void);
 
-volatile int timeTilBatteryLevelRefresh = 0;
+volatile int timeTilBatteryLevelRefresh = 7;
 
 void inGameMenu(void) {
 	returnToMenu = false;
@@ -30,8 +30,6 @@ void inGameMenu(void) {
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
-
-	igmText->battery = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
 
 	int timeOut = 0;
 	while (sharedAddr[5] != 0x59444552) { // 'REDY'
@@ -50,7 +48,7 @@ void inGameMenu(void) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 			timeTilBatteryLevelRefresh++;
-			if (timeTilBatteryLevelRefresh == 8) {
+			if (timeTilBatteryLevelRefresh >= 8) {
 				igmText->battery = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
 				timeTilBatteryLevelRefresh = 0;
 			}
@@ -86,7 +84,7 @@ void inGameMenu(void) {
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT
-	timeTilBatteryLevelRefresh = 0;
+	timeTilBatteryLevelRefresh = 7;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;
