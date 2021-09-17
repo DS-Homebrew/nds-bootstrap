@@ -1517,7 +1517,7 @@ int arm7_main(void) {
 			(cardengineArm9*)ce9Location,
 			ndsHeader,
 			moduleParams,
-			ROMsupportsDsiMode(ndsHeader) ? 0 : 1,
+			(ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "AKD", 3) == 0) ? 0 : 1,
 			0,
 			ROMinRAM,
 			saveFileCluster,
