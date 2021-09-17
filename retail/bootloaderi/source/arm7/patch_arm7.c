@@ -402,15 +402,15 @@ u32 patchCardNdsArm7(
 	}
 	toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 
-    const char* romTid = getRomTid(ndsHeader);
+	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+		return 0;
+	}
+
+	const char* romTid = getRomTid(ndsHeader);
 
 	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
-		if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
-			return 0;
-		}
-
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 

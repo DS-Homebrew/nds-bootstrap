@@ -1026,6 +1026,18 @@ u32 myIrqEnable(u32 irq) {
 		driveInitialize();
 	}
 
+	const char* romTid = getRomTid(ndsHeader);
+
+	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
+	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
+	|| (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM))) {
+		// Proceed below "else" code
+	} else {
+		REG_IE |= irq;
+		leaveCriticalSection(oldIME);
+		return irq;
+	}
+
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;
 	//irq |= BIT(28);
