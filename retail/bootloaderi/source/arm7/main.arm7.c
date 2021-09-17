@@ -1453,8 +1453,10 @@ int arm7_main(void) {
 					ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
 				} else if ((u32)ndsHeader->arm9destination == 0x02004000) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2;
-				} else if (extendedMemoryConfirmed) {
-					ce9Location = (extendedMemory == 2 || REG_SCFG_EXT == 0) ? CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM : CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
+				} else if (extendedMemoryConfirmed && (extendedMemory == 2 || REG_SCFG_EXT == 0)) {
+					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
+				} else if (REG_SCFG_EXT != 0) {
+					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				}
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 				if (((u32)ndsHeader->arm9destination != 0x02004000 && extendedMemoryConfirmed && (extendedMemory == 2 || REG_SCFG_EXT == 0)) || (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed)) {
