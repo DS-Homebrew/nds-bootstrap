@@ -854,6 +854,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		debugRamMpuFix();
 		if (!FAT_InitFiles(false, 0))
 		{
 			//nocashMessage("!FAT_InitFiles");
@@ -1099,8 +1100,6 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
-
-	debugRamMpuFix();
 
 	hookIPC_SYNC();
 
