@@ -300,6 +300,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 						for (int i = 0; i < 16; i++) {
 							transferToArm9(i);
 						}
+					} else {
+						transferToArm9(15);
 					}
 					// Switch to 4MB mode
 					REG_SCFG_EXT -= 0xC000;
