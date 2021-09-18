@@ -1482,7 +1482,10 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 				patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			} else {
-				tonccpy((u32*)CARDENGINEI_ARM9_SDK5_LOCATION, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
+				if (REG_SCFG_EXT != 0) {
+					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
+				}
+				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 			}
 		} else if (gameOnFlashcard && !ROMinRAM) {
 			ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
@@ -1501,7 +1504,7 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 			}
 		} else {
-			ce9Location = (ROMinRAM && REG_SCFG_EXT != 0) ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : CARDENGINEI_ARM9_LOCATION;
+			ce9Location = (REG_SCFG_EXT != 0) ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : CARDENGINEI_ARM9_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x4000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_BUFFERED_LOCATION), size);
 			if (ROMinRAM && ce9Location == CARDENGINEI_ARM9_LOCATION) {
