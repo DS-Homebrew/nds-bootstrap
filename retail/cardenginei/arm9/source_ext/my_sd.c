@@ -72,7 +72,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	nocashMessage("readSector internal");
 	#endif
 
-	if (buffer >= 0x02000000 && buffer < 0x03000000) {
+	if ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
 		DC_InvalidateRange(buffer, 512);
 	}
 
@@ -103,7 +103,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	nocashMessage("readSectors internal");
 	#endif
 
-	if (buffer >= 0x02000000 && buffer < 0x03000000) {
+	if ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
 		DC_InvalidateRange(buffer, numSectors * 512);
 	}
 
