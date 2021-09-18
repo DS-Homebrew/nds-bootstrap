@@ -72,9 +72,9 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	nocashMessage("readSector internal");
 	#endif
 
-	#ifndef UNCACHED
-	DC_InvalidateRange(buffer, 512);
-	#endif
+	if (buffer >= 0x02000000 && buffer < 0x03000000) {
+		DC_InvalidateRange(buffer, 512);
+	}
 
 	u32 commandRead = isDma ? 0x53444D31 : 0x53445231;
 
@@ -103,9 +103,9 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	nocashMessage("readSectors internal");
 	#endif
 
-	#ifndef UNCACHED
-	DC_InvalidateRange(buffer, numSectors * 512);
-	#endif
+	if (buffer >= 0x02000000 && buffer < 0x03000000) {
+		DC_InvalidateRange(buffer, numSectors * 512);
+	}
 
 	u32 commandRead = isDma ? 0x53444D41 : 0x53445244;
 

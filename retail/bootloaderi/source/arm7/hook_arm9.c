@@ -224,9 +224,9 @@ int hookNdsRetailArm9(
 		}
 	  }
 
-		if(strncmp(romTid, "CLJ", 3) == 0 && dsiModeConfirmed) {
+		/*if(strncmp(romTid, "CLJ", 3) == 0) {
 			ce9->valueBits |= b_cacheFlushFlag;
-		}
+		}*/
 
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;

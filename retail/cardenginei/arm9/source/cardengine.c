@@ -726,9 +726,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	//sleepMsEnabled = false;
 
-	if (ce9->valueBits & cacheFlushFlag) {
+	/*if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
-	}
+	}*/
 
 	return 0;
 }
@@ -774,7 +774,8 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 // Required for proper access to the extra DSi RAM
 void __attribute__((target("arm"))) debugRamMpuFix() {
-	asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
+	//asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
+	asm("LDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
 }
 
 bool isNotTcm(u32 address, u32 len) {
