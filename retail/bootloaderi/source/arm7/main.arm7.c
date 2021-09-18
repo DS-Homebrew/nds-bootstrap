@@ -81,6 +81,8 @@ extern void arm7clearRAM(void);
 extern void arm7_reset(void);
 extern void arm7_reset_sdk5(void);
 
+extern bool moreMemory;
+
 //extern u32 _start;
 extern u32 storedFileCluster;
 extern u32 initDisc;
@@ -646,15 +648,17 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader)+ioverlaysSize : (ndsHeader->romSize-0x8000)+0x88) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < 0x01000000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < 0x01800000)
-			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && (ndsHeader->romSize-0x8000)+0x88 < 0x00800000));
+		u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
+		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader)+ioverlaysSize : romSize) < 0x01000000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01000000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01800000)
+			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && romSize < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-		res = ((consoleModel>0 && (ndsHeader->romSize-0x8000)+0x88 < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
-			|| (consoleModel==0 && (ndsHeader->romSize-0x8000)+0x88 < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
+		res = ((consoleModel>0 && romSize < (extendedMemory==2 ? 0x01C80000 : 0x01C00000))
+			|| (consoleModel==0 && romSize < (extendedMemory==2 ? 0x00C80000 : 0x00C00000)));
 		extendedMemoryConfirmed = res;
+		moreMemory = (romSize >= (consoleModel==0 ? 0x00C00000 : 0x01C00000));
 	  }
 	}
 	if ((strncmp(romTid, "HND", 3) == 0)
@@ -812,9 +816,6 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (romSize >= romSizeLimit) {
-		extern bool moreMemory;
-		moreMemory = true;
-
 		tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
 		romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
 		tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
@@ -1453,13 +1454,13 @@ int arm7_main(void) {
 					ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
 				} else if ((u32)ndsHeader->arm9destination == 0x02004000) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2;
-				} else if (extendedMemoryConfirmed && (extendedMemory == 2 || REG_SCFG_EXT == 0)) {
+				} else if (extendedMemoryConfirmed && (moreMemory || REG_SCFG_EXT == 0)) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
 				} else if (REG_SCFG_EXT != 0) {
 					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				}
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
-				if (((u32)ndsHeader->arm9destination != 0x02004000 && extendedMemoryConfirmed && (extendedMemory == 2 || REG_SCFG_EXT == 0)) || (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed)) {
+				if (((u32)ndsHeader->arm9destination != 0x02004000 && extendedMemoryConfirmed && (moreMemory || REG_SCFG_EXT == 0)) || (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed)) {
 					patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 				}
 				if (ce9Location != CARDENGINEI_ARM9_LOCATION_DSI_WRAM) {
@@ -1495,7 +1496,7 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		} else if (extendedMemoryConfirmed) {
-			if (extendedMemory == 2 || REG_SCFG_EXT == 0) {
+			if (moreMemory || REG_SCFG_EXT == 0) {
 				ce9Location = (moduleParams->sdk_version >= 0x2008000) ? (u32)patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM) : CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION_DSI_WRAM,ce9Location,0x1C00);
