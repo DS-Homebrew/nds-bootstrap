@@ -197,7 +197,11 @@ int discBytePerClus;
 enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 
 // Global sector buffer to save on stack space
+#ifdef DLDI
 unsigned char globalBuffer[BYTES_PER_SECTOR];
+#else
+unsigned char* globalBuffer = (unsigned char*)0x02788000;
+#endif
 
 #define CLUSTER_CACHE      0x2700000 // Main RAM
 #define CLUSTER_CACHE_SIZE 0x80000 // 512K

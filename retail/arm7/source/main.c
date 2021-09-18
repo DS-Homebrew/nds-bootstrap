@@ -61,6 +61,8 @@ int main(void) {
 	*(u16*)0x02FFFC36 = *(u16*)0x0800015E;	// Header CRC16
 	*(u32*)0x02FFFC38 = *(u32*)0x0800000C;	// Game Code
 
+	*(u32*)0x02FFFDF0 = REG_SCFG_EXT;
+
 	// read User Settings from firmware
 	readUserSettings();
 	irqInit();
