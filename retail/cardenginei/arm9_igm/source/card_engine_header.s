@@ -2,6 +2,7 @@
 	.section ".init"
 @---------------------------------------------------------------------------------
 	.global _start
+	.global igmText
 	.global sharedAddr
 	.global scfgExtBak
 	.global scfgClkBak
@@ -15,6 +16,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 #Text is placed here
+igmText:
 .word 0
 .word 0
 .word 0

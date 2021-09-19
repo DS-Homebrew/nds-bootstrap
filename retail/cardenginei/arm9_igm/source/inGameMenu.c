@@ -15,15 +15,7 @@
 // Needs to be font_bin_size * 4, but needs to be statically defined
 #define FONT_SIZE 0x5C00
 
-#ifdef TWLSDK
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
-#else
-#ifdef B4DS
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
-#else
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
-#endif
-#endif
+extern struct IgmText igmText;
 
 extern u32 scfgExtBak;
 extern u16 scfgClkBak;
@@ -221,19 +213,19 @@ static void screenshot(void) {
 		clearScreen();
 
 		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
-		printCenter(15, 10, igmText->selectBank, 0);
+		printCenter(15, 10, igmText.selectBank, 0);
 		printChar(15, 12, 'A' + vramBank, 3);
 		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
 
-		u8 color = igmText->currentScreenshot == 50 ? 4 : 5;
-		if(igmText->rtl) {
-			printDec(6, 14, igmText->currentScreenshot, 2, color);
+		u8 color = igmText.currentScreenshot == 50 ? 4 : 5;
+		if(igmText.rtl) {
+			printDec(6, 14, igmText.currentScreenshot, 2, color);
 			printChar(8, 14, '/', color);
 			printDec(9, 14, 50, 2, color);
-			printRight(23, 14, igmText->count, 0);
+			printRight(23, 14, igmText.count, 0);
 		} else {
-			print(6, 14, igmText->count, 0);
-			printDec(19, 14, igmText->currentScreenshot, 2, color);
+			print(6, 14, igmText.count, 0);
+			printDec(19, 14, igmText.currentScreenshot, 2, color);
 			printChar(21, 14, '/', color);
 			printDec(22, 14, 50, 2, color);
 
@@ -247,7 +239,7 @@ static void screenshot(void) {
 		} else if (KEYS & (KEY_DOWN | KEY_RIGHT)) {
 			if(vramBank < 3)
 				cursorPosition++;
-		} else if(KEYS & KEY_A && igmText->currentScreenshot < 50) {
+		} else if(KEYS & KEY_A && igmText.currentScreenshot < 50) {
 			break;
 		} else if(KEYS & KEY_B) {
 			VRAM_x_CR(vramBank) = vramCr;
@@ -289,13 +281,13 @@ static void screenshot(void) {
 #endif
 
 static void drawCursor(u8 line) {
-	u8 pos = igmText->rtl ? 0x1F : 0;
+	u8 pos = igmText.rtl ? 0x1F : 0;
 	// Clear other cursors
 	for(int i = 0; i < 0x18; i++)
 		BG_MAP_RAM_SUB(15)[i * 0x20 + pos] = 0;
 
 	// Set cursor on the selected line
-	BG_MAP_RAM_SUB(15)[line * 0x20 + pos] = igmText->rtl ? '<' : '>';
+	BG_MAP_RAM_SUB(15)[line * 0x20 + pos] = igmText.rtl ? '<' : '>';
 }
 
 static void drawMainMenu(void) {
@@ -307,15 +299,15 @@ static void drawMainMenu(void) {
 	#else
 	for(int i = 0; i < 4; i++) {
 	#endif
-		if(igmText->rtl)
-			printRight(0x1D, i, igmText->menu[i], 0);
+		if(igmText.rtl)
+			printRight(0x1D, i, igmText.menu[i], 0);
 		else
-			print(2, i, igmText->menu[i], 0);
+			print(2, i, igmText.menu[i], 0);
 	}
 
 	// Print info
-	print(1, 0x18 - 3, igmText->ndsBootstrap, 1);
-	print(1, 0x18 - 2, igmText->version, 1);
+	print(1, 0x18 - 3, igmText.ndsBootstrap, 1);
+	print(1, 0x18 - 2, igmText.version, 1);
 	#ifndef B4DS
 	printChar(0x20 - 5, 0x18 - 2, '\2', 3);
 	printChar(0x20 - 2, 0x18 - 2, '\7', 3);
@@ -329,38 +321,38 @@ static void optionsMenu(s8 *mainScreen) {
 
 		// Print labels
 		for(int i = 0; i < 3; i++) {
-			if(igmText->rtl)
-				printRight(0x1D, i, igmText->options[i], 0);
+			if(igmText.rtl)
+				printRight(0x1D, i, igmText.options[i], 0);
 			else
-				print(2, i, igmText->options[i], 0);
+				print(2, i, igmText.options[i], 0);
 		}
 		drawCursor(cursorPosition);
 
 		#ifndef B4DS
-		if(igmText->rtl) {
+		if(igmText.rtl) {
 			// Main screen
-			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
+			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
 			// Clock speed
-			print(1, 1, igmText->options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
+			print(1, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
 			// VRAM boost
-			print(1, 2, igmText->options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
+			print(1, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		} else {
 			// Main screen
-			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
+			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
 			// Clock speed
-			printRight(0x1E, 1, igmText->options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
+			printRight(0x1E, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
 			// VRAM boost
-			printRight(0x1E, 2, igmText->options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
+			printRight(0x1E, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		}
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 		#else
-		if(igmText->rtl) {
+		if(igmText.rtl) {
 			// Main screen
-			print(1, 0, igmText->options[3 + (*mainScreen)] , 0);
+			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
 		} else {
 			// Main screen
-			printRight(0x1E, 0, igmText->options[3 + (*mainScreen)] , 0);
+			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
 		}
 
 		waitKeys(KEY_LEFT | KEY_RIGHT | KEY_B);
@@ -407,7 +399,7 @@ static void jumpToAddress(void) {
 	u8 cursorPosition = 0;
 	while(1) {
 		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
-		printCenter(15, 10, igmText->jumpAddress, 0);
+		printCenter(15, 10, igmText.jumpAddress, 0);
 		printHex(11, 12, (u32)address, 4, 3);
 		BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
 		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
@@ -435,7 +427,7 @@ static void ramViewer(void) {
 
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
-		printCenter(14, 0, igmText->ramViewer, 0);
+		printCenter(14, 0, igmText.ramViewer, 0);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 3);
 
 		for(int i = 0; i < 23; i++) {
@@ -601,7 +593,7 @@ void inGameMenu(s8* mainScreen) {
 		#endif
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
-	} while(KEYS & igmText->hotkey);
+	} while(KEYS & igmText.hotkey);
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {
