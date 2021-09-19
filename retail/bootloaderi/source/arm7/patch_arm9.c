@@ -833,7 +833,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
-	if (!isSdk5(moduleParams)) {
+	if (!isSdk5(moduleParams) && strncmp(getRomTid(ndsHeader), "A2D", 3) != 0) {
 		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
 		if (!patchOffsetCache.mpuDataOffsetAlt) {
 			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
