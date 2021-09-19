@@ -296,18 +296,18 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
     // Pokemon Dash
-	if (strcmp(romTid, "APDJ") == 0) {
+	//if (strcmp(romTid, "APDJ") == 0) {
 		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
         
-        *(u32*)0x02000B94 = 0xE1A00000; //nop
+        //*(u32*)0x02000B94 = 0xE1A00000; //nop
 
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
-	}
+	//}
 
     // Pokemon Dash
-	if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
+	//if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
         /*unsigned char pdash_patch_chars[64] =
         {
           0xFE, 0x40, 0x2D, 0xE9, 
@@ -353,19 +353,24 @@ void patchBinary(const tNDSHeader* ndsHeader) {
             *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
         }*/
         
-        *((u32*)0x02000BB0) = 0xE1A00000; //nop 
+        //*((u32*)0x02000BB0) = 0xE1A00000; //nop 
     
 		//*(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
         
 		//*(u32*)0x020D5010 = 0xe12fff1e; //bx lr
+	//}
+
+    /* // Pokemon Dash (Kiosk Demo)
+	if (strcmp(romTid, "A24E") == 0) {
+        *(u32*)0x02000BB0 = 0xE1A00000; //nop
 	}
 
     // Pokemon Dash
 	if (strcmp(romTid, "APDK") == 0) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
-	}
+	}*/
 
 
     // Golden Sun

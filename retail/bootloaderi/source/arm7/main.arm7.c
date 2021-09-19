@@ -1405,12 +1405,12 @@ int arm7_main(void) {
 		}
 
 		if (!dsiModeConfirmed) {
-			if (
+			/*if (
 				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
 			 && strncmp(romTid, "A24", 3) != 0				// Pokemon Dash (Kiosk Demo)
-			) {
+			) {*/
 				NTR_BIOS();
-			}
+			//}
 		}
 
 		// If possible, set to load ROM into RAM
