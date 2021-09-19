@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_extmem cardengine_arm9_igm cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9_igm_twlsdk cardenginei_arm9 cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_wram cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam clean
+.PHONY: all dist release nightly bootloader bootloaderi cardengine_arm7 cardengine_arm9 cardengine_arm9_extmem cardengine_arm9_igm cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_wram cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam clean
 
 all:	$(OUTPUT)
 
@@ -166,7 +166,7 @@ bootloader: $(DATA) cardengine_arm7 cardengine_arm9 cardengine_arm9_extmem carde
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
-bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9_igm_twlsdk cardenginei_arm9 cardenginei_arm9_wram cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_wram cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam
+bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_sdk5 cardenginei_arm7_cheat cardenginei_arm7_cheatonly cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_wram cardenginei_arm9_dldi cardenginei_arm9_sdk5 cardenginei_arm9_sdk5_wram cardenginei_arm9_twlsdk cardenginei_arm9_sdk5_dldi cardenginei_arm9_twlsdk_dldi cardenginei_arm9_romInRam
 	@$(MAKE) -C bootloaderi
 
 #---------------------------------------------------------------------------------		
@@ -208,10 +208,6 @@ cardenginei_arm7_cheatonly: $(DATA)
 #---------------------------------------------------------------------------------		
 cardenginei_arm9_igm: $(DATA)
 	@$(MAKE) -C cardenginei/arm9_igm
-
-#---------------------------------------------------------------------------------		
-cardenginei_arm9_igm_twlsdk: $(DATA)
-	@$(MAKE) -C cardenginei/arm9_igm_twlsdk
 
 #---------------------------------------------------------------------------------		
 cardenginei_arm9: $(DATA)
@@ -269,7 +265,6 @@ clean:
 	@$(MAKE) -C cardenginei/arm7_cheat clean
 	@$(MAKE) -C cardenginei/arm7_cheatonly clean
 	@$(MAKE) -C cardenginei/arm9_igm clean
-	@$(MAKE) -C cardenginei/arm9_igm_twlsdk clean
 	@$(MAKE) -C cardenginei/arm9 clean
 	@$(MAKE) -C cardenginei/arm9_wram clean
 	@$(MAKE) -C cardenginei/arm9_dldi clean

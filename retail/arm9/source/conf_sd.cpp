@@ -594,7 +594,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load in-game menu ce9 binary
-	cebin = fopen((conf->dsiMode > 0 && unitCode > 0) ? "nitro:/cardenginei_arm9_igm_twlsdk.lz77" : "nitro:/cardenginei_arm9_igm.lz77", "rb");
+	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
@@ -640,6 +640,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
 		setIgmString(lang.fetch("OPTIONS", "OFF", "Off").c_str(), igmText->options[8]);
 		setIgmString(lang.fetch("OPTIONS", "ON", "On").c_str(), igmText->options[9]);
+
+		if (conf->dsiMode > 0 && unitCode > 0) {
+			// Relocate
+			u32* addr = (u32*)INGAME_MENU_LOCATION;
+			for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
+				if (addr[i] >= INGAME_MENU_LOCATION && addr[i] < INGAME_MENU_LOCATION+0x4000) {
+					addr[i] -= INGAME_MENU_LOCATION;
+					addr[i] += INGAME_MENU_LOCATION_TWLSDK;
+				}
+			}
+		}
 	}
 	fclose(cebin);
 
