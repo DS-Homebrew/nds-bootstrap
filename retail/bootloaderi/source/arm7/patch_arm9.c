@@ -860,7 +860,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 			*mpuDataOffsetAlt = PAGE_32M | 0x02000000 | 1;
 
-			dbg_printf("Mpu data offset: ");
+			dbg_printf("Mpu data alt: ");
 			dbg_hexa((u32)mpuDataOffsetAlt);
 			dbg_printf("\n\n");
 		}
