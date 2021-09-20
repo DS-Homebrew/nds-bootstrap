@@ -965,6 +965,10 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
+	if (REG_IE & IRQ_NETWORK) {
+		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
+	}
+
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
 	} else if (valueBits & b_runCardEngineCheck) {
