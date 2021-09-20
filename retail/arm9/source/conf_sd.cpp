@@ -396,39 +396,39 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
-		if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
-			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
-		}
-
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
 
-		if (std::string(conf->cleanDonorPath) != std::string(conf->ndsPath) && strlen(conf->cleanDonorPath) > 8) {
-			fclose(ndsFile);
-			FILE* ndsFile = fopen(conf->cleanDonorPath, "rb");
-		  if (ndsFile) {
-			fseek(ndsFile, 0x1C0, SEEK_SET);
-			fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x1C8, SEEK_SET);
-			fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x1CC, SEEK_SET);
-			fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x1D0, SEEK_SET);
-			fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x1D8, SEEK_SET);
-			fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x1DC, SEEK_SET);
-			fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x224, SEEK_SET);
-			fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x22C, SEEK_SET);
-			fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
+		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
+			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
 
-			fseek(ndsFile, 0, SEEK_SET);
-			fread(target, 1, 0x180, ndsFile);
-		  }
-		}
+			if (std::string(conf->cleanDonorPath) != std::string(conf->ndsPath) && strlen(conf->cleanDonorPath) > 8) {
+				fclose(ndsFile);
+				FILE* ndsFile = fopen(conf->cleanDonorPath, "rb");
+				if (ndsFile) {
+					fseek(ndsFile, 0x1C0, SEEK_SET);
+					fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x1C8, SEEK_SET);
+					fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x1CC, SEEK_SET);
+					fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x1D0, SEEK_SET);
+					fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x1D8, SEEK_SET);
+					fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x1DC, SEEK_SET);
+					fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x224, SEEK_SET);
+					fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x22C, SEEK_SET);
+					fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
+
+					fseek(ndsFile, 0, SEEK_SET);
+					fread(target, 1, 0x180, ndsFile);
+				}
+			}
+		}*/
 
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
