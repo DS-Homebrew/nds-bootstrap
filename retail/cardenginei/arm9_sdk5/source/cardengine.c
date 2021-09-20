@@ -1042,7 +1042,7 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
 	}
 
-	if (unpatchedFuncs->mpuDataOffsetAlt) {
+	if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
 		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 	}
 

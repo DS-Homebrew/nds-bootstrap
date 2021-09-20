@@ -296,8 +296,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
-			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 			if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 				openDebugRam();
 			}
@@ -525,6 +523,8 @@ u32 myIrqEnable(u32 irq) {
 	#endif
 
 	if (ce9->valueBits & isSdk5) {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
 	}
 
@@ -555,7 +555,7 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
 	}
 
-	if (unpatchedFuncs->mpuDataOffsetAlt) {
+	if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
 		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 	}
 

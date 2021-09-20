@@ -1521,7 +1521,11 @@ int arm7_main(void) {
 			(cardengineArm9*)ce9Location,
 			ndsHeader,
 			moduleParams,
-			(ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "AKD", 3) == 0 || strncmp(romTid, "A2D", 3) == 0) ? 0 : 1,
+			(ROMsupportsDsiMode(ndsHeader)
+			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
+			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
+			|| strncmp(romTid, "A2D", 3) == 0 // New Super Mario Bros.
+			) ? 0 : 1,
 			0,
 			ROMinRAM,
 			saveFileCluster,
