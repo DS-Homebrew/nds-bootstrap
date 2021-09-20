@@ -741,6 +741,11 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	if (!patchOffsetCache.mpuStartOffset) {
 		mpuStartOffset = findMpuStartOffset(ndsHeader, patchMpuRegion);
 	}
+	if (mpuStartOffset) {
+		dbg_printf("Mpu start: ");
+		dbg_hexa((u32)mpuStartOffset);
+		dbg_printf("\n\n");
+	}
 	if (!patchOffsetCache.mpuDataOffset) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
 	}
@@ -777,6 +782,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 			}
 		}
+
+		dbg_printf("Mpu data: ");
+		dbg_hexa((u32)mpuDataOffset);
+		dbg_printf("\n\n");
 	}
 
 	// Find the mpu cache init
@@ -790,6 +799,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		*mpuInitCacheOffset = 0xE3A00046;
 		mpuInitCachePatched = true;
 		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
+
+		dbg_printf("Mpu init cache: ");
+		dbg_hexa((u32)mpuInitCacheOffset);
+		dbg_printf("\n\n");
 	}
 
 	// Patch out all further mpu reconfiguration
@@ -846,6 +859,10 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			unpatchedFuncs->mpuInitRegionOldDataAlt = *mpuDataOffsetAlt;
 
 			*mpuDataOffsetAlt = PAGE_32M | 0x02000000 | 1;
+
+			dbg_printf("Mpu data offset: ");
+			dbg_hexa((u32)mpuDataOffsetAlt);
+			dbg_printf("\n\n");
 		}
 	}
 
@@ -867,6 +884,11 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	u32* mpuDataOffset = patchOffsetCache.mpuDataOffset2;
 	if (!patchOffsetCache.mpuStartOffset2) {
 		mpuStartOffset = findMpuStartOffset(ndsHeader, 2);
+	}
+	if (mpuStartOffset) {
+		dbg_printf("Mpu start 2: ");
+		dbg_hexa((u32)mpuStartOffset);
+		dbg_printf("\n\n");
 	}
 	if (!patchOffsetCache.mpuDataOffset2) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
@@ -916,6 +938,10 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		if (mpuNewDataAccess) {
 			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
 		}*/
+
+		dbg_printf("Mpu data 2: ");
+		dbg_hexa((u32)mpuDataOffset);
+		dbg_printf("\n\n");
 	}
 
 	// Find the mpu cache init
@@ -929,6 +955,10 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		*mpuInitCacheOffset = 0xE3A00046;
 		mpuInitCachePatched = true;
 		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
+
+		dbg_printf("Mpu init cache: ");
+		dbg_hexa((u32)mpuInitCacheOffset);
+		dbg_printf("\n\n");
 	}
 
 	// Patch out all further mpu reconfiguration
@@ -947,7 +977,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		);
 	}
 	if (mpuInitOffset) {
-		dbg_printf("Mpu2 init: ");
+		dbg_printf("Mpu init 2: ");
 		dbg_hexa((u32)mpuInitOffset);
 		dbg_printf("\n\n");
 

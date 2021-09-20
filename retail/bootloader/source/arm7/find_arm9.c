@@ -1241,14 +1241,9 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 		mpuInitRegionSignature, 1
 	);
 	if (mpuStartOffset) {
-		dbg_printf("Mpu init found: ");
+		dbg_printf("Mpu init found\n");
 	} else {
 		dbg_printf("Mpu init not found\n");
-	}
-
-	if (mpuStartOffset) {
-		dbg_hexa((u32)mpuStartOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
@@ -1301,14 +1296,9 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 		}
 	}
 	if (mpuDataOffset) {
-		dbg_printf("Mpu data found: ");
+		dbg_printf("Mpu data found\n");
 	} else {
 		dbg_printf("Mpu data not found\n");
-	}
-
-	if (mpuDataOffset) {
-		dbg_hexa((u32)mpuDataOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
@@ -1323,14 +1313,9 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 		mpuInitCache, 1
 	);
 	if (mpuInitCacheOffset) {
-		dbg_printf("Mpu init cache found: ");
+		dbg_printf("Mpu init cache found\n");
 	} else {
 		dbg_printf("Mpu init cache not found\n");
-	}
-
-	if (mpuInitCacheOffset) {
-		dbg_hexa((u32)mpuInitCacheOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
