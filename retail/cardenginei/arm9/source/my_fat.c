@@ -33,6 +33,7 @@
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
+#include "locations.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -200,7 +201,7 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 #ifdef DLDI
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #else
-unsigned char* globalBuffer = (unsigned char*)0x02788000;
+unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
 #endif
 
 #define CLUSTER_CACHE      0x2700000 // Main RAM

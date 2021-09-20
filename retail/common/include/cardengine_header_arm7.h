@@ -86,6 +86,7 @@ typedef struct cardengineArm7 {
 		5: dsiSD
 		6: preciseVolumeControl
 	*/
+	u32 overlaysSize;
     u32* languageAddr;
     u8 language;
     u8 consoleModel;

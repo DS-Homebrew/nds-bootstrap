@@ -20,6 +20,7 @@
 .global ramDumpCluster
 .global screenshotCluster
 .global valueBits
+.global overlaysSize
 .global language
 .global languageAddr
 .global consoleModel
@@ -55,6 +56,8 @@ screenshotCluster:
 cardStruct:
 	.word	0x00000000
 valueBits:
+	.word	0x00000000
+overlaysSize:
 	.word	0x00000000
 languageAddr:
 	.word	0x00000000

@@ -172,6 +172,18 @@ void cardSetDma(u32 * params) {
   	}
 
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+	if (!(ce9->valueBits & extendedMemory) && !(ce9->valueBits & dsiMode)) {
+		if (src >= ndsHeader->arm9romOffset && src < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) { // ARM9 binary
+			newSrc = (u32)((ndsHeader->arm9destination + 0x0A400000)-ndsHeader->arm9romOffset);
+		} else if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) { // Overlays
+			newSrc = (u32)(ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
+		} else if (src >= ndsHeader->arm7romOffset && src < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) { // ARM7 binary
+			newSrc = (u32)((ndsHeader->arm7destination + 0x0A400000)-ndsHeader->arm7romOffset);
+		} else { // NitroFS data
+			newSrc = (u32)(ce9->romLocation+ce9->overlaysSize-ndsHeader->arm7romOffset-ndsHeader->arm7binarySize);
+		}
+		newSrc += src;
+	}
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
@@ -337,6 +349,18 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	
 	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+	if (!(ce9->valueBits & extendedMemory) && !(ce9->valueBits & dsiMode)) {
+		if (src >= ndsHeader->arm9romOffset && src < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) { // ARM9 binary
+			newSrc = (u32)((ndsHeader->arm9destination + 0x0A400000)-ndsHeader->arm9romOffset);
+		} else if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) { // Overlays
+			newSrc = (u32)(ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
+		} else if (src >= ndsHeader->arm7romOffset && src < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) { // ARM7 binary
+			newSrc = (u32)((ndsHeader->arm7destination + 0x0A400000)-ndsHeader->arm7romOffset);
+		} else { // NitroFS data
+			newSrc = (u32)(ce9->romLocation+ce9->overlaysSize-ndsHeader->arm7romOffset-ndsHeader->arm7binarySize);
+		}
+		newSrc += src;
+	}
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}

@@ -77,6 +77,7 @@ typedef struct cardengineArm9 {
 		5: isSdk5
 		6: overlaysInRam
 	*/
+    u32 overlaysSize;
 	u32 consoleModel;
     u32* irqTable;
     u32 romLocation;

@@ -73,6 +73,7 @@ extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
+extern u32 overlaysSize;
 extern u32* languageAddr;
 extern u8 language;
 extern u8 consoleModel;
@@ -1302,7 +1303,20 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	#endif	
 	
 	if (valueBits & ROMinRAM) {
-		tonccpy(dst, romLocation + src, len);
+		u32 newSrc = (u32)(romLocation-0x8000)+src;
+		if (!(valueBits & extendedMemory) && !(valueBits & dsiMode)) {
+			if (src >= ndsHeader->arm9romOffset && src < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) { // ARM9 binary
+				newSrc = (u32)((ndsHeader->arm9destination + 0x0A400000)-ndsHeader->arm9romOffset);
+			} else if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) { // Overlays
+				newSrc = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
+			} else if (src >= ndsHeader->arm7romOffset && src < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) { // ARM7 binary
+				newSrc = (u32)((ndsHeader->arm7destination + 0x0A400000)-ndsHeader->arm7romOffset);
+			} else { // NitroFS data
+				newSrc = (u32)(romLocation+overlaysSize-ndsHeader->arm7romOffset-ndsHeader->arm7binarySize);
+			}
+			newSrc += src;
+		}
+		tonccpy(dst, (u8*)newSrc, len);
 	} else {
 		//while (readOngoing) {}
 		driveInitialize();

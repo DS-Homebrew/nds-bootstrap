@@ -297,6 +297,8 @@ int hookNdsRetailArm7(
 		*(u32*)intr_vblank_orig_return = *vblankHandler;
 		*vblankHandler = 0x2FFC008;
 	} else {
+		extern u32 overlaysSize;
+
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
 		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
@@ -326,6 +328,7 @@ int hookNdsRetailArm7(
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
 		}
+		ce7->overlaysSize             = overlaysSize;
 		ce7->language                 = language;
 		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 			ce7->languageAddr = (u32*)0x020DC5DC;

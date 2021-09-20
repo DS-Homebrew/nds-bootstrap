@@ -605,7 +605,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-					if (addr[i] >= CARDENGINEI_ARM9_LOCATION && addr[i] < CARDENGINEI_ARM9_LOCATION+0x8000) {
+					if (addr[i] >= CARDENGINEI_ARM9_LOCATION && addr[i] < CARDENGINEI_ARM9_LOCATION+0x7E00) {
 						addr[i] -= CARDENGINEI_ARM9_LOCATION;
 						addr[i] += CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 					}
@@ -633,7 +633,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-					if (addr[i] >= CARDENGINEI_ARM9_SDK5_LOCATION && addr[i] < CARDENGINEI_ARM9_SDK5_LOCATION+0x8000) {
+					if (addr[i] >= CARDENGINEI_ARM9_SDK5_LOCATION && addr[i] < CARDENGINEI_ARM9_SDK5_LOCATION+0x7E00) {
 						addr[i] -= CARDENGINEI_ARM9_SDK5_LOCATION;
 						addr[i] += CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 					}

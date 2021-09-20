@@ -136,6 +136,8 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern u32 overlaysSize;
+
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	if (saveOnFlashcard) {
@@ -156,6 +158,7 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
+	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
 	if (extendedMemory) {
 		ce9->romLocation = ROM_LOCATION_EXT;
@@ -209,10 +212,7 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-	  if (runOverlayCheck) {
-		extern u32 overlaysSize;
-
-		if (overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0x1000000 : 0x1800000) : 0x800000)) {
+		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0x1000000 : 0x1800000) : 0x800000)) {
 			if (cacheBlockSize == 0) {
 				ce9->cacheAddress += (overlaysSize/4)*4;
 			} else
@@ -222,7 +222,6 @@ int hookNdsRetailArm9(
 			}
 			ce9->valueBits |= b_overlaysInRam;
 		}
-	  }
 
 		/*if(strncmp(romTid, "CLJ", 3) == 0) {
 			ce9->valueBits |= b_cacheFlushFlag;

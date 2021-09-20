@@ -33,6 +33,7 @@
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
+#include "locations.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -203,7 +204,7 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #ifdef DLDI
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #else
-unsigned char* globalBuffer = (unsigned char*)0x02788000;
+unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
 #endif
 #endif
 
