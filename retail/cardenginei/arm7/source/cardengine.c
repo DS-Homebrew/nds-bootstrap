@@ -278,6 +278,11 @@ static void initialize(void) {
 	}
 	#endif
 
+	if (language >= 0 && language <= 7) {
+		// Change language
+		personalData->language = language;
+	}
+
 	//if (isSdk5(moduleParams)) {
 	//	*(u16*)0x02fffc40 = 1;	// Change boot indicator to Slot-1 card
 	//}
@@ -811,12 +816,12 @@ void myIrqHandlerVBlank(void) {
 		(*cheatEngine)();
 	}
 
-	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
+	if (language >= 0 && language <= 7 && languageAddr > 0) {
 		// Change language
-		personalData->language = language;
-		if (languageAddr > 0) {
-			// Extra measure for specific games
+		// Extra measure for specific games
+		if (languageTimer < 60*3) {
 			*languageAddr = language;
+			languageAddr = 0;
 		}
 		languageTimer++;
 	}
