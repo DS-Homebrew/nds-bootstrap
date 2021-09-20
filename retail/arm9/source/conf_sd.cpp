@@ -195,6 +195,13 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY").c_str(), NULL, 16);
 }
 
+static void load_game_conf(configuration* conf, const char* fn, char* romTid) {
+	easysave::ini config_file(fn);
+
+	// SDK5 (TWL) Donor NDS path
+	conf->cleanDonorPath = strdup(config_file.fetch(romTid, "DONOR_NDS_PATH").c_str());
+}
+
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fatMountSimple("sd", &__my_io_dsisd);
 	fatMountSimple("fat", dldiGetInternal());
@@ -389,6 +396,40 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
+		if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
+			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
+		}
+
+		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
+		fseek(ndsFile, 0, SEEK_SET);
+		fread(target, 1, 0x1000, ndsFile);
+
+		if (std::string(conf->cleanDonorPath) != std::string(conf->ndsPath) && strlen(conf->cleanDonorPath) > 8) {
+			fclose(ndsFile);
+			FILE* ndsFile = fopen(conf->cleanDonorPath, "rb");
+		  if (ndsFile) {
+			fseek(ndsFile, 0x1C0, SEEK_SET);
+			fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x1C8, SEEK_SET);
+			fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x1CC, SEEK_SET);
+			fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x1D0, SEEK_SET);
+			fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x1D8, SEEK_SET);
+			fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x1DC, SEEK_SET);
+			fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x224, SEEK_SET);
+			fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x22C, SEEK_SET);
+			fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
+
+			fseek(ndsFile, 0, SEEK_SET);
+			fread(target, 1, 0x180, ndsFile);
+		  }
+		}
+
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
@@ -397,9 +438,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(ndsFile, ndsArm7isrc, SEEK_SET);
 			fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
 		}
-		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
-		fseek(ndsFile, 0, SEEK_SET);
-		fread(target, 1, 0x1000, ndsFile);
 
 		if (target[0x01C] & 2)
 		{
