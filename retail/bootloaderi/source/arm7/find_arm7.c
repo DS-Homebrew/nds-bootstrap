@@ -270,7 +270,6 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* modul
 			swiHaltConstSignatureAlt, 1
 		);
 	}
-	u32 bak = dispStatAddr;
 	if (dispStatAddr) {
 		dispStatAddr += 0x20;
 		swiHaltOffset =
@@ -278,9 +277,7 @@ u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* modul
 				swiHaltSignature2, 1
 		);
 	}
-	if (!dispStatAddr && moduleParams->sdk_version < 0x2008000) {
-		dispStatAddr = bak;
-		dispStatAddr += 0x20;
+	if (!swiHaltOffset && moduleParams->sdk_version < 0x2008000) {
 		swiHaltOffset =
 			findOffsetBackwards((u32*)dispStatAddr, 0x40,
 				swiHaltSignature1, 1
