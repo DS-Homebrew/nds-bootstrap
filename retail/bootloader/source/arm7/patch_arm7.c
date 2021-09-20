@@ -78,7 +78,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	patchOffsetCache.ramClearChecked = true;
 }
 
-/*static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
 	if (!cardIrqEnableOffset) {
@@ -89,7 +89,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	return true;
 }
 
-static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+/*static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card check pull out
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
@@ -181,11 +181,11 @@ u32 patchCardNdsArm7(
 
 	//const char* romTid = getRomTid(ndsHeader);
 
-	/*if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
 	}
 
-	patchCardCheckPullOut(ce7, ndsHeader, moduleParams);*/
+	//patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
 	u32 saveResult = 0;
 

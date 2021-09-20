@@ -32,7 +32,7 @@ CFLAGS	:=	-g -Wall -Os\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM7 -DB4DS -D_NO_SDMMC -DNO_CARDID -DNO_TONCCPY
+CFLAGS	+=	$(INCLUDE) -DARM7 -DB4DS -D_NO_SDMMC -DNO_CARDID
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)

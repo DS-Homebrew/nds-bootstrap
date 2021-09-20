@@ -54,7 +54,7 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* cardReadDmaEndOffset);
 u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset);
-u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
+u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
 u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
@@ -72,6 +72,7 @@ u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findRamClearOffset(const tNDSHeader* ndsHeader);
+u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 #endif // FIND_H

@@ -107,6 +107,13 @@ static void initialize(void) {
 	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
 
+	if (language >= 0 && language <= 7) {
+		// Change language
+		personalData->language = language;
+	}
+
+	toncset((u8*)0x06020000, 0, 0x20000);	// Clear bootloader
+
 	initialized = true;
 }
 
@@ -131,19 +138,17 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	initialize();
-
 	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
 		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
 		(*cheatEngine)();
 	}
 
-	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
+	if (language >= 0 && language <= 7 && languageAddr > 0) {
 		// Change language
-		personalData->language = language;
-		if (languageAddr > 0) {
-			// Extra measure for specific games
+		// Extra measure for specific games
+		if (languageTimer < 60*3) {
 			*languageAddr = language;
+			languageAddr = 0;
 		}
 		languageTimer++;
 	}
@@ -212,6 +217,20 @@ void myIrqHandlerVBlank(void) {
 	#endif	
 	
 	cheat_engine_start();*/
+}
+
+u32 myIrqEnable(u32 irq) {	
+	int oldIME = enterCriticalSection();
+
+	#ifdef DEBUG		
+	nocashMessage("myIrqEnable\n");
+	#endif	
+
+	initialize();
+
+	REG_IE |= irq;
+	leaveCriticalSection(oldIME);
+	return irq;
 }
 
 //

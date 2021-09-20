@@ -279,7 +279,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	// Card irq enable
 	u32* cardIrqEnableOffset = patchOffsetCache.a9CardIrqEnableOffset;
 	if (!patchOffsetCache.a9CardIrqEnableOffset) {
-		cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams, &usesThumb);
+		cardIrqEnableOffset = a9FindCardIrqEnableOffset(ndsHeader, moduleParams, &usesThumb);
 		if (cardIrqEnableOffset) {
 			patchOffsetCache.a9CardIrqEnableOffset = cardIrqEnableOffset;
 			patchOffsetCache.a9CardIrqIsThumb = usesThumb;

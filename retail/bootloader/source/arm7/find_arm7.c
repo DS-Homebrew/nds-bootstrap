@@ -129,7 +129,7 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 	return cardCheckPullOutOffset;
 }
 
-/*u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
@@ -180,4 +180,4 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 
 	dbg_printf("\n");
 	return cardIrqEnableOffset;
-}*/
+}

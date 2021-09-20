@@ -1144,7 +1144,7 @@ u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset) {
 	return cardReadDmaStartOffset;
 }
 
-u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {
+u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
