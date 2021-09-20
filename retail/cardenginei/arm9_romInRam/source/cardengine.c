@@ -292,12 +292,18 @@ void __attribute__((target("arm"))) openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
 }
 
+void __attribute__((target("arm"))) sdk5MpuFix() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0\nLDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
 			if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 				openDebugRam();
+			} else {
+				sdk5MpuFix();
 			}
 		}/* else {
 			debug8mbMpuFix();

@@ -818,6 +818,10 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 void __attribute__((target("arm"))) openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
 }
+#else
+void __attribute__((target("arm"))) mpuFix() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0\nLDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
 #endif
 
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
@@ -825,6 +829,8 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	if (!flagsSet) {
 		#ifdef TWLSDK
 		openDebugRam();
+		#else
+		mpuFix();
 		#endif
 		//setExceptionHandler2();
 		//#ifdef DLDI
