@@ -42,6 +42,7 @@
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
+#define a7HaltPatched BIT(9)
 
 //extern void user_exception(void);
 
@@ -189,15 +190,17 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		int dma = 0;
-		for (dma = 0; dma < 4; dma++) {
-			if (!ndmaBusy(dma)) break;
+	if ((!(ce9->valueBits & a7HaltPatched) && !(ce9->valueBits & extendedMemory)) || (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode))) {
+		bool copyDone = false;
+		for (int dma = 0; dma < 4; dma++) {
+			if (!ndmaBusy(dma)) {
+				ndmaCopyWords(dma, (u8*)newSrc, dst, len2);
+				copyDone = true;
+				break;
+			}
 		}
-		if (dma == 4) {
+		if (!copyDone) {
 			tonccpy(dst, (u8*)newSrc, len2);
-		} else {
-			ndmaCopyWords(dma, (u8*)newSrc, dst, len2);
 		}
 		endCardReadDma();
 	} else if (ce9->valueBits & extendedMemory) {
@@ -343,7 +346,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	//readCount++;
 
-	if ((ce9->valueBits & extendedMemory) && dst >= 0x02400000 && dst < 0x02700000) {
+	if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}
 	
