@@ -1534,7 +1534,6 @@ int arm7_main(void) {
 			(ROMsupportsDsiMode(ndsHeader)
 			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
-			|| strncmp(romTid, "A2D", 3) == 0 // New Super Mario Bros.
 			) ? 0 : 1,
 			0,
 			ROMinRAM,
