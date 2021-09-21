@@ -100,6 +100,7 @@ static int aQSize = 0;
 #endif
 #endif
 static bool flagsSet = false;
+static bool region0FixNeeded = false;
 bool isDma = false;
 bool dmaCode = false;
 //static bool dmaReadOnArm7 = false;
@@ -779,6 +780,11 @@ void __attribute__((target("arm"))) debugRamMpuFix() {
 	asm("LDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
 }
 
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -854,6 +860,9 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 int cardRead(u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
+		if (region0FixNeeded) {
+			region0Fix();
+		}
 		debugRamMpuFix();
 		if (!FAT_InitFiles(false, 0))
 		{
@@ -1075,6 +1084,7 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {
+		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
 		if (unpatchedFuncs->mpuAccessOffset) {

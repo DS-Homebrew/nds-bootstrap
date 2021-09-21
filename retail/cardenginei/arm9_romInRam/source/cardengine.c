@@ -55,6 +55,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static bool flagsSet = false;
+static bool region0FixNeeded = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u32 romWordBak = 0;
@@ -307,8 +308,13 @@ void __attribute__((target("arm"))) openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
 }
 
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
 void __attribute__((target("arm"))) sdk5MpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0\nLDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
 }
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -320,9 +326,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			} else {
 				sdk5MpuFix();
 			}
-		}/* else {
-			debug8mbMpuFix();
-		}*/
+		}
+		if (region0FixNeeded) {
+			region0Fix();
+		}
 		if (ce9->valueBits & extendedMemory) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		}
@@ -572,6 +579,7 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {
+		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
 		if (unpatchedFuncs->mpuAccessOffset) {

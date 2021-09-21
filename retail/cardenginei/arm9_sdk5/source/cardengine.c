@@ -96,6 +96,9 @@ static int aQSize = 0;
 #endif
 
 static bool flagsSet = false;
+#ifndef TWLSDK
+static bool region0FixNeeded = false;
+#endif
 bool isDma = false;
 bool dmaCode = false;
 
@@ -820,8 +823,13 @@ void __attribute__((target("arm"))) openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
 }
 #else
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
 void __attribute__((target("arm"))) mpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0\nLDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
 }
 #endif
 
@@ -832,6 +840,9 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 		openDebugRam();
 		#else
 		mpuFix();
+		if (region0FixNeeded) {
+			region0Fix();
+		}
 		#endif
 		//setExceptionHandler2();
 		//#ifdef DLDI
@@ -1033,6 +1044,9 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {
+		#ifndef TWLSDK
+		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
+		#endif
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
 		if (unpatchedFuncs->mpuAccessOffset) {
