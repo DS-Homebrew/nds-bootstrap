@@ -295,7 +295,8 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, 
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	loader->asyncCardRead               = conf->asyncCardRead;
 	loader->cardReadDMA                 = conf->cardReadDMA;
-	loader->specialCard                      = conf->specialCard;
+	loader->swiHaltHook                 = conf->swiHaltHook;
+	loader->specialCard                 = conf->specialCard;
 
 	if (!dsiFeatures()) {
 		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;

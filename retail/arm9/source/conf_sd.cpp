@@ -167,6 +167,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Card read DMA
 	conf->cardReadDMA = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
 
+	// Hook SWI Halt (for SD reads with little to no sound issues)
+	conf->swiHaltHook = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SWI_HALT_HOOK", "1").c_str(), NULL, 0);
+
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH", "0").c_str(), NULL, 0);
 
@@ -195,12 +198,12 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY").c_str(), NULL, 16);
 }
 
-static void load_game_conf(configuration* conf, const char* fn, char* romTid) {
+/*static void load_game_conf(configuration* conf, const char* fn, char* romTid) {
 	easysave::ini config_file(fn);
 
 	// SDK5 (TWL) Donor NDS path
 	conf->cleanDonorPath = strdup(config_file.fetch(romTid, "DONOR_NDS_PATH").c_str());
-}
+}*/
 
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fatMountSimple("sd", &__my_io_dsisd);

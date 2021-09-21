@@ -19,6 +19,7 @@
 #define b_overlaysInRam BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
+#define b_a7HaltPatched BIT(9)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -137,6 +138,7 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	extern u32 overlaysSize;
+	extern bool swiHaltPatched;
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -157,6 +159,9 @@ int hookNdsRetailArm9(
 	}
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
+	}
+	if (swiHaltPatched) {
+		ce9->valueBits |= b_a7HaltPatched;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;

@@ -16,6 +16,7 @@ extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
 extern u8 asyncCardRead;
 extern u8 dsiSD;
+extern u8 swiHaltHook;
 
 extern bool sdRead;
 
@@ -50,6 +51,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
+bool swiHaltPatched = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM) {
 	extern bool setDmaPatched;
@@ -70,12 +72,12 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
 	 || strncmp(romTid, "YLU", 3) == 0		// Last Window: The Secret of Cape West
 	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
-	 || (strncmp(romTid, "AH9", 3) == 0 && asyncCardRead)		// Tony Hawk's American Sk8Land
+	 || strncmp(romTid, "AH9", 3) == 0		// Tony Hawk's American Sk8Land
 	) {
 		doPatch = false;
 	}
 
-	if (swiHaltOffset && doPatch) {
+	if (swiHaltOffset && swiHaltHook && doPatch) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
@@ -85,6 +87,8 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
 			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
 		}
+		swiHaltPatched = true;
+		dbg_printf("swiHalt hooked\n");
 	}
 
     dbg_printf("swiHalt location : ");

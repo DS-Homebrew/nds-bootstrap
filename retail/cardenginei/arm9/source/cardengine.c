@@ -45,6 +45,7 @@
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
+#define a7HaltPatched BIT(9)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -811,7 +812,7 @@ u32 cardReadDma() {
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
 			#ifndef DLDI
-			if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+			if (!(ce9->valueBits & a7HaltPatched) || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 			#endif
 				cardRead(NULL);
 				endCardReadDma();

@@ -42,6 +42,7 @@
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
+#define a7HaltPatched BIT(9)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -518,7 +519,7 @@ void cardSetDma (u32 * params) {
 	u32 len = dmaParams[5];
 
 	#ifndef DLDI
-	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+	if (!(ce9->valueBits & a7HaltPatched) || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 		cardRead(0, dst, src, len);
 		endCardReadDma();
 		return;

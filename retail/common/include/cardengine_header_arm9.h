@@ -76,6 +76,9 @@ typedef struct cardengineArm9 {
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysInRam
+		7: cacheFlushFlag
+		8: cardReadFix
+		9: a7HaltPatched
 	*/
     u32 overlaysSize;
 	u32 consoleModel;

@@ -17,7 +17,7 @@ typedef struct configuration {
 	char* donor3Path;
 	char* donorPath;
 	char* donorTwlPath;
-	char* cleanDonorPath;
+	//char* cleanDonorPath;
 	char* gbaPath;
 	char* gbaSavPath;
 	char* apPatchPath;
@@ -45,6 +45,7 @@ typedef struct configuration {
 	u8 dmaRomRead_LED;
 	bool asyncCardRead;
 	bool cardReadDMA;
+	bool swiHaltHook;
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;

@@ -17,6 +17,7 @@ extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
 extern u8 asyncCardRead;
 extern u8 cardReadDMA;
+extern u8 swiHaltHook;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
@@ -596,7 +597,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
 	if ((ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM)
-	 || (gameOnFlashcard && !isSdk5(moduleParams))) {
+	 || ((gameOnFlashcard || !swiHaltHook) && !isSdk5(moduleParams))) {
 		return false;
 	}
 	const char* romTid = getRomTid(ndsHeader);

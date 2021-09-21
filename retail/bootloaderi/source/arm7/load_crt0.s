@@ -67,6 +67,7 @@
 	.global dmaRomRead_LED
 	.global asyncCardRead
 	.global cardReadDMA
+	.global swiHaltHook
 	.global soundFreq
 	.global specialCard
 @---------------------------------------------------------------------------------
@@ -164,6 +165,8 @@ dmaRomRead_LED:
 asyncCardRead:
 	.byte	0
 cardReadDMA:
+	.byte	0
+swiHaltHook:
 	.byte	0
 soundFreq:
 	.byte	0

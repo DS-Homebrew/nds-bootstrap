@@ -51,6 +51,7 @@ typedef struct loadCrt0 {
     u8 dmaRomRead_LED;
     u8 asyncCardRead;
     u8 cardReadDMA;
+    u8 swiHaltHook;
     u8 soundFreq;
     u8 specialCard;
 } __attribute__ ((__packed__)) loadCrt0;
