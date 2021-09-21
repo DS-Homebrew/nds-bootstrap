@@ -971,7 +971,8 @@ void myIrqHandlerVBlank(void) {
 
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
-	} else if (valueBits & b_runCardEngineCheck) {
+	}
+	if (valueBits & b_runCardEngineCheck) {
 		calledViaIPC = false;
 		runCardEngineCheck();
 	}
