@@ -383,8 +383,8 @@ int hookNdsRetailArm7(
 
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x2000) {
-		u32 cheatEngineOffset = (u32)ce7-0x2400;
+	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
+		u32 cheatEngineOffset = (u32)ce7-0x2000;
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize);

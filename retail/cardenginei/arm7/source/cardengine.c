@@ -817,12 +817,12 @@ void myIrqHandlerVBlank(void) {
 		(*cheatEngine)();
 	}
 
-	if (language >= 0 && language <= 7 && languageAddr > 0) {
+	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
-		// Extra measure for specific games
-		if (languageTimer < 60*3) {
+		personalData->language = language;
+		if (languageAddr > 0) {
+			// Extra measure for specific games
 			*languageAddr = language;
-			languageAddr = 0;
 		}
 		languageTimer++;
 	}

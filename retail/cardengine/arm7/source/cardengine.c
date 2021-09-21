@@ -138,17 +138,17 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	if (*(u32*)((u32)ce7-(0x2400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x23FC;
+	if (*(u32*)((u32)ce7-(0x2000+0x3E8)) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)ce7-0x1FFC;
 		(*cheatEngine)();
 	}
 
-	if (language >= 0 && language <= 7 && languageAddr > 0) {
+	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
-		// Extra measure for specific games
-		if (languageTimer < 60*3) {
+		personalData->language = language;
+		if (languageAddr > 0) {
+			// Extra measure for specific games
 			*languageAddr = language;
-			languageAddr = 0;
 		}
 		languageTimer++;
 	}
