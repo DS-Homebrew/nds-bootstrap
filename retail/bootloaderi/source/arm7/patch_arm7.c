@@ -192,7 +192,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		dbg_printf("\n\n");
 	}
 
-	if (a7iStartOffset && (REG_SCFG_ROM & BIT(9)) && *(u32*)0x02ED0020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	if (a7iStartOffset && (REG_SCFG_ROM & BIT(9)) && *(u32*)0x02EC0020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		u16* swi24Offset = patchOffsetCache.a7Swi24Offset;
 		u16* swi25Offset = patchOffsetCache.a7Swi25Offset;
 		u16* swi26Offset = patchOffsetCache.a7Swi26Offset;
