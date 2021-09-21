@@ -9,8 +9,6 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
-//#define memcpy __builtin_memcpy // memcpy
-
 //bool cardReadFound = false; // patch_common.c
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
@@ -121,9 +119,9 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
     dbg_printf("cardRead location : ");
-    dbg_hexa(cardReadStartOffset);
+    dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
     dbg_hexa((u32)ce9);
     dbg_printf("\n\n");
@@ -160,9 +158,9 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
-	memcpy(cardPullOutOffset, cardPullOutPatch, 0x4);
+	tonccpy(cardPullOutOffset, cardPullOutPatch, 0x4);
     dbg_printf("cardPullOut location : ");
-    dbg_hexa(cardPullOutOffset);
+    dbg_hexa((u32)cardPullOutOffset);
     dbg_printf("\n\n");
 }
 
@@ -184,7 +182,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 	}
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
-	memcpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
+	tonccpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
@@ -217,9 +215,9 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
 		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
-		memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		tonccpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 		dbg_printf("cardId location : ");
-		dbg_hexa(cardIdStartOffset);
+		dbg_hexa((u32)cardIdStartOffset);
 		dbg_printf("\n\n");
 	}
 }
@@ -248,9 +246,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
     dbg_printf("cardReadDma location : ");
-    dbg_hexa(cardReadDmaStartOffset);
+    dbg_hexa((u32)cardReadDmaStartOffset);
     dbg_printf("\n\n");
 }
 
@@ -266,7 +264,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	if (reset) {
 		// Patch
 		u32* resetPatch = ce9->patches->reset_arm9;
-		memcpy(reset, resetPatch, 0x40);
+		tonccpy(reset, resetPatch, 0x40);
 		dbg_printf("reset location : ");
 		dbg_hexa((u32)reset);
 		dbg_printf("\n\n");
@@ -289,9 +287,9 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		return false;
 	}
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
-	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
+	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x20 : 0x30);
     dbg_printf("cardIrqEnable location : ");
-    dbg_hexa(cardIrqEnableOffset);
+    dbg_hexa((u32)cardIrqEnableOffset);
     dbg_printf("\n\n");
 	return true;
 }
@@ -891,11 +889,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
       //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandWritePatch = ce9->patches->nand_write_arm9;
-      memcpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
+      tonccpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
 
       //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandReadPatch = ce9->patches->nand_read_arm9;
-      memcpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
+      tonccpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
     } else {
         // Jam with the Band (Europe)
         if (strcmp(romTid, "UXBP") == 0) {
@@ -913,11 +911,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
             //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            memcpy((u32*)0x0206176C, nandWritePatch, 0x40);
+            tonccpy((u32*)0x0206176C, nandWritePatch, 0x40);
 
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            memcpy((u32*)0x02061AC4, nandReadPatch, 0x40);
+            tonccpy((u32*)0x02061AC4, nandReadPatch, 0x40);
     	}
 	}
 }

@@ -7,6 +7,7 @@
 #include "common.h"
 #include "value_bits.h"
 #include "locations.h"
+#include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
@@ -85,7 +86,7 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		return false;
 	}
 	u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-	memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	return true;
 }
 
@@ -94,7 +95,7 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-		memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }*/
 

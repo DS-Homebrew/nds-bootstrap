@@ -602,12 +602,8 @@ int arm7_main(void) {
 
 	if ((strcmp(romTid, "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
 		toncset((char*)0x02400000, 0xFF, 0xC0);
-		*(u8*)0x024000B2 = 0;
-		*(u8*)0x024000B3 = 0;
-		*(u8*)0x024000B4 = 0;
-		*(u8*)0x024000B5 = 0x24;
-		*(u8*)0x024000B6 = 0x24;
-		*(u8*)0x024000B7 = 0x24;
+		toncset((u8*)0x024000B2, 0, 3);
+		toncset((u8*)0x024000B5, 0x24, 3);
 		*(u16*)0x024000BE = 0x7FFF;
 		*(u16*)0x024000CE = 0x7FFF;
 	}

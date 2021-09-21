@@ -924,36 +924,40 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 		// Set region flag
 		if (region == 0xFE || region == -2) {
+			u8 newRegion = 0;
 			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 0;
+				newRegion = 0;
 			} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "T", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 1;
+				newRegion = 1;
 			} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "V", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 2;
+				newRegion = 2;
 			} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 3;
+				newRegion = 3;
 			} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 4;
+				newRegion = 4;
 			} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
-				*(u8*)(0x02FFFD70) = 5;
+				newRegion = 5;
 			}
+			toncset((u8*)0x02FFFD70, newRegion, 1);
 		} else if (region == 0xFF || region == -1) {
+			u8 newRegion = 0;
 			u8 country = *(u8*)0x02000405;
 			if (country == 0x01) {
-				*(u8*)(0x02FFFD70) = 0;	// Japan
+				newRegion = 0;	// Japan
 			} else if (country == 0xA0) {
-				*(u8*)(0x02FFFD70) = 4;	// China
+				newRegion = 4;	// China
 			} else if (country == 0x88) {
-				*(u8*)(0x02FFFD70) = 5;	// Korea
+				newRegion = 5;	// Korea
 			} else if (country == 0x41 || country == 0x5F) {
-				*(u8*)(0x02FFFD70) = 3;	// Australia
+				newRegion = 3;	// Australia
 			} else if ((country >= 0x08 && country <= 0x34) || country == 0x99 || country == 0xA8) {
-				*(u8*)(0x02FFFD70) = 1;	// USA
+				newRegion = 1;	// USA
 			} else if (country >= 0x40 && country <= 0x70) {
-				*(u8*)(0x02FFFD70) = 2;	// Europe
+				newRegion = 2;	// Europe
 			}
+			toncset((u8*)0x02FFFD70, newRegion, 1);
 		} else {
-			*(u8*)(0x02FFFD70) = region;
+			toncset((u8*)0x02FFFD70, region, 1);
 		}
 		// Set bitmask for supported languages
 		u8 curRegion = *(u8*)0x02FFFD70;
@@ -1366,12 +1370,8 @@ int arm7_main(void) {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x02400000, 0xFF, 0xC0);
-			*(u8*)0x024000B2 = 0;
-			*(u8*)0x024000B3 = 0;
-			*(u8*)0x024000B4 = 0;
-			*(u8*)0x024000B5 = 0x24;
-			*(u8*)0x024000B6 = 0x24;
-			*(u8*)0x024000B7 = 0x24;
+			toncset((u8*)0x024000B2, 0, 3);
+			toncset((u8*)0x024000B5, 0x24, 3);
 			*(u16*)0x024000BE = 0x7FFF;
 			*(u16*)0x024000CE = 0x7FFF;
 		} /*else // GBA file
