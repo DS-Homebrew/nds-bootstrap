@@ -729,10 +729,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load DSi ARM7 BIOS
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (cebin) {
-			fread((u32*)0x02ED0000, 1, 0x10000, cebin);
+			fread((u32*)0x02EC0000, 1, 0x10000, cebin);
 
 			// Relocate addresses
-			*(u32*)0x02ED58A8 += 0x02ED0000;
+			*(u32*)0x02EC58A8 += 0x02EC0000;
 		}
 		fclose(cebin);
 	}
