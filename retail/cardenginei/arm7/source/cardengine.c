@@ -211,7 +211,7 @@ static void driveInitialize(void) {
 
 	bool sdReadBak = sdRead;
 
-	if ((valueBits & b_dsiSD) && !(valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard)) {
+	if (valueBits & b_dsiSD) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
 			SD_Init();
@@ -1032,7 +1032,9 @@ u32 myIrqEnable(u32 irq) {
 
 	initialize();
 
-	REG_AUXIE &= ~(1UL << 8);
+	if (valueBits & b_dsiSD) {
+		REG_AUXIE &= ~(1UL << 8);
+	}
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
 		driveInitialize();
 	}

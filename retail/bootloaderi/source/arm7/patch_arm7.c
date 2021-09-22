@@ -304,6 +304,27 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }*/
 
+static void patchBootPreventer(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode != 3 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x00403000) {
+		return;
+	}
+
+	u32* bootPreventerOffset = patchOffsetCache.bootPreventerOffset;
+	if (!patchOffsetCache.bootPreventerOffset) {
+		bootPreventerOffset = findBootPreventerOffset(ndsHeader);
+		if (bootPreventerOffset) {
+			patchOffsetCache.bootPreventerOffset = bootPreventerOffset;
+			patchOffsetCacheChanged = true;
+		}
+	}
+	if (bootPreventerOffset) {
+		*bootPreventerOffset = 0xE12FFF1E;	// bx lr
+		dbg_printf("Boot preventer location : ");
+		dbg_hexa((u32)bootPreventerOffset);
+		dbg_printf("\n\n");
+	}
+}
+
 static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = patchOffsetCache.a7CardIrqEnableOffset;
@@ -395,6 +416,8 @@ u32 patchCardNdsArm7(
 		patchOffsetCacheChanged = true;
 	}
 
+	patchBootPreventer(ndsHeader);
+
 	patchScfgExt(ndsHeader, ROMinRAM);
 
 	patchSleepMode(ndsHeader);
@@ -461,7 +484,7 @@ u32 patchCardNdsArm7(
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
-	if (!gameOnFlashcard || !saveOnFlashcard) {
+	if (dsiSD) {
 		patchSdCardReset(ndsHeader, moduleParams);
 	}
 

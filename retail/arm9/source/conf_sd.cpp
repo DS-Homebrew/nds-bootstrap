@@ -325,8 +325,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && !conf->gameOnFlashcard && conf->dsiMode > 0 && unitCode == 2) {
-			donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
+		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && unitCode == (conf->gameOnFlashcard ? 3 : 2)) {
+			donorNdsFile = fopen(conf->gameOnFlashcard ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
 		} else
 		switch (ndsArm7Size) {
 			case 0x22B40:

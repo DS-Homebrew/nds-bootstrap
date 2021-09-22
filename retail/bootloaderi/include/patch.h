@@ -110,6 +110,7 @@ typedef struct patchOffsetCacheContents {
 	u32* swiGetPitchTableOffset;
 	u32 swiGetPitchTableChecked;
 	u32* sleepPatchOffset;
+	u32* bootPreventerOffset;
 	u32* a7CardIrqEnableOffset;
 	u32* cardCheckPullOutOffset;
 	u32 cardCheckPullOutChecked;

@@ -82,6 +82,10 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 // RAM clear
 //static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
+// Boot preventer (lol)
+static const u32 bootPreventerStartSignature[1] = {0xE92D47F0};
+static const u32 bootPreventerEndSignature[1]   = {0x04000300};
+
 // Card check pull out
 static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
 static const u32 cardCheckPullOutSignature2[4] = {0xE92D4018, 0xE24DD004, 0xE59F204C, 0xE1D210B0}; // SDK != 3
@@ -963,6 +967,36 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	dbg_printf("\n");
 	return ramClearOffset;
 }*/
+
+u32* findBootPreventerOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findBootPreventerOffset:\n");
+
+	u32* startOffset = NULL;
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
+		bootPreventerEndSignature, 1
+	);
+	if (endOffset) {
+		dbg_printf("Boot preventer end found: ");
+		dbg_hexa((u32)endOffset);
+		dbg_printf("\n");
+
+		startOffset = findOffsetBackwards(
+			endOffset, 0x200,
+			bootPreventerStartSignature, 1
+		);
+		if (startOffset) {
+			dbg_printf("Boot preventer start found\n");
+		} else {
+			dbg_printf("Boot preventer start not found\n");
+		}
+	} else {
+		dbg_printf("Boot preventer not found\n");
+	}
+
+	dbg_printf("\n");
+	return startOffset;
+}
 
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardCheckPullOutOffset:\n");
