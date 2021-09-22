@@ -556,7 +556,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (isDSiMode() && unitCode > 0) {
+	if (isDSiMode() && unitCode > 0 && (REG_SCFG_EXT7 == 0 ? !conf->gameOnFlashcard : conf->sdFound)) {
 		// Load device list
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
