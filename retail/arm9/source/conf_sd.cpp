@@ -988,8 +988,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if ((conf->gameOnFlashcard || !conf->isDSiWare) && conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
 			consoleDemoInit();
-			printf("Creating FAT table file.\n");
-			printf("Please wait...\n");
+			iprintf("Creating FAT table file.\n");
+			iprintf("Please wait...\n");
 
 			FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
 			if (fatTableFile) {
@@ -1008,15 +1008,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
 			consoleDemoInit();
-			printf("Creating RAM dump file.\n");
-			printf("Please wait...\n");
+			iprintf("Creating RAM dump file.\n");
+			iprintf("Please wait...\n");
 			/* printf("\n");
 			if (conf->consoleModel >= 2) {
-				printf("If this takes a while, press\n");
-				printf("HOME, then press B.\n");
+				iprintf("If this takes a while, press\n");
+				iprintf("HOME, then press B.\n");
 			} else {
-				printf("If this takes a while, close\n");
-				printf("the lid, and open it again.\n");
+				iprintf("If this takes a while, close\n");
+				iprintf("the lid, and open it again.\n");
 			} */
 
 			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
@@ -1038,8 +1038,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			char buffer[2][0x100] = {{0}};
 
 			consoleDemoInit();
-			printf("Creating screenshots.tar\n");
-			printf("Please wait...\n");
+			iprintf("Creating screenshots.tar\n");
+			iprintf("Please wait...\n");
 
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
