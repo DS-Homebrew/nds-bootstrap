@@ -96,6 +96,11 @@ static const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
 static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
+// Unknown function related to card id
+static const u32 cardIdThingSignature[3]         = {0xE92D4038, 0xE59F4090, 0xE5940008};
+static const u16 cardIdThingSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
+static const u16 cardIdThingSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
+
 // Card refresh (SDK 5)
 /*static const u32 cardRefreshSignatureEarly[4] = {0x02FFFC00, 0x02FFFAE0, 0x040001A4, 0x04100010};
 static const u32 cardRefreshSignature[3]      = {0x02FFFC00, 0x040001A4, 0x04100010};
@@ -1361,6 +1366,52 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	dbg_printf("\n");
 	return offset+signatureLen;
 }*/
+
+u32* findCardIdThingOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findCardIdThingOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		cardIdThingSignature, 3
+	);
+	if (offset) {
+		dbg_printf("CardID-related function found\n");
+	} else {
+		dbg_printf("CardID-related function not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findCardIdThingOffsetThumb(const tNDSHeader* ndsHeader) {
+	dbg_printf("findCardIdThingOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		cardIdThingSignatureThumb, 3
+	);
+	if (offset) {
+		dbg_printf("CardID-related function found\n");
+	} else {
+		dbg_printf("CardID-related function not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			cardIdThingSignatureThumbAlt, 3
+		);
+		if (offset) {
+			dbg_printf("CardID-related function alt found\n");
+		} else {
+			dbg_printf("CardID-related function alt not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
 
 u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardReadDmaEndOffset:\n");

@@ -17,6 +17,7 @@ typedef struct configuration {
 	char* donor3Path;
 	char* donorPath;
 	char* donorTwlPath;
+	char* donorTwlOnlyPath;
 	//char* cleanDonorPath;
 	char* gbaPath;
 	char* gbaSavPath;

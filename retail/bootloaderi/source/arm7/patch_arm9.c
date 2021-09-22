@@ -419,6 +419,40 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 }
 
+static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
+	if (ndsHeader->unitCode != 2 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
+		return;
+	}
+
+	// Card ID
+	u32* cardIdThingOffset = patchOffsetCache.cardIdThingOffset;
+	if (!patchOffsetCache.cardIdThingChecked) {
+		if (usesThumb) {
+			cardIdThingOffset = (u32*)findCardIdThingOffsetThumb(ndsHeader);
+		} else {
+			cardIdThingOffset = findCardIdThingOffset(ndsHeader);
+		}
+		if (cardIdThingOffset) {
+			patchOffsetCache.cardIdThingOffset = cardIdThingOffset;
+		}
+		patchOffsetCache.cardIdThingChecked = true;
+		patchOffsetCacheChanged = true;
+	}
+
+	if (cardIdThingOffset) {
+        // Patch
+		if (usesThumb) {
+			*(u16*)cardIdThingOffset = 0x4770;	// bx lr
+		} else {
+			*cardIdThingOffset = 0xE12FFF1E;	// bx lr
+		}
+
+		dbg_printf("cardIdThing location : ");
+		dbg_hexa((u32)cardIdThingOffset);
+		dbg_printf("\n\n");
+	}
+}
+
 /*static void patchCardRefresh(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	if (moduleParams->sdk_version < 0x5000000) {
 		return;
@@ -1796,6 +1830,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+
+	patchCardIdThing(ndsHeader, usesThumb);
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 

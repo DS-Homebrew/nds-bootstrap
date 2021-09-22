@@ -46,6 +46,7 @@
 extern bool sdRead;
 
 extern u32 newArm7binarySize;
+extern u32 newArm7ibinarySize;
 
 static const int MAX_HANDLER_LEN = 50;
 
@@ -252,7 +253,7 @@ int hookNdsRetailArm7(
 				hookLocation = findIrqListOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 			}
 			if (!hookLocation && ndsHeader->unitCode == 3) {
-				switch (*(u32*)0x02FFE1DC) {
+				switch (newArm7ibinarySize) {
 					case 0x6AFD4:
 						hookLocation = (u32*)0x2EE7360;
 						break;

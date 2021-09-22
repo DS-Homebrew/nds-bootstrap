@@ -114,6 +114,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDK5 (TWL) Donor NDS path
 	conf->donorTwlPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
 
+	// SDK5 (TWL) DSi-Exclusive Donor NDS path
+	conf->donorTwlOnlyPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWLONLY_NDS_PATH").c_str());
+
 	// GBA path
 	conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
 
@@ -309,7 +312,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 	}
 
+	u32 donorArm7iOffset = 0;
+	u32 donorModcrypt2len = 0;
+
 	FILE* cebin = NULL;
+	FILE* donorNdsFile = NULL;
 	bool donorLoaded = false;
 	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
@@ -318,25 +325,28 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
 
 		// Load donor ROM's arm7 binary, if needed
+		if (REG_SCFG_EXT7 == 0 && !conf->gameOnFlashcard && conf->dsiMode > 0 && unitCode == 2) {
+			donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
+		} else
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (hasCycloDSi) cebin = fopen(conf->donorTwlPath, "rb");
+				if (hasCycloDSi) donorNdsFile = fopen(conf->donorTwlPath, "rb");
 				break;
 			case 0x23708:
 			case 0x2378C:
 			case 0x237F0:
-				if (hasCycloDSi) cebin = fopen(conf->donorPath, "rb");
+				if (hasCycloDSi) donorNdsFile = fopen(conf->donorPath, "rb");
 				break;
 			case 0x2352C:
 			case 0x235DC:
 			case 0x23CAC:
-				if (hasCycloDSi) cebin = fopen(conf->donorE2Path, "rb");
+				if (hasCycloDSi) donorNdsFile = fopen(conf->donorE2Path, "rb");
 				break;
 			case 0x245C4:
 			case 0x24DA8:
 			case 0x24F50:
-				cebin = fopen(conf->donor2Path, "rb");
+				donorNdsFile = fopen(conf->donor2Path, "rb");
 				break;
 			case 0x2434C:
 			case 0x2484C:
@@ -344,26 +354,33 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x25D04:
 			case 0x25D94:
 			case 0x25FFC:
-				if (hasCycloDSi) cebin = fopen(conf->donor3Path, "rb");
+				if (hasCycloDSi) donorNdsFile = fopen(conf->donor3Path, "rb");
 				break;
 			case 0x27618:
 			case 0x2762C:
 			case 0x29CEC:
-				cebin = fopen(conf->donorPath, "rb");
+				donorNdsFile = fopen(conf->donorPath, "rb");
 				break;
 			default:
 				break;
 		}
 
-		if (cebin) {
+		if (donorNdsFile) {
 			u32 donorArm7Offset = 0;
-			fseek(cebin, 0x30, SEEK_SET);
-			fread(&donorArm7Offset, sizeof(u32), 1, cebin);
-			fseek(cebin, 0x3C, SEEK_SET);
-			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, cebin);
-			fseek(cebin, donorArm7Offset, SEEK_SET);
-			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, cebin);
-			fclose(cebin);
+			fseek(donorNdsFile, 0x30, SEEK_SET);
+			fread(&donorArm7Offset, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, 0x3C, SEEK_SET);
+			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, 0x1A0, SEEK_SET);
+			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, 0x1D0, SEEK_SET);
+			fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, 0x1DC, SEEK_SET);
+			fread((u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, 0x22C, SEEK_SET);
+			fread(&donorModcrypt2len, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, donorArm7Offset, SEEK_SET);
+			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, donorNdsFile);
 			donorLoaded = true;
 		}
 	}
@@ -437,9 +454,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
 		}
-		if (ndsArm7ilen) {
-			fseek(ndsFile, ndsArm7isrc, SEEK_SET);
-			fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
+		if (donorLoaded) {
+			if (*(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION) {
+				fseek(donorNdsFile, donorArm7iOffset, SEEK_SET);
+				fread((u32*)ndsArm7idst, 1, *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, donorNdsFile);
+			}
+		} else {
+			if (ndsArm7ilen) {
+				fseek(ndsFile, ndsArm7isrc, SEEK_SET);
+				fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
+			}
 		}
 
 		if (target[0x01C] & 2)
@@ -467,9 +491,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		  u128_lrot(key, 42) ;
 			}
 
-			uint32_t rk[4];
-			tonccpy(rk, key, 16) ;
-			
 			dsi_context ctx;
 			dsi_set_key(&ctx, key);
 			dsi_set_ctr(&ctx, &target[0x300]);
@@ -480,13 +501,52 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			dsi_set_key(&ctx, key);
 			dsi_set_ctr(&ctx, &target[0x314]);
-			if (modcrypt2len)
+			if (modcrypt2len && !donorLoaded)
 			{
 				decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, modcrypt2len);
 			}
 		}
+		if (donorLoaded && donorModcrypt2len) {
+			fseek(donorNdsFile, 0, SEEK_SET);
+			fread(target, 1, 0x1000, donorNdsFile);
+
+			if (target[0x01C] & 2)
+			{
+				u8 key[16] = {0} ;
+				u8 keyp[16] = {0} ;
+				if (target[0x01C] & 4)
+				{
+					// Debug Key
+					tonccpy(key, target, 16) ;
+				} else
+				{
+					//Retail key
+					char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
+					tonccpy(keyp, modcrypt_shared_key, 8) ;
+					for (int i=0;i<4;i++)
+					{
+						keyp[8+i] = target[0x0c+i] ;
+						keyp[15-i] = target[0x0c+i] ;
+					}
+					tonccpy(key, target+0x350, 16) ;
+					
+					u128_xor(key, keyp);
+					u128_add(key, DSi_KEY_MAGIC);
+			  u128_lrot(key, 42) ;
+				}
+
+				dsi_context ctx;
+				dsi_set_key(&ctx, key);
+				dsi_set_ctr(&ctx, &target[0x314]);
+				//if (donorModcrypt2len)
+				//{
+					decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, donorModcrypt2len);
+				//}
+			}
+		}
 	}
 	fclose(ndsFile);
+	fclose(donorNdsFile);
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
@@ -764,6 +824,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
   } else {
 	fclose(ndsFile);
+	fclose(donorNdsFile);
 
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");

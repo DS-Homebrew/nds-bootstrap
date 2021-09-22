@@ -138,6 +138,7 @@ static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
 
 u32 newArm7binarySize = 0;
+u32 newArm7ibinarySize = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -233,8 +234,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
-	memset_addrs_arm7(0x02800000, (u32)TARGETBUFFERHEADER);
-	memset_addrs_arm7(0x02C00000, 0x02E80000);
+	memset_addrs_arm7(0x02800000, 0x02E80000);
 	memset_addrs_arm7(0x02F00000, 0x02FFE000);
 	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
 	REG_IE = 0;
@@ -1253,7 +1253,6 @@ int arm7_main(void) {
 			savFile->fatTableCache = (u32)savFile->fatTableCache+0x01000000;
 		}
 	}*/
-	toncset((u32*)TARGETBUFFERHEADER, 0, 0x1000);	// Clear buffered DSi header
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
@@ -1524,6 +1523,10 @@ int arm7_main(void) {
 		}
 
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
+
+		if (*(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION != 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+		}
 
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(

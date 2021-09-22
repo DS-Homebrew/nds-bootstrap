@@ -21,6 +21,7 @@ extern u8 swiHaltHook;
 extern bool sdRead;
 
 extern u32 newArm7binarySize;
+extern u32 newArm7ibinarySize;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -186,7 +187,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	dbg_printf(useGetPitchTableBranch ? "swiGetPitchTableBranch location : " : "swiGetPitchTable location : ");
 	dbg_hexa((u32)swiGetPitchTableOffset);
 	dbg_printf("\n\n");
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && a7iStartOffset) {
 		dbg_printf("a7iStart location : ");
 		dbg_hexa((u32)a7iStartOffset);
 		dbg_printf("\n\n");
@@ -378,12 +379,14 @@ u32 patchCardNdsArm7(
 	u32 saveFileCluster
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
+	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
 	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
+		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
 		tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
-		toncset((u8*)DONOR_ROM_ARM7_LOCATION, 0, 0x40000);
+		toncset((u8*)DONOR_ROM_ARM7_LOCATION, 0, 0x3000C);
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
