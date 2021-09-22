@@ -97,7 +97,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
     dbg_printf("\n\n");
 }
 
-static void patchScfgExt(const tNDSHeader* ndsHeader, u32 ROMinRAM) {
+void patchScfgExt(const tNDSHeader* ndsHeader) {
 	if (ndsHeader->unitCode == 0) return;
 
 	u32* scfgExtOffset = patchOffsetCache.a7ScfgExtOffset;
@@ -418,7 +418,7 @@ u32 patchCardNdsArm7(
 
 	patchBootPreventer(ndsHeader);
 
-	patchScfgExt(ndsHeader, ROMinRAM);
+	patchScfgExt(ndsHeader);
 
 	patchSleepMode(ndsHeader);
 

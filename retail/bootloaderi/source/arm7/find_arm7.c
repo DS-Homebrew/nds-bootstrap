@@ -436,7 +436,7 @@ u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader) {
 	if (offset) {
 		dbg_printf("SCFG_EXT found\n");
 	} else {
-		dbg_printf("SCFG_EXT call not found\n");
+		dbg_printf("SCFG_EXT not found\n");
 	}
 
 	dbg_printf("\n");

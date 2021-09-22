@@ -419,11 +419,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 }
 
-static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
-	if (ndsHeader->unitCode != 2 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
-		return;
-	}
-
+void patchCardIdThing_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
 	// Card ID
 	u32* cardIdThingOffset = patchOffsetCache.cardIdThingOffset;
 	if (!patchOffsetCache.cardIdThingChecked) {
@@ -432,11 +428,20 @@ static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
 		} else {
 			cardIdThingOffset = findCardIdThingOffset(ndsHeader);
 		}
+		if (!cardIdThingOffset && searchAgainForThumb) {
+			cardIdThingOffset = (u32*)findCardIdThingOffsetThumb(ndsHeader);
+			if (cardIdThingOffset) {
+				usesThumb = true;
+				patchOffsetCache.a9IsThumb = usesThumb;
+			}
+		}
 		if (cardIdThingOffset) {
 			patchOffsetCache.cardIdThingOffset = cardIdThingOffset;
 		}
 		patchOffsetCache.cardIdThingChecked = true;
 		patchOffsetCacheChanged = true;
+	} else if (searchAgainForThumb) {
+		usesThumb = patchOffsetCache.a9IsThumb;
 	}
 
 	if (cardIdThingOffset) {
@@ -451,6 +456,13 @@ static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
 		dbg_hexa((u32)cardIdThingOffset);
 		dbg_printf("\n\n");
 	}
+}
+
+static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
+	if (ndsHeader->unitCode != 2 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
+		return;
+	}
+	patchCardIdThing_cont(ndsHeader, usesThumb, false);
 }
 
 /*static void patchCardRefresh(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {

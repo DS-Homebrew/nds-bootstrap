@@ -1271,7 +1271,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	if (gameOnFlashcard || !isDSiWare) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
@@ -1301,8 +1301,6 @@ int arm7_main(void) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
-		toncset((u32*)0x02680000, 0, 0x100000);
-
 		if (*(u8*)0x02FFE1BF & BIT(0)) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			DSiTouchscreenMode();
@@ -1327,8 +1325,42 @@ int arm7_main(void) {
 			//tonccpy((char*)0x02E9A834, newBannerPath, 16);
 		//}
 
+		newArm7binarySize = ndsHeader->arm7binarySize;
+		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
+
 		extern void rsetPatchCache(bool dsiWare);
 		rsetPatchCache(true);
+
+		if (REG_SCFG_EXT == 0) {
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				extern void patchCardIdThing_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+				patchCardIdThing_cont(ndsHeader, false, true);
+
+				if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+					// Replace incompatible ARM7 binary
+					newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
+					newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
+					*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+					tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
+				}
+
+				if (*(u32*)0x02FFE1D4 >= 0x03000000 && *(u32*)0x02FFE1D4 < 0x03040000) {
+					// Relocate device list
+					*(u32*)0x02FFE1D4 += 0x7D0000;
+				}
+			}
+
+			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+				rsetA7Cache();
+				patchOffsetCache.a7BinSize = newArm7binarySize;
+				patchOffsetCacheChanged = true;
+			}
+
+			extern void patchScfgExt(const tNDSHeader* ndsHeader);
+			patchScfgExt(ndsHeader);
+		}
+
+		toncset((u32*)0x02680000, 0, 0x100000);
 
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)NULL,

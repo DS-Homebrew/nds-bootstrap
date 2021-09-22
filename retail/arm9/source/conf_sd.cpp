@@ -556,7 +556,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (isDSiMode() && !donorLoaded && unitCode > 0) {
+	if (isDSiMode() && unitCode > 0) {
 		// Load device list
 		cebin = fopen("nitro:/deviceList.bin", "rb");
 		if (cebin) {
