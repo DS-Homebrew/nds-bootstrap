@@ -275,6 +275,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	char romTid[5] = {0};
 	u8 unitCode = 0;
 	u32 ndsArm7Size = 0;
+	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
 	u32 ndsArm9isrc = 0;
 	u32 ndsArm9idst = 0;
@@ -292,6 +293,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&unitCode, 1, 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x1A0, SEEK_SET);
+		fread(&a7mbk6, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1B4, SEEK_SET);
 		fread(&accessControl, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1C0, SEEK_SET);
@@ -325,7 +328,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && unitCode == (conf->gameOnFlashcard ? 3 : 2)) {
+		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && a7mbk6 == (conf->gameOnFlashcard ? 0x080037C0 : 0x00403000)) {
 			donorNdsFile = fopen(conf->gameOnFlashcard ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
 		} else
 		switch (ndsArm7Size) {

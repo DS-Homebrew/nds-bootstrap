@@ -305,7 +305,11 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }*/
 
 static void patchBootPreventer(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode != 3 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x00403000) {
+	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed
+	|| ((strncmp(getRomTid(ndsHeader), "KD9", 3) == 0 || strncmp(getRomTid(ndsHeader), "KAD", 3) == 0
+	  || strncmp(getRomTid(ndsHeader), "KPP", 3) == 0 || strncmp(getRomTid(ndsHeader), "KPF", 3) == 0)
+	&& *(u32*)0x02FFE1A0 == 0x00403000)
+	|| *(u32*)0x02FFE1A0 != 0x00403000) {
 		return;
 	}
 
