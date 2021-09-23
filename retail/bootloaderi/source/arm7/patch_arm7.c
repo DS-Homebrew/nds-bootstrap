@@ -304,7 +304,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }*/
 
-static void patchBootPreventer(const tNDSHeader* ndsHeader) {
+static void patchPostBoot(const tNDSHeader* ndsHeader) {
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed
 	|| ((strncmp(getRomTid(ndsHeader), "KD9", 3) == 0 || strncmp(getRomTid(ndsHeader), "KAD", 3) == 0
 	  || strncmp(getRomTid(ndsHeader), "KPP", 3) == 0 || strncmp(getRomTid(ndsHeader), "KPF", 3) == 0)
@@ -313,18 +313,18 @@ static void patchBootPreventer(const tNDSHeader* ndsHeader) {
 		return;
 	}
 
-	u32* bootPreventerOffset = patchOffsetCache.bootPreventerOffset;
-	if (!patchOffsetCache.bootPreventerOffset) {
-		bootPreventerOffset = findBootPreventerOffset(ndsHeader);
-		if (bootPreventerOffset) {
-			patchOffsetCache.bootPreventerOffset = bootPreventerOffset;
+	u32* postBootOffset = patchOffsetCache.postBootOffset;
+	if (!patchOffsetCache.postBootOffset) {
+		postBootOffset = findPostBootOffset(ndsHeader);
+		if (postBootOffset) {
+			patchOffsetCache.postBootOffset = postBootOffset;
 			patchOffsetCacheChanged = true;
 		}
 	}
-	if (bootPreventerOffset) {
-		*bootPreventerOffset = 0xE12FFF1E;	// bx lr
-		dbg_printf("Boot preventer location : ");
-		dbg_hexa((u32)bootPreventerOffset);
+	if (postBootOffset) {
+		*postBootOffset = 0xE12FFF1E;	// bx lr
+		dbg_printf("Post boot location : ");
+		dbg_hexa((u32)postBootOffset);
 		dbg_printf("\n\n");
 	}
 }
@@ -420,7 +420,7 @@ u32 patchCardNdsArm7(
 		patchOffsetCacheChanged = true;
 	}
 
-	patchBootPreventer(ndsHeader);
+	patchPostBoot(ndsHeader);
 
 	patchScfgExt(ndsHeader);
 

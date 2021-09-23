@@ -1351,6 +1351,7 @@ int arm7_main(void) {
 			}
 
 			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+				extern void rsetA7Cache(void);
 				rsetA7Cache();
 				patchOffsetCache.a7BinSize = newArm7binarySize;
 				patchOffsetCacheChanged = true;
