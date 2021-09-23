@@ -459,7 +459,7 @@ void patchCardIdThing_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool sea
 }
 
 static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
-	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (gameOnFlashcard && *(u32*)0x02FFE1A0 != 0x080037C0)) {
+	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
 		return;
 	}
 	patchCardIdThing_cont(ndsHeader, usesThumb, false);
