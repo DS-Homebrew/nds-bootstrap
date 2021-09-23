@@ -96,12 +96,12 @@ static const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
 static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
-// Unknown function related to card id
-static const u32 cardIdThingSignature[3]         = {0xE92D4070, 0xE59F0088, 0xE1D010B0};
-static const u32 cardIdThingSignatureAlt1[3]     = {0xE92D4038, 0xE59F0094, 0xE5901008};
-static const u32 cardIdThingSignatureAlt2[3]     = {0xE92D4038, 0xE59F4090, 0xE5940008};
-static const u16 cardIdThingSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
-static const u16 cardIdThingSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
+// PM init
+static const u32 pmInitSignature[3]         = {0xE92D4070, 0xE59F0088, 0xE1D010B0};
+static const u32 pmInitSignatureAlt1[3]     = {0xE92D4038, 0xE59F0094, 0xE5901008};
+static const u32 pmInitSignatureAlt2[3]     = {0xE92D4038, 0xE59F4090, 0xE5940008};
+static const u16 pmInitSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
+static const u16 pmInitSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
 
 // Card refresh (SDK 5)
 /*static const u32 cardRefreshSignatureEarly[4] = {0x02FFFC00, 0x02FFFAE0, 0x040001A4, 0x04100010};
@@ -1369,39 +1369,39 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	return offset+signatureLen;
 }*/
 
-u32* findCardIdThingOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findCardIdThingOffset:\n");
+u32* findPmInitOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findPmInitOffset:\n");
 
 	u32* offset = findOffset(
 		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		cardIdThingSignature, 3
+		pmInitSignature, 3
 	);
 	if (offset) {
-		dbg_printf("CardID-related function found\n");
+		dbg_printf("PM init found\n");
 	} else {
-		dbg_printf("CardID-related function not found\n");
+		dbg_printf("PM init not found\n");
 	}
 
 	if (!offset) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			cardIdThingSignatureAlt1, 3
+			pmInitSignatureAlt1, 3
 		);
 		if (offset) {
-			dbg_printf("CardID-related function alt 1 found\n");
+			dbg_printf("PM init alt 1 found\n");
 		} else {
-			dbg_printf("CardID-related function alt 1 not found\n");
+			dbg_printf("PM init alt 1 not found\n");
 		}
 	}
 	if (!offset) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			cardIdThingSignatureAlt2, 3
+			pmInitSignatureAlt2, 3
 		);
 		if (offset) {
-			dbg_printf("CardID-related function alt 2 found\n");
+			dbg_printf("PM init alt 2 found\n");
 		} else {
-			dbg_printf("CardID-related function alt 2 not found\n");
+			dbg_printf("PM init alt 2 not found\n");
 		}
 	}
 
@@ -1409,28 +1409,28 @@ u32* findCardIdThingOffset(const tNDSHeader* ndsHeader) {
 	return offset;
 }
 
-u16* findCardIdThingOffsetThumb(const tNDSHeader* ndsHeader) {
-	dbg_printf("findCardIdThingOffsetThumb:\n");
+u16* findPmInitOffsetThumb(const tNDSHeader* ndsHeader) {
+	dbg_printf("findPmInitOffsetThumb:\n");
 
 	u16* offset = findOffsetThumb(
 		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		cardIdThingSignatureThumb, 3
+		pmInitSignatureThumb, 3
 	);
 	if (offset) {
-		dbg_printf("CardID-related function thumb found\n");
+		dbg_printf("PM init thumb found\n");
 	} else {
-		dbg_printf("CardID-related function thumb not found\n");
+		dbg_printf("PM init thumb not found\n");
 	}
 
 	if (!offset) {
 		offset = findOffsetThumb(
 			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			cardIdThingSignatureThumbAlt, 3
+			pmInitSignatureThumbAlt, 3
 		);
 		if (offset) {
-			dbg_printf("CardID-related function thumb alt found\n");
+			dbg_printf("PM init thumb alt found\n");
 		} else {
-			dbg_printf("CardID-related function thumb alt not found\n");
+			dbg_printf("PM init thumb alt not found\n");
 		}
 	}
 

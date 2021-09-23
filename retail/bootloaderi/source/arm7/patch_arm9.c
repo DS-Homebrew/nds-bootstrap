@@ -419,50 +419,50 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 }
 
-void patchCardIdThing_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
+void patchPmInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
 	// Card ID
-	u32* cardIdThingOffset = patchOffsetCache.cardIdThingOffset;
-	if (!patchOffsetCache.cardIdThingChecked) {
+	u32* pmInitOffset = patchOffsetCache.pmInitOffset;
+	if (!patchOffsetCache.pmInitChecked) {
 		if (usesThumb) {
-			cardIdThingOffset = (u32*)findCardIdThingOffsetThumb(ndsHeader);
+			pmInitOffset = (u32*)findPmInitOffsetThumb(ndsHeader);
 		} else {
-			cardIdThingOffset = findCardIdThingOffset(ndsHeader);
+			pmInitOffset = findPmInitOffset(ndsHeader);
 		}
-		if (!cardIdThingOffset && searchAgainForThumb) {
-			cardIdThingOffset = (u32*)findCardIdThingOffsetThumb(ndsHeader);
-			if (cardIdThingOffset) {
+		if (!pmInitOffset && searchAgainForThumb) {
+			pmInitOffset = (u32*)findPmInitOffsetThumb(ndsHeader);
+			if (pmInitOffset) {
 				usesThumb = true;
 				patchOffsetCache.a9IsThumb = usesThumb;
 			}
 		}
-		if (cardIdThingOffset) {
-			patchOffsetCache.cardIdThingOffset = cardIdThingOffset;
+		if (pmInitOffset) {
+			patchOffsetCache.pmInitOffset = pmInitOffset;
 		}
-		patchOffsetCache.cardIdThingChecked = true;
+		patchOffsetCache.pmInitChecked = true;
 		patchOffsetCacheChanged = true;
 	} else if (searchAgainForThumb) {
 		usesThumb = patchOffsetCache.a9IsThumb;
 	}
 
-	if (cardIdThingOffset) {
+	if (pmInitOffset) {
         // Patch
 		if (usesThumb) {
-			*(u16*)cardIdThingOffset = 0x4770;	// bx lr
+			*(u16*)pmInitOffset = 0x4770;	// bx lr
 		} else {
-			*cardIdThingOffset = 0xE12FFF1E;	// bx lr
+			*pmInitOffset = 0xE12FFF1E;	// bx lr
 		}
 
-		dbg_printf("cardIdThing location : ");
-		dbg_hexa((u32)cardIdThingOffset);
+		dbg_printf("pmInit location : ");
+		dbg_hexa((u32)pmInitOffset);
 		dbg_printf("\n\n");
 	}
 }
 
-static void patchCardIdThing(const tNDSHeader* ndsHeader, bool usesThumb) {
+static void patchPmInit(const tNDSHeader* ndsHeader, bool usesThumb) {
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
 		return;
 	}
-	patchCardIdThing_cont(ndsHeader, usesThumb, false);
+	patchPmInit_cont(ndsHeader, usesThumb, false);
 }
 
 /*static void patchCardRefresh(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -1843,7 +1843,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	patchCardIdThing(ndsHeader, usesThumb);
+	patchPmInit(ndsHeader, usesThumb);
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 

@@ -68,8 +68,8 @@ typedef struct patchOffsetCacheContents {
     u32* cardPullOutOffset;
     u32* cardIdOffset;
     u32 cardIdChecked;
-    u32* cardIdThingOffset;
-    u32 cardIdThingChecked;
+    u32* pmInitOffset;
+    u32 pmInitChecked;
     u32* cardReadDmaOffset;
     u32* cardReadDmaEndOffset;
     u32 cardReadDmaChecked;
