@@ -1359,6 +1359,11 @@ int arm7_main(void) {
 
 			extern void patchScfgExt(const tNDSHeader* ndsHeader);
 			patchScfgExt(ndsHeader);
+		} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+			extern void rsetA7Cache(void);
+			rsetA7Cache();
+			patchOffsetCache.a7BinSize = newArm7binarySize;
+			patchOffsetCacheChanged = true;
 		}
 
 		toncset((u32*)0x02680000, 0, 0x100000);
