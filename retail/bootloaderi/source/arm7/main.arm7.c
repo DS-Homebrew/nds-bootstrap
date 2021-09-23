@@ -649,7 +649,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
-		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? romSize+ioverlaysSize : romSize) < 0x01000000)
+		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize : romSize) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
