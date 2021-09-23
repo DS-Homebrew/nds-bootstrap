@@ -541,9 +541,9 @@ static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->romSize+0x88) - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }
 
-static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
+/*static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
 	return (u32)dsiHeader->arm9iromOffset - dsiHeader->ndshdr.arm7romOffset - dsiHeader->ndshdr.arm7binarySize + overlaysSize;
-}
+}*/
 
 // SDK 5
 static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
@@ -649,7 +649,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
-		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? getIRomSizeNoArmBins(dsiHeader)+ioverlaysSize : romSize) < 0x01000000)
+		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? romSize+ioverlaysSize : romSize) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && getRomSizeNoArmBins(ndsHeader) < 0x01800000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && getRomSizeNoArmBins(ndsHeader) < 0x00800000));
@@ -800,7 +800,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	fileRead((char*)ROM_SDK5_LOCATION+getIRomSizeNoArmBins(dsiHeader), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
+	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-0x8000), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool isDSBrowser, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
