@@ -926,7 +926,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
 		// Set region flag
-		if (region == 0xFE || region == -2 || twlCfgCountry == 0) {
+		if (region == 0xFE || region == -2 || ((region == 0xFF || region == -1) && twlCfgCountry == 0)) {
 			u8 newRegion = 0;
 			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
 				newRegion = 0;
