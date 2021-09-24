@@ -613,7 +613,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
-  if (conf->gameOnFlashcard || !conf->isDSiWare) {
+  if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
 	if (cebin) {

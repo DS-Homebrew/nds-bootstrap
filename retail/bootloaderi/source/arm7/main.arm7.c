@@ -139,6 +139,7 @@ u32 srlAddr = 0;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
+u32 oldArm7mbk = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -979,7 +980,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
-	if (!gameOnFlashcard && isDSiWare) {
+	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || oldArm7mbk != 0x00403000)) {
 		*(u16*)(0x02FFFC40) = 3;						// Boot Indicator (NAND/SD)
 		return;
 	}
@@ -1271,7 +1272,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
@@ -1297,7 +1298,9 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (!gameOnFlashcard && isDSiWare) {
+	oldArm7mbk = *(u32*)0x02FFE1A0;
+
+	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || *(u32*)0x02FFE1A0 != 0x00403000)) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
@@ -1332,7 +1335,7 @@ int arm7_main(void) {
 		rsetPatchCache(true);
 
 		if (REG_SCFG_EXT == 0) {
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+			/*if (*(u32*)0x02FFE1A0 == 0x00403000) {
 				extern void patchPmInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
 				patchPmInit_cont(ndsHeader, false, true);
 
@@ -1348,7 +1351,7 @@ int arm7_main(void) {
 					// Relocate device list
 					*(u32*)0x02FFE1D4 += 0x7D0000;
 				}
-			}
+			}*/
 
 			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 				extern void rsetA7Cache(void);
@@ -1703,11 +1706,6 @@ int arm7_main(void) {
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
-	if ((!ROMsupportsDsiMode(ndsHeader) && !dsiModeConfirmed)
-	/*|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)*/) {
-		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}
-
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
@@ -1722,9 +1720,14 @@ int arm7_main(void) {
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, !sdRead, -1);	// Dump (decrypted?) arm9 binary
 	}
 
-	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
+	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && (REG_SCFG_EXT != 0 || gameOnFlashcard || oldArm7mbk != 0x00403000) && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
+	}
+
+	if ((!ROMsupportsDsiMode(ndsHeader) && !dsiModeConfirmed)
+	/*|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)*/) {
+		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 
 	startBinary_ARM7();
