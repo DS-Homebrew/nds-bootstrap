@@ -1108,6 +1108,8 @@ int arm7_main(void) {
 	aFile* romFile = (aFile*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT);
 	*romFile = getFileFromCluster(storedFileCluster);
 
+	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), !sdRead, -1);
+
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 
 	// Sav file
@@ -1129,7 +1131,7 @@ int arm7_main(void) {
 		//return -1;
 	}*/
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000)) {
 		u32 currentFatTableVersion = 3;
 		extern u32 currentClusterCacheSize;
 
@@ -1272,7 +1274,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000)) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
@@ -1298,9 +1300,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	oldArm7mbk = *(u32*)0x02FFE1A0;
-
-	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || *(u32*)0x02FFE1A0 != 0x00403000)) {
+	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || oldArm7mbk != 0x00403000)) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
