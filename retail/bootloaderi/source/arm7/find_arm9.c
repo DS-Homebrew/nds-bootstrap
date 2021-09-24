@@ -97,9 +97,8 @@ static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
 // PM init
-static const u32 pmInitSignature[3]         = {0xE92D4070, 0xE59F0088, 0xE1D010B0};
-static const u32 pmInitSignatureAlt1[3]     = {0xE92D4038, 0xE59F0094, 0xE5901008};
-static const u32 pmInitSignatureAlt2[3]     = {0xE92D4038, 0xE59F4090, 0xE5940008};
+static const u32 pmInitSignature[3]         = {0xE92D4038, 0xE59F0094, 0xE5901008};
+static const u32 pmInitSignatureAlt[3]      = {0xE92D4038, 0xE59F4090, 0xE5940008};
 static const u16 pmInitSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
 static const u16 pmInitSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
 
@@ -1385,23 +1384,12 @@ u32* findPmInitOffset(const tNDSHeader* ndsHeader) {
 	if (!offset) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			pmInitSignatureAlt1, 3
+			pmInitSignatureAlt, 3
 		);
 		if (offset) {
-			dbg_printf("PM init alt 1 found\n");
+			dbg_printf("PM init alt found\n");
 		} else {
-			dbg_printf("PM init alt 1 not found\n");
-		}
-	}
-	if (!offset) {
-		offset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			pmInitSignatureAlt2, 3
-		);
-		if (offset) {
-			dbg_printf("PM init alt 2 found\n");
-		} else {
-			dbg_printf("PM init alt 2 not found\n");
+			dbg_printf("PM init alt not found\n");
 		}
 	}
 
