@@ -123,6 +123,7 @@ extern u8 soundFreq;
 extern u8 specialCard;
 
 bool useTwlCfg = false;
+u8 twlCfgCountry = 0;
 int twlCfgLang = 0;
 
 bool sdRead = true;
@@ -247,6 +248,7 @@ static void resetMemory_ARM7(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	useTwlCfg = ((*(u8*)0x02000400 & 0x0F) && (*(u8*)0x02000401 == 0) && (*(u8*)0x02000402 == 0) && (*(u8*)0x02000404 == 0));
+	twlCfgCountry = *(u8*)0x02000405;
 	twlCfgLang = *(u8*)0x02000406;
 }
 
@@ -754,7 +756,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
-		if (ROMsupportsDsiMode(ndsHeader)) {
+		if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
 			*(u8*)0x02000406 = language;
 		}
 	}
@@ -924,7 +926,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
 		// Set region flag
-		if (region == 0xFE || region == -2) {
+		if (region == 0xFE || region == -2 || twlCfgCountry == 0) {
 			u8 newRegion = 0;
 			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
 				newRegion = 0;
@@ -940,20 +942,19 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 				newRegion = 5;
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
-		} else if (region == 0xFF || region == -1) {
+		} else if ((region == 0xFF || region == -1) && twlCfgCountry != 0) {
 			u8 newRegion = 0;
-			u8 country = *(u8*)0x02000405;
-			if (country == 0x01) {
+			if (twlCfgCountry == 0x01) {
 				newRegion = 0;	// Japan
-			} else if (country == 0xA0) {
+			} else if (twlCfgCountry == 0xA0) {
 				newRegion = 4;	// China
-			} else if (country == 0x88) {
+			} else if (twlCfgCountry == 0x88) {
 				newRegion = 5;	// Korea
-			} else if (country == 0x41 || country == 0x5F) {
+			} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
 				newRegion = 3;	// Australia
-			} else if ((country >= 0x08 && country <= 0x34) || country == 0x99 || country == 0xA8) {
+			} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
 				newRegion = 1;	// USA
-			} else if (country >= 0x40 && country <= 0x70) {
+			} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
 				newRegion = 2;	// Europe
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
