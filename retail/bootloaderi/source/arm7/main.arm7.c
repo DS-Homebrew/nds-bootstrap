@@ -1129,7 +1129,7 @@ int arm7_main(void) {
 		//return -1;
 	}*/
 
-	if (gameOnFlashcard || !isDSiWare) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000)) {
 		u32 currentFatTableVersion = 3;
 		extern u32 currentClusterCacheSize;
 
@@ -1229,7 +1229,7 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
-		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !isDSiWare) {
+		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && *(u32*)0x02FFE1A0 == 0x00403000))) {
 			/*if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
