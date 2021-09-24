@@ -105,6 +105,7 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 		scfgExtOffset = a7_findScfgExtOffset(ndsHeader);
 		if (scfgExtOffset) {
 			patchOffsetCache.a7ScfgExtOffset = scfgExtOffset;
+			patchOffsetCacheChanged = true;
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {

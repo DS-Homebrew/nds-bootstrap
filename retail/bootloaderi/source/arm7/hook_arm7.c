@@ -136,8 +136,6 @@ int hookNdsRetailArm7(
 
 	bool isDSiWare = (ce7 == NULL);
 
-	if (isDSiWare) newArm7binarySize = ndsHeader->arm7binarySize;
-
 	if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
 	}
