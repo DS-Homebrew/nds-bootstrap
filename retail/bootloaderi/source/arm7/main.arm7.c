@@ -925,6 +925,32 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
+		if (!useTwlCfg && ndsHeader->arm9destination >= 0x02000800) {
+			// Reconstruct TWLCFG
+			u8* twlCfg = (u8*)0x02000400;
+			u8* personalData = (u8*)0x02FFFC80;
+			u32 configFlags = 0x0300000F;
+			if (consoleModel < 2) {
+				u8 wifiLedState = i2cReadRegister(0x4A, 0x30);
+				if (wifiLedState == 0 || wifiLedState == 0x12) {
+					configFlags &= ~BIT(3); // Clear WiFi Enable flag
+				}
+			}
+			toncset32(twlCfg, configFlags, 1); // Config Flags
+			tonccpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
+			tonccpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
+			tonccpy(twlCfg+0x8, personalData+0x68, 4); // RTC Offset (difference in seconds on change)
+			tonccpy(twlCfg+0x1A, personalData+0x52, 1); // Alarm Hour   (0..17h)
+			tonccpy(twlCfg+0x1B, personalData+0x53, 1); // Alarm Minute (0..3Bh)
+			tonccpy(twlCfg+0x1E, personalData+0x56, 1); // Alarm Enable (0=Off, 1=On)
+			tonccpy(twlCfg+0x30, personalData+0x58, 0xC); // TSC calib
+			toncset32(twlCfg+0x3C, 0x0201209C, 1);
+			tonccpy(twlCfg+0x44, personalData+0x02, 1); // Favorite color (also Sysmenu Cursor Color)
+			tonccpy(twlCfg+0x46, personalData+0x03, 2); // Birthday (month, day)
+			tonccpy(twlCfg+0x48, personalData+0x06, 0x16); // Nickname (UCS-2), max 10 chars+EOL
+			tonccpy(twlCfg+0x5E, personalData+0x1C, 0x36); // Message (UCS-2), max 26 chars+EOL
+		}
+
 		// Set region flag
 		if (region == 0xFE || region == -2 || ((region == 0xFF || region == -1) && twlCfgCountry == 0)) {
 			u8 newRegion = 0;
