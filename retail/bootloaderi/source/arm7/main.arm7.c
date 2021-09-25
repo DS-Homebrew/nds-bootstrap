@@ -929,7 +929,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			// Reconstruct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
 			u8* personalData = (u8*)0x02FFFC80;
-			u32 configFlags = 0x0300000F;
+			u32 configFlags = 0x0100000F;
 			if (consoleModel < 2) {
 				u8 wifiLedState = i2cReadRegister(0x4A, 0x30);
 				if (wifiLedState == 0 || wifiLedState == 0x12) {
@@ -949,6 +949,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			tonccpy(twlCfg+0x46, personalData+0x03, 2); // Birthday (month, day)
 			tonccpy(twlCfg+0x48, personalData+0x06, 0x16); // Nickname (UCS-2), max 10 chars+EOL
 			tonccpy(twlCfg+0x5E, personalData+0x1C, 0x36); // Message (UCS-2), max 26 chars+EOL
+			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
+			toncset32(twlCfg+0x1E4, 0x500400, 1); // WlFirm RAM vars
+			toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
+			toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
+			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
 		}
 
 		// Set region flag
