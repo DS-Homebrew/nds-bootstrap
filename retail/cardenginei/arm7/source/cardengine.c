@@ -180,11 +180,11 @@ static void readSrBackendId(void) {
 	// Use SR backend ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
-	*(u32*)(0x02000308) = *(u32*)(ce7+0xA900);
-	*(u32*)(0x0200030C) = *(u32*)(ce7+0xA904);
+	*(u32*)(0x02000308) = 0;
+	*(u32*)(0x0200030C) = 0;
 	*(u32*)(0x02000310) = *(u32*)(ce7+0xA900);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0xA904);
-	*(u32*)(0x02000318) = 0x17;
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xA904) == 0x00030000 ? 0x13 : */ 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -378,7 +378,7 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (*(u32*)(ce7+0xA900) == 0) {
+		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(false);
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
@@ -387,7 +387,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	if (*(u32*)(ce7+0xA900) == 0) {
+	if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -403,12 +403,15 @@ void returnToLoader(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xA900) == 0) {
+		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xA900) == 0) {
+		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID

@@ -554,7 +554,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
 	cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
-	if (cebin) {
+	if (REG_SCFG_EXT7 == 0 && conf->gameOnFlashcard) {
+		/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
+		srBackendId[1] = 0x00030000;*/
+	} else if (cebin) {
 		fread(&srBackendId, sizeof(u32), 2, cebin);
 	}
 	fclose(cebin);
@@ -619,7 +622,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
-		tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+		if (REG_SCFG_EXT7 != 0) {
+			tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+		}
 		tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
@@ -629,7 +634,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION);
-		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+		if (REG_SCFG_EXT7 != 0) {
+			tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+		}
 		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
