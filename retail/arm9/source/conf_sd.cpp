@@ -553,14 +553,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
-	cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
 	if (REG_SCFG_EXT7 == 0 && conf->gameOnFlashcard) {
 		/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
 		srBackendId[1] = 0x00030000;*/
-	} else if (cebin) {
+	} else {
+		cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
 		fread(&srBackendId, sizeof(u32), 2, cebin);
+		fclose(cebin);
 	}
-	fclose(cebin);
 
 	if (isDSiMode() && unitCode > 0 && (REG_SCFG_EXT7 == 0 ? !conf->gameOnFlashcard : conf->sdFound)) {
 		// Load device list

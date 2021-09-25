@@ -85,6 +85,10 @@ typedef struct cardengineArm7 {
 		4: dsiMode
 		5: dsiSD
 		6: preciseVolumeControl
+		7: powerCodeOnVBlank
+		8: runCardEngineCheck
+		9: ipcEveryFrame
+		31: scfgLocked
 	*/
 	u32 overlaysSize;
     u32* languageAddr;

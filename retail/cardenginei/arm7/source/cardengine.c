@@ -53,6 +53,7 @@
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
 #define ipcEveryFrame BIT(9)
+#define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -405,7 +406,7 @@ void returnToLoader(void) {
 	if (consoleModel >= 2) {
 		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		} else {
+		} else if (*(char*)(ce7+0xA903) == 'H' || *(char*)(ce7+0xA903) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
