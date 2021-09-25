@@ -140,6 +140,8 @@ static int saveMutex = 0;
 
 bool returnToMenu = false;
 
+static u32 wordBak = 0;
+
 #ifdef TWLSDK
 static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
@@ -298,6 +300,8 @@ static void initialize(void) {
 	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 	}*/
+
+	wordBak = *(u32*)0x02000000;
 
 	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 
@@ -909,6 +913,7 @@ void myIrqHandlerVBlank(void) {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
+		*(u32*)0x02000000 = wordBak;	// In case if soft-resetting fails in DSiWarehax
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 		leaveCriticalSection(oldIME);
