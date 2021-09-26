@@ -1744,7 +1744,7 @@ int arm7_main(void) {
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams, isDSiWare);
 
-	if (dsiSD && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
 		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
 
 		sdRead = dsiSD;
