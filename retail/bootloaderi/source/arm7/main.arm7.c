@@ -1700,7 +1700,8 @@ int arm7_main(void) {
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
-		} else if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
+		} else if ((consoleModel > 0 && (REG_SCFG_EXT != 0 || !gameOnFlashcard || !ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed))
+				|| ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
