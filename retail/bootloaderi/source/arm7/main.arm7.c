@@ -125,6 +125,7 @@ extern u8 specialCard;
 bool useTwlCfg = false;
 u8 twlCfgCountry = 0;
 int twlCfgLang = 0;
+u8 wifiLedState = 0;
 
 bool sdRead = true;
 
@@ -929,20 +930,13 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			// Reconstruct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
 			u8* personalData = (u8*)0x02FFFC80;
-			u32 configFlags = 0x0100000F;
-			if (consoleModel < 2) {
-				u8 wifiLedState = i2cReadRegister(0x4A, 0x30);
-				if (wifiLedState == 0 || wifiLedState == 0x12) {
-					configFlags &= ~BIT(3); // Clear WiFi Enable flag
-				}
-			}
-			toncset32(twlCfg, configFlags, 1); // Config Flags
 			tonccpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
 			tonccpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
 			tonccpy(twlCfg+0x8, personalData+0x68, 4); // RTC Offset (difference in seconds on change)
 			tonccpy(twlCfg+0x1A, personalData+0x52, 1); // Alarm Hour   (0..17h)
 			tonccpy(twlCfg+0x1B, personalData+0x53, 1); // Alarm Minute (0..3Bh)
 			tonccpy(twlCfg+0x1E, personalData+0x56, 1); // Alarm Enable (0=Off, 1=On)
+			toncset(twlCfg+0x24, 0x03, 1); // Unknown (02h or 03h)
 			tonccpy(twlCfg+0x30, personalData+0x58, 0xC); // TSC calib
 			toncset32(twlCfg+0x3C, 0x0201209C, 1);
 			tonccpy(twlCfg+0x44, personalData+0x02, 1); // Favorite color (also Sysmenu Cursor Color)
@@ -954,6 +948,22 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
 			toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
 			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
+		}
+
+		if (ndsHeader->arm9destination >= 0x02000800) {
+			u8* twlCfg = (u8*)0x02000400;
+			u32 configFlags = useTwlCfg ? *(u32*)0x02000400 : 0x0100000F;
+			if (consoleModel < 2) {
+				if (wifiLedState == 0 || wifiLedState == 0x12) {
+					configFlags &= ~BIT(3); // Clear WiFi Enable flag
+				} else {
+					configFlags |= BIT(3);
+				}
+			}
+
+			toncset32(twlCfg, configFlags, 1); // Config Flags
+			tonccpy(twlCfg+0x10, (u8*)0x02FFE20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
+			tonccpy(twlCfg+0x9C, (u8*)0x02FFE2F0, 1); // Parental Controls Years of Age Rating (00h..14h)
 		}
 
 		// Set region flag
@@ -1098,6 +1108,8 @@ int arm7_main(void) {
 	resetMemory_ARM7();
 
 	arm9_macroMode = macroMode;
+
+	wifiLedState = i2cReadRegister(0x4A, 0x30);
 
 	// Init card
 	if (dsiSD) {
