@@ -217,12 +217,15 @@ int hookNdsRetailArm9(
 			}
 		}
 		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0x1000000 : 0x1800000) : 0x800000)) {
-			if (cacheBlockSize == 0) {
-				ce9->cacheAddress += (overlaysSize/4)*4;
-			} else
-			for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
-				ce9->cacheAddress += cacheBlockSize;
-				ce9->cacheSlots--;
+			extern u8 gameOnFlashcard;
+			if (!gameOnFlashcard) {
+				if (cacheBlockSize == 0) {
+					ce9->cacheAddress += (overlaysSize/4)*4;
+				} else
+				for (u32 i = 0; i < overlaysSize; i += cacheBlockSize) {
+					ce9->cacheAddress += cacheBlockSize;
+					ce9->cacheSlots--;
+				}
 			}
 			ce9->valueBits |= b_overlaysInRam;
 		}
