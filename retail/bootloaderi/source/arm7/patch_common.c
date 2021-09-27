@@ -559,7 +559,7 @@ u32 patchCardNds(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize,
+	bool usesCloneboot,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize
@@ -572,7 +572,7 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ROMinRAM, patchMpuRegion, patchMpuSize);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ROMinRAM, patchMpuRegion, usesCloneboot);
 	
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);

@@ -20,18 +20,32 @@ extern u8 swiHaltHook;
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
 
-static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb) {
+static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb, bool usesCloneboot) {
+	if (!usesCloneboot) {
+		u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
+		if (!patchOffsetCache.a9Swi12Offset) {
+			swi12Offset = a9_findSwi12Offset(ndsHeader);
+			if (swi12Offset) {
+				patchOffsetCache.a9Swi12Offset = swi12Offset;
+			}
+		}
+
+		// swi 0x12 call
+		if (swi12Offset && (u8)a9ScfgRom == 1 && (!(REG_SCFG_ROM & BIT(1)) || dsiModeConfirmed)) {
+			// Patch to call swi 0x02 instead of 0x12
+			u32* swi12Patch = ce9->patches->swi02;
+			tonccpy(swi12Offset, swi12Patch, 0x4);
+		}
+
+		dbg_printf("swi12 location : ");
+		dbg_hexa((u32)swi12Offset);
+		dbg_printf("\n\n");
+	}
+
 	bool ROMisDsiEnhanced = (ndsHeader->unitCode > 0);
 
-	u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
 	u32* dsiModeCheckOffset = patchOffsetCache.dsiModeCheckOffset;
 	u32* dsiModeCheck2Offset = patchOffsetCache.dsiModeCheck2Offset;
-	if (!patchOffsetCache.a9Swi12Offset) {
-		swi12Offset = a9_findSwi12Offset(ndsHeader);
-		if (swi12Offset) {
-			patchOffsetCache.a9Swi12Offset = swi12Offset;
-		}
-	}
 	if (ROMisDsiEnhanced) {
 		if (!patchOffsetCache.dsiModeCheckOffset) {
 			dsiModeCheckOffset = findDsiModeCheckOffset(ndsHeader);
@@ -44,12 +58,6 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 		}
 	}
 
-	// swi 0x12 call
-	if (swi12Offset && (u8)a9ScfgRom == 1 && (!(REG_SCFG_ROM & BIT(1)) || dsiModeConfirmed)) {
-		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = ce9->patches->swi02;
-		tonccpy(swi12Offset, swi12Patch, 0x4);
-	}
 	if (dsiModeCheckOffset && ROMisDsiEnhanced) {
 		// Patch to return as DS BIOS
 		if (dsiModeConfirmed && (u8)a9ScfgRom != 1) {
@@ -80,9 +88,6 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 		}
 	}
 
-    dbg_printf("swi12 location : ");
-    dbg_hexa((u32)swi12Offset);
-    dbg_printf("\n\n");
 	if (ROMisDsiEnhanced) {
 		dbg_printf("dsiModeCheck location : ");
 		dbg_hexa((u32)dsiModeCheckOffset);
@@ -766,7 +771,7 @@ static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeade
 
 static bool mpuInitCachePatched = false;
 
-static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion) {
 	if (patchMpuRegion == 2
 	|| (ndsHeader->unitCode > 0 && dsiModeConfirmed)) return;
 
@@ -851,9 +856,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
 	// Patch out all further mpu reconfiguration
-	dbg_printf("patchMpuSize: ");
-	dbg_hexa(patchMpuSize);
-	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 	u32* mpuInitOffset = patchOffsetCache.mpuInitOffset;
 	if (!mpuInitOffset) {
@@ -861,9 +863,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 	extern u32 iUncompressedSize;
 	u32 patchSize = iUncompressedSize;
-	if (patchMpuSize > 1) {
-		patchSize = patchMpuSize;
-	}
 	if (mpuInitOffset == mpuStartOffset) {
 		mpuInitOffset = findOffset(
 			//(u32*)((u32)mpuStartOffset + 4), patchSize,
@@ -1778,10 +1777,10 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
 
 	bool usesThumb;
-	bool slot2usesThumb = false;
+	//bool slot2usesThumb = false;
 	int readType;
 	int sdk5ReadType; // SDK 5
 	u32* cardReadEndOffset;
@@ -1809,7 +1808,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
-	fixForDifferentBios(ce9, ndsHeader, usesThumb);
+	fixForDifferentBios(ce9, ndsHeader, usesThumb, usesCloneboot);
 
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		patchCardRomInit(cardReadEndOffset, usesThumb);
@@ -1860,7 +1859,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams);
 
 	//patchDownloadplay(ndsHeader);

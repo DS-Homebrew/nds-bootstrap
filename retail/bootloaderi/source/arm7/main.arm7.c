@@ -1613,6 +1613,10 @@ int arm7_main(void) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 		}
 
+		u32 clonebootFlag = 0;
+		fileRead(&clonebootFlag, *romFile, ndsHeader->romSize, sizeof(u32), !sdRead, -1);
+		bool usesCloneboot = (clonebootFlag == 0x16361);
+
 		patchBinary(ndsHeader);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
@@ -1623,7 +1627,7 @@ int arm7_main(void) {
 			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 			) ? 0 : 1,
-			0,
+			usesCloneboot,
 			ROMinRAM,
 			saveFileCluster,
 			saveSize
