@@ -334,14 +334,14 @@ static void optionsMenu(s8 *mainScreen) {
 			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
 			// Clock speed
 			print(1, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
-			// VRAM boost
+			// VRAM mode
 			print(1, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		} else {
 			// Main screen
 			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
 			// Clock speed
 			printRight(0x1E, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
-			// VRAM boost
+			// VRAM mode
 			printRight(0x1E, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		}
 
