@@ -227,7 +227,7 @@ int hookNdsRetailArm9(
 					ce9->cacheSlots--;
 				}
 			}
-			if (REG_SCFG_EXT != 0 || !gameOnFlashcard || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+			if (!gameOnFlashcard || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 				ce9->valueBits |= b_overlaysInRam;
 			}
 		}
