@@ -211,7 +211,7 @@ unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
 #define CLUSTER_CACHE      0x2700000 // Main RAM
 #define CLUSTER_CACHE_SIZE 0x80000 // 512K
 
-static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+//static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -886,7 +886,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 	return dataPos;
 }
 
-void buildFatTableCache (aFile * file, int ndmaSlot) {
+/*void buildFatTableCache (aFile * file, int ndmaSlot) {
     #ifdef DEBUG
 	nocashMessage("buildFatTableCache");
     #endif
@@ -922,4 +922,4 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;
-}
+}*/
