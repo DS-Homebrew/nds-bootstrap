@@ -227,9 +227,7 @@ int hookNdsRetailArm9(
 					ce9->cacheSlots--;
 				}
 			}
-			if (!gameOnFlashcard || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
-				ce9->valueBits |= b_overlaysInRam;
-			}
+			ce9->valueBits |= b_overlaysInRam;
 		}
 
 		if(strncmp(romTid, "CLJ", 3) == 0) {
