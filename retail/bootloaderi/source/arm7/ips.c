@@ -10,6 +10,7 @@
 #include "tonccpy.h"
 
 extern u32 consoleModel;
+extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
 
 bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
@@ -19,6 +20,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 
 	const char* romTid = getRomTid(ndsHeader);
 	bool doLow = (strncmp(romTid, "BKW", 3) == 0 || strncmp(romTid, "VKG", 3) == 0);
+	bool armPatched = false;
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -29,11 +31,16 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		if (offset >= ndsHeader->arm9romOffset && ((offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) || arm9Only)) {
 			// ARM9 binary
 			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
+			armPatched = true;
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
 			// ARM7 binary
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
+			armPatched = true;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
+			if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+				return armPatched;
+			}
 			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
