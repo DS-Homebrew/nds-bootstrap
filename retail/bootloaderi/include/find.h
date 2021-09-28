@@ -61,13 +61,13 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 u16* findCardIdEndOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u16* cardReadEndOffset);
 u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardIdEndOffset);
 u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* cardIdEndOffset);
-u32* findPmInitOffset(const tNDSHeader* ndsHeader);
-u16* findPmInitOffsetThumb(const tNDSHeader* ndsHeader);
 //u32* findCardRefreshOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* cardReadDmaEndOffset);
 u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset);
+u32* findGbaSlotInitOffset(const tNDSHeader* ndsHeader);
+u16* findGbaSlotInitOffsetThumb(const tNDSHeader* ndsHeader);
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);

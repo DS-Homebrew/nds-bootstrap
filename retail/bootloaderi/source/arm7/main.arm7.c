@@ -1380,8 +1380,8 @@ int arm7_main(void) {
 
 		if (REG_SCFG_EXT == 0) {
 			/*if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				extern void patchPmInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
-				patchPmInit_cont(ndsHeader, false, true);
+				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+				patchGbaSlotInit_cont(ndsHeader, false, true);
 
 				if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 					// Replace incompatible ARM7 binary

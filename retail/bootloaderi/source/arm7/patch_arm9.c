@@ -424,50 +424,50 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 }
 
-void patchPmInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
+void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
 	// Card ID
-	u32* pmInitOffset = patchOffsetCache.pmInitOffset;
-	if (!patchOffsetCache.pmInitChecked) {
+	u32* gbaSlotInitOffset = patchOffsetCache.gbaSlotInitOffset;
+	if (!patchOffsetCache.gbaSlotInitChecked) {
 		if (usesThumb) {
-			pmInitOffset = (u32*)findPmInitOffsetThumb(ndsHeader);
+			gbaSlotInitOffset = (u32*)findGbaSlotInitOffsetThumb(ndsHeader);
 		} else {
-			pmInitOffset = findPmInitOffset(ndsHeader);
+			gbaSlotInitOffset = findGbaSlotInitOffset(ndsHeader);
 		}
-		if (!pmInitOffset && searchAgainForThumb) {
-			pmInitOffset = (u32*)findPmInitOffsetThumb(ndsHeader);
-			if (pmInitOffset) {
+		if (!gbaSlotInitOffset && searchAgainForThumb) {
+			gbaSlotInitOffset = (u32*)findGbaSlotInitOffsetThumb(ndsHeader);
+			if (gbaSlotInitOffset) {
 				usesThumb = true;
 				patchOffsetCache.a9IsThumb = usesThumb;
 			}
 		}
-		if (pmInitOffset) {
-			patchOffsetCache.pmInitOffset = pmInitOffset;
+		if (gbaSlotInitOffset) {
+			patchOffsetCache.gbaSlotInitOffset = gbaSlotInitOffset;
 		}
-		patchOffsetCache.pmInitChecked = true;
+		patchOffsetCache.gbaSlotInitChecked = true;
 		patchOffsetCacheChanged = true;
 	} else if (searchAgainForThumb) {
 		usesThumb = patchOffsetCache.a9IsThumb;
 	}
 
-	if (pmInitOffset) {
+	if (gbaSlotInitOffset) {
         // Patch
 		if (usesThumb) {
-			*(u16*)pmInitOffset = 0x4770;	// bx lr
+			*(u16*)gbaSlotInitOffset = 0x4770;	// bx lr
 		} else {
-			*pmInitOffset = 0xE12FFF1E;	// bx lr
+			*gbaSlotInitOffset = 0xE12FFF1E;	// bx lr
 		}
 
-		dbg_printf("pmInit location : ");
-		dbg_hexa((u32)pmInitOffset);
+		dbg_printf("gbaSlotInit location : ");
+		dbg_hexa((u32)gbaSlotInitOffset);
 		dbg_printf("\n\n");
 	}
 }
 
-static void patchPmInit(const tNDSHeader* ndsHeader, bool usesThumb) {
+static void patchGbaSlotInit(const tNDSHeader* ndsHeader, bool usesThumb) {
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || *(u32*)0x02FFE1A0 != 0x080037C0) {
 		return;
 	}
-	patchPmInit_cont(ndsHeader, usesThumb, false);
+	patchGbaSlotInit_cont(ndsHeader, usesThumb, false);
 }
 
 /*static void patchCardRefresh(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -1842,7 +1842,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 
-	patchPmInit(ndsHeader, usesThumb);
+	patchGbaSlotInit(ndsHeader, usesThumb);
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 

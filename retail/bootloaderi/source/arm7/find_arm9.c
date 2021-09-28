@@ -96,12 +96,6 @@ static const u16 cardIdStartSignatureThumbAlt1[2] = {0xB508, 0x202E};
 static const u16 cardIdStartSignatureThumbAlt2[2] = {0xB508, 0x20B8};
 static const u16 cardIdStartSignatureThumbAlt3[2] = {0xB510, 0x24B8};
 
-// PM init
-static const u32 pmInitSignature[3]         = {0xE92D4038, 0xE59F0094, 0xE5901008};
-static const u32 pmInitSignatureAlt[3]      = {0xE92D4038, 0xE59F4090, 0xE5940008};
-static const u16 pmInitSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
-static const u16 pmInitSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
-
 // Card refresh (SDK 5)
 /*static const u32 cardRefreshSignatureEarly[4] = {0x02FFFC00, 0x02FFFAE0, 0x040001A4, 0x04100010};
 static const u32 cardRefreshSignature[3]      = {0x02FFFC00, 0x040001A4, 0x04100010};
@@ -138,6 +132,12 @@ static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0
 static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
 static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
 static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
+
+// GBA Slot init (SDK 5)
+static const u32 gbaSlotInitSignature[3]         = {0xE92D4038, 0xE59F0094, 0xE5901008};
+static const u32 gbaSlotInitSignatureAlt[3]      = {0xE92D4038, 0xE59F4090, 0xE5940008};
+static const u16 gbaSlotInitSignatureThumb[3]    = {0xB538, 0x4818, 0x6881};
+static const u16 gbaSlotInitSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
@@ -1368,64 +1368,6 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 	return offset+signatureLen;
 }*/
 
-u32* findPmInitOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findPmInitOffset:\n");
-
-	u32* offset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		pmInitSignature, 3
-	);
-	if (offset) {
-		dbg_printf("PM init found\n");
-	} else {
-		dbg_printf("PM init not found\n");
-	}
-
-	if (!offset) {
-		offset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			pmInitSignatureAlt, 3
-		);
-		if (offset) {
-			dbg_printf("PM init alt found\n");
-		} else {
-			dbg_printf("PM init alt not found\n");
-		}
-	}
-
-	dbg_printf("\n");
-	return offset;
-}
-
-u16* findPmInitOffsetThumb(const tNDSHeader* ndsHeader) {
-	dbg_printf("findPmInitOffsetThumb:\n");
-
-	u16* offset = findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		pmInitSignatureThumb, 3
-	);
-	if (offset) {
-		dbg_printf("PM init thumb found\n");
-	} else {
-		dbg_printf("PM init thumb not found\n");
-	}
-
-	if (!offset) {
-		offset = findOffsetThumb(
-			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			pmInitSignatureThumbAlt, 3
-		);
-		if (offset) {
-			dbg_printf("PM init thumb alt found\n");
-		} else {
-			dbg_printf("PM init thumb alt not found\n");
-		}
-	}
-
-	dbg_printf("\n");
-	return offset;
-}
-
 u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardReadDmaEndOffset:\n");
 
@@ -1589,6 +1531,64 @@ u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset) {
 
 	dbg_printf("\n");
 	return cardReadDmaStartOffset;
+}
+
+u32* findGbaSlotInitOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findGbaSlotInitOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		gbaSlotInitSignature, 3
+	);
+	if (offset) {
+		dbg_printf("GBA slot init found\n");
+	} else {
+		dbg_printf("GBA slot init not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			gbaSlotInitSignatureAlt, 3
+		);
+		if (offset) {
+			dbg_printf("GBA slot init alt found\n");
+		} else {
+			dbg_printf("GBA slot init alt not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findGbaSlotInitOffsetThumb(const tNDSHeader* ndsHeader) {
+	dbg_printf("findGbaSlotInitOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		gbaSlotInitSignatureThumb, 3
+	);
+	if (offset) {
+		dbg_printf("GBA slot init thumb found\n");
+	} else {
+		dbg_printf("GBA slot init thumb not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			gbaSlotInitSignatureThumbAlt, 3
+		);
+		if (offset) {
+			dbg_printf("GBA slot init thumb alt found\n");
+		} else {
+			dbg_printf("GBA slot init thumb alt not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {
