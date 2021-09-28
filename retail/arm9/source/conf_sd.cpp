@@ -795,7 +795,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	if (!isDSiMode() && unitCode>0 && conf->dsiMode) {
+	/*if (!isDSiMode() && unitCode>0 && conf->dsiMode) {
 		// Load DSi ARM7 BIOS
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (cebin) {
@@ -805,7 +805,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			*(u32*)0x02EC58A8 += 0x02EC0000;
 		}
 		fclose(cebin);
-	}
+	}*/
 
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";

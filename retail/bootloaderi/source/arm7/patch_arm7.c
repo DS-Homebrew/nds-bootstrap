@@ -134,7 +134,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
-	u32 a7iStartOffset = patchOffsetCache.a7iStartOffset;
+	//u32 a7iStartOffset = patchOffsetCache.a7iStartOffset;
 	if (!patchOffsetCache.a7Swi12Offset) {
 		swi12Offset = a7_findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
@@ -152,13 +152,13 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		}
 		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
-	if (!patchOffsetCache.a7iStartOffset && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	/*if (!patchOffsetCache.a7iStartOffset && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		a7iStartOffset = (u32)findA7iStartOffset();
 		if (a7iStartOffset) {
 			patchOffsetCache.a7iStartOffset = a7iStartOffset;
 			patchOffsetCacheChanged = true;
 		}
-	}
+	}*/
 
 	// swi 0x12 call
 	if (swi12Offset && !(REG_SCFG_ROM & BIT(9))) {
@@ -188,7 +188,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	dbg_printf(useGetPitchTableBranch ? "swiGetPitchTableBranch location : " : "swiGetPitchTable location : ");
 	dbg_hexa((u32)swiGetPitchTableOffset);
 	dbg_printf("\n\n");
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && a7iStartOffset) {
+	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed && a7iStartOffset) {
 		dbg_printf("a7iStart location : ");
 		dbg_hexa((u32)a7iStartOffset);
 		dbg_printf("\n\n");
@@ -269,7 +269,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		dbg_printf(" ");
 		dbg_hexa((u32)swi27Offset - a7iStartOffset + 0x2F88000);
 		dbg_printf("\n\n");
-	}
+	}*/
 }
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
