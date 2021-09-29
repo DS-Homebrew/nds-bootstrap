@@ -751,14 +751,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
 		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
-		setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST", "VRAM Boost").c_str(), igmText->options[2]);
+		setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->options[2]);
 		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
 		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
 		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
 		setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
 		setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
-		setIgmString(lang.fetch("OPTIONS", "OFF", "Off").c_str(), igmText->options[8]);
-		setIgmString(lang.fetch("OPTIONS", "ON", "On").c_str(), igmText->options[9]);
+		setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->options[8]);
+		setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->options[9]);
 
 		if (conf->dsiMode > 0 && unitCode > 0) {
 			// Relocate
@@ -884,14 +884,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
 		//setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
-		//setIgmString(lang.fetch("OPTIONS", "VRAM_BOOST", "VRAM Boost").c_str(), igmText->options[2]);
+		//setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->options[2]);
 		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
 		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
 		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
 		//setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
 		//setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
-		//setIgmString(lang.fetch("OPTIONS", "OFF", "Off").c_str(), igmText->options[8]);
-		//setIgmString(lang.fetch("OPTIONS", "ON", "On").c_str(), igmText->options[9]);
+		//setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->options[8]);
+		//setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->options[9]);
 
 		fclose(cebin);
 
