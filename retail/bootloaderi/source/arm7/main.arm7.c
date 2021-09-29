@@ -948,6 +948,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
 			toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
 			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
+
+			dbg_printf("TWLCFG reconstructed\n");
 		}
 
 		if (ndsHeader->arm9destination >= 0x02000800) {
