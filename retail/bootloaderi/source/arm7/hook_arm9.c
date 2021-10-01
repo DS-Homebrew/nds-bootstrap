@@ -230,7 +230,7 @@ int hookNdsRetailArm9(
 			ce9->valueBits |= b_overlaysInRam;
 		}
 
-		if(strncmp(romTid, "CLJ", 3) == 0) {
+		if (strncmp(romTid, "CLJ", 3) == 0 || strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cacheFlushFlag;
 		}
 
