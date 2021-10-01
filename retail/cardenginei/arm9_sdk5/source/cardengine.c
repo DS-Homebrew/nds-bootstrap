@@ -749,7 +749,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = (ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+	sharedAddr[2] = (ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
@@ -757,7 +757,7 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	#endif
 
 	// Copy directly
-	tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+	tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 
 	return 0;
 }

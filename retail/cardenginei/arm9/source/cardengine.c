@@ -744,7 +744,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 
 		sharedAddr[0] = dst;
 		sharedAddr[1] = len;
-		sharedAddr[2] = (ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src;
+		sharedAddr[2] = (ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
 		sharedAddr[3] = commandRead;
 
 		waitForArm7();
@@ -752,7 +752,7 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 		#endif
 
 		// Copy directly
-		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+		tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 
 		// Update cardi common
 		cardStruct[0] = src + len;

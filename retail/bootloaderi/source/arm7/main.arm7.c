@@ -788,14 +788,14 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 
-			if (strncmp(romTid, "BKW", 3) == 0 || strncmp(romTid, "VKG", 3) == 0) {
+			if (strncmp(romTid, "BKW", 3) == 0) {
 				overlaysLocation = (u32)CACHE_ADRESS_START_low;
 			}
 		}
-		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
+		fileRead((char*)overlaysLocation, file,ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
 
-		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-			*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -841,9 +841,9 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool isDSBrowser, const 
 				fileRead((char*)ndsHeader->arm9destination + 0x0A400000 + 0x4000, *romFile, romOffset, ndsHeader->arm9binarySize - 0x4000, !sdRead, 0); // ARM9 binary
 				fileRead((char*)ndsHeader->arm7destination + 0x0A400000, *romFile, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, !sdRead, 0); // ARM7 binary
 			}
-			fileRead((char*)romLocation, *romFile, 0x4000 + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0); // Overlays
-			if (!isSdk5(moduleParams) && *(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-				*(u32*)((romLocation-0x4000-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
+			fileRead((char*)romLocation, *romFile, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0); // Overlays
+			if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+				*(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 			}
 		}
 		fileRead((char*)romLocation + ((dsiModeConfirmed || extendedMemoryConfirmed) ? 0 : overlaysSize), *romFile,
@@ -1736,7 +1736,7 @@ int arm7_main(void) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 			dbg_printf("AP-fix found\n");
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
-			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), (isSdk5(moduleParams) || dsiModeConfirmed), ROMinRAM)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");

@@ -183,8 +183,7 @@ int hookNdsRetailArm9(
 				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheSlots = dev_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
-			} else if ((strncmp(romTid, "BKW", 3) == 0)
-					|| (strncmp(romTid, "VKG", 3) == 0 && !dsiModeConfirmed)) {
+			} else if (strncmp(romTid, "BKW", 3) == 0) {
 				ce9->romLocation = CACHE_ADRESS_START_low;
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;

@@ -13,13 +13,13 @@ extern u32 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool higherMem, bool ROMinRAM) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool isSdk5, bool ROMinRAM) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
-	bool doLow = (strncmp(romTid, "BKW", 3) == 0 || strncmp(romTid, "VKG", 3) == 0);
+	bool doLow = (strncmp(romTid, "BKW", 3) == 0);
 	bool armPatched = false;
 
 	int ipson = 5;
@@ -41,20 +41,21 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				return armPatched;
 			}
-			rombyte = (void*)(higherMem ? ROM_SDK5_LOCATION : ROM_LOCATION);
+			rombyte = (void*)(isSdk5 ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
-			} else if (consoleModel == 0 && higherMem) {
+			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
 
 				if (doLow) {
 					rombyte = (void*)CACHE_ADRESS_START_low;
 				}
 			}
-			if (ROMinRAM) {
-				rombyte -= (ndsHeader->arm9binarySize-0x4000);
+			if (ROMinRAM && (dsiModeConfirmed || extendedMemoryConfirmed)) {
+				rombyte -= 0x8000;
 			} else {
-				rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
+				rombyte -= ndsHeader->arm9romOffset;
+				rombyte -= ndsHeader->arm9binarySize;
 			}
 		}
 		ipson += 3;
