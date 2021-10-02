@@ -382,6 +382,25 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
+	// Dragon's Lair (USA)
+    if (strcmp(romTid, "KDLE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x02012064 = 0xE1A00000; // nop
+		*(u32*)0x02012068 = 0xE1A00000; // nop
+		*(u32*)0x020132D0 = 0xE1A00000; // nop
+		*(u32*)0x0201360C = 0xE1A00000; // nop
+		*(u32*)0x02013A54 = 0xE1A00000; // nop
+		*(u32*)0x02014DB8 = 0xE1A00000; // nop
+		*(u32*)0x02016144 = 0xE1A00000; // nop
+		*(u32*)0x0202FACC = 0xE1A00000; // nop
+		*(u32*)0x02033044 = 0xE1A00000; // nop
+		*(u32*)0x02036A4C = 0xE1A00000; // nop
+		*(u32*)0x02038868 = 0xE1A00000; // nop
+		*(u32*)0x02038878 = 0xE1A00000; // nop
+		*(u32*)0x020389BC = 0xE1A00000; // nop
+	}
+
 	// Glory Days: Tactical Defense (USA)
     if (strcmp(romTid, "KGKE") == 0) {
 		*(u32*)0x02004878 = 0xE1A00000; // nop
