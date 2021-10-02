@@ -397,22 +397,27 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033044 = 0xE1A00000; // nop
 		*(u32*)0x02036A4C = 0xE1A00000; // nop
 		*(u32*)0x02038868 = 0xE1A00000; // nop
+		*(u32*)0x0203886C = 0xE1A00000; // nop
 		*(u32*)0x02038878 = 0xE1A00000; // nop
 		*(u32*)0x020389BC = 0xE1A00000; // nop
+		*(u32*)0x02038A18 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
 	//	*(u32*)0x02070558 = 0xE1A00000; // nop
 	}
 
 	// Glory Days: Tactical Defense (USA)
     if (strcmp(romTid, "KGKE") == 0) {
-	//	*(u32*)0x02004878 = 0xE1A00000; // nop
-	//	*(u32*)0x0200487C = 0xE1A00000; // nop
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x020057A0 = 0xE1A00000; // nop
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
 		*(u32*)0x02017128 = 0xE1A00000; // nop
 		*(u32*)0x02018F94 = 0xE1A00000; // nop
+		*(u32*)0x02018F98 = 0xE1A00000; // nop
 		*(u32*)0x02018FA4 = 0xE1A00000; // nop
 		*(u32*)0x02019104 = 0xE1A00000; // nop
+		*(u32*)0x02019160 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0206710C = 0xE1A00000; // nop
 		*(u32*)0x02067110 = 0xE1A00000; // nop
 		*(u32*)0x02067114 = 0xE1A00000; // nop
