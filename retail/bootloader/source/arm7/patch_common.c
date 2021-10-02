@@ -451,7 +451,7 @@ u32 patchCardNds(
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS
 		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
 		rsetA7CacheDone = true;
 	}
