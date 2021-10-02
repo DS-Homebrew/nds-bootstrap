@@ -218,14 +218,18 @@ static void initialize(void) {
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
 
-		buildFatTableCache(&romFile);
+		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
+
+		if (!cloneboot) {
+			buildFatTableCache(&romFile);
+		}
 		buildFatTableCache(&savFile);
 
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
 
-		if (ce9->valueBits & ROMinRAM) {
+		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
 			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-0x4000);
 			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
 		}
