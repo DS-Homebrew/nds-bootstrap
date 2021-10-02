@@ -87,6 +87,7 @@ typedef struct patchOffsetCacheContents {
 	u32 ramClearChecked;
 	u32* sleepPatchOffset;
 	u32* postBootOffset;
+	u32* a7CardIrqEnableOffset;
 	u32* a7IrqHandlerOffset;
 	u32 savePatchType;
 	u32 relocateStartOffset;
