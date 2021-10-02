@@ -399,12 +399,13 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02038868 = 0xE1A00000; // nop
 		*(u32*)0x02038878 = 0xE1A00000; // nop
 		*(u32*)0x020389BC = 0xE1A00000; // nop
+	//	*(u32*)0x02070558 = 0xE1A00000; // nop
 	}
 
 	// Glory Days: Tactical Defense (USA)
     if (strcmp(romTid, "KGKE") == 0) {
-		*(u32*)0x02004878 = 0xE1A00000; // nop
-		*(u32*)0x0200487C = 0xE1A00000; // nop
+	//	*(u32*)0x02004878 = 0xE1A00000; // nop
+	//	*(u32*)0x0200487C = 0xE1A00000; // nop
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020057A0 = 0xE1A00000; // nop
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
