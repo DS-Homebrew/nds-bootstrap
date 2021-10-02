@@ -517,6 +517,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.swiGetPitchTableOffset = 0;
 	patchOffsetCache.swiGetPitchTableChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.postBootOffset = 0;
 	patchOffsetCache.a7CardIrqEnableOffset = 0;
 	patchOffsetCache.cardCheckPullOutOffset = 0;
 	patchOffsetCache.cardCheckPullOutChecked = 0;

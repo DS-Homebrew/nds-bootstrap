@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 18;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 19;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -379,6 +379,34 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
+
+	// Patch DSiWare to run in DS mode
+
+	// Glory Days: Tactical Defense (USA)
+    if (strcmp(romTid, "KGKE") == 0) {
+		*(u32*)0x02004878 = 0xE1A00000; // nop
+		*(u32*)0x0200487C = 0xE1A00000; // nop
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020057A0 = 0xE1A00000; // nop
+		*(u32*)0x0200B488 = 0xE1A00000; // nop
+		*(u32*)0x02017128 = 0xE1A00000; // nop
+		*(u32*)0x02018F94 = 0xE1A00000; // nop
+		*(u32*)0x02018FA4 = 0xE1A00000; // nop
+		*(u32*)0x02019104 = 0xE1A00000; // nop
+		*(u32*)0x0206710C = 0xE1A00000; // nop
+		*(u32*)0x02067110 = 0xE1A00000; // nop
+		*(u32*)0x02067114 = 0xE1A00000; // nop
+		*(u32*)0x02067118 = 0xE1A00000; // nop
+		*(u32*)0x0206711C = 0xE1A00000; // nop
+		*(u32*)0x02067120 = 0xE1A00000; // nop
+		*(u32*)0x02067124 = 0xE1A00000; // nop
+		*(u32*)0x02067128 = 0xE1A00000; // nop
+		*(u32*)0x0206712C = 0xE1A00000; // nop
+		*(u32*)0x02067130 = 0xE1A00000; // nop
+		*(u32*)0x02067134 = 0xE1A00000; // nop
+		*(u32*)0x02067138 = 0xE1A00000; // nop
+		*(u32*)0x020671F0 = 0xE1A00000; // nop
+	}
 }
 
 static bool rsetA7CacheDone = false;
@@ -392,6 +420,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.ramClearOffset = 0;
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.postBootOffset = 0;
 	patchOffsetCache.a7IrqHandlerOffset = 0;
 	patchOffsetCache.savePatchType = 0;
 	patchOffsetCache.relocateStartOffset = 0;

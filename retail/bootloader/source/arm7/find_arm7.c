@@ -2,6 +2,8 @@
 #include "find.h"
 #include "debug_file.h"
 
+extern u32 newArm7binarySize;
+
 //
 // Subroutine function signatures ARM7
 //
@@ -13,6 +15,10 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
 static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+
+// Post-boot code
+static const u32 postBootStartSignature[1] = {0xE92D47F0};
+static const u32 postBootEndSignature[1]   = {0x04000300};
 
 // Card check pull out
 static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
@@ -29,7 +35,7 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSleepPatchOffset:\n");
 
 	u32* sleepPatchOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
 		sleepPatch, 2
 	);
 	if (sleepPatchOffset) {
@@ -51,7 +57,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSleepPatchOffsetThumb:\n");
 	
 	u16* sleepPatchOffset = findOffsetThumb(
-		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u16*)ndsHeader->arm7destination, newArm7binarySize,
 		sleepPatchThumb, 2
 	);
 	if (sleepPatchOffset) {
@@ -62,7 +68,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	if (!sleepPatchOffset) {
 		sleepPatchOffset = findOffsetThumb(
-			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			(u16*)ndsHeader->arm7destination, newArm7binarySize,
 			sleepPatchThumbAlt, 2
 		);
 		if (sleepPatchOffset) {
@@ -85,7 +91,7 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
 		ramClearSignature, 2
 	);
 	if (ramClearOffset) {
@@ -100,6 +106,36 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 	return ramClearOffset;
 }
 
+u32* findPostBootOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findPostBootOffset:\n");
+
+	u32* startOffset = NULL;
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
+		postBootEndSignature, 1
+	);
+	if (endOffset) {
+		dbg_printf("Post boot end found: ");
+		dbg_hexa((u32)endOffset);
+		dbg_printf("\n");
+
+		startOffset = findOffsetBackwards(
+			endOffset, 0x200,
+			postBootStartSignature, 1
+		);
+		if (startOffset) {
+			dbg_printf("Post boot start found\n");
+		} else {
+			dbg_printf("Post boot start not found\n");
+		}
+	} else {
+		dbg_printf("Post boot not found\n");
+	}
+
+	dbg_printf("\n");
+	return startOffset;
+}
+
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findCardCheckPullOutOffset:\n");
 	
@@ -111,7 +147,7 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 
 	u32* cardCheckPullOutOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
 		cardCheckPullOutSignature, 4
 	);
 	if (cardCheckPullOutOffset) {
@@ -138,7 +174,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 
 	u32* cardIrqEnableOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
 		irqEnableStartSignature, 4
 	);
 	if (cardIrqEnableOffset) {
@@ -150,7 +186,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset) {
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize,
             irqEnableStartSignature4Alt, 4
 		);
 		if (cardIrqEnableOffset) {
@@ -163,7 +199,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset && isSdk5(moduleParams)) {
 		// SDK 5
 		cardIrqEnableOffset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize,
             irqEnableStartSignatureThumb5, 5
 		);
 		if (cardIrqEnableOffset) {

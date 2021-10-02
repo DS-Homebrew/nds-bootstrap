@@ -106,7 +106,8 @@ u16 s2FlashcardId = 0;
 
 bool expansionPakFound = false;
 
-//static char bootName[9] = {'B','O','O','T','.','N','D','S', 0};
+u32 newArm7binarySize = 0;
+u32 arm7mbk = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -260,6 +261,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
 	}
 
+	fileRead(&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
+
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
 	if (
@@ -300,7 +303,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25FFC
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x27618
 	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2762C
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x29CEC) {
+	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x29CEC
+	 && arm7mbk != 0x080037C0) {
 		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 	}
 }
@@ -491,7 +495,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
-	 || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
+	 || strncmp(romTid, "KPF", 3) == 0		// Pop Island: Paperfield
+	 || strncmp(romTid, "KGK", 3) == 0)	// Glory Days: Tactical Defense
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}

@@ -98,7 +98,7 @@ u16* a7_findSwi27Offset(void);
 u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader);
 u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+//u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 //u32* findRamClearOffset(const tNDSHeader* ndsHeader);

@@ -13,6 +13,9 @@
 
 extern u32 _io_dldi_features;
 
+extern u32 newArm7binarySize;
+extern u32 arm7mbk;
+
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -79,6 +82,26 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	patchOffsetCache.ramClearChecked = true;
 }
 
+static void patchPostBoot(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode == 0 || arm7mbk != 0x080037C0) {
+		return;
+	}
+
+	u32* postBootOffset = patchOffsetCache.postBootOffset;
+	if (!patchOffsetCache.postBootOffset) {
+		postBootOffset = findPostBootOffset(ndsHeader);
+		if (postBootOffset) {
+			patchOffsetCache.postBootOffset = postBootOffset;
+		}
+	}
+	if (postBootOffset) {
+		*postBootOffset = 0xE12FFF1E;	// bx lr
+		dbg_printf("Post boot location : ");
+		dbg_hexa((u32)postBootOffset);
+		dbg_printf("\n\n");
+	}
+}
+
 static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
@@ -107,6 +130,8 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
+	newArm7binarySize = ndsHeader->arm7binarySize;
+
 	if (ndsHeader->arm7binarySize == 0x22B40
 	 || ndsHeader->arm7binarySize == 0x22BCC
 	 || ndsHeader->arm7binarySize == 0x2352C
@@ -127,7 +152,8 @@ u32 patchCardNdsArm7(
 	 || ndsHeader->arm7binarySize == 0x25FFC
 	 || ndsHeader->arm7binarySize == 0x27618
 	 || ndsHeader->arm7binarySize == 0x2762C
-	 || ndsHeader->arm7binarySize == 0x29CEC) {
+	 || ndsHeader->arm7binarySize == 0x29CEC
+	 || arm7mbk == 0x080037C0) {
 		// Replace incompatible ARM7 binary
 		aFile donorRomFile;
 		if (ndsHeader->arm7binarySize == 0x2352C
@@ -150,7 +176,8 @@ u32 patchCardNdsArm7(
 			extern u32 donorFile3Cluster;	// SDK3-4
 			donorRomFile = getFileFromCluster(donorFile3Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x22B40
-				 || ndsHeader->arm7binarySize == 0x22BCC) {
+				 || ndsHeader->arm7binarySize == 0x22BCC
+				 || arm7mbk == 0x080037C0) {
 			extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 			donorRomFile = getFileFromCluster(donorFileTwlCluster);
 		} else {
@@ -166,15 +193,16 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4);
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
-		ndsHeader->arm7binarySize = arm7size;
-		ndsHeader->headerCRC16 = swiCRC16(0xFFFF, ndsHeader, 0x15E);	// Fix CRC
+		newArm7binarySize = arm7size;
 	}
 
-	if (ndsHeader->arm7binarySize != patchOffsetCache.a7BinSize) {
+	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 		rsetA7Cache();
-		patchOffsetCache.a7BinSize = ndsHeader->arm7binarySize;
+		patchOffsetCache.a7BinSize = newArm7binarySize;
 		patchOffsetCacheChanged = true;
 	}
+
+	patchPostBoot(ndsHeader);
 
 	patchSleepMode(ndsHeader);
 
