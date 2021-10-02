@@ -78,6 +78,9 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	if (ramClearOffset) {
 		*(ramClearOffset) = 0x023FC000;
 		*(ramClearOffset + 1) = 0x023FC000;
+		dbg_printf("RAM clear location : ");
+		dbg_hexa((u32)ramClearOffset);
+		dbg_printf("\n\n");
 	}
 	patchOffsetCache.ramClearChecked = true;
 }
