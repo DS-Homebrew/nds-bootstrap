@@ -209,8 +209,6 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	}
 
 	if (cardIdStartOffset) {
-		dbg_printf("Found cardId\n\n");
-
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
@@ -585,12 +583,14 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 }*/
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	extern u32 arm7mbk;
 	extern bool expansionPakFound;
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (extendedMemory2
 	|| moduleParams->sdk_version < 0x2008000
-	|| strncmp(romTid, "VSO", 3) == 0) {
+	|| strncmp(romTid, "VSO", 3) == 0
+	|| arm7mbk == 0x080037C0) {
 		return;
 	}
 

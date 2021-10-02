@@ -393,6 +393,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013A54 = 0xE1A00000; // nop
 		*(u32*)0x02014DB8 = 0xE1A00000; // nop
 		*(u32*)0x02016144 = 0xE1A00000; // nop
+		for (int i = 0; i < 9; i++) {
+			u32* offset = (u32*)0x0202EF50;
+			offset[i] = 0xE1A00000; // nop
+		}
+	//	*(u32*)0x0202F224 = 0xE1A00000; // nop
 		*(u32*)0x0202FACC = 0xE1A00000; // nop
 		*(u32*)0x02033044 = 0xE1A00000; // nop
 		*(u32*)0x02036A4C = 0xE1A00000; // nop
@@ -403,6 +408,10 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02038A18 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
 		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x020257F8;
+			offset[i] = 0xE1A00000; // nop
+		}
 	//	*(u32*)0x02070558 = 0xE1A00000; // nop
 	}
 
@@ -431,6 +440,35 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02067134 = 0xE1A00000; // nop
 		*(u32*)0x02067138 = 0xE1A00000; // nop
 		*(u32*)0x020671F0 = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x02075514;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Space Ace (USA)
+    if (strcmp(romTid, "KA6E") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x02005DD0 = 0xE1A00000; // nop
+		*(u32*)0x02016458 = 0xE1A00000; // nop
+		*(u32*)0x0201645C = 0xE1A00000; // nop
+		for (int i = 0; i < 21; i++) {
+			u32* offset = (u32*)0x02032BC4;
+			offset[i] = 0xE1A00000; // nop
+		}
+	//	*(u32*)0x02032ECC = 0xE1A00000; // nop
+		*(u32*)0x02033768 = 0xE1A00000; // nop
+		*(u32*)0x02036B88 = 0xE1A00000; // nop
+		*(u32*)0x0203A348 = 0xE1A00000; // nop
+		*(u32*)0x0203C108 = 0xE1A00000; // nop
+		*(u32*)0x0203C10C = 0xE1A00000; // nop
+		*(u32*)0x0203C118 = 0xE1A00000; // nop
+		*(u32*)0x0203C278 = 0xE1A00000; // nop
+		*(u32*)0x0203C2D4 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
 	}
 }
 
