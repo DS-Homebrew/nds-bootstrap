@@ -380,10 +380,56 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
 
+	// Patch DSi-Exclusives to run in DS mode
+
+	// Nintendo DSi XL Demo Video (USA)
+	// Freezes after opening logos
+	/*if (strcmp(romTid, "DMEE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02008DD8 = 0xE1A00000; // nop
+		*(u32*)0x0200BC58 = 0xE1A00000; // nop
+		*(u32*)0x0200D778 = 0xE1A00000; // nop
+		*(u32*)0x0200EFF4 = 0xE1A00000; // nop
+		*(u32*)0x0200EFF8 = 0xE1A00000; // nop
+		*(u32*)0x0200F004 = 0xE1A00000; // nop
+		*(u32*)0x0200F148 = 0xE1A00000; // nop
+		*(u32*)0x020107FC = 0xE1A00000; // nop
+		*(u32*)0x02010800 = 0xE1A00000; // nop
+		*(u32*)0x02010804 = 0xE1A00000; // nop
+		*(u32*)0x02010808 = 0xE1A00000; // nop
+	}*/
+
+	// Picture Perfect Hair Salon (USA)
+	// Hair Salon (Europe/Australia)
+	// Requires main RAM to be larger than 4MB
+	if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02005108 = 0xE1A00000; // nop
+		*(u32*)0x0200517C = 0xE1A00000; // nop
+		*(u32*)0x02005190 = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x0200F2B0 = 0xE1A00000; // nop
+		*(u32*)0x02012840 = 0xE1A00000; // nop
+		*(u32*)0x02017F34 = 0xE1A00000; // nop
+		*(u32*)0x02019A0C = 0xE1A00000; // nop
+		*(u32*)0x02019A10 = 0xE1A00000; // nop
+		*(u32*)0x02019A1C = 0xE1A00000; // nop
+		*(u32*)0x02019B60 = 0xE1A00000; // nop
+		//if (!extendedMemory2) {
+		//	*(u32*)0x02019BBC = 0xE3A00697; // mov r0, #0x9700000: Use Memory Expansion Pak
+			*(u32*)0x02019BBC = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x27C0000)
+		//}
+		*(u32*)0x02019BE0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019BE8 = 0x13A00627; // movne r0, #0x2700000
+	}
+
 	// Patch DSiWare to run in DS mode
 
 	// Dragon's Lair (USA)
-    if (strcmp(romTid, "KDLE") == 0) {
+	// Does not boot
+	if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050CC = 0xE1A00000; // nop
@@ -421,7 +467,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Glory Days: Tactical Defense (USA)
-    if (strcmp(romTid, "KGKE") == 0) {
+	if (strcmp(romTid, "KGKE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
@@ -453,7 +499,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Space Ace (USA)
-    if (strcmp(romTid, "KA6E") == 0) {
+ 	// Does not boot
+	if (strcmp(romTid, "KA6E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
