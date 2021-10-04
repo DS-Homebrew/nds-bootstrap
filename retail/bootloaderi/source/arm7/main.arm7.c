@@ -642,7 +642,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && consoleModel>0)
-	|| (strncmp(romTid, "UOR", 3) == 0 && consoleModel>0)
+	//|| (strncmp(romTid, "UOR", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "APD", 3) != 0
@@ -807,7 +807,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
 	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-0x8000), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
 }
 
-static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool isDSBrowser, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
 	// Load ROM into RAM
 	u32 romLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
@@ -837,7 +837,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool isDSBrowser, const 
 			tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
 			savFile->fatTableCache = (u32*)((char*)ce7Location+0xFC00);
 		} else if (!dsiModeConfirmed) {
-			if (!isDSBrowser) {
+			if (armBins) {
 				fileRead((char*)ndsHeader->arm9destination + 0x0A400000 + 0x4000, *romFile, romOffset, ndsHeader->arm9binarySize - 0x4000, !sdRead, 0); // ARM9 binary
 				fileRead((char*)ndsHeader->arm7destination + 0x0A400000, *romFile, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, !sdRead, 0); // ARM7 binary
 			}
@@ -1720,7 +1720,7 @@ int arm7_main(void) {
 				tonccpy((u32*)0x023FF000, (u32*)(isSdk5(moduleParams) ? 0x02FFF000 : 0x027FF000), 0x1000);
 				ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 			}
-			loadROMintoRAM(ndsHeader, (strncmp(romTid, "UBR", 3) == 0), moduleParams, romFile, savFile);
+			loadROMintoRAM(ndsHeader, (strncmp(romTid, "UBR", 3) != 0 && usesCloneboot), moduleParams, romFile, savFile);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
