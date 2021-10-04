@@ -427,6 +427,22 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
+	// Dark Void Zero (USA)
+	// Improper/broken patch
+	/*if (strcmp(romTid, "KDVE") == 0) {
+		*(u32*)0x0204CC24 = 0xE1A00000; // nop
+		*(u32*)0x0204EF18 = 0xE1A00000; // nop
+		*(u32*)0x0204EF1C = 0xE1A00000; // nop
+		*(u32*)0x0204EF28 = 0xE1A00000; // nop
+		*(u32*)0x0204F06C = 0xE1A00000; // nop
+		*(u32*)0x02059C44 = 0xE1A00000; // nop
+		*(u16*)0x0208100C = 0x4770; // bx lr
+		*(u16*)0x020851A2 = 0x46C0; // nop
+		*(u16*)0x020851A4 = 0x46C0; // nop
+		*(u16*)0x020851A6 = 0x46C0; // nop
+		*(u16*)0x02086D04 = 0x4770; // bx lr
+	}*/
+
 	// Dragon's Lair (USA)
 	// Does not boot
 	if (strcmp(romTid, "KDLE") == 0) {
@@ -464,6 +480,19 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 			offset[i] = 0xE1A00000; // nop
 		}
 	//	*(u32*)0x02070558 = 0xE1A00000; // nop
+	}
+
+	// Famicom Wars DS: Ushinawareta Hikari (Japan)
+	// Weird crash in the main menu
+	if (strcmp(romTid, "Z2EJ") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02015BC4 = 0xE1A00000; // nop
+		*(u32*)0x020197B8 = 0xE1A00000; // nop
+		*(u32*)0x0201F670 = 0xE1A00000; // nop
+		*(u32*)0x020216B8 = 0xE1A00000; // nop
+		*(u32*)0x020216BC = 0xE1A00000; // nop
+		*(u32*)0x020216C8 = 0xE1A00000; // nop
+		*(u32*)0x02021828 = 0xE1A00000; // nop
 	}
 
 	// Glory Days: Tactical Defense (USA)
