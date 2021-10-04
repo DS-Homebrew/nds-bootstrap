@@ -1050,8 +1050,9 @@ u32 myIrqEnable(u32 irq) {
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if ((strncmp(romTid, "UOR", 3) == 0 && !saveOnFlashcard)
-	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
+	if ((strncmp(romTid, "UOR", 3) == 0)
+	|| (strncmp(romTid, "UXB", 3) == 0)
+	|| (strncmp(romTid, "USK", 3) == 0)
 	|| (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM))) {
 		// Proceed below "else" code
 	} else {

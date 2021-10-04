@@ -346,7 +346,7 @@ int hookNdsRetailArm7(
 		if ((strncmp(romTid, "UOR", 3) == 0)
 		|| (strncmp(romTid, "UXB", 3) == 0)
 		|| (strncmp(romTid, "USK", 3) == 0)
-		|| (!gameOnFlashcard || ROMinRAM)) {
+		|| (!gameOnFlashcard && !ROMinRAM)) {
 			*ipcSyncHandler = ce7->patches->fifoHandler;
 			//*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
