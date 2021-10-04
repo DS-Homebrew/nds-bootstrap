@@ -388,6 +388,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008DD8 = 0xE1A00000; // nop
+		*(u32*)0x02008EF4 = 0xE1A00000; // nop
+		*(u32*)0x02008F08 = 0xE1A00000; // nop
 		*(u32*)0x0200BC58 = 0xE1A00000; // nop
 		*(u32*)0x0200D778 = 0xE1A00000; // nop
 		*(u32*)0x0200EFF4 = 0xE1A00000; // nop
@@ -411,6 +413,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005190 = 0xE1A00000; // nop
 		*(u32*)0x020051A0 = 0xE1A00000; // nop
 		*(u32*)0x0200F2B0 = 0xE1A00000; // nop
+		*(u32*)0x0200F3DC = 0xE1A00000; // nop
+		*(u32*)0x0200F3F0 = 0xE1A00000; // nop
 		*(u32*)0x02012840 = 0xE1A00000; // nop
 		*(u32*)0x02017F34 = 0xE1A00000; // nop
 		*(u32*)0x02019A0C = 0xE1A00000; // nop
@@ -462,6 +466,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0202F224 = 0xE1A00000; // nop
 		*(u32*)0x0202FACC = 0xE1A00000; // nop
+		*(u32*)0x0202FC00 = 0xE1A00000; // nop
+		*(u32*)0x0202FC14 = 0xE1A00000; // nop
 		*(u32*)0x02033044 = 0xE1A00000; // nop
 		*(u32*)0x02036A4C = 0xE1A00000; // nop
 		*(u32*)0x02038868 = 0xE1A00000; // nop
@@ -527,6 +533,34 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shantae: Risky's Revenge (USA)
+	// Crashes after selecting a file due to memory limitations
+	/*if (strcmp(romTid, "KS3E") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02092050 = 0xE1A00000; // nop
+		*(u32*)0x02092078 = 0xE1A00000; // nop
+		*(u32*)0x02092BA8 = 0xE1A00000; // nop
+		*(u32*)0x02092E08 = 0xE1A00000; // nop
+		*(u32*)0x02092E14 = 0xE1A00000; // nop
+		*(u32*)0x02092E20 = 0xE1A00000; // nop
+		*(u32*)0x020AB800 = 0xE1A00000; // nop
+		*(u32*)0x020DDB84 = 0xE1A00000; // nop
+		*(u32*)0x020DE420 = 0xE1A00000; // nop
+		*(u32*)0x020DE548 = 0xE1A00000; // nop
+		*(u32*)0x020DE55C = 0xE1A00000; // nop
+		*(u32*)0x020E20C4 = 0xE1A00000; // nop
+		*(u32*)0x020E616C = 0xE1A00000; // nop
+		*(u32*)0x020E7F64 = 0xE1A00000; // nop
+		*(u32*)0x020E7F68 = 0xE1A00000; // nop
+		*(u32*)0x020E7F74 = 0xE1A00000; // nop
+		*(u32*)0x020E80D4 = 0xE1A00000; // nop
+		*(u32*)0x020E977C = 0xE1A00000; // nop
+		*(u32*)0x020E9780 = 0xE1A00000; // nop
+		*(u32*)0x020E9784 = 0xE1A00000; // nop
+		*(u32*)0x020E9788 = 0xE1A00000; // nop
+	}*/
+
 	// Space Ace (USA)
  	// Does not boot
 	if (strcmp(romTid, "KA6E") == 0) {
@@ -542,6 +576,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02032ECC = 0xE1A00000; // nop
 		*(u32*)0x02033768 = 0xE1A00000; // nop
+		*(u32*)0x02033890 = 0xE1A00000; // nop
+		*(u32*)0x020338A4 = 0xE1A00000; // nop
 		*(u32*)0x02036B88 = 0xE1A00000; // nop
 		*(u32*)0x0203A348 = 0xE1A00000; // nop
 		*(u32*)0x0203C108 = 0xE1A00000; // nop
