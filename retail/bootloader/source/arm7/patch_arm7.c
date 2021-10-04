@@ -203,7 +203,7 @@ u32 patchCardNdsArm7(
 			extern u32 donorFileCluster;	// SDK5 (NTR)
 			donorRomFile = getFileFromCluster(donorFileCluster);
 		}
-		if (donorRomFile.firstCluster == CLUSTER_FREE) {
+		if (donorRomFile.firstCluster == CLUSTER_FREE && ndsHeader->gameCode[0] != 'D') {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
 		}
