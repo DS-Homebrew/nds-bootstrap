@@ -325,7 +325,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 
 	if (dsiFeatures()) {
-		bool usingB4DS = (!dsiFeatures() && conf->gameOnFlashcard);
 		bool dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 
 		// Load donor ROM's arm7 binary, if needed
@@ -335,17 +334,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorTwlPath, "rb");
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorTwlPath, "rb");
 				break;
 			case 0x23708:
 			case 0x2378C:
 			case 0x237F0:
-				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorPath, "rb");
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorPath, "rb");
 				break;
 			case 0x2352C:
 			case 0x235DC:
 			case 0x23CAC:
-				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE2Path, "rb");
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE2Path, "rb");
 				break;
 			case 0x245C4:
 			case 0x24DA8:
@@ -358,7 +357,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x25D04:
 			case 0x25D94:
 			case 0x25FFC:
-				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
 				break;
 			case 0x27618:
 			case 0x2762C:
