@@ -48,9 +48,9 @@ constexpr char16_t map[] =
 	u"檢游率界畫目看移端置自至視計設跳"
 	u"轉转返退选遊選部重鐘钟開關離面頂"
 	u"頻顶项频　　　　　　　　　　　　"
-	u"가게기끔덤도돌동래럭로료리린메면" // Hangul
-	u"뱅뷰상샷선설셋소속스아어운위으이"
-	u"인임자정종주카켬크클택트프향화";
+	u"가게기덤도돌동드래럭로료리린메면" // Hangul
+	u"모뱅뷰샷선설셋소속스아어운위으이"
+	u"인임자정종주카크클택트프화";
 
 std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {
 	// Initial, Medial, Final
