@@ -61,6 +61,7 @@ extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
+static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
@@ -173,6 +174,25 @@ static void unlaunchSetFilename(bool boot) {
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xA800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
+	}
+	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
+		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
+	}
+}
+
+static void unlaunchSetHiyaFilename(void) {
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
+	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
+	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
+													// Use colors 2000814h
+	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
+	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	int i2 = 0;
+	for (int i = 0; i < (int)sizeof(hiyaDSiPath); i++) {
+		*(u8*)(0x02000838+i2) = hiyaDSiPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+		i2 += 2;
 	}
 	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
@@ -383,8 +403,8 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
-			unlaunchSetFilename(false);
+		if (valueBits & b_dsiSD) {
+			(*(u32*)(ce7+0xA900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -904,8 +924,8 @@ void myIrqHandlerVBlank(void) {
 		driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10, !sdRead, -1);
-		if (consoleModel < 2 && *(u32*)(ce7+0xA900) == 0) {
-			unlaunchSetFilename(false);
+		if (consoleModel < 2) {
+			(*(u32*)(ce7+0xA900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		if (*(u32*)(ce7+0xA900) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
