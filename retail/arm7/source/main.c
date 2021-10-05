@@ -85,6 +85,15 @@ int main(void) {
 		//i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
 	}
 
+	if (isDSiMode() && REG_SCFG_EXT == 0) {
+		u32 wordBak = *(vu32*)0x037C0000;
+		*(vu32*)0x037C0000 = 0x414C5253;
+		if (*(vu32*)0x037C0000 == 0x414C5253 && *(vu32*)0x037C8000 != 0x414C5253) {
+			*(u32*)0x02FFE1A0 = 0x0800C730;
+		}
+		*(vu32*)0x037C0000 = wordBak;
+	}
+
 	swiIntrWait(0, IRQ_FIFO_NOT_EMPTY);
 
 	SCFGFifoCheck();

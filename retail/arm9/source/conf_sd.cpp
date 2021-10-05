@@ -325,26 +325,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 
 	if (dsiFeatures()) {
-		bool hasCycloDSi = (isDSiMode() && memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0);
+		bool usingB4DS = (!dsiFeatures() && conf->gameOnFlashcard);
+		bool dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && a7mbk6 == (conf->gameOnFlashcard ? 0x080037C0 : 0x00403000)) {
-			donorNdsFile = fopen(conf->gameOnFlashcard ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
+		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
+			donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
 		} else
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (hasCycloDSi) donorNdsFile = fopen(conf->donorTwlPath, "rb");
+				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorTwlPath, "rb");
 				break;
 			case 0x23708:
 			case 0x2378C:
 			case 0x237F0:
-				if (hasCycloDSi) donorNdsFile = fopen(conf->donorPath, "rb");
+				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorPath, "rb");
 				break;
 			case 0x2352C:
 			case 0x235DC:
 			case 0x23CAC:
-				if (hasCycloDSi) donorNdsFile = fopen(conf->donorE2Path, "rb");
+				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE2Path, "rb");
 				break;
 			case 0x245C4:
 			case 0x24DA8:
@@ -357,7 +358,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x25D04:
 			case 0x25D94:
 			case 0x25FFC:
-				if (hasCycloDSi) donorNdsFile = fopen(conf->donor3Path, "rb");
+				if (usingB4DS || dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
 				break;
 			case 0x27618:
 			case 0x2762C:
