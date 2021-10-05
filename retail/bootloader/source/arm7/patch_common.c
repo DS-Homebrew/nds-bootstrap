@@ -514,21 +514,37 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019160 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
 		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0206710C = 0xE1A00000; // nop
-		*(u32*)0x02067110 = 0xE1A00000; // nop
-		*(u32*)0x02067114 = 0xE1A00000; // nop
-		*(u32*)0x02067118 = 0xE1A00000; // nop
-		*(u32*)0x0206711C = 0xE1A00000; // nop
-		*(u32*)0x02067120 = 0xE1A00000; // nop
-		*(u32*)0x02067124 = 0xE1A00000; // nop
-		*(u32*)0x02067128 = 0xE1A00000; // nop
-		*(u32*)0x0206712C = 0xE1A00000; // nop
-		*(u32*)0x02067130 = 0xE1A00000; // nop
-		*(u32*)0x02067134 = 0xE1A00000; // nop
-		*(u32*)0x02067138 = 0xE1A00000; // nop
-		*(u32*)0x020671F0 = 0xE1A00000; // nop
+		for (int i = 0; i < 12; i++) {
+			u32* offset = (u32*)0x0206710C;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x020671B4 = 0xE1A00000; // nop
 		for (int i = 0; i < 10; i++) {
 			u32* offset = (u32*)0x02075514;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Glory Days: Tactical Defense (Europe)
+	if (strcmp(romTid, "KGKP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x0200B488 = 0xE1A00000; // nop
+		*(u32*)0x02017128 = 0xE1A00000; // nop
+		*(u32*)0x02018F94 = 0xE1A00000; // nop
+		*(u32*)0x02018F98 = 0xE1A00000; // nop
+		*(u32*)0x02018FA4 = 0xE1A00000; // nop
+		*(u32*)0x02019104 = 0xE1A00000; // nop
+		*(u32*)0x02019160 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
+		for (int i = 0; i < 12; i++) {
+			u32* offset = (u32*)0x02067264;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0206730C = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x0207566C;
 			offset[i] = 0xE1A00000; // nop
 		}
 	}
