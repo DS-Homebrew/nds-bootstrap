@@ -118,7 +118,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		return false;
 	}
 
-	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);
+	data_t *pDH = (data_t*)(((u32*)(&__myio_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
