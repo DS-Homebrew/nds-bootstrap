@@ -23,6 +23,7 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include "dldi_patcher.h"
+#include "tonccpy.h"
 
 #define FIX_ALL	0x01
 #define FIX_GLUE	0x02
@@ -99,11 +100,11 @@ static const data_t ramdIoTypeString[] = "RAMD";
 
 extern const u32 _io_dldi;
 
-bool checkArm7DLDI (data_t *binData, u32 binSize) {
+/*bool checkArm7DLDI (data_t *binData, u32 binSize) {
 	// Find the DLDI reserved space in the file
 	addr_t patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
 	return (patchOffset > 0x02380000);
-}
+}*/
 
 bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 
@@ -155,8 +156,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-        for (size_t i = 0; i < dldiFileSize; i++)
-        	pAH[i] = pDH[i];
+	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -175,12 +175,12 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 	if (ramDisk) {
-		memcpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
-		memcpy (pAH+DO_ioType, ramdIoTypeString, 4);
+		tonccpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
+		tonccpy (pAH+DO_ioType, ramdIoTypeString, 4);
 	}
 
 	// Put the correct DLDI magic string back into the DLDI header
-	memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file
@@ -211,7 +211,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 
 	if (pDH[DO_fixSections] & FIX_BSS) {
 		// Initialise the BSS to 0
-		memset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
+		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}
 
 	return true;
