@@ -53,20 +53,20 @@ volatile u32 arm9_ramDiskCluster = 0;
 void initMBKARM9(void) {
 	// Default DSiWare settings
 
-	// WRAM-B fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK2 = 0x9195999D;
-	*(vu32*)REG_MBK3 = 0x8185898D;
-	
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x9195999D;
-	*(vu32*)REG_MBK5 = 0x8185898D;
-		
+	// WRAM-B fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK2)=0x8C888480;
+	*((vu32*)REG_MBK3)=0x9C989490;
+
+	// WRAM-C fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK4)=0x8C888480;
+	*((vu32*)REG_MBK5)=0x9C989490;
+
 	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK6 = 0x00000000;
+	REG_MBK6=0x00000000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7 = 0x07C03740; // Same as DSiWare
+	REG_MBK7=0x07C03740; // same as dsiware
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8 = 0x07403700; // Same as DSiWare
+	REG_MBK8=0x07403700; // same as dsiware
 }
 
 /*-------------------------------------------------------------------------
