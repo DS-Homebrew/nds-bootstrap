@@ -63,9 +63,7 @@ void sendValue32(u32 value32) {
 void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
 	*((vu32*)myMemUncached(&word_params)) = size;
-	for(int i=0;i<size;i++)  {
-		*((u8*)myMemUncached(&words_msg)+i) = msg[i];
-	}
+	memcpy(msg, (u8*)myMemUncached(&words_msg), size);
 	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
@@ -96,8 +94,8 @@ void extendedMemory(bool yes) {
 	}
 }
 
-void __custom_mpu_setup();
-void __custom_mpu_restore();
+//void __custom_mpu_setup();
+//void __custom_mpu_restore();
 
 //---------------------------------------------------------------------------------
 bool sd_Startup() {
