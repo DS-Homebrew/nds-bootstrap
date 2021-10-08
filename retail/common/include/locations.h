@@ -102,7 +102,7 @@
 
 #define retail_CACHE_ADRESS_SIZE        0x800000
 #define retail_CACHE_ADRESS_SIZE_low    0x274000
-#define retail_CACHE_ADRESS_SIZE_SDK5   0x700000
+#define retail_CACHE_ADRESS_SIZE_SDK5   0x778000
 #define retail_CACHE_ADRESS_SIZE_TWLSDK 0x16000
 
 #define retail_CACHE_SLOTS_16KB      0x200
