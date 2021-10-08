@@ -778,10 +778,7 @@ static void NTR_BIOS() {
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
-	if (consoleModel>0
-	? overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x1000000 : 0x1800000))
-	: overlaysSize<=((isSdk5(moduleParams)||dsiModeConfirmed ? 0x700000 : 0x800000)))
-	{
+	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : 0x700000)) {
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 		if (extendedMemoryConfirmed) {
 			overlaysLocation = (u32)ROM_LOCATION_EXT;

@@ -215,7 +215,7 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0x1000000 : 0x1800000) : 0x800000)) {
+		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : 0x700000)) {
 			extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard) {
 				if (cacheBlockSize == 0) {
