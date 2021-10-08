@@ -111,7 +111,7 @@ static bool patchCardHashInit(const tNDSHeader* ndsHeader, const module_params_t
 	}
 
 	if (cardHashInitOffset) {
-		if (cardHashInitOffset < *(u32*)0x02FFE1C8) {
+		if ((u32)cardHashInitOffset < *(u32*)0x02FFE1C8) {
 			if (usesThumb) {
 				u16* cardHashInitOffsetThumb = (u16*)cardHashInitOffset;
 				cardHashInitOffsetThumb[-2] = 0xB003;	// ADD SP, SP, #0xC
@@ -1196,7 +1196,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 
-    return *heapPointer;
+    return (u32*)*heapPointer;
 }
 
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
