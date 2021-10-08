@@ -362,11 +362,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x25FFC:
 				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
 				break;
-			case 0x27618:
-			case 0x2762C:
-			case 0x29CEC:
-				donorNdsFile = fopen(conf->donorPath, "rb");
-				break;
 			default:
 				break;
 		}

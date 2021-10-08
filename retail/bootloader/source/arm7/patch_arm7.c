@@ -169,9 +169,6 @@ u32 patchCardNdsArm7(
 	 || ndsHeader->arm7binarySize == 0x25D04
 	 || ndsHeader->arm7binarySize == 0x25D94
 	 || ndsHeader->arm7binarySize == 0x25FFC
-	 || ndsHeader->arm7binarySize == 0x27618
-	 || ndsHeader->arm7binarySize == 0x2762C
-	 || ndsHeader->arm7binarySize == 0x29CEC
 	 || arm7mbk == 0x080037C0) {
 		// Replace incompatible ARM7 binary
 		aFile donorRomFile;

@@ -64,6 +64,9 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 save
         *(u32*)(relocationCheck - 0x4);
 
     if (relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000 > relocationCheck2) {
+		relocationCheck -= 4;
+	}
+    if (relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000 > relocationCheck2) {
         dbg_printf("Error in relocation checking\n");
         dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + 0x37F8000);
         dbg_hexa(relocationCheck2);
