@@ -72,10 +72,8 @@ static void sendValue32(vu32 value32) {
 	commandAddr[1] = value32;
 }
 
-static void getDatamsg(int size, vu8* msg) {
-	for(int i=0;i<size;i++)  {
-		msg[i]=*((vu8*)commandAddr+8+i);
-	}
+static inline void getDatamsg(int size, u8* msg) {
+	tonccpy(msg, (u8*)commandAddr+8, size);
 }
 
 //---------------------------------------------------------------------------------

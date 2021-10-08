@@ -146,7 +146,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads;
 
-		vu32* mybuffer = myMemUncached(tmp_buf_addr);
+		vu32* mybuffer = (vu32*)myMemUncached(tmp_buf_addr);
 
 		msg.type = SDMMC_SD_READ_SECTORS;
 		msg.sdParams.startsector = startsector;
@@ -185,7 +185,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads;
 
-		vu32* mybuffer = myMemUncached(tmp_buf_addr);
+		vu32* mybuffer = (vu32*)myMemUncached(tmp_buf_addr);
 
 		memcpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 
@@ -262,7 +262,9 @@ returns true if successful, otherwise returns false
 bool startup(void) {
 	//nocashMessage("startup");
 	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
-	dsiMode = (REG_SCFG_ROM == 1);
+	if (REG_SCFG_EXT == 0x8307F100) {
+		dsiMode = *(u16*)((u32)RAM_DISK_LOCATION_DSIMODE+0x1FE) == 0xAA55;
+	}
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
 
 	if (ramDisk) {
