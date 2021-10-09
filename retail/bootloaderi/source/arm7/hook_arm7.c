@@ -189,22 +189,19 @@ int hookNdsRetailArm7(
 					break;
 
 				case 0x00025664:
-					hookLocation = (u32*)0x23A5330;		// DSi-Exclusive cart games
-					if (*(u32*)0x23A5660 != 0xFFFFFFFF) {
-						hookLocation = (u32*)0x23A5340;		// DSiWare alternative
-					}
+					hookLocation = (u32*)0x23A5340;		// DSi-Exclusive/DSiWare games
 					break;
 
 				case 0x000257DC:
-					hookLocation = (u32*)0x23A54B8;		// DSi-Exclusive cart games
+					hookLocation = (u32*)0x23A54B8;		// DSi-Exclusive/DSiWare games
 					break;
 
 				case 0x00025860:
-					hookLocation = (u32*)0x23A5538;		// DSi-Exclusive cart games
+					hookLocation = (u32*)0x23A5538;		// DSi-Exclusive/DSiWare games
 					break;
 
 				case 0x00026DF4:
-					hookLocation = (u32*)0x23A6AD4;		// DSi-Exclusive cart games
+					hookLocation = (u32*)0x23A6AD4;		// DSi-Exclusive/DSiWare games
 					break;
 
 				case 0x00028F84:
