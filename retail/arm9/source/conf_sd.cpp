@@ -352,7 +352,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x245C4:
 			case 0x24DA8:
 			case 0x24F50:
-				donorNdsFile = fopen(conf->donor2Path, "rb");
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor2Path, "rb");
 				break;
 			case 0x2434C:
 			case 0x2484C:
@@ -387,35 +387,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures()) {
-	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
-		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) {
-			disableSlot1();
-		} else {
-			enableSlot1();
-
-			sysSetCardOwner(BUS_OWNER_ARM9);
-
-			// Dummy command sent after card reset
-			cardParamCommand (CARD_CMD_DUMMY, 0,
-				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-				NULL, 0);
-
-			char headerData[0x200];
-			// Read the header
-			cardParamCommand (CARD_CMD_HEADER_READ, 0,
-				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-				(u32*)headerData, 0x200/sizeof(u32));
-
-			sysSetCardOwner(BUS_OWNER_ARM7);
-
-			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
-			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
-			if (!conf->specialCard) {
-				disableSlot1();
-			}
-		}
-	}
-
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
@@ -548,6 +519,35 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(ndsFile);
 	fclose(donorNdsFile);
+
+	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
+		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) {
+			disableSlot1();
+		} else {
+			enableSlot1();
+
+			sysSetCardOwner(BUS_OWNER_ARM9);
+
+			// Dummy command sent after card reset
+			cardParamCommand (CARD_CMD_DUMMY, 0,
+				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+				NULL, 0);
+
+			char headerData[0x200];
+			// Read the header
+			cardParamCommand (CARD_CMD_HEADER_READ, 0,
+				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+				(u32*)headerData, 0x200/sizeof(u32));
+
+			sysSetCardOwner(BUS_OWNER_ARM7);
+
+			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
+			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
+			if (!conf->specialCard) {
+				disableSlot1();
+			}
+		}
+	}
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId

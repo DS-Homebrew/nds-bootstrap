@@ -176,7 +176,7 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
 			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 			if (isSdk5(moduleParams) && (REG_SCFG_ROM & BIT(9)) && dsiModeConfirmed) {
-				u16* swiGetPitchTableOffsetThumb = patchOffsetCache.swiGetPitchTableOffset;
+				u16* swiGetPitchTableOffsetThumb = (u16*)patchOffsetCache.swiGetPitchTableOffset;
 				tonccpy(swiGetPitchTableOffsetThumb+2, swiGetPitchTablePatch, 0xC);
 			}
 		}
@@ -451,9 +451,7 @@ u32 patchCardNdsArm7(
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
 		
-		if (
-			(newArm7binarySize==0x2352C||newArm7binarySize==0x235DC||newArm7binarySize==0x23CAC||newArm7binarySize==0x245C4) && dsiSD
-		) {
+		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4 || newArm7binarySize==0x24DA8 || newArm7binarySize==0x24F50) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
 			// SDK 5
