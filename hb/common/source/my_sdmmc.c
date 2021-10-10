@@ -22,7 +22,9 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#ifndef _NO_SDMMC
 #include <stddef.h> // NULL
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
 #include <nds/debug.h>
@@ -313,19 +315,19 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 {
 	if (ndmaSlot < 0) ndmaSlot = 0;
 	if (ndmaSlot > 3) ndmaSlot = 3;
+    
+   *((vu32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
-    *((u32*)0x4004100) = 0x80020000; //use round robin arbitration method;
+	*(vu32*)((u32)0x4004104+0x1C*ndmaSlot) = 0x0400490C;
+	*(vu32*)((u32)0x4004108+0x1C*ndmaSlot) = (u32)ctx->rData;
+	
+	*(vu32*)((u32)0x400410C+0x1C*ndmaSlot) = ctx->size;
+	
+	*(vu32*)((u32)0x4004110+0x1C*ndmaSlot) = 0x80;
+	
+	*(vu32*)((u32)0x4004114+0x1C*ndmaSlot) = 0x10;
 
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
-
-	*(u32*)(0x400410C+(ndmaSlot*0x1C)) = ctx->size;
-
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
-
-	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x10;
-
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8064000;
+	*(vu32*)((u32)0x400411C+0x1C*ndmaSlot) = 0xC8064000;
 
 	//const bool getSDRESP = (cmd << 15) >> 31;
 	u16 flags = (cmd << 15) >> 31;
@@ -358,10 +360,9 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 	//bool rUseBuf = ( NULL != rDataPtr32 );
 	bool tUseBuf = ( NULL != tDataPtr32 );
 
-
+    
     nocashMessage("main loop");
 
-	//u16 status0 = 0;
 	while(1)
 	{
 		volatile u16 status1 = sdmmc_read16(REG_SDSTATUS1);
@@ -461,17 +462,17 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
             // command is ongoing : return
             nocashMessage("cmd busy");
             break;
-		}
-        else
+		} 
+        else if (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)
         {
             // command is finished already without going busy : return
             // not supposed to happen
             // needed for no$gba only
-            /*status0 = sdmmc_read16(REG_SDSTATUS0);
+            u16 status0 = sdmmc_read16(REG_SDSTATUS0);
             nocashMessage("already finished");
             if((status0 & flags) == flags)
-            break;*/
 		}
+            break;
 	}
 	//ctx->stat0 = sdmmc_read16(REG_SDSTATUS0);
 	//ctx->stat1 = sdmmc_read16(REG_SDSTATUS1);
@@ -519,10 +520,10 @@ static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd, int ndmaSlo
       		ctx->ret[2] = (u32)(sdmmc_read16(REG_SDRESP4) | (sdmmc_read16(REG_SDRESP5) << 16));
       		ctx->ret[3] = (u32)(sdmmc_read16(REG_SDRESP6) | (sdmmc_read16(REG_SDRESP7) << 16));
       	}
-        *(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48064000;
         return true;
     }
 
+        *(vu32*)((u32)0x400411C+ndmaSlot*0x1C) = 0x48064000;
     if(!(status1 & TMIO_STAT1_CMD_BUSY))
 	{
 		status0 = sdmmc_read16(REG_SDSTATUS0);
@@ -552,7 +553,7 @@ static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd, int ndmaSlo
       		ctx->ret[2] = (u32)(sdmmc_read16(REG_SDRESP4) | (sdmmc_read16(REG_SDRESP5) << 16));
       		ctx->ret[3] = (u32)(sdmmc_read16(REG_SDRESP6) | (sdmmc_read16(REG_SDRESP7) << 16));
       	}
-        *(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48004000;
+        *(vu32*)((u32)0x400411C+ndmaSlot*0x1C) = 0x48064000; 
         return true;
 	} else return false;
 }
@@ -561,19 +562,19 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 {
 	if (ndmaSlot < 0) ndmaSlot = 0;
 	if (ndmaSlot > 3) ndmaSlot = 3;
+    
+    *((vu32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
-    *((u32*)0x4004100) = 0x80020000; //use round robin arbitration method;
+	*(vu32*)((u32)0x4004104+ndmaSlot*0x1C) = 0x0400490C;
+	*(vu32*)((u32)0x4004108+ndmaSlot*0x1C) = (u32)ctx->rData;
 
-	*(u32*)(0x4004104+(ndmaSlot*0x1C)) = 0x0400490C;
-	*(u32*)(0x4004108+(ndmaSlot*0x1C)) = (u32)ctx->rData;
+	*(vu32*)((u32)0x400410C+ndmaSlot*0x1C) = ctx->size;
 
-	*(u32*)(0x400410C+(ndmaSlot*0x1C)) = ctx->size;
+	*(vu32*)((u32)0x4004110+ndmaSlot*0x1C) = 0x80;
 
-	*(u32*)(0x4004110+(ndmaSlot*0x1C)) = 0x80;
+	*(vu32*)((u32)0x4004114+ndmaSlot*0x1C) = 0x10;
 
-	*(u32*)(0x4004114+(ndmaSlot*0x1C)) = 0x10;
-
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0xC8064000;
+	*(vu32*)((u32)0x400411C+ndmaSlot*0x1C) = 0xC8064000;
 
 
 	const bool getSDRESP = (cmd << 15) >> 31;
@@ -760,7 +761,7 @@ static void sdmmc_send_command_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, in
 		ctx->ret[2] = (u32)(sdmmc_read16(REG_SDRESP4) | (sdmmc_read16(REG_SDRESP5) << 16));
 		ctx->ret[3] = (u32)(sdmmc_read16(REG_SDRESP6) | (sdmmc_read16(REG_SDRESP7) << 16));
 	}
-	*(u32*)(0x400411C+(ndmaSlot*0x1C)) = 0x48004000;
+	*(vu32*)((u32)0x400411C+ndmaSlot*0x1C) = 0x48064000;
 }
 
 int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
@@ -1064,3 +1065,4 @@ int my_sdmmc_get_cid(bool isNand, u32 *info)
 
 	return 0;
 }
+#endif

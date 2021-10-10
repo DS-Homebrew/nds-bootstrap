@@ -27,7 +27,7 @@ arm7clearRAM:
 
 	push	{r0-r9}
 	// clear exclusive IWRAM
-	// 0380:0000 to 0380:FFFF, total 64KiB
+	// 037C:0000 to 0380:FFFF, total 64KiB
 	mov	r0, #0
 	mov	r1, #0
 	mov	r2, #0
@@ -37,7 +37,7 @@ arm7clearRAM:
 	mov	r6, #0
 	mov	r7, #0
 	mov	r8, #0x03800000
-	sub	r8, #0x00008000
+	sub	r8, #0x000C0000
 	mov	r9, #0x03800000
 	orr	r9, r9, #0x10000
 clear_IWRAM_loop:

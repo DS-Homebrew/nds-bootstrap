@@ -344,8 +344,7 @@ static int runNdsFile(configuration* conf) {
 	// Logging
 	const char *logFilePath = (conf->sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
 	if (conf->logging) {
-		static FILE* loggingFile;
-		loggingFile = fopen(logFilePath, "w");
+		static FILE* loggingFile = fopen(logFilePath, "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
 		fclose(loggingFile);
 

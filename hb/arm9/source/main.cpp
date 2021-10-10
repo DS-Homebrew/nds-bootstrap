@@ -283,16 +283,17 @@ int main( int argc, char **argv) {
 		}
 
 		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "LOGGING").c_str(), NULL, 0)) {
-			static FILE * debugFile;
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","w");
-			fprintf(debugFile, "DEBUG MODE\n");			
-			fclose (debugFile);
-			
-			// create a big file (minimal sdengine libfat cannot append to a file)
-			debugFile = fopen ("fat:/NDSBTSRP.LOG","a");
-			for (int i=0; i<50000; i++) {
-				fprintf(debugFile, "                                                                                                                                          \n");			
+			static FILE * loggingFile = fopen ("fat:/NDSBTSRP.LOG","w");
+			fprintf(loggingFile, "LOGGING MODE\n");			
+			fclose (loggingFile);
+
+			// Create a big file (minimal sdengine libfat cannot append to a file)
+			loggingFile = fopen("fat:/NDSBTSRP.LOG", "a");
+			for (int i = 0; i < 1000; i++) {
+				fprintf(loggingFile, "                                                                                                                                          \n");
 			}
+
+			fclose(loggingFile);
 		} else {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
