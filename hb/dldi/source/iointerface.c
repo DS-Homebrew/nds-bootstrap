@@ -39,7 +39,7 @@
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
-#include "memcpy.h"
+#include "tonccpy.h"
 #include "locations.h"
 
 extern vu32* myMemUncached(vu32*);
@@ -63,7 +63,7 @@ void sendValue32(u32 value32) {
 void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
 	*((vu32*)myMemUncached(&word_params)) = size;
-	memcpy(msg, (u8*)myMemUncached(&words_msg), size);
+	tonccpy((u8*)myMemUncached(&words_msg), msg, size);
 	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
@@ -157,7 +157,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 		result = getValue32();
 
-		memcpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
+		tonccpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 	}
 
 	//__custom_mpu_restore();
@@ -185,7 +185,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 
 		vu32* mybuffer = (vu32*)myMemUncached(tmp_buf_addr);
 
-		memcpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
+		tonccpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = startsector;
@@ -213,7 +213,7 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		memcpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
+		tonccpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -224,7 +224,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
+		tonccpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
@@ -234,7 +234,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		memcpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
+		tonccpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -245,7 +245,7 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
+		tonccpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;

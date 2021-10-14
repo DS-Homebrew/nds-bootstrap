@@ -18,7 +18,7 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET		:=	dsisd
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../common/source_general
 DATA		:=	data
 INCLUDES	:=	include ../common/include
 
