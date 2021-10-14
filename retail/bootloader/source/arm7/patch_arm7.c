@@ -183,14 +183,16 @@ u32 patchCardNdsArm7(
 			extern u32 donorFile2Cluster;	// SDK2
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x2434C
-				 || ndsHeader->arm7binarySize == 0x2484C
-				 || ndsHeader->arm7binarySize == 0x249DC
-				 || ndsHeader->arm7binarySize == 0x249E8
 				 || ndsHeader->arm7binarySize == 0x25D04
 				 || ndsHeader->arm7binarySize == 0x25D94
 				 || ndsHeader->arm7binarySize == 0x25FFC) {
-			extern u32 donorFile3Cluster;	// SDK3-4
+			extern u32 donorFile3Cluster;	// SDK3
 			donorRomFile = getFileFromCluster(donorFile3Cluster);
+		} else if (ndsHeader->arm7binarySize == 0x2484C
+				 || ndsHeader->arm7binarySize == 0x249DC
+				 || ndsHeader->arm7binarySize == 0x249E8) {
+			extern u32 donorFile4Cluster;	// SDK4
+			donorRomFile = getFileFromCluster(donorFile4Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x22B40
 				 || ndsHeader->arm7binarySize == 0x22BCC
 				 || arm7mbk == 0x080037C0) {

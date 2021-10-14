@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, u32 donor3Cluster, u32 donorCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, configuration* conf) {
+int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, u32 donor3Cluster, u32 donor4Cluster, u32 donorCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -263,6 +263,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, 
 	loader->donorFileE2Cluster          = donorE2Cluster;
 	loader->donorFile2Cluster           = donor2Cluster;
 	loader->donorFile3Cluster           = donor3Cluster;
+	loader->donorFile4Cluster           = donor4Cluster;
 	loader->donorFileCluster            = donorCluster;
 	loader->donorFileTwlCluster         = donorTwlCluster;
 	loader->gbaFileCluster              = gbaCluster;
