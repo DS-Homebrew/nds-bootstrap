@@ -925,9 +925,9 @@ void myIrqHandlerVBlank(void) {
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xA900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
-		if (*(u32*)(ce7+0xA900) == 0) {
+		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID
