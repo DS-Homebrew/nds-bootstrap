@@ -108,7 +108,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDK3 Donor NDS path
 	conf->donor3Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR3_NDS_PATH").c_str());
 
-	// SDK4 Donor NDS path
+	// Early SDK4 Donor NDS path
+	conf->donorE4Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORE4_NDS_PATH").c_str());
+
+	// Late SDK4 Donor NDS path
 	conf->donor4Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR4_NDS_PATH").c_str());
 
 	// SDK5 Donor NDS path
@@ -361,12 +364,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x24F50:
 				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor2Path, "rb");
 				break;
-			case 0x2434C:
 			case 0x25D00:
 			case 0x25D04:
 			case 0x25D94:
 			case 0x25FFC:
 				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
+				break;
+			case 0x2434C:
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE4Path, "rb");
 				break;
 			case 0x2484C:
 			case 0x249DC:

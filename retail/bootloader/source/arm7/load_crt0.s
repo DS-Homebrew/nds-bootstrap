@@ -34,6 +34,7 @@
 	.global donorFileE2Cluster
 	.global donorFile2Cluster
 	.global donorFile3Cluster
+	.global donorFileE4Cluster
 	.global donorFile4Cluster
 	.global donorFileCluster
 	.global donorFileTwlCluster
@@ -103,8 +104,10 @@ donorFile2Cluster:
 	.word	0x00000000		@ Late SDK2 donor .nds file
 donorFile3Cluster:
 	.word	0x00000000		@ SDK3 donor .nds file
+donorFileE4Cluster:
+	.word	0x00000000		@ Early SDK4 donor .nds file
 donorFile4Cluster:
-	.word	0x00000000		@ SDK4 donor .nds file
+	.word	0x00000000		@ Late SDK4 donor .nds file
 donorFileCluster:
 	.word	0x00000000		@ SDK5 (NTR) donor .nds file
 donorFileTwlCluster:
