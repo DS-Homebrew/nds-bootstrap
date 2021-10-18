@@ -175,9 +175,7 @@ static void unlaunchSetFilename(bool boot) {
 			i2 += 2;
 		}
 	}
-	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
-		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
-	}
+	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 }
 
 static void unlaunchSetHiyaFilename(void) {
@@ -194,9 +192,7 @@ static void unlaunchSetHiyaFilename(void) {
 		*(u8*)(0x02000838+i2) = hiyaDSiPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 		i2 += 2;
 	}
-	while (*(u16*)(0x0200080E) == 0) {	// Keep running, so that CRC16 isn't 0
-		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
-	}
+	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 }
 
 static void readSrBackendId(void) {
