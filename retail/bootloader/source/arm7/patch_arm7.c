@@ -166,12 +166,30 @@ u32 patchCardNdsArm7(
 	 || ndsHeader->arm7binarySize == 0x249E8
 	 || ndsHeader->arm7binarySize == 0x24DA8
 	 || ndsHeader->arm7binarySize == 0x24F50
+	 || ndsHeader->arm7binarySize == 0x25D00
 	 || ndsHeader->arm7binarySize == 0x25D04
 	 || ndsHeader->arm7binarySize == 0x25D94
 	 || ndsHeader->arm7binarySize == 0x25FFC
 	 || arm7mbk == 0x080037C0) {
 		// Replace incompatible ARM7 binary
 		aFile donorRomFile;
+		const char* romTid = getRomTid(ndsHeader);
+		if (memcmp(romTid, "B7N", 3) == 0) { // Ben 10: Triple Pack
+			// Donor ROM not needed, so read ARM7 binary from an SRL file within the ROM
+			extern u32 storedFileCluster;
+			donorRomFile = getFileFromCluster(storedFileCluster);
+
+			u32 fatAddr = 0;
+			u32 srlAddr = 0;
+			u32 arm7src = 0;
+			u32 arm7size = 0;
+			fileRead((char*)&fatAddr, donorRomFile, 0x48, 0x4);
+			fileRead((char*)&srlAddr, donorRomFile, fatAddr+0x80, 0x4);
+			fileRead((char*)&arm7src, donorRomFile, srlAddr+0x30, 0x4);
+			fileRead((char*)&arm7size, donorRomFile, srlAddr+0x3C, 0x4);
+			fileRead(ndsHeader->arm7destination, donorRomFile, srlAddr+arm7src, arm7size);
+			newArm7binarySize = arm7size;
+		} else {
 		if (ndsHeader->arm7binarySize == 0x2352C
 		 || ndsHeader->arm7binarySize == 0x235DC
 		 || ndsHeader->arm7binarySize == 0x23CAC) {
@@ -183,6 +201,7 @@ u32 patchCardNdsArm7(
 			extern u32 donorFile2Cluster;	// SDK2
 			donorRomFile = getFileFromCluster(donorFile2Cluster);
 		} else if (ndsHeader->arm7binarySize == 0x2434C
+				 || ndsHeader->arm7binarySize == 0x25D00
 				 || ndsHeader->arm7binarySize == 0x25D04
 				 || ndsHeader->arm7binarySize == 0x25D94
 				 || ndsHeader->arm7binarySize == 0x25FFC) {
@@ -212,6 +231,7 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
 		newArm7binarySize = arm7size;
+		}
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {

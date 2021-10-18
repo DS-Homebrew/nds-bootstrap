@@ -278,6 +278,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	char romTid[5] = {0};
 	u8 unitCode = 0;
 	u32 ndsArm7Size = 0;
+	u32 fatAddr = 0;
 	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
 	u32 ndsArm9isrc = 0;
@@ -296,6 +297,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&unitCode, 1, 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x48, SEEK_SET);
+		fread(&fatAddr, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1A0, SEEK_SET);
 		fread(&a7mbk6, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1B4, SEEK_SET);
@@ -329,6 +332,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (dsiFeatures()) {
 		bool dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
+		u32 srlAddr = 0;
 
 		// Load donor ROM's arm7 binary, if needed
 		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
@@ -358,6 +362,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor2Path, "rb");
 				break;
 			case 0x2434C:
+			case 0x25D00:
 			case 0x25D04:
 			case 0x25D94:
 			case 0x25FFC:
@@ -366,7 +371,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			case 0x2484C:
 			case 0x249DC:
 			case 0x249E8:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor4Path, "rb");
+				if (dsiEnhancedMbk) {
+					if (memcmp(romTid, "B7N", 3) == 0) { // Ben 10: Triple Pack
+						// Donor ROM not needed, so read ARM7 binary from an SRL file within the ROM
+						donorNdsFile = fopen(conf->ndsPath, "rb");
+
+						fseek(donorNdsFile, fatAddr+0x80, SEEK_SET);
+						fread(&srlAddr, sizeof(u32), 1, donorNdsFile);
+					} else {
+						donorNdsFile = fopen(conf->donor4Path, "rb");
+					}
+				}
 				break;
 			default:
 				break;
@@ -374,19 +389,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (donorNdsFile) {
 			u32 donorArm7Offset = 0;
-			fseek(donorNdsFile, 0x30, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x30, SEEK_SET);
 			fread(&donorArm7Offset, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x3C, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x3C, SEEK_SET);
 			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1A0, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x1A0, SEEK_SET);
 			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1D0, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x1D0, SEEK_SET);
 			fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1DC, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x1DC, SEEK_SET);
 			fread((u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x22C, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+0x22C, SEEK_SET);
 			fread(&donorModcrypt2len, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, donorArm7Offset, SEEK_SET);
+			fseek(donorNdsFile, srlAddr+donorArm7Offset, SEEK_SET);
 			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, donorNdsFile);
 			donorLoaded = true;
 		}
