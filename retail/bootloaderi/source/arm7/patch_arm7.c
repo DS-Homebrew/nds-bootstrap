@@ -486,7 +486,7 @@ u32 patchCardNdsArm7(
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
-	if (dsiSD) {
+	if (!gameOnFlashcard || !saveOnFlashcard) {
 		patchSdCardReset(ndsHeader, moduleParams);
 	}
 
