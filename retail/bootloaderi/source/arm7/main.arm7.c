@@ -1028,6 +1028,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		} else {
 			toncset((u32*)0x02FFFD60, 0, 0xA0);
 		}
+	} else {
+		toncset((u32*)0x02FFFD60, 0, 0xA0);
 	}
 
 	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || oldArm7mbk != 0x00403000)) {
