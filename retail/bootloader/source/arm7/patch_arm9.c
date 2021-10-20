@@ -11,7 +11,7 @@
 
 //bool cardReadFound = false; // patch_common.c
 
-static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr) {
+static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
 	int sdk5ReadType = 0; // SDK 5
@@ -19,9 +19,9 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	// Card read
 	// SDK 5
 	//dbg_printf("Trying SDK 5 thumb...\n");
-	u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
+    u32* cardReadEndOffset = patchOffsetCache.cardReadEndOffset;
 	if (!patchOffsetCache.cardReadEndOffset) {
-		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams);
+		cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type1(ndsHeader, moduleParams, startOffset);
 		if (cardReadEndOffset) {
 			sdk5ReadType = 1;
 			usesThumb = true;
@@ -29,7 +29,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			// SDK 5
-			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams);
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb5Type0(ndsHeader, moduleParams, startOffset);
 			if (cardReadEndOffset) {
 				sdk5ReadType = 0;
 				usesThumb = true;
@@ -38,18 +38,18 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying thumb...\n");
-			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader);
+			cardReadEndOffset = (u32*)findCardReadEndOffsetThumb(ndsHeader, startOffset);
 			if (cardReadEndOffset) {
 				usesThumb = true;
 				patchOffsetCache.a9IsThumb = usesThumb;
 			}
 		}
 		if (!cardReadEndOffset) {
-			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams);
+			cardReadEndOffset = findCardReadEndOffsetType0(ndsHeader, moduleParams, startOffset);
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
-			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader);
+			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, startOffset);
 			if (cardReadEndOffset) {
 				readType = 1;
 				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
@@ -968,7 +968,22 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return ERR_LOAD_OTHR;
 	}
 
-	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset)) {
+    const char* romTid = getRomTid(ndsHeader);
+
+    u32 startOffset = (u32)ndsHeader->arm9destination;
+    if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
+        startOffset = (u32)ndsHeader->arm9destination + 0x3800;
+    } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
+        startOffset = (u32)ndsHeader->arm9destination + 0x80000;        
+    } else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
+        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;        
+    }
+
+    dbg_printf("startOffset : ");
+    dbg_hexa(startOffset);
+    dbg_printf("\n\n");
+
+	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, startOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
@@ -994,8 +1009,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	randomPatch(ndsHeader, moduleParams);
 	randomPatch5Second(ndsHeader, moduleParams);
-
-    const char* romTid = getRomTid(ndsHeader);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader, moduleParams);

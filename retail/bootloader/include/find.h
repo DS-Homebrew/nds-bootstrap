@@ -28,11 +28,11 @@ inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* 
 
 // ARM9
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
-u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader);
-u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader);
-u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
-u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
+u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset);
+u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset);
+u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
+u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
 u32* findCardReadStartOffsetType0(const module_params_t* moduleParams, const u32* cardReadEndOffset);
 u32* findCardReadStartOffsetType1(const u32* cardReadEndOffset);
 u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* cardReadEndOffset); // SDK 5
