@@ -1116,7 +1116,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (!conf->isDSiWare) {
+	if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {
