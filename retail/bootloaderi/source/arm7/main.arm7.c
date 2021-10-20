@@ -239,7 +239,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
 	memset_addrs_arm7(0x02F00000, 0x02FFE000);
-	toncset((u32*)0x02FFF000, 0, 0x1000);		// clear part of EWRAM: header
+	toncset((u32*)0x02FFF000, 0, 0xD60);		// clear part of EWRAM
+	toncset((u32*)0x02FFFE00, 0, 0x200);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
 	REG_AUXIE = 0;
@@ -1024,6 +1025,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		if (dsiModeConfirmed) {
 			i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
 			i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
+		} else {
+			toncset((u32*)0x02FFFD60, 0, 0xA0);
 		}
 	}
 
