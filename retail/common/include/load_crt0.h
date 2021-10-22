@@ -45,17 +45,13 @@ typedef struct loadCrt0 {
     u8 language;
     u8 region; // SDK 5
     u8 dsiMode; // SDK 5
-    u8 isDSiWare; // SDK 5
+    u8 valueBits2;
     u8 donorSdkVer;
     u8 extendedMemory;
     u8 consoleModel;
     u8 romRead_LED;
     u8 dmaRomRead_LED;
-    u8 asyncCardRead;
-    u8 cardReadDMA;
-    u8 swiHaltHook;
     u8 soundFreq;
-    u8 specialCard;
 } __attribute__ ((__packed__)) loadCrt0;
 
 #endif // LOAD_CRT0_H

@@ -14,9 +14,7 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
-extern u8 asyncCardRead;
 extern u8 dsiSD;
-extern u8 swiHaltHook;
 
 extern bool sdRead;
 

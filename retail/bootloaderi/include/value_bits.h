@@ -4,6 +4,7 @@
 #include <nds/ndstypes.h>
 
 extern u8 valueBits;
+extern u8 valueBits2;
 
 #define cacheFatTable (valueBits & BIT(0))
 #define boostVram (valueBits & BIT(1))
@@ -13,5 +14,11 @@ extern u8 valueBits;
 #define apPatchIsCheat (valueBits & BIT(5))
 #define macroMode (valueBits & BIT(6))
 #define logging (valueBits & BIT(7))
+#define isDSiWare (valueBits2 & BIT(0))
+#define asyncCardRead (valueBits2 & BIT(1))
+#define cardReadDMA (valueBits2 & BIT(2))
+#define swiHaltHook (valueBits2 & BIT(3))
+#define specialCard (valueBits2 & BIT(4))
+#define dsiWramAccess (valueBits2 & BIT(5))
 
 #endif

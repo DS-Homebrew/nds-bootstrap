@@ -287,7 +287,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, 
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
 	loader->dsiMode                     = conf->dsiMode; // SDK 5
-	loader->isDSiWare                   = conf->isDSiWare; // SDK 5
+	loader->valueBits2                  = conf->valueBits2;
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;
@@ -295,10 +295,6 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorE2Cluster, u32 donor2Cluster, 
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
-	loader->asyncCardRead               = conf->asyncCardRead;
-	loader->cardReadDMA                 = conf->cardReadDMA;
-	loader->swiHaltHook                 = conf->swiHaltHook;
-	loader->specialCard                 = conf->specialCard;
 
 	if (!dsiFeatures()) {
 		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;

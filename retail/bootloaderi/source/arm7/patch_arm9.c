@@ -5,6 +5,7 @@
 #include "patch.h"
 #include "find.h"
 #include "common.h"
+#include "value_bits.h"
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 #include "debug_file.h"
@@ -13,9 +14,6 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
-extern u8 asyncCardRead;
-extern u8 cardReadDMA;
-extern u8 swiHaltHook;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;

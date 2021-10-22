@@ -135,14 +135,14 @@ int hookNdsRetailArm7(
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
-	bool isDSiWare = (ce7 == NULL);
+	bool ce7NotFound = (ce7 == NULL);
 
 	if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
 	}
 
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
-	if (!handlerLocation && !isDSiWare) {
+	if (!handlerLocation && !ce7NotFound) {
 		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (handlerLocation) {
 			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
@@ -151,7 +151,7 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (!handlerLocation && !isDSiWare) {
+	if (!handlerLocation && !ce7NotFound) {
 	/*	if (strncmp(romTid, "YGX", 3) == 0) {
 			ce7->valueBits |= b_powerCodeOnVBlank;
 		} else {
@@ -164,7 +164,7 @@ int hookNdsRetailArm7(
 	}
 
 	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
-	if (!wordsLocation && !isDSiWare) {
+	if (!wordsLocation && !ce7NotFound) {
 		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (wordsLocation) {
 			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
@@ -287,7 +287,7 @@ int hookNdsRetailArm7(
 	u32* ipcSyncHandler = hookLocation + 16;
 	//u32* ndma0Handler = hookLocation + 28;
 
-	if (isDSiWare) {
+	if (ce7NotFound) {
 		u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
 		intr_vblank_orig_return += 0x2FFC008;
 
@@ -362,7 +362,7 @@ int hookNdsRetailArm7(
 
 	u32 cheatEngineOffset = (u32)ce7-0x8400;
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
-	if (isDSiWare) {
+	if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
 		cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		*(u32*)((u32)cheatDataOffset) = 0x22FFFCE4;
@@ -375,7 +375,7 @@ int hookNdsRetailArm7(
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (isDSiWare ? 0x1BF0 : 0x8000)) {
+	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (ce7NotFound ? 0x1BF0 : 0x8000)) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, !sdRead, 0);
 			cheatDataOffset += apPatchSize;

@@ -113,14 +113,12 @@ extern u8 patchMpuRegion;
 extern u8 language;
 extern u8 region;
 extern u8 dsiMode; // SDK 5
-extern u8 isDSiWare; // SDK 5
 extern u8 donorSdkVer;
 extern u8 extendedMemory;
 extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u8 soundFreq;
-extern u8 specialCard;
 
 bool useTwlCfg = false;
 u8 twlCfgCountry = 0;
@@ -675,7 +673,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	return res;
 }
 
-static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode, bool isDSiWare) {
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	/*if (isGSDD) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
@@ -894,7 +892,7 @@ static void startBinary_ARM7(void) {
 	arm7code();
 }
 
-static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool isDSiWare) {
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
 		if (isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
@@ -1326,7 +1324,7 @@ int arm7_main(void) {
     dbg_hexa(moduleParams->sdk_version);
     dbg_printf("\n"); 
 
-	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed, isDSiWare);
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
 	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000)) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
@@ -1558,13 +1556,13 @@ int arm7_main(void) {
 					ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
 				} else if ((u32)ndsHeader->arm9destination == 0x02004000) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2;
-				} else if (extendedMemoryConfirmed && (moreMemory || REG_SCFG_EXT == 0)) {
+				} else if (extendedMemoryConfirmed && (moreMemory || !dsiWramAccess)) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
-				} else if (REG_SCFG_EXT != 0) {
+				} else if (dsiWramAccess) {
 					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				}
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
-				if (((u32)ndsHeader->arm9destination != 0x02004000 && extendedMemoryConfirmed && (moreMemory || REG_SCFG_EXT == 0)) || (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed)) {
+				if (((u32)ndsHeader->arm9destination != 0x02004000 && extendedMemoryConfirmed && (moreMemory || !dsiWramAccess)) || (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed)) {
 					patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 				}
 				if (ce9Location != CARDENGINEI_ARM9_LOCATION_DSI_WRAM) {
@@ -1587,7 +1585,7 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
 				patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			} else {
-				if (REG_SCFG_EXT != 0) {
+				if (dsiWramAccess) {
 					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				}
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, 0x5000);
@@ -1609,7 +1607,7 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, 0x1C00);
 			}
 		} else {
-			ce9Location = (REG_SCFG_EXT != 0) ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : CARDENGINEI_ARM9_LOCATION;
+			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : CARDENGINEI_ARM9_LOCATION;
 			u16 size = (ROMinRAM ? 0x1C00 : 0x4000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_BUFFERED_LOCATION), size);
 			if (ROMinRAM && ce9Location == CARDENGINEI_ARM9_LOCATION) {
@@ -1768,7 +1766,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag != ARM9_READY);
 
 	nocashMessage("Starting the NDS file...");
-    setMemoryAddress(ndsHeader, moduleParams, isDSiWare);
+    setMemoryAddress(ndsHeader, moduleParams);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
 		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);

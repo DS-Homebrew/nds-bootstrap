@@ -61,17 +61,13 @@
 	.global language
 	.global region
 	.global dsiMode
-	.global isDSiWare
+	.global valueBits2
 	.global donorSdkVer
 	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
-	.global asyncCardRead
-	.global cardReadDMA
-	.global swiHaltHook
 	.global soundFreq
-	.global specialCard
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -156,7 +152,7 @@ region:
 	.byte	0
 dsiMode:
 	.byte	0
-isDSiWare:
+valueBits2:
 	.byte	0
 donorSdkVer:
 	.byte	0		@ donor SDK version
@@ -168,15 +164,7 @@ romRead_LED:
 	.byte	0
 dmaRomRead_LED:
 	.byte	0
-asyncCardRead:
-	.byte	0
-cardReadDMA:
-	.byte	0
-swiHaltHook:
-	.byte	0
 soundFreq:
-	.byte	0
-specialCard:
 	.byte	0
 .align 4
 

@@ -264,6 +264,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->logging) {
 		conf->valueBits |= BIT(7);
 	}
+	if (conf->asyncCardRead) {
+		conf->valueBits2 |= BIT(1);
+	}
+	if (conf->cardReadDMA) {
+		conf->valueBits2 |= BIT(2);
+	}
+	if (conf->swiHaltHook) {
+		conf->valueBits2 |= BIT(3);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
@@ -332,6 +341,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	bool donorLoaded = false;
 	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
+
+	if (conf->isDSiWare) {
+		conf->valueBits2 |= BIT(0);
+	}
 
 	if (dsiFeatures()) {
 		bool dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
@@ -569,7 +582,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
 			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
-			if (!conf->specialCard) {
+			if (conf->specialCard) {
+				conf->valueBits2 |= BIT(4);
+			} else {
 				disableSlot1();
 			}
 		}
@@ -640,6 +655,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
+	if (REG_SCFG_EXT7 == 0) {
+		u32 wordBak = *(vu32*)0x03700000;
+		*(vu32*)0x03700000 = 0x414C5253;
+		conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
+		*(vu32*)0x03700000 = wordBak;
+	} else {
+		conf->dsiWramAccess = true;
+	}
+	if (conf->dsiWramAccess) {
+		conf->valueBits2 |= BIT(5);
+	}
+
   if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
@@ -686,7 +713,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x3000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-			if (REG_SCFG_EXT7 != 0) {
+			if (conf->dsiWramAccess) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
@@ -714,7 +741,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, 0x3000, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
-			if (REG_SCFG_EXT7 != 0 && (unitCode == 0 || !conf->dsiMode)) {
+			if (conf->dsiWramAccess && (unitCode == 0 || !conf->dsiMode)) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {

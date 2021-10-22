@@ -8,6 +8,7 @@
 typedef struct configuration {
     bool debug;
     bool cacheFatTable;
+	bool dsiWramAccess;
 	char* ndsPath;
 	char* appPath;
 	char* savPath;
@@ -38,6 +39,7 @@ typedef struct configuration {
 	u8 dsiMode; // SDK 5
 	u8 isDSiWare; // SDK 5
 	u8 valueBits;
+	u8 valueBits2;
 	u8 donorSdkVer;
 	u8 patchMpuRegion;
 	u32 patchMpuSize;
