@@ -227,6 +227,12 @@ static const u32 resetSignature5Alt4[4] = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0
 static const u32 resetConstant[1]       = {RESET_PARAM};
 static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
+// MBK WRAM set
+static const u32 mbkWramBCGetSignature[1]      = {0xE59F1018};
+static const u16 mbkWramBCGetSignatureThumb[1] = {0x4804};
+static const u32 mbkWramBConstant[1]           = {0x4004058};
+//static const u32 mbkWramCConstant[1]           = {0x400405C};
+
 // Panic
 // TODO : could be a good idea to catch the call to Panic function and store the message somewhere
 
@@ -2513,4 +2519,114 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 	dbg_printf("\n");
 	return resetOffset;
+}
+
+u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findMbkWramBOffset\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5008000) {
+		offset = findOffset(
+			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	} else {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	}
+
+	if (offset) {
+		offset = findOffsetBackwards(
+			offset, 0x40,//ndsHeader->arm9binarySize,
+			mbkWramBCGetSignature, 1
+		);
+	}
+
+	if (offset) {
+		dbg_printf("MBK WRAM B&C get found\n");
+	} else {
+		dbg_printf("MBK WRAM B&C get not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findMbkWramBOffsetThumb\n");
+
+	u16* offset = NULL;
+	if (moduleParams->sdk_version > 0x5008000) {
+		offset = (u16*)findOffset(
+			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	} else {
+		offset = (u16*)findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	}
+
+	if (offset) {
+		offset = findOffsetBackwardsThumb(
+			offset, 0x40,//ndsHeader->arm9binarySize,
+			mbkWramBCGetSignatureThumb, 1
+		);
+	}
+
+	if (offset) {
+		dbg_printf("MBK WRAM B&C get thumb found\n");
+	} else {
+		dbg_printf("MBK WRAM B&C get thumb not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {
+	dbg_printf("findMbkWramBOffsetBoth\n");
+
+	*usesThumb = false;
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5008000) {
+		offset = findOffset(
+			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	} else {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			mbkWramBConstant, 1
+		);
+	}
+
+	if (offset) {
+		u32* startOffset = findOffsetBackwards(
+			offset, 0x40,//ndsHeader->arm9binarySize,
+			mbkWramBCGetSignature, 1
+		);
+		if (!startOffset) {
+			startOffset = findOffsetBackwardsThumb(
+				offset, 0x40,//ndsHeader->arm9binarySize,
+				mbkWramBCGetSignatureThumb, 1
+			);
+			if (startOffset) {
+				*usesThumb = true;
+			}
+		}
+		offset = startOffset;
+	}
+
+	if (offset) {
+		dbg_printf(*usesThumb ? "MBK WRAM B&C get thumb found\n" : "MBK WRAM B&C get found\n");
+	} else {
+		dbg_printf("MBK WRAM B&C get not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }

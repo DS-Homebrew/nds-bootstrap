@@ -85,6 +85,9 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 
 // ARM7
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

@@ -1326,7 +1326,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000)) {
+	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000) || !dsiWramAccess) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
@@ -1404,6 +1404,13 @@ int arm7_main(void) {
 					*(u32*)0x02FFE1D4 += 0x7D0000;
 				}
 			}*/
+
+			if (!dsiWramAccess) {
+				patchHiHeapPointer(moduleParams, ndsHeader, false);
+
+				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
+				patchA9Mbk(ndsHeader, moduleParams, true);
+			}
 
 			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 				extern void rsetA7Cache(void);
