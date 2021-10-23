@@ -1219,11 +1219,9 @@ int arm7_main(void) {
 			}
 			buildFatTableCache(romFile, !sdRead, 0);
 		} else {
-			tonccpy((char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), (char*)0x2670000, sizeof(aFile));
+			tonccpy(romFile, (char*)0x2670000, sizeof(aFile));
 		}
-		//if (gameOnFlashcard) {
-			tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
-		//}
+		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, romFile, sizeof(aFile));
 
 		sdRead = (saveOnFlashcard ? false : dsiSD);
 
@@ -1231,18 +1229,16 @@ int arm7_main(void) {
 			if (fatTableEmpty) {
 				buildFatTableCache(savFile, !sdRead, 0);
 			} else {
-				tonccpy((char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), (char*)0x2670020, sizeof(aFile));
+				tonccpy(savFile, (char*)0x2670020, sizeof(aFile));
 			}
-			//if (saveOnFlashcard) {
-				tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
-			//}
+			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
 		if (gameOnFlashcard) sdRead = false;
 
 		if (fatTableEmpty) {
-			tonccpy((char*)0x2670000, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
-			tonccpy((char*)0x2670020, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)0x2670000, romFile, sizeof(aFile));
+			tonccpy((char*)0x2670020, savFile, sizeof(aFile));
 			*(u32*)(0x2670040) = storedFileCluster;
 			*(u32*)(0x2670044) = romSize;
 			*(u32*)(0x2670048) = saveFileCluster;
@@ -1538,8 +1534,8 @@ int arm7_main(void) {
 		}
 
 		if (isSdk5(moduleParams)) {
-			tonccpy((char*)ROM_FILE_LOCATION_SDK5, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
-			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
+			tonccpy((char*)ROM_FILE_LOCATION_SDK5, romFile, sizeof(aFile));
+			tonccpy((char*)SAV_FILE_LOCATION_SDK5, savFile, sizeof(aFile));
 		}
 
 		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0xB000);
@@ -1749,7 +1745,7 @@ int arm7_main(void) {
 
 	arm9_boostVram = boostVram;
 	arm9_isSdk5 = isSdk5(moduleParams);
-	arm9_a7SCFGLocked = (REG_SCFG_EXT == 0);
+	arm9_a7SCFGLocked = (REG_SCFG_EXT == 0 && !dsiSD);
 
     /*if (isGSDD) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
