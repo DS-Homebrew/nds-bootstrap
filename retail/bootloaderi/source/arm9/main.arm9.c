@@ -52,6 +52,7 @@ bool isGSDD = false;
 bool arm9_isSdk5 = false;
 bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
+bool arm9_a7SCFGLocked = false;
 bool extendedMemoryConfirmed = false;
 bool moreMemory = false;
 volatile bool screenFadedIn = false;
@@ -307,8 +308,10 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					REG_SCFG_EXT -= 0xC000;
 				} else {
 					transferToArm9(15);
-					// lock SCFG
-					REG_SCFG_EXT &= ~(1UL << 31);
+					if (!arm9_isSdk5 || !arm9_a7SCFGLocked) {
+						// lock SCFG
+						REG_SCFG_EXT &= ~(1UL << 31);
+					}
 				}
 			}
 			arm9_stateFlag = ARM9_READY;

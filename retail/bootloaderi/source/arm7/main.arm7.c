@@ -1531,9 +1531,7 @@ int arm7_main(void) {
 			ce7Location = CARDENGINEI_ARM7_LOCATION_ALT;
 		}
 
-		bool useSdk5ce7 = (!extendedMemoryConfirmed && isSdk5(moduleParams) &&
-		   (!dsiSD || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed))
-		);
+		bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 
 		if (useSdk5ce7) {
 			ce7Location = CARDENGINEI_ARM7_SDK5_LOCATION;
@@ -1543,8 +1541,6 @@ int arm7_main(void) {
 			tonccpy((char*)ROM_FILE_LOCATION_SDK5, (char*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT), sizeof(aFile));
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, (char*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT), sizeof(aFile));
 		}
-
-		//rebootConsole = (fatTableEmpty && !useSdk5ce7 && !gameOnFlashcard && (REG_SCFG_EXT == 0));
 
 		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0xB000);
 		if (gameOnFlashcard || saveOnFlashcard) {
@@ -1753,6 +1749,7 @@ int arm7_main(void) {
 
 	arm9_boostVram = boostVram;
 	arm9_isSdk5 = isSdk5(moduleParams);
+	arm9_a7SCFGLocked = (REG_SCFG_EXT == 0);
 
     /*if (isGSDD) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9

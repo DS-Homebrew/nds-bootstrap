@@ -63,6 +63,7 @@ extern bool isGSDD;
 extern bool arm9_isSdk5;
 extern bool dsiModeConfirmed;
 extern bool arm9_boostVram;
+extern bool arm9_a7SCFGLocked;
 extern bool extendedMemoryConfirmed;
 extern bool arm9_macroMode;
 extern volatile int arm9_stateFlag;
