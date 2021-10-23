@@ -119,44 +119,32 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 
 	int romFileType = -1;
 	bool romIsCompressed = false;
-	if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
-	|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".GEN") == 0))
+	if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
 	{
 		romFileType = 0;
-		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.gen") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.GEN") == 0));
+		romIsCompressed = (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.gen") == 0);
 	}
 	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMC") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SFC") == 0))
+			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0))
 	{
 		romFileType = 1;
 		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.smc") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMC") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sfc") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SFC") == 0));
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sfc") == 0));
 	}
-	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sms") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".SMS") == 0))
+	else if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sms") == 0)
 	{
 		romFileType = 2;
-		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sms") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.SMS") == 0));
+		romIsCompressed = (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.sms") == 0);
 	}
-	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".gg") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".GG") == 0))
+	else if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".gg") == 0)
 	{
 		romFileType = 3;
-		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".LZ77.GG") == 0));
+		romIsCompressed = (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.gg") == 0);
 	}
-	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".pce") == 0)
-			|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".PCE") == 0))
+	else if (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".pce") == 0)
 	{
 		romFileType = 4;
-		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.pce") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.PCE") == 0));
+		romIsCompressed = (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.pce") == 0);
 	}
 
 	if ((strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0
