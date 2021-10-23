@@ -53,6 +53,7 @@
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
 #define ipcEveryFrame BIT(9)
+#define hiyaCfwFound BIT(10)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -179,6 +180,8 @@ static void unlaunchSetFilename(bool boot) {
 }
 
 static void unlaunchSetHiyaFilename(void) {
+	if (!(valueBits & hiyaCfwFound)) return;
+
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)

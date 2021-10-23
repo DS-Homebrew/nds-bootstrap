@@ -20,5 +20,6 @@ extern u8 valueBits2;
 #define swiHaltHook (valueBits2 & BIT(3))
 #define specialCard (valueBits2 & BIT(4))
 #define dsiWramAccess (valueBits2 & BIT(5))
+#define hiyaCfwFound (valueBits2 & BIT(6))
 
 #endif

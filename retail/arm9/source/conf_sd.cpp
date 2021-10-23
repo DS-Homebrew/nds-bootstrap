@@ -666,6 +666,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->dsiWramAccess) {
 		conf->valueBits2 |= BIT(5);
 	}
+	if (access("sd:/hiya.dsi", F_OK) == 0) {
+		conf->valueBits2 |= BIT(6);
+	}
 
   if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
 	// Load ce7 binary

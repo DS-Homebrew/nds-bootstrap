@@ -42,6 +42,7 @@
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
 #define b_ipcEveryFrame BIT(9)
+#define b_hiyaCfwFound BIT(10)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -324,6 +325,9 @@ int hookNdsRetailArm7(
 		}
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
+		}
+		if (hiyaCfwFound) {
+			ce7->valueBits |= b_hiyaCfwFound;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
