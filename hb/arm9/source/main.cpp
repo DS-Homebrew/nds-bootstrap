@@ -159,7 +159,12 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".LZ77.PCE") == 0));
 	}
 
-	if ( strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0 || argarray.size() == 0 ) {
+	if ((strcasecmp (filename.c_str() + filename.size() - 4, ".nds") != 0
+	  && strcasecmp (filename.c_str() + filename.size() - 4, ".dsi") != 0
+	  && strcasecmp (filename.c_str() + filename.size() - 4, ".ids") != 0
+	  && strcasecmp (filename.c_str() + filename.size() - 4, ".srl") != 0
+	  && strcasecmp (filename.c_str() + filename.size() - 4, ".app") != 0)
+	|| argarray.size() == 0) {
 		dbg_printf("no nds file specified\n");
 	} else {
 		char *name = argarray.at(0);
