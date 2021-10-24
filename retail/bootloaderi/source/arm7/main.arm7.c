@@ -1385,46 +1385,39 @@ int arm7_main(void) {
 		rsetPatchCache(true);
 
 		if (REG_SCFG_EXT == 0) {
-			if (oldArm7mbk == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
-				if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
-					ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+			if (!dsiWramAccess) {
+				patchHiHeapPointer(moduleParams, ndsHeader, false);
 
-					extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
-					patchGbaSlotInit_cont(ndsHeader, false, true);
-				}
+				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
+				patchA9Mbk(ndsHeader, moduleParams, true);
+			}
 
-				if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
-					// Replace incompatible ARM7 binary
-					newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
-					newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
-					*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
-					*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
-					tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
-				}
+			if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
+				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 
-				if (newArm7binarySize != patchOffsetCache.a7BinSize) {
-					extern void rsetA7Cache(void);
-					rsetA7Cache();
-					patchOffsetCache.a7BinSize = newArm7binarySize;
-					patchOffsetCacheChanged = true;
-				}
+				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+				patchGbaSlotInit_cont(ndsHeader, false, true);
+			}
 
-				if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
-					extern void patchPostBoot(const tNDSHeader* ndsHeader);
-					patchPostBoot(ndsHeader);
-				}
-			} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+			if (oldArm7mbk == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+				// Replace incompatible ARM7 binary
+				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
+				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
+				*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+				*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
+				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
+			}
+
+			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 				extern void rsetA7Cache(void);
 				rsetA7Cache();
 				patchOffsetCache.a7BinSize = newArm7binarySize;
 				patchOffsetCacheChanged = true;
 			}
 
-			if (!dsiWramAccess) {
-				patchHiHeapPointer(moduleParams, ndsHeader, false);
-
-				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
-				patchA9Mbk(ndsHeader, moduleParams, true);
+			if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
+				extern void patchPostBoot(const tNDSHeader* ndsHeader);
+				patchPostBoot(ndsHeader);
 			}
 
 			extern void patchScfgExt(const tNDSHeader* ndsHeader);
