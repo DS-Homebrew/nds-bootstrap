@@ -354,12 +354,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load donor ROM's arm7 binary, if needed
 		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
 			donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
-		} else
+		} else if (conf->gameOnFlashcard || !conf->isDSiWare) {
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (dsiEnhancedMbk || (conf->dsiMode && (conf->gameOnFlashcard || !conf->isDSiWare))) donorNdsFile = fopen(conf->donorTwlPath, "rb");
-				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode && (conf->gameOnFlashcard || !conf->isDSiWare)) {
+				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorTwlPath, "rb");
+				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode) {
 					donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
 				}
 				break;
@@ -404,6 +404,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				break;
 			default:
 				break;
+		}
 		}
 
 		if (donorNdsFile) {
