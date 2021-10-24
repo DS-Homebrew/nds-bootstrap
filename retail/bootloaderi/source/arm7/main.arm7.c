@@ -1385,8 +1385,7 @@ int arm7_main(void) {
 		rsetPatchCache(true);
 
 		if (REG_SCFG_EXT == 0) {
-			if (*(u32*)0x02FFE1A0 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
-				u32 oldArm7mbk = *(u32*)0x02FFE1A0;
+			if (oldArm7mbk == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
 				if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
 					ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 
@@ -1403,10 +1402,22 @@ int arm7_main(void) {
 					tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 				}
 
+				if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+					extern void rsetA7Cache(void);
+					rsetA7Cache();
+					patchOffsetCache.a7BinSize = newArm7binarySize;
+					patchOffsetCacheChanged = true;
+				}
+
 				if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
 					extern void patchPostBoot(const tNDSHeader* ndsHeader);
 					patchPostBoot(ndsHeader);
 				}
+			} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+				extern void rsetA7Cache(void);
+				rsetA7Cache();
+				patchOffsetCache.a7BinSize = newArm7binarySize;
+				patchOffsetCacheChanged = true;
 			}
 
 			if (!dsiWramAccess) {
@@ -1414,13 +1425,6 @@ int arm7_main(void) {
 
 				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
 				patchA9Mbk(ndsHeader, moduleParams, true);
-			}
-
-			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
-				extern void rsetA7Cache(void);
-				rsetA7Cache();
-				patchOffsetCache.a7BinSize = newArm7binarySize;
-				patchOffsetCacheChanged = true;
 			}
 
 			extern void patchScfgExt(const tNDSHeader* ndsHeader);
