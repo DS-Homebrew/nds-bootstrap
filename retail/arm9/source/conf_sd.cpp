@@ -351,7 +351,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		u32 srlAddr = 0;
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && conf->dsiMode > 0 && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
+		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
 			donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
 		} else
 		switch (ndsArm7Size) {
@@ -415,6 +415,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, srlAddr+0x1D0, SEEK_SET);
 			fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
+			fseek(donorNdsFile, srlAddr+0x1D4, SEEK_SET);
+			fread((u32*)DONOR_ROM_DEVICE_LIST_LOCATION, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, srlAddr+0x1DC, SEEK_SET);
 			fread((u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, srlAddr+0x22C, SEEK_SET);
@@ -670,7 +672,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->valueBits2 |= BIT(6);
 	}
 
-  if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
+  if (conf->gameOnFlashcard || !conf->isDSiWare) {
 	// Load ce7 binary
 	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
 	if (cebin) {
@@ -1050,7 +1052,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		}
 
-		if ((conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) && conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
+		if ((conf->gameOnFlashcard || !conf->isDSiWare) && conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
 			consoleDemoInit();
 			iprintf("Creating FAT table file.\n");
 			iprintf("Please wait...\n");
@@ -1146,7 +1148,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (conf->gameOnFlashcard || (conf->isDSiWare && REG_SCFG_EXT7 == 0 && a7mbk6 == 0x00403000) || !conf->isDSiWare) {
+	if (conf->gameOnFlashcard || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {

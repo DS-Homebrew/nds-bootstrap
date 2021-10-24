@@ -139,7 +139,6 @@ u32 srlAddr = 0;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
-u32 oldArm7mbk = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -1030,7 +1029,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		toncset((u32*)0x02FFFD60, 0, 0xA0);
 	}
 
-	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || oldArm7mbk != 0x00403000)) {
+	if (!gameOnFlashcard && isDSiWare) {
 		*(u16*)(0x02FFFC40) = 3;						// Boot Indicator (NAND/SD)
 		return;
 	}
@@ -1160,8 +1159,6 @@ int arm7_main(void) {
 	aFile* romFile = (aFile*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT);
 	*romFile = getFileFromCluster(storedFileCluster);
 
-	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), !sdRead, -1);
-
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 
 	// Sav file
@@ -1183,7 +1180,7 @@ int arm7_main(void) {
 		//return -1;
 	}*/
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000)) {
+	if (gameOnFlashcard || !isDSiWare) {
 		u32 currentFatTableVersion = 3;
 		extern u32 currentClusterCacheSize;
 
@@ -1279,7 +1276,7 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
-		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000))) {
+		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
 			/*if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
@@ -1322,7 +1319,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
-	if (gameOnFlashcard || !isDSiWare || (isDSiWare && REG_SCFG_EXT == 0 && oldArm7mbk == 0x00403000) || !dsiWramAccess) {
+	if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
@@ -1348,7 +1345,7 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
-	if (!gameOnFlashcard && isDSiWare && (REG_SCFG_EXT != 0 || oldArm7mbk != 0x00403000)) {
+	if (!gameOnFlashcard && isDSiWare) {
 		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
@@ -1383,7 +1380,9 @@ int arm7_main(void) {
 		rsetPatchCache(true);
 
 		if (REG_SCFG_EXT == 0) {
-			/*if (*(u32*)0x02FFE1A0 == 0x00403000) {
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+
 				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
 				patchGbaSlotInit_cont(ndsHeader, false, true);
 
@@ -1392,14 +1391,10 @@ int arm7_main(void) {
 					newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 					newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
 					*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+					*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 					tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 				}
-
-				if (*(u32*)0x02FFE1D4 >= 0x03000000 && *(u32*)0x02FFE1D4 < 0x03040000) {
-					// Relocate device list
-					*(u32*)0x02FFE1D4 += 0x7D0000;
-				}
-			}*/
+			}
 
 			if (!dsiWramAccess) {
 				patchHiHeapPointer(moduleParams, ndsHeader, false);
@@ -1776,7 +1771,7 @@ int arm7_main(void) {
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, !sdRead, -1);	// Dump (decrypted?) arm9 binary
 	}
 
-	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && (REG_SCFG_EXT != 0 || gameOnFlashcard || oldArm7mbk != 0x00403000) && !(REG_SCFG_ROM & BIT(9))) {
+	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	}

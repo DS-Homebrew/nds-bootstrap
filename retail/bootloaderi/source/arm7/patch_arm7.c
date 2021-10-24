@@ -409,7 +409,7 @@ u32 patchCardNdsArm7(
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
 		tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
-		toncset((u8*)DONOR_ROM_ARM7_LOCATION, 0, 0x3000C);
+		toncset((u8*)DONOR_ROM_ARM7_LOCATION, 0, 0x30010);
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {

@@ -38,6 +38,7 @@
 #define DONOR_ROM_ARM7_SIZE_LOCATION                 0x026B0000
 #define DONOR_ROM_ARM7I_SIZE_LOCATION                0x026B0004
 #define DONOR_ROM_MBK6_LOCATION                      0x026B0008
+#define DONOR_ROM_DEVICE_LIST_LOCATION               0x026B000C
 #define CHEAT_ENGINE_BUFFERED_LOCATION	             0x026E0000
 #define INGAME_MENU_LOCATION                         0x026F6000
 #define INGAME_MENU_LOCATION_B4DS                    0x023E6000

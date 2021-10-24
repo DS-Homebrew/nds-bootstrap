@@ -237,7 +237,11 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 	return raw_len;
 }
 
+static bool isDecompressed = false;
+
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
+	if (isDecompressed) return;
+
 	const char* romTid = getRomTid(ndsHeader);
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
@@ -280,6 +284,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		}
 		}
 	}
+	isDecompressed = true;
 }
 
 u32 card_hash[0x412];
