@@ -1143,6 +1143,8 @@ int arm7_main(void) {
 
 	if (gameOnFlashcard) sdRead = false;
 
+	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT == 0);
+
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10, !sdRead, -1);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
@@ -1156,13 +1158,13 @@ int arm7_main(void) {
 	}
 
 	// ROM file
-	aFile* romFile = (aFile*)(dsiSD ? ROM_FILE_LOCATION : ROM_FILE_LOCATION_ALT);
+	aFile* romFile = (aFile*)(dsiEnhancedMbk ? ROM_FILE_LOCATION_ALT : ROM_FILE_LOCATION);
 	*romFile = getFileFromCluster(storedFileCluster);
 
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 
 	// Sav file
-	aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
+	aFile* savFile = (aFile*)(dsiEnhancedMbk ? SAV_FILE_LOCATION_ALT : SAV_FILE_LOCATION);
 	*savFile = getFileFromCluster(saveFileCluster);
 
 	sdRead = (gameOnFlashcard ? false : dsiSD);
@@ -1380,11 +1382,14 @@ int arm7_main(void) {
 		rsetPatchCache(true);
 
 		if (REG_SCFG_EXT == 0) {
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+			if (*(u32*)0x02FFE1A0 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
+				u32 oldArm7mbk = *(u32*)0x02FFE1A0;
+				if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
+					ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
 
-				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
-				patchGbaSlotInit_cont(ndsHeader, false, true);
+					extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+					patchGbaSlotInit_cont(ndsHeader, false, true);
+				}
 
 				if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 					// Replace incompatible ARM7 binary
@@ -1393,6 +1398,11 @@ int arm7_main(void) {
 					*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 					*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 					tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
+				}
+
+				if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
+					extern void patchPostBoot(const tNDSHeader* ndsHeader);
+					patchPostBoot(ndsHeader);
 				}
 			}
 
@@ -1518,7 +1528,7 @@ int arm7_main(void) {
 
 		nocashMessage("Trying to patch the card...\n");
 
-		if (!dsiSD) {
+		if (dsiEnhancedMbk) {
 			ce7Location = CARDENGINEI_ARM7_LOCATION_ALT;
 		}
 

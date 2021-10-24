@@ -303,9 +303,9 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }*/
 
-static void patchPostBoot(const tNDSHeader* ndsHeader) {
+void patchPostBoot(const tNDSHeader* ndsHeader) {
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed
-	|| ((ndsHeader->unitCode == 2 || strncmp(getRomTid(ndsHeader), "KD9", 3) == 0)
+	|| ((ndsHeader->unitCode == 2 || ndsHeader->gameCode[0] == 'K')
 	&& *(u32*)0x02FFE1A0 == 0x00403000)
 	|| *(u32*)0x02FFE1A0 != 0x00403000) {
 		return;

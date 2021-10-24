@@ -341,13 +341,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	bool donorLoaded = false;
 	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
+	bool dsiEnhancedMbk = false;
 
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
 	}
 
 	if (dsiFeatures()) {
-		bool dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
+		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 		u32 srlAddr = 0;
 
 		// Load donor ROM's arm7 binary, if needed
@@ -357,8 +358,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (dsiEnhancedMbk || conf->dsiMode) donorNdsFile = fopen(conf->donorTwlPath, "rb");
-				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode) {
+				if (dsiEnhancedMbk || (conf->dsiMode && (conf->gameOnFlashcard || !conf->isDSiWare))) donorNdsFile = fopen(conf->donorTwlPath, "rb");
+				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode && (conf->gameOnFlashcard || !conf->isDSiWare)) {
 					donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
 				}
 				break;
@@ -674,7 +675,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
   if (conf->gameOnFlashcard || !conf->isDSiWare) {
 	// Load ce7 binary
-	cebin = fopen(conf->sdFound ? "nitro:/cardenginei_arm7.lz77" : "nitro:/cardenginei_arm7_alt.lz77", "rb");
+	cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x8000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
