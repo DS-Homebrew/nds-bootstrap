@@ -358,7 +358,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		switch (ndsArm7Size) {
 			case 0x22B40:
 			case 0x22BCC:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorTwlPath, "rb");
+				if (dsiEnhancedMbk || conf->dsiMode) donorNdsFile = fopen(conf->donorTwlPath, "rb");
 				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode) {
 					donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
 				}
