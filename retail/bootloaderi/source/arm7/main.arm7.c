@@ -139,6 +139,7 @@ u32 srlAddr = 0;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
+u32 oldArm7mbk = 0;
 
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
@@ -1160,6 +1161,8 @@ int arm7_main(void) {
 	// ROM file
 	aFile* romFile = (aFile*)(dsiEnhancedMbk ? ROM_FILE_LOCATION_ALT : ROM_FILE_LOCATION);
 	*romFile = getFileFromCluster(storedFileCluster);
+
+	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), !sdRead, -1);
 
 	sdRead = (saveOnFlashcard ? false : dsiSD);
 

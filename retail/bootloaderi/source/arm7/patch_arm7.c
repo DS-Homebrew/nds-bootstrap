@@ -20,6 +20,7 @@ extern bool sdRead;
 
 extern u32 newArm7binarySize;
 extern u32 newArm7ibinarySize;
+extern u32 oldArm7mbk;
 
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
@@ -305,8 +306,8 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 
 void patchPostBoot(const tNDSHeader* ndsHeader) {
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed
-	|| ((ndsHeader->unitCode == 2 || ndsHeader->gameCode[0] == 'K')
-	&& *(u32*)0x02FFE1A0 == 0x00403000)
+	|| ((ndsHeader->unitCode == 2 || strncmp(getRomTid(ndsHeader), "KD9", 3) == 0)
+	&& oldArm7mbk == 0x00403000)
 	|| *(u32*)0x02FFE1A0 != 0x00403000) {
 		return;
 	}
