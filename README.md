@@ -52,3 +52,37 @@ A frontend isn't required as nds-bootstrap uses an ini file to load its paramete
 TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz) & co. It has 7 customizable launchers to choose from with the ability to launch emulators and other homebrew.
 
 It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-bootstrap for you, with customizable per game settings.
+
+# Credits
+## Developers
+- [Rocket Robz](https://github.com/RocketRobz): Lead developer, DSi mode and DSiWare support, B4DS mode, general maintenance and updates
+- [ahezard](https://github.com/ahezard): Starting the project, former lead developer
+- [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, and translation management
+
+## Other
+- [devkitPro](https://devkitpro.org): devkitARM and libnds
+
+## Translators
+- Chinese Simplified: [James-Makoto](https://crowdin.com/profile/VCMOD55), [R-YaTian](https://github.com/R-YaTian)
+- Chinese Traditional: [James-Makoto](https://crowdin.com/profile/VCMOD55), [R-YaTian](https://github.com/R-YaTian)
+- Danish: [Nadia Pedersen](https://crowdin.com/profile/nadiaholmquist)
+- Dutch: [guusbuk](https://crowdin.com/profile/guusbuk), [TM-47](https://crowdin.com/profile/-tm-)
+- French: [Benjamin](https://crowdin.com/profile/sombrabsol), [Dhalian](https://crowdin.com/profile/DHALiaN3630), [Fleefie~](https://crowdin.com/profile/fleefie), [LinuxCat](https://github.com/LinUwUxCat), [TM-47](https://crowdin.com/profile/-tm-)
+- German: [TheDude](https://crowdin.com/profile/the6771), [TM-47](https://crowdin.com/profile/-tm-)
+- Greek: [TM-47](https://crowdin.com/profile/-tm-)
+- Hebrew: [Barawer](https://crowdin.com/profile/barawer), [Yaniv Levin](https://crowdin.com/profile/y4niv)
+- Hungarian: [TM-47](https://crowdin.com/profile/-tm-)
+- Indonesian: [heydootdoot](https://crowdin.com/profile/heydootdoot), [ZianoGG](https://crowdin.com/profile/zianogg)
+- Italian: [TM-47](https://crowdin.com/profile/-tm-)
+- Japanese: [Pk11](https://github.com/Epicpkmn11)
+- Korean: [I'm Not Cry](https://crowdin.com/profile/cryental), [Myebyeol_NOTE](https://crowdin.com/profile/groovy-mint)
+- Norwegian: [Nullified Block](https://crowdin.com/profile/elasderas123), [TM-47](https://crowdin.com/profile/-tm-)
+- Polish: [gierkowiec tv](https://crowdin.com/profile/krystianbederz), [TM-47](https://crowdin.com/profile/-tm-)
+- Portuguese (Portugal): [Tavisc0](https://crowdin.com/profile/tavisc0)
+- Portuguese (Brazil): [Tavisc0](https://crowdin.com/profile/tavisc0), [TM-47](https://crowdin.com/profile/-tm-)
+- Romanian: [Tescu](https://crowdin.com/profile/tescu48)
+- Russian: [Ckau](https://crowdin.com/profile/Ckau)
+- Spanish: [Nintendo R](https://crowdin.com/profile/nintendor), [nuxa17](https://twitter.com/TimeLordJean), [Radriant](https://ja.crowdin.com/profile/radriant), [SofyUchiha](https://crowdin.com/profile/sofyuchiha), [TM-47](https://crowdin.com/profile/-tm-)
+- Swedish: [TM-47](https://crowdin.com/profile/-tm-)
+- Turkish: [Egehan.TWL](https://crowdin.com/profile/egehan.twl), [rewold20](https://crowdin.com/profile/rewold20), [TM-47](https://crowdin.com/profile/-tm-)
+- Ukrainian: [MichaelBest01](https://crowdin.com/profile/michaelbest01), [TM-47](https://crowdin.com/profile/-tm-)
