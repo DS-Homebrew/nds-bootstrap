@@ -625,7 +625,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				//if (access(photoPath, F_OK) == 0) {
 					toncset((u8*)0x02EFF151, 0x10, 1);
 					toncset((char*)0x02EFF164, 0, 0x40);
-					tonccpy((char*)0x02EFF168, photoPath, strlen(photoPath));
+					tonccpy((char*)0x02EFF166, photoPath, strlen(photoPath));
 					tonccpy((char*)0x02EFF164, sdmcText, 4);
 				//}
 				if ((strncmp(romTid, "HNK", 3) == 0 || strncmp(romTid, "KGU", 3) == 0) && shared2Found) {
