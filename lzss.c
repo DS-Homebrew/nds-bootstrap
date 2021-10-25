@@ -68,15 +68,15 @@ int           pos_ring, len_ring, lzs_vram;
 void  Title(void);
 void  Usage(void);
 
-char *Load(char *filename, int *length, int min, int max);
-void  Save(char *filename, char *buffer, int length);
-char *Memory(int length, int size);
+unsigned char *Load(char *filename, unsigned int *length, int min, int max);
+void  Save(char *filename, unsigned char *buffer, int length);
+unsigned char *Memory(int length, int size);
 
 void  LZS_Decode(char *filename);
 void  LZS_Encode(char *filename, int mode);
-char *LZS_Code(unsigned char *raw_buffer, int raw_len, int *new_len, int best);
+unsigned char *LZS_Code(unsigned char *raw_buffer, int raw_len, unsigned int *new_len, int best);
 
-char *LZS_Fast(unsigned char *raw_buffer, int raw_len, int *new_len);
+unsigned char *LZS_Fast(unsigned char *raw_buffer, int raw_len, unsigned int *new_len);
 void  LZS_InitTree(void);
 void  LZS_InsertNode(int r);
 void  LZS_DeleteNode(int p);
@@ -145,10 +145,10 @@ void Usage(void) {
 }
 
 /*----------------------------------------------------------------------------*/
-char *Load(char *filename, int *length, int min, int max) {
+unsigned char *Load(char *filename, unsigned int *length, int min, int max) {
   FILE *fp;
-  int   fs;
-  char *fb;
+  unsigned int fs;
+  unsigned char *fb;
 
   if ((fp = fopen(filename, "rb")) == NULL) EXIT("\nFile open error\n");
   fseek(fp, 0, SEEK_END);
@@ -165,7 +165,7 @@ char *Load(char *filename, int *length, int min, int max) {
 }
 
 /*----------------------------------------------------------------------------*/
-void Save(char *filename, char *buffer, int length) {
+void Save(char *filename, unsigned char *buffer, int length) {
   FILE *fp;
 
   if ((fp = fopen(filename, "wb")) == NULL) EXIT("\nFile create error\n");
@@ -174,10 +174,10 @@ void Save(char *filename, char *buffer, int length) {
 }
 
 /*----------------------------------------------------------------------------*/
-char *Memory(int length, int size) {
-  char *fb;
+unsigned char *Memory(int length, int size) {
+  unsigned char *fb;
 
-  fb = (char *) calloc(length, size);
+  fb = (unsigned char *) calloc(length, size);
   if (fb == NULL) EXIT("\nMemory error\n");
 
   return(fb);
@@ -229,7 +229,10 @@ void LZS_Decode(char *filename) {
         len = raw_end - raw;
       }
       pos = (pos & 0xFFF) + 1;
-      while (len--) *raw++ = *(raw - pos);
+      while (len--) {
+        *raw = *(raw - pos);
+        raw++;
+      }
     }
   }
 
@@ -280,7 +283,7 @@ void LZS_Encode(char *filename, int mode) {
 }
 
 /*----------------------------------------------------------------------------*/
-char *LZS_Code(unsigned char *raw_buffer, int raw_len, int *new_len, int best) {
+unsigned char *LZS_Code(unsigned char *raw_buffer, int raw_len, unsigned int *new_len, int best) {
   unsigned char *pak_buffer, *pak, *raw, *raw_end, *flg;
   unsigned int   pak_len, len, pos, len_best, pos_best;
   unsigned int   len_next, pos_next, len_post, pos_post;
@@ -357,7 +360,7 @@ char *LZS_Code(unsigned char *raw_buffer, int raw_len, int *new_len, int best) {
 }
 
 /*----------------------------------------------------------------------------*/
-char *LZS_Fast(unsigned char *raw_buffer, int raw_len, int *new_len) {
+unsigned char *LZS_Fast(unsigned char *raw_buffer, int raw_len, unsigned int *new_len) {
   unsigned char *pak_buffer, *pak, *raw, *raw_end, *flg;
   unsigned int   pak_len, len, r, s, len_tmp, i;
   unsigned char  mask; 
