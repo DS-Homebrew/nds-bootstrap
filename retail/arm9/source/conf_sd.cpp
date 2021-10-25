@@ -620,25 +620,21 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					toncset((u8*)0x02EFF0FD, 0x10, 1);
 					tonccpy((char*)0x02EFF110, sdmcText, 4);
 				}
-				if (shared2Found) {
-					toncset((u8*)0x02EFF141, 0x10, 1);
-					tonccpy((char*)0x02EFF164, sdmcText, 4);
-				}
 				const char* photoPath = "sd:/photo";
 				mkdir(photoPath, 0777);
 				//if (access(photoPath, F_OK) == 0) {
-					toncset((u8*)0x02EFF1A5, 0x10, 1);
-					toncset((char*)0x02EFF1B8, 0, 0x40);
-					tonccpy((char*)0x02EFF1BA, photoPath, strlen(photoPath));
-					tonccpy((char*)0x02EFF1B8, sdmcText, 4);
+					toncset((u8*)0x02EFF151, 0x10, 1);
+					toncset((char*)0x02EFF164, 0, 0x40);
+					tonccpy((char*)0x02EFF168, photoPath, strlen(photoPath));
+					tonccpy((char*)0x02EFF164, sdmcText, 4);
 				//}
-				if (strncmp(romTid, "KGU", 3) == 0 && shared2Found) {
+				if ((strncmp(romTid, "HNK", 3) == 0 || strncmp(romTid, "KGU", 3) == 0) && shared2Found) {
 					const char* filePath = "sdmc:/shared2/0000";
 					const char* share = "share";
 					u8 cPath[3] = {'C', 0x08, 0x06};
-					tonccpy((char*)0x02EFF2A0, cPath, 3);
-					tonccpy((char*)0x02EFF2A4, share, strlen(share));
-					tonccpy((char*)0x02EFF2B4, filePath, strlen(filePath));
+					tonccpy((char*)0x02EFF24C, cPath, 3);
+					tonccpy((char*)0x02EFF250, share, strlen(share));
+					tonccpy((char*)0x02EFF260, filePath, strlen(filePath));
 				}
 			}
 			if (!conf->gameOnFlashcard) {
@@ -647,19 +643,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					tonccpy((char*)0x02EFF3C2, sdmcText+2, 2);
 				}
 				if (strlen(conf->prvPath) < 62) {
-					if (strncmp(conf->prvPath, "sd:", 3) != 0) {
-						tonccpy((char*)0x02EFF20C, conf->prvPath, strlen(conf->prvPath));
+					if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
+						tonccpy((char*)0x02EFF1B8, conf->prvPath, strlen(conf->prvPath));
 					} else {
-						tonccpy((char*)0x02EFF20E, conf->prvPath, strlen(conf->prvPath));
-						tonccpy((char*)0x02EFF20E, sdmcText+2, 2);
+						tonccpy((char*)0x02EFF1BA, conf->prvPath, strlen(conf->prvPath));
+						tonccpy((char*)0x02EFF1BA, sdmcText+2, 2);
 					}
 				}
 				if (strlen(conf->savPath) < 62) {
-					if (strncmp(conf->savPath, "sd:", 3) != 0) {
-						tonccpy((char*)0x02EFF260, conf->savPath, strlen(conf->savPath));
+					if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
+						tonccpy((char*)0x02EFF20C, conf->savPath, strlen(conf->savPath));
 					} else {
-						tonccpy((char*)0x02EFF262, conf->savPath, strlen(conf->savPath));
-						tonccpy((char*)0x02EFF262, sdmcText+2, 2);
+						tonccpy((char*)0x02EFF20E, conf->savPath, strlen(conf->savPath));
+						tonccpy((char*)0x02EFF20E, sdmcText+2, 2);
 					}
 				}
 			}
