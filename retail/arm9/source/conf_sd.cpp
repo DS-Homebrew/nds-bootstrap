@@ -595,10 +595,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if (REG_SCFG_EXT7 == 0) {
-		u32 wordBak = *(vu32*)0x03700000;
-		*(vu32*)0x03700000 = 0x414C5253;
-		conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
-		*(vu32*)0x03700000 = wordBak;
+		if (conf->gameOnFlashcard && !conf->sdFound) {
+			// MBK and WRAM are inaccessible, but DSi titles and cardEngine seem to access those fine?
+			conf->dsiWramAccess = (memcmp(romTid, "VDE", 3) != 0); // Fossil Fighters: Champions
+		} else {
+			u32 wordBak = *(vu32*)0x03700000;
+			*(vu32*)0x03700000 = 0x414C5253;
+			conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
+			*(vu32*)0x03700000 = wordBak;
+		}
 	} else {
 		conf->dsiWramAccess = true;
 	}
