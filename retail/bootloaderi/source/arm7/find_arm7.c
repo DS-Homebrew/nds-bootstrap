@@ -83,8 +83,9 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 //static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
 // Post-boot code
-static const u32 postBootStartSignature[1] = {0xE92D47F0};
-static const u32 postBootEndSignature[1]   = {0x04000300};
+static const u32 postBootStartSignature[1]      = {0xE92D47F0};
+static const u16 postBootStartSignatureThumb[1] = {0xB5F8};
+static const u32 postBootEndSignature[1]        = {0x04000300};
 
 // Card check pull out
 static const u32 cardCheckPullOutSignature1[4] = {0xE92D4000, 0xE24DD004, 0xE59F00B4, 0xE5900000}; // Pokemon Dash, early sdk2
@@ -993,6 +994,17 @@ u32* findPostBootOffset(const tNDSHeader* ndsHeader) {
 		} else {
 			dbg_printf("Post boot start not found\n");
 		}
+		if (!startOffset) {
+			startOffset = (u32*)findOffsetBackwardsThumb(
+				(u16*)endOffset, 0x100,
+				postBootStartSignatureThumb, 1
+			);
+			if (startOffset) {
+				dbg_printf("Post boot start thumb found\n");
+			} else {
+				dbg_printf("Post boot start thumb not found\n");
+			}
+		}
 	} else {
 		dbg_printf("Post boot not found\n");
 	}
@@ -1064,7 +1076,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	if (!cardIrqEnableOffset && isSdk5(moduleParams)) {
 		// SDK 5
 		cardIrqEnableOffset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm7destination, newArm7binarySize,
+			(u16*)ndsHeader->arm7destination, newArm7binarySize,
             irqEnableStartSignatureThumb5, 5
 		);
 		if (cardIrqEnableOffset) {
@@ -1150,28 +1162,28 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	if (!sdCardResetOffset) {
 		sdCardResetOffset = (u32*)findOffsetThumb(
-			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
 			sdCardResetSignatureThumbType1, 7
 		);
 	}
 
 	if (!sdCardResetOffset) {
 		sdCardResetOffset = (u32*)findOffsetThumb(
-			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
 			sdCardResetSignatureThumbType2, 7
 		);
 	}
 
 	if (!sdCardResetOffset) {
 		sdCardResetOffset = (u32*)findOffsetThumb(
-			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
 			sdCardResetSignatureThumbType3, 7
 		);
 	}
 
 	if (!sdCardResetOffset) {
 		sdCardResetOffset = (u32*)findOffsetThumb(
-			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
 			sdCardResetSignatureThumbType4, 7
 		);
 	}

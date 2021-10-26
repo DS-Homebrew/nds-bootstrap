@@ -330,7 +330,12 @@ void patchPostBoot(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (postBootOffset) {
-		*postBootOffset = 0xE12FFF1E;	// bx lr
+		bool usesThumb = (*(u16*)postBootOffset == 0xB5F8);
+		if (usesThumb) {
+			*(u16*)postBootOffset = 0x4770;	// bx lr
+		} else {
+			*postBootOffset = 0xE12FFF1E;	// bx lr
+		}
 		dbg_printf("Post boot location : ");
 		dbg_hexa((u32)postBootOffset);
 		dbg_printf("\n\n");
