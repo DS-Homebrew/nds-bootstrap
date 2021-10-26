@@ -2,13 +2,12 @@
 #define UNPATCHED_FUNCS_ARM9_H
 
 #include <nds/ndstypes.h>
-#include "module_params.h"
 
 typedef struct unpatchedFunctions {
+	u32* compressedFlagOffset;
+	u32* iCompressedFlagOffset;
 	u32 compressed_static_end;
 	u32 ltd_compressed_static_end;
-	module_params_t* moduleParams;
-	ltd_module_params_t* ltdModuleParams;
 	u32* mpuDataOffset;
 	u32* mpuDataOffsetAlt;
 	u32* mpuDataOffset2;

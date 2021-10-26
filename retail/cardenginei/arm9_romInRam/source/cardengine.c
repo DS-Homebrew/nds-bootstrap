@@ -569,13 +569,11 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->compressed_static_end) {
-		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
-		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
 	}
 
 	if (unpatchedFuncs->ltd_compressed_static_end) {
-		ltd_module_params_t* ltdModuleParams = unpatchedFuncs->ltdModuleParams;
-		ltdModuleParams->compressed_static_end = unpatchedFuncs->ltd_compressed_static_end;
+		*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {

@@ -22,6 +22,7 @@
 #include <nds/debug.h>
 
 //#include "my_fat.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "nds_header.h"
 #include "cardengine_header_arm7.h"
@@ -365,6 +366,7 @@ int hookNdsRetailArm7(
 	}
 
 	u32 cheatEngineOffset = (u32)ce7-0x8400;
+	u16 cheatSizeLimit = (ce7NotFound ? 0x1BF0 : 0x8000);
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 	if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
@@ -373,13 +375,30 @@ int hookNdsRetailArm7(
 		cheatDataOffset += 4;
 		*(u32*)((u32)cheatDataOffset) = language;
 		cheatDataOffset += 4;
+
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
+		if (unpatchedFuncs->compressed_static_end) {
+			*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->compressedFlagOffset;
+			cheatDataOffset += 4;
+			*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->compressed_static_end;
+			cheatDataOffset += 4;
+			cheatSizeLimit -= 8;
+		}
+		if (unpatchedFuncs->ltd_compressed_static_end) {
+			*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->iCompressedFlagOffset;
+			cheatDataOffset += 4;
+			*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->ltd_compressed_static_end;
+			cheatDataOffset += 4;
+			cheatSizeLimit -= 8;
+		}
 		*(cheatDataOffset + 3) = 0xCF;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
 	aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= (ce7NotFound ? 0x1BF0 : 0x8000)) {
+	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, !sdRead, 0);
 			cheatDataOffset += apPatchSize;

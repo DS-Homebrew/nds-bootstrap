@@ -149,8 +149,8 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 	) {
 		// Compressed
 		dbg_printf("arm9 is compressed\n");
+		unpatchedFuncs->compressedFlagOffset = (u32*)((u32)moduleParams+0x14);
 		unpatchedFuncs->compressed_static_end = moduleParams->compressed_static_end;
-		unpatchedFuncs->moduleParams = moduleParams;
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
 		moduleParams->compressed_static_end = 0;

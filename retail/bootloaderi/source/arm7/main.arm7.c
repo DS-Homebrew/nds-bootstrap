@@ -1325,7 +1325,7 @@ int arm7_main(void) {
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
 	if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
-		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, true);
 	}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
@@ -1393,7 +1393,7 @@ int arm7_main(void) {
 			}
 
 			if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
-				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams);
+				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
 				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
 				patchGbaSlotInit_cont(ndsHeader, false, true);

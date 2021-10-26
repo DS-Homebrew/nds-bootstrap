@@ -336,8 +336,7 @@ u32 myIrqEnable(u32 irq) {
 	initialize();
 
 	if (unpatchedFuncs->compressed_static_end) {
-		module_params_t* moduleParams = unpatchedFuncs->moduleParams;
-		moduleParams->compressed_static_end = unpatchedFuncs->compressed_static_end;
+		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {

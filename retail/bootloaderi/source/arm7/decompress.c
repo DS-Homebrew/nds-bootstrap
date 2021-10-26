@@ -237,10 +237,11 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 	return raw_len;
 }
 
-static bool isDecompressed = false;
+static bool a9Decompressed = false;
+static bool a9iDecompressed = false;
 
-void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
-	if (isDecompressed) return;
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool arm9iToo) {
+	if (a9Decompressed) return;
 
 	const char* romTid = getRomTid(ndsHeader);
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
@@ -253,8 +254,8 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 	) {
 		// Compressed
 		dbg_printf("arm9 is compressed\n");
+		unpatchedFuncs->compressedFlagOffset = (u32*)((u32)moduleParams+0x14);
 		unpatchedFuncs->compressed_static_end = moduleParams->compressed_static_end;
-		unpatchedFuncs->moduleParams = moduleParams;
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
 		moduleParams->compressed_static_end = 0;
@@ -263,7 +264,9 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		dbg_printf("arm9 is not compressed\n");
 		iUncompressedSize = ndsHeader->arm9binarySize;
 	}
+	a9Decompressed = true;
 
+	if (!arm9iToo || a9iDecompressed) return;
 	if (ndsHeader->unitCode > 0) {
 		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
 
@@ -272,8 +275,8 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		if (ltdModuleParams->compressed_static_end) {
 			// Compressed
 			dbg_printf("arm9i is compressed\n");
+			unpatchedFuncs->iCompressedFlagOffset = (u32*)((u32)ltdModuleParams+0xC);
 			unpatchedFuncs->ltd_compressed_static_end = ltdModuleParams->compressed_static_end;
-			unpatchedFuncs->ltdModuleParams = ltdModuleParams;
 			u32 arm9ioffset = *(u32*)0x02FFE1C8;
 			iUncompressedSizei = decompressIBinary((unsigned char*)arm9ioffset, *(unsigned int*)0x02FFE1CC);
 			ltdModuleParams->compressed_static_end = 0;
@@ -284,7 +287,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		}
 		}
 	}
-	isDecompressed = true;
+	a9iDecompressed = true;
 }
 
 u32 card_hash[0x412];
