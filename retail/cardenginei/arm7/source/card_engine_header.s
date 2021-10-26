@@ -251,7 +251,7 @@ patches:
 .word   swi26
 .word   swi27
 .word   j_newSwiHalt
-.word   j_newSwiHaltThumb
+.word   newSwiHaltThumb
 .word   j_twlGetPitchTable
 .word   j_twlGetPitchTableThumb
 .word   getPitchTableStub
@@ -347,14 +347,14 @@ twlGetPitchTable:
 
 	.thumb
 @---------------------------------------------------------------------------------
-j_newSwiHaltThumb:
+newSwiHaltThumb:
 @---------------------------------------------------------------------------------
-	push	{r4-r6, lr}
-	ldr	r6, =newSwiHalt
-	bl	_blx_r6_stub
-	pop             {r4-r6}
-	pop             {r3}
+	ldr	r6, =myIrqHandlerHalt
+	bx	r6
+	swi	#0x06
+	pop  {r3}
 	bx  r3
+.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

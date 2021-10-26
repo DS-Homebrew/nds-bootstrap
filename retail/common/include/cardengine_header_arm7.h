@@ -54,7 +54,7 @@ typedef struct cardengineArm7Patches {
     u32* swi26;
     u32* swi27;
     u32* j_newSwiHalt;
-    u32* j_newSwiHaltThumb;
+    u32* newSwiHaltThumb;
     u32* j_twlGetPitchTable;
     u32* j_twlGetPitchTableThumb;
     u32* getPitchTableStub;
