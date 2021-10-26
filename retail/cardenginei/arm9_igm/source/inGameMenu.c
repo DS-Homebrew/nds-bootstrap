@@ -66,6 +66,8 @@ static void SetBrightness(u8 screen, s8 bright) {
 
 // For RAM viewer, global so it's persistant
 static vu32 *address = (vu32*)0x02000000;
+static bool arm7Ram = false;
+static u8 *arm7RamBuffer = (u8*)NULL;
 
 static void print(int x, int y, const u16 *str, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
@@ -425,19 +427,42 @@ static void jumpToAddress(void) {
 static void ramViewer(void) {
 	clearScreen();
 
+	arm7RamBuffer = (u8*)((u32)sharedAddr-0x94C);
+	bool ramLoaded = false;
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
+		u16 armText[5] = {'A','R','M',arm7Ram?'7':'9',0};
 		printCenter(14, 0, igmText.ramViewer, 0);
+		print(27, 0, armText, 3);
 		printHex(0, 0, (u32)(address) >> 0x10, 2, 3);
 
+		if (arm7Ram && !ramLoaded) {
+			sharedAddr[0] = (vu32)arm7RamBuffer;
+			sharedAddr[1] = (vu32)address;
+			sharedAddr[4] = 0x524D4152;
+			while (sharedAddr[4] == 0x524D4152) {
+				while (REG_VCOUNT != 191);
+				while (REG_VCOUNT == 191);
+			}
+		}
+		ramLoaded = true;
 		for(int i = 0; i < 23; i++) {
 			printHex(0, i + 1, (u32)(address + (i * 2)) & 0xFFFF, 2, 3);
-			for(int j = 0; j < 4; j++)
-				printHex(5 + (j * 2), i + 1, ((u8*)address)[(i * 8) + j], 1, 1 + j % 2);
-			for(int j = 0; j < 4; j++)
-				printHex(14 + (j * 2), i + 1, ((u8*)address)[4 + (i * 8) + j], 1, 1 + j % 2);
-			for(int j = 0; j < 8; j++)
-				printChar(23 + j, i + 1, ((char*)address)[i * 8 + j], 0);
+			if (arm7Ram) {
+				for(int j = 0; j < 4; j++)
+					printHex(5 + (j * 2), i + 1, arm7RamBuffer[(i * 8) + j], 1, 1 + j % 2);
+				for(int j = 0; j < 4; j++)
+					printHex(14 + (j * 2), i + 1, arm7RamBuffer[4 + (i * 8) + j], 1, 1 + j % 2);
+				for(int j = 0; j < 8; j++)
+					printChar(23 + j, i + 1, ((char*)arm7RamBuffer)[i * 8 + j], 0);
+			} else {
+				for(int j = 0; j < 4; j++)
+					printHex(5 + (j * 2), i + 1, ((u8*)address)[(i * 8) + j], 1, 1 + j % 2);
+				for(int j = 0; j < 4; j++)
+					printHex(14 + (j * 2), i + 1, ((u8*)address)[4 + (i * 8) + j], 1, 1 + j % 2);
+				for(int j = 0; j < 8; j++)
+					printChar(23 + j, i + 1, ((char*)address)[i * 8 + j], 0);
+			}
 		}
 
 		// Change color of selected byte
@@ -452,28 +477,36 @@ static void ramViewer(void) {
 			BG_MAP_RAM_SUB(15)[loc] = (BG_MAP_RAM_SUB(15)[loc] & ~(0xF << 12)) | (3 + mode) << 12;
 		}
 
-		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y);
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B | KEY_Y | KEY_SELECT);
 
 		if(mode == 0) {
 			if(KEYS & KEY_R && KEYS & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) {
 				if (KEYS & KEY_UP) {
 					address -= 0x400;
+					ramLoaded = false;
 				} else if (KEYS & KEY_DOWN) {
 					address += 0x400;
+					ramLoaded = false;
 				} else if (KEYS & KEY_LEFT) {
 					address -= 0x4000;
+					ramLoaded = false;
 				} else if (KEYS & KEY_RIGHT) {
 					address += 0x4000;
+					ramLoaded = false;
 				}
 			} else {
 				if (KEYS & KEY_UP) {
 					address -= 2;
+					ramLoaded = false;
 				} else if (KEYS & KEY_DOWN) {
 					address += 2;
+					ramLoaded = false;
 				} else if (KEYS & KEY_LEFT) {
 					address -= 2 * 23;
+					ramLoaded = false;
 				} else if (KEYS & KEY_RIGHT) {
 					address += 2 * 23;
+					ramLoaded = false;
 				} else if (KEYS & KEY_A) {
 					mode = 1;
 				} else if (KEYS & KEY_B) {
@@ -481,6 +514,10 @@ static void ramViewer(void) {
 				} else if(KEYS & KEY_Y) {
 					jumpToAddress();
 					clearScreen();
+					ramLoaded = false;
+				}else if (KEYS & KEY_SELECT) {
+					arm7Ram = !arm7Ram;
+					ramLoaded = false;
 				}
 			}
 		} else if(mode == 1) {
@@ -509,16 +546,38 @@ static void ramViewer(void) {
 				clearScreen();
 			}
 		} else if(mode == 2) {
-			if (KEYS & KEY_UP) {
-				((u8 *)address)[cursorPosition]++;
-			} else if (KEYS & KEY_DOWN) {
-				((u8 *)address)[cursorPosition]--;
-			} else if (KEYS & KEY_LEFT) {
-				((u8 *)address)[cursorPosition] -= 0x10;
-			} else if (KEYS & KEY_RIGHT) {
-				((u8 *)address)[cursorPosition] += 0x10;
-			} else if (KEYS & (KEY_A | KEY_B)) {
-				mode = 1;
+			if (arm7Ram) {
+				if (KEYS & KEY_UP) {
+					arm7RamBuffer[cursorPosition]++;
+				} else if (KEYS & KEY_DOWN) {
+					arm7RamBuffer[cursorPosition]--;
+				} else if (KEYS & KEY_LEFT) {
+					arm7RamBuffer[cursorPosition] -= 0x10;
+				} else if (KEYS & KEY_RIGHT) {
+					arm7RamBuffer[cursorPosition] += 0x10;
+				} else if (KEYS & (KEY_A | KEY_B)) {
+					sharedAddr[0] = (vu32)arm7RamBuffer;
+					sharedAddr[1] = (vu32)address;
+					sharedAddr[2] = cursorPosition;
+					sharedAddr[4] = 0x574D4152;
+					/*while (sharedAddr[4] == 0x574D4152) {
+						while (REG_VCOUNT != 191);
+						while (REG_VCOUNT == 191);
+					}*/
+					mode = 1;
+				}
+			} else {
+				if (KEYS & KEY_UP) {
+					((u8 *)address)[cursorPosition]++;
+				} else if (KEYS & KEY_DOWN) {
+					((u8 *)address)[cursorPosition]--;
+				} else if (KEYS & KEY_LEFT) {
+					((u8 *)address)[cursorPosition] -= 0x10;
+				} else if (KEYS & KEY_RIGHT) {
+					((u8 *)address)[cursorPosition] += 0x10;
+				} else if (KEYS & (KEY_A | KEY_B)) {
+					mode = 1;
+				}
 			}
 		}
 	}

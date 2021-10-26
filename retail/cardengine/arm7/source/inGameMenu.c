@@ -7,6 +7,7 @@
 #include "locations.h"
 #include "cardengine.h"
 #include "nds_header.h"
+#include "tonccpy.h"
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
@@ -41,6 +42,14 @@ void inGameMenu(void) {
 					break;
 				case 0x54495551: // QUIT
 					rebootConsole();
+					break;
+				case 0x524D4152: // RAMR
+					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					sharedAddr[4] = 0x554E454D;
+					break;
+				case 0x574D4152: // RAMW
+					tonccpy((u32*)((u32)sharedAddr[1])+sharedAddr[2], (u32*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					sharedAddr[4] = 0x554E454D;
 					break;
 			}
 			if (sharedAddr[4] != 0x554E454D) {
