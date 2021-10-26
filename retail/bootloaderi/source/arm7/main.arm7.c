@@ -1463,6 +1463,8 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
+		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
+
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
