@@ -16,12 +16,6 @@ typedef struct loadCrt0 {
     u8 dsiSD;
     u8 valueBits;
     u32 saveFileCluster;
-	u32 donorFileE2Cluster;
-	u32 donorFile2Cluster;
-	u32 donorFile3Cluster;
-	u32 donorFileE4Cluster;
-	u32 donorFile4Cluster;
-	u32 donorFileCluster;
 	u32 donorFileTwlCluster;
     u32 gbaFileCluster;
     u32 gbaSaveFileCluster;

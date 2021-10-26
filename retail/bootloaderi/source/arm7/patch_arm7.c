@@ -49,6 +49,12 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
+u16* getOffsetFromBLThumb(u16* blOffset) {
+	s16 codeOffset = blOffset[1];
+
+	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
+}
+
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 bool swiHaltPatched = false;

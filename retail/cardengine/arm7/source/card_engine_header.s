@@ -173,71 +173,76 @@ arm7FunctionsThumb:
 .word    cardIdThumbStub
 
 .thumb
-_blx_r3_stubthumb:
-	bx	lr
-
 eepromProtectThumbStub:
-	push    {r14}
-	push	{r1-r4}
-	ldr	r3, =eepromProtect
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r3-r7,lr}
+	ldr	r4, =eepromProtect
+	bl	_blx_r3_stubthumb1
+	pop   	{r3-r7} 
 	pop  	{r3}
 	bx  r3    
-	
+_blx_r3_stubthumb1:
+	bx	r4
+.pool
 eepromPageEraseThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =eepromPageErase
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r3-r7,lr}
+	ldr	r4, =eepromPageErase
+	bl	_blx_r3_stubthumb2
+	pop   	{r3-r7} 
 	pop  	{r3}
 	bx  r3    
-
+_blx_r3_stubthumb2:
+	bx	r4
+.pool
 eepromPageVerifyThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =eepromPageVerify
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r3-r7,lr}
+	ldr	r4, =eepromPageVerify
+	bl	_blx_r3_stubthumb3
+	pop   	{r3-r7} 
 	pop  	{r3}
 	bx  r3
-	
+_blx_r3_stubthumb3:
+	bx	r4
+.pool
 eepromPageWriteThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =eepromPageWrite
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r4-r7,lr}
+	ldr	r4, =eepromPageWrite
+	bl	_blx_r3_stubthumb4
+	pop   	{r4-r7} 
 	pop  	{r3}
 	bx  r3
-	
+_blx_r3_stubthumb4:
+	bx	r4
+.pool
 eepromPageProgThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =eepromPageProg
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r4-r7,lr}
+	ldr	r4, =eepromPageProg
+	bl	_blx_r3_stubthumb5
+	pop   	{r4-r7} 
 	pop  	{r3}
 	bx  r3
-
+_blx_r3_stubthumb5:
+	bx	r4
+.pool
 cardReadThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =cardRead
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r4-r6,lr}
+	ldr	r4, =cardRead
+	bl	_blx_r3_stubthumb6
+	pop   	{r4-r6} 
 	pop  	{r3}
 	bx  r3
-
+_blx_r3_stubthumb6:
+	bx	r4
+.pool
 eepromReadThumbStub:
-	push    {lr}
-	push	{r1-r4}
-	ldr	r3, =eepromRead
-	bl	_blx_r3_stubthumb
-	pop   	{r1-r4} 
+	push	{r4-r6,lr}
+	ldr	r4, =eepromRead
+	bl	_blx_r3_stubthumb7
+	pop   	{r4-r6} 
 	pop  	{r3}
 	bx  r3
+_blx_r3_stubthumb7:
+	bx	r4
+.pool
 	
 cardIdThumbStub:
 	ldr r0, cardIdDataT

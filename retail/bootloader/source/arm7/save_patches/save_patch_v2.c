@@ -1,18 +1,16 @@
 #include <nds/ndstypes.h>
-#include "nds_header.h"
 #include "module_params.h"
 #include "patch.h"
 #include "find.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
+extern u32 vAddrOfRelocSrc;
+extern u32 relocDestAtSharedMem;
+
 //
 // Subroutine function signatures ARM7
 //
-
-static const u32 relocateStartSignature[1] = {0x027FFFFA};
-
-static const u32 nextFunctiontSignature[1] = {0xE92D4000};
 
 static const u32 a7cardReadSignature[2] = {0x04100010, 0x040001A4};
 
@@ -22,89 +20,6 @@ static const u32 a7something2Signature[2] = {0x0000A040, 0x040001A0};
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster) {
 	//dbg_printf("\nArm7 (patch v2.0)\n");
 	dbg_printf("\nArm7 (patch v2)\n");
-
-	// Find the relocation signature
-    u32 relocationStart = patchOffsetCache.relocateStartOffset;
-	if (!patchOffsetCache.relocateStartOffset) {
-		relocationStart = (u32)findOffset(
-			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-			relocateStartSignature, 1
-		);
-
-		if (relocationStart) {
-			patchOffsetCache.relocateStartOffset = relocationStart;
-		}
-	}
-	if (!relocationStart) {
-		dbg_printf("Relocation start not found\n");
-		return 0;
-	}
-
-	// Validate the relocation signature
-	u32 forwardedRelocStartAddr = relocationStart + 4;
-	while (!*(u32*)forwardedRelocStartAddr || *(u32*)forwardedRelocStartAddr < 0x02000000 || *(u32*)forwardedRelocStartAddr > 0x03000000) {
-		forwardedRelocStartAddr += 4;
-	}
-	u32 vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
-    
-    dbg_printf("forwardedRelocStartAddr\n");
-    dbg_hexa(forwardedRelocStartAddr);   
-    dbg_printf("\nvAddrOfRelocSrc\n");
-    dbg_hexa(vAddrOfRelocSrc);
-    dbg_printf("\n");  
-
-	// Sanity checks
-	u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
-	u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
-	if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
-		dbg_printf("Error in relocation checking method 1\n");
-		
-		// Found the beginning of the next function
-		u32 nextFunction = patchOffsetCache.relocateValidateOffset;
-		if (!patchOffsetCache.relocateValidateOffset) {
-			nextFunction = (u32)findOffset(
-				(u32*)relocationStart, ndsHeader->arm7binarySize,
-				nextFunctiontSignature, 1
-			);
-			if (nextFunction) {
-				patchOffsetCache.relocateValidateOffset = nextFunction;
-			}
-		}
-	
-		   // Validate the relocation signature
-		forwardedRelocStartAddr = nextFunction - 0x14;
-		
-		// Validate the relocation signature
-		vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
-		
-		// sanity checks
-		relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
-		relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
-		if (vAddrOfRelocSrc != relocationCheck1 || vAddrOfRelocSrc != relocationCheck2) {
-			dbg_printf("Error in relocation checking method 2\n");
-			return 0;
-		}
-	}
-	
-	// Get the remaining details regarding relocation
-	u32 valueAtRelocStart = *(u32*)forwardedRelocStartAddr;
-	u32 relocDestAtSharedMem = *(u32*)valueAtRelocStart;
-	if (relocDestAtSharedMem != 0x37F8000) { // shared memory in RAM
-		// Try again
-		vAddrOfRelocSrc += *(u32*)(valueAtRelocStart + 4);
-		relocDestAtSharedMem = *(u32*)(valueAtRelocStart + 0xC);
-		if (relocDestAtSharedMem != 0x37F8000) {
-			dbg_printf("Error in finding shared memory relocation area\n");
-			return 0;
-		}
-	}
-
-	dbg_printf("Relocation src: ");
-	dbg_hexa(vAddrOfRelocSrc);
-	dbg_printf("\n");
-	dbg_printf("Relocation dst: ");
-	dbg_hexa(relocDestAtSharedMem);
-	dbg_printf("\n");
 
 	// Find the card read
 	u32 cardReadEndAddr = patchOffsetCache.a7CardReadEndOffset;
@@ -222,8 +137,6 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		u32 patchProtect = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromProtect);
 		*eepromProtect = patchProtect;
 
-		u32* cardIdPatch = (u32*)ce7->patches->arm7Functions->cardId;
-		cardIdPatch[2] = getChipId(ndsHeader, moduleParams);
 		u32* cardId = (u32*)(JumpTableFunc + 0xE8);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);
@@ -291,8 +204,6 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 			return 0;
 		}
 
-		u32* cardIdPatch = (u32*)ce7->patches->arm7Functions->cardId;
-		cardIdPatch[2] = getChipId(ndsHeader, moduleParams);
 		u32* cardId = (u32*)(JumpTableFunc + 0xE0);
 		dbg_printf("Card id:\t");
 		dbg_hexa((u32)cardId);

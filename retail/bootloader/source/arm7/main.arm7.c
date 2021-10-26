@@ -285,26 +285,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 
 	// Load binaries into memory
 	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-	if (dsiHeaderTemp->ndshdr.arm7binarySize != 0x22B40
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x22BCC
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2352C
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x235DC
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x23708
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2378C
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x237F0
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x23CAC
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2434C
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x245C4
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x2484C
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x249DC
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x249E8
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x24DA8
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x24F50
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25D00
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25D04
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25D94
-	 && dsiHeaderTemp->ndshdr.arm7binarySize != 0x25FFC
-	 && (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0))) {
+	if (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0)) {
 		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 	}
 }

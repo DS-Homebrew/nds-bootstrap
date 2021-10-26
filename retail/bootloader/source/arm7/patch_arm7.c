@@ -26,7 +26,7 @@ u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-const u16* generateA7InstrThumb(int arg1, int arg2) {
+/*const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
 	// 23 bit offset
@@ -41,7 +41,16 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 
 	return instrs;
+}*/
+
+u16* getOffsetFromBLThumb(u16* blOffset) {
+	s16 codeOffset = blOffset[1];
+
+	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
 }
+
+u32 vAddrOfRelocSrc = 0;
+u32 relocDestAtSharedMem = 0;
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
@@ -151,78 +160,10 @@ u32 patchCardNdsArm7(
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
 
-	if (ndsHeader->arm7binarySize == 0x22B40
-	 || ndsHeader->arm7binarySize == 0x22BCC
-	 || ndsHeader->arm7binarySize == 0x2352C
-	 || ndsHeader->arm7binarySize == 0x235DC
-	 || ndsHeader->arm7binarySize == 0x23708
-	 || ndsHeader->arm7binarySize == 0x2378C
-	 || ndsHeader->arm7binarySize == 0x237F0
-	 || ndsHeader->arm7binarySize == 0x23CAC
-	 || ndsHeader->arm7binarySize == 0x2434C
-	 || ndsHeader->arm7binarySize == 0x245C4
-	 || ndsHeader->arm7binarySize == 0x2484C
-	 || ndsHeader->arm7binarySize == 0x249DC
-	 || ndsHeader->arm7binarySize == 0x249E8
-	 || ndsHeader->arm7binarySize == 0x24DA8
-	 || ndsHeader->arm7binarySize == 0x24F50
-	 || ndsHeader->arm7binarySize == 0x25D00
-	 || ndsHeader->arm7binarySize == 0x25D04
-	 || ndsHeader->arm7binarySize == 0x25D94
-	 || ndsHeader->arm7binarySize == 0x25FFC
-	 || arm7mbk == 0x080037C0) {
+	if (arm7mbk == 0x080037C0) {
 		// Replace incompatible ARM7 binary
-		aFile donorRomFile;
-		const char* romTid = getRomTid(ndsHeader);
-		if (memcmp(romTid, "B7N", 3) == 0) { // Ben 10: Triple Pack
-			// Donor ROM not needed, so read ARM7 binary from an SRL file within the ROM
-			extern u32 storedFileCluster;
-			donorRomFile = getFileFromCluster(storedFileCluster);
-
-			u32 fatAddr = 0;
-			u32 srlAddr = 0;
-			u32 arm7src = 0;
-			u32 arm7size = 0;
-			fileRead((char*)&fatAddr, donorRomFile, 0x48, 0x4);
-			fileRead((char*)&srlAddr, donorRomFile, fatAddr+0x80, 0x4);
-			fileRead((char*)&arm7src, donorRomFile, srlAddr+0x30, 0x4);
-			fileRead((char*)&arm7size, donorRomFile, srlAddr+0x3C, 0x4);
-			fileRead(ndsHeader->arm7destination, donorRomFile, srlAddr+arm7src, arm7size);
-			newArm7binarySize = arm7size;
-		} else {
-		if (ndsHeader->arm7binarySize == 0x2352C
-		 || ndsHeader->arm7binarySize == 0x235DC
-		 || ndsHeader->arm7binarySize == 0x23CAC) {
-			extern u32 donorFileE2Cluster;	// Early SDK2
-			donorRomFile = getFileFromCluster(donorFileE2Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x245C4
-				 || ndsHeader->arm7binarySize == 0x24DA8
-				 || ndsHeader->arm7binarySize == 0x24F50) {
-			extern u32 donorFile2Cluster;	// Late SDK2
-			donorRomFile = getFileFromCluster(donorFile2Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x25D00
-				 || ndsHeader->arm7binarySize == 0x25D04
-				 || ndsHeader->arm7binarySize == 0x25D94
-				 || ndsHeader->arm7binarySize == 0x25FFC) {
-			extern u32 donorFile3Cluster;	// SDK3
-			donorRomFile = getFileFromCluster(donorFile3Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x2434C) {
-			extern u32 donorFileE4Cluster;	// Early SDK4
-			donorRomFile = getFileFromCluster(donorFileE4Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x2484C
-				 || ndsHeader->arm7binarySize == 0x249DC
-				 || ndsHeader->arm7binarySize == 0x249E8) {
-			extern u32 donorFile4Cluster;	// Late SDK4
-			donorRomFile = getFileFromCluster(donorFile4Cluster);
-		} else if (ndsHeader->arm7binarySize == 0x22B40
-				 || ndsHeader->arm7binarySize == 0x22BCC
-				 || arm7mbk == 0x080037C0) {
-			extern u32 donorFileTwlCluster;	// SDK5 (TWL)
-			donorRomFile = getFileFromCluster(donorFileTwlCluster);
-		} else {
-			extern u32 donorFileCluster;	// SDK5 (NTR)
-			donorRomFile = getFileFromCluster(donorFileCluster);
-		}
+		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+		aFile donorRomFile = getFileFromCluster(donorFileTwlCluster);
 		if (donorRomFile.firstCluster == CLUSTER_FREE && ndsHeader->gameCode[0] != 'D') {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;
@@ -233,7 +174,6 @@ u32 patchCardNdsArm7(
 		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
 		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
 		newArm7binarySize = arm7size;
-		}
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
@@ -256,34 +196,34 @@ u32 patchCardNdsArm7(
 
 	//patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
-	u32 saveResult = 0;
-
-    /*if (
-        strncmp(romTid, "ATK", 3) == 0  // Kirby: Canvas Curse
-    ) {
-        saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
-	} else*/ if (isSdk5(moduleParams)) {
-		// SDK 5
-		saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
-	} else {
-		if (patchOffsetCache.savePatchType == 0) {
-			saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-			if (!saveResult) {
-				patchOffsetCache.savePatchType = 1;
+	if (a7GetReloc(ndsHeader, moduleParams)) {
+		u32 saveResult = 0;
+		
+		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4 || newArm7binarySize==0x24DA8 || newArm7binarySize==0x24F50) {
+			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+		} else if (isSdk5(moduleParams)) {
+			// SDK 5
+			saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
+		} else {
+			if (patchOffsetCache.savePatchType == 0) {
+				saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+				if (!saveResult) {
+					patchOffsetCache.savePatchType = 1;
+				}
+			}
+			if (!saveResult && patchOffsetCache.savePatchType == 1) {
+				saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+				if (!saveResult) {
+					patchOffsetCache.savePatchType = 2;
+				}
+			}
+			if (!saveResult && patchOffsetCache.savePatchType == 2) {
+				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 			}
 		}
-		if (!saveResult && patchOffsetCache.savePatchType == 1) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
-			if (!saveResult) {
-				patchOffsetCache.savePatchType = 2;
-			}
+		if (!saveResult) {
+			patchOffsetCache.savePatchType = 0;
 		}
-		if (!saveResult && patchOffsetCache.savePatchType == 2) {
-			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
-		}
-	}
-	if (!saveResult) {
-		patchOffsetCache.savePatchType = 0;
 	}
 
 	/*if (REG_SCFG_ROM != 0x703) {

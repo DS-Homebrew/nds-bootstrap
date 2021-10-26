@@ -66,6 +66,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
+bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSwi12Offset(const tNDSHeader* ndsHeader);
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

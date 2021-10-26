@@ -19,6 +19,8 @@
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
 
+#define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
+
 u8 lz77ImageBuffer[0x20000];
 
 std::string patchOffsetCacheFilePath;
@@ -130,15 +132,6 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
-	if (debug) {
-		dopause();
-	}
-	dbg_printf("donorE2Path: \"%s\"\n", conf->donorE2Path);
-	dbg_printf("donor2Path: \"%s\"\n", conf->donor2Path);
-	dbg_printf("donor3Path: \"%s\"\n", conf->donor3Path);
-	dbg_printf("donorE4Path: \"%s\"\n", conf->donorE4Path);
-	dbg_printf("donor4Path: \"%s\"\n", conf->donor4Path);
-	dbg_printf("donorPath: \"%s\"\n", conf->donorPath);
 	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
 	if (debug) {
 		dopause();
@@ -160,16 +153,13 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
 	dbg_printf("prvPath: \"%s\"\n", conf->prvPath);
 	//dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
-	if (debug) {
-		dopause();
+	if (isDSiMode() && REG_SCFG_EXT7 == 0) {
+		if (*(u32*)0x02FFE1A0 == 0x00403000) {
+			dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
+		} else {
+			dbg_printf("donorTwlOnlyPath: \"%s\"\n", conf->donorTwlOnlyPath);
+		}
 	}
-	dbg_printf("donorE2Path: \"%s\"\n", conf->donorE2Path);
-	dbg_printf("donor2Path: \"%s\"\n", conf->donor2Path);
-	dbg_printf("donor3Path: \"%s\"\n", conf->donor3Path);
-	dbg_printf("donorE4Path: \"%s\"\n", conf->donorE4Path);
-	dbg_printf("donor4Path: \"%s\"\n", conf->donor4Path);
-	dbg_printf("donorPath: \"%s\"\n", conf->donorPath);
-	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
 	if (debug) {
 		dopause();
 	}
@@ -391,7 +381,7 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
-	struct stat stDonor[7];
+	struct stat stDonor;
 	struct stat stGba;
 	struct stat stGbaSav;
 	struct stat stWideCheat;
@@ -403,7 +393,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stSrParams;
 	struct stat stScreenshot;
 	u32 clusterSav = 0;
-	u32 clusterDonor[7] = {0};
+	u32 clusterDonor = 0;
 	u32 clusterGba = 0;
 	u32 clusterGbaSav = 0;
 	u32 clusterWideCheat = 0;
@@ -423,32 +413,8 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 
-	if (stat(conf->donorE2Path, &stDonor[0]) >= 0) {
-		clusterDonor[0] = stDonor[0].st_ino;
-	}
-
-	if (stat(conf->donor2Path, &stDonor[1]) >= 0) {
-		clusterDonor[1] = stDonor[1].st_ino;
-	}
-
-	if (stat(conf->donor3Path, &stDonor[2]) >= 0) {
-		clusterDonor[2] = stDonor[2].st_ino;
-	}
-
-	if (stat(conf->donorE4Path, &stDonor[3]) >= 0) {
-		clusterDonor[3] = stDonor[3].st_ino;
-	}
-
-	if (stat(conf->donor4Path, &stDonor[4]) >= 0) {
-		clusterDonor[4] = stDonor[4].st_ino;
-	}
-
-	if (stat(conf->donorPath, &stDonor[5]) >= 0) {
-		clusterDonor[5] = stDonor[5].st_ino;
-	}
-
-	if (stat(conf->donorTwlPath, &stDonor[6]) >= 0) {
-		clusterDonor[6] = stDonor[6].st_ino;
+	if (stat(conf->donorTwlPath, &stDonor) >= 0) {
+		clusterDonor = stDonor.st_ino;
 	}
 
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
@@ -497,7 +463,7 @@ static int runNdsFile(configuration* conf) {
 		}
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor[0], clusterDonor[1], clusterDonor[2], clusterDonor[3], clusterDonor[4], clusterDonor[5], clusterDonor[6], clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, conf);
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, conf);
 }
 
 int main(int argc, char** argv) {

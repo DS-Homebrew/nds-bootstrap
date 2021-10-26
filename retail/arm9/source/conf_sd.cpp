@@ -99,25 +99,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	// PRV path
 	conf->prvPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "PRV_PATH").c_str());
 
-	// Early SDK2 Donor NDS path
-	conf->donorE2Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORE2_NDS_PATH").c_str());
-
-	// Late SDK2 Donor NDS path
-	conf->donor2Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR2_NDS_PATH").c_str());
-
-	// SDK3 Donor NDS path
-	conf->donor3Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR3_NDS_PATH").c_str());
-
-	// Early SDK4 Donor NDS path
-	conf->donorE4Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORE4_NDS_PATH").c_str());
-
-	// Late SDK4 Donor NDS path
-	conf->donor4Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR4_NDS_PATH").c_str());
-
-	// SDK5 Donor NDS path
-	conf->donorPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR_NDS_PATH").c_str());
-
-	// SDK5 (TWL) Donor NDS path
+	// SDK5 (TWL) DSi-Enhanced Donor NDS path
 	conf->donorTwlPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
 
 	// SDK5 (TWL) DSi-Exclusive Donor NDS path
@@ -354,57 +336,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load donor ROM's arm7 binary, if needed
 		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
 			donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
-		} else if (conf->gameOnFlashcard || !conf->isDSiWare) {
-		switch (ndsArm7Size) {
-			case 0x22B40:
-			case 0x22BCC:
-				if (dsiEnhancedMbk || conf->dsiMode) donorNdsFile = fopen(conf->donorTwlPath, "rb");
-				if (!donorNdsFile && REG_SCFG_EXT7 != 0 && conf->dsiMode) {
-					donorNdsFile = fopen(conf->donorTwlOnlyPath, "rb");
-				}
-				break;
-			case 0x23708:
-			case 0x2378C:
-			case 0x237F0:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorPath, "rb");
-				break;
-			case 0x2352C:
-			case 0x235DC:
-			case 0x23CAC:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE2Path, "rb");
-				break;
-			case 0x245C4:
-			case 0x24DA8:
-			case 0x24F50:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor2Path, "rb");
-				break;
-			case 0x25D00:
-			case 0x25D04:
-			case 0x25D94:
-			case 0x25FFC:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donor3Path, "rb");
-				break;
-			case 0x2434C:
-				if (dsiEnhancedMbk) donorNdsFile = fopen(conf->donorE4Path, "rb");
-				break;
-			case 0x2484C:
-			case 0x249DC:
-			case 0x249E8:
-				if (dsiEnhancedMbk) {
-					if (memcmp(romTid, "B7N", 3) == 0) { // Ben 10: Triple Pack
-						// Donor ROM not needed, so read ARM7 binary from an SRL file within the ROM
-						donorNdsFile = fopen(conf->ndsPath, "rb");
-
-						fseek(donorNdsFile, fatAddr+0x80, SEEK_SET);
-						fread(&srlAddr, sizeof(u32), 1, donorNdsFile);
-					} else {
-						donorNdsFile = fopen(conf->donor4Path, "rb");
-					}
-				}
-				break;
-			default:
-				break;
-		}
 		}
 
 		if (donorNdsFile) {
