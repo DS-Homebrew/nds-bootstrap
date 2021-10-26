@@ -1172,7 +1172,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		if (!gameOnFlashcard && !isDSiWare && !dsiWramAccess) {
+		if ((gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062E; /* MOVNE R0, #0x2E00000 */
