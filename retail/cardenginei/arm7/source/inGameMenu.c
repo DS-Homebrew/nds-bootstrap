@@ -82,7 +82,7 @@ void inGameMenu(void) {
 					sharedAddr[4] = 0x554E454D;
 					break;
 				case 0x574D4152: // RAMW
-					tonccpy((u32*)((u32)sharedAddr[1])+sharedAddr[2], (u32*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
 					sharedAddr[4] = 0x554E454D;
 					break;
 			}
