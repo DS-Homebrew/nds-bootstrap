@@ -594,7 +594,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
-	conf->dsiWramAccess = (REG_SCFG_EXT7 == 0 ? (REG_MBK7 == 0x07C03740 && REG_MBK8 == 0x07403700) : true);
+	if (REG_SCFG_EXT7 == 0) {
+		u32 wordBak = *(vu32*)0x03700000;
+		*(vu32*)0x03700000 = 0x414C5253;
+		conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
+		*(vu32*)0x03700000 = wordBak;
+	} else {
+		conf->dsiWramAccess = true;
+	}
 	if (conf->dsiWramAccess) {
 		conf->valueBits2 |= BIT(5);
 	}
