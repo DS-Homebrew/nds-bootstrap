@@ -111,7 +111,9 @@ static const u32 sdCardResetSignatureType4[4]      = {0xEBFFFE48, 0xEBFFFF82, 0x
 static const u16 sdCardResetSignatureThumbType1[7] = {0xF7FF, 0xFDAB, 0xF7FF, 0xFF5F, 0xF000, 0xF871, 0x1C05};
 static const u16 sdCardResetSignatureThumbType2[7] = {0xF7FF, 0xFDBC, 0xF7FF, 0xFF58, 0xF000, 0xF84A, 0x1C05};
 static const u16 sdCardResetSignatureThumbType3[7] = {0xF7FF, 0xFD9C, 0xF7FF, 0xFF50, 0xF000, 0xF87A, 0x1C05};
-static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
+static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDB2, 0xF7FF, 0xFF50, 0xF000, 0xF84A, 0x1C05};
+static const u16 sdCardResetSignatureThumbType5[7] = {0xF7FF, 0xFDC1, 0xF7FF, 0xFF5F, 0xF000, 0xF849, 0x1C05};
+static const u16 sdCardResetSignatureThumbType6[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
 
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
@@ -1185,6 +1187,20 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 		sdCardResetOffset = (u32*)findOffsetThumb(
 			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
 			sdCardResetSignatureThumbType4, 7
+		);
+	}
+
+	if (!sdCardResetOffset) {
+		sdCardResetOffset = (u32*)findOffsetThumb(
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardResetSignatureThumbType5, 7
+		);
+	}
+
+	if (!sdCardResetOffset) {
+		sdCardResetOffset = (u32*)findOffsetThumb(
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardResetSignatureThumbType6, 7
 		);
 	}
 
