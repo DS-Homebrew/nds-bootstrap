@@ -6,6 +6,7 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
+extern u32 newArm7binarySize;
 extern u32 vAddrOfRelocSrc;
 extern u32 relocDestAtSharedMem;
 
@@ -26,13 +27,13 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 save
 
 	if (!patchOffsetCache.a7JumpTableFuncOffset) {
 		JumpTableFunc = (u32)findOffset(
-			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize,
 			a7JumpTableSignatureUniversal, 3
 		);
 
 		if(!JumpTableFunc){
 			JumpTableFunc = (u32)findOffset(
-				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u32*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2, 3
 			);
 		}
@@ -41,7 +42,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 save
 			usesThumb = true;
 			patchOffsetCache.a7IsThumb = true;
 			JumpTableFunc = (u32)findOffsetThumb(
-				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u16*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb, 4
 			);
 		}

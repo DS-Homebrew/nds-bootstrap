@@ -6,6 +6,7 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
+extern u32 newArm7binarySize;
 extern u32 vAddrOfRelocSrc;
 extern u32 relocDestAtSharedMem;
 extern u32 newSwiHaltAddr;
@@ -66,33 +67,33 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	if (JumpTableFuncType == 0 && !usesThumb) {
 		if (!JumpTableFunc) {
 			JumpTableFunc = findOffset(
-				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u32*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversal, 3
 			);
 		}
 		if (JumpTableFunc) {
 			EepromReadJump = findOffset(
-				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u32*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversal, 3
 			);
 			EepromWriteJump = findOffset(
-				EepromReadJump + 4, ndsHeader->arm7binarySize,
+				EepromReadJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_pt2, 3
 			);
 			EepromProgJump = findOffset(
-				EepromWriteJump + 4, ndsHeader->arm7binarySize,
+				EepromWriteJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_pt2, 3
 			);
 			EepromVerifyJump = findOffset(
-				EepromProgJump + 4, ndsHeader->arm7binarySize,
+				EepromProgJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_pt2, 3
 			);
 			EepromEraseJump = findOffset(
-				EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+				EepromVerifyJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_pt3, 2
 			);
 			if(!EepromEraseJump) EepromEraseJump = findOffset(
-				EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+				EepromVerifyJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_pt3_alt, 2
 			);
 		} else JumpTableFuncType++;
@@ -100,29 +101,29 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	if (JumpTableFuncType == 1 && !usesThumb) {
 		if (!JumpTableFunc) {
 			JumpTableFunc = findOffset(
-				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u32*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2, 3
 			);
 		}
 		if (JumpTableFunc) {
 			EepromReadJump = findOffset(
-				(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u32*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2, 3
 			);
 			EepromWriteJump = findOffset(
-				EepromReadJump + 4, ndsHeader->arm7binarySize,
+				EepromReadJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromProgJump = findOffset(
-				EepromWriteJump + 4, ndsHeader->arm7binarySize,
+				EepromWriteJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromVerifyJump = findOffset(
-				EepromProgJump + 4, ndsHeader->arm7binarySize,
+				EepromProgJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2_pt2, 3
 			);
 			EepromEraseJump = findOffset(
-				EepromVerifyJump + 4, ndsHeader->arm7binarySize,
+				EepromVerifyJump + 4, newArm7binarySize,
 				a7JumpTableSignatureUniversal_2_pt3, 2
 			);
 		} else {
@@ -133,7 +134,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	if (usesThumb) {
 		if (!JumpTableFunc) {
 			JumpTableFunc = (u32*)findOffsetThumb(
-				(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+				(u16*)ndsHeader->arm7destination, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb, 3
 			);
 		}
@@ -147,31 +148,31 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 		dbg_hexa((u32)JumpTableFunc);
 
 		EepromReadJump = (u32*)findOffsetThumb(
-			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			(u16*)ndsHeader->arm7destination, newArm7binarySize,
 			a7JumpTableSignatureUniversalThumb, 3
 		);
 
 		if (JumpTableFuncType == 0) {
 			EepromWriteJump = (u32*)findOffsetThumb(
-				(u16*)EepromReadJump + 2, ndsHeader->arm7binarySize,
+				(u16*)EepromReadJump + 2, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb_pt2, 3
 			);
 			if (EepromWriteJump) {
 				EepromProgJump = (u32*)findOffsetThumb(
-					(u16*)EepromWriteJump + 2, ndsHeader->arm7binarySize,
+					(u16*)EepromWriteJump + 2, newArm7binarySize,
 					a7JumpTableSignatureUniversalThumb_pt2, 3
 				);
 				EepromVerifyJump = (u32*)findOffsetThumb(
-					(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+					(u16*)EepromProgJump + 2, newArm7binarySize,
 					a7JumpTableSignatureUniversalThumb_pt2, 3
 				);
 				EepromEraseJump = (u32*)findOffsetThumb(
-					(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+					(u16*)EepromVerifyJump + 2, newArm7binarySize,
 					a7JumpTableSignatureUniversalThumb_pt3, 2
 				);
 				if (!EepromEraseJump) {
 					EepromEraseJump = (u32*)findOffsetThumb(
-						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+						(u16*)EepromVerifyJump + 2, newArm7binarySize,
 						a7JumpTableSignatureUniversalThumb_pt3_alt, 2
 					);
 				}
@@ -180,19 +181,19 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 		if (JumpTableFuncType == 1) {
 			// alternate v1 order
 			EepromProgJump = (u32*)findOffsetThumb(
-				(u16*)JumpTableFunc, ndsHeader->arm7binarySize,
+				(u16*)JumpTableFunc, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb_pt2, 2
 			);
 			EepromWriteJump = (u32*)findOffsetThumb(
-				(u16*)EepromProgJump - 2, ndsHeader->arm7binarySize,
+				(u16*)EepromProgJump - 2, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb_pt2, 2
 			);
 			EepromVerifyJump = (u32*)findOffsetThumb(
-				(u16*)EepromWriteJump - 2, ndsHeader->arm7binarySize,
+				(u16*)EepromWriteJump - 2, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb_pt2, 2
 			);
 			EepromEraseJump = (u32*)findOffsetThumb(
-				(u16*)EepromVerifyJump - 2, ndsHeader->arm7binarySize,
+				(u16*)EepromVerifyJump - 2, newArm7binarySize,
 				a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
 			);
 		}
@@ -356,27 +357,27 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 
     // inverted order
     EepromEraseJump = (u32*)findOffsetThumb(
-    	(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    	(u16*)ndsHeader->arm7destination, newArm7binarySize,
     		a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
 	);
 
     EepromVerifyJump = (u32*)findOffsetThumb(
-		(u16*)EepromEraseJump + 2, ndsHeader->arm7binarySize,
+		(u16*)EepromEraseJump + 2, newArm7binarySize,
 		a7JumpTableSignatureUniversalThumb_pt2, 3
 	);
 
     EepromProgJump = (u32*)findOffsetThumb(
-		(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+		(u16*)EepromVerifyJump + 2, newArm7binarySize,
 		a7JumpTableSignatureUniversalThumb_pt2, 3
 	);
 
     EepromWriteJump = (u32*)findOffsetThumb(
-		(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+		(u16*)EepromProgJump + 2, newArm7binarySize,
 		a7JumpTableSignatureUniversalThumb_pt2, 3
 	);
 
     EepromReadJump = (u32*)findOffsetThumb(
-		(u16*)EepromWriteJump, ndsHeader->arm7binarySize,
+		(u16*)EepromWriteJump, newArm7binarySize,
 		a7JumpTableSignatureUniversalThumb, 3
 	);
 
