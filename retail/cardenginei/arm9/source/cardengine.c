@@ -82,6 +82,8 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
+//static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
+//static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
 #ifdef DLDI
 bool sdRead = false;
 #else
@@ -978,18 +980,14 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
     return true; 
 }
 
-u32 slot2Read(u8* dst, u32 src, u32 len, u32 dma) {
-	// Send a command to the ARM7 to read the GBA ROM
-	/*u32 commandRead = 0x025FBC01;
+u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
+	/*if (src >= 0x02000000 ? (gbaSavFile->firstCluster == CLUSTER_FREE) : (gbaFile->firstCluster == CLUSTER_FREE)) {
+		return false;
+	}
 
-	// Write the command
-	sharedAddr[0] = (vu32)dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
-
-	waitForArm7();*/
-    return 0; 
+	fileRead(dst, src >= 0x02000000 ? *gbaSavFile : *gbaFile, src, len, 0);
+	return true;*/
+	return 0;
 }
 
 //---------------------------------------------------------------------------------

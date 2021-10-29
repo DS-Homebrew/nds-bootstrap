@@ -170,16 +170,22 @@ static const u32 mpuInitCache[1] = {0xE3A00042};
 
 //static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
-// Slot-2 read
-static const u32 slot2ReadSignature[4]         = {0xE92D40F0, 0xE24DD004, 0xE1A07000, 0xE1A06001};
-static const u16 slot2ReadSignatureThumb[4]    = {0xB5F0, 0xB081, 0x1C07, 0x1C0D};
-//static const u32 slot2ReadSignature[5]         = {0xE92D4000, 0xE24DD004, 0xE1A0E001, 0xE1A03002, 0xE35E0302};
-//static const u16 slot2ReadSignatureThumb[6]    = {0xB530, 0xB081, 0x1C05, 0x1C0C, 0x1C13, 0x480D};
+// GBA Cart info init
+static const u32 cartInfoInitSignatureType1[4] = {0xE92D40F0, 0xE24DD014, 0xE59F0194, 0xE5901000};
+static const u32 cartInfoInitSignatureType2[4] = {0xE92D40F0, 0xE24DD014, 0xE59F01D8, 0xE5901000};
+static const u16 cartInfoInitSignatureThumb[4] = {0xB5F0, 0xB085, 0x483D, 0x6801};
+static const u32 cartInfoInitConstant[1]       = {0x27FFC30};
 
-// Slot-2 exists
-static const u32 slot2ExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
-//static const u32 slot2ExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
-//static const u16 slot2ExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
+// GBA Cart exists
+static const u32 cartExistEndSignature[2]   = {0x027FFC30, 0x0000FFFF};
+static const u32 cartExistSignature[4]      = {0xE92D4010, 0xE24DD010, 0xE59F20FC, 0xE59F00FC};
+static const u16 cartExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
+
+// GBA Cart read
+static const u32 cartReadSignatureStart[1]      = {0xE92D40F0};
+static const u32 cartReadSignatureMid[4]        = {0xE3500011, 0x8A000009, 0xE3500010, 0x3A000004};
+static const u16 cartReadSignatureStartThumb[1] = {0xB5F0};
+static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD304};
 
 // Threads management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
@@ -1984,61 +1990,107 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	return randomPatchOffset;
 }
 
-u32* findSlot2ExistEndOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
-	dbg_printf("findSlot2ExistEndOffset:\n");
+u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	dbg_printf("findCartInfoInitConstantOffset:\n");
 
-	u32* slot2ExistEndOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,
-		slot2ExistEndSignature, 2
-	);
-	usesThumb = (*(slot2ExistEndOffset + 3) == 0x8000000);
-	if (slot2ExistEndOffset) {
-		dbg_printf("Slot-2 exist end offset found: ");
-	} else {
-		dbg_printf("Slot-2 exist end offset not found\n");
-	}
-
-	if (slot2ExistEndOffset) {
-		dbg_hexa((u32)slot2ExistEndOffset);
-		dbg_printf("\n");
-	}
-
-	return slot2ExistEndOffset;
-}
-
-u32* findSlot2ReadOffset(const tNDSHeader* ndsHeader, bool *usesThumb) {
-	dbg_printf("findSlot2ReadStartOffset:\n");
-
-	u32* slot2ReadStartOffset = NULL;
+	u32* offset = NULL;
 	if (usesThumb) {
-		slot2ReadStartOffset = findOffsetThumb(
+		offset = (u32*)findOffsetThumb(
 			(u16*)ndsHeader->arm9destination, iUncompressedSize,
-			slot2ReadSignatureThumb, 4
+			cartInfoInitSignatureThumb, 4
 		);
 	} else {
-		slot2ReadStartOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,
-			slot2ReadSignature, 4
-		);
-		// Keep finding
-		slot2ReadStartOffset = findOffset(
-			slot2ReadStartOffset, 0x800,
-			slot2ReadSignature, 4
+		if (moduleParams->sdk_version >= 0x3008000) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				cartInfoInitSignatureType2, 4
+			);
+		} else {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				cartInfoInitSignatureType1, 4
+			);
+		}
+	}
+	if (offset) {
+		offset = findOffset(
+			offset, 0x300,
+			cartInfoInitConstant, 1
 		);
 	}
-	if (slot2ReadStartOffset) {
-		dbg_printf("Slot-2 read start found: ");
+	if (offset) {
+		dbg_printf("Cart info init constant offset found\n");
 	} else {
-		dbg_printf("Slot-2 read start not found\n");
-	}
-
-	if (slot2ReadStartOffset) {
-		dbg_hexa((u32)slot2ReadStartOffset);
-		dbg_printf("\n");
+		dbg_printf("Cart info init constant offset not found\n");
 	}
 
 	dbg_printf("\n");
-	return slot2ReadStartOffset;
+	return offset;
+}
+
+u32* findCartExistOffset(const tNDSHeader* ndsHeader, bool usesThumb) {
+	dbg_printf("findCartExistOffset:\n");
+
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		cartExistEndSignature, 2
+	);
+	u32* startOffset = NULL;
+	if (usesThumb) {
+		startOffset = (u32*)findOffsetBackwardsThumb(
+			(u16*)endOffset, 0xC0,
+			cartExistSignatureThumb, 4
+		);
+	} else {
+		startOffset = findOffsetBackwards(
+			endOffset, 0x120,
+			cartExistSignature, 4
+		);
+	}
+	if (startOffset) {
+		dbg_printf("Cart exist offset found\n");
+	} else {
+		dbg_printf("Cart exist offset not found\n");
+	}
+
+	dbg_printf("\n");
+	return startOffset;
+}
+
+u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb) {
+	dbg_printf("findCartReadOffset:\n");
+
+	u32* midOffset = NULL;
+	u32* startOffset = NULL;
+	if (usesThumb) {
+		midOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			cartReadSignatureMidThumb, 4
+		);
+		// Keep finding
+		startOffset = (u32*)findOffsetBackwardsThumb(
+			(u16*)midOffset, 0x80,
+			cartReadSignatureStartThumb, 1
+		);
+	} else {
+		midOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			cartReadSignatureMid, 4
+		);
+		// Keep finding
+		startOffset = findOffsetBackwards(
+			midOffset, 0x80,
+			cartReadSignatureStart, 1
+		);
+	}
+	if (startOffset) {
+		dbg_printf("Cart read found\n");
+	} else {
+		dbg_printf("Cart read not found\n");
+	}
+
+	dbg_printf("\n");
+	return startOffset;
 }
 
 /*u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -2610,8 +2662,8 @@ u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* 
 			mbkWramBCGetSignature, 1
 		);
 		if (!startOffset) {
-			startOffset = findOffsetBackwardsThumb(
-				offset, 0x40,//ndsHeader->arm9binarySize,
+			startOffset = (u32*)findOffsetBackwardsThumb(
+				(u16*)offset, 0x40,//ndsHeader->arm9binarySize,
 				mbkWramBCGetSignatureThumb, 1
 			);
 			if (startOffset) {

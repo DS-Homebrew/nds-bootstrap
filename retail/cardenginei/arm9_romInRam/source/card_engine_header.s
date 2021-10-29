@@ -54,8 +54,7 @@ patches:
 .word   nand_write_arm9
 .word	cardStructArm9
 .word   card_pull
-.word   slot2_exists_fix
-.word	slot2_read
+.word	cart_read
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
@@ -77,7 +76,7 @@ thumbPatches:
 .word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
-.word	thumb_slot2_read
+.word	thumb_cart_read
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
@@ -227,12 +226,7 @@ card_pull:
 	bx      lr
 
 @---------------------------------------------------------------------------------
-slot2_exists_fix:
-@---------------------------------------------------------------------------------
-	mov r0, #0x0D000000
-
-@---------------------------------------------------------------------------------
-slot2_read:
+cart_read:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r4-r7,lr}
 
@@ -249,7 +243,7 @@ _blx_r6_stub_slot2_read:
 ce9locationS2R:
 .word   ce9
 cardReadRefS2R:
-.word   slot2Read-ce9
+.word   cartRead-ce9
 	.thumb
 @---------------------------------------------------------------------------------
 thumb_card_id_arm9:
@@ -480,7 +474,7 @@ thumb_card_pull:
 	bx      lr
 
 @---------------------------------------------------------------------------------
-thumb_slot2_read:
+thumb_cart_read:
 @---------------------------------------------------------------------------------
 	push	{r4-r7, lr}
 
@@ -500,7 +494,7 @@ _blx_r6_stub_thumb_slot2_read:
 ce9locationTS2R:
 .word   ce9
 cardReadRefTS2R:
-.word   slot2Read-ce9
+.word   cartRead-ce9
 	.arm
     
 vblankHandler:

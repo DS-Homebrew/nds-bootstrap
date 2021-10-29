@@ -1076,13 +1076,6 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
-	/*if (gbaRomFound) {
-		*(u16*)0x027FFC30 = *(u16*)0x0D0000BE;
-		tonccpy((u8*)0x027FFC32, (u8*)0x0D0000B5, 3);
-		*(u16*)0x027FFC36 = *(u16*)0x0D0000B0;
-		*(u32*)0x027FFC38 = *(u32*)0x0D0000AC;
-	}*/
-
 	if (softResetParams[0] != 0xFFFFFFFF) {
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
 		resetParamLoc[0] = softResetParams[0];
@@ -1477,11 +1470,23 @@ int arm7_main(void) {
 			*(u16*)0x024000BE = 0x7FFF;
 			*(u16*)0x024000CE = 0x7FFF;
 		} /*else // GBA file
-		if (consoleModel > 0 && !dsiModeConfirmed && !isSdk5(moduleParams) && gbaRomSize <= 0x1000000) {
-			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
+		if (!dsiModeConfirmed && !isSdk5(moduleParams)) {
+			aFile* gbaFile = (aFile*)(dsiEnhancedMbk ? GBA_FILE_LOCATION_ALT : GBA_FILE_LOCATION);
 			*gbaFile = getFileFromCluster(gbaFileCluster);
+			aFile* gbaSavFile = (aFile*)(dsiEnhancedMbk ? GBA_SAV_FILE_LOCATION_ALT : GBA_SAV_FILE_LOCATION);
+			*gbaSavFile = getFileFromCluster(gbaSaveFileCluster);
 			gbaRomFound = (gbaFile->firstCluster != CLUSTER_FREE);
-			patchSlot2Addr(ndsHeader);
+			//patchSlot2Addr(ndsHeader);
+
+			tonccpy((char*)GBA_FILE_LOCATION_MAINMEM, gbaFile, sizeof(aFile));
+			tonccpy((char*)GBA_SAV_FILE_LOCATION_MAINMEM, gbaSavFile, sizeof(aFile));
+
+			if (gbaRomFound) {
+				fileRead((char*)0x027FFC30, *gbaFile, 0xBE, 2, !sdRead, -1);
+				fileRead((char*)0x027FFC32, *gbaFile, 0xB5, 3, !sdRead, -1);
+				fileRead((char*)0x027FFC36, *gbaFile, 0xB0, 2, !sdRead, -1);
+				fileRead((char*)0x027FFC38, *gbaFile, 0xAC, 4, !sdRead, -1);
+			}
 		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
@@ -1703,19 +1708,6 @@ int arm7_main(void) {
 		if (srlAddr == 0 && (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged)) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
-
-		/*if (gbaRomFound && !extendedMemoryConfirmed) {
-			aFile* gbaFile = (aFile*)(dsiSD ? GBA_FILE_LOCATION : GBA_FILE_LOCATION_ALT);
-			//fileRead((char*)0x0D000000, *gbaFile, 0, 0xC0, -1);
-			//fileRead((char*)0x0D0000CE, *gbaFile, 0x1FFFE, 2, -1);
-			fileRead((char*)0x0D000000, *gbaFile, 0, gbaRomSize, 0);
-			aFile* gbaSavFile = (aFile*)(dsiSD ? GBA_SAV_FILE_LOCATION : GBA_SAV_FILE_LOCATION_ALT);
-			*gbaSavFile = getFileFromCluster(gbaSaveFileCluster);
-			if (gbaSavFile->firstCluster != CLUSTER_FREE && gbaSaveSize <= 0x10000) {
-				fileRead((char*)0x02600000, *gbaSavFile, 0, gbaSaveSize, 0);
-			}
-			dbg_printf("GBA ROM loaded\n");
-		}*/
 
 		if (isSdk5(moduleParams)) {
 			tonccpy((u32*)UNPATCHED_FUNCTION_LOCATION_SDK5, (u32*)UNPATCHED_FUNCTION_LOCATION, 0x40);
