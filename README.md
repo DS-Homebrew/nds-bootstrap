@@ -56,6 +56,7 @@ It also includes a number of Anti-Piracy patches for the games and will automati
 # Credits
 ## Developers
 - [Rocket Robz](https://github.com/RocketRobz): Lead developer, DSi mode and DSiWare support, B4DS mode, general maintenance and updates
+- [shutterbug2000](https://github.com/shutterbug2000): SDK5 support, help with DSi mode support, and some other implemented stuff
 - [ahezard](https://github.com/ahezard): Starting the project, former lead developer
 - [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, and translation management
 
