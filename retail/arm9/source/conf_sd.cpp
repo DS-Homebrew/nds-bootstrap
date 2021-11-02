@@ -498,20 +498,55 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) {
 			disableSlot1();
 		} else {
-			enableSlot1();
+			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
+			sysSetCardOwner(BUS_OWNER_ARM9); // Allow arm9 to access NDS cart
+			if (isDSiMode()) {
+				// Reset card slot
+				disableSlot1();
+				for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
+				enableSlot1();
+				for(int i = 0; i < 15; i++) { swiWaitForVBlank(); }
 
-			sysSetCardOwner(BUS_OWNER_ARM9);
+				// Dummy command sent after card reset
+				cardParamCommand (CARD_CMD_DUMMY, 0,
+					CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+					NULL, 0);
+			}
 
-			// Dummy command sent after card reset
-			cardParamCommand (CARD_CMD_DUMMY, 0,
-				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-				NULL, 0);
+			REG_ROMCTRL = 0;
+			REG_AUXSPICNT = 0;
+			for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
+			REG_AUXSPICNT = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+			REG_ROMCTRL = CARD_nRESET | CARD_SEC_SEED;
+			while(REG_ROMCTRL & CARD_BUSY);
+			cardReset();
+			while(REG_ROMCTRL & CARD_BUSY);
 
-			char headerData[0x200];
+			u32 iCardId = cardReadID(CARD_CLK_SLOW);
+			while(REG_ROMCTRL & CARD_BUSY);
+
+			bool normalChip = (iCardId & BIT(31)) != 0; // ROM chip ID MSB
+
 			// Read the header
+			char headerData[0x1000];
 			cardParamCommand (CARD_CMD_HEADER_READ, 0,
 				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-				(u32*)headerData, 0x200/sizeof(u32));
+				(u32 *)headerData, 0x200 / sizeof(u32));
+
+			if ((headerData[0x12] != 0) || (headerData[0x1BF] != 0)) {
+				// Extended header found
+				if(normalChip) {
+					for(int i = 0; i < 8; i++) {
+						cardParamCommand (CARD_CMD_HEADER_READ, i * 0x200,
+							CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+							(u32 *)headerData + i * 0x200 / sizeof(u32), 0x200 / sizeof(u32));
+					}
+				} else {
+					cardParamCommand (CARD_CMD_HEADER_READ, 0,
+						CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(4) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+						(u32 *)headerData, 0x1000 / sizeof(u32));
+				}
+			}
 
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
