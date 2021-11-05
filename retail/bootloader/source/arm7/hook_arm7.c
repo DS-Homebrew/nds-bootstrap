@@ -215,8 +215,6 @@ int hookNdsRetailArm7(
 	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
-	} else if (strcmp(romTid, "AWIP") == 0) { // Hotel Dusk (EUR)
-		ce7->languageAddr = (u32*)0x02100BBC;
 	}
 
 	*vblankHandler = ce7->patches->vblankHandler;
