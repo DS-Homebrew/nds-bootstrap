@@ -272,7 +272,10 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			*eepromRead = ce7->patches->arm7FunctionsThumb->eepromRead;
 
 			u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
-			newSwiHaltAddr = (u32)getOffsetFromBLThumb((u16*)eepromPageWrite);
+			newSwiHaltAddr = *eepromPageWrite;
+			newSwiHaltAddr -= 0x37F8000;
+			newSwiHaltAddr += vAddrOfRelocSrc;
+			newSwiHaltAddr--;
 			dbg_printf("Eeprom page write:\t");
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
@@ -403,7 +406,10 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 	dbg_printf("\n");
 
 	u32* eepromPageWrite = (u16*)((u32)EepromWriteJump + 0xA);
-	newSwiHaltAddr = (u32)getOffsetFromBLThumb((u16*)eepromPageWrite);
+	newSwiHaltAddr = *eepromPageWrite;
+	newSwiHaltAddr -= 0x37F8000;
+	newSwiHaltAddr += vAddrOfRelocSrc;
+	newSwiHaltAddr--;
 	dbg_printf("Eeprom page write:\t");
 	dbg_hexa((u32)eepromPageWrite);
     dbg_printf("\t:\t");

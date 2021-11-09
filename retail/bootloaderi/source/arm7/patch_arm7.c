@@ -92,6 +92,10 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + 0x37F8000;
 			const u16* swiHaltPatch = generateA7InstrThumb(srcAddr, dstAddr);
 			tonccpy(swiHaltOffset, swiHaltPatch, 0x4);
+
+			dbg_printf("swiHalt new location : ");
+			dbg_hexa(newSwiHaltAddr);
+			dbg_printf("\n\n");
 		} else {
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
 			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
