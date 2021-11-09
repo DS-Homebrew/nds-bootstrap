@@ -222,7 +222,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom read:\t");
 			dbg_hexa((u32)eepromRead);
 			dbg_printf("\n");
-			tonccpy(eepromRead, ce7->patches->arm7FunctionsThumb->eepromRead, 0x14);
+			tonccpy(eepromRead, (u16*)ce7->patches->arm7FunctionsThumb->eepromRead, 0x14);
 
 			u16* eepromPageWriteBranch = (u16*)((u32)EepromWriteJump + 0x6);
 			dbg_printf("Eeprom page write branch:\t");
@@ -232,7 +232,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom page write:\t");
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
-			tonccpy(eepromPageWrite, ce7->patches->arm7FunctionsThumb->eepromPageWrite, 0x14);
+			tonccpy(eepromPageWrite, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageWrite, 0x14);
 			newSwiHaltAddr = (u32)eepromPageWrite+0x14;
 
 			u16* eepromPageProgBranch = (u16*)((u32)EepromProgJump + 0x6);
@@ -243,7 +243,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom page prog:\t");
 			dbg_hexa((u32)eepromPageProg);
 			dbg_printf("\n");
-			tonccpy(eepromPageProg, ce7->patches->arm7FunctionsThumb->eepromPageProg, 0x14);
+			tonccpy(eepromPageProg, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageProg, 0x14);
 
 			u16* eepromPageVerifyBranch = (u16*)((u32)EepromVerifyJump + 0x6);
 			dbg_printf("Eeprom verify branch:\t");
@@ -253,7 +253,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom verify:\t");
 			dbg_hexa((u32)eepromPageVerify);
 			dbg_printf("\n");
-			tonccpy(eepromPageVerify, ce7->patches->arm7FunctionsThumb->eepromPageVerify, 0x14);
+			tonccpy(eepromPageVerify, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageVerify, 0x14);
 
 			u16* eepromPageEraseBranch = (u16*)((u32)EepromEraseJump + 0x4);
 			dbg_printf("Eeprom page erase branch:\t");
@@ -263,13 +263,13 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom page erase:\t");
 			dbg_hexa((u32)eepromPageErase);
 			dbg_printf("\n");
-			tonccpy(eepromPageErase, ce7->patches->arm7FunctionsThumb->eepromPageErase, 0x14);
+			tonccpy(eepromPageErase, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageErase, 0x14);
 		} else {
 			u32* eepromRead = (u32*)((u32)EepromReadJump + 0xA);
 			dbg_printf("Eeprom read:\t");
 			dbg_hexa((u32)eepromRead);
 			dbg_printf("\n");
-			*eepromRead = ce7->patches->arm7FunctionsThumb->eepromRead;
+			*eepromRead = ce7->patches->arm7Functions->eepromRead;
 
 			u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
 			newSwiHaltAddr = *eepromPageWrite;
@@ -279,25 +279,25 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			dbg_printf("Eeprom page write:\t");
 			dbg_hexa((u32)eepromPageWrite);
 			dbg_printf("\n");
-			*eepromPageWrite = ce7->patches->arm7FunctionsThumb->eepromPageWrite;
+			*eepromPageWrite = ce7->patches->arm7Functions->eepromPageWrite;
 
 			u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xA);
 			dbg_printf("Eeprom page prog:\t");
 			dbg_hexa((u32)eepromPageProg);
 			dbg_printf("\n");
-			*eepromPageProg = ce7->patches->arm7FunctionsThumb->eepromPageProg;
+			*eepromPageProg = ce7->patches->arm7Functions->eepromPageProg;
 
 			u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xA);
 			dbg_printf("Eeprom verify:\t");
 			dbg_hexa((u32)eepromPageVerify);
 			dbg_printf("\n");
-			*eepromPageVerify = ce7->patches->arm7FunctionsThumb->eepromPageVerify;
+			*eepromPageVerify = ce7->patches->arm7Functions->eepromPageVerify;
 
 			u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
 			dbg_printf("Eeprom page erase:\t");
 			dbg_hexa((u32)eepromPageErase);
 			dbg_printf("\n");
-			*eepromPageErase = ce7->patches->arm7FunctionsThumb->eepromPageErase;
+			*eepromPageErase = ce7->patches->arm7Functions->eepromPageErase;
 		}
 	} else {
 		u32* eepromRead = (u32*)((u32)EepromReadJump + 0xC);
@@ -392,20 +392,20 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
 
     //u32 srcAddr;
 
-	u32* eepromRead = (u16*)((u32)EepromReadJump + 0xA);
+	u32* eepromRead = (u32*)((u32)EepromReadJump + 0xA);
 	dbg_printf("Eeprom read :\t");
 	dbg_hexa((u32)eepromRead);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromRead);
 	dbg_printf("\n");
-    *eepromRead = ce7->patches->arm7FunctionsThumb->eepromRead+1;
+    *eepromRead = ce7->patches->arm7Functions->eepromRead;
     dbg_printf("Eeprom read after:\t");
 	dbg_hexa((u32)eepromRead);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromRead);
 	dbg_printf("\n");
 
-	u32* eepromPageWrite = (u16*)((u32)EepromWriteJump + 0xA);
+	u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
 	newSwiHaltAddr = *eepromPageWrite;
 	newSwiHaltAddr -= 0x37F8000;
 	newSwiHaltAddr += vAddrOfRelocSrc;
@@ -415,46 +415,46 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageWrite);
 	dbg_printf("\n");
-    *eepromPageWrite = ce7->patches->arm7FunctionsThumb->eepromPageWrite+1;
+    *eepromPageWrite = ce7->patches->arm7Functions->eepromPageWrite;
     dbg_printf("Eeprom page write after:\t");
 	dbg_hexa((u32)eepromPageWrite);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageWrite);
 	dbg_printf("\n");
 
-	u32* eepromPageProg = (u16*)((u32)EepromProgJump + 0xA);
+	u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xA);
 	dbg_printf("Eeprom page prog:\t");
 	dbg_hexa((u32)eepromPageProg);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageProg);
 	dbg_printf("\n");
-    *eepromPageProg = ce7->patches->arm7FunctionsThumb->eepromPageProg+1;
+    *eepromPageProg = ce7->patches->arm7Functions->eepromPageProg;
     dbg_printf("Eeprom page prog after:\t");
 	dbg_hexa((u32)eepromPageProg);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageProg);
 	dbg_printf("\n");
 
-	u32* eepromPageVerify = (u16*)((u32)EepromVerifyJump + 0xA);
+	u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xA);
 	dbg_printf("Eeprom verify:\t");
 	dbg_hexa((u32)eepromPageVerify);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageVerify);
 	dbg_printf("\n");
-    *eepromPageVerify = ce7->patches->arm7FunctionsThumb->eepromPageVerify+1;
+    *eepromPageVerify = ce7->patches->arm7Functions->eepromPageVerify;
     dbg_printf("Eeprom verify after:\t");
 	dbg_hexa((u32)eepromPageVerify);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageVerify);
 	dbg_printf("\n");
 
-	u16* eepromPageErase = (u16*)((u32)EepromEraseJump + 0xA);
+	u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
 	dbg_printf("Eeprom page erase:\t");
 	dbg_hexa((u32)eepromPageErase);
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageErase);
 	dbg_printf("\n");  
-    *eepromPageErase = ce7->patches->arm7FunctionsThumb->eepromPageErase+1;
+    *eepromPageErase = ce7->patches->arm7Functions->eepromPageErase;
     dbg_printf("Eeprom page erase after:\t");
 	dbg_hexa((u32)eepromPageErase);
     dbg_printf("\t:\t");
