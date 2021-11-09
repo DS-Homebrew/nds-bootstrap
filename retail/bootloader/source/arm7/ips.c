@@ -11,6 +11,7 @@
 
 extern bool extendedMemory;
 extern bool dsDebugRam;
+extern u32 romLocation;
 
 bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool ROMinRAM) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
@@ -31,11 +32,12 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			rombyte = (void*)(extendedMemory&&!dsDebugRam ? 0x0C800000 : 0x09000000);
+			rombyte = (void*)(extendedMemory&&!dsDebugRam ? 0x0C800000 : romLocation);
 			if (ROMinRAM) {
-				rombyte -= (ndsHeader->arm9binarySize-0x4000);
+				rombyte -= 0x8000;
 			} else {
-				rombyte -= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize;
+				rombyte -= ndsHeader->arm9romOffset;
+				rombyte -= ndsHeader->arm9binarySize;
 			}
 		}
 		ipson += 3;
