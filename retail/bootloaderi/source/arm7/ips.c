@@ -9,7 +9,7 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-extern u32 consoleModel;
+extern u8 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
 
