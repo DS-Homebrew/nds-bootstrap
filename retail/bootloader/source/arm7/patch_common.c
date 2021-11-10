@@ -549,6 +549,58 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Nintendo DSi + Internet (Japan)
+	// Nintendo DSi + Internet (USA)
+	if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x0200599C = 0xE1A00000; // nop
+		*(u32*)0x020059A8 = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C4 = 0xE1A00000; // nop
+		*(u32*)0x0200AB2C = 0xE1A00000; // nop
+		*(u32*)0x0200DB70 = 0xE1A00000; // nop
+		*(u32*)0x0200FED4 = 0xE1A00000; // nop
+		*(u32*)0x02011B0C = 0xE1A00000; // nop
+		*(u32*)0x02011BA4 = 0xE1A00000; // nop
+		*(u32*)0x02011BA8 = 0xE1A00000; // nop
+		*(u32*)0x02011BB4 = 0xE1A00000; // nop
+		*(u32*)0x02011CF8 = 0xE1A00000; // nop
+	}
+
+	// Nintendo DSi + Internet (Europe)
+	if (strcmp(romTid, "K2DP") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x020059AC = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C8 = 0xE1A00000; // nop
+		*(u32*)0x020059D4 = 0xE1A00000; // nop
+		*(u32*)0x0200ADE0 = 0xE1A00000; // nop
+		*(u32*)0x0200DE24 = 0xE1A00000; // nop
+		*(u32*)0x02010188 = 0xE1A00000; // nop
+		*(u32*)0x02011DB0 = 0xE1A00000; // nop
+		*(u32*)0x02011E48 = 0xE1A00000; // nop
+		*(u32*)0x02011E4C = 0xE1A00000; // nop
+		*(u32*)0x02011E58 = 0xE1A00000; // nop
+		*(u32*)0x02011F9C = 0xE1A00000; // nop
+	}
+
+	// Nintendo DSi + Internet (Australia)
+	if (strcmp(romTid, "K2DU") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x020059AC = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C8 = 0xE1A00000; // nop
+		*(u32*)0x020059D4 = 0xE1A00000; // nop
+		*(u32*)0x0200AB70 = 0xE1A00000; // nop
+		*(u32*)0x0200DBB4 = 0xE1A00000; // nop
+		*(u32*)0x0200FF18 = 0xE1A00000; // nop
+		*(u32*)0x02011B40 = 0xE1A00000; // nop
+		*(u32*)0x02011BD8 = 0xE1A00000; // nop
+		*(u32*)0x02011BDC = 0xE1A00000; // nop
+		*(u32*)0x02011BE8 = 0xE1A00000; // nop
+		*(u32*)0x02011D2C = 0xE1A00000; // nop
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Crashes after selecting a file due to memory limitations
 	/*if (strcmp(romTid, "KS3E") == 0) {
