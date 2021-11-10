@@ -1731,7 +1731,7 @@ int arm7_main(void) {
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}
 
-		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x30000) {
+		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 			dbg_printf("AP-fix found\n");
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
