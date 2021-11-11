@@ -45,7 +45,8 @@ void inGameMenu(void) {
 	}
 
 	if (sharedAddr[4] == 0x554E454D) {
-		while (1) {
+		bool exitMenu = false;
+		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 			timeTilBatteryLevelRefresh++;
@@ -59,36 +60,38 @@ void inGameMenu(void) {
 
 			switch (sharedAddr[4]) {
 				case 0x54495845: // EXIT
-				default:
+					exitMenu = true;
 					break;
 				case 0x54455352: // RSET
 					forceGameReboot();
+					exitMenu = true;
 					break;
 				case 0x54495551: // QUIT
 					returnToLoader();
+					exitMenu = true;
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
-					break;
-				case 0x544F4853: // SHOT
-					saveScreenshot();
-					sharedAddr[4] = 0x554E454D;
+					exitMenu = true;
 					break;
 				case 0x50455453: // STEP
 					returnToMenu = true;
+					exitMenu = true;
+					break;
+				case 0x544F4853: // SHOT
+					saveScreenshot();
 					break;
 				case 0x524D4152: // RAMR
 					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
-					sharedAddr[4] = 0x554E454D;
 					break;
 				case 0x574D4152: // RAMW
 					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
-					sharedAddr[4] = 0x554E454D;
+					break;
+				default:
 					break;
 			}
-			if (sharedAddr[4] != 0x554E454D) {
-				break;
-			}
+
+			sharedAddr[4] = 0x554E454D; // MENU
 		}
 	}
 
