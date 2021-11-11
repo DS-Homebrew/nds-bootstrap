@@ -143,6 +143,11 @@ static const u16 gbaSlotInitSignatureThumbAlt[3] = {0xB538, 0x4C18, 0x68A0};
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
+// FileIO functions (SDK 5)
+static const u32 fileIoFuncSignature[4]    = {0xE92D4078, 0xE24DD04C, 0xE3A04000, 0xE1A06001};
+static const u32 fileIoFuncSignatureAlt[4] = {0xE92D4078, 0xE24DD04C, 0xE3A05000, 0xE1A06001};
+static const u32 fileIoFunc2Signature[4]   = {0xE92D40F8, 0xE1A07000, 0xE5973020, 0xE5970024};
+
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
 static const u32 irqEnableStartSignature2Alt[4]     = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xEBFFFFDB};					// SDK 2
@@ -1988,6 +1993,46 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return randomPatchOffset;
+}
+
+u32* findFileIoFuncOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findFileIoFuncOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		fileIoFuncSignature, 4
+	);
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoFuncSignatureAlt, 4
+		);
+	}
+	if (offset) {
+		dbg_printf("FileIO function found\n");
+	} else {
+		dbg_printf("FileIO function not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findFileIoFunc2Offset(const u32* fileIoFuncOffset) {
+	dbg_printf("findFileIoFunc2Offset:\n");
+
+	u32* offset = findOffset(
+		fileIoFuncOffset, 0x180,
+		fileIoFunc2Signature, 4
+	);
+	if (offset) {
+		dbg_printf("FileIO function 2 found\n");
+	} else {
+		dbg_printf("FileIO function 2 not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {

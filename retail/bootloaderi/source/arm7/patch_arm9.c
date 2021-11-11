@@ -1305,6 +1305,47 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	}
 }
 
+void patchFileIoFuncs(const tNDSHeader* ndsHeader) {
+	u32* offset = patchOffsetCache.fileIoFuncOffset;
+	if (!patchOffsetCache.fileIoFuncChecked) {
+		offset = findFileIoFuncOffset(ndsHeader);
+		patchOffsetCacheChanged = true;
+		if (offset) {
+			patchOffsetCache.fileIoFuncOffset = offset;
+		}
+		patchOffsetCache.fileIoFuncChecked = true;
+	}
+
+	if (offset) {
+		offset[0] = 0xE3A00001; //mov r0, #1
+		offset[1] = 0xE12FFF1E; //bx lr
+
+		dbg_printf("fileIoFunc location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
+	} else {
+		return;
+	}
+
+	offset = patchOffsetCache.fileIoFunc2Offset;
+	if (!patchOffsetCache.fileIoFunc2Checked) {
+		offset = findFileIoFunc2Offset(patchOffsetCache.fileIoFuncOffset);
+		if (offset) {
+			patchOffsetCache.fileIoFunc2Offset = offset;
+		}
+		patchOffsetCache.fileIoFunc2Checked = true;
+	}
+
+	if (offset) {
+		offset[0] = 0xE3A00001; //mov r0, #1
+		offset[1] = 0xE12FFF1E; //bx lr
+
+		dbg_printf("fileIoFunc2 location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
+	}
+}
+
 void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
 
@@ -1924,6 +1965,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 
 		patchA9Mbk(ndsHeader, moduleParams, false);
+
+		extern u8 dsiSD;
+		if (!dsiSD && isDSiWare) {
+			patchFileIoFuncs(ndsHeader);
+		}
 	}
 
    /*if (strncmp(romTid, "V2G", 3) == 0) {

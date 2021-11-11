@@ -14,7 +14,7 @@
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
-extern u8 dsiSD;
+//extern u8 dsiSD;
 
 extern bool sdRead;
 
@@ -495,7 +495,6 @@ u32 patchCardNdsArm7(
 		if (!saveResult) {
 			patchOffsetCache.savePatchType = 0;
 		} /*else if (strncmp(romTid, "AMH", 3) == 0) {
-			extern u32 dsiSD;
 			aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
 			fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
 		}*/

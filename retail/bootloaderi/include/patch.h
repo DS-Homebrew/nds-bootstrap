@@ -82,6 +82,10 @@ typedef struct patchOffsetCacheContents {
     u32* cartInfoInitConstantOffset;
     u32* cartReadOffset;
     u32 cartReadOffsetChecked;*/
+	u32* fileIoFuncOffset;
+	u32* fileIoFunc2Offset;
+	u32 fileIoFuncChecked;
+	u32 fileIoFunc2Checked;
 	u32* a9CardIrqEnableOffset;
 	u32 a9CardIrqIsThumb;
 	u32* resetOffset;

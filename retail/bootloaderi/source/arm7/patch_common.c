@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 66;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 67;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -408,6 +408,60 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x202E69C = 0xE1A00000; //nop
         *(u32*)0x202E6A0 = 0xE1A00000; //nop
     }
+
+	extern u8 dsiSD;
+	if (!dsiSD) {
+		// Stub out save functions
+
+		// Asphalt 4: Elite Racing (USA)
+		if (strcmp(romTid, "KA4E") == 0) {
+			*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
+		}
+
+		// Asphalt 4: Elite Racing (Europe, Australia)
+		if (strcmp(romTid, "KA4V") == 0) {
+			*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
+		}
+
+		// Aura-Aura Climber (USA)
+		if (strcmp(romTid, "KSRE") == 0) {
+			*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		}
+
+		// Aura-Aura Climber (Europe, Australia)
+		if (strcmp(romTid, "KSRV") == 0) {
+			*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Cave Story (USA)
+		if (strcmp(romTid, "KCVE") == 0) {
+			*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
+		}
+
+		// Plants vs. Zombies (USA)
+		if (strcmp(romTid, "KZLE") == 0) {
+			*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr
+		}
+
+		// Plants vs. Zombies (Europe, Australia)
+		if (strcmp(romTid, "KZLV") == 0) {
+			*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Tetris Party Live (USA)
+		if (strcmp(romTid, "KTEE") == 0) {
+			*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
+		}
+
+		// Tetris Party Live (Europe, Australia)
+		if (strcmp(romTid, "KTEV") == 0) {
+			*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+		}
+	}
 }
 
 /*void patchSlot2Addr(const tNDSHeader* ndsHeader) {
