@@ -954,7 +954,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			dbg_printf("TWLCFG reconstructed\n");
 		}
 
-		/*if (ndsHeader->arm9destination >= 0x02000800) {
+		if (ndsHeader->arm9destination >= 0x02000800) {
 			u8* twlCfg = (u8*)0x02000400;
 			u32 configFlags = useTwlCfg ? *(u32*)0x02000400 : 0x0100000F;
 			if (consoleModel < 2) {
@@ -968,7 +968,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			toncset32(twlCfg, configFlags, 1); // Config Flags
 			tonccpy(twlCfg+0x10, (u8*)0x02FFE20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
 			tonccpy(twlCfg+0x9C, (u8*)0x02FFE2F0, 1); // Parental Controls Years of Age Rating (00h..14h)
-		}*/
+		}
 
 		// Set region flag
 		if (region == 0xFE || region == -2 || ((region == 0xFF || region == -1) && twlCfgCountry == 0)) {
