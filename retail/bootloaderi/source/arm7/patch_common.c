@@ -483,9 +483,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 
 		// Nintendogs (China)
-		if (strcmp(romTid, "KDOC") == 0) {
+		/*if (strcmp(romTid, "KDOC") == 0) {
 			*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
-		}
+		}*/
 
 		// Plants vs. Zombies (USA)
 		if (strcmp(romTid, "KZLE") == 0) {
