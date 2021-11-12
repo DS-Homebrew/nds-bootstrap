@@ -413,6 +413,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	if (!dsiSD) {
 		// Stub out save functions
 
+		// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
+		if (strcmp(romTid, "K72V") == 0) {
+			*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
+		}
+
 		// Asphalt 4: Elite Racing (USA)
 		if (strcmp(romTid, "KA4E") == 0) {
 			*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
@@ -433,11 +438,48 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 			*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
 		}
 
+		// Brain Challenge (USA)
+		if (strcmp(romTid, "KBCE") == 0) {
+			*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Brain Challenge (Europe, Australia)
+		if (strcmp(romTid, "KBCV") == 0) {
+			*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
+		}
+
 		// Cave Story (USA)
 		if (strcmp(romTid, "KCVE") == 0) {
 			*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
+		}
+
+		// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
+		if (strcmp(romTid, "KYBE") == 0) {
+			*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203C928 = 0xE12FFF1E; // bx lr
+		}
+
+		// Face Pilot: Fly With Your Nintendo DSi Camera! (Europe, Australia)
+		if (strcmp(romTid, "KYBV") == 0) {
+			*(u32*)0x0200BB44 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
+		}
+
+		// Ferrari GT: Evolution (USA)
+		if (strcmp(romTid, "KFRE") == 0) {
+			*(u32*)0x0205FDA8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Ferrari GT: Evolution (Europe, Australia)
+		if (strcmp(romTid, "KFRV") == 0) {
+			*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
+		}
+
+		// Nintendogs (China)
+		if (strcmp(romTid, "KDOC") == 0) {
+			*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
 		}
 
 		// Plants vs. Zombies (USA)
