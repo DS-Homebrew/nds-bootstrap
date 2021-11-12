@@ -418,6 +418,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 			*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 		}
 
+		// A Little Bit of... Puzzle League (Europe, Australia)
+		if (strcmp(romTid, "KPNV") == 0) {
+			*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+		}
+
 		// Asphalt 4: Elite Racing (USA)
 		if (strcmp(romTid, "KA4E") == 0) {
 			*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
@@ -490,6 +495,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		// Plants vs. Zombies (Europe, Australia)
 		if (strcmp(romTid, "KZLV") == 0) {
 			*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Puzzle League: Express (USA)
+		if (strcmp(romTid, "KPNE") == 0) {
+			*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
 		}
 
 		// Tetris Party Live (USA)
