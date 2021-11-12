@@ -44,17 +44,17 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Trauma Center: Under the Knife (Europe)
-	if (strcmp(romTid, "AKDP") == 0) {
+	else if (strcmp(romTid, "AKDP") == 0) {
 		*(u32*)0x20A6B90 = 0;
 	}
 
 	// Chou Shittou Caduceus (Japan)
-	if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
+	else if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
 		*(u32*)0x20CCB18 = 0;
 	}
 
 	// Animal Crossing: Wild World
-	if (strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) {
+	else if (strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
@@ -68,29 +68,29 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// The World Ends With You (USA/Europe)
-	if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
+	else if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
 		*(u32*)0x203E7B0 = 0;
 	}
 
 	// Subarashiki Kono Sekai - It's a Wonderful World (Japan)
-	if (strcmp(romTid, "AWLJ") == 0) {
+	else if (strcmp(romTid, "AWLJ") == 0) {
 		*(u32*)0x203F114 = 0;
 	}
 
 	// Miami Nights - Singles in the City (USA)
-	if (strcmp(romTid, "AVWE") == 0) {
+	else if (strcmp(romTid, "AVWE") == 0) {
 		// Fix not enough memory error
 		*(u32*)0x0204CCCC = 0xe1a00000; //nop
 	}
 
 	// Miami Nights - Singles in the City (Europe)
-	if (strcmp(romTid, "AVWP") == 0) {
+	else if (strcmp(romTid, "AVWP") == 0) {
 		// Fix not enough memory error
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
 	
 	// 0735 - Castlevania - Portrait of Ruin (USA)
-	if (strcmp(romTid, "ACBE") == 0) {
+	else if (strcmp(romTid, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
 		*(u32*)0x02007918 = 0xea000004;
 		*(u32*)0x02007a00 = 0xeb025052;
@@ -101,7 +101,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	if (strcmp(romTid, "ACBJ") == 0) {
+	else if (strcmp(romTid, "ACBJ") == 0) {
 		*(u32*)0x02007910 = 0xeb0250b0;
 		*(u32*)0x02007918 = 0xea000004;
 		*(u32*)0x02007a00 = 0xeb025074;
@@ -112,7 +112,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
-	if (strcmp(romTid, "ACBP") == 0) {
+	else if (strcmp(romTid, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
 		*(u32*)0x02007b08 = 0xea000004;
 		*(u32*)0x02007bf0 = 0xeb025334;
@@ -123,7 +123,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Catan (Europe) (En,De)
-	if (strcmp(romTid, "CN7P") == 0) {
+	else if (strcmp(romTid, "CN7P") == 0) {
 		*(u32*)0x02000bc0 = 0xe3540000;
 		*(u32*)0x02000bc4 = 0x12441001;
 		*(u32*)0x02000bc8 = 0x112fff1e;
@@ -134,7 +134,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// De Kolonisten van Catan (Netherlands)
-	if (strcmp(romTid, "CN7H") == 0) {
+	else if (strcmp(romTid, "CN7H") == 0) {
 		*(u32*)0x02000bc0 = 0xe3540000;
 		*(u32*)0x02000bc4 = 0x12441001;
 		*(u32*)0x02000bc8 = 0x112fff1e;
@@ -145,17 +145,17 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 	
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
-	if (strcmp(romTid, "B3NE") == 0) {
+	else if (strcmp(romTid, "B3NE") == 0) {
 		*(u32*)0x02060608 = 0xe3a00001; //mov r0, #1
 	}
 
 	// Power Rangers - Samurai (Europe) (En,Fr,De,Es,It)
-	if (strcmp(romTid, "B3NP") == 0) {
+	else if (strcmp(romTid, "B3NP") == 0) {
 		*(u32*)0x02060724 = 0xe3a00001; //mov r0, #1
 	}
 
 	// Learn with Pokemon - Typing Adventure (Europe)
-	if (strcmp(romTid, "UZPP") == 0) {
+	else if (strcmp(romTid, "UZPP") == 0) {
 		*(u32*)0x02000560 = 0xe92d401f;
 		*(u32*)0x02000564 = 0xe28f0024;
 		*(u32*)0x02000568 = 0xe5901000;
@@ -283,20 +283,20 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// WarioWare: DIY (USA)
-	if (strcmp(romTid, "UORE") == 0) {
+	else if (strcmp(romTid, "UORE") == 0) {
 		*(u32*)0x02003114 = 0xE12FFF1E; //bx lr
 	}
 	// WarioWare: Do It Yourself (Europe)
-	if (strcmp(romTid, "UORP") == 0) {
+	else if (strcmp(romTid, "UORP") == 0) {
 		*(u32*)0x020031B4 = 0xE12FFF1E; //bx lr
 	}
 	// Made in Ore (Japan)
-	if (strcmp(romTid, "UORJ") == 0) {
+	else if (strcmp(romTid, "UORJ") == 0) {
 		*(u32*)0x020030F4 = 0xE12FFF1E; //bx lr
 	}
 
-    // Pokemon Dash
-	//if (strcmp(romTid, "APDJ") == 0) {
+    // Pokemon Dash (Japan)
+	//else if (strcmp(romTid, "APDJ") == 0) {
 		//*(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         //*(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		//*(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
@@ -307,7 +307,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	//}
 
     // Pokemon Dash
-	//if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
+	//else if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
         /*unsigned char pdash_patch_chars[64] =
         {
           0xFE, 0x40, 0x2D, 0xE9, 
@@ -363,18 +363,18 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	//}
 
     /* // Pokemon Dash (Kiosk Demo)
-	if (strcmp(romTid, "A24E") == 0) {
+	else if (strcmp(romTid, "A24E") == 0) {
         *(u32*)0x02000BB0 = 0xE1A00000; //nop
 	}
 
-    // Pokemon Dash
-	if (strcmp(romTid, "APDK") == 0) {
+    // Pokemon Dash (Korea)
+	else if (strcmp(romTid, "APDK") == 0) {
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}*/
 
 
     // Golden Sun
-    /*if (strcmp(romTid, "BO5E") == 0) {
+    /*else if (strcmp(romTid, "BO5E") == 0) {
         // patch "refresh" function
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
@@ -384,7 +384,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Nintendo DSi XL Demo Video (USA)
 	// Freezes after opening logos
-	/*if (strcmp(romTid, "DMEE") == 0) {
+	/*else if (strcmp(romTid, "DMEE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008DD8 = 0xE1A00000; // nop
@@ -405,7 +405,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	// Picture Perfect Hair Salon (USA)
 	// Hair Salon (Europe/Australia)
 	// Requires main RAM to be larger than 4MB
-	if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
+	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02005108 = 0xE1A00000; // nop
@@ -433,7 +433,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Dark Void Zero (USA)
 	// Improper/broken patch
-	/*if (strcmp(romTid, "KDVE") == 0) {
+	/*else if (strcmp(romTid, "KDVE") == 0) {
 		*(u32*)0x0204CC24 = 0xE1A00000; // nop
 		*(u32*)0x0204EF18 = 0xE1A00000; // nop
 		*(u32*)0x0204EF1C = 0xE1A00000; // nop
@@ -449,7 +449,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Dragon's Lair (USA)
 	// Does not boot
-	if (strcmp(romTid, "KDLE") == 0) {
+	else if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050CC = 0xE1A00000; // nop
@@ -490,7 +490,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// Weird crash in the main menu
-	if (strcmp(romTid, "Z2EJ") == 0) {
+	else if (strcmp(romTid, "Z2EJ") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02015BC4 = 0xE1A00000; // nop
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
@@ -502,7 +502,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Glory Days: Tactical Defense (USA)
-	if (strcmp(romTid, "KGKE") == 0) {
+	else if (strcmp(romTid, "KGKE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
@@ -526,7 +526,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Glory Days: Tactical Defense (Europe)
-	if (strcmp(romTid, "KGKP") == 0) {
+	else if (strcmp(romTid, "KGKP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
@@ -551,7 +551,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
-	if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
+	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
 		*(u32*)0x020050B8 = 0xE1A00000; // nop
 		*(u32*)0x0200599C = 0xE1A00000; // nop
 		*(u32*)0x020059A8 = 0xE1A00000; // nop
@@ -568,7 +568,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo DSi + Internet (Europe)
-	if (strcmp(romTid, "K2DP") == 0) {
+	else if (strcmp(romTid, "K2DP") == 0) {
 		*(u32*)0x020050B8 = 0xE1A00000; // nop
 		*(u32*)0x020059AC = 0xE1A00000; // nop
 		*(u32*)0x020059B8 = 0xE1A00000; // nop
@@ -585,7 +585,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo DSi + Internet (Australia)
-	if (strcmp(romTid, "K2DU") == 0) {
+	else if (strcmp(romTid, "K2DU") == 0) {
 		*(u32*)0x020050B8 = 0xE1A00000; // nop
 		*(u32*)0x020059AC = 0xE1A00000; // nop
 		*(u32*)0x020059B8 = 0xE1A00000; // nop
@@ -603,7 +603,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (USA)
 	// Crashes after selecting a file due to memory limitations
-	/*if (strcmp(romTid, "KS3E") == 0) {
+	/*else if (strcmp(romTid, "KS3E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02092050 = 0xE1A00000; // nop
@@ -631,7 +631,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Space Ace (USA)
  	// Does not boot
-	if (strcmp(romTid, "KA6E") == 0) {
+	else if (strcmp(romTid, "KA6E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
