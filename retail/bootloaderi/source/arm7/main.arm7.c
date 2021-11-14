@@ -646,6 +646,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "APD", 3) != 0
 	 && strncmp(romTid, "A24", 3) != 0
+	 && strncmp(romTid, "AMC", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
