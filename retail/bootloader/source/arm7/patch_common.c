@@ -382,6 +382,46 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSi-Exclusives to run in DS mode
 
+	// Aura-Aura Climber (USA)
+	else if (strcmp(romTid, "KSRE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x020104A0 = 0xE1A00000; // nop
+		*(u32*)0x02010508 = 0xE1A00000; // nop
+		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F500 = 0xE1A00000; // nop
+		*(u32*)0x02042F10 = 0xE1A00000; // nop
+		*(u32*)0x02049420 = 0xE1A00000; // nop
+		*(u32*)0x0204B27C = 0xE1A00000; // nop
+		*(u32*)0x0204B280 = 0xE1A00000; // nop
+		*(u32*)0x0204B28C = 0xE1A00000; // nop
+		*(u32*)0x0204B3EC = 0xE1A00000; // nop
+		*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Aura-Aura Climber (Europe, Australia)
+	else if (strcmp(romTid, "KSRV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x0201066C = 0xE1A00000; // nop
+		*(u32*)0x020106D4 = 0xE1A00000; // nop
+		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F580 = 0xE1A00000; // nop
+		*(u32*)0x02042F90 = 0xE1A00000; // nop
+		*(u32*)0x020494A0 = 0xE1A00000; // nop
+		*(u32*)0x0204B2FC = 0xE1A00000; // nop
+		*(u32*)0x0204B300 = 0xE1A00000; // nop
+		*(u32*)0x0204B30C = 0xE1A00000; // nop
+		*(u32*)0x0204B46C = 0xE1A00000; // nop
+		*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
+	}
+
 	// Nintendo DSi XL Demo Video (USA)
 	// Freezes after opening logos
 	/*else if (strcmp(romTid, "DMEE") == 0) {
@@ -489,8 +529,8 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
-	// Weird crash in the main menu
-	else if (strcmp(romTid, "Z2EJ") == 0) {
+	// 4MB of RAM causes crash in the main menu
+	else if (strcmp(romTid, "Z2EJ") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02015BC4 = 0xE1A00000; // nop
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
@@ -499,6 +539,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020216BC = 0xE1A00000; // nop
 		*(u32*)0x020216C8 = 0xE1A00000; // nop
 		*(u32*)0x02021828 = 0xE1A00000; // nop
+		//*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
 	}
 
 	// Glory Days: Tactical Defense (USA)
