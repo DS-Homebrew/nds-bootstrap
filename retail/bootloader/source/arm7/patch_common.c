@@ -672,7 +672,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018F98 = 0xE1A00000; // nop
 		*(u32*)0x02018FA4 = 0xE1A00000; // nop
 		*(u32*)0x02019104 = 0xE1A00000; // nop
-		*(u32*)0x02019160 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
 		for (int i = 0; i < 12; i++) {
@@ -696,7 +696,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018F98 = 0xE1A00000; // nop
 		*(u32*)0x02018FA4 = 0xE1A00000; // nop
 		*(u32*)0x02019104 = 0xE1A00000; // nop
-		*(u32*)0x02019160 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
 		for (int i = 0; i < 12; i++) {
@@ -765,6 +765,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011BA8 = 0xE1A00000; // nop
 		*(u32*)0x02011BB4 = 0xE1A00000; // nop
 		*(u32*)0x02011CF8 = 0xE1A00000; // nop
+		*(u32*)0x02011D54 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02011D78 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02011D80 = 0x13A00627; // movne r0, #0x2700000
 	}
 
 	// Nintendo DSi + Internet (Europe)
@@ -782,6 +785,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011E4C = 0xE1A00000; // nop
 		*(u32*)0x02011E58 = 0xE1A00000; // nop
 		*(u32*)0x02011F9C = 0xE1A00000; // nop
+		*(u32*)0x02011FF8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201201C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02012024 = 0x13A00627; // movne r0, #0x2700000
 	}
 
 	// Nintendo DSi + Internet (Australia)
@@ -799,6 +805,9 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011BDC = 0xE1A00000; // nop
 		*(u32*)0x02011BE8 = 0xE1A00000; // nop
 		*(u32*)0x02011D2C = 0xE1A00000; // nop
+		*(u32*)0x02011D88 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02011DAC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02011DB4 = 0x13A00627; // movne r0, #0x2700000
 	}
 
 	// Shantae: Risky's Revenge (USA)
