@@ -560,6 +560,22 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
 	}
 
+	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
+	// Requires main RAM to be larger than 4MB
+	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0206B93C = 0xE1A00000; // nop
+		*(u32*)0x0206F438 = 0xE1A00000; // nop
+		*(u32*)0x02075718 = 0xE1A00000; // nop
+		*(u32*)0x02077620 = 0xE1A00000; // nop
+		*(u32*)0x02077624 = 0xE1A00000; // nop
+		*(u32*)0x02077630 = 0xE1A00000; // nop
+		*(u32*)0x02077790 = 0xE1A00000; // nop
+		//*(u32*)0x020777EC = 0xE3A0078F; // mov r0, #0x23C0000
+		//*(u32*)0x02077810 = 0xE3500001; // cmp r0, #1
+		//*(u32*)0x02077818 = 0x13A00627; // movne r0, #0x2700000
+	}
+
 	// Dark Void Zero (USA)
 	// Improper/broken patch
 	/*else if (strcmp(romTid, "KDVE") == 0) {
