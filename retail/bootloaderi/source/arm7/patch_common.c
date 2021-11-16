@@ -516,6 +516,35 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}
 }
 
+void bannerSavPatch(const tNDSHeader* ndsHeader) {
+	// Patch out banner.sav check
+	//const char* newBannerPath = "dataPrv:";
+	const char* romTid = getRomTid(ndsHeader);
+
+	// Touhoku Daigaku Karei Igaku Kenkyuusho Kawashi Maryuuta Kyouji Kanchuu: Chotto Nou o Kitaeru Otona no DSi Training: Sudoku-Hen (Japan)
+	if (strcmp(romTid, "KN9J") == 0) {
+		*(u32*)0x0201161C = 0xE3A00001; // mov r0, #1
+	}
+
+	// Brain Age Express: Sudoku (USA)
+	else if (strcmp(romTid, "KN9E") == 0) {
+		//toncset((char*)0x020925A0, 0, 0xE);
+		//tonccpy((char*)0x020925A0, newBannerPath, 8);
+
+		*(u32*)0x0201178C = 0xE3A00001; // mov r0, #1
+	}
+
+	// A Little Bit of... Brain Training: Sudoku (Europe, Australia)
+	else if (strcmp(romTid, "KN9V") == 0) {
+		*(u32*)0x02011774 = 0xE3A00001; // mov r0, #1
+	}
+
+	// Even Tijd Voor... Brain Training: Sudoku (Netherlands)
+	else if (strcmp(romTid, "KN9H") == 0) {
+		*(u32*)0x02011718 = 0xE3A00001; // mov r0, #1
+	}
+}
+
 /*void patchSlot2Addr(const tNDSHeader* ndsHeader) {
 	extern u32 gbaAddrToDsi[];
 

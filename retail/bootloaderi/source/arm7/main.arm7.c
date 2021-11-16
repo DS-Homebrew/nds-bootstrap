@@ -1361,16 +1361,10 @@ int arm7_main(void) {
 		}
 		*(u16*)0x4000500 = 0x807F;
 
-		//if (*(u8*)0x02FFE1BF & BIT(2)) {
-			//const char* newBannerPath = "sdmc:/";
-			//toncset((char*)0x020925A0, 0, 0xE);
-			//tonccpy((char*)0x020925A0, newBannerPath, 6);
-			//toncset((char*)0x020A8D84, 0, 0xE);
-			//tonccpy((char*)0x020A8D84, newBannerPath, 6);
-			//const char* newBannerPath = "sdmc:/banner.sav";
-			//toncset((char*)0x02E9A828, 0, 0x1C);
-			//tonccpy((char*)0x02E9A834, newBannerPath, 16);
-		//}
+		if (*(u8*)0x02FFE1BF & BIT(2)) {
+			ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
+			bannerSavPatch(ndsHeader);
+		}
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
