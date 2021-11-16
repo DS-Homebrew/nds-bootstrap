@@ -560,6 +560,21 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
 	}
 
+	// Big Bass Arcade (USA)
+	// Locks up on the first shown logos
+	/*else if (strcmp(romTid, "K9GE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005120 = 0xE1A00000; // nop
+		*(u32*)0x0200D83C = 0xE1A00000; // nop
+		*(u32*)0x02010DDC = 0xE1A00000; // nop
+		*(u32*)0x020168C0 = 0xE1A00000; // nop
+		*(u32*)0x020186E8 = 0xE1A00000; // nop
+		*(u32*)0x020186EC = 0xE1A00000; // nop
+		*(u32*)0x020186F8 = 0xE1A00000; // nop
+		*(u32*)0x02018858 = 0xE1A00000; // nop
+		*(u32*)0x0203AF58 = 0xE12FFF1E; // bx lr
+	}*/
+
 	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
 	// Requires main RAM to be larger than 4MB
 	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
@@ -714,6 +729,24 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02082A3C = 0xE1A00000; // nop
 		*(u32*)0x02082A58 = 0xE1A00000; // nop
 		*(u32*)0x020A467C = 0xE1A00000; // nop
+	}*/
+
+	// Mario vs. Donkey Kong: Minis March Again! (USA)
+	// Does not boot
+	/*else if (strcmp(romTid, "KDME") == 0) {
+		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
+		*(u32*)0x0202E788 = 0xE1A00000; // nop
+		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02064F80 = 0xE1A00000; // nop
+		*(u32*)0x0206C780 = 0xE1A00000; // nop
+		*(u32*)0x0206F7AC = 0xE1A00000; // nop
+		*(u32*)0x0206F7B0 = 0xE1A00000; // nop
+		*(u32*)0x0206F7BC = 0xE1A00000; // nop
+		*(u32*)0x0206F900 = 0xE1A00000; // nop
+		*(u32*)0x0206F904 = 0xE1A00000; // nop
+		*(u32*)0x0206F908 = 0xE1A00000; // nop
+		*(u32*)0x0206F90C = 0xE1A00000; // nop
 	}*/
 
 	// Nintendo DSi + Internet (Japan)
