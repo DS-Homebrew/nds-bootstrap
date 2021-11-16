@@ -382,46 +382,6 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSi-Exclusives to run in DS mode
 
-	// Aura-Aura Climber (USA)
-	else if (strcmp(romTid, "KSRE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0200515C = 0xE1A00000; // nop
-		*(u32*)0x02005164 = 0xE1A00000; // nop
-		*(u32*)0x020104A0 = 0xE1A00000; // nop
-		*(u32*)0x02010508 = 0xE1A00000; // nop
-		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203F500 = 0xE1A00000; // nop
-		*(u32*)0x02042F10 = 0xE1A00000; // nop
-		*(u32*)0x02049420 = 0xE1A00000; // nop
-		*(u32*)0x0204B27C = 0xE1A00000; // nop
-		*(u32*)0x0204B280 = 0xE1A00000; // nop
-		*(u32*)0x0204B28C = 0xE1A00000; // nop
-		*(u32*)0x0204B3EC = 0xE1A00000; // nop
-		*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Aura-Aura Climber (Europe, Australia)
-	else if (strcmp(romTid, "KSRV") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0200515C = 0xE1A00000; // nop
-		*(u32*)0x02005164 = 0xE1A00000; // nop
-		*(u32*)0x0201066C = 0xE1A00000; // nop
-		*(u32*)0x020106D4 = 0xE1A00000; // nop
-		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203F580 = 0xE1A00000; // nop
-		*(u32*)0x02042F90 = 0xE1A00000; // nop
-		*(u32*)0x020494A0 = 0xE1A00000; // nop
-		*(u32*)0x0204B2FC = 0xE1A00000; // nop
-		*(u32*)0x0204B300 = 0xE1A00000; // nop
-		*(u32*)0x0204B30C = 0xE1A00000; // nop
-		*(u32*)0x0204B46C = 0xE1A00000; // nop
-		*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
-	}
-
 	// Nintendo DSi XL Demo Video (USA)
 	// Freezes after opening logos
 	/*else if (strcmp(romTid, "DMEE") == 0) {
@@ -471,6 +431,135 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
+	// 10 Second Run (USA)
+	// Does not boot
+	/*else if (strcmp(romTid, "KJUE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201588C = 0xE1A00000; // nop
+		*(u32*)0x0201589C = 0xE1A00000; // nop
+		*(u32*)0x020158A8 = 0xE1A00000; // nop
+		*(u32*)0x020158B4 = 0xE1A00000; // nop
+		*(u32*)0x02015968 = 0xE1A00000; // nop
+		*(u32*)0x02015970 = 0xE1A00000; // nop
+		*(u32*)0x02015980 = 0xE1A00000; // nop
+		*(u32*)0x02015A60 = 0xE1A00000; // nop
+		*(u32*)0x02015A98 = 0xE1A00000; // nop
+		*(u32*)0x02015F74 = 0xE1A00000; // nop
+		*(u32*)0x02018B4C = 0xE1A00000; // nop
+		*(u32*)0x020193A0 = 0xE1A00000; // nop
+		*(u32*)0x020193A4 = 0xE1A00000; // nop
+		*(u32*)0x020193B4 = 0xE1A00000; // nop
+		//*(u32*)0x02019414 = 0xE1A00000; // nop
+		//*(u32*)0x0201942C = 0xE1A00000; // nop
+		*(u32*)0x02030A88 = 0xE1A00000; // nop
+		*(u32*)0x02034224 = 0xE1A00000; // nop
+		*(u32*)0x02037F24 = 0xE1A00000; // nop
+		*(u32*)0x02039CCC = 0xE1A00000; // nop
+		*(u32*)0x02039CD0 = 0xE1A00000; // nop
+		*(u32*)0x02039CDC = 0xE1A00000; // nop
+		*(u32*)0x02039E3C = 0xE1A00000; // nop
+		*(u32*)0x0203B7D4 = 0xE1A00000; // nop
+		*(u32*)0x0203B7E0 = 0xE1A00000; // nop
+		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
+		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
+		*(u32*)0x0203E9C0 = 0xE1A00000; // nop
+	}*/
+
+	// Art Style: AQUIA (USA)
+	// Doesn't seem to work on real hardware?
+	// NOTE: Exiting options will cause an error
+	else if (strcmp(romTid, "KAAE") == 0) {
+		*(u32*)0x02005094 = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050A0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x020051B8 = 0xE1A00000; // nop
+		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020583BC = 0xE1A00000; // nop
+		*(u32*)0x02062C58 = 0xE1A00000; // nop
+		*(u32*)0x02064A48 = 0xE1A00000; // nop
+		*(u32*)0x02064A4C = 0xE1A00000; // nop
+		*(u32*)0x02064A58 = 0xE1A00000; // nop
+		*(u32*)0x02064B9C = 0xE1A00000; // nop
+		*(u32*)0x02064BA0 = 0xE1A00000; // nop
+		*(u32*)0x02064BA4 = 0xE1A00000; // nop
+		*(u32*)0x02064BA8 = 0xE1A00000; // nop
+		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Asphalt 4: Elite Racing (USA)
+	// Does not boot (Black screens)
+	/*else if (strcmp(romTid, "KA4E") == 0) {
+		*(u32*)0x020050E0 = 0xE1A00000; // nop
+		*(u32*)0x02031E08 = 0xE1A00000; // nop
+		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207951C = 0xE1A00000; // nop
+		*(u32*)0x0207952C = 0xE1A00000; // nop
+		*(u32*)0x0207954C = 0xE1A00000; // nop
+		*(u32*)0x02079554 = 0xE1A00000; // nop
+		*(u32*)0x0207955C = 0xE1A00000; // nop
+		*(u32*)0x02079564 = 0xE1A00000; // nop
+		*(u32*)0x02079578 = 0xE1A00000; // nop
+		*(u32*)0x02079580 = 0xE1A00000; // nop
+		*(u32*)0x02079588 = 0xE1A00000; // nop
+		*(u32*)0x02079590 = 0xE1A00000; // nop
+		*(u32*)0x020795B4 = 0xE1A00000; // nop
+		*(u32*)0x0207ACB8 = 0xE1A00000; // nop
+		*(u32*)0x0207B840 = 0xE1A00000; // nop
+		*(u32*)0x0207B868 = 0xE1A00000; // nop
+		*(u32*)0x0208FCC4 = 0xE1A00000; // nop
+		*(u32*)0x0209868C = 0xE1A00000; // nop
+		*(u32*)0x0209A5E4 = 0xE1A00000; // nop
+		*(u32*)0x0209A5E8 = 0xE1A00000; // nop
+		*(u32*)0x0209A5F4 = 0xE1A00000; // nop
+		*(u32*)0x0209A738 = 0xE1A00000; // nop
+	}*/
+
+	// Aura-Aura Climber (USA)
+	else if (strcmp(romTid, "KSRE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x020104A0 = 0xE1A00000; // nop
+		*(u32*)0x02010508 = 0xE1A00000; // nop
+		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F500 = 0xE1A00000; // nop
+		*(u32*)0x02042F10 = 0xE1A00000; // nop
+		*(u32*)0x02049420 = 0xE1A00000; // nop
+		*(u32*)0x0204B27C = 0xE1A00000; // nop
+		*(u32*)0x0204B280 = 0xE1A00000; // nop
+		*(u32*)0x0204B28C = 0xE1A00000; // nop
+		*(u32*)0x0204B3EC = 0xE1A00000; // nop
+		*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Aura-Aura Climber (Europe, Australia)
+	else if (strcmp(romTid, "KSRV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x0201066C = 0xE1A00000; // nop
+		*(u32*)0x020106D4 = 0xE1A00000; // nop
+		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F580 = 0xE1A00000; // nop
+		*(u32*)0x02042F90 = 0xE1A00000; // nop
+		*(u32*)0x020494A0 = 0xE1A00000; // nop
+		*(u32*)0x0204B2FC = 0xE1A00000; // nop
+		*(u32*)0x0204B300 = 0xE1A00000; // nop
+		*(u32*)0x0204B30C = 0xE1A00000; // nop
+		*(u32*)0x0204B46C = 0xE1A00000; // nop
+		*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
+	}
+
 	// Dark Void Zero (USA)
 	// Improper/broken patch
 	/*else if (strcmp(romTid, "KDVE") == 0) {
@@ -488,7 +577,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Dragon's Lair (USA)
-	// Does not boot
+	// Doesn't seem to work on real hardware?
 	else if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
@@ -590,6 +679,27 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
+	// Does not boot (Lack of memory?)
+	/*else if (strcmp(romTid, "KQ9E") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x020050F8 = 0xE1A00000; // nop
+		*(u32*)0x020051CC = 0xE1A00000; // nop
+		*(u32*)0x02012AAC = 0xE1A00000; // nop
+		*(u32*)0x020166D4 = 0xE1A00000; // nop
+		*(u32*)0x020185C8 = 0xE1A00000; // nop
+		*(u32*)0x020185CC = 0xE1A00000; // nop
+		*(u32*)0x020185D8 = 0xE1A00000; // nop
+		*(u32*)0x02018738 = 0xE1A00000; // nop
+		*(u32*)0x02018738 = 0xE1A00000; // nop
+		*(u32*)0x0205663C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056738 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02082A3C = 0xE1A00000; // nop
+		*(u32*)0x02082A58 = 0xE1A00000; // nop
+		*(u32*)0x020A467C = 0xE1A00000; // nop
+	}*/
+
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
 	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
@@ -671,7 +781,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Space Ace (USA)
- 	// Does not boot
+	// Doesn't seem to work on real hardware?
 	else if (strcmp(romTid, "KA6E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
