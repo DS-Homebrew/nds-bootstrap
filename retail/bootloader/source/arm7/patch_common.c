@@ -535,7 +535,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B280 = 0xE1A00000; // nop
 		*(u32*)0x0204B28C = 0xE1A00000; // nop
 		*(u32*)0x0204B3EC = 0xE1A00000; // nop
-		*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
+		if (extendedMemory2) {
+			*(u32*)0x0204B448 = 0xE3A0079F; // mov r0, #0x27C0000
+		} else {
+			*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
 		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
 	}
@@ -555,7 +559,11 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B300 = 0xE1A00000; // nop
 		*(u32*)0x0204B30C = 0xE1A00000; // nop
 		*(u32*)0x0204B46C = 0xE1A00000; // nop
-		*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		if (extendedMemory2) {
+			*(u32*)0x0204B4C8 = 0xE3A0079F; // mov r0, #0x27C0000
+		} else {
+			*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
 		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
 	}
@@ -606,6 +614,23 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u16*)0x020851A6 = 0x46C0; // nop
 		*(u16*)0x02086D04 = 0x4770; // bx lr
 	}*/
+
+	// Dairojo! Samurai Defenders (USA)
+	else if (strcmp(romTid, "KF3E") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
+		*(u32*)0x02011580 = 0xE1A00000; // nop
+		*(u32*)0x0201BCD4 = 0xE1A00000; // nop
+		*(u32*)0x0201DB50 = 0xE1A00000; // nop
+		*(u32*)0x0201DB54 = 0xE1A00000; // nop
+		*(u32*)0x0201DB60 = 0xE1A00000; // nop
+		*(u32*)0x0201DCC0 = 0xE1A00000; // nop
+		*(u32*)0x0201DD1C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201DD40 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201DD48 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201EFDC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EFE8 = 0xE12FFF1E; // bx lr
+	}
 
 	// GO Series: Defense Wars (USA)
 	else if (strcmp(romTid, "KWTE") == 0) {
