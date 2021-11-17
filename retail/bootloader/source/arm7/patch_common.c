@@ -431,7 +431,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
-	// 10 Second Run (USA)
+	// GO Series: 10 Second Run (USA)
 	// Does not boot
 	/*else if (strcmp(romTid, "KJUE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
@@ -606,6 +606,46 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u16*)0x020851A6 = 0x46C0; // nop
 		*(u16*)0x02086D04 = 0x4770; // bx lr
 	}*/
+
+	// GO Series: Defense Wars (USA)
+	else if (strcmp(romTid, "KWTE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200722C = 0xE1A00000; // nop
+		*(u32*)0x0200B350 = 0xE1A00000; // nop
+		*(u32*)0x02049F68 = 0xE1A00000; // nop
+		*(u32*)0x0204DC94 = 0xE1A00000; // nop
+		*(u32*)0x020537F4 = 0xE1A00000; // nop
+		*(u32*)0x020555D4 = 0xE1A00000; // nop
+		*(u32*)0x020555D8 = 0xE1A00000; // nop
+		*(u32*)0x020555E4 = 0xE1A00000; // nop
+		*(u32*)0x02055744 = 0xE1A00000; // nop
+		*(u32*)0x020557A0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020557C4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020557CC = 0x13A00627; // movne r0, #0x2700000
+
+		// Manual screen
+		/**(u32*)0x0200CB0C = 0xE1A00000; // nop
+		*(u32*)0x0200CB10 = 0xE1A00000; // nop
+		*(u32*)0x0200CB34 = 0xE1A00000; // nop
+		*(u32*)0x0200CB50 = 0xE1A00000; // nop
+		*(u32*)0x0200CB80 = 0xE1A00000; // nop*/
+
+		// Skip
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200CC98;
+			offset[i] = 0xE1A00000; // nop
+		}
+
+		/*for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x0203B3A0;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0203CAD4 = 0xEB006798; // bl 0x205693C
+		for (int i = 0; i < 6; i++) {
+			u32* offset = (u32*)0x0203CD60;
+			offset[i] = 0xE1A00000; // nop
+		}*/
+	}
 
 	// Dragon's Lair (USA)
 	// Doesn't seem to work on real hardware?
@@ -809,6 +849,23 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011DAC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02011DB4 = 0x13A00627; // movne r0, #0x2700000
 	}
+
+	// Nintendoji (Japan)
+	// Does not boot
+	/*else if (strcmp(romTid, "K9KJ") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005538 = 0xE1A00000; // nop
+		*(u32*)0x0200554C = 0xE1A00000; // nop
+		*(u32*)0x02018C08 = 0xE1A00000; // nop
+		*(u32*)0x0201A9F8 = 0xE1A00000; // nop
+		*(u32*)0x0201A9FC = 0xE1A00000; // nop
+		*(u32*)0x0201AA08 = 0xE1A00000; // nop
+		*(u32*)0x0201AB68 = 0xE1A00000; // nop
+		*(u32*)0x0201ABC4 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
+	}*/
 
 	// Shantae: Risky's Revenge (USA)
 	// Crashes after selecting a file due to memory limitations
