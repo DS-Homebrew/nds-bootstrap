@@ -23,13 +23,21 @@ void inGameMenu(void) {
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
 
+	int timeOut = 0;
 	while (sharedAddr[5] != 0x59444552) { // 'REDY'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
+
+		timeOut++;
+		if (timeOut == 60*2) {
+			rebootConsole();
+			timeOut = 0;
+		}
 	}
 
 	if (sharedAddr[4] == 0x554E454D) {
-		while (1) {
+		bool exitMenu = false;
+		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 
@@ -38,23 +46,23 @@ void inGameMenu(void) {
 
 			switch (sharedAddr[4]) {
 				case 0x54495845: // EXIT
-				default:
+					exitMenu = true;
 					break;
 				case 0x54495551: // QUIT
 					rebootConsole();
+					exitMenu = true;
 					break;
 				case 0x524D4152: // RAMR
 					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
-					sharedAddr[4] = 0x554E454D;
 					break;
 				case 0x574D4152: // RAMW
 					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
-					sharedAddr[4] = 0x554E454D;
+					break;
+				default:
 					break;
 			}
-			if (sharedAddr[4] != 0x554E454D) {
-				break;
-			}
+
+			sharedAddr[4] = 0x554E454D; // MENU
 		}
 	}
 
