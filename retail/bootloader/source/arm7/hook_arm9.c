@@ -130,6 +130,7 @@ int hookNdsRetailArm9(
 	bool ROMinRAM,
 	bool dsDebugRam,
 	u32 overlaysSize,
+	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 ) {
@@ -164,6 +165,7 @@ int hookNdsRetailArm9(
 		ce9->valueBits |= b_cacheFlushFlag;
 	}
 	ce9->overlaysSize           = overlaysSize;
+	ce9->ioverlaysSize          = ioverlaysSize;
 	ce9->maxClusterCacheSize    = maxClusterCacheSize;
 	ce9->fatTableAddr           = fatTableAddr;
 	if (extendedMemory && !dsDebugRam) {

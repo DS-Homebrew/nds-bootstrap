@@ -152,6 +152,7 @@ typedef struct cardengineArm9 {
 		6: overlaysInRam
 	*/
     u32 overlaysSize;
+    u32 ioverlaysSize;
     u32 maxClusterCacheSize;
     u32 fatTableAddr;
     u32* irqTable;

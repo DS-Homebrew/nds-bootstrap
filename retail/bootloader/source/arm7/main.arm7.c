@@ -96,8 +96,13 @@ extern u8 patchMpuRegion;
 extern u8 language;
 extern u8 donorSdkVer;
 
+u32 arm9iromOffset = 0;
+u32 arm9ibinarySize = 0;
+u32 arm7iromOffset = 0;
+
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
+static u32 ioverlaysSize = 0;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
@@ -319,7 +324,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->romSize-0x8000)+0x88 < romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (arm9iromOffset-0x8000)+ioverlaysSize : (ndsHeader->romSize-0x8000)+0x88) < romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -589,6 +594,16 @@ int arm7_main(void) {
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
+	if (ndsHeader->unitCode == 3) {
+		fileRead(&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
+		fileRead(&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+		fileRead(&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
+
+		// Calculate i-overlay pack size
+		for (u32 i = arm9iromOffset+arm9ibinarySize; i < arm7iromOffset; i++) {
+			ioverlaysSize++;
+		}
+	}
 
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -689,6 +704,7 @@ int arm7_main(void) {
 		ROMinRAM,
 		dsDebugRam,
 		overlaysSize,
+		ioverlaysSize,
 		fatTableSize,
 		fatTableAddr
 	);

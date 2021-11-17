@@ -51,6 +51,7 @@ int hookNdsRetailArm9(
 	bool ROMinRAM,
 	bool dsDebugRam,
 	u32 overlaysSize,
+	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 );

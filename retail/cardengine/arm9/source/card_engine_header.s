@@ -34,6 +34,8 @@ valueBits:
 	.word	0x00000000
 overlaysSize:
 	.word	0x00000000
+ioverlaysSize:
+	.word	0x00000000
 maxClusterCacheSize:
 	.word	0x00000000
 fatTableAddr:

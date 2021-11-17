@@ -64,6 +64,8 @@ extern u32 clusterCache;
 extern u32 clusterCacheSize;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+static u32 arm9iromOffset = 0;
+static u32 arm9ibinarySize = 0;
 
 static aFile romFile;
 static aFile savFile;
@@ -232,6 +234,12 @@ static void initialize(void) {
 		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
 			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-0x4000);
 			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
+			if (ndsHeader->unitCode == 3) {
+				fileRead(&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
+				fileRead(&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+
+				fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
+			}
 		}
 
 		initialized = true;
@@ -292,6 +300,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	if (ce9->valueBits & ROMinRAM) {
 		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+		if (ndsHeader->unitCode == 3 && src >= arm9iromOffset) {
+			newSrc = (u32)(ce9->romLocation-0x8000-arm9ibinarySize)+src;
+		}
 		tonccpy(dst, (u8*)newSrc, len);
 	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
