@@ -24,9 +24,12 @@
 #include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
+#include "locations.h"
 #include "tonccpy.h"
 #include "loading_screen.h"
 #include "debug_file.h"
+
+extern bool expansionPakFound;
 
 u16 patchOffsetCacheFileVersion = 21;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
@@ -535,13 +538,21 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B280 = 0xE1A00000; // nop
 		*(u32*)0x0204B28C = 0xE1A00000; // nop
 		*(u32*)0x0204B3EC = 0xE1A00000; // nop
-		if (extendedMemory2) {
+		/*if (extendedMemory2) {
 			*(u32*)0x0204B448 = 0xE3A0079F; // mov r0, #0x27C0000
 		} else {
 			*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
-		}
+		}*/
+		*(u32*)0x0204B448 = 0xE59F0094; // ldr r0,=0x02??0000
 		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0204B488 = 0xE3A01000; // mov r1, #0
+		if (extendedMemory2) {
+			*(u32*)0x0204B4E4 = 0x02700000;
+		} else {
+			//*(u32*)0x0204B4E4 = 0x023E0000;
+			*(u32*)0x0204B4E4 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+		}
 	}
 
 	// Aura-Aura Climber (Europe, Australia)
@@ -559,13 +570,21 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B300 = 0xE1A00000; // nop
 		*(u32*)0x0204B30C = 0xE1A00000; // nop
 		*(u32*)0x0204B46C = 0xE1A00000; // nop
-		if (extendedMemory2) {
+		/*if (extendedMemory2) {
 			*(u32*)0x0204B4C8 = 0xE3A0079F; // mov r0, #0x27C0000
 		} else {
 			*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
-		}
+		}*/
+		*(u32*)0x0204B4C8 = 0xE59F0094; // ldr r0,=0x02??0000
 		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0204B508 = 0xE3A01000; // mov r1, #0
+		if (extendedMemory2) {
+			*(u32*)0x0204B564 = 0x02700000;
+		} else {
+			//*(u32*)0x0204B564 = 0x023E0000;
+			*(u32*)0x0204B564 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+		}
 	}
 
 	// Big Bass Arcade (USA)
@@ -903,7 +922,6 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02092E08 = 0xE1A00000; // nop
 		*(u32*)0x02092E14 = 0xE1A00000; // nop
 		*(u32*)0x02092E20 = 0xE1A00000; // nop
-		*(u32*)0x020AB800 = 0xE1A00000; // nop
 		*(u32*)0x020DDB84 = 0xE1A00000; // nop
 		*(u32*)0x020DE420 = 0xE1A00000; // nop
 		*(u32*)0x020DE548 = 0xE1A00000; // nop
@@ -914,10 +932,14 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E7F68 = 0xE1A00000; // nop
 		*(u32*)0x020E7F74 = 0xE1A00000; // nop
 		*(u32*)0x020E80D4 = 0xE1A00000; // nop
+		*(u32*)0x020E8130 = 0xE3A0079F; // mov r0, #0x27C0000
+		*(u32*)0x020E8154 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020E815C = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x020E977C = 0xE1A00000; // nop
 		*(u32*)0x020E9780 = 0xE1A00000; // nop
 		*(u32*)0x020E9784 = 0xE1A00000; // nop
 		*(u32*)0x020E9788 = 0xE1A00000; // nop
+		*(u32*)0x020E9794 = 0xE1A00000; // nop (Activates a message when memory runs out)
 	}*/
 
 	// Space Ace (USA)
