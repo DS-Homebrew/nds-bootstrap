@@ -87,6 +87,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		//}
 		*(u32*)0x02019BE0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019BE8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E6CC = 0xE1A00000; // nop
 	}
 
 	// Patch DSiWare to run in DS mode
@@ -278,6 +279,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020777EC = 0xE3A0078F; // mov r0, #0x23C0000
 		//*(u32*)0x02077810 = 0xE3500001; // cmp r0, #1
 		//*(u32*)0x02077818 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0207BE88 = 0xE1A00000; // nop
 	}
 
 	// Dark Void Zero (USA)
@@ -298,6 +300,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204F0F4 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02052BD4 = 0xE1A00000; // nop
 		*(u32*)0x02052C00 = 0xE1A00000; // nop
+		*(u32*)0x02054EF8 = 0xE1A00000; // nop
 		*(u32*)0x02058A24 = 0xE1A00000; // nop
 		*(u32*)0x02059C44 = 0xE1A00000; // nop
 		*(u16*)0x020851A4 = 0x46C0; // nop
@@ -322,6 +325,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201DD48 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0201EFDC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201EFE8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022418 = 0xE1A00000; // nop
 	}
 
 	// GO Series: Defense Wars (USA)
@@ -339,6 +343,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020557A0 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x020557C4 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020557CC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205A134 = 0xE1A00000; // nop
 
 		// Manual screen
 		/* *(u32*)0x0200CB0C = 0xE1A00000; // nop
@@ -398,6 +403,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203A540 = 0xE1A00000; // nop
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
 		*(u32*)0x0203A548 = 0xE1A00000; // nop
+		*(u32*)0x0203D0A4 = 0xE1A00000; // nop
 		for (int i = 0; i < 10; i++) {
 			u32* offset = (u32*)0x020257F8;
 			offset[i] = 0xE1A00000; // nop
@@ -417,6 +423,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020216C8 = 0xE1A00000; // nop
 		*(u32*)0x02021828 = 0xE1A00000; // nop
 		//*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02026A94 = 0xE1A00000; // nop
 	}
 
 	// Game & Watch: Ball (USA, Europe)
@@ -433,6 +440,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201985C = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E328 = 0xE1A00000; // nop
 		/* *(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02034594 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020348B4 = 0xE12FFF1E; // bx lr
@@ -453,6 +461,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020196B0 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E07C = 0xE1A00000; // nop
 		*(u32*)0x02034BC8 = 0xE12FFF1E; // bx lr
 	}
 
@@ -470,6 +479,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B554 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201B578 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201B580 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020204E8 = 0xE1A00000; // nop
 		*(u32*)0x0202F0FC = 0xE12FFF1E; // bx lr
 	}
 
@@ -486,6 +496,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B3A8 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201B3CC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201B3D4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202023C = 0xE1A00000; // nop
 		*(u32*)0x0202EE9C = 0xE12FFF1E; // bx lr
 	}
 
@@ -503,6 +514,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019AD8 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019AFC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019B04 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E998 = 0xE1A00000; // nop
 		*(u32*)0x0202D860 = 0xE12FFF1E; // bx lr
 	}
 
@@ -519,6 +531,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201992C = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019950 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019958 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E6EC = 0xE1A00000; // nop
 		*(u32*)0x0202D600 = 0xE12FFF1E; // bx lr
 	}
 
@@ -536,6 +549,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019CA8 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019CCC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019CD4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E774 = 0xE1A00000; // nop
 		*(u32*)0x0202D520 = 0xE12FFF1E; // bx lr
 	}
 
@@ -552,6 +566,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019AFC = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019B20 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019B28 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E4C8 = 0xE1A00000; // nop
 		*(u32*)0x0202D2C0 = 0xE12FFF1E; // bx lr
 	}
 
@@ -573,8 +588,10 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
 		if (strcmp(romTid, "KGHO") == 0 || strcmp(romTid, "KGMO") == 0) {
+			*(u32*)0x0201E71C = 0xE1A00000; // nop
 			*(u32*)0x0202D5E4 = 0xE12FFF1E; // bx lr
 		} else {
+			*(u32*)0x0201E328 = 0xE1A00000; // nop
 			*(u32*)0x0202D158 = 0xE12FFF1E; // bx lr
 		}
 	}
@@ -596,8 +613,10 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
 		if (strcmp(romTid, "KGHJ") == 0 || strcmp(romTid, "KGMJ") == 0) {
+			*(u32*)0x0201E470 = 0xE1A00000; // nop
 			*(u32*)0x0202D384 = 0xE12FFF1E; // bx lr
 		} else {
+			*(u32*)0x0201E07C = 0xE1A00000; // nop
 			*(u32*)0x0202CEF8 = 0xE12FFF1E; // bx lr
 		}
 	}
@@ -616,6 +635,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B5E0 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201B604 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201B60C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02020574 = 0xE1A00000; // nop
 		*(u32*)0x0202F188 = 0xE12FFF1E; // bx lr
 	}
 
@@ -632,6 +652,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B434 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201B458 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201B460 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020202C8 = 0xE1A00000; // nop
 		*(u32*)0x0202EF28 = 0xE12FFF1E; // bx lr
 	}
 
@@ -649,6 +670,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201985C = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E328 = 0xE1A00000; // nop
 		*(u32*)0x0202D0D4 = 0xE12FFF1E; // bx lr
 	}
 
@@ -665,6 +687,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020196B0 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E07C = 0xE1A00000; // nop
 		*(u32*)0x0202CE74 = 0xE12FFF1E; // bx lr
 	}
 
@@ -681,6 +704,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201D83C = 0xE1A00000; // nop
 		for (int i = 0; i < 12; i++) {
 			u32* offset = (u32*)0x0206710C;
 			offset[i] = 0xE1A00000; // nop
@@ -705,6 +729,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201D83C = 0xE1A00000; // nop
 		for (int i = 0; i < 12; i++) {
 			u32* offset = (u32*)0x02067264;
 			offset[i] = 0xE1A00000; // nop
@@ -730,6 +755,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020185D8 = 0xE1A00000; // nop
 		*(u32*)0x02018738 = 0xE1A00000; // nop
 		*(u32*)0x02018738 = 0xE1A00000; // nop
+		*(u32*)0x0201D01C = 0xE1A00000; // nop
 		*(u32*)0x0205663C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02056738 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02082A3C = 0xE1A00000; // nop
@@ -774,6 +800,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011D54 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02011D78 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02011D80 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02015D50 = 0xE1A00000; // nop
 	}
 
 	// Nintendo DSi + Internet (Europe)
@@ -794,6 +821,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011FF8 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201201C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02012024 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02016048 = 0xE1A00000; // nop
 	}
 
 	// Nintendo DSi + Internet (Australia)
@@ -814,6 +842,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011D88 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02011DAC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02011DB4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02015DD8 = 0xE1A00000; // nop
 	}
 
 	// Nintendoji (Japan)
@@ -830,6 +859,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201ABC4 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
 	}*/
 
@@ -928,6 +958,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E9784 = 0xE1A00000; // nop
 		*(u32*)0x020E9788 = 0xE1A00000; // nop
 		*(u32*)0x020E9794 = 0xE1A00000; // nop (Activates a message when memory runs out)
+		*(u32*)0x020ECBEC = 0xE1A00000; // nop
 	}*/
 
 	// Space Ace (USA)
@@ -961,6 +992,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203DDD0 = 0xE1A00000; // nop
 		*(u32*)0x0203DDD4 = 0xE1A00000; // nop
 		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
+		*(u32*)0x02040888 = 0xE1A00000; // nop
 		for (int i = 0; i < 10; i++) {
 			u32* offset = (u32*)0x02029578;
 			offset[i] = 0xE1A00000; // nop
