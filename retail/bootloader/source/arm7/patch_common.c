@@ -92,9 +92,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Patch DSiWare to run in DS mode
 
 	// GO Series: 10 Second Run (USA)
-	// Does not boot
-	/*else if (strcmp(romTid, "KJUE") == 0) {
+	// Crashes on the title screen
+	else if (strcmp(romTid, "KJUE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005888 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201588C = 0xE1A00000; // nop
 		*(u32*)0x0201589C = 0xE1A00000; // nop
 		*(u32*)0x020158A8 = 0xE1A00000; // nop
@@ -104,13 +106,12 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015980 = 0xE1A00000; // nop
 		*(u32*)0x02015A60 = 0xE1A00000; // nop
 		*(u32*)0x02015A98 = 0xE1A00000; // nop
-		*(u32*)0x02015F74 = 0xE1A00000; // nop
 		*(u32*)0x02018B4C = 0xE1A00000; // nop
 		*(u32*)0x020193A0 = 0xE1A00000; // nop
 		*(u32*)0x020193A4 = 0xE1A00000; // nop
 		*(u32*)0x020193B4 = 0xE1A00000; // nop
-		//*(u32*)0x02019414 = 0xE1A00000; // nop
-		//*(u32*)0x0201942C = 0xE1A00000; // nop
+		*(u32*)0x02019414 = 0xE1A00000; // nop
+		*(u32*)0x0201942C = 0xE1A00000; // nop
 		*(u32*)0x02030A88 = 0xE1A00000; // nop
 		*(u32*)0x02034224 = 0xE1A00000; // nop
 		*(u32*)0x02037F24 = 0xE1A00000; // nop
@@ -118,12 +119,16 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02039CD0 = 0xE1A00000; // nop
 		*(u32*)0x02039CDC = 0xE1A00000; // nop
 		*(u32*)0x02039E3C = 0xE1A00000; // nop
-		*(u32*)0x0203B7D4 = 0xE1A00000; // nop
-		*(u32*)0x0203B7E0 = 0xE1A00000; // nop
+		*(u32*)0x02039E98 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02039EBC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02039EC4 = 0x13A00627; // movne r0, #0x2700000
+		//*(u32*)0x0203B77C = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x0203B7D4 = 0xE1A00000; // nop
+		*(u32*)0x0203B7D8 = 0xE1A00000; // nop
+		*(u32*)0x0203B7DC = 0xE1A00000; // nop
+		*(u32*)0x0203B7E0 = 0xE1A00000; // nop */
 		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
-		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
-		*(u32*)0x0203E9C0 = 0xE1A00000; // nop
-	}*/
+	}
 
 	// Art Style: AQUIA (USA)
 	// Doesn't seem to work on real hardware?
