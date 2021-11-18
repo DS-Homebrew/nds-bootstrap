@@ -539,6 +539,119 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202D2C0 = 0xE12FFF1E; // bx lr
 	}
 
+	// Game & Watch: Helmet (USA, Europe)
+	// Game & Watch: Judge (USA, Europe)
+	// Game & Watch: Manhole (USA, Europe)
+	// Helmet & Manhole: Softlocks after 3 misses or exiting gameplay
+	// Judge: Softlocks after limit is reached or exiting gameplay
+	else if (strcmp(romTid, "KGHO") == 0 || strcmp(romTid, "KGJO") == 0 || strcmp(romTid, "KGMO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201007C = 0xE1A00000; // nop
+		*(u32*)0x020138C0 = 0xE1A00000; // nop
+		*(u32*)0x020177FC = 0xE1A00000; // nop
+		*(u32*)0x020196AC = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE1A00000; // nop
+		*(u32*)0x020196BC = 0xE1A00000; // nop
+		*(u32*)0x02019800 = 0xE1A00000; // nop
+		*(u32*)0x0201985C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
+		if (strcmp(romTid, "KGHO") == 0 || strcmp(romTid, "KGMO") == 0) {
+			*(u32*)0x0202D5E4 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0202D158 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Game & Watch: Helmet (Japan)
+	// Game & Watch: Judge (Japan)
+	// Game & Watch: Manhole (Japan)
+	// Helmet & Manhole: Softlocks after 3 misses or exiting gameplay
+	// Judge: Softlocks after limit is reached or exiting gameplay
+	else if (strcmp(romTid, "KGHJ") == 0 || strcmp(romTid, "KGJJ") == 0 || strcmp(romTid, "KGMJ") == 0) {
+		*(u32*)0x02010024 = 0xE1A00000; // nop
+		*(u32*)0x02013804 = 0xE1A00000; // nop
+		*(u32*)0x0201765C = 0xE1A00000; // nop
+		*(u32*)0x02019500 = 0xE1A00000; // nop
+		*(u32*)0x02019504 = 0xE1A00000; // nop
+		*(u32*)0x02019510 = 0xE1A00000; // nop
+		*(u32*)0x02019654 = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
+		if (strcmp(romTid, "KGHJ") == 0 || strcmp(romTid, "KGMJ") == 0) {
+			*(u32*)0x0202D384 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0202CEF8 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Game & Watch: Mario's Cement Factory (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGFO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02011B84 = 0xE1A00000; // nop
+		*(u32*)0x020153C8 = 0xE1A00000; // nop
+		*(u32*)0x02019580 = 0xE1A00000; // nop
+		*(u32*)0x0201B430 = 0xE1A00000; // nop
+		*(u32*)0x0201B434 = 0xE1A00000; // nop
+		*(u32*)0x0201B440 = 0xE1A00000; // nop
+		*(u32*)0x0201B584 = 0xE1A00000; // nop
+		*(u32*)0x0201B5E0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201B604 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201B60C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202F188 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Mario's Cement Factory (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGFJ") == 0) {
+		*(u32*)0x02011B2C = 0xE1A00000; // nop
+		*(u32*)0x02015250 = 0xE1A00000; // nop
+		*(u32*)0x020193E0 = 0xE1A00000; // nop
+		*(u32*)0x0201B284 = 0xE1A00000; // nop
+		*(u32*)0x0201B288 = 0xE1A00000; // nop
+		*(u32*)0x0201B294 = 0xE1A00000; // nop
+		*(u32*)0x0201B3D8 = 0xE1A00000; // nop
+		*(u32*)0x0201B434 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201B458 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201B460 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202EF28 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Vermin (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGVO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201007C = 0xE1A00000; // nop
+		*(u32*)0x020138C0 = 0xE1A00000; // nop
+		*(u32*)0x020177FC = 0xE1A00000; // nop
+		*(u32*)0x020196AC = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE1A00000; // nop
+		*(u32*)0x020196BC = 0xE1A00000; // nop
+		*(u32*)0x02019800 = 0xE1A00000; // nop
+		*(u32*)0x0201985C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202D0D4 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Vermin (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGVJ") == 0) {
+		*(u32*)0x02010024 = 0xE1A00000; // nop
+		*(u32*)0x02013804 = 0xE1A00000; // nop
+		*(u32*)0x0201765C = 0xE1A00000; // nop
+		*(u32*)0x02019500 = 0xE1A00000; // nop
+		*(u32*)0x02019504 = 0xE1A00000; // nop
+		*(u32*)0x02019510 = 0xE1A00000; // nop
+		*(u32*)0x02019654 = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202CE74 = 0xE12FFF1E; // bx lr
+	}
+
 	// Glory Days: Tactical Defense (USA)
 	else if (strcmp(romTid, "KGKE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
