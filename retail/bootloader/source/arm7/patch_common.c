@@ -281,20 +281,31 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Dark Void Zero (USA)
-	// Improper/broken patch
-	/*else if (strcmp(romTid, "KDVE") == 0) {
+	// Dark Void Zero (Europe, Australia)
+	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02018A3C = 0xE1A00000; // nop
+		*(u32*)0x02018A4C = 0xE1A00000; // nop
+		*(u32*)0x02046DD8 = 0xE1A00000; // nop
 		*(u32*)0x0204CC24 = 0xE1A00000; // nop
+		*(u32*)0x0204EE80 = 0xE1A00000; // nop
 		*(u32*)0x0204EF18 = 0xE1A00000; // nop
 		*(u32*)0x0204EF1C = 0xE1A00000; // nop
 		*(u32*)0x0204EF28 = 0xE1A00000; // nop
 		*(u32*)0x0204F06C = 0xE1A00000; // nop
+		*(u32*)0x0204F0C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0204F0EC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204F0F4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02052BD4 = 0xE1A00000; // nop
+		*(u32*)0x02052C00 = 0xE1A00000; // nop
+		*(u32*)0x02058A24 = 0xE1A00000; // nop
 		*(u32*)0x02059C44 = 0xE1A00000; // nop
-		*(u16*)0x0208100C = 0x4770; // bx lr
-		*(u16*)0x020851A2 = 0x46C0; // nop
 		*(u16*)0x020851A4 = 0x46C0; // nop
 		*(u16*)0x020851A6 = 0x46C0; // nop
-		*(u16*)0x02086D04 = 0x4770; // bx lr
-	}*/
+		*(u32*)0x020891BC = 0xE1A00000; // nop
+		*(u32*)0x0208AE4C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0208B008 = 0xE12FFF1E; // bx lr
+	}
 
 	// Dairojo! Samurai Defenders (USA)
 	else if (strcmp(romTid, "KF3E") == 0) {
@@ -820,6 +831,72 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
+	}*/
+
+	// Petit Computer (USA)
+	// Does not boot (black screens, seems to rely on code from DSi binaries)
+	/*else if (strcmp(romTid, "KNAE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200523C = 0xE1A00000; // nop
+		*(u32*)0x0200EB90 = 0xE1A00000; // nop
+		*(u32*)0x0200EB98 = 0xE1A00000; // nop
+		*(u32*)0x0200EBB4 = 0xE1A00000; // nop
+		*(u32*)0x0200EBBC = 0xE1A00000; // nop
+		*(u32*)0x0200EBF0 = 0xE1A00000; // nop
+		*(u32*)0x0200EC08 = 0xE1A00000; // nop
+		*(u32*)0x0200EC30 = 0xE1A00000; // nop
+		*(u32*)0x02086F5C = 0xE1A00000; // nop
+		*(u32*)0x0208B504 = 0xE1A00000; // nop
+		*(u32*)0x0208BCBC = 0xE1A00000; // nop
+		*(u32*)0x0208BCD8 = 0xE1A00000; // nop
+		*(u32*)0x0208BF4C = 0xE1A00000; // nop
+		*(u32*)0x0208C288 = 0xE1A00000; // nop
+		*(u32*)0x0208C2A0 = 0xE1A00000; // nop
+		*(u32*)0x0208C8D8 = 0xE1A00000; // nop
+		*(u32*)0x0208C974 = 0xE1A00000; // nop
+		*(u32*)0x0208CA28 = 0xE1A00000; // nop
+		*(u32*)0x0208CADC = 0xE1A00000; // nop
+		*(u32*)0x0208CB7C = 0xE1A00000; // nop
+		*(u32*)0x0208CBFC = 0xE1A00000; // nop
+		*(u32*)0x0208CC78 = 0xE1A00000; // nop
+		*(u32*)0x0208CCFC = 0xE1A00000; // nop
+		*(u32*)0x0208CD9C = 0xE1A00000; // nop
+		*(u32*)0x0208CE58 = 0xE1A00000; // nop
+		*(u32*)0x0208CF14 = 0xE1A00000; // nop
+		*(u32*)0x0208CFD0 = 0xE1A00000; // nop
+		*(u32*)0x0208D08C = 0xE1A00000; // nop
+		*(u32*)0x0208D148 = 0xE1A00000; // nop
+		*(u32*)0x0208D204 = 0xE1A00000; // nop
+		*(u32*)0x0208D2C0 = 0xE1A00000; // nop
+		*(u32*)0x0208D36C = 0xE1A00000; // nop
+		*(u32*)0x0208D400 = 0xE1A00000; // nop
+		*(u32*)0x0208D494 = 0xE1A00000; // nop
+		*(u32*)0x0208D528 = 0xE1A00000; // nop
+		*(u32*)0x0208D5BC = 0xE1A00000; // nop
+		*(u32*)0x0208D650 = 0xE1A00000; // nop
+		*(u32*)0x0208D6E4 = 0xE1A00000; // nop
+		*(u32*)0x0208D778 = 0xE1A00000; // nop
+		*(u32*)0x0208D89C = 0xE1A00000; // nop
+		*(u32*)0x0208D900 = 0xE1A00000; // nop
+		*(u32*)0x0208D9C8 = 0xE1A00000; // nop
+		*(u32*)0x0208DA38 = 0xE1A00000; // nop
+		*(u32*)0x0208DAC4 = 0xE1A00000; // nop
+		*(u32*)0x0208DB34 = 0xE1A00000; // nop
+		*(u32*)0x0208DBBC = 0xE1A00000; // nop
+		*(u32*)0x0208DC2C = 0xE1A00000; // nop
+		*(u32*)0x0208DD40 = 0xE1A00000; // nop
+		*(u32*)0x0208DE28 = 0xE1A00000; // nop
+		*(u32*)0x0208DE8C = 0xE1A00000; // nop
+		*(u32*)0x0208DF44 = 0xE1A00000; // nop
+		*(u32*)0x0208DFB4 = 0xE1A00000; // nop
+		*(u32*)0x02090994 = 0xE1A00000; // nop
+		*(u32*)0x02092A74 = 0xE1A00000; // nop
+		*(u32*)0x02092A78 = 0xE1A00000; // nop
+		*(u32*)0x02092A84 = 0xE1A00000; // nop
+		*(u32*)0x02092BE4 = 0xE1A00000; // nop
+		*(u32*)0x02092C40 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02092C64 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02092C6C = 0x13A00627; // movne r0, #0x2700000
 	}*/
 
 	// Shantae: Risky's Revenge (USA)
