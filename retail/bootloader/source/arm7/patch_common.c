@@ -29,8 +29,6 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-extern bool expansionPakFound;
-
 u16 patchOffsetCacheFileVersion = 21;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
@@ -38,7 +36,749 @@ patchOffsetCacheContents patchOffsetCache;
 
 bool patchOffsetCacheChanged = false;
 
+void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
+	extern bool expansionPakFound;
+	const char* romTid = getRomTid(ndsHeader);
+
+	// Patch DSi-Exclusives to run in DS mode
+
+	// Nintendo DSi XL Demo Video (USA)
+	// Freezes after opening logos
+	/*if (strcmp(romTid, "DMEE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02008DD8 = 0xE1A00000; // nop
+		*(u32*)0x02008EF4 = 0xE1A00000; // nop
+		*(u32*)0x02008F08 = 0xE1A00000; // nop
+		*(u32*)0x0200BC58 = 0xE1A00000; // nop
+		*(u32*)0x0200D778 = 0xE1A00000; // nop
+		*(u32*)0x0200EFF4 = 0xE1A00000; // nop
+		*(u32*)0x0200EFF8 = 0xE1A00000; // nop
+		*(u32*)0x0200F004 = 0xE1A00000; // nop
+		*(u32*)0x0200F148 = 0xE1A00000; // nop
+		*(u32*)0x020107FC = 0xE1A00000; // nop
+		*(u32*)0x02010800 = 0xE1A00000; // nop
+		*(u32*)0x02010804 = 0xE1A00000; // nop
+		*(u32*)0x02010808 = 0xE1A00000; // nop
+	}*/
+
+	// Picture Perfect Hair Salon (USA)
+	// Hair Salon (Europe/Australia)
+	// Requires main RAM to be larger than 4MB
+	if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02005108 = 0xE1A00000; // nop
+		*(u32*)0x0200517C = 0xE1A00000; // nop
+		*(u32*)0x02005190 = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x0200F2B0 = 0xE1A00000; // nop
+		*(u32*)0x0200F3DC = 0xE1A00000; // nop
+		*(u32*)0x0200F3F0 = 0xE1A00000; // nop
+		*(u32*)0x02012840 = 0xE1A00000; // nop
+		*(u32*)0x02017F34 = 0xE1A00000; // nop
+		*(u32*)0x02019A0C = 0xE1A00000; // nop
+		*(u32*)0x02019A10 = 0xE1A00000; // nop
+		*(u32*)0x02019A1C = 0xE1A00000; // nop
+		*(u32*)0x02019B60 = 0xE1A00000; // nop
+		//if (!extendedMemory2) {
+		//	*(u32*)0x02019BBC = 0xE3A00697; // mov r0, #0x9700000: Use Memory Expansion Pak
+			*(u32*)0x02019BBC = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x27C0000)
+		//}
+		*(u32*)0x02019BE0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019BE8 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Patch DSiWare to run in DS mode
+
+	// GO Series: 10 Second Run (USA)
+	// Does not boot
+	/*else if (strcmp(romTid, "KJUE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201588C = 0xE1A00000; // nop
+		*(u32*)0x0201589C = 0xE1A00000; // nop
+		*(u32*)0x020158A8 = 0xE1A00000; // nop
+		*(u32*)0x020158B4 = 0xE1A00000; // nop
+		*(u32*)0x02015968 = 0xE1A00000; // nop
+		*(u32*)0x02015970 = 0xE1A00000; // nop
+		*(u32*)0x02015980 = 0xE1A00000; // nop
+		*(u32*)0x02015A60 = 0xE1A00000; // nop
+		*(u32*)0x02015A98 = 0xE1A00000; // nop
+		*(u32*)0x02015F74 = 0xE1A00000; // nop
+		*(u32*)0x02018B4C = 0xE1A00000; // nop
+		*(u32*)0x020193A0 = 0xE1A00000; // nop
+		*(u32*)0x020193A4 = 0xE1A00000; // nop
+		*(u32*)0x020193B4 = 0xE1A00000; // nop
+		//*(u32*)0x02019414 = 0xE1A00000; // nop
+		//*(u32*)0x0201942C = 0xE1A00000; // nop
+		*(u32*)0x02030A88 = 0xE1A00000; // nop
+		*(u32*)0x02034224 = 0xE1A00000; // nop
+		*(u32*)0x02037F24 = 0xE1A00000; // nop
+		*(u32*)0x02039CCC = 0xE1A00000; // nop
+		*(u32*)0x02039CD0 = 0xE1A00000; // nop
+		*(u32*)0x02039CDC = 0xE1A00000; // nop
+		*(u32*)0x02039E3C = 0xE1A00000; // nop
+		*(u32*)0x0203B7D4 = 0xE1A00000; // nop
+		*(u32*)0x0203B7E0 = 0xE1A00000; // nop
+		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
+		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
+		*(u32*)0x0203E9C0 = 0xE1A00000; // nop
+	}*/
+
+	// Art Style: AQUIA (USA)
+	// Doesn't seem to work on real hardware?
+	// NOTE: Exiting options will cause an error
+	else if (strcmp(romTid, "KAAE") == 0) {
+		*(u32*)0x02005094 = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050A0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x020051B8 = 0xE1A00000; // nop
+		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020583BC = 0xE1A00000; // nop
+		*(u32*)0x02062C58 = 0xE1A00000; // nop
+		*(u32*)0x02064A48 = 0xE1A00000; // nop
+		*(u32*)0x02064A4C = 0xE1A00000; // nop
+		*(u32*)0x02064A58 = 0xE1A00000; // nop
+		*(u32*)0x02064B9C = 0xE1A00000; // nop
+		*(u32*)0x02064BA0 = 0xE1A00000; // nop
+		*(u32*)0x02064BA4 = 0xE1A00000; // nop
+		*(u32*)0x02064BA8 = 0xE1A00000; // nop
+		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Asphalt 4: Elite Racing (USA)
+	// Does not boot (Black screens)
+	/*else if (strcmp(romTid, "KA4E") == 0) {
+		*(u32*)0x020050E0 = 0xE1A00000; // nop
+		*(u32*)0x02031E08 = 0xE1A00000; // nop
+		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207951C = 0xE1A00000; // nop
+		*(u32*)0x0207952C = 0xE1A00000; // nop
+		*(u32*)0x0207954C = 0xE1A00000; // nop
+		*(u32*)0x02079554 = 0xE1A00000; // nop
+		*(u32*)0x0207955C = 0xE1A00000; // nop
+		*(u32*)0x02079564 = 0xE1A00000; // nop
+		*(u32*)0x02079578 = 0xE1A00000; // nop
+		*(u32*)0x02079580 = 0xE1A00000; // nop
+		*(u32*)0x02079588 = 0xE1A00000; // nop
+		*(u32*)0x02079590 = 0xE1A00000; // nop
+		*(u32*)0x020795B4 = 0xE1A00000; // nop
+		*(u32*)0x0207ACB8 = 0xE1A00000; // nop
+		*(u32*)0x0207B840 = 0xE1A00000; // nop
+		*(u32*)0x0207B868 = 0xE1A00000; // nop
+		*(u32*)0x0208FCC4 = 0xE1A00000; // nop
+		*(u32*)0x0209868C = 0xE1A00000; // nop
+		*(u32*)0x0209A5E4 = 0xE1A00000; // nop
+		*(u32*)0x0209A5E8 = 0xE1A00000; // nop
+		*(u32*)0x0209A5F4 = 0xE1A00000; // nop
+		*(u32*)0x0209A738 = 0xE1A00000; // nop
+	}*/
+
+	// Aura-Aura Climber (USA)
+	else if (strcmp(romTid, "KSRE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x020104A0 = 0xE1A00000; // nop
+		*(u32*)0x02010508 = 0xE1A00000; // nop
+		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F500 = 0xE1A00000; // nop
+		*(u32*)0x02042F10 = 0xE1A00000; // nop
+		*(u32*)0x02049420 = 0xE1A00000; // nop
+		*(u32*)0x0204B27C = 0xE1A00000; // nop
+		*(u32*)0x0204B280 = 0xE1A00000; // nop
+		*(u32*)0x0204B28C = 0xE1A00000; // nop
+		*(u32*)0x0204B3EC = 0xE1A00000; // nop
+		/*if (extendedMemory2) {
+			*(u32*)0x0204B448 = 0xE3A0079F; // mov r0, #0x27C0000
+		} else {
+			*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
+		}*/
+		*(u32*)0x0204B448 = 0xE59F0094; // ldr r0,=0x02??0000
+		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0204B488 = 0xE3A01000; // mov r1, #0
+		if (extendedMemory2) {
+			*(u32*)0x0204B4E4 = 0x02700000;
+		} else {
+			//*(u32*)0x0204B4E4 = 0x023E0000;
+			*(u32*)0x0204B4E4 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+		}
+	}
+
+	// Aura-Aura Climber (Europe, Australia)
+	else if (strcmp(romTid, "KSRV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x0201066C = 0xE1A00000; // nop
+		*(u32*)0x020106D4 = 0xE1A00000; // nop
+		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F580 = 0xE1A00000; // nop
+		*(u32*)0x02042F90 = 0xE1A00000; // nop
+		*(u32*)0x020494A0 = 0xE1A00000; // nop
+		*(u32*)0x0204B2FC = 0xE1A00000; // nop
+		*(u32*)0x0204B300 = 0xE1A00000; // nop
+		*(u32*)0x0204B30C = 0xE1A00000; // nop
+		*(u32*)0x0204B46C = 0xE1A00000; // nop
+		/*if (extendedMemory2) {
+			*(u32*)0x0204B4C8 = 0xE3A0079F; // mov r0, #0x27C0000
+		} else {
+			*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
+		}*/
+		*(u32*)0x0204B4C8 = 0xE59F0094; // ldr r0,=0x02??0000
+		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0204B508 = 0xE3A01000; // mov r1, #0
+		if (extendedMemory2) {
+			*(u32*)0x0204B564 = 0x02700000;
+		} else {
+			//*(u32*)0x0204B564 = 0x023E0000;
+			*(u32*)0x0204B564 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+		}
+	}
+
+	// Big Bass Arcade (USA)
+	// Locks up on the first shown logos
+	/*else if (strcmp(romTid, "K9GE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005120 = 0xE1A00000; // nop
+		*(u32*)0x0200D83C = 0xE1A00000; // nop
+		*(u32*)0x02010DDC = 0xE1A00000; // nop
+		*(u32*)0x020168C0 = 0xE1A00000; // nop
+		*(u32*)0x020186E8 = 0xE1A00000; // nop
+		*(u32*)0x020186EC = 0xE1A00000; // nop
+		*(u32*)0x020186F8 = 0xE1A00000; // nop
+		*(u32*)0x02018858 = 0xE1A00000; // nop
+		*(u32*)0x0203AF58 = 0xE12FFF1E; // bx lr
+	}*/
+
+	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
+	// Requires main RAM to be larger than 4MB
+	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0206B93C = 0xE1A00000; // nop
+		*(u32*)0x0206F438 = 0xE1A00000; // nop
+		*(u32*)0x02075718 = 0xE1A00000; // nop
+		*(u32*)0x02077620 = 0xE1A00000; // nop
+		*(u32*)0x02077624 = 0xE1A00000; // nop
+		*(u32*)0x02077630 = 0xE1A00000; // nop
+		*(u32*)0x02077790 = 0xE1A00000; // nop
+		//*(u32*)0x020777EC = 0xE3A0078F; // mov r0, #0x23C0000
+		//*(u32*)0x02077810 = 0xE3500001; // cmp r0, #1
+		//*(u32*)0x02077818 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Dark Void Zero (USA)
+	// Improper/broken patch
+	/*else if (strcmp(romTid, "KDVE") == 0) {
+		*(u32*)0x0204CC24 = 0xE1A00000; // nop
+		*(u32*)0x0204EF18 = 0xE1A00000; // nop
+		*(u32*)0x0204EF1C = 0xE1A00000; // nop
+		*(u32*)0x0204EF28 = 0xE1A00000; // nop
+		*(u32*)0x0204F06C = 0xE1A00000; // nop
+		*(u32*)0x02059C44 = 0xE1A00000; // nop
+		*(u16*)0x0208100C = 0x4770; // bx lr
+		*(u16*)0x020851A2 = 0x46C0; // nop
+		*(u16*)0x020851A4 = 0x46C0; // nop
+		*(u16*)0x020851A6 = 0x46C0; // nop
+		*(u16*)0x02086D04 = 0x4770; // bx lr
+	}*/
+
+	// Dairojo! Samurai Defenders (USA)
+	else if (strcmp(romTid, "KF3E") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
+		*(u32*)0x02011580 = 0xE1A00000; // nop
+		*(u32*)0x0201BCD4 = 0xE1A00000; // nop
+		*(u32*)0x0201DB50 = 0xE1A00000; // nop
+		*(u32*)0x0201DB54 = 0xE1A00000; // nop
+		*(u32*)0x0201DB60 = 0xE1A00000; // nop
+		*(u32*)0x0201DCC0 = 0xE1A00000; // nop
+		*(u32*)0x0201DD1C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201DD40 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201DD48 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201EFDC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EFE8 = 0xE12FFF1E; // bx lr
+	}
+
+	// GO Series: Defense Wars (USA)
+	else if (strcmp(romTid, "KWTE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200722C = 0xE1A00000; // nop
+		*(u32*)0x0200B350 = 0xE1A00000; // nop
+		*(u32*)0x02049F68 = 0xE1A00000; // nop
+		*(u32*)0x0204DC94 = 0xE1A00000; // nop
+		*(u32*)0x020537F4 = 0xE1A00000; // nop
+		*(u32*)0x020555D4 = 0xE1A00000; // nop
+		*(u32*)0x020555D8 = 0xE1A00000; // nop
+		*(u32*)0x020555E4 = 0xE1A00000; // nop
+		*(u32*)0x02055744 = 0xE1A00000; // nop
+		*(u32*)0x020557A0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020557C4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020557CC = 0x13A00627; // movne r0, #0x2700000
+
+		// Manual screen
+		/* *(u32*)0x0200CB0C = 0xE1A00000; // nop
+		*(u32*)0x0200CB10 = 0xE1A00000; // nop
+		*(u32*)0x0200CB34 = 0xE1A00000; // nop
+		*(u32*)0x0200CB50 = 0xE1A00000; // nop
+		*(u32*)0x0200CB80 = 0xE1A00000; // nop */
+
+		// Skip
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200CC98;
+			offset[i] = 0xE1A00000; // nop
+		}
+
+		/*for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x0203B3A0;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0203CAD4 = 0xEB006798; // bl 0x205693C
+		for (int i = 0; i < 6; i++) {
+			u32* offset = (u32*)0x0203CD60;
+			offset[i] = 0xE1A00000; // nop
+		}*/
+	}
+
+	// Dragon's Lair (USA)
+	// Doesn't seem to work on real hardware?
+	else if (strcmp(romTid, "KDLE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x02012064 = 0xE1A00000; // nop
+		*(u32*)0x02012068 = 0xE1A00000; // nop
+		*(u32*)0x020132D0 = 0xE1A00000; // nop
+		*(u32*)0x0201360C = 0xE1A00000; // nop
+		*(u32*)0x02013A54 = 0xE1A00000; // nop
+		*(u32*)0x02014DB8 = 0xE1A00000; // nop
+		*(u32*)0x02016144 = 0xE1A00000; // nop
+		for (int i = 0; i < 9; i++) {
+			u32* offset = (u32*)0x0202EF50;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0202F224 = 0xE1A00000; // nop
+		*(u32*)0x0202FACC = 0xE1A00000; // nop
+		*(u32*)0x0202FC00 = 0xE1A00000; // nop
+		*(u32*)0x0202FC14 = 0xE1A00000; // nop
+		*(u32*)0x02033044 = 0xE1A00000; // nop
+		*(u32*)0x02036A4C = 0xE1A00000; // nop
+		*(u32*)0x02038868 = 0xE1A00000; // nop
+		*(u32*)0x0203886C = 0xE1A00000; // nop
+		*(u32*)0x02038878 = 0xE1A00000; // nop
+		*(u32*)0x020389BC = 0xE1A00000; // nop
+		*(u32*)0x02038A18 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203A53C = 0xE1A00000; // nop
+		*(u32*)0x0203A540 = 0xE1A00000; // nop
+		*(u32*)0x0203A544 = 0xE1A00000; // nop
+		*(u32*)0x0203A548 = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x020257F8;
+			offset[i] = 0xE1A00000; // nop
+		}
+	//	*(u32*)0x02070558 = 0xE1A00000; // nop
+	}
+
+	// Famicom Wars DS: Ushinawareta Hikari (Japan)
+	// 4MB of RAM causes crash in the main menu
+	else if (strcmp(romTid, "Z2EJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02015BC4 = 0xE1A00000; // nop
+		*(u32*)0x020197B8 = 0xE1A00000; // nop
+		*(u32*)0x0201F670 = 0xE1A00000; // nop
+		*(u32*)0x020216B8 = 0xE1A00000; // nop
+		*(u32*)0x020216BC = 0xE1A00000; // nop
+		*(u32*)0x020216C8 = 0xE1A00000; // nop
+		*(u32*)0x02021828 = 0xE1A00000; // nop
+		//*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
+	}
+
+	// Game & Watch: Ball (USA, Europe)
+	// Softlocks after a miss or exiting gameplay
+	else if (strcmp(romTid, "KGBO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201007C = 0xE1A00000; // nop
+		*(u32*)0x020138C0 = 0xE1A00000; // nop
+		*(u32*)0x020177FC = 0xE1A00000; // nop
+		*(u32*)0x020196AC = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE1A00000; // nop
+		*(u32*)0x020196BC = 0xE1A00000; // nop
+		*(u32*)0x02019800 = 0xE1A00000; // nop
+		*(u32*)0x0201985C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019880 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019888 = 0x13A00627; // movne r0, #0x2700000
+		/* *(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02034594 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020348B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02034D34 = 0xE12FFF1E; // bx lr */
+		*(u32*)0x02035078 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Ball (Japan)
+	// Softlocks after a miss or exiting gameplay
+	else if (strcmp(romTid, "KGBJ") == 0) {
+		*(u32*)0x02010024 = 0xE1A00000; // nop
+		*(u32*)0x02013804 = 0xE1A00000; // nop
+		*(u32*)0x0201765C = 0xE1A00000; // nop
+		*(u32*)0x02019500 = 0xE1A00000; // nop
+		*(u32*)0x02019504 = 0xE1A00000; // nop
+		*(u32*)0x02019510 = 0xE1A00000; // nop
+		*(u32*)0x02019654 = 0xE1A00000; // nop
+		*(u32*)0x020196B0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020196D4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020196DC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02034BC8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Chef (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGCO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02011B84 = 0xE1A00000; // nop
+		*(u32*)0x020153C8 = 0xE1A00000; // nop
+		*(u32*)0x020194F4 = 0xE1A00000; // nop
+		*(u32*)0x0201B3A4 = 0xE1A00000; // nop
+		*(u32*)0x0201B3A8 = 0xE1A00000; // nop
+		*(u32*)0x0201B3B4 = 0xE1A00000; // nop
+		*(u32*)0x0201B4F8 = 0xE1A00000; // nop
+		*(u32*)0x0201B554 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201B578 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201B580 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202F0FC = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Chef (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGCJ") == 0) {
+		*(u32*)0x02011B2C = 0xE1A00000; // nop
+		*(u32*)0x0201530C = 0xE1A00000; // nop
+		*(u32*)0x02019354 = 0xE1A00000; // nop
+		*(u32*)0x0201B1F8 = 0xE1A00000; // nop
+		*(u32*)0x0201B1FC = 0xE1A00000; // nop
+		*(u32*)0x0201B208 = 0xE1A00000; // nop
+		*(u32*)0x0201B34C = 0xE1A00000; // nop
+		*(u32*)0x0201B3A8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201B3CC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201B3D4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202EE9C = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Donkey Kong Jr. (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGDO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201007C = 0xE1A00000; // nop
+		*(u32*)0x020138C0 = 0xE1A00000; // nop
+		*(u32*)0x02017A78 = 0xE1A00000; // nop
+		*(u32*)0x02019928 = 0xE1A00000; // nop
+		*(u32*)0x0201992C = 0xE1A00000; // nop
+		*(u32*)0x02019938 = 0xE1A00000; // nop
+		*(u32*)0x02019A7C = 0xE1A00000; // nop
+		*(u32*)0x02019AD8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019AFC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019B04 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202D860 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Donkey Kong Jr. (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGDJ") == 0) {
+		*(u32*)0x02010024 = 0xE1A00000; // nop
+		*(u32*)0x02013804 = 0xE1A00000; // nop
+		*(u32*)0x020178D8 = 0xE1A00000; // nop
+		*(u32*)0x0201977C = 0xE1A00000; // nop
+		*(u32*)0x02019780 = 0xE1A00000; // nop
+		*(u32*)0x0201978C = 0xE1A00000; // nop
+		*(u32*)0x020198D0 = 0xE1A00000; // nop
+		*(u32*)0x0201992C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019950 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019958 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202D600 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Flagman (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGGO") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020104C8 = 0xE1A00000; // nop
+		*(u32*)0x02013D0C = 0xE1A00000; // nop
+		*(u32*)0x02017C48 = 0xE1A00000; // nop
+		*(u32*)0x02019AF8 = 0xE1A00000; // nop
+		*(u32*)0x02019AFC = 0xE1A00000; // nop
+		*(u32*)0x02019B08 = 0xE1A00000; // nop
+		*(u32*)0x02019C4C = 0xE1A00000; // nop
+		*(u32*)0x02019CA8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019CCC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019CD4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202D520 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Flagman (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGGJ") == 0) {
+		*(u32*)0x02010470 = 0xE1A00000; // nop
+		*(u32*)0x02013C50 = 0xE1A00000; // nop
+		*(u32*)0x02017AA8 = 0xE1A00000; // nop
+		*(u32*)0x0201994C = 0xE1A00000; // nop
+		*(u32*)0x02019950 = 0xE1A00000; // nop
+		*(u32*)0x0201995C = 0xE1A00000; // nop
+		*(u32*)0x02019AA0 = 0xE1A00000; // nop
+		*(u32*)0x02019AFC = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019B20 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02019B28 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202D2C0 = 0xE12FFF1E; // bx lr
+	}
+
+	// Glory Days: Tactical Defense (USA)
+	else if (strcmp(romTid, "KGKE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x0200B488 = 0xE1A00000; // nop
+		*(u32*)0x02017128 = 0xE1A00000; // nop
+		*(u32*)0x02018F94 = 0xE1A00000; // nop
+		*(u32*)0x02018F98 = 0xE1A00000; // nop
+		*(u32*)0x02018FA4 = 0xE1A00000; // nop
+		*(u32*)0x02019104 = 0xE1A00000; // nop
+		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
+		for (int i = 0; i < 12; i++) {
+			u32* offset = (u32*)0x0206710C;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x020671B4 = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x02075514;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Glory Days: Tactical Defense (Europe)
+	else if (strcmp(romTid, "KGKP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x0200B488 = 0xE1A00000; // nop
+		*(u32*)0x02017128 = 0xE1A00000; // nop
+		*(u32*)0x02018F94 = 0xE1A00000; // nop
+		*(u32*)0x02018F98 = 0xE1A00000; // nop
+		*(u32*)0x02018FA4 = 0xE1A00000; // nop
+		*(u32*)0x02019104 = 0xE1A00000; // nop
+		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
+		for (int i = 0; i < 12; i++) {
+			u32* offset = (u32*)0x02067264;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0206730C = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x0207566C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
+	// Does not boot (Lack of memory?)
+	/*else if (strcmp(romTid, "KQ9E") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x020050F8 = 0xE1A00000; // nop
+		*(u32*)0x020051CC = 0xE1A00000; // nop
+		*(u32*)0x02012AAC = 0xE1A00000; // nop
+		*(u32*)0x020166D4 = 0xE1A00000; // nop
+		*(u32*)0x020185C8 = 0xE1A00000; // nop
+		*(u32*)0x020185CC = 0xE1A00000; // nop
+		*(u32*)0x020185D8 = 0xE1A00000; // nop
+		*(u32*)0x02018738 = 0xE1A00000; // nop
+		*(u32*)0x02018738 = 0xE1A00000; // nop
+		*(u32*)0x0205663C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056738 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02082A3C = 0xE1A00000; // nop
+		*(u32*)0x02082A58 = 0xE1A00000; // nop
+		*(u32*)0x020A467C = 0xE1A00000; // nop
+	}*/
+
+	// Mario vs. Donkey Kong: Minis March Again! (USA)
+	// Does not boot
+	/*else if (strcmp(romTid, "KDME") == 0) {
+		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
+		*(u32*)0x0202E788 = 0xE1A00000; // nop
+		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02064F80 = 0xE1A00000; // nop
+		*(u32*)0x0206C780 = 0xE1A00000; // nop
+		*(u32*)0x0206F7AC = 0xE1A00000; // nop
+		*(u32*)0x0206F7B0 = 0xE1A00000; // nop
+		*(u32*)0x0206F7BC = 0xE1A00000; // nop
+		*(u32*)0x0206F900 = 0xE1A00000; // nop
+		*(u32*)0x0206F904 = 0xE1A00000; // nop
+		*(u32*)0x0206F908 = 0xE1A00000; // nop
+		*(u32*)0x0206F90C = 0xE1A00000; // nop
+	}*/
+
+	// Nintendo DSi + Internet (Japan)
+	// Nintendo DSi + Internet (USA)
+	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x0200599C = 0xE1A00000; // nop
+		*(u32*)0x020059A8 = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C4 = 0xE1A00000; // nop
+		*(u32*)0x0200AB2C = 0xE1A00000; // nop
+		*(u32*)0x0200DB70 = 0xE1A00000; // nop
+		*(u32*)0x0200FED4 = 0xE1A00000; // nop
+		*(u32*)0x02011B0C = 0xE1A00000; // nop
+		*(u32*)0x02011BA4 = 0xE1A00000; // nop
+		*(u32*)0x02011BA8 = 0xE1A00000; // nop
+		*(u32*)0x02011BB4 = 0xE1A00000; // nop
+		*(u32*)0x02011CF8 = 0xE1A00000; // nop
+		*(u32*)0x02011D54 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02011D78 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02011D80 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Nintendo DSi + Internet (Europe)
+	else if (strcmp(romTid, "K2DP") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x020059AC = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C8 = 0xE1A00000; // nop
+		*(u32*)0x020059D4 = 0xE1A00000; // nop
+		*(u32*)0x0200ADE0 = 0xE1A00000; // nop
+		*(u32*)0x0200DE24 = 0xE1A00000; // nop
+		*(u32*)0x02010188 = 0xE1A00000; // nop
+		*(u32*)0x02011DB0 = 0xE1A00000; // nop
+		*(u32*)0x02011E48 = 0xE1A00000; // nop
+		*(u32*)0x02011E4C = 0xE1A00000; // nop
+		*(u32*)0x02011E58 = 0xE1A00000; // nop
+		*(u32*)0x02011F9C = 0xE1A00000; // nop
+		*(u32*)0x02011FF8 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201201C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02012024 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Nintendo DSi + Internet (Australia)
+	else if (strcmp(romTid, "K2DU") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x020059AC = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C8 = 0xE1A00000; // nop
+		*(u32*)0x020059D4 = 0xE1A00000; // nop
+		*(u32*)0x0200AB70 = 0xE1A00000; // nop
+		*(u32*)0x0200DBB4 = 0xE1A00000; // nop
+		*(u32*)0x0200FF18 = 0xE1A00000; // nop
+		*(u32*)0x02011B40 = 0xE1A00000; // nop
+		*(u32*)0x02011BD8 = 0xE1A00000; // nop
+		*(u32*)0x02011BDC = 0xE1A00000; // nop
+		*(u32*)0x02011BE8 = 0xE1A00000; // nop
+		*(u32*)0x02011D2C = 0xE1A00000; // nop
+		*(u32*)0x02011D88 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02011DAC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02011DB4 = 0x13A00627; // movne r0, #0x2700000
+	}
+
+	// Nintendoji (Japan)
+	// Does not boot
+	/*else if (strcmp(romTid, "K9KJ") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005538 = 0xE1A00000; // nop
+		*(u32*)0x0200554C = 0xE1A00000; // nop
+		*(u32*)0x02018C08 = 0xE1A00000; // nop
+		*(u32*)0x0201A9F8 = 0xE1A00000; // nop
+		*(u32*)0x0201A9FC = 0xE1A00000; // nop
+		*(u32*)0x0201AA08 = 0xE1A00000; // nop
+		*(u32*)0x0201AB68 = 0xE1A00000; // nop
+		*(u32*)0x0201ABC4 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
+	}*/
+
+	// Shantae: Risky's Revenge (USA)
+	// Crashes after selecting a file due to memory limitations
+	/*else if (strcmp(romTid, "KS3E") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02092050 = 0xE1A00000; // nop
+		*(u32*)0x02092078 = 0xE1A00000; // nop
+		*(u32*)0x02092BA8 = 0xE1A00000; // nop
+		*(u32*)0x02092E08 = 0xE1A00000; // nop
+		*(u32*)0x02092E14 = 0xE1A00000; // nop
+		*(u32*)0x02092E20 = 0xE1A00000; // nop
+		*(u32*)0x020DDB84 = 0xE1A00000; // nop
+		*(u32*)0x020DE420 = 0xE1A00000; // nop
+		*(u32*)0x020DE548 = 0xE1A00000; // nop
+		*(u32*)0x020DE55C = 0xE1A00000; // nop
+		*(u32*)0x020E20C4 = 0xE1A00000; // nop
+		*(u32*)0x020E616C = 0xE1A00000; // nop
+		*(u32*)0x020E7F64 = 0xE1A00000; // nop
+		*(u32*)0x020E7F68 = 0xE1A00000; // nop
+		*(u32*)0x020E7F74 = 0xE1A00000; // nop
+		*(u32*)0x020E80D4 = 0xE1A00000; // nop
+		*(u32*)0x020E8130 = 0xE3A0079F; // mov r0, #0x27C0000
+		*(u32*)0x020E8154 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020E815C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020E977C = 0xE1A00000; // nop
+		*(u32*)0x020E9780 = 0xE1A00000; // nop
+		*(u32*)0x020E9784 = 0xE1A00000; // nop
+		*(u32*)0x020E9788 = 0xE1A00000; // nop
+		*(u32*)0x020E9794 = 0xE1A00000; // nop (Activates a message when memory runs out)
+	}*/
+
+	// Space Ace (USA)
+	// Doesn't seem to work on real hardware?
+	else if (strcmp(romTid, "KA6E") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x02005DD0 = 0xE1A00000; // nop
+		*(u32*)0x02016458 = 0xE1A00000; // nop
+		*(u32*)0x0201645C = 0xE1A00000; // nop
+		for (int i = 0; i < 21; i++) {
+			u32* offset = (u32*)0x02032BC4;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x02032ECC = 0xE1A00000; // nop
+		*(u32*)0x02033768 = 0xE1A00000; // nop
+		*(u32*)0x02033890 = 0xE1A00000; // nop
+		*(u32*)0x020338A4 = 0xE1A00000; // nop
+		*(u32*)0x02036B88 = 0xE1A00000; // nop
+		*(u32*)0x0203A348 = 0xE1A00000; // nop
+		*(u32*)0x0203C108 = 0xE1A00000; // nop
+		*(u32*)0x0203C10C = 0xE1A00000; // nop
+		*(u32*)0x0203C118 = 0xE1A00000; // nop
+		*(u32*)0x0203C278 = 0xE1A00000; // nop
+		*(u32*)0x0203C2D4 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203DDC8 = 0xE1A00000; // nop
+		*(u32*)0x0203DDCC = 0xE1A00000; // nop
+		*(u32*)0x0203DDD0 = 0xE1A00000; // nop
+		*(u32*)0x0203DDD4 = 0xE1A00000; // nop
+		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
+		for (int i = 0; i < 10; i++) {
+			u32* offset = (u32*)0x02029578;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+}
+
 void patchBinary(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode == 3) {
+		patchDSiModeToDSMode(ndsHeader);
+		return;
+	}
+
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Trauma Center: Under the Knife (USA)
@@ -382,602 +1122,6 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
-
-	// Patch DSi-Exclusives to run in DS mode
-
-	// Nintendo DSi XL Demo Video (USA)
-	// Freezes after opening logos
-	/*else if (strcmp(romTid, "DMEE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x02008DD8 = 0xE1A00000; // nop
-		*(u32*)0x02008EF4 = 0xE1A00000; // nop
-		*(u32*)0x02008F08 = 0xE1A00000; // nop
-		*(u32*)0x0200BC58 = 0xE1A00000; // nop
-		*(u32*)0x0200D778 = 0xE1A00000; // nop
-		*(u32*)0x0200EFF4 = 0xE1A00000; // nop
-		*(u32*)0x0200EFF8 = 0xE1A00000; // nop
-		*(u32*)0x0200F004 = 0xE1A00000; // nop
-		*(u32*)0x0200F148 = 0xE1A00000; // nop
-		*(u32*)0x020107FC = 0xE1A00000; // nop
-		*(u32*)0x02010800 = 0xE1A00000; // nop
-		*(u32*)0x02010804 = 0xE1A00000; // nop
-		*(u32*)0x02010808 = 0xE1A00000; // nop
-	}*/
-
-	// Picture Perfect Hair Salon (USA)
-	// Hair Salon (Europe/Australia)
-	// Requires main RAM to be larger than 4MB
-	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x02005108 = 0xE1A00000; // nop
-		*(u32*)0x0200517C = 0xE1A00000; // nop
-		*(u32*)0x02005190 = 0xE1A00000; // nop
-		*(u32*)0x020051A0 = 0xE1A00000; // nop
-		*(u32*)0x0200F2B0 = 0xE1A00000; // nop
-		*(u32*)0x0200F3DC = 0xE1A00000; // nop
-		*(u32*)0x0200F3F0 = 0xE1A00000; // nop
-		*(u32*)0x02012840 = 0xE1A00000; // nop
-		*(u32*)0x02017F34 = 0xE1A00000; // nop
-		*(u32*)0x02019A0C = 0xE1A00000; // nop
-		*(u32*)0x02019A10 = 0xE1A00000; // nop
-		*(u32*)0x02019A1C = 0xE1A00000; // nop
-		*(u32*)0x02019B60 = 0xE1A00000; // nop
-		//if (!extendedMemory2) {
-		//	*(u32*)0x02019BBC = 0xE3A00697; // mov r0, #0x9700000: Use Memory Expansion Pak
-			*(u32*)0x02019BBC = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x27C0000)
-		//}
-		*(u32*)0x02019BE0 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02019BE8 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Patch DSiWare to run in DS mode
-
-	// GO Series: 10 Second Run (USA)
-	// Does not boot
-	/*else if (strcmp(romTid, "KJUE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0201588C = 0xE1A00000; // nop
-		*(u32*)0x0201589C = 0xE1A00000; // nop
-		*(u32*)0x020158A8 = 0xE1A00000; // nop
-		*(u32*)0x020158B4 = 0xE1A00000; // nop
-		*(u32*)0x02015968 = 0xE1A00000; // nop
-		*(u32*)0x02015970 = 0xE1A00000; // nop
-		*(u32*)0x02015980 = 0xE1A00000; // nop
-		*(u32*)0x02015A60 = 0xE1A00000; // nop
-		*(u32*)0x02015A98 = 0xE1A00000; // nop
-		*(u32*)0x02015F74 = 0xE1A00000; // nop
-		*(u32*)0x02018B4C = 0xE1A00000; // nop
-		*(u32*)0x020193A0 = 0xE1A00000; // nop
-		*(u32*)0x020193A4 = 0xE1A00000; // nop
-		*(u32*)0x020193B4 = 0xE1A00000; // nop
-		//*(u32*)0x02019414 = 0xE1A00000; // nop
-		//*(u32*)0x0201942C = 0xE1A00000; // nop
-		*(u32*)0x02030A88 = 0xE1A00000; // nop
-		*(u32*)0x02034224 = 0xE1A00000; // nop
-		*(u32*)0x02037F24 = 0xE1A00000; // nop
-		*(u32*)0x02039CCC = 0xE1A00000; // nop
-		*(u32*)0x02039CD0 = 0xE1A00000; // nop
-		*(u32*)0x02039CDC = 0xE1A00000; // nop
-		*(u32*)0x02039E3C = 0xE1A00000; // nop
-		*(u32*)0x0203B7D4 = 0xE1A00000; // nop
-		*(u32*)0x0203B7E0 = 0xE1A00000; // nop
-		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
-		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
-		*(u32*)0x0203E9C0 = 0xE1A00000; // nop
-	}*/
-
-	// Art Style: AQUIA (USA)
-	// Doesn't seem to work on real hardware?
-	// NOTE: Exiting options will cause an error
-	else if (strcmp(romTid, "KAAE") == 0) {
-		*(u32*)0x02005094 = 0xE1A00000; // nop
-		*(u32*)0x02005098 = 0xE1A00000; // nop
-		*(u32*)0x020050A0 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
-		*(u32*)0x020050C4 = 0xE1A00000; // nop
-		*(u32*)0x020051B8 = 0xE1A00000; // nop
-		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
-		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
-		*(u32*)0x020583BC = 0xE1A00000; // nop
-		*(u32*)0x02062C58 = 0xE1A00000; // nop
-		*(u32*)0x02064A48 = 0xE1A00000; // nop
-		*(u32*)0x02064A4C = 0xE1A00000; // nop
-		*(u32*)0x02064A58 = 0xE1A00000; // nop
-		*(u32*)0x02064B9C = 0xE1A00000; // nop
-		*(u32*)0x02064BA0 = 0xE1A00000; // nop
-		*(u32*)0x02064BA4 = 0xE1A00000; // nop
-		*(u32*)0x02064BA8 = 0xE1A00000; // nop
-		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Asphalt 4: Elite Racing (USA)
-	// Does not boot (Black screens)
-	/*else if (strcmp(romTid, "KA4E") == 0) {
-		*(u32*)0x020050E0 = 0xE1A00000; // nop
-		*(u32*)0x02031E08 = 0xE1A00000; // nop
-		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207951C = 0xE1A00000; // nop
-		*(u32*)0x0207952C = 0xE1A00000; // nop
-		*(u32*)0x0207954C = 0xE1A00000; // nop
-		*(u32*)0x02079554 = 0xE1A00000; // nop
-		*(u32*)0x0207955C = 0xE1A00000; // nop
-		*(u32*)0x02079564 = 0xE1A00000; // nop
-		*(u32*)0x02079578 = 0xE1A00000; // nop
-		*(u32*)0x02079580 = 0xE1A00000; // nop
-		*(u32*)0x02079588 = 0xE1A00000; // nop
-		*(u32*)0x02079590 = 0xE1A00000; // nop
-		*(u32*)0x020795B4 = 0xE1A00000; // nop
-		*(u32*)0x0207ACB8 = 0xE1A00000; // nop
-		*(u32*)0x0207B840 = 0xE1A00000; // nop
-		*(u32*)0x0207B868 = 0xE1A00000; // nop
-		*(u32*)0x0208FCC4 = 0xE1A00000; // nop
-		*(u32*)0x0209868C = 0xE1A00000; // nop
-		*(u32*)0x0209A5E4 = 0xE1A00000; // nop
-		*(u32*)0x0209A5E8 = 0xE1A00000; // nop
-		*(u32*)0x0209A5F4 = 0xE1A00000; // nop
-		*(u32*)0x0209A738 = 0xE1A00000; // nop
-	}*/
-
-	// Aura-Aura Climber (USA)
-	else if (strcmp(romTid, "KSRE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0200515C = 0xE1A00000; // nop
-		*(u32*)0x02005164 = 0xE1A00000; // nop
-		*(u32*)0x020104A0 = 0xE1A00000; // nop
-		*(u32*)0x02010508 = 0xE1A00000; // nop
-		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203F500 = 0xE1A00000; // nop
-		*(u32*)0x02042F10 = 0xE1A00000; // nop
-		*(u32*)0x02049420 = 0xE1A00000; // nop
-		*(u32*)0x0204B27C = 0xE1A00000; // nop
-		*(u32*)0x0204B280 = 0xE1A00000; // nop
-		*(u32*)0x0204B28C = 0xE1A00000; // nop
-		*(u32*)0x0204B3EC = 0xE1A00000; // nop
-		/*if (extendedMemory2) {
-			*(u32*)0x0204B448 = 0xE3A0079F; // mov r0, #0x27C0000
-		} else {
-			*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
-		}*/
-		*(u32*)0x0204B448 = 0xE59F0094; // ldr r0,=0x02??0000
-		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0204B488 = 0xE3A01000; // mov r1, #0
-		if (extendedMemory2) {
-			*(u32*)0x0204B4E4 = 0x02700000;
-		} else {
-			//*(u32*)0x0204B4E4 = 0x023E0000;
-			*(u32*)0x0204B4E4 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
-		}
-	}
-
-	// Aura-Aura Climber (Europe, Australia)
-	else if (strcmp(romTid, "KSRV") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0200515C = 0xE1A00000; // nop
-		*(u32*)0x02005164 = 0xE1A00000; // nop
-		*(u32*)0x0201066C = 0xE1A00000; // nop
-		*(u32*)0x020106D4 = 0xE1A00000; // nop
-		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203F580 = 0xE1A00000; // nop
-		*(u32*)0x02042F90 = 0xE1A00000; // nop
-		*(u32*)0x020494A0 = 0xE1A00000; // nop
-		*(u32*)0x0204B2FC = 0xE1A00000; // nop
-		*(u32*)0x0204B300 = 0xE1A00000; // nop
-		*(u32*)0x0204B30C = 0xE1A00000; // nop
-		*(u32*)0x0204B46C = 0xE1A00000; // nop
-		/*if (extendedMemory2) {
-			*(u32*)0x0204B4C8 = 0xE3A0079F; // mov r0, #0x27C0000
-		} else {
-			*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
-		}*/
-		*(u32*)0x0204B4C8 = 0xE59F0094; // ldr r0,=0x02??0000
-		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0204B508 = 0xE3A01000; // mov r1, #0
-		if (extendedMemory2) {
-			*(u32*)0x0204B564 = 0x02700000;
-		} else {
-			//*(u32*)0x0204B564 = 0x023E0000;
-			*(u32*)0x0204B564 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
-		}
-	}
-
-	// Big Bass Arcade (USA)
-	// Locks up on the first shown logos
-	/*else if (strcmp(romTid, "K9GE") == 0) {
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x02005120 = 0xE1A00000; // nop
-		*(u32*)0x0200D83C = 0xE1A00000; // nop
-		*(u32*)0x02010DDC = 0xE1A00000; // nop
-		*(u32*)0x020168C0 = 0xE1A00000; // nop
-		*(u32*)0x020186E8 = 0xE1A00000; // nop
-		*(u32*)0x020186EC = 0xE1A00000; // nop
-		*(u32*)0x020186F8 = 0xE1A00000; // nop
-		*(u32*)0x02018858 = 0xE1A00000; // nop
-		*(u32*)0x0203AF58 = 0xE12FFF1E; // bx lr
-	}*/
-
-	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
-	// Requires main RAM to be larger than 4MB
-	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0206B93C = 0xE1A00000; // nop
-		*(u32*)0x0206F438 = 0xE1A00000; // nop
-		*(u32*)0x02075718 = 0xE1A00000; // nop
-		*(u32*)0x02077620 = 0xE1A00000; // nop
-		*(u32*)0x02077624 = 0xE1A00000; // nop
-		*(u32*)0x02077630 = 0xE1A00000; // nop
-		*(u32*)0x02077790 = 0xE1A00000; // nop
-		//*(u32*)0x020777EC = 0xE3A0078F; // mov r0, #0x23C0000
-		//*(u32*)0x02077810 = 0xE3500001; // cmp r0, #1
-		//*(u32*)0x02077818 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Dark Void Zero (USA)
-	// Improper/broken patch
-	/*else if (strcmp(romTid, "KDVE") == 0) {
-		*(u32*)0x0204CC24 = 0xE1A00000; // nop
-		*(u32*)0x0204EF18 = 0xE1A00000; // nop
-		*(u32*)0x0204EF1C = 0xE1A00000; // nop
-		*(u32*)0x0204EF28 = 0xE1A00000; // nop
-		*(u32*)0x0204F06C = 0xE1A00000; // nop
-		*(u32*)0x02059C44 = 0xE1A00000; // nop
-		*(u16*)0x0208100C = 0x4770; // bx lr
-		*(u16*)0x020851A2 = 0x46C0; // nop
-		*(u16*)0x020851A4 = 0x46C0; // nop
-		*(u16*)0x020851A6 = 0x46C0; // nop
-		*(u16*)0x02086D04 = 0x4770; // bx lr
-	}*/
-
-	// Dairojo! Samurai Defenders (USA)
-	else if (strcmp(romTid, "KF3E") == 0) {
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
-		*(u32*)0x02011580 = 0xE1A00000; // nop
-		*(u32*)0x0201BCD4 = 0xE1A00000; // nop
-		*(u32*)0x0201DB50 = 0xE1A00000; // nop
-		*(u32*)0x0201DB54 = 0xE1A00000; // nop
-		*(u32*)0x0201DB60 = 0xE1A00000; // nop
-		*(u32*)0x0201DCC0 = 0xE1A00000; // nop
-		*(u32*)0x0201DD1C = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0201DD40 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0201DD48 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0201EFDC = 0xE12FFF1E; // bx lr
-		*(u32*)0x0201EFE8 = 0xE12FFF1E; // bx lr
-	}
-
-	// GO Series: Defense Wars (USA)
-	else if (strcmp(romTid, "KWTE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0200722C = 0xE1A00000; // nop
-		*(u32*)0x0200B350 = 0xE1A00000; // nop
-		*(u32*)0x02049F68 = 0xE1A00000; // nop
-		*(u32*)0x0204DC94 = 0xE1A00000; // nop
-		*(u32*)0x020537F4 = 0xE1A00000; // nop
-		*(u32*)0x020555D4 = 0xE1A00000; // nop
-		*(u32*)0x020555D8 = 0xE1A00000; // nop
-		*(u32*)0x020555E4 = 0xE1A00000; // nop
-		*(u32*)0x02055744 = 0xE1A00000; // nop
-		*(u32*)0x020557A0 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x020557C4 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x020557CC = 0x13A00627; // movne r0, #0x2700000
-
-		// Manual screen
-		/**(u32*)0x0200CB0C = 0xE1A00000; // nop
-		*(u32*)0x0200CB10 = 0xE1A00000; // nop
-		*(u32*)0x0200CB34 = 0xE1A00000; // nop
-		*(u32*)0x0200CB50 = 0xE1A00000; // nop
-		*(u32*)0x0200CB80 = 0xE1A00000; // nop*/
-
-		// Skip
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x0200CC98;
-			offset[i] = 0xE1A00000; // nop
-		}
-
-		/*for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x0203B3A0;
-			offset[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x0203CAD4 = 0xEB006798; // bl 0x205693C
-		for (int i = 0; i < 6; i++) {
-			u32* offset = (u32*)0x0203CD60;
-			offset[i] = 0xE1A00000; // nop
-		}*/
-	}
-
-	// Dragon's Lair (USA)
-	// Doesn't seem to work on real hardware?
-	else if (strcmp(romTid, "KDLE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x020050CC = 0xE1A00000; // nop
-		*(u32*)0x02012064 = 0xE1A00000; // nop
-		*(u32*)0x02012068 = 0xE1A00000; // nop
-		*(u32*)0x020132D0 = 0xE1A00000; // nop
-		*(u32*)0x0201360C = 0xE1A00000; // nop
-		*(u32*)0x02013A54 = 0xE1A00000; // nop
-		*(u32*)0x02014DB8 = 0xE1A00000; // nop
-		*(u32*)0x02016144 = 0xE1A00000; // nop
-		for (int i = 0; i < 9; i++) {
-			u32* offset = (u32*)0x0202EF50;
-			offset[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x0202F224 = 0xE1A00000; // nop
-		*(u32*)0x0202FACC = 0xE1A00000; // nop
-		*(u32*)0x0202FC00 = 0xE1A00000; // nop
-		*(u32*)0x0202FC14 = 0xE1A00000; // nop
-		*(u32*)0x02033044 = 0xE1A00000; // nop
-		*(u32*)0x02036A4C = 0xE1A00000; // nop
-		*(u32*)0x02038868 = 0xE1A00000; // nop
-		*(u32*)0x0203886C = 0xE1A00000; // nop
-		*(u32*)0x02038878 = 0xE1A00000; // nop
-		*(u32*)0x020389BC = 0xE1A00000; // nop
-		*(u32*)0x02038A18 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
-		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0203A53C = 0xE1A00000; // nop
-		*(u32*)0x0203A540 = 0xE1A00000; // nop
-		*(u32*)0x0203A544 = 0xE1A00000; // nop
-		*(u32*)0x0203A548 = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x020257F8;
-			offset[i] = 0xE1A00000; // nop
-		}
-	//	*(u32*)0x02070558 = 0xE1A00000; // nop
-	}
-
-	// Famicom Wars DS: Ushinawareta Hikari (Japan)
-	// 4MB of RAM causes crash in the main menu
-	else if (strcmp(romTid, "Z2EJ") == 0 && extendedMemory2) {
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x02015BC4 = 0xE1A00000; // nop
-		*(u32*)0x020197B8 = 0xE1A00000; // nop
-		*(u32*)0x0201F670 = 0xE1A00000; // nop
-		*(u32*)0x020216B8 = 0xE1A00000; // nop
-		*(u32*)0x020216BC = 0xE1A00000; // nop
-		*(u32*)0x020216C8 = 0xE1A00000; // nop
-		*(u32*)0x02021828 = 0xE1A00000; // nop
-		//*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
-	}
-
-	// Glory Days: Tactical Defense (USA)
-	else if (strcmp(romTid, "KGKE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x0200B488 = 0xE1A00000; // nop
-		*(u32*)0x02017128 = 0xE1A00000; // nop
-		*(u32*)0x02018F94 = 0xE1A00000; // nop
-		*(u32*)0x02018F98 = 0xE1A00000; // nop
-		*(u32*)0x02018FA4 = 0xE1A00000; // nop
-		*(u32*)0x02019104 = 0xE1A00000; // nop
-		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
-		for (int i = 0; i < 12; i++) {
-			u32* offset = (u32*)0x0206710C;
-			offset[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x020671B4 = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x02075514;
-			offset[i] = 0xE1A00000; // nop
-		}
-	}
-
-	// Glory Days: Tactical Defense (Europe)
-	else if (strcmp(romTid, "KGKP") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x0200B488 = 0xE1A00000; // nop
-		*(u32*)0x02017128 = 0xE1A00000; // nop
-		*(u32*)0x02018F94 = 0xE1A00000; // nop
-		*(u32*)0x02018F98 = 0xE1A00000; // nop
-		*(u32*)0x02018FA4 = 0xE1A00000; // nop
-		*(u32*)0x02019104 = 0xE1A00000; // nop
-		*(u32*)0x02019160 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02019184 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0201918C = 0x13A00627; // movne r0, #0x2700000
-		for (int i = 0; i < 12; i++) {
-			u32* offset = (u32*)0x02067264;
-			offset[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x0206730C = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x0207566C;
-			offset[i] = 0xE1A00000; // nop
-		}
-	}
-
-	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
-	// Does not boot (Lack of memory?)
-	/*else if (strcmp(romTid, "KQ9E") == 0) {
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		*(u32*)0x020050F8 = 0xE1A00000; // nop
-		*(u32*)0x020051CC = 0xE1A00000; // nop
-		*(u32*)0x02012AAC = 0xE1A00000; // nop
-		*(u32*)0x020166D4 = 0xE1A00000; // nop
-		*(u32*)0x020185C8 = 0xE1A00000; // nop
-		*(u32*)0x020185CC = 0xE1A00000; // nop
-		*(u32*)0x020185D8 = 0xE1A00000; // nop
-		*(u32*)0x02018738 = 0xE1A00000; // nop
-		*(u32*)0x02018738 = 0xE1A00000; // nop
-		*(u32*)0x0205663C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02056738 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02082A3C = 0xE1A00000; // nop
-		*(u32*)0x02082A58 = 0xE1A00000; // nop
-		*(u32*)0x020A467C = 0xE1A00000; // nop
-	}*/
-
-	// Mario vs. Donkey Kong: Minis March Again! (USA)
-	// Does not boot
-	/*else if (strcmp(romTid, "KDME") == 0) {
-		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
-		*(u32*)0x0202E788 = 0xE1A00000; // nop
-		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
-		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
-		*(u32*)0x02064F80 = 0xE1A00000; // nop
-		*(u32*)0x0206C780 = 0xE1A00000; // nop
-		*(u32*)0x0206F7AC = 0xE1A00000; // nop
-		*(u32*)0x0206F7B0 = 0xE1A00000; // nop
-		*(u32*)0x0206F7BC = 0xE1A00000; // nop
-		*(u32*)0x0206F900 = 0xE1A00000; // nop
-		*(u32*)0x0206F904 = 0xE1A00000; // nop
-		*(u32*)0x0206F908 = 0xE1A00000; // nop
-		*(u32*)0x0206F90C = 0xE1A00000; // nop
-	}*/
-
-	// Nintendo DSi + Internet (Japan)
-	// Nintendo DSi + Internet (USA)
-	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
-		*(u32*)0x020050B8 = 0xE1A00000; // nop
-		*(u32*)0x0200599C = 0xE1A00000; // nop
-		*(u32*)0x020059A8 = 0xE1A00000; // nop
-		*(u32*)0x020059B8 = 0xE1A00000; // nop
-		*(u32*)0x020059C4 = 0xE1A00000; // nop
-		*(u32*)0x0200AB2C = 0xE1A00000; // nop
-		*(u32*)0x0200DB70 = 0xE1A00000; // nop
-		*(u32*)0x0200FED4 = 0xE1A00000; // nop
-		*(u32*)0x02011B0C = 0xE1A00000; // nop
-		*(u32*)0x02011BA4 = 0xE1A00000; // nop
-		*(u32*)0x02011BA8 = 0xE1A00000; // nop
-		*(u32*)0x02011BB4 = 0xE1A00000; // nop
-		*(u32*)0x02011CF8 = 0xE1A00000; // nop
-		*(u32*)0x02011D54 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02011D78 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02011D80 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Nintendo DSi + Internet (Europe)
-	else if (strcmp(romTid, "K2DP") == 0) {
-		*(u32*)0x020050B8 = 0xE1A00000; // nop
-		*(u32*)0x020059AC = 0xE1A00000; // nop
-		*(u32*)0x020059B8 = 0xE1A00000; // nop
-		*(u32*)0x020059C8 = 0xE1A00000; // nop
-		*(u32*)0x020059D4 = 0xE1A00000; // nop
-		*(u32*)0x0200ADE0 = 0xE1A00000; // nop
-		*(u32*)0x0200DE24 = 0xE1A00000; // nop
-		*(u32*)0x02010188 = 0xE1A00000; // nop
-		*(u32*)0x02011DB0 = 0xE1A00000; // nop
-		*(u32*)0x02011E48 = 0xE1A00000; // nop
-		*(u32*)0x02011E4C = 0xE1A00000; // nop
-		*(u32*)0x02011E58 = 0xE1A00000; // nop
-		*(u32*)0x02011F9C = 0xE1A00000; // nop
-		*(u32*)0x02011FF8 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0201201C = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02012024 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Nintendo DSi + Internet (Australia)
-	else if (strcmp(romTid, "K2DU") == 0) {
-		*(u32*)0x020050B8 = 0xE1A00000; // nop
-		*(u32*)0x020059AC = 0xE1A00000; // nop
-		*(u32*)0x020059B8 = 0xE1A00000; // nop
-		*(u32*)0x020059C8 = 0xE1A00000; // nop
-		*(u32*)0x020059D4 = 0xE1A00000; // nop
-		*(u32*)0x0200AB70 = 0xE1A00000; // nop
-		*(u32*)0x0200DBB4 = 0xE1A00000; // nop
-		*(u32*)0x0200FF18 = 0xE1A00000; // nop
-		*(u32*)0x02011B40 = 0xE1A00000; // nop
-		*(u32*)0x02011BD8 = 0xE1A00000; // nop
-		*(u32*)0x02011BDC = 0xE1A00000; // nop
-		*(u32*)0x02011BE8 = 0xE1A00000; // nop
-		*(u32*)0x02011D2C = 0xE1A00000; // nop
-		*(u32*)0x02011D88 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02011DAC = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02011DB4 = 0x13A00627; // movne r0, #0x2700000
-	}
-
-	// Nintendoji (Japan)
-	// Does not boot
-	/*else if (strcmp(romTid, "K9KJ") == 0) {
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x02005538 = 0xE1A00000; // nop
-		*(u32*)0x0200554C = 0xE1A00000; // nop
-		*(u32*)0x02018C08 = 0xE1A00000; // nop
-		*(u32*)0x0201A9F8 = 0xE1A00000; // nop
-		*(u32*)0x0201A9FC = 0xE1A00000; // nop
-		*(u32*)0x0201AA08 = 0xE1A00000; // nop
-		*(u32*)0x0201AB68 = 0xE1A00000; // nop
-		*(u32*)0x0201ABC4 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
-	}*/
-
-	// Shantae: Risky's Revenge (USA)
-	// Crashes after selecting a file due to memory limitations
-	/*else if (strcmp(romTid, "KS3E") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x02092050 = 0xE1A00000; // nop
-		*(u32*)0x02092078 = 0xE1A00000; // nop
-		*(u32*)0x02092BA8 = 0xE1A00000; // nop
-		*(u32*)0x02092E08 = 0xE1A00000; // nop
-		*(u32*)0x02092E14 = 0xE1A00000; // nop
-		*(u32*)0x02092E20 = 0xE1A00000; // nop
-		*(u32*)0x020DDB84 = 0xE1A00000; // nop
-		*(u32*)0x020DE420 = 0xE1A00000; // nop
-		*(u32*)0x020DE548 = 0xE1A00000; // nop
-		*(u32*)0x020DE55C = 0xE1A00000; // nop
-		*(u32*)0x020E20C4 = 0xE1A00000; // nop
-		*(u32*)0x020E616C = 0xE1A00000; // nop
-		*(u32*)0x020E7F64 = 0xE1A00000; // nop
-		*(u32*)0x020E7F68 = 0xE1A00000; // nop
-		*(u32*)0x020E7F74 = 0xE1A00000; // nop
-		*(u32*)0x020E80D4 = 0xE1A00000; // nop
-		*(u32*)0x020E8130 = 0xE3A0079F; // mov r0, #0x27C0000
-		*(u32*)0x020E8154 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x020E815C = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x020E977C = 0xE1A00000; // nop
-		*(u32*)0x020E9780 = 0xE1A00000; // nop
-		*(u32*)0x020E9784 = 0xE1A00000; // nop
-		*(u32*)0x020E9788 = 0xE1A00000; // nop
-		*(u32*)0x020E9794 = 0xE1A00000; // nop (Activates a message when memory runs out)
-	}*/
-
-	// Space Ace (USA)
-	// Doesn't seem to work on real hardware?
-	else if (strcmp(romTid, "KA6E") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
-		*(u32*)0x020050D4 = 0xE1A00000; // nop
-		*(u32*)0x02005DD0 = 0xE1A00000; // nop
-		*(u32*)0x02016458 = 0xE1A00000; // nop
-		*(u32*)0x0201645C = 0xE1A00000; // nop
-		for (int i = 0; i < 21; i++) {
-			u32* offset = (u32*)0x02032BC4;
-			offset[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x02032ECC = 0xE1A00000; // nop
-		*(u32*)0x02033768 = 0xE1A00000; // nop
-		*(u32*)0x02033890 = 0xE1A00000; // nop
-		*(u32*)0x020338A4 = 0xE1A00000; // nop
-		*(u32*)0x02036B88 = 0xE1A00000; // nop
-		*(u32*)0x0203A348 = 0xE1A00000; // nop
-		*(u32*)0x0203C108 = 0xE1A00000; // nop
-		*(u32*)0x0203C10C = 0xE1A00000; // nop
-		*(u32*)0x0203C118 = 0xE1A00000; // nop
-		*(u32*)0x0203C278 = 0xE1A00000; // nop
-		*(u32*)0x0203C2D4 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
-		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0203DDC8 = 0xE1A00000; // nop
-		*(u32*)0x0203DDCC = 0xE1A00000; // nop
-		*(u32*)0x0203DDD0 = 0xE1A00000; // nop
-		*(u32*)0x0203DDD4 = 0xE1A00000; // nop
-		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x02029578;
-			offset[i] = 0xE1A00000; // nop
-		}
-	}
 }
 
 static bool rsetA7CacheDone = false;
