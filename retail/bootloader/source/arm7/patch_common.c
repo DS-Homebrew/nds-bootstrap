@@ -43,7 +43,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Patch DSi-Exclusives to run in DS mode
 
 	// Nintendo DSi XL Demo Video (USA)
-	// Requires main RAM to be larger than 4MB
+	// Requires 8MB of RAM
 	if (strcmp(romTid, "DMEE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
@@ -66,7 +66,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo DSi XL Demo Video: Volume 2 (USA)
-	// Requires main RAM to be larger than 4MB
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "DMDE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
@@ -86,7 +86,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 
 	// Picture Perfect Hair Salon (USA)
 	// Hair Salon (Europe/Australia)
-	// Requires main RAM to be larger than 4MB
+	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
@@ -378,7 +378,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
-	// Requires main RAM to be larger than 4MB
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0206B93C = 0xE1A00000; // nop
@@ -927,7 +927,9 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Mighty Milky Way (USA)
-	else if (strcmp(romTid, "KWYE") == 0 && extendedMemory2) {
+	// Mighty Milky Way (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KWYE") == 0 || strcmp(romTid, "KWYP") == 0) && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
