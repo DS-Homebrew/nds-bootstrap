@@ -780,6 +780,73 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F904 = 0xE1A00000; // nop
 		*(u32*)0x0206F908 = 0xE1A00000; // nop
 		*(u32*)0x0206F90C = 0xE1A00000; // nop
+		*(u32*)0x0206F968 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0206F98C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0206F994 = 0x13A00627; // movne r0, #0x2700000
+	}*/
+
+	// Mighty Flip Champs! (USA)
+	else if (strcmp(romTid, "KMGE") == 0) {
+		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
+		*(u32*)0x02051124 = 0xE1A00000; // nop
+		*(u32*)0x020566E8 = 0xE1A00000; // nop
+		*(u32*)0x020585BC = 0xE1A00000; // nop
+		*(u32*)0x020585C0 = 0xE1A00000; // nop
+		*(u32*)0x020585CC = 0xE1A00000; // nop
+		*(u32*)0x02058710 = 0xE1A00000; // nop
+		*(u32*)0x0205876C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02058790 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02058798 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205C93C = 0xE1A00000; // nop
+	}
+
+	// Mighty Flip Champs! (Europe, Australia)
+	else if (strcmp(romTid, "KMGV") == 0) {
+		*(u32*)0x0204D504 = 0xE1A00000; // nop
+		*(u32*)0x02050F30 = 0xE1A00000; // nop
+		*(u32*)0x020564F4 = 0xE1A00000; // nop
+		*(u32*)0x020583E4 = 0xE1A00000; // nop
+		*(u32*)0x020583E8 = 0xE1A00000; // nop
+		*(u32*)0x020583F4 = 0xE1A00000; // nop
+		*(u32*)0x02058538 = 0xE1A00000; // nop
+		*(u32*)0x02058594 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020585B8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020585C0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205C88C = 0xE1A00000; // nop
+	}
+
+	// Mighty Milky Way (USA)
+	// Crashes after opening logos due to lack of memory
+	/*else if (strcmp(romTid, "KWYE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200545C = 0xE1A00000; // nop
+		*(u32*)0x020054B0 = 0xE1A00000; // nop
+		*(u32*)0x020054C8 = 0xE1A00000; // nop
+		*(u32*)0x020054CC = 0xE1A00000; // nop
+		*(u32*)0x020054D0 = 0xE1A00000; // nop
+		*(u32*)0x020054D4 = 0xE1A00000; // nop
+		*(u32*)0x020054DC = 0xE1A00000; // nop
+		*(u32*)0x0200554C = 0xE1A00000; // nop
+		*(u32*)0x020057C0 = 0xE1A00000; // nop
+		*(u32*)0x02005A20 = 0xE1A00000; // nop
+		*(u32*)0x02005A28 = 0xE1A00000; // nop
+		*(u32*)0x02005A2C = 0xE1A00000; // nop
+		*(u32*)0x02005A20 = 0xE1A00000; // nop
+		*(u32*)0x02005A38 = 0xE1A00000; // nop
+		*(u32*)0x02064E34 = 0xE1A00000; // nop
+		*(u32*)0x0206CCE0 = 0xE1A00000; // nop
+		*(u32*)0x0206EB6C = 0xE1A00000; // nop
+		*(u32*)0x0206EB70 = 0xE1A00000; // nop
+		*(u32*)0x0206EB7C = 0xE1A00000; // nop
+		*(u32*)0x0206ECDC = 0xE1A00000; // nop
+		*(u32*)0x0206ED38 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0206ED5C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0206ED64 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02070384 = 0xE1A00000; // nop
+		*(u32*)0x02070388 = 0xE1A00000; // nop
+		*(u32*)0x0207038C = 0xE1A00000; // nop
+		*(u32*)0x02070390 = 0xE1A00000; // nop
+		*(u32*)0x0207388C = 0xE1A00000; // nop
 	}*/
 
 	// Nintendo DSi + Internet (Japan)
