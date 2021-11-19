@@ -43,8 +43,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Patch DSi-Exclusives to run in DS mode
 
 	// Nintendo DSi XL Demo Video (USA)
-	// Freezes after opening logos
-	/*if (strcmp(romTid, "DMEE") == 0) {
+	// Requires main RAM to be larger than 4MB
+	if (strcmp(romTid, "DMEE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008DD8 = 0xE1A00000; // nop
@@ -56,16 +56,44 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200EFF8 = 0xE1A00000; // nop
 		*(u32*)0x0200F004 = 0xE1A00000; // nop
 		*(u32*)0x0200F148 = 0xE1A00000; // nop
+		//*(u32*)0x0200F1A4 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0200F1A4 = 0xE59F0094; // ldr r0,=0x02700000
+		*(u32*)0x0200F1C8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0200F1D0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0200F1E4 = 0xE3A01C10; // mov r1, #0x1000
+		*(u32*)0x0200F240 = 0x02700000;
 		*(u32*)0x020107FC = 0xE1A00000; // nop
 		*(u32*)0x02010800 = 0xE1A00000; // nop
 		*(u32*)0x02010804 = 0xE1A00000; // nop
 		*(u32*)0x02010808 = 0xE1A00000; // nop
-	}*/
+	}
+
+	// Nintendo DSi XL Demo Video: Volume 2 (USA)
+	// Requires main RAM to be larger than 4MB
+	else if (strcmp(romTid, "DMDE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x02008E04 = 0xE1A00000; // nop
+		*(u32*)0x02008F14 = 0xE1A00000; // nop
+		*(u32*)0x02008F28 = 0xE1A00000; // nop
+		*(u32*)0x0200BB3C = 0xE1A00000; // nop
+		*(u32*)0x0200D55C = 0xE1A00000; // nop
+		*(u32*)0x0200ED80 = 0xE1A00000; // nop
+		*(u32*)0x0200ED84 = 0xE1A00000; // nop
+		*(u32*)0x0200ED90 = 0xE1A00000; // nop
+		*(u32*)0x0200EEF0 = 0xE1A00000; // nop
+		//*(u32*)0x0200EF4C = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0200EF4C = 0xE59F0094; // ldr r0,=0x02700000
+		*(u32*)0x0200EF70 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0200EF78 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0200EF8C = 0xE3A01C10; // mov r1, #0x1000
+		*(u32*)0x0200EFE8 = 0x02700000;
+	}
 
 	// Picture Perfect Hair Salon (USA)
 	// Hair Salon (Europe/Australia)
 	// Requires main RAM to be larger than 4MB
-	if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
+	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02005108 = 0xE1A00000; // nop
@@ -130,6 +158,98 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203B7E0 = 0xE1A00000; // nop */
 		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
 	}
+
+	// Ace Mathician (USA)
+	else if (strcmp(romTid, "KQKE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x02005128 = 0xE1A00000; // nop
+		*(u32*)0x0200512C = 0xE1A00000; // nop
+		*(u32*)0x02005130 = 0xE1A00000; // nop
+		*(u32*)0x02005134 = 0xE1A00000; // nop
+		*(u32*)0x02005138 = 0xE1A00000; // nop
+		*(u32*)0x0200513C = 0xE1A00000; // nop
+		*(u32*)0x0200DFD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02010084 = 0xE1A00000; // nop
+		*(u32*)0x02030344 = 0xE1A00000; // nop
+		*(u32*)0x020335B0 = 0xE1A00000; // nop
+		*(u32*)0x02036444 = 0xE1A00000; // nop
+		*(u32*)0x020381E0 = 0xE1A00000; // nop
+		*(u32*)0x020381E4 = 0xE1A00000; // nop
+		*(u32*)0x020381F0 = 0xE1A00000; // nop
+		*(u32*)0x02038350 = 0xE1A00000; // nop
+		*(u32*)0x020383AC = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020383D0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020383D8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02039B74 = 0xE1A00000; // nop
+		*(u32*)0x02039B78 = 0xE1A00000; // nop
+		*(u32*)0x02039B7C = 0xE1A00000; // nop
+		*(u32*)0x02039B80 = 0xE1A00000; // nop
+		*(u32*)0x0203C5DC = 0xE1A00000; // nop
+	}
+
+	// Ace Mathician (Europe, Australia)
+	else if (strcmp(romTid, "KQKV") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x02005128 = 0xE1A00000; // nop
+		*(u32*)0x0200512C = 0xE1A00000; // nop
+		*(u32*)0x02005130 = 0xE1A00000; // nop
+		*(u32*)0x02005134 = 0xE1A00000; // nop
+		*(u32*)0x02005138 = 0xE1A00000; // nop
+		*(u32*)0x0200513C = 0xE1A00000; // nop
+		*(u32*)0x0200DFD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02030354 = 0xE1A00000; // nop
+		*(u32*)0x020335C0 = 0xE1A00000; // nop
+		*(u32*)0x02036454 = 0xE1A00000; // nop
+		*(u32*)0x020381F0 = 0xE1A00000; // nop
+		*(u32*)0x020381F4 = 0xE1A00000; // nop
+		*(u32*)0x02038200 = 0xE1A00000; // nop
+		*(u32*)0x02038360 = 0xE1A00000; // nop
+		*(u32*)0x020383BC = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020383E0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020383E8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02039B84 = 0xE1A00000; // nop
+		*(u32*)0x02039B88 = 0xE1A00000; // nop
+		*(u32*)0x02039B8C = 0xE1A00000; // nop
+		*(u32*)0x02039B90 = 0xE1A00000; // nop
+		*(u32*)0x0203C5EC = 0xE1A00000; // nop
+	}
+
+	// AlphaBounce (USA)
+	// Does not boot
+	/*else if (strcmp(romTid, "KALE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020187B8 = 0xE1A00000; // nop
+		*(u32*)0x0201BC4C = 0xE1A00000; // nop
+		*(u32*)0x0201EA34 = 0xE1A00000; // nop
+		*(u32*)0x0201EAE8 = 0xE1A00000; // nop
+		*(u32*)0x0201EC08 = 0xE1A00000; // nop
+		*(u32*)0x0201EC84 = 0xE1A00000; // nop
+		*(u32*)0x0201ED08 = 0xE1A00000; // nop
+		*(u32*)0x0201FBC8 = 0xE1A00000; // nop
+		*(u32*)0x0201FC38 = 0xE1A00000; // nop
+		*(u32*)0x0201FD4C = 0xE1A00000; // nop
+		*(u32*)0x0201FDB4 = 0xE1A00000; // nop
+		*(u32*)0x0201FE34 = 0xE1A00000; // nop
+		*(u32*)0x0201FE98 = 0xE1A00000; // nop
+		*(u32*)0x0201FF50 = 0xE1A00000; // nop
+		*(u32*)0x0201FFC0 = 0xE1A00000; // nop
+		*(u32*)0x020226A0 = 0xE1A00000; // nop
+		*(u32*)0x02024DD4 = 0xE1A00000; // nop
+		*(u32*)0x02024DD8 = 0xE1A00000; // nop
+		*(u32*)0x02024DE4 = 0xE1A00000; // nop
+		*(u32*)0x02024F44 = 0xE1A00000; // nop
+		*(u32*)0x02024FA0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02024FC4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02024FCC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020299E0 = 0xE1A00000; // nop
+		*(u32*)0x020B0600 = 0xE1A00000; // nop
+		*(u32*)0x020B0604 = 0xE1A00000; // nop
+		*(u32*)0x020B060C = 0xE1A00000; // nop
+	}*/
 
 	// Art Style: AQUIA (USA)
 	// Doesn't seem to work on real hardware?
