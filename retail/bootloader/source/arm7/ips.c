@@ -32,7 +32,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			rombyte = (void*)(extendedMemory&&!dsDebugRam ? 0x0C800000 : romLocation);
+			rombyte = (void*)romLocation;
 			if (ROMinRAM) {
 				rombyte -= 0x8000;
 			} else {
