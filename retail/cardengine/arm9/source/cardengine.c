@@ -88,6 +88,8 @@ static inline void setDeviceOwner(void) {
 }
 
 static bool initialized = false;
+static bool region0FixNeeded = false;
+static bool mpuSet = false;
 static bool mariosHolidayPrimaryFixApplied = false;
 
 static bool IPC_SYNC_hooked = false;
@@ -277,7 +279,26 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	}
 }
 
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
+void __attribute__((target("arm"))) sdk5MpuFix() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
+	if (!mpuSet) {
+		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
+			sdk5MpuFix();
+		}
+		if (region0FixNeeded) {
+			region0Fix();
+		}
+		mpuSet = true;
+	}
+
 	u16 exmemcnt = REG_EXMEMCNT;
 
 	setDeviceOwner();
@@ -351,6 +372,7 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {
+		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
 		if (unpatchedFuncs->mpuAccessOffset) {
@@ -365,6 +387,10 @@ u32 myIrqEnable(u32 irq) {
 
 	if (unpatchedFuncs->mpuInitCacheOffset) {
 		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
+	}
+
+	if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
+		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset2) {

@@ -187,7 +187,8 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
-		toncset((u32*)0x02400000, 0, dsDebugRam ? 0x400000 : 0xC00000);
+		toncset((u32*)0x02400000, 0, 0x3FE000);
+		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
 	}
 
 	REG_IE = 0;
@@ -245,9 +246,9 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }*/
 
 // SDK 5
-/*static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
+static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
-}*/
+}
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	nocashMessage("loadBinary_ARM7");
@@ -310,10 +311,24 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 u32 romLocation = 0x09000000;
 u32 romSizeLimit = 0x780000;
 
-static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid) {
+static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
 		romSizeLimit = (s2FlashcardId == 0x5A45) ? 0xF80000 : 0x1F80000;
+	}
+	if (extendedMemory2 && !dsDebugRam) {
+		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
+		bool isDevConsole = (*(vu32*)(0x0DFFFE0C) == 0x4253444E);
+
+		romLocation = 0x0C800000;
+		if (isSdk5(moduleParams)) {
+			if (isDevConsole) {
+				romLocation = 0x0D000000;
+			}
+			romSizeLimit = isDevConsole ? 0x1000000 : 0x700000;
+		} else {
+			romSizeLimit = isDevConsole ? 0x1800000 : 0x800000;
+		}
 	}
 
 	bool res = false;
@@ -434,7 +449,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
-		u32 overlaysLocation = (extendedMemory2&&!dsDebugRam ? 0x0C800000 : romLocation);
+		u32 overlaysLocation = romLocation;
 		if (ROMinRAM) {
 			overlaysLocation += (ndsHeader->arm9binarySize-0x4000);
 		}
@@ -619,7 +634,7 @@ int arm7_main(void) {
 	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(romTid, "UBRP") != 0));
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid);
+	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
 
 	nocashMessage("Trying to patch the card...\n");
 
@@ -640,7 +655,10 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		patchMpuRegion,
+		(ROMsupportsDsiMode(ndsHeader)
+		|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
+		|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
+		) ? 0 : 1,
 		patchMpuSize,
 		saveFileCluster,
 		saveSize

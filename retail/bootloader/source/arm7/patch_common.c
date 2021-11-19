@@ -29,7 +29,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 21;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 22;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -46,7 +46,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Requires main RAM to be larger than 4MB
 	if (strcmp(romTid, "DMEE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008DD8 = 0xE1A00000; // nop
 		*(u32*)0x02008EF4 = 0xE1A00000; // nop
 		*(u32*)0x02008F08 = 0xE1A00000; // nop
@@ -56,12 +56,9 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200EFF8 = 0xE1A00000; // nop
 		*(u32*)0x0200F004 = 0xE1A00000; // nop
 		*(u32*)0x0200F148 = 0xE1A00000; // nop
-		//*(u32*)0x0200F1A4 = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0200F1A4 = 0xE59F0094; // ldr r0,=0x02700000
+		*(u32*)0x0200F1A4 = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x0200F1C8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0200F1D0 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0200F1E4 = 0xE3A01C10; // mov r1, #0x1000
-		*(u32*)0x0200F240 = 0x02700000;
 		*(u32*)0x020107FC = 0xE1A00000; // nop
 		*(u32*)0x02010800 = 0xE1A00000; // nop
 		*(u32*)0x02010804 = 0xE1A00000; // nop
@@ -72,7 +69,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Requires main RAM to be larger than 4MB
 	else if (strcmp(romTid, "DMDE") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008E04 = 0xE1A00000; // nop
 		*(u32*)0x02008F14 = 0xE1A00000; // nop
 		*(u32*)0x02008F28 = 0xE1A00000; // nop
@@ -82,12 +79,9 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200ED84 = 0xE1A00000; // nop
 		*(u32*)0x0200ED90 = 0xE1A00000; // nop
 		*(u32*)0x0200EEF0 = 0xE1A00000; // nop
-		//*(u32*)0x0200EF4C = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x0200EF4C = 0xE59F0094; // ldr r0,=0x02700000
+		*(u32*)0x0200F1A4 = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x0200EF70 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0200EF78 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0200EF8C = 0xE3A01C10; // mov r1, #0x1000
-		*(u32*)0x0200EFE8 = 0x02700000;
 	}
 
 	// Picture Perfect Hair Salon (USA)
@@ -95,7 +89,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Requires main RAM to be larger than 4MB
 	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02005108 = 0xE1A00000; // nop
 		*(u32*)0x0200517C = 0xE1A00000; // nop
 		*(u32*)0x02005190 = 0xE1A00000; // nop
@@ -109,10 +103,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019A10 = 0xE1A00000; // nop
 		*(u32*)0x02019A1C = 0xE1A00000; // nop
 		*(u32*)0x02019B60 = 0xE1A00000; // nop
-		//if (!extendedMemory2) {
-		//	*(u32*)0x02019BBC = 0xE3A00697; // mov r0, #0x9700000: Use Memory Expansion Pak
-			*(u32*)0x02019BBC = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x27C0000)
-		//}
+		*(u32*)0x02019BBC = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x02019BE0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02019BE8 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0201E6CC = 0xE1A00000; // nop
@@ -494,7 +485,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Doesn't seem to work on real hardware?
 	else if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050CC = 0xE1A00000; // nop
 		*(u32*)0x02012064 = 0xE1A00000; // nop
 		*(u32*)0x02012068 = 0xE1A00000; // nop
@@ -815,7 +806,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Glory Days: Tactical Defense (USA)
 	else if (strcmp(romTid, "KGKE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
 		*(u32*)0x02017128 = 0xE1A00000; // nop
 		*(u32*)0x02018F94 = 0xE1A00000; // nop
@@ -840,7 +831,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Glory Days: Tactical Defense (Europe)
 	else if (strcmp(romTid, "KGKP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
 		*(u32*)0x02017128 = 0xE1A00000; // nop
 		*(u32*)0x02018F94 = 0xE1A00000; // nop
@@ -936,8 +927,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Mighty Milky Way (USA)
-	// Crashes after opening logos due to lack of memory
-	/*else if (strcmp(romTid, "KWYE") == 0) {
+	else if (strcmp(romTid, "KWYE") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
@@ -959,7 +949,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206EB70 = 0xE1A00000; // nop
 		*(u32*)0x0206EB7C = 0xE1A00000; // nop
 		*(u32*)0x0206ECDC = 0xE1A00000; // nop
-		*(u32*)0x0206ED38 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0206ED38 = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x0206ED5C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0206ED64 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02070384 = 0xE1A00000; // nop
@@ -967,7 +957,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207038C = 0xE1A00000; // nop
 		*(u32*)0x02070390 = 0xE1A00000; // nop
 		*(u32*)0x0207388C = 0xE1A00000; // nop
-	}*/
+	}
 
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
@@ -1153,7 +1143,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Doesn't seem to work on real hardware?
 	else if (strcmp(romTid, "KA6E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
 		*(u32*)0x02005DD0 = 0xE1A00000; // nop
 		*(u32*)0x02016458 = 0xE1A00000; // nop

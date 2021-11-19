@@ -295,7 +295,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 static bool mpuInitCachePatched = false;
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (!extendedMemory2 || patchMpuRegion == 2) {
+	if (ndsHeader->unitCode == 3 || !extendedMemory2 || patchMpuRegion == 2) {
 		return;
 	}
 
@@ -380,9 +380,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
 	// Patch out all further mpu reconfiguration
-	dbg_printf("patchMpuSize: ");
-	dbg_hexa(patchMpuSize);
-	dbg_printf("\n\n");
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 	u32* mpuInitOffset = patchOffsetCache.mpuInitOffset;
 	if (!mpuInitOffset) {
@@ -390,9 +387,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 	extern u32 iUncompressedSize;
 	u32 patchSize = iUncompressedSize;
-	if (patchMpuSize > 1) {
-		patchSize = patchMpuSize;
-	}
 	if (mpuInitOffset == mpuStartOffset) {
 		mpuInitOffset = findOffset(
 			//(u32*)((u32)mpuStartOffset + 4), patchSize,
@@ -418,6 +412,26 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 				*mpuStartOffset = 0xE1A00000;
 			}
 		}*/
+	}
+
+	if (!isSdk5(moduleParams)) {
+		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
+		if (!patchOffsetCache.mpuDataOffsetAlt) {
+			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
+			if (mpuDataOffsetAlt) {
+				patchOffsetCache.mpuDataOffsetAlt = mpuDataOffsetAlt;
+			}
+		}
+		if (mpuDataOffsetAlt) {
+			unpatchedFuncs->mpuDataOffsetAlt = mpuDataOffsetAlt;
+			unpatchedFuncs->mpuInitRegionOldDataAlt = *mpuDataOffsetAlt;
+
+			*mpuDataOffsetAlt = PAGE_32M | 0x02000000 | 1;
+
+			dbg_printf("Mpu data alt: ");
+			dbg_hexa((u32)mpuDataOffsetAlt);
+			dbg_printf("\n\n");
+		}
 	}
 
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
