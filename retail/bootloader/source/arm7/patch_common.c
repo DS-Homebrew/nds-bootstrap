@@ -133,7 +133,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 
 	// Art Style: AQUIA (USA)
 	// Doesn't seem to work on real hardware?
-	// NOTE: Exiting options will cause an error
+	// Exiting options will cause an error
 	else if (strcmp(romTid, "KAAE") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -141,6 +141,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
 		*(u32*)0x020051B8 = 0xE1A00000; // nop
+		*(u32*)0x0203BB4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
