@@ -660,6 +660,44 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	//	*(u32*)0x02070558 = 0xE1A00000; // nop
 	}
 
+	// GO Series: Earth Saver (USA)
+	// Doesn't seem to work on real hardware?
+	else if (strcmp(romTid, "KB8E") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005530 = 0xE1A00000; // nop
+		*(u32*)0x02005534 = 0xE1A00000; // nop
+		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200B690 = 0xE1A00000; // nop
+		*(u32*)0x0200B694 = 0xE1A00000; // nop
+		*(u32*)0x0200B6A0 = 0xE1A00000; // nop
+		*(u32*)0x0200B6B8 = 0xE1A00000; // nop
+		*(u32*)0x0200B6D0 = 0xE1A00000; // nop
+		*(u32*)0x0200B6E0 = 0xE1A00000; // nop
+		*(u32*)0x02036398 = 0xE1A00000; // nop
+		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204BFE8 = 0xE1A00000; // nop
+		*(u32*)0x0204F548 = 0xE1A00000; // nop
+		*(u32*)0x02054440 = 0xE1A00000; // nop
+		*(u32*)0x02056228 = 0xE1A00000; // nop
+		*(u32*)0x0205622C = 0xE1A00000; // nop
+		*(u32*)0x02056238 = 0xE1A00000; // nop
+		*(u32*)0x020563F4 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02056418 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02056420 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02057AAC = 0xE1A00000; // nop
+		*(u32*)0x02057AB0 = 0xE1A00000; // nop
+		*(u32*)0x02057AB4 = 0xE1A00000; // nop
+		*(u32*)0x02057AB8 = 0xE1A00000; // nop
+		*(u32*)0x0205ABF8 = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x02014BEC;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// 4MB of RAM causes crash in the main menu
 	else if (strcmp(romTid, "Z2EJ") == 0 && extendedMemory2) {
@@ -1315,6 +1353,28 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 			offset[i] = 0xE1A00000; // nop
 		}
 	}
+
+	// Spotto! (USA)
+	// Does not boot: Issue unknown
+	/*else if (strcmp(romTid, "KSPE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02022AB4 = 0xE1A00000; // nop
+		*(u32*)0x02026038 = 0xE1A00000; // nop
+		*(u32*)0x0202C280 = 0xE1A00000; // nop
+		*(u32*)0x0202E0E0 = 0xE1A00000; // nop
+		*(u32*)0x0202E0E4 = 0xE1A00000; // nop
+		*(u32*)0x0202E0F0 = 0xE1A00000; // nop
+		*(u32*)0x0202E250 = 0xE1A00000; // nop
+		*(u32*)0x0202E2AC = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0202E2D0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0202E2D8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02031EB4 = 0xE1A00000; // nop
+		*(u32*)0x0204CA50 = 0xE1A00000; // nop
+		*(u32*)0x0204CA74 = 0xE1A00000; // nop
+		*(u32*)0x020558C4 = 0xE1A00000; // nop
+		*(u32*)0x020558F4 = 0xE1A00000; // nop
+		*(u32*)0x020558FC = 0xE1A00000; // nop
+	}*/
 }
 
 void patchBinary(const tNDSHeader* ndsHeader) {

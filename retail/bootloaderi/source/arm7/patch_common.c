@@ -460,6 +460,20 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 			*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
 		}
 
+		// GO Series: Earth Saver (USA)
+		else if (strcmp(romTid, "KB8E") == 0) {
+			*(u32*)0x02005530 = 0xE1A00000; // nop
+			*(u32*)0x02005534 = 0xE1A00000; // nop
+			*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02014BEC;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+
 		// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
 		else if (strcmp(romTid, "KYBE") == 0) {
 			*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
