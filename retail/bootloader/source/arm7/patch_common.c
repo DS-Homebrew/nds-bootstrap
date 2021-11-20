@@ -639,6 +639,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x020051E4 = 0xE1A00000; // nop
 		*(u32*)0x02012064 = 0xE1A00000; // nop
 		*(u32*)0x02012068 = 0xE1A00000; // nop
 		for (int i = 0; i < 5; i++) {
@@ -653,12 +654,6 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 			offset4[i] = 0xE1A00000; // nop
 			offset5[i] = 0xE1A00000; // nop
 		}
-		//*(u32*)0x0201BB90 = 0xE12FFF1E; // bx lr
-		for (int i = 0; i < 9; i++) {
-			u32* offset = (u32*)0x0202EF50;
-			offset[i] = 0xE1A00000; // nop
-		}
-		//*(u32*)0x0202F224 = 0xE1A00000; // nop
 		*(u32*)0x0202FACC = 0xE1A00000; // nop
 		*(u32*)0x0202FC00 = 0xE1A00000; // nop
 		*(u32*)0x0202FC14 = 0xE1A00000; // nop
@@ -681,11 +676,32 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
 		*(u32*)0x0203A548 = 0xE1A00000; // nop
 		*(u32*)0x0203D0A4 = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x020257F8;
-			offset[i] = 0xE1A00000; // nop
-		}
 	//	*(u32*)0x02070558 = 0xE1A00000; // nop
+	}
+
+	// Dragon's Lair II: Time Warp (USA)
+	else if (strcmp(romTid, "KLYE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020051C8 = 0xE1A00000; // nop
+		*(u32*)0x020171CC = 0xE1A00000; // nop
+		*(u32*)0x020171D0 = 0xE1A00000; // nop
+		*(u32*)0x02033EE0 = 0xE1A00000; // nop
+		*(u32*)0x02037300 = 0xE1A00000; // nop
+		*(u32*)0x0203AB00 = 0xE1A00000; // nop
+		*(u32*)0x0203C8C0 = 0xE1A00000; // nop
+		*(u32*)0x0203C8C4 = 0xE1A00000; // nop
+		*(u32*)0x0203C8D0 = 0xE1A00000; // nop
+		*(u32*)0x0203CA30 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x0203CA8C = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0203CA8C = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+		}
+		*(u32*)0x0203CAB0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203CAB8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203E0D4 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x02041040 = 0xE1A00000; // nop
 	}
 
 	// GO Series: Earth Saver (USA)
@@ -1350,14 +1366,10 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020051C8 = 0xE1A00000; // nop
 		*(u32*)0x02005DD0 = 0xE1A00000; // nop
 		*(u32*)0x02016458 = 0xE1A00000; // nop
 		*(u32*)0x0201645C = 0xE1A00000; // nop
-		for (int i = 0; i < 21; i++) {
-			u32* offset = (u32*)0x02032BC4;
-			offset[i] = 0xE1A00000; // nop
-		}
-		//*(u32*)0x02032ECC = 0xE1A00000; // nop
 		*(u32*)0x02033768 = 0xE1A00000; // nop
 		*(u32*)0x02033890 = 0xE1A00000; // nop
 		*(u32*)0x020338A4 = 0xE1A00000; // nop
@@ -1381,10 +1393,6 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203DDD4 = 0xE1A00000; // nop
 		*(u32*)0x0203E9B4 = 0xE1A00000; // nop
 		*(u32*)0x02040888 = 0xE1A00000; // nop
-		for (int i = 0; i < 10; i++) {
-			u32* offset = (u32*)0x02029578;
-			offset[i] = 0xE1A00000; // nop
-		}
 	}
 
 	// Spotto! (USA)
