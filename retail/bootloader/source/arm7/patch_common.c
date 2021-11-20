@@ -38,7 +38,7 @@ bool patchOffsetCacheChanged = false;
 
 void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
-	extern u32 generateA7Instr(int arg1, int arg2);
+	//extern u32 generateA7Instr(int arg1, int arg2);
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Patch DSi-Exclusives to run in DS mode
@@ -366,7 +366,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02064A48 = 0xE1A00000; // nop
 		*(u32*)0x02064A4C = 0xE1A00000; // nop
 		*(u32*)0x02064A58 = 0xE1A00000; // nop
-		*(u32*)0x02064B9C = generateA7Instr(0x02064B9C, 0x020665C4); // bl 0x020665C4
+		*(u32*)0x02064B9C = 0xE1A00000; // nop
+		*(u32*)0x02064BA0 = 0xE1A00000; // nop
+		*(u32*)0x02064BA4 = 0xE1A00000; // nop
+		*(u32*)0x02064BA8 = 0xE1A00000; // nop
+		/* *(u32*)0x02064B9C = generateA7Instr(0x02064B9C, 0x020665C4); // bl 0x020665C4
 		{
 			*(u32*)0x020665C4 = 0xE3A00001; // mov r0, #1
 			*(u32*)0x020665C8 = 0xE3A01402; // mov r1, #0x2000000
@@ -378,7 +382,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 			*(u32*)0x020665E0 = generateA7Instr(0x020665E0, 0x02065214); // bl 0x02065214
 			*(u32*)0x020665E4 = 0xE8BD8008; // LDMFD SP!, {R3,PC}
 			*(u32*)0x020665E8 = 0x027FF000;
-		}
+		} */
 		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
