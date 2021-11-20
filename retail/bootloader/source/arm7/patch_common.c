@@ -38,6 +38,7 @@ bool patchOffsetCacheChanged = false;
 
 void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
+	extern u32 generateA7Instr(int arg1, int arg2);
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Patch DSi-Exclusives to run in DS mode
@@ -346,8 +347,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Art Style: AQUIA (USA)
-	// Doesn't seem to work on real hardware?
-	// Exiting options will cause an error
+	// Audio doesn't play
+	// Pressing A to exit options will cause an error
 	else if (strcmp(romTid, "KAAE") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -357,6 +358,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020051B8 = 0xE1A00000; // nop
 		*(u32*)0x0203BB4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02051E00 = 0xE1A00000; // nop
 		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020583BC = 0xE1A00000; // nop
@@ -364,13 +366,23 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02064A48 = 0xE1A00000; // nop
 		*(u32*)0x02064A4C = 0xE1A00000; // nop
 		*(u32*)0x02064A58 = 0xE1A00000; // nop
-		*(u32*)0x02064B9C = 0xE1A00000; // nop
-		*(u32*)0x02064BA0 = 0xE1A00000; // nop
-		*(u32*)0x02064BA4 = 0xE1A00000; // nop
-		*(u32*)0x02064BA8 = 0xE1A00000; // nop
+		*(u32*)0x02064B9C = generateA7Instr(0x02064B9C, 0x020665C4); // bl 0x020665C4
+		{
+			*(u32*)0x020665C4 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020665C8 = 0xE3A01402; // mov r1, #0x2000000
+			*(u32*)0x020665CC = 0xE3A0202A; // mov r2, #0x2A
+			*(u32*)0x020665D0 = generateA7Instr(0x020665D0, 0x02065214); // bl 0x02065214
+			*(u32*)0x020665D4 = 0xE59F100C; // ldr r1, =0x27FF000
+			*(u32*)0x020665D8 = 0xE3A00002; // mov r0, #2
+			*(u32*)0x020665DC = 0xE3A02016; // mov r2, #0x16
+			*(u32*)0x020665E0 = generateA7Instr(0x020665E0, 0x02065214); // bl 0x02065214
+			*(u32*)0x020665E4 = 0xE8BD8008; // LDMFD SP!, {R3,PC}
+			*(u32*)0x020665E8 = 0x027FF000;
+		}
 		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02066054 = 0xE12FFF1E; // bx lr
 	}
 
 	// Asphalt 4: Elite Racing (USA)
@@ -619,23 +631,30 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Dragon's Lair (USA)
-	// Doesn't seem to work on real hardware?
 	else if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x020050CC = 0xE1A00000; // nop
 		*(u32*)0x02012064 = 0xE1A00000; // nop
 		*(u32*)0x02012068 = 0xE1A00000; // nop
-		*(u32*)0x020132D0 = 0xE1A00000; // nop
-		*(u32*)0x0201360C = 0xE1A00000; // nop
-		*(u32*)0x02013A54 = 0xE1A00000; // nop
-		*(u32*)0x02014DB8 = 0xE1A00000; // nop
-		*(u32*)0x02016144 = 0xE1A00000; // nop
+		for (int i = 0; i < 5; i++) {
+			u32* offset1 = (u32*)0x020132C0;
+			u32* offset2 = (u32*)0x020135FC;
+			u32* offset3 = (u32*)0x02013A44;
+			u32* offset4 = (u32*)0x02014DA8;
+			u32* offset5 = (u32*)0x02016134;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+			offset3[i] = 0xE1A00000; // nop
+			offset4[i] = 0xE1A00000; // nop
+			offset5[i] = 0xE1A00000; // nop
+		}
+		//*(u32*)0x0201BB90 = 0xE12FFF1E; // bx lr
 		for (int i = 0; i < 9; i++) {
 			u32* offset = (u32*)0x0202EF50;
 			offset[i] = 0xE1A00000; // nop
 		}
-		*(u32*)0x0202F224 = 0xE1A00000; // nop
+		//*(u32*)0x0202F224 = 0xE1A00000; // nop
 		*(u32*)0x0202FACC = 0xE1A00000; // nop
 		*(u32*)0x0202FC00 = 0xE1A00000; // nop
 		*(u32*)0x0202FC14 = 0xE1A00000; // nop
@@ -645,9 +664,14 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203886C = 0xE1A00000; // nop
 		*(u32*)0x02038878 = 0xE1A00000; // nop
 		*(u32*)0x020389BC = 0xE1A00000; // nop
-		*(u32*)0x02038A18 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		if (extendedMemory2) {
+			*(u32*)0x02038A18 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x02038A18 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+		}
 		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203A068 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x0203A53C = 0xE1A00000; // nop
 		*(u32*)0x0203A540 = 0xE1A00000; // nop
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
@@ -661,7 +685,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// GO Series: Earth Saver (USA)
-	// Doesn't seem to work on real hardware?
+	// Extra fixes required for it to boot on real hardware
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02005234 = 0xE1A00000; // nop
@@ -1317,7 +1341,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Space Ace (USA)
-	// Doesn't seem to work on real hardware?
+	// Freezes after clearing high scores
 	else if (strcmp(romTid, "KA6E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02004B9C = 0x0200002F;
@@ -1329,7 +1353,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 			u32* offset = (u32*)0x02032BC4;
 			offset[i] = 0xE1A00000; // nop
 		}
-		*(u32*)0x02032ECC = 0xE1A00000; // nop
+		//*(u32*)0x02032ECC = 0xE1A00000; // nop
 		*(u32*)0x02033768 = 0xE1A00000; // nop
 		*(u32*)0x02033890 = 0xE1A00000; // nop
 		*(u32*)0x020338A4 = 0xE1A00000; // nop
@@ -1339,9 +1363,14 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203C10C = 0xE1A00000; // nop
 		*(u32*)0x0203C118 = 0xE1A00000; // nop
 		*(u32*)0x0203C278 = 0xE1A00000; // nop
-		*(u32*)0x0203C2D4 = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrored to 0x23C0000)
+		if (extendedMemory2) {
+			*(u32*)0x0203C2D4 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0203C2D4 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+		}
 		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203D91C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x0203DDC8 = 0xE1A00000; // nop
 		*(u32*)0x0203DDCC = 0xE1A00000; // nop
 		*(u32*)0x0203DDD0 = 0xE1A00000; // nop
