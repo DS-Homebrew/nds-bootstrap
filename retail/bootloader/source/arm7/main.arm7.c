@@ -335,6 +335,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	if ((strncmp(romTid, "APD", 3) != 0
 	 && strncmp(romTid, "A24", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
+	 && strncmp(romTid, "AMC", 3) != 0
+	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)

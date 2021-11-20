@@ -209,6 +209,52 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203C5EC = 0xE1A00000; // nop
 	}
 
+	// AiRace: Tunnel (USA)
+	// Requires 8MB of RAM
+	// Crashes after selecting a stage
+	/*else if (strcmp(romTid, "KATE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u16*)0x0202A3D2 = 0x46C0; // nop
+		*(u16*)0x0202A3D4 = 0x46C0; // nop
+		*(u16*)0x0202A59C = 0x46C0; // nop
+		*(u16*)0x0202A59E = 0x46C0; // nop
+		*(u32*)0x02032AF0 = 0xE1A00000; // nop
+		*(u16*)0x02042042 = 0x46C0; // nop
+		*(u16*)0x02042044 = 0x46C0; // nop
+		*(u16*)0x02042048 = 0x46C0; // nop
+		*(u16*)0x0204204A = 0x46C0; // nop
+		*(u32*)0x020420F4 = 0xE1A00000; // nop
+		*(u32*)0x02048AC0 = 0xE1A00000; // nop
+		*(u32*)0x0204C1C8 = 0xE1A00000; // nop
+		*(u32*)0x02056798 = 0xE1A00000; // nop
+		*(u32*)0x02058628 = 0xE1A00000; // nop
+		*(u32*)0x0205862C = 0xE1A00000; // nop
+		*(u32*)0x02058638 = 0xE1A00000; // nop
+		*(u32*)0x02058798 = 0xE1A00000; // nop
+		*(u32*)0x020587F4 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x02058818 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02058820 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205D21C = 0xE1A00000; // nop
+	}*/
+
+	// G.G. Series: All Breaker (USA)
+	// G.G. Series: All Breaker (Japan)
+	else if ((strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200D71C = 0xE1A00000; // nop
+		*(u32*)0x0204E880 = 0xE1A00000; // nop
+		*(u32*)0x02052814 = 0xE1A00000; // nop
+		*(u32*)0x02058BE8 = 0xE1A00000; // nop
+		*(u32*)0x0205AA84 = 0xE1A00000; // nop
+		*(u32*)0x0205AA88 = 0xE1A00000; // nop
+		*(u32*)0x0205AA94 = 0xE1A00000; // nop
+		*(u32*)0x0205ABF4 = 0xE1A00000; // nop
+		*(u32*)0x0205AC50 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0205AC74 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0205AC7C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205FA64 = 0xE1A00000; // nop
+	}
+
 	// AlphaBounce (USA)
 	// Does not boot
 	/*else if (strcmp(romTid, "KALE") == 0) {
@@ -240,6 +286,63 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B0600 = 0xE1A00000; // nop
 		*(u32*)0x020B0604 = 0xE1A00000; // nop
 		*(u32*)0x020B060C = 0xE1A00000; // nop
+	}*/
+
+	// Antipole (USA)
+	// Does not boot due to lack of memory
+	/*else if (strcmp(romTid, "KJHE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x020333F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02035704 = 0xE1A00000; // nop
+		*(u32*)0x020357E0 = 0xE1A00000; // nop
+		*(u32*)0x0203BAD8 = 0xE1A00000; // nop
+		*(u32*)0x0203D9E4 = 0xE1A00000; // nop
+		*(u32*)0x02056BD0 = 0xE1A00000; // nop
+		*(u32*)0x020577A4 = 0xE1A00000; // nop
+		*(u32*)0x020581AC = 0xE1A00000; // nop
+		*(u32*)0x02058260 = 0xE1A00000; // nop
+		*(u32*)0x02058300 = 0xE1A00000; // nop
+		*(u32*)0x02058380 = 0xE1A00000; // nop
+		*(u32*)0x020583FC = 0xE1A00000; // nop
+		*(u32*)0x02058480 = 0xE1A00000; // nop
+		*(u32*)0x02058988 = 0xE1A00000; // nop
+		*(u32*)0x02058A44 = 0xE1A00000; // nop
+		*(u32*)0x02058AF0 = 0xE1A00000; // nop
+		*(u32*)0x02058B84 = 0xE1A00000; // nop
+		*(u32*)0x02058C18 = 0xE1A00000; // nop
+		*(u32*)0x02058CAC = 0xE1A00000; // nop
+		*(u32*)0x02058D40 = 0xE1A00000; // nop
+		*(u32*)0x02058DD4 = 0xE1A00000; // nop
+		*(u32*)0x02058E68 = 0xE1A00000; // nop
+		*(u32*)0x02058EFC = 0xE1A00000; // nop
+		*(u32*)0x02059020 = 0xE1A00000; // nop
+		*(u32*)0x02059084 = 0xE1A00000; // nop
+		*(u32*)0x0205914C = 0xE1A00000; // nop
+		*(u32*)0x020591BC = 0xE1A00000; // nop
+		*(u32*)0x02059248 = 0xE1A00000; // nop
+		*(u32*)0x020592B8 = 0xE1A00000; // nop
+		*(u32*)0x02059340 = 0xE1A00000; // nop
+		*(u32*)0x020593B0 = 0xE1A00000; // nop
+		*(u32*)0x020594C4 = 0xE1A00000; // nop
+		*(u32*)0x0205952C = 0xE1A00000; // nop
+		*(u32*)0x020595AC = 0xE1A00000; // nop
+		*(u32*)0x02059610 = 0xE1A00000; // nop
+		*(u32*)0x020596C8 = 0xE1A00000; // nop
+		*(u32*)0x02059738 = 0xE1A00000; // nop
+		*(u32*)0x0205D874 = 0xE1A00000; // nop
+		*(u32*)0x0205D878 = 0xE1A00000; // nop
+		*(u32*)0x0205D884 = 0xE1A00000; // nop
+		*(u32*)0x0205DA40 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0205DA64 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0205DA6C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0205F090 = 0xE1A00000; // nop
+		*(u32*)0x0205F094 = 0xE1A00000; // nop
+		*(u32*)0x0205F098 = 0xE1A00000; // nop
+		*(u32*)0x0205F09C = 0xE1A00000; // nop
+		*(u32*)0x02061984 = 0xE1A00000; // nop
 	}*/
 
 	// Art Style: AQUIA (USA)
@@ -297,6 +400,40 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0209A5F4 = 0xE1A00000; // nop
 		*(u32*)0x0209A738 = 0xE1A00000; // nop
 	}*/
+
+	// G.G. Series: Assault Buster (USA)
+	else if (strcmp(romTid, "KABE") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200D83C = 0xE1A00000; // nop
+		*(u32*)0x0204F59C = 0xE1A00000; // nop
+		*(u32*)0x02053530 = 0xE1A00000; // nop
+		*(u32*)0x02059980 = 0xE1A00000; // nop
+		*(u32*)0x0205B81C = 0xE1A00000; // nop
+		*(u32*)0x0205B820 = 0xE1A00000; // nop
+		*(u32*)0x0205B82C = 0xE1A00000; // nop
+		*(u32*)0x0205B98C = 0xE1A00000; // nop
+		*(u32*)0x0205B9E8 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0205BA0C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0205BA14 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020607FC = 0xE1A00000; // nop
+	}
+
+	// G.G. Series: Assault Buster (Japan)
+	else if (strcmp(romTid, "KABJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200A29C = 0xE1A00000; // nop
+		*(u32*)0x020427A0 = 0xE1A00000; // nop
+		*(u32*)0x020466A0 = 0xE1A00000; // nop
+		*(u32*)0x0204C830 = 0xE1A00000; // nop
+		*(u32*)0x0204E6C4 = 0xE1A00000; // nop
+		*(u32*)0x0204E6C8 = 0xE1A00000; // nop
+		*(u32*)0x0204E6D4 = 0xE1A00000; // nop
+		*(u32*)0x0204E834 = 0xE1A00000; // nop
+		*(u32*)0x0204E890 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0204E8B4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0204E8BC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02053548 = 0xE1A00000; // nop
+	}
 
 	// Aura-Aura Climber (USA)
 	else if (strcmp(romTid, "KSRE") == 0) {
