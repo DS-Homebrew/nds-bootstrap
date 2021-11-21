@@ -38,7 +38,150 @@ bool patchOffsetCacheChanged = false;
 extern bool logging;
 extern bool gbaRomFound;
 
+void dsiWarePatch(const tNDSHeader* ndsHeader) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	extern u8 dsiSD;
+	if (!dsiSD) {
+		// Stub out save functions
+
+		// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
+		if (strcmp(romTid, "K72V") == 0) {
+			*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
+		}
+
+		// A Little Bit of... Puzzle League (Europe, Australia)
+		else if (strcmp(romTid, "KPNV") == 0) {
+			*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Asphalt 4: Elite Racing (USA)
+		else if (strcmp(romTid, "KA4E") == 0) {
+			*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
+		}
+
+		// Asphalt 4: Elite Racing (Europe, Australia)
+		else if (strcmp(romTid, "KA4V") == 0) {
+			*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
+		}
+
+		// Aura-Aura Climber (USA)
+		else if (strcmp(romTid, "KSRE") == 0) {
+			*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		}
+
+		// Aura-Aura Climber (Europe, Australia)
+		else if (strcmp(romTid, "KSRV") == 0) {
+			*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Brain Challenge (USA)
+		else if (strcmp(romTid, "KBCE") == 0) {
+			*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Brain Challenge (Europe, Australia)
+		else if (strcmp(romTid, "KBCV") == 0) {
+			*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
+		}
+
+		// Cave Story (USA)
+		else if (strcmp(romTid, "KCVE") == 0) {
+			*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
+		}
+
+		// Crazy Chicken: Director's Cut (Europe)
+		else if (strcmp(romTid, "KQZP") == 0) {
+			*(u32*)0x0207DAC0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207DD1C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207DF6C = 0xE12FFF1E; // bx lr
+		}
+
+		// Crazy Chicken: Pirates (Europe)
+		else if (strcmp(romTid, "KCVP") == 0) {
+			*(u32*)0x020771D0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207742C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
+		}
+
+		// GO Series: Earth Saver (USA)
+		else if (strcmp(romTid, "KB8E") == 0) {
+			*(u32*)0x02005530 = 0xE1A00000; // nop
+			*(u32*)0x02005534 = 0xE1A00000; // nop
+			*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02014BEC;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+
+		// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
+		else if (strcmp(romTid, "KYBE") == 0) {
+			*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203C928 = 0xE12FFF1E; // bx lr
+		}
+
+		// Face Pilot: Fly With Your Nintendo DSi Camera! (Europe, Australia)
+		else if (strcmp(romTid, "KYBV") == 0) {
+			*(u32*)0x0200BB44 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
+		}
+
+		// Ferrari GT: Evolution (USA)
+		else if (strcmp(romTid, "KFRE") == 0) {
+			*(u32*)0x0205FDA8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Ferrari GT: Evolution (Europe, Australia)
+		else if (strcmp(romTid, "KFRV") == 0) {
+			*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
+		}
+
+		// Nintendogs (China)
+		/*else if (strcmp(romTid, "KDOC") == 0) {
+			*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
+		}*/
+
+		// Plants vs. Zombies (USA)
+		else if (strcmp(romTid, "KZLE") == 0) {
+			*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr
+		}
+
+		// Plants vs. Zombies (Europe, Australia)
+		else if (strcmp(romTid, "KZLV") == 0) {
+			*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Puzzle League: Express (USA)
+		else if (strcmp(romTid, "KPNE") == 0) {
+			*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
+		}
+
+		// Tetris Party Live (USA)
+		else if (strcmp(romTid, "KTEE") == 0) {
+			*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
+		}
+
+		// Tetris Party Live (Europe, Australia)
+		else if (strcmp(romTid, "KTEV") == 0) {
+			*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+		}
+	}
+}
+
 void patchBinary(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode == 3) {
+		dsiWarePatch(ndsHeader);
+		return;
+	}
+
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Trauma Center: Under the Knife (USA)
@@ -408,126 +551,6 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x202E69C = 0xE1A00000; //nop
         *(u32*)0x202E6A0 = 0xE1A00000; //nop
     }
-
-	extern u8 dsiSD;
-	if (!dsiSD) {
-		// Stub out save functions
-
-		// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
-		if (strcmp(romTid, "K72V") == 0) {
-			*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
-		}
-
-		// A Little Bit of... Puzzle League (Europe, Australia)
-		else if (strcmp(romTid, "KPNV") == 0) {
-			*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
-		}
-
-		// Asphalt 4: Elite Racing (USA)
-		else if (strcmp(romTid, "KA4E") == 0) {
-			*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
-		}
-
-		// Asphalt 4: Elite Racing (Europe, Australia)
-		else if (strcmp(romTid, "KA4V") == 0) {
-			*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
-		}
-
-		// Aura-Aura Climber (USA)
-		else if (strcmp(romTid, "KSRE") == 0) {
-			*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		}
-
-		// Aura-Aura Climber (Europe, Australia)
-		else if (strcmp(romTid, "KSRV") == 0) {
-			*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
-		}
-
-		// Brain Challenge (USA)
-		else if (strcmp(romTid, "KBCE") == 0) {
-			*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
-		}
-
-		// Brain Challenge (Europe, Australia)
-		else if (strcmp(romTid, "KBCV") == 0) {
-			*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
-		}
-
-		// Cave Story (USA)
-		else if (strcmp(romTid, "KCVE") == 0) {
-			*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
-		}
-
-		// GO Series: Earth Saver (USA)
-		else if (strcmp(romTid, "KB8E") == 0) {
-			*(u32*)0x02005530 = 0xE1A00000; // nop
-			*(u32*)0x02005534 = 0xE1A00000; // nop
-			*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
-
-			// Skip Manual screen
-			for (int i = 0; i < 11; i++) {
-				u32* offset = (u32*)0x02014BEC;
-				offset[i] = 0xE1A00000; // nop
-			}
-		}
-
-		// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
-		else if (strcmp(romTid, "KYBE") == 0) {
-			*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
-			//*(u32*)0x0203C928 = 0xE12FFF1E; // bx lr
-		}
-
-		// Face Pilot: Fly With Your Nintendo DSi Camera! (Europe, Australia)
-		else if (strcmp(romTid, "KYBV") == 0) {
-			*(u32*)0x0200BB44 = 0xE12FFF1E; // bx lr
-			//*(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
-		}
-
-		// Ferrari GT: Evolution (USA)
-		else if (strcmp(romTid, "KFRE") == 0) {
-			*(u32*)0x0205FDA8 = 0xE12FFF1E; // bx lr
-		}
-
-		// Ferrari GT: Evolution (Europe, Australia)
-		else if (strcmp(romTid, "KFRV") == 0) {
-			*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
-		}
-
-		// Nintendogs (China)
-		/*else if (strcmp(romTid, "KDOC") == 0) {
-			*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
-		}*/
-
-		// Plants vs. Zombies (USA)
-		else if (strcmp(romTid, "KZLE") == 0) {
-			*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr
-		}
-
-		// Plants vs. Zombies (Europe, Australia)
-		else if (strcmp(romTid, "KZLV") == 0) {
-			*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
-		}
-
-		// Puzzle League: Express (USA)
-		else if (strcmp(romTid, "KPNE") == 0) {
-			*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
-		}
-
-		// Tetris Party Live (USA)
-		else if (strcmp(romTid, "KTEE") == 0) {
-			*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
-			*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
-		}
-
-		// Tetris Party Live (Europe, Australia)
-		else if (strcmp(romTid, "KTEV") == 0) {
-			*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
-		}
-	}
 }
 
 void bannerSavPatch(const tNDSHeader* ndsHeader) {
