@@ -1641,6 +1641,7 @@ int arm7_main(void) {
 			(ROMsupportsDsiMode(ndsHeader)
 			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
+			|| strncmp(romTid, "A2L", 3) == 0 // Anno 1701: Dawn of Discovery
 			) ? 0 : 1,
 			usesCloneboot,
 			ROMinRAM,
