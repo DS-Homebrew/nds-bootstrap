@@ -94,6 +94,7 @@ extern u32 srParamsFileCluster;
 extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
+extern u8 region;
 extern u8 donorSdkVer;
 
 u32 arm9iromOffset = 0;
@@ -410,6 +411,9 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
+		if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
+			*(u8*)0x02000406 = language;
+		}
 	}
 
 	if (personalData->language != 6 && ndsHeader->reserved1[8] == 0x80) {
@@ -465,7 +469,80 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 }
 
-static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {
+	if (ROMsupportsDsiMode(ndsHeader)) {
+		if (ndsHeader->arm9destination >= 0x02000800) {
+			// Construct TWLCFG
+			u8* twlCfg = (u8*)0x02000400;
+			u8* personalData = (u8*)0x02FFFC80;
+			tonccpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
+			tonccpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
+			tonccpy(twlCfg+0x8, personalData+0x68, 4); // RTC Offset (difference in seconds on change)
+			tonccpy(twlCfg+0x1A, personalData+0x52, 1); // Alarm Hour   (0..17h)
+			tonccpy(twlCfg+0x1B, personalData+0x53, 1); // Alarm Minute (0..3Bh)
+			tonccpy(twlCfg+0x1E, personalData+0x56, 1); // Alarm Enable (0=Off, 1=On)
+			toncset(twlCfg+0x24, 0x03, 1); // Unknown (02h or 03h)
+			tonccpy(twlCfg+0x30, personalData+0x58, 0xC); // TSC calib
+			toncset32(twlCfg+0x3C, 0x0201209C, 1);
+			tonccpy(twlCfg+0x44, personalData+0x02, 1); // Favorite color (also Sysmenu Cursor Color)
+			tonccpy(twlCfg+0x46, personalData+0x03, 2); // Birthday (month, day)
+			tonccpy(twlCfg+0x48, personalData+0x06, 0x16); // Nickname (UCS-2), max 10 chars+EOL
+			tonccpy(twlCfg+0x5E, personalData+0x1C, 0x36); // Message (UCS-2), max 26 chars+EOL
+			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
+			if (twlCfg[0x1E0] == 2 || twlCfg[0x1E0] == 3) {
+				toncset32(twlCfg+0x1E4, 0x520000, 1); // WlFirm RAM vars
+				toncset32(twlCfg+0x1E8, 0x520000, 1); // WlFirm RAM base
+				toncset32(twlCfg+0x1EC, 0x020000, 1); // WlFirm RAM size
+			} else {
+				toncset32(twlCfg+0x1E4, 0x500400, 1); // WlFirm RAM vars
+				toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
+				toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
+			}
+			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
+
+			u32 configFlags = 0x0100000F;
+			configFlags |= BIT(3);
+
+			toncset32(twlCfg, configFlags, 1); // Config Flags
+			fileRead(twlCfg+0x10, romFile, 0x20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
+			fileRead(twlCfg+0x9C, romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
+		}
+
+		// Set region flag
+		if (region == 0xFE || region == -2 || region == 0xFF || region == -1) {
+			u8 newRegion = 0;
+			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
+				newRegion = 0;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "T", 1) == 0) {
+				newRegion = 1;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "V", 1) == 0) {
+				newRegion = 2;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
+				newRegion = 3;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
+				newRegion = 4;
+			} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
+				newRegion = 5;
+			}
+			toncset((u8*)0x02FFFD70, newRegion, 1);
+		} else {
+			toncset((u8*)0x02FFFD70, region, 1);
+		}
+		// Set bitmask for supported languages
+		u8 curRegion = *(u8*)0x02FFFD70;
+		if (curRegion == 1) {
+			*(u32*)(0x02FFFD68) = 0x26;
+		} else if (curRegion == 2 || curRegion == 3) {
+			*(u32*)(0x02FFFD68) = 0x3E;
+		} else if (curRegion == 4) {
+			*(u32*)(0x02FFFD68) = 0x40; //CHN
+		} else if (curRegion == 5) {
+			*(u32*)(0x02FFFD68) = 0x80; //KOR
+		} else if (curRegion == 0) {
+			*(u32*)(0x02FFFD68) = 0x01; //JAP
+		}
+	}
+
 	u32 chipID = getChipId(ndsHeader, moduleParams);
     dbg_printf("chipID: ");
     dbg_hexa(chipID);
@@ -761,7 +838,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag != ARM9_READY);
 
 	nocashMessage("Starting the NDS file...");
-    setMemoryAddress(ndsHeader, moduleParams);
+    setMemoryAddress(ndsHeader, moduleParams, romFile);
 	startBinary_ARM7();
 
 	return 0;
