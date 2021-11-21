@@ -676,7 +676,50 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
 		*(u32*)0x0203A548 = 0xE1A00000; // nop
 		*(u32*)0x0203D0A4 = 0xE1A00000; // nop
-	//	*(u32*)0x02070558 = 0xE1A00000; // nop
+	}
+
+	// Dragon's Lair (Europe, Australia)
+	else if (strcmp(romTid, "KDLV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		//*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x020051E4 = 0xE1A00000; // nop
+		*(u32*)0x0201205C = 0xE1A00000; // nop
+		*(u32*)0x02012060 = 0xE1A00000; // nop
+		for (int i = 0; i < 5; i++) {
+			u32* offset1 = (u32*)0x020132B4;
+			u32* offset2 = (u32*)0x020135F0;
+			u32* offset3 = (u32*)0x02013A38;
+			u32* offset4 = (u32*)0x02014D9C;
+			u32* offset5 = (u32*)0x02016128;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+			offset3[i] = 0xE1A00000; // nop
+			offset4[i] = 0xE1A00000; // nop
+			offset5[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0202FAC0 = 0xE1A00000; // nop
+		*(u32*)0x0202FBF4 = 0xE1A00000; // nop
+		*(u32*)0x0202FC08 = 0xE1A00000; // nop
+		*(u32*)0x02033038 = 0xE1A00000; // nop
+		*(u32*)0x02036A40 = 0xE1A00000; // nop
+		*(u32*)0x0203885C = 0xE1A00000; // nop
+		*(u32*)0x02038860 = 0xE1A00000; // nop
+		*(u32*)0x0203886C = 0xE1A00000; // nop
+		*(u32*)0x020389B0 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x02038A0C = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x02038A0C = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+		}
+		*(u32*)0x02038A30 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02038A38 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203A05C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203A530 = 0xE1A00000; // nop
+		*(u32*)0x0203A534 = 0xE1A00000; // nop
+		*(u32*)0x0203A538 = 0xE1A00000; // nop
+		*(u32*)0x0203A53C = 0xE1A00000; // nop
+		*(u32*)0x0203D098 = 0xE1A00000; // nop
 	}
 
 	// Dragon's Lair II: Time Warp (USA)
@@ -702,6 +745,33 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203CAB8 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0203E0D4 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x02041040 = 0xE1A00000; // nop
+	}
+
+	// Dragon's Lair II: Time Warp (Europe, Australia)
+	// Crashes on company logos (Cause unknown)
+	else if (strcmp(romTid, "KLYV") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050EC = 0xE1A00000; // nop
+		*(u32*)0x020051E0 = 0xE1A00000; // nop
+		*(u32*)0x020171E8 = 0xE1A00000; // nop
+		*(u32*)0x020171EC = 0xE1A00000; // nop
+		*(u32*)0x02033F64 = 0xE1A00000; // nop
+		*(u32*)0x02036AE8 = 0xE1A00000; // nop
+		*(u32*)0x0203740C = 0xE1A00000; // nop
+		*(u32*)0x0203AC20 = 0xE1A00000; // nop
+		*(u32*)0x0203C9E8 = 0xE1A00000; // nop
+		*(u32*)0x0203C9EC = 0xE1A00000; // nop
+		*(u32*)0x0203C9F8 = 0xE1A00000; // nop
+		*(u32*)0x0203CB58 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x0203CBB4 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0203CBB4 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+		}
+		*(u32*)0x0203CBD8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203CBE0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203E1FC = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x02041168 = 0xE1A00000; // nop
 	}
 
 	// GO Series: Earth Saver (USA)
