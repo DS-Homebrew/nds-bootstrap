@@ -813,8 +813,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
-	// 4MB of RAM causes crash in the main menu
-	else if (strcmp(romTid, "Z2EJ") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "Z2EJ") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02015BC4 = 0xE1A00000; // nop
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
@@ -823,7 +822,10 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020216BC = 0xE1A00000; // nop
 		*(u32*)0x020216C8 = 0xE1A00000; // nop
 		*(u32*)0x02021828 = 0xE1A00000; // nop
-		//*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02021884 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020218A8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020218B0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020219B8 = 0x02257500;
 		*(u32*)0x02026A94 = 0xE1A00000; // nop
 	}
 
