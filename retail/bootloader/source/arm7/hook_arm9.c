@@ -10,6 +10,7 @@
 #define b_extendedMemory BIT(1)
 #define b_ROMinRAM BIT(2)
 #define b_dsDebugRam BIT(3)
+#define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
 #define b_overlaysInRam BIT(6)
 #define b_cacheFlushFlag BIT(7)
@@ -129,6 +130,7 @@ int hookNdsRetailArm9(
 	bool extendedMemory,
 	bool ROMinRAM,
 	bool dsDebugRam,
+	u8 enableExceptionHandler,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
@@ -154,6 +156,9 @@ int hookNdsRetailArm9(
 	}
 	if (dsDebugRam) {
 		ce9->valueBits |= b_dsDebugRam;
+	}
+	if (enableExceptionHandler) {
+		ce9->valueBits |= b_enableExceptionHandler;
 	}
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;

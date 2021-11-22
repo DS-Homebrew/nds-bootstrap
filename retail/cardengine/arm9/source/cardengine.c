@@ -41,6 +41,7 @@
 #define extendedMemory BIT(1)
 #define ROMinRAM BIT(2)
 #define dsDebugRam BIT(3)
+#define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
@@ -288,6 +289,16 @@ void __attribute__((target("arm"))) sdk5MpuFix() {
 	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
 }
 
+void user_exception(void);
+
+//---------------------------------------------------------------------------------
+void setExceptionHandler2() {
+//---------------------------------------------------------------------------------
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_B4DS ;
+	EXCEPTION_VECTOR = enterException ;
+	*exceptionC = user_exception;
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
 		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
@@ -297,6 +308,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		mpuSet = true;
+	}
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
 	}
 
 	u16 exmemcnt = REG_EXMEMCNT;
@@ -402,6 +417,10 @@ u32 myIrqEnable(u32 irq) {
 	hookIPC_SYNC();
 
 	REG_EXMEMCNT = exmemcnt;
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

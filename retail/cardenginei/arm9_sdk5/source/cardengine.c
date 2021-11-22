@@ -260,12 +260,12 @@ static void updateDescriptor(int slot, u32 sector) {
 void user_exception(void);
 
 //---------------------------------------------------------------------------------
-/*void setExceptionHandler2() {
+void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION ;
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5 ;
 	EXCEPTION_VECTOR = enterException ;
 	*exceptionC = user_exception;
-}*/
+}
 
 #ifdef TWLSDK
 static void waitForArm7(void) {
@@ -838,7 +838,6 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 			region0Fix();
 		}
 		#endif
-		//setExceptionHandler2();
 		//#ifdef DLDI
 		if (!FAT_InitFiles(false, 0))
 		{
@@ -846,10 +845,9 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 			//return -1;
 		}
 		//#endif
-		//if (ce9->enableExceptionHandler) {
-			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			//setExceptionHandler(user_exception);
-		//}
+		if (ce9->valueBits & enableExceptionHandler) {
+			setExceptionHandler2();
+		}
 		flagsSet = true;
 	}
 
@@ -1066,6 +1064,10 @@ u32 myIrqEnable(u32 irq) {
 	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

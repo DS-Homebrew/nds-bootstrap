@@ -336,7 +336,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	if ((strncmp(romTid, "APD", 3) != 0
 	 && strncmp(romTid, "A24", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
-	 && strncmp(romTid, "AMC", 3) != 0
+	// && strncmp(romTid, "AMC", 3) != 0
+	// && strncmp(romTid, "A8T", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
@@ -422,7 +423,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
-/*static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
+static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	// ExceptionHandler2 (red screen) blacklist
@@ -430,7 +431,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
 	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
 	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
-}*/
+}
 
 /*-------------------------------------------------------------------------
 startBinary_ARM7
@@ -800,6 +801,7 @@ int arm7_main(void) {
 		extendedMemory2,
 		ROMinRAM,
 		dsDebugRam,
+		supportsExceptionHandler(romTid),
 		overlaysSize,
 		ioverlaysSize,
 		fatTableSize,

@@ -244,6 +244,16 @@ u32 popFromAsyncQueueHead() {
 }*/
 
 
+void user_exception(void);
+
+//---------------------------------------------------------------------------------
+void setExceptionHandler2() {
+//---------------------------------------------------------------------------------
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION ;
+	EXCEPTION_VECTOR = enterException ;
+	*exceptionC = user_exception;
+}
+
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
 	//int count = 0;
@@ -871,17 +881,9 @@ int cardRead(u32* cacheStruct) {
 			//nocashMessage("!FAT_InitFiles");
 			//return -1;
 		}
-		//if (strncmp(getRomTid(ndsHeader), "UBR", 3) != 0) {
-		//	debug8mbMpuFix();
-		//}
-
-		//ndsHeader->romSize += 0x1000;
-
-		//if (ce9->enableExceptionHandler && ce9==CARDENGINEI_ARM9_LOCATION) {
-			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			//setExceptionHandler(user_exception);
-		//}
-
+		if (ce9->valueBits & enableExceptionHandler) {
+			setExceptionHandler2();
+		}
 		flagsSet = true;
 	}
 
@@ -1109,6 +1111,10 @@ u32 myIrqEnable(u32 irq) {
 	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

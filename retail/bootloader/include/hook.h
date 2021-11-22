@@ -50,6 +50,7 @@ int hookNdsRetailArm9(
 	bool extendedMemory,
 	bool ROMinRAM,
 	bool dsDebugRam,
+	u8 enableExceptionHandler,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
