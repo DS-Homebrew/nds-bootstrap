@@ -666,10 +666,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		if (extendedMemory2) {
 			*(u32*)0x02038A18 = 0xE3A00627; // mov r0, #0x2700000
 		} else {
-			*(u32*)0x02038A18 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+			*(u32*)0x02038A18 = 0xE3A0078F; // mov r0, #0x23C0000
 		}
 		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02038B4C = 0x02084600;
 		*(u32*)0x0203A068 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x0203A53C = 0xE1A00000; // nop
 		*(u32*)0x0203A540 = 0xE1A00000; // nop
@@ -710,10 +711,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		if (extendedMemory2) {
 			*(u32*)0x02038A0C = 0xE3A00627; // mov r0, #0x2700000
 		} else {
-			*(u32*)0x02038A0C = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+			*(u32*)0x02038A0C = 0xE3A0078F; // mov r0, #0x23C0000
 		}
 		*(u32*)0x02038A30 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A38 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02038B40 = 0x02084600;
 		*(u32*)0x0203A05C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x0203A530 = 0xE1A00000; // nop
 		*(u32*)0x0203A534 = 0xE1A00000; // nop
@@ -739,10 +741,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		if (extendedMemory2) {
 			*(u32*)0x0203CA8C = 0xE3A00627; // mov r0, #0x2700000
 		} else {
-			*(u32*)0x0203CA8C = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+			*(u32*)0x0203CA8C = 0xE3A0078F; // mov r0, #0x23C0000
 		}
 		*(u32*)0x0203CAB0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203CAB8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203CBC0 = 0x02089260;
 		*(u32*)0x0203E0D4 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x02041040 = 0xE1A00000; // nop
 	}
@@ -766,10 +769,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		if (extendedMemory2) {
 			*(u32*)0x0203CBB4 = 0xE3A00627; // mov r0, #0x2700000
 		} else {
-			*(u32*)0x0203CBB4 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+			*(u32*)0x0203CBB4 = 0xE3A0078F; // mov r0, #0x23C0000
 		}
 		*(u32*)0x0203CBD8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203CBE0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203CCE8 = 0x020894E0;
 		*(u32*)0x0203E1FC = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x02041168 = 0xE1A00000; // nop
 	}
@@ -1484,10 +1488,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		if (extendedMemory2) {
 			*(u32*)0x0203C2D4 = 0xE3A00627; // mov r0, #0x2700000
 		} else {
-			*(u32*)0x0203C2D4 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail units)
+			*(u32*)0x0203C2D4 = 0xE3A0078F; // mov r0, #0x23C0000
 		}
 		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203C408 = 0x02088940;
 		*(u32*)0x0203D91C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
 		*(u32*)0x0203DDC8 = 0xE1A00000; // nop
 		*(u32*)0x0203DDCC = 0xE1A00000; // nop
