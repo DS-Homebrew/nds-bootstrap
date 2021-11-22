@@ -1451,6 +1451,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E8130 = 0xE3A0079F; // mov r0, #0x27C0000
 		*(u32*)0x020E8154 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020E815C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020E8264 = 0x02186C60;
 		*(u32*)0x020E977C = 0xE1A00000; // nop
 		*(u32*)0x020E9780 = 0xE1A00000; // nop
 		*(u32*)0x020E9784 = 0xE1A00000; // nop
