@@ -347,7 +347,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Art Style: AQUIA (USA)
-	// Audio doesn't play
+	// Audio doesn't play on retail consoles
 	// Pressing A to exit options will cause an error
 	else if (strcmp(romTid, "KAAE") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
@@ -383,14 +383,18 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 			*(u32*)0x020665E4 = 0xE8BD8008; // LDMFD SP!, {R3,PC}
 			*(u32*)0x020665E8 = 0x027FF000;
 		} */
-		*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
+		if (extendedMemory2) {
+			*(u32*)0x02064C04 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x02064C04 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
 		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02066054 = 0xE12FFF1E; // bx lr
 	}
 
 	// Art Style: AQUITE (Europe, Australia)
-	// Audio doesn't play
+	// Audio doesn't play on retail consoles
 	// Pressing A to exit options will cause an error
 	else if (strcmp(romTid, "KAAV") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
@@ -413,7 +417,11 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02064CB0 = 0xE1A00000; // nop
 		*(u32*)0x02064CB4 = 0xE1A00000; // nop
 		*(u32*)0x02064CB8 = 0xE1A00000; // nop
-		*(u32*)0x02064D14 = 0xE3A0078F; // mov r0, #0x23C0000
+		if (extendedMemory2) {
+			*(u32*)0x02064D14 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x02064D14 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
 		*(u32*)0x02064D38 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064D40 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02066164 = 0xE12FFF1E; // bx lr
