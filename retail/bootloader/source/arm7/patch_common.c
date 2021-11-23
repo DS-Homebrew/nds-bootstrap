@@ -389,6 +389,36 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02066054 = 0xE12FFF1E; // bx lr
 	}
 
+	// Art Style: AQUITE (Europe, Australia)
+	// Audio doesn't play
+	// Pressing A to exit options will cause an error
+	else if (strcmp(romTid, "KAAV") == 0) {
+		*(u32*)0x02005094 = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050A0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x020051B8 = 0xE1A00000; // nop
+		*(u32*)0x0203BC5C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BD28 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02051F10 = 0xE1A00000; // nop
+		*(u32*)0x02054DE8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02054DEC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020584CC = 0xE1A00000; // nop
+		*(u32*)0x02062D68 = 0xE1A00000; // nop
+		*(u32*)0x02064B58 = 0xE1A00000; // nop
+		*(u32*)0x02064B5C = 0xE1A00000; // nop
+		*(u32*)0x02064B58 = 0xE1A00000; // nop
+		*(u32*)0x02064CAC = 0xE1A00000; // nop
+		*(u32*)0x02064CB0 = 0xE1A00000; // nop
+		*(u32*)0x02064CB4 = 0xE1A00000; // nop
+		*(u32*)0x02064CB8 = 0xE1A00000; // nop
+		*(u32*)0x02064D14 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02064D38 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02064D40 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02066164 = 0xE12FFF1E; // bx lr
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	// Does not boot (Black screens)
 	/*else if (strcmp(romTid, "KA4E") == 0) {
