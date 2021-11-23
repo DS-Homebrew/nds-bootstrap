@@ -588,8 +588,10 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201DD1C = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0201DD40 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201DD48 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0201EFDC = 0xE12FFF1E; // bx lr
-		*(u32*)0x0201EFE8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EFDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201EFE0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EFE8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EFEC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02022418 = 0xE1A00000; // nop
 	}
 
@@ -1892,6 +1894,95 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
+
+	// DSiWare containing Cloneboot
+
+	// Art Style: BASE 10 (USA)
+	else if (strcmp(romTid, "KADE") == 0) {
+		*(u32*)0x0200749C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074AC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074DC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020075B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip manual screen)
+		//*(u32*)0x0202D2EC = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x0202D314 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203A288 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02056724 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02059F88 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02064FC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020668F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020668FC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066E50 = 0xE1A00000; // nop
+		*(u32*)0x02066E54 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02066E6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02066FB4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067050 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067080 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067154 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067184 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206865C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020686B0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02068A98 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070068 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Art Style: CODE (Europe, Australia)
+	else if (strcmp(romTid, "KADV") == 0) {
+		*(u32*)0x0200749C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074AC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074DC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020075B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip manual screen)
+		*(u32*)0x0203A318 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020567B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205A018 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02065050 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02066988 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206698C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066EE0 = 0xE1A00000; // nop
+		*(u32*)0x02066EE4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02066EFC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067044 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020670E0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067110 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020671E4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067214 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020686EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02068740 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02068B28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020700F8 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Art Style: DECODE (Japan)
+	else if (strcmp(romTid, "KADJ") == 0) {
+		*(u32*)0x020074A4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074D0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074E4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020074F4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020075B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip manual screen)
+		*(u32*)0x0203B148 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020575B0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205AE14 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067784 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02067788 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02067CDC = 0xE1A00000; // nop
+		*(u32*)0x02067CE0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067CF8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067E40 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067EDC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067F0C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067FE0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02068010 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02069480 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020694C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070E08 = 0xE3A00000; // mov r0, #0
+	}
 }
 
 static bool rsetA7CacheDone = false;

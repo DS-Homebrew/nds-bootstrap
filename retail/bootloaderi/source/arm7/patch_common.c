@@ -37,11 +37,11 @@ bool patchOffsetCacheChanged = false;
 
 extern bool logging;
 extern bool gbaRomFound;
+extern u8 dsiSD;
 
 void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	extern u8 dsiSD;
 	if (!dsiSD) {
 		// Stub out save functions
 
@@ -519,6 +519,23 @@ void patchBinary(const tNDSHeader* ndsHeader) {
         *(u32*)0x204995C = 0xe12fff1e; //bx lr
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
+
+	// DSiWare containing Cloneboot
+
+	// Art Style: BASE 10 (USA)
+	else if (strcmp(romTid, "KADE") == 0 && !dsiSD) {
+		*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip Manual screen)
+	}
+
+	// Art Style: CODE (Europe, Australia)
+	else if (strcmp(romTid, "KADV") == 0 && !dsiSD) {
+		*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip manual screen)
+	}
+
+	// Art Style: DECODE (Japan)
+	else if (strcmp(romTid, "KADJ") == 0 && !dsiSD) {
+		*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip manual screen)
+	}
 
 	// Pop Island (USA)
     else if (strcmp(romTid, "KPPE") == 0) {
