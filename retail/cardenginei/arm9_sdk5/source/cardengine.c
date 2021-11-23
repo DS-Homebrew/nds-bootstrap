@@ -78,7 +78,7 @@ bool sdRead = false;
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
 #ifdef TWLSDK
-static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB] = {0};
+static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 static u32 cacheCounter[dev_CACHE_SLOTS_16KB];
 #else
 static u32* cacheDescriptor = (u32*)0x02790000;
@@ -106,7 +106,7 @@ static u32 tempDmaParams[8] = {0};
 
 s8 mainScreen = 0;
 
-void SetBrightness(u8 screen, s8 bright) {
+static void SetBrightness(u8 screen, s8 bright) {
 	u8 mode = 1;
 
 	if (bright < 0) {
@@ -262,8 +262,10 @@ void user_exception(void);
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5 ;
-	EXCEPTION_VECTOR = enterException ;
+	if (EXCEPTION_VECTOR == enterException && *exceptionC == user_exception) return;
+
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5;
+	EXCEPTION_VECTOR = enterException;
 	*exceptionC = user_exception;
 }
 
@@ -762,6 +764,21 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 	return 0;
 }
 
+#ifdef TWLSDK
+void __attribute__((target("arm"))) openDebugRam() {
+	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
+}
+#else
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
+}
+
+void __attribute__((target("arm"))) mpuFix() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
+}
+#endif
+
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -811,21 +828,6 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 
     return false;
 }
-
-#ifdef TWLSDK
-void __attribute__((target("arm"))) openDebugRam() {
-	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
-}
-#else
-// Revert region 0 patch
-void __attribute__((target("arm"))) region0Fix() {
-	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
-}
-
-void __attribute__((target("arm"))) mpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
-}
-#endif
 
 int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");

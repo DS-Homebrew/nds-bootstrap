@@ -34,6 +34,8 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
+#define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
+
 #define FEATURE_SLOT_GBA			0x00000010
 #define FEATURE_SLOT_NDS			0x00000020
 
@@ -117,8 +119,10 @@ void user_exception(void);
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_B4DS ;
-	EXCEPTION_VECTOR = enterException ;
+	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
+
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_B4DS;
+	EXCEPTION_VECTOR_SDK1 = enterException;
 	*exceptionC = user_exception;
 }
 
@@ -255,10 +259,6 @@ static void initialize(void) {
 			}
 		}
 
-		if (ce9->valueBits & enableExceptionHandler) {
-			setExceptionHandler2();
-		}
-
 		initialized = true;
 	}
 }
@@ -310,6 +310,9 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 		if (region0FixNeeded) {
 			region0Fix();
+		}
+		if (ce9->valueBits & enableExceptionHandler) {
+			setExceptionHandler2();
 		}
 		mpuSet = true;
 	}
@@ -381,6 +384,10 @@ u32 myIrqEnable(u32 irq) {
 
 	setDeviceOwner();
 	initialize();
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	if (unpatchedFuncs->compressed_static_end) {
 		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;

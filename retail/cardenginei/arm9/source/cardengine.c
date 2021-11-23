@@ -36,6 +36,8 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
+#define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
+
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
 #define ROMinRAM BIT(2)
@@ -112,7 +114,7 @@ s8 mainScreen = 0;
 
 void myIrqHandlerDMA(void);
 
-void SetBrightness(u8 screen, s8 bright) {
+static void SetBrightness(u8 screen, s8 bright) {
 	u8 mode = 1;
 
 	if (bright < 0) {
@@ -249,8 +251,10 @@ void user_exception(void);
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION ;
-	EXCEPTION_VECTOR = enterException ;
+	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
+
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+	EXCEPTION_VECTOR_SDK1 = enterException;
 	*exceptionC = user_exception;
 }
 
@@ -781,22 +785,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 	return 0;
 }
 
-//Currently used for NSMBDS romhacks
-//void __attribute__((target("arm"))) debug8mbMpuFix(){
-//	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-//}
-
-// Required for proper access to the extra DSi RAM
-void __attribute__((target("arm"))) debugRamMpuFix() {
-	//asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
-	asm("LDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
-}
-
-// Revert region 0 patch
-void __attribute__((target("arm"))) region0Fix() {
-	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
-}
-
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -867,6 +855,22 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 
     counter++;
 	return counter;
+}
+
+//Currently used for NSMBDS romhacks
+//void __attribute__((target("arm"))) debug8mbMpuFix(){
+//	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
+//}
+
+// Required for proper access to the extra DSi RAM
+void __attribute__((target("arm"))) debugRamMpuFix() {
+	//asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
+	asm("LDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
+}
+
+// Revert region 0 patch
+void __attribute__((target("arm"))) region0Fix() {
+	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
 }
 
 int cardRead(u32* cacheStruct) {
@@ -1077,6 +1081,10 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	if (unpatchedFuncs->compressed_static_end) {
 		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
