@@ -206,8 +206,8 @@ void reset(u32 param) {
 	if (param == 0xFFFFFFFF) {
 		*(u32*)(0x02000000) |= BIT(2);
 	}
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x02004000, 0x3D9000 - 0x4000);
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x023E0000, 0x1E000);
+	toncset((u32*)0x02000004, 0, 0x3D9000 - 4);
+	toncset((u32*)0x023E0000, 0, 0x1E000);
 
 	ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
