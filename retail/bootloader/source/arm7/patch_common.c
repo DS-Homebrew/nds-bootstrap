@@ -521,7 +521,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			*(u32*)0x0204B448 = 0xE3A0078F; // mov r0, #0x23C0000
 		}*/
-		*(u32*)0x0204B448 = 0xE59F0094; // ldr r0,=0x02??0000
+		*(u32*)0x0204B448 = 0xE59F0094; // ldr r0, =0x02??0000
 		*(u32*)0x0204B46C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B474 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0204B488 = 0xE3A01000; // mov r1, #0
@@ -553,7 +553,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			*(u32*)0x0204B4C8 = 0xE3A0078F; // mov r0, #0x23C0000
 		}*/
-		*(u32*)0x0204B4C8 = 0xE59F0094; // ldr r0,=0x02??0000
+		*(u32*)0x0204B4C8 = 0xE59F0094; // ldr r0, =0x02??0000
 		*(u32*)0x0204B4EC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0204B4F4 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0204B508 = 0xE3A01000; // mov r1, #0
@@ -660,6 +660,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020557A0 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x020557C4 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020557CC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02057058 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		*(u32*)0x0205705C = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		*(u32*)0x02057060 = 0xFFFFFFFF;
 		*(u32*)0x0205A134 = 0xE1A00000; // nop
 
 		// Manual screen
