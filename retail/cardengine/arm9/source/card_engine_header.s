@@ -108,7 +108,7 @@ thumbPatches:
 .word   thumb_card_pull
 .word   cacheFlushRef
 .word   terminateForPullOutRef
-.word   0x0
+.word   thumb_reset_arm9
 
 @---------------------------------------------------------------------------------
 card_read_arm9:
@@ -290,6 +290,17 @@ thumb_card_irq_enable:
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
 	bx  lr
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_reset_arm9:
+@---------------------------------------------------------------------------------
+    push	{r1-r7, lr}
+
+	ldr	r3, =reset
+
+	bl	thumb_blx_r3_stub2
+	pop	{r1-r7, pc}
 thumb_blx_r3_stub2:
 	bx	r3
 .pool

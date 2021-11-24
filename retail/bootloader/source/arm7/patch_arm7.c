@@ -26,7 +26,7 @@ u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-/*const u16* generateA7InstrThumb(int arg1, int arg2) {
+const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
 	// 23 bit offset
@@ -41,7 +41,7 @@ u32 generateA7Instr(int arg1, int arg2) {
 	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 
 	return instrs;
-}*/
+}
 
 u16* getOffsetFromBLThumb(u16* blOffset) {
 	s16 codeOffset = blOffset[1];

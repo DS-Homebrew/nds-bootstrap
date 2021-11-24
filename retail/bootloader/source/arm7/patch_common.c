@@ -36,9 +36,8 @@ patchOffsetCacheContents patchOffsetCache;
 
 bool patchOffsetCacheChanged = false;
 
-void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
+void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
-	//extern u32 generateA7Instr(int arg1, int arg2);
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Patch DSi-Exclusives to run in DS mode
@@ -833,6 +832,36 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02041168 = 0xE1A00000; // nop
 	}
 
+	// DS WiFi Settings
+	else if (strcmp(romTid, "B88A") == 0) {
+		const u16* branchCode = generateA7InstrThumb(0x020051F4, (int)ce9->thumbPatches->reset_arm9);
+
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u16*)0x020051F4 = branchCode[0];
+		*(u16*)0x020051F6 = branchCode[1];
+		*(u32*)0x02005224 = 0xFFFFFFFF;
+		*(u16*)0x0202FAEE = 0x46C0; // nop
+		*(u16*)0x0202FAF0 = 0x46C0; // nop
+		*(u16*)0x02031B3E = 0x46C0; // nop
+		*(u16*)0x02031B40 = 0x46C0; // nop
+		*(u16*)0x020344A0 = 0x46C0; // nop
+		*(u16*)0x020344A2 = 0x46C0; // nop
+		*(u16*)0x02036532 = 0x46C0; // nop
+		*(u16*)0x02036534 = 0x46C0; // nop
+		*(u16*)0x02036536 = 0x46C0; // nop
+		*(u16*)0x02036538 = 0x46C0; // nop
+		*(u16*)0x02036542 = 0x46C0; // nop
+		*(u16*)0x02036544 = 0x46C0; // nop
+		*(u16*)0x02036626 = 0x46C0; // nop
+		*(u16*)0x02036628 = 0x46C0; // nop
+		*(u16*)0x020374D8 = 0x2001; // movs r0, #1
+		*(u16*)0x020374DA = 0x4770; // bx lr
+		*(u16*)0x02037510 = 0x2000; // movs r0, #0
+		*(u16*)0x02037512 = 0x4770; // bx lr
+		*(u16*)0x0203B490 = 0x2003; // movs r0, #3
+		*(u16*)0x0203B492 = 0x4770; // bx lr
+	}
+
 	// GO Series: Earth Saver (USA)
 	// Extra fixes required for it to boot on real hardware
 	else if (strcmp(romTid, "KB8E") == 0) {
@@ -1599,9 +1628,9 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	}*/
 }
 
-void patchBinary(const tNDSHeader* ndsHeader) {
+void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	if (ndsHeader->unitCode == 3) {
-		patchDSiModeToDSMode(ndsHeader);
+		patchDSiModeToDSMode(ce9, ndsHeader);
 		return;
 	}
 
