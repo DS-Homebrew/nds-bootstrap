@@ -412,9 +412,9 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
-		if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
+		/*if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
 			*(u8*)0x02000406 = language;
-		}
+		}*/
 	}
 
 	if (personalData->language != 6 && ndsHeader->reserved1[8] == 0x80) {
@@ -472,7 +472,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		if (ndsHeader->arm9destination >= 0x02000800) {
+		/*if (ndsHeader->arm9destination >= 0x02000800) {
 			// Construct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
 			u8* personalData = (u8*)0x02FFFC80;
@@ -507,7 +507,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			toncset32(twlCfg, configFlags, 1); // Config Flags
 			fileRead(twlCfg+0x10, romFile, 0x20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
 			fileRead(twlCfg+0x9C, romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
-		}
+		}*/
 
 		// Set region flag
 		if (region == 0xFE || region == -2 || region == 0xFF || region == -1) {

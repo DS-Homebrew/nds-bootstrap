@@ -113,10 +113,17 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Patch DSiWare to run in DS mode
 
 	// GO Series: 10 Second Run (USA)
-	// Crashes on the title screen
+	// Sound either does not play or stop too quickly
 	else if (strcmp(romTid, "KJUE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02005888 = 0xE12FFF1E; // bx lr
+		// Real hardware fix: Disable option font
+		{
+			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005A9C = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005B74 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02005BA0 = 0xE12FFF1E; // bx lr
+		}
 		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201588C = 0xE1A00000; // nop
 		*(u32*)0x0201589C = 0xE1A00000; // nop
@@ -133,6 +140,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020193B4 = 0xE1A00000; // nop
 		*(u32*)0x02019414 = 0xE1A00000; // nop
 		*(u32*)0x0201942C = 0xE1A00000; // nop
+		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02030A88 = 0xE1A00000; // nop
 		*(u32*)0x02034224 = 0xE1A00000; // nop
 		*(u32*)0x02037F24 = 0xE1A00000; // nop
@@ -143,6 +151,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02039E98 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02039EBC = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02039EC4 = 0x13A00627; // movne r0, #0x2700000
+		//*(u32*)0x02039FCC = 0x02115860;
+		*(u32*)0x0203B3CC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		//*(u32*)0x0203B77C = 0xE12FFF1E; // bx lr
 		/* *(u32*)0x0203B7D4 = 0xE1A00000; // nop
 		*(u32*)0x0203B7D8 = 0xE1A00000; // nop
@@ -390,7 +400,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02064C28 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064C30 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x02066054 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020660BC = 0xE1A00000; // nop
+		*(u32*)0x020660C4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
 	// Art Style: AQUITE (Europe, Australia)
@@ -424,7 +435,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02064D38 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02064D40 = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x02066164 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020661CC = 0xE1A00000; // nop
+		*(u32*)0x020661D4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
 	// Asphalt 4: Elite Racing (USA)
@@ -711,7 +723,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02038A3C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A44 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02038B4C = 0x02084600;
-		*(u32*)0x0203A068 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203A0D0 = 0xE1A00000; // nop
+		*(u32*)0x0203A0D8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 		*(u32*)0x0203A53C = 0xE1A00000; // nop
 		*(u32*)0x0203A540 = 0xE1A00000; // nop
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
@@ -756,7 +769,8 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02038A30 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02038A38 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02038B40 = 0x02084600;
-		*(u32*)0x0203A05C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203A0C4 = 0xE1A00000; // nop
+		*(u32*)0x0203A0CC = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 		*(u32*)0x0203A530 = 0xE1A00000; // nop
 		*(u32*)0x0203A534 = 0xE1A00000; // nop
 		*(u32*)0x0203A538 = 0xE1A00000; // nop
@@ -786,7 +800,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203CAB0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203CAB8 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0203CBC0 = 0x02089260;
-		*(u32*)0x0203E0D4 = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203E13C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02041040 = 0xE1A00000; // nop
 	}
 
@@ -814,7 +828,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203CBD8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203CBE0 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0203CCE8 = 0x020894E0;
-		*(u32*)0x0203E1FC = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203E264 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02041168 = 0xE1A00000; // nop
 	}
 
@@ -843,6 +857,7 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F4 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02056418 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02056420 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02057678 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02057AAC = 0xE1A00000; // nop
 		*(u32*)0x02057AB0 = 0xE1A00000; // nop
 		*(u32*)0x02057AB4 = 0xE1A00000; // nop
