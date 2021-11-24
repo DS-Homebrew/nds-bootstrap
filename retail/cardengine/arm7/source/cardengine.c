@@ -19,10 +19,12 @@
 #include <string.h> // memcpy
 #include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
+#include <nds/dma.h>
 #include <nds/ipc.h>
-#include <nds/interrupts.h>
 #include <nds/system.h>
+#include <nds/interrupts.h>
 #include <nds/input.h>
+#include <nds/timers.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
@@ -127,7 +129,50 @@ void rebootConsole(void) {
 	} else {
 		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
 	}
-	sharedAddr[3] = 0;
+}
+
+void reset(void) {
+	register int i;
+	
+	REG_IME = 0;
+
+	for (i = 0; i < 16; i++) {
+		SCHANNEL_CR(i) = 0;
+		SCHANNEL_TIMER(i) = 0;
+		SCHANNEL_SOURCE(i) = 0;
+		SCHANNEL_LENGTH(i) = 0;
+	}
+
+	REG_SOUNDCNT = 0;
+
+	// Clear out ARM7 DMA channels and timers
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	REG_IE = 0;
+	REG_IF = ~0;
+	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	// Start ARM7
+	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+	arm7code();
 }
 
 
@@ -158,7 +203,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		rebootConsole();
+		reset();
 	}
 
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {

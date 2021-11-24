@@ -21,9 +21,12 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/system.h>
+#include <nds/dma.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
+#include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -114,6 +117,17 @@ static void enableIPC_SYNC(void) {
 	}
 }
 
+void __attribute__((target("arm"))) mpuFullRam() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
+}
+
+static inline void dmaFill(const void* src, void* dest, u32 size) {
+	DMA_SRC(3)  = (u32)src;
+	DMA_DEST(3) = (u32)dest;
+	DMA_CR(3)   = DMA_COPY_WORDS | DMA_SRC_FIX | (size>>2);
+	while (DMA_CR(3) & DMA_BUSY);
+}
+
 void user_exception(void);
 
 //---------------------------------------------------------------------------------
@@ -124,6 +138,98 @@ void setExceptionHandler2() {
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_B4DS;
 	EXCEPTION_VECTOR_SDK1 = enterException;
 	*exceptionC = user_exception;
+}
+
+void reset(u32 param) {
+	setDeviceOwner();
+	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
+	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
+	sharedAddr[3] = 0x52534554;
+
+	EXCEPTION_VECTOR_SDK1 = 0;
+
+	volatile u32 arm9_BLANK_RAM = 0;
+ 	register int i;
+
+	REG_IME = 0;
+	REG_IE = 0;
+	REG_IF = ~0;
+
+	// Clear out ARM9 DMA channels
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	VRAM_A_CR = 0x80;
+	VRAM_B_CR = 0x80;
+	VRAM_C_CR = 0x80;
+	VRAM_D_CR = 0x80;
+	VRAM_E_CR = 0x80;
+	VRAM_F_CR = 0x80;
+	VRAM_G_CR = 0x80;
+	VRAM_H_CR = 0x80;
+	VRAM_I_CR = 0x80;
+	BG_PALETTE[0] = 0xFFFF;
+	dmaFill((u16*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
+	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
+	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
+
+	REG_DISPSTAT = 0;
+
+	VRAM_A_CR = 0;
+	VRAM_B_CR = 0;
+	VRAM_C_CR = 0;
+	VRAM_D_CR = 0;
+	VRAM_E_CR = 0;
+	VRAM_F_CR = 0;
+	VRAM_G_CR = 0;
+	VRAM_H_CR = 0;
+	VRAM_I_CR = 0;
+	WRAM_CR = 0; 	// Set shared ram to ARM9
+	REG_POWERCNT = 0x820F;
+
+	mpuFullRam();
+
+	*(u32*)(0x02000000) = BIT(0) | BIT(1);
+	if (param == 0xFFFFFFFF) {
+		*(u32*)(0x02000000) |= BIT(2);
+	}
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x02004000, 0x3D9000 - 0x4000);
+	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x023E0000, 0x1E000);
+
+	ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+
+	aFile bootNds = getBootFileCluster("BOOT.NDS");
+	fileRead((char*)ndsHeader, bootNds, 0, 0x170);
+	fileRead(ndsHeader->arm9destination, bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+	fileRead(ndsHeader->arm7destination, bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+
+	// Set shared ram to ARM7
+	WRAM_CR = 0x03;
+
+	if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
+		while (1);
+	}
+
+	sharedAddr[0] = 0x544F4F42; // 'BOOT'
+	while (REG_VCOUNT != 191);
+	while (REG_VCOUNT == 191);
+
+	// Start ARM9
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();
 }
 
 s8 mainScreen = 0;
@@ -210,6 +316,10 @@ void myIrqHandlerIPC(void) {
 			*(u32*)(INGAME_MENU_LOCATION_B4DS+0x400) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS+0x40C;
 			(*inGameMenu)(&mainScreen);
+
+			if (sharedAddr[3] == 0x52534554) {
+				reset(0xFFFFFFFF);
+			}
 
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
@@ -299,14 +409,10 @@ void __attribute__((target("arm"))) region0Fix() {
 	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
 }
 
-void __attribute__((target("arm"))) sdk5MpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
-}
-
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
 		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
-			sdk5MpuFix();
+			mpuFullRam();
 		}
 		if (region0FixNeeded) {
 			region0Fix();
@@ -365,14 +471,6 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return true;
 }
 
-
-void reset(u32 param) {
-	setDeviceOwner();
-	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
-	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
-	sharedAddr[3] = 0x52534554;
-	while (1);
-}
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
