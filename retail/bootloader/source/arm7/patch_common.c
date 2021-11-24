@@ -113,8 +113,9 @@ void patchDSiModeToDSMode(const tNDSHeader* ndsHeader) {
 	// Patch DSiWare to run in DS mode
 
 	// GO Series: 10 Second Run (USA)
+	// GO Series: 10 Second Run (Europe)
 	// Sound either does not play or stop too quickly
-	else if (strcmp(romTid, "KJUE") == 0) {
+	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02005888 = 0xE12FFF1E; // bx lr
 		// Real hardware fix: Disable option font
