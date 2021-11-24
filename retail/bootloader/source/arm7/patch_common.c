@@ -1596,7 +1596,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203C2F8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0203C300 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0203C408 = 0x02088940;
-		*(u32*)0x0203D91C = 0xE12FFF1E; // bx lr (Not needed on NO$GBA)
+		*(u32*)0x0203D984 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0203DDC8 = 0xE1A00000; // nop
 		*(u32*)0x0203DDCC = 0xE1A00000; // nop
 		*(u32*)0x0203DDD0 = 0xE1A00000; // nop
