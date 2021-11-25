@@ -21,12 +21,9 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
-#include <nds/arm9/video.h>
 #include <nds/system.h>
-#include <nds/dma.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
-#include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -117,17 +114,6 @@ static void enableIPC_SYNC(void) {
 	}
 }
 
-void __attribute__((target("arm"))) mpuFullRam() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
-}
-
-static inline void dmaFill(const void* src, void* dest, u32 size) {
-	DMA_SRC(3)  = (u32)src;
-	DMA_DEST(3) = (u32)dest;
-	DMA_CR(3)   = DMA_COPY_WORDS | DMA_SRC_FIX | (size>>2);
-	while (DMA_CR(3) & DMA_BUSY);
-}
-
 void user_exception(void);
 
 //---------------------------------------------------------------------------------
@@ -140,7 +126,7 @@ void setExceptionHandler2() {
 	*exceptionC = user_exception;
 }
 
-void reset(u32 param) {
+/*void reset(u32 param) {
 	setDeviceOwner();
 	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
 	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
@@ -232,7 +218,7 @@ void reset(u32 param) {
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
 	arm9code();
-}
+}*/
 
 s8 mainScreen = 0;
 
@@ -318,10 +304,6 @@ void myIrqHandlerIPC(void) {
 			*(u32*)(INGAME_MENU_LOCATION_B4DS+0x400) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS+0x40C;
 			(*inGameMenu)(&mainScreen);
-
-			if (sharedAddr[3] == 0x52534554) {
-				reset(0xFFFFFFFF);
-			}
 
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
@@ -411,10 +393,14 @@ void __attribute__((target("arm"))) region0Fix() {
 	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
 }
 
+void __attribute__((target("arm"))) sdk5MpuFix() {
+	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
+}
+
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
 		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
-			mpuFullRam();
+			sdk5MpuFix();
 		}
 		if (region0FixNeeded) {
 			region0Fix();
@@ -473,6 +459,14 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return true;
 }
 
+
+void reset(u32 param) {
+	setDeviceOwner();
+	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
+	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
+	sharedAddr[3] = 0x52534554;
+	while (1);
+}
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();

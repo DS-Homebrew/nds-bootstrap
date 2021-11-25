@@ -15,7 +15,6 @@ extern vu32* volatile sharedAddr;
 extern bool returnToMenu;
 
 extern void rebootConsole(void);
-extern void reset(void);
 
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
@@ -50,7 +49,7 @@ void inGameMenu(void) {
 					exitMenu = true;
 					break;
 				case 0x54495551: // QUIT
-					reset();
+					rebootConsole();
 					exitMenu = true;
 					break;
 				case 0x524D4152: // RAMR

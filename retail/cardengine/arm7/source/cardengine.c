@@ -19,12 +19,10 @@
 #include <string.h> // memcpy
 #include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
-#include <nds/dma.h>
 #include <nds/ipc.h>
-#include <nds/system.h>
 #include <nds/interrupts.h>
+#include <nds/system.h>
 #include <nds/input.h>
-#include <nds/timers.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
@@ -129,9 +127,10 @@ void rebootConsole(void) {
 	} else {
 		writePowerManagement(PM_CONTROL_REG,PM_SYSTEM_PWR);	// Shut down console
 	}
+	sharedAddr[3] = 0;
 }
 
-void reset(void) {
+/*void reset(void) {
 	register int i;
 	
 	REG_IME = 0;
@@ -173,7 +172,7 @@ void reset(void) {
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
-}
+}*/
 
 
 //---------------------------------------------------------------------------------
@@ -203,7 +202,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		reset();
+		rebootConsole();
 	}
 
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
