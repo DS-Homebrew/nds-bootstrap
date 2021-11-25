@@ -208,8 +208,12 @@ static void hookIPC_SYNC(void) {
 	if (!IPC_SYNC_hooked) {
 		u32* vblankHandler = ce9->irqTable;
 		u32* ipcSyncHandler = ce9->irqTable + 16;
-		ce9->intr_vblank_orig_return = *vblankHandler;
-		ce9->intr_ipc_orig_return = *ipcSyncHandler;
+		if (ce9->intr_vblank_orig_return == 0) {
+			ce9->intr_vblank_orig_return = *vblankHandler;
+		}
+		if (ce9->intr_ipc_orig_return == 0) {
+			ce9->intr_ipc_orig_return = *ipcSyncHandler;
+		}
 		*vblankHandler = ce9->patches->vblankHandlerRef;
 		*ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
 		IPC_SYNC_hooked = true;
@@ -1030,6 +1034,7 @@ void reset(u32 param) {
 
 	cacheFlush();
 
+	toncset((u8*)getDtcmBase()+0x0A003E00, 0, 0x200);
 	toncset((u32*)0x01FF8000, 0, 0x8000);
 
 	// Clear out ARM9 DMA channels
@@ -1048,9 +1053,6 @@ void reset(u32 param) {
 
 	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	//memset_addrs((u32)ndsHeader->arm9destination+(*(u32*)ARM9_DEC_SIZE_LOCATION), 0x02380000);
-	//memset_addrs(0x02380000+ndsHeader->arm7binarySize, 0x02400000);
-	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 	while (ndmaBusy(0) || ndmaBusy(1));
 
 	for (i = 0; i < 4; i++) {

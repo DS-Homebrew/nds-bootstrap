@@ -334,7 +334,9 @@ static void initialize(void) {
 }
 
 void reset(void) {
-	if ((valueBits & ROMinRAM) || (valueBits & dsiMode)) {
+#ifndef TWLSDK
+	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+#endif
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
@@ -354,6 +356,7 @@ void reset(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 		leaveCriticalSection(oldIME);
 		while (1);
+#ifndef TWLSDK
 	}
 
 	register int i;
@@ -402,6 +405,7 @@ void reset(void) {
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
+#endif
 }
 
 static void cardReadLED(bool on, bool dmaLed) {

@@ -57,6 +57,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static bool flagsSet = false;
+static bool flagsSetOnce = false;
 static bool region0FixNeeded = false;
 static bool isDma = false;
 static bool dmaLed = false;
@@ -117,8 +118,12 @@ static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
         u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
-        ce9->intr_vblank_orig_return = *vblankHandler;
-        ce9->intr_ipc_orig_return = *ipcSyncHandler;
+		if (ce9->intr_vblank_orig_return == 0) {
+			ce9->intr_vblank_orig_return = *vblankHandler;
+		}
+		if (ce9->intr_ipc_orig_return == 0) {
+			ce9->intr_ipc_orig_return = *ipcSyncHandler;
+		}
         *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
@@ -516,7 +521,7 @@ void myIrqHandlerIPC(void) {
 
 void reset(u32 param) {
 	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
-	//if ((ce9->valueBits & extendedMemory) || (ce9->valueBits & dsiMode)) {
+	if ((ce9->valueBits & extendedMemory) || (ce9->valueBits & dsiMode)) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
@@ -527,7 +532,7 @@ void reset(u32 param) {
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
-	/*} else {
+	} else {
 		sharedAddr[3] = 0x52534554;
 	}
 
@@ -539,6 +544,7 @@ void reset(u32 param) {
 
 	cacheFlush();
 
+	toncset((u8*)getDtcmBase()+0x0A003E00, 0, 0x200);
 	toncset((u32*)0x01FF8000, 0, 0x8000);
 
 	// Clear out ARM9 DMA channels
@@ -557,9 +563,6 @@ void reset(u32 param) {
 
 	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	//memset_addrs((u32)ndsHeader->arm9destination+(*(u32*)ARM9_DEC_SIZE_LOCATION), 0x02380000);
-	//memset_addrs(0x02380000+ndsHeader->arm7binarySize, 0x02400000);
-	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 	while (ndmaBusy(0) || ndmaBusy(1));
 
 	for (i = 0; i < 4; i++) {
@@ -576,7 +579,7 @@ void reset(u32 param) {
 
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();*/
+	arm9code();
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -586,10 +589,13 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	if (ce9->valueBits & isSdk5) {
-		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
-		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+	if (!flagsSetOnce) {
+		if (ce9->valueBits & isSdk5) {
+			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+			unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+		}
+		flagsSetOnce = true;
 	}
 
 	if (unpatchedFuncs->compressed_static_end) {
