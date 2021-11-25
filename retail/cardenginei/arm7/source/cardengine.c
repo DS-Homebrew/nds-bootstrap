@@ -342,7 +342,8 @@ static void initialize(void) {
 
 void reset(void) {
 #ifndef TWLSDK
-	if ((valueBits & extendedMemory) || (ndsHeader->unitCode == 0 && (valueBits & dsiMode))) {
+	u32 resetParam = (isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	if (*(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory) || (ndsHeader->unitCode == 0 && (valueBits & dsiMode))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
