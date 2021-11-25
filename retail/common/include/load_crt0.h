@@ -34,6 +34,7 @@ typedef struct loadCrt0 {
     u32 ramDumpCluster;
 	u32 srParamsFileCluster;
 	u32 screenshotCluster;
+	u32 pageFileCluster;
     u32 patchMpuSize;
     u8 patchMpuRegion;
     u8 language;

@@ -50,6 +50,7 @@
 	.global ramDumpCluster
 	.global srParamsFileCluster
 	.global screenshotCluster
+	.global pageFileCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -123,6 +124,8 @@ ramDumpCluster:
 srParamsFileCluster:
 	.word	0x00000000
 screenshotCluster:
+	.word	0x00000000
+pageFileCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

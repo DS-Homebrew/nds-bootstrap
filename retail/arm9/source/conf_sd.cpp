@@ -60,6 +60,7 @@ extern std::string cheatFilePath;
 extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
 extern std::string screenshotPath;
+extern std::string pageFilePath;
 
 extern u8 lz77ImageBuffer[0x20000];
 
@@ -267,6 +268,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
+	}
+
+	pageFilePath = "sd:/_nds/pagefile.sys";
+	if (!conf->sdFound) {
+		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
 	char romTid[5] = {0};
@@ -736,6 +742,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 	}
+	if ((conf->gameOnFlashcard || !conf->isDSiWare) && unitCode > 0 && conf->dsiMode) {
+		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+		if (!found) {
+			consoleDemoInit();
+			iprintf("Creating pagefile.sys\n");
+			iprintf("Please wait...\n");
+		}
+
+		cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+		fseek(cebin, 0x400000 - 1, SEEK_SET);
+		fputc('\0', cebin);
+		fclose(cebin);
+
+		if (!found) {
+			consoleClear();
+		}
+	}
 
 	// Load ROMinRAM ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
@@ -928,13 +951,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		fclose(cebin);
 
-		if (access("fat:/_nds/pagefile.sys", F_OK) != 0) {
-			cebin = fopen("fat:/_nds/pagefile.sys", "wb");
+		if (access(pageFilePath.c_str(), F_OK) != 0) {
+			cebin = fopen(pageFilePath.c_str(), "wb");
 			fseek(cebin, 0x14000 - 1, SEEK_SET);
 			fputc('\0', cebin);
 			fclose(cebin);
 		}
-		cebin = fopen("fat:/_nds/pagefile.sys", "r+");
+		cebin = fopen(pageFilePath.c_str(), "r+");
 		fwrite((u8*)INGAME_MENU_LOCATION_B4DS, 1, 0xA000, cebin);
 		fclose(cebin);
 		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);

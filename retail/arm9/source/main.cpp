@@ -30,6 +30,7 @@ std::string cheatFilePath;
 std::string ramDumpPath;
 std::string srParamsFilePath;
 std::string screenshotPath;
+std::string pageFilePath;
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -392,6 +393,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stRamDump;
 	struct stat stSrParams;
 	struct stat stScreenshot;
+	struct stat stPage;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
 	u32 clusterGba = 0;
@@ -404,6 +406,7 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterRamDump = 0;
 	u32 clusterSrParams = 0;
 	u32 clusterScreenshot = 0;
+	u32 clusterPageFile = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -457,13 +460,13 @@ static int runNdsFile(configuration* conf) {
 		if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 			clusterScreenshot = stScreenshot.st_ino;
 		}
-	} else {
-		if (stat("fat:/_nds/pagefile.sys", &stWideCheat) >= 0) {
-			clusterWideCheat = stWideCheat.st_ino;
-		}
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, conf);
+	if (stat(pageFilePath.c_str(), &stPage) >= 0) {
+		clusterPageFile = stPage.st_ino;
+	}
+
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, clusterPageFile, conf);
 }
 
 int main(int argc, char** argv) {

@@ -76,6 +76,7 @@ extern u32 saveCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
+extern u32 pageFileCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
 extern u32 overlaysSize;
@@ -127,6 +128,9 @@ static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
+#ifdef TWLSDK
+static aFile pageFile;
+#endif
 
 static int saveTimer = 0;
 
@@ -254,6 +258,9 @@ static void driveInitialize(void) {
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
 	srParamsFile = getFileFromCluster(srParamsCluster);
 	screenshotFile = getFileFromCluster(screenshotCluster);
+	#ifdef TWLSDK
+	pageFile = getFileFromCluster(pageFileCluster);
+	#endif
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -335,8 +342,7 @@ static void initialize(void) {
 
 void reset(void) {
 #ifndef TWLSDK
-	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-#endif
+	if (valueBits & extendedMemory) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
@@ -356,8 +362,8 @@ void reset(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 		leaveCriticalSection(oldIME);
 		while (1);
-#ifndef TWLSDK
 	}
+#endif
 
 	register int i;
 	
@@ -397,6 +403,25 @@ void reset(void) {
 	ipcSyncHooked = false;
 	languageTimer = 0;
 
+	#ifdef TWLSDK
+	u32 iUncompressedSize = 0;
+	u32 iUncompressedSizei = 0;
+	u32 newArm7binarySize = 0;
+	u32 newArm7ibinarySize = 0;
+
+	sdRead = (valueBits & b_dsiSD);
+	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, 0);
+	fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
+	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
+	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
+	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, 0);
+
+	sharedAddr[0] = 0x44414F4C; // 'LOAD'
+	#endif
+
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
@@ -405,7 +430,6 @@ void reset(void) {
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
-#endif
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
@@ -868,6 +892,7 @@ void myIrqHandlerHalt(void) {
 	nocashMessage("myIrqHandlerHalt");
 	#endif	
 
+	#ifndef TWLSDK
 	haltIsRunning = true;
 
 	sdmmcHandler();
@@ -886,6 +911,7 @@ void myIrqHandlerHalt(void) {
 			}
 		}
 	}
+	#endif
 
 	/*if (readOngoing) {
 		timeTillDmaLedOff++;
@@ -947,22 +973,22 @@ void myIrqHandlerVBlank(void) {
 		u32 auxIeBak = REG_AUXIE;
 		u32 sdStatBak = *(vu32*)0x400481C;
 		u32 sdMaskBak = *(vu32*)0x4004820;
-		if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+		//if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 			igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 			i2cWriteRegister(0x4A, 0x12, 0x00);
 			REG_AUXIE &= ~(1UL << 8);
 			*(vu32*)0x400481C = 0;
 			*(vu32*)0x4004820 = 0;
-		}
+		//}
 #endif
 		inGameMenu();
 #ifdef TWLSDK
-		if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+		//if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 			REG_AUXIE = auxIeBak;
 			*(vu32*)0x400481C = sdStatBak;
 			*(vu32*)0x4004820 = sdMaskBak;
 			i2cWriteRegister(0x4A, 0x12, 0x01);
-		}
+		//}
 #endif
 	}
 

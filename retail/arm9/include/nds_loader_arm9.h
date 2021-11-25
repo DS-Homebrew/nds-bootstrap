@@ -31,7 +31,7 @@ extern "C"
 
 //#define LOAD_DEFAULT_NDS 0
 
-int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, configuration* conf);
+int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 fatTableCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 pageFileCluster, configuration* conf);
 
 #ifdef __cplusplus
 }

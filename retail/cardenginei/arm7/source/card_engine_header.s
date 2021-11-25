@@ -19,6 +19,7 @@
 .global srParamsCluster
 .global ramDumpCluster
 .global screenshotCluster
+.global pageFileCluster
 .global valueBits
 .global overlaysSize
 .global language
@@ -52,6 +53,8 @@ srParamsCluster:
 ramDumpCluster:
 	.word	0x00000000
 screenshotCluster:
+	.word	0x00000000
+pageFileCluster:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000

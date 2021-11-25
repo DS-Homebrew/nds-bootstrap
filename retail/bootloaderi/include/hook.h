@@ -43,6 +43,7 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
+	u32 pageFileCluster,
     u8 gameOnFlashcard,
     u8 saveOnFlashcard,
 	u8 language,
