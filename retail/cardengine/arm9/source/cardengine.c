@@ -199,7 +199,6 @@ void reset(u32 param) {
 	VRAM_G_CR = 0;
 	VRAM_H_CR = 0;
 	VRAM_I_CR = 0;
-	WRAM_CR = 0; 	// Set shared ram to ARM9
 	REG_POWERCNT = 0x820F;
 
 	mpuFullRam();
@@ -213,13 +212,14 @@ void reset(u32 param) {
 
 	ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
+	WRAM_CR = 0; // Set shared ram to ARM9
+
 	aFile bootNds = getBootFileCluster("BOOT.NDS");
 	fileRead((char*)ndsHeader, bootNds, 0, 0x170);
 	fileRead(ndsHeader->arm9destination, bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 	fileRead(ndsHeader->arm7destination, bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 
-	// Set shared ram to ARM7
-	WRAM_CR = 0x03;
+	WRAM_CR = 0x03; // Set shared ram to ARM7
 
 	if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
 		while (1);
