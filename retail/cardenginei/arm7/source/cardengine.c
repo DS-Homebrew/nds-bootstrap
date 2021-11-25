@@ -342,7 +342,7 @@ static void initialize(void) {
 
 void reset(void) {
 #ifndef TWLSDK
-	if (valueBits & extendedMemory) {
+	if ((valueBits & extendedMemory) || (ndsHeader->unitCode == 0 && (valueBits & dsiMode))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
