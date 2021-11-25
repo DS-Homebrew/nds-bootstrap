@@ -38,7 +38,7 @@
 	.global saveSize
 	.global gbaRomSize
 	.global gbaSaveSize
-	.global pageFileCluster
+	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
 	.global apPatchSize
@@ -50,6 +50,7 @@
 	.global ramDumpCluster
 	.global srParamsFileCluster
 	.global screenshotCluster
+	.global pageFileCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -102,7 +103,7 @@ gbaRomSize:
 	.word	0x00000000		@ .gba file size
 gbaSaveSize:
 	.word	0x00000000		@ GBA .sav file size
-pageFileCluster:
+wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:
 	.word	0x00000000
@@ -123,6 +124,8 @@ ramDumpCluster:
 srParamsFileCluster:
 	.word	0x00000000
 screenshotCluster:
+	.word	0x00000000
+pageFileCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000
