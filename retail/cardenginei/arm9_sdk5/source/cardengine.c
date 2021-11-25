@@ -24,6 +24,7 @@
 #include <nds/dma.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
+#include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "ndma.h"
@@ -96,6 +97,7 @@ static int aQSize = 0;
 #endif
 
 static bool flagsSet = false;
+static bool driveInitialized = false;
 #ifndef TWLSDK
 static bool region0FixNeeded = false;
 #endif
@@ -840,13 +842,10 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 			region0Fix();
 		}
 		#endif
-		//#ifdef DLDI
-		if (!FAT_InitFiles(false, 0))
-		{
-			//nocashMessage("!FAT_InitFiles");
-			//return -1;
+		if (!driveInitialized) {
+			FAT_InitFiles(false, 0);
+			driveInitialized = true;
 		}
-		//#endif
 		if (ce9->valueBits & enableExceptionHandler) {
 			setExceptionHandler2();
 		}
@@ -1007,17 +1006,68 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
-	if (ce9->consoleModel < 2) {
-		// Make screens white
-		SetBrightness(0, 31);
-		SetBrightness(1, 31);
-		waitFrames(5);	// Wait for DSi screens to stabilize
-	}
-	enterCriticalSection();
 	*(u32*)RESET_PARAM_SDK5 = param;
+	if (ce9->valueBits & dsiMode) {
+		if (ce9->consoleModel < 2) {
+			// Make screens white
+			SetBrightness(0, 31);
+			SetBrightness(1, 31);
+			waitFrames(5);	// Wait for DSi screens to stabilize
+		}
+		enterCriticalSection();
+		cacheFlush();
+		sharedAddr[3] = 0x52534554;
+		while (1);
+	} else {
+		sharedAddr[3] = 0x52534554;
+	}
+
+ 	register int i, reg;
+
+	REG_IME = 0;
+	REG_IE = 0;
+	REG_IF = ~0;
+
 	cacheFlush();
-	sharedAddr[3] = 0x52534554;
-	while (1);
+
+	toncset((u32*)0x01FF8000, 0, 0x8000);
+
+	// Clear out ARM9 DMA channels
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
+	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	//memset_addrs((u32)ndsHeader->arm9destination+(*(u32*)ARM9_DEC_SIZE_LOCATION), 0x02380000);
+	//memset_addrs(0x02380000+ndsHeader->arm7binarySize, 0x02400000);
+	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+	while (ndmaBusy(0) || ndmaBusy(1));
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
+	flagsSet = false;
+	IPC_SYNC_hooked = false;
+
+	sharedAddr[0] = 0x544F4F42; // 'BOOT'
+	sharedAddr[3] = 0;
+	while (REG_VCOUNT != 191);
+	while (REG_VCOUNT == 191);
+
+	// Start ARM9
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -1026,6 +1076,10 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	if (unpatchedFuncs->compressed_static_end) {
 		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
@@ -1063,13 +1117,9 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
-	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
+	//toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
-
-	if (ce9->valueBits & enableExceptionHandler) {
-		setExceptionHandler2();
-	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

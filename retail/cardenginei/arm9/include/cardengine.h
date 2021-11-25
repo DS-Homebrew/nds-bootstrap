@@ -28,5 +28,6 @@ int cardRead(u32* cacheStruct);
 void cardPullOut(void);
 
 void cacheFlush(void);
+void DC_FlushAll(void);
 
 #endif // CARDENGINEI_ARM9_H

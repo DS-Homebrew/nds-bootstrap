@@ -19,10 +19,12 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
+#include <nds/dma.h>
 #include <nds/ipc.h>
-#include <nds/interrupts.h>
 #include <nds/system.h>
+#include <nds/interrupts.h>
 #include <nds/input.h>
+#include <nds/timers.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
@@ -97,6 +99,7 @@ bool sdRead = true;
 
 static bool initialized = false;
 static bool driveInited = false;
+static bool bootloaderCleared = false;
 //static bool initializedIRQ = false;
 static bool haltIsRunning = false;
 static bool calledViaIPC = false;
@@ -320,11 +323,85 @@ static void initialize(void) {
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 	}*/
 
-	wordBak = *(u32*)0x02000000;
+	if (!bootloaderCleared) {
+		wordBak = *(u32*)0x02000000;
 
-	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		bootloaderCleared = true;
+	}
 
 	initialized = true;
+}
+
+void reset(void) {
+	if ((valueBits & ROMinRAM) || (valueBits & dsiMode)) {
+		REG_MASTER_VOLUME = 0;
+		int oldIME = enterCriticalSection();
+		driveInitialize();
+		sdRead = !(valueBits & gameOnFlashcard);
+		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10, !sdRead, -1);
+		if (consoleModel < 2) {
+			(*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+		}
+		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
+			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+		*(u32*)0x02000000 = wordBak;	// In case if soft-resetting fails in DSiWarehax
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+		leaveCriticalSection(oldIME);
+		while (1);
+	}
+
+	register int i;
+	
+	REG_IME = 0;
+
+	for (i = 0; i < 16; i++) {
+		SCHANNEL_CR(i) = 0;
+		SCHANNEL_TIMER(i) = 0;
+		SCHANNEL_SOURCE(i) = 0;
+		SCHANNEL_LENGTH(i) = 0;
+	}
+
+	REG_SOUNDCNT = 0;
+
+	// Clear out ARM7 DMA channels and timers
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	REG_IE = 0;
+	REG_IF = ~0;
+	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	initialized = false;
+	haltIsRunning = false;
+	ipcSyncHooked = false;
+	languageTimer = 0;
+
+	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	// Start ARM7
+	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+	arm7code();
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
@@ -468,7 +545,7 @@ void saveScreenshot(void) {
 
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)DONOR_ROM_ARM7_SIZE_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
 
 	// Skip until next blank slot
 	char magic;
@@ -927,24 +1004,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		REG_MASTER_VOLUME = 0;
-		int oldIME = enterCriticalSection();
-		driveInitialize();
-		sdRead = !(valueBits & gameOnFlashcard);
-		fileWrite((char*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10, !sdRead, -1);
-		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
-		}
-		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
-			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
-		} else {
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-		*(u32*)0x02000000 = wordBak;	// In case if soft-resetting fails in DSiWarehax
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-		leaveCriticalSection(oldIME);
+		reset();
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
@@ -1084,9 +1144,10 @@ u32 myIrqEnable(u32 irq) {
 	|| (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM))) {
 		// Proceed below "else" code
 	} else {
+		u32 irq_before = REG_IE;		
 		REG_IE |= irq;
 		leaveCriticalSection(oldIME);
-		return irq;
+		return irq_before;
 	}
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		

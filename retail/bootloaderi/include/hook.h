@@ -65,7 +65,8 @@ int hookNdsRetailArm9(
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK5
 	u8 enableExceptionHandler,
-	u8 consoleModel
+	u8 consoleModel,
+	bool usesCloneboot
 );
 
 #endif // HOOK_H

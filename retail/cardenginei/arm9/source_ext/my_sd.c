@@ -7,12 +7,6 @@
 extern bool isDma;
 extern void sleepMs(int ms);
 
-/*! \fn DC_FlushAll()
-	\brief flush the entire data cache to memory.
-*/
-void	DC_FlushAll();
-
-
 /*! \fn DC_FlushRange(const void *base, u32 size)
 	\brief flush the data cache for a range of addresses to memory.
 	\param base base address of the region to flush.

@@ -24,6 +24,7 @@
 #include <nds/dma.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
+#include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "ndma.h"
@@ -43,6 +44,7 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define a7HaltPatched BIT(9)
+#define cloneboot BIT(10)
 
 //extern void user_exception(void);
 
@@ -174,18 +176,6 @@ void cardSetDma(u32 * params) {
   	}
 
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
-	if (!(ce9->valueBits & extendedMemory) && !(ce9->valueBits & dsiMode)) {
-		if (src >= ndsHeader->arm9romOffset && src < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) { // ARM9 binary
-			newSrc = (u32)((ndsHeader->arm9destination + 0x0A400000)-ndsHeader->arm9romOffset);
-		} else if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) { // Overlays
-			newSrc = (u32)(ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
-		} else if (src >= ndsHeader->arm7romOffset && src < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) { // ARM7 binary
-			newSrc = (u32)((ndsHeader->arm7destination + 0x0A400000)-ndsHeader->arm7romOffset);
-		} else { // NitroFS data
-			newSrc = (u32)(ce9->romLocation+ce9->overlaysSize-ndsHeader->arm7romOffset-ndsHeader->arm7binarySize);
-		}
-		newSrc += src;
-	}
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
@@ -334,11 +324,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		}
 
-		//if (ce9->enableExceptionHandler && ce9==CARDENGINEI_ARM9_LOCATION) {
-			//exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-			//setExceptionHandler(user_exception);
-		//}
-
 		flagsSet = true;
 	}
 	
@@ -359,18 +344,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	
 	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
-	if (!(ce9->valueBits & extendedMemory) && !(ce9->valueBits & dsiMode)) {
-		if (src >= ndsHeader->arm9romOffset && src < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) { // ARM9 binary
-			newSrc = (u32)((ndsHeader->arm9destination + 0x0A400000)-ndsHeader->arm9romOffset);
-		} else if (src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) { // Overlays
-			newSrc = (u32)(ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
-		} else if (src >= ndsHeader->arm7romOffset && src < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) { // ARM7 binary
-			newSrc = (u32)((ndsHeader->arm7destination + 0x0A400000)-ndsHeader->arm7romOffset);
-		} else { // NitroFS data
-			newSrc = (u32)(ce9->romLocation+ce9->overlaysSize-ndsHeader->arm7romOffset-ndsHeader->arm7binarySize);
-		}
-		newSrc += src;
-	}
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
@@ -542,17 +515,68 @@ void myIrqHandlerIPC(void) {
 }
 
 void reset(u32 param) {
-	if (ce9->consoleModel < 2) {
-		// Make screens white
-		SetBrightness(0, 31);
-		SetBrightness(1, 31);
-		waitFrames(5);	// Wait for DSi screens to stabilize
-	}
-	enterCriticalSection();
 	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
+	//if ((ce9->valueBits & extendedMemory) || (ce9->valueBits & dsiMode)) {
+		if (ce9->consoleModel < 2) {
+			// Make screens white
+			SetBrightness(0, 31);
+			SetBrightness(1, 31);
+			waitFrames(5);	// Wait for DSi screens to stabilize
+		}
+		enterCriticalSection();
+		cacheFlush();
+		sharedAddr[3] = 0x52534554;
+		while (1);
+	/*} else {
+		sharedAddr[3] = 0x52534554;
+	}
+
+ 	register int i, reg;
+
+	REG_IME = 0;
+	REG_IE = 0;
+	REG_IF = ~0;
+
 	cacheFlush();
-	sharedAddr[3] = 0x52534554;
-	while (1);
+
+	toncset((u32*)0x01FF8000, 0, 0x8000);
+
+	// Clear out ARM9 DMA channels
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
+	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	//memset_addrs((u32)ndsHeader->arm9destination+(*(u32*)ARM9_DEC_SIZE_LOCATION), 0x02380000);
+	//memset_addrs(0x02380000+ndsHeader->arm7binarySize, 0x02400000);
+	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+	while (ndmaBusy(0) || ndmaBusy(1));
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
+	flagsSet = false;
+	IPC_SYNC_hooked = false;
+
+	sharedAddr[0] = 0x544F4F42; // 'BOOT'
+	sharedAddr[3] = 0;
+	while (REG_VCOUNT != 191);
+	while (REG_VCOUNT == 191);
+
+	// Start ARM9
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();*/
 }
 
 u32 myIrqEnable(u32 irq) {	
@@ -602,7 +626,7 @@ u32 myIrqEnable(u32 irq) {
 		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 	}
 
-	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
+	//toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
 

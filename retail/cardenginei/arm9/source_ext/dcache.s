@@ -28,25 +28,6 @@
 //---------------------------------------------------------------------------------
 	.arm
 //---------------------------------------------------------------------------------
-BEGIN_ASM_FUNC DC_FlushAll
-/*---------------------------------------------------------------------------------
-	Clean and invalidate entire data cache
----------------------------------------------------------------------------------*/
-	mov	r1, #0
-outer_loop:
-	mov	r0, #0
-inner_loop:
-	orr	r2, r1, r0			@ generate segment and line address
-	mcr	p15, 0, r2, c7, c14, 2		@ clean and flush the line
-	add	r0, r0, #CACHE_LINE_SIZE
-	cmp	r0, #DCACHE_SIZE/4
-	bne	inner_loop
-	add	r1, r1, #0x40000000
-	cmp	r1, #0
-	bne	outer_loop
-	b	drainWriteBuffer
-
-//---------------------------------------------------------------------------------
 BEGIN_ASM_FUNC DC_FlushRange
 /*---------------------------------------------------------------------------------
 	Clean and invalidate a range

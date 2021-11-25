@@ -35,8 +35,8 @@ static u16 igmPal[] = {
 };
 
 #ifndef B4DS
-static u16* vramBak = (u16*)DONOR_ROM_ARM7_LOCATION;
-static u16* bmpBuffer = (u16*)DONOR_ROM_ARM7_SIZE_LOCATION;
+static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
+static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 
 // Header for a 256x192 16 bit (RGBA 565) BMP
 const static u8 bmpHeader[] = {
@@ -707,6 +707,7 @@ void inGameMenu(s8* mainScreen) {
 					ramViewer();
 					break;
 				case 3:
+					sharedAddr[3] = 0x52534554; // RSET
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
