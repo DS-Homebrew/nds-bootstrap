@@ -155,6 +155,8 @@ void reset(u32 param) {
 	REG_IE = 0;
 	REG_IF = ~0;
 
+	toncset((u32*)0x01FF8000, 0, 0x8000);
+
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
 		DMA_CR(i) = 0;
