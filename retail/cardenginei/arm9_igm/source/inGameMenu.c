@@ -596,8 +596,8 @@ void inGameMenu(s8* mainScreen) {
 		VRAM_C_CR = VRAM_C_LCD;
 	VRAM_H_CR = VRAM_ENABLE | VRAM_H_SUB_BG;
 
-	REG_BG0VOFS_SUB = 0;
-	REG_BG0HOFS_SUB = 0;
+	REG_BG3VOFS_SUB = 0;
+	REG_BG3HOFS_SUB = 0;
 
 	// If main screen is on auto, then force the bottom
 	REG_POWERCNT |= POWER_SWAP_LCDS;
