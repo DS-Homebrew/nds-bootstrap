@@ -560,30 +560,24 @@ void reset(u32 param) {
 		TIMER_DATA(i) = 0;
 	}
 
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
-	if (!(ce9->valueBits & dsiMode)) {
-		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
-		ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-		while (ndmaBusy(0) || ndmaBusy(1));
-	}
-
-	for (i = 0; i < 4; i++) {
-		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
-	}
-
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
 
-	if (ce9->valueBits & dsiMode) {
-		while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		}
+	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
 
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 		sysSetCardOwner(true);	// Give Slot-1 access back to arm9
 	}
 

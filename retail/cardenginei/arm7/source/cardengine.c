@@ -369,7 +369,7 @@ void reset(void) {
 	}
 #endif
 
-	register int i;
+	register int i, reg;
 	
 	REG_IME = 0;
 
@@ -408,7 +408,11 @@ void reset(void) {
 	ipcSyncHooked = false;
 	languageTimer = 0;
 
-	#ifdef TWLSDK
+	#ifndef TWLSDK
+	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
+	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	while (ndmaBusy(0) || ndmaBusy(1));
+	#else
 	u32 iUncompressedSize = 0;
 	u32 iUncompressedSizei = 0;
 	u32 newArm7binarySize = 0;
@@ -423,9 +427,12 @@ void reset(void) {
 	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
 	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
 	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, 0);
-
-	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 	#endif
+	sharedAddr[0] = 0x44414F4C; // 'LOAD'
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
 
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
 		while (REG_VCOUNT != 191) swiDelay(100);
