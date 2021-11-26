@@ -1091,7 +1091,7 @@ void reset(u32 param) {
 	cacheFlush();
 	resetMpu();
 
-	toncset((u8*)getDtcmBase(), 0, 0x200);
+	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
