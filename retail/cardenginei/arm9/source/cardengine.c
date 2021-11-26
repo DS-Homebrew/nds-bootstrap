@@ -129,11 +129,6 @@ static void SetBrightness(u8 screen, s8 bright) {
 	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
 
-static inline void memset_addrs(u32 start, u32 end)
-{
-	toncset((u32*)start, 0, ((int)end - (int)start));
-}
-
 // Alternative to swiWaitForVBlank()
 static void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
@@ -351,12 +346,8 @@ static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
         u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
-		if (ce9->intr_vblank_orig_return == 0) {
-			ce9->intr_vblank_orig_return = *vblankHandler;
-		}
-		if (ce9->intr_ipc_orig_return == 0) {
-			ce9->intr_ipc_orig_return = *ipcSyncHandler;
-		}
+		ce9->intr_vblank_orig_return = *vblankHandler;
+		ce9->intr_ipc_orig_return = *ipcSyncHandler;
         *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
@@ -1070,6 +1061,10 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
+void __attribute__((target("arm"))) resetMpu(void) {
+	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
+}
+
 void reset(u32 param) {
 	*(u32*)RESET_PARAM = param;
 	if (*(u32*)(RESET_PARAM+0xC) > 0 || (ce9->valueBits & dsiMode)) {
@@ -1094,8 +1089,9 @@ void reset(u32 param) {
 	REG_IF = ~0;
 
 	cacheFlush();
+	resetMpu();
 
-	toncset((u8*)getDtcmBase()+0x0A003E00, 0, 0x200);
+	toncset((u8*)getDtcmBase(), 0, 0x200);
 
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {

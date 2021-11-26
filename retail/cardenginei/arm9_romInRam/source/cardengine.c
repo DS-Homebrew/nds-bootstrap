@@ -118,12 +118,8 @@ static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
         u32* vblankHandler = ce9->irqTable;
         u32* ipcSyncHandler = ce9->irqTable + 16;
-		if (ce9->intr_vblank_orig_return == 0) {
-			ce9->intr_vblank_orig_return = *vblankHandler;
-		}
-		if (ce9->intr_ipc_orig_return == 0) {
-			ce9->intr_ipc_orig_return = *ipcSyncHandler;
-		}
+		ce9->intr_vblank_orig_return = *vblankHandler;
+		ce9->intr_ipc_orig_return = *ipcSyncHandler;
         *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
@@ -519,6 +515,10 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
+void __attribute__((target("arm"))) resetMpu(void) {
+	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
+}
+
 void reset(u32 param) {
 	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	*(u32*)resetParam = param;
@@ -547,8 +547,9 @@ void reset(u32 param) {
 	REG_IF = ~0;
 
 	cacheFlush();
+	resetMpu();
 
-	toncset((u8*)getDtcmBase()+0x0A003E00, 0, 0x200);
+	toncset((u8*)getDtcmBase(), 0, 0x200);
 
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
