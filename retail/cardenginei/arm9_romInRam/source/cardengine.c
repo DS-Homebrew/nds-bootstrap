@@ -613,41 +613,9 @@ u32 myIrqEnable(u32 irq) {
 		flagsSetOnce = true;
 	}
 
-	if (unpatchedFuncs->compressed_static_end) {
-		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
-	}
-
-	if (unpatchedFuncs->ltd_compressed_static_end) {
-		*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
-	}
-
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
-		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
-
-		if (unpatchedFuncs->mpuAccessOffset) {
-			if (unpatchedFuncs->mpuOldInstrAccess) {
-				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
-			}
-			if (unpatchedFuncs->mpuOldDataAccess) {
-				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
-			}
-		}
 	}
-
-	if (unpatchedFuncs->mpuInitCacheOffset) {
-		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
-	}
-
-	if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
-		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
-	}
-
-	if (unpatchedFuncs->mpuDataOffset2) {
-		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
-	}
-
-	//toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
 

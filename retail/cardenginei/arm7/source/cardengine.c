@@ -36,6 +36,7 @@
 #include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
@@ -101,6 +102,7 @@ bool sdRead = true;
 static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
+static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
 static bool haltIsRunning = false;
 static bool calledViaIPC = false;
@@ -179,7 +181,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xA800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xAC00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -211,9 +213,9 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xA900);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xA904);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xA904) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0xAD00);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0xAD04);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xAD04) == 0x00030000 ? 0x13 : */ 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -350,9 +352,9 @@ void reset(void) {
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
-		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID
@@ -400,6 +402,7 @@ void reset(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	initialized = false;
+	funcsUnpatched = false;
 	haltIsRunning = false;
 	ipcSyncHooked = false;
 	languageTimer = 0;
@@ -509,7 +512,7 @@ void forceGameReboot(void) {
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
 		if (valueBits & b_dsiSD) {
-			(*(u32*)(ce7+0xA900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xAD00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -517,7 +520,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
+	if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -533,15 +536,15 @@ void returnToLoader(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		} else if (*(char*)(ce7+0xA903) == 'H' || *(char*)(ce7+0xA903) == 'K') {
+		} else if (*(char*)(ce7+0xAD03) == 'H' || *(char*)(ce7+0xAD03) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
@@ -960,6 +963,47 @@ void myIrqHandlerVBlank(void) {
 			*languageAddr = language;
 		}
 		languageTimer++;
+	}
+
+	if (!funcsUnpatched && *(int*)(isSdk5(moduleParams) ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)(isSdk5(moduleParams) ? UNPATCHED_FUNCTION_LOCATION_SDK5 : UNPATCHED_FUNCTION_LOCATION);
+
+		if (unpatchedFuncs->compressed_static_end) {
+			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
+		}
+
+		#ifdef TWLSDK
+		if (unpatchedFuncs->ltd_compressed_static_end) {
+			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
+		}
+		#endif
+
+		if (unpatchedFuncs->mpuDataOffset) {
+			*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
+
+			if (unpatchedFuncs->mpuAccessOffset) {
+				if (unpatchedFuncs->mpuOldInstrAccess) {
+					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+				}
+				if (unpatchedFuncs->mpuOldDataAccess) {
+					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+				}
+			}
+		}
+
+		if (unpatchedFuncs->mpuInitCacheOffset) {
+			*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
+		}
+
+		if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
+			*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
+		}
+
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
+
+		funcsUnpatched = true;
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
