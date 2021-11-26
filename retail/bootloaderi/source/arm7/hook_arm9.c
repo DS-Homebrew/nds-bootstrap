@@ -20,7 +20,7 @@
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
 #define b_a7HaltPatched BIT(9)
-#define b_cloneboot BIT(10)
+#define b_slowSoftReset BIT(10)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -134,8 +134,7 @@ int hookNdsRetailArm9(
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK 5
 	u8 enableExceptionHandler,
-	u8 consoleModel,
-	bool usesCloneboot
+	u8 consoleModel
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
@@ -164,9 +163,6 @@ int hookNdsRetailArm9(
 	}
 	if (swiHaltPatched) {
 		ce9->valueBits |= b_a7HaltPatched;
-	}
-	if (usesCloneboot) {
-		ce9->valueBits |= b_cloneboot;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
@@ -240,6 +236,7 @@ int hookNdsRetailArm9(
 
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;
+			ce9->valueBits |= b_slowSoftReset;
 		}
 	}
 

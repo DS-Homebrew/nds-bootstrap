@@ -49,6 +49,7 @@
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define a7HaltPatched BIT(9)
+#define slowSoftReset BIT(10)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -1067,7 +1068,7 @@ void __attribute__((target("arm"))) resetMpu(void) {
 
 void reset(u32 param) {
 	*(u32*)RESET_PARAM = param;
-	if (*(u32*)(RESET_PARAM+0xC) > 0 || (ce9->valueBits & dsiMode)) {
+	if ((ce9->valueBits & slowSoftReset) || *(u32*)(RESET_PARAM+0xC) > 0 || (ce9->valueBits & dsiMode)) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);

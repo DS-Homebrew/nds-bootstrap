@@ -1694,8 +1694,7 @@ int arm7_main(void) {
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(romTid),
-			consoleModel,
-			(strncmp(romTid, "UBR", 3) != 0 && usesCloneboot)
+			consoleModel
 		);
 
 		if (srlAddr == 0 && (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged)) {

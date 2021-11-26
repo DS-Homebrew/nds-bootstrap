@@ -44,6 +44,7 @@
 #define b_runCardEngineCheck BIT(8)
 #define b_ipcEveryFrame BIT(9)
 #define b_hiyaCfwFound BIT(10)
+#define b_slowSoftReset BIT(11)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -332,6 +333,9 @@ int hookNdsRetailArm7(
 		}
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
+		}
+		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
+			ce7->valueBits |= b_slowSoftReset;
 		}
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
