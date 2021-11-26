@@ -1096,7 +1096,6 @@ void reset(u32 param) {
 	cacheFlush();
 
 	toncset((u8*)getDtcmBase()+0x0A003E00, 0, 0x200);
-	toncset((u32*)0x01FF8000, 0, 0x8000);
 
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
@@ -1114,7 +1113,6 @@ void reset(u32 param) {
 
 	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 	while (ndmaBusy(0) || ndmaBusy(1));
 
 	for (i = 0; i < 4; i++) {
