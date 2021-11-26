@@ -649,7 +649,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "A24", 3) != 0
 	 && strncmp(romTid, "AMC", 3) != 0
 	 && strncmp(romTid, "A8T", 3) != 0
-	 && strncmp(romTid, "A2L", 3) != 0
 	 && strncmp(romTid, "CAY", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
