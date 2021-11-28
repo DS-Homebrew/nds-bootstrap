@@ -1648,6 +1648,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020558F4 = 0xE1A00000; // nop
 		*(u32*)0x020558FC = 0xE1A00000; // nop
 	}*/
+
+	// Trajectile (USA)
+	// Requires 8MB of RAM
+	// Crashes after loading a stage
+	/*else if (strcmp(romTid, "KDZE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020408B8 = 0xE1A00000; // nop
+		*(u32*)0x020408BC = 0xE1A00000; // nop
+		*(u16*)0x02040D24 = 0x46C0; // nop
+		*(u16*)0x02040D26 = 0x46C0; // nop
+		*(u16*)0x020B4B40 = 0x46C0; // nop
+		*(u16*)0x020B4B42 = 0x46C0; // nop
+		*(u16*)0x020B9216 = 0x46C0; // nop
+		*(u16*)0x020B9218 = 0x46C0; // nop
+		for (int i = 0; i < 36; i++) {
+			u16* offset = (u16*)0x020B9298;
+			offset[i] = 0x46C0; // nop
+		}
+		*(u32*)0x020C560C = 0xE1A00000; // nop
+		*(u32*)0x020C751C = 0xE1A00000; // nop
+		*(u32*)0x020C75B4 = 0xE1A00000; // nop
+		*(u32*)0x020C75B8 = 0xE1A00000; // nop
+		*(u32*)0x020C75C4 = 0xE1A00000; // nop
+		*(u32*)0x020C7708 = 0xE1A00000; // nop
+		*(u32*)0x020C7764 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020C7788 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020C7790 = 0x13A00627; // movne r0, #0x2700000
+		*(u16*)0x020CF4BA = 0x46C0; // nop
+		*(u16*)0x020CF4BC = 0x46C0; // nop
+		*(u16*)0x020D515E = 0x46C0; // nop
+		*(u16*)0x020D5160 = 0x46C0; // nop
+	}*/
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
