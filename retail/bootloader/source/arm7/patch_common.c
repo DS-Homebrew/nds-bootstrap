@@ -1572,6 +1572,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ECBEC = 0xE1A00000; // nop
 	}*/
 
+	// Soul of Darkness (USA)
+	// Does not boot: Black screens
+	/*else if (strcmp(romTid, "KSKE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050F4 = 0xE1A00000; // nop
+		*(u32*)0x0204CD4C = 0xE1A00000; // nop
+		*(u32*)0x0204CDB8 = 0xE1A00000; // nop
+		*(u32*)0x02088804 = 0xE1A00000; // nop
+		*(u32*)0x0208BF00 = 0xE1A00000; // nop
+		*(u32*)0x02090884 = 0xE1A00000; // nop
+		*(u32*)0x02092714 = 0xE1A00000; // nop
+		*(u32*)0x02092718 = 0xE1A00000; // nop
+		*(u32*)0x02092724 = 0xE1A00000; // nop
+		*(u32*)0x02092884 = 0xE1A00000; // nop
+		*(u32*)0x020928E0 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02092904 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0209290C = 0x13A00627; // movne r0, #0x2700000
+	}*/
+
 	// Space Ace (USA)
 	// Freezes after clearing high scores
 	else if (strcmp(romTid, "KA6E") == 0) {
