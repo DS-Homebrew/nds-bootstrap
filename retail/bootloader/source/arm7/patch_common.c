@@ -1672,7 +1672,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C75B8 = 0xE1A00000; // nop
 		*(u32*)0x020C75C4 = 0xE1A00000; // nop
 		*(u32*)0x020C7708 = 0xE1A00000; // nop
-		*(u32*)0x020C7764 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x020C7764 = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x020C7788 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020C7790 = 0x13A00627; // movne r0, #0x2700000
 		*(u16*)0x020CF4BA = 0x46C0; // nop
