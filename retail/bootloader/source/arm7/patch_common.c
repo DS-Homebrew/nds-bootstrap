@@ -1391,6 +1391,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207388C = 0xE1A00000; // nop
 	}
 
+	// Mixed Messages (USA)
+	// Mixed Messages (Europe, Australia)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KMME") == 0 || strcmp(romTid, "KMMV") == 0) && extendedMemory2) {
+		*(u32*)0x020036D8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x020036DC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02006E74 = 0xE1A00000; // nop
+		*(u32*)0x0200B8FC = 0xE1A00000; // nop
+		*(u32*)0x0200B900 = 0xE1A00000; // nop
+		*(u32*)0x0200B90C = 0xE1A00000; // nop
+		*(u32*)0x0200BA50 = 0xE1A00000; // nop
+		*(u32*)0x0200BA54 = 0xE1A00000; // nop
+		*(u32*)0x0200BA58 = 0xE1A00000; // nop
+		*(u32*)0x0200BA5C = 0xE1A00000; // nop
+		*(u32*)0x0200BAB8 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0200BADC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0200BAE4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0200F694 = 0xE1A00000; // nop
+		*(u32*)0x0202A65C = 0xE1A00000; // nop
+		*(u32*)0x02031A40 = 0xE3A00008; // mov r0, #8
+		*(u32*)0x02031A44 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020337FC = 0xE1A00000; // nop
+		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
 	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
