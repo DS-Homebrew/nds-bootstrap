@@ -57,7 +57,8 @@ static const u32 swiGetPitchTableSignature3Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature3Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804559};
 static const u32 swiGetPitchTableSignature3Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03804615};
 static const u32 swiGetPitchTableSignature3Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x038053E1};
-static const u32 swiGetPitchTableSignature3Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x038055A5};
+static const u32 swiGetPitchTableSignature3Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x03805485};
+static const u32 swiGetPitchTableSignature3Alt12[3] = {0xE59FC000, 0xE12FFF1C, 0x038055A5};
 static const u32 swiGetPitchTableSignature4[3]      = {0xE59FC000, 0xE12FFF1C, 0x038006A1};
 static const u32 swiGetPitchTableSignature4Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x03800811};
 static const u32 swiGetPitchTableSignature4Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x03800919};
@@ -766,6 +767,17 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 3 call alt 11 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 11 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			swiGetPitchTableSignature3Alt12, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK 3 call alt 12 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK 3 call alt 12 not found\n");
 		}
 	}
 	if (!swiGetPitchTableOffset) {
