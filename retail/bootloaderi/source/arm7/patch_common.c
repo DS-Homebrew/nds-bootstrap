@@ -58,6 +58,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
 	}
 
+	// Anonymous Notes 1: From The Abyss (USA)
+	else if (strcmp(romTid, "KVIE") == 0) {
+		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	else if (strcmp(romTid, "KA4E") == 0) {
 		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr

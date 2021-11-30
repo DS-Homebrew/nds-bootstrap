@@ -299,6 +299,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B060C = 0xE1A00000; // nop
 	}*/
 
+	// Anonymous Notes 1: From The Abyss (USA)
+	// Crashes on reading save data after touching START
+	/*else if (strcmp(romTid, "KVIE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200E74C = 0xE1A00000; // nop
+		*(u32*)0x02011C48 = 0xE1A00000; // nop
+		*(u32*)0x02016A5C = 0xE1A00000; // nop
+		*(u32*)0x020188E0 = 0xE1A00000; // nop
+		*(u32*)0x020188E4 = 0xE1A00000; // nop
+		*(u32*)0x020188F0 = 0xE1A00000; // nop
+		*(u32*)0x02018A50 = 0xE1A00000; // nop
+		*(u32*)0x02018AAC = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02018AD0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02018AD8 = 0x13A00627; // movne r0, #0x2700000
+		//*(u32*)0x0201A58C = 0xE59F0000; // ldr r0, =0
+		//*(u32*)0x0201A590 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		//*(u32*)0x0201A594 = 0;
+		*(u32*)0x0201D5C4 = 0xE1A00000; // nop
+		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0209E2CC = 0xE1A00000; // nop
+		*(u32*)0x0209E2E0 = 0xE1A00000; // nop
+		*(u32*)0x0209E2F4 = 0xE1A00000; // nop
+		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020CFB78 = 0xE1A00000; // nop
+		*(u32*)0x020CFCD0 = 0xE1A00000; // nop
+	}*/
+
 	// Antipole (USA)
 	// Does not boot due to lack of memory
 	/*else if (strcmp(romTid, "KJHE") == 0) {
