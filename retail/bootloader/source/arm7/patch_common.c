@@ -1624,7 +1624,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Phantasy Star 0 Mini (Japan)
 	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KPSJ") == 0) && extendedMemory2) {
+	else if (strcmp(romTid, "KPSJ") == 0 && extendedMemory2) {
 		*(u32*)0x02007FA8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02007FAC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0200CC88 = 0xE1A00000; // nop
