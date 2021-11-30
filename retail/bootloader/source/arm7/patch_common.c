@@ -250,6 +250,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G. Series: All Breaker (USA)
 	// G.G. Series: All Breaker (Japan)
+	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200D71C = 0xE1A00000; // nop
@@ -467,6 +468,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020661D4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// ARC Style: Soccer! (Korea)
+	// Requires 8MB of RAM
+	// 3D graphics are missing
+	else if (strcmp(romTid, "KAZK") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		*(u32*)0x020585D0 = 0xE1A00000; // nop
+		*(u32*)0x020585D8 = 0xE1A00000; // nop
+		*(u32*)0x020585F4 = 0xE1A00000; // nop
+		*(u32*)0x02058648 = 0xE1A00000; // nop
+		*(u32*)0x02058684 = 0xE1A00000; // nop
+		*(u32*)0x020683C8 = 0xE1A00000; // nop
+		*(u32*)0x0206C9C8 = 0xE1A00000; // nop
+		*(u32*)0x020784B8 = 0xE1A00000; // nop
+		*(u32*)0x0207A424 = 0xE1A00000; // nop
+		*(u32*)0x0207A428 = 0xE1A00000; // nop
+		*(u32*)0x0207A434 = 0xE1A00000; // nop
+		*(u32*)0x0207A594 = 0xE1A00000; // nop
+		*(u32*)0x0207A5F0 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0207A614 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0207A61C = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0207A724 = 0x022993E0;
+		*(u32*)0x0207F478 = 0xE1A00000; // nop
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	// Does not boot (Black screens)
 	/*else if (strcmp(romTid, "KA4E") == 0) {
@@ -496,6 +524,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// G.G. Series: Assault Buster (USA)
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KABE") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
@@ -513,6 +542,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G. Series: Assault Buster (Japan)
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KABJ") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
