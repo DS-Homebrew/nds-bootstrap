@@ -1622,6 +1622,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02092C6C = 0x13A00627; // movne r0, #0x2700000
 	}*/
 
+	// Phantasy Star 0 Mini (Japan)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KPSJ") == 0) && extendedMemory2) {
+		*(u32*)0x02007FA8 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02007FAC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0200CC88 = 0xE1A00000; // nop
+		*(u32*)0x02015F6C = 0xE1A00000; // nop
+		*(u32*)0x0202D9DC = 0xE1A00000; // nop
+		*(u32*)0x0202D9E0 = 0xE1A00000; // nop
+		*(u32*)0x0202D9EC = 0xE1A00000; // nop
+		*(u32*)0x0202DB30 = 0xE1A00000; // nop
+		*(u32*)0x0202DB34 = 0xE1A00000; // nop
+		*(u32*)0x0202DB38 = 0xE1A00000; // nop
+		*(u32*)0x0202DB3C = 0xE1A00000; // nop
+		*(u32*)0x0202DB98 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0202DBBC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0202DBC4 = 0x13A00627; // movne r0, #0x2700000
+		//*(u32*)0x0202DCCC = 0x0218B0A0;
+		*(u16*)0x0209F778 = 0x46C0; // nop
+		*(u16*)0x0209F77A = 0x46C0; // nop
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Crashes after selecting a file due to memory limitations
 	/*else if (strcmp(romTid, "KS3E") == 0) {
