@@ -945,6 +945,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}*/
 	}
 
+	// Dr. Mario Express (USA)
+	// Stuck "Save data is corrupt" message with font missing
+	/*else if (strcmp(romTid, "KD9E") == 0) {
+		*(u32*)0x020103C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02013A08 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02019DF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201B724 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201B728 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201BC0C = 0xE1A00000; // nop
+		*(u32*)0x0201BC10 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BC28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BD70 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BE0C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BE3C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BF10 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BF40 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D2A8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020246F0 = 0xE1A00000; // nop (Skip NTFR file loading from TWLNAND)
+		*(u32*)0x02058F68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205990C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207401C = 0xE1A00000; // nop
+		*(u32*)0x020740FC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207412C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207415C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207419C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020741D4 = 0xE3A00000; // mov r0, #0
+	}*/
+
 	// Dragon's Lair (USA)
 	else if (strcmp(romTid, "KDLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
@@ -1950,6 +1979,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020558C4 = 0xE1A00000; // nop
 		*(u32*)0x020558F4 = 0xE1A00000; // nop
 		*(u32*)0x020558FC = 0xE1A00000; // nop
+	}*/
+
+	// Tori to Mame (Japan)
+	// Does not boot: Crashes on black screens
+	/*else if (strcmp(romTid, "KP6J") == 0) {
+		*(u32*)0x0202BF30 = 0xE12FFF1E; // bx lr (Skip NTFR file loading from TWLNAND)
 	}*/
 
 	// Trajectile (USA)
