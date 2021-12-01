@@ -813,6 +813,46 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207BE88 = 0xE1A00000; // nop
 	}
 
+	// Calculator (USA)
+	// Crashes on black screens after company logos
+	else if (strcmp(romTid, "KCYE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201F6A8 = 0xE1A00000; // nop
+		*(u32*)0x020239D8 = 0xE1A00000; // nop
+		*(u32*)0x02027270 = 0xE1A00000; // nop
+		*(u32*)0x02029038 = 0xE1A00000; // nop
+		*(u32*)0x0202903C = 0xE1A00000; // nop
+		*(u32*)0x02029048 = 0xE1A00000; // nop
+		*(u32*)0x020291A8 = 0xE1A00000; // nop
+		*(u32*)0x02029204 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02029228 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02029230 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0202A590 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202DA48 = 0xE1A00000; // nop
+		*(u32*)0x0203ED20 = 0xE1A00000; // nop
+	}
+
+	// Calculator (Europe, Australia)
+	// Crashes on black screens after company logos
+	else if (strcmp(romTid, "KCYV") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201503C = 0xE1A00000; // nop
+		*(u32*)0x0201937C = 0xE1A00000; // nop
+		*(u32*)0x0201CC14 = 0xE1A00000; // nop
+		*(u32*)0x0201E9DC = 0xE1A00000; // nop
+		*(u32*)0x0201E9E0 = 0xE1A00000; // nop
+		*(u32*)0x0201E9EC = 0xE1A00000; // nop
+		*(u32*)0x0201EB4C = 0xE1A00000; // nop
+		*(u32*)0x0201EBA8 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x0201EBCC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0201EBD4 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0201FF34 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020233EC = 0xE1A00000; // nop
+		*(u32*)0x020346D0 = 0xE1A00000; // nop
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
