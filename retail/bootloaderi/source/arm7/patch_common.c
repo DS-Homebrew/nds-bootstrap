@@ -121,6 +121,7 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		*(u32*)0x02005534 = 0xE1A00000; // nop
 		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02046AA8 = 0xE1A00000; // nop
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 
 		// Skip Manual screen
