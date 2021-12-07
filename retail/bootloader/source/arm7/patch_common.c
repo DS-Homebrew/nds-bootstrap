@@ -628,7 +628,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// ARC Style: Soccer! (Korea)
 	// Requires 8MB of RAM
-	// 3D graphics are missing
 	else if (strcmp(romTid, "KAZK") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
