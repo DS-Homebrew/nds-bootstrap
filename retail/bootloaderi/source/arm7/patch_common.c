@@ -153,6 +153,12 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Kung Fu Dragon (USA)
+	// Kung Fu Dragon (Europe)
+	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
+		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Mixed Messages (USA)
 	// Mixed Messages (Europe, Australia)
 	else if (strcmp(romTid, "KMME") == 0 || strcmp(romTid, "KMMV") == 0) {

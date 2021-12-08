@@ -1520,6 +1520,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Kung Fu Dragon (USA)
+	// Kung Fu Dragon (Europe)
+	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005154 = 0xE1A00000; // nop
+		*(u32*)0x020051D4 = 0xE1A00000; // nop
+		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0200E8F4 = 0xE1A00000; // nop
+		*(u32*)0x02011D90 = 0xE1A00000; // nop
+		*(u32*)0x0201580C = 0xE1A00000; // nop
+		*(u32*)0x020175A8 = 0xE1A00000; // nop
+		*(u32*)0x020175AC = 0xE1A00000; // nop
+		*(u32*)0x020175B8 = 0xE1A00000; // nop
+		*(u32*)0x02017718 = 0xE1A00000; // nop
+		*(u32*)0x02017774 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02017798 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020177A0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02019000 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		*(u32*)0x02019004 = generateA7Instr(0x02019004, (int)ce9->patches->reset_arm9);
+		*(u32*)0x02019008 = 0xFFFFFFFF;
+		*(u32*)0x0201BD60 = 0xE1A00000; // nop
+		*(u32*)0x0201D8EC = 0xE1A00000; // nop
+		*(u32*)0x02024994 = 0xE1A00000; // nop
+		*(u32*)0x02024A4C = 0xE1A00000; // nop
+	}
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
@@ -1887,7 +1913,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201697C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02016984 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x020181E4 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x020181E8 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		*(u32*)0x020181E8 = generateA7Instr(0x020181E8, (int)ce9->patches->reset_arm9);
 		*(u32*)0x020181EC = 0xFFFFFFFF;
 		*(u32*)0x0201A848 = 0xE1A00000; // nop
 		if (strcmp(romTid, "KLBE") == 0) {
@@ -1916,7 +1942,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02016828 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02016830 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x02018090 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x02018094 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		*(u32*)0x02018094 = generateA7Instr(0x02018094, (int)ce9->patches->reset_arm9);
 		*(u32*)0x02018098 = 0xFFFFFFFF;
 		*(u32*)0x0201A6F4 = 0xE1A00000; // nop
 	}
