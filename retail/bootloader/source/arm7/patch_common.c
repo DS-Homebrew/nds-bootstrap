@@ -1726,6 +1726,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Mr. Brain (Japan)
+	else if (strcmp(romTid, "KMBJ") == 0) {
+		*(u32*)0x020054EC = 0xE1A00000; // nop
+		*(u32*)0x02005504 = 0xE1A00000; // nop
+		*(u32*)0x0200648C = 0xE1A00000; // nop
+		*(u32*)0x0200949C = 0xE1A00000; // nop
+		*(u32*)0x02025AB4 = 0xE1A00000; // nop
+		*(u32*)0x02029804 = 0xE1A00000; // nop
+		*(u32*)0x0203065C = 0xE1A00000; // nop
+		*(u32*)0x020325FC = 0xE1A00000; // nop
+		*(u32*)0x02032600 = 0xE1A00000; // nop
+		*(u32*)0x0203260C = 0xE1A00000; // nop
+		*(u32*)0x02032750 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x020327AC = 0xE3A0062F; // mov r0, #0x2F00000 (mirrors to 0x2700000 on debug DS units)
+		} else {
+			*(u32*)0x020327AC = 0xE3A007BF; // mov r0, #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		}
+		*(u32*)0x020327D0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020327D8 = 0x13A0062F; // movne r0, #0x2F00000
+		*(u32*)0x02036ED0 = 0xE1A00000; // nop
+	}
+
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
 	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
