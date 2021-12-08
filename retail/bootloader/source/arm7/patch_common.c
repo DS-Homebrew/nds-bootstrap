@@ -1870,6 +1870,57 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0209F77A = 0x46C0; // nop
 	}
 
+	// Rabi Laby (USA)
+	// Rabi Laby (Europe)
+	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020051C8 = 0xE1A00000; // nop
+		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0200DC38 = 0xE1A00000; // nop
+		*(u32*)0x020110D4 = 0xE1A00000; // nop
+		*(u32*)0x020149F0 = 0xE1A00000; // nop
+		*(u32*)0x0201678C = 0xE1A00000; // nop
+		*(u32*)0x02016790 = 0xE1A00000; // nop
+		*(u32*)0x0201679C = 0xE1A00000; // nop
+		*(u32*)0x020168FC = 0xE1A00000; // nop
+		*(u32*)0x02016958 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201697C = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02016984 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020181E4 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		*(u32*)0x020181E8 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		*(u32*)0x020181EC = 0xFFFFFFFF;
+		*(u32*)0x0201A848 = 0xE1A00000; // nop
+		if (strcmp(romTid, "KLBE") == 0) {
+			*(u32*)0x0202663C = 0xE1A00000; // nop
+			*(u32*)0x020266F8 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020266CC = 0xE1A00000; // nop
+			*(u32*)0x02026788 = 0xE1A00000; // nop
+		}
+	}
+
+	// Rabi Laby 2 (USA)
+	// Rabi Laby 2 (Europe)
+	else if (strcmp(romTid, "KLVE") == 0 || strcmp(romTid, "KLVP") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020051E8 = 0xE1A00000; // nop
+		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0200DAE4 = 0xE1A00000; // nop
+		*(u32*)0x02010F80 = 0xE1A00000; // nop
+		*(u32*)0x0201489C = 0xE1A00000; // nop
+		*(u32*)0x02016638 = 0xE1A00000; // nop
+		*(u32*)0x0201663C = 0xE1A00000; // nop
+		*(u32*)0x02016648 = 0xE1A00000; // nop
+		*(u32*)0x020167A8 = 0xE1A00000; // nop
+		*(u32*)0x02016804 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x02016828 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02016830 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02018090 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		*(u32*)0x02018094 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
+		*(u32*)0x02018098 = 0xFFFFFFFF;
+		*(u32*)0x0201A6F4 = 0xE1A00000; // nop
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Crashes after selecting a file due to memory limitations
 	/*else if (strcmp(romTid, "KS3E") == 0) {

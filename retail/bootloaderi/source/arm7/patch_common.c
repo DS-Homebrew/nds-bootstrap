@@ -181,6 +181,18 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
 	}
 
+	// Rabi Laby (USA)
+	// Rabi Laby (Europe)
+	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
+		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Rabi Laby 2 (USA)
+	// Rabi Laby 2 (Europe)
+	else if (strcmp(romTid, "KLVE") == 0 || strcmp(romTid, "KLVP") == 0) {
+		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
 		*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
