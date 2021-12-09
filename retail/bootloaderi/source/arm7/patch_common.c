@@ -199,6 +199,18 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Space Invaders Extreme Z (Japan)
+	else if (strcmp(romTid, "KEVJ") == 0) {
+		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E43A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4624 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4628 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4854 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
 		*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr

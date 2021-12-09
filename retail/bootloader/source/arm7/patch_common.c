@@ -2058,6 +2058,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02040888 = 0xE1A00000; // nop
 	}
 
+	// Space Invaders Extreme Z (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEVJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02017904 = 0xE1A00000; // nop
+		*(u32*)0x0201B794 = 0xE1A00000; // nop
+		*(u32*)0x020207B0 = 0xE1A00000; // nop
+		*(u32*)0x020225D8 = 0xE1A00000; // nop
+		*(u32*)0x020225DC = 0xE1A00000; // nop
+		*(u32*)0x020225E8 = 0xE1A00000; // nop
+		*(u32*)0x02022748 = 0xE1A00000; // nop
+		*(u32*)0x020227A4 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x020227C8 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020227D0 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020228D8 = 0x0213CC60;
+		*(u32*)0x020240E0 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		*(u32*)0x020240E4 = generateA7Instr(0x020240E4, (int)ce9->patches->reset_arm9);
+		*(u32*)0x020240E8 = 0xFFFFFFFF;
+		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E43A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4624 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4628 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4854 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
+	}
+
 	// Spotto! (USA)
 	// Does not boot: Issue unknown
 	/*else if (strcmp(romTid, "KSPE") == 0) {
