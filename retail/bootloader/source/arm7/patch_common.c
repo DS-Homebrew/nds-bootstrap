@@ -627,8 +627,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// ARC Style: Soccer! (Korea)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KAZK") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KAZK") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
@@ -645,7 +644,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207A428 = 0xE1A00000; // nop
 		*(u32*)0x0207A434 = 0xE1A00000; // nop
 		*(u32*)0x0207A594 = 0xE1A00000; // nop
-		*(u32*)0x0207A5F0 = 0xE3A00627; // mov r0, #0x2700000
+		if (extendedMemory2) {
+			*(u32*)0x0207A5F0 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0207A5F0 = 0xE3A0079F; // mov r0, #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		}
 		*(u32*)0x0207A614 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0207A61C = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0207A724 = 0x022993E0;
