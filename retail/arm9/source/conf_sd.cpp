@@ -742,7 +742,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 	}
-	if ((conf->gameOnFlashcard || !conf->isDSiWare) && unitCode > 0 && conf->dsiMode) {
+	if ((conf->gameOnFlashcard || !conf->isDSiWare) && (conf->extendedMemory || conf->dsiMode)) {
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 		if (!found) {
 			consoleDemoInit();

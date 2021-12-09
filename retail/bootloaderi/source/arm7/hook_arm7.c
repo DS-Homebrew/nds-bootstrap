@@ -302,6 +302,7 @@ int hookNdsRetailArm7(
 		*(u32*)intr_vblank_orig_return = *vblankHandler;
 		*vblankHandler = 0x2FFC008;
 	} else {
+		extern u32 iUncompressedSize;
 		extern u32 overlaysSize;
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
@@ -334,9 +335,9 @@ int hookNdsRetailArm7(
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
 		}
-		/*if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
+		if (iUncompressedSize > 0x280000) {
 			ce7->valueBits |= b_slowSoftReset;
-		}*/
+		}
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
 		}

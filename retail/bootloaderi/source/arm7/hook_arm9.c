@@ -138,6 +138,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool swiHaltPatched;
 
@@ -236,6 +237,9 @@ int hookNdsRetailArm9(
 
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;
+		}
+		if (iUncompressedSize > 0x280000) {
+			ce9->valueBits |= b_slowSoftReset;
 		}
 	}
 

@@ -1730,27 +1730,27 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!extendedMemoryConfirmed && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) || !dsiModeConfirmed)) {
-			extern u32 iUncompressedSize;
-			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				extern u32 iUncompressedSizei;
-				aFile pageFile = getFileFromCluster(pageFileCluster);
+		extern u32 iUncompressedSize;
+		if (extendedMemoryConfirmed || dsiModeConfirmed) {
+			extern u32 iUncompressedSizei;
+			aFile pageFile = getFileFromCluster(pageFileCluster);
 
-				sdRead = dsiSD;
-				fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
-				fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
+			sdRead = dsiSD;
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, -1);
+			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, -1);
 				fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, -1);
-				fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, -1);
-				fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, -1);
 				fileWrite((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, -1);
 				fileWrite((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, -1);
-				sdRead = (gameOnFlashcard ? false : dsiSD);
-			} else {
-				*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
-				tonccpy((char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, iUncompressedSize);
-				tonccpy((char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 			}
+			sdRead = (gameOnFlashcard ? false : dsiSD);
+		} else {
+			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
+			tonccpy((char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, iUncompressedSize);
+			tonccpy((char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		}
 		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off

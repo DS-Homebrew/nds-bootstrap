@@ -131,9 +131,7 @@ static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
-#ifdef TWLSDK
 static aFile pageFile;
-#endif
 
 static int saveTimer = 0;
 
@@ -261,9 +259,7 @@ static void driveInitialize(void) {
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
 	srParamsFile = getFileFromCluster(srParamsCluster);
 	screenshotFile = getFileFromCluster(screenshotCluster);
-	#ifdef TWLSDK
 	pageFile = getFileFromCluster(pageFileCluster);
-	#endif
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -346,7 +342,7 @@ static void initialize(void) {
 void reset(void) {
 #ifndef TWLSDK
 	u32 resetParam = (isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if ((valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory) || (ndsHeader->unitCode == 0 && (valueBits & dsiMode))) {
+	if ((valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory)) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		driveInitialize();
@@ -409,9 +405,18 @@ void reset(void) {
 	languageTimer = 0;
 
 	#ifndef TWLSDK
-	ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
-	ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	while (ndmaBusy(0) || ndmaBusy(1));
+	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		u32 iUncompressedSize = 0;
+		u32 newArm7binarySize = 0;
+		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
+		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
+		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
+	} else {
+		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
+		ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		while (ndmaBusy(0) || ndmaBusy(1));
+	}
 	#else
 	u32 iUncompressedSize = 0;
 	u32 iUncompressedSizei = 0;

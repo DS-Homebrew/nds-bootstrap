@@ -522,7 +522,7 @@ void __attribute__((target("arm"))) resetMpu(void) {
 void reset(u32 param) {
 	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	*(u32*)resetParam = param;
-	if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (ce9->valueBits & extendedMemory) || (ndsHeader->unitCode == 0 && (ce9->valueBits & dsiMode))) {
+	if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
