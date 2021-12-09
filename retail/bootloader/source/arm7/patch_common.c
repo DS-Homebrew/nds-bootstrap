@@ -652,6 +652,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207A614 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0207A61C = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0207A724 = 0x022993E0;
+		*(u32*)0x0207BC68 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BC6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207BC74 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207BC78 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207F478 = 0xE1A00000; // nop
 	}
 
@@ -1205,6 +1209,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020218A8 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020218B0 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x020219B8 = 0x02257500;
+		*(u32*)0x02022C1C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02022C20 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022C70 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02022C74 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02026A94 = 0xE1A00000; // nop
 	}
 
