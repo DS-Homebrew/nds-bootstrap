@@ -334,9 +334,9 @@ int hookNdsRetailArm7(
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
 		}
-		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
+		/*if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce7->valueBits |= b_slowSoftReset;
-		}
+		}*/
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
 		}

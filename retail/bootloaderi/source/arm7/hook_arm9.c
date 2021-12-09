@@ -236,7 +236,6 @@ int hookNdsRetailArm9(
 
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;
-			ce9->valueBits |= b_slowSoftReset;
 		}
 	}
 

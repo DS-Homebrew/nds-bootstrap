@@ -1718,6 +1718,18 @@ int arm7_main(void) {
 		} else if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
+
+		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+			dbg_printf("AP-fix found\n");
+			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
+			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
+				dbg_printf("AP-fix applied\n");
+			} else {
+				dbg_printf("Failed to apply AP-fix\n");
+			}
+		}
+
 		if (!extendedMemoryConfirmed && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) || !dsiModeConfirmed)) {
 			extern u32 iUncompressedSize;
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
@@ -1743,17 +1755,6 @@ int arm7_main(void) {
 		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
-		}
-
-		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
-			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-			dbg_printf("AP-fix found\n");
-			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
-			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
-				dbg_printf("AP-fix applied\n");
-			} else {
-				dbg_printf("Failed to apply AP-fix\n");
-			}
 		}
 	}
 
