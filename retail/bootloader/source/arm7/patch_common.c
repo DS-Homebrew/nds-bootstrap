@@ -2106,6 +2106,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020240E0 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
 		*(u32*)0x020240E4 = generateA7Instr(0x020240E4, (int)ce9->patches->reset_arm9);
 		*(u32*)0x020240E8 = 0xFFFFFFFF;
+		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
 		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
