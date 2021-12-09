@@ -2532,12 +2532,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
-		*(u32*)0x0200749C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074AC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074C8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074DC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020075B4 = 0xE3A00000; // mov r0, #0
+		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074BC) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074D8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074E8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x02007500) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020075C4) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip manual screen)
 		//*(u32*)0x0202D2EC = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x0202D314 = 0xE3A00000; // mov r0, #0
@@ -2563,12 +2563,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: CODE (Europe, Australia)
 	else if (strcmp(romTid, "KADV") == 0) {
-		*(u32*)0x0200749C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074AC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074C8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074DC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020075B4 = 0xE3A00000; // mov r0, #0
+		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074BC) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074D8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074E8) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x02007500) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020075C4) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip manual screen)
 		*(u32*)0x0203A318 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020567B4 = 0xE3A00000; // mov r0, #0
@@ -2592,12 +2592,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: DECODE (Japan)
 	else if (strcmp(romTid, "KADJ") == 0) {
-		*(u32*)0x020074A4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074B4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074D0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074E4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020074F4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020075B8 = 0xE3A00000; // mov r0, #0
+		*getOffsetFromBL((u32*)0x020074B0) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074C4) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074E0) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020074F0) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x02007508) = 0xE12FFF1E; // bx lr
+		*getOffsetFromBL((u32*)0x020075C8) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip manual screen)
 		*(u32*)0x0203B148 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020575B0 = 0xE3A00000; // mov r0, #0

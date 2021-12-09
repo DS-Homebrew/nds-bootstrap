@@ -26,6 +26,12 @@ u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
+u32* getOffsetFromBL(u32* blOffset) {
+	u32 opCode = *blOffset;
+
+	return (u32*)((u32)blOffset + ((opCode - 0xEB000000)*4) + 8);
+}
+
 const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 

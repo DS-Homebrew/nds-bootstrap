@@ -104,6 +104,7 @@ extern patchOffsetCacheContents patchOffsetCache;
 extern bool patchOffsetCacheChanged;
 
 u32 generateA7Instr(int arg1, int arg2);
+u32* getOffsetFromBL(u32* blOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 u16* getOffsetFromBLThumb(u16* blOffset);
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader);
