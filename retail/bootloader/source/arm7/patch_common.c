@@ -1668,8 +1668,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KWYE") == 0 || strcmp(romTid, "KWYP") == 0) && extendedMemory2) {
+	//
+	// Music and some sound effects don't play on retail consoles
+	// Crashes after completing a stage on retail consoles
+	else if (strcmp(romTid, "KWYE") == 0 || strcmp(romTid, "KWYP") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
@@ -1685,15 +1687,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005A2C = 0xE1A00000; // nop
 		*(u32*)0x02005A20 = 0xE1A00000; // nop
 		*(u32*)0x02005A38 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Skip loading sdat and title music files
+			*(u32*)0x020072C8 = 0xE1A00000; // nop
+			*(u32*)0x020072CC = 0xE1A00000; // nop
+			*(u32*)0x020072D0 = 0xE1A00000; // nop
+			*(u32*)0x020128EC = 0xE1A00000; // nop
+			*(u32*)0x020128F8 = 0xE1A00000; // nop
+			*(u32*)0x02012918 = 0xE1A00000; // nop
+			*(u32*)0x02012934 = 0xE1A00000; // nop
+			*(u32*)0x02012D7C = 0xE1A00000; // nop
+			*(u32*)0x02012D98 = 0xE1A00000; // nop
+		}
 		*(u32*)0x02064E34 = 0xE1A00000; // nop
 		*(u32*)0x0206CCE0 = 0xE1A00000; // nop
 		*(u32*)0x0206EB6C = 0xE1A00000; // nop
 		*(u32*)0x0206EB70 = 0xE1A00000; // nop
 		*(u32*)0x0206EB7C = 0xE1A00000; // nop
 		*(u32*)0x0206ECDC = 0xE1A00000; // nop
-		*(u32*)0x0206ED38 = 0xE3A00627; // mov r0, #0x2700000
+		if (extendedMemory2) {
+			*(u32*)0x0206ED38 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0206ED38 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
 		*(u32*)0x0206ED5C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0206ED64 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0206EE6C -= 0x30000;
 		*(u32*)0x02070384 = 0xE1A00000; // nop
 		*(u32*)0x02070388 = 0xE1A00000; // nop
 		*(u32*)0x0207038C = 0xE1A00000; // nop
