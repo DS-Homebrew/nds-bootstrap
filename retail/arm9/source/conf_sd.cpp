@@ -587,7 +587,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				//*(u8*)0x02EFF055 = 0; // nand
 				//*(u8*)0x02EFF0A9 = 0; // nand2
 				bool shared1Found = (access("sd:/shared1", F_OK) == 0);
-				//bool shared2Found = (access("sd:/shared2", F_OK) == 0);
+				bool shared2Found = (access("sd:/shared2", F_OK) == 0);
 				if (shared1Found) {
 					toncset((u8*)0x02EFF0FD, 0x10, 1);
 					tonccpy((char*)0x02EFF110, sdmcText, 4);
@@ -600,15 +600,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					tonccpy((char*)0x02EFF166, photoPath, strlen(photoPath));
 					tonccpy((char*)0x02EFF164, sdmcText, 4);
 				//}
-				// Seems to cause issues
-				/*if ((strncmp(romTid, "HNK", 3) == 0 || strncmp(romTid, "KGU", 3) == 0) && shared2Found) {
+				if ((strncmp(romTid, "HNK", 3) == 0 || strncmp(romTid, "KGU", 3) == 0) && shared2Found) {
 					const char* filePath = "sdmc:/shared2/0000";
 					const char* share = "share";
 					u8 cPath[3] = {'C', 0x08, 0x06};
 					tonccpy((char*)0x02EFF24C, cPath, 3);
 					tonccpy((char*)0x02EFF250, share, strlen(share));
 					tonccpy((char*)0x02EFF260, filePath, strlen(filePath));
-				}*/
+				}
 			}
 			if (!conf->gameOnFlashcard) {
 				if (strlen(conf->appPath) < 62) {
