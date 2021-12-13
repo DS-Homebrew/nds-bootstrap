@@ -1649,6 +1649,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
+		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
 		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
 		*(u32*)0x02051124 = 0xE1A00000; // nop
 		*(u32*)0x020566E8 = 0xE1A00000; // nop
@@ -1664,6 +1665,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0) {
+		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
 		*(u32*)0x0204D504 = 0xE1A00000; // nop
 		*(u32*)0x02050F30 = 0xE1A00000; // nop
 		*(u32*)0x020564F4 = 0xE1A00000; // nop
@@ -1680,7 +1682,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
 	//
-	// Music and some sound effects don't play on retail consoles
+	// Audio doesn't play on retail consoles
 	// Crashes after completing a stage on retail consoles
 	else if (strcmp(romTid, "KWYE") == 0 || strcmp(romTid, "KWYP") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -1691,24 +1693,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020054D0 = 0xE1A00000; // nop
 		*(u32*)0x020054D4 = 0xE1A00000; // nop
 		*(u32*)0x020054DC = 0xE1A00000; // nop
-		*(u32*)0x0200554C = 0xE1A00000; // nop
-		*(u32*)0x020057C0 = 0xE1A00000; // nop
+		*(u32*)0x020054E4 = 0xE1A00000; // nop
+		*(u32*)0x020057AC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02005A20 = 0xE1A00000; // nop
 		*(u32*)0x02005A28 = 0xE1A00000; // nop
 		*(u32*)0x02005A2C = 0xE1A00000; // nop
 		*(u32*)0x02005A20 = 0xE1A00000; // nop
 		*(u32*)0x02005A38 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			// Skip loading sdat and title music files
+			// Skip loading sdat and sfx files
 			*(u32*)0x020072C8 = 0xE1A00000; // nop
 			*(u32*)0x020072CC = 0xE1A00000; // nop
 			*(u32*)0x020072D0 = 0xE1A00000; // nop
-			*(u32*)0x020128EC = 0xE1A00000; // nop
-			*(u32*)0x020128F8 = 0xE1A00000; // nop
-			*(u32*)0x02012918 = 0xE1A00000; // nop
-			*(u32*)0x02012934 = 0xE1A00000; // nop
-			*(u32*)0x02012D7C = 0xE1A00000; // nop
-			*(u32*)0x02012D98 = 0xE1A00000; // nop
+			*(u32*)0x020084C0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008588 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x02064E34 = 0xE1A00000; // nop
 		*(u32*)0x0206CCE0 = 0xE1A00000; // nop
@@ -1728,6 +1726,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02070388 = 0xE1A00000; // nop
 		*(u32*)0x0207038C = 0xE1A00000; // nop
 		*(u32*)0x02070390 = 0xE1A00000; // nop
+		*(u32*)0x0207039C = 0xE1A00000; // nop (Enable error exception screen)
 		*(u32*)0x0207388C = 0xE1A00000; // nop
 	}
 
@@ -2001,17 +2000,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
-	// Crashes after selecting a file due to memory limitations
-	/*else if (strcmp(romTid, "KS3E") == 0) {
+	else if (strcmp(romTid, "KS3E") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02004B9C = 0x0200002F;
+		*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
+		/*if (!extendedMemory2) {
+			*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr
+		}*/
 		*(u32*)0x02092050 = 0xE1A00000; // nop
-		*(u32*)0x02092078 = 0xE1A00000; // nop
-		*(u32*)0x02092BA8 = 0xE1A00000; // nop
-		*(u32*)0x02092E08 = 0xE1A00000; // nop
-		*(u32*)0x02092E14 = 0xE1A00000; // nop
-		*(u32*)0x02092E20 = 0xE1A00000; // nop
-		*(u32*)0x020DDB84 = 0xE1A00000; // nop
+		*(u32*)0x02092078 = 0xE3A05001; // mov r5, #1
+		*(u32*)0x02092B94 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020DE420 = 0xE1A00000; // nop
 		*(u32*)0x020DE548 = 0xE1A00000; // nop
 		*(u32*)0x020DE55C = 0xE1A00000; // nop
@@ -2021,7 +2021,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E7F68 = 0xE1A00000; // nop
 		*(u32*)0x020E7F74 = 0xE1A00000; // nop
 		*(u32*)0x020E80D4 = 0xE1A00000; // nop
-		*(u32*)0x020E8130 = 0xE3A0079F; // mov r0, #0x27C0000
+		//if (extendedMemory2) {
+			*(u32*)0x020E8130 = 0xE3A00627; // mov r0, #0x2700000
+		/*} else {
+			*(u32*)0x020E8130 = 0xE3A0078F; // mov r0, #0x23C0000
+		}*/
 		*(u32*)0x020E8154 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x020E815C = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x020E8264 = 0x02186C60;
@@ -2029,9 +2033,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E9780 = 0xE1A00000; // nop
 		*(u32*)0x020E9784 = 0xE1A00000; // nop
 		*(u32*)0x020E9788 = 0xE1A00000; // nop
-		*(u32*)0x020E9794 = 0xE1A00000; // nop (Activates a message when memory runs out)
+		*(u32*)0x020E9794 = 0xE1A00000; // nop (Enable error exception screen)
 		*(u32*)0x020ECBEC = 0xE1A00000; // nop
-	}*/
+	}
+
+	// Shantae: Risky's Revenge (Europe)
+	else if (strcmp(romTid, "KS3P") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
+		/*if (!extendedMemory2) {
+			*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			*(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr
+		}*/
+		*(u32*)0x020922D4 = 0xE1A00000; // nop
+		*(u32*)0x020922FC = 0xE3A05001; // mov r5, #1
+		*(u32*)0x02092FC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DE810 = 0xE1A00000; // nop
+		*(u32*)0x020DE938 = 0xE1A00000; // nop
+		*(u32*)0x020DE94C = 0xE1A00000; // nop
+		*(u32*)0x020E253C = 0xE1A00000; // nop
+		*(u32*)0x020E6600 = 0xE1A00000; // nop
+		*(u32*)0x020E8400 = 0xE1A00000; // nop
+		*(u32*)0x020E8404 = 0xE1A00000; // nop
+		*(u32*)0x020E8410 = 0xE1A00000; // nop
+		*(u32*)0x020E8570 = 0xE1A00000; // nop
+		//if (extendedMemory2) {
+			*(u32*)0x020E85CC = 0xE3A00627; // mov r0, #0x2700000
+		/*} else {
+			*(u32*)0x020E85CC = 0xE3A0078F; // mov r0, #0x23C0000
+		}*/
+		*(u32*)0x020E85F0 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x020E85F8 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020E8700 = 0x02190100;
+		*(u32*)0x020E9C18 = 0xE1A00000; // nop
+		*(u32*)0x020E9C1C = 0xE1A00000; // nop
+		*(u32*)0x020E9C20 = 0xE1A00000; // nop
+		*(u32*)0x020E9C24 = 0xE1A00000; // nop
+		*(u32*)0x020E9C30 = 0xE1A00000; // nop (Enable error exception screen)
+		*(u32*)0x020ED088 = 0xE1A00000; // nop
+	}
 
 	// Soul of Darkness (USA)
 	// Does not boot: Black screens
