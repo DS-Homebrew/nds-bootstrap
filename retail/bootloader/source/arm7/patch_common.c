@@ -1629,7 +1629,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario vs. Donkey Kong: Minis March Again! (USA)
 	// Does not boot
 	/*else if (strcmp(romTid, "KDME") == 0) {
-		*(u32*)0x02005190 = 0xE1A00000; // nop
 		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
 		*(u32*)0x0202E788 = 0xE1A00000; // nop
 		*(u32*)0x020343E0 = 0xE1A00000; // nop
