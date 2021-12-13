@@ -2016,12 +2016,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
+	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
-		/*if (!extendedMemory2) {
+		//*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
+		//if (!extendedMemory2) {
 			*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
-			*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
+			/* *(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr
 		}*/
@@ -2054,12 +2055,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (Europe)
+	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3P") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
-		/*if (!extendedMemory2) {
+		//*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
+		//if (!extendedMemory2) {
 			*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
-			*(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
+			/* *(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr
 		}*/
