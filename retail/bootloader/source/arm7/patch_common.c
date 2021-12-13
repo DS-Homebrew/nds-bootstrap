@@ -1843,9 +1843,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendoji (Japan)
-	// Does not boot
-	/*else if (strcmp(romTid, "K9KJ") == 0) {
+	// Audio does not play, requires more patches to get past the save screen
+	else if (strcmp(romTid, "K9KJ") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005160 = 0xE3A01601; // mov r1, #0x100000
+		*(u32*)0x020051C0 = 0xE1A00000; // nop
+		*(u32*)0x020051C4 = 0xE1A00000; // nop
+		*(u32*)0x020051C8 = 0xE1A00000; // nop
+		*(u32*)0x020051CC = 0xE1A00000; // nop
 		*(u32*)0x02005538 = 0xE1A00000; // nop
 		*(u32*)0x0200554C = 0xE1A00000; // nop
 		*(u32*)0x02018C08 = 0xE1A00000; // nop
@@ -1853,12 +1858,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201A9FC = 0xE1A00000; // nop
 		*(u32*)0x0201AA08 = 0xE1A00000; // nop
 		*(u32*)0x0201AB68 = 0xE1A00000; // nop
-		*(u32*)0x0201ABC4 = 0xE3A0078F; // mov r0, #0x23C0000
+		*(u32*)0x0201ABC4 = 0xE3A00627; // mov r0, #0x2700000
 		*(u32*)0x0201ABD0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0201ABF0 = 0x13A00627; // movne r0, #0x2700000
 		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
-	}*/
+	}
 
 	// Petit Computer (USA)
 	// Does not boot (black screens, seems to rely on code from DSi binaries)
