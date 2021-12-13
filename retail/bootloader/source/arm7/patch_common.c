@@ -1629,8 +1629,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario vs. Donkey Kong: Minis March Again! (USA)
 	// Does not boot
 	/*else if (strcmp(romTid, "KDME") == 0) {
+		*(u32*)0x02005190 = 0xE1A00000; // nop
 		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
 		*(u32*)0x0202E788 = 0xE1A00000; // nop
+		*(u32*)0x020343E0 = 0xE1A00000; // nop
+		*(u32*)0x020343E4 = 0xE1A00000; // nop
+		*(u32*)0x020343F4 = 0xE1A00000; // nop
+		*(u32*)0x02034408 = 0xE1A00000; // nop
+		*(u32*)0x0203448C = 0xE1A00000; // nop
+		*(u32*)0x02059770 = 0xE1A00000; // nop
+		*(u32*)0x0205A72C = 0xE1A00000; // nop
 		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x02064F80 = 0xE1A00000; // nop
@@ -1645,6 +1653,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F968 = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x0206F98C = 0xE3500001; // cmp r0, #1
 		*(u32*)0x0206F994 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x02071390 = 0xE1A00000; // nop
+		*(u32*)0x02071394 = 0xE1A00000; // nop
+		*(u32*)0x02071398 = 0xE1A00000; // nop
+		*(u32*)0x0207139C = 0xE1A00000; // nop
 	}*/
 
 	// Mighty Flip Champs! (USA)
