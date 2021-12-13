@@ -2016,6 +2016,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
+	// Requires 8MB of RAM
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0 && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
@@ -2055,6 +2056,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (Europe)
+	// Requires 8MB of RAM
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3P") == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
