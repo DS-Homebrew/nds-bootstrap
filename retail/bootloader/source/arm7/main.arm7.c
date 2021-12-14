@@ -97,6 +97,8 @@ extern u8 language;
 extern u8 region;
 extern u8 donorSdkVer;
 
+extern u32 _io_dldi_features;
+
 u32 arm9iromOffset = 0;
 u32 arm9ibinarySize = 0;
 u32 arm7iromOffset = 0;
@@ -614,7 +616,9 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
 	}
 
-	s2FlashcardId = *(u16*)(0x020000C0);
+	if (_io_dldi_features & FEATURE_SLOT_NDS) {
+		s2FlashcardId = *(u16*)(0x020000C0);
+	}
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10);
