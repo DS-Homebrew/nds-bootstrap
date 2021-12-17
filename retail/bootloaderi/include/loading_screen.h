@@ -4,6 +4,7 @@
 #include "common.h"
 
 void clearScreen(void);
+void esrbOutput(void);
 void pleaseWaitOutput(void);
 void errorOutput(void);
 

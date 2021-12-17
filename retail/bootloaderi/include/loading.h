@@ -4,6 +4,7 @@
 /*-------------------------------------------------------------------------
 Declarations of loading screen functions
 --------------------------------------------------------------------------*/
+void arm9_esrbScreen(void);
 void arm9_pleaseWaitText(void);
 void arm9_errorText(void);
 

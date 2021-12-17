@@ -185,7 +185,7 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
@@ -512,7 +512,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}*/
 
 		// Set region flag
-		if (region == 0xFE || region == -2 || region == 0xFF || region == -1) {
+		if (region == 0xFE || region == 0xFF) {
 			u8 newRegion = 0;
 			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
 				newRegion = 0;
@@ -674,6 +674,10 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+
+	if (dsiHeaderTemp.ndshdr.unitCode < 3 && dsiHeaderTemp.ndshdr.gameCode[0] != 'K' && dsiHeaderTemp.ndshdr.gameCode[0] != 'Z' && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+		esrbOutput();
+	}
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
@@ -837,7 +841,7 @@ int arm7_main(void) {
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
-	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// clear nds-bootstrap images and IPS patch
+	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	arm9_stateFlag = ARM9_SETSCFG;

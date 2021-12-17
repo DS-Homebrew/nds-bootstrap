@@ -779,7 +779,7 @@ void rsetPatchCache(bool dsiWare)
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0) {
-		if (srlAddr == 0 && !dsiWare) pleaseWaitOutput();
+		if (srlAddr == 0 && !dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));

@@ -2719,7 +2719,7 @@ u32 patchCardNds(
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
-		if (srlAddr == 0) pleaseWaitOutput();
+		if (srlAddr == 0 && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;

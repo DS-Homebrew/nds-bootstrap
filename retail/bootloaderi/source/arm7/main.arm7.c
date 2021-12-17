@@ -230,7 +230,7 @@ static void resetMemory_ARM7(void) {
 		memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	}*/
 
-	toncset((u32*)0x02004000, 0, 0x33C000);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
 	toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
@@ -754,7 +754,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 
-	if (useTwlCfg && (language == 0xFF || language == -1)) {
+	if (useTwlCfg && language == 0xFF) {
 		language = twlCfgLang;
 	}
 
@@ -967,29 +967,33 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		// Set region flag
-		if (region == 0xFE || region == -2 || ((region == 0xFF || region == -1) && twlCfgCountry == 0)) {
+		bool gameRegion = (region == 0xFE);
+		bool sysRegion = (region == 0xFF);
+		if ((gameRegion || (sysRegion && twlCfgCountry == 0)) && ndsHeader->gameCode[3] != 'O') {
 			u8 newRegion = 0;
-			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
+			if (ndsHeader->gameCode[3] == 'J') {
 				newRegion = 0;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "T", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'E' || ndsHeader->gameCode[3] == 'T') {
 				newRegion = 1;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "V", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'P' || ndsHeader->gameCode[3] == 'V') {
 				newRegion = 2;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'U') {
 				newRegion = 3;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'C') {
 				newRegion = 4;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'K') {
 				newRegion = 5;
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
-		} else if ((region == 0xFF || region == -1) && twlCfgCountry != 0) {
+		} else if ((sysRegion || (gameRegion && ndsHeader->gameCode[3] == 'O')) && twlCfgCountry != 0) {
 			u8 newRegion = 0;
-			if (twlCfgCountry == 0x01) {
+			if ((twlCfgCountry == 0x01 || twlCfgCountry == 0xA0 || twlCfgCountry == 0x88) && ndsHeader->gameCode[3] == 'O') {
+				newRegion = 2;	// Europe
+			} else if (twlCfgCountry == 0x01 && ndsHeader->gameCode[3] != 'O') {
 				newRegion = 0;	// Japan
-			} else if (twlCfgCountry == 0xA0) {
+			} else if (twlCfgCountry == 0xA0 && ndsHeader->gameCode[3] != 'O') {
 				newRegion = 4;	// China
-			} else if (twlCfgCountry == 0x88) {
+			} else if (twlCfgCountry == 0x88 && ndsHeader->gameCode[3] != 'O') {
 				newRegion = 5;	// Korea
 			} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
 				newRegion = 3;	// Australia
@@ -1312,6 +1316,10 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+
+	if (!isDSiWare && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+		esrbOutput();
+	}
 
 	if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, true);
@@ -1772,7 +1780,7 @@ int arm7_main(void) {
 		REG_SCFG_CLK = 0x187;
 	}
 
-	toncset((u32*)IMAGES_LOCATION, 0, 0x40000);	// Clear nds-bootstrap images and IPS patch
+	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press

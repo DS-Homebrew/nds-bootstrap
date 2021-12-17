@@ -55,6 +55,8 @@ bool arm9_boostVram = false;
 bool arm9_a7SCFGLocked = false;
 bool extendedMemoryConfirmed = false;
 bool moreMemory = false;
+volatile bool esrbScreenPrepared = false;
+volatile bool esrbScreenDisplayed = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
@@ -120,7 +122,6 @@ void SetBrightness(u8 screen, s8 bright) {
 void fadeIn(void) {
 	for (int i = 25; i >= 0; i--) {
 		SetBrightness(0, i);
-		SetBrightness(1, i);
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
@@ -129,7 +130,13 @@ void fadeIn(void) {
 void fadeOut(void) {
 	for (int i = 0; i <= 25; i++) {
 		SetBrightness(0, i);
-		SetBrightness(1, i);
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+}
+
+void waitFrames(int frames) {
+	for (int i = 0; i < frames; i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
@@ -210,7 +217,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 
 	REG_DISPSTAT = 0;
 
-	VRAM_A_CR = 0;
+	//VRAM_A_CR = 0;
 	VRAM_B_CR = 0;
 	// Don't mess with the ARM7's VRAM
 	//VRAM_C_CR = 0;
@@ -221,9 +228,6 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	VRAM_H_CR = 0;
 	VRAM_I_CR = 0;
 	REG_POWERCNT = 0x820F;
-
-	*(vu16*)0x0400006C |= BIT(14);
-	*(vu16*)0x0400006C &= BIT(15);
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -241,17 +245,48 @@ void __attribute__((target("arm"))) arm9_main(void) {
 			if (screenFadedIn) {
 				fadeOut();
 				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
+
+				REG_DISPSTAT = 0;
 				VRAM_A_CR = 0;
+				REG_DISPCNT = 0;
 				REG_POWERCNT = 0x820F;
+
 				SetBrightness(0, 0);
-				SetBrightness(1, 0);
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
-		if (arm9_stateFlag == ARM9_DISPSCRN) {
+		if (arm9_stateFlag == ARM9_DISPESRB) { // Display ESRB rating and descriptor(s) for current title
+			if (*(u32*)IMAGES_LOCATION != 0) {
+				esrbScreenPrepared = true;
+				if (!esrbScreenDisplayed) {
+					fadeOut();
+					screenFadedIn = false;
+					imageLoaded = false;
+				}
+				if (!screenFadedIn) {
+					SetBrightness(0, 31);
+				}
+				if (!imageLoaded) {
+					arm9_esrbScreen();
+					imageLoaded = true;
+				}
+				if (!screenFadedIn) {
+					fadeIn();
+					screenFadedIn = true;
+					waitFrames(60*3); // Wait a minimum of 3 seconds
+				}
+				esrbScreenDisplayed = true;
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
+		if (arm9_stateFlag == ARM9_DISPSCRN) { // Display nds-bootstrap: Please wait
+			if (esrbScreenDisplayed) {
+				fadeOut();
+				screenFadedIn = false;
+				imageLoaded = false;
+			}
 			if (!screenFadedIn) {
 				SetBrightness(0, 31);
-				SetBrightness(1, 31);
 			}
 			if (!imageLoaded) {
 				arm9_pleaseWaitText();
@@ -261,12 +296,17 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				fadeIn();
 				screenFadedIn = true;
 			}
+			esrbScreenDisplayed = false;
 			arm9_stateFlag = ARM9_READY;
 		}
-		if (arm9_stateFlag == ARM9_DISPERR) {
+		if (arm9_stateFlag == ARM9_DISPERR) { // Display nds-bootstrap: An error has occurred
+			if (esrbScreenDisplayed) {
+				fadeOut();
+				screenFadedIn = false;
+				imageLoaded = false;
+			}
 			if (!screenFadedIn) {
 				SetBrightness(0, 31);
-				SetBrightness(1, 31);
 			}
 			arm9_errorText();
 			if (!screenFadedIn) {

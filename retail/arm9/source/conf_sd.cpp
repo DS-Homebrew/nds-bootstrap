@@ -335,6 +335,43 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->valueBits2 |= BIT(0);
 	}
 
+	// Get region
+	u8 twlCfgCountry = (dsiFeatures() ? *(u8*)0x02000405 : 0);
+	u8 newRegion = 0;
+	if ((conf->region == 0xFE || (conf->region == 0xFF && twlCfgCountry == 0)) && romTid[3] != 'O') {
+		if (romTid[3] == 'J') {
+			newRegion = 0;
+		} else if (romTid[3] == 'E' || romTid[3] == 'T') {
+			newRegion = 1;
+		} else if (romTid[3] == 'P' || romTid[3] == 'V') {
+			newRegion = 2;
+		} else if (romTid[3] == 'U') {
+			newRegion = 3;
+		} else if (romTid[3] == 'C') {
+			newRegion = 4;
+		} else if (romTid[3] == 'K') {
+			newRegion = 5;
+		}
+	} else if ((conf->region == 0xFF || (conf->region == 0xFE && romTid[3] == 'O')) && twlCfgCountry != 0) {
+		if ((twlCfgCountry == 0x01 || twlCfgCountry == 0xA0 || twlCfgCountry == 0x88) && romTid[3] == 'O') {
+			newRegion = 2;	// Europe
+		} else if (twlCfgCountry == 0x01 && romTid[3] != 'O') {
+			newRegion = 0;	// Japan
+		} else if (twlCfgCountry == 0xA0 && romTid[3] != 'O') {
+			newRegion = 4;	// China
+		} else if (twlCfgCountry == 0x88 && romTid[3] != 'O') {
+			newRegion = 5;	// Korea
+		} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
+			newRegion = 3;	// Australia
+		} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
+			newRegion = 1;	// USA
+		} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
+			newRegion = 2;	// Europe
+		}
+	} else {
+		newRegion = conf->region;
+	}
+
 	if (dsiFeatures()) {
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 		u32 srlAddr = 0;
@@ -879,14 +916,61 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
-	bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
+	//bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
 
-	FILE* bootstrapImages = fopen(wideCheatFound&&!conf->macroMode ? "nitro:/bootloader_wideImages.lz77" : "nitro:/bootloader_images.lz77", "rb");
+	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
 		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
+
+	if (newRegion == 1) {
+		// Read ESRB rating and descriptor(s) for current title
+		bootstrapImages = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/esrb.bin" : "fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		if (bootstrapImages) {
+			// Read width & height
+			/*fseek(bootstrapImages, 0x12, SEEK_SET);
+			u32 width, height;
+			fread(&width, 1, sizeof(width), bootstrapImages);
+			fread(&height, 1, sizeof(height), bootstrapImages);
+
+			if (width > 256 || height > 192) {
+				fclose(bootstrapImages);
+				return false;
+			}
+
+			fseek(bootstrapImages, 0xE, SEEK_SET);
+			u8 headerSize = fgetc(bootstrapImages);
+			bool rgb565 = false;
+			if(headerSize == 0x38) {
+				// Check the upper byte green mask for if it's got 5 or 6 bits
+				fseek(bootstrapImages, 0x2C, SEEK_CUR);
+				rgb565 = fgetc(bootstrapImages) == 0x07;
+				fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
+			} else {
+				fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
+			}
+			u16 *bmpImageBuffer = new u16[width * height];
+			fread(bmpImageBuffer, 2, width * height, bootstrapImages);
+			u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
+			u16 *src = bmpImageBuffer;
+			for (uint y = 0; y < height; y++, dst -= 256) {
+				for (uint x = 0; x < width; x++) {
+					u16 val = *(src++);
+					*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+				}
+			}
+
+			delete[] bmpImageBuffer;*/
+			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+		} else {
+			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		}
+		fclose(bootstrapImages);
+	} else {
+		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+	}
 
   } else {
 	fclose(ndsFile);
@@ -995,9 +1079,56 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
 		fread(lz77ImageBuffer, 1, 0x8000, bootstrapImages);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
+
+	if (newRegion == 1) {
+		// Read ESRB rating and descriptor(s) for current title
+		bootstrapImages = fopen("fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		if (bootstrapImages) {
+			// Read width & height
+			/*fseek(bootstrapImages, 0x12, SEEK_SET);
+			u32 width, height;
+			fread(&width, 1, sizeof(width), bootstrapImages);
+			fread(&height, 1, sizeof(height), bootstrapImages);
+
+			if (width > 256 || height > 192) {
+				fclose(bootstrapImages);
+				return false;
+			}
+
+			fseek(bootstrapImages, 0xE, SEEK_SET);
+			u8 headerSize = fgetc(bootstrapImages);
+			bool rgb565 = false;
+			if(headerSize == 0x38) {
+				// Check the upper byte green mask for if it's got 5 or 6 bits
+				fseek(bootstrapImages, 0x2C, SEEK_CUR);
+				rgb565 = fgetc(bootstrapImages) == 0x07;
+				fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
+			} else {
+				fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
+			}
+			u16 *bmpImageBuffer = new u16[width * height];
+			fread(bmpImageBuffer, 2, width * height, bootstrapImages);
+			u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
+			u16 *src = bmpImageBuffer;
+			for (uint y = 0; y < height; y++, dst -= 256) {
+				for (uint x = 0; x < width; x++) {
+					u16 val = *(src++);
+					*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+				}
+			}
+
+			delete[] bmpImageBuffer;*/
+			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+		} else {
+			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		}
+		fclose(bootstrapImages);
+	} else {
+		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+	}
   }
 
 	const char *typeToReplace = ".nds";
