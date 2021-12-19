@@ -13,7 +13,8 @@
 #include "font_bin.h"
 
 // Needs to be font_bin_size * 4, but needs to be statically defined
-#define FONT_SIZE 0x5C00
+#define FONT_TILE_COUNT 704
+#define FONT_SIZE (FONT_TILE_COUNT * 8 * 4)
 
 extern struct IgmText igmText;
 
