@@ -1216,6 +1216,81 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026A94 = 0xE1A00000; // nop
 	}
 
+	// Flipper (USA)
+	// Music will not play on retail consoles
+	else if (strcmp(romTid, "KFPE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005168 = 0xE1A00000; // nop
+		*(u32*)0x0200DE64 = 0xE1A00000; // nop
+		*(u32*)0x02031F9C = 0xE1A00000; // nop
+		*(u32*)0x020351FC = 0xE1A00000; // nop
+		*(u32*)0x020384E4 = 0xE1A00000; // nop
+		*(u32*)0x0203A278 = 0xE1A00000; // nop
+		*(u32*)0x0203A27C = 0xE1A00000; // nop
+		*(u32*)0x0203A288 = 0xE1A00000; // nop
+		*(u32*)0x0203A3E8 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x0203A444 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0203A444 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
+		*(u32*)0x0203A468 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203A470 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203B7E4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0203E664 = 0xE1A00000; // nop
+	}
+
+	// Flipper (Europe)
+	// Music will not play on retail consoles
+	else if (strcmp(romTid, "KFPP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005168 = 0xE1A00000; // nop
+		*(u32*)0x0200DECC = 0xE1A00000; // nop
+		*(u32*)0x02032008 = 0xE1A00000; // nop
+		*(u32*)0x02035268 = 0xE1A00000; // nop
+		*(u32*)0x02038550 = 0xE1A00000; // nop
+		*(u32*)0x0203A2E4 = 0xE1A00000; // nop
+		*(u32*)0x0203A2E8 = 0xE1A00000; // nop
+		*(u32*)0x0203A2F4 = 0xE1A00000; // nop
+		*(u32*)0x0203A454 = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u32*)0x0203A4B0 = 0xE3A00627; // mov r0, #0x2700000
+		} else {
+			*(u32*)0x0203A4B0 = 0xE3A0078F; // mov r0, #0x23C0000
+		}
+		*(u32*)0x0203A4D4 = 0xE3500001; // cmp r0, #1
+		*(u32*)0x0203A4DC = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x0203B8C0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0203E740 = 0xE1A00000; // nop
+	}
+
+	// Flipper 2: Flush the Goldfish (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KKNE") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020051EC = 0xE1A00000; // nop
+		*(u32*)0x02005208 = 0xE1A00000; // nop
+		*(u32*)0x02005220 = 0xE1A00000; // nop
+		*(u32*)0x02005224 = 0xE1A00000; // nop
+		*(u32*)0x02005228 = 0xE1A00000; // nop
+		*(u32*)0x0200522C = 0xE1A00000; // nop
+		*(u32*)0x02005230 = 0xE1A00000; // nop
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02008160 = 0xE1A00000; // nop
+		*(u32*)0x0203A338 = 0xE1A00000; // nop
+		*(u32*)0x0203D5A4 = 0xE1A00000; // nop
+		*(u32*)0x0204044C = 0xE1A00000; // nop
+		*(u32*)0x0204220C = 0xE1A00000; // nop
+		*(u32*)0x02042210 = 0xE1A00000; // nop
+		*(u32*)0x0204221C = 0xE1A00000; // nop
+		*(u32*)0x0204237C = 0xE1A00000; // nop
+		*(u32*)0x020423D8 = 0xE3A00627; // mov r0, #0x2700000
+		*(u32*)0x020423FC = 0xE3500001; // cmp r0, #1
+		*(u32*)0x02042404 = 0x13A00627; // movne r0, #0x2700000
+		*(u32*)0x020437F8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02046678 = 0xE1A00000; // nop
+	}
+
 	// Game & Watch: Ball (USA, Europe)
 	// Softlocks after a miss or exiting gameplay
 	else if (strcmp(romTid, "KGBO") == 0) {
