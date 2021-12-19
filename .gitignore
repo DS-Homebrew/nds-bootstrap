@@ -123,5 +123,4 @@ retail/arm9/include/version.h
 
 *.exe
 *.lz77
-
-!retail/cardenginei/arm9_igm/data/font.bin
+!retail/nitrofiles/fonts/*.lz77

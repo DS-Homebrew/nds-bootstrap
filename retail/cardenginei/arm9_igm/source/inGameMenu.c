@@ -10,19 +10,13 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
-#include "font_bin.h"
-
-// Needs to be font_bin_size * 4, but needs to be statically defined
-#define FONT_TILE_COUNT 704
-#define FONT_SIZE (FONT_TILE_COUNT * 8 * 4)
-
 extern struct IgmText igmText;
 
 extern u32 scfgExtBak;
 extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;
 
-static char bgBak[FONT_SIZE];
+static u8 bgBak[sizeof(igmText.font) * 4];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 
@@ -69,15 +63,15 @@ static void SetBrightness(u8 screen, s8 bright) {
 static vu32 *address = (vu32*)0x02000000;
 static bool arm7Ram = false;
 
-static void print(int x, int y, const u16 *str, int palette) {
+static void print(int x, int y, const unsigned char *str, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	while(*str)
 		*(dst++) = *(str++) | palette << 12;
 }
 
-static void printCenter(int x, int y, const u16 *str, int palette) {
+static void printCenter(int x, int y, const unsigned char *str, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
-	const u16 *start = str;
+	const unsigned char *start = str;
 	while(*str)
 		str++;
 	dst += (str - start) / 2;
@@ -85,16 +79,16 @@ static void printCenter(int x, int y, const u16 *str, int palette) {
 		*(--dst) = *(--str) | palette << 12;
 }
 
-static void printRight(int x, int y, const u16 *str, int palette) {
+static void printRight(int x, int y, const unsigned char *str, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
-	const u16 *start = str;
+	const unsigned char *start = str;
 	while(*str)
 		str++;
 	while(str != start)
 		*(dst--) = *(--str) | palette << 12;
 }
 
-static void printChar(int x, int y, u16 c, int palette) {
+static void printChar(int x, int y, unsigned char c, int palette) {
 	BG_MAP_RAM_SUB(15)[y * 0x20 + x] = c | palette << 12;
 }
 
@@ -117,25 +111,25 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 #ifndef B4DS
 static void printBattery(void) {
 	u8 batteryLevel = (u8)sharedAddr[6];
-	const u16 *bars = u"\3\3";
+	const unsigned char *bars = "\3\3";
 	if (batteryLevel & BIT(7)) {
-		bars = u"\6\6";	// Charging
+		bars = "\6\6";	// Charging
 	} else {
 		switch (batteryLevel) {
 			default:
 				break;
 			case 0x1:
 			case 0x3:
-				bars = u"\3\4";
+				bars = "\3\4";
 				break;
 			case 0x7:
-				bars = u"\3\5";
+				bars = "\3\5";
 				break;
 			case 0xB:
-				bars = u"\4\5";
+				bars = "\4\5";
 				break;
 			case 0xF:
-				bars = u"\5\5";
+				bars = "\5\5";
 				break;
 		}
 	}
@@ -433,7 +427,7 @@ static void ramViewer(void) {
 	while(1) {
 		u8 *ramPtr = arm7Ram ? arm7RamBuffer : (u8*)address;
 
-		u16 armText[5] = {'A', 'R', 'M', arm7Ram ? '7' : '9', 0};
+		unsigned char armText[5] = {'A', 'R', 'M', arm7Ram ? '7' : '9', 0};
 		printCenter(14, 0, igmText.ramViewer, 0);
 		print(27, 0, armText, 3);
 		printHex(0, 0, (u32)address >> 0x10, 2, 3);
@@ -615,9 +609,9 @@ void inGameMenu(s8* mainScreen) {
 		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}
 
-	tonccpy(bgBak, BG_GFX_SUB, FONT_SIZE);	// Backup the original graphics
-	for(int i = 0; i < font_bin_size; i++) {	// Load font from 1bpp to 4bpp
-		u8 val = font_bin[i];
+	tonccpy(bgBak, BG_GFX_SUB, sizeof(igmText.font) * 4);	// Backup the original graphics
+	for(int i = 0; i < sizeof(igmText.font); i++) {	// Load font from 1bpp to 4bpp
+		u8 val = igmText.font[i];
 		BG_GFX_SUB[i * 2]     = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
 		val >>= 4;
 		BG_GFX_SUB[i * 2 + 1] = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
@@ -735,7 +729,7 @@ void inGameMenu(s8* mainScreen) {
 
 	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
 	tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
-	tonccpy(BG_GFX_SUB, bgBak, FONT_SIZE);	// Restore the original graphics
+	tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
 
 	*(vu16*)0x0400106C = masterBright;
 
