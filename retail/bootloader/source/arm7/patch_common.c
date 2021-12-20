@@ -1917,6 +1917,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0209F77A = 0x46C0; // nop
 	}
 
+	// Pinball Pulse: The Ancients Beckon (USA)
+	// Incomplete/broken patch
+	/*else if (strcmp(romTid, "KZPE") == 0) {
+		*(u32*)0x02004988 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x02008240 = 0xE12FFF1E; // bx lr
+		for (int i = 0; i < 19; i++) {
+			u32* offset1 = (u16*)0x02013614;
+			u32* offset2 = (u16*)0x020136C4;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x02013D2C = 0xE1A00000; // nop
+		*(u32*)0x0202C6E0 = 0xE1A00000; // nop
+		*(u32*)0x02049058 = 0xE1A00000; // nop
+		*(u32*)0x020655AC = 0xE1A00000; // nop
+		*(u32*)0x02067530 = 0xE1A00000; // nop
+		*(u32*)0x0206ABA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02087214 = 0xE1A00000; // nop
+		*(u32*)0x0208A6E8 = 0xE1A00000; // nop
+		*(u32*)0x0208DFCC = 0xE1A00000; // nop
+		*(u32*)0x0208FE18 = 0xE1A00000; // nop
+		*(u32*)0x0208FE1C = 0xE1A00000; // nop
+		*(u32*)0x0208FE28 = 0xE1A00000; // nop
+		*(u32*)0x0208FF6C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0208FFC8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0209147C = 0xE1A00000; // nop
+		*(u32*)0x02091480 = 0xE1A00000; // nop
+		*(u32*)0x02091484 = 0xE1A00000; // nop
+		*(u32*)0x02091488 = 0xE1A00000; // nop
+	}*/
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
