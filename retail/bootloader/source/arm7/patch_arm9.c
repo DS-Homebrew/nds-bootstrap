@@ -643,6 +643,12 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 }
 
+void patchHiHeapDSiWare(u32 addr, u32 opCode) {
+	*(u32*)(addr) = opCode; // mov r0, #0x????????
+	*(u32*)(addr+0x24) = 0xE3500001; // cmp r0, #1
+	*(u32*)(addr+0x2C) = 0x13A00627; // movne r0, #0x2700000
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     
