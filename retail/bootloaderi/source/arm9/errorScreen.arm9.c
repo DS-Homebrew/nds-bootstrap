@@ -24,13 +24,13 @@ void arm9_esrbScreen(void) {
 void arm9_pleaseWaitText(void) {
 	dmaCopy((u16*)(IMAGES_LOCATION+0x18000), VRAM_A, 0x18000);
 
-	REG_POWERCNT = POWER_ALL_2D;
+	REG_POWERCNT = (u16)POWER_ALL_2D;
 	REG_DISPCNT = MODE_FB0;
 }
 
 void arm9_errorText(void) {
 	dmaCopy((u16*)(IMAGES_LOCATION+0x30000), VRAM_A, 0x18000);
 
-	REG_POWERCNT = POWER_ALL_2D;
+	REG_POWERCNT = (u16)POWER_ALL_2D;
 	REG_DISPCNT = MODE_FB0;
 }

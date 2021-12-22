@@ -829,6 +829,12 @@ int arm7_main(void) {
 	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
+		if (esrbScreenPrepared) {
+			while (!esrbImageLoaded) {
+				while (REG_VCOUNT != 191);
+				while (REG_VCOUNT == 191);
+			}
+		}
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
 		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM)) {
 			dbg_printf("AP-fix applied\n");
@@ -840,6 +846,13 @@ int arm7_main(void) {
 	arm9_boostVram = boostVram;
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+
+	if (esrbScreenPrepared) {
+		while (!esrbImageLoaded) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
+	}
 
 	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();

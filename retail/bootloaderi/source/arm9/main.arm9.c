@@ -59,6 +59,7 @@ volatile bool esrbScreenPrepared = false;
 volatile bool esrbScreenDisplayed = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
+volatile bool esrbImageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
 
@@ -268,6 +269,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				}
 				if (!imageLoaded) {
 					arm9_esrbScreen();
+					esrbImageLoaded = true;
 					imageLoaded = true;
 				}
 				if (!screenFadedIn) {
