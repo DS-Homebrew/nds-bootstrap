@@ -18,7 +18,7 @@ extern bool returnToMenu;
 
 extern struct IgmText *igmText;
 
-extern void forceGameReboot(void);
+extern void reset(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 extern void saveScreenshot(void);
@@ -63,8 +63,13 @@ void inGameMenu(void) {
 					exitMenu = true;
 					break;
 				case 0x54455352: // RSET
-					forceGameReboot();
 					exitMenu = true;
+					timeTilBatteryLevelRefresh = 7;
+					#ifdef TWLSDK
+					extern void restoreBakData(void);
+					restoreBakData();
+					#endif
+					reset();
 					break;
 				case 0x54495551: // QUIT
 					returnToLoader();

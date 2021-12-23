@@ -59,6 +59,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static bool flagsSet = false;
 static bool flagsSetOnce = false;
 static bool region0FixNeeded = false;
+static bool igmReset = false;
 static bool isDma = false;
 static bool dmaLed = false;
 static u32 romWordBak = 0;
@@ -444,6 +445,86 @@ u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
     return 0; 
 }
 
+void __attribute__((target("arm"))) resetMpu(void) {
+	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
+}
+
+void reset(u32 param) {
+	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	*(u32*)resetParam = param;
+	if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
+		if (ce9->consoleModel < 2) {
+			// Make screens white
+			SetBrightness(0, 31);
+			SetBrightness(1, 31);
+			waitFrames(5);	// Wait for DSi screens to stabilize
+		}
+		enterCriticalSection();
+		cacheFlush();
+		sharedAddr[3] = 0x52534554;
+		while (1);
+	} else {
+		if (ce9->valueBits & dsiMode) {
+			sysSetCardOwner(false);	// Give Slot-1 access to arm7
+		}
+		sharedAddr[3] = 0x52534554;
+	}
+
+ 	register int i, reg;
+
+	REG_IME = 0;
+	REG_IE = 0;
+	REG_IF = ~0;
+
+	cacheFlush();
+	resetMpu();
+
+	if (igmReset) {
+		igmReset = false;
+	} else {
+		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+	}
+
+	// Clear out ARM9 DMA channels
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	flagsSet = false;
+	IPC_SYNC_hooked = false;
+
+	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+		sysSetCardOwner(true);	// Give Slot-1 access back to arm9
+	}
+
+	sharedAddr[0] = 0x544F4F42; // 'BOOT'
+	sharedAddr[3] = 0;
+	while (REG_VCOUNT != 191);
+	while (REG_VCOUNT == 191);
+
+	// Start ARM9
+	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
+	arm9code();
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
@@ -498,6 +579,10 @@ void myIrqHandlerIPC(void) {
 					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
 					(*inGameMenu)(&mainScreen);
 				}
+				if (sharedAddr[3] == 0x52534554) {
+					igmReset = true;
+					reset(0);
+				}
 			}
 		}
 			break;
@@ -513,82 +598,6 @@ void myIrqHandlerIPC(void) {
 		cacheFlush();
 		while (1);
 	}
-}
-
-void __attribute__((target("arm"))) resetMpu(void) {
-	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
-}
-
-void reset(u32 param) {
-	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	*(u32*)resetParam = param;
-	if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
-		if (ce9->consoleModel < 2) {
-			// Make screens white
-			SetBrightness(0, 31);
-			SetBrightness(1, 31);
-			waitFrames(5);	// Wait for DSi screens to stabilize
-		}
-		enterCriticalSection();
-		cacheFlush();
-		sharedAddr[3] = 0x52534554;
-		while (1);
-	} else {
-		if (ce9->valueBits & dsiMode) {
-			sysSetCardOwner(false);	// Give Slot-1 access to arm7
-		}
-		sharedAddr[3] = 0x52534554;
-	}
-
- 	register int i, reg;
-
-	REG_IME = 0;
-	REG_IE = 0;
-	REG_IF = ~0;
-
-	cacheFlush();
-	resetMpu();
-
-	toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
-
-	// Clear out ARM9 DMA channels
-	for (i = 0; i < 4; i++) {
-		DMA_CR(i) = 0;
-		DMA_SRC(i) = 0;
-		DMA_DEST(i) = 0;
-		TIMER_CR(i) = 0;
-		TIMER_DATA(i) = 0;
-	}
-
-	for (i = 0; i < 4; i++) {
-		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
-	}
-
-	// Clear out FIFO
-	REG_IPC_SYNC = 0;
-	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
-	REG_IPC_FIFO_CR = 0;
-
-	flagsSet = false;
-	IPC_SYNC_hooked = false;
-
-	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
-
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		sysSetCardOwner(true);	// Give Slot-1 access back to arm9
-	}
-
-	sharedAddr[0] = 0x544F4F42; // 'BOOT'
-	sharedAddr[3] = 0;
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
-
-	// Start ARM9
-	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();
 }
 
 u32 myIrqEnable(u32 irq) {	
