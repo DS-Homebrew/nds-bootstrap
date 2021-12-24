@@ -100,7 +100,7 @@ static void fixForDSiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
 
-	if (a9ScfgRom == 1 && REG_SCFG_ROM == 0) {
+	if (a9ScfgRom == 1 && REG_SCFG_ROM != 0x703) {
 		// swi 0x12 call
 		if (swi12Offset) {
 			// Patch to call swi 0x02 instead of 0x12
