@@ -58,20 +58,20 @@ volatile u32 arm9_BLANK_RAM = 0;
 void initMBKARM9(void) {
 	// Default DSiWare settings
 
-	// WRAM-B fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK2 = 0x9195999D;
-	*(vu32*)REG_MBK3 = 0x8185898D;
-	
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x9195999D;
-	*(vu32*)REG_MBK5 = 0x8185898D;
-		
+	// WRAM-B fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK2)=0x8C888480;
+	*((vu32*)REG_MBK3)=0x9C989490;
+
+	// WRAM-C fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK4)=0x8C888480;
+	*((vu32*)REG_MBK5)=0x9C989490;
+
 	// WRAM-A not mapped (reserved to arm7)
-	REG_MBK6 = 0x00000000;
+	REG_MBK6=0x00000000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7 = 0x07C03740; // Same as DSiWare
+	REG_MBK7=0x07C03740; // same as dsiware
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8 = 0x07403700; // Same as DSiWare
+	REG_MBK8=0x07403700; // same as dsiware
 }
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -132,7 +132,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	*(vu32*)(0x02400000) = 0x324D454D;
 	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
 		extendedMemory2 = true;
-		dsDebugRam = ((vu8)REG_SCFG_EXT == 0);
+		dsDebugRam = ((vu8)((vu32)REG_SCFG_EXT+3) == 0);
 	}
 
 	arm9_stateFlag = ARM9_START;
