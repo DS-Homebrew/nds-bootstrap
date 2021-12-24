@@ -190,7 +190,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
-		toncset((u32*)0x02400000, 0, 0x3FE000);
+		toncset((u32*)0x02400000, 0, 0x3FC000);
 		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
 	}
 
@@ -618,14 +618,12 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	{
 		u32 overlaysLocation = romLocation;
 		if (ROMinRAM) {
-			overlaysLocation += (ndsHeader->arm9binarySize-0x4000);
+			overlaysLocation += (ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
 		}
-		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
+		fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
 
-		if (!isSdk5(moduleParams)) {
-			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
-			}
+		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -1015,8 +1013,6 @@ int arm7_main(void) {
 	}
 
 	arm9_boostVram = boostVram;
-
-	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
 	if (esrbScreenPrepared) {
 		while (!esrbImageLoaded) {
