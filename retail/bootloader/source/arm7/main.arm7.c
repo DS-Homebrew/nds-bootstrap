@@ -860,7 +860,6 @@ int arm7_main(void) {
 
 	// Switch to NTR mode BIOS
 	REG_SCFG_ROM = 0x703;
-	REG_SCFG_EXT = 0x12A03000;
 
 	// Calculate overlay pack size
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
@@ -1023,6 +1022,8 @@ int arm7_main(void) {
 
 	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
+
+	REG_SCFG_EXT = 0x12A03000;
 
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
