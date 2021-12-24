@@ -1100,7 +1100,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (newRegion == 1) {
 		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen("fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		bootstrapImages = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/esrb.bin" : "fat:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
 			// Read width & height
 			/*fseek(bootstrapImages, 0x12, SEEK_SET);

@@ -52,6 +52,8 @@
 
 #include <nds/arm9/dldi.h>
 
+#define REG_GPIO_WIFI *(vu16*)0x4004C04
+
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "debug_file.h"
@@ -859,8 +861,11 @@ int arm7_main(void) {
 		*(u16*)0x4000500 = 0x807F;
 	}
 
+	REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+
 	// Switch to NTR mode BIOS
 	REG_SCFG_ROM = 0x703;
+	REG_SCFG_EXT = 0x12A03000;
 
 	// Calculate overlay pack size
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
