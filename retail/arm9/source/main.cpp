@@ -340,7 +340,7 @@ static int runNdsFile(configuration* conf) {
 	fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
-	const char *logFilePath = (conf->sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
+	const char *logFilePath = (conf->sdFound && !conf->b4dsMode ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
 	if (conf->logging) {
 		static FILE* loggingFile = fopen(logFilePath, "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
@@ -474,7 +474,6 @@ static int runNdsFile(configuration* conf) {
 
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
-	conf->initDisc = (REG_SCFG_EXT == 0);
 
 	int status = loadFromSD(conf, argv[0]);
 

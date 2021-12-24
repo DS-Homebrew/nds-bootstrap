@@ -226,12 +226,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	
 	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
 
+	conf->initDisc = (REG_SCFG_EXT == 0);
+
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
 
 	if (conf->b4dsMode) {
 		if (!dsiFeatures() || !conf->gameOnFlashcard || !conf->saveOnFlashcard) {
 			conf->b4dsMode = 0;
+		} else {
+			conf->initDisc = true;
 		}
 	}
 
