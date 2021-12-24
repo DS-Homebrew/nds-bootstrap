@@ -128,16 +128,11 @@ void __attribute__((target("arm"))) arm9_main(void) {
 
 	initMBKARM9();
 
-	extendedMemory2 = (REG_SCFG_EXT != 0);
-	if (extendedMemory2) {
-		REG_SCFG_EXT = 0x8300C000;
-	} else {
-		*(vu32*)(0x02000000) = 0x314D454D;
-		*(vu32*)(0x02400000) = 0x324D454D;
-		if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
-			extendedMemory2 = true;
-			dsDebugRam = true;
-		}
+	*(vu32*)(0x02000000) = 0x314D454D;
+	*(vu32*)(0x02400000) = 0x324D454D;
+	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+		extendedMemory2 = true;
+		dsDebugRam = ((vu8)REG_SCFG_EXT == 0);
 	}
 
 	arm9_stateFlag = ARM9_START;

@@ -88,6 +88,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Cache FAT table
 	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", "0").c_str(), NULL, 0);
 
+	// B4DS mode
+	conf->b4dsMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "B4DS_MODE", "0").c_str(), NULL, 0);
+
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
@@ -226,6 +229,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
 
+	if (conf->b4dsMode) {
+		if (!dsiFeatures() || !conf->gameOnFlashcard || !conf->saveOnFlashcard) {
+			conf->b4dsMode = 0;
+		}
+	}
+
 	if (conf->cacheFatTable) {
 		conf->valueBits |= BIT(0);
 	}
@@ -271,7 +280,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	pageFilePath = "sd:/_nds/pagefile.sys";
-	if (!conf->sdFound) {
+	if (conf->b4dsMode || !conf->sdFound) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
@@ -327,7 +336,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* cebin = NULL;
 	FILE* donorNdsFile = NULL;
 	bool donorLoaded = false;
-	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
+	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 	bool dsiEnhancedMbk = false;
 
@@ -372,7 +381,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		newRegion = conf->region;
 	}
 
-	if (dsiFeatures()) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 		u32 srlAddr = 0;
 
@@ -403,7 +412,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-  if (dsiFeatures()) {
+  if (dsiFeatures() && !conf->b4dsMode) {
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
@@ -1047,11 +1056,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);
 	}
 
-	*(vu32*)(0x02000000) = 0x314D454D;
-	*(vu32*)(0x02400000) = 0x324D454D;
+	if (conf->b4dsMode == 0) {
+		*(vu32*)(0x02800000) = 0x314D454D;
+		*(vu32*)(0x02C00000) = 0x324D454D;
+	}
 
 	// Load ce9 binary
-	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
@@ -1177,7 +1188,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	if (dsiFeatures()) {	// Not for B4DS
+	if (dsiFeatures() && !conf->b4dsMode) {	// Not for B4DS
 		fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
 			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;

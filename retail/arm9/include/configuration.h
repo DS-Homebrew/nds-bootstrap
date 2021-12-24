@@ -9,6 +9,7 @@ typedef struct configuration {
     bool debug;
     bool cacheFatTable;
 	bool dsiWramAccess;
+	int b4dsMode;
 	char* ndsPath;
 	char* appPath;
 	char* savPath;
