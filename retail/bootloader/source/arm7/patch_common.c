@@ -1917,6 +1917,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0209F77A = 0x46C0; // nop
 	}
 
+	// Art Style: PiCTOBiTS (USA)
+	else if (strcmp(romTid, "KAPE") == 0) {
+		*(u32*)0x0200518C = 0xE1A00000; // nop
+		*(u32*)0x02005198 = 0xE1A00000; // nop
+		*(u32*)0x0200519C = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x020395E0 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x020395E4 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203CC10 = 0xE1A00000; // nop
+		*(u32*)0x0204153C = 0xE1A00000; // nop
+		*(u32*)0x020432A4 = 0xE1A00000; // nop
+		*(u32*)0x020432A8 = 0xE1A00000; // nop
+		*(u32*)0x020432B4 = 0xE1A00000; // nop
+		*(u32*)0x020433F8 = 0xE1A00000; // nop
+		*(u32*)0x020433FC = 0xE1A00000; // nop
+		*(u32*)0x02043400 = 0xE1A00000; // nop
+		*(u32*)0x02043404 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043460, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02044804 = 0xE1A00000; // nop
+		*(u32*)0x0204480C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
+	// Art Style: PiCOPiCT (Europe, Australia)
+	else if (strcmp(romTid, "KAPV") == 0) {
+		*(u32*)0x0200518C = 0xE1A00000; // nop
+		*(u32*)0x02005198 = 0xE1A00000; // nop
+		*(u32*)0x0200519C = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x02039658 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0203965C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203CC88 = 0xE1A00000; // nop
+		*(u32*)0x020415B0 = 0xE1A00000; // nop
+		*(u32*)0x0204331C = 0xE1A00000; // nop
+		*(u32*)0x02043320 = 0xE1A00000; // nop
+		*(u32*)0x0204332C = 0xE1A00000; // nop
+		*(u32*)0x02043470 = 0xE1A00000; // nop
+		*(u32*)0x02043474 = 0xE1A00000; // nop
+		*(u32*)0x02043478 = 0xE1A00000; // nop
+		*(u32*)0x0204347C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020434D8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0204487C = 0xE1A00000; // nop
+		*(u32*)0x02044884 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
+	// Art Style: PiCOPiCT (Japan)
+	else if (strcmp(romTid, "KAPJ") == 0) {
+		*(u32*)0x02005194 = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x020051A4 = 0xE1A00000; // nop
+		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x020051B0 = 0xE1A00000; // nop
+		*(u32*)0x0203990C = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02039910 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203CF3C = 0xE1A00000; // nop
+		*(u32*)0x02041868 = 0xE1A00000; // nop
+		*(u32*)0x020435B4 = 0xE1A00000; // nop
+		*(u32*)0x020435B8 = 0xE1A00000; // nop
+		*(u32*)0x020435C4 = 0xE1A00000; // nop
+		*(u32*)0x02043708 = 0xE1A00000; // nop
+		*(u32*)0x0204370C = 0xE1A00000; // nop
+		*(u32*)0x02043710 = 0xE1A00000; // nop
+		*(u32*)0x02043714 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043770, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0204487C = 0xE1A00000; // nop
+		*(u32*)0x02044884 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
 	// Pinball Pulse: The Ancients Beckon (USA)
 	// Incomplete/broken patch
 	/*else if (strcmp(romTid, "KZPE") == 0) {
