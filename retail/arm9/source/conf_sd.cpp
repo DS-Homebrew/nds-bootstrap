@@ -120,9 +120,14 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);
+	if (conf->language < -1) conf->language = -1;
 
 	// Region
-	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-2").c_str(), NULL, 0);
+	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-1").c_str(), NULL, 0);
+	if (conf->region < -1) conf->region = -1;
+
+	// Use ROM Region
+	conf->useRomRegion = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "USE_ROM_REGION", "1").c_str(), NULL, 0);
 
 	// SDNAND
 	conf->sdNand = strtol(config_file.fetch("NDS-BOOTSTRAP", "SDNAND", "0").c_str(), NULL, 0);
@@ -269,6 +274,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->swiHaltHook) {
 		conf->valueBits2 |= BIT(3);
 	}
+	if (conf->useRomRegion) {
+		conf->valueBits2 |= BIT(7);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
@@ -351,7 +359,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Get region
 	u8 twlCfgCountry = (dsiFeatures() ? *(u8*)0x02000405 : 0);
 	u8 newRegion = 0;
-	if ((conf->region == 0xFE || (conf->region == 0xFF && twlCfgCountry == 0)) && romTid[3] != 'O') {
+	if (conf->useRomRegion && romTid[3] != 'A' && romTid[3] != 'O') {
 		if (romTid[3] == 'J') {
 			newRegion = 0;
 		} else if (romTid[3] == 'E' || romTid[3] == 'T') {
@@ -365,14 +373,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else if (romTid[3] == 'K') {
 			newRegion = 5;
 		}
-	} else if ((conf->region == 0xFF || (conf->region == 0xFE && romTid[3] == 'O')) && twlCfgCountry != 0) {
-		if ((twlCfgCountry == 0x01 || twlCfgCountry == 0xA0 || twlCfgCountry == 0x88) && romTid[3] == 'O') {
-			newRegion = 2;	// Europe
-		} else if (twlCfgCountry == 0x01 && romTid[3] != 'O') {
+	} else if (conf->region == 0xFF && twlCfgCountry != 0) {
+		if (twlCfgCountry == 0x01) {
 			newRegion = 0;	// Japan
-		} else if (twlCfgCountry == 0xA0 && romTid[3] != 'O') {
+		} else if (twlCfgCountry == 0xA0) {
 			newRegion = 4;	// China
-		} else if (twlCfgCountry == 0x88 && romTid[3] != 'O') {
+		} else if (twlCfgCountry == 0x88) {
 			newRegion = 5;	// Korea
 		} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
 			newRegion = 3;	// Australia

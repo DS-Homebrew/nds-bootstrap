@@ -21,5 +21,6 @@ extern u8 valueBits2;
 #define specialCard (valueBits2 & BIT(4))
 #define dsiWramAccess (valueBits2 & BIT(5))
 #define hiyaCfwFound (valueBits2 & BIT(6))
+#define useRomRegion (valueBits2 & BIT(7))
 
 #endif
