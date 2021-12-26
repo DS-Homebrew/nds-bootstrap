@@ -66,7 +66,7 @@ It also includes a number of Anti-Piracy patches for the games and will automati
 ## Translators
 - Chinese Simplified: [James-Makoto](https://crowdin.com/profile/VCMOD55), [R-YaTian](https://github.com/R-YaTian)
 - Chinese Traditional: [James-Makoto](https://crowdin.com/profile/VCMOD55), [R-YaTian](https://github.com/R-YaTian)
-- Danish: [Nadia Pedersen](https://crowdin.com/profile/nadiaholmquist)
+- Danish: [Sebastian øllgaard](https://crowdin.com/profile/seba187d), [Nadia Pedersen](https://crowdin.com/profile/nadiaholmquist)
 - Dutch: [guusbuk](https://crowdin.com/profile/guusbuk), [TM-47](https://crowdin.com/profile/-tm-)
 - French: [Benjamin](https://crowdin.com/profile/sombrabsol), [Dhalian](https://crowdin.com/profile/DHALiaN3630), [Fleefie~](https://crowdin.com/profile/fleefie), [LinuxCat](https://github.com/LinUwUxCat), [TM-47](https://crowdin.com/profile/-tm-)
 - German: [TheDude](https://crowdin.com/profile/the6771), [TM-47](https://crowdin.com/profile/-tm-)
@@ -83,7 +83,7 @@ It also includes a number of Anti-Piracy patches for the games and will automati
 - Portuguese (Brazil): [Tavisc0](https://crowdin.com/profile/tavisc0), [TM-47](https://crowdin.com/profile/-tm-)
 - Romanian: [Tescu](https://crowdin.com/profile/tescu48)
 - Russian: [Ckau](https://crowdin.com/profile/Ckau)
-- Spanish: [Nintendo R](https://crowdin.com/profile/nintendor), [nuxa17](https://twitter.com/TimeLordJean), [Radriant](https://ja.crowdin.com/profile/radriant), [SofyUchiha](https://crowdin.com/profile/sofyuchiha), [TM-47](https://crowdin.com/profile/-tm-)
+- Spanish: [beta215](https://crowdin.com/profile/beta215), [Nintendo R](https://crowdin.com/profile/nintendor), [nuxa17](https://twitter.com/TimeLordJean), [Radriant](https://ja.crowdin.com/profile/radriant), [SofyUchiha](https://crowdin.com/profile/sofyuchiha), [TM-47](https://crowdin.com/profile/-tm-)
 - Swedish: [TM-47](https://crowdin.com/profile/-tm-)
 - Turkish: [Egehan.TWL](https://crowdin.com/profile/egehan.twl), [rewold20](https://crowdin.com/profile/rewold20), [TM-47](https://crowdin.com/profile/-tm-)
 - Ukrainian: [MichaelBest01](https://crowdin.com/profile/michaelbest01), [TM-47](https://crowdin.com/profile/-tm-)

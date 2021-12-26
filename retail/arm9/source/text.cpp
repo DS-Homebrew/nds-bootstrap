@@ -4,53 +4,82 @@
 #include <array>
 #include <map>
 
-constexpr char16_t map[] =
-	u"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"// Special
-	u"¡«º»¿           " // Extended punctuation, before ASCII to keep it normal
-	u" !\"#$%&'()*+,-./" // Printable ASCII
-	u"0123456789:;<=>?"
-	u"@ABCDEFGHIJKLMNO"
-	u"PQRSTUVWXYZ[\\]^_"
-	u"`abcdefghijklmno"
-	u"pqrstuvwxyz{|}~ "
-	u"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ" // Latin extended
-	u"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"
-	u"àáâãäåæçèéêëìíîï"
-	u"ðñòóôõö÷øùúûüýþÿ"
-	u"ĂăĄąĆćĘęĞğİıŁłŃń"
-	u"ŐőŚśŞşŰűŹźŻżȘșȚț"
-	u"ΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟ" // Greek
-	u"ΠΡ ΣΤΥΦΧΨΩΪΫάέήί"
-	u"ΰαβγδεζηθικλμνξο"
-	u"πρςστυφχψωϊϋόύώϏ"
-	u"ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏ" // Cyrillic
-	u"АБВГДЕЖЗИЙКЛМНОП"
-	u"РСТУФХЦЧШЩЪЫЬЭЮЯ"
-	u"абвгдежзийклмноп"
-	u"рстуфхцчшщъыьэюя"
-	u"ѐёђѓєѕіїјљњћќѝўџ"
-	u"אבגדהוזחטיךכלםמן" // Hebrew
-	u"נסעףפץצקרשתװױײ׳״"
-	u"ءآأؤإئابةتثجحخدذ" // Arabic
+IgmFont extendedFont = IgmFont::extendedLatin;
+
+constexpr char16_t mapArabic[] =
+	u"ءآأؤإئابةتثجحخدذ"
 	u"رزسشصضطظعغـفقكلم"
 	u"نهوىيﯨﯩﺂﺄﺆﺈﺊﺋﺌﺎﺐ"
 	u"ﺑﺒﺔﺖﺗﺘﺚﺛﺜﺞﺟﺠﺢﺣﺤﺦ"
 	u"ﺧﺨﺪﺬﺮﺰﺲﺳﺴﺶﺷﺸﺺﺻﺼﺾ"
 	u"ﺿﻀﻂﻃﻄﻆﻇﻈﻊﻋﻌﻎﻏﻐﻒﻓ"
 	u"ﻔﻖﻗﻘﻚﻛﻜﻞﻟﻠﻢﻣﻤﻦﻧﻨ"
-	u"ﻪﻫﻬﻮﻰﻲﻳﻴ،؟ﻻﻼ    "
-	u"　｡｢｣､･ｦｧｨｩｪｫｬｭｮｯ" // Kana
-	u"ｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ"
-	u"ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ"
-	u"ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ"
-	u"主位儲关出到动動区器回图圖地址块" // Hànzì
-	u"增定底开強强戏截戲择擇数數时時查"
-	u"檢游率界畫目看移端置自至視計設跳"
-	u"轉转返退选遊選部重鐘钟開關離面頂"
-	u"頻顶项频　　　　　　　　　　　　"
-	u"가게기덤도돌동드래럭로료리린메면" // Hangul
+	u"ﻪﻫﻬﻮﻰﻲﻳﻴ،؟ﻻﻼ";
+
+constexpr char16_t mapCyrillic[] =
+	u"ЂЃ ѓ      Љ ЊЌЋЏ"
+	u"ђ         љ њќћџ"
+	u" ЎўЈ Ґ  Ё Є    Ї"
+	u"  Ііґ   ё є јЅѕї"
+	u"АБВГДЕЖЗИЙКЛМНОП"
+	u"РСТУФХЦЧШЩЪЫЬЭЮЯ"
+	u"абвгдежзийклмноп"
+	u"рстуфхцчшщъыьэюя";
+
+constexpr char16_t mapExtendedLatin[] =
+	u"ĂăĄąĆćĘęĞğİıŁłŃń"
+	u"ŐőŚśŞşŰűŹźŻżȘșȚț"
+	u" ¡   …     «    "
+	u"          º»   ¿"
+	u"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"
+	u"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"
+	u"àáâãäåæçèéêëìíîï"
+	u"ðñòóôõö÷øùúûüýþÿ";
+
+constexpr char16_t mapGreek[] =
+	u"                "
+	u"                "
+	u"  Ά             "
+	u"        ΈΉΊ Ό ΎΏ"
+	u"ΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟ"
+	u"ΠΡ ΣΤΥΦΧΨΩΪΫάέήί"
+	u"ΰαβγδεζηθικλμνξο"
+	u"πρςστυφχψωϊϋόύώ";
+
+constexpr char16_t mapHangul[] =
+	u"가게기덤도돌동드래럭로료리린메면"
 	u"모뱅뷰샷선설셋소속스아어운위으이"
 	u"인임자정종주카크클택트프화";
+
+constexpr char16_t mapHebrew[] =
+	u"                "
+	u"                "
+	u"                "
+	u"                "
+	u"                "
+	u"    װױײ׳״       "
+	u"אבגדהוזחטיךכלםמן"
+	u"נסעףפץצקרשת";
+
+constexpr char16_t mapKanaChinese[] =
+	u"‥…　なにのるをアクゲシジスセダ"
+	u"ットドバビプムモャュョリレロンー"
+	u"上下主了位儲关出到动動区器回图圖"
+	u"地址块增存定底度开式強强戏截戲戻"
+	u"択择擇数數时显時查模檢游率画界畫"
+	u"目看移端終置自至視計設跳轉转返退"
+	u"选速遊選部重鐘钟開關離面頂頻顶项"
+	u"频";
+
+constexpr const char16_t *extendedMaps[] = {
+	mapArabic,
+	mapCyrillic,
+	mapExtendedLatin,
+	mapGreek,
+	mapHangul,
+	mapHebrew,
+	mapKanaChinese
+};
 
 std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {
 	// Initial, Medial, Final
@@ -99,15 +128,19 @@ std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {
 	{u'ﻻ', {u'ﻻ', u'ﻼ', u'ﻼ'}}, // Ligature lam with alef
 };
 
-// Can't do a binary search as the map isn't fully sorted (so the image looks better)
-constexpr u16 getIndex(char16_t c) {
-	for(uint i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
-		if(c == map[i]) {
-			return i;
+// Can't do a binary search as the maps aren't fully sorted
+constexpr char getIndex(char16_t c) {
+	if(c < 0x80) { // ASCII is left as is
+		return c;
+	} else {
+		for(uint i = 0; i < 0x80; i++) {
+			if(c == extendedMaps[u8(extendedFont)][i]) {
+				return 0x80 + i;
+			}
 		}
 	}
 
-	return c == '?' ? '?' : getIndex('?');
+	return '?';
 }
 
 // Specifically the Arabic letters that have supported presentation forms
@@ -147,14 +180,17 @@ char16_t arabicForm(char16_t current, char16_t prev, char16_t next) {
 	return current;
 }
 
-void processRTL(u16 *begin, u16 *end) {
-	u16 *ltrBegin = end, *ltrEnd = end;
+#include <nds.h>
+#include <string>
+
+void processRTL(unsigned char *begin, unsigned char *end) {
+	unsigned char *ltrBegin = end, *ltrEnd = end;
 	bool rtl = true;
-	u16 buffer[end - begin + 1] = {0};
-	u16 *res = buffer;
+	unsigned char buffer[end - begin + 1] = {0};
+	unsigned char *res = buffer;
 
 	// Loop through string and save to buffer
-	for(u16 *p = end - 1; true; p += (rtl ? -1 : 1)) {
+	for(unsigned char *p = end - 1; true; p += (rtl ? -1 : 1)) {
 		// If we hit the end of the string in an LTR section of an RTL
 		// string, it may not be done, if so jump back to printing RTL
 		if(p == (rtl ? begin - 1 : end)) {
@@ -167,66 +203,75 @@ void processRTL(u16 *begin, u16 *end) {
 			}
 		}
 
+		char16_t c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+		nocashMessage(("a" + std::to_string(c)).c_str());
+
 		// If at the end of an LTR section within RTL, jump back to the RTL
 		if(p == ltrEnd && ltrBegin != end) {
 			if(ltrBegin == begin && (!isWeak(*ltrBegin) || isNumber(*ltrBegin)))
 				break;
 
 			p = ltrBegin;
+			c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			ltrBegin = end;
 			rtl = true;
 		// If in RTL and hit a non-RTL character that's not punctuation, switch to LTR
-		} else if(rtl && !isStrongRTL(map[*p]) && (!isWeak(map[*p]) || isNumber(map[*p]))) {
+		} else if(rtl && !isStrongRTL(c) && (!isWeak(c) || isNumber(c))) {
 			// Save where we are as the end of the LTR section
 			ltrEnd = p + 1;
 
 			// Go back until an RTL character or the start of the string
 			bool allNumbers = true;
-			while(!isStrongRTL(map[*p]) && p != begin) {
+			while(!isStrongRTL(c) && p != begin) {
 				// Check for if the LTR section is only numbers,
 				// if so they won't be removed from the end
-				if(allNumbers && !isNumber(map[*p]) && !isWeak(map[*p]))
+				if(allNumbers && !isNumber(c) && !isWeak(c))
 					allNumbers = false;
 				p--;
+				c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			}
 
 			// Save where we are to return to after printing the LTR section
 			ltrBegin = p;
 
 			// If on an RTL char right now, add one
-			if(isStrongRTL(map[*p])) {
+			if(isStrongRTL(c)) {
 				p++;
+				c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			}
 
 			// Remove all punctuation and, if the section isn't only numbers,
 			// numbers from the end of the LTR section
 			if(allNumbers) {
-				while(isWeak(map[*p]) && !isNumber(map[*p])) {
+				while(isWeak(c) && !isNumber(c)) {
 					if(p != begin)
 						ltrBegin++;
 					p++;
+					c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 				}
 			} else {
-				while(isWeak(map[*p])) {
+				while(isWeak(c)) {
 					if(p != begin)
 						ltrBegin++;
 					p++;
+					c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 				}
 			}
 
 			// But then allow all numbers directly touching the strong LTR or with 1 weak between
-			while((p - 1 >= begin && isNumber(*(p - 1))) || (p - 2 >= begin && isWeak(*(p - 1)) && isNumber(*(p - 2)))) {
+			while((p - 1 >= begin && isNumber(p[-1])) || (p - 2 >= begin && isWeak(p[-1]) && isNumber(p[-2]))) {
 				if(p - 1 != begin)
 					ltrBegin--;
 				p--;
 			}
+			c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 
 			rtl = false;
 		}
 
 		// Brackets are flipped in RTL
 		if(rtl) {
-			switch(map[*p]) {
+			switch(c) {
 				case '(':
 					*(res++) = getIndex(')');
 					break;
@@ -246,8 +291,12 @@ void processRTL(u16 *begin, u16 *end) {
 					*(res++) = getIndex('<');
 					break;
 				default:
-					*(res++) = getIndex(arabicForm(map[*p], p > begin ? map[*(p - 1)] : 0, p < end - 1 ? map[*(p + 1)] : 0));
+				{
+					char16_t prev = p > begin ? (p[-1] < 0x80 ? p[-1] : extendedMaps[u8(extendedFont)][p[-1] - 0x80]) : 0;
+					char16_t next = p < end - 1 ? (p[1] < 0x80 ? p[1] : extendedMaps[u8(extendedFont)][p[1] - 0x80]) : 0;
+					*(res++) = getIndex(arabicForm(c, prev, next));
 					break;
+				}
 			}
 		} else {
 			*(res++) = *p;
@@ -257,9 +306,9 @@ void processRTL(u16 *begin, u16 *end) {
 	tonccpy(begin, buffer, sizeof(buffer));
 }
 
-void setIgmString(const char *src, u16 *dst) {
+void setIgmString(const char *src, unsigned char *dst) {
 	bool containsRTL = false;
-	u16 *dstStart = dst;
+	unsigned char *dstStart = dst;
 
 	while(*src) {
 		// Get codepoint from UTF-8

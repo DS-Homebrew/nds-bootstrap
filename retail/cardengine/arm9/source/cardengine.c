@@ -27,6 +27,7 @@
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
+#include "igm_text.h"
 #include "nds_header.h"
 #include "module_params.h"
 #include "cardengine.h"
@@ -301,8 +302,8 @@ void myIrqHandlerIPC(void) {
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
 
-			*(u32*)(INGAME_MENU_LOCATION_B4DS+0x400) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS+0x40C;
+			*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
 			(*inGameMenu)(&mainScreen);
 
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu

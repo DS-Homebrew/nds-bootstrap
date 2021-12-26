@@ -30,6 +30,7 @@
 #include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
+#include "igm_text.h"
 #include "nds_header.h"
 #include "cardengine.h"
 #include "locations.h"
@@ -571,12 +572,12 @@ void myIrqHandlerIPC(void) {
 		case 0x9: {
 			if (!(ce9->valueBits & extendedMemory)) {
 				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-					*(u32*)(INGAME_MENU_LOCATION_TWLSDK+0x400) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK+0x40C;
+					*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
 					(*inGameMenu)(&mainScreen);
 				} else {
-					*(u32*)(INGAME_MENU_LOCATION+0x400) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION+0x40C;
+					*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 					(*inGameMenu)(&mainScreen);
 				}
 				if (sharedAddr[3] == 0x52534554) {

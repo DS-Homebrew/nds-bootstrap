@@ -832,8 +832,46 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Set In-Game Menu strings
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
-		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
-		igmText->rtl = (strcmp(conf->guiLanguage, "he") == 0 || strcmp(conf->guiLanguage, "ar") == 0);
+		tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
+		igmText->rtl = false;
+
+		// Load In-Game Menu font
+		extendedFont = IgmFont::extendedLatin;
+		const char *extendedFontPath = "nitro:/fonts/extended_latin.lz77";
+		if (strcmp(conf->guiLanguage, "ar") == 0) {
+			extendedFont = IgmFont::arabic;
+			extendedFontPath = "nitro:/fonts/arabic.lz77";
+			igmText->rtl = true;
+		} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
+			extendedFont = IgmFont::cyrillic;
+			extendedFontPath = "nitro:/fonts/cyrillic.lz77";
+		} else if (strcmp(conf->guiLanguage, "el") == 0) {
+			extendedFont = IgmFont::greek;
+			extendedFontPath = "nitro:/fonts/greek.lz77";
+		} else if (strcmp(conf->guiLanguage, "ko") == 0) {
+			extendedFont = IgmFont::hangul;
+			extendedFontPath = "nitro:/fonts/hangul.lz77";
+		} else if (strcmp(conf->guiLanguage, "he") == 0) {
+			extendedFont = IgmFont::hebrew;
+			extendedFontPath = "nitro:/fonts/hebrew.lz77";
+			igmText->rtl = true;
+		} else if (strcmp(conf->guiLanguage, "ja") == 0 || strncmp(conf->guiLanguage, "zh", 2) == 0) {
+			extendedFont = IgmFont::kanaChinese;
+			extendedFontPath = "nitro:/fonts/kana_chinese.lz77";
+		}
+
+		FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
+		if (font) {
+			fread(lz77ImageBuffer, 1, 0x400, font);
+			LZ77_Decompress(lz77ImageBuffer, igmText->font);
+			fclose(font);
+		}
+		font = fopen(extendedFontPath, "rb");
+		if (font) {
+			fread(lz77ImageBuffer, 1, 0x400, font);
+			LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
+			fclose(font);
+		}
 
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
@@ -1019,8 +1057,46 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Set In-Game Menu strings
 		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
-		tonccpy(igmText->ndsBootstrap, u"nds-bootstrap", 28);
-		igmText->rtl = (strcmp(conf->guiLanguage, "he") == 0 || strcmp(conf->guiLanguage, "ar") == 0);
+		tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
+		igmText->rtl = false;
+
+		// Load In-Game Menu font
+		extendedFont = IgmFont::extendedLatin;
+		const char *extendedFontPath = "nitro:/fonts/extended_latin.lz77";
+		if (strcmp(conf->guiLanguage, "ar") == 0) {
+			extendedFont = IgmFont::arabic;
+			extendedFontPath = "nitro:/fonts/arabic.lz77";
+			igmText->rtl = true;
+		} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
+			extendedFont = IgmFont::cyrillic;
+			extendedFontPath = "nitro:/fonts/cyrillic.lz77";
+		} else if (strcmp(conf->guiLanguage, "el") == 0) {
+			extendedFont = IgmFont::greek;
+			extendedFontPath = "nitro:/fonts/greek.lz77";
+		} else if (strcmp(conf->guiLanguage, "ko") == 0) {
+			extendedFont = IgmFont::hangul;
+			extendedFontPath = "nitro:/fonts/hangul.lz77";
+		} else if (strcmp(conf->guiLanguage, "he") == 0) {
+			extendedFont = IgmFont::hebrew;
+			extendedFontPath = "nitro:/fonts/hebrew.lz77";
+			igmText->rtl = true;
+		} else if (strcmp(conf->guiLanguage, "ja") == 0 || strncmp(conf->guiLanguage, "zh", 2) == 0) {
+			extendedFont = IgmFont::kanaChinese;
+			extendedFontPath = "nitro:/fonts/kana_chinese.lz77";
+		}
+
+		FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
+		if (font) {
+			fread(lz77ImageBuffer, 1, 0x400, font);
+			LZ77_Decompress(lz77ImageBuffer, igmText->font);
+			fclose(font);
+		}
+		font = fopen(extendedFontPath, "rb");
+		if (font) {
+			fread(lz77ImageBuffer, 1, 0x400, font);
+			LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
+			fclose(font);
+		}
 
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
