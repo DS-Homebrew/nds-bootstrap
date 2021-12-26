@@ -406,6 +406,8 @@ void reset(void) {
 
 	#ifndef TWLSDK
 	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		sdRead = (valueBits & b_dsiSD);
+
 		u32 iUncompressedSize = 0;
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
