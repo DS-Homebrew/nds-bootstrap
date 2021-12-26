@@ -344,8 +344,8 @@ static void initialize(void) {
 		}
 
 		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
-			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-0x4000);
-			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-0x4000)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
+			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
+			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
 			if (ndsHeader->unitCode == 3) {
 				fileRead(&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
 				fileRead(&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
@@ -439,7 +439,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 		tonccpy(dst, (u8*)newSrc, len);
 	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		tonccpy(dst, (u8*)((ce9->romLocation-0x4000-ndsHeader->arm9binarySize)+src),len);
+		tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}

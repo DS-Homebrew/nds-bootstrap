@@ -238,7 +238,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	nocashMessage("runNds");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen(dsiFeatures() ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
+	FILE* bootloaderBin = fopen(dsiFeatures() && !conf->b4dsMode ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
 	if (bootloaderBin) {
 		fread(lz77ImageBuffer, 1, (int)sizeof(lz77ImageBuffer), bootloaderBin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
@@ -247,7 +247,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 		return 2;
 	}
 
-	u32 bootloaderSize = dsiFeatures() ? 0x40000 : 0x20000;
+	u32 bootloaderSize = (dsiFeatures() && !conf->b4dsMode) ? 0x40000 : 0x20000;
 
 	loadCrt0* loader = (loadCrt0*)loaderBin;
 
@@ -291,7 +291,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
 
-	if (!dsiFeatures()) {
+	if (!dsiFeatures() || conf->b4dsMode) {
 		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;
 	}
 
@@ -299,7 +299,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	irqDisable(IRQ_ALL);
 
 	// Direct CPU access to VRAM banks C & D
-	if (dsiFeatures()) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	}
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
@@ -318,11 +318,15 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
-	if (dsiFeatures()) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
 	}
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
-	
+
+	if (dsiFeatures() && conf->b4dsMode) {
+		REG_SCFG_EXT = conf->b4dsMode == 2 ? 0x8300C000 : 0x83000000;
+	}
+
 	// Reset into a passme loop
 	nocashMessage("Reset into a passme loop");
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
@@ -335,7 +339,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(dsiFeatures() ? 0x06000000 : 0x06020000);	
+	resetARM7(dsiFeatures() && !conf->b4dsMode ? 0x06000000 : 0x06020000);	
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");

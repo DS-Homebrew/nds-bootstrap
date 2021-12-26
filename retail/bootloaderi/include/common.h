@@ -68,6 +68,7 @@ extern bool arm9_a7SCFGLocked;
 extern bool extendedMemoryConfirmed;
 extern bool arm9_macroMode;
 extern volatile bool esrbScreenPrepared;
+extern volatile bool esrbImageLoaded;
 extern volatile int arm9_stateFlag;
 extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;

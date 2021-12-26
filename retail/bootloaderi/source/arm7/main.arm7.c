@@ -967,9 +967,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		// Set region flag
-		bool gameRegion = (region == 0xFE);
-		bool sysRegion = (region == 0xFF);
-		if ((gameRegion || (sysRegion && twlCfgCountry == 0)) && ndsHeader->gameCode[3] != 'O') {
+		if (useRomRegion && ndsHeader->gameCode[3] != 'A' && ndsHeader->gameCode[3] != 'O') {
 			u8 newRegion = 0;
 			if (ndsHeader->gameCode[3] == 'J') {
 				newRegion = 0;
@@ -985,15 +983,13 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 				newRegion = 5;
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
-		} else if ((sysRegion || (gameRegion && ndsHeader->gameCode[3] == 'O')) && twlCfgCountry != 0) {
+		} else if (region == 0xFF && twlCfgCountry != 0) {
 			u8 newRegion = 0;
-			if ((twlCfgCountry == 0x01 || twlCfgCountry == 0xA0 || twlCfgCountry == 0x88) && ndsHeader->gameCode[3] == 'O') {
-				newRegion = 2;	// Europe
-			} else if (twlCfgCountry == 0x01 && ndsHeader->gameCode[3] != 'O') {
+			if (twlCfgCountry == 0x01) {
 				newRegion = 0;	// Japan
-			} else if (twlCfgCountry == 0xA0 && ndsHeader->gameCode[3] != 'O') {
+			} else if (twlCfgCountry == 0xA0) {
 				newRegion = 4;	// China
-			} else if (twlCfgCountry == 0x88 && ndsHeader->gameCode[3] != 'O') {
+			} else if (twlCfgCountry == 0x88) {
 				newRegion = 5;	// Korea
 			} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
 				newRegion = 3;	// Australia
@@ -1730,6 +1726,12 @@ int arm7_main(void) {
 		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 			dbg_printf("AP-fix found\n");
+			if (esrbScreenPrepared) {
+				while (!esrbImageLoaded) {
+					while (REG_VCOUNT != 191);
+					while (REG_VCOUNT == 191);
+				}
+			}
 			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
 			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
 				dbg_printf("AP-fix applied\n");
@@ -1778,6 +1780,13 @@ int arm7_main(void) {
 		initMBK_dsiMode();
 		REG_SCFG_EXT = 0x93FFFB06;
 		REG_SCFG_CLK = 0x187;
+	}
+
+	if (esrbScreenPrepared) {
+		while (!esrbImageLoaded) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
 	}
 
 	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch

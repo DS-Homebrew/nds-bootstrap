@@ -123,9 +123,7 @@ typedef struct cardengineArm7Patches {
     u32* card_irq_enable_arm7;
     u32* thumb_card_irq_enable_arm7;
     u32 vblankHandler;
-    u32 card_pull;
-    u32 cacheFlushRef;
-    u32 readCachedRef;
+    u32* j_twlGetPitchTable;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
 } __attribute__ ((__packed__)) cardengineArm7Patches;

@@ -9,6 +9,7 @@ typedef struct configuration {
     bool debug;
     bool cacheFatTable;
 	bool dsiWramAccess;
+	int b4dsMode;
 	char* ndsPath;
 	char* appPath;
 	char* savPath;
@@ -30,6 +31,7 @@ typedef struct configuration {
 	u8 language;
 	char* guiLanguage;
 	u8 region; // SDK 5
+	bool useRomRegion;
 	bool sdNand; // SDK 5
 	u8 dsiMode; // SDK 5
 	u8 isDSiWare; // SDK 5

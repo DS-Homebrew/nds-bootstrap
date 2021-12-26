@@ -406,6 +406,8 @@ void reset(void) {
 
 	#ifndef TWLSDK
 	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		sdRead = (valueBits & b_dsiSD);
+
 		u32 iUncompressedSize = 0;
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
@@ -517,6 +519,19 @@ static void cardReadLED(bool on, bool dmaLed) {
 }*/
 
 extern void inGameMenu(void);
+
+#ifdef TWLSDK
+u32 auxIeBak = 0;
+u32 sdStatBak = 0;
+u32 sdMaskBak = 0;
+
+void restoreBakData(void) {
+	REG_AUXIE = auxIeBak;
+	*(vu32*)0x400481C = sdStatBak;
+	*(vu32*)0x4004820 = sdMaskBak;
+	i2cWriteRegister(0x4A, 0x12, 0x01);
+}
+#endif
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
@@ -1028,9 +1043,9 @@ void myIrqHandlerVBlank(void) {
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory)) || returnToMenu) {
 #ifdef TWLSDK
-		u32 auxIeBak = REG_AUXIE;
-		u32 sdStatBak = *(vu32*)0x400481C;
-		u32 sdMaskBak = *(vu32*)0x4004820;
+		auxIeBak = REG_AUXIE;
+		sdStatBak = *(vu32*)0x400481C;
+		sdMaskBak = *(vu32*)0x4004820;
 		//if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 			igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 			i2cWriteRegister(0x4A, 0x12, 0x00);
@@ -1042,10 +1057,7 @@ void myIrqHandlerVBlank(void) {
 		inGameMenu();
 #ifdef TWLSDK
 		//if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
-			REG_AUXIE = auxIeBak;
-			*(vu32*)0x400481C = sdStatBak;
-			*(vu32*)0x4004820 = sdMaskBak;
-			i2cWriteRegister(0x4A, 0x12, 0x01);
+			restoreBakData();
 		//}
 #endif
 	}

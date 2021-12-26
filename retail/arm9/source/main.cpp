@@ -142,7 +142,10 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
-	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
+	if (dsiFeatures()) {
+		dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
+		dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
+	}
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
@@ -337,7 +340,7 @@ static int runNdsFile(configuration* conf) {
 	fifoWaitValue32(FIFO_USER_05);
 
 	// Logging
-	const char *logFilePath = (conf->sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
+	const char *logFilePath = (conf->sdFound && !conf->b4dsMode ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG");
 	if (conf->logging) {
 		static FILE* loggingFile = fopen(logFilePath, "w");
 		fprintf(loggingFile, "LOGGING MODE\n");
@@ -354,7 +357,7 @@ static int runNdsFile(configuration* conf) {
 		remove(logFilePath);
 	}
 
-	(dsiFeatures()) ? debugConf(conf) : debugConfB4DS(conf);
+	(dsiFeatures() && !conf->b4dsMode) ? debugConf(conf) : debugConfB4DS(conf);
 
 	if ((!extention(conf->ndsPath, ".nds"))
 	&& (!extention(conf->ndsPath, ".dsi"))
@@ -436,7 +439,7 @@ static int runNdsFile(configuration* conf) {
 		clusterCheat = stCheat.st_ino;
 	}
 
-	if (dsiFeatures()) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		if (stat(conf->gbaPath, &stGba) >= 0) {
 			clusterGba = stGba.st_ino;
 		}
@@ -471,7 +474,6 @@ static int runNdsFile(configuration* conf) {
 
 int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
-	conf->initDisc = (REG_SCFG_EXT == 0);
 
 	int status = loadFromSD(conf, argv[0]);
 

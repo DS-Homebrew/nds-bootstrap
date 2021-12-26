@@ -88,6 +88,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Cache FAT table
 	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", "0").c_str(), NULL, 0);
 
+	// B4DS mode
+	conf->b4dsMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "B4DS_MODE", "0").c_str(), NULL, 0);
+
 	// NDS path
 	conf->ndsPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH").c_str());
 
@@ -117,9 +120,14 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);
+	if (conf->language < -1) conf->language = -1;
 
 	// Region
-	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-2").c_str(), NULL, 0);
+	conf->region = strtol(config_file.fetch("NDS-BOOTSTRAP", "REGION", "-1").c_str(), NULL, 0);
+	if (conf->region < -1) conf->region = -1;
+
+	// Use ROM Region
+	conf->useRomRegion = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "USE_ROM_REGION", "1").c_str(), NULL, 0);
 
 	// SDNAND
 	conf->sdNand = strtol(config_file.fetch("NDS-BOOTSTRAP", "SDNAND", "0").c_str(), NULL, 0);
@@ -223,8 +231,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	
 	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
 
+	conf->initDisc = (REG_SCFG_EXT == 0);
+
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+
+	if (conf->b4dsMode) {
+		if (!dsiFeatures() || !conf->gameOnFlashcard || !conf->saveOnFlashcard) {
+			conf->b4dsMode = 0;
+		} else {
+			conf->initDisc = true;
+		}
+	}
 
 	if (conf->cacheFatTable) {
 		conf->valueBits |= BIT(0);
@@ -256,6 +274,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->swiHaltHook) {
 		conf->valueBits2 |= BIT(3);
 	}
+	if (conf->useRomRegion) {
+		conf->valueBits2 |= BIT(7);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
@@ -271,7 +292,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	pageFilePath = "sd:/_nds/pagefile.sys";
-	if (!conf->sdFound) {
+	if (conf->b4dsMode || !conf->sdFound) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
@@ -327,7 +348,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* cebin = NULL;
 	FILE* donorNdsFile = NULL;
 	bool donorLoaded = false;
-	conf->isDSiWare = (dsiFeatures() && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
+	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 	bool dsiEnhancedMbk = false;
 
@@ -338,7 +359,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Get region
 	u8 twlCfgCountry = (dsiFeatures() ? *(u8*)0x02000405 : 0);
 	u8 newRegion = 0;
-	if ((conf->region == 0xFE || (conf->region == 0xFF && twlCfgCountry == 0)) && romTid[3] != 'O') {
+	if (conf->useRomRegion && romTid[3] != 'A' && romTid[3] != 'O') {
 		if (romTid[3] == 'J') {
 			newRegion = 0;
 		} else if (romTid[3] == 'E' || romTid[3] == 'T') {
@@ -352,14 +373,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else if (romTid[3] == 'K') {
 			newRegion = 5;
 		}
-	} else if ((conf->region == 0xFF || (conf->region == 0xFE && romTid[3] == 'O')) && twlCfgCountry != 0) {
-		if ((twlCfgCountry == 0x01 || twlCfgCountry == 0xA0 || twlCfgCountry == 0x88) && romTid[3] == 'O') {
-			newRegion = 2;	// Europe
-		} else if (twlCfgCountry == 0x01 && romTid[3] != 'O') {
+	} else if (conf->region == 0xFF && twlCfgCountry != 0) {
+		if (twlCfgCountry == 0x01) {
 			newRegion = 0;	// Japan
-		} else if (twlCfgCountry == 0xA0 && romTid[3] != 'O') {
+		} else if (twlCfgCountry == 0xA0) {
 			newRegion = 4;	// China
-		} else if (twlCfgCountry == 0x88 && romTid[3] != 'O') {
+		} else if (twlCfgCountry == 0x88) {
 			newRegion = 5;	// Korea
 		} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
 			newRegion = 3;	// Australia
@@ -372,7 +391,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		newRegion = conf->region;
 	}
 
-	if (dsiFeatures()) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 		u32 srlAddr = 0;
 
@@ -403,7 +422,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-  if (dsiFeatures()) {
+  if (dsiFeatures() && !conf->b4dsMode) {
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
@@ -1017,14 +1036,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
-		fread((u8*)CHEAT_ENGINE_LOCATION_B4DS, 1, 0x400, cebin);
+		fread((u8*)(conf->b4dsMode == 1 ? CHEAT_ENGINE_LOCATION_B4DS-0x400000 : CHEAT_ENGINE_LOCATION_B4DS), 1, 0x400, cebin);
 	}
 	fclose(cebin);
 
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)CARDENGINE_ARM7_LOCATION, 1, 0x1000, cebin);
+		fread((void*)(conf->b4dsMode == 1 ? CARDENGINE_ARM7_LOCATION-0x400000 : CARDENGINE_ARM7_LOCATION), 1, 0x1000, cebin);
 	}
 	fclose(cebin);
 
@@ -1082,7 +1101,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
 
-		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION;
+		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)(conf->b4dsMode == 1 ? (u32)CARDENGINE_ARM7_LOCATION-0x400000 : (u32)CARDENGINE_ARM7_LOCATION);
 		ce7->igmHotkey = igmText->hotkey;
 
 		char path[40];
@@ -1123,11 +1142,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);
 	}
 
-	*(vu32*)(0x02000000) = 0x314D454D;
-	*(vu32*)(0x02400000) = 0x324D454D;
+	if (conf->b4dsMode == 0) {
+		*(vu32*)(0x02800000) = 0x314D454D;
+		*(vu32*)(0x02C00000) = 0x324D454D;
+	}
 
 	// Load ce9 binary
-	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
+	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
@@ -1161,7 +1182,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (newRegion == 1) {
 		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen("fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		bootstrapImages = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/esrb.bin" : "fat:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
 			// Read width & height
 			/*fseek(bootstrapImages, 0x12, SEEK_SET);
@@ -1253,7 +1274,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	if (dsiFeatures()) {	// Not for B4DS
+	if (dsiFeatures() && !conf->b4dsMode) {	// Not for B4DS
 		fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
 		if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
 			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;

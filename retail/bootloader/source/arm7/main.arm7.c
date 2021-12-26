@@ -52,6 +52,8 @@
 
 #include <nds/arm9/dldi.h>
 
+#define REG_GPIO_WIFI *(vu16*)0x4004C04
+
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "debug_file.h"
@@ -96,6 +98,7 @@ extern u8 patchMpuRegion;
 extern u8 language;
 extern u8 region;
 extern u8 donorSdkVer;
+extern u8 soundFreq;
 
 extern u32 _io_dldi_features;
 
@@ -118,30 +121,27 @@ u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
 
 static void initMBK(void) {
-	// Give all DSi WRAM to ARM7 at boot
-	// This function has no effect with ARM7 SCFG locked
-	
-	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9 = 0x3000000F;
-	
-	// WRAM-A fully mapped to ARM7
-	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
-	
-	// WRAM-B fully mapped to ARM7 // inverted order
-	*(vu32*)REG_MBK2 = 0x9195999D;
-	*(vu32*)REG_MBK3 = 0x8185898D;
-	
-	// WRAM-C fully mapped to arm7 // inverted order
-	*(vu32*)REG_MBK4 = 0x9195999D;
-	*(vu32*)REG_MBK5 = 0x8185898D;
-	
+	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9=0x3000000F;
+
+	// WRAM-A fully mapped to arm7
+	*((vu32*)REG_MBK1)=0x8D898581; // same as dsiware
+
+	// WRAM-B fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK2)=0x8C888480;
+	*((vu32*)REG_MBK3)=0x9C989490;
+
+	// WRAM-C fully mapped to arm9 // inverted order
+	*((vu32*)REG_MBK4)=0x8C888480;
+	*((vu32*)REG_MBK5)=0x9C989490;
+
 	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
-	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-	REG_MBK6 = 0x080037C0; // same as DSiWare
+	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
+	REG_MBK6=0x00403000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
-	REG_MBK7 = 0x07C03740; // same as DSiWare
+	REG_MBK7=0x07C03740; // same as dsiware
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
-	REG_MBK8 = 0x07403700; // same as DSiWare
+	REG_MBK8=0x07403700; // same as dsiware
 }
 
 void memset_addrs_arm7(u32 start, u32 end)
@@ -190,7 +190,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
-		toncset((u32*)0x02400000, 0, 0x3FE000);
+		toncset((u32*)0x02400000, 0, 0x3FC000);
 		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
 	}
 
@@ -199,6 +199,164 @@ static void resetMemory_ARM7(void) {
 	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
+}
+
+static void NDSTouchscreenMode(void) {
+	u8 volLevel;
+	
+	// 0xAC: special setting (when found special gamecode)
+	// 0xA7: normal setting (for any other gamecodes)
+	volLevel = volumeFix ? 0xAC : 0xA7;
+
+	// Touchscreen
+	cdcReadReg (0x63, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcReadReg (CDC_SOUND, 0x28);
+	cdcReadReg (CDC_SOUND, 0x2A);
+	cdcReadReg (CDC_SOUND, 0x2E);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x0C);
+	cdcWriteReg(CDC_SOUND, 0x24, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x25, 0xFF);
+	cdcWriteReg(CDC_SOUND, 0x26, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x27, 0x7F);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4A);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x10);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x14);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0x00);
+	cdcReadReg (CDC_CONTROL, 0x0B);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x02);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_CONTROL, 0x01, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x39, 0x66);
+	cdcReadReg (CDC_SOUND, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x20, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x81);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x82);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x04, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x05, 0xA1);
+	cdcWriteReg(CDC_CONTROL, 0x06, 0x15);
+	cdcWriteReg(CDC_CONTROL, 0x0B, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x0C, 0x83);
+	cdcWriteReg(CDC_CONTROL, 0x12, 0x87);
+	cdcWriteReg(CDC_CONTROL, 0x13, 0x83);
+	cdcReadReg (CDC_TOUCHCNT, 0x10);
+	cdcWriteReg(CDC_TOUCHCNT, 0x10, 0x08);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_CONTROL, 0x41, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x42, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+	cdcWriteReg(0x04, 0x08, 0x7F);
+	cdcWriteReg(0x04, 0x09, 0xE1);
+	cdcWriteReg(0x04, 0x0A, 0x80);
+	cdcWriteReg(0x04, 0x0B, 0x1F);
+	cdcWriteReg(0x04, 0x0C, 0x7F);
+	cdcWriteReg(0x04, 0x0D, 0xC1);
+	cdcWriteReg(CDC_SOUND, 0x2F, 0x2B);
+	cdcWriteReg(CDC_SOUND, 0x30, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x31, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x32, 0x60);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x02);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x10);
+	cdcReadReg (CDC_CONTROL, 0x74);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0x40);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_CONTROL, 0x51);
+	cdcReadReg (CDC_CONTROL, 0x3F);
+	cdcWriteReg(CDC_CONTROL, 0x3F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x23, 0x44);
+	cdcWriteReg(CDC_SOUND, 0x1F, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
+	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
+	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
+	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
+	cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
+	cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
+	cdcWriteReg(CDC_CONTROL, 0x40, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	cdcWriteReg(CDC_SOUND, 0x26, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x27, volLevel);
+	cdcWriteReg(CDC_SOUND, 0x2E, 0x03);
+	cdcWriteReg(CDC_TOUCHCNT, 0x03, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+	cdcReadReg (CDC_SOUND, 0x22);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+	
+	// Set remaining values
+	cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
+	cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
+	cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
+	cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
+	cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
+	cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
+	cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
+	cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
+	cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
+	cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
+	cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
+	cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
+	cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
+	cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
+	cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
+	cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
+	cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
+	cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
+	cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
+	cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
+	cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
+	cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
+	cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
+	cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
+
+	// Finish up!
+	cdcReadReg (CDC_TOUCHCNT, 0x02);
+	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+	cdcWriteReg(0xFF, 0x05, 0x00); //writeTSC(0x00, 0xFF);
+
+	// Power management
+	writePowerManagement(PM_READ_REGISTER, 0x00); //*(unsigned char*)0x40001C2 = 0x80, 0x00; // read PWR[0]   ;<-- also part of TSC !
+	writePowerManagement(PM_CONTROL_REG, 0x0D); //*(unsigned char*)0x40001C2 = 0x00, 0x0D; // PWR[0]=0Dh    ;<-- also part of TSC !
 }
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
@@ -460,14 +618,12 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	{
 		u32 overlaysLocation = romLocation;
 		if (ROMinRAM) {
-			overlaysLocation += (ndsHeader->arm9binarySize-0x4000);
+			overlaysLocation += (ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
 		}
-		fileRead((char*)overlaysLocation, file, 0x4000 + ndsHeader->arm9binarySize, overlaysSize);
+		fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
 
-		if (!isSdk5(moduleParams)) {
-			if(*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148){
-				*(u32*)((overlaysLocation-0x4000-ndsHeader->arm9binarySize)+0x003128AC) = 0xA00;	// Primary fix for Mario's Holiday
-			}
+		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -512,7 +668,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}*/
 
 		// Set region flag
-		if (region == 0xFE || region == 0xFF) {
+		if (useRomRegion || region == 0xFF) {
 			u8 newRegion = 0;
 			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
 				newRegion = 0;
@@ -693,6 +849,18 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
+	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
+		// Switch touch mode to NTR
+		*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+	}
+
+	REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+
+	// Switch to NTR mode BIOS
+	REG_SCFG_ROM = 0x703;
+
 	// Calculate overlay pack size
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
@@ -829,6 +997,12 @@ int arm7_main(void) {
 	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
+		if (esrbScreenPrepared) {
+			while (!esrbImageLoaded) {
+				while (REG_VCOUNT != 191);
+				while (REG_VCOUNT == 191);
+			}
+		}
 		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
 		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM)) {
 			dbg_printf("AP-fix applied\n");
@@ -839,10 +1013,17 @@ int arm7_main(void) {
 
 	arm9_boostVram = boostVram;
 
-	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	if (esrbScreenPrepared) {
+		while (!esrbImageLoaded) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
+	}
 
 	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 	clearScreen();
+
+	REG_SCFG_EXT = 0x12A03000;
 
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
