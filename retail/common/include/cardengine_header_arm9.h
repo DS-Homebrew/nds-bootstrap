@@ -78,6 +78,8 @@ typedef struct cardengineArm9 {
 		7: cacheFlushFlag
 		8: cardReadFix
 		9: a7HaltPatched
+		10: slowSoftReset
+		11: dsiBios
 	*/
     u32 overlaysSize;
 	u32 consoleModel;

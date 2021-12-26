@@ -50,6 +50,7 @@
 #define cardReadFix BIT(8)
 #define a7HaltPatched BIT(9)
 #define slowSoftReset BIT(10)
+#define dsiBios BIT(11)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -251,12 +252,16 @@ u32 popFromAsyncQueueHead() {
 
 
 void user_exception(void);
+extern u32 exceptionAddr;
 
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
 	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
 
+	if (ce9->valueBits & dsiBios) {
+		exceptionAddr = 0x02FFFD90;
+	}
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	EXCEPTION_VECTOR_SDK1 = enterException;
 	*exceptionC = user_exception;

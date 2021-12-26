@@ -50,7 +50,7 @@ BEGIN_ASM_FUNC enterException
 	mcr	p15,0,r0,c1,c0,0
 
 	// bios exception stack
-	ldr 	r0, =0x02FFFD90
+	ldr 	r0, exceptionAddr
 
 	// grab r15 from bios exception stack
 	ldr	r2,[r0,#8]
@@ -88,6 +88,12 @@ BEGIN_ASM_FUNC enterException
 	// return through bios
 	mov	pc,lr
 
+@---------------------------------------------------------------------------------
+	.global exceptionAddr
+@---------------------------------------------------------------------------------
+exceptionAddr:
+@---------------------------------------------------------------------------------
+	.word	0x027FFD90
 @---------------------------------------------------------------------------------
 	.global exceptionC
 @---------------------------------------------------------------------------------

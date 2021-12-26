@@ -21,6 +21,7 @@
 #define b_cardReadFix BIT(8)
 #define b_a7HaltPatched BIT(9)
 #define b_slowSoftReset BIT(10)
+#define b_dsiBios BIT(11)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -164,6 +165,9 @@ int hookNdsRetailArm9(
 	}
 	if (swiHaltPatched) {
 		ce9->valueBits |= b_a7HaltPatched;
+	}
+	if (!(REG_SCFG_ROM & BIT(9))) {
+		ce9->valueBits |= b_dsiBios;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
