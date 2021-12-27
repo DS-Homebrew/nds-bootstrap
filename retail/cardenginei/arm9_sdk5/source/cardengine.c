@@ -1103,10 +1103,10 @@ void myIrqHandlerIPC(void) {
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 #endif
 			(*inGameMenu)(&mainScreen);
-			/*if (sharedAddr[3] == 0x52534554) {
+			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
 				reset(0);
-			}*/
+			}
 		}
 			break;
 	}

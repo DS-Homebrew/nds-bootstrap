@@ -663,7 +663,7 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
 				case 1:
-					//sharedAddr[3] = 0x52534554; // RSET
+					sharedAddr[3] = 0x52534554; // RSET
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case 2:
@@ -703,7 +703,7 @@ void inGameMenu(s8* mainScreen) {
 					ramViewer();
 					break;
 				case 3:
-					//sharedAddr[3] = 0x52534554; // RSET
+					sharedAddr[3] = 0x52534554; // RSET
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
