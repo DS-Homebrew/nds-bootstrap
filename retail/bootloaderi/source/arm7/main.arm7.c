@@ -134,6 +134,7 @@ static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
 u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
+bool overlaysInRam = false;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
@@ -782,10 +783,12 @@ static void NTR_BIOS() {
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
 	// Load overlays into RAM
-	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : 0x700000)) {
+	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x200000 : 0x280000) : 0x700000))) {
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 		if (extendedMemoryConfirmed) {
 			overlaysLocation = (u32)ROM_LOCATION_EXT;
+		} else if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
+			overlaysLocation = (u32)retail_OVARLAYS_ADRESS_START_TWLSDK;
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 
@@ -798,6 +801,8 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
 			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
+
+		overlaysInRam = true;
 	}
 }
 
@@ -847,6 +852,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 			romFile->fatTableCached = false;
 		}
 	}
+	overlaysInRam = true;
 
 	dbg_printf("ROM loaded into RAM\n");
 	if (extendedMemoryConfirmed) {
@@ -1719,7 +1725,7 @@ int arm7_main(void) {
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
-		} else if (consoleModel > 0 || ((ROMsupportsDsiMode(ndsHeader) || strncmp(romTid, "UBR", 3) != 0) && !dsiModeConfirmed)) {
+		} else if ((ndsHeader->unitCode == 0x02 && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 

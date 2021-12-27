@@ -12,6 +12,7 @@
 extern u8 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
+extern bool overlaysInRam;
 
 bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool isSdk5, bool ROMinRAM) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
@@ -38,12 +39,14 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			armPatched = true;
 		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
 			// Overlays
-			if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+			if (!overlaysInRam) {
 				return armPatched;
 			}
 			rombyte = (void*)(isSdk5 ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
+			} else if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
+				rombyte = (void*)retail_OVARLAYS_ADRESS_START_TWLSDK;
 			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
 

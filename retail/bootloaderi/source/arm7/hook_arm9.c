@@ -9,6 +9,7 @@
 #include "find.h"
 #include "nds_header.h"
 #include "cardengine_header_arm9.h"
+#include "value_bits.h"
 
 #define b_saveOnFlashcard BIT(0)
 #define b_extendedMemory BIT(1)
@@ -194,8 +195,8 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-				runOverlayCheck = false;
-				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
+				runOverlayCheck = (ndsHeader->unitCode == 0x02);
+				ce9->romLocation = (ndsHeader->unitCode == 0x02) ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;
 				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
 			} else {
@@ -221,9 +222,9 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : 0x700000)) {
+		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x200000 : 0x280000) : 0x700000))) {
 			extern u8 gameOnFlashcard;
-			if (!gameOnFlashcard) {
+			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {
 				if (cacheBlockSize == 0) {
 					ce9->cacheAddress += (overlaysSize/4)*4;
 				} else
