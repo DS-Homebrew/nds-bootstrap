@@ -63,6 +63,7 @@
 	.global romRead_LED
 	.global dmaRomRead_LED
 	.global soundFreq
+	.global valueBits3
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -150,6 +151,8 @@ romRead_LED:
 dmaRomRead_LED:
 	.byte	0
 soundFreq:
+	.byte	0
+valueBits3:
 	.byte	0
 .align 4
 

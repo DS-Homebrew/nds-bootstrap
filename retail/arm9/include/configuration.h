@@ -37,6 +37,7 @@ typedef struct configuration {
 	u8 isDSiWare; // SDK 5
 	u8 valueBits;
 	u8 valueBits2;
+	u8 valueBits3;
 	u8 donorSdkVer;
 	u8 patchMpuRegion;
 	u32 patchMpuSize;

@@ -290,6 +290,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
+	loader->valueBits3                  = conf->valueBits3;
 
 	if (!dsiFeatures() || conf->b4dsMode) {
 		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;

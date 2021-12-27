@@ -5,6 +5,7 @@
 
 extern u8 valueBits;
 extern u8 valueBits2;
+extern u8 valueBits3;
 
 #define cacheFatTable (valueBits & BIT(0))
 #define boostVram (valueBits & BIT(1))
@@ -22,5 +23,6 @@ extern u8 valueBits2;
 #define dsiWramAccess (valueBits2 & BIT(5))
 #define hiyaCfwFound (valueBits2 & BIT(6))
 #define useRomRegion (valueBits2 & BIT(7))
+#define boostCpu (valueBits3 & BIT(0))
 
 #endif

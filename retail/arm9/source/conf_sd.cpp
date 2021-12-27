@@ -277,6 +277,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->useRomRegion) {
 		conf->valueBits2 |= BIT(7);
 	}
+	if (conf->boostCpu) {
+		conf->valueBits3 |= BIT(0);
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);

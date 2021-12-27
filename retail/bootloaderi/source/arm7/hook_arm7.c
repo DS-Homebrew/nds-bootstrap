@@ -335,7 +335,7 @@ int hookNdsRetailArm7(
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
 		}
-		if (iUncompressedSize > 0x280000) {
+		if (iUncompressedSize > 0x280000 || (isSdk5(moduleParams) && !dsiModeConfirmed && !boostCpu)) {
 			ce7->valueBits |= b_slowSoftReset;
 		}
 		if (hiyaCfwFound) {
