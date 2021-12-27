@@ -243,6 +243,12 @@ static void screenshot(void) {
 		}
 	}
 
+	sharedAddr[4] = 0x50505353;
+	while (sharedAddr[4] == 0x50505353) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+
 	// Backup VRAM bank
 	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
 

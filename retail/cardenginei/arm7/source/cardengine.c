@@ -600,6 +600,14 @@ void dumpRam(void) {
 	sharedAddr[3] = 0;
 }
 
+#ifdef TWLSDK
+void prepareScreenshot(void) {
+	driveInitialize();
+	sdRead = (valueBits & b_dsiSD);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+}
+#endif
+
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
@@ -613,6 +621,10 @@ void saveScreenshot(void) {
 		igmText->currentScreenshot++;
 		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, !sdRead, -1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
+
+#ifdef TWLSDK
+	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+#endif
 }
 
 static void log_arm9(void) {

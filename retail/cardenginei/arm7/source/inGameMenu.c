@@ -21,6 +21,7 @@ extern struct IgmText *igmText;
 extern void reset(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
+extern void prepareScreenshot(void);
 extern void saveScreenshot(void);
 
 volatile int timeTilBatteryLevelRefresh = 7;
@@ -82,6 +83,11 @@ void inGameMenu(void) {
 				case 0x50455453: // STEP
 					returnToMenu = true;
 					exitMenu = true;
+					break;
+				case 0x50505353: // SSPP
+					#ifdef TWLSDK
+					prepareScreenshot();
+					#endif
 					break;
 				case 0x544F4853: // SHOT
 					saveScreenshot();

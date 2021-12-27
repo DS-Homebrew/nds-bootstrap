@@ -810,7 +810,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-		fseek(cebin, 0x400000 - 1, SEEK_SET);
+		fseek(cebin, (conf->dsiMode ? 0x440000 : 0x400000) - 1, SEEK_SET);
 		fputc('\0', cebin);
 		fclose(cebin);
 

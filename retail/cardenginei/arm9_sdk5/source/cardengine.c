@@ -977,7 +977,7 @@ void reset(u32 param) {
 	sharedAddr[3] = 0x52534554;
 #endif
 
- 	register int i, reg;
+	register int i, reg;
 
 	REG_IME = 0;
 	REG_IE = 0;
