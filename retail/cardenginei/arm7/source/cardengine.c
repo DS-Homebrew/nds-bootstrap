@@ -600,13 +600,17 @@ void dumpRam(void) {
 	sharedAddr[3] = 0;
 }
 
-#ifdef TWLSDK
 void prepareScreenshot(void) {
-	driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
-}
+#ifdef TWLSDK
+	if (valueBits & dsiMode) {
 #endif
+		driveInitialize();
+		sdRead = (valueBits & b_dsiSD);
+		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+#ifdef TWLSDK
+	}
+#endif
+}
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
@@ -623,7 +627,11 @@ void saveScreenshot(void) {
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
 #ifdef TWLSDK
-	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+	if (valueBits & dsiMode) {
+#endif
+		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+#ifdef TWLSDK
+	}
 #endif
 }
 
