@@ -18,7 +18,7 @@ extern bool returnToMenu;
 
 extern struct IgmText *igmText;
 
-extern void reset(void);
+extern void forceGameReboot(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 extern void saveScreenshot(void);
@@ -69,7 +69,7 @@ void inGameMenu(void) {
 					extern void restoreBakData(void);
 					restoreBakData();
 					#endif
-					reset();
+					forceGameReboot();
 					break;
 				case 0x54495551: // QUIT
 					returnToLoader();
