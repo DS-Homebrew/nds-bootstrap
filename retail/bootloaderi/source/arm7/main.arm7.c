@@ -1645,6 +1645,7 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			(ROMsupportsDsiMode(ndsHeader)
+			|| strncmp(romTid, "AMU", 3) == 0 // Big Mutha Truckers
 			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 			) ? 0 : 1,
