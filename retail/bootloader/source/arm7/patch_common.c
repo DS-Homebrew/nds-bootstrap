@@ -518,7 +518,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: AQUIA (USA)
 	// Audio doesn't play on retail consoles
-	// Pressing A to exit options will cause an error
 	else if (strcmp(romTid, "KAAE") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -526,8 +525,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
 		*(u32*)0x020051B8 = 0xE1A00000; // nop
-		*(u32*)0x0203BB4C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203BC18 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BB4C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203BB50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BC18 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203BC1C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02051E00 = 0xE1A00000; // nop
 		*(u32*)0x02054CD8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
@@ -560,7 +561,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: AQUITE (Europe, Australia)
 	// Audio doesn't play on retail consoles
-	// Pressing A to exit options will cause an error
 	else if (strcmp(romTid, "KAAV") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -568,8 +568,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
 		*(u32*)0x020051B8 = 0xE1A00000; // nop
-		*(u32*)0x0203BC5C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203BD28 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BC5C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203BC60 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BD28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203BD2C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02051F10 = 0xE1A00000; // nop
 		*(u32*)0x02054DE8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02054DEC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
@@ -1924,6 +1926,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200519C = 0xE1A00000; // nop
 		*(u32*)0x020051A0 = 0xE1A00000; // nop
 		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x020059E4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020059E8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020395E0 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x020395E4 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0203CC10 = 0xE1A00000; // nop
@@ -1947,6 +1951,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200519C = 0xE1A00000; // nop
 		*(u32*)0x020051A0 = 0xE1A00000; // nop
 		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x020059E4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020059E8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02039658 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x0203965C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0203CC88 = 0xE1A00000; // nop
@@ -1970,6 +1976,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020051A4 = 0xE1A00000; // nop
 		*(u32*)0x020051A8 = 0xE1A00000; // nop
 		*(u32*)0x020051B0 = 0xE1A00000; // nop
+		*(u32*)0x02005A8C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005A90 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203990C = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02039910 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0203CF3C = 0xE1A00000; // nop
@@ -2264,6 +2272,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020D515E = 0x46C0; // nop
 		*(u16*)0x020D5160 = 0x46C0; // nop
 	}*/
+
+	// Art Style: ZENGAGE (USA)
+	else if (strcmp(romTid, "KASE") == 0) {
+		*(u32*)0x0200E000 = 0xE1A00000; // nop
+		*(u32*)0x0200E080 = 0xE1A00000; // nop
+		*(u32*)0x0200E1E8 = 0xE1A00000; // nop
+		*(u32*)0x0200E290 = 0xE1A00000; // nop
+		*(u32*)0x0200EBC8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200EBCC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201CAAC = 0xE1A00000; // nop
+		*(u32*)0x0201CAB0 = 0xE1A00000; // nop
+		*(u32*)0x0201CAC0 = 0xE1A00000; // nop
+		*(u32*)0x0201CE74 = 0xE1A00000; // nop
+		*(u32*)0x0201CE80 = 0xE1A00000; // nop
+		*(u32*)0x0201CEA8 = 0xE1A00000; // nop
+		*(u32*)0x0201D474 = 0xE1A00000; // nop
+		*(u32*)0x0201D48C = 0xE1A00000; // nop
+		*(u32*)0x0201D538 = 0xE1A00000; // nop
+		*(u32*)0x02035228 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0203522C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02038820 = 0xE1A00000; // nop
+		*(u32*)0x0203F0B8 = 0xE1A00000; // nop
+		*(u32*)0x02040E7C = 0xE1A00000; // nop
+		*(u32*)0x02040E80 = 0xE1A00000; // nop
+		*(u32*)0x02040E8C = 0xE1A00000; // nop
+		*(u32*)0x02040FEC = 0xE1A00000; // nop
+		*(u32*)0x02040FF0 = 0xE1A00000; // nop
+		*(u32*)0x02040FF4 = 0xE1A00000; // nop
+		*(u32*)0x02040FF8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02041054, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02042388 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+	}
+
+	// Art Style: NEMREM (Europe, Australia)
+	else if (strcmp(romTid, "KASV") == 0) {
+		*(u32*)0x0200E000 = 0xE1A00000; // nop
+		*(u32*)0x0200E080 = 0xE1A00000; // nop
+		*(u32*)0x0200E1E8 = 0xE1A00000; // nop
+		*(u32*)0x0200E290 = 0xE1A00000; // nop
+		*(u32*)0x0200EBC8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200EBCC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201C7A0 = 0xE1A00000; // nop
+		*(u32*)0x0201C7A4 = 0xE1A00000; // nop
+		*(u32*)0x0201C7B4 = 0xE1A00000; // nop
+		*(u32*)0x0201CB5C = 0xE1A00000; // nop
+		*(u32*)0x0201CB68 = 0xE1A00000; // nop
+		*(u32*)0x0201CB90 = 0xE1A00000; // nop
+		*(u32*)0x0201D164 = 0xE1A00000; // nop
+		*(u32*)0x0201D17C = 0xE1A00000; // nop
+		*(u32*)0x0201D228 = 0xE1A00000; // nop
+		*(u32*)0x02034CBC = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02034CC0 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020382B4 = 0xE1A00000; // nop
+		*(u32*)0x0203EB4C = 0xE1A00000; // nop
+		*(u32*)0x02040910 = 0xE1A00000; // nop
+		*(u32*)0x02040914 = 0xE1A00000; // nop
+		*(u32*)0x02040920 = 0xE1A00000; // nop
+		*(u32*)0x02040A80 = 0xE1A00000; // nop
+		*(u32*)0x02040A84 = 0xE1A00000; // nop
+		*(u32*)0x02040A88 = 0xE1A00000; // nop
+		*(u32*)0x02040A8C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02040AE8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02041E1C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+	}
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
