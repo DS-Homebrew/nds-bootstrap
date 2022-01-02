@@ -2030,11 +2030,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KAKE") == 0) {
 		*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0200776C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200B730 = 0xE1A00000; // nop
-		*(u32*)0x0200B73C = 0xE1A00000; // nop
-		*(u32*)0x0200B7AC = 0xE1A00000; // nop
-		*(u32*)0x0200B7B0 = 0xE1A00000; // nop
-		*(u32*)0x0200B7B8 = 0xE1A00000; // nop
+		*(u32*)0x0200B370 = 0xE1A00000; // nop
+		*(u32*)0x0200B37C = 0xE1A00000; // nop
+		*(u32*)0x0200B3AC = 0xE1A00000; // nop
+		*(u32*)0x0200B3B0 = 0xE1A00000; // nop
+		*(u32*)0x0200B3B8 = 0xE1A00000; // nop
 		*(u32*)0x0203B6AC = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x0203B6B0 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0203EAC0 = 0xE1A00000; // nop
@@ -2055,11 +2055,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KAKV") == 0) {
 		*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0200776C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200B730 = 0xE1A00000; // nop
-		*(u32*)0x0200B73C = 0xE1A00000; // nop
-		*(u32*)0x0200B7AC = 0xE1A00000; // nop
-		*(u32*)0x0200B7B0 = 0xE1A00000; // nop
-		*(u32*)0x0200B7B8 = 0xE1A00000; // nop
+		*(u32*)0x0200B370 = 0xE1A00000; // nop
+		*(u32*)0x0200B37C = 0xE1A00000; // nop
+		*(u32*)0x0200B3AC = 0xE1A00000; // nop
+		*(u32*)0x0200B3B0 = 0xE1A00000; // nop
+		*(u32*)0x0200B3B8 = 0xE1A00000; // nop
 		*(u32*)0x0203B6A4 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x0203B6A8 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0203EAB8 = 0xE1A00000; // nop
