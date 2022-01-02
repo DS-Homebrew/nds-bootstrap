@@ -2026,6 +2026,56 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02091488 = 0xE1A00000; // nop
 	}*/
 
+	// Art Style: precipice (USA)
+	else if (strcmp(romTid, "KAKE") == 0) {
+		*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200776C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200B730 = 0xE1A00000; // nop
+		*(u32*)0x0200B73C = 0xE1A00000; // nop
+		*(u32*)0x0200B7AC = 0xE1A00000; // nop
+		*(u32*)0x0200B7B0 = 0xE1A00000; // nop
+		*(u32*)0x0200B7B8 = 0xE1A00000; // nop
+		*(u32*)0x0203B6AC = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0203B6B0 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203EAC0 = 0xE1A00000; // nop
+		*(u32*)0x02045C18 = 0xE1A00000; // nop
+		*(u32*)0x02047A0C = 0xE1A00000; // nop
+		*(u32*)0x02047A10 = 0xE1A00000; // nop
+		*(u32*)0x02047A1C = 0xE1A00000; // nop
+		*(u32*)0x02047B60 = 0xE1A00000; // nop
+		*(u32*)0x02047B64 = 0xE1A00000; // nop
+		*(u32*)0x02047B68 = 0xE1A00000; // nop
+		*(u32*)0x02047B6C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02047BC8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02048F2C = 0xE1A00000; // nop
+		*(u32*)0x02048F34 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
+	// Art Style: KUBOS (Europe, Australia)
+	else if (strcmp(romTid, "KAKV") == 0) {
+		*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200776C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200B730 = 0xE1A00000; // nop
+		*(u32*)0x0200B73C = 0xE1A00000; // nop
+		*(u32*)0x0200B7AC = 0xE1A00000; // nop
+		*(u32*)0x0200B7B0 = 0xE1A00000; // nop
+		*(u32*)0x0200B7B8 = 0xE1A00000; // nop
+		*(u32*)0x0203B6A4 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0203B6A8 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203EAB8 = 0xE1A00000; // nop
+		*(u32*)0x02045C10 = 0xE1A00000; // nop
+		*(u32*)0x02047A04 = 0xE1A00000; // nop
+		*(u32*)0x02047A08 = 0xE1A00000; // nop
+		*(u32*)0x02047A14 = 0xE1A00000; // nop
+		*(u32*)0x02047B58 = 0xE1A00000; // nop
+		*(u32*)0x02047B5C = 0xE1A00000; // nop
+		*(u32*)0x02047B60 = 0xE1A00000; // nop
+		*(u32*)0x02047B64 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02047BC0, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02048F24 = 0xE1A00000; // nop
+		*(u32*)0x02048F2C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
