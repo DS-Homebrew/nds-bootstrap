@@ -1607,6 +1607,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204E62C = 0xE1A00000; // nop
 		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020632E8 = 0xE12FFF1E; // bx lr
 	}
 
 	// Mario Calculator (USA)
