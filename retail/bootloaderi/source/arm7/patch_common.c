@@ -65,6 +65,11 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
 	}
 
+	// ARC Style: Soccer! (Korea)
+	else if (strcmp(romTid, "KAZK") == 0) {
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	else if (strcmp(romTid, "KA4E") == 0) {
 		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
@@ -102,6 +107,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
 	}
 
+	// Crash-Course Domo (USA)
+	else if (strcmp(romTid, "KDCE") == 0) {
+		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
+		*(u16*)0x0200DF3A = 0x4770; // bx lr
+		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+	}
+
 	// Crazy Chicken: Director's Cut (Europe)
 	else if (strcmp(romTid, "KQZP") == 0) {
 		*(u32*)0x0207DAC0 = 0xE12FFF1E; // bx lr
@@ -120,8 +132,8 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		*(u32*)0x02005534 = 0xE1A00000; // nop
+		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02046AA8 = 0xE1A00000; // nop
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 
 		// Skip Manual screen

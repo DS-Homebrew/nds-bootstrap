@@ -40,6 +40,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 opCode);
+	extern void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2);
 
 	// Patch DSi-Exclusives to run in DS mode
 
@@ -592,14 +593,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// ARC Style: Soccer! (Korea)
 	else if (strcmp(romTid, "KAZK") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
 		*(u32*)0x0200DD70 = 0xE1A00000; // nop
-		*(u32*)0x020585D0 = 0xE1A00000; // nop
-		*(u32*)0x020585D8 = 0xE1A00000; // nop
-		*(u32*)0x020585F4 = 0xE1A00000; // nop
-		*(u32*)0x02058648 = 0xE1A00000; // nop
-		*(u32*)0x02058684 = 0xE1A00000; // nop
 		*(u32*)0x020683C8 = 0xE1A00000; // nop
 		*(u32*)0x0206C9C8 = 0xE1A00000; // nop
 		*(u32*)0x020784B8 = 0xE1A00000; // nop
@@ -858,6 +854,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FF34 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020233EC = 0xE1A00000; // nop
 		*(u32*)0x020346D0 = 0xE1A00000; // nop
+	}
+
+	// Crash-Course Domo (USA)
+	else if (strcmp(romTid, "KDCE") == 0) {
+		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
+		*(u16*)0x0200DF3A = 0x4770; // bx lr
+		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u16*)0x02015418 = 0x46C0; // nop
+		*(u16*)0x02023C72 = 0x46C0; // nop
+		*(u16*)0x02023C74 = 0x46C0; // nop
+		*(u16*)0x02025EC2 = 0x46C0; // nop
+		*(u16*)0x02025EC4 = 0x46C0; // nop
+		*(u16*)0x02028B44 = 0x46C0; // nop
+		*(u16*)0x02028B46 = 0x46C0; // nop
+		*(u16*)0x0202A0FE = 0x46C0; // nop
+		*(u16*)0x0202A100 = 0x46C0; // nop
+		*(u16*)0x0202A102 = 0x46C0; // nop
+		*(u16*)0x0202A104 = 0x46C0; // nop
+		*(u16*)0x0202A10E = 0x46C0; // nop
+		*(u16*)0x0202A110 = 0x46C0; // nop
+		*(u16*)0x0202A1F2 = 0x46C0; // nop
+		*(u16*)0x0202A1F4 = 0x46C0; // nop
+		patchHiHeapDSiWareThumb(0x0202A230, 0x208F, 0x0480); // movs r0, #0x23C0000
+		*(u16*)0x0202B2B6 = 0x46C0; // nop
+		*(u16*)0x0202B2B8 = 0x46C0; // nop
+		*(u16*)0x0202B2BA = 0x46C0; // nop
+		*(u16*)0x0202B2BC = 0x46C0; // nop
+		*(u16*)0x0202B2BE = 0x46C0; // nop
+		*(u16*)0x0202B2C0 = 0x46C0; // nop
+		*(u16*)0x0202D372 = 0x46C0; // nop
+		*(u16*)0x0202D374 = 0x46C0; // nop
 	}
 
 	// Dark Void Zero (USA)
@@ -1134,14 +1161,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		*(u32*)0x02005534 = 0xE1A00000; // nop
+		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200B690 = 0xE1A00000; // nop
-		*(u32*)0x0200B694 = 0xE1A00000; // nop
-		*(u32*)0x0200B6A0 = 0xE1A00000; // nop
-		*(u32*)0x0200B6B8 = 0xE1A00000; // nop
-		*(u32*)0x0200B6D0 = 0xE1A00000; // nop
 		*(u32*)0x02036398 = 0xE1A00000; // nop
-		*(u32*)0x02046AA8 = 0xE1A00000; // nop
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204BFE8 = 0xE1A00000; // nop
 		*(u32*)0x0204F548 = 0xE1A00000; // nop

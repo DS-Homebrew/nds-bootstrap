@@ -649,6 +649,13 @@ void patchHiHeapDSiWare(u32 addr, u32 opCode) {
 	*(u32*)(addr+0x2C) = 0x13A00627; // movne r0, #0x2700000
 }
 
+void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2) {
+	*(u16*)(addr) = opCode1; // movs r0, #0x????????
+	*(u16*)(addr+0x2) = opCode2;
+	*(u16*)(addr+0x1A) = 0x2801; // cmp r0, #1
+	*(u16*)(addr+0x22) = 0x2027; // movne r0, #0x2700000
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     
