@@ -163,9 +163,9 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
 		*(u32*)0x02036A34 = 0xE1A00000; // nop  Manual screen)
+		*(u32*)0x0204E5AC = 0xE3A00002; // mov r0, #2
 		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020632E8 = 0xE12FFF1E; // bx lr
 	}
 
 	// Mixed Messages (USA)
