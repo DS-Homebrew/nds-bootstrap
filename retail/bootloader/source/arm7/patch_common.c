@@ -1583,6 +1583,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}*/
 
+	// Magnetic Joe (USA)
+	else if (strcmp(romTid, "KJOE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02013344 = 0xE1A00000; // nop
+		*(u32*)0x0201705C = 0xE1A00000; // nop
+		*(u32*)0x0201B0B0 = 0xE1A00000; // nop
+		*(u32*)0x0201CF48 = 0xE1A00000; // nop
+		*(u32*)0x0201CF4C = 0xE1A00000; // nop
+		*(u32*)0x0201CF58 = 0xE1A00000; // nop
+		*(u32*)0x0201D0B8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201D114, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0201D248 = 0x020C5360;
+		*(u32*)0x02021464 = 0xE1A00000; // nop
+		*(u32*)0x02027058 = 0xE1A00000; // nop
+		*(u32*)0x02027328 = 0xE1A00000; // nop
+		*(u32*)0x02036964 = 0xE1A00000; // nop
+		*(u32*)0x02036980 = 0xE1A00000; // nop
+		*(u32*)0x020369F8 = 0xE1A00000; // nop
+		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
+		*(u32*)0x02036A34 = 0xE1A00000; // nop  Manual screen)
+		*(u32*)0x02036AAC = 0xE1A00000; // nop
+		*(u32*)0x0204E62C = 0xE1A00000; // nop
+		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Mario Calculator (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KWFE") == 0 && extendedMemory2) {

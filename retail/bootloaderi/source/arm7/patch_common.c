@@ -159,6 +159,14 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Magnetic Joe (USA)
+	else if (strcmp(romTid, "KJOE") == 0) {
+		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
+		*(u32*)0x02036A34 = 0xE1A00000; // nop  Manual screen)
+		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Mixed Messages (USA)
 	// Mixed Messages (Europe, Australia)
 	else if (strcmp(romTid, "KMME") == 0 || strcmp(romTid, "KMMV") == 0) {
