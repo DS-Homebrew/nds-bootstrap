@@ -139,8 +139,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020193A0 = 0xE1A00000; // nop
 		*(u32*)0x020193A4 = 0xE1A00000; // nop
 		*(u32*)0x020193B4 = 0xE1A00000; // nop
-		*(u32*)0x02019414 = 0xE1A00000; // nop
-		*(u32*)0x0201942C = 0xE1A00000; // nop
+		*(u32*)0x020193E0 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02030A88 = 0xE1A00000; // nop
 		*(u32*)0x02034224 = 0xE1A00000; // nop

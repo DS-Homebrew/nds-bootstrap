@@ -46,7 +46,15 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		return;
 	}
 
-	// Stub out save functions
+	// Stub out save functions (and some others)
+
+	// GO Series: 10 Second Run (USA)
+	// GO Series: 10 Second Run (Europe)
+	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
+		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020193E0 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
+	}
 
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	if (strcmp(romTid, "K72V") == 0) {
