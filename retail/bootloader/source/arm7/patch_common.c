@@ -36,6 +36,11 @@ patchOffsetCacheContents patchOffsetCache;
 
 bool patchOffsetCacheChanged = false;
 
+static inline void doubleNopT(u32 addr) {
+	*(u16*)(addr)   = 0x46C0;
+	*(u16*)(addr+2) = 0x46C0;
+}
+
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
 	const char* romTid = getRomTid(ndsHeader);
@@ -862,29 +867,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0200DF3A = 0x4770; // bx lr
 		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		*(u16*)0x02015418 = 0x46C0; // nop
-		*(u16*)0x02023C72 = 0x46C0; // nop
-		*(u16*)0x02023C74 = 0x46C0; // nop
-		*(u16*)0x02025EC2 = 0x46C0; // nop
-		*(u16*)0x02025EC4 = 0x46C0; // nop
-		*(u16*)0x02028B44 = 0x46C0; // nop
-		*(u16*)0x02028B46 = 0x46C0; // nop
-		*(u16*)0x0202A0FE = 0x46C0; // nop
-		*(u16*)0x0202A100 = 0x46C0; // nop
-		*(u16*)0x0202A102 = 0x46C0; // nop
-		*(u16*)0x0202A104 = 0x46C0; // nop
-		*(u16*)0x0202A10E = 0x46C0; // nop
-		*(u16*)0x0202A110 = 0x46C0; // nop
-		*(u16*)0x0202A1F2 = 0x46C0; // nop
-		*(u16*)0x0202A1F4 = 0x46C0; // nop
+		doubleNopT(0x02023C72);
+		doubleNopT(0x02025EC2);
+		doubleNopT(0x02028B44);
+		doubleNopT(0x0202A0FE);
+		doubleNopT(0x0202A102);
+		doubleNopT(0x0202A10E);
+		doubleNopT(0x0202A1F2);
 		patchHiHeapDSiWareThumb(0x0202A230, 0x208F, 0x0480); // movs r0, #0x23C0000
-		*(u16*)0x0202B2B6 = 0x46C0; // nop
-		*(u16*)0x0202B2B8 = 0x46C0; // nop
+		doubleNopT(0x0202B2B6);
 		*(u16*)0x0202B2BA = 0x46C0; // nop
 		*(u16*)0x0202B2BC = 0x46C0; // nop
-		*(u16*)0x0202B2BE = 0x46C0; // nop
-		*(u16*)0x0202B2C0 = 0x46C0; // nop
-		*(u16*)0x0202D372 = 0x46C0; // nop
-		*(u16*)0x0202D374 = 0x46C0; // nop
+		doubleNopT(0x0202B2BE);
+		doubleNopT(0x0202D372);
 	}
 
 	// Dark Void Zero (USA)
@@ -1542,6 +1537,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Hard-Hat Domo (USA)
+	else if (strcmp(romTid, "KDHE") == 0) {
+		*(u16*)0x0200D060 = 0x2001; // movs r0, #1
+		*(u16*)0x0200D062 = 0x4770; // bx lr
+		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		doubleNopT(0x02024C7E);
+		doubleNopT(0x02022A2E);
+		doubleNopT(0x02027900);
+		doubleNopT(0x02028EBA);
+		doubleNopT(0x02028EBE);
+		doubleNopT(0x02028ECA);
+		doubleNopT(0x02028FAE);
+		patchHiHeapDSiWareThumb(0x02028FEC, 0x208F, 0x0480); // movs r0, #0x23C0000
+		doubleNopT(0x0202A076);
+		*(u16*)0x0202A078 = 0x46C0;
+		*(u16*)0x0202A07A = 0x46C0;
+		doubleNopT(0x0202A07E);
+		doubleNopT(0x0202C176);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
@@ -2129,6 +2144,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02048F2C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Pro-Putt Domo (USA)
+	else if (strcmp(romTid, "KDPE") == 0) {
+		*(u16*)0x020106BC = 0x2001; // movs r0, #1
+		*(u16*)0x020106BE = 0x4770; // bx lr
+		*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		doubleNopT(0x02026262);
+		doubleNopT(0x020284B2);
+		doubleNopT(0x0202B2D4);
+		doubleNopT(0x0202C88E);
+		doubleNopT(0x0202C892);
+		doubleNopT(0x0202C89E);
+		doubleNopT(0x0202C982);
+		patchHiHeapDSiWareThumb(0x0202C9C0, 0x208F, 0x0480); // movs r0, #0x23C0000
+		doubleNopT(0x0202DA1E);
+		*(u16*)0x0202DA22 = 0x46C0; // nop
+		*(u16*)0x0202DA24 = 0x46C0; // nop
+		doubleNopT(0x0202DA26);
+		doubleNopT(0x0202FADA);
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
@@ -2174,6 +2209,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018094 = generateA7Instr(0x02018094, (int)ce9->patches->reset_arm9);
 		*(u32*)0x02018098 = 0xFFFFFFFF;
 		*(u32*)0x0201A6F4 = 0xE1A00000; // nop
+	}
+
+	// Rock-n-Roll Domo (USA)
+	else if (strcmp(romTid, "KD6E") == 0) {
+		*(u16*)0x02010164 = 0x2001; // movs r0, #1
+		*(u16*)0x02010166 = 0x4770; // bx lr
+		*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		doubleNopT(0x02024D86);
+		doubleNopT(0x02026FD6);
+		doubleNopT(0x02029C58);
+		doubleNopT(0x0202B212);
+		doubleNopT(0x0202B216);
+		doubleNopT(0x0202B222);
+		doubleNopT(0x0202B306);
+		patchHiHeapDSiWareThumb(0x0202B344, 0x208F, 0x0480); // movs r0, #0x23C0000
+		doubleNopT(0x0202C3A2);
+		*(u16*)0x0202C3A6 = 0x46C0;
+		*(u16*)0x0202C3A8 = 0x46C0;
+		doubleNopT(0x0202C3AA);
+		doubleNopT(0x0202E45E);
 	}
 
 	// Shantae: Risky's Revenge (USA)
@@ -2343,7 +2398,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Tori to Mame (Japan)
 	// Does not boot: Crashes on black screens
 	/*else if (strcmp(romTid, "KP6J") == 0) {
-		*(u32*)0x0202BF30 = 0xE12FFF1E; // bx lr (Skip NTFR file loading from TWLNAND)
+		*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Skip NTFR file loading from TWLNAND)
 	}*/
 
 	// Trajectile (USA)
@@ -2353,12 +2408,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020408B8 = 0xE1A00000; // nop
 		*(u32*)0x020408BC = 0xE1A00000; // nop
-		*(u16*)0x02040D24 = 0x46C0; // nop
-		*(u16*)0x02040D26 = 0x46C0; // nop
-		*(u16*)0x020B4B40 = 0x46C0; // nop
-		*(u16*)0x020B4B42 = 0x46C0; // nop
-		*(u16*)0x020B9216 = 0x46C0; // nop
-		*(u16*)0x020B9218 = 0x46C0; // nop
+		doubleNopT(0x02040D24);
+		doubleNopT(0x020B4B40);
+		doubleNopT(0x020B9216);
 		for (int i = 0; i < 36; i++) {
 			u16* offset = (u16*)0x020B9298;
 			offset[i] = 0x46C0; // nop
@@ -2370,11 +2422,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C75C4 = 0xE1A00000; // nop
 		*(u32*)0x020C7708 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020C7764, 0xE3A00627); // mov r0, #0x2700000
-		*(u16*)0x020CF4BA = 0x46C0; // nop
-		*(u16*)0x020CF4BC = 0x46C0; // nop
-		*(u16*)0x020D515E = 0x46C0; // nop
-		*(u16*)0x020D5160 = 0x46C0; // nop
+		doubleNopT(0x020CF4BA);
+		doubleNopT(0x020D515E);
 	}*/
+
+	// White-Water Domo (USA)
+	else if (strcmp(romTid, "KDWE") == 0) {
+		*(u16*)0x0200C918 = 0x2001; // movs r0, #1
+		*(u16*)0x0200C91A = 0x4770; // bx lr
+		*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		doubleNopT(0x020223BE);
+		doubleNopT(0x0202460E);
+		doubleNopT(0x020272C4);
+		doubleNopT(0x0202887E);
+		doubleNopT(0x02028882);
+		doubleNopT(0x0202888E);
+		doubleNopT(0x02028972);
+		patchHiHeapDSiWareThumb(0x020289B0, 0x208F, 0x0480); // movs r0, #0x23C0000
+		doubleNopT(0x02029A36);
+		*(u16*)0x02029A3A = 0x46C0;
+		*(u16*)0x02029A3C = 0x46C0;
+		doubleNopT(0x02029A3E);
+		doubleNopT(0x0202BAF2);
+	}
 
 	// Art Style: ZENGAGE (USA)
 	else if (strcmp(romTid, "KASE") == 0) {

@@ -165,6 +165,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Hard-Hat Domo (USA)
+	else if (strcmp(romTid, "KDHE") == 0) {
+		*(u16*)0x0200D060 = 0x2001; // movs r0, #1
+		*(u16*)0x0200D062 = 0x4770; // bx lr
+		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
@@ -203,6 +210,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
 	}
 
+	// Pro-Putt Domo (USA)
+	else if (strcmp(romTid, "KDPE") == 0) {
+		*(u16*)0x020106BC = 0x2001; // movs r0, #1
+		*(u16*)0x020106BE = 0x4770; // bx lr
+		*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+	}
+
 	// Puzzle League: Express (USA)
 	else if (strcmp(romTid, "KPNE") == 0) {
 		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
@@ -218,6 +232,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	// Rabi Laby 2 (Europe)
 	else if (strcmp(romTid, "KLVE") == 0 || strcmp(romTid, "KLVP") == 0) {
 		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Rock-n-Roll Domo (USA)
+	else if (strcmp(romTid, "KD6E") == 0) {
+		*(u16*)0x02010164 = 0x2001; // movs r0, #1
+		*(u16*)0x02010166 = 0x4770; // bx lr
+		*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
 	// Space Invaders Extreme Z (Japan)
@@ -242,6 +263,13 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KTEV") == 0) {
 		*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+	}
+
+	// White-Water Domo (USA)
+	else if (strcmp(romTid, "KDWE") == 0) {
+		*(u16*)0x0200C918 = 0x2001; // movs r0, #1
+		*(u16*)0x0200C91A = 0x4770; // bx lr
+		*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 }
 
