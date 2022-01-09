@@ -2394,6 +2394,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020558FC = 0xE1A00000; // nop
 	}*/
 
+	// Sudoku (USA)
+	else if (strcmp(romTid, "K4DE") == 0) {
+		if (ndsHeader->romversion == 1) {
+			*(u32*)0x0200698C = 0xE1A00000; // nop
+			*(u32*)0x0203701C = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02037020 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020B7CA4 = 0xE1A00000; // nop
+			*(u32*)0x020BB4B8 = 0xE1A00000; // nop
+			*(u32*)0x020C0D34 = 0xE1A00000; // nop
+			*(u32*)0x020C2B18 = 0xE1A00000; // nop
+			*(u32*)0x020C2B1C = 0xE1A00000; // nop
+			*(u32*)0x020C2B28 = 0xE1A00000; // nop
+			*(u32*)0x020C2C6C = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x020C2CC8, 0xE3A0078F); // mov r0, #0x23C0000
+			*(u32*)0x020C7E08 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x0200695C = 0xE1A00000; // nop
+			*(u32*)0x0203609C = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020360A0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020A0670 = 0xE1A00000; // nop
+			*(u32*)0x020A3E84 = 0xE1A00000; // nop
+			*(u32*)0x020A9700 = 0xE1A00000; // nop
+			*(u32*)0x020AB4E4 = 0xE1A00000; // nop
+			*(u32*)0x020AB4E8 = 0xE1A00000; // nop
+			*(u32*)0x020AB4F4 = 0xE1A00000; // nop
+			*(u32*)0x020AB638 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x020AB694, 0xE3A0078F); // mov r0, #0x23C0000
+			*(u32*)0x020B0664 = 0xE1A00000; // nop
+		}
+	}
+
 	// Tori to Mame (Japan)
 	// Does not boot: Crashes on black screens
 	/*else if (strcmp(romTid, "KP6J") == 0) {

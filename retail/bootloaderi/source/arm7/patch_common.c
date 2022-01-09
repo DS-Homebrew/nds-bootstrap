@@ -261,6 +261,17 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
 	}
 
+	// Sudoku (USA)
+	else if (strcmp(romTid, "K4DE") == 0) {
+		if (ndsHeader->romversion == 1) {
+			*(u32*)0x0203701C = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02037020 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0203609C = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020360A0 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
 		*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
