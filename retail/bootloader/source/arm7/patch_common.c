@@ -770,6 +770,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207BE88 = 0xE1A00000; // nop
 	}
 
+	// Bloons TD 4 (USA)
+	// Unknown bug causes game to crash after popping the last bloon
+	// Requires 8MB of RAM
+	/*else if (strcmp(romTid, "KUVE") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x0201C584 = 0xE1A00000; // nop
+		*(u32*)0x0201FF40 = 0xE1A00000; // nop
+		*(u32*)0x02023CF8 = 0xE1A00000; // nop
+		*(u32*)0x02025A94 = 0xE1A00000; // nop
+		*(u32*)0x02025A98 = 0xE1A00000; // nop
+		*(u32*)0x02025AA4 = 0xE1A00000; // nop
+		*(u32*)0x02025C04 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02025C60, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x0202A344 = 0xE1A00000; // nop
+	}*/
+
 	// Cake Ninja (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K2JE") == 0 && extendedMemory2) {
