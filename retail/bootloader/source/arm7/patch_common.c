@@ -1199,6 +1199,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026A94 = 0xE1A00000; // nop
 	}
 
+	// Fieldrunners (USA)
+	// Fieldrunners (Europe, Australia)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KFDE") == 0 || strcmp(romTid, "KFDV") == 0) && extendedMemory2) {
+		*(u32*)0x0205828C = 0xE1A00000; // nop
+		*(u32*)0x0205B838 = 0xE1A00000; // nop
+		*(u32*)0x0205F8FC = 0xE1A00000; // nop
+		*(u32*)0x020616E0 = 0xE1A00000; // nop
+		*(u32*)0x020616E4 = 0xE1A00000; // nop
+		*(u32*)0x020616F0 = 0xE1A00000; // nop
+		*(u32*)0x02061834 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02061890, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x020619C4 -= 0x30000;
+		*(u32*)0x02063280 = 0xE1A00000; // nop
+		*(u32*)0x02063284 = 0xE1A00000; // nop
+		*(u32*)0x02063288 = 0xE1A00000; // nop
+		*(u32*)0x0206328C = 0xE1A00000; // nop
+		*(u32*)0x020663D4 = 0xE1A00000; // nop
+	}
+
 	// Flipper (USA)
 	// Music will not play on retail consoles
 	else if (strcmp(romTid, "KFPE") == 0) {
