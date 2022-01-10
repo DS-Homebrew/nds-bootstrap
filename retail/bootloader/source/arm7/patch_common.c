@@ -1657,6 +1657,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}*/
 
+	// Libera Wing (Europe)
+	// Will not boot with 4 or 8 MB of RAM
+	/*else if (strcmp(romTid, "KLWP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02016138 = 0xE1A00000; // nop
+		*(u32*)0x020195A8 = 0xE1A00000; // nop
+		*(u32*)0x0201ED70 = 0xE1A00000; // nop
+		*(u32*)0x02020B90 = 0xE1A00000; // nop
+		*(u32*)0x02020B94 = 0xE1A00000; // nop
+		*(u32*)0x02020BA0 = 0xE1A00000; // nop
+		*(u32*)0x02020D00 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02020D5C, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02020E90 = 0x020D7F40;
+		*(u32*)0x02024FD0 = 0xE1A00000; // nop
+		*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0204468C = 0xE1A00000; // nop
+		*(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02045860 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020563F8 = 0xE1A00000; // nop
+	}*/
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
