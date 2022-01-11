@@ -205,6 +205,90 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->cleanDonorPath = strdup(config_file.fetch(romTid, "DONOR_NDS_PATH").c_str());
 }*/
 
+void getIgmStrings(configuration* conf) {
+	// Set In-Game Menu strings
+	tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
+	tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
+	igmText->rtl = false;
+
+	// Load In-Game Menu font
+	extendedFont = IgmFont::extendedLatin;
+	const char *extendedFontPath = "nitro:/fonts/extended_latin.lz77";
+	if (strcmp(conf->guiLanguage, "ar") == 0) {
+		extendedFont = IgmFont::arabic;
+		extendedFontPath = "nitro:/fonts/arabic.lz77";
+		igmText->rtl = true;
+	} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
+		extendedFont = IgmFont::cyrillic;
+		extendedFontPath = "nitro:/fonts/cyrillic.lz77";
+	} else if (strcmp(conf->guiLanguage, "el") == 0) {
+		extendedFont = IgmFont::greek;
+		extendedFontPath = "nitro:/fonts/greek.lz77";
+	} else if (strcmp(conf->guiLanguage, "ko") == 0) {
+		extendedFont = IgmFont::hangul;
+		extendedFontPath = "nitro:/fonts/hangul.lz77";
+	} else if (strcmp(conf->guiLanguage, "he") == 0) {
+		extendedFont = IgmFont::hebrew;
+		extendedFontPath = "nitro:/fonts/hebrew.lz77";
+		igmText->rtl = true;
+	} else if (strcmp(conf->guiLanguage, "ja") == 0 || strncmp(conf->guiLanguage, "zh", 2) == 0) {
+		extendedFont = IgmFont::kanaChinese;
+		extendedFontPath = "nitro:/fonts/kana_chinese.lz77";
+	}
+
+	FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
+	if (font) {
+		fread(lz77ImageBuffer, 1, 0x400, font);
+		LZ77_Decompress(lz77ImageBuffer, igmText->font);
+		fclose(font);
+	}
+	font = fopen(extendedFontPath, "rb");
+	if (font) {
+		fread(lz77ImageBuffer, 1, 0x400, font);
+		LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
+		fclose(font);
+	}
+
+	// Set In-Game Menu hotkey
+	igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
+
+	cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
+	ce7->igmHotkey = igmText->hotkey;
+	if (*(u32*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION != 0) {
+		cardengineArm7* ce7sdk5 = (cardengineArm7*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION;
+		ce7sdk5->igmHotkey = igmText->hotkey;
+	}
+
+	char path[40];
+	snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
+	easysave::ini lang(path);
+
+	setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
+	setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
+	setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
+	setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
+
+	setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
+	setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
+	setIgmString(lang.fetch("MENU", "SCREENSHOT", "Screenshot...").c_str(), igmText->menu[2]);
+	setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[3]);
+	setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[4]);
+	// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[5]);
+	setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[5]);
+	setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[6]);
+
+	setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
+	setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
+	setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->options[2]);
+	setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
+	setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
+	setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
+	setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
+	setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
+	setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->options[8]);
+	setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->options[9]);
+}
+
 int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fatMountSimple("sd", &__my_io_dsisd);
 	fatMountSimple("fat", dldiGetInternal());
@@ -833,85 +917,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
 
-		// Set In-Game Menu strings
-		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
-		tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
-		igmText->rtl = false;
-
-		// Load In-Game Menu font
-		extendedFont = IgmFont::extendedLatin;
-		const char *extendedFontPath = "nitro:/fonts/extended_latin.lz77";
-		if (strcmp(conf->guiLanguage, "ar") == 0) {
-			extendedFont = IgmFont::arabic;
-			extendedFontPath = "nitro:/fonts/arabic.lz77";
-			igmText->rtl = true;
-		} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
-			extendedFont = IgmFont::cyrillic;
-			extendedFontPath = "nitro:/fonts/cyrillic.lz77";
-		} else if (strcmp(conf->guiLanguage, "el") == 0) {
-			extendedFont = IgmFont::greek;
-			extendedFontPath = "nitro:/fonts/greek.lz77";
-		} else if (strcmp(conf->guiLanguage, "ko") == 0) {
-			extendedFont = IgmFont::hangul;
-			extendedFontPath = "nitro:/fonts/hangul.lz77";
-		} else if (strcmp(conf->guiLanguage, "he") == 0) {
-			extendedFont = IgmFont::hebrew;
-			extendedFontPath = "nitro:/fonts/hebrew.lz77";
-			igmText->rtl = true;
-		} else if (strcmp(conf->guiLanguage, "ja") == 0 || strncmp(conf->guiLanguage, "zh", 2) == 0) {
-			extendedFont = IgmFont::kanaChinese;
-			extendedFontPath = "nitro:/fonts/kana_chinese.lz77";
-		}
-
-		FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
-		if (font) {
-			fread(lz77ImageBuffer, 1, 0x400, font);
-			LZ77_Decompress(lz77ImageBuffer, igmText->font);
-			fclose(font);
-		}
-		font = fopen(extendedFontPath, "rb");
-		if (font) {
-			fread(lz77ImageBuffer, 1, 0x400, font);
-			LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
-			fclose(font);
-		}
-
-		// Set In-Game Menu hotkey
-		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
-
-		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		cardengineArm7* ce7sdk5 = (cardengineArm7*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION;
-		ce7->igmHotkey = igmText->hotkey;
-		ce7sdk5->igmHotkey = igmText->hotkey;
-
-		char path[40];
-		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
-		easysave::ini lang(path);
-
-		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
-		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
-		setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
-		setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
-
-		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
-		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
-		setIgmString(lang.fetch("MENU", "SCREENSHOT", "Screenshot...").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[3]);
-		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[4]);
-		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[5]);
-		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[5]);
-		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[6]);
-
-		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
-		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
-		setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->options[2]);
-		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
-		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
-		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
-		setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
-		setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
-		setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->options[8]);
-		setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->options[9]);
+		getIgmStrings(conf);
 
 		if (conf->dsiMode > 0 && unitCode > 0) {
 			// Relocate
@@ -983,83 +989,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, 0x4000, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
 
-		// Set In-Game Menu strings
-		tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
-		tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
-		igmText->rtl = false;
-
-		// Load In-Game Menu font
-		extendedFont = IgmFont::extendedLatin;
-		const char *extendedFontPath = "nitro:/fonts/extended_latin.lz77";
-		if (strcmp(conf->guiLanguage, "ar") == 0) {
-			extendedFont = IgmFont::arabic;
-			extendedFontPath = "nitro:/fonts/arabic.lz77";
-			igmText->rtl = true;
-		} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
-			extendedFont = IgmFont::cyrillic;
-			extendedFontPath = "nitro:/fonts/cyrillic.lz77";
-		} else if (strcmp(conf->guiLanguage, "el") == 0) {
-			extendedFont = IgmFont::greek;
-			extendedFontPath = "nitro:/fonts/greek.lz77";
-		} else if (strcmp(conf->guiLanguage, "ko") == 0) {
-			extendedFont = IgmFont::hangul;
-			extendedFontPath = "nitro:/fonts/hangul.lz77";
-		} else if (strcmp(conf->guiLanguage, "he") == 0) {
-			extendedFont = IgmFont::hebrew;
-			extendedFontPath = "nitro:/fonts/hebrew.lz77";
-			igmText->rtl = true;
-		} else if (strcmp(conf->guiLanguage, "ja") == 0 || strncmp(conf->guiLanguage, "zh", 2) == 0) {
-			extendedFont = IgmFont::kanaChinese;
-			extendedFontPath = "nitro:/fonts/kana_chinese.lz77";
-		}
-
-		FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
-		if (font) {
-			fread(lz77ImageBuffer, 1, 0x400, font);
-			LZ77_Decompress(lz77ImageBuffer, igmText->font);
-			fclose(font);
-		}
-		font = fopen(extendedFontPath, "rb");
-		if (font) {
-			fread(lz77ImageBuffer, 1, 0x400, font);
-			LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
-			fclose(font);
-		}
-
-		// Set In-Game Menu hotkey
-		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
-
-		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		ce7->igmHotkey = igmText->hotkey;
-
-		char path[40];
-		snprintf(path, sizeof(path), "nitro:/languages/%s/in_game_menu.ini", conf->guiLanguage);
-		easysave::ini lang(path);
-
-		setIgmString(lang.fetch("TITLES", "RAM_VIEWER", "RAM Viewer").c_str(), igmText->ramViewer);
-		setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
-		setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
-		setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
-
-		setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
-		setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);
-		setIgmString(lang.fetch("MENU", "SCREENSHOT", "Screenshot...").c_str(), igmText->menu[2]);
-		setIgmString(lang.fetch("MENU", "DUMP_RAM", "Dump RAM").c_str(), igmText->menu[3]);
-		setIgmString(lang.fetch("MENU", "OPTIONS", "Options...").c_str(), igmText->menu[4]);
-		// setIgmString(lang.fetch("MENU", "CHEATS", "Cheats...").c_str(), igmText->menu[5]);
-		setIgmString(lang.fetch("MENU", "RAM_VIEWER", "RAM Viewer...").c_str(), igmText->menu[5]);
-		setIgmString(lang.fetch("MENU", "QUIT_GAME", "Quit Game").c_str(), igmText->menu[6]);
-
-		setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->options[0]);
-		setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->options[1]);
-		setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->options[2]);
-		setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->options[3]);
-		setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->options[4]);
-		setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->options[5]);
-		setIgmString(lang.fetch("OPTIONS", "67_MHZ", "67 MHz").c_str(), igmText->options[6]);
-		setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->options[7]);
-		setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->options[8]);
-		setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->options[9]);
+		getIgmStrings(conf);
 
 		// Relocate
 		u32* addr = (u32*)INGAME_MENU_LOCATION;
