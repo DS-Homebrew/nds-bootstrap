@@ -111,7 +111,7 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 #ifndef B4DS
 static void printBattery(void) {
 	u8 batteryLevel = (u8)sharedAddr[6];
-	const unsigned char *bars = "\3\3";
+	const char *bars = "\3\3";
 	if (batteryLevel & BIT(7)) {
 		bars = "\6\6";	// Charging
 	} else {
@@ -133,7 +133,7 @@ static void printBattery(void) {
 				break;
 		}
 	}
-	print(0x20 - 4, 0x18 - 2, bars, 3);
+	print(0x20 - 4, 0x18 - 2, (const unsigned char *)bars, 3);
 }
 #endif
 
@@ -190,7 +190,7 @@ static void screenshot(void) {
 
 	// Use capture mode B if no banks are mapped for main engine
 	u8 captureMode = DCAP_MODE_B;
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i <= 6; i++) {
 		if(VRAM_x_CR(i) & 1)
 			captureMode = DCAP_MODE_A;
 	}
