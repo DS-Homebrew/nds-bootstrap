@@ -1398,8 +1398,6 @@ int arm7_main(void) {
 			}
 
 			if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
-				ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
-
 				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
 				patchGbaSlotInit_cont(ndsHeader, false, true);
 			}
