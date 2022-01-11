@@ -601,13 +601,13 @@ void dumpRam(void) {
 }
 
 void prepareScreenshot(void) {
-#ifdef TWLSDK
+#ifndef TWLSDK
 	if (valueBits & dsiMode) {
 #endif
 		driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
-#ifdef TWLSDK
+#ifndef TWLSDK
 	}
 #endif
 }
@@ -626,11 +626,11 @@ void saveScreenshot(void) {
 		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, !sdRead, -1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-#ifdef TWLSDK
+#ifndef TWLSDK
 	if (valueBits & dsiMode) {
 #endif
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
-#ifdef TWLSDK
+#ifndef TWLSDK
 	}
 #endif
 }
