@@ -1382,14 +1382,14 @@ int arm7_main(void) {
 			bannerSavPatch(ndsHeader);
 		}
 
-		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
-
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
 		extern void rsetPatchCache(bool dsiWare);
 		rsetPatchCache(true);
+
+		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		if (REG_SCFG_EXT == 0) {
 			if (!dsiWramAccess) {
