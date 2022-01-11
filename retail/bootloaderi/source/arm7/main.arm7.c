@@ -1350,7 +1350,16 @@ int arm7_main(void) {
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	if (!gameOnFlashcard && isDSiWare) {
-		tonccpy((char*)0x02FFC000, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
+		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
+
+		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x6000);
+		tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
+		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
+
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8000);
+		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 		if (*(u8*)0x02FFE1BF & BIT(0)) {
@@ -1366,10 +1375,15 @@ int arm7_main(void) {
 		}
 		*(u16*)0x4000500 = 0x807F;
 
+		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
+		patchHiHeapPointer(moduleParams, ndsHeader, false);
+
 		if (*(u8*)0x02FFE1BF & BIT(2)) {
-			ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 			bannerSavPatch(ndsHeader);
 		}
+
+		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -1379,8 +1393,6 @@ int arm7_main(void) {
 
 		if (REG_SCFG_EXT == 0) {
 			if (!dsiWramAccess) {
-				patchHiHeapPointer(moduleParams, ndsHeader, false);
-
 				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
 				patchA9Mbk(ndsHeader, moduleParams, true);
 			}
@@ -1422,10 +1434,16 @@ int arm7_main(void) {
 			patchOffsetCacheChanged = true;
 		}
 
+		extern bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		if (!a7PatchCardIrqEnable((cardengineArm7*)ce7Location, ndsHeader, moduleParams)) {
+			dbg_printf("ERR_LOAD_OTHR");
+			errorOutput();
+		}
+
 		toncset((u32*)0x02680000, 0, 0x100000);
 
 		errorCode = hookNdsRetailArm7(
-			(cardengineArm7*)NULL,
+			(cardengineArm7*)ce7Location,
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
@@ -1456,6 +1474,12 @@ int arm7_main(void) {
 			nocashMessage("Card hook failed");
 			errorOutput();
 		}
+
+		hookNdsRetailArm9Mini(
+			(cardengineArm9*)ce9Location,
+			moduleParams,
+			consoleModel
+		);
 
 		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 

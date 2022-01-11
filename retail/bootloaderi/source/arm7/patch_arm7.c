@@ -348,7 +348,7 @@ void patchPostBoot(const tNDSHeader* ndsHeader) {
 	}
 }
 
-static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = patchOffsetCache.a7CardIrqEnableOffset;
 	if (!patchOffsetCache.a7CardIrqEnableOffset) {
@@ -455,7 +455,7 @@ u32 patchCardNdsArm7(
 	}
 	toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 
-	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
+	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return 0;
 	}
 

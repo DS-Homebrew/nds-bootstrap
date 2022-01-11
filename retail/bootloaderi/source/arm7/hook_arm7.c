@@ -295,13 +295,13 @@ int hookNdsRetailArm7(
 	u32* ipcSyncHandler = hookLocation + 16;
 	//u32* ndma0Handler = hookLocation + 28;
 
-	if (ce7NotFound) {
-		u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
+	if (!ce7NotFound) {
+	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
 		intr_vblank_orig_return += 0x2FFC008;
 
 		*(u32*)intr_vblank_orig_return = *vblankHandler;
 		*vblankHandler = 0x2FFC008;
-	} else {
+	} else {*/
 		extern u32 iUncompressedSize;
 		extern u32 overlaysSize;
 
@@ -354,10 +354,11 @@ int hookNdsRetailArm7(
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
 		*vblankHandler = ce7->patches->vblankHandler;
-		if ((strncmp(romTid, "UOR", 3) == 0)
-		|| (strncmp(romTid, "UXB", 3) == 0)
-		|| (strncmp(romTid, "USK", 3) == 0)
-		|| (!gameOnFlashcard && !ROMinRAM)) {
+		if (ce7->patches->fifoHandler
+		&& ((strncmp(romTid, "UOR", 3) == 0)
+		 || (strncmp(romTid, "UXB", 3) == 0)
+		 || (strncmp(romTid, "USK", 3) == 0)
+		|| (!gameOnFlashcard && !ROMinRAM))) {
 			*ipcSyncHandler = ce7->patches->fifoHandler;
 			//*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
@@ -377,7 +378,7 @@ int hookNdsRetailArm7(
 	u32 cheatEngineOffset = (u32)ce7-0x8400;
 	u16 cheatSizeLimit = (ce7NotFound ? 0x1BF0 : 0x8000);
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
-	if (ce7NotFound) {
+	/*if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
 		cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		*(u32*)((u32)cheatDataOffset) = 0x22FFFCE4;
@@ -402,6 +403,9 @@ int hookNdsRetailArm7(
 			cheatSizeLimit -= 8;
 		}
 		*(cheatDataOffset + 3) = 0xCF;
+	}*/
+	if (!gameOnFlashcard && isDSiWare) {
+		cheatSizeLimit -= 0x10;
 	}
 
 	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
@@ -421,6 +425,25 @@ int hookNdsRetailArm7(
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, !sdRead, 0);
+		}
+		if (!gameOnFlashcard && isDSiWare) {
+			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
+			if (unpatchedFuncs->compressed_static_end) {
+				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->compressedFlagOffset;
+				cheatDataOffset += 4;
+				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->compressed_static_end;
+				cheatDataOffset += 4;
+				cheatSizeLimit -= 8;
+			}
+			if (unpatchedFuncs->ltd_compressed_static_end) {
+				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->iCompressedFlagOffset;
+				cheatDataOffset += 4;
+				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->ltd_compressed_static_end;
+				cheatDataOffset += 4;
+				cheatSizeLimit -= 8;
+			}
+			*(cheatDataOffset + 3) = 0xCF;
 		}
 	}
 

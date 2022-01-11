@@ -68,5 +68,6 @@ int hookNdsRetailArm9(
 	u8 enableExceptionHandler,
 	u8 consoleModel
 );
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const module_params_t* moduleParams, u8 consoleModel);
 
 #endif // HOOK_H

@@ -278,3 +278,29 @@ int hookNdsRetailArm9(
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;
 }
+
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const module_params_t* moduleParams, u8 consoleModel) {
+	ce9->consoleModel           = consoleModel;
+
+	extern u32 iUncompressedSize;
+
+    u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
+ 	if (!tableAddr) {
+		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
+	}
+   
+    if (!tableAddr) {
+		dbg_printf("ERR_HOOK_9\n");
+		return ERR_HOOK;
+	}
+    
+    dbg_printf("hookLocation arm9: ");
+	dbg_hexa((u32)tableAddr);
+	dbg_printf("\n\n");
+	patchOffsetCache.a9IrqHookOffset = tableAddr;
+
+    ce9->irqTable   = tableAddr;
+
+	nocashMessage("ERR_NONE");
+	return ERR_NONE;
+}

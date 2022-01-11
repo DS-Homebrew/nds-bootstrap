@@ -730,7 +730,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	return offset ? true : false;
 }
 
-static bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars - Fix white screen on boot
@@ -1213,7 +1213,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					*heapPointer = (u32)0x048020B8; /* MOVS R0, #0x2E00000 */
 					break;
 			}
-		} else {
+		} else if (gameOnFlashcard || !isDSiWare) {
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
@@ -1223,6 +1223,18 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 				case 0x048020BE:
 					*heapPointer = (u32)0x048020BB; /* MOVS R0, #0x2EC0000 */
+					break;
+			}
+		} else {
+			switch (*heapPointer) {
+				case 0x13A007BE:
+					*heapPointer = (u32)0x13A007BD; /* MOVNE R0, #0x2F40000 */
+					break;
+				case 0xE3A007BE:
+					*heapPointer = (u32)0xE3A007BD; /* MOV R0, #0x2F40000 */
+					break;
+				case 0x048020BE:
+					*heapPointer = (u32)0x048020BD; /* MOVS R0, #0x2F40000 */
 					break;
 			}
 		}
