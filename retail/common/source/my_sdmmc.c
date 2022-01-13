@@ -902,7 +902,7 @@ void sdmmc_init(void)
 	handleSD.clk = 0x20; // 523.655968 KHz
 	handleSD.devicenumber = 0;
 
-	*(vu16*)0x10006100 &= 0xF7FFu; //SDDATACTL32
+	/* *(vu16*)0x10006100 &= 0xF7FFu; //SDDATACTL32
 	*(vu16*)0x10006100 &= 0xEFFFu; //SDDATACTL32
 #ifdef DATA32_SUPPORT
 	*(vu16*)0x10006100 |= 0x402u; //SDDATACTL32
@@ -936,7 +936,7 @@ void sdmmc_init(void)
 #endif
 	*(vu16*)0x10006002 &= 0xFFFCu; ////SDPORTSEL
 	*(vu16*)0x10006026 = 512; //SDBLKLEN
-	*(vu16*)0x10006008 = 0; //SDSTOP
+	*(vu16*)0x10006008 = 0; //SDSTOP */
 }
 
 int SD_Init(void)
