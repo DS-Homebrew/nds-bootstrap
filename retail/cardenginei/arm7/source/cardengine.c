@@ -406,6 +406,7 @@ void reset(void) {
 
 	#ifndef TWLSDK
 	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
 
 		u32 iUncompressedSize = 0;
@@ -420,6 +421,8 @@ void reset(void) {
 		while (ndmaBusy(0) || ndmaBusy(1));
 	}
 	#else
+	driveInitialize();
+
 	u32 iUncompressedSize = 0;
 	u32 iUncompressedSizei = 0;
 	u32 newArm7binarySize = 0;
