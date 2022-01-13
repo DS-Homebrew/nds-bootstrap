@@ -549,7 +549,7 @@ cardReadRef13:
 @---------------------------------------------------------------------------------
 reset_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
+    stmfd   sp!, {r2-r11,lr}
 
 	ldr		r6, cardReadRefRes
     ldr     r7, ce9locationRes
@@ -558,7 +558,7 @@ reset_arm9:
 	bl		_blx_r6_stub_reset	
     
 
-	ldmfd   sp!, {r1-r11,pc}
+	ldmfd   sp!, {r2-r11,pc}
 _blx_r6_stub_reset:
 	bx	r6	
 .pool

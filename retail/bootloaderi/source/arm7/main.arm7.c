@@ -1376,7 +1376,6 @@ int arm7_main(void) {
 		*(u16*)0x4000500 = 0x807F;
 
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
-		patchHiHeapPointer(moduleParams, ndsHeader, false);
 
 		if (*(u8*)0x02FFE1BF & BIT(2)) {
 			bannerSavPatch(ndsHeader);
@@ -1388,8 +1387,13 @@ int arm7_main(void) {
 		extern void rsetPatchCache(bool dsiWare);
 		rsetPatchCache(true);
 
+		patchHiHeapPointer(moduleParams, ndsHeader, false);
+
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
+
+		extern void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader);
+		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader);
 
 		if (REG_SCFG_EXT == 0) {
 			if (!dsiWramAccess) {
@@ -1422,15 +1426,15 @@ int arm7_main(void) {
 				extern void patchPostBoot(const tNDSHeader* ndsHeader);
 				patchPostBoot(ndsHeader);
 			}
-
-			extern void patchScfgExt(const tNDSHeader* ndsHeader);
-			patchScfgExt(ndsHeader);
 		} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 			extern void rsetA7Cache(void);
 			rsetA7Cache();
 			patchOffsetCache.a7BinSize = newArm7binarySize;
 			patchOffsetCacheChanged = true;
 		}
+
+		extern void patchScfgExt(const tNDSHeader* ndsHeader);
+		patchScfgExt(ndsHeader);
 
 		extern bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		if (!a7PatchCardIrqEnable((cardengineArm7*)ce7Location, ndsHeader, moduleParams)) {
@@ -1483,6 +1487,30 @@ int arm7_main(void) {
 
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+		}
+
+		extern u32 iUncompressedSize;
+		extern u32 iUncompressedSizei;
+		if (consoleModel > 0) {
+			tonccpy((char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, iUncompressedSize);
+			tonccpy((char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, newArm7binarySize);
+			tonccpy((char*)(*(u32*)0x02FFE1C8)+0xB000000, (u32*)*(u32*)0x02FFE1C8, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC));
+			tonccpy((char*)(*(u32*)0x02FFE1D8)+0xB000000, (u32*)*(u32*)0x02FFE1D8, newArm7ibinarySize);
+			*(u32*)0x0DFFE02C = iUncompressedSize;
+			*(u32*)0x0DFFE03C = newArm7binarySize;
+			*(u32*)0x0DFFE1CC = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
+			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
+		} else {
+			aFile pageFile = getFileFromCluster(pageFileCluster);
+
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC), !sdRead, -1);
+			fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, -1);
+			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x3FFFF8, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, -1);
 		}
 	} else {
 		const char* romTid = getRomTid(ndsHeader);
@@ -1842,10 +1870,7 @@ int arm7_main(void) {
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	}
 
-	if ((!ROMsupportsDsiMode(ndsHeader) && !dsiModeConfirmed)
-	/*|| (ROMsupportsDsiMode(ndsHeader) && !gameOnFlashcard)*/) {
-		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}
+	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 
 	startBinary_ARM7();
 

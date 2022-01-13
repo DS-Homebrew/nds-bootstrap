@@ -1097,7 +1097,14 @@ void myIrqHandlerVBlank(void) {
 	}else{
 		swapTimer = 0;
 	}
-	
+
+#ifdef TWLSDK
+	if (sharedAddr[3] == (vu32)0x54495845) {
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);
+	}
+#endif
+
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
 			returnToLoader();

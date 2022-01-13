@@ -238,6 +238,9 @@ static const u32 resetSignature5Alt4[4] = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0
 static const u32 resetConstant[1]       = {RESET_PARAM};
 static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
+// Reset (TWL)
+static const u32 resetTwlEndSignature[2] = {0xE8BD8008, 0x02FFE230};
+
 // MBK WRAM set
 static const u32 mbkWramBCGetSignature[1]      = {0xE59F1018};
 static const u16 mbkWramBCGetSignatureThumb[1] = {0x4804};
@@ -2616,6 +2619,25 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 	dbg_printf("\n");
 	return resetOffset;
+}
+
+u32* findResetTwlOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findResetTwlOffset\n");
+	
+    u32 offset = (u32)findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		resetTwlEndSignature, 2
+	);
+
+	if (offset) {
+		offset -= 4;
+		dbg_printf("Reset (TWL) found\n");
+	} else {
+		dbg_printf("Reset (TWL) not found\n");
+	}
+
+	dbg_printf("\n");
+	return (u32)offset;
 }
 
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

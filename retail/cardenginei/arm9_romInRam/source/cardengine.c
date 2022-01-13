@@ -450,10 +450,28 @@ void __attribute__((target("arm"))) resetMpu(void) {
 	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
 }
 
-void reset(u32 param) {
+void reset(u32 param, u32 tid2) {
 	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	*(u32*)resetParam = param;
-	if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
+	if (ndsHeader->unitCode == 0 || *(u32*)0x02FFE234 != 0x00030004) {
+		*(u32*)resetParam = param;
+	}
+	if (ndsHeader->unitCode > 0 && *(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+		if (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
+			if (ce9->consoleModel < 2) {
+				// Make screens white
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+				waitFrames(5);	// Wait for DSi screens to stabilize
+			}
+			enterCriticalSection();
+			cacheFlush();
+			sharedAddr[3] = 0x54495845;
+			while (1);
+		} else {
+			sysSetCardOwner(false);	// Give Slot-1 access to arm7
+			sharedAddr[3] = 0x52534554;
+		}
+	} else if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
@@ -582,7 +600,11 @@ void myIrqHandlerIPC(void) {
 				}
 				if (sharedAddr[3] == 0x52534554) {
 					igmReset = true;
-					reset(0);
+					if (ndsHeader->unitCode > 0 && *(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+						reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+					} else {
+						reset(0, 0);
+					}
 				}
 			}
 		}

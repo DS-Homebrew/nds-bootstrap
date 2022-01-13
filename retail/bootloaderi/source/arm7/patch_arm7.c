@@ -121,20 +121,25 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
-		*(u16*)0x2EFFFD0 = 0x0101;
-		//*(u16*)0x2EFFFD4 = 0x0187;
-		//*(u16*)0x2EFFFD6 = 0;
-		*(u32*)0x2EFFFD8 = 0x93FFFB06;
-		//*(u16*)0x2EFFFF0 = 1;
-		//*(u16*)0x2EFFFF4 = 0;
+		u32 scfgLoc = 0x2EFFFD0;
+		if (!gameOnFlashcard && isDSiWare) {
+			scfgLoc = 0x2F7FFD0;
+		}
 
-		scfgExtOffset[0] = 0x2EFFFD8;
-		//scfgExtOffset[1] = 0x2EFFFF0;
-		//scfgExtOffset[2] = 0x2EFFFD4;
-		//scfgExtOffset[4] = 0x2EFFFF4;
-		scfgExtOffset[5] = 0x2EFFFD0;
-		scfgExtOffset[6] = 0x2EFFFD1;
-		//scfgExtOffset[7] = 0x2EFFFD6;
+		*(u16*)(scfgLoc+0x00) = 0x0101;
+		//*(u16*)(scfgLoc+0x04) = 0x0187;
+		//*(u16*)(scfgLoc+0x06) = 0;
+		*(u32*)(scfgLoc+0x08) = 0x93FFFB06;
+		//*(u16*)(scfgLoc+0x20) = 1;
+		//*(u16*)(scfgLoc+0x24) = 0;
+
+		scfgExtOffset[0] = scfgLoc+0x08;
+		//scfgExtOffset[1] = scfgLoc+0x20;
+		//scfgExtOffset[2] = scfgLoc+0x04;
+		//scfgExtOffset[4] = scfgLoc+0x24;
+		scfgExtOffset[5] = scfgLoc+0x00;
+		scfgExtOffset[6] = scfgLoc+0x01;
+		//scfgExtOffset[7] = scfgLoc+0x06;
 	}
 
     dbg_printf("SCFG_EXT location : ");

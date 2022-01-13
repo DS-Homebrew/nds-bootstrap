@@ -953,9 +953,9 @@ void __attribute__((target("arm"))) resetMpu(void) {
 	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
 }
 
-void reset(u32 param) {
-	*(u32*)RESET_PARAM_SDK5 = param;
+void reset(u32 param, u32 tid2) {
 #ifndef TWLSDK
+	*(u32*)RESET_PARAM_SDK5 = param;
 	if ((ce9->valueBits & slowSoftReset) || *(u32*)(RESET_PARAM_SDK5+0xC) > 0) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
@@ -974,7 +974,25 @@ void reset(u32 param) {
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
-	sharedAddr[3] = 0x52534554;
+	if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+		if (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
+			if (ce9->consoleModel < 2) {
+				// Make screens white
+				SetBrightness(0, 31);
+				SetBrightness(1, 31);
+				waitFrames(5);	// Wait for DSi screens to stabilize
+			}
+			enterCriticalSection();
+			cacheFlush();
+			sharedAddr[3] = 0x54495845;
+			while (1);
+		} else {
+			sharedAddr[3] = 0x52534554;
+		}
+	} else {
+		*(u32*)RESET_PARAM_SDK5 = param;
+		sharedAddr[3] = 0x52534554;
+	}
 #endif
 
 	register int i, reg;
@@ -1105,7 +1123,15 @@ void myIrqHandlerIPC(void) {
 			(*inGameMenu)(&mainScreen);
 			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
-				reset(0);
+#ifdef TWLSDK
+				if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+				} else {
+#endif
+					reset(0, 0);
+#ifdef TWLSDK
+				}
+#endif
 			}
 		}
 			break;

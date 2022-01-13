@@ -30,6 +30,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
+#include "ndma.h"
 #include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
@@ -104,7 +105,7 @@ static bool volumeAdjustActivated = false;
 
 bool returnToMenu = false;
 
-//static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 
 static void unlaunchSetFilename(bool boot) {
@@ -256,6 +257,88 @@ void restoreBakData(void) {
 	i2cWriteRegister(0x4A, 0x12, 0x01);
 }
 
+void reset(void) {
+	register int i, reg;
+	
+	REG_IME = 0;
+
+	for (i = 0; i < 16; i++) {
+		SCHANNEL_CR(i) = 0;
+		SCHANNEL_TIMER(i) = 0;
+		SCHANNEL_SOURCE(i) = 0;
+		SCHANNEL_LENGTH(i) = 0;
+	}
+
+	REG_SOUNDCNT = 0;
+
+	// Clear out ARM7 DMA channels and timers
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	REG_IE = 0;
+	REG_IF = ~0;
+	REG_AUXIE = 0;
+	REG_AUXIF = ~0;
+	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	initialized = false;
+	languageTimer = 0;
+
+	if (consoleModel > 0) {
+		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFFE02C);
+		ndmaCopyWordsAsynch(1, (char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, *(u32*)0x0DFFE03C);
+		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, *(u32*)0x02FFE1C8, *(u32*)0x0DFFE1CC);
+		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, *(u32*)0x02FFE1D8, *(u32*)0x0DFFE1DC);
+		while (ndmaBusy(0) || ndmaBusy(1) || ndmaBusy(2) || ndmaBusy(3));
+	} else {
+		bakData();
+
+		driveInitialize();
+
+		u32 iUncompressedSize = 0;
+		u32 iUncompressedSizei = 0;
+		u32 newArm7binarySize = 0;
+		u32 newArm7ibinarySize = 0;
+
+		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, 0);
+		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
+		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
+		fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
+		fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, 0);
+
+		restoreBakData();
+	}
+	sharedAddr[0] = 0x44414F4C; // 'LOAD'
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
+	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	// Start ARM7
+	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+	arm7code();
+}
+
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = 0;
@@ -395,6 +478,11 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
+	if (sharedAddr[3] == (vu32)0x54495845) {
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);
+	}
+
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
 			returnToLoader();
@@ -417,6 +505,10 @@ void myIrqHandlerVBlank(void) {
 		ramDumpTimer++;
 	} else {
 		ramDumpTimer = 0;
+	}
+
+	if (sharedAddr[3] == (vu32)0x52534554) {
+		reset();
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {

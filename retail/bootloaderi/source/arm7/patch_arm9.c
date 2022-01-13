@@ -686,10 +686,10 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-    u32* reset = patchOffsetCache.resetOffset;
+	u32* reset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
-		reset = findResetOffset(ndsHeader,moduleParams);
+		reset = findResetOffset(ndsHeader, moduleParams);
 		if (reset) patchOffsetCache.resetOffset = reset;
 		patchOffsetCache.resetChecked = true;
 	}
@@ -699,6 +699,30 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		u32* resetPatch = ce9->patches->reset_arm9;
 		tonccpy(reset, resetPatch, 0x40);
 		dbg_printf("reset location : ");
+		dbg_hexa((u32)reset);
+		dbg_printf("\n\n");
+	}
+}
+
+void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {    
+	if (!isDSiWare) {
+		return;
+	}
+
+	u32* reset = patchOffsetCache.resetTwlOffset;
+
+    if (!patchOffsetCache.resetTwlChecked) {
+		reset = findResetTwlOffset(ndsHeader);
+		if (reset) patchOffsetCache.resetTwlOffset = reset;
+		patchOffsetCache.resetTwlChecked = true;
+	}
+
+	if (reset) {
+		extern u32 generateA7Instr(int arg1, int arg2);
+
+		// Patch
+		*reset = generateA7Instr((int)reset, (int)ce9->patches->reset_arm9);
+		dbg_printf("resetTwl location : ");
 		dbg_hexa((u32)reset);
 		dbg_printf("\n\n");
 	}
@@ -2045,6 +2069,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchReset(ce9, ndsHeader, moduleParams);
+	patchResetTwl(ce9, ndsHeader);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch(ndsHeader);
