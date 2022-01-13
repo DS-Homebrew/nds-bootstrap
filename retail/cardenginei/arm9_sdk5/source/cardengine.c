@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -1032,6 +1033,35 @@ void reset(u32 param, u32 tid2) {
 	IPC_SYNC_hooked = false;
 
 #ifdef TWLSDK
+	if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+		REG_DISPSTAT = 0;
+		REG_DISPCNT = 0;
+
+		VRAM_A_CR = 0x80;
+		VRAM_B_CR = 0x80;
+		VRAM_C_CR = 0x80;
+		VRAM_D_CR = 0x80;
+		VRAM_E_CR = 0x80;
+		VRAM_F_CR = 0x80;
+		VRAM_G_CR = 0x80;
+		VRAM_H_CR = 0x80;
+		VRAM_I_CR = 0x80;
+		BG_PALETTE[0] = 0xFFFF;
+		BG_PALETTE_SUB[0] = 0xFFFF;
+
+		toncset(VRAM, 0, 0xC0000); // Clear VRAM
+
+		VRAM_A_CR = 0;
+		VRAM_B_CR = 0;
+		VRAM_C_CR = 0;
+		VRAM_D_CR = 0;
+		VRAM_E_CR = 0;
+		VRAM_F_CR = 0;
+		VRAM_G_CR = 0;
+		VRAM_H_CR = 0;
+		VRAM_I_CR = 0;
+	}
+
 	#ifndef DLDI
 	if (ce9->consoleModel == 0) {
 		resetSlots();

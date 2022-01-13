@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <nds/ndstypes.h>
+#include <nds/arm9/video.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -135,6 +136,33 @@ void reset(u32 tid1, u32 tid2) {
 	REG_IPC_FIFO_CR = 0;
 
 	IPC_SYNC_hooked = false;
+
+	REG_DISPSTAT = 0;
+	REG_DISPCNT = 0;
+
+	VRAM_A_CR = 0x80;
+	VRAM_B_CR = 0x80;
+	VRAM_C_CR = 0x80;
+	VRAM_D_CR = 0x80;
+	VRAM_E_CR = 0x80;
+	VRAM_F_CR = 0x80;
+	VRAM_G_CR = 0x80;
+	VRAM_H_CR = 0x80;
+	VRAM_I_CR = 0x80;
+	BG_PALETTE[0] = 0xFFFF;
+	BG_PALETTE_SUB[0] = 0xFFFF;
+
+	toncset(VRAM, 0, 0xC0000); // Clear VRAM
+
+	VRAM_A_CR = 0;
+	VRAM_B_CR = 0;
+	VRAM_C_CR = 0;
+	VRAM_D_CR = 0;
+	VRAM_E_CR = 0;
+	VRAM_F_CR = 0;
+	VRAM_G_CR = 0;
+	VRAM_H_CR = 0;
+	VRAM_I_CR = 0;
 
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
