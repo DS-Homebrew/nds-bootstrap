@@ -878,6 +878,138 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020346D0 = 0xE1A00000; // nop
 	}
 
+	// Castle Conqueror (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KCNE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201D8B8 = 0xE1A00000; // nop
+		*(u32*)0x0201D8BC = 0xE1A00000; // nop
+		*(u32*)0x0201D8C8 = 0xE1A00000; // nop
+		*(u32*)0x0201DA28 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201DA84, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x0201ECBC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02021FA4 = 0xE1A00000; // nop
+		*(u32*)0x02024740 = 0xE1A00000; // nop
+		*(u32*)0x02027A00 = 0xE1A00000; // nop
+		*(u32*)0x0202B438 = 0xE1A00000; // nop
+		*(u32*)0x0204AFD8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204B084 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204B44C = 0xE12FFF1E; // bx lr
+	}
+
+	// Castle Conqueror (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KCNP") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02016340 = 0xE1A00000; // nop
+		*(u32*)0x02019694 = 0xE1A00000; // nop
+		*(u32*)0x0201D330 = 0xE1A00000; // nop
+		*(u32*)0x0201F0CC = 0xE1A00000; // nop
+		*(u32*)0x0201F0D0 = 0xE1A00000; // nop
+		*(u32*)0x0201F0DC = 0xE1A00000; // nop
+		*(u32*)0x0201F23C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F298, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x020204E0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023960 = 0xE1A00000; // nop
+		*(u32*)0x0203A5A4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203A7D4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203AB6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203B134 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203BA14 = 0xE12FFF1E; // bx lr
+	}
+
+	// Castle Conqueror: Against (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KQNE") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x02015B2C = 0xE1A00000; // nop
+		*(u32*)0x02018DA4 = 0xE1A00000; // nop
+		*(u32*)0x0201CE90 = 0xE1A00000; // nop
+		*(u32*)0x0201EC3C = 0xE1A00000; // nop
+		*(u32*)0x0201EC40 = 0xE1A00000; // nop
+		*(u32*)0x0201EC4C = 0xE1A00000; // nop
+		*(u32*)0x0201EDAC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201EE08, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x020200E4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023594 = 0xE1A00000; // nop
+		*(u32*)0x0206ACC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206AEC8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Castle Conqueror: Against (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KQNV") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x02015B2C = 0xE1A00000; // nop
+		*(u32*)0x02018E0C = 0xE1A00000; // nop
+		*(u32*)0x0201CEF8 = 0xE1A00000; // nop
+		*(u32*)0x0201ECA4 = 0xE1A00000; // nop
+		*(u32*)0x0201ECA8 = 0xE1A00000; // nop
+		*(u32*)0x0201ECB4 = 0xE1A00000; // nop
+		*(u32*)0x0201EE14 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201EE70, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x0202014C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020235FC = 0xE1A00000; // nop
+		*(u32*)0x02041BF8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02041DFC = 0xE12FFF1E; // bx lr
+	}
+
+	// Castle Conqueror: Heroes (Europe, Australia)
+	else if (strcmp(romTid, "KC5V") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02017670 = 0xE1A00000; // nop
+		*(u32*)0x0201AAA8 = 0xE1A00000; // nop
+		*(u32*)0x0201E680 = 0xE1A00000; // nop
+		*(u32*)0x020204FC = 0xE1A00000; // nop
+		*(u32*)0x02020500 = 0xE1A00000; // nop
+		*(u32*)0x0202050C = 0xE1A00000; // nop
+		*(u32*)0x0202066C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020206C8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020207FC = 0x022C9BA0;
+		*(u32*)0x02021994 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202465C = 0xE1A00000; // nop
+	}
+
+	// Castle Conqueror: Heroes 2 (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KXCV") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02013170 = 0xE1A00000; // nop
+		*(u32*)0x020164C4 = 0xE1A00000; // nop
+		*(u32*)0x0201A118 = 0xE1A00000; // nop
+		*(u32*)0x0201BEB4 = 0xE1A00000; // nop
+		*(u32*)0x0201BEB8 = 0xE1A00000; // nop
+		*(u32*)0x0201BEC4 = 0xE1A00000; // nop
+		*(u32*)0x0201C024 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C080, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x0201D2C8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020710 = 0xE1A00000; // nop
+	}
+
+	// Castle Conqueror: Revolution (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KQNV") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x02015B4C = 0xE1A00000; // nop
+		*(u32*)0x02018E2C = 0xE1A00000; // nop
+		*(u32*)0x0201CF18 = 0xE1A00000; // nop
+		*(u32*)0x0201ECC4 = 0xE1A00000; // nop
+		*(u32*)0x0201ECC8 = 0xE1A00000; // nop
+		*(u32*)0x0201ECD4 = 0xE1A00000; // nop
+		*(u32*)0x0201EE34 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C080, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x020201DC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202368C = 0xE1A00000; // nop
+		*(u32*)0x02066CA8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
