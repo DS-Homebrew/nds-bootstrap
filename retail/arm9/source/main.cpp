@@ -18,6 +18,7 @@
 #include "configuration.h"
 #include "nds_loader_arm9.h"
 #include "conf_sd.h"
+#include "version.h"
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
@@ -152,6 +153,7 @@ static inline void debugConfB4DS(configuration* conf) {
 }
 
 static inline void debugConf(configuration* conf) {
+	dbg_printf("version: " VER_NUMBER "\n");
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
