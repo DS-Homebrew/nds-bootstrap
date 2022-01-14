@@ -52,7 +52,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020051F6 = branchCode[1];
 	}
 
-	if (dsiSD) {
+	else if (dsiSD) {
 		return;
 	}
 
@@ -106,6 +106,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Aura-Aura Climber (Europe, Australia)
 	else if (strcmp(romTid, "KSRV") == 0) {
 		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Bomberman Blitz (USA)
+	else if (strcmp(romTid, "KBBE") == 0) {
+		*(u32*)0x02043528 = 0xE3A00001; // mov r0, #1
+	}
+
+	// Bomberman Blitz (Europe, Australia)
+	else if (strcmp(romTid, "KBBV") == 0) {
+		*(u32*)0x020435F4 = 0xE3A00001; // mov r0, #1
 	}
 
 	// Brain Challenge (USA)
