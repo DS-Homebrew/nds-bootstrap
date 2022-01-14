@@ -153,7 +153,6 @@ static inline void debugConfB4DS(configuration* conf) {
 }
 
 static inline void debugConf(configuration* conf) {
-	dbg_printf("version: " VER_NUMBER "\n");
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
@@ -359,6 +358,7 @@ static int runNdsFile(configuration* conf) {
 		remove(logFilePath);
 	}
 
+	dbg_printf("version: " VER_NUMBER "\n");
 	(dsiFeatures() && !conf->b4dsMode) ? debugConf(conf) : debugConfB4DS(conf);
 
 	if ((!extention(conf->ndsPath, ".nds"))
