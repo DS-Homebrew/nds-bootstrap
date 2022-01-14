@@ -1036,6 +1036,7 @@ void reset(u32 param, u32 tid2) {
 	if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
+		REG_DISPCNT_SUB = 0;
 
 		VRAM_A_CR = 0x80;
 		VRAM_B_CR = 0x80;
@@ -1046,9 +1047,9 @@ void reset(u32 param, u32 tid2) {
 		VRAM_G_CR = 0x80;
 		VRAM_H_CR = 0x80;
 		VRAM_I_CR = 0x80;
-		BG_PALETTE[0] = 0xFFFF;
-		BG_PALETTE_SUB[0] = 0xFFFF;
 
+		toncset16(BG_PALETTE, 0, 256); // Clear palettes
+		toncset16(BG_PALETTE_SUB, 0, 256);
 		toncset(VRAM, 0, 0xC0000); // Clear VRAM
 
 		VRAM_A_CR = 0;
