@@ -728,14 +728,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (cebin) {
 			char sdmcText[4] = {'s','d','m','c'};
 			fread((u8*)0x02EFF000, 1, 0x400, cebin);
-			u8 sdAccessBits = 0;
-			if (accessControl & BIT(13)) {
-				sdAccessBits |= BIT(2);
-			}
-			if (accessControl & BIT(14)) {
-				sdAccessBits |= BIT(1);
-			}
-			toncset((u8*)0x02EFF002, sdAccessBits, 1);
 			if (conf->sdNand) {
 				//*(u8*)0x02EFF055 = 0; // nand
 				//*(u8*)0x02EFF0A9 = 0; // nand2
