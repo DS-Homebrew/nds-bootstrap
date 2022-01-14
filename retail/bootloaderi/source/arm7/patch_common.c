@@ -110,12 +110,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0) {
-		*(u32*)0x02043528 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0
 	}
 
 	// Bomberman Blitz (Europe, Australia)
 	else if (strcmp(romTid, "KBBV") == 0) {
-		*(u32*)0x020435F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0
 	}
 
 	// Brain Challenge (USA)
