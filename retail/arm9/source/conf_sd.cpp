@@ -435,7 +435,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	FILE* cebin = NULL;
 	FILE* donorNdsFile = NULL;
 	bool donorLoaded = false;
-	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)) && strncmp(romTid, "KQO", 3) != 0)
+	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)))
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 	bool dsiEnhancedMbk = false;
 
