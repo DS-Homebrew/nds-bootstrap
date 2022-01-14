@@ -148,6 +148,9 @@ int hookNdsRetailArm7(
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
 	if (!handlerLocation && !ce7NotFound) {
 		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
+		if (!handlerLocation && ndsHeader->unitCode == 0x03) {
+			handlerLocation = findIrqHandlerOffset((u32*)__DSiHeader->arm7idestination, newArm7ibinarySize);
+		}
 		if (handlerLocation) {
 			patchOffsetCache.a7IrqHandlerOffset = handlerLocation;
 		}
@@ -253,9 +256,6 @@ int hookNdsRetailArm7(
 					hookLocation = (u32*)0x2392E74;
 					break;
 			}
-			if (!hookLocation) {
-				hookLocation = findIrqListOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
-			}
 			if (!hookLocation && ndsHeader->unitCode == 3) {
 				switch (newArm7ibinarySize) {
 					case 0x6AFD4:
@@ -265,6 +265,9 @@ int hookNdsRetailArm7(
 						hookLocation = (u32*)0x2EE5E10;
 						break;
 				}
+			}
+			if (!hookLocation) {
+				hookLocation = findIrqListOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 			}
 			if (!hookLocation && ndsHeader->unitCode == 3) {
 				dbg_printf("ERR_HOOK\n");

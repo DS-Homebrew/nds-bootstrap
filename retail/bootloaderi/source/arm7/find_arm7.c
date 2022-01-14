@@ -1114,6 +1114,32 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
+	if (!cardIrqEnableOffset && ndsHeader->unitCode == 0x03) {
+		// SDK 5
+		cardIrqEnableOffset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+            irqEnableStartSignature4Alt, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable alt (ARM7i) found\n");
+		} else {
+			dbg_printf("irq enable alt (ARM7i) not found\n");
+		}
+	}
+
+	if (!cardIrqEnableOffset && ndsHeader->unitCode == 0x03) {
+		// SDK 5
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+            irqEnableStartSignatureThumb5, 5
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb (ARM7i) found\n");
+		} else {
+			dbg_printf("irq enable thumb (ARM7i) not found\n");
+		}
+	}
+
 	dbg_printf("\n");
 	return cardIrqEnableOffset;
 }
