@@ -312,14 +312,14 @@ void reset(void) {
 		u32 newArm7binarySize = 0;
 		u32 newArm7ibinarySize = 0;
 
-		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
-		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
-		fileRead((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, 0);
-		fileRead((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, 0);
 		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
 		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
 		fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
-		fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, 0);
+		fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, 0);
 
 		restoreBakData();
 	}
@@ -409,7 +409,7 @@ void dumpRam(void) {
 void prepareScreenshot(void) {
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 }
 
 void saveScreenshot(void) {
@@ -426,7 +426,7 @@ void saveScreenshot(void) {
 		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, !sdRead, -1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 }
 
 void myIrqHandlerVBlank(void) {

@@ -234,7 +234,6 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x5A000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023DB000, 0, 0x25000);		// clear part of EWRAM
-	toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
@@ -1291,6 +1290,7 @@ int arm7_main(void) {
 		}
 	} else {
 		toncset((u32*)0x02400000, 0, 0x20);
+		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 		toncset((u32*)0x02E80000, 0, 0x800);
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
@@ -1507,12 +1507,12 @@ int arm7_main(void) {
 
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
 			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
 			fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC), !sdRead, -1);
-			fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, -1);
-			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x3FFFF8, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, -1);
+			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x5FFFF8, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
 		}
 	} else {
 		const char* romTid = getRomTid(ndsHeader);
@@ -1807,13 +1807,13 @@ int arm7_main(void) {
 			sdRead = dsiSD;
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
 			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, -1);
-				fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, -1);
-				fileWrite((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, -1);
-				fileWrite((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, -1);
+				fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, -1);
+				fileWrite((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), !sdRead, -1);
+				fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
 			}
 			sdRead = (gameOnFlashcard ? false : dsiSD);
 		} else {

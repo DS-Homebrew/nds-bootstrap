@@ -411,8 +411,8 @@ void reset(void) {
 
 		u32 iUncompressedSize = 0;
 		u32 newArm7binarySize = 0;
-		fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
-		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
+		fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
 		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
 		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
 	} else {
@@ -429,14 +429,14 @@ void reset(void) {
 	u32 newArm7ibinarySize = 0;
 
 	sdRead = (valueBits & b_dsiSD);
-	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&iUncompressedSizei, pageFile, 0x3FFFF8, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&newArm7ibinarySize, pageFile, 0x3FFFFC, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, 0);
 	fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
 	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
 	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
-	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x380000, newArm7ibinarySize, !sdRead, 0);
+	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, 0);
 	#endif
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
@@ -598,7 +598,7 @@ void dumpRam(void) {
 	} else {
 		// Dump RAM used in DS mode
 		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
+		fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
 	}
 	sharedAddr[3] = 0;
 }
@@ -609,7 +609,7 @@ void prepareScreenshot(void) {
 #endif
 		driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
-		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 #ifndef TWLSDK
 	}
 #endif
@@ -632,7 +632,7 @@ void saveScreenshot(void) {
 #ifndef TWLSDK
 	if (valueBits & dsiMode) {
 #endif
-		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x400000, 0x40000, !sdRead, -1);
+		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 #ifndef TWLSDK
 	}
 #endif

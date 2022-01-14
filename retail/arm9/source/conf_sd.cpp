@@ -32,6 +32,8 @@
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
+#define twlPageFileSize 0x600000
+
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
@@ -894,7 +896,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-		fseek(cebin, (conf->dsiMode ? 0x440000 : 0x400000) - 1, SEEK_SET);
+		fseek(cebin, twlPageFileSize - 1, SEEK_SET);
 		fputc('\0', cebin);
 		fclose(cebin);
 
@@ -966,22 +968,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
-	if (!found) {
-		consoleDemoInit();
-		iprintf("Creating pagefile.sys\n");
-		iprintf("Please wait...\n");
-	}
-
-	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-	fseek(cebin, 0x440000 - 1, SEEK_SET);
-	fputc('\0', cebin);
-	fclose(cebin);
-
-	if (!found) {
-		consoleClear();
-	}
-
 	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
@@ -1000,6 +986,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 	fclose(cebin);
+
+	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+	if (!found) {
+		consoleDemoInit();
+		iprintf("Creating pagefile.sys\n");
+		iprintf("Please wait...\n");
+	}
+
+	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+	fseek(cebin, twlPageFileSize - 1, SEEK_SET);
+	fputc('\0', cebin);
+	fclose(cebin);
+
+	if (!found) {
+		consoleClear();
+	}
   }
 
 	// Load DS blowfish
