@@ -39,8 +39,18 @@ extern bool logging;
 extern bool gbaRomFound;
 extern u8 dsiSD;
 
-void dsiWarePatch(const tNDSHeader* ndsHeader) {
+void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
+
+	// DS WiFi Settings
+	if (strcmp(romTid, "B88A") == 0) {
+		tonccpy((void*)0x023C0000, ce9->thumbPatches->reset_arm9, 0x18);
+
+		const u16* branchCode = generateA7InstrThumb(0x020051F4, 0x023C0000);
+
+		*(u16*)0x020051F4 = branchCode[0];
+		*(u16*)0x020051F6 = branchCode[1];
+	}
 
 	if (dsiSD) {
 		return;
@@ -299,9 +309,9 @@ void dsiWarePatch(const tNDSHeader* ndsHeader) {
 	}
 }
 
-void patchBinary(const tNDSHeader* ndsHeader) {
+void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	if (ndsHeader->unitCode == 3) {
-		dsiWarePatch(ndsHeader);
+		dsiWarePatch(ce9, ndsHeader);
 		return;
 	}
 

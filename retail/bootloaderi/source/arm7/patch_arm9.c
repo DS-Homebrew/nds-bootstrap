@@ -1568,6 +1568,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *thumbIrqEnableLocation = current_location;
 
+    u32* thumbResetLocation = findOffset((u32*)current_location, size, location_sig, 1);
+	if (!thumbResetLocation) {
+		return;
+	}
+    dbg_printf("thumbResetLocation ");
+	dbg_hexa((u32)thumbResetLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*thumbResetLocation);
+    dbg_printf("\n\n");
+
+    *thumbResetLocation = current_location;
+
     u32* pdashReadLocation = findOffset((u32*)current_location, size, location_sig, 1);
 	if (!pdashReadLocation) {
 		return;
@@ -1668,6 +1680,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->cart_read = (u32*)((u32)ce9->patches->cart_read - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
     ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
+    ce9->thumbPatches->reset_arm9 = (u32*)((u32)ce9->thumbPatches->reset_arm9 - default_location + current_location);
 }
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

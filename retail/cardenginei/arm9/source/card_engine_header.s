@@ -88,6 +88,7 @@ thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
 thumbSleepRef:
 .word   0x0 @sleepRef
+.word   reset_arm9
 
 	.thumb
 @---------------------------------------------------------------------------------

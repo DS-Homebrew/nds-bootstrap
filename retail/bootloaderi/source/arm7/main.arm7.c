@@ -1377,6 +1377,8 @@ int arm7_main(void) {
 
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
+		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
+
 		if (*(u8*)0x02FFE1BF & BIT(2)) {
 			bannerSavPatch(ndsHeader);
 		}
@@ -1688,7 +1690,7 @@ int arm7_main(void) {
 		fileRead(&clonebootFlag, *romFile, ndsHeader->romSize, sizeof(u32), !sdRead, -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 
-		patchBinary(ndsHeader);
+		patchBinary((cardengineArm9*)ce9Location, ndsHeader);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
 			(cardengineArm9*)ce9Location,

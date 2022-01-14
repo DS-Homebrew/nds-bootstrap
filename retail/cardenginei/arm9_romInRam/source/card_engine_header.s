@@ -81,6 +81,7 @@ thumbPatches:
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
 .word   terminateForPullOutRef
+.word   thumb_reset_arm9
 
 	.thumb
 @---------------------------------------------------------------------------------
@@ -438,6 +439,26 @@ cardReadRefTIrq:
 .word   myIrqEnable-ce9 
 @---------------------------------------------------------------------------------
 
+@---------------------------------------------------------------------------------
+thumb_reset_arm9:
+@---------------------------------------------------------------------------------
+    push	{r2-r7, lr}
+
+	ldr		r3, cardReadRefTReset
+    ldr     r4, ce9locationTReset
+    add     r3, r3, r4
+
+	bl	thumb_blx_r3_stub3
+	pop	{r2-r7, pc}
+thumb_blx_r3_stub3:
+	bx	r3
+.pool
+.align	4
+ce9locationTReset:
+.word   ce9
+cardReadRefTReset:
+.word   reset-ce9 
+@---------------------------------------------------------------------------------
 
 	.arm
 pdash_read:

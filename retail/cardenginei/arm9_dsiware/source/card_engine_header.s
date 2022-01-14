@@ -80,6 +80,7 @@ thumbCardEndReadDmaRef:
 .word   0x0
 thumbSleepRef:
 .word   0x0
+.word   thumb_reset_arm9
 
 	.arm
 @---------------------------------------------------------------------------------
@@ -107,11 +108,25 @@ thumb_card_irq_enable:
 
 	ldr		r6, =myIrqEnable
 
-	bl	thumb_blx_r3_stub2
+	bl	thumb_blx_r6_stub2
 	pop	{r1-r7, pc}
 	bx  lr
-thumb_blx_r3_stub2:
+thumb_blx_r6_stub2:
 	bx	r6
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_reset_arm9:
+@---------------------------------------------------------------------------------
+    push	{r2-r7, lr}
+
+	ldr	r3, =reset
+
+	bl	thumb_blx_r3_stub2
+	pop	{r2-r7, pc}
+thumb_blx_r3_stub2:
+	bx	r3
 .pool
 .align	4
 @---------------------------------------------------------------------------------
