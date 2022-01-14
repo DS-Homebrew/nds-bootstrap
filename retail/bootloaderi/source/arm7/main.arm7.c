@@ -902,9 +902,6 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			dbg_hexa((u32)deviceListAddr);
 			dbg_printf("\n");
 
-			if (moduleParams->sdk_version > 0x5050000) {
-				toncset((u8*)0x02EFF002, 0, 1); // Certain SDK5.5 titles seems to dislike SD access rights(?)
-			}
 			tonccpy(deviceListAddr, (u32*)0x02EFF000, 0x400);
 			toncset((u32*)0x02EFF000, 0, 0x400);
 			/*const char *ndsPath = "sdmc:/DSIWARE.NDS";
