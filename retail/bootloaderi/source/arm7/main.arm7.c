@@ -237,7 +237,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
-	memset_addrs_arm7(0x02F00000, 0x02FFE000);
+	memset_addrs_arm7(0x02F80000, 0x02FFE000);
 	toncset((u32*)0x02FFF000, 0, 0xD60);		// clear part of EWRAM
 	toncset((u32*)0x02FFFE00, 0, 0x200);		// clear part of EWRAM: header
 	REG_IE = 0;
@@ -1292,6 +1292,7 @@ int arm7_main(void) {
 		toncset((u32*)0x02400000, 0, 0x20);
 		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 		toncset((u32*)0x02E80000, 0, 0x800);
+		memset_addrs_arm7(0x02F00000, 0x02F80000);
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
@@ -1350,18 +1351,6 @@ int arm7_main(void) {
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	if (!gameOnFlashcard && isDSiWare) {
-		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
-		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
-
-		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x6000);
-		tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
-		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
-
-		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8000);
-		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
-		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
-
 		if (*(u8*)0x02FFE1BF & BIT(0)) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			DSiTouchscreenMode();
@@ -1374,6 +1363,21 @@ int arm7_main(void) {
 			}
 		}
 		*(u16*)0x4000500 = 0x807F;
+
+	  if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
+		memset_addrs_arm7(0x02F00000, 0x02F80000);
+
+		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
+		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
+
+		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x6000);
+		tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
+		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
+
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8000);
+		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
+		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
@@ -1514,6 +1518,7 @@ int arm7_main(void) {
 			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x5FFFF8, sizeof(u32), !sdRead, -1);
 			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
 		}
+	  }
 	} else {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {

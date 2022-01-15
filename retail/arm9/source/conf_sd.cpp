@@ -964,7 +964,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread((u8*)ARM7_FIX_BUFFERED_LOCATION, 1, 0x140, cebin);
 	}
 	fclose(cebin);
-  } else {
+  } else if (ndsArm7idst <= 0x02E80000) {
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardenginei_arm7_dsiware.lz77", "rb");
 	if (cebin) {

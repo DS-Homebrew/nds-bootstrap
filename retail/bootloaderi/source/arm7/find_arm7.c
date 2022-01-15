@@ -355,7 +355,7 @@ u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
 
 	u32* swi12Offset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 		swi12Signature, 1
 	);
 	if (swi12Offset) {
@@ -440,7 +440,7 @@ u32* a7_findScfgExtOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("a7_findScfgExtOffset:\n");
 
 	u32* offset = findOffset(
-		(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+		(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 		scfgExtSignature, 1
 	);
 	if (offset) {
@@ -484,7 +484,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	if (moduleParams->sdk_version > 0x5000000) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature5, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -496,7 +496,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -508,7 +508,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt1, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -519,7 +519,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt2, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -530,7 +530,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt3, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -541,7 +541,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt4, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -552,7 +552,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt5, 4
 		);
 		if (swiGetPitchTableOffset) {
@@ -563,7 +563,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -574,7 +574,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -585,7 +585,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -596,7 +596,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt9, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -607,7 +607,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt10, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -618,7 +618,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt11, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -629,7 +629,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt12, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -640,7 +640,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature1Alt13, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -651,7 +651,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -662,7 +662,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt1, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -673,7 +673,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt2, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -684,7 +684,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt3, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -695,7 +695,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt4, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -706,7 +706,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt5, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -717,7 +717,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -728,7 +728,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -739,7 +739,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -750,7 +750,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt9, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -761,7 +761,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt10, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -772,7 +772,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt11, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -783,7 +783,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3Alt12, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -794,7 +794,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -805,7 +805,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt1, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -816,7 +816,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt2, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -827,7 +827,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt3, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -838,7 +838,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt4, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -849,7 +849,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt5, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -860,7 +860,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt6, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -871,7 +871,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt7, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -882,7 +882,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt8, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -894,7 +894,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x00010000,//newArm7binarySize,
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature4Alt9, 3
 		);
 		if (swiGetPitchTableOffset) {
