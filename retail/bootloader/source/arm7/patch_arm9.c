@@ -272,7 +272,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	if (ndsHeader->unitCode == 0) {
+	if (ndsHeader->unitCode != 3) {
 		return;
 	}
 
@@ -310,6 +310,17 @@ static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		nandTmpJumpFuncOffset[-5] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);
 		nandTmpJumpFuncOffset[-4] = 0xFFFFFFFF;
 		dbg_printf("Exit-to-menu patched!\n");
+	} else if (nandTmpJumpFuncOffset[-15] == 0xE8BD8008 && nandTmpJumpFuncOffset[-14] == 0x02FFE230) {
+		nandTmpJumpFuncOffset[-24] = 0xE59F0000; // ldr r0, =0
+		nandTmpJumpFuncOffset[-23] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (23 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-22] = 0;
+		dbg_printf("Reset (TWL) patched!\n");
+		if (nandTmpJumpFuncOffset[-26] == 0xE12FFF1C) {
+			nandTmpJumpFuncOffset[-20] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+			nandTmpJumpFuncOffset[-19] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (19 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+			nandTmpJumpFuncOffset[-18] = 0xFFFFFFFF;
+			dbg_printf("Exit-to-menu patched!\n");
+		}
 	} else if (nandTmpJumpFuncOffset[-15] == 0xE12FFF1C) {
 		nandTmpJumpFuncOffset[-19] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
 		nandTmpJumpFuncOffset[-18] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);

@@ -737,6 +737,13 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 	} else if (nandTmpJumpFuncOffset[-2] == 0xE12FFF1C) {
 		nandTmpJumpFuncOffset[-1] = (u32)ce9->patches->reset_arm9;
 		dbg_printf("Exit-to-menu patched!\n");
+	} else if (nandTmpJumpFuncOffset[-15] == 0xE8BD8008 && nandTmpJumpFuncOffset[-14] == 0x02FFE230) {
+		nandTmpJumpFuncOffset[-16] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (15 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		dbg_printf("Reset (TWL) patched!\n");
+		if (nandTmpJumpFuncOffset[-26] == 0xE12FFF1C) {
+			nandTmpJumpFuncOffset[-25] = (u32)ce9->patches->reset_arm9;
+			dbg_printf("Exit-to-menu patched!\n");
+		}
 	} else if (nandTmpJumpFuncOffset[-15] == 0xE12FFF1C) {
 		nandTmpJumpFuncOffset[-14] = (u32)ce9->patches->reset_arm9;
 		dbg_printf("Exit-to-menu patched!\n");
