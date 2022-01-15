@@ -45,18 +45,9 @@
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
 #include "sr_data_srllastran.h" // For rebooting the game
 
-#define gameOnFlashcard BIT(0)
-#define saveOnFlashcard BIT(1)
-#define extendedMemory BIT(2)
-#define ROMinRAM BIT(3)
-#define dsiMode BIT(4)
-#define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
-#define powerCodeOnVBlank BIT(7)
-#define b_runCardEngineCheck BIT(8)
-#define ipcEveryFrame BIT(9)
 #define hiyaCfwFound BIT(10)
-#define slowSoftReset BIT(11)
+#define wideCheatUsed BIT(12)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -82,7 +73,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_DSIWARE;
 
-bool dsiSD = false;
+bool dsiSD = true;
 bool sdRead = true;
 
 static bool initialized = false;
@@ -185,17 +176,11 @@ static void driveInitialize(void) {
 		return;
 	}
 
-	bool sdReadBak = sdRead;
-
-	if (valueBits & b_dsiSD) {
-		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-			sdmmc_init();
-			SD_Init();
-		}
-		dsiSD = true;
-		sdRead = true;				// Switch to SD
-		FAT_InitFiles(false, false, 0);
+	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+		sdmmc_init();
+		SD_Init();
 	}
+	FAT_InitFiles(false, false, 0);
 
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
 	srParamsFile = getFileFromCluster(srParamsCluster);
@@ -211,8 +196,6 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
-	sdRead = sdReadBak;
-
 	driveInited = true;
 }
 
@@ -350,16 +333,13 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (valueBits & b_dsiSD) {
-			(*(u32*)(ce7+0x7D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
-		}
+		(*(u32*)(ce7+0x7D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
 	driveInitialize();
-	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	if (*(u32*)(ce7+0x7D00) == 0 && (valueBits & b_dsiSD)) {
+	if (*(u32*)(ce7+0x7D00) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -389,7 +369,9 @@ void returnToLoader(bool wait) {
 	//IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
 		if (*(u32*)(ce7+0x7D00) == 0) {
-			//tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			if (valueBits & wideCheatUsed) {
+				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			}
 		} else if (*(char*)(ce7+0x7D03) == 'H' || *(char*)(ce7+0x7D03) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
@@ -405,7 +387,7 @@ void returnToLoader(bool wait) {
 		//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
 
-	if (*(u32*)(ce7+0x7D00) != 0) {
+	if (*(u32*)(ce7+0x7D00) != 0 || (valueBits & wideCheatUsed)) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
@@ -486,23 +468,14 @@ void returnToLoader(bool wait) {
 
 void dumpRam(void) {
 	driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
-	if (valueBits & dsiMode) {
-		// Dump full RAM
-		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
-	} else {
-		// Dump RAM used in DS mode
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileWrite((char*)((moduleParams->sdk_version > 0x5000000) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
-	}
+	fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
 	sharedAddr[3] = 0;
 }
 
 void prepareScreenshot(void) {
 	driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 }
 
@@ -510,7 +483,6 @@ void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
 	driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
 
 	// Skip until next blank slot
@@ -594,7 +566,7 @@ void myIrqHandlerVBlank(void) {
 		returnTimer = 0;
 	}
 
-	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
 		if (ramDumpTimer == 60 * 2) {
 			REG_MASTER_VOLUME = 0;
 			int oldIME = enterCriticalSection();
@@ -613,7 +585,7 @@ void myIrqHandlerVBlank(void) {
 		reset();
 	}
 
-	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
 		if (softResetTimer == 60 * 2) {
 			REG_MASTER_VOLUME = 0;
 			int oldIME = enterCriticalSection();
