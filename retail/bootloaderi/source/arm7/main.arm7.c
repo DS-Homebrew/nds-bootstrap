@@ -1394,8 +1394,8 @@ int arm7_main(void) {
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
-		extern void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader);
-		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader);
+		extern void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		if (REG_SCFG_EXT == 0) {
 			if (!dsiWramAccess) {

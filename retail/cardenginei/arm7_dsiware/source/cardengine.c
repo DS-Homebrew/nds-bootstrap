@@ -369,13 +369,13 @@ void forceGameReboot(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
 }
 
-void returnToLoader(void) {
+void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0x7D00) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0x7D00) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		} else if (*(char*)(ce7+0x7D03) == 'H' || *(char*)(ce7+0x7D03) == 'K') {
 			// Use different SR backend ID
@@ -383,13 +383,13 @@ void returnToLoader(void) {
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0x7D00) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0x7D00) == 0) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
-		waitFrames(5);							// Wait for DSi screens to stabilize
+		waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
@@ -493,13 +493,12 @@ void myIrqHandlerVBlank(void) {
 	}
 	
 	if (sharedAddr[3] == (vu32)0x54495845) {
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		returnToLoader(false);
 	}
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
-			returnToLoader();
+			returnToLoader(true);
 		}
 		returnTimer++;
 	} else {

@@ -29,7 +29,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 24;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 25;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -450,9 +450,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018AAC = 0xE3A0078F; // mov r0, #0x23C0000
 		*(u32*)0x02018AD0 = 0xE3500001; // cmp r0, #1
 		*(u32*)0x02018AD8 = 0x13A00627; // movne r0, #0x2700000
-		//*(u32*)0x0201A58C = 0xE59F0000; // ldr r0, =0
-		//*(u32*)0x0201A590 = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
-		//*(u32*)0x0201A594 = 0;
 		*(u32*)0x0201D5C4 = 0xE1A00000; // nop
 		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
@@ -1088,9 +1085,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020555E4 = 0xE1A00000; // nop
 		*(u32*)0x02055744 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020557A0, 0xE3A0078F); // mov r0, #0x23C0000
-		*(u32*)0x02057058 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x0205705C = generateA7Instr(0x0205705C, (int)ce9->patches->reset_arm9);
-		*(u32*)0x02057060 = 0xFFFFFFFF;
 		*(u32*)0x0205A134 = 0xE1A00000; // nop
 
 		// Manual screen
@@ -1741,9 +1735,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020175B8 = 0xE1A00000; // nop
 		*(u32*)0x02017718 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02017774, 0xE3A0078F); // mov r0, #0x23C0000
-		*(u32*)0x02019000 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x02019004 = generateA7Instr(0x02019004, (int)ce9->patches->reset_arm9);
-		*(u32*)0x02019008 = 0xFFFFFFFF;
 		*(u32*)0x0201BD60 = 0xE1A00000; // nop
 		*(u32*)0x0201D8EC = 0xE1A00000; // nop
 		*(u32*)0x02024994 = 0xE1A00000; // nop
@@ -2367,9 +2358,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201679C = 0xE1A00000; // nop
 		*(u32*)0x020168FC = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02016958, 0xE3A0078F); // mov r0, #0x23C0000
-		*(u32*)0x020181E4 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x020181E8 = generateA7Instr(0x020181E8, (int)ce9->patches->reset_arm9);
-		*(u32*)0x020181EC = 0xFFFFFFFF;
 		*(u32*)0x0201A848 = 0xE1A00000; // nop
 		if (strcmp(romTid, "KLBE") == 0) {
 			*(u32*)0x0202663C = 0xE1A00000; // nop
@@ -2394,9 +2382,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02016648 = 0xE1A00000; // nop
 		*(u32*)0x020167A8 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02016804, 0xE3A0078F); // mov r0, #0x23C0000
-		*(u32*)0x02018090 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x02018094 = generateA7Instr(0x02018094, (int)ce9->patches->reset_arm9);
-		*(u32*)0x02018098 = 0xFFFFFFFF;
 		*(u32*)0x0201A6F4 = 0xE1A00000; // nop
 	}
 
@@ -2550,9 +2535,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02022748 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020227A4, 0xE3A00627); // mov r0, #0x2700000
 		*(u32*)0x020228D8 = 0x0213CC60;
-		*(u32*)0x020240E0 = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		*(u32*)0x020240E4 = generateA7Instr(0x020240E4, (int)ce9->patches->reset_arm9);
-		*(u32*)0x020240E8 = 0xFFFFFFFF;
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
 		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr

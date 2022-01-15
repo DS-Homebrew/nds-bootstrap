@@ -239,7 +239,11 @@ static const u32 resetConstant[1]       = {RESET_PARAM};
 static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
 // Reset (TWL)
-static const u32 resetTwlEndSignature[2] = {0xE8BD8008, 0x02FFE230};
+static const u32 nandTmpJumpFuncStart30[1]  = {0xE92D000F};
+static const u32 nandTmpJumpFuncStart3[1]   = {0xE92D4008};
+static const u32 nandTmpJumpFuncStart4[1]   = {0xE92D4010};
+
+static const u32 nandTmpJumpFuncConstant[1] = {0x02FFDFC0};
 
 // MBK WRAM set
 static const u32 mbkWramBCGetSignature[1]      = {0xE59F1018};
@@ -2621,23 +2625,42 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	return resetOffset;
 }
 
-u32* findResetTwlOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findResetTwlOffset\n");
+u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findNandTmpJumpFuncOffset\n");
 	
-    u32 offset = (u32)findOffset(
+	u32* endOffset = findOffset(
 		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-		resetTwlEndSignature, 2
+		nandTmpJumpFuncConstant, 1
 	);
 
-	if (offset) {
-		offset -= 4;
-		dbg_printf("Reset (TWL) found\n");
+	u32* offset = NULL;
+	if (moduleParams->sdk_version < 0x5008000) {
+		offset = findOffsetBackwards(
+			endOffset, 0x400,
+			nandTmpJumpFuncStart30, 1
+		);
 	} else {
-		dbg_printf("Reset (TWL) not found\n");
+		offset = findOffsetBackwards(
+			endOffset, 0x60,
+			nandTmpJumpFuncStart3, 1
+		);
+
+		if (!offset) {
+			offset = findOffsetBackwards(
+				endOffset, 0x60,
+				nandTmpJumpFuncStart4, 1
+			);
+		}
+	}
+
+	if (offset) {
+		dbg_printf("nandTmpJumpFunc found\n");
+	} else {
+		dbg_printf("nandTmpJumpFunc not found\n");
 	}
 
 	dbg_printf("\n");
-	return (u32)offset;
+	return offset;
 }
 
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

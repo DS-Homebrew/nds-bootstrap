@@ -259,14 +259,66 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		patchOffsetCache.resetChecked = true;
 	}
 
-	if (reset) {
-		// Patch
-		u32* resetPatch = ce9->patches->reset_arm9;
-		tonccpy(reset, resetPatch, 0x40);
-		dbg_printf("reset location : ");
-		dbg_hexa((u32)reset);
-		dbg_printf("\n\n");
+	if (!reset) {
+		return;
 	}
+
+	// Patch
+	u32* resetPatch = ce9->patches->reset_arm9;
+	tonccpy(reset, resetPatch, 0x40);
+	dbg_printf("reset location : ");
+	dbg_hexa((u32)reset);
+	dbg_printf("\n\n");
+}
+
+static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
+	if (ndsHeader->unitCode == 0) {
+		return;
+	}
+
+	u32* nandTmpJumpFuncOffset = patchOffsetCache.nandTmpJumpFuncOffset;
+
+    if (!patchOffsetCache.nandTmpJumpFuncChecked) {
+		nandTmpJumpFuncOffset = findNandTmpJumpFuncOffset(ndsHeader, moduleParams);
+		if (nandTmpJumpFuncOffset) patchOffsetCache.nandTmpJumpFuncOffset = nandTmpJumpFuncOffset;
+		patchOffsetCache.nandTmpJumpFuncChecked = true;
+	}
+
+	if (!nandTmpJumpFuncOffset) {
+		return;
+	}
+	extern u32 generateA7Instr(int arg1, int arg2);
+
+	// Patch
+	if (moduleParams->sdk_version < 0x5008000) {
+		nandTmpJumpFuncOffset[0] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		nandTmpJumpFuncOffset[1] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) + (1 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[2] = 0xFFFFFFFF;
+	} else if (nandTmpJumpFuncOffset[-2] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
+		nandTmpJumpFuncOffset[-11] = 0xE59F0000; // ldr r0, =0
+		nandTmpJumpFuncOffset[-10] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (10 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-9] = 0;
+		dbg_printf("Reset (TWL) patched!\n");
+		if (nandTmpJumpFuncOffset[-13] == 0xE12FFF1C) {
+			nandTmpJumpFuncOffset[-17] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+			nandTmpJumpFuncOffset[-16] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (16 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+			nandTmpJumpFuncOffset[-15] = 0xFFFFFFFF;
+			dbg_printf("Exit-to-menu patched!\n");
+		}
+	} else if (nandTmpJumpFuncOffset[-2] == 0xE12FFF1C) {
+		nandTmpJumpFuncOffset[-6] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		nandTmpJumpFuncOffset[-5] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-4] = 0xFFFFFFFF;
+		dbg_printf("Exit-to-menu patched!\n");
+	} else if (nandTmpJumpFuncOffset[-15] == 0xE12FFF1C) {
+		nandTmpJumpFuncOffset[-19] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
+		nandTmpJumpFuncOffset[-18] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-17] = 0xFFFFFFFF;
+		dbg_printf("Exit-to-menu patched!\n");
+	}
+	dbg_printf("nandTmpJumpFunc location : ");
+	dbg_hexa((u32)nandTmpJumpFuncOffset);
+	dbg_printf("\n\n");
 }
 
 static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1033,6 +1085,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
 
 	patchReset(ce9, ndsHeader, moduleParams);
+	patchResetTwl(ce9, ndsHeader, moduleParams);
 
 	randomPatch(ndsHeader, moduleParams);
 	randomPatch5Second(ndsHeader, moduleParams);

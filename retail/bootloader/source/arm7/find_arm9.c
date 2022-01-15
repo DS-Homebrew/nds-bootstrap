@@ -141,6 +141,13 @@ static const u32 resetSignature5Alt4[4] = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0
 static const u32 resetConstant[1]       = {RESET_PARAM};
 static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
+// Reset (TWL)
+static const u32 nandTmpJumpFuncStart30[1]  = {0xE92D000F};
+static const u32 nandTmpJumpFuncStart3[1]   = {0xE92D4008};
+static const u32 nandTmpJumpFuncStart4[1]   = {0xE92D4010};
+
+static const u32 nandTmpJumpFuncConstant[1] = {0x02FFDFC0};
+
 // Panic
 // TODO : could be a good idea to catch the call to Panic function and store the message somewhere
 
@@ -1596,4 +1603,42 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 	dbg_printf("\n");
 	return resetOffset;
+}
+
+u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findNandTmpJumpFuncOffset\n");
+	
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		nandTmpJumpFuncConstant, 1
+	);
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version < 0x5008000) {
+		offset = findOffsetBackwards(
+			endOffset, 0x400,
+			nandTmpJumpFuncStart30, 1
+		);
+	} else {
+		offset = findOffsetBackwards(
+			endOffset, 0x60,
+			nandTmpJumpFuncStart3, 1
+		);
+
+		if (!offset) {
+			offset = findOffsetBackwards(
+				endOffset, 0x60,
+				nandTmpJumpFuncStart4, 1
+			);
+		}
+	}
+
+	if (offset) {
+		dbg_printf("nandTmpJumpFunc found\n");
+	} else {
+		dbg_printf("nandTmpJumpFunc not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }

@@ -561,7 +561,7 @@ void forceGameReboot(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
 }
 
-void returnToLoader(void) {
+void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	sharedAddr[4] = 0x57534352;
@@ -581,7 +581,11 @@ void returnToLoader(void) {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
+#ifdef TWLSDK
+		waitFrames(wait ? 5 : 1);
+#else
 		waitFrames(5);							// Wait for DSi screens to stabilize
+#endif
 	}
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
@@ -1103,14 +1107,13 @@ void myIrqHandlerVBlank(void) {
 
 #ifdef TWLSDK
 	if (sharedAddr[3] == (vu32)0x54495845) {
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		returnToLoader(false);
 	}
 #endif
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
-			returnToLoader();
+			returnToLoader(true);
 		}
 		returnTimer++;
 	} else {
