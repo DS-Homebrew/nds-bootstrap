@@ -1408,7 +1408,7 @@ int arm7_main(void) {
 				patchGbaSlotInit_cont(ndsHeader, false, true);
 			}
 
-			if (oldArm7mbk == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
