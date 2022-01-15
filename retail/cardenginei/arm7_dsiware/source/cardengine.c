@@ -445,10 +445,12 @@ void returnToLoader(bool wait) {
 
 	fileRead(__DSiHeader->ndshdr.arm9destination, file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize, !sdRead, 0);
 	fileRead(__DSiHeader->ndshdr.arm7destination, file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize, !sdRead, 0);
-	fileRead(__DSiHeader->arm9idestination, file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, !sdRead, 0);
-	fileRead(__DSiHeader->arm7idestination, file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, !sdRead, 0);
+	if (ndsHeader->unitCode > 0) {
+		fileRead(__DSiHeader->arm9idestination, file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, !sdRead, 0);
+		fileRead(__DSiHeader->arm7idestination, file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, !sdRead, 0);
 
-	initMBK_dsiMode();
+		initMBK_dsiMode();
+	}
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 

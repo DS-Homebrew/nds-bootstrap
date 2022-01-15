@@ -153,6 +153,9 @@ void reset(u32 tid1, u32 tid2) {
 	REG_DISPCNT = 0;
 	REG_DISPCNT_SUB = 0;
 
+	toncset((u16*)0x04000000, 0, 0x56);
+	toncset((u16*)0x04001000, 0, 0x56);
+
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
 	VRAM_C_CR = 0x80;
@@ -182,8 +185,11 @@ void reset(u32 tid1, u32 tid2) {
 		while (REG_VCOUNT == 191);
 	}
 
-	if (sharedAddr[3] == 0x54495845) {
+	if (ndsHeader->unitCode > 0 && sharedAddr[3] == 0x54495845) {
 		initMBKARM9_dsiMode();
+		REG_SCFG_EXT = 0x8307F100;
+		REG_SCFG_CLK = 0x87;
+		REG_SCFG_RST = 1;
 	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
