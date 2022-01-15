@@ -245,6 +245,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
 	}
 
+	// GO Series: Portable Shrine Wars (USA)
+	else if (strcmp(romTid, "KOQE") == 0) {
+		*(u32*)0x0200E004 = 0xE1A00000; // nop  (Disable NFTR loading from TWLNAND)
+
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200DE78;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0) {
 		*(u16*)0x020106BC = 0x2001; // movs r0, #1

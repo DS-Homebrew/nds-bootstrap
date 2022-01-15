@@ -2274,6 +2274,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02091488 = 0xE1A00000; // nop
 	}*/
 
+	// GO Series: Portable Shrine Wars (USA)
+	else if (strcmp(romTid, "KOQE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020073E0 = 0xE1A00000; // nop
+		*(u32*)0x0200E004 = 0xE1A00000; // nop  (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0204E1B8 = 0xE1A00000; // nop
+		*(u32*)0x02051F6C = 0xE1A00000; // nop
+		*(u32*)0x02057C84 = 0xE1A00000; // nop
+		*(u32*)0x02059A6C = 0xE1A00000; // nop
+		*(u32*)0x02059A70 = 0xE1A00000; // nop
+		*(u32*)0x02059A7C = 0xE1A00000; // nop
+		*(u32*)0x02059BDC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02059C38, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0205AEBC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0205E5CC = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200DE78;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Art Style: precipice (USA)
 	else if (strcmp(romTid, "KAKE") == 0) {
 		*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
