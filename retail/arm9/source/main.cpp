@@ -421,7 +421,7 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 
-	if (stat(conf->donorTwlPath, &stDonor) >= 0) {
+	if (stat(conf->donorTwlPath, &stDonor) >= 0 || stat(conf->donorTwl0Path, &stDonor) >= 0) {
 		clusterDonor = stDonor.st_ino;
 	}
 

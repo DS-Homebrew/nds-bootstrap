@@ -3,7 +3,6 @@
 
 //#include <limits.h> // ARG_MAX
 #include <nds/ndstypes.h>
-#include "cheat_engine.h"
 
 typedef struct configuration {
     bool debug;
@@ -15,7 +14,9 @@ typedef struct configuration {
 	char* savPath;
 	char* prvPath;
 	char* donorPath;
+	char* donorTwl0Path;
 	char* donorTwlPath;
+	char* donorTwlOnly0Path;
 	char* donorTwlOnlyPath;
 	//char* cleanDonorPath;
 	char* gbaPath;

@@ -105,10 +105,16 @@ static void load_conf(configuration* conf, const char* fn) {
 	// PRV path
 	conf->prvPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "PRV_PATH").c_str());
 
-	// SDK5 (TWL) DSi-Enhanced Donor NDS path
+	// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
+	conf->donorTwl0Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
+
+	// SDK5.x (TWL) DSi-Enhanced Donor NDS path
 	conf->donorTwlPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
 
-	// SDK5 (TWL) DSi-Exclusive Donor NDS path
+	// SDK5.0 (TWL) DSi-Exclusive Donor NDS path
+	conf->donorTwlOnly0Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWLONLY0_NDS_PATH").c_str());
+
+	// SDK5.x (TWL) DSi-Exclusive Donor NDS path
 	conf->donorTwlOnlyPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWLONLY_NDS_PATH").c_str());
 
 	// GBA path
@@ -485,8 +491,26 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		u32 srlAddr = 0;
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000)) {
-			donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
+		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
+			if (romTid[0] == 'H' && ndsArm7Size < 0xC000) {
+				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb"); // System titles can only use an SDK 5.0 donor ROM
+			} else {
+				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
+				if (!donorNdsFile
+				|| ( dsiEnhancedMbk && ndsArm7Size == 0x1511C)
+				|| ( dsiEnhancedMbk && ndsArm7Size == 0x26CC8)
+				|| ( dsiEnhancedMbk && ndsArm7Size == 0x28E54)
+				|| (!dsiEnhancedMbk && ndsArm7Size == 0x29EE8)
+				) {
+					if (donorNdsFile) {
+						fclose(donorNdsFile);
+					}
+					FILE* donorNdsFile2 = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb");
+					if (donorNdsFile2) {
+						donorNdsFile = donorNdsFile2;
+					}
+				}
+			}
 		}
 
 		if (donorNdsFile) {
