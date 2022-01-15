@@ -106,7 +106,7 @@ static bool volumeAdjustActivated = false;
 
 bool returnToMenu = false;
 
-static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 
 static void unlaunchSetFilename(bool boot) {
@@ -260,7 +260,7 @@ void restoreBakData(void) {
 
 void reset(void) {
 	register int i, reg;
-	
+
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -369,30 +369,119 @@ void forceGameReboot(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
 }
 
+static void initMBK_dsiMode(void) {
+	// This function has no effect with ARM7 SCFG locked
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE1A0;
+	REG_MBK7 = *(u32*)0x02FFE1A4;
+	REG_MBK8 = *(u32*)0x02FFE1A8;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
+}
+
 void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	sharedAddr[4] = 0x57534352;
-	IPC_SendSync(0x8);
+	//IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
 		if (*(u32*)(ce7+0x7D00) == 0) {
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			//tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		} else if (*(char*)(ce7+0x7D03) == 'H' || *(char*)(ce7+0x7D03) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
-		waitFrames(1);
+		//waitFrames(1);
 	} else {
 		if (*(u32*)(ce7+0x7D00) == 0) {
-			unlaunchSetFilename(true);
+			//unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
-		waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
+		//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+
+	if (*(u32*)(ce7+0x7D00) != 0) {
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);
+	}
+
+	register int i, reg;
+
+	REG_IME = 0;
+
+	for (i = 0; i < 16; i++) {
+		SCHANNEL_CR(i) = 0;
+		SCHANNEL_TIMER(i) = 0;
+		SCHANNEL_SOURCE(i) = 0;
+		SCHANNEL_LENGTH(i) = 0;
+	}
+
+	REG_SOUNDCNT = 0;
+
+	// Clear out ARM7 DMA channels and timers
+	for (i = 0; i < 4; i++) {
+		DMA_CR(i) = 0;
+		DMA_SRC(i) = 0;
+		DMA_DEST(i) = 0;
+		TIMER_CR(i) = 0;
+		TIMER_DATA(i) = 0;
+	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
+
+	REG_IE = 0;
+	REG_IF = ~0;
+	REG_AUXIE = 0;
+	REG_AUXIF = ~0;
+	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	REG_POWERCNT = 1;  // Turn off power to stuff
+
+	REG_AUXIE &= ~(1UL << 8);
+	*(vu32*)0x400481C = 0;
+	*(vu32*)0x4004820 = 0;
+
+	driveInitialize();
+
+	aFile file = getBootFileCluster("BOOT.NDS", 0);
+	if (file.firstCluster == CLUSTER_FREE) {
+		// File not found, so reboot console instead
+		i2cWriteRegister(0x4A, 0x70, 0x01);
+		i2cWriteRegister(0x4A, 0x11, 0x01);
+	}
+
+	fileRead((char*)__DSiHeader, file, 0, sizeof(tDSiHeader), !sdRead, 0);
+	*ndsHeader = __DSiHeader->ndshdr;
+
+	fileRead(__DSiHeader->ndshdr.arm9destination, file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize, !sdRead, 0);
+	fileRead(__DSiHeader->ndshdr.arm7destination, file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize, !sdRead, 0);
+	fileRead(__DSiHeader->arm9idestination, file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, !sdRead, 0);
+	fileRead(__DSiHeader->arm7idestination, file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, !sdRead, 0);
+
+	initMBK_dsiMode();
+
+	sharedAddr[0] = 0x44414F4C; // 'LOAD'
+
+	for (i = 0; i < 4; i++) {
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+	}
+
+	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	// Start ARM7
+	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
+	arm7code();
 }
 
 void dumpRam(void) {

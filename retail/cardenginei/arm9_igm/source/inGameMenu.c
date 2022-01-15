@@ -687,6 +687,7 @@ void inGameMenu(s8* mainScreen) {
 					ramViewer();
 					break;
 				case 6:
+					sharedAddr[3] = 0x54495845; // EXIT
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:

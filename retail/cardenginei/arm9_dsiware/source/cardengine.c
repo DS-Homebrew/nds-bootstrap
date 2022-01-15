@@ -59,12 +59,12 @@ static void SetBrightness(u8 screen, s8 bright) {
 }
 
 // Alternative to swiWaitForVBlank()
-static void waitFrames(int count) {
+/*static void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
-}
+}*/
 
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
@@ -82,22 +82,34 @@ static void hookIPC_SYNC(void) {
 	}
 }*/
 
+void initMBKARM9_dsiMode(void) {
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE194;
+	REG_MBK7 = *(u32*)0x02FFE198;
+	REG_MBK8 = *(u32*)0x02FFE19C;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
+}
+
 void __attribute__((target("arm"))) resetMpu(void) {
 	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
 }
 
 void reset(u32 tid1, u32 tid2) {
 	if (tid1 != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
-		if (ce9->consoleModel < 2) {
+		/*if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
 			SetBrightness(1, 31);
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
-		cacheFlush();
+		cacheFlush();*/
 		sharedAddr[3] = 0x54495845;
-		while (1);
+		//while (1);
 	} else {
 		sharedAddr[3] = 0x52534554;
 	}
@@ -170,6 +182,10 @@ void reset(u32 tid1, u32 tid2) {
 		while (REG_VCOUNT == 191);
 	}
 
+	if (sharedAddr[3] == 0x54495845) {
+		initMBKARM9_dsiMode();
+	}
+
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;
 	while (REG_VCOUNT != 191);
@@ -223,9 +239,13 @@ void myIrqHandlerIPC(void) {
 			*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
 			(*inGameMenu)(&mainScreen);
-			if (sharedAddr[3] == 0x52534554) {
+			if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
 				igmReset = true;
-				reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+				if (sharedAddr[3] == 0x52534554) {
+					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+				} else {
+					reset(0, 0);
+				}
 			}
 		}
 			break;

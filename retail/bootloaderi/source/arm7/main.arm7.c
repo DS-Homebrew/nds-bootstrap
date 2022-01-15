@@ -1872,7 +1872,9 @@ int arm7_main(void) {
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	}
 
-	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	if (!dsiModeConfirmed || (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)) {
+		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
+	}
 
 	startBinary_ARM7();
 
