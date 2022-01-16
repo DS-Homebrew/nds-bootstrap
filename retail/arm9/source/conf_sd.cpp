@@ -491,8 +491,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		u32 srlAddr = 0;
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
-			if (romTid[0] == 'H' && ndsArm7Size < 0xC000) {
+		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
+			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb"); // System titles can only use an SDK 5.0 donor ROM
 			} else {
 				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
