@@ -29,9 +29,10 @@ static const u32 cardHashInitSignatureEarlyAlt2[3]  = {0xE280101F, 0xE3A00000, 0
 static const u32 cardHashInitSignature[3]           = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
 static const u32 cardHashInitSignatureAlt[4]        = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
 static const u32 cardHashInitSignatureAlt2[4]       = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
-static const u16 cardHashInitSignatureThumbEarly[4] = {0x301F, 0x1C04, 0x211F, 0x2000};
-static const u16 cardHashInitSignatureThumb[3]      = {0xB578, 0xB083, 0x2000};
-static const u16 cardHashInitSignatureThumbAlt[3]   = {0xB5F0, 0xB083, 0x2000};
+static const u16 cardHashInitSignatureThumbEarly[4]    = {0x301F, 0x1C04, 0x211F, 0x2000};
+static const u16 cardHashInitSignatureThumbEarlyAlt[4] = {0x301F, 0x1C05, 0x211F, 0x2000};
+static const u16 cardHashInitSignatureThumb[3]         = {0xB578, 0xB083, 0x2000};
+static const u16 cardHashInitSignatureThumbAlt[3]      = {0xB5F0, 0xB083, 0x2000};
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
@@ -475,6 +476,13 @@ u16* findCardHashInitOffsetThumb(const tNDSHeader* ndsHeader, const module_param
 			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureThumbEarly, 4
 		);
+
+		if (!offset) {
+			offset = findOffsetThumb(
+				(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureThumbEarlyAlt, 4
+			);
+		}
 	}
 
 	if (offset) {
