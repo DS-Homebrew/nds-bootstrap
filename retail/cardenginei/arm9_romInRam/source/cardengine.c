@@ -634,7 +634,7 @@ void myIrqHandlerIPC(void) {
 				}
 				if (sharedAddr[3] == 0x52534554) {
 					igmReset = true;
-					if (ndsHeader->unitCode > 0 && *(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+					if (ndsHeader->unitCode > 0 && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) { // If DSiWare...
 						reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
 					} else {
 						reset(0, 0);

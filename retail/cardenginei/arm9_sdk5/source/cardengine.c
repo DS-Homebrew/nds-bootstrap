@@ -1158,7 +1158,7 @@ void myIrqHandlerIPC(void) {
 			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
 #ifdef TWLSDK
-				if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
 				} else {
 #endif
