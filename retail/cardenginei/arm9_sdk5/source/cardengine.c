@@ -975,7 +975,7 @@ void reset(u32 param, u32 tid2) {
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
-	if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		if (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
 			if (ce9->consoleModel < 2) {
 				// Make screens white
@@ -1033,10 +1033,13 @@ void reset(u32 param, u32 tid2) {
 	IPC_SYNC_hooked = false;
 
 #ifdef TWLSDK
-	if (*(u32*)0x02FFE234 == 0x00030004) { // If DSiWare...
+	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
+
+		toncset((u16*)0x04000000, 0, 0x56);
+		toncset((u16*)0x04001000, 0, 0x56);
 
 		VRAM_A_CR = 0x80;
 		VRAM_B_CR = 0x80;
