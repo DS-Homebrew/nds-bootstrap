@@ -25,6 +25,7 @@ static const u16 dsiModeCheck2SignatureThumbAlt[4] = {0x4809, 0x69C0, 0x2800, 0x
 // Card hash init (SDK 5)
 static const u32 cardHashInitSignatureEarly[4]      = {0xE3500000, 0x028DD00C, 0x08BD8078, 0xE3A00000};
 static const u32 cardHashInitSignatureEarlyAlt[3]   = {0xE280101F, 0xE3A00000, 0xE3C1501F};
+static const u32 cardHashInitSignatureEarlyAlt2[3]  = {0xE280101F, 0xE3A00000, 0xE3C1601F};
 static const u32 cardHashInitSignature[3]           = {0xE92D4078, 0xE24DD00C, 0xE3A00000};
 static const u32 cardHashInitSignatureAlt[4]        = {0xE92D41F8, 0xE24DD00C, 0xE3A04000, 0xE1A00004};
 static const u32 cardHashInitSignatureAlt2[4]       = {0xE92D41F0, 0xE24DD010, 0xE3A04000, 0xE1A00004};
@@ -432,6 +433,13 @@ u32* findCardHashInitOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 			offset = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 				cardHashInitSignatureEarlyAlt, 3
+			);
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardHashInitSignatureEarlyAlt2, 3
 			);
 		}
 	}
