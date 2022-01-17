@@ -2429,17 +2429,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
-	// Requires 8MB of RAM
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
 	// BGM is disabled to stay within RAM limitations
-	else if (strcmp(romTid, "KS3E") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KS3E") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		//*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
-		//if (!extendedMemory2) {
-			*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		if (!extendedMemory2) {
+			*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
 			/* *(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr
-		}*/
+			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
+		}
+		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x02092050 = 0xE1A00000; // nop
 		*(u32*)0x02092078 = 0xE3A05001; // mov r5, #1
 		*(u32*)0x02092B94 = 0xE12FFF1E; // bx lr
@@ -2452,8 +2452,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E7F68 = 0xE1A00000; // nop
 		*(u32*)0x020E7F74 = 0xE1A00000; // nop
 		*(u32*)0x020E80D4 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020E8130, 0xE3A00627); // mov r0, #0x2700000
-		//patchHiHeapDSiWare(0x020E8130, 0xE3A0078F); // mov r0, #0x23C0000
+		patchHiHeapDSiWare(0x020E8130, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 		*(u32*)0x020E8264 = 0x02186C60;
 		*(u32*)0x020E977C = 0xE1A00000; // nop
 		*(u32*)0x020E9780 = 0xE1A00000; // nop
@@ -2464,17 +2463,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (Europe)
-	// Requires 8MB of RAM
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
 	// BGM is disabled to stay within RAM limitations
-	else if (strcmp(romTid, "KS3P") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KS3P") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
-		//*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
-		//if (!extendedMemory2) {
-			*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		if (!extendedMemory2) {
+			*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
 			/* *(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr
-		}*/
+			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr */
+		}
+		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x020922D4 = 0xE1A00000; // nop
 		*(u32*)0x020922FC = 0xE3A05001; // mov r5, #1
 		*(u32*)0x02092FC4 = 0xE12FFF1E; // bx lr
@@ -2487,8 +2486,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E8404 = 0xE1A00000; // nop
 		*(u32*)0x020E8410 = 0xE1A00000; // nop
 		*(u32*)0x020E8570 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020E85CC, 0xE3A00627); // mov r0, #0x2700000
-		//patchHiHeapDSiWare(0x020E85CC, 0xE3A0078F); // mov r0, #0x23C0000
+		patchHiHeapDSiWare(0x020E85CC, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 		*(u32*)0x020E8700 = 0x02190100;
 		*(u32*)0x020E9C18 = 0xE1A00000; // nop
 		*(u32*)0x020E9C1C = 0xE1A00000; // nop
