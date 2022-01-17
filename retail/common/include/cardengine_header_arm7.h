@@ -91,7 +91,6 @@ typedef struct cardengineArm7 {
 		9: ipcEveryFrame
 		31: scfgLocked
 	*/
-	u32 overlaysSize;
     u32* languageAddr;
     u8 language;
     u8 consoleModel;

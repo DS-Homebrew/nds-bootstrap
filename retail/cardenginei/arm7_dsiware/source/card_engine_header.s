@@ -21,7 +21,6 @@
 .global screenshotCluster
 .global pageFileCluster
 .global valueBits
-.global overlaysSize
 .global language
 .global languageAddr
 .global consoleModel
@@ -59,8 +58,6 @@ pageFileCluster:
 cardStruct:
 	.word	0x00000000
 valueBits:
-	.word	0x00000000
-overlaysSize:
 	.word	0x00000000
 languageAddr:
 	.word	0x00000000

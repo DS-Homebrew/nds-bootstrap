@@ -307,7 +307,6 @@ int hookNdsRetailArm7(
 		*vblankHandler = 0x2FFC008;
 	} else {*/
 		extern u32 iUncompressedSize;
-		extern u32 overlaysSize;
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
@@ -348,7 +347,6 @@ int hookNdsRetailArm7(
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
 		}
-		ce7->overlaysSize             = overlaysSize;
 		ce7->language                 = language;
 		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 			ce7->languageAddr = (u32*)0x020DC5DC;
