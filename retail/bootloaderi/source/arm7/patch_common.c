@@ -135,6 +135,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
 	}
 
+	// Chuck E. Cheese's Alien Defense Force (USA)
+	else if (strcmp(romTid, "KUQE") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 4; i++) {
+			u32* offset = (u32*)0x0202D43C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Chuck E. Cheese's Arcade Room (USA)
+	else if (strcmp(romTid, "KUCE") == 0) {
+		*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1

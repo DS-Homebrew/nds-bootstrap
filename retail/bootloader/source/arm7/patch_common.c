@@ -1007,6 +1007,45 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
 	}
 
+	// Chuck E. Cheese's Alien Defense Force (USA)
+	else if (strcmp(romTid, "KUQE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200BB6C = 0xE1A00000; // nop
+		*(u32*)0x0200F008 = 0xE1A00000; // nop
+		*(u32*)0x02012354 = 0xE1A00000; // nop
+		*(u32*)0x020140F0 = 0xE1A00000; // nop
+		*(u32*)0x020140F4 = 0xE1A00000; // nop
+		*(u32*)0x02014100 = 0xE1A00000; // nop
+		*(u32*)0x02014260 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020142BC, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02015504 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201829C = 0xE1A00000; // nop
+		*(u32*)0x0201B9E4 = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		for (int i = 0; i < 4; i++) {
+			u32* offset = (u32*)0x0202D43C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Chuck E. Cheese's Arcade Room (USA)
+	else if (strcmp(romTid, "KUCE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02013978 = 0xE1A00000; // nop
+		*(u32*)0x02016E14 = 0xE1A00000; // nop
+		*(u32*)0x0201A2B0 = 0xE1A00000; // nop
+		*(u32*)0x0201C04C = 0xE1A00000; // nop
+		*(u32*)0x0201C050 = 0xE1A00000; // nop
+		*(u32*)0x0201C05C = 0xE1A00000; // nop
+		*(u32*)0x0201C1BC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C218, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0201D460 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020201F8 = 0xE1A00000; // nop
+		*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x020459F0 = 0xE1A00000; // nop
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
