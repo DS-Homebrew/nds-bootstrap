@@ -1046,6 +1046,45 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020459F0 = 0xE1A00000; // nop
 	}
 
+	// Color Commando (USA)
+	// Color Commando (Europe) (Rev 0)
+	else if (strcmp(romTid, "KXFE") == 0 || (strcmp(romTid, "KXFP") == 0 && ndsHeader->romversion == 0)) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x0200AD6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200CF04 = 0xE1A00000; // nop
+		*(u32*)0x0202D958 = 0xE1A00000; // nop
+		*(u32*)0x02030BC4 = 0xE1A00000; // nop
+		*(u32*)0x02033A58 = 0xE1A00000; // nop
+		*(u32*)0x020357F4 = 0xE1A00000; // nop
+		*(u32*)0x020357F8 = 0xE1A00000; // nop
+		*(u32*)0x02035804 = 0xE1A00000; // nop
+		*(u32*)0x02035964 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020359C0, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02036D70 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02039BF0 = 0xE1A00000; // nop
+	}
+
+	// Color Commando (Europe) (Rev 1)
+	else if (strcmp(romTid, "KXFP") == 0 && ndsHeader->romversion == 1) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x0200AD6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200CF04 = 0xE1A00000; // nop
+		*(u32*)0x0202D884 = 0xE1A00000; // nop
+		*(u32*)0x02030AF0 = 0xE1A00000; // nop
+		*(u32*)0x02033984 = 0xE1A00000; // nop
+		*(u32*)0x02035720 = 0xE1A00000; // nop
+		*(u32*)0x02035724 = 0xE1A00000; // nop
+		*(u32*)0x02035730 = 0xE1A00000; // nop
+		*(u32*)0x02035890 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020358EC, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02036C9C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02039B1C = 0xE1A00000; // nop
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
