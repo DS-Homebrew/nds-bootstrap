@@ -2666,6 +2666,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Sudoku (USA)
+	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
 		if (ndsHeader->romversion == 1) {
 			*(u32*)0x0200698C = 0xE1A00000; // nop
@@ -2694,6 +2695,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchHiHeapDSiWare(0x020AB694, 0xE3A0078F); // mov r0, #0x23C0000
 			*(u32*)0x020B0664 = 0xE1A00000; // nop
 		}
+	}
+
+	// Sudoku (Europe, Australia) (Rev 1)
+	else if (strcmp(romTid, "K4DV") == 0) {
+		*(u32*)0x0200695C = 0xE1A00000; // nop
+		*(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020A06BC = 0xE1A00000; // nop
+		*(u32*)0x020A3ED0 = 0xE1A00000; // nop
+		*(u32*)0x020A974C = 0xE1A00000; // nop
+		*(u32*)0x020AB530 = 0xE1A00000; // nop
+		*(u32*)0x020AB534 = 0xE1A00000; // nop
+		*(u32*)0x020AB540 = 0xE1A00000; // nop
+		*(u32*)0x020AB684 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020AB6E0, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020B06B0 = 0xE1A00000; // nop
 	}
 
 	// Tori to Mame (Japan)

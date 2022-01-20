@@ -118,6 +118,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0
 	}
 
+	// Itsudemo Bomberman (Japan)
+	else if (strcmp(romTid, "KBBJ") == 0) {
+		*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Brain Challenge (USA)
 	else if (strcmp(romTid, "KBCE") == 0) {
 		*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
