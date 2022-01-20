@@ -83,8 +83,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
 	}
 
+	// ARC Style: Everyday Football (Europe, Australia)
+	// ARC Style: Soccer! (Japan)
 	// ARC Style: Soccer! (Korea)
-	else if (strcmp(romTid, "KAZK") == 0) {
+	else if (strncmp(romTid, "KAZ", 3) == 0) {
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
@@ -257,6 +259,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204E5AC = 0xE3A00002; // mov r0, #2
 		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
+	}
+
+	// Mighty Flip Champs! (USA)
+	else if (strcmp(romTid, "KMGE") == 0) {
+		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
+	}
+
+	// Mighty Flip Champs! (Europe, Australia)
+	else if (strcmp(romTid, "KMGV") == 0) {
+		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
+	}
+
+	// Mighty Flip Champs! (Japan)
+	else if (strcmp(romTid, "KMGJ") == 0) {
+		*(u32*)0x0200B184 = 0xE1A00000; // nop
+	}
+
+	// Mighty Milky Way (USA)
+	// Mighty Milky Way (Europe)
+	// Mighty Milky Way (Japan)
+	else if (strncmp(romTid, "KWY", 3) == 0) {
+		*(u32*)0x020054E4 = 0xE1A00000; // nop
 	}
 
 	// Mixed Messages (USA)

@@ -199,6 +199,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02071114 = 0xE1A00000; // nop
 	}
 
+	// 99Bullets (Japan)
+	else if (strcmp(romTid, "K99J") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x02005144 = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005160 = 0xE1A00000; // nop
+		*(u32*)0x02005168 = 0xE1A00000; // nop
+		*(u32*)0x02063618 = 0xE1A00000; // nop
+		*(u32*)0x02069F60 = 0xE1A00000; // nop
+		*(u32*)0x0206BDF0 = 0xE1A00000; // nop
+		*(u32*)0x0206BDF4 = 0xE1A00000; // nop
+		*(u32*)0x0206BE00 = 0xE1A00000; // nop
+		*(u32*)0x0206BF60 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0206BFBC, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020726F0 = 0xE1A00000; // nop
+	}
+
 	// 99Moves (USA)
 	else if (strcmp(romTid, "K9WE") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -591,8 +610,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020661D4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// ARC Style: Everyday Football (Europe, Australia)
+	// DS Download Play requires 8MB of RAM
+	else if (strcmp(romTid, "KAZV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		*(u32*)0x020684E8 = 0xE1A00000; // nop
+		*(u32*)0x0206CAE8 = 0xE1A00000; // nop
+		*(u32*)0x020785D8 = 0xE1A00000; // nop
+		*(u32*)0x0207A544 = 0xE1A00000; // nop
+		*(u32*)0x0207A548 = 0xE1A00000; // nop
+		*(u32*)0x0207A554 = 0xE1A00000; // nop
+		*(u32*)0x0207A6B4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0207A710, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x0207A844 = 0x02299500;
+		*(u32*)0x0207BD88 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BD8C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207BD94 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207BD98 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F598 = 0xE1A00000; // nop
+	}
+
+	// ARC Style: Soccer! (Japan)
 	// ARC Style: Soccer! (Korea)
-	else if (strcmp(romTid, "KAZK") == 0) {
+	else if (strcmp(romTid, "KAZJ") == 0 || strcmp(romTid, "KAZK") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
@@ -955,6 +998,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02041DFC = 0xE12FFF1E; // bx lr
 	}
 
+	// Castle Conqueror: Heroes (USA)
+	// Castle Conqueror: Heroes (Japan)
+	else if (strcmp(romTid, "KC5E") == 0 || strcmp(romTid, "KC5J") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02017744 = 0xE1A00000; // nop
+		*(u32*)0x0201AB7C = 0xE1A00000; // nop
+		*(u32*)0x0201E754 = 0xE1A00000; // nop
+		*(u32*)0x020205D0 = 0xE1A00000; // nop
+		*(u32*)0x020205D4 = 0xE1A00000; // nop
+		*(u32*)0x020205E0 = 0xE1A00000; // nop
+		*(u32*)0x02020740 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202079C, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020208D0 -= 0x30000;
+		*(u32*)0x02021A68 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02024730 = 0xE1A00000; // nop
+	}
+
 	// Castle Conqueror: Heroes (Europe, Australia)
 	else if (strcmp(romTid, "KC5V") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -971,9 +1031,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202465C = 0xE1A00000; // nop
 	}
 
+	// Castle Conqueror: Heroes 2 (USA)
 	// Castle Conqueror: Heroes 2 (Europe, Australia)
+	// Castle Conqueror: Heroes 2 (Japan)
 	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KXCV") == 0 && extendedMemory2) {
+	else if (strncmp(romTid, "KXC", 3) == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
@@ -987,9 +1049,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020710 = 0xE1A00000; // nop
 	}
 
+	// Castle Conqueror: Revolution (USA)
 	// Castle Conqueror: Revolution (Europe, Australia)
 	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KQNV") == 0 && extendedMemory2) {
+	else if (strncmp(romTid, "KQN", 3) == 0 && extendedMemory2) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02005104 = 0xE1A00000; // nop
 		*(u32*)0x02005118 = 0xE1A00000; // nop
@@ -1003,8 +1066,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x0201C080, 0xE3A00627); // mov r0, #0x2700000
 		*(u32*)0x020201DC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0202368C = 0xE1A00000; // nop
-		*(u32*)0x02066CA8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x020642A4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020644BC = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			*(u32*)0x02066CA8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
+		}
 	}
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
@@ -2043,12 +2111,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205C88C = 0xE1A00000; // nop
 	}
 
+	// Mighty Flip Champs! (Japan)
+	else if (strcmp(romTid, "KMGJ") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200B184 = 0xE1A00000; // nop
+		*(u32*)0x0204B538 = 0xE1A00000; // nop
+		*(u32*)0x0204EEB4 = 0xE1A00000; // nop
+		*(u32*)0x02053EA8 = 0xE1A00000; // nop
+		*(u32*)0x02055D34 = 0xE1A00000; // nop
+		*(u32*)0x02055D38 = 0xE1A00000; // nop
+		*(u32*)0x02055D44 = 0xE1A00000; // nop
+		*(u32*)0x02055EA4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02055F00, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0205A99C = 0xE1A00000; // nop
+	}
+
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
+	// Mighty Milky Way (Japan)
 	//
 	// Audio doesn't play on retail consoles
 	// Crashes after completing a stage on retail consoles
-	else if (strcmp(romTid, "KWYE") == 0 || strcmp(romTid, "KWYP") == 0) {
+	else if (strncmp(romTid, "KWY", 3) == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
@@ -2060,9 +2144,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020054E4 = 0xE1A00000; // nop
 		*(u32*)0x020057AC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02005A20 = 0xE1A00000; // nop
+		*(u32*)0x02005A24 = 0xE1A00000; // nop
 		*(u32*)0x02005A28 = 0xE1A00000; // nop
 		*(u32*)0x02005A2C = 0xE1A00000; // nop
-		*(u32*)0x02005A20 = 0xE1A00000; // nop
+		*(u32*)0x02005A30 = 0xE1A00000; // nop
 		*(u32*)0x02005A38 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			// Skip loading sdat and sfx files
@@ -2072,20 +2157,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020084C0 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02008588 = 0xE12FFF1E; // bx lr
 		}
-		*(u32*)0x02064E34 = 0xE1A00000; // nop
-		*(u32*)0x0206CCE0 = 0xE1A00000; // nop
-		*(u32*)0x0206EB6C = 0xE1A00000; // nop
-		*(u32*)0x0206EB70 = 0xE1A00000; // nop
-		*(u32*)0x0206EB7C = 0xE1A00000; // nop
-		*(u32*)0x0206ECDC = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0206ED38, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
-		*(u32*)0x0206EE6C -= 0x30000;
-		*(u32*)0x02070384 = 0xE1A00000; // nop
-		*(u32*)0x02070388 = 0xE1A00000; // nop
-		*(u32*)0x0207038C = 0xE1A00000; // nop
-		*(u32*)0x02070390 = 0xE1A00000; // nop
-		*(u32*)0x0207039C = 0xE1A00000; // nop (Enable error exception screen)
-		*(u32*)0x0207388C = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'J') {
+			*(u32*)0x02064FB0 = 0xE1A00000; // nop
+			*(u32*)0x02068924 = 0xE1A00000; // nop
+			*(u32*)0x0206CE5C = 0xE1A00000; // nop
+			*(u32*)0x0206ECE8 = 0xE1A00000; // nop
+			*(u32*)0x0206ECEC = 0xE1A00000; // nop
+			*(u32*)0x0206ECF8 = 0xE1A00000; // nop
+			*(u32*)0x0206EE58 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206EEB4, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+			*(u32*)0x0206EFE8 -= 0x30000;
+			*(u32*)0x02070500 = 0xE1A00000; // nop
+			*(u32*)0x02070504 = 0xE1A00000; // nop
+			*(u32*)0x02070508 = 0xE1A00000; // nop
+			*(u32*)0x0207050C = 0xE1A00000; // nop
+			*(u32*)0x02070518 = 0xE1A00000; // nop (Enable error exception screen)
+			*(u32*)0x02073A08 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02064E34 = 0xE1A00000; // nop
+			*(u32*)0x020687A8 = 0xE1A00000; // nop
+			*(u32*)0x0206CCE0 = 0xE1A00000; // nop
+			*(u32*)0x0206EB6C = 0xE1A00000; // nop
+			*(u32*)0x0206EB70 = 0xE1A00000; // nop
+			*(u32*)0x0206EB7C = 0xE1A00000; // nop
+			*(u32*)0x0206ECDC = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206ED38, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+			*(u32*)0x0206EE6C -= 0x30000;
+			*(u32*)0x02070384 = 0xE1A00000; // nop
+			*(u32*)0x02070388 = 0xE1A00000; // nop
+			*(u32*)0x0207038C = 0xE1A00000; // nop
+			*(u32*)0x02070390 = 0xE1A00000; // nop
+			*(u32*)0x0207039C = 0xE1A00000; // nop (Enable error exception screen)
+			*(u32*)0x0207388C = 0xE1A00000; // nop
+		}
 	}
 
 	// Mixed Messages (USA)
