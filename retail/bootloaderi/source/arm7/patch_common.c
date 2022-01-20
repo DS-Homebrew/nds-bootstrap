@@ -175,6 +175,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
 	}
 
+	// DotMan (USA)
+	else if (strcmp(romTid, "KHEE") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x02022600;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// DotMan (Europe)
+	else if (strcmp(romTid, "KHEP") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x020226DC;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop
