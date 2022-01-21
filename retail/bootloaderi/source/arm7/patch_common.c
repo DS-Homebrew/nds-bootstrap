@@ -66,11 +66,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 	}
 
-	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
-	if (strcmp(romTid, "K72V") == 0) {
-		*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
-	}
-
 	// A Little Bit of... Puzzle League (Europe, Australia)
 	else if (strcmp(romTid, "KPNV") == 0) {
 		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
@@ -175,6 +170,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020771D0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207742C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
+	}
+
+	// GO Series: Defense Wars (USA)
+	// GO Series: Defence Wars (Europe)
+	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200CC98;
+			offset[i] = 0xE1A00000; // nop
+		}
 	}
 
 	// DotMan (USA)
@@ -329,6 +334,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
 	}
 
+	// A Little Bit of... Puzzle League (Europe, Australia)
+	else if (strcmp(romTid, "KPNE") == 0) {
+		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Chotto Panel de Pon (Japan)
+	else if (strcmp(romTid, "KPNJ") == 0) {
+		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
@@ -361,6 +376,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Sudoku (USA)
+	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
 		if (ndsHeader->romversion == 1) {
 			*(u32*)0x0203701C = 0xE3A00001; // mov r0, #1
@@ -369,6 +385,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0203609C = 0xE3A00001; // mov r0, #1
 			*(u32*)0x020360A0 = 0xE12FFF1E; // bx lr
 		}
+	}
+
+	// Sudoku (Europe, Australia) (Rev 1)
+	else if (strcmp(romTid, "K4DV") == 0) {
+		*(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
 	}
 
 	// Tetris Party Live (USA)
@@ -381,6 +403,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KTEV") == 0) {
 		*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+	}
+
+	// True Swing Golf Express (USA)
+	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
+	if (strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) {
+		*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 	}
 
 	// White-Water Domo (USA)

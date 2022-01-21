@@ -1075,6 +1075,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chronos Twins: One Hero in Two Times (USA)
+	// Overlay-related crash
+	/*else if (strcmp(romTid, "K9TE") == 0) {
+		*(u32*)0x0200B7AC = 0xE1A00000; // nop
+		*(u32*)0x0200F400 = 0xE1A00000; // nop
+		*(u32*)0x02013488 = 0xE1A00000; // nop
+		*(u32*)0x0201526C = 0xE1A00000; // nop
+		*(u32*)0x02015270 = 0xE1A00000; // nop
+		*(u32*)0x0201527C = 0xE1A00000; // nop
+		*(u32*)0x020153C0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201541C, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02019000 = 0xE1A00000; // nop
+	}*/
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -1219,7 +1233,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// GO Series: Defense Wars (USA)
-	else if (strcmp(romTid, "KWTE") == 0) {
+	// GO Series: Defence Wars (Europe)
+	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0200722C = 0xE1A00000; // nop
 		*(u32*)0x0200B350 = 0xE1A00000; // nop
