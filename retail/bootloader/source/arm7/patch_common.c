@@ -1971,6 +1971,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02024A4C = 0xE1A00000; // nop
 	}
 
+	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
+	else if (strcmp(romTid, "KT9J") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop
+		*(u32*)0x020051D8 = 0xE1A00000; // nop
+		*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0200E8C8 = 0xE1A00000; // nop
+		*(u32*)0x02011D64 = 0xE1A00000; // nop
+		*(u32*)0x020157E0 = 0xE1A00000; // nop
+		*(u32*)0x0201757C = 0xE1A00000; // nop
+		*(u32*)0x02017580 = 0xE1A00000; // nop
+		*(u32*)0x0201758C = 0xE1A00000; // nop
+		*(u32*)0x020176EC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02017748, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0201BD34 = 0xE1A00000; // nop
+		*(u32*)0x0201D8C0 = 0xE1A00000; // nop
+		*(u32*)0x020248BC = 0xE1A00000; // nop
+		*(u32*)0x02024974 = 0xE1A00000; // nop
+	}
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
@@ -2648,7 +2668,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020168FC = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02016958, 0xE3A0078F); // mov r0, #0x23C0000
 		*(u32*)0x0201A848 = 0xE1A00000; // nop
-		if (strcmp(romTid, "KLBE") == 0) {
+		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0202663C = 0xE1A00000; // nop
 			*(u32*)0x020266F8 = 0xE1A00000; // nop
 		} else {
@@ -2657,9 +2677,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Akushon Pazuru: Rabi x Rabi (Japan)
+	else if (strcmp(romTid, "KLBJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005190 = 0xE1A00000; // nop
+		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0200DBAC = 0xE1A00000; // nop
+		*(u32*)0x020148C8 = 0xE1A00000; // nop
+		*(u32*)0x0201665C = 0xE1A00000; // nop
+		*(u32*)0x02016660 = 0xE1A00000; // nop
+		*(u32*)0x0201666C = 0xE1A00000; // nop
+		*(u32*)0x020167CC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02016828, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0201A718 = 0xE1A00000; // nop
+		*(u32*)0x02026BD0 = 0xE1A00000; // nop
+		*(u32*)0x02026CB4 = 0xE1A00000; // nop
+	}
+
 	// Rabi Laby 2 (USA)
 	// Rabi Laby 2 (Europe)
-	else if (strcmp(romTid, "KLVE") == 0 || strcmp(romTid, "KLVP") == 0) {
+	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
+	else if (strncmp(romTid, "KLV", 3) == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x020051E8 = 0xE1A00000; // nop
 		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)

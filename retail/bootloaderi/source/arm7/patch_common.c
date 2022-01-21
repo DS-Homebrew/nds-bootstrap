@@ -259,6 +259,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
+	else if (strcmp(romTid, "KT9J") == 0) {
+		*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Libera Wing (Europe)
 	else if (strcmp(romTid, "KLWP") == 0) {
 		*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -359,9 +364,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Akushon Pazuru: Rabi x Rabi (Japan)
+	else if (strcmp(romTid, "KLBJ") == 0) {
+		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rabi Laby 2 (USA)
 	// Rabi Laby 2 (Europe)
-	else if (strcmp(romTid, "KLVE") == 0 || strcmp(romTid, "KLVP") == 0) {
+	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
+	else if (strncmp(romTid, "KLV", 3) == 0) {
 		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
