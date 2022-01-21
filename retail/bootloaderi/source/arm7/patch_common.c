@@ -78,6 +78,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
 	}
 
+	// Everyday Soccer (USA)
 	// ARC Style: Everyday Football (Europe, Australia)
 	// ARC Style: Soccer! (Japan)
 	// ARC Style: Soccer! (Korea)

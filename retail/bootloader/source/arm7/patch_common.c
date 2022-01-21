@@ -610,6 +610,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020661D4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Everyday Soccer (USA)
+	// DS Download Play requires 8MB of RAM
+	else if (strcmp(romTid, "KAZE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0200DC9C = 0xE1A00000; // nop
+		*(u32*)0x02068414 = 0xE1A00000; // nop
+		*(u32*)0x0206CA14 = 0xE1A00000; // nop
+		*(u32*)0x02078504 = 0xE1A00000; // nop
+		*(u32*)0x0207A470 = 0xE1A00000; // nop
+		*(u32*)0x0207A474 = 0xE1A00000; // nop
+		*(u32*)0x0207A480 = 0xE1A00000; // nop
+		*(u32*)0x0207A5E0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0207A63C, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x0207A770 = 0x02299500;
+		*(u32*)0x0207BCB4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BCB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207BCC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207BCC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F4C4 = 0xE1A00000; // nop
+	}
+
 	// ARC Style: Everyday Football (Europe, Australia)
 	// DS Download Play requires 8MB of RAM
 	else if (strcmp(romTid, "KAZV") == 0) {
