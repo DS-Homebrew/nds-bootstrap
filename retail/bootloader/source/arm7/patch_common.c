@@ -1318,6 +1318,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// DotMan (Japan)
+	else if (strcmp(romTid, "KHEJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005358 = 0xE1A00000; // nop
+		*(u32*)0x0200E014 = 0xE1A00000; // nop
+		*(u32*)0x02011568 = 0xE1A00000; // nop
+		*(u32*)0x02014F54 = 0xE1A00000; // nop
+		*(u32*)0x02016CE8 = 0xE1A00000; // nop
+		*(u32*)0x02016CEC = 0xE1A00000; // nop
+		*(u32*)0x02016CF8 = 0xE1A00000; // nop
+		*(u32*)0x02016E58 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02016EB4, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020180FC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201AD84 = 0xE1A00000; // nop
+		*(u32*)0x0201D080 = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0202248C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Dr. Mario Express (USA)
 	// Stuck "Save data is corrupt" message with font missing
 	/*else if (strcmp(romTid, "KD9E") == 0) {

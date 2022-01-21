@@ -200,6 +200,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// DotMan (Japan)
+	else if (strcmp(romTid, "KHEJ") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0202248C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop
