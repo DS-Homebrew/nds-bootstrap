@@ -1680,6 +1680,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02046678 = 0xE1A00000; // nop
 	}
 
+	// Frogger Returns (USA)
+	else if (strcmp(romTid, "KFGE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020117D4 = 0xE1A00000; // nop
+		*(u32*)0x020152F0 = 0xE1A00000; // nop
+		*(u32*)0x0201A220 = 0xE1A00000; // nop
+		*(u32*)0x0201C040 = 0xE1A00000; // nop
+		*(u32*)0x0201C044 = 0xE1A00000; // nop
+		*(u32*)0x0201C050 = 0xE1A00000; // nop
+		*(u32*)0x0201C1B0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C20C, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x02020C60 = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x0204B968 = 0xE1A00000; // nop
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0204B98C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Game & Watch: Ball (USA, Europe)
 	// Softlocks after a miss or exiting gameplay
 	else if (strcmp(romTid, "KGBO") == 0) {

@@ -112,7 +112,7 @@ static void initialize(void) {
 		personalData->language = language;
 	}
 
-	toncset((u8*)0x06020000, 0, 0x20000);	// Clear bootloader
+	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 
 	initialized = true;
 }

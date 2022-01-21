@@ -247,8 +247,6 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 		return 2;
 	}
 
-	u32 bootloaderSize = (dsiFeatures() && !conf->b4dsMode) ? 0x40000 : 0x20000;
-
 	loadCrt0* loader = (loadCrt0*)loaderBin;
 
 	loader->storedFileCluster = cluster;
@@ -292,36 +290,28 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	loader->valueBits3                  = conf->valueBits3;
 
-	if (!dsiFeatures() || conf->b4dsMode) {
-		lc0 = (loadCrt0*)LOAD_CRT0_LOCATION_B4DS;
-	}
-
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);
 
 	// Direct CPU access to VRAM banks C & D
-	if (dsiFeatures() && !conf->b4dsMode) {
-		VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
-	}
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 
 	// Set the parameters for the loader
 
 	// Load the loader into the correct address
-	tonccpy(lc0, loader, bootloaderSize); //vramcpy(LCDC_BANK_D, loader, loaderSize);
+	tonccpy(lc0, loader, 0x40000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
-		if (!dldiPatchLoader ((data_t*)lc0, bootloaderSize, conf->initDisc)) {
+		if (!dldiPatchLoader ((data_t*)lc0, 0x40000, conf->initDisc)) {
 			return 3;
 		}
 	}
 
 	// Give the VRAM to the ARM7
 	nocashMessage("Give the VRAM to the ARM7");
-	if (dsiFeatures() && !conf->b4dsMode) {
-		VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
-	}
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
 
 	if (dsiFeatures() && conf->b4dsMode) {
@@ -340,7 +330,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(dsiFeatures() && !conf->b4dsMode ? 0x06000000 : 0x06020000);	
+	resetARM7(0x06000000);	
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");
