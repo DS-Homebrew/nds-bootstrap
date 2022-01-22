@@ -87,6 +87,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x0200EF4C, 0xE3A00627); // mov r0, #0x2700000
 	}
 
+	// NOE Movie Player: Volume 1 (Europe)
+	else if (strcmp(romTid, "DMDP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02009ED8 = 0xE1A00000; // nop
+		*(u32*)0x0200D0D8 = 0xE1A00000; // nop
+		*(u32*)0x0200EE00 = 0xE1A00000; // nop
+		*(u32*)0x02010630 = 0xE1A00000; // nop
+		*(u32*)0x02010634 = 0xE1A00000; // nop
+		*(u32*)0x02010640 = 0xE1A00000; // nop
+		*(u32*)0x020107A0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020107FC, 0xE3A0078F); // mov r0, #0x23C0000
+	}
+
 	// Picture Perfect Hair Salon (USA)
 	// Hair Salon (Europe/Australia)
 	// Requires 8MB of RAM
