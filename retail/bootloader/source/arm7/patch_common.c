@@ -88,7 +88,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// NOE Movie Player: Volume 1 (Europe)
-	else if (strcmp(romTid, "DMDP") == 0) {
+	else if (strcmp(romTid, "DMPP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02009ED8 = 0xE1A00000; // nop
 		*(u32*)0x0200D0D8 = 0xE1A00000; // nop
