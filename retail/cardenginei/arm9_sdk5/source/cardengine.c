@@ -211,11 +211,8 @@ static inline bool checkArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
 	if (!IPC_SYNC_hooked) {
-		u32* vblankHandler = ce9->irqTable;
 		u32* ipcSyncHandler = ce9->irqTable + 16;
-		ce9->intr_vblank_orig_return = *vblankHandler;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
-		*vblankHandler = ce9->patches->vblankHandlerRef;
 		*ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
 		IPC_SYNC_hooked = true;
 	}
@@ -1007,8 +1004,20 @@ void reset(u32 param, u32 tid2) {
 
 	if (igmReset) {
 		igmReset = false;
+#ifdef TWLSDK
+		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
+			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
+		}
+#endif
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+#ifdef TWLSDK
+		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+			*(u32*)0x02FFC230 = 0;
+			*(u32*)0x02FFC234 = 0;
+		}
+#endif
 	}
 
 	// Clear out ARM9 DMA channels

@@ -119,11 +119,13 @@ static void waitForArm7(void) {
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
     if (!IPC_SYNC_hooked) {
-        u32* vblankHandler = ce9->irqTable;
+		if (!(ce9->valueBits & isSdk5)) {
+			u32* vblankHandler = ce9->irqTable;
+			ce9->intr_vblank_orig_return = *vblankHandler;
+			*vblankHandler = ce9->patches->vblankHandlerRef;
+		}
         u32* ipcSyncHandler = ce9->irqTable + 16;
-		ce9->intr_vblank_orig_return = *vblankHandler;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
-        *vblankHandler = ce9->patches->vblankHandlerRef;
         *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
@@ -456,7 +458,7 @@ void reset(u32 param, u32 tid2) {
 	if (ndsHeader->unitCode == 0 || (*(u32*)0x02FFE234 != 0x00030004 && *(u32*)0x02FFE234 != 0x00030005)) {
 		*(u32*)resetParam = param;
 	}
-	if (ndsHeader->unitCode > 0 && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) { // If DSiWare...
+	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		if (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
 			if (ce9->consoleModel < 2) {
 				// Make screens white
@@ -501,8 +503,18 @@ void reset(u32 param, u32 tid2) {
 
 	if (igmReset) {
 		igmReset = false;
+
+		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
+			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
+		}
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+
+		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+			*(u32*)0x02FFC230 = 0;
+			*(u32*)0x02FFC234 = 0;
+		}
 	}
 
 	// Clear out ARM9 DMA channels
@@ -526,7 +538,7 @@ void reset(u32 param, u32 tid2) {
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
 
-	if (ndsHeader->unitCode > 0 && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) { // If DSiWare...
+	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -634,7 +646,7 @@ void myIrqHandlerIPC(void) {
 				}
 				if (sharedAddr[3] == 0x52534554) {
 					igmReset = true;
-					if (ndsHeader->unitCode > 0 && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) { // If DSiWare...
+					if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 						reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
 					} else {
 						reset(0, 0);

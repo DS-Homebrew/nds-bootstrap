@@ -247,6 +247,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Frogger Returns (USA)
+	else if (strcmp(romTid, "KFGE") == 0) {
+		// Skip Manual screen
+		*(u32*)0x0204B968 = 0xE1A00000; // nop
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0204B98C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		*(u16*)0x0200D060 = 0x2001; // movs r0, #1
