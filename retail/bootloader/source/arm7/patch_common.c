@@ -42,10 +42,15 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 	extern bool expansionPakFound;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 opCode);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2);
+
+	if (donorFileTwlCluster == 0) {
+		return;
+	}
 
 	// Patch DSi-Exclusives to run in DS mode
 
