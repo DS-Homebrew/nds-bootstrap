@@ -112,6 +112,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
+	// 1950s Lawn Mower Kids (USA)
+	// 1950s Lawn Mower Kids (Europe, Australia)
+	else if (strcmp(romTid, "K95E") == 0 || strcmp(romTid, "K95V") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02019608 = 0xE1A00000; // nop
+		*(u32*)0x02015A08 = 0xE1A00000; // nop
+		*(u32*)0x0201D8BC = 0xE1A00000; // nop
+		*(u32*)0x0201F658 = 0xE1A00000; // nop
+		*(u32*)0x0201F65C = 0xE1A00000; // nop
+		*(u32*)0x0201F668 = 0xE1A00000; // nop
+		*(u32*)0x0201F7C8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F824, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02020DD8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023C1C = 0xE1A00000; // nop
+		doubleNopT(0x020471B0);
+		*(u16*)0x0204713C = 0x4770; // bx lr
+		*(u16*)0x0204715C = 0x4770; // bx lr
+	}
+
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
 	// Sound either does not play or stop too quickly
