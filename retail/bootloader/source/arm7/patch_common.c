@@ -1227,6 +1227,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02039B1C = 0xE1A00000; // nop
 	}
 
+	// CuteWitch! runner (USA)
+	// CuteWitch! runner (Europe)
+	// Stage music doesn't play on retail consoles
+	else if (strncmp(romTid, "K32", 3) == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0201B8CC = 0xE1A00000; // nop
+		*(u32*)0x0201ED48 = 0xE1A00000; // nop
+		*(u32*)0x020234D4 = 0xE1A00000; // nop
+		*(u32*)0x02025304 = 0xE1A00000; // nop
+		*(u32*)0x02025308 = 0xE1A00000; // nop
+		*(u32*)0x02025314 = 0xE1A00000; // nop
+		*(u32*)0x02025474 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020254D0, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02026978 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02029700 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02062068 = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02093AA4 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1

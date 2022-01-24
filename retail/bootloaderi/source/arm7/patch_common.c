@@ -173,6 +173,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
 	}
 
+	// CuteWitch! runner (USA)
+	// CuteWitch! runner (Europe)
+	else if (strncmp(romTid, "K32", 3) == 0) {
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02062068 = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02093AA4 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
 	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
