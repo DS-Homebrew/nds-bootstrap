@@ -443,6 +443,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 	}
 
+	// Wakugumi: Monochrome Puzzle (Europe, Australia)
+	else if (strcmp(romTid, "KK4V") == 0) {
+		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
 		*(u16*)0x0200C918 = 0x2001; // movs r0, #1

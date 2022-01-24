@@ -3052,6 +3052,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020D515E);
 	}*/
 
+	// Wakugumi: Monochrome Puzzle (Europe, Australia)
+	else if (strcmp(romTid, "KK4V") == 0) {
+		*(u32*)0x02005A38 = 0xE1A00000; // nop
+		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020668F8 = 0xE1A00000; // nop
+		*(u32*)0x0206A538 = 0xE1A00000; // nop
+		*(u32*)0x0206EA28 = 0xE1A00000; // nop
+		*(u32*)0x02070804 = 0xE1A00000; // nop
+		*(u32*)0x02070808 = 0xE1A00000; // nop
+		*(u32*)0x02070814 = 0xE1A00000; // nop
+		*(u32*)0x02070958 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020709B4, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020754C0 = 0xE1A00000; // nop
+	}
+
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
 		*(u16*)0x0200C918 = 0x2001; // movs r0, #1
