@@ -2642,7 +2642,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// GO Series: Portable Shrine Wars (USA)
-	else if (strcmp(romTid, "KOQE") == 0) {
+	// GO Series: Portable Shrine Wars (Europe)
+	else if (strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x020073E0 = 0xE1A00000; // nop
 		*(u32*)0x0200E004 = 0xE1A00000; // nop  (Disable NFTR loading from TWLNAND)

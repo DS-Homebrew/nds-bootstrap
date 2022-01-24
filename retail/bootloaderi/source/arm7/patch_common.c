@@ -337,8 +337,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// GO Series: Portable Shrine Wars (USA)
-	else if (strcmp(romTid, "KOQE") == 0) {
-		*(u32*)0x0200E004 = 0xE1A00000; // nop  (Disable NFTR loading from TWLNAND)
+	// GO Series: Portable Shrine Wars (Europe)
+	else if (strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) {
+		*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
