@@ -939,11 +939,6 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 		return 0;
 	}
 
-	if(startOffset<file.currentOffset) {
-		file.currentOffset=0;
-		file.currentCluster = file.firstCluster;
-	}
-
 	if(file.fatTableCached) {
     	#ifdef DEBUG
         nocashMessage("fat table cached");
