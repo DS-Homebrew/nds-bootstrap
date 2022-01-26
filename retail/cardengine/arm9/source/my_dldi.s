@@ -95,7 +95,7 @@ _DLDI_shutdown:
 	.align
 	.pool
 
-	.space (__mydldi_start + 16384) - .	@ Fill to 16KiB
+	.space (__mydldi_start + 15360) - .	@ Fill to 15KiB
 
 _dldi_end:
 	.end
