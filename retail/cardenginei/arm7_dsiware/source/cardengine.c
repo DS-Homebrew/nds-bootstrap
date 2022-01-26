@@ -58,6 +58,7 @@ static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
 static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
+extern u32 saveCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
@@ -81,6 +82,9 @@ static bool driveInited = false;
 static bool bootloaderCleared = false;
 static bool swapScreens = false;
 
+#ifdef CARDSAVE
+static aFile savFile;
+#endif
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
@@ -182,6 +186,9 @@ static void driveInitialize(void) {
 	}
 	FAT_InitFiles(false, false, 0);
 
+	#ifdef CARDSAVE
+	savFile = getFileFromCluster(saveCluster);
+	#endif
 	ramDumpFile = getFileFromCluster(ramDumpCluster);
 	srParamsFile = getFileFromCluster(srParamsCluster);
 	screenshotFile = getFileFromCluster(screenshotCluster);
@@ -240,6 +247,24 @@ void restoreBakData(void) {
 	*(vu32*)0x4004820 = sdMaskBak;
 	i2cWriteRegister(0x4A, 0x12, 0x01);
 }
+
+#ifdef CARDSAVE
+void bakSdData(void) {
+	auxIeBak = REG_AUXIE;
+	sdStatBak = *(vu32*)0x400481C;
+	sdMaskBak = *(vu32*)0x4004820;
+
+	REG_AUXIE &= ~(1UL << 8);
+	*(vu32*)0x400481C = 0;
+	*(vu32*)0x4004820 = 0;
+}
+
+void restoreSdBakData(void) {
+	REG_AUXIE = auxIeBak;
+	*(vu32*)0x400481C = sdStatBak;
+	*(vu32*)0x4004820 = sdMaskBak;
+}
+#endif
 
 void reset(void) {
 	register int i, reg;
@@ -648,3 +673,199 @@ u32 myIrqEnable(u32 irq) {
 	leaveCriticalSection(oldIME);
 	return irq_before;
 }
+
+#ifdef CARDSAVE
+//
+// ARM7 Redirected functions
+//
+
+bool eepromProtect(void) {
+	#ifdef DEBUG		
+	dbg_printf("\narm7 eepromProtect\n");
+	#endif	
+	
+	return true;
+}
+
+bool eepromRead(u32 src, void *dst, u32 len) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromRead\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa((u32)dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	#endif	
+
+	bakSdData();
+	driveInitialize();
+	fileRead(dst, savFile, src, len, !sdRead, -1);
+	restoreSdBakData();
+
+	return true;
+}
+
+bool eepromPageWrite(u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageWrite\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa((u32)src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	#endif	
+	
+	bakSdData();
+	driveInitialize();
+	fileWrite(src, savFile, dst, len, !sdRead, -1);
+	restoreSdBakData();
+
+	return true;
+}
+
+bool eepromPageProg(u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageProg\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa((u32)src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	#endif	
+
+	bakSdData();
+	driveInitialize();
+	fileWrite(src, savFile, dst, len, !sdRead, -1);
+	restoreSdBakData();
+
+	return true;
+}
+
+bool eepromPageVerify(u32 dst, const void *src, u32 len) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageVerify\n");	
+	
+	dbg_printf("\nsrc : \n");
+	dbg_hexa((u32)src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa(dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	#endif	
+
+	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
+	//fileWrite(src, savFile, dst, len, -1);
+	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
+	return true;
+}
+
+bool eepromPageErase (u32 dst) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 eepromPageErase\n");	
+	#endif	
+
+	// TODO: this should be implemented?
+	return true;
+}
+
+/*
+TODO: return the correct ID
+
+From gbatek 
+Returns RAW unencrypted Chip ID (eg. C2h,0Fh,00h,00h), repeated every 4 bytes.
+  1st byte - Manufacturer (eg. C2h=Macronix) (roughly based on JEDEC IDs)
+  2nd byte - Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?)
+  3rd byte - Flags (see below)
+  4th byte - Flags (see below)
+The Flag Bits in 3th byte can be
+  0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
+  1   Unknown (set in some 3DS carts)
+  2-7 Zero
+The Flag Bits in 4th byte can be
+  0-2 Zero
+  3   Seems to be NAND flag (0=ROM, 1=NAND) (observed in only ONE cartridge)
+  4   3DS Flag (0=NDS/DSi, 1=3DS)
+  5   Zero   ... set in ... DSi-exclusive games?
+  6   DSi flag (0=NDS/3DS, 1=DSi)
+  7   Cart Protocol Variant (0=older/smaller carts, 1=newer/bigger carts)
+
+Existing/known ROM IDs are:
+  C2h,07h,00h,00h NDS Macronix 8MB ROM  (eg. DS Vision)
+  AEh,0Fh,00h,00h NDS Noname   16MB ROM (eg. Meine Tierarztpraxis)
+  C2h,0Fh,00h,00h NDS Macronix 16MB ROM (eg. Metroid Demo)
+  C2h,1Fh,00h,00h NDS Macronix 32MB ROM (eg. Over the Hedge)
+  C2h,1Fh,00h,40h DSi Macronix 32MB ROM (eg. Art Academy, TWL-VAAV, SystemFlaw)
+  80h,3Fh,01h,E0h ?            64MB ROM+Infrared (eg. Walk with Me, NTR-IMWP)
+  AEh,3Fh,00h,E0h DSi Noname   64MB ROM (eg. de Blob 2, TWL-VD2V)
+  C2h,3Fh,00h,00h NDS Macronix 64MB ROM (eg. Ultimate Spiderman)
+  C2h,3Fh,00h,40h DSi Macronix 64MB ROM (eg. Crime Lab, NTR-VAOP)
+  80h,7Fh,00h,80h NDS SanDisk  128MB ROM (DS Zelda, NTR-AZEP-0)
+  80h,7Fh,01h,E0h ?            128MB ROM+Infrared? (P-letter Soul Silver, IPGE)
+  C2h,7Fh,00h,80h NDS Macronix 128MB ROM (eg. Spirit Tracks, NTR-BKIP)
+  C2h,7Fh,00h,C0h DSi Macronix 128MB ROM (eg. Cooking Coach/TWL-VCKE)
+  ECh,7Fh,00h,88h NDS Samsung  128MB NAND (eg. Warioware D.I.Y.)
+  ECh,7Fh,01h,88h NDS Samsung? 128MB NAND+What? (eg. Jam with the Band, UXBP)
+  ECh,7Fh,00h,E8h DSi Samsung? 128MB NAND (eg. Face Training, USKV)
+  80h,FFh,80h,E0h NDS          256MB ROM (Kingdom Hearts - Re-Coded, NTR-BK9P)
+  C2h,FFh,01h,C0h DSi Macronix 256MB ROM+Infrared? (eg. P-Letter White)
+  C2h,FFh,00h,80h NDS Macronix 256MB ROM (eg. Band Hero, NTR-BGHP)
+  C2h,FEh,01h,C0h DSi Macronix 512MB ROM+Infrared? (eg. P-Letter White 2)
+  C2h,FEh,00h,90h 3DS Macronix probably 512MB? ROM (eg. Sims 3)
+  45h,FAh,00h,90h 3DS SunDisk? maybe... 1.5GB? ROM (eg. Starfox)
+  C2h,F8h,00h,90h 3DS Macronix maybe... 2GB?   ROM (eg. Kid Icarus)
+  C2h,7Fh,00h,90h 3DS Macronix 128MB ROM CTR-P-AENJ MMinna no Ennichi
+  C2h,FFh,00h,90h 3DS Macronix 256MB ROM CTR-P-AFSJ Pro Yakyuu Famista 2011
+  C2h,FEh,00h,90h 3DS Macronix 512MB ROM CTR-P-AFAJ Real 3D Bass FishingFishOn
+  C2h,FAh,00h,90h 3DS Macronix 1GB ROM CTR-P-ASUJ Hana to Ikimono Rittai Zukan
+  C2h,FAh,02h,90h 3DS Macronix 1GB ROM CTR-P-AGGW Luigis Mansion 2 ASiA CHT
+  C2h,F8h,00h,90h 3DS Macronix 2GB ROM CTR-P-ACFJ Castlevania - Lords of Shadow
+  C2h,F8h,02h,90h 3DS Macronix 2GB ROM CTR-P-AH4J Monster Hunter 4
+  AEh,FAh,00h,90h 3DS          1GB ROM CTR-P-AGKJ Gyakuten Saiban 5
+  AEh,FAh,00h,98h 3DS          1GB NAND CTR-P-EGDJ Tobidase Doubutsu no Mori
+  45h,FAh,00h,90h 3DS          1GB ROM CTR-P-AFLJ Fantasy Life
+  45h,F8h,00h,90h 3DS          2GB ROM CTR-P-AVHJ Senran Kagura Burst - Guren
+  C2h,F0h,00h,90h 3DS Macronix 4GB ROM CTR-P-ABRJ Biohazard Revelations
+  FFh,FFh,FFh,FFh None (no cartridge inserted)
+*/
+u32 cardId(void) {
+	#ifdef DEBUG	
+	dbg_printf("\ncardId\n");
+	#endif
+    
+    u32 cardid = getChipId(ndsHeader, moduleParams);
+
+    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
+    //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x80FF80E0; // golden sun
+    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xFF000000; // golden sun
+    //if (cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0x000000FF; // golden sun
+
+    #ifdef DEBUG
+    dbg_hexa(cardid);
+    #endif
+    
+	return cardid;
+}
+
+bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
+	#ifdef DEBUG	
+	dbg_printf("\narm7 cardRead\n");	
+	
+	dbg_printf("\ndma : \n");
+	dbg_hexa(dma);		
+	dbg_printf("\nsrc : \n");
+	dbg_hexa(src);		
+	dbg_printf("\ndst : \n");
+	dbg_hexa((u32)dst);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	#endif	
+	
+	return false;
+}
+#endif

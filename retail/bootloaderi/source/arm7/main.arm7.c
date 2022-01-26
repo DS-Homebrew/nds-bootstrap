@@ -1449,6 +1449,9 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
+		/*extern u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
+		savePatchV5((cardengineArm7*)ce7Location, ndsHeader, saveFileCluster);*/
+
 		toncset((u32*)0x02680000, 0, 0x100000);
 
 		errorCode = hookNdsRetailArm7(
