@@ -2631,6 +2631,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02044884 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Picture Perfect: Pocket Stylist (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KHRE") == 0 && extendedMemory2) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200511C = 0xE1A00000; // nop
+		for (int i = 0; i < 7; i++) {
+			u32* offset = (u16*)0x02005194;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x020051B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200D14C = 0xE1A00000; // nop
+		*(u32*)0x0201300C = 0xE1A00000; // nop
+		*(u32*)0x02013144 = 0xE1A00000; // nop
+		*(u32*)0x02013158 = 0xE1A00000; // nop
+		*(u32*)0x02016F98 = 0xE1A00000; // nop
+		*(u32*)0x0201D1DC = 0xE1A00000; // nop
+		*(u32*)0x0201F0E0 = 0xE1A00000; // nop
+		*(u32*)0x0201F0E4 = 0xE1A00000; // nop
+		*(u32*)0x0201F0F0 = 0xE1A00000; // nop
+		*(u32*)0x0201F250 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F2AC, 0xE3A00627); // mov r0, #0x2700000
+		*(u32*)0x0201F3E0 = 0x022B3440;
+		*(u32*)0x02020614 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023D6C = 0xE1A00000; // nop
+		*(u32*)0x02044080 = 0xE1A00000; // nop
+		*(u32*)0x020440A0 = 0xE1A00000; // nop
+		*(u32*)0x0205C7A8 = 0xE1A00000; // nop
+	}
+
 	// Pinball Pulse: The Ancients Beckon (USA)
 	// Incomplete/broken patch
 	/*else if (strcmp(romTid, "KZPE") == 0) {
