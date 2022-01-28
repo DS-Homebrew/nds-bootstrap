@@ -1128,12 +1128,6 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
-		/*case 0x0:
-			if(mainScreen == 1)
-				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
-				REG_POWERCNT |= POWER_SWAP_LCDS;
-			break;*/
 #ifndef DLDI
 #ifndef TWLSDK
 		case 0x3:
@@ -1144,6 +1138,12 @@ void myIrqHandlerIPC(void) {
 			break;
 #endif
 #endif
+		case 0x6:
+			if(mainScreen == 1)
+				REG_POWERCNT &= ~POWER_SWAP_LCDS;
+			else if(mainScreen == 2)
+				REG_POWERCNT |= POWER_SWAP_LCDS;
+			break;
 		case 0x7: {
 			mainScreen++;
 			if(mainScreen > 2)

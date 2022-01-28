@@ -80,6 +80,7 @@ bool sdRead = true;
 static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
+bool ipcEveryFrame = false;
 static bool swapScreens = false;
 
 #ifdef CARDSAVE
@@ -570,9 +571,9 @@ void myIrqHandlerVBlank(void) {
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
 		if (swapTimer == 60){
 			swapTimer = 0;
-			//if (!(valueBits & ipcEveryFrame)) {
+			if (!ipcEveryFrame) {
 				IPC_SendSync(0x7);
-			//}
+			}
 			swapScreens = true;
 		}
 		swapTimer++;
@@ -657,6 +658,12 @@ void myIrqHandlerVBlank(void) {
 	/*if (REG_IE & IRQ_NETWORK) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix (Not needed for DSiWare)
 	}*/
+
+	// Update main screen or swap screens
+	if (ipcEveryFrame) {
+		IPC_SendSync(swapScreens ? 0x7 : 0x6);
+	}
+	swapScreens = false;
 }
 
 u32 myIrqEnable(u32 irq) {	

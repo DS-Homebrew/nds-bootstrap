@@ -14,6 +14,7 @@
 #define REG_EXTKEYINPUT (*(vuint16*)0x04000136)
 
 extern vu32* volatile sharedAddr;
+extern bool ipcEveryFrame;
 extern bool returnToMenu;
 
 extern struct IgmText *igmText;
@@ -75,6 +76,12 @@ void inGameMenu(void) {
 				case 0x54495551: // QUIT
 					returnToLoader();
 					exitMenu = true;
+					break;
+				case 0x59435049: // IPCY
+					ipcEveryFrame = true;
+					break;
+				case 0x4E435049: // IPCN
+					ipcEveryFrame = false;
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();

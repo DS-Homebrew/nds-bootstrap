@@ -377,6 +377,7 @@ static void optionsMenu(s8 *mainScreen) {
 						*mainScreen = 0;
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
+					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
 					break;
 				#ifndef B4DS
 				case 1:

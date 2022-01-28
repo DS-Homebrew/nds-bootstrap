@@ -55,7 +55,6 @@
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define ipcEveryFrame BIT(9)
 #define hiyaCfwFound BIT(10)
 #define slowSoftReset BIT(11)
 #define scfgLocked BIT(31)
@@ -107,6 +106,7 @@ static bool funcsUnpatched = false;
 static bool haltIsRunning = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
+bool ipcEveryFrame = false;
 //static bool dmaLed = false;
 static bool swapScreens = false;
 static bool dmaSignal = false;
@@ -962,7 +962,7 @@ void myIrqHandlerHalt(void) {
 		} else if (!ndmaBusy(0)) {
 			readOngoing = false;
 			sharedAddr[4] = 0;
-			if (valueBits & ipcEveryFrame) {
+			if (ipcEveryFrame) {
 				dmaSignal = true;
 			} else {
 				IPC_SendSync(0x3);
@@ -1092,9 +1092,9 @@ void myIrqHandlerVBlank(void) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
-				//if (!(valueBits & ipcEveryFrame)) {
+				if (!ipcEveryFrame) {
 					IPC_SendSync(0x7);
-				//}
+				}
 				swapScreens = true;
 			}
 		}
@@ -1215,15 +1215,15 @@ void myIrqHandlerVBlank(void) {
 	}*/
 
 	// Update main screen or swap screens
-	/*if (valueBits & ipcEveryFrame) {
+	if (ipcEveryFrame) {
 		if (dmaSignal) {
 			IPC_SendSync(0x3);
 			dmaSignal = false;
 		} else {
-			IPC_SendSync(swapScreens ? 0x7 : 0x0);
+			IPC_SendSync(swapScreens ? 0x7 : 0x6);
 		}
 	}
-	swapScreens = false;*/
+	swapScreens = false;
 }
 
 void i2cIRQHandler(void) {

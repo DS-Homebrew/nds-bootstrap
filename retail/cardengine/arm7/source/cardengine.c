@@ -63,6 +63,9 @@ static bool volumeAdjustActivated = false;*/
 
 //static bool ndmaUsed = false;
 
+bool ipcEveryFrame = false;
+static bool swapScreens = false;
+
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
 static int swapTimer = 0;
@@ -208,7 +211,10 @@ void myIrqHandlerVBlank(void) {
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
 		if (swapTimer == 60){
 			swapTimer = 0;
-			IPC_SendSync(0x7);
+			if (!ipcEveryFrame) {
+				IPC_SendSync(0x7);
+			}
+			swapScreens = true;
 		}
 		swapTimer++;
 	}else{
@@ -241,26 +247,11 @@ void myIrqHandlerVBlank(void) {
 		REG_MASTER_VOLUME = 63;
 	}
 
-	/*if (saveTimer > 0) {
-		saveTimer++;
-		if (saveTimer == 60) {
-			i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-			saveTimer = 0;
-		}
+	// Update main screen or swap screens
+	if (ipcEveryFrame) {
+		IPC_SendSync(swapScreens ? 0x7 : 0x6);
 	}
-
-	if (sharedAddr[3] != 0) {
-		saveReadTimeOut++;
-		if (saveReadTimeOut > 60) {
-			sharedAddr[3] = 0;		// Cancel save read/write, if arm9 does nothing
-		}
-	}*/
-
-	/*#ifdef DEBUG
-	nocashMessage("cheat_engine_start\n");
-	#endif	
-	
-	cheat_engine_start();*/
+	swapScreens = false;
 }
 
 u32 myIrqEnable(u32 irq) {	
