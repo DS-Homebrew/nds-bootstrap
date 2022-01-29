@@ -78,7 +78,7 @@ typedef struct cardengineArm9 {
 		6: overlaysInRam
 		7: cacheFlushFlag
 		8: cardReadFix
-		9: a7HaltPatched
+		9: cacheDisabled
 		10: slowSoftReset
 		11: dsiBios
 	*/

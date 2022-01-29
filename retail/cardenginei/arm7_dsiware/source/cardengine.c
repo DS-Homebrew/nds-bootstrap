@@ -122,7 +122,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x7C00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8C00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -154,8 +154,8 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x7D00);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x7D04);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x8D00);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x8D04);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -359,13 +359,13 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		(*(u32*)(ce7+0x7D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+		(*(u32*)(ce7+0x8D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
 	driveInitialize();
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	if (*(u32*)(ce7+0x7D00) == 0) {
+	if (*(u32*)(ce7+0x8D00) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -394,17 +394,17 @@ void returnToLoader(bool wait) {
 	sharedAddr[4] = 0x57534352;
 	//IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0x7D00) == 0) {
+		if (*(u32*)(ce7+0x8D00) == 0) {
 			if (valueBits & wideCheatUsed) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			}
-		} else if (*(char*)(ce7+0x7D03) == 'H' || *(char*)(ce7+0x7D03) == 'K') {
+		} else if (*(char*)(ce7+0x8D03) == 'H' || *(char*)(ce7+0x8D03) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
 		//waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0x7D00) == 0) {
+		if (*(u32*)(ce7+0x8D00) == 0) {
 			//unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
@@ -413,7 +413,7 @@ void returnToLoader(bool wait) {
 		//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
 
-	if (*(u32*)(ce7+0x7D00) != 0 || (valueBits & wideCheatUsed)) {
+	if (*(u32*)(ce7+0x8D00) != 0 || (valueBits & wideCheatUsed)) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}

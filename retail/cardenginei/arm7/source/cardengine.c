@@ -103,7 +103,6 @@ static bool driveInited = false;
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
-static bool haltIsRunning = false;
 static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 bool ipcEveryFrame = false;
@@ -179,7 +178,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xAC00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xB800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -211,9 +210,9 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xAD00);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xAD04);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xAD04) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0xB900);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0xB904);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xB904) == 0x00030000 ? 0x13 : */ 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -348,9 +347,9 @@ void reset(void) {
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
-		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID
@@ -399,7 +398,6 @@ void reset(void) {
 
 	initialized = false;
 	funcsUnpatched = false;
-	haltIsRunning = false;
 	ipcSyncHooked = false;
 	languageTimer = 0;
 
@@ -542,7 +540,7 @@ void forceGameReboot(void) {
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
 		if (valueBits & b_dsiSD) {
-			(*(u32*)(ce7+0xAD00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xB900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -550,7 +548,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
+	if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -566,15 +564,15 @@ void returnToLoader(bool wait) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		} else if (*(char*)(ce7+0xAD03) == 'H' || *(char*)(ce7+0xAD03) == 'K') {
+		} else if (*(char*)(ce7+0xB903) == 'H' || *(char*)(ce7+0xB903) == 'K') {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xAD00) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
@@ -760,8 +758,10 @@ static void nandWrite(void) {
 }*/
 
 static bool readOngoing = false;
-/*//static int currentCmd=0, currentNdmaSlot=0;
-static int timeTillDmaLedOff = 0;
+static bool sdReadOngoing = false;
+static bool ongoingIsDma = false;
+//static int currentCmd=0, currentNdmaSlot=0;
+//static int timeTillDmaLedOff = 0;
 
 static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
@@ -827,9 +827,41 @@ static bool resume_cardRead_arm9(void) {
     {
         return false;    
     }
-}*/
+}
 
 static inline void sdmmcHandler(void) {
+	if (sdReadOngoing) {
+		if (my_sdmmc_sdcard_check_command(0x33C12, 0)) {
+			sharedAddr[4] = 0;
+			cardReadLED(false, ongoingIsDma);
+			sdReadOngoing = false;
+		}
+		return;
+	}
+
+	if (sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+		if (valueBits & ROMinRAM) {
+			ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
+			sharedAddr[3] = 0;
+		} else if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
+			/*u32 src = sharedAddr[2];
+			u32 dst = sharedAddr[0];
+			u32 len = sharedAddr[1];
+
+			cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
+			fileRead((char*)dst, *romFile, src, len, !sdRead, 0);
+			cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator */
+			sharedAddr[3] = 0;
+		}
+		IPC_SendSync(0x3);
+		return;
+	} else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
+		ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
+		sharedAddr[3] = 0;
+		IPC_SendSync(0x3);
+		return;
+	}
+
 	switch (sharedAddr[4]) {
 		case 0x53445231:
 		case 0x53444D31: {
@@ -846,10 +878,13 @@ static inline void sdmmcHandler(void) {
 			//#ifdef DEBUG		
 			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
 			//#endif
-			bool isDma = sharedAddr[4]==0x53444D41;
-			cardReadLED(true, isDma);
-			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
-			cardReadLED(false, isDma);
+			//bool isDma = sharedAddr[4]==0x53444D41;
+			ongoingIsDma = sharedAddr[4]==0x53444D41;
+			cardReadLED(true, ongoingIsDma);
+			//sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			//cardReadLED(false, ongoingIsDma);
+			/* sharedAddr[4] = */ my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			sdReadOngoing = true;
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
@@ -894,7 +929,7 @@ static void runCardEngineCheck(void) {
   			i2cWriteRegister(0x4A, 0x11, 0x01);
   		}*/
 
-			if (!haltIsRunning && !(valueBits & gameOnFlashcard)) {
+			if (!(valueBits & gameOnFlashcard)) {
 				sdmmcHandler();
 			}
 
@@ -949,27 +984,6 @@ void myIrqHandlerHalt(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerHalt");
 	#endif	
-
-	#ifndef TWLSDK
-	haltIsRunning = true;
-
-	sdmmcHandler();
-
-	if (sharedAddr[4] == (vu32)0x025FFB0A) {	// Card read DMA
-		if (!readOngoing) {
-			ndmaCopyWordsAsynch(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] > 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
-			readOngoing = true;
-		} else if (!ndmaBusy(0)) {
-			readOngoing = false;
-			sharedAddr[4] = 0;
-			if (ipcEveryFrame) {
-				dmaSignal = true;
-			} else {
-				IPC_SendSync(0x3);
-			}
-		}
-	}
-	#endif
 
 	/*if (readOngoing) {
 		timeTillDmaLedOff++;
@@ -1205,14 +1219,6 @@ void myIrqHandlerVBlank(void) {
 		calledViaIPC = false;
 		runCardEngineCheck();
 	}
-	/*if (readOngoing) {
-		if (my_sdmmc_sdcard_check_command(0x33C12, 0)) {
-			sharedAddr[4] = 0;
-			cardReadLED(false);
-			readOngoing = false;
-			sharedAddr[3] = 0;
-		}
-	}*/
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {

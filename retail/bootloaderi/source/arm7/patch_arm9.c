@@ -642,7 +642,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
 	if ((ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM)
-	 || ((gameOnFlashcard || !swiHaltHook) && !isSdk5(moduleParams))) {
+	 || (gameOnFlashcard && !isSdk5(moduleParams))) {
 		return false;
 	}
 	const char* romTid = getRomTid(ndsHeader);

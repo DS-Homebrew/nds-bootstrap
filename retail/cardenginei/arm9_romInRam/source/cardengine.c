@@ -187,7 +187,7 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	if ((!(ce9->valueBits & a7HaltPatched) && !(ce9->valueBits & extendedMemory)) || (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode))) {
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 		bool copyDone = false;
 		for (int dma = 0; dma < 4; dma++) {
 			if (!ndmaBusy(dma)) {
@@ -218,9 +218,11 @@ void cardSetDma(u32 * params) {
 		sharedAddr[2] = (vu32)newSrc;
 		sharedAddr[4] = commandRead;
 
-		if (dst > 0x03000000) {
+		if (dst >= 0x03000000) {
 			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
 		}
+
+		IPC_SendSync(0x4);
 	}
 }
 

@@ -20,7 +20,7 @@
 #define b_overlaysInRam BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
-#define b_a7HaltPatched BIT(9)
+#define b_cacheDisabled BIT(9)
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
 
@@ -142,7 +142,7 @@ int hookNdsRetailArm9(
 
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
-	extern bool swiHaltPatched;
+	const char* romTid = getRomTid(ndsHeader);
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -164,8 +164,10 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (swiHaltPatched) {
-		ce9->valueBits |= b_a7HaltPatched;
+	if (strncmp(romTid, "CAY", 3) == 0 // Army Men: Soldiers of Misfortune
+	 || strncmp(romTid, "B7F", 3) == 0 // The Magic School Bus: Oceans
+	) {
+		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
 	}
 	if (!(REG_SCFG_ROM & BIT(9))) {
 		ce9->valueBits |= b_dsiBios;
@@ -184,7 +186,6 @@ int hookNdsRetailArm9(
 		//extern bool gbaRomFound;
 		bool runOverlayCheck = true;
 		ce9->cacheBlockSize = cacheBlockSize;
-		const char* romTid = getRomTid(ndsHeader);
 		if (isSdk5(moduleParams)) {
 			if (consoleModel > 0) {
 				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;

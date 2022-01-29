@@ -1375,7 +1375,7 @@ int arm7_main(void) {
 		tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
 		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
 
-		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8000);
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x9000);
 		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
@@ -1612,9 +1612,9 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, savFile, sizeof(aFile));
 		}
 
-		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0xB000);
+		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), 0xBC00);
 		if (gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, 0xA800)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, 0xB800)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -1761,7 +1761,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			strncmp(romTid, "B3R", 3)==0 ? 0x8000 : 0x4000,
+			0x2000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

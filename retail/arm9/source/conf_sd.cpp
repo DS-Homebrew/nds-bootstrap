@@ -175,9 +175,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Card read DMA
 	conf->cardReadDMA = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
 
-	// Hook SWI Halt (for SD reads with little to no sound issues)
-	conf->swiHaltHook = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SWI_HALT_HOOK", "1").c_str(), NULL, 0);
-
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH", "0").c_str(), NULL, 0);
 
@@ -362,9 +359,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	if (conf->cardReadDMA) {
 		conf->valueBits2 |= BIT(2);
-	}
-	if (conf->swiHaltHook) {
-		conf->valueBits2 |= BIT(3);
 	}
 	if (conf->useRomRegion) {
 		conf->valueBits2 |= BIT(7);
@@ -874,7 +868,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-					if (addr[i] >= CARDENGINEI_ARM9_LOCATION && addr[i] < CARDENGINEI_ARM9_LOCATION+0x7E00) {
+					if (addr[i] >= CARDENGINEI_ARM9_LOCATION && addr[i] < CARDENGINEI_ARM9_LOCATION+0x7C00) {
 						addr[i] -= CARDENGINEI_ARM9_LOCATION;
 						addr[i] += CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 					}
@@ -902,7 +896,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Relocate
 				u32* addr = (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 				for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-					if (addr[i] >= CARDENGINEI_ARM9_SDK5_LOCATION && addr[i] < CARDENGINEI_ARM9_SDK5_LOCATION+0x7E00) {
+					if (addr[i] >= CARDENGINEI_ARM9_SDK5_LOCATION && addr[i] < CARDENGINEI_ARM9_SDK5_LOCATION+0x7C00) {
 						addr[i] -= CARDENGINEI_ARM9_SDK5_LOCATION;
 						addr[i] += CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 					}

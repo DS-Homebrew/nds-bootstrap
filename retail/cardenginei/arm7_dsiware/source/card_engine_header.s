@@ -130,8 +130,6 @@ patches:
 .word   0
 .word   0
 .word   0
-.word   0
-.word   0
 .word   arm7FunctionsThumb
 .pool
 @---------------------------------------------------------------------------------

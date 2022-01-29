@@ -109,8 +109,8 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
 
-	IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead) {
+		IPC_SendSync(0x4);
 		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;

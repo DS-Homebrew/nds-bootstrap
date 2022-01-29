@@ -18,7 +18,6 @@ extern u8 valueBits3;
 #define isDSiWare (valueBits2 & BIT(0))
 #define asyncCardRead (valueBits2 & BIT(1))
 #define cardReadDMA (valueBits2 & BIT(2))
-#define swiHaltHook (valueBits2 & BIT(3))
 #define specialCard (valueBits2 & BIT(4))
 #define dsiWramAccess (valueBits2 & BIT(5))
 #define hiyaCfwFound (valueBits2 & BIT(6))
