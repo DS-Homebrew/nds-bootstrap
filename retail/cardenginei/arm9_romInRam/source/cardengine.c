@@ -64,7 +64,6 @@ static bool region0FixNeeded = false;
 static bool igmReset = false;
 static bool isDma = false;
 static bool dmaLed = false;
-static u32 romWordBak = 0;
 
 s8 mainScreen = 0;
 
@@ -187,7 +186,7 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+	if (!(ce9->valueBits & extendedMemory) /*ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)*/) {
 		bool copyDone = false;
 		for (int dma = 0; dma < 4; dma++) {
 			if (!ndmaBusy(dma)) {
@@ -200,30 +199,28 @@ void cardSetDma(u32 * params) {
 			tonccpy(dst, (u8*)newSrc, len2);
 		}
 		endCardReadDma();
-	} else if (ce9->valueBits & extendedMemory) {
+	} else /*if (ce9->valueBits & extendedMemory)*/ {
 		int oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 		endCardReadDma();
-	} else {
-		romWordBak = sharedAddr[4];
-
-		u32 commandRead=0x025FFB0A;
+	} /*else {
+		u32 commandRead=0x026FFB0A;
 
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len2;
 		sharedAddr[2] = (vu32)newSrc;
-		sharedAddr[4] = commandRead;
+		sharedAddr[3] = commandRead;
 
 		if (dst >= 0x03000000) {
 			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
 		}
 
 		IPC_SendSync(0x4);
-	}
+	}*/
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -612,12 +609,9 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
-#ifndef DLDI
-		case 0x3:
+		/*case 0x3:
 			endCardReadDma();
-			sharedAddr[4] = romWordBak;
-			break;
-#endif
+			break;*/
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;

@@ -839,29 +839,6 @@ static inline void sdmmcHandler(void) {
 		return;
 	}
 
-	if (sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
-		if (valueBits & ROMinRAM) {
-			ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
-			sharedAddr[3] = 0;
-		} else if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
-			/*u32 src = sharedAddr[2];
-			u32 dst = sharedAddr[0];
-			u32 len = sharedAddr[1];
-
-			cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-			fileRead((char*)dst, *romFile, src, len, !sdRead, 0);
-			cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator */
-			sharedAddr[3] = 0;
-		}
-		IPC_SendSync(0x3);
-		return;
-	} else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
-		ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
-		sharedAddr[3] = 0;
-		IPC_SendSync(0x3);
-		return;
-	}
-
 	switch (sharedAddr[4]) {
 		case 0x53445231:
 		case 0x53444D31: {
@@ -931,6 +908,24 @@ static void runCardEngineCheck(void) {
 
 			if (!(valueBits & gameOnFlashcard)) {
 				sdmmcHandler();
+
+				if (sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
+						/*u32 src = sharedAddr[2];
+						u32 dst = sharedAddr[0];
+						u32 len = sharedAddr[1];
+
+						cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
+						fileRead((char*)dst, *romFile, src, len, !sdRead, 0);
+						cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator */
+						sharedAddr[3] = 0;
+					}
+					IPC_SendSync(0x3);
+				} else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
+					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
+					sharedAddr[3] = 0;
+					IPC_SendSync(0x3);
+				}
 			}
 
     		if (sharedAddr[3] == (vu32)0x026FF800) {
