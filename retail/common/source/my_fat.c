@@ -1090,7 +1090,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 	#ifdef TWOCARD
 	if (prevFirstClust[card2] != file.firstCluster || prevSect[card2] != curSect || prevClust[card2] != file.currentCluster) {
 		prevFirstClust[card2] = file.firstCluster;
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster, card2), globalBuffer[card2], 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster, card2), 1, globalBuffer[card2], ndmaSlot);
 		prevSect[card2] = curSect;
 		prevClust[card2] = file.currentCluster;
 	}
@@ -1314,7 +1314,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
           #endif
 
 		#ifdef TWOCARD
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster, card2), lastGlobalBuffer[card2], 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster, card2), 1, lastGlobalBuffer[card2], ndmaSlot);
 		#else
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), lastGlobalBuffer, 0, 0);
 		#endif
@@ -1417,7 +1417,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length)
 	#ifdef TWOCARD
 	if (prevFirstClust[card2] != file.firstCluster || prevSect[card2] != curSect || prevClust[card2] != file.currentCluster) {
 		prevFirstClust[card2] = file.firstCluster;
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster, card2), globalBuffer[card2], 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster, card2), 1, globalBuffer[card2], ndmaSlot);
 		prevSect[card2] = curSect;
 		prevClust[card2] = file.currentCluster;
 	}
@@ -1533,7 +1533,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length)
 			file.currentOffset+=discBytePerClus[card2];
 		}
 		#ifdef TWOCARD
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster, card2), lastGlobalBuffer[card2], 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster, card2), 1, lastGlobalBuffer[card2], ndmaSlot);
 		#else
 		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster, card2), lastGlobalBuffer, 0, 0);
 		#endif

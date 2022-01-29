@@ -832,7 +832,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	// Load sector buffer for new position in file
 	if (prevFirstClust != file.firstCluster || prevSect != curSect || prevClust != file.currentCluster) {
 		prevFirstClust = file.firstCluster;
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, globalBuffer, ndmaSlot);
 		prevSect = curSect;
 		prevClust = file.currentCluster;
 	}
@@ -959,7 +959,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
           dbg_hexa(lastGlobalBuffer);
           #endif
 
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), lastGlobalBuffer, 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, lastGlobalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
           tonccpy(buffer+dataPos,lastGlobalBuffer+curByte,length-dataPos);
@@ -1027,7 +1027,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 	// Load sector buffer for new position in file
 	if (prevFirstClust != file.firstCluster || prevSect != curSect || prevClust != file.currentCluster) {
 		prevFirstClust = file.firstCluster;
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, globalBuffer, ndmaSlot);
 		prevSect = curSect;
 		prevClust = file.currentCluster;
 	}
@@ -1095,7 +1095,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 			curSect = 0;
 			file.currentOffset+=discBytePerClus;
 		}
-		CARD_ReadSector( curSect + FAT_ClustToSect(file.currentCluster), lastGlobalBuffer, 0, 0);
+		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, lastGlobalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
         tonccpy(lastGlobalBuffer+curByte,buffer+dataPos,length-dataPos);
