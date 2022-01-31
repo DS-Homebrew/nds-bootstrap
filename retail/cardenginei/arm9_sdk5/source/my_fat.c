@@ -774,6 +774,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 	
 }
 
+#ifdef TWLSDK
 /*-----------------------------------------------------------------
 fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
@@ -905,6 +906,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	return dataPos;
 }
+#endif
 
 /*void buildFatTableCache (aFile * file, int ndmaSlot) {
     #ifdef DEBUG
