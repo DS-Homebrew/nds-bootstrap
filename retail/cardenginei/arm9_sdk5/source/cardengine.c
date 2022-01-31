@@ -144,6 +144,7 @@ static void waitMs(int count) {
 #endif
 
 //static int readCount = 0;
+#ifndef DLDI
 static bool sleepMsEnabled = false;
 
 void sleepMs(int ms) {
@@ -151,7 +152,10 @@ void sleepMs(int ms) {
 		sleepMsEnabled = true;
 	}
 
-	if (dmaCode || !sleepMsEnabled) return;
+	if (dmaCode || !sleepMsEnabled) {
+		swiDelay(50);
+		return;
+	}
 
 	if(ce9->patches->sleepRef) {
 		volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
@@ -159,10 +163,11 @@ void sleepMs(int ms) {
 	} else if(ce9->thumbPatches->sleepRef) {
 		extern void callSleepThumb(int ms);
 		callSleepThumb(ms);
+	} else {
+		swiDelay(50);
 	}
 }
 
-#ifndef DLDI
 /*static void getSdatAddr(u32 sector, u32 buffer) {
 	if ((!ce9->patches->sleepRef && !ce9->thumbPatches->sleepRef) || sdatSize != 0) return;
 
@@ -681,7 +686,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) || (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)) {
+	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 		fileRead((char*)dst, *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache

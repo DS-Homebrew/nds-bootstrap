@@ -284,7 +284,7 @@ void cardSetDma(void) {
 	processAsyncCommand();
 	#endif
 
-	if ((ce9->valueBits & cacheDisabled) || (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)) {
+	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
