@@ -244,7 +244,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 4 : 8);
     dbg_printf("cardReadDma location : ");
     dbg_hexa((u32)cardReadDmaStartOffset);
     dbg_printf("\n\n");

@@ -895,10 +895,10 @@ int arm7_main(void) {
 	nocashMessage("Trying to patch the card...\n");
 
 	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6000);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x7000);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");
@@ -960,7 +960,7 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = 0x1A000;
+		fatTableSize = 0x19000;
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {

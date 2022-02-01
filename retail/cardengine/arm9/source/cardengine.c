@@ -395,14 +395,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	}
 }
 
-// Revert region 0 patch
-void __attribute__((target("arm"))) region0Fix() {
-	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
-}
-
-void __attribute__((target("arm"))) sdk5MpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
-}
+extern void region0Fix(); // Revert region 0 patch
+extern void sdk5MpuFix();
 
 int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
