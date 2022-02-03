@@ -54,7 +54,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 					rombyte = (void*)CACHE_ADRESS_START_low;
 				}
 			}
-			if (ROMinRAM && (dsiModeConfirmed || extendedMemoryConfirmed)) {
+			if (ROMinRAM) {
 				rombyte -= 0x8000;
 			} else {
 				rombyte -= ndsHeader->arm9romOffset;
