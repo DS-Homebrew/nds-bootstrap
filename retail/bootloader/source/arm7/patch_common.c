@@ -2153,6 +2153,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
 	}*/
 
+	// Lola's Alphabet Train (USA)
+	else if (strcmp(romTid, "KLKE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050D0 = 0xE1A00000; // nop
+		*(u32*)0x02024D24 = 0xE1A00000; // nop
+		*(u32*)0x02028FAC = 0xE1A00000; // nop
+		*(u32*)0x0202CA60 = 0xE1A00000; // nop
+		*(u32*)0x0202E83C = 0xE1A00000; // nop
+		*(u32*)0x0202E840 = 0xE1A00000; // nop
+		*(u32*)0x0202E84C = 0xE1A00000; // nop
+		*(u32*)0x0202E9AC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202EA08, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0202FDB4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02033218 = 0xE1A00000; // nop
+	}
+
+	// Lola's Alphabet Train (Europe)
+	else if (strcmp(romTid, "KLKP") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050D0 = 0xE1A00000; // nop
+		*(u32*)0x02024CE4 = 0xE1A00000; // nop
+		*(u32*)0x02028F6C = 0xE1A00000; // nop
+		*(u32*)0x0202CA20 = 0xE1A00000; // nop
+		*(u32*)0x0202E7FC = 0xE1A00000; // nop
+		*(u32*)0x0202E800 = 0xE1A00000; // nop
+		*(u32*)0x0202E80C = 0xE1A00000; // nop
+		*(u32*)0x0202E96C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202E9C8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0202FD74 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020331D8 = 0xE1A00000; // nop
+	}
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

@@ -292,6 +292,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02045860 = 0xE12FFF1E; // bx lr
 	}
 
+	// Lola's Alphabet Train (USA)
+	// Lola's Alphabet Train (Europe)
+	else if (strcmp(romTid, "KLKE") == 0 || strcmp(romTid, "KLKP") == 0) {
+		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
