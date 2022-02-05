@@ -2140,6 +2140,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02024974 = 0xE1A00000; // nop
 	}
 
+	// Kyara Pasha!: Hello Kitty (Japan)
+	// Shows Japanese error screen (Possibly related to camera)
+	/*else if (strcmp(romTid, "KYKJ") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020051E4 -= 4;
+		*(u32*)0x020051EC = 0xE1A00000; // nop
+		*(u32*)0x020052CC = 0xE1A00000; // nop
+		*(u32*)0x0201EA20 = 0xE1A00000; // nop
+		*(u32*)0x0201EA24 = 0xE1A00000; // nop
+		*(u32*)0x0201EA3C = 0xE8BD80F8; // LDMFD SP!, {R3-R7,PC}
+		*(u32*)0x0203F004 = 0xE1A00000; // nop
+		*(u32*)0x02046130 = 0xE1A00000; // nop
+		*(u32*)0x0204B7C4 = 0xE1A00000; // nop
+		*(u32*)0x0204DE30 = 0xE1A00000; // nop
+		*(u32*)0x0204DE34 = 0xE1A00000; // nop
+		*(u32*)0x0204DE40 = 0xE1A00000; // nop
+		*(u32*)0x0204DFA0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204DFFC, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0204F350 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0205321C = 0xE1A00000; // nop
+	}*/
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
