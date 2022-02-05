@@ -3152,6 +3152,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B06B0 = 0xE1A00000; // nop
 	}
 
+	// Sudoku 4Pockets (USA)
+	// Sudoku 4Pockets (Europe)
+	else if (strcmp(romTid, "K4FE") == 0 || strcmp(romTid, "K4FP") == 0) {
+		*(u32*)0x02004C4C = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02013030 = 0xE1A00000; // nop
+		*(u32*)0x0201680C = 0xE1A00000; // nop
+		*(u32*)0x020197DC = 0xE1A00000; // nop
+		*(u32*)0x0201B58C = 0xE1A00000; // nop
+		*(u32*)0x0201B590 = 0xE1A00000; // nop
+		*(u32*)0x0201B59C = 0xE1A00000; // nop
+		*(u32*)0x0201B6FC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201B758, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02020014 = 0xE1A00000; // nop
+		*(u32*)0x0202E888 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202E88C = 0xE12FFF1E; // bx lr
+	}
+
 	// Tori to Mame (Japan)
 	// Does not boot: Crashes on black screens
 	/*else if (strcmp(romTid, "KP6J") == 0) {

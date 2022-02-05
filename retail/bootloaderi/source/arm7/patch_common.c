@@ -451,6 +451,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
 	}
 
+	// Sudoku 4Pockets (USA)
+	// Sudoku 4Pockets (Europe)
+	else if (strcmp(romTid, "K4FE") == 0 || strcmp(romTid, "K4FP") == 0) {
+		*(u32*)0x02004C4C = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0202E888 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202E88C = 0xE12FFF1E; // bx lr
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
 		*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
