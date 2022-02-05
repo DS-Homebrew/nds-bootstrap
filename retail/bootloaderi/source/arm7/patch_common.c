@@ -66,9 +66,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 	}
 
-	// A Little Bit of... Puzzle League (Europe, Australia)
-	else if (strcmp(romTid, "KPNV") == 0) {
-		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+	// Absolute Baseball (USA)
+	else if (strcmp(romTid, "KE9E") == 0) {
+		*(u32*)0x0205FAD0 = 0xE1A00000; // nop
+		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
+	}
+
+	// Absolute BrickBuster (USA)
+	else if (strcmp(romTid, "K6QE") == 0) {
+		*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02055B78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr
 	}
 
 	// Anonymous Notes 1: From The Abyss (USA)
@@ -377,7 +387,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// A Little Bit of... Puzzle League (Europe, Australia)
-	else if (strcmp(romTid, "KPNE") == 0) {
+	else if (strcmp(romTid, "KPNV") == 0) {
 		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
 	}
 
