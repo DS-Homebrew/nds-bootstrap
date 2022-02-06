@@ -118,17 +118,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0) {
-		*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
 	}
 
 	// Bomberman Blitz (Europe, Australia)
 	else if (strcmp(romTid, "KBBV") == 0) {
-		*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
 	}
 
 	// Itsudemo Bomberman (Japan)
 	else if (strcmp(romTid, "KBBJ") == 0) {
-		*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
 	}
 
 	// Brain Challenge (USA)

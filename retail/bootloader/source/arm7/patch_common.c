@@ -934,6 +934,54 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202A344 = 0xE1A00000; // nop
 	}*/
 
+	// Bomberman Blitz (USA)
+	// Bomberman Blitz (Europe, Australia)
+	// Itsudemo Bomberman (Japan)
+	// Controls must be reset in the Options menu to play the game properly
+	else if (strncmp(romTid, "KBB", 3) == 0) {
+		*(u32*)0x02008988 = 0xE1A00000; // nop
+		*(u32*)0x0200C280 = 0xE1A00000; // nop
+		*(u32*)0x02012524 = 0xE1A00000; // nop
+		*(u32*)0x020146C4 = 0xE1A00000; // nop
+		*(u32*)0x020146C8 = 0xE1A00000; // nop
+		*(u32*)0x020146D4 = 0xE1A00000; // nop
+		*(u32*)0x02014818 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02014874, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02015B60 = 0xE1A00000; // nop
+		*(u32*)0x02015B68 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x02015B88 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02015B8C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02015B94 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02015B98 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02015BB8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02015BBC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02015BCC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02015BD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02015BDC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02015BE0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02019670 = 0xE1A00000; // nop
+		*(u32*)0x0201B8BC = 0xE3A00003; // mov r0, #3
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0204351C = 0xE1A00000; // nop
+			*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0208FC20 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02098818 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0209881C = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			*(u32*)0x020435E8 = 0xE1A00000; // nop
+			*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'J') {
+			*(u32*)0x02043248 = 0xE1A00000; // nop
+			*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Cake Ninja (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K2JE") == 0 && extendedMemory2) {
