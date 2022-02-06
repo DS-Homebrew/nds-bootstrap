@@ -28,7 +28,7 @@
 3. 
 
 <!-- Be sure to upload your nds-bootstrap ini from `sd:/_nds/nds-bootstrap.ini`. -->
-<!-- You can upload it by dragging and dropping into the GitHub text box. -->
+<!-- Copy the text from the file and paste it below, and put it in a ```codeblock``` for nicer formatting. -->
 ### nds-bootstrap.ini
 
 
