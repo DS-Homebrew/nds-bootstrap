@@ -2574,6 +2574,63 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
 	}
 
+	// Number Battle
+	// Shows "WiFi connection information erased" message on boot
+	else if (strcmp(romTid, "KSUE") == 0) {
+		*(u32*)0x02005330 = 0xE1A00000; // nop
+		*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02005EA8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005FA0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02005FA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02006130 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006134 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200619C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020061A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02006384 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020063F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200657C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020065CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006B68 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200CB10 = 0xE1A00000; // nop
+		*(u32*)0x0200CB20 = 0xE1A00000; // nop
+		*(u32*)0x0200CBF8 = 0xE1A00000; // nop
+		*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x020225C0 = 0xE1A00000; // nop
+		*(u32*)0x020225CC = 0xE1A00000; // nop
+		*(u32*)0x02022620 = 0xE1A00000; // nop
+		*(u32*)0x02065870 = 0xE1A00000; // nop
+		*(u32*)0x02065874 = 0xE1A00000; // nop
+		*(u32*)0x0206588C = 0xE1A00000; // nop
+		*(u32*)0x020A9EAC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020CE79C = 0xE1A00000; // nop
+		*(u32*)0x020D2A3C = 0xE1A00000; // nop
+		*(u32*)0x020DA2B4 = 0xE1A00000; // nop
+		*(u32*)0x020DD3C0 = 0xE1A00000; // nop
+		*(u32*)0x020DD3C4 = 0xE1A00000; // nop
+		*(u32*)0x020DD3D0 = 0xE1A00000; // nop
+		*(u32*)0x020DD514 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020DD570, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020DD6A4 = 0x0234F020;
+		*(u32*)0x020DEA44 = 0xE1A00000; // nop
+		*(u32*)0x020DEA4C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020DEA6C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020DEA70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DEA78 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020DEA7C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DEA9C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020DEAA0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DEAB0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020DEAB4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DEAC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020DEAC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020DEF00 = 0xE1A00000; // nop
+		*(u32*)0x020DEF04 = 0xE1A00000; // nop
+		*(u32*)0x020DEF08 = 0xE1A00000; // nop
+		*(u32*)0x020DEF0C = 0xE1A00000; // nop
+		*(u32*)0x020E256C = 0xE1A00000; // nop
+		*(u32*)0x020E4774 = 0xE3A00003; // mov r0, #3
+	}
+
 	// Petit Computer (USA)
 	// Does not boot (black screens, seems to rely on code from DSi binaries)
 	/*else if (strcmp(romTid, "KNAE") == 0) {

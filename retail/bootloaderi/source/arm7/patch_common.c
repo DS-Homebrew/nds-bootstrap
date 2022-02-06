@@ -352,6 +352,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
 	}*/
 
+	// Number Battle
+	else if (strcmp(romTid, "KSUE") == 0) {
+		*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02005EA8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005FA0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02005FA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02006130 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006134 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200619C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020061A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02006384 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020063F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200657C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020065CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006B68 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0) {
 		*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr
