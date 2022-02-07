@@ -583,9 +583,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
-static bool supportsExceptionHandler(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-
+static bool supportsExceptionHandler(const char* romTid) {
 	// ExceptionHandler2 (red screen) blacklist
 	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
 	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
