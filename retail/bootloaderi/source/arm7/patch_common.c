@@ -288,6 +288,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// JellyCar 2 (USA)
+	else if (strcmp(romTid, "KJYE") == 0) {
+		*(u32*)0x02019F94 = 0xE1A00000; // nop (Skip Manual screen, Part 1)
+		for (int i = 0; i < 11; i++) { // Skip Manual screen, Part 2
+			u32* offset = (u32*)0x0201A028;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

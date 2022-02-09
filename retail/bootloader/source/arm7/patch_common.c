@@ -2167,6 +2167,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202C176);
 	}
 
+	// JellyCar 2 (USA)
+	else if (strcmp(romTid, "KJYE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02006334 = 0xE1A00000; // nop
+		*(u32*)0x0200634C = 0xE1A00000; // nop
+		*(u32*)0x02019F94 = 0xE1A00000; // nop (Skip Manual screen, Part 1)
+		for (int i = 0; i < 11; i++) { // Skip Manual screen, Part 2
+			u32* offset = (u32*)0x0201A028;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x020B4694 = 0xE1A00000; // nop
+		*(u32*)0x020B7F60 = 0xE1A00000; // nop
+		*(u32*)0x020BC368 = 0xE1A00000; // nop
+		*(u32*)0x020BE0FC = 0xE1A00000; // nop
+		*(u32*)0x020BE100 = 0xE1A00000; // nop
+		*(u32*)0x020BE10C = 0xE1A00000; // nop
+		*(u32*)0x020BE26C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020BE2C8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020BF7D0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020C31BC = 0xE1A00000; // nop
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
