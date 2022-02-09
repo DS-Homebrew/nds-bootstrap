@@ -297,6 +297,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Jump Trials (USA)
+	else if (strcmp(romTid, "KJPE") == 0) {
+		*(u32*)0x0201E88C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201E890 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EA40 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EA44 = 0xE12FFF1E; // bx lr
+	}
+
+	// Jump Trials Extreme (USA)
+	else if (strcmp(romTid, "KZCE") == 0) {
+		*(u32*)0x020215F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020215F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020217A4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020217A8 = 0xE12FFF1E; // bx lr
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

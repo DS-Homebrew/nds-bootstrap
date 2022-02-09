@@ -2189,6 +2189,60 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C31BC = 0xE1A00000; // nop
 	}
 
+	// Jump Trials (USA)
+	// Does not work on real hardware
+	/*else if (strcmp(romTid, "KJPE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x0201BD6C = 0xE1A00000; // nop
+		*(u32*)0x0201BD9C = 0xE1A00000; // nop
+		*(u32*)0x0201BDBC = 0xE1A00000; // nop
+		*(u32*)0x0201E5D0 = 0xE1A00000; // nop
+		*(u32*)0x0201E5E0 = 0xE1A00000; // nop
+		*(u32*)0x0201E61C = 0xE1A00000; // nop
+		*(u32*)0x0201E88C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201E890 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EA40 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EA44 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203AA5C = 0xE1A00000; // nop
+		*(u32*)0x0203ED64 = 0xE1A00000; // nop
+		*(u32*)0x02045AFC = 0xE1A00000; // nop
+		*(u32*)0x02047938 = 0xE1A00000; // nop
+		*(u32*)0x0204793C = 0xE1A00000; // nop
+		*(u32*)0x02047948 = 0xE1A00000; // nop
+		*(u32*)0x02047AA8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02047B04, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x02048D88 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0204C1F0 = 0xE1A00000; // nop
+	}*/
+
+	// Jump Trials Extreme (USA)
+	// Does not work on real hardware
+	/*else if (strcmp(romTid, "KZCE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x0201EAD0 = 0xE1A00000; // nop
+		*(u32*)0x0201EB00 = 0xE1A00000; // nop
+		*(u32*)0x0201EB20 = 0xE1A00000; // nop
+		*(u32*)0x02021334 = 0xE1A00000; // nop
+		*(u32*)0x02021344 = 0xE1A00000; // nop
+		*(u32*)0x02021380 = 0xE1A00000; // nop
+		*(u32*)0x020215F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020215F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020217A4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020217A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203D7C0 = 0xE1A00000; // nop
+		*(u32*)0x02041AC8 = 0xE1A00000; // nop
+		*(u32*)0x020488C0 = 0xE1A00000; // nop
+		*(u32*)0x0204A6FC = 0xE1A00000; // nop
+		*(u32*)0x0204A700 = 0xE1A00000; // nop
+		*(u32*)0x0204A70C = 0xE1A00000; // nop
+		*(u32*)0x0204A86C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204A8C8, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x0204BB4C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0204EFB4 = 0xE1A00000; // nop
+	}*/
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
