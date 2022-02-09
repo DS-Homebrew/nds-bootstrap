@@ -149,6 +149,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
 	// Chuck E. Cheese's Alien Defense Force (USA)

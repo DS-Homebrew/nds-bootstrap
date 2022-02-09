@@ -1229,6 +1229,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Cave Story (USA)
+	else if (strcmp(romTid, "KCVE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0207342C = 0xE1A00000; // nop
+		*(u32*)0x0207654C = 0xE1A00000; // nop
+		*(u32*)0x0207A454 = 0xE1A00000; // nop
+		*(u32*)0x0207C20C = 0xE1A00000; // nop
+		*(u32*)0x0207C210 = 0xE1A00000; // nop
+		*(u32*)0x0207C21C = 0xE1A00000; // nop
+		*(u32*)0x0207C37C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0207C3D8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0207D758 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02080F68 = 0xE1A00000; // nop
+	}
+
 	// Chronos Twins: One Hero in Two Times (USA)
 	// Overlay-related crash
 	/*else if (strcmp(romTid, "K9TE") == 0) {
