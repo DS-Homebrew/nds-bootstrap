@@ -107,6 +107,8 @@ static bool calledViaIPC = false;
 static bool ipcSyncHooked = false;
 bool ipcEveryFrame = false;
 //static bool dmaLed = false;
+static bool powerLedChecked = false;
+static bool powerLedIsPurple = false;
 static bool swapScreens = false;
 static bool dmaSignal = false;
 static bool saveInRam = false;
@@ -452,38 +454,43 @@ void reset(void) {
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
-	if (consoleModel < 2) {
-		if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
-		if (on) {
-			switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0xFF);    // Turn power LED purple
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
-					break;
-			}
-		} else {
-			switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
-				case 0:
-				default:
-					break;
-				case 1:
-					i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
-					break;
-				case 2:
-					i2cWriteRegister(0x4A, 0x63, 0x00);    // Revert power LED to normal
-					break;
-				case 3:
-					i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
-					break;
-			}
+	if (consoleModel < 2) { /* Proceed below */ } else { return; }
+
+	if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
+	if (!powerLedChecked && (romRead_LED || dmaRomRead_LED)) {
+		u8 byte = i2cReadRegister(0x4A, 0x63);
+		powerLedIsPurple = (byte == 0xFF);
+		powerLedChecked = true;
+	}
+	if (on) {
+		switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x30, 0x13);    // Turn WiFi LED on
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x63, powerLedIsPurple ? 0x00 : 0xFF);    // Turn power LED purple
+				break;
+			case 3:
+				i2cWriteRegister(0x4A, 0x31, 0x01);    // Turn Camera LED on
+				break;
+		}
+	} else {
+		switch(dmaLed ? dmaRomRead_LED : romRead_LED) {
+			case 0:
+			default:
+				break;
+			case 1:
+				i2cWriteRegister(0x4A, 0x30, 0x12);    // Turn WiFi LED off
+				break;
+			case 2:
+				i2cWriteRegister(0x4A, 0x63, powerLedIsPurple ? 0xFF : 0x00);    // Revert power LED to normal
+				break;
+			case 3:
+				i2cWriteRegister(0x4A, 0x31, 0x00);    // Turn Camera LED off
+				break;
 		}
 	}
 }
