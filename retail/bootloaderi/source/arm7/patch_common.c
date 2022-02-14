@@ -509,6 +509,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
 	}
 
+	// Spotto! (USA)
+	else if (strcmp(romTid, "KSPE") == 0) {
+		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
+	}
+
+	// Bird & Bombs (Europe, Australia)
+	else if (strcmp(romTid, "KSPV") == 0) {
+		*(u32*)0x0202D6A8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D6AC = 0xE12FFF1E; // bx lr
+	}
+
+	// Neratte Supotto! (Japan)
+	else if (strcmp(romTid, "KSPJ") == 0) {
+		*(u32*)0x0202DB94 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202DB98 = 0xE12FFF1E; // bx lr
+	}
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {

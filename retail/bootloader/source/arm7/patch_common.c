@@ -3379,9 +3379,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Does not boot: Issue unknown
 	/*else if (strcmp(romTid, "KSPE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02012D80 = 0xE1A00000; // nop
 		*(u32*)0x02022AB4 = 0xE1A00000; // nop
 		*(u32*)0x02026038 = 0xE1A00000; // nop
 		*(u32*)0x0202C280 = 0xE1A00000; // nop
+		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202E0E0 = 0xE1A00000; // nop
 		*(u32*)0x0202E0E4 = 0xE1A00000; // nop
 		*(u32*)0x0202E0F0 = 0xE1A00000; // nop
@@ -3393,6 +3396,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020558C4 = 0xE1A00000; // nop
 		*(u32*)0x020558F4 = 0xE1A00000; // nop
 		*(u32*)0x020558FC = 0xE1A00000; // nop
+		*(u32*)0x02055FAC = 0xE3A00000; // mov r0, #0
 	}*/
 
 	// Sudoku (USA)
