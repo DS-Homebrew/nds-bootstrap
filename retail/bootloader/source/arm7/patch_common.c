@@ -2167,6 +2167,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202C176);
 	}
 
+	// Invasion of the Alien Blobs (USA)
+	// Branches to DSi code in ITCM?
+	/*else if (strcmp(romTid, "KBTE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0201BF84 = 0xE1A00000; // nop
+		*(u32*)0x0201BF94 = 0xE1A00000; // nop
+		*(u32*)0x0201BFB0 = 0xE1A00000; // nop
+		*(u32*)0x02021214 = 0xE1A00000; // nop
+		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020224F0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02023498 = 0xE1A00000; // nop
+		*(u32*)0x0203C79C = 0xE1A00000; // nop
+		*(u32*)0x020404A8 = 0xE1A00000; // nop
+		*(u32*)0x02046608 = 0xE1A00000; // nop
+		*(u32*)0x02048444 = 0xE1A00000; // nop
+		*(u32*)0x02048448 = 0xE1A00000; // nop
+		*(u32*)0x02048454 = 0xE1A00000; // nop
+		*(u32*)0x020485B4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02048610, extendedMemory2 ? 0xE3A00627 : 0xE3A0079F); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x02049894 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0204CDE0 = 0xE1A00000; // nop
+	}*/
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

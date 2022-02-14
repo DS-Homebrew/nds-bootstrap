@@ -288,6 +288,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// Invasion of the Alien Blobs (USA)
+	else if (strcmp(romTid, "KBTE") == 0) {
+		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020224F0 = 0xE12FFF1E; // bx lr
+	}
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		*(u32*)0x02019F94 = 0xE1A00000; // nop (Skip Manual screen, Part 1)
