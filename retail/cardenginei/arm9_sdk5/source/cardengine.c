@@ -83,8 +83,8 @@ bool sdRead = false;
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
 #ifdef TWLSDK
-static u32 cacheDescriptor[dev_CACHE_SLOTS_8KB_SDK5];
-static u32 cacheCounter[dev_CACHE_SLOTS_8KB_SDK5];
+static u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5];
+static u32 cacheCounter[dev_CACHE_SLOTS_16KB_SDK5];
 #else
 static u32* cacheDescriptor = (u32*)0x02790000;
 static u32* cacheCounter = (u32*)0x027A0000;
