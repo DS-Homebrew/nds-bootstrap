@@ -331,6 +331,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02045860 = 0xE12FFF1E; // bx lr
 	}
 
+	// Little Twin Stars (Japan)
+	else if (strcmp(romTid, "KQ3J") == 0) {
+		*(u32*)0x020162C4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
 	// Lola's Alphabet Train (USA)
 	// Lola's Alphabet Train (Europe)
 	else if (strcmp(romTid, "KLKE") == 0 || strcmp(romTid, "KLKP") == 0) {

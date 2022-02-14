@@ -2365,6 +2365,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
 	}*/
 
+	// Little Twin Stars (Japan)
+	// Locks up(?) after confirming age and left/right hand
+	else if (strcmp(romTid, "KQ3J") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050DC = 0xE1A00000; // nop
+		*(u32*)0x020050F0 = 0xE1A00000; // nop
+		*(u32*)0x02005200 = 0xE1A00000; // nop
+		*(u32*)0x0200523C = 0xE1A00000; // nop
+		*(u32*)0x020162C4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0203DEF4 = 0xE1A00000; // nop
+		*(u32*)0x020417D0 = 0xE1A00000; // nop
+		*(u32*)0x020460B8 = 0xE1A00000; // nop
+		*(u32*)0x02047F94 = 0xE1A00000; // nop
+		*(u32*)0x02047F98 = 0xE1A00000; // nop
+		*(u32*)0x02047FA4 = 0xE1A00000; // nop
+		*(u32*)0x02048104 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02048160, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02048294 = 0x0221A980;
+		*(u32*)0x020495B0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0204CB3C = 0xE1A00000; // nop
+	}
+
 	// Lola's Alphabet Train (USA)
 	else if (strcmp(romTid, "KLKE") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
