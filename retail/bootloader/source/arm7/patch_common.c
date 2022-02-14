@@ -2644,6 +2644,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Monster Buster Club (USA)
+	else if (strcmp(romTid, "KXBE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0207F058 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F05C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F138 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F13C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F4F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F4FC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F63C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F640 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02094318 = 0xE1A00000; // nop
+		*(u32*)0x02097954 = 0xE1A00000; // nop
+		*(u32*)0x0209AB24 = 0xE1A00000; // nop
+		*(u32*)0x0209C8E4 = 0xE1A00000; // nop
+		*(u32*)0x0209C8E8 = 0xE1A00000; // nop
+		*(u32*)0x0209C8F4 = 0xE1A00000; // nop
+		*(u32*)0x0209CA54 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0209CAB0, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0209DEA8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020A0C08 = 0xE1A00000; // nop
+	}
+
+	// Monster Buster Club (Europe)
+	else if (strcmp(romTid, "KXBP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0207EF64 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207EF68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F044 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F048 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F414 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F418 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F558 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F55C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0209424C = 0xE1A00000; // nop
+		*(u32*)0x02097888 = 0xE1A00000; // nop
+		*(u32*)0x0209AA58 = 0xE1A00000; // nop
+		*(u32*)0x0209C818 = 0xE1A00000; // nop
+		*(u32*)0x0209C81C = 0xE1A00000; // nop
+		*(u32*)0x0209C828 = 0xE1A00000; // nop
+		*(u32*)0x0209C988 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0209C9E4, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0209DDDC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020A0B3C = 0xE1A00000; // nop
+	}
+
 	// Mr. Brain (Japan)
 	else if (strcmp(romTid, "KMBJ") == 0) {
 		*(u32*)0x020054EC = 0xE1A00000; // nop

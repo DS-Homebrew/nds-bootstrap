@@ -381,6 +381,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Monster Buster Club (USA)
+	else if (strcmp(romTid, "KXBE") == 0) {
+		*(u32*)0x0207F058 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F05C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F138 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F13C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F4F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F4FC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F63C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F640 = 0xE12FFF1E; // bx lr
+	}
+
+	// Monster Buster Club (Europe)
+	else if (strcmp(romTid, "KXBP") == 0) {
+		*(u32*)0x0207EF64 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207EF68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F044 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F048 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F414 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F418 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207F558 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207F55C = 0xE12FFF1E; // bx lr
+	}
+
 	// Nintendogs (China)
 	/*else if (strcmp(romTid, "KDOC") == 0) {
 		*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
