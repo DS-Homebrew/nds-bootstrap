@@ -788,7 +788,7 @@ static bool start_cardRead_arm9(void) {
 	dbg_hexa(marker);	
 	#endif
 
-	//driveInitialize();
+	driveInitialize();
 	cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
@@ -996,7 +996,7 @@ void myIrqHandlerNdma0(void) {
 	nocashMessage("myIrqHandlerNdma0");
 	#endif	
 	
-	calledViaIPC = false;
+	//calledViaIPC = false;
 
 	//i2cWriteRegister(0x4A, 0x70, 0x01);
 	//i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
