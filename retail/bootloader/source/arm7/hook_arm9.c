@@ -124,6 +124,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
 	u32 pageFileCluster,
 	bool expansionPakFound,
@@ -143,6 +144,7 @@ int hookNdsRetailArm9(
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->pageFileCluster        = pageFileCluster;
 	if (expansionPakFound) {

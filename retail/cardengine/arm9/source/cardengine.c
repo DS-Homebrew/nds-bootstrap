@@ -73,6 +73,7 @@ static u32 arm9ibinarySize = 0;
 
 static aFile romFile;
 static aFile savFile;
+static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile pageFile;
 
@@ -315,6 +316,16 @@ void myIrqHandlerIPC(void) {
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
+			if (sharedAddr[3] == 0x444D4152) { // RAMD
+				#ifdef EXTMEM
+				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
+				fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
+				#else
+				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
+				#endif
+				sharedAddr[3] = 0;
+			}
+
 			leaveCriticalSection(oldIME);
 		}
 			break;
@@ -335,6 +346,7 @@ static void initialize(void) {
 		romFile = getFileFromCluster(ce9->fileCluster);
 		savFile = getFileFromCluster(ce9->saveCluster);
 
+		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
 

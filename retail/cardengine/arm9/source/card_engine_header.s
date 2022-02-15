@@ -24,6 +24,8 @@ fileCluster:
 	.word	0x00000000
 saveCluster:
 	.word	0x00000000
+ramDumpCluster:
+	.word	0x00000000
 srParamsCluster:
 	.word	0x00000000
 pageFileCluster:

@@ -42,6 +42,7 @@
 #include <nds/arm7/codec.h>
 #include <nds/dma.h>
 #include <nds/system.h>
+#include <nds/input.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>
 #include <nds/arm7/audio.h>
@@ -92,6 +93,7 @@ extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
+extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
 extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
@@ -970,6 +972,7 @@ int arm7_main(void) {
 		moduleParams,
 		romFile.firstCluster,
 		savFile.firstCluster,
+		ramDumpCluster,
 		srParamsFileCluster,
 		pageFileCluster,
 		expansionPakFound,
@@ -1029,6 +1032,17 @@ int arm7_main(void) {
 
 	nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams, romFile);
+
+	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
+		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
+		if (extendedMemory2) {
+			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
+			fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
+		} else {
+			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
+		}
+	}
+
 	startBinary_ARM7();
 
 	return 0;

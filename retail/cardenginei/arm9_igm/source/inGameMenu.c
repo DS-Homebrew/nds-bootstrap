@@ -299,7 +299,7 @@ static void drawMainMenu(void) {
 	#ifndef B4DS
 	for(int i = 0; i < 7; i++) {
 	#else
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 5; i++) {
 	#endif
 		if(igmText.rtl)
 			printRight(0x1D, i, igmText.menu[i], 0);
@@ -656,7 +656,7 @@ void inGameMenu(s8* mainScreen) {
 			#ifndef B4DS
 			if (cursorPosition < 6)
 			#else
-			if (cursorPosition < 3)
+			if (cursorPosition < 4)
 			#endif
 				cursorPosition++;
 		} else if (KEYS & KEY_A) {
@@ -704,13 +704,17 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
 				case 1:
+					sharedAddr[3] = 0x444D4152; // RAMD
+					sharedAddr[4] = 0x54495845; // EXIT
+					break;
+				case 2:
 					optionsMenu(mainScreen);
 					break;
 				// To be added: Cheats...
-				case 2:
+				case 3:
 					ramViewer();
 					break;
-				case 3:
+				case 4:
 					sharedAddr[3] = 0x52534554; // RSET
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;

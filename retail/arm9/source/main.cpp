@@ -458,13 +458,13 @@ static int runNdsFile(configuration* conf) {
 			clusterFatTable = stFatTable.st_ino;
 		}
 
-		if (stat(ramDumpPath.c_str(), &stRamDump) >= 0) {
-			clusterRamDump = stRamDump.st_ino;
-		}
-
 		if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 			clusterScreenshot = stScreenshot.st_ino;
 		}
+	}
+
+	if (stat(ramDumpPath.c_str(), &stRamDump) >= 0) {
+		clusterRamDump = stRamDump.st_ino;
 	}
 
 	if (stat(pageFilePath.c_str(), &stPage) >= 0) {
