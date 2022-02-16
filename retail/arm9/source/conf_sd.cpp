@@ -173,7 +173,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->asyncCardRead = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "ASYNC_CARD_READ", "0").c_str(), NULL, 0);
 
 	// Card read DMA
-	conf->cardReadDMA = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
+	conf->cardReadDMA = strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
 
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH", "0").c_str(), NULL, 0);
@@ -365,6 +365,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	if (conf->boostCpu) {
 		conf->valueBits3 |= BIT(0);
+	}
+	if (conf->cardReadDMA == 2) {
+		conf->valueBits3 |= BIT(1);
 	}
 
 	if (conf->sdFound) {

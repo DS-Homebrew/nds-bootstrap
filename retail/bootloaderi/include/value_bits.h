@@ -23,5 +23,6 @@ extern u8 valueBits3;
 #define hiyaCfwFound (valueBits2 & BIT(6))
 #define useRomRegion (valueBits2 & BIT(7))
 #define boostCpu (valueBits3 & BIT(0))
+#define cardDmaImprove (valueBits3 & BIT(1))
 
 #endif

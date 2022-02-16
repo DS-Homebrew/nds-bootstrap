@@ -48,7 +48,7 @@ typedef struct configuration {
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
 	bool asyncCardRead;
-	bool cardReadDMA;
+	int cardReadDMA;
 	bool boostCpu;
 	bool boostVram;
 	bool soundFreq;

@@ -183,7 +183,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);
 	dbg_printf("dmaRomRead_LED: %lX\n", conf->dmaRomRead_LED);
 	dbg_printf("asyncCardRead: %s\n", btoa(conf->asyncCardRead));
-	dbg_printf("cardReadDMA: %s\n", btoa(conf->cardReadDMA));
+	dbg_printf("cardReadDMA: %i\n", conf->cardReadDMA);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 	dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
 	dbg_printf("soundFreq: %s\n", btoa(conf->soundFreq));

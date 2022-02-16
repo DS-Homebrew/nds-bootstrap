@@ -766,7 +766,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		} else if (ROMinRAM) {
 			if (!cardReadDMA || extendedMemoryConfirmed || ROMsupportsDsiMode) return false;
 		} else {
-			if (!cardReadDMA && !asyncCardRead) return false;
+			if (!cardDmaImprove && !asyncCardRead) return false;
 		}
 	}
 
