@@ -63,7 +63,6 @@ static bool flagsSetOnce = false;
 static bool region0FixNeeded = false;
 static bool igmReset = false;
 static bool isDma = false;
-static bool dmaLed = false;
 
 s8 mainScreen = 0;
 
@@ -90,25 +89,19 @@ static void waitFrames(int count) {
 	}
 }
 
-//static int readCount = 0;
-/*static bool sleepMsEnabled = false;
-
-static void sleepMs(int ms) {
-	extern void callSleepThumb(int ms);
-
-	if (readCount >= 100) {
-		sleepMsEnabled = true;
+void sleepMs(int ms) {
+	if (REG_IME == 0 || REG_IF == 0) {
+		return;
 	}
 
-	if (!sleepMsEnabled) return;
-
-    if(ce9->patches->sleepRef) {
-        volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
-        (*sleepRef)(ms);
-    } else if(ce9->thumbPatches->sleepRef) {
-        callSleepThumb(ms);
-    }
-}*/
+	if(ce9->patches->sleepRef) {
+		volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
+		(*sleepRef)(ms);
+	} else if(ce9->thumbPatches->sleepRef) {
+		extern void callSleepThumb(int ms);
+		callSleepThumb(ms);
+	}
+}
 
 static void waitForArm7(void) {
 	IPC_SendSync(0x4);
@@ -185,17 +178,7 @@ void cardSetDma(u32 * params) {
 
 	// Copy via dma
 	if (!(ce9->valueBits & extendedMemory) /*ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)*/) {
-		bool copyDone = false;
-		for (int dma = 0; dma < 4; dma++) {
-			if (!ndmaBusy(dma)) {
-				ndmaCopyWords(dma, (u8*)newSrc, dst, len2);
-				copyDone = true;
-				break;
-			}
-		}
-		if (!copyDone) {
-			tonccpy(dst, (u8*)newSrc, len2);
-		}
+		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
 		endCardReadDma();
 	} else /*if (ce9->valueBits & extendedMemory)*/ {
 		int oldIME = enterCriticalSection();
@@ -248,39 +231,31 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && !(((int)len) & 511)
         && !(((int)src) & 511)
 	) {
-		dmaLed = true;
-
+		isDma = true;
+        cacheFlush();
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
-			isDma = true;
 			// new dma method
-
-            cacheFlush();
 			if (!(ce9->valueBits & isSdk5)) {
 				cardSetDma(NULL);
 			}
             return true;
-		} else {
+		} /*else {
 			isDma = false;
 			dma=4;
             clearIcache();
-		}
-    } else {
-		dmaLed = false;
+		}*/
+    } /*else {
         isDma = false;
         dma=4;
         clearIcache();
-    }
+    }*/
 
     return 0;
 }
 
 static int counter=0;
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
-#ifndef DLDI
-    dmaLed = true;
-#endif
-
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
     cardStruct[0] = src;
@@ -335,12 +310,10 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	u32 lenExt = 0;
 
-	//readCount++;
-
 	if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}
-	
+
 	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
@@ -358,24 +331,31 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 	}
 
-	int oldIME = 0;
-	if (ce9->valueBits & extendedMemory) {
-		// Open extra memory
-		oldIME = enterCriticalSection();
-		REG_SCFG_EXT += 0xC000;
-	}
+	if (isDma && !(ce9->valueBits & extendedMemory)) {
+		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
+		while (ndmaBusy(0)) {
+			sleepMs(1);
+		}
+	} else {
+		int oldIME = 0;
+		if (ce9->valueBits & extendedMemory) {
+			// Open extra memory
+			oldIME = enterCriticalSection();
+			REG_SCFG_EXT += 0xC000;
+		}
 
-	tonccpy(dst, (u8*)newSrc, len);
-	if (lenExt > 0) {
-		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-		newSrc = (u32)(newSrc-0x8000)+src+len;
-		tonccpy(dst+len, (u8*)newSrc, lenExt);
-	}
+		tonccpy(dst, (u8*)newSrc, len);
+		if (lenExt > 0) {
+			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+			newSrc = (u32)(newSrc-0x8000)+src+len;
+			tonccpy(dst+len, (u8*)newSrc, lenExt);
+		}
 
-	if (ce9->valueBits & extendedMemory) {
-		// Close extra memory
-		REG_SCFG_EXT -= 0xC000;
-		leaveCriticalSection(oldIME);
+		if (ce9->valueBits & extendedMemory) {
+			// Close extra memory
+			REG_SCFG_EXT -= 0xC000;
+			leaveCriticalSection(oldIME);
+		}
 	}
 
     isDma=false;

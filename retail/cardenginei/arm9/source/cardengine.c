@@ -52,6 +52,7 @@
 #define cacheDisabled BIT(9)
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
+#define asyncCardRead BIT(12)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -113,7 +114,6 @@ static bool region0FixNeeded = false;
 static bool igmReset = false;
 
 extern bool isDma;
-extern bool dmaCode;
 extern bool dmaReadOnArm7;
 extern bool dmaReadOnArm9;
 
@@ -152,16 +152,9 @@ static void waitMs(int count) {
 	}
 }
 
-//static int readCount = 0;
 #ifndef DLDI
-static bool sleepMsEnabled = false;
-
 void sleepMs(int ms) {
-	if (REG_IME != 0 && REG_IF != 0) {
-		sleepMsEnabled = true;
-	}
-
-	if (dmaCode || !sleepMsEnabled) {
+	if ((!isDma && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
 		swiDelay(50);
 		return;
 	}
@@ -408,6 +401,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		fileRead((char*)dst, *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache
+		bool runSleep = true;
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
@@ -431,6 +425,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
 				#endif
+				runSleep = false;
 			} else {
 				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
@@ -475,7 +470,16 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     		#endif
     
     		// Copy directly
-			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+			if (isDma) {
+				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+				while (ndmaBusy(0)) {
+					if (runSleep) {
+						sleepMs(1);
+					}
+				}
+			} else {
+				tonccpy(dst, (u8*)buffer+(src-sector), len2);
+			}
 
     		// Update cardi common
     		cardStruct[0] = src + len2;
@@ -614,10 +618,6 @@ int cardRead(u32* cacheStruct) {
 	waitForArm7();
 	// -------------------------------------*/
 	#endif
-
-	//readCount++;
-
-	dmaCode = false;
 
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
 		// Fix reads below 0x8000

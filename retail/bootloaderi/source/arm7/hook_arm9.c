@@ -23,6 +23,7 @@
 #define b_cacheDisabled BIT(9)
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
+#define b_asyncCardRead BIT(12)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -171,6 +172,9 @@ int hookNdsRetailArm9(
 	}
 	if (!(REG_SCFG_ROM & BIT(9))) {
 		ce9->valueBits |= b_dsiBios;
+	}
+	if (asyncCardRead) {
+		ce9->valueBits |= b_asyncCardRead;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
