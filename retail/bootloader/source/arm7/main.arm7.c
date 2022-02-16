@@ -473,15 +473,17 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 
 u32 romLocation = 0x09000000;
 u32 romSizeLimit = 0x780000;
+u32 ROMinRAM = 0;
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+	bool isDevConsole = false;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
 		romSizeLimit = (s2FlashcardId == 0x5A45) ? 0xF80000 : 0x1F80000;
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
-		bool isDevConsole = (*(vu32*)(0x0DFFFE0C) == 0x4253444E);
+		isDevConsole = (*(vu32*)(0x0DFFFE0C) == 0x4253444E);
 
 		romLocation = 0x0C800000;
 		if (isSdk5(moduleParams)) {
@@ -495,12 +497,11 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	}
 
 	bool res = false;
-	if ((strncmp(romTid, "APD", 3) != 0
+	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
+	 || (strncmp(romTid, "APD", 3) != 0
 	 && strncmp(romTid, "A24", 3) != 0
-	 && strncmp(romTid, "UBR", 3) != 0
 	// && strncmp(romTid, "AMC", 3) != 0
 	// && strncmp(romTid, "A8T", 3) != 0
-	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
@@ -879,18 +880,18 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if ((strcmp(romTid, "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
-		toncset((char*)0x02400000, 0xFF, 0xC0);
-		toncset((u8*)0x024000B2, 0, 3);
-		toncset((u8*)0x024000B5, 0x24, 3);
-		*(u16*)0x024000BE = 0x7FFF;
-		*(u16*)0x024000CE = 0x7FFF;
+		toncset((char*)0x0C400000, 0xFF, 0xC0);
+		toncset((u8*)0x0C4000B2, 0, 3);
+		toncset((u8*)0x0C4000B5, 0x24, 3);
+		*(u16*)0x0C4000BE = 0x7FFF;
+		*(u16*)0x0C4000CE = 0x7FFF;
 	}
 
 	*(vu32*)(0x08240000) = 1;
 	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(romTid, "UBRP") != 0));
 
 	// If possible, set to load ROM into RAM
-	u32 ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
+	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
 
 	nocashMessage("Trying to patch the card...\n");
 

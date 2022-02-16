@@ -1526,11 +1526,11 @@ int arm7_main(void) {
 	} else {
 		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
-			toncset((char*)0x02400000, 0xFF, 0xC0);
-			toncset((u8*)0x024000B2, 0, 3);
-			toncset((u8*)0x024000B5, 0x24, 3);
-			*(u16*)0x024000BE = 0x7FFF;
-			*(u16*)0x024000CE = 0x7FFF;
+			toncset((char*)0x0C400000, 0xFF, 0xC0);
+			toncset((u8*)0x0C4000B2, 0, 3);
+			toncset((u8*)0x0C4000B5, 0x24, 3);
+			*(u16*)0x0C4000BE = 0x7FFF;
+			*(u16*)0x0C4000CE = 0x7FFF;
 		} /*else // GBA file
 		if (!dsiModeConfirmed && !isSdk5(moduleParams)) {
 			aFile* gbaFile = (aFile*)(dsiEnhancedMbk ? GBA_FILE_LOCATION_ALT : GBA_FILE_LOCATION);
@@ -1809,7 +1809,9 @@ int arm7_main(void) {
 		}
 
 		extern u32 iUncompressedSize;
-		if (extendedMemoryConfirmed || dsiModeConfirmed) {
+		if (strncmp(romTid, "UBR", 3) == 0) {
+			// Do nothing
+		} else if (extendedMemoryConfirmed || dsiModeConfirmed) {
 			extern u32 iUncompressedSizei;
 			aFile pageFile = getFileFromCluster(pageFileCluster);
 

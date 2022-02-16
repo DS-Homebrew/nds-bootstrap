@@ -1010,35 +1010,47 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	}
 }
 
-static void operaRamPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void operaRamPatch(void) {
 	if (dsDebugRam || !extendedMemory2) {
 		return;
 	}
 
+	extern u32 ROMinRAM;
+
 	// Opera RAM patch (ARM9)
-	*(u32*)0x02003D48 = 0x2400000;
-	*(u32*)0x02003D4C = 0x2400004;
+	*(u32*)0x02003D48 = 0xC400000;
+	*(u32*)0x02003D4C = 0xC400004;
 
-	*(u32*)0x02010FF0 = 0x2400000;
-	*(u32*)0x02010FF4 = 0x24000CE;
+	*(u32*)0x02010FF0 = 0xC400000;
+	*(u32*)0x02010FF4 = 0xC4000CE;
 
-	*(u32*)0x020112AC = 0x2400080;
+	*(u32*)0x020112AC = 0xC400080;
 
-	*(u32*)0x020402BC = 0x24000C2;
-	*(u32*)0x020402C0 = 0x24000C0;
-	*(u32*)0x020402CC = 0x2FFFFFE;
-	*(u32*)0x020402D0 = 0x2800000;
-	*(u32*)0x020402D4 = 0x29FFFFF;
-	*(u32*)0x020402D8 = 0x2BFFFFF;
-	*(u32*)0x020402DC = 0x2FFFFFF;
-	*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
-	toncset((char*)0x2800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	*(u32*)0x020402BC = 0xC4000C2;
+	*(u32*)0x020402C0 = 0xC4000C0;
+	if (ROMinRAM) {
+		*(u32*)0x020402CC = 0xD7FFFFE;
+		*(u32*)0x020402D0 = 0xD000000;
+		*(u32*)0x020402D4 = 0xD1FFFFF;
+		*(u32*)0x020402D8 = 0xD3FFFFF;
+		*(u32*)0x020402DC = 0xD7FFFFF;
+		*(u32*)0x020402E0 = 0xDFFFFFF;	// ???
+		toncset((char*)0xD000000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	} else {
+		*(u32*)0x020402CC = 0xCFFFFFE;
+		*(u32*)0x020402D0 = 0xC800000;
+		*(u32*)0x020402D4 = 0xC9FFFFF;
+		*(u32*)0x020402D8 = 0xCBFFFFF;
+		*(u32*)0x020402DC = 0xCFFFFFF;
+		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
+		toncset((char*)0xC800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	}
 
 	// Opera RAM patch (ARM7)
-	*(u32*)0x0238C7BC = 0x2400000;
-	*(u32*)0x0238C7C0 = 0x24000CE;
+	*(u32*)0x0238C7BC = 0xC400000;
+	*(u32*)0x0238C7C0 = 0xC4000CE;
 
-	//*(u32*)0x0238C950 = 0x2400000;
+	//*(u32*)0x0238C950 = 0xC400000;
 }
 
 static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
@@ -1102,7 +1114,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
-		operaRamPatch(ndsHeader, moduleParams);
+		operaRamPatch();
 	}
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);

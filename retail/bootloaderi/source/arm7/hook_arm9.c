@@ -244,7 +244,7 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;
 		}
-		if (iUncompressedSize > 0x280000 || (moduleParams->sdk_version >= 0x5040000 && !dsiModeConfirmed && !boostCpu)) {
+		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000 || (moduleParams->sdk_version >= 0x5040000 && !dsiModeConfirmed && !boostCpu)) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
 	}
