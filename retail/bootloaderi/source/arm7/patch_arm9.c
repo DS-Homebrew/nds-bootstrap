@@ -754,6 +754,7 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AH9", 3) == 0 // Tony Hawk's American Sk8land
@@ -763,7 +764,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		if (gameOnFlashcard && !ROMinRAM) {
 			return false;
 		} else if (ROMinRAM) {
-			if (!cardReadDMA) return false;
+			if (!cardReadDMA || ROMsupportsDsiMode) return false;
 		} else {
 			if (!cardReadDMA && !asyncCardRead) return false;
 		}
