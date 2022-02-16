@@ -71,6 +71,7 @@ extern aFile* savFile;
 extern u32 accessCounter;
 
 bool isDma = false;
+bool dmaCode = false;
 
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
@@ -259,6 +260,7 @@ void continueCardReadDmaArm7() {
 
 void cardSetDma(void) {
 	isDma = true;
+	dmaCode = true;
 
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
@@ -361,15 +363,14 @@ void cardSetDma(void) {
 	IPC_SendSync(0x4);
 }
 #else
-void cardSetDma(void) {
-	cardRead(NULL);
-	endCardReadDma();
-}
+void cardSetDma(void) {}
 #endif
 
 extern bool isNotTcm(u32 address, u32 len);
 
 u32 cardReadDma() {
+	if (ce9->cacheBlockSize == 0) return 0;
+
 	vu32* volatile cardStruct = ce9->cardStruct0;
     
 	u32 src = cardStruct[0];
@@ -388,10 +389,21 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-		cacheFlush();
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
-			cardSetDma();
+			#ifndef DLDI
+			if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+			#endif
+				cardRead(NULL);
+				endCardReadDma();
+			#ifndef DLDI
+			} else {
+
+				cacheFlush();
+
+				cardSetDma();
+			}
+			#endif
             return true;
 		} /*else {
 			dma=4;

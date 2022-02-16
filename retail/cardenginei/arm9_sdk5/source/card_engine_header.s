@@ -413,7 +413,7 @@ callSleepThumb:
     pop	    {r1-r11, pc}
 	bx      lr
 _blx_r6_stub_callEndReadDmaThumb:
-	bx	r6
+	bx	r6	
 .pool
 
 .global setIrqMask

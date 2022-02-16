@@ -48,7 +48,6 @@
 #define cacheDisabled BIT(9)
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
-#define asyncCardRead BIT(12)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -108,6 +107,7 @@ static bool region0FixNeeded = false;
 #endif
 static bool igmReset = false;
 bool isDma = false;
+bool dmaCode = false;
 
 s8 mainScreen = 0;
 
@@ -141,9 +141,16 @@ static void waitMs(int count) {
 }
 #endif
 
+//static int readCount = 0;
 #ifndef DLDI
+static bool sleepMsEnabled = false;
+
 void sleepMs(int ms) {
-	if ((!isDma && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
+	if (REG_IME != 0 && REG_IF != 0) {
+		sleepMsEnabled = true;
+	}
+
+	if (dmaCode || !sleepMsEnabled) {
 		swiDelay(50);
 		return;
 	}
@@ -538,6 +545,7 @@ void cardSetDma (u32 * params) {
 		endCardReadDma();
 		return;
 	}
+	dmaCode = true;
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
@@ -680,7 +688,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 		fileRead((char*)dst, *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache
-		bool runSleep = true;
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
@@ -704,7 +711,6 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
 				#endif
-				runSleep = false;
 			} else {
 				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
@@ -749,16 +755,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 			#endif
 
     		// Copy directly
-			if (isDma) {
-				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
-				while (ndmaBusy(0)) {
-					if (runSleep) {
-						sleepMs(1);
-					}
-				}
-			} else {
-				tonccpy(dst, (u8*)buffer+(src-sector), len2);
-			}
+			tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
 			len -= len2;
 			if (len > 0) {
@@ -833,10 +830,12 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-		cacheFlush();
 #ifndef TWLSDK
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
+			// new dma method
+
+            cacheFlush();
             return true;
 		} /*else {
 			dma=4;
@@ -889,6 +888,10 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	waitForArm7();
 	// -------------------------------------
 	#endif
+
+	//readCount++;
+
+	dmaCode = false;
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		return cardReadRAM(dst, src, len);

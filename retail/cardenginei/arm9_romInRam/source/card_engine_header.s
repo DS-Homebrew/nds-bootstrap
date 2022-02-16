@@ -57,7 +57,7 @@ patches:
 .word	cart_read
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
-.word   0x0 @sleepRef
+.word   terminateForPullOutRef
 .word	swi02
 .word   reset_arm9
 needFlushDCCache:
@@ -80,8 +80,7 @@ thumbPatches:
 .word   cacheFlushRef
 thumbCardEndReadDmaRef:
 .word   0x0 @cardEndReadDmaRef
-thumbSleepRef:
-.word   0x0 @sleepRef
+.word   terminateForPullOutRef
 .word   thumb_reset_arm9
 
 	.thumb
@@ -109,9 +108,11 @@ _blx_r6_stub_card_read:
 	bx	r6
 .pool
 cardStructArm9:
-.word    0x00000000 
+.word    0x00000000     
 cacheFlushRef:
-.word    0x00000000 
+.word    0x00000000  
+terminateForPullOutRef:
+.word    0x00000000  
 cacheRef:
 .word    0x00000000
 ce9location1:
@@ -593,16 +594,6 @@ cardReadRefRes:
 callEndReadDmaThumb:
     push	{r1-r11, lr}
     ldr     r6, thumbCardEndReadDmaRef
-    add     r6, #1
-    bl		_blx_r6_stub_callEndReadDmaThumb
-    pop	    {r1-r11, pc}
-	bx      lr
-
-.global callSleepThumb
-.type	callSleepThumb STT_FUNC
-callSleepThumb:
-    push	{r1-r11, lr}
-    ldr     r6, thumbSleepRef
     add     r6, #1
     bl		_blx_r6_stub_callEndReadDmaThumb
     pop	    {r1-r11, pc}

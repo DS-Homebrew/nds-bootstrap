@@ -754,23 +754,10 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	const char* romTid = getRomTid(ndsHeader);
+	if ((ndsHeader->unitCode > 0 && dsiModeConfirmed) || gameOnFlashcard || ROMinRAM || !asyncCardRead) return false;
 
-	if (strncmp(romTid, "AH9", 3) == 0 // Tony Hawk's American Sk8land
-	) {
-		return false;
-	} else {
-		if (gameOnFlashcard && !ROMinRAM) {
-			return false;
-		} else if (ROMinRAM) {
-			if (!cardReadDMA) return false;
-		} else {
-			if (!cardReadDMA && !asyncCardRead) return false;
-		}
-	}
-
-	// Work-around for minorly unstable card read DMA inplementation
-	u32* offset = patchOffsetCache.sleepFuncOffset;
+	// Work-around for lags and/or screen flickers during loading
+   u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
 		if (offset) {
@@ -1699,7 +1686,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
     ce9->patches->cart_read = (u32*)((u32)ce9->patches->cart_read - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
-    ce9->patches->cardEndReadDmaRef = (u32*)((u32)ce9->patches->cardEndReadDmaRef - default_location + current_location);
     ce9->patches->sleepRef = (u32*)((u32)ce9->patches->sleepRef - default_location + current_location);
     ce9->patches->swi02 = (u32*)((u32)ce9->patches->swi02 - default_location + current_location);
     ce9->patches->reset_arm9 = (u32*)((u32)ce9->patches->reset_arm9 - default_location + current_location);
@@ -1718,7 +1704,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->card_pull = (u32*)((u32)ce9->thumbPatches->card_pull - default_location + current_location);
     ce9->thumbPatches->cart_read = (u32*)((u32)ce9->patches->cart_read - default_location + current_location);
     ce9->thumbPatches->cacheFlushRef = (u32*)((u32)ce9->thumbPatches->cacheFlushRef - default_location + current_location);
-    ce9->thumbPatches->cardEndReadDmaRef = (u32*)((u32)ce9->thumbPatches->cardEndReadDmaRef - default_location + current_location);
     ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
     ce9->thumbPatches->reset_arm9 = (u32*)((u32)ce9->thumbPatches->reset_arm9 - default_location + current_location);
 }
@@ -2102,7 +2087,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
 	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+		isSdk5(moduleParams) ? patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) : patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+		patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
 	} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
