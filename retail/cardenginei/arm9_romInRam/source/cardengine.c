@@ -151,8 +151,6 @@ static void clearIcache (void) {
 //	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 //}
 
-static u32 dmaParams[8] = {0};
-
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
         volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
@@ -240,10 +238,6 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
     u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
 
-	dmaParams[3] = src;
-	dmaParams[4] = (u32)dst;
-	dmaParams[5] = len;
-
     if(dma >= 0 
         && dma <= 3 
         //&& func != NULL
@@ -262,9 +256,9 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 			// new dma method
 
             cacheFlush();
-
-            cardSetDma(dmaParams);
-
+			if (!(ce9->valueBits & isSdk5)) {
+				cardSetDma(NULL);
+			}
             return true;
 		} else {
 			isDma = false;
