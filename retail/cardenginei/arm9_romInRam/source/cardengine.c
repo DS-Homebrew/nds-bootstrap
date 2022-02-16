@@ -252,7 +252,7 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         clearIcache();
     }*/
 
-    return false;
+    return 0;
 }
 
 static int counter=0;
