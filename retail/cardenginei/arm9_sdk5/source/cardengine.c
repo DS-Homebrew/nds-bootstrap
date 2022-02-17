@@ -559,7 +559,7 @@ void cardSetDma (u32 * params) {
 	processAsyncCommand();
 	#endif
 
-	if ((ce9->valueBits & cacheDisabled) || (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)) {
+	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 	#ifdef TWLSDK
 		fileRead((char*)dst, *romFile, src, ce9->cacheBlockSize, 0);
 		endCardReadDma();
