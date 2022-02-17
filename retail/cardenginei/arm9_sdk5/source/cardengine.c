@@ -92,13 +92,13 @@ static u32* cacheCounter = (u32*)0x027A0000;
 #endif
 static u32 accessCounter = 0;
 
-//#if ASYNCPF
+#if ASYNCPF
 static u32 asyncSector = 0;
 /*static u32 asyncQueue[5];
 static int aQHead = 0;
 static int aQTail = 0;
 static int aQSize = 0;*/
-//#endif
+#endif
 #endif
 
 static bool flagsSet = false;
@@ -308,7 +308,7 @@ void endCardReadDma() {
 
 static u32 * dmaParams = NULL;
 #ifndef DLDI
-//#ifdef ASYNCPF
+#ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
@@ -366,7 +366,7 @@ void getAsyncSector() {
 		}	
 	}	
 }
-//#endif
+#endif
 
 #ifndef TWLSDK
 static int currentLen=0;
@@ -553,9 +553,9 @@ void cardSetDma (u32 * params) {
 
 	accessCounter++;  
 
-	//#ifdef ASYNCPF
+	#ifdef ASYNCPF
 	processAsyncCommand();
-	//#endif
+	#endif
 
 	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 	#ifdef TWLSDK
@@ -577,7 +577,6 @@ void cardSetDma (u32 * params) {
 		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
 		#endif
-		getAsyncSector();
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
 			#ifdef ASYNCPF
@@ -667,9 +666,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	accessCounter++;
 
-	//#ifdef ASYNCPF
+	#ifdef ASYNCPF
 	processAsyncCommand();
-	//#endif
+	#endif
 
 	//if (src >= sdatAddr && src < sdatAddr+sdatSize) {
 	//	sleepMsEnabled = true;
@@ -683,14 +682,14 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			//#ifdef ASYNCPF
+			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
-			//#endif
+			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
-				//#ifdef ASYNCPF
+				#ifdef ASYNCPF
 				getAsyncSector();
-				//#endif
+				#endif
 
 				slot = allocateCacheSlot();
 
@@ -698,14 +697,16 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-				updateDescriptor(slot, sector);	
-	
-				//#ifdef ASYNCPF
-				triggerAsyncPrefetch(nextSector);
-				//#endif
+				//updateDescriptor(slot, sector);	
+
+				#ifdef ASYNCPF
+				if (REG_IME != 0 && REG_IF != 0) {
+					triggerAsyncPrefetch(nextSector);
+				}
+				#endif
 				runSleep = false;
 			} else {
-				//#ifdef ASYNCPF
+				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
@@ -721,7 +722,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 						}
 					}
 				}*/
-				//#endif
+				#endif
 				//updateDescriptor(slot, sector);
 			}
 			updateDescriptor(slot, sector);	

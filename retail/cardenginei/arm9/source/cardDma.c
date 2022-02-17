@@ -84,13 +84,13 @@ void endCardReadDma() {
 }
 
 #ifndef DLDI
-//#ifdef ASYNCPF
+#ifdef ASYNCPF
 static u32 asyncSector = 0;
 //static u32 asyncQueue[5];
 //static int aQHead = 0;
 //static int aQTail = 0;
 //static int aQSize = 0;
-//#endif
+#endif
 
 bool dmaReadOnArm7 = false;
 bool dmaReadOnArm9 = false;
@@ -141,7 +141,7 @@ static void waitForArm7(bool ipc) {
 	}
 }
 
-//#ifdef ASYNCPF
+#ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
@@ -199,7 +199,7 @@ void getAsyncSector() {
 		}	
 	}	
 }
-//#endif
+#endif
 
 static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
@@ -384,9 +384,9 @@ void cardSetDma(void) {
 
 	accessCounter++;  
 
-	//#ifdef ASYNCPF
+	#ifdef ASYNCPF
 	processAsyncCommand();
-	//#endif
+	#endif
 
 	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 		// Write the command
@@ -403,7 +403,6 @@ void cardSetDma(void) {
 		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
 		#endif
-		getAsyncSector();
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
 			#ifdef ASYNCPF

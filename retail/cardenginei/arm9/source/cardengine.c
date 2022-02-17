@@ -285,9 +285,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 	accessCounter++;
 
-	//#ifdef ASYNCPF
+	#ifdef ASYNCPF
 	processAsyncCommand();
-	//#endif
+	#endif
 
 	//if (src >= sdatAddr && src < sdatAddr+sdatSize) {
 	//	sleepMsEnabled = true;
@@ -301,14 +301,14 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			//#ifdef ASYNCPF
+			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
-			//#endif
+			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
-				//#ifdef ASYNCPF
+				#ifdef ASYNCPF
 				getAsyncSector();
-				//#endif
+				#endif
 
 				slot = allocateCacheSlot();
 
@@ -316,14 +316,16 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-				updateDescriptor(slot, sector);	
-	
-				//#ifdef ASYNCPF
-				triggerAsyncPrefetch(nextSector);
-				//#endif
+				//updateDescriptor(slot, sector);	
+
+				#ifdef ASYNCPF
+				if (REG_IME != 0 && REG_IF != 0) {
+					triggerAsyncPrefetch(nextSector);
+				}
+				#endif
 				runSleep = false;
 			} else {
-				//#ifdef ASYNCPF
+				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
@@ -339,10 +341,10 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 						}
 					}
 				}*/
-				//#endif
-				updateDescriptor(slot, sector);
+				#endif
+				//updateDescriptor(slot, sector);
 			}
-			//updateDescriptor(slot, sector);
+			updateDescriptor(slot, sector);
 
 			//getSdatAddr(sector, (u32)buffer);
 
