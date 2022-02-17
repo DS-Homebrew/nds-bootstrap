@@ -753,7 +753,7 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 				while (ndmaBusy(0)) {
 					if (runSleep) {
-						sleepMs(0);
+						sleepMs(1);
 					}
 				}
 			} else {
