@@ -291,7 +291,7 @@ static void waitForArm7(bool ipc) {
 	while (sharedAddr[3] != (vu32)0) {
 		if (ipc) {
 			IPC_SendSync(0x4);
-			swiDelay(50);
+			sleepMs(1);
 		}
 	}
 }

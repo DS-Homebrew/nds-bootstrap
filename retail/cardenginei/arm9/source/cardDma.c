@@ -128,13 +128,15 @@ u32 popFromAsyncQueueHead() {
 #endif*/
 
 static void waitForArm7(bool ipc) {
+	extern void sleepMs(int ms);
+
 	if (!ipc) {
 		IPC_SendSync(0x4);
 	}
 	while (sharedAddr[3] != (vu32)0) {
 		if (ipc) {
 			IPC_SendSync(0x4);
-			swiDelay(50);
+			sleepMs(1);
 		}
 	}
 }
