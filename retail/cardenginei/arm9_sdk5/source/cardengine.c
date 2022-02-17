@@ -92,13 +92,13 @@ static u32* cacheCounter = (u32*)0x027A0000;
 #endif
 static u32 accessCounter = 0;
 
-#if ASYNCPF
+//#if ASYNCPF
 static u32 asyncSector = 0;
-static u32 asyncQueue[5];
+/*static u32 asyncQueue[5];
 static int aQHead = 0;
 static int aQTail = 0;
-static int aQSize = 0;
-#endif
+static int aQSize = 0;*/
+//#endif
 #endif
 
 static bool flagsSet = false;
@@ -171,7 +171,7 @@ void sleepMs(int ms) {
 	}
 }*/
 
-#if ASYNCPF
+/*#if ASYNCPF
 void addToAsyncQueue(sector) {
 	asyncQueue[aQHead] = sector;
 	aQHead++;
@@ -196,7 +196,7 @@ u32 popFromAsyncQueueHead() {
 		return asyncQueue[aQHead];
 	} else return 0;
 }
-#endif
+#endif*/
 
 static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
@@ -283,20 +283,19 @@ void setExceptionHandler2() {
 	*exceptionC = user_exception;
 }
 
-#ifdef TWLSDK
-static void waitForArm7(void) {
-	IPC_SendSync(0x4);
-	//int count = 0;
+//#ifdef TWLSDK
+static void waitForArm7(bool ipc) {
+	if (!ipc) {
+		IPC_SendSync(0x4);
+	}
 	while (sharedAddr[3] != (vu32)0) {
-		//if (count==0) {
-			waitMs(1);
-			//IPC_SendSync(0x4);
-			//count=1000;
-		//}
-		//count--;
+		if (ipc) {
+			IPC_SendSync(0x4);
+			swiDelay(50);
+		}
 	}
 }
-#endif
+//#endif
 
 void endCardReadDma() {
     if(ce9->patches->cardEndReadDmaRef) {
@@ -309,17 +308,16 @@ void endCardReadDma() {
 
 static u32 * dmaParams = NULL;
 #ifndef DLDI
-#ifdef ASYNCPF
+//#ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
 		// read max 32k via the WRAM cache
 		// do it only if there is no async command ongoing
 		if(slot==-1) {
-			addToAsyncQueue(sector);
+			//addToAsyncQueue(sector);
 			// send a command to the arm7 to fill the main RAM cache
-			//u32 commandRead = (dmaLed ? 0x020FF80A : 0x020FF808);
-			u32 commandRead = (dmaLed ? 0x025FFB0A : 0x025FFB08);
+			u32 commandRead = (isDma ? 0x020FF80A : 0x020FF808);
 
 			slot = allocateCacheSlot();
 
@@ -361,14 +359,14 @@ void getAsyncSector() {
 		int slot = getSlotForSector(asyncSector);
 		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
 			// get back the data from arm7
-			waitForArm7();
+			waitForArm7(true);
 
 			updateDescriptor(slot, asyncSector);
 			asyncSector = 0;
 		}	
 	}	
 }
-#endif
+//#endif
 
 #ifndef TWLSDK
 static int currentLen=0;
@@ -555,9 +553,9 @@ void cardSetDma (u32 * params) {
 
 	accessCounter++;  
 
-	#ifdef ASYNCPF
+	//#ifdef ASYNCPF
 	processAsyncCommand();
-	#endif
+	//#endif
 
 	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
 	#ifdef TWLSDK
@@ -579,6 +577,7 @@ void cardSetDma (u32 * params) {
 		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
 		#endif
+		getAsyncSector();
 		// Read max CACHE_READ_SIZE via the main RAM cache
 		if (slot == -1) {    
 			#ifdef ASYNCPF
@@ -668,9 +667,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	accessCounter++;
 
-	#ifdef ASYNCPF
+	//#ifdef ASYNCPF
 	processAsyncCommand();
-	#endif
+	//#endif
 
 	//if (src >= sdatAddr && src < sdatAddr+sdatSize) {
 	//	sleepMsEnabled = true;
@@ -684,14 +683,14 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			#ifdef ASYNCPF
+			//#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
-			#endif
+			//#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
-				#ifdef ASYNCPF
+				//#ifdef ASYNCPF
 				getAsyncSector();
-				#endif
+				//#endif
 
 				slot = allocateCacheSlot();
 
@@ -699,20 +698,20 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-				//updateDescriptor(slot, sector);	
+				updateDescriptor(slot, sector);	
 	
-				#ifdef ASYNCPF
+				//#ifdef ASYNCPF
 				triggerAsyncPrefetch(nextSector);
-				#endif
+				//#endif
 				runSleep = false;
 			} else {
-				#ifdef ASYNCPF
+				//#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
 					// prefetch successfull
 					getAsyncSector();
 
 					triggerAsyncPrefetch(nextSector);
-				} else {
+				} /*else {
 					int i;
 					for(i=0; i<5; i++) {
 						if(asyncQueue[i]==sector) {
@@ -721,8 +720,8 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 							break;
 						}
 					}
-				}
-				#endif
+				}*/
+				//#endif
 				//updateDescriptor(slot, sector);
 			}
 			updateDescriptor(slot, sector);	
@@ -919,7 +918,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[2] = flash;
 	sharedAddr[3] = commandNandRead;
 
-	waitForArm7();
+	waitForArm7(false);
 #endif
     return true; 
 }
@@ -942,7 +941,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[2] = flash;
 	sharedAddr[3] = commandNandWrite;
 
-	waitForArm7();
+	waitForArm7(false);
 #endif
     return true; 
 }
