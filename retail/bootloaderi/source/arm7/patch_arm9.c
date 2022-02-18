@@ -529,19 +529,23 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
-		const char* romTid = getRomTid(ndsHeader);
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
-		if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-		 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
-		 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
-		 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
-		 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
-		 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
-		 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
-		 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-		 || ((!gameOnFlashcard || ROMinRAM) && !cardReadDMA)) return false;
+	if (ROMsupportsDsiMode && !ROMinRAM) {
+		return false;
 	}
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
+	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
+	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
+	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
+	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
+	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
+	 || ((!gameOnFlashcard || ROMinRAM) && !cardReadDMA)) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -754,21 +758,21 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
+	/*bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AH9", 3) == 0 // Tony Hawk's American Sk8land
 	) {
 		return false;
-	} else {
+	} else {*/
 		if (gameOnFlashcard && !ROMinRAM) {
 			return false;
 		} else if (ROMinRAM) {
-			if (!cardReadDMA || extendedMemoryConfirmed || ROMsupportsDsiMode) return false;
+			/*if (!cardReadDMA || extendedMemoryConfirmed || ROMsupportsDsiMode)*/ return false;
 		} else {
-			if (!cardDmaImprove && !asyncCardRead) return false;
+			if (/* !cardDmaImprove &&*/ !asyncCardRead) return false;
 		}
-	}
+	//}
 
 	// Work-around for minorly unstable card read DMA inplementation
 	u32* offset = patchOffsetCache.sleepFuncOffset;
@@ -2108,7 +2112,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
-		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}

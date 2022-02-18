@@ -843,7 +843,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    tonccpy(buffer+dataPos,globalBuffer+curByte,beginBytes-dataPos);
+    tonccpy(buffer,globalBuffer+curByte,beginBytes);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -940,7 +940,6 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
           #endif
 
 		// Update the read buffer
-		curByte = 0;
 		if (curSect >= discSecPerClus)
 		{
 			if(file.fatTableCached) {
@@ -962,7 +961,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, lastGlobalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
-          tonccpy(buffer+dataPos,lastGlobalBuffer+curByte,length-dataPos);
+          tonccpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
           curByte+=length;
           dataPos+=length;
 	}
@@ -1038,7 +1037,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    tonccpy(globalBuffer+curByte,buffer+dataPos,beginBytes-dataPos);
+    tonccpy(globalBuffer+curByte,buffer,beginBytes);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -1083,7 +1082,6 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 	{
 
 		// Update the read buffer
-		curByte = 0;
 		if (curSect >= discSecPerClus)
 		{
             if(file.fatTableCached) {
@@ -1098,7 +1096,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file.currentCluster), 1, lastGlobalBuffer, ndmaSlot);
 
 		// Read in last partial chunk
-        tonccpy(lastGlobalBuffer+curByte,buffer+dataPos,length-dataPos);
+        tonccpy(lastGlobalBuffer,buffer+dataPos,length-dataPos);
         curByte+=length;
         dataPos+=length;
 

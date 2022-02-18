@@ -165,11 +165,11 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (strncmp(romTid, "CAY", 3) == 0 // Army Men: Soldiers of Misfortune
+	/*if (strncmp(romTid, "CAY", 3) == 0 // Army Men: Soldiers of Misfortune
 	 || strncmp(romTid, "B7F", 3) == 0 // The Magic School Bus: Oceans
 	) {
 		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
-	}
+	}*/
 	if (!(REG_SCFG_ROM & BIT(9))) {
 		ce9->valueBits |= b_dsiBios;
 	}

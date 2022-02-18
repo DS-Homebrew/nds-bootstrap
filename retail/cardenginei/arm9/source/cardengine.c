@@ -104,6 +104,7 @@ static bool flagsSet = false;
 static bool driveInitialized = false;
 static bool region0FixNeeded = false;
 static bool igmReset = false;
+bool isAsync = false;
 
 extern bool isDma;
 extern bool dmaReadOnArm7;
@@ -146,7 +147,7 @@ static void waitFrames(int count) {
 
 #ifndef DLDI
 void sleepMs(int ms) {
-	if ((!isDma && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
+	if ((!isAsync && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
 		swiDelay(50);
 		return;
 	}
@@ -293,11 +294,11 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) /*|| (len > ce9->cacheBlockSize && (u32)dst < 0x03000000 && (u32)dst >= 0x02000000)*/) {
+	/*if (ce9->valueBits & cacheDisabled) {
 		fileRead((char*)dst, *romFile, src, len, 0);
-	} else {
+	} else {*/
 		// Read via the main RAM cache
-		bool runSleep = true;
+		//bool runSleep = true;
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
@@ -323,7 +324,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 					triggerAsyncPrefetch(nextSector);
 				}
 				#endif
-				runSleep = false;
+				//runSleep = false;
 			} else {
 				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {
@@ -368,16 +369,16 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
     		#endif
     
     		// Copy directly
-			if (isDma) {
+			/*if (isDma) {
 				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 				while (ndmaBusy(0)) {
 					if (runSleep) {
 						sleepMs(1);
 					}
 				}
-			} else {
+			} else {*/
 				tonccpy(dst, (u8*)buffer+(src-sector), len2);
-			}
+			//}
 
     		// Update cardi common
     		cardStruct[0] = src + len2;
@@ -392,7 +393,7 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 				accessCounter++;
 			}
 		}
-	}
+	//}
 #endif
 
 	//sleepMsEnabled = false;

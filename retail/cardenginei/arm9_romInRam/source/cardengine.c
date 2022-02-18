@@ -145,6 +145,10 @@ static void clearIcache (void) {
 //}
 
 void endCardReadDma() {
+	if (ndmaBusy(0)) {
+		IPC_SendSync(0x3);
+		return;
+	}
     if(ce9->patches->cardEndReadDmaRef) {
         volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
         (*cardEndReadDmaRef)();
@@ -165,43 +169,27 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? params[4] : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 
-  	u32 len2 = len;
-  	if (len2 > 512) {
-  		len2 -= src % 4;
-  		len2 -= len2 % 32;
-  	}
-
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
 
 	// Copy via dma
-	if (!(ce9->valueBits & extendedMemory) /*ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)*/) {
-		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
+	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
+		ndmaCopyWords(0, (u8*)newSrc, dst, len);
 		endCardReadDma();
-	} else /*if (ce9->valueBits & extendedMemory)*/ {
+	} else if (ce9->valueBits & extendedMemory) {
 		int oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
-		ndmaCopyWords(0, (u8*)newSrc, dst, len2);
+		ndmaCopyWords(0, (u8*)newSrc, dst, len);
 		REG_SCFG_EXT -= 0xC000;
 		leaveCriticalSection(oldIME);
 		endCardReadDma();
-	} /*else {
-		u32 commandRead=0x026FFB0A;
-
-		// Write the command
-		sharedAddr[0] = (vu32)dst;
-		sharedAddr[1] = len2;
-		sharedAddr[2] = (vu32)newSrc;
-		sharedAddr[3] = commandRead;
-
-		if (dst >= 0x03000000) {
-			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2);
-		}
-
-		IPC_SendSync(0x4);
-	}*/
+	} else {
+		// Copy via dma
+		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
+		IPC_SendSync(0x3);
+	}
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -583,9 +571,9 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
-		/*case 0x3:
+		case 0x3:
 			endCardReadDma();
-			break;*/
+			break;
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;

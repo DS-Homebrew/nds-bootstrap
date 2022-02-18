@@ -902,10 +902,11 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-    /*if (IPC_GetSync() == 0x3) {
+    if (IPC_GetSync() == 0x3) {
+		swiDelay(100);
 		IPC_SendSync(0x3);
 		return;
-	}*/
+	}
 
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
         //if(!readOngoing)
@@ -935,11 +936,11 @@ static void runCardEngineCheck(void) {
 					//if (sharedAddr[3] == (vu32)0x025FFB0A) {
 						IPC_SendSync(0x3);
 					//}
-				} else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
+				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
 					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
 					sharedAddr[3] = 0;
 					IPC_SendSync(0x3);
-				}
+				}*/
 			}
 
     		if (sharedAddr[3] == (vu32)0x026FF800) {
@@ -1283,7 +1284,7 @@ u32 myIrqEnable(u32 irq) {
 		driveInitialize();
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
+	/*const char* romTid = getRomTid(ndsHeader);
 
 	if ((strncmp(romTid, "UOR", 3) == 0)
 	|| (strncmp(romTid, "UXB", 3) == 0)
@@ -1295,7 +1296,7 @@ u32 myIrqEnable(u32 irq) {
 		REG_IE |= irq;
 		leaveCriticalSection(oldIME);
 		return irq_before;
-	}
+	}*/
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
 	irq |= IRQ_IPC_SYNC;

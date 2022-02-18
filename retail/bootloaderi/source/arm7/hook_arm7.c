@@ -356,12 +356,12 @@ int hookNdsRetailArm7(
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 
 		*vblankHandler = ce7->patches->vblankHandler;
+		*ipcSyncHandler = ce7->patches->fifoHandler;
 		if (ce7->patches->fifoHandler
 		&& ((strncmp(romTid, "UOR", 3) == 0)
 		 || (strncmp(romTid, "UXB", 3) == 0)
 		 || (strncmp(romTid, "USK", 3) == 0)
 		|| (!gameOnFlashcard && !ROMinRAM))) {
-			*ipcSyncHandler = ce7->patches->fifoHandler;
 			//*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
 				ce7->valueBits |= b_runCardEngineCheck;
