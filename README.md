@@ -49,9 +49,17 @@ A frontend isn't required as nds-bootstrap uses an ini file to load its paramete
 
 ## [TWiLight Menu++](https://github.com/DS-Homebrew/TWiLightMenu)
 
-TWiLight Menu++ is a frontend for nds-bootstrap, developed by [RocketRobz](https://github.com/RocketRobz) & co. It has 7 customizable launchers to choose from with the ability to launch emulators and other homebrew.
+TWiLight Menu++ is a frontend for nds-bootstrap, developed by [Rocket Robz](https://github.com/RocketRobz) & co. It has 6 customizable launchers to choose from with the ability to launch emulators and other homebrew.
 
 It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-bootstrap for you, with customizable per game settings.
+
+## [Forwarders](https://wiki.ds-homebrew.com/ds-index/forwarders)
+
+Allows you to run games directly from the DSi Menu or 3DS HOME Menu. Some compatibility features from TWiLight Menu++ are missing in forwarders so if you have issues you may need to edit the per-game settings by holding <kbd>Y</kbd> while loading the forwarder.
+
+### [YANBF](https://gbatemp.net/threads/606138/) (Yet Another nds-bootstrap Forwarder)
+
+An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode applications so they count towards the normal 300 title limit insted of the smaller 40 title limit on DSi-mode applications, however they cannot have animated icons and take slightly longer to load.
 
 # Credits
 ## Developers
