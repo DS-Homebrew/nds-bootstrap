@@ -234,6 +234,11 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
+		case 0x3:
+			igmReset = true;
+			sharedAddr[3] = 0x54495845;
+			reset(0, 0);
+			break;
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;

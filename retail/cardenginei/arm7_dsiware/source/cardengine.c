@@ -581,17 +581,17 @@ void myIrqHandlerVBlank(void) {
 		swapTimer = 0;
 	}
 	
-	if (sharedAddr[3] == (vu32)0x54495845) {
-		returnToLoader(false);
-	}
-
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
-			returnToLoader(true);
+			IPC_SendSync(0x3);
 		}
 		returnTimer++;
 	} else {
 		returnTimer = 0;
+	}
+
+	if (sharedAddr[3] == (vu32)0x54495845) {
+		returnToLoader(false);
 	}
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
