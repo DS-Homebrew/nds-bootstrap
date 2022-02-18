@@ -643,7 +643,7 @@ bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 
-	if ((ROMsupportsDsiMode && !gameOnFlashcard && !ROMinRAM)
+	if ((ROMsupportsDsiMode && !ROMinRAM)
 	 || (gameOnFlashcard && !isSdk5(moduleParams))) {
 		return false;
 	}
