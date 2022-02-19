@@ -645,9 +645,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	|| (strncmp(romTid, "UOR", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
-	|| (strncmp(romTid, "APD", 3) != 0
-	 && strncmp(romTid, "A24", 3) != 0
-	 && strncmp(romTid, "AMC", 3) != 0
+	|| (strncmp(romTid, "AMC", 3) != 0
 	 && strncmp(romTid, "A8T", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
@@ -1582,12 +1580,7 @@ int arm7_main(void) {
 		}
 
 		if (!dsiModeConfirmed) {
-			/*if (
-				strncmp(romTid, "APD", 3) != 0				// Pokemon Dash
-			 && strncmp(romTid, "A24", 3) != 0				// Pokemon Dash (Kiosk Demo)
-			) {*/
-				NTR_BIOS();
-			//}
+			NTR_BIOS();
 		}
 
 		// If possible, set to load ROM into RAM

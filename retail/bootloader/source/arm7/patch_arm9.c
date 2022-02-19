@@ -1010,6 +1010,53 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	}
 }
 
+static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+    u32 sdPatchEntry = 0;
+    
+	const char* romTid = getRomTid(ndsHeader);
+	if (strncmp(romTid, "APD", 3) != 0 && strncmp(romTid, "A24", 3) != 0) return;
+
+	if (strncmp(romTid, "A24", 3) == 0) { // Kiosk Demo
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0206DA88 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206DFCC = 0; // Fix card set DMA function find
+
+			sdPatchEntry = 0x206DB28;
+		}
+	} else if (ndsHeader->gameCode[3] == 'E') {
+		*(u32*)0x0206CF48 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206D48C = 0; // Fix card set DMA function find
+
+		sdPatchEntry = 0x206CFE8;
+        // target 206CFE8, more similar to cardread
+        // r0 cardstruct 218A6E0 ptr 20D6120
+        // r1 src
+        // r2 dst
+        // r3 len
+        // return r0=number of time executed ?? 206D1A8
+	} else if (ndsHeader->gameCode[3] == 'P') {
+		*(u32*)0x0206CF60 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206D4A4 = 0; // Fix card set DMA function find
+
+		sdPatchEntry = 0x206D000;
+	} else if (ndsHeader->gameCode[3] == 'J') {
+		*(u32*)0x0206AAF4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206B038 = 0; // Fix card set DMA function find
+
+		sdPatchEntry = 0x206AB94;
+	} else if (ndsHeader->gameCode[3] == 'K') {
+		*(u32*)0x0206DFCC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206E510 = 0; // Fix card set DMA function find
+
+		sdPatchEntry = 0x206E06C;
+	}
+
+    if(sdPatchEntry) {   
+     	// Patch
+    	u32* pDashReadPatch = ce9->patches->pdash_read;
+    	tonccpy((u32*)sdPatchEntry, pDashReadPatch, 0x40);   
+    }
+}
 static void operaRamPatch(void) {
 	if (dsDebugRam || !extendedMemory2) {
 		return;
@@ -1089,6 +1136,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
+
+	patchCardReadPdash(ce9, ndsHeader);
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
 

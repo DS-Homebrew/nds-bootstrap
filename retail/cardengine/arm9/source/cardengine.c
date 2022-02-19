@@ -407,6 +407,20 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	}
 }
 
+static int counter=0;
+int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
+	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
+
+    cardStruct[0] = src;
+    cardStruct[1] = (vu32)dst;
+    cardStruct[2] = len;
+
+    cardRead(cacheStruct, src, dst, len);
+
+    counter++;
+	return counter;
+}
+
 extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 

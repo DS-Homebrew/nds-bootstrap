@@ -97,6 +97,7 @@ patches:
 .word   reset_arm9
 needFlushDCCache:
 .word   0x0
+.word   pdash_read
 .word	ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
@@ -294,6 +295,23 @@ thumb_card_irq_enable:
 	bx  lr
 @---------------------------------------------------------------------------------
 
+	.arm
+pdash_read:
+    push	{r1-r11, lr}
+    @mov     r0, r4 @DST
+    @mov     r1, r5 @SRC
+    @mov     r2, r6 @LEN
+    @mov     r3, r10 @cardStruct
+    add     r0, r0, #0x2C    
+    ldr		r6, =cardReadPDash
+	bl		_blx_r6_stub_pdash   
+    pop	    {r1-r11, pc}
+    bx      lr
+_blx_r6_stub_pdash:
+	bx	r6	
+.pool
+
+	.thumb   
 @---------------------------------------------------------------------------------
 thumb_reset_arm9:
 @---------------------------------------------------------------------------------
