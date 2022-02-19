@@ -104,7 +104,6 @@ static bool flagsSet = false;
 static bool driveInitialized = false;
 static bool region0FixNeeded = false;
 static bool igmReset = false;
-bool isAsync = false;
 
 extern bool isDma;
 extern bool dmaReadOnArm7;
@@ -147,7 +146,7 @@ static void waitFrames(int count) {
 
 #ifndef DLDI
 void sleepMs(int ms) {
-	if ((!isAsync && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
+	if (!(ce9->valueBits & asyncCardRead) || REG_IME == 0 || REG_IF == 0) {
 		swiDelay(50);
 		return;
 	}

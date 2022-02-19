@@ -143,7 +143,7 @@ static void waitMs(int count) {
 
 #ifndef DLDI
 void sleepMs(int ms) {
-	if ((!isDma && !(ce9->valueBits & asyncCardRead)) || REG_IME == 0 || REG_IF == 0) {
+	if (!(ce9->valueBits & asyncCardRead) || REG_IME == 0 || REG_IF == 0) {
 		swiDelay(50);
 		return;
 	}

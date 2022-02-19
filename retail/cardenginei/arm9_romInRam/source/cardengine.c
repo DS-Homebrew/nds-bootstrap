@@ -175,10 +175,7 @@ void cardSetDma(u32 * params) {
 	}
 
 	// Copy via dma
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		ndmaCopyWords(0, (u8*)newSrc, dst, len);
-		endCardReadDma();
-	} else if (ce9->valueBits & extendedMemory) {
+	if (ce9->valueBits & extendedMemory) {
 		int oldIME = enterCriticalSection();
 		REG_SCFG_EXT += 0xC000;
 		ndmaCopyWords(0, (u8*)newSrc, dst, len);
@@ -319,12 +316,12 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 	}
 
-	if (isDma && !(ce9->valueBits & extendedMemory)) {
+	/*if (isDma && !(ce9->valueBits & extendedMemory)) {
 		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
 		while (ndmaBusy(0)) {
 			sleepMs(1);
 		}
-	} else {
+	} else {*/
 		int oldIME = 0;
 		if (ce9->valueBits & extendedMemory) {
 			// Open extra memory
@@ -344,7 +341,7 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			REG_SCFG_EXT -= 0xC000;
 			leaveCriticalSection(oldIME);
 		}
-	}
+	//}
 
     isDma=false;
 
