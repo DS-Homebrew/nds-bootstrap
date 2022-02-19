@@ -367,7 +367,7 @@ void getAsyncSector() {
 }
 #endif
 
-static u32 dmaParams[3] = {0};
+static u32 * dmaParams = NULL;
 static int currentLen=0;
 static bool dmaReadOnArm7 = false;
 static bool dmaReadOnArm9 = false;
@@ -382,18 +382,18 @@ void continueCardReadDmaArm9() {
 
 		u32 commandRead=0x025FFB0A;
 
-		u32 src = dmaParams[0];
-		u8* dst = (u8*)dmaParams[1];
-		u32 len = dmaParams[2];
+		u32 src = dmaParams[3];
+		u8* dst = (u8*)dmaParams[4];
+		u32 len = dmaParams[5];
 
-        // Update cardi common
-  		dmaParams[0] = src + currentLen;
-  		dmaParams[1] = (vu32)(dst + currentLen);
-  		dmaParams[2] = len - currentLen;
+		// Update cardi common
+		dmaParams[3] = src + currentLen;
+		dmaParams[4] = (vu32)(dst + currentLen);
+		dmaParams[5] = len - currentLen;
 
-        src = dmaParams[0];
-        dst = (u8*)dmaParams[1];
-        len = dmaParams[2];
+		src = dmaParams[3];
+		dst = (u8*)dmaParams[4];
+		len = dmaParams[5];
 
         u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -488,9 +488,9 @@ void continueCardReadDmaArm7() {
 
         vu32* volatile cardStruct = ce9->cardStruct0;
 
-        u32 src = dmaParams[0];
-    	u8* dst = (u8*)dmaParams[1];
-    	u32 len = dmaParams[2];
+		u32 src = dmaParams[3];
+		u8* dst = (u8*)dmaParams[4];
+		u32 len = dmaParams[5];
 
 		/*if (ce9->valueBits & cacheDisabled) {
 			endCardReadDma();
@@ -523,12 +523,10 @@ void continueCardReadDmaArm7() {
 void cardSetDma (u32 * params) {
 	isDma = true;
 
-	dmaParams[0] = params[3];
-	dmaParams[1] = params[4];
-	dmaParams[2] = params[5];
-	u32 src = dmaParams[0];
-	u8* dst = (u8*)dmaParams[1];
-	u32 len = dmaParams[2];
+	dmaParams = params;
+	u32 src = dmaParams[3];
+	u8* dst = (u8*)dmaParams[4];
+	u32 len = dmaParams[5];
 
 	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 		cardRead(0, dst, src, len);
