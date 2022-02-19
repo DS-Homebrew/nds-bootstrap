@@ -393,7 +393,7 @@ void continueCardReadDmaArm9() {
 
         src = dmaParams[0];
         dst = (u8*)dmaParams[1];
-        len = dmaParams[2]; 
+        len = dmaParams[2];
 
         u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -488,9 +488,9 @@ void continueCardReadDmaArm7() {
 
         vu32* volatile cardStruct = ce9->cardStruct0;
 
-        u32 src = dmaParams[3];
-    	u8* dst = (u8*)dmaParams[4];
-    	u32 len = dmaParams[5];   
+        u32 src = dmaParams[0];
+    	u8* dst = (u8*)dmaParams[1];
+    	u32 len = dmaParams[2];
 
 		/*if (ce9->valueBits & cacheDisabled) {
 			endCardReadDma();
