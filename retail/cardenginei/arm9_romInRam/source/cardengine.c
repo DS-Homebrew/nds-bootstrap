@@ -220,10 +220,10 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-        cacheFlush();
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
 			// new dma method
+			cacheFlush();
 			if (!(ce9->valueBits & isSdk5)) {
 				cardSetDma(NULL);
 			}

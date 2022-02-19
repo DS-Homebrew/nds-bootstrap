@@ -836,10 +836,10 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-		cacheFlush();
 #ifndef TWLSDK
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
+			cacheFlush();
             return true;
 		} /*else {
 			dma=4;
