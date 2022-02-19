@@ -529,12 +529,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
-
-	if (ROMsupportsDsiMode && !ROMinRAM) {
-		return false;
-	}
-
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -545,7 +539,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || ((!gameOnFlashcard || ROMinRAM) && !cardReadDMA)) return false;
+	 || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -641,12 +635,6 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 
 bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
-
-	if ((ROMsupportsDsiMode && !ROMinRAM)
-	 || (gameOnFlashcard && !isSdk5(moduleParams))) {
-		return false;
-	}
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -657,7 +645,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || (gameOnFlashcard && !ROMsupportsDsiMode && !ROMinRAM) || !cardReadDMA) return false;
+	 || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
 
