@@ -906,7 +906,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	patchBinary((cardengineArm9*)ce9Location, ndsHeader);
+	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)ce9Location,

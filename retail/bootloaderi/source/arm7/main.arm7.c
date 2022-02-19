@@ -1690,7 +1690,7 @@ int arm7_main(void) {
 		fileRead(&clonebootFlag, *romFile, ndsHeader->romSize, sizeof(u32), !sdRead, -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 
-		patchBinary((cardengineArm9*)ce9Location, ndsHeader);
+		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
 			(cardengineArm9*)ce9Location,
