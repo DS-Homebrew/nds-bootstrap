@@ -24,7 +24,7 @@
 /*#define is_aligned(POINTER, BYTE_COUNT) \
     (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)*/
 
-int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0);
+void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0);
 void cardPullOut(void);
 
 void cacheFlush(void);

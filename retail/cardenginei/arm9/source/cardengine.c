@@ -276,7 +276,7 @@ void enableIPC_SYNC(void) {
       leaveCriticalSection(oldIME);*/
 //}
 
-static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
+static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
@@ -400,11 +400,9 @@ static inline int cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
-
-	return 0;
 }
 
-static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
+static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
 	while (len > 0) {
 		#ifdef DEBUG
 		// Send a log command for debug purpose
@@ -434,8 +432,6 @@ static inline int cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* d
 			dst = (u8*)cardStruct[1];
 		}
 	}
-
-	return 0;
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -476,7 +472,7 @@ void __attribute__((target("arm"))) region0Fix() {
 	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
 }
 
-int cardRead(u32* cacheStruct) {
+void cardRead(u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (region0FixNeeded) {
@@ -523,14 +519,11 @@ int cardRead(u32* cacheStruct) {
 	}
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		return cardReadRAM(cardStruct, cacheStruct, dst, src, len);
+		cardReadRAM(cardStruct, cacheStruct, dst, src, len);
+	} else {
+		cardReadNormal(cardStruct, cacheStruct, dst, src, len);
 	}
-
-	int ret = cardReadNormal(cardStruct, cacheStruct, dst, src, len);
-
     isDma=false;
-
-	return ret; 
 }
 
 void cardPullOut(void) {

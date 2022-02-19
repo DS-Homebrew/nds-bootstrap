@@ -415,7 +415,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     cardStruct[1] = (vu32)dst;
     cardStruct[2] = len;
 
-    cardRead(cacheStruct, src, dst, len);
+    cardRead(cacheStruct, dst, src, len);
 
     counter++;
 	return counter;
@@ -424,7 +424,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 
-int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
+void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
 		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
 			sdk5MpuFix();
@@ -471,7 +471,6 @@ int cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	REG_EXMEMCNT = exmemcnt;
-	return 0;
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {

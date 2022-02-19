@@ -660,7 +660,7 @@ void cardSetDma (u32 * params) {
       leaveCriticalSection(oldIME);*/
 //}
 
-static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
+static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
@@ -775,11 +775,9 @@ static inline int cardReadNormal(u8* dst, u32 src, u32 len) {
 #endif
 
 	//sleepMsEnabled = false;
-
-	return 0;
 }
 
-static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
+static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -796,8 +794,6 @@ static inline int cardReadRAM(u8* dst, u32 src, u32 len) {
 
 	// Copy directly
 	tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
-
-	return 0;
 }
 
 #ifdef TWLSDK
@@ -854,7 +850,7 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
     return false;
 }
 
-int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
+void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		#ifdef TWLSDK
@@ -894,14 +890,11 @@ int cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	#endif
 
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		return cardReadRAM(dst, src, len);
+		cardReadRAM(dst, src, len);
+	} else {
+		cardReadNormal(dst, src, len);
 	}
-
-	int ret = cardReadNormal(dst, src, len);
-
     isDma=false;
-
-	return ret; 
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
