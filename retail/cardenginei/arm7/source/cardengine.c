@@ -339,6 +339,28 @@ static void initialize(void) {
 	initialized = true;
 }
 
+#ifdef TWLSDK
+u32 auxIeBak = 0;
+u32 sdStatBak = 0;
+u32 sdMaskBak = 0;
+
+void bakSdData(void) {
+	auxIeBak = REG_AUXIE;
+	sdStatBak = *(vu32*)0x400481C;
+	sdMaskBak = *(vu32*)0x4004820;
+
+	REG_AUXIE &= ~(1UL << 8);
+	*(vu32*)0x400481C = 0;
+	*(vu32*)0x4004820 = 0;
+}
+
+void restoreSdBakData(void) {
+	REG_AUXIE = auxIeBak;
+	*(vu32*)0x400481C = sdStatBak;
+	*(vu32*)0x4004820 = sdMaskBak;
+}
+#endif
+
 void reset(void) {
 #ifndef TWLSDK
 	u32 resetParam = (isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
@@ -420,6 +442,9 @@ void reset(void) {
 		while (ndmaBusy(0) || ndmaBusy(1));
 	}
 	#else
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
+
 	driveInitialize();
 
 	u32 iUncompressedSize = 0;
@@ -436,6 +461,8 @@ void reset(void) {
 	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
 	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
 	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, 0);
+
+	if (doBak) restoreSdBakData();
 	#endif
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
@@ -527,35 +554,6 @@ static void cardReadLED(bool on, bool dmaLed) {
 
 extern void inGameMenu(void);
 
-#ifdef TWLSDK
-u32 auxIeBak = 0;
-u32 sdStatBak = 0;
-u32 sdMaskBak = 0;
-
-void restoreBakData(void) {
-	REG_AUXIE = auxIeBak;
-	*(vu32*)0x400481C = sdStatBak;
-	*(vu32*)0x4004820 = sdMaskBak;
-	i2cWriteRegister(0x4A, 0x12, 0x01);
-}
-
-void bakSdData(void) {
-	auxIeBak = REG_AUXIE;
-	sdStatBak = *(vu32*)0x400481C;
-	sdMaskBak = *(vu32*)0x4004820;
-
-	REG_AUXIE &= ~(1UL << 8);
-	*(vu32*)0x400481C = 0;
-	*(vu32*)0x4004820 = 0;
-}
-
-void restoreSdBakData(void) {
-	REG_AUXIE = auxIeBak;
-	*(vu32*)0x400481C = sdStatBak;
-	*(vu32*)0x4004820 = sdMaskBak;
-}
-#endif
-
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = 0;
@@ -568,14 +566,15 @@ void forceGameReboot(void) {
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
-	driveInitialize();
 	#ifdef TWLSDK
-	bakSdData();
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
 	#endif
+	driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
-	#ifdef TWLSDK
-	restoreSdBakData();
+  	#ifdef TWLSDK
+	if (doBak) restoreSdBakData();
 	#endif
 	if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
@@ -619,7 +618,8 @@ void returnToLoader(bool wait) {
 
 void dumpRam(void) {
 	#ifdef TWLSDK
-	bakSdData();
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
 	#endif
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
@@ -634,8 +634,8 @@ void dumpRam(void) {
 		fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
 	}
 	sharedAddr[3] = 0;
-	#ifdef TWLSDK
-	restoreSdBakData();
+  	#ifdef TWLSDK
+	if (doBak) restoreSdBakData();
 	#endif
 }
 
@@ -643,7 +643,8 @@ void prepareScreenshot(void) {
 #ifndef TWLSDK
 	if (valueBits & dsiMode) {
 #else
-	bakSdData();
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
 #endif
 		driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
@@ -651,13 +652,17 @@ void prepareScreenshot(void) {
 #ifndef TWLSDK
 	}
 #else
-	restoreSdBakData();
+	if (doBak) restoreSdBakData();
 #endif
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
+#ifdef TWLSDK
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
+#endif
 	driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
@@ -671,14 +676,12 @@ void saveScreenshot(void) {
 
 #ifndef TWLSDK
 	if (valueBits & dsiMode) {
-#else
-	bakSdData();
 #endif
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 #ifndef TWLSDK
 	}
 #else
-	restoreSdBakData();
+	if (doBak) restoreSdBakData();
 #endif
 }
 
@@ -1129,13 +1132,12 @@ void myIrqHandlerVBlank(void) {
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory)) || returnToMenu) {
 #ifdef TWLSDK
-		bakSdData();
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
 #endif
 		inGameMenu();
 #ifdef TWLSDK
-		restoreBakData();
+		i2cWriteRegister(0x4A, 0x12, 0x01);
 #endif
 	}
 
@@ -1385,7 +1387,8 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
 		#endif
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
@@ -1395,7 +1398,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 			fileRead(dst, *savFile, src, len, !sdRead, -1);
 		//}
 		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
   		unlockMutex(&saveMutex);
 	}
@@ -1421,7 +1424,8 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
 		#endif
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
@@ -1432,7 +1436,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		}*/
 		fileWrite(src, *savFile, dst, len, !sdRead, -1);
 		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
   		unlockMutex(&saveMutex);
 	}
@@ -1458,7 +1462,8 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
   	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
 		#endif
 		driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
@@ -1469,7 +1474,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		}*/
 		fileWrite(src, *savFile, dst, len, !sdRead, -1);
   		#ifdef TWLSDK
-		if (!(valueBits & saveOnFlashcard)) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
 		unlockMutex(&saveMutex);
 	}
@@ -1609,9 +1614,6 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		tonccpy(dst, (u8*)newSrc, len);
 	} else {
 		while (readOngoing) { swiDelay(100); }
-		#ifdef TWLSDK
-		if (!(valueBits & gameOnFlashcard)) bakSdData();
-		#endif
 		driveInitialize();
 		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
@@ -1622,9 +1624,6 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, *romFile, src, len, !sdRead, 0);
 		//ndmaUsed = true;
 		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
-		#ifdef TWLSDK
-		if (!(valueBits & gameOnFlashcard)) restoreSdBakData();
-		#endif
 	}
 	
 	return true;

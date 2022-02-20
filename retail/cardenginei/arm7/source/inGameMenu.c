@@ -68,8 +68,7 @@ void inGameMenu(void) {
 					exitMenu = true;
 					timeTilBatteryLevelRefresh = 7;
 					#ifdef TWLSDK
-					extern void restoreBakData(void);
-					restoreBakData();
+					i2cWriteRegister(0x4A, 0x12, 0x01);
 					#endif
 					reset();
 					break;
