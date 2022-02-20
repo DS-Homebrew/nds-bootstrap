@@ -542,6 +542,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    u32 offsetDmaHandler = patchOffsetCache.dmaHandlerOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
 		if (!patchOffsetCache.cardReadDmaEndOffset) {
 			u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader, moduleParams);
@@ -552,8 +553,11 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 				patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
 			}
 		}
-		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb,patchOffsetCache.cardReadDmaEndOffset);
-		if (offset) patchOffsetCache.cardEndReadDmaOffset = offset;
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb,patchOffsetCache.cardReadDmaEndOffset,&offsetDmaHandler);
+		if (offset) {
+			patchOffsetCache.cardEndReadDmaOffset = offset;
+			patchOffsetCache.dmaHandlerOffset = offsetDmaHandler;
+		}
 		patchOffsetCache.cardEndReadDmaChecked = true;
 		patchOffsetCacheChanged = true;
 	  }
@@ -586,7 +590,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 				*thumbOffset = 0xB5F8; // push	{r3-r7, lr}
 			}
             ce9->thumbPatches->cardEndReadDmaRef = (u32*)thumbOffset;
-          } else {
+        } else {
             u32* armOffset = (u32*)offset;
             u32* armOffsetStartFunc = (u32*)offset;
 			bool lrOnly = false;
@@ -604,10 +608,13 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 				armOffset--;
 				armOffset[0] = *armOffsetStartFunc; // "STMFD SP!, {LR}", "STMFD SP!, {R4,R5,LR}", or "STMFD SP!, {R4-R7,LR}"
 				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
+				if (offsetDmaHandler && *armOffsetStartFunc==0xE92D40F0) {
+					offsetDmaHandler += 14*sizeof(u32); // Relocation fix
+				}
 			} else {
 				*armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
 			}
-            ce9->patches->cardEndReadDmaRef = armOffset;
+            ce9->patches->cardEndReadDmaRef = offsetDmaHandler==0 ? armOffset : (u32*)offsetDmaHandler;
         }
       } else {
         // SDK5 

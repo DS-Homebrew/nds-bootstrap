@@ -85,7 +85,7 @@ u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_pa
 u32* findCartExistOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr);
-u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset);
+u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

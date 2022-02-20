@@ -2321,14 +2321,14 @@ u32* findCardEndReadDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* 
 	return offset;
 }
 
-u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset) {
+u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* dmaHandlerOffset) {
 	dbg_printf("findCardEndReadDma\n");
 
     if (moduleParams->sdk_version > 0x5000000) {
         return findCardEndReadDmaSdk5(ndsHeader,moduleParams,usesThumb);
     }     
 
-    u32* offsetDmaHandler = NULL;
+	u32* offsetDmaHandler = NULL;
 	if (moduleParams->sdk_version < 0x4000000) {
 		offsetDmaHandler = cardReadDmaEndOffset+8;
 	}
@@ -2349,7 +2349,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     dbg_printf("\noffsetDmaHandler found\n");
  	dbg_hexa((u32)offsetDmaHandler);
 	dbg_printf(" : ");
-    dbg_hexa(*offsetDmaHandler);   
+    dbg_hexa(*offsetDmaHandler);
     dbg_printf("\n");
 
     u32 * offset = NULL;
@@ -2366,11 +2366,25 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
         ); 
     } 
 
-	if (!offset && usesThumb) {
-  		offset = findOffsetThumb(
-      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
-            cardEndReadDmaSignatureThumb3, 1
-        );
+	if (!offset) {
+		if (usesThumb) {
+			offset = findOffsetThumb(
+				((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+				cardEndReadDmaSignatureThumb3, 1
+			);
+		} else {
+			// Relocation alternative
+			offset = findOffset(
+				offsetDmaHandler+1, 0x200,//ndsHeader->arm9binarySize,
+				cardEndReadDmaSignature4, 1
+			);
+			if (offset) {
+				*dmaHandlerOffset = *offsetDmaHandler;
+				dbg_printf("Offset before relocation: ");
+				dbg_hexa((u32)offsetDmaHandler+4);
+				dbg_printf("\n");
+			}
+		}
 	}
 
     if (offset) {
