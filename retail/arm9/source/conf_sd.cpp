@@ -775,11 +775,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					tonccpy((char*)0x02EFF260, filePath, strlen(filePath));
 				}
 			}
-			if (!conf->gameOnFlashcard) {
-				if (strlen(conf->appPath) < 62) {
-					tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
-					tonccpy((char*)0x02EFF3C2, sdmcText+2, 2);
-				}
+			if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
+				tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
+				tonccpy((char*)0x02EFF3C0, sdmcText, 4);
+			}
+			if (!conf->saveOnFlashcard) {
 				if (strlen(conf->prvPath) < 62) {
 					if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
 						tonccpy((char*)0x02EFF1B8, conf->prvPath, strlen(conf->prvPath));
