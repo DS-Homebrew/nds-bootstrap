@@ -220,14 +220,14 @@ static void readSrBackendId(void) {
 }
 
 // Alternative to swiWaitForVBlank()
-static void waitFrames(int count) {
+static inline void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
 }
 
-static bool isSdEjected(void) {
+static inline bool isSdEjected(void) {
 	if (*(vu32*)(0x400481C) & BIT(3)) {
 		return true;
 	}
@@ -1124,7 +1124,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
-	if (!(valueBits & ROMinRAM) && isSdEjected()) {
+	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed

@@ -162,14 +162,14 @@ static void readSrBackendId(void) {
 }
 
 // Alternative to swiWaitForVBlank()
-static void waitFrames(int count) {
+static inline void waitFrames(int count) {
 	for (int i = 0; i < count; i++) {
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
 }
 
-static bool isSdEjected(void) {
+static inline bool isSdEjected(void) {
 	if (*(vu32*)(0x400481C) & BIT(3)) {
 		return true;
 	}
