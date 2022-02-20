@@ -1304,17 +1304,9 @@ u32 myIrqEnable(u32 irq) {
 
 	initialize();
 
-	if (!(valueBits & gameOnFlashcard)) {
-		REG_AUXIE &= ~(1UL << 8);
-	}
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
-		#ifdef TWLSDK
-		bakSdData();
-		#endif
+		REG_AUXIE &= ~(1UL << 8);
 		driveInitialize();
-		#ifdef TWLSDK
-		restoreSdBakData();
-		#endif
 	}
 
 	/*const char* romTid = getRomTid(ndsHeader);
