@@ -461,7 +461,7 @@ void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool sea
 
 static void patchGbaSlotInit(const tNDSHeader* ndsHeader, bool usesThumb) {
 	extern u32 oldArm7mbk;
-	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || oldArm7mbk != 0x080037C0) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk != 0x080037C0 && *(u32*)0x02FFE1A0 != 0x080037C0) || oldArm7mbk == 0x080037C0) {
 		return;
 	}
 	patchGbaSlotInit_cont(ndsHeader, usesThumb, false);
