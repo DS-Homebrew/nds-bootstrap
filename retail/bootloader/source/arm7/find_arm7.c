@@ -133,6 +133,7 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			relocationCheck -= 4;
 		}
 		if (relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem > relocationCheck2) {
+			relocationCheck += 4;
 			dbg_printf("Error in relocation checking\n");
 			dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem);
 			dbg_printf(" ");
