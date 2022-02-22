@@ -174,13 +174,13 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem);
 			dbg_printf(" ");
 			dbg_hexa(relocationCheck2);
+			dbg_printf("\n");
 
 			vAddrOfRelocSrc =  relocationCheck + 0xC - relocationCheck2 + relocDestAtSharedMem;
-			dbg_printf("vAddrOfRelocSrc\n");
-			dbg_hexa(vAddrOfRelocSrc); 
+			dbg_printf("vAddrOfRelocSrc: ");
+		} else {
+			dbg_printf("Relocation src: ");
 		}
-
-		dbg_printf("Relocation src: ");
 		dbg_hexa(vAddrOfRelocSrc);
 		dbg_printf("\n");
 
