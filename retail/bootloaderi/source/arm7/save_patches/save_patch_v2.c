@@ -191,8 +191,6 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		srcAddr = JumpTableFunc + 0x178 - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchErase = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageErase);
 		*eepromPageErase = patchErase;
-
-		ce7->patches->arm7Functions->saveCluster = saveFileCluster;
 	} else {
 		dbg_printf("[Warning] Eeprom protect not found \n");
 
@@ -258,9 +256,8 @@ u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 		srcAddr = JumpTableFunc + 0x170 - vAddrOfRelocSrc + relocDestAtSharedMem;
 		u32 patchErase = generateA7Instr(srcAddr, ce7->patches->arm7Functions->eepromPageErase);
 		*eepromPageErase = patchErase;
-
-		ce7->patches->arm7Functions->saveCluster = saveFileCluster;
-	}    
+	}
+	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
 
 	return 1;
 }
