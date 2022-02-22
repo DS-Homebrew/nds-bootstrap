@@ -882,6 +882,7 @@ static bool supportsExceptionHandler(const char* romTid) {
 	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
 	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
 	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
+	&& strncmp(romTid, "AMC", 3) != 0	// MKDS (ROM hacks may contain their own exception handler)
 	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
 }
 
