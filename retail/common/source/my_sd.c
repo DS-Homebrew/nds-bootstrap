@@ -34,11 +34,11 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffset) {
+bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffset, int ndmaSlot) {
 	#ifdef DEBUG
 	nocashMessage("readSector internal");
 	#endif
-	return my_sdmmc_sdcard_readsector(sector, buffer, startOffset, endOffset) == 0;
+	return my_sdmmc_sdcard_readsector(sector, buffer, startOffset, endOffset, ndmaSlot) == 0;
 }
 
 /*-----------------------------------------------------------------

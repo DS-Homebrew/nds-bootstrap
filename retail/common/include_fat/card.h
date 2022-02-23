@@ -43,8 +43,8 @@ static inline bool CARD_IsInserted(void) {
 					: __myio_dldi.isInserted();
 }
 
-static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset) {
-	return sdRead ? __myio_dsisd.readSector(sector, buffer, startOffset, endOffset)
+static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset, int ndmaSlot) {
+	return sdRead ? __myio_dsisd.readSector(sector, buffer, startOffset, endOffset, ndmaSlot)
 					: __myio_dldi.readSectors(sector, 1, buffer);
 }
 
@@ -82,7 +82,7 @@ static inline bool CARD_IsInserted(void) {
 	return __myio_dldi.isInserted();
 }
 
-static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset) {
+static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset, int ndmaSlot) {
 	return __myio_dldi.readSectors(sector, 1, buffer);
 }
 
