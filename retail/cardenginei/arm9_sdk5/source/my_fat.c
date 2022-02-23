@@ -250,7 +250,7 @@ u32 FAT_NextCluster(u32 cluster)
 			prevFirstClust = -1;
 			prevSect = -1;
 			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0, -1);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			nextCluster = ((u8*) globalBuffer)[offset];
 			offset++;
 
@@ -259,7 +259,7 @@ u32 FAT_NextCluster(u32 cluster)
 				sector++;
 			}
 
-			CARD_ReadSector(sector, globalBuffer, 0, 0, -1);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			nextCluster |= (((u8*) globalBuffer)[offset]) << 8;
 
 			if (cluster & 0x01) {
@@ -277,7 +277,7 @@ u32 FAT_NextCluster(u32 cluster)
 			prevFirstClust = -1;
 			prevSect = -1;
 			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0, -1);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			// read the nextCluster value
 			nextCluster = ((u16*)globalBuffer)[offset];
 
@@ -294,7 +294,7 @@ u32 FAT_NextCluster(u32 cluster)
 			prevFirstClust = -1;
 			prevSect = -1;
 			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0, -1);
+			CARD_ReadSector(sector, globalBuffer, 0, 0);
 			// read the nextCluster value
 			nextCluster = (((u32*)globalBuffer)[offset]) & 0x0FFFFFFF;
 
@@ -346,7 +346,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 	}
 
 	// Read first sector of card
-	if (!CARD_ReadSector (0, globalBuffer, 0, 0, ndmaSlot)) 
+	if (!CARD_ReadSector (0, globalBuffer, 0, 0)) 
 	{
 		#ifdef DEBUG
 		nocashMessage("!CARD_ReadSector (0, globalBuffer)");
@@ -383,7 +383,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 
 	// Read in boot sector
 	bootSec = (BOOT_SEC*) globalBuffer;
-	CARD_ReadSector (bootSector,  bootSec, 0, 0, ndmaSlot);
+	CARD_ReadSector (bootSector,  bootSec, 0, 0);
 
 	// Store required information about the file system
 	if (bootSec->sectorsPerFAT != 0)
@@ -488,7 +488,7 @@ aFile getBootFileCluster (const char* bootName)
 //	maxSectors = (wrkDirCluster == FAT16_ROOT_DIR_CLUSTER ? (discData - discRootDir) : discSecPerClus);
 	// Scan Dir for correct entry
 	firstSector = discRootDir;
-	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0, -1);
+	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0);
 	found = false;
 	notFound = false;
 	wrkDirOffset = -1;	// Start at entry zero, Compensating for increment
@@ -512,7 +512,7 @@ aFile getBootFileCluster (const char* bootName)
 			{
 				notFound = true;	// Got to end of root dir
 			}
-			CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0, -1);
+			CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0);
 		}
 		dir = ((DIR_ENT*) globalBuffer)[wrkDirOffset];
 		found = true;

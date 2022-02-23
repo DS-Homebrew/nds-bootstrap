@@ -898,7 +898,7 @@ static inline void sdmmcHandler(void) {
 			//#endif
 			bool isDma = sharedAddr[4]==0x53444D31;
 			cardReadLED(true, isDma);
-			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3], -1);
+			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
 			cardReadLED(false, isDma);
 		}	break;
 		case 0x53445244:

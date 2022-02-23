@@ -61,7 +61,7 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffset, int ndmaSlot) {
+bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffset) {
 	#ifdef DEBUG
 	nocashMessage("readSector internal");
 	#endif

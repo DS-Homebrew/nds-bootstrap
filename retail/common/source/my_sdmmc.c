@@ -786,7 +786,7 @@ int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, in
 	return get_error(&handleSD);
 }
 
-int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset, int ndmaSlot)
+int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -800,15 +800,7 @@ int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endO
 	handleSD.size = 1 << 9;
     handleSD.startOffset = startOffset;
     handleSD.endOffset = endOffset;
-	if (ndmaSlot == -1) {
-		sdmmc_send_command(&handleSD,0x33C12,sector_no);
-	} else {
-        //nocashMessage("my_sdmmc_sdcard_readsectors");
-        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
-        //nocashMessage("command sent");
-        while(!sdmmc_check_command_ndma(&handleSD,0x33C12,ndmaSlot)) {}
-        //nocashMessage("command checked");
-	}
+	sdmmc_send_command(&handleSD,0x33C12,sector_no);
 	return get_error(&handleSD);
 }
 
