@@ -198,8 +198,8 @@ static void resetMemory_ARM7(void) {
 
 	REG_IE = 0;
 	REG_IF = ~0;
-	*(vu32*)(0x04000000 - 4) = 0;  // IRQ_HANDLER ARM7 version
-	*(vu32*)(0x04000000 - 8) = ~0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
 }
 
