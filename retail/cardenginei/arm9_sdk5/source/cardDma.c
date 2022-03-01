@@ -197,6 +197,7 @@ extern bool IPC_SYNC_hooked;
 extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
+static u32 * dmaParams = NULL;
 static int currentLen=0;
 
 void continueCardReadDmaArm9() {
@@ -207,23 +208,20 @@ void continueCardReadDmaArm9() {
 		}
         dmaReadOnArm9 = false;
 
-        vu32* volatile cardStruct = ce9->cardStruct0;
-        u32	dma = cardStruct[3]; // dma channel
-
 		u32 commandRead=0x025FFB0A;
 
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
+		u32 src = dmaParams[3];
+		u8* dst = (u8*)dmaParams[4];
+		u32 len = dmaParams[5];
 
-        // Update cardi common
-  		cardStruct[0] = src + currentLen;
-  		cardStruct[1] = (vu32)(dst + currentLen);
-  		cardStruct[2] = len - currentLen;
+		// Update cardi common
+		dmaParams[3] = src + currentLen;
+		dmaParams[4] = (vu32)(dst + currentLen);
+		dmaParams[5] = len - currentLen;
 
-        src = cardStruct[0];
-        dst = (u8*)(cardStruct[1]);
-        len = cardStruct[2]; 
+		src = dmaParams[3];
+		dst = (u8*)dmaParams[4];
+		len = dmaParams[5];
 
         u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -337,10 +335,9 @@ void continueCardReadDmaArm7() {
 
         vu32* volatile cardStruct = ce9->cardStruct0;
 
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
-        u32	dma = cardStruct[3]; // dma channel
+		u32 src = dmaParams[3];
+		u8* dst = (u8*)dmaParams[4];
+		u32 len = dmaParams[5];
 
 		/*if (ce9->valueBits & cacheDisabled) {
 			endCardReadDma();
@@ -370,20 +367,24 @@ void continueCardReadDmaArm7() {
 	}
 }
 
-void cardSetDma(void) {
+void cardSetDma (u32 * params) {
 	isDma = true;
 
-	vu32* volatile cardStruct = ce9->cardStruct0;
+	dmaParams = params;
+	u32 src = dmaParams[3];
+	u8* dst = (u8*)dmaParams[4];
+	u32 len = dmaParams[5];
+
+	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+		cardRead(0, dst, src, len);
+		endCardReadDma();
+		return;
+	}
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
 
 	enableIPC_SYNC();
-
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel     
 
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -495,23 +496,20 @@ void cardSetDma(void) {
 	//}
 }
 #else
-void cardSetDma(void) {
-	cardRead(NULL);
+void cardSetDma (u32 * params) {
+	u32 src = params[3];
+	u8* dst = (u8*)params[4];
+	u32 len = params[5];
+
+	cardRead(0, dst, src, len);
 	endCardReadDma();
 }
 #endif
 
 extern bool isNotTcm(u32 address, u32 len);
 
-u32 cardReadDma() {
-	vu32* volatile cardStruct = ce9->cardStruct0;
-    
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel
-
-    if(dma >= 0 
+u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
+	if(dma >= 0 
         && dma <= 3 
         //&& func != NULL
         && len > 0
@@ -522,10 +520,9 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
-			// new dma method
+		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
+		{
 			cacheFlush();
-			cardSetDma();
             return true;
 		} /*else {
 			dma=4;

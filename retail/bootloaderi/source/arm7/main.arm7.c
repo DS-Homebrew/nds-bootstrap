@@ -1688,7 +1688,7 @@ int arm7_main(void) {
 			}
 		} else {
 			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : CARDENGINEI_ARM9_LOCATION;
-			u16 size = (ROMinRAM ? 0x1C00 : 0x4000);
+			u16 size = (ROMinRAM ? 0x1C00 : 0x5000);
 			tonccpy((u32*)ce9Location, (u32*)(ROMinRAM ? CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION : CARDENGINEI_ARM9_BUFFERED_LOCATION), size);
 			if (ROMinRAM && ce9Location == CARDENGINEI_ARM9_LOCATION) {
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION_DSI_WRAM,ce9Location,0x1C00);
@@ -1768,7 +1768,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			0x4000,
+			0x2000,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

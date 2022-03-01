@@ -38,14 +38,10 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
-#define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
-
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
-#define ROMinRAM BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
-#define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
@@ -78,8 +74,6 @@
 #define END_FLAG   0
 #define BUSY_FLAG   4  
 
-//extern void user_exception(void);
-
 extern cardengineArm9* volatile ce9;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
@@ -106,8 +100,6 @@ static bool region0FixNeeded = false;
 static bool igmReset = false;
 
 extern bool isDma;
-extern bool dmaReadOnArm7;
-extern bool dmaReadOnArm9;
 
 extern void continueCardReadDmaArm7();
 extern void continueCardReadDmaArm9();
@@ -219,21 +211,7 @@ void updateDescriptor(int slot, u32 sector) {
 }*/
 
 
-void user_exception(void);
-extern u32 exceptionAddr;
-
-//---------------------------------------------------------------------------------
-void setExceptionHandler2() {
-//---------------------------------------------------------------------------------
-	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
-
-	if (ce9->valueBits & dsiBios) {
-		exceptionAddr = 0x02FFFD90;
-	}
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-	EXCEPTION_VECTOR_SDK1 = enterException;
-	*exceptionC = user_exception;
-}
+extern void setExceptionHandler2();
 
 static inline void waitForArm7(void) {
 	IPC_SendSync(0x4);
@@ -314,9 +292,27 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 
 				buffer = getCacheAddress(slot);
 
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				u32 len2 = (src - sector) + len;
+				u16 readLen = ce9->cacheBlockSize;
+				if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
+					readLen = ce9->cacheBlockSize*4;
+				} else if (len2 > ce9->cacheBlockSize*2 && slot+2 < ce9->cacheSlots) {
+					readLen = ce9->cacheBlockSize*3;
+				} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
+					readLen = ce9->cacheBlockSize*2;
+				}
 
-				//updateDescriptor(slot, sector);	
+				fileRead((char*)buffer, *romFile, sector, readLen, 0);
+				updateDescriptor(slot, sector);
+				if (readLen >= ce9->cacheBlockSize*2) {
+					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
+				}
+				if (readLen >= ce9->cacheBlockSize*3) {
+					updateDescriptor(slot+2, sector+(ce9->cacheBlockSize*2));
+				}
+				if (readLen >= ce9->cacheBlockSize*4) {
+					updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
+				}
 
 				#ifdef ASYNCPF
 				if (REG_IME != 0 && REG_IF != 0) {
@@ -342,9 +338,9 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 					}
 				}*/
 				#endif
-				//updateDescriptor(slot, sector);
+				updateDescriptor(slot, sector);
 			}
-			updateDescriptor(slot, sector);
+			//updateDescriptor(slot, sector);
 
 			//getSdatAddr(sector, (u32)buffer);
 
