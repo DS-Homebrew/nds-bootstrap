@@ -7,6 +7,8 @@
 	
 BEGIN_ASM_FUNC user_exception
     mov r12, #0x04000000
+    mov r11, #0
+    strh r11, [r12, #0x6C]
     mov r11, #0x20000
     str r11, [r12]
     mov r11, #0x80
