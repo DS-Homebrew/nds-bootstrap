@@ -84,6 +84,7 @@ bool dmaReadOnArm9 = false;
 
 extern int allocateCacheSlot(void);
 extern int getSlotForSector(u32 sector);
+extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
 
@@ -197,7 +198,8 @@ extern bool IPC_SYNC_hooked;
 extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
-static int currentLen=0;
+static int currentLen = 0;
+static int currentSlot = 0;
 
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
@@ -235,7 +237,7 @@ void continueCardReadDmaArm9() {
 			accessCounter++;  
 
             // Read via the main RAM cache
-        	int slot = getSlotForSector(sector);
+        	int slot = getSlotForSectorManual(currentSlot+1, sector);
         	vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
@@ -283,6 +285,7 @@ void continueCardReadDmaArm9() {
 				if (readLen >= ce9->cacheBlockSize*4) {
 					updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 				}
+				currentSlot = slot;
                 return;
         	}
 			#ifdef ASYNCPF
@@ -317,7 +320,8 @@ void continueCardReadDmaArm9() {
 			// Copy via dma
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
-			currentLen= len2;
+			currentLen = len2;
+			currentSlot = slot;
 
 			IPC_SendSync(0x3);
         } else {
@@ -357,13 +361,12 @@ void continueCardReadDmaArm7() {
 				len2 -= len2 % 32;
 			}*/
 
-			int slot = getSlotForSector(sector);
-			vu8* buffer = getCacheAddress(slot);
+			vu8* buffer = getCacheAddress(currentSlot);
 
 			// TODO Copy via dma
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
-			currentLen= len2;
+			currentLen = len2;
 
 			IPC_SendSync(0x3);
 		//}
@@ -455,6 +458,7 @@ void cardSetDma(void) {
 			if (readLen >= ce9->cacheBlockSize*4) {
 				updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 			}
+			currentSlot = slot;
 			return;
 		} 
 		#ifdef ASYNCPF
@@ -489,7 +493,8 @@ void cardSetDma(void) {
 		// Copy via dma
 		ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 		dmaReadOnArm9 = true;
-		currentLen= len2;
+		currentLen = len2;
+		currentSlot = slot;
 
 		IPC_SendSync(0x3);
 	//}

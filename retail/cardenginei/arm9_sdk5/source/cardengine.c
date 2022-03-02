@@ -250,6 +250,15 @@ int getSlotForSector(u32 sector) {
 	return -1;
 }
 
+int getSlotForSectorManual(int i, u32 sector) {
+	if (i < ce9->cacheSlots) {
+		if (cacheDescriptor[i] == sector) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 #ifdef TWLSDK
 void resetSlots(void) {
 	for (int i = 0; i < ce9->cacheSlots; i++) {
@@ -383,8 +392,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	} else {*/
 		// Read via the main RAM cache
 		//bool runSleep = true;
+		int slot = getSlotForSector(sector);
 		while(len > 0) {
-			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
@@ -488,6 +497,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				dst = (u8*)(dst + len2);
 				sector = (src / ce9->cacheBlockSize) * ce9->cacheBlockSize;
 				accessCounter++;
+				slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
 	//}
