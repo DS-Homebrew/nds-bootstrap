@@ -251,7 +251,10 @@ int getSlotForSector(u32 sector) {
 }
 
 int getSlotForSectorManual(int i, u32 sector) {
-	if (cacheDescriptor[i % (ce9->cacheSlots-1)] == sector) {
+	if (i >= ce9->cacheSlots) {
+		i -= ce9->cacheSlots;
+	}
+	if (cacheDescriptor[i] == sector) {
 		return i;
 	}
 	return -1;
