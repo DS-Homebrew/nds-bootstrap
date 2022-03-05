@@ -9,6 +9,19 @@ extern u32 newArm7binarySize;
 // Subroutine function signatures ARM7
 //
 
+// WRAM clear
+static const u32 wramEndAddr[1]                = {0x0380FF00};
+static const u32 wramClearSignature1[2]        = {0xE92D4010, 0xE3A00008};
+static const u32 wramClearSignature3[3]        = {0xE92D4010, 0xE24DD008, 0xE3A00008};
+static const u32 wramClearSignature4[1]        = {0xE1C407BA};
+static const u32 wramClearSignature5[2]        = {0xE92D4038, 0xE3A05008};
+static const u32 wramClearSignatureTwlEarly[3] = {0xE92D4070, 0xE1A06000, 0xE3560001};
+static const u32 wramClearSignatureTwl[3]      = {0xE92D40F8, 0xE1A07000, 0xE3570001};
+static const u16 wramClearSignature1Thumb[2]   = {0xB510, 0x2008};
+static const u16 wramClearSignature4Thumb[1]   = {0x80E0};
+static const u16 wramClearSignatureTwlThumb[3] = {0xB570, 0x1C05, 0x2D01};
+
+// Relocate
 static const u32 relocateStartSignature[1] = {0x027FFFFA};
 static const u32 relocateStartSignature5[1]    = {0x3381C0DE}; //  33 81 C0 DE  DE C0 81 33 00 00 00 00 is the marker for the beggining of the relocated area :-)
 static const u32 relocateStartSignature5Alt[1] = {0x2106C0DE};
@@ -16,6 +29,7 @@ static const u32 relocateStartSignature5Alt[1] = {0x2106C0DE};
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
 static const u32 relocateValidateSignature[1] = {0x400010C};
 
+// SWI
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 
 static const u16 swiGetPitchTableSignatureThumb[2]  = {0xDF1B,0x4770};
@@ -81,6 +95,141 @@ static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE1DC30B0, 0xE
 static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
 static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
+
+u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findWramEndAddrOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm7destination, 0x200,
+		wramEndAddr, 1
+	);
+	if (offset) {
+		dbg_printf("WRAM end addr offset found\n");
+	} else {
+		dbg_printf("WRAM end addr offset not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findWramEndAddrOffset:\n");
+
+	u32* offset = NULL;
+	if (ndsHeader->unitCode > 0) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x1000,
+			wramClearSignatureTwlEarly, 3
+		);
+		if (offset) {
+			dbg_printf("WRAM clear offset (early SDK5) found\n");
+		} else {
+			dbg_printf("WRAM clear offset (early SDK5) not found\n");
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignatureTwl, 3
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset found\n");
+			} else {
+				dbg_printf("WRAM clear offset not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignatureTwlThumb, 3
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset thumb found\n");
+			} else {
+				dbg_printf("WRAM clear offset thumb not found\n");
+			}
+		}
+	} else {
+		offset = findOffset(
+			(u32*)ndsHeader->arm7destination, 0x1000,
+			wramClearSignature1, 2
+		);
+		if (offset) {
+			dbg_printf("WRAM clear offset (SDK2) found\n");
+		} else {
+			dbg_printf("WRAM clear offset (SDK2) not found\n");
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignature3, 3
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK3) found\n");
+			} else {
+				dbg_printf("WRAM clear offset (SDK3) not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignature5, 2
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK5) found\n");
+			} else {
+				dbg_printf("WRAM clear offset (SDK5) not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignature1Thumb, 2
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK2) thumb found\n");
+			} else {
+				dbg_printf("WRAM clear offset (SDK2) thumb not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x800,
+				wramClearSignature4, 1
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK4) found\n");
+				dbg_printf("\n");
+				return offset + 2;
+			} else {
+				dbg_printf("WRAM clear offset (SDK4) not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, 0x800,
+				wramClearSignature4Thumb, 1
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK4) thumb found\n");
+				dbg_printf("\n");
+				return (u32*)((u32)offset + 6);
+			} else {
+				dbg_printf("WRAM clear offset (SDK4) thumb not found\n");
+			}
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
 
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;

@@ -86,6 +86,8 @@ typedef struct patchOffsetCacheContents {
     u32* a9IrqHandlerOffset;
 	u32 a7BinSize;
 	u32 a7IsThumb;
+    u32* wramEndAddrOffset;
+    u32* wramClearOffset;
 	u32* ramClearOffset;
 	u32 ramClearChecked;
 	u32* a7Swi12Offset;

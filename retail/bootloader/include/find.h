@@ -68,6 +68,8 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7
+u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader);
+u32* findWramClearOffset(const tNDSHeader* ndsHeader);
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader);
 u16* findSwiGetPitchTableThumbOffset(const tNDSHeader* ndsHeader);

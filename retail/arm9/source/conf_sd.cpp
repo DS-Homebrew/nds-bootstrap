@@ -1123,14 +1123,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
-		fread((u8*)(conf->b4dsMode == 1 ? CHEAT_ENGINE_LOCATION_B4DS-0x400000 : CHEAT_ENGINE_LOCATION_B4DS), 1, 0x400, cebin);
+		fread((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 1, 0x400, cebin);
 	}
 	fclose(cebin);
 
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((void*)(conf->b4dsMode == 1 ? CARDENGINE_ARM7_LOCATION-0x400000 : CARDENGINE_ARM7_LOCATION), 1, 0x1000, cebin);
+		fread((void*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1000, cebin);
 	}
 	fclose(cebin);
 
@@ -1188,7 +1188,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Set In-Game Menu hotkey
 		igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
 
-		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)(conf->b4dsMode == 1 ? (u32)CARDENGINE_ARM7_LOCATION-0x400000 : (u32)CARDENGINE_ARM7_LOCATION);
+		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION_BUFFERED;
 		ce7->igmHotkey = igmText->hotkey;
 
 		char path[40];
@@ -1239,6 +1239,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
+		FILE* dldiFile = fopen("nitro:/cardengine_arm9_dldionly.bin", "rb");
+		if (dldiFile) {
+			fread((u8*)CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE, 1, 0x1000, cebin);
+		}
+		fclose(dldiFile);
 		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
 	}
 	if (cebin) {
