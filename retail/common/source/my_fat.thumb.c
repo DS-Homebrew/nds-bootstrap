@@ -34,6 +34,8 @@
 #include "card.h"
 #include "debug_file.h"
 
+#define nextClusterBufferCount 8
+
 //#define memcpy __builtin_memcpy
 
 
@@ -194,6 +196,7 @@ int discData[2];
 int discBytePerSec[2];
 int discSecPerClus[2];
 int discBytePerClus[2];
+int prevNextClust[2] = {0};
 int prevFirstClust[2] = {-1};
 int prevSect[2] = {-1};
 int prevClust[2] = {-1};
@@ -207,6 +210,12 @@ int discData;
 int discBytePerSec;
 int discSecPerClus;
 int discBytePerClus;
+#ifdef MORECLUSTERBUFFERS
+int fatAccessCounter = 0;
+int prevNextClust[nextClusterBufferCount] = {0};
+#else
+int prevNextClust = 0;
+#endif
 int prevFirstClust = -1;
 int prevSect = -1;
 int prevClust = -1;
@@ -221,9 +230,15 @@ discFileSystem;
 
 // Global sector buffer to save on stack space
 #ifdef TWOCARD
+unsigned char nextClusterBuffer[2][BYTES_PER_SECTOR];
 unsigned char lastGlobalBuffer[2][BYTES_PER_SECTOR];
 unsigned char globalBuffer[2][BYTES_PER_SECTOR];
 #else
+#ifdef MORECLUSTERBUFFERS
+unsigned char nextClusterBuffer[nextClusterBufferCount][BYTES_PER_SECTOR];
+#else
+unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
+#endif
 unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #endif
@@ -252,6 +267,26 @@ u32 FAT_ClustToSect (u32 cluster, bool card2) {
 u32 FAT_ClustToSect (u32 cluster) {
 	return (((cluster-2) * discSecPerClus) + discData);
 }
+
+#ifdef MORECLUSTERBUFFERS
+int FAT_ReadNextClusterCache(u32 sector)
+{
+	int curSector = 0;
+	for (int i = 0; i < nextClusterBufferCount; i++) {
+		if (prevNextClust[i] == sector) {
+			return i;
+		}
+	}
+
+	curSector = fatAccessCounter;
+	CARD_ReadSector(sector, nextClusterBuffer[curSector], 0, 0);
+	prevNextClust[curSector] = sector;
+	fatAccessCounter++;
+	if (fatAccessCounter == nextClusterBufferCount) fatAccessCounter = 0;
+
+	return curSector;
+}
+#endif
 #endif
 
 /*-----------------------------------------------------------------
@@ -267,6 +302,9 @@ u32 FAT_NextCluster(u32 cluster)
 	u32 nextCluster = CLUSTER_FREE;
 	u32 sector;
 	int offset;
+#ifdef MORECLUSTERBUFFERS
+	int curSector;
+#endif
 
 
 #ifdef TWOCARD
@@ -283,19 +321,9 @@ u32 FAT_NextCluster(u32 cluster)
 			#ifdef TWOCARD
 			sector = discFAT[card2] + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
-			prevFirstClust[card2] = -1;
-			prevSect[card2] = -1;
-			prevClust[card2] = -1;
-			CARD_ReadSector(sector, globalBuffer[card2], 0, 0);
-			nextCluster = ((u8*) globalBuffer[card2])[offset];
 			#else
 			sector = discFAT + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
-			nextCluster = ((u8*) globalBuffer)[offset];
 			#endif
 			offset++;
 
@@ -305,11 +333,24 @@ u32 FAT_NextCluster(u32 cluster)
 			}
 
 			#ifdef TWOCARD
-			CARD_ReadSector(sector, globalBuffer[card2], 0, 0);
-			nextCluster |= (((u8*) globalBuffer[card2])[offset]) << 8;
+			if (prevNextClust[card2] != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer[card2], 0, 0);
+				prevNextClust[card2] = sector;
+			}
+			nextCluster |= (((u8*) nextClusterBuffer[card2])[offset]) << 8;
 			#else
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
-			nextCluster |= (((u8*) globalBuffer)[offset]) << 8;
+			#ifdef MORECLUSTERBUFFERS
+			curSector = FAT_ReadNextClusterCache(sector);
+			// read the nextCluster value
+			nextCluster |= (((u8*) nextClusterBuffer[curSector])[offset]) << 8;
+			#else
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			// read the nextCluster value
+			nextCluster |= (((u8*) nextClusterBuffer)[offset]) << 8;
+			#endif
 			#endif
 
 			if (cluster & 0x01) {
@@ -329,21 +370,25 @@ u32 FAT_NextCluster(u32 cluster)
 			offset = cluster % (BYTES_PER_SECTOR >> 1);
 
 			#ifdef TWOCARD
-			prevFirstClust[card2] = -1;
-			prevSect[card2] = -1;
-			prevClust[card2] = -1;
-
-			CARD_ReadSector(sector, globalBuffer[card2], 0, 0);
+			if (prevNextClust[card2] != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer[card2], 0, 0);
+				prevNextClust[card2] = sector;
+			}
 			// read the nextCluster value
-			nextCluster = ((u16*)globalBuffer[card2])[offset];
+			nextCluster = ((u16*)nextClusterBuffer[card2])[offset];
 			#else
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
+			#ifdef MORECLUSTERBUFFERS
+			curSector = FAT_ReadNextClusterCache(sector);
 			// read the nextCluster value
-			nextCluster = ((u16*)globalBuffer)[offset];
+			nextCluster = ((u16*)nextClusterBuffer[curSector])[offset];
+			#else
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			// read the nextCluster value
+			nextCluster = ((u16*)nextClusterBuffer)[offset];
+			#endif
 			#endif
 
 			if (nextCluster >= 0xFFF7)
@@ -361,21 +406,25 @@ u32 FAT_NextCluster(u32 cluster)
 			offset = cluster % (BYTES_PER_SECTOR >> 2);
 
 			#ifdef TWOCARD
-			prevFirstClust[card2] = -1;
-			prevSect[card2] = -1;
-			prevClust[card2] = -1;
-
-			CARD_ReadSector(sector, globalBuffer[card2], 0, 0);
+			if (prevNextClust[card2] != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer[card2], 0, 0);
+				prevNextClust[card2] = sector;
+			}
 			// read the nextCluster value
-			nextCluster = (((u32*)globalBuffer[card2])[offset]) & 0x0FFFFFFF;
+			nextCluster = (((u32*)nextClusterBuffer[card2])[offset]) & 0x0FFFFFFF;
 			#else
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
+			#ifdef MORECLUSTERBUFFERS
+			curSector = FAT_ReadNextClusterCache(sector);
 			// read the nextCluster value
-			nextCluster = (((u32*)globalBuffer)[offset]) & 0x0FFFFFFF;
+			nextCluster = (((u32*)nextClusterBuffer[curSector])[offset]) & 0x0FFFFFFF;
+			#else
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			// read the nextCluster value
+			nextCluster = (((u32*)nextClusterBuffer)[offset]) & 0x0FFFFFFF;
+			#endif
 			#endif
 
 			if (nextCluster >= 0x0FFFFFF7)
