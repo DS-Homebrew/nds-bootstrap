@@ -293,6 +293,10 @@ thumb_card_irq_enable:
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
 	bx  lr
+thumb_blx_r3_stub2:
+	bx	r3
+.pool
+.align	4
 @---------------------------------------------------------------------------------
 
 	.arm
@@ -319,9 +323,9 @@ thumb_reset_arm9:
 
 	ldr	r3, =reset
 
-	bl	thumb_blx_r3_stub2
+	bl	thumb_blx_r3_stub3
 	pop	{r1-r7, pc}
-thumb_blx_r3_stub2:
+thumb_blx_r3_stub3:
 	bx	r3
 .pool
 @---------------------------------------------------------------------------------
