@@ -24,7 +24,6 @@
 	.arm
 	.global __mydldi_start
 	.global __myio_dldi
-	.global _io_dldi_features
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
 .equ FEATURE_MEDIUM_CANWRITE,		0x00000002
@@ -33,8 +32,6 @@
 
 
 __mydldi_start:
-#ifndef NO_DLDI
-
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
 #ifdef STANDARD_DLDI
@@ -68,7 +65,6 @@ __mydldi_start:
 @ IO_INTERFACE data -- 32 bytes
 __myio_dldi:
 	.ascii	"DLDI"				@ ioType
-_io_dldi_features:
 	.word	0x00000000			@ Features
 	.word	__mydldi_startup		@ 
 	.word	_DLDI_isInserted		@ 
@@ -95,32 +91,7 @@ _DLDI_shutdown:
 	.align
 	.pool
 
-	.space (__mydldi_start + 16384) - .	@ Fill to 16KiB
+	.space (__mydldi_start + 8192) - .	@ Fill to 8KiB
 
 _dldi_end:
 	.end
-@---------------------------------------------------------------------------------
-#else
-@---------------------------------------------------------------------------------
-@ IO_INTERFACE data -- 32 bytes
-__myio_dldi:
-	.ascii	"DLDI"				@ ioType
-	.word	0x00000000			@ Features
-	.word	__mydldi_startup		@
-	.word	_DLDI_isInserted		@
-	.word	_DLDI_readSectors		@   Function pointers to standard device driver functions
-	.word	_DLDI_writeSectors		@
-	.word	_DLDI_clearStatus		@
-	.word	_DLDI_shutdown			@
-
-	__mydldi_startup:
-_DLDI_isInserted:
-_DLDI_readSectors:
-_DLDI_writeSectors:
-_DLDI_clearStatus:
-_DLDI_shutdown:
-	mov		r0, #0x00		@ Return false for every function
-	bx		lr
-
-
-#endif

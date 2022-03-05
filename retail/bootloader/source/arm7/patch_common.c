@@ -29,7 +29,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 26;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 27;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -3643,7 +3643,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	// Animal Crossing: Wild World
-	else if (strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) {
+	/*else if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory2) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
@@ -3654,7 +3654,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			addrOffset += 4;
 			if (addrOffset > (u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) break;
 		}
-	}
+	}*/
 
 	// The World Ends With You (USA/Europe)
 	else if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
@@ -4118,6 +4118,8 @@ void rsetA7Cache(void)
 
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
+	patchOffsetCache.wramEndAddrOffset = 0;
+	patchOffsetCache.wramClearOffset = 0;
 	patchOffsetCache.ramClearOffset = 0;
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;

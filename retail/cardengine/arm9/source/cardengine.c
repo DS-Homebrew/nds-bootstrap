@@ -51,6 +51,7 @@
 #define cardReadFix BIT(8)
 
 #include "tonccpy.h"
+#include "card.h"
 #include "my_fat.h"
 
 extern cardengineArm9* volatile ce9;
@@ -58,8 +59,6 @@ extern cardengineArm9* volatile ce9;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
-
-extern u32 _io_dldi_features;
 
 extern vu32* volatile cardStruct0;
 
@@ -84,10 +83,10 @@ static inline u32 getRomSizeNoArm9Bin(const tNDSHeader* ndsHeader) {
 }
 
 static inline void setDeviceOwner(void) {
-	if ((ce9->valueBits & expansionPakFound) || (_io_dldi_features & FEATURE_SLOT_GBA)) {
+	if ((ce9->valueBits & expansionPakFound) || (__myio_dldi.features & FEATURE_SLOT_GBA)) {
 		sysSetCartOwner (BUS_OWNER_ARM9);
 	}
-	if (_io_dldi_features & FEATURE_SLOT_NDS) {
+	if (__myio_dldi.features & FEATURE_SLOT_NDS) {
 		sysSetCardOwner (BUS_OWNER_ARM9);
 	}
 }
@@ -332,6 +331,13 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
+#ifndef EXTMEM
+static inline void getDldiInfo(void) {
+	if (initialized) return;
+	tonccpy(&__myio_dldi, (char*)CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE+0x60, 0x20);
+}
+#endif
+
 static void initialize(void) {
 	if (!initialized) {
 		if (!FAT_InitFiles(true)) {
@@ -352,10 +358,12 @@ static void initialize(void) {
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 
-		if (!cloneboot) {
-			buildFatTableCache(&romFile);
+		if (ce9->fatTableAddr >= 0x02400000) {
+			if (!cloneboot) {
+				buildFatTableCache(&romFile);
+			}
+			buildFatTableCache(&savFile);
 		}
-		buildFatTableCache(&savFile);
 
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -440,6 +448,9 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	u16 exmemcnt = REG_EXMEMCNT;
 
+	#ifndef EXTMEM
+	getDldiInfo();
+	#endif
 	setDeviceOwner();
 	initialize();
 
@@ -502,6 +513,9 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
+	#ifndef EXTMEM
+	getDldiInfo();
+	#endif
 	setDeviceOwner();
 	initialize();
 

@@ -57,6 +57,66 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
 }
 
+static bool patchWramClear(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->unitCode == 0) {
+		u32* offset = patchOffsetCache.wramEndAddrOffset;
+		if (!patchOffsetCache.wramEndAddrOffset) {
+			offset = findWramEndAddrOffset(ndsHeader);
+			if (offset) {
+				patchOffsetCache.wramEndAddrOffset = offset;
+			}
+		}
+		if (offset) {
+			*offset = 0x0380C000;
+			dbg_printf("WRAM end addr location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n");
+		} else {
+			return false;
+		}
+	}
+	u32* offset = patchOffsetCache.wramClearOffset;
+	if (!patchOffsetCache.wramClearOffset) {
+		offset = findWramClearOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.wramClearOffset = offset;
+		}
+	}
+	if (offset) {
+		bool notWithinSubroutine = (*(u16*)offset == 0x2008 || *((u16*)offset + 1) == 0xE3A0);
+		bool usesThumb = (notWithinSubroutine ? (*(u16*)offset == 0x2008) : (*((u16*)offset + 1) != 0xE92D));
+		if (notWithinSubroutine) {
+			if (usesThumb) {
+				*((u16*)offset + 20) = 0x2200;	// movs r2, #0
+			} else {
+				offset[13] = 0xE3A02000;	// mov r2, #0
+			}
+		} else {
+			if (usesThumb) {
+				if (ndsHeader->unitCode == 0) {
+					*((u16*)offset + 21) = 0x2200;	// movs r2, #0
+				} else {
+					*((u16*)offset + 11) = 0x2100;	// movs r1, #0
+					*((u16*)offset + 55) = 0x2100;	// movs r1, #0
+				}
+			} else {
+				if (ndsHeader->unitCode == 0) {
+					offset[*offset==0xE92D4038 ? 15 : (offset[1]==0xE24DD008 ? 18 : 17)] = 0xE3A02000;	// mov r2, #0
+				} else {
+					offset[*offset==0xE92D40F8 ? 10 : 9]  = 0xE3A01000;	// mov r1, #0
+					offset[*offset==0xE92D40F8 ? 44 : 43] = 0xE3A01000;	// mov r1, #0
+				}
+			}
+		}
+		dbg_printf("WRAM clear location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
+	} else {
+		return false;
+	}
+	return true;
+}
+
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 u32 newSwiGetPitchTableAddr = 0;
@@ -172,8 +232,8 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		}
 	}
 	if (ramClearOffset) {
-		*(ramClearOffset) = 0x023FC000;
-		*(ramClearOffset + 1) = 0x023FC000;
+		*(ramClearOffset) = 0x02FFC000;
+		*(ramClearOffset + 1) = 0x02FFD000;
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");
@@ -274,6 +334,11 @@ u32 patchCardNdsArm7(
 		patchOffsetCacheChanged = true;
 	}
 
+	if (!patchWramClear(ndsHeader)) {
+		dbg_printf("ERR_LOAD_OTHR");
+		return ERR_LOAD_OTHR;
+	}
+
 	patchPostBoot(ndsHeader);
 
 	patchSleepMode(ndsHeader);
@@ -283,14 +348,15 @@ u32 patchCardNdsArm7(
 	//const char* romTid = getRomTid(ndsHeader);
 
 	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
-		return 0;
+		dbg_printf("ERR_LOAD_OTHR");
+		return ERR_LOAD_OTHR;
 	}
 
 	//patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
-		
+
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4 || newArm7binarySize==0x24DA8 || newArm7binarySize==0x24F50) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
