@@ -104,7 +104,7 @@ code_handler_start_vblank:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerVBlank
 	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
+
 	@ exit after return
 	b	exit
 
@@ -112,8 +112,7 @@ code_handler_start_fifo:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerFIFO
 	bl	_blx_r3_stub		@ jump to myIrqHandler
-  
-  
+
 	@ exit after return
 	b	exit
 
@@ -121,7 +120,7 @@ code_handler_start_ndma0:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerNdma0
 	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
+
 	@ exit after return
 	b	exit
 
@@ -612,13 +611,13 @@ _blx_r3_stubthumb8:
 .type	tryLockMutex STT_FUNC
 @ r0 : mutex adr
 tryLockMutex:
-	mov r1, r0   
+	mov r1, r0
 	mov r2, #1
 	swp r0,r2, [r1]
 	cmp r0, r2
-	beq trymutex_fail	
+	beq trymutex_fail
 	mov r0, #1
-	b mutex_exit	
+	b mutex_exit
 trymutex_fail:
 	mov r0, #0
 mutex_exit:
@@ -628,13 +627,13 @@ mutex_exit:
 .type	lockMutex STT_FUNC
 @ r0 : mutex adr
 lockMutex:
-  mov r1, r0    
+  mov r1, r0
   mov r2, #1
 mutex_loop:
   swp r0,r2, [r1]
   cmp r0,r2
-  beq mutex_loop    
-  mov r0, #1	
+  beq mutex_loop
+  mov r0, #1
   bx  lr
 
 
@@ -642,7 +641,7 @@ mutex_loop:
 .global unlockMutex
 .type	unlockMutex STT_FUNC
 @ r0 : mutex adr
-unlockMutex:  
+unlockMutex:
 	mov r1, #0
 	str r1, [r0]
 	bx  lr

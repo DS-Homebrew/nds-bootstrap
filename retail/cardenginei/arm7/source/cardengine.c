@@ -1020,19 +1020,19 @@ void myIrqHandlerFIFO(void) {
 //---------------------------------------------------------------------------------
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerFIFO");
-	#endif	
-	
+	#endif
+
 	calledViaIPC = true;
-	
+
 	runCardEngineCheck();
 }
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerHalt(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerHalt");
-	#endif	
+	#endif
 
 	/*if (readOngoing) {
 		timeTillDmaLedOff++;
@@ -1325,7 +1325,7 @@ u32 myIrqEnable(u32 irq) {
 		return irq_before;
 	}*/
 
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
 	//irq |= BIT(28);
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;

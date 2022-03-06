@@ -321,9 +321,19 @@ u32 FAT_NextCluster(u32 cluster)
 			#ifdef TWOCARD
 			sector = discFAT[card2] + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
+			if (prevNextClust[card2] != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer[card2], 0, 0);
+				prevNextClust[card2] = sector;
+			}
+			nextCluster = ((u8*) nextClusterBuffer[card2])[offset];
 			#else
 			sector = discFAT + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			nextCluster = ((u8*) nextClusterBuffer)[offset];
 			#endif
 			offset++;
 

@@ -194,6 +194,7 @@ int discData;
 int discBytePerSec;
 int discSecPerClus;
 int discBytePerClus;
+int prevNextClust = 0;
 int prevFirstClust = -1;
 int prevSect = -1;
 int prevClust = -1;
@@ -202,9 +203,11 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 
 // Global sector buffer to save on stack space
 #ifdef DLDI
+unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
 unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #else
+unsigned char* nextClusterBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7A00;
 unsigned char* lastGlobalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7C00;
 unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
 #endif
@@ -242,11 +245,11 @@ u32 FAT_NextCluster(u32 cluster)
 		case FS_FAT12:
 			sector = discFAT + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
-			nextCluster = ((u8*) globalBuffer)[offset];
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			nextCluster = ((u8*) nextClusterBuffer)[offset];
 			offset++;
 
 			if (offset >= BYTES_PER_SECTOR) {
@@ -254,8 +257,11 @@ u32 FAT_NextCluster(u32 cluster)
 				sector++;
 			}
 
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
-			nextCluster |= (((u8*) globalBuffer)[offset]) << 8;
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
+			nextCluster |= (((u8*) nextClusterBuffer)[offset]) << 8;
 
 			if (cluster & 0x01) {
 				nextCluster = nextCluster >> 4;
@@ -269,12 +275,12 @@ u32 FAT_NextCluster(u32 cluster)
 			sector = discFAT + ((cluster << 1) / BYTES_PER_SECTOR);
 			offset = cluster % (BYTES_PER_SECTOR >> 1);
 
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
 			// read the nextCluster value
-			nextCluster = ((u16*)globalBuffer)[offset];
+			nextCluster = ((u16*)nextClusterBuffer)[offset];
 
 			if (nextCluster >= 0xFFF7)
 			{
@@ -286,12 +292,12 @@ u32 FAT_NextCluster(u32 cluster)
 			sector = discFAT + ((cluster << 2) / BYTES_PER_SECTOR);
 			offset = cluster % (BYTES_PER_SECTOR >> 2);
 
-			prevFirstClust = -1;
-			prevSect = -1;
-			prevClust = -1;
-			CARD_ReadSector(sector, globalBuffer, 0, 0);
+			if (prevNextClust != sector) {
+				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
+				prevNextClust = sector;
+			}
 			// read the nextCluster value
-			nextCluster = (((u32*)globalBuffer)[offset]) & 0x0FFFFFFF;
+			nextCluster = (((u32*)nextClusterBuffer)[offset]) & 0x0FFFFFFF;
 
 			if (nextCluster >= 0x0FFFFFF7)
 			{
