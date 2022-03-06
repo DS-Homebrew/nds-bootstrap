@@ -1239,11 +1239,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
-		FILE* dldiFile = fopen("nitro:/cardengine_arm9_dldionly.bin", "rb");
-		if (dldiFile) {
-			fread((u8*)CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE, 1, 0x1000, cebin);
-		}
-		fclose(dldiFile);
 		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
 	}
 	if (cebin) {

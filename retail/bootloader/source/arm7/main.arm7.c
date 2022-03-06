@@ -894,17 +894,17 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, (extendedMemory2 ? 0x7000 : 0x3000));
-	toncset((u32*)0x023E0000, 0, 0x10000);
-
 	tonccpy((u32*)CHEAT_ENGINE_LOCATION_B4DS, (u32*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
 	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u32*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);
 	toncset((u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
-	toncset((u8*)CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE+0x200, 0, 0x1E00);
 
-	if (!dldiPatchBinary((data_t*)(extendedMemory2 ? ce9Location : CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE), 0x7000)) {
+	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x7000);
+	toncset((u32*)0x023E0000, 0, 0x10000);
+	toncset((u32*)0x023FD000, 0, 0x2000);
+
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x7000)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");

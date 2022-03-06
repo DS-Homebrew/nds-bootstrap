@@ -331,13 +331,6 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
-#ifndef EXTMEM
-static inline void getDldiInfo(void) {
-	if (initialized) return;
-	tonccpy(&__myio_dldi, (char*)CARDENGINE_ARM9_LOCATION_DLDI_SEPARATE+0x60, 0x20);
-}
-#endif
-
 static void initialize(void) {
 	if (!initialized) {
 		if (!FAT_InitFiles(true)) {
@@ -358,12 +351,10 @@ static void initialize(void) {
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 
-		if (ce9->fatTableAddr >= 0x02400000) {
-			if (!cloneboot) {
-				buildFatTableCache(&romFile);
-			}
-			buildFatTableCache(&savFile);
+		if (!cloneboot) {
+			buildFatTableCache(&romFile);
 		}
+		buildFatTableCache(&savFile);
 
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -448,9 +439,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	u16 exmemcnt = REG_EXMEMCNT;
 
-	#ifndef EXTMEM
-	getDldiInfo();
-	#endif
 	setDeviceOwner();
 	initialize();
 
@@ -513,9 +501,6 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	#ifndef EXTMEM
-	getDldiInfo();
-	#endif
 	setDeviceOwner();
 	initialize();
 
