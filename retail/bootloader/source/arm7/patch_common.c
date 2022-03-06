@@ -3643,18 +3643,18 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	// Animal Crossing: Wild World
-	/*else if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory2) {
+	else if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory2) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
 			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x3000;
+				*(u32*)addrOffset -= 0x2000;
 				instancesPatched++;
 			}
 			addrOffset += 4;
 			if (addrOffset > (u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) break;
 		}
-	}*/
+	}
 
 	// The World Ends With You (USA/Europe)
 	else if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {
