@@ -1222,7 +1222,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	}
 
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	extern int consoleModel;
+	extern u8 consoleModel;
 
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
@@ -2008,7 +2008,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
 }
 
 static void operaRamPatch(void) {
-	extern int consoleModel;
+	extern u8 consoleModel;
 
 	// Opera RAM patch (ARM9)
 	*(u32*)0x02003D48 = 0xC400000;
