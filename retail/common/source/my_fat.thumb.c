@@ -329,11 +329,18 @@ u32 FAT_NextCluster(u32 cluster)
 			#else
 			sector = discFAT + (((cluster * 3) / 2) / BYTES_PER_SECTOR);
 			offset = ((cluster * 3) / 2) % BYTES_PER_SECTOR;
+			#ifdef MORECLUSTERBUFFERS
+			curSector = FAT_ReadNextClusterCache(sector);
+			// read the nextCluster value
+			nextCluster = ((u8*) nextClusterBuffer[curSector])[offset];
+			#else
 			if (prevNextClust != sector) {
 				CARD_ReadSector(sector, nextClusterBuffer, 0, 0);
 				prevNextClust = sector;
 			}
+			// read the nextCluster value
 			nextCluster = ((u8*) nextClusterBuffer)[offset];
+			#endif
 			#endif
 			offset++;
 
