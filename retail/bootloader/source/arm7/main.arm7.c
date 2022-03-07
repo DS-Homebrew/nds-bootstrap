@@ -963,7 +963,7 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = 0x19000;
+		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1A000;
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
