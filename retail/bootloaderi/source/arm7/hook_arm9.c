@@ -227,7 +227,7 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x200000 : 0x280000) : 0x700000))) {
+		if (runOverlayCheck && overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x280000 : 0x200000) : 0x700000))) {
 			extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {
 				if (cacheBlockSize == 0) {
