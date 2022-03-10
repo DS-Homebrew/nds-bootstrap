@@ -367,7 +367,7 @@ void reset(void) {
 	if ((valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory)) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
-		driveInitialize();
+		//driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
@@ -427,7 +427,7 @@ void reset(void) {
 
 	#ifndef TWLSDK
 	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-		driveInitialize();
+		//driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
 
 		u32 iUncompressedSize = 0;
@@ -445,7 +445,7 @@ void reset(void) {
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	if (doBak) bakSdData();
 
-	driveInitialize();
+	//driveInitialize();
 
 	u32 iUncompressedSize = 0;
 	u32 iUncompressedSizei = 0;
@@ -570,7 +570,7 @@ void forceGameReboot(void) {
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	if (doBak) bakSdData();
 	#endif
-	driveInitialize();
+	//driveInitialize();
 	sdRead = !(valueBits & gameOnFlashcard);
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
   	#ifdef TWLSDK
@@ -621,7 +621,7 @@ void dumpRam(void) {
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	if (doBak) bakSdData();
 	#endif
-	driveInitialize();
+	//driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
@@ -646,7 +646,7 @@ void prepareScreenshot(void) {
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	if (doBak) bakSdData();
 #endif
-		driveInitialize();
+		//driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 #ifndef TWLSDK
@@ -663,7 +663,7 @@ void saveScreenshot(void) {
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	if (doBak) bakSdData();
 #endif
-	driveInitialize();
+	//driveInitialize();
 	sdRead = (valueBits & b_dsiSD);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
 
@@ -736,7 +736,7 @@ static void nandRead(void) {
 	#endif
 
     if (tryLockMutex(&saveMutex)) {
-		driveInitialize();
+		//driveInitialize();
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileRead(memory, *savFile, flash, len, !sdRead, -1);
     	cardReadLED(false, true);
@@ -767,7 +767,7 @@ static void nandWrite(void) {
 	#endif
 
   	if (tryLockMutex(&saveMutex)) {
-		driveInitialize();
+		//driveInitialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
 		fileWrite(memory, *savFile, flash, len, !sdRead, -1);
@@ -837,7 +837,7 @@ static bool start_cardRead_arm9(void) {
 	//bool isDma = sharedAddr[3] == (0x0000000A & 0x0000000F);
 	bool isDma = true;
 
-	driveInitialize();
+	//driveInitialize();
 	cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
@@ -1308,8 +1308,16 @@ u32 myIrqEnable(u32 irq) {
 
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
 		REG_AUXIE &= ~(1UL << 8);
-		driveInitialize();
 	}
+
+	#ifdef TWLSDK
+	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	if (doBak) bakSdData();
+	#endif
+	driveInitialize();
+  	#ifdef TWLSDK
+	if (doBak) restoreSdBakData();
+	#endif
 
 	/*const char* romTid = getRomTid(ndsHeader);
 
@@ -1390,7 +1398,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		if (doBak) bakSdData();
 		#endif
-		driveInitialize();
+		//driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
@@ -1427,7 +1435,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		if (doBak) bakSdData();
 		#endif
-		driveInitialize();
+		//driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1465,7 +1473,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		if (doBak) bakSdData();
 		#endif
-		driveInitialize();
+		//driveInitialize();
 		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
@@ -1614,7 +1622,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		tonccpy(dst, (u8*)newSrc, len);
 	} else {
 		while (readOngoing) { swiDelay(100); }
-		driveInitialize();
+		//driveInitialize();
 		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
