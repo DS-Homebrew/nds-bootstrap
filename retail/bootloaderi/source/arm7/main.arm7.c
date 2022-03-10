@@ -104,7 +104,6 @@ extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
-extern u32 fatTableFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
@@ -1194,75 +1193,17 @@ int arm7_main(void) {
 	}*/
 
 	if (gameOnFlashcard || !isDSiWare) {
-		u32 currentFatTableVersion = 3;
-		extern u32 currentClusterCacheSize;
-
-		// FAT table file
-		aFile fatTableFile = getFileFromCluster(fatTableFileCluster);
-		if (cacheFatTable && fatTableFile.firstCluster != CLUSTER_FREE) {
-			fileRead((char*)0x2670000, fatTableFile, 0, 0x400, !sdRead, -1);
-		}
-		u32 fatTableVersion = *(u32*)(0x2670100);
-		bool fatTableEmpty = (*(u32*)(0x2670200) == 0);
-
-		if (*(u32*)(0x2670040) != storedFileCluster
-		|| *(u32*)(0x2670044) != romSize)
-		{
-			fatTableEmpty = true;
-		}
-
-		if (*(u32*)(0x2670048) != saveFileCluster
-		|| *(u32*)(0x267004C) != saveSize)
-		{
-			fatTableEmpty = true;
-		}
-
-		if (fatTableVersion != currentFatTableVersion) {
-			fatTableEmpty = true;
-		}
-
-		if (fatTableEmpty) {
-			if (!softResetParamsFound) {
-				pleaseWaitOutput();
-			}
-			buildFatTableCache(romFile, !sdRead, 0);
-		} else {
-			tonccpy(romFile, (char*)0x2670000, sizeof(aFile));
-		}
+		buildFatTableCache(romFile, !sdRead, 0);
 		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, romFile, sizeof(aFile));
 
 		sdRead = (saveOnFlashcard ? false : dsiSD);
 
 		if (savFile->firstCluster != CLUSTER_FREE) {
-			if (fatTableEmpty) {
-				buildFatTableCache(savFile, !sdRead, 0);
-			} else {
-				tonccpy(savFile, (char*)0x2670020, sizeof(aFile));
-			}
+			buildFatTableCache(savFile, !sdRead, 0);
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
 		if (gameOnFlashcard) sdRead = false;
-
-		if (fatTableEmpty) {
-			tonccpy((char*)0x2670000, romFile, sizeof(aFile));
-			tonccpy((char*)0x2670020, savFile, sizeof(aFile));
-			*(u32*)(0x2670040) = storedFileCluster;
-			*(u32*)(0x2670044) = romSize;
-			*(u32*)(0x2670048) = saveFileCluster;
-			*(u32*)(0x267004C) = saveSize;
-			*(u32*)(0x2670050) = currentClusterCacheSize;
-			*(u32*)(0x2670100) = currentFatTableVersion;
-			if (cacheFatTable) {
-				fileWrite((char*)0x2670000, fatTableFile, 0, 0x200, !sdRead, -1);
-				fileWrite((char*)0x2700000, fatTableFile, 0x200, currentClusterCacheSize, !sdRead, -1);
-			}
-		} else {
-			currentClusterCacheSize = *(u32*)(0x2670050);
-			fileRead((char*)0x2700000, fatTableFile, 0x200, currentClusterCacheSize, !sdRead, -1);
-		}
-
-		toncset((u32*)0x02670000, 0, 0x400);
 	}
 
 	int errorCode;

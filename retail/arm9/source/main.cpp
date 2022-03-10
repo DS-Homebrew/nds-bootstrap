@@ -25,7 +25,6 @@
 u8 lz77ImageBuffer[0x20000];
 
 std::string patchOffsetCacheFilePath;
-std::string fatTableFilePath;
 std::string wideCheatFilePath;
 std::string cheatFilePath;
 std::string ramDumpPath;
@@ -395,7 +394,6 @@ static int runNdsFile(configuration* conf) {
 	struct stat stApPatch;
 	struct stat stCheat;
 	struct stat stPatchOffsetCache;
-	struct stat stFatTable;
 	struct stat stRamDump;
 	struct stat stSrParams;
 	struct stat stScreenshot;
@@ -408,7 +406,6 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterApPatch = 0;
 	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
-	u32 clusterFatTable = 0;
 	u32 clusterRamDump = 0;
 	u32 clusterSrParams = 0;
 	u32 clusterScreenshot = 0;
@@ -457,10 +454,6 @@ static int runNdsFile(configuration* conf) {
 			clusterWideCheat = stWideCheat.st_ino;
 		}
 
-		if (conf->cacheFatTable && stat(fatTableFilePath.c_str(), &stFatTable) >= 0) {
-			clusterFatTable = stFatTable.st_ino;
-		}
-
 		if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 			clusterScreenshot = stScreenshot.st_ino;
 		}
@@ -474,7 +467,7 @@ static int runNdsFile(configuration* conf) {
 		clusterPageFile = stPage.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterFatTable, clusterRamDump, clusterSrParams, clusterScreenshot, clusterPageFile, conf);
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, clusterPageFile, conf);
 }
 
 int main(int argc, char** argv) {

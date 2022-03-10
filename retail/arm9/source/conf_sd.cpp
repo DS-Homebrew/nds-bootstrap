@@ -56,7 +56,6 @@ static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srl
 extern const DISC_INTERFACE __my_io_dsisd;
 
 extern std::string patchOffsetCacheFilePath;
-extern std::string fatTableFilePath;
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 extern std::string ramDumpPath;
@@ -86,9 +85,6 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Debug
 	conf->debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG", "0").c_str(), NULL, 0);
-
-	// Cache FAT table
-	conf->cacheFatTable = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", "0").c_str(), NULL, 0);
 
 	// B4DS mode
 	conf->b4dsMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "B4DS_MODE", "0").c_str(), NULL, 0);
@@ -333,9 +329,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (conf->cacheFatTable) {
-		conf->valueBits |= BIT(0);
-	}
 	if (conf->boostVram) {
 		conf->valueBits |= BIT(1);
 	}
@@ -1363,26 +1356,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if (dsiFeatures() && !conf->b4dsMode) {	// Not for B4DS
-		fatTableFilePath = "sd:/_nds/nds-bootstrap/fatTable/"+romFilename;
-		if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
-			fatTableFilePath = "fat:/_nds/nds-bootstrap/fatTable/"+romFilename;
-		}
-
-		if ((conf->gameOnFlashcard || !conf->isDSiWare) && conf->cacheFatTable && getFileSize(fatTableFilePath.c_str()) < 0x80180) {
-			consoleDemoInit();
-			iprintf("Creating FAT table file.\n");
-			iprintf("Please wait...\n");
-
-			FILE *fatTableFile = fopen(fatTableFilePath.c_str(), "wb");
-			if (fatTableFile) {
-				fseek(fatTableFile, 0x80200 - 1, SEEK_SET);
-				fputc('\0', fatTableFile);
-				fclose(fatTableFile);
-			}
-
-			consoleClear();
-		}
-
 		ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
 		if (!conf->sdFound) {
 			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";

@@ -30,7 +30,6 @@ typedef struct loadCrt0 {
     u32 cheatFileCluster;
     u32 cheatSize;
     u32 patchOffsetCacheFileCluster;
-    u32 fatTableFileCluster;
     u32 ramDumpCluster;
 	u32 srParamsFileCluster;
 	u32 screenshotCluster;
