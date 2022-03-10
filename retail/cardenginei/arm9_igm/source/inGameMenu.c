@@ -140,13 +140,13 @@ static void printBattery(void) {
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && (KEYS & keys); i++) {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
 	do {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	} while(!(KEYS & keys));
 }
 
@@ -155,14 +155,14 @@ static void waitKeysBattery(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && (KEYS & keys); i++) {
 		printBattery();
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
 	do {
 		printBattery();
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	} while(!(KEYS & keys));
 }
 #endif
@@ -245,8 +245,8 @@ static void screenshot(void) {
 
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
 	// Backup VRAM bank
@@ -276,8 +276,8 @@ static void screenshot(void) {
 
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 }
 #endif
@@ -444,8 +444,8 @@ static void ramViewer(void) {
 			sharedAddr[1] = (vu32)address;
 			sharedAddr[4] = 0x524D4152; // RAMR
 			while (sharedAddr[4] == 0x524D4152) {
-				while (REG_VCOUNT != 191);
-				while (REG_VCOUNT == 191);
+				while (REG_VCOUNT != 191) swiDelay(100);
+				while (REG_VCOUNT == 191) swiDelay(100);
 			}
 		}
 		ramLoaded = true;
@@ -556,8 +556,8 @@ static void ramViewer(void) {
 					sharedAddr[2] = cursorPosition;
 					sharedAddr[4] = 0x574D4152; // RAMW
 					while (sharedAddr[4] == 0x574D4152) {
-						while (REG_VCOUNT != 191);
-						while (REG_VCOUNT == 191);
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
 					}
 					ramLoaded = false;
 				}
@@ -634,8 +634,8 @@ void inGameMenu(s8* mainScreen) {
 		#ifndef B4DS
 		printBattery();
 		#endif
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
 	} while(KEYS & igmText.hotkey);
 
 	u8 cursorPosition = 0;
@@ -664,8 +664,8 @@ void inGameMenu(s8* mainScreen) {
 			switch(cursorPosition) {
 				case 0:
 					do {
-						while (REG_VCOUNT != 191);
-						while (REG_VCOUNT == 191);
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
 					} while(KEYS & KEY_A);
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
@@ -678,7 +678,10 @@ void inGameMenu(s8* mainScreen) {
 					break;
 				case 3:
 					sharedAddr[4] = 0x444D4152; // RAMD
-					while (sharedAddr[4] == 0x444D4152);
+					while (sharedAddr[4] == 0x444D4152) {
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
+					}
 					break;
 				case 4:
 					optionsMenu(mainScreen);
@@ -724,16 +727,16 @@ void inGameMenu(s8* mainScreen) {
 			#endif
 		} else if (KEYS & KEY_B) {
 			do {
-				while (REG_VCOUNT != 191);
-				while (REG_VCOUNT == 191);
+				while (REG_VCOUNT != 191) swiDelay(100);
+				while (REG_VCOUNT == 191) swiDelay(100);
 			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
 		}
 		#ifndef B4DS
 		else if (KEYS & KEY_R) {
 			do {
-				while (REG_VCOUNT != 191);
-				while (REG_VCOUNT == 191);
+				while (REG_VCOUNT != 191) swiDelay(100);
+				while (REG_VCOUNT == 191) swiDelay(100);
 			} while(KEYS & KEY_R);
 			sharedAddr[4] = 0x50455453; // STEP
 		}
