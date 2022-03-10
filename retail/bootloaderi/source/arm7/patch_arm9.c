@@ -1221,7 +1221,10 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		return NULL;
 	}
 
+	const char* romTid = getRomTid(ndsHeader);
+
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
+	bool isPkmnBW2 = (strncmp(romTid, "IRD", 3) == 0) || (strncmp(romTid, "IRE", 3) == 0);
 	extern u8 consoleModel;
 
 	u32* heapPointer = NULL;
@@ -1245,14 +1248,18 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		return NULL;
 	}
 
+    dbg_printf("hi heap end: ");
+	dbg_hexa((u32)heapPointer);
+    dbg_printf("\n\n");
+
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old hi heap end pointer: ");
+    dbg_printf("old hi heap value: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && !isDSiWare && ndsHeader->unitCode == 0x02) {
+		if (consoleModel == 0 && !isPkmnBW2 && !isDSiWare && ndsHeader->unitCode == 0x02) {
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062C; /* MOVNE R0, #0x2C00000 */
@@ -1305,7 +1312,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
 	}
 
-    dbg_printf("new hi heap pointer: ");
+    dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");

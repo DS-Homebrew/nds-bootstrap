@@ -692,15 +692,19 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 		patchOffsetCacheChanged = true;
 	}
 
+    dbg_printf("hi heap end: ");
+	dbg_hexa((u32)heapPointer);
+    dbg_printf("\n\n");
+
     u32* oldheapPointer = (u32*)*heapPointer;
 
-    dbg_printf("old hi heap end pointer: ");
+    dbg_printf("old hi heap value: ");
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
 	*heapPointer = expansionPakFound ? (u32)ce9 : 0x023C0000; // shrink heap by 128KB (or ce9 binary size, if expansion pak is found)
 
-    dbg_printf("new hi heap pointer: ");
+    dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
