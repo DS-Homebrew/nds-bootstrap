@@ -131,7 +131,7 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
-	u8 saveOnFlashcard,
+	u16 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
 	u8 ROMinRAM,

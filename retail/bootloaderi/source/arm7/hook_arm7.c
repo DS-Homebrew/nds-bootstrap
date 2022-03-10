@@ -127,8 +127,8 @@ int hookNdsRetailArm7(
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
 	u32 pageFileCluster,
-    u8 gameOnFlashcard,
-    u8 saveOnFlashcard,
+    u16 gameOnFlashcard,
+    u16 saveOnFlashcard,
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,

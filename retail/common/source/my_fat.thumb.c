@@ -538,7 +538,7 @@ bool FAT_InitFiles (bool initCard)
 
 	// Read in boot sector
 	bootSec = (BOOT_SEC*) globalBuffer[card2];
-	CARD_ReadSector (bootSector,  bootSec, 0, 0);
+	CARD_ReadSector (bootSector, bootSec, 0, 0);
 
 	// Store required information about the file system
 	if (bootSec->sectorsPerFAT != 0)
@@ -633,7 +633,7 @@ bool FAT_InitFiles (bool initCard)
 
 	// Read in boot sector
 	bootSec = (BOOT_SEC*) globalBuffer;
-	CARD_ReadSector (bootSector,  bootSec, 0, 0);
+	CARD_ReadSector (bootSector, bootSec, 0, 0);
 
 	// Store required information about the file system
 	if (bootSec->sectorsPerFAT != 0)
@@ -713,7 +713,7 @@ aFile getBootFileCluster (const char* bootName)
 	bool notFound = false;
 	bool found = false;
 //	int maxSectors;
-	#ifndef B4DS
+	#ifdef TWOCARD
 	u32 wrkDirCluster = discRootDirClus[card2];
 	#else
 	u32 wrkDirCluster = discRootDirClus;
@@ -752,9 +752,11 @@ aFile getBootFileCluster (const char* bootName)
 	// Scan Dir for correct entry
 	#ifdef TWOCARD
 	firstSector = discRootDir[card2];
+	prevSect[card2] = -1;
 	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer[card2], 0, 0);
 	#else
 	firstSector = discRootDir;
+	prevSect = -1;
 	CARD_ReadSector (firstSector + wrkDirSector, globalBuffer, 0, 0);
 	#endif
 	found = false;

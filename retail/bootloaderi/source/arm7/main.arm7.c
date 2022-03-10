@@ -1140,6 +1140,7 @@ int arm7_main(void) {
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, true, 0)) {
 			nocashMessage("!FAT_InitFiles");
+			//errorOutput();
 			//return -1;
 		}
 		sdRead = dsiSD;
@@ -1210,14 +1211,12 @@ int arm7_main(void) {
 			fatTableEmpty = true;
 		}
 
-		if (!gameOnFlashcard) {
-			if (*(u32*)(0x2670048) != saveFileCluster
-			|| *(u32*)(0x267004C) != saveSize)
-			{
-				fatTableEmpty = true;
-			}
+		if (*(u32*)(0x2670048) != saveFileCluster
+		|| *(u32*)(0x267004C) != saveSize)
+		{
+			fatTableEmpty = true;
 		}
-		
+
 		if (fatTableVersion != currentFatTableVersion) {
 			fatTableEmpty = true;
 		}
