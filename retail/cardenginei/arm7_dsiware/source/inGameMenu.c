@@ -107,7 +107,9 @@ void inGameMenu(void) {
 					break;
 			}
 
-			sharedAddr[4] = 0x554E454D; // MENU
+			if (!exitMenu) {
+				sharedAddr[4] = 0x554E454D; // MENU
+			}
 		}
 	}
 
