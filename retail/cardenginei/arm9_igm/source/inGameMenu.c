@@ -1,3 +1,4 @@
+#include <nds/bios.h>
 #include <nds/ndstypes.h>
 #include <nds/input.h>
 #include <nds/interrupts.h>
@@ -9,6 +10,35 @@
 #include "locations.h"
 #include "nds_header.h"
 #include "tonccpy.h"
+
+#ifndef B4DS
+#define MAIN_MENU_ITEMS 7
+#define OPTIONS_MENU_ITEMS 3
+
+enum MenuItem {
+	MENU_EXIT = 0,
+	MENU_RESET = 1,
+	MENU_SCREENSHOT = 2,
+	MENU_RAM_DUMP = 3,
+	MENU_OPTIONS = 4,
+	MENU_RAM_VIEWER = 5,
+	MENU_QUIT = 6
+
+};
+#else
+#define MAIN_MENU_ITEMS 5
+#define OPTIONS_MENU_ITEMS 1
+
+enum MenuItem {
+	MENU_EXIT = 0,
+	MENU_RAM_DUMP = 1,
+	MENU_OPTIONS = 2,
+	MENU_RAM_VIEWER = 3,
+	MENU_QUIT = 4,
+	MENU_RESET = 0xFF,
+	MENU_SCREENSHOT = 0xFE
+};
+#endif
 
 extern struct IgmText igmText;
 
@@ -92,6 +122,7 @@ static void printChar(int x, int y, unsigned char c, int palette) {
 	BG_MAP_RAM_SUB(15)[y * 0x20 + x] = c | palette << 12;
 }
 
+#ifndef B4DS
 static void printDec(int x, int y, u32 val, int digits, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	for(int i = digits - 1; i >= 0; i--) {
@@ -99,6 +130,7 @@ static void printDec(int x, int y, u32 val, int digits, int palette) {
 		val /= 10;
 	}
 }
+#endif
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
@@ -296,11 +328,7 @@ static void drawMainMenu(void) {
 	clearScreen();
 
 	// Print labels
-	#ifndef B4DS
-	for(int i = 0; i < 7; i++) {
-	#else
-	for(int i = 0; i < 5; i++) {
-	#endif
+	for(int i = 0; i < MAIN_MENU_ITEMS; i++) {
 		if(igmText.rtl)
 			printRight(0x1D, i, igmText.menu[i], 0);
 		else
@@ -310,7 +338,9 @@ static void drawMainMenu(void) {
 	// Print info
 	print(1, 0x18 - 3, igmText.ndsBootstrap, 1);
 	print(1, 0x18 - 2, igmText.version, 1);
+
 	#ifndef B4DS
+	// Print battery
 	printChar(0x20 - 5, 0x18 - 2, '\2', 3);
 	printChar(0x20 - 2, 0x18 - 2, '\7', 3);
 	#endif
@@ -346,8 +376,6 @@ static void optionsMenu(s8 *mainScreen) {
 			// VRAM mode
 			printRight(0x1E, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		}
-
-		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 		#else
 		if(igmText.rtl) {
 			// Main screen
@@ -356,20 +384,21 @@ static void optionsMenu(s8 *mainScreen) {
 			// Main screen
 			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
 		}
-
-		waitKeys(KEY_LEFT | KEY_RIGHT | KEY_B);
 		#endif
 
-		#ifndef B4DS
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+
 		if (KEYS & KEY_UP) {
 			if(cursorPosition > 0)
 				cursorPosition--;
+			else
+				cursorPosition = OPTIONS_MENU_ITEMS - 1;
 		} else if (KEYS & KEY_DOWN) {
-			if(cursorPosition < 2)
+			if(cursorPosition < (OPTIONS_MENU_ITEMS - 1))
 				cursorPosition++;
-		} else
-		#endif
-		if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
+			else
+				cursorPosition = 0;
+		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
 			switch(cursorPosition) {
 				case 0:
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
@@ -379,14 +408,12 @@ static void optionsMenu(s8 *mainScreen) {
 						*mainScreen = 2;
 					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
 					break;
-				#ifndef B4DS
 				case 1:
 					REG_SCFG_CLK ^= 1;
 					break;
 				case 2:
 					REG_SCFG_EXT ^= BIT(13);
 					break;
-				#endif
 				default:
 					break;
 			}
@@ -652,79 +679,56 @@ void inGameMenu(s8* mainScreen) {
 		if (KEYS & KEY_UP) {
 			if (cursorPosition > 0)
 				cursorPosition--;
+			else
+				cursorPosition = MAIN_MENU_ITEMS - 1;
 		} else if (KEYS & KEY_DOWN) {
-			#ifndef B4DS
-			if (cursorPosition < 6)
-			#else
-			if (cursorPosition < 4)
-			#endif
+			if (cursorPosition < (MAIN_MENU_ITEMS - 1))
 				cursorPosition++;
+			else
+				cursorPosition = 0;
 		} else if (KEYS & KEY_A) {
-			#ifndef B4DS
 			switch(cursorPosition) {
-				case 0:
+				case MENU_EXIT:
 					do {
 						while (REG_VCOUNT != 191) swiDelay(100);
 						while (REG_VCOUNT == 191) swiDelay(100);
 					} while(KEYS & KEY_A);
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
-				case 1:
-					sharedAddr[3] = 0x52534554; // RSET
+				case MENU_RESET:
+					sharedAddr[3] = 0x52534554; // TESR
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
-				case 2:
+				case MENU_SCREENSHOT:
+					#ifndef B4DS
 					screenshot();
+					#endif
 					break;
-				case 3:
+				case MENU_RAM_DUMP:
+					#ifndef B4DS
 					sharedAddr[4] = 0x444D4152; // RAMD
 					while (sharedAddr[4] == 0x444D4152) {
 						while (REG_VCOUNT != 191) swiDelay(100);
 						while (REG_VCOUNT == 191) swiDelay(100);
 					}
+					#else
+					sharedAddr[3] = 0x444D4152; // RAMD
+					sharedAddr[4] = 0x54495845; // EXIT
+					#endif
 					break;
-				case 4:
+				case MENU_OPTIONS:
 					optionsMenu(mainScreen);
 					break;
-				// To be added: Cheats...
-				case 5:
+				case MENU_RAM_VIEWER:
 					ramViewer();
 					break;
-				case 6:
+				case MENU_QUIT:
 					sharedAddr[3] = 0x54495845; // EXIT
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
 					break;
 			}
-			#else
-			switch(cursorPosition) {
-				case 0:
-					do {
-						while (REG_VCOUNT != 191);
-						while (REG_VCOUNT == 191);
-					} while(KEYS & KEY_A);
-					sharedAddr[4] = 0x54495845; // EXIT
-					break;
-				case 1:
-					sharedAddr[3] = 0x444D4152; // RAMD
-					sharedAddr[4] = 0x54495845; // EXIT
-					break;
-				case 2:
-					optionsMenu(mainScreen);
-					break;
-				// To be added: Cheats...
-				case 3:
-					ramViewer();
-					break;
-				case 4:
-					sharedAddr[3] = 0x52534554; // RSET
-					sharedAddr[4] = 0x54495551; // QUIT
-					break;
-				default:
-					break;
-			}
-			#endif
 		} else if (KEYS & KEY_B) {
 			do {
 				while (REG_VCOUNT != 191) swiDelay(100);
