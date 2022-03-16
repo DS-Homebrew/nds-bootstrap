@@ -628,10 +628,19 @@ void dumpRam(void) {
 	if (valueBits & dsiMode) {
 		// Dump full RAM
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
-	} else {
-		// Dump RAM used in DS mode
+	} else if (isSdk5(moduleParams)) {
+		// Dump RAM used in DS mode (SDK5)
 		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
+		fileWrite((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
+		fileWrite((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0x1000, !sdRead, -1);
+	} else if (moduleParams->sdk_version >= 0x2008000) {
+		// Dump RAM used in DS mode (SDK2.1+)
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileWrite((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
+	} else {
+		// Dump RAM used in DS mode (SDK2.0)
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
+		fileWrite((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x40000, !sdRead, -1);
 	}
 	sharedAddr[3] = 0;
   	#ifdef TWLSDK
