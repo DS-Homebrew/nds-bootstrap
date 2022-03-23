@@ -667,6 +667,10 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			fileRead(twlCfg+0x9C, romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
 		}*/
 
+		if (softResetParams[0] == 0xFFFFFFFF) {
+			fileRead((char*)0x02FFE230, romFile, 0x230, 8);
+		}
+
 		// Set region flag
 		if (useRomRegion || region == 0xFF) {
 			u8 newRegion = 0;
