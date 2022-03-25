@@ -1787,7 +1787,6 @@ int arm7_main(void) {
 
 	arm9_boostVram = boostVram;
 	arm9_isSdk5 = isSdk5(moduleParams);
-	arm9_a7SCFGLocked = (REG_SCFG_EXT == 0 && !dsiSD);
 
     /*if (isGSDD) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
