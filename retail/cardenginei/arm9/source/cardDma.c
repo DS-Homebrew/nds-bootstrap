@@ -84,7 +84,7 @@ bool dmaReadOnArm9 = false;
 
 extern int allocateCacheSlot(void);
 extern int getSlotForSector(u32 sector);
-extern int getSlotForSectorManual(int i, u32 sector);
+//extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
 
@@ -199,7 +199,7 @@ extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
 static int currentLen = 0;
-static int currentSlot = 0;
+//static int currentSlot = 0;
 
 void continueCardReadDmaArm9() {
     if(dmaReadOnArm9) {
@@ -237,7 +237,8 @@ void continueCardReadDmaArm9() {
 			accessCounter++;  
 
             // Read via the main RAM cache
-        	int slot = getSlotForSectorManual(currentSlot+1, sector);
+        	//int slot = getSlotForSectorManual(currentSlot+1, sector);
+        	int slot = getSlotForSector(sector);
         	vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
@@ -255,7 +256,7 @@ void continueCardReadDmaArm9() {
 
 				//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-				u32 len2 = (src - sector) + len;
+				/*u32 len2 = (src - sector) + len;
 				u16 readLen = ce9->cacheBlockSize;
 				if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
 					readLen = ce9->cacheBlockSize*4;
@@ -263,11 +264,11 @@ void continueCardReadDmaArm9() {
 					readLen = ce9->cacheBlockSize*3;
 				} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
 					readLen = ce9->cacheBlockSize*2;
-				}
+				}*/
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
-				sharedAddr[1] = readLen;
+				sharedAddr[1] = ce9->cacheBlockSize;
 				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
@@ -276,7 +277,7 @@ void continueCardReadDmaArm9() {
 				IPC_SendSync(0x4);
 
 				updateDescriptor(slot, sector);
-				if (readLen >= ce9->cacheBlockSize*2) {
+				/*if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
 				}
 				if (readLen >= ce9->cacheBlockSize*3) {
@@ -285,7 +286,7 @@ void continueCardReadDmaArm9() {
 				if (readLen >= ce9->cacheBlockSize*4) {
 					updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 				}
-				currentSlot = slot;
+				currentSlot = slot;*/
                 return;
         	}
 			#ifdef ASYNCPF
@@ -321,7 +322,7 @@ void continueCardReadDmaArm9() {
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
 			currentLen = len2;
-			currentSlot = slot;
+			//currentSlot = slot;
 
 			IPC_SendSync(0x3);
         } else {
@@ -361,7 +362,8 @@ void continueCardReadDmaArm7() {
 				len2 -= len2 % 32;
 			}*/
 
-			vu8* buffer = getCacheAddress(currentSlot);
+			//vu8* buffer = getCacheAddress(currentSlot);
+			vu8* buffer = getCacheAddress(getSlotForSector(sector));
 
 			// TODO Copy via dma
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
@@ -428,7 +430,7 @@ void cardSetDma(void) {
 
 			//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 
-			u32 len2 = (src - sector) + len;
+			/*u32 len2 = (src - sector) + len;
 			u16 readLen = ce9->cacheBlockSize;
 			if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
 				readLen = ce9->cacheBlockSize*4;
@@ -436,11 +438,11 @@ void cardSetDma(void) {
 				readLen = ce9->cacheBlockSize*3;
 			} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
 				readLen = ce9->cacheBlockSize*2;
-			}
+			}*/
 
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = readLen;
+			sharedAddr[1] = ce9->cacheBlockSize;
 			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
@@ -449,7 +451,7 @@ void cardSetDma(void) {
 			IPC_SendSync(0x4);
 
 			updateDescriptor(slot, sector);
-			if (readLen >= ce9->cacheBlockSize*2) {
+			/*if (readLen >= ce9->cacheBlockSize*2) {
 				updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
 			}
 			if (readLen >= ce9->cacheBlockSize*3) {
@@ -458,7 +460,7 @@ void cardSetDma(void) {
 			if (readLen >= ce9->cacheBlockSize*4) {
 				updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 			}
-			currentSlot = slot;
+			currentSlot = slot;*/
 			return;
 		} 
 		#ifdef ASYNCPF
@@ -494,7 +496,7 @@ void cardSetDma(void) {
 		ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 		dmaReadOnArm9 = true;
 		currentLen = len2;
-		currentSlot = slot;
+		//currentSlot = slot;
 
 		IPC_SendSync(0x3);
 	//}

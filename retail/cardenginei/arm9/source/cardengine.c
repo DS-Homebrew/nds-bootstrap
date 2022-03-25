@@ -190,7 +190,7 @@ int getSlotForSector(u32 sector) {
 	return -1;
 }
 
-int getSlotForSectorManual(int i, u32 sector) {
+/*int getSlotForSectorManual(int i, u32 sector) {
 	if (i >= ce9->cacheSlots) {
 		i -= ce9->cacheSlots;
 	}
@@ -198,7 +198,7 @@ int getSlotForSectorManual(int i, u32 sector) {
 		return i;
 	}
 	return -1;
-}
+}*/
 
 vu8* getCacheAddress(int slot) {
 	//return (vu32*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
@@ -286,8 +286,8 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 	} else {*/
 		// Read via the main RAM cache
 		//bool runSleep = true;
-		int slot = getSlotForSector(sector);
 		while(len > 0) {
+			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
@@ -302,7 +302,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 
 				buffer = getCacheAddress(slot);
 
-				u32 len2 = (src - sector) + len;
+				/*u32 len2 = (src - sector) + len;
 				u16 readLen = ce9->cacheBlockSize;
 				if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
 					readLen = ce9->cacheBlockSize*4;
@@ -310,10 +310,10 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 					readLen = ce9->cacheBlockSize*3;
 				} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
 					readLen = ce9->cacheBlockSize*2;
-				}
+				}*/
 
-				fileRead((char*)buffer, *romFile, sector, readLen, 0);
-				updateDescriptor(slot, sector);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
 				}
@@ -322,7 +322,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 				}
 				if (readLen >= ce9->cacheBlockSize*4) {
 					updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
-				}
+				}*/
 
 				#ifdef ASYNCPF
 				if (REG_IME != 0 && REG_IF != 0) {
@@ -348,9 +348,9 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 					}
 				}*/
 				#endif
-				updateDescriptor(slot, sector);
+				//updateDescriptor(slot, sector);
 			}
-			//updateDescriptor(slot, sector);
+			updateDescriptor(slot, sector);
 
 			//getSdatAddr(sector, (u32)buffer);
 
@@ -396,7 +396,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 				dst = (u8*)cardStruct[1];
 				sector = (src / ce9->cacheBlockSize) * ce9->cacheBlockSize;
 				accessCounter++;
-				slot = getSlotForSectorManual(slot+1, sector);
+				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
 	//}
