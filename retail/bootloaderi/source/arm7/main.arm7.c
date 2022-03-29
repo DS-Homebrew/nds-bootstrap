@@ -1246,6 +1246,7 @@ int arm7_main(void) {
 		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 		toncset((u32*)0x02E80000, 0, 0x800);
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
+		memset_addrs_arm7(0x02FFE000, 0x02FFF000); // clear DSi header
 	} /*else if (!gameOnFlashcard) {
 		*(u32*)0x03708000 = 0x54455354;
 		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
