@@ -31,6 +31,14 @@ u32 generateA7Instr(int arg1, int arg2) {
 u32* getOffsetFromBL(u32* blOffset) {
 	u32 opCode = (*blOffset) - 0xEB000000;
 
+	if (opCode >= 0x00800000 && opCode <= 0x00FFFFFF) {
+		u32 offset = (u32)blOffset + 8;
+		for (u32 i = opCode; i <= 0x00FFFFFF; i++) {
+			offset -= 4;
+		}
+
+		return (u32*)offset;
+	}
 	return (u32*)((u32)blOffset + (opCode*4) + 8);
 }
 
