@@ -673,7 +673,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	return res;
 }
 
-static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, int dsiMode) {
+static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* moduleParams, bool dsiModeConfirmed) {
 	tNDSHeader* ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
 	/*if (isGSDD) {
 		ndsHeader = (tNDSHeader*)(NDS_HEADER_4MB);
@@ -683,7 +683,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, (char*)ndsHeader, 0x170);
 	//dmaCopyWords(3, &dsiHeaderTemp.ndshdr, ndsHeader, sizeof(dsiHeaderTemp.ndshdr));
 	*ndsHeader = dsiHeaderTemp->ndshdr;
-	if (dsiMode > 0) {
+	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
 		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
@@ -1241,7 +1241,8 @@ int arm7_main(void) {
 			tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
 		}
-	} else {
+	}
+	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
 		toncset((u32*)0x02400000, 0, 0x20);
 		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
 		toncset((u32*)0x02E80000, 0, 0x800);
