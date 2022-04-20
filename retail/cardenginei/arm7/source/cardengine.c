@@ -740,7 +740,7 @@ void readManual(int line) {
 	// Read in 24 lines
 	u32 tempManualOffset = currentManualOffset;
 	bool fullLine = false;
-	for(int line = 0; line < 24; line++) {
+	for(int line = 0; line < 24 && line < igmText->manualMaxLine; line++) {
 		fileRead(buffer, manualFile, tempManualOffset, 32, !sdRead, -1);
 
 		// Fix for exactly 32 char lines
@@ -748,7 +748,7 @@ void readManual(int line) {
 			fileRead(buffer, manualFile, ++tempManualOffset, 32, !sdRead, -1);
 
 		for(int i = 0; i <= 32; i++) {
-			if(i == 32 || buffer[i] == '\n') {
+			if(i == 32 || buffer[i] == '\n' || buffer[i] == '\0') {
 				tempManualOffset += i;
 				if(buffer[i] == '\n')
 					tempManualOffset++;

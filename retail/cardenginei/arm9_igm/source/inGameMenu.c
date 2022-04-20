@@ -335,7 +335,7 @@ static void manual(void) {
 		if(igmText.manualLine < 0)
 			igmText.manualLine = 0;
 		else if(igmText.manualLine > igmText.manualMaxLine - 23)
-			igmText.manualLine = igmText.manualMaxLine - 23;
+			igmText.manualLine = igmText.manualMaxLine - 23 > 0 ? igmText.manualMaxLine - 23 : 0;
 	}
 }
 
