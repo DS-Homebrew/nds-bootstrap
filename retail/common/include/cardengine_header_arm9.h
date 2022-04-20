@@ -147,6 +147,7 @@ typedef struct cardengineArm9 {
     u32 ramDumpCluster;
     u32 srParamsCluster;
     u32 pageFileCluster;
+    // u32 manualCluster;
     u32 cardStruct0;
 	u32 valueBits;
 	/*
