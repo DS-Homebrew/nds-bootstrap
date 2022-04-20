@@ -78,6 +78,7 @@ extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
 extern u32 pageFileCluster;
+extern u32 manualCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
 extern u32* languageAddr;
@@ -132,6 +133,7 @@ static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
 static aFile pageFile;
+static aFile manualFile;
 
 static int saveTimer = 0;
 
@@ -260,6 +262,7 @@ static void driveInitialize(void) {
 	srParamsFile = getFileFromCluster(srParamsCluster);
 	screenshotFile = getFileFromCluster(screenshotCluster);
 	pageFile = getFileFromCluster(pageFileCluster);
+	manualFile = getFileFromCluster(manualCluster);
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -692,6 +695,69 @@ void saveScreenshot(void) {
 #else
 	if (doBak) restoreSdBakData();
 #endif
+}
+
+int currentManualLine = 0, currentManualOffset = 0;
+void readManual(int line) {
+	sdRead = (valueBits & b_dsiSD);
+	char buffer[32];
+
+	// Seek for desired line
+	bool firstLoop = true;
+	while(currentManualLine != line) {
+		if(line > currentManualLine) {
+			fileRead(buffer, manualFile, currentManualOffset, 32, !sdRead, -1);
+
+			for(int i = 0; i < 32; i++) {
+				if(buffer[i] == '\n') {
+					currentManualOffset += i + 1;
+					currentManualLine++;
+					break;
+				} else if(i == 31) {
+					currentManualOffset += i + 1;
+					break;
+				}
+			}
+		} else {
+			currentManualOffset -= 32;
+			fileRead(buffer, manualFile, currentManualOffset, 32, !sdRead, -1);
+			int i = firstLoop ? 30 : 31;
+			firstLoop = false;
+			for(; i >= 0; i--) {
+				if((buffer[i] == '\n') || currentManualOffset + i == -1) {
+					currentManualOffset += i + 1;
+					currentManualLine--;
+					firstLoop = true;
+					break;
+				}
+			}
+		}
+	}
+
+	memset((u8*)INGAME_MENU_EXT_LOCATION, ' ', 32 * 24);
+	((vu8*)INGAME_MENU_EXT_LOCATION)[32 * 24] = '\0';
+
+	// Read in 24 lines
+	u32 tempManualOffset = currentManualOffset;
+	bool fullLine = false;
+	for(int line = 0; line < 24; line++) {
+		fileRead(buffer, manualFile, tempManualOffset, 32, !sdRead, -1);
+
+		// Fix for exactly 32 char lines
+		if(fullLine && buffer[0] == '\n')
+			fileRead(buffer, manualFile, ++tempManualOffset, 32, !sdRead, -1);
+
+		for(int i = 0; i <= 32; i++) {
+			if(i == 32 || buffer[i] == '\n') {
+				tempManualOffset += i;
+				if(buffer[i] == '\n')
+					tempManualOffset++;
+				fullLine = i == 32;
+				memcpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
+				break;
+			}
+		}
+	}
 }
 
 static void log_arm9(void) {

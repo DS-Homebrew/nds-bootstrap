@@ -12,7 +12,7 @@ struct IgmText {
 	unsigned char jumpAddress[20];
 	unsigned char selectBank[20];
 	unsigned char count[14];
-	unsigned char menu[7][20];
+	unsigned char menu[8][20];
 	unsigned char options[10][20];
 
 	u8 font[256 * 8];
@@ -20,10 +20,12 @@ struct IgmText {
 	bool rtl;
 	u16 hotkey;
 	u8 currentScreenshot;
+	int manualLine;
+	int manualMaxLine;
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(IgmText) == 0x9C6, "IgmText is too big! Allocate more space in the in-game menu header");
+static_assert(sizeof(IgmText) == 0x9E4, "IgmText is too big! Allocate more space in the in-game menu header");
 
 enum class IgmFont : u8 {
 	arabic = 0,

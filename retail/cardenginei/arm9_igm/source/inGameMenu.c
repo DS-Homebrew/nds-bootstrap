@@ -11,34 +11,26 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
-#ifndef B4DS
-#define MAIN_MENU_ITEMS 7
-#define OPTIONS_MENU_ITEMS 3
+void DC_InvalidateRange(const void *base, u32 size);
+void DC_FlushRange(const void *base, u32 size);
 
-enum MenuItem {
+#ifdef B4DS
+#define OPTIONS_MENU_ITEMS 1
+#else
+#define OPTIONS_MENU_ITEMS 3
+#endif
+
+typedef enum {
 	MENU_EXIT = 0,
 	MENU_RESET = 1,
 	MENU_SCREENSHOT = 2,
-	MENU_RAM_DUMP = 3,
-	MENU_OPTIONS = 4,
-	MENU_RAM_VIEWER = 5,
-	MENU_QUIT = 6
+	MENU_MANUAL = 3,
+	MENU_RAM_DUMP = 4,
+	MENU_OPTIONS = 5,
+	MENU_RAM_VIEWER = 6,
+	MENU_QUIT = 7
 
-};
-#else
-#define MAIN_MENU_ITEMS 5
-#define OPTIONS_MENU_ITEMS 1
-
-enum MenuItem {
-	MENU_EXIT = 0,
-	MENU_RAM_DUMP = 1,
-	MENU_OPTIONS = 2,
-	MENU_RAM_VIEWER = 3,
-	MENU_QUIT = 4,
-	MENU_RESET = 0xFF,
-	MENU_SCREENSHOT = 0xFE
-};
-#endif
+} MenuItem;
 
 extern struct IgmText igmText;
 
@@ -314,6 +306,39 @@ static void screenshot(void) {
 }
 #endif
 
+static void manual(void) {
+	while(1) {
+		DC_InvalidateRange((unsigned char *)INGAME_MENU_EXT_LOCATION, 32 * 24);
+		sharedAddr[0] = igmText.manualLine;
+		sharedAddr[4] = 0x554E414D; // MANU
+		do {
+			while (REG_VCOUNT != 191) swiDelay(100);
+			while (REG_VCOUNT == 191) swiDelay(100);
+		} while (sharedAddr[4] == 0x554E414D);
+
+		print(0, 0, (unsigned char *)INGAME_MENU_EXT_LOCATION, 0);
+
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+		if(KEYS & KEY_UP) {
+			igmText.manualLine -= (KEYS & KEY_R) ? 100 : 1;
+		} else if(KEYS & KEY_DOWN) {
+			igmText.manualLine += (KEYS & KEY_R) ? 100 : 1;
+		} else if(KEYS & KEY_LEFT) {
+			igmText.manualLine -= (KEYS & KEY_R) ? 1000 : 23;
+			
+		} else if(KEYS & KEY_RIGHT) {
+			igmText.manualLine += (KEYS & KEY_R) ? 1000 : 23;
+		} else if(KEYS & KEY_B) {
+			break;
+		}
+
+		if(igmText.manualLine < 0)
+			igmText.manualLine = 0;
+		else if(igmText.manualLine > igmText.manualMaxLine - 23)
+			igmText.manualLine = igmText.manualMaxLine - 23;
+	}
+}
+
 static void drawCursor(u8 line) {
 	u8 pos = igmText.rtl ? 0x1F : 0;
 	// Clear other cursors
@@ -324,15 +349,15 @@ static void drawCursor(u8 line) {
 	BG_MAP_RAM_SUB(15)[line * 0x20 + pos] = igmText.rtl ? '<' : '>';
 }
 
-static void drawMainMenu(void) {
+static void drawMainMenu(MenuItem *menuItems, int menuItemCount) {
 	clearScreen();
 
 	// Print labels
-	for(int i = 0; i < MAIN_MENU_ITEMS; i++) {
+	for(int i = 0; i < menuItemCount; i++) {
 		if(igmText.rtl)
-			printRight(0x1D, i, igmText.menu[i], 0);
+			printRight(0x1D, i, igmText.menu[menuItems[i]], 0);
 		else
-			print(2, i, igmText.menu[i], 0);
+			print(2, i, igmText.menu[menuItems[i]], 0);
 	}
 
 	// Print info
@@ -352,7 +377,7 @@ static void optionsMenu(s8 *mainScreen) {
 		clearScreen();
 
 		// Print labels
-		for(int i = 0; i < 3; i++) {
+		for(int i = 0; i < OPTIONS_MENU_ITEMS; i++) {
 			if(igmText.rtl)
 				printRight(0x1D, i, igmText.options[i], 0);
 			else
@@ -360,7 +385,7 @@ static void optionsMenu(s8 *mainScreen) {
 		}
 		drawCursor(cursorPosition);
 
-		#ifndef B4DS
+#ifndef B4DS
 		if(igmText.rtl) {
 			// Main screen
 			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
@@ -376,7 +401,7 @@ static void optionsMenu(s8 *mainScreen) {
 			// VRAM mode
 			printRight(0x1E, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
 		}
-		#else
+#else
 		if(igmText.rtl) {
 			// Main screen
 			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
@@ -384,7 +409,7 @@ static void optionsMenu(s8 *mainScreen) {
 			// Main screen
 			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
 		}
-		#endif
+#endif
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 
@@ -654,8 +679,22 @@ void inGameMenu(s8* mainScreen) {
 	// Let ARM7 know the menu loaded
 	sharedAddr[5] = 0x59444552; // 'REDY'
 
+	MenuItem menuItems[8];
+	int menuItemCount = 0;
+	menuItems[menuItemCount++] = MENU_EXIT;
+#ifndef B4DS
+	menuItems[menuItemCount++] = MENU_RESET;
+	menuItems[menuItemCount++] = MENU_SCREENSHOT;
+	if(igmText.manualMaxLine > 0)
+		menuItems[menuItemCount++] = MENU_MANUAL;
+#endif
+	menuItems[menuItemCount++] = MENU_RAM_DUMP;
+	menuItems[menuItemCount++] = MENU_OPTIONS;
+	menuItems[menuItemCount++] = MENU_RAM_VIEWER;
+	menuItems[menuItemCount++] = MENU_QUIT;
+
 	// Wait for keys to be released
-	drawMainMenu();
+	drawMainMenu(menuItems, menuItemCount);
 	drawCursor(0);
 	do {
 		#ifndef B4DS
@@ -667,7 +706,7 @@ void inGameMenu(s8* mainScreen) {
 
 	u8 cursorPosition = 0;
 	while (sharedAddr[4] == 0x554E454D) {
-		drawMainMenu();
+		drawMainMenu(menuItems, menuItemCount);
 		drawCursor(cursorPosition);
 
 		#ifndef B4DS
@@ -680,14 +719,14 @@ void inGameMenu(s8* mainScreen) {
 			if (cursorPosition > 0)
 				cursorPosition--;
 			else
-				cursorPosition = MAIN_MENU_ITEMS - 1;
+				cursorPosition = menuItemCount - 1;
 		} else if (KEYS & KEY_DOWN) {
-			if (cursorPosition < (MAIN_MENU_ITEMS - 1))
+			if (cursorPosition < (menuItemCount - 1))
 				cursorPosition++;
 			else
 				cursorPosition = 0;
 		} else if (KEYS & KEY_A) {
-			switch(cursorPosition) {
+			switch(menuItems[cursorPosition]) {
 				case MENU_EXIT:
 					do {
 						while (REG_VCOUNT != 191) swiDelay(100);
@@ -703,6 +742,9 @@ void inGameMenu(s8* mainScreen) {
 					#ifndef B4DS
 					screenshot();
 					#endif
+					break;
+				case MENU_MANUAL:
+					manual();
 					break;
 				case MENU_RAM_DUMP:
 					#ifndef B4DS

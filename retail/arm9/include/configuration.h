@@ -62,6 +62,7 @@ typedef struct configuration {
 	bool macroMode;
 	u16 hotkey;
 	bool specialCard;
+	char* manualPath;
 } configuration;
 
 #endif // CONFIGURATION_H

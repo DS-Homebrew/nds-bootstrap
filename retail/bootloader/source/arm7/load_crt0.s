@@ -50,6 +50,7 @@
 	.global srParamsFileCluster
 	.global screenshotCluster
 	.global pageFileCluster
+	.global manualCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -124,6 +125,8 @@ srParamsFileCluster:
 screenshotCluster:
 	.word	0x00000000
 pageFileCluster:
+	.word	0x00000000
+manualCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

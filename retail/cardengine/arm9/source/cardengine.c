@@ -75,6 +75,7 @@ static aFile savFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile pageFile;
+// static aFile manualFile;
 
 static int cardReadCount = 0;
 
@@ -348,6 +349,7 @@ static void initialize(void) {
 		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
+		// manualFile = getFileFromCluster(ce9->manualCluster);
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 

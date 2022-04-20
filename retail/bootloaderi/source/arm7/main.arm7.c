@@ -108,6 +108,7 @@ extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
 extern u32 pageFileCluster;
+extern u32 manualCluster;
 extern u8 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -1423,6 +1424,7 @@ int arm7_main(void) {
 			apPatchFileCluster,
 			apPatchSize,
 			pageFileCluster,
+			manualCluster,
 			gameOnFlashcard,
 			saveOnFlashcard,
 			language,
@@ -1687,6 +1689,7 @@ int arm7_main(void) {
 			apPatchFileCluster,
 			apPatchSize,
 			pageFileCluster,
+			manualCluster,
 			gameOnFlashcard,
 			saveOnFlashcard,
 			language,

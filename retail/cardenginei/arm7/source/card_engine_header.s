@@ -20,6 +20,7 @@
 .global ramDumpCluster
 .global screenshotCluster
 .global pageFileCluster
+.global manualCluster
 .global valueBits
 .global language
 .global languageAddr
@@ -54,6 +55,8 @@ ramDumpCluster:
 screenshotCluster:
 	.word	0x00000000
 pageFileCluster:
+	.word	0x00000000
+manualCluster:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000

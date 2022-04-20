@@ -127,6 +127,7 @@ int hookNdsRetailArm7(
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
 	u32 pageFileCluster,
+	u32 manualCluster,
     u16 gameOnFlashcard,
     u16 saveOnFlashcard,
 	u8 language,
@@ -317,6 +318,7 @@ int hookNdsRetailArm7(
 		ce7->ramDumpCluster           = ramDumpCluster;
 		ce7->screenshotCluster        = screenshotCluster;
 		ce7->pageFileCluster          = pageFileCluster;
+		ce7->manualCluster            = manualCluster;
 		if (gameOnFlashcard) {
 			ce7->valueBits |= b_gameOnFlashcard;
 		}
