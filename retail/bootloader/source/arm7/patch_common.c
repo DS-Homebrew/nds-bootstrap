@@ -2241,6 +2241,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr
 	}
 
+	// Hellokids: Vol. 1: Coloring and Painting! (USA)
+	// Loops in some code during white screens
+	/*else if (strcmp(romTid, "KKIE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200B888 = 0xE3A02001; // mov r2, #1
+		*(u32*)0x02028700 = 0xE1A00000; // nop
+		*(u32*)0x0202F7F4 = 0xE1A00000; // nop
+		*(u32*)0x02034310 = 0xE1A00000; // nop
+		*(u32*)0x020361A8 = 0xE1A00000; // nop
+		*(u32*)0x020361AC = 0xE1A00000; // nop
+		*(u32*)0x020361B8 = 0xE1A00000; // nop
+		*(u32*)0x02036318 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02036374, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02037868 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02039C48 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02039C80 = 0xE1A00000; // nop
+		*(u32*)0x0203B674 = 0xE1A00000; // nop
+	}*/
+
 	// Invasion of the Alien Blobs (USA)
 	// Branches to DSi code in ITCM?
 	/*else if (strcmp(romTid, "KBTE") == 0) {
