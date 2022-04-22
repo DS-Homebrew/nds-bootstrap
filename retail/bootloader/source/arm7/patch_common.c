@@ -1037,7 +1037,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Calculator (USA)
-	// Crashes on black screens after company logos
 	else if (strcmp(romTid, "KCYE") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200507C = 0xE1A00000; // nop
@@ -1052,10 +1051,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202A590 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0202DA48 = 0xE1A00000; // nop
 		*(u32*)0x0203ED20 = 0xE1A00000; // nop
+		*(u32*)0x0204D1FC = 0xE12FFF1E; // bx lr
 	}
 
 	// Calculator (Europe, Australia)
-	// Crashes on black screens after company logos
 	else if (strcmp(romTid, "KCYV") == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200507C = 0xE1A00000; // nop
@@ -1070,6 +1069,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FF34 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020233EC = 0xE1A00000; // nop
 		*(u32*)0x020346D0 = 0xE1A00000; // nop
+		*(u32*)0x02042B6C = 0xE12FFF1E; // bx lr
 	}
 
 	// Castle Conqueror (USA)
