@@ -3591,6 +3591,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Skip NTFR file loading from TWLNAND)
 	}*/
 
+	// Touch Solitaire (USA)
+	// Requires 8MB of RAM (but why?)
+	else if (strcmp(romTid, "KSLE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		doubleNopT(0x0200D78A);
+		doubleNopT(0x0200D90A);
+		doubleNopT(0x0200D916);
+		doubleNopT(0x0200DA26);
+		doubleNopT(0x0200E15A);
+		doubleNopT(0x0201AD4A);
+		doubleNopT(0x0201D28A);
+		doubleNopT(0x02020F94);
+		doubleNopT(0x02022552);
+		doubleNopT(0x02022556);
+		doubleNopT(0x02022562);
+		doubleNopT(0x02022646);
+		patchHiHeapDSiWareThumb(0x02022684, 0x209C, 0x0480); // movs r0, #0x2700000
+		*(u16*)0x020233DE = 0x46C0; // nop
+		*(u16*)0x020233E2 = 0xBD38; // POP {R3-R5,PC}
+		doubleNopT(0x020236CC);
+		*(u16*)0x020236D0 = 0x46C0; // nop
+		*(u16*)0x020236D2 = 0x46C0; // nop
+		doubleNopT(0x020236D4);
+		*(u16*)0x02025690 = 0x2001; // mov r0, #1
+		*(u16*)0x02025692 = 0x4770; // bx lr
+		*(u16*)0x02025698 = 0x2000; // mov r0, #0
+		*(u16*)0x0202569A = 0x4770; // bx lr
+		doubleNopT(0x02025756);
+	}
+
 	// Trajectile (USA)
 	// Requires 8MB of RAM
 	// Crashes after loading a stage
