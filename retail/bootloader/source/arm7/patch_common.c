@@ -2218,6 +2218,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202C176);
 	}
 
+	// Heathcliff: Spot On (USA)
+	else if (strcmp(romTid, "K6SE") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005280 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020052C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201615C = 0xE1A00000; // nop
+		*(u32*)0x02019EDC = 0xE1A00000; // nop
+		*(u32*)0x0201F084 = 0xE1A00000; // nop
+		*(u32*)0x02020FC8 = 0xE1A00000; // nop
+		*(u32*)0x02020FCC = 0xE1A00000; // nop
+		*(u32*)0x02020FD8 = 0xE1A00000; // nop
+		*(u32*)0x02021138 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02021194, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02022500 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02022504 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202250C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02022510 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02025AA8 = 0xE1A00000; // nop
+		*(u32*)0x0205B604 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr
+	}
+
 	// Invasion of the Alien Blobs (USA)
 	// Branches to DSi code in ITCM?
 	/*else if (strcmp(romTid, "KBTE") == 0) {

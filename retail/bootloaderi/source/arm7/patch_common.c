@@ -302,6 +302,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// Heathcliff: Spot On (USA)
+	else if (strcmp(romTid, "K6SE") == 0) {
+		*(u32*)0x02005248 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005280 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020052C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205B604 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr
+	}
+
 	// Invasion of the Alien Blobs (USA)
 	else if (strcmp(romTid, "KBTE") == 0) {
 		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
