@@ -271,6 +271,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Flashlight (USA)
+	else if (strcmp(romTid, "KFSE") == 0) {
+		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		// Skip Manual screen

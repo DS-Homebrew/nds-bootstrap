@@ -1789,6 +1789,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020663D4 = 0xE1A00000; // nop
 	}
 
+	// Flashlight (USA)
+	else if (strcmp(romTid, "KFSE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0201A200 = 0xE1A00000; // nop
+		*(u32*)0x0201D1F0 = 0xE1A00000; // nop
+		*(u32*)0x020201CC = 0xE1A00000; // nop
+		*(u32*)0x02021F7C = 0xE1A00000; // nop
+		*(u32*)0x02021F80 = 0xE1A00000; // nop
+		*(u32*)0x02021F8C = 0xE1A00000; // nop
+		*(u32*)0x020220EC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02022148, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020233AC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020265C4 = 0xE1A00000; // nop
+	}
+
+	// Flashlight (Europe)
+	else if (strcmp(romTid, "KFSP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201A10C = 0xE1A00000; // nop
+		*(u32*)0x0201D0FC = 0xE1A00000; // nop
+		*(u32*)0x020200D8 = 0xE1A00000; // nop
+		*(u32*)0x02021E88 = 0xE1A00000; // nop
+		*(u32*)0x02021E8C = 0xE1A00000; // nop
+		*(u32*)0x02021E98 = 0xE1A00000; // nop
+		*(u32*)0x02021FF8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02022054, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020232B8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020264D0 = 0xE1A00000; // nop
+	}
+
 	// Flipper (USA)
 	// Music will not play on retail consoles
 	else if (strcmp(romTid, "KFPE") == 0) {
