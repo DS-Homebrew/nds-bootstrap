@@ -2546,6 +2546,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020585CC = 0xE1A00000; // nop
 		*(u32*)0x02058710 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0205876C, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020599A0 = 0xE1A00000; // nop
+		*(u32*)0x020599A8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 		*(u32*)0x0205C93C = 0xE1A00000; // nop
 	}
 
@@ -2560,6 +2562,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020583F4 = 0xE1A00000; // nop
 		*(u32*)0x02058538 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02058594, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x020597C8 = 0xE1A00000; // nop
+		*(u32*)0x020597D0 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 		*(u32*)0x0205C88C = 0xE1A00000; // nop
 	}
 
@@ -2575,15 +2579,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02055D44 = 0xE1A00000; // nop
 		*(u32*)0x02055EA4 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02055F00, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x02057118 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0205A99C = 0xE1A00000; // nop
 	}
 
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
-	//
 	// Audio doesn't play on retail consoles
-	// Crashes after completing a stage on retail consoles
 	else if (strncmp(romTid, "KWY", 3) == 0) {
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
@@ -2619,6 +2622,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206EE58 = 0xE1A00000; // nop
 			patchHiHeapDSiWare(0x0206EEB4, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 			*(u32*)0x0206EFE8 -= 0x30000;
+			*(u32*)0x020700CC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 			*(u32*)0x02070500 = 0xE1A00000; // nop
 			*(u32*)0x02070504 = 0xE1A00000; // nop
 			*(u32*)0x02070508 = 0xE1A00000; // nop
@@ -2635,6 +2639,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206ECDC = 0xE1A00000; // nop
 			patchHiHeapDSiWare(0x0206ED38, extendedMemory2 ? 0xE3A00627 : 0xE3A0078F); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 			*(u32*)0x0206EE6C -= 0x30000;
+			*(u32*)0x0206FF50 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 			*(u32*)0x02070384 = 0xE1A00000; // nop
 			*(u32*)0x02070388 = 0xE1A00000; // nop
 			*(u32*)0x0207038C = 0xE1A00000; // nop
