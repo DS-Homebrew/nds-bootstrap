@@ -620,6 +620,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02061984 = 0xE1A00000; // nop
 	}*/
 
+	// Army Defender (USA)
+	// Army Defender (Europe)
+	else if (strncmp(romTid, "KAY", 3) == 0) {
+		*(u32*)0x020051BC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020051C0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005204 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005208 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020426BC = 0xE1A00000; // nop
+		*(u32*)0x02045CC4 = 0xE1A00000; // nop
+		*(u32*)0x0204B010 = 0xE1A00000; // nop
+		*(u32*)0x0204CECC = 0xE1A00000; // nop
+		*(u32*)0x0204CED0 = 0xE1A00000; // nop
+		*(u32*)0x0204CEDC = 0xE1A00000; // nop
+		*(u32*)0x0204D020 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204D07C, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0204E3E0 = 0xE1A00000; // nop
+		*(u32*)0x0204E3E8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x02051AB8 = 0xE1A00000; // nop
+	}
+
 	// Art Style: AQUIA (USA)
 	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAE") == 0) {
