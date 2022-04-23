@@ -83,6 +83,9 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			return false;
 		}
 	}
+	if (ndsHeader->arm7binarySize == 0xCAB4) {
+		return true;
+	}
 	u32* offset = patchOffsetCache.wramClearOffset;
 	if (!patchOffsetCache.wramClearOffset) {
 		offset = findWramClearOffset(ndsHeader);
