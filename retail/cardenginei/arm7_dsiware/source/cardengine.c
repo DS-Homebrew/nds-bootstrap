@@ -526,8 +526,9 @@ void saveScreenshot(void) {
 	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
 }
 
-int currentManualLine = 0, currentManualOffset = 0;
 void readManual(int line) {
+	static int currentManualLine = 0;
+	static int currentManualOffset = 0;
 	driveInitialize();
 	char buffer[32];
 

@@ -697,8 +697,9 @@ void saveScreenshot(void) {
 #endif
 }
 
-int currentManualLine = 0, currentManualOffset = 0;
 void readManual(int line) {
+	static int currentManualLine = 0;
+	static int currentManualOffset = 0;
 	sdRead = (valueBits & b_dsiSD);
 	char buffer[32];
 
