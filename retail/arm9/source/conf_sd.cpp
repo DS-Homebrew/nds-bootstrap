@@ -517,17 +517,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb"); // System titles can only use an SDK 5.0 donor ROM
 			} else {
-				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath, "rb");
-				if (!donorNdsFile
-				|| ( dsiEnhancedMbk && ndsArm7Size == 0x1511C)
+				bool sdk50 = (
+				   ( dsiEnhancedMbk && ndsArm7Size == 0x1511C)
 				|| ( dsiEnhancedMbk && ndsArm7Size == 0x26CC8)
 				|| ( dsiEnhancedMbk && ndsArm7Size == 0x28E54)
 				|| (!dsiEnhancedMbk && ndsArm7Size == 0x29EE8)
-				) {
+				);
+				donorNdsFile = fopen(sdk50 ? (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path) : (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath), "rb");
+				if (!donorNdsFile) {
 					if (donorNdsFile) {
 						fclose(donorNdsFile);
 					}
-					FILE* donorNdsFile2 = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb");
+					FILE* donorNdsFile2 = fopen(sdk50 ? (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath) : (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "rb");
 					if (donorNdsFile2) {
 						donorNdsFile = donorNdsFile2;
 					}
