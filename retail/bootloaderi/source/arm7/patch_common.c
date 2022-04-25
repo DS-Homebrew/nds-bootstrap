@@ -41,9 +41,44 @@ extern u8 dsiSD;
 
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
+	const char* dataPub = "dataPub:";
+
+	// Absolute BrickBuster (USA)
+	if (strcmp(romTid, "K6QE") == 0) {
+		if (dsiSD) { // Redirect otherPub to dataPub
+			toncset((char*)0x02095CD4, 0, 9);
+			tonccpy((char*)0x02095CD4, dataPub, strlen(dataPub));
+			toncset((char*)0x02095CE8, 0, 9);
+			tonccpy((char*)0x02095CE8, dataPub, strlen(dataPub));
+		} else {
+			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02055B78 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Absolute Chess (USA)
+	else if (strcmp(romTid, "KCZE") == 0 && dsiSD) {
+		// Redirect otherPub to dataPub
+		toncset((char*)0x0209E9C8, 0, 9);
+		tonccpy((char*)0x0209E9C8, dataPub, strlen(dataPub));
+		toncset((char*)0x0209E9DC, 0, 9);
+		tonccpy((char*)0x0209E9DC, dataPub, strlen(dataPub));
+	}
+
+	// Absolute Reversi (USA)
+	else if (strcmp(romTid, "KA8E") == 0 && dsiSD) {
+		// Redirect otherPub to dataPub
+		toncset((char*)0x0209D220, 0, 9);
+		tonccpy((char*)0x0209D220, dataPub, strlen(dataPub));
+		toncset((char*)0x0209D234, 0, 9);
+		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
+	}
 
 	// DS WiFi Settings
-	if (strcmp(romTid, "B88A") == 0) {
+	else if (strcmp(romTid, "B88A") == 0) {
 		tonccpy((void*)0x023C0000, ce9->thumbPatches->reset_arm9, 0x18);
 
 		const u16* branchCode = generateA7InstrThumb(0x020051F4, 0x023C0000);
@@ -70,15 +105,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KE9E") == 0) {
 		*(u32*)0x0205FAD0 = 0xE1A00000; // nop
 		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
-	}
-
-	// Absolute BrickBuster (USA)
-	else if (strcmp(romTid, "K6QE") == 0) {
-		*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02055B78 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr
 	}
 
 	// Anonymous Notes 1: From The Abyss (USA)
