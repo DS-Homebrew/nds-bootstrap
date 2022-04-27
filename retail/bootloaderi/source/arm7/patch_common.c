@@ -527,6 +527,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
 	}
 
+	// Quick Fill Q (USA)
+	// Quick Fill Q (Europe)
+	else if (strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) {
+		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {

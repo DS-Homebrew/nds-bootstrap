@@ -3278,6 +3278,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202FADA);
 	}
 
+	// Quick Fill Q (USA)
+	// Quick Fill Q (Europe)
+	else if (strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) {
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02010300 = 0xE1A00000; // nop
+		*(u32*)0x020139A4 = 0xE1A00000; // nop
+		*(u32*)0x02017460 = 0xE1A00000; // nop
+		*(u32*)0x020191FC = 0xE1A00000; // nop
+		*(u32*)0x02019200 = 0xE1A00000; // nop
+		*(u32*)0x0201920C = 0xE1A00000; // nop
+		*(u32*)0x0201936C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020193C8, 0xE3A0078F); // mov r0, #0x23C0000
+		*(u32*)0x0201A740 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201DDB0 = 0xE1A00000; // nop
+		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
