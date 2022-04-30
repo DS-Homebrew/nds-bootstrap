@@ -710,10 +710,27 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 }
 
-void patchHiHeapDSiWare(u32 addr, u32 opCode) {
-	*(u32*)(addr) = opCode; // mov r0, #0x????????
+void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
+	//*(u32*)(addr) = opCode; // mov r0, #0x????????
+
+	*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x????????
 	*(u32*)(addr+0x24) = 0xE3500001; // cmp r0, #1
 	*(u32*)(addr+0x2C) = 0x13A00627; // movne r0, #0x2700000
+
+	*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+	if (*(u32*)(addr+0x9C) != 0) {
+		for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+			*(u32*)(addr+0x40) += 1;
+		}
+	}
+
+	/*if (*(u32*)(addr+0x9C) == 0) {
+		*(u32*)(addr+0x40) = 0xE3A01000; // mov r1, #0
+	} else if (*(u32*)(addr+0x9C) == 0x800) {
+		*(u32*)(addr+0x40) = 0xE3A01B02; // mov r1, #0x800
+	}*/
+
+	*(u32*)(addr+0x9C) = heapEnd;
 }
 
 void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2) {

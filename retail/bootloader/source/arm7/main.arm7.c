@@ -192,7 +192,7 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02000620, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FE000, 0, 0x2000);
@@ -955,18 +955,28 @@ int arm7_main(void) {
 	buildFatTableCache(&romFile);
 	if (wramUsed) {
 		if (romFile.fatTableCached) {
+			bool startMem = (ndsHeader->arm9destination >= 0x02004000 && arm7mbk == 0x080037C0 && romFile.fatTableCacheSize <= 0x3000);
+
 			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
-			fatTableAddr -= romFile.fatTableCacheSize;
+			if (startMem) {
+				fatTableAddr = 0x02000000;
+			} else {
+				fatTableAddr -= romFile.fatTableCacheSize;
+			}
 			tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, romFile.fatTableCacheSize);
 			romFile.fatTableCache = (u32*)fatTableAddr;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x10000;
+			clusterCacheSize = startMem ? 0x1000 : 0xA000;
 
 			buildFatTableCache(&savFile);
 			if (savFile.fatTableCached) {
-				fatTableAddr -= savFile.fatTableCacheSize;
+				if (startMem) {
+					fatTableAddr += romFile.fatTableCacheSize;
+				} else {
+					fatTableAddr -= savFile.fatTableCacheSize;
+				}
 				tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
 				savFile.fatTableCache = (u32*)fatTableAddr;
 			}
