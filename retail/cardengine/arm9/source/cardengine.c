@@ -62,10 +62,6 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 
 extern vu32* volatile cardStruct0;
 
-extern u32* lastClusterCacheUsed;
-extern u32 clusterCache;
-extern u32 clusterCacheSize;
-
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 arm9iromOffset = 0;
 static u32 arm9ibinarySize = 0;
@@ -339,12 +335,17 @@ static void initialize(void) {
 			while (1);
 		}
 
-		lastClusterCacheUsed = (u32*)ce9->fatTableAddr;
-		clusterCache = ce9->fatTableAddr;
-		clusterCacheSize = ce9->maxClusterCacheSize;
-
 		romFile = getFileFromCluster(ce9->fileCluster);
 		savFile = getFileFromCluster(ce9->saveCluster);
+
+		if (ce9->romFatTableCache != 0) {
+			romFile.fatTableCache = (u32*)ce9->romFatTableCache;
+			romFile.fatTableCached = true;
+		}
+		if (ce9->savFatTableCache != 0) {
+			savFile.fatTableCache = (u32*)ce9->savFatTableCache;
+			savFile.fatTableCached = true;
+		}
 
 		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
@@ -352,11 +353,6 @@ static void initialize(void) {
 		// manualFile = getFileFromCluster(ce9->manualCluster);
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
-
-		if (!cloneboot) {
-			buildFatTableCache(&romFile);
-		}
-		buildFatTableCache(&savFile);
 
 		if (ce9->valueBits & isSdk5) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;

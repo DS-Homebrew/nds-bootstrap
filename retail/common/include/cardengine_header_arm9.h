@@ -144,6 +144,8 @@ typedef struct cardengineArm9 {
     u32 intr_ipc_orig_return;
     u32 fileCluster;
     u32 saveCluster;
+    u32 romFatTableCache;
+    u32 savFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
     u32 pageFileCluster;
@@ -160,8 +162,6 @@ typedef struct cardengineArm9 {
 	*/
     u32 overlaysSize;
     u32 ioverlaysSize;
-    u32 maxClusterCacheSize;
-    u32 fatTableAddr;
     u32* irqTable;
     u32 romLocation;
 } __attribute__ ((__packed__)) cardengineArm9;

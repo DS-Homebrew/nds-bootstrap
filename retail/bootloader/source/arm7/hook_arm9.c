@@ -124,6 +124,8 @@ int hookNdsRetailArm9(
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 romFatTableCache,
+	u32 savFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
 	u32 pageFileCluster,
@@ -144,6 +146,8 @@ int hookNdsRetailArm9(
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->romFatTableCache       = romFatTableCache;
+	ce9->savFatTableCache       = savFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->pageFileCluster        = pageFileCluster;
@@ -173,8 +177,6 @@ int hookNdsRetailArm9(
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
-	ce9->maxClusterCacheSize    = maxClusterCacheSize;
-	ce9->fatTableAddr           = fatTableAddr;
 	if (extendedMemory && !dsDebugRam) {
 		ce9->romLocation = 0x0C800000;
 	} else {

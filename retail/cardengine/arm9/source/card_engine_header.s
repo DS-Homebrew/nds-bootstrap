@@ -18,11 +18,13 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_ipc_orig_return:
 	.word	0x00000000
-moduleParams:
-	.word	0x00000000
 fileCluster:
 	.word	0x00000000
 saveCluster:
+	.word	0x00000000
+romFatTableCache:
+	.word	0x00000000
+savFatTableCache:
 	.word	0x00000000
 ramDumpCluster:
 	.word	0x00000000
@@ -37,10 +39,6 @@ valueBits:
 overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
-	.word	0x00000000
-maxClusterCacheSize:
-	.word	0x00000000
-fatTableAddr:
 	.word	0x00000000
 irqTable:
 	.word	0x00000000

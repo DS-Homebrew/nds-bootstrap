@@ -104,6 +104,10 @@ extern u8 soundFreq;
 
 extern u32 _io_dldi_features;
 
+extern u32* lastClusterCacheUsed;
+extern u32 clusterCache;
+extern u32 clusterCacheSize;
+
 u32 arm9iromOffset = 0;
 u32 arm9ibinarySize = 0;
 u32 arm7iromOffset = 0;
@@ -111,6 +115,7 @@ u32 arm7iromOffset = 0;
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 static u32 ioverlaysSize = 0;
+u32 fatTableAddr = 0;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
@@ -912,6 +917,71 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
+	bool wramUsed = false;
+	u32 fatTableSize = 0;
+	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
+		fatTableAddr = 0x09F80000;
+		fatTableSize = (s2FlashcardId==0x4353 ? 0x7FFFC : 0x80000);
+	} else if (s2FlashcardId == 0x5A45) {
+		fatTableAddr = 0x08F80000;
+		fatTableSize = 0x80000;
+	} else if (expansionPakFound) {
+		fatTableAddr = 0x09780000;
+		fatTableSize = 0x80000;
+	} else if (extendedMemory2) {
+		fatTableAddr = 0x02700000;
+		fatTableSize = 0x80000;
+	} else {
+		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
+		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1A000;
+
+		if (moduleParams->sdk_version >= 0x2008000) {
+			fatTableAddr = CARDENGINE_ARM9_LOCATION_DLDI;
+
+			lastClusterCacheUsed = (u32*)0x037F8000;
+			clusterCache = 0x037F8000;
+			clusterCacheSize = 0x10000;
+
+			wramUsed = true;
+		}
+	}
+
+	if (!wramUsed) {
+		lastClusterCacheUsed = (u32*)fatTableAddr;
+		clusterCache = fatTableAddr;
+		clusterCacheSize = fatTableSize;
+	}
+
+	buildFatTableCache(&romFile);
+	if (wramUsed) {
+		if (romFile.fatTableCached) {
+			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
+			fatTableAddr -= romFile.fatTableCacheSize;
+			tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, romFile.fatTableCacheSize);
+			romFile.fatTableCache = (u32*)fatTableAddr;
+
+			lastClusterCacheUsed = (u32*)0x037F8000;
+			clusterCache = 0x037F8000;
+			clusterCacheSize = 0x10000;
+
+			buildFatTableCache(&savFile);
+			if (savFile.fatTableCached) {
+				fatTableAddr -= savFile.fatTableCacheSize;
+				tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
+				savFile.fatTableCache = (u32*)fatTableAddr;
+			}
+		} else {
+			lastClusterCacheUsed = (u32*)fatTableAddr;
+			clusterCache = fatTableAddr;
+			clusterCacheSize = fatTableSize;
+
+			buildFatTableCache(&romFile);
+			buildFatTableCache(&savFile);
+		}
+	} else {
+		buildFatTableCache(&savFile);
+	}
+
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -952,25 +1022,6 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	u32 fatTableAddr = 0;
-	u32 fatTableSize = 0;
-	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
-		fatTableAddr = 0x09F80000;
-		fatTableSize = (s2FlashcardId==0x4353 ? 0x7FFFC : 0x80000);
-	} else if (s2FlashcardId == 0x5A45) {
-		fatTableAddr = 0x08F80000;
-		fatTableSize = 0x80000;
-	} else if (expansionPakFound) {
-		fatTableAddr = 0x09780000;
-		fatTableSize = 0x80000;
-	} else if (extendedMemory2) {
-		fatTableAddr = 0x02700000;
-		fatTableSize = 0x80000;
-	} else {
-		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1A000;
-	}
-
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
 		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile, ROMinRAM);
 	}
@@ -980,6 +1031,8 @@ int arm7_main(void) {
 		moduleParams,
 		romFile.firstCluster,
 		savFile.firstCluster,
+		romFile.fatTableCache,
+		savFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
 		pageFileCluster,

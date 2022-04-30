@@ -661,7 +661,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern u32 arm7mbk;
-	extern bool expansionPakFound;
+	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (extendedMemory2
@@ -702,7 +702,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = expansionPakFound ? (u32)ce9 : 0x023C0000; // shrink heap by 128KB (or ce9 binary size, if expansion pak is found)
+	*heapPointer = (fatTableAddr > (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 
     dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);

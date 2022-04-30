@@ -43,10 +43,12 @@ static inline void doubleNopT(u32 addr) {
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
-	extern bool expansionPakFound;
+	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 opCode);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2);
+
+	const u32 heapEnd = (fatTableAddr > CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
 
 	if (donorFileTwlCluster == 0) {
 		return;
@@ -870,7 +872,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0204B4E4 = 0x02700000;
 		} else {
 			//*(u32*)0x0204B4E4 = 0x023E0000;
-			*(u32*)0x0204B4E4 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+			*(u32*)0x0204B4E4 = heapEnd;
 		}
 	}
 
@@ -902,7 +904,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0204B564 = 0x02700000;
 		} else {
 			//*(u32*)0x0204B564 = 0x023E0000;
-			*(u32*)0x0204B564 = expansionPakFound ? CARDENGINE_ARM9_LOCATION_DLDI : 0x023C0000;
+			*(u32*)0x0204B564 = heapEnd;
 		}
 	}
 

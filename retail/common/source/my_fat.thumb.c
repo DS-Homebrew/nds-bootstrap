@@ -1683,6 +1683,7 @@ void buildFatTableCache (aFile * file)
 #ifndef B4DS
 		currentClusterCacheSize += 4;
 #endif
+		file->fatTableCacheSize += 4;
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
@@ -1693,7 +1694,8 @@ void buildFatTableCache (aFile * file)
 	}
     #ifdef DEBUG 
     else {
-      nocashMessage("fat table not cached");  
+      nocashMessage("fat table not cached");
+	  file->fatTableCacheSize = 0;
     }
     #endif
 
