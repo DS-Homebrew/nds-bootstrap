@@ -903,9 +903,6 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
-
 	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6000);
 	toncset((u32*)0x023E0000, 0, 0x10000);
@@ -940,7 +937,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x10000;
+			clusterCacheSize = 0x18000;
 
 			wramUsed = true;
 		}
@@ -955,7 +952,7 @@ int arm7_main(void) {
 	buildFatTableCache(&romFile);
 	if (wramUsed) {
 		if (romFile.fatTableCached) {
-			bool startMem = (ndsHeader->arm9destination >= 0x02004000 && arm7mbk == 0x080037C0 && romFile.fatTableCacheSize <= 0x3000);
+			bool startMem = (ndsHeader->arm9destination >= 0x02004000 && arm7mbk == 0x080037C0 && romFile.fatTableCacheSize <= 0x4000);
 
 			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
 			if (startMem) {
@@ -968,17 +965,19 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = startMem ? 0x1000 : 0xA000;
+			clusterCacheSize = (startMem ? 0x4000 : 0x1A000)-romFile.fatTableCacheSize;
 
-			buildFatTableCache(&savFile);
-			if (savFile.fatTableCached) {
-				if (startMem) {
-					fatTableAddr += romFile.fatTableCacheSize;
-				} else {
-					fatTableAddr -= savFile.fatTableCacheSize;
+			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
+				buildFatTableCache(&savFile);
+				if (savFile.fatTableCached) {
+					if (startMem) {
+						fatTableAddr += romFile.fatTableCacheSize;
+					} else {
+						fatTableAddr -= savFile.fatTableCacheSize;
+					}
+					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
+					savFile.fatTableCache = (u32*)fatTableAddr;
 				}
-				tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
-				savFile.fatTableCache = (u32*)fatTableAddr;
 			}
 		} else {
 			lastClusterCacheUsed = (u32*)fatTableAddr;
@@ -991,6 +990,11 @@ int arm7_main(void) {
 	} else {
 		buildFatTableCache(&savFile);
 	}
+
+	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	toncset((u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
+
+	toncset((u32*)0x038FF000, 0, 0x1000);
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(
