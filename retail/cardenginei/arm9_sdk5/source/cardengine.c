@@ -527,18 +527,12 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 }
 
 #ifdef TWLSDK
-void __attribute__((target("arm"))) openDebugRam() {
-	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
-}
+extern void openDebugRam();
 #else
 // Revert region 0 patch
-void __attribute__((target("arm"))) region0Fix() {
-	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
-}
+extern void region0Fix();
 
-void __attribute__((target("arm"))) mpuFix() {
-	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
-}
+extern void mpuFix();
 #endif
 
 bool isNotTcm(u32 address, u32 len) {
@@ -643,9 +637,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
     return true; 
 }
 
-void __attribute__((target("arm"))) resetMpu(void) {
-	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
-}
+extern void resetMpu();
 
 void reset(u32 param, u32 tid2) {
 #ifndef TWLSDK

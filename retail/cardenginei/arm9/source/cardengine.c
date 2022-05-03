@@ -464,20 +464,13 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 
-/*void __attribute__((target("arm"))) region2Disable() {
-	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
-}*/
+//extern void region2Disable();
 
 // Required for proper access to the extra DSi RAM
-void __attribute__((target("arm"))) debugRamMpuFix() {
-	//asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\nLDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
-	asm("LDR R0,=#0x15111111\n\tmcr p15, 0, r0, C5,C0,2");
-}
+extern void debugRamMpuFix();
 
 // Revert region 0 patch
-void __attribute__((target("arm"))) region0Fix() {
-	asm("LDR R0,=#0x4000033\n\tmcr p15, 0, r0, C6,C0,0");
-}
+extern void region0Fix();
 
 void cardRead(u32* cacheStruct) {
 	//nocashMessage("\narm9 cardRead\n");
