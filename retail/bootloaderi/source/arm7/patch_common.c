@@ -514,16 +514,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puzzle League: Express (USA)
 	else if (strcmp(romTid, "KPNE") == 0) {
+		*(u32*)0x0205663C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02056640 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
 	}
 
 	// A Little Bit of... Puzzle League (Europe, Australia)
 	else if (strcmp(romTid, "KPNV") == 0) {
+		*(u32*)0x020575FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02057600 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
 	}
 
 	// Chotto Panel de Pon (Japan)
 	else if (strcmp(romTid, "KPNJ") == 0) {
+		*(u32*)0x02056128 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205612C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
 	}
 

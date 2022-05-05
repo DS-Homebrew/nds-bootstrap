@@ -3323,6 +3323,87 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202FADA);
 	}
 
+	// Puzzle League: Express (USA)
+	else if (strcmp(romTid, "KPNE") == 0) {
+		*(u32*)0x0200508C = 0xE1A00000; // nop
+		*(u32*)0x02005094 = 0xE1A00000; // nop
+		*(u32*)0x020050D0 = 0xE1A00000; // nop
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x02023614 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
+		*(u32*)0x0203604C = 0xE1A00000; // nop
+		*(u32*)0x0205663C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02056640 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02064DD0 = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
+		*(u32*)0x020ACF54 = 0xE1A00000; // nop
+		*(u32*)0x020B1334 = 0xE1A00000; // nop
+		*(u32*)0x020BE08C = 0xE1A00000; // nop
+		*(u32*)0x020C0004 = 0xE1A00000; // nop
+		*(u32*)0x020C0008 = 0xE1A00000; // nop
+		*(u32*)0x020C0014 = 0xE1A00000; // nop
+		*(u32*)0x020C0158 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020C01B4, extendedMemory2 ? 0x02700000 : heapEnd+0x400000); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x020C1668 = 0xE1A00000; // nop
+		*(u32*)0x020C1670 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020C52F8 = 0xE1A00000; // nop
+	}
+
+	// A Little Bit of... Puzzle League (Europe, Australia)
+	else if (strcmp(romTid, "KPNV") == 0) {
+		*(u32*)0x0200508C = 0xE1A00000; // nop
+		*(u32*)0x02005094 = 0xE1A00000; // nop
+		*(u32*)0x020050D0 = 0xE1A00000; // nop
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x02023634 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
+		*(u32*)0x02036FA0 = 0xE1A00000; // nop
+		*(u32*)0x020575FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02057600 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02065DE4 = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
+		*(u32*)0x020AE94C = 0xE1A00000; // nop
+		*(u32*)0x020BD2DC = 0xE1A00000; // nop
+		*(u32*)0x020BFA84 = 0xE1A00000; // nop
+		*(u32*)0x020C19FC = 0xE1A00000; // nop
+		*(u32*)0x020C1A00 = 0xE1A00000; // nop
+		*(u32*)0x020C1A0C = 0xE1A00000; // nop
+		*(u32*)0x020C1B50 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020C1BAC, extendedMemory2 ? 0x02700000 : heapEnd+0x400000); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x020C3060 = 0xE1A00000; // nop
+		*(u32*)0x020C3068 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020C6CF0 = 0xE1A00000; // nop
+	}
+
+	// Chotto Panel de Pon (Japan)
+	else if (strcmp(romTid, "KPNJ") == 0) {
+		*(u32*)0x02005068 = 0xE1A00000; // nop
+		*(u32*)0x02005070 = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x02023404 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
+		*(u32*)0x02035BB8 = 0xE1A00000; // nop
+		*(u32*)0x02056128 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205612C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02064FEC = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
+		*(u32*)0x020ADCCC = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x020ADCD0 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020B21BC = 0xE1A00000; // nop
+		*(u32*)0x020C0B54 = 0xE1A00000; // nop
+		*(u32*)0x020C29C0 = 0xE1A00000; // nop
+		*(u32*)0x020C29C4 = 0xE1A00000; // nop
+		*(u32*)0x020C29D0 = 0xE1A00000; // nop
+		*(u32*)0x020C2B14 = 0xE1A00000; // nop
+		*(u32*)0x020C2B18 = 0xE1A00000; // nop
+		*(u32*)0x020C2B1C = 0xE1A00000; // nop
+		*(u32*)0x020C2B20 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020C2B7C, extendedMemory2 ? 0x02700000 : heapEnd+0x400000); // mov r0, extendedMemory2 ? #0x2700000 : #0x27C0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x020C4030 = 0xE1A00000; // nop
+		*(u32*)0x020C4038 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
 	// Quick Fill Q (USA)
 	// Quick Fill Q (Europe)
 	else if (strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) {
