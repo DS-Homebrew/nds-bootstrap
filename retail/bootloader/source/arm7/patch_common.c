@@ -497,6 +497,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02058638 = 0xE1A00000; // nop
 		*(u32*)0x02058798 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020587F4, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02059B68 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0205D21C = 0xE1A00000; // nop
 	}*/
 
@@ -992,6 +993,91 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
 			*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
 		}
+	}
+
+	// Art Style: BOXLIFE (USA)
+	else if (strcmp(romTid, "KAHE") == 0) {
+		*(u32*)0x0202FBD0 = 0xE1A00000; // nop
+		*(u32*)0x020355D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020355DC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020356C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020356C8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02035DC0 = 0xE1A00000; // nop
+		*(u32*)0x02035DD0 = 0xE1A00000; // nop
+		*(u32*)0x02035DE0 = 0xE1A00000; // nop
+		*(u32*)0x02036060 = 0xE1A00000; // nop
+		*(u32*)0x0203606C = 0xE1A00000; // nop
+		*(u32*)0x02036088 = 0xE1A00000; // nop
+		*(u32*)0x02055990 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02055994 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02058F84 = 0xE1A00000; // nop
+		*(u32*)0x02060EE0 = 0xE1A00000; // nop
+		*(u32*)0x02062D18 = 0xE1A00000; // nop
+		*(u32*)0x02062D1C = 0xE1A00000; // nop
+		*(u32*)0x02062D28 = 0xE1A00000; // nop
+		*(u32*)0x02062E88 = 0xE1A00000; // nop
+		*(u32*)0x02062E8C = 0xE1A00000; // nop
+		*(u32*)0x02062E90 = 0xE1A00000; // nop
+		*(u32*)0x02062E94 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02062EF0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02064224 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+	}
+
+	// Art Style: BOXLIFE (Europe, Australia)
+	else if (strcmp(romTid, "KAHV") == 0) {
+		*(u32*)0x0202FB18 = 0xE1A00000; // nop
+		*(u32*)0x02035220 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02035224 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203530C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02035310 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02035A08 = 0xE1A00000; // nop
+		*(u32*)0x02035A18 = 0xE1A00000; // nop
+		*(u32*)0x02035A28 = 0xE1A00000; // nop
+		*(u32*)0x02035CA8 = 0xE1A00000; // nop
+		*(u32*)0x02035CB4 = 0xE1A00000; // nop
+		*(u32*)0x02035CD0 = 0xE1A00000; // nop
+		*(u32*)0x02055694 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02055698 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02058C88 = 0xE1A00000; // nop
+		*(u32*)0x02060BE4 = 0xE1A00000; // nop
+		*(u32*)0x02062A1C = 0xE1A00000; // nop
+		*(u32*)0x02062A20 = 0xE1A00000; // nop
+		*(u32*)0x02062A2C = 0xE1A00000; // nop
+		*(u32*)0x02062B8C = 0xE1A00000; // nop
+		*(u32*)0x02062B90 = 0xE1A00000; // nop
+		*(u32*)0x02062B94 = 0xE1A00000; // nop
+		*(u32*)0x02062B98 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02062BF4, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02063F28 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+	}
+
+	// Art Style: Hacolife (Japan)
+	else if (strcmp(romTid, "KAHJ") == 0) {
+		*(u32*)0x0202F148 = 0xE1A00000; // nop
+		*(u32*)0x0203456C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034570 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02034658 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203465C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02034D54 = 0xE1A00000; // nop
+		*(u32*)0x02034D64 = 0xE1A00000; // nop
+		*(u32*)0x02034D74 = 0xE1A00000; // nop
+		*(u32*)0x02034FF4 = 0xE1A00000; // nop
+		*(u32*)0x02035000 = 0xE1A00000; // nop
+		*(u32*)0x0203501C = 0xE1A00000; // nop
+		*(u32*)0x02054C10 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02054C14 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x020583A8 = 0xE1A00000; // nop
+		*(u32*)0x02060A64 = 0xE1A00000; // nop
+		*(u32*)0x020628C4 = 0xE1A00000; // nop
+		*(u32*)0x020628C8 = 0xE1A00000; // nop
+		*(u32*)0x020628D4 = 0xE1A00000; // nop
+		*(u32*)0x02062A18 = 0xE1A00000; // nop
+		*(u32*)0x02062A1C = 0xE1A00000; // nop
+		*(u32*)0x02062A20 = 0xE1A00000; // nop
+		*(u32*)0x02062A24 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02062A80, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02063DE4 = 0xE1A00000; // nop
+		*(u32*)0x02063DEC = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
 	// Cake Ninja (USA)
