@@ -565,6 +565,39 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Robot Rescue (USA)
+	else if (strcmp(romTid, "KRTE") == 0) {
+		*(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2E0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C39C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C3A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C570 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C574 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Robot Rescue (Europe, Australia)
+	else if (strcmp(romTid, "KRTV") == 0) {
+		*(u32*)0x0200C2CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C388 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C38C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C550 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C554 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// ARC Style: Robot Rescue (Japan)
+	else if (strcmp(romTid, "KRTJ") == 0) {
+		*(u32*)0x0200F460 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F464 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200F51C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F520 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200F6E4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F6E8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rock-n-Roll Domo (USA)
 	else if (strcmp(romTid, "KD6E") == 0) {
 		*(u16*)0x02010164 = 0x2001; // movs r0, #1
