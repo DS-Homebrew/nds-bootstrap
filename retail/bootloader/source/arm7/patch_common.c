@@ -749,6 +749,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020661D4 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Art Style: AQUARIO (Japan)
+	// Audio doesn't play on retail consoles
+	else if (strcmp(romTid, "KAAJ") == 0) {
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x020051B8 = 0xE1A00000; // nop
+		*(u32*)0x0203E250 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203E254 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203E324 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203E328 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205446C = 0xE1A00000; // nop
+		*(u32*)0x02057344 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02057348 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0205AA28 = 0xE1A00000; // nop
+		*(u32*)0x020652C4 = 0xE1A00000; // nop
+		*(u32*)0x020670B4 = 0xE1A00000; // nop
+		*(u32*)0x020670B8 = 0xE1A00000; // nop
+		*(u32*)0x020670C4 = 0xE1A00000; // nop
+		*(u32*)0x02067208 = 0xE1A00000; // nop
+		*(u32*)0x0206720C = 0xE1A00000; // nop
+		*(u32*)0x02067210 = 0xE1A00000; // nop
+		*(u32*)0x02067214 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02067270, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+	}
+
 	// Everyday Soccer (USA)
 	// DS Download Play requires 8MB of RAM
 	else if (strcmp(romTid, "KAZE") == 0) {
