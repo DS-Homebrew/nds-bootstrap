@@ -474,6 +474,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203C5EC = 0xE1A00000; // nop
 	}
 
+	// Ah! Heaven (USA)
+	// Ah! Heaven (Europe)
+	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200F778 = 0xE1A00000; // nop
+		*(u32*)0x02012A58 = 0xE1A00000; // nop
+		*(u32*)0x02016388 = 0xE1A00000; // nop
+		*(u32*)0x02018124 = 0xE1A00000; // nop
+		*(u32*)0x02018128 = 0xE1A00000; // nop
+		*(u32*)0x02018134 = 0xE1A00000; // nop
+		*(u32*)0x02018294 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020182F0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02019538 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201C150 = 0xE1A00000; // nop
+		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
+	}
+
 	// AiRace: Tunnel (USA)
 	// Requires 8MB of RAM
 	// Crashes after selecting a stage

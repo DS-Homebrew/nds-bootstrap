@@ -107,6 +107,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
 	}
 
+	// Ah! Heaven (USA)
+	// Ah! Heaven (Europe)
+	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {
+		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
+	}
+
 	// Anonymous Notes 1: From The Abyss (USA)
 	else if (strcmp(romTid, "KVIE") == 0) {
 		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
