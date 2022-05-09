@@ -2870,14 +2870,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005A30 = 0xE1A00000; // nop
 		*(u32*)0x02005A38 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			// Skip loading sdat and sfx files
-			*(u32*)0x020072C8 = 0xE1A00000; // nop
-			*(u32*)0x020072CC = 0xE1A00000; // nop
-			*(u32*)0x020072D0 = 0xE1A00000; // nop
-			*(u32*)0x020084C0 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02008588 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020072CC = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
 		}
 		if (ndsHeader->gameCode[3] == 'J') {
+			if (!extendedMemory2) {
+				// Disable loading title music
+				*(u32*)0x02012930 = 0xE1A00000; // nop
+				*(u32*)0x02012934 = 0xE1A00000; // nop
+				*(u32*)0x02012938 = 0xE1A00000; // nop
+				*(u32*)0x0201293C = 0xE1A00000; // nop
+				*(u32*)0x02012940 = 0xE1A00000; // nop
+				*(u32*)0x02012944 = 0xE1A00000; // nop
+				*(u32*)0x02012964 = 0xE1A00000; // nop
+				*(u32*)0x02012980 = 0xE1A00000; // nop
+				*(u32*)0x02012DC4 = 0xE1A00000; // nop
+				*(u32*)0x02012DE0 = 0xE1A00000; // nop
+			}
 			*(u32*)0x02064FB0 = 0xE1A00000; // nop
 			*(u32*)0x02068924 = 0xE1A00000; // nop
 			*(u32*)0x0206CE5C = 0xE1A00000; // nop
@@ -2895,6 +2903,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02070518 = 0xE1A00000; // nop (Enable error exception screen)
 			*(u32*)0x02073A08 = 0xE1A00000; // nop
 		} else {
+			if (!extendedMemory2) {
+				// Disable loading title music
+				*(u32*)0x020128E4 = 0xE1A00000; // nop
+				*(u32*)0x020128E8 = 0xE1A00000; // nop
+				*(u32*)0x020128EC = 0xE1A00000; // nop
+				*(u32*)0x020128F0 = 0xE1A00000; // nop
+				*(u32*)0x020128F4 = 0xE1A00000; // nop
+				*(u32*)0x020128F8 = 0xE1A00000; // nop
+				*(u32*)0x02012918 = 0xE1A00000; // nop
+				*(u32*)0x02012934 = 0xE1A00000; // nop
+				*(u32*)0x02012D7C = 0xE1A00000; // nop
+				*(u32*)0x02012D98 = 0xE1A00000; // nop
+			}
 			*(u32*)0x02064E34 = 0xE1A00000; // nop
 			*(u32*)0x020687A8 = 0xE1A00000; // nop
 			*(u32*)0x0206CCE0 = 0xE1A00000; // nop
