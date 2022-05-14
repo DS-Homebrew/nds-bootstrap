@@ -2801,10 +2801,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
 		ce9->rumbleFrames[0] = 30;
-		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201A38C;
+		ce9->rumbleFrames[1] = 30;
+		ce9->rumbleForce[0] = 2;
+		ce9->rumbleForce[1] = 1;
+		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014BDC;
+		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201A38C;
 
 		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
-		*(u32*)0x0201A38C = generateA7Instr(0x0201A38C, (int)ce9->patches->rumble_arm9[0]); // Rumble when flip slam effect plays
+		*(u32*)0x02014BDC = generateA7Instr(0x02014BDC, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
+		*(u32*)0x0201A38C = generateA7Instr(0x0201A38C, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
 		*(u32*)0x02051124 = 0xE1A00000; // nop
 		*(u32*)0x020566E8 = 0xE1A00000; // nop
@@ -2821,10 +2826,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0) {
 		ce9->rumbleFrames[0] = 30;
-		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201AA44;
+		ce9->rumbleFrames[1] = 30;
+		ce9->rumbleForce[0] = 2;
+		ce9->rumbleForce[1] = 1;
+		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201528C;
+		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201AA44;
 
 		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
-		*(u32*)0x0201AA44 = generateA7Instr(0x0201AA44, (int)ce9->patches->rumble_arm9[0]); // Rumble when flip slam effect plays
+		*(u32*)0x0201528C = generateA7Instr(0x0201528C, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
+		*(u32*)0x0201AA44 = generateA7Instr(0x0201AA44, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D504 = 0xE1A00000; // nop
 		*(u32*)0x02050F30 = 0xE1A00000; // nop
 		*(u32*)0x020564F4 = 0xE1A00000; // nop
@@ -2841,12 +2851,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0) {
 		ce9->rumbleFrames[0] = 30;
-		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02019C54;
+		ce9->rumbleFrames[1] = 30;
+		ce9->rumbleForce[0] = 2;
+		ce9->rumbleForce[1] = 1;
+		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014718;
+		ce9->patches->rumble_arm9[1][3] = *(u32*)0x02019C54;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200B184 = 0xE1A00000; // nop
-		*(u32*)0x02019C54 = generateA7Instr(0x02019C54, (int)ce9->patches->rumble_arm9[0]); // Rumble when flip slam effect plays
+		*(u32*)0x02014718 = generateA7Instr(0x02014718, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
+		*(u32*)0x02019C54 = generateA7Instr(0x02019C54, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204B538 = 0xE1A00000; // nop
 		*(u32*)0x0204EEB4 = 0xE1A00000; // nop
 		*(u32*)0x02053EA8 = 0xE1A00000; // nop
@@ -2866,6 +2881,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "KWY", 3) == 0) {
 		ce9->rumbleFrames[0] = 10;
 		ce9->rumbleFrames[1] = 30;
+		ce9->rumbleForce[0] = 1;
+		ce9->rumbleForce[1] = 1;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -3763,6 +3780,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0) {
 		ce9->rumbleFrames[0] = 10;
+		ce9->rumbleForce[0] = 1;
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
 
 		*(u32*)0x0200498C = 0xE1A00000; // nop
@@ -3802,6 +3820,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3P") == 0) {
 		ce9->rumbleFrames[0] = 10;
+		ce9->rumbleForce[0] = 1;
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x020271E0;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop

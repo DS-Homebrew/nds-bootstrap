@@ -18,6 +18,7 @@
 .global language
 .global languageAddr
 .global igmHotkey
+.global RumblePakType
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -40,6 +41,8 @@ languageAddr:
 	.word	0x00000000
 igmHotkey:
 	.hword	0
+RumblePakType:
+	.byte	0
 .align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

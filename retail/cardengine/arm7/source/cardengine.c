@@ -34,6 +34,9 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define RUMBLE_PAK			(*(vuint16 *)0x08000000)
+#define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
+
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
 extern u32 ce7;
@@ -48,6 +51,7 @@ extern module_params_t* moduleParams;
 extern u32 language;
 extern u32* languageAddr;
 extern u16 igmHotkey;
+extern u8 RumblePakType;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
@@ -65,6 +69,9 @@ static bool volumeAdjustActivated = false;*/
 
 bool ipcEveryFrame = false;
 static bool swapScreens = false;
+
+int RumbleTimer = 0;
+int RumbleForce = 1;
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
@@ -121,6 +128,38 @@ static void initialize(void) {
 }
 
 extern void inGameMenu(void);
+
+void Rumble(int Frames) {
+	if ((RumblePakType == 0) || (RumbleForce == 0)) return;
+
+	if (RumblePakType == 1) WARIOWARE_PAK = 8; 	
+	else if (RumblePakType == 2) RUMBLE_PAK = 2;
+
+	if (RumbleForce == 1) RumbleTimer = Frames + 1;
+	if (RumbleForce == 2) RumbleTimer = Frames * 20;
+
+	return;
+}
+
+void StopRumble() {
+	if (RumblePakType == 1) WARIOWARE_PAK = 0;
+	else if (RumblePakType == 2) RUMBLE_PAK = 0;
+}
+
+void DoRumble() {
+	if (RumbleTimer) 
+	{
+		RumbleTimer--;
+		if (RumblePakType == 1) WARIOWARE_PAK = ((RumbleTimer % 2) ? 8 : 0); 	
+		if (RumblePakType == 2) RUMBLE_PAK = ((RumbleTimer % 2) ? 2 : 0); 	
+	}
+
+	if (RumbleTimer == 1)
+	{
+		StopRumble();
+		RumbleTimer = 0;
+	}
+}
 
 void rebootConsole(void) {
 	if (*(vu16*)0x4004700 != 0) {
@@ -202,6 +241,20 @@ void myIrqHandlerVBlank(void) {
 
 	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
 		inGameMenu();
+	}
+
+	if (sharedAddr[3] == 0x424D5552) { // 'RUMB'
+		RumbleForce = sharedAddr[1];
+		Rumble(sharedAddr[0]);
+		sharedAddr[3] = 0;
+	}
+
+	if (RumbleForce == 2) {
+		for (int i = 0; i < 20; i++) {
+			DoRumble();
+		}
+	} else {
+		DoRumble();
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
