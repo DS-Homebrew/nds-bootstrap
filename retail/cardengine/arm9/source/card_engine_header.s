@@ -46,6 +46,7 @@ romLocation:
 	.word	0x00000000
 rumbleFrames:
 	.word	30
+	.word	30
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -96,6 +97,7 @@ patches:
 .word   terminateForPullOutRef
 .word   reset_arm9
 .word   rumble_arm9
+.word   rumble2_arm9
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
@@ -359,6 +361,21 @@ rumble_arm9:
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_rumble:
+	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+rumble2_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, =rumble2
+	bl		_blx_r6_stub_rumble2
+	nop
+
+	ldmfd   sp!, {r1-r11,pc}
+_blx_r6_stub_rumble2:
 	bx	r6	
 .pool
 @---------------------------------------------------------------------------------

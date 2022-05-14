@@ -491,8 +491,13 @@ void reset(u32 param) {
 	while (1);
 }
 
-void rumble(u32 arg1/*, u32 arg2, u32 arg3, u32 arg4*/) {
-	sharedAddr[0] = ce9->rumbleFrames;
+void rumble(u32 arg) {
+	sharedAddr[0] = ce9->rumbleFrames[0];
+	sharedAddr[3] = 0x424D5552; // 'RUMB'
+}
+
+void rumble2(u32 arg) {
+	sharedAddr[0] = ce9->rumbleFrames[1];
 	sharedAddr[3] = 0x424D5552; // 'RUMB'
 }
 

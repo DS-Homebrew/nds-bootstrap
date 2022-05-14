@@ -109,7 +109,7 @@ typedef struct cardengineArm9Patches {
     u32* cacheFlushRef;
     u32* readCachedRef;
     u32* reset_arm9;
-    u32* rumble_arm9;
+    u32* rumble_arm9[2];
     u32 needFlushDCCache;
     u32* pdash_read;
     u32* ipcSyncHandlerRef;
@@ -165,7 +165,7 @@ typedef struct cardengineArm9 {
     u32 ioverlaysSize;
     u32* irqTable;
     u32 romLocation;
-	u32 rumbleFrames;
+	u32 rumbleFrames[2];
 } __attribute__ ((__packed__)) cardengineArm9;
 #endif
 
