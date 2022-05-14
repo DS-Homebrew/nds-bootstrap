@@ -165,6 +165,7 @@ typedef struct cardengineArm9 {
     u32 ioverlaysSize;
     u32* irqTable;
     u32 romLocation;
+	u32 rumbleFrames;
 } __attribute__ ((__packed__)) cardengineArm9;
 #endif
 

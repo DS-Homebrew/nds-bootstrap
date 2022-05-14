@@ -2800,6 +2800,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
+		ce9->rumbleFrames = 30;
+		ce9->patches->rumble_arm9[3] = *(u32*)0x0201A38C;
+
 		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
 		*(u32*)0x0201A38C = generateA7Instr(0x0201A38C, (int)ce9->patches->rumble_arm9); // Rumble when flip slam effect plays
 		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
@@ -2817,6 +2820,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0) {
+		ce9->rumbleFrames = 30;
+		ce9->patches->rumble_arm9[3] = *(u32*)0x0201AA44;
+
 		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
 		*(u32*)0x0201AA44 = generateA7Instr(0x0201AA44, (int)ce9->patches->rumble_arm9); // Rumble when flip slam effect plays
 		*(u32*)0x0204D504 = 0xE1A00000; // nop
@@ -2834,6 +2840,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0) {
+		ce9->rumbleFrames = 30;
+		ce9->patches->rumble_arm9[3] = *(u32*)0x02019C54;
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200B184 = 0xE1A00000; // nop
@@ -3742,6 +3751,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0) {
+		ce9->rumbleFrames = 10;
+		ce9->patches->rumble_arm9[3] = *(u32*)0x02026F68;
+
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
@@ -3750,6 +3762,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		*(u32*)0x02026F68 = generateA7Instr(0x02026F68, (int)ce9->patches->rumble_arm9); // Rumble when hair is whipped
 		*(u32*)0x02092050 = 0xE1A00000; // nop
 		*(u32*)0x02092078 = 0xE3A05001; // mov r5, #1
 		*(u32*)0x02092B94 = 0xE12FFF1E; // bx lr
@@ -3777,6 +3790,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3P") == 0) {
+		ce9->rumbleFrames = 10;
+		ce9->patches->rumble_arm9[3] = *(u32*)0x020271E0;
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
@@ -3786,6 +3802,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr */
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		*(u32*)0x020271E0 = generateA7Instr(0x020271E0, (int)ce9->patches->rumble_arm9); // Rumble when hair is whipped
 		*(u32*)0x020922D4 = 0xE1A00000; // nop
 		*(u32*)0x020922FC = 0xE3A05001; // mov r5, #1
 		*(u32*)0x02092FC4 = 0xE12FFF1E; // bx lr

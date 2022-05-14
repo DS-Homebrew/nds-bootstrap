@@ -593,7 +593,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 u8 getRumblePakType(void) {
 	// First, make sure we're on DS Phat/Lite, and if DLDI is Slot-1
-	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0) {
+	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[1] == 0xFFFF) {
 		return 0;
 	}
 	// Then, check for 0x96 to see if it's a GBA game
@@ -926,8 +926,8 @@ int arm7_main(void) {
 		*(u16*)0x0C4000CE = 0x7FFF;
 	}
 
-	*(vu32*)(0x08240000) = 1;
-	expansionPakFound = ((*(vu32*)(0x08240000) == 1) && (strcmp(romTid, "UBRP") != 0));
+	*(vu16*)0x08240000 = 1;
+	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (strcmp(romTid, "UBRP") != 0));
 
 	// If possible, set to load ROM into RAM
 	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);

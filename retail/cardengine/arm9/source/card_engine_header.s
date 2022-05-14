@@ -44,6 +44,8 @@ irqTable:
 	.word	0x00000000
 romLocation:
 	.word	0x00000000
+rumbleFrames:
+	.word	30
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -353,7 +355,7 @@ rumble_arm9:
 
 	ldr		r6, =rumble
 	bl		_blx_r6_stub_rumble
-	mov r0, #3
+	nop
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_rumble:
