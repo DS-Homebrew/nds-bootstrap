@@ -93,6 +93,7 @@ patches:
 .word   cacheFlushRef
 .word   terminateForPullOutRef
 .word   reset_arm9
+.word   rumble_arm9
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
@@ -341,6 +342,21 @@ reset_arm9:
 
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_reset:
+	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+rumble_arm9:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r11,lr}
+
+	ldr		r6, =rumble
+	bl		_blx_r6_stub_rumble
+	mov r0, #3
+
+	ldmfd   sp!, {r1-r11,pc}
+_blx_r6_stub_rumble:
 	bx	r6	
 .pool
 @---------------------------------------------------------------------------------

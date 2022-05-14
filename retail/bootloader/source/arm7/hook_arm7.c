@@ -93,7 +93,8 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
-	u32 language
+	u32 language,
+	u8 RumblePakType
 ) {
 
 	nocashMessage("hookNdsRetailArm7");
@@ -216,6 +217,7 @@ int hookNdsRetailArm7(
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
 	}
+	ce7->RumblePakType           = RumblePakType;
 
 	*vblankHandler = ce7->patches->vblankHandler;
 

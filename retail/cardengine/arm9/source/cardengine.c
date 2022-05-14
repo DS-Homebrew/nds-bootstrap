@@ -491,6 +491,11 @@ void reset(u32 param) {
 	while (1);
 }
 
+void rumble(u32 arg1/*, u32 arg2, u32 arg3, u32 arg4*/) {
+	sharedAddr[0] = 30;
+	sharedAddr[3] = 0x424D5552; // 'RUMB'
+}
+
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;

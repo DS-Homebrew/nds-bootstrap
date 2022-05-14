@@ -53,6 +53,8 @@
 
 #include <nds/arm9/dldi.h>
 
+#define WARIOWARE_ENABLE	(*(vuint16 *)0x080000C6)
+
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
@@ -589,6 +591,35 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
+u8 getRumblePakType(void) {
+	// First, make sure we're on DS Phat/Lite, and if DLDI is Slot-1
+	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0) {
+		return 0;
+	}
+	// Then, check for 0x96 to see if it's a GBA game
+	if (GBA_HEADER.is96h == 0x96) {
+		//if it is a game, we check the game code
+		//to see if it is warioware twisted
+		if (	(GBA_HEADER.gamecode[0] == 'R') &&
+				(GBA_HEADER.gamecode[1] == 'Z') &&
+				(GBA_HEADER.gamecode[2] == 'W')
+			)
+		{
+			WARIOWARE_ENABLE = 8;
+			return 1;
+		}
+	} else {
+		for (int i = 0; i < 60000; i++) { // Run 60000 times to make sure it works
+			for (int p = 0; p < 0x1000/2; p++) {
+				if (GBA_BUS[1+(p*2)] == 0xFFFD) {
+					return 2;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 static bool supportsExceptionHandler(const char* romTid) {
 	// ExceptionHandler2 (red screen) blacklist
 	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
@@ -1027,7 +1058,8 @@ int arm7_main(void) {
 		cheatSize,
 		apPatchFileCluster,
 		apPatchSize,
-		language
+		language,
+		getRumblePakType()
 	);
 	if (errorCode == ERR_NONE) {
 		nocashMessage("Card hook successful");

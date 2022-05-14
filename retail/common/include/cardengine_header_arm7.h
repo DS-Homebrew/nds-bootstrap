@@ -138,6 +138,7 @@ typedef struct cardengineArm7 {
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;
+    u8 RumblePakType;
 } __attribute__ ((__packed__)) cardengineArm7;
 #endif
 

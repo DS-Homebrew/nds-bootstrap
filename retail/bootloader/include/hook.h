@@ -37,7 +37,8 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
-	u32 language
+	u32 language,
+	u8 RumblePakType
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
