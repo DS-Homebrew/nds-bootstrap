@@ -1224,7 +1224,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const char* romTid = getRomTid(ndsHeader);
 
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	bool isPkmnBW2 = (strncmp(romTid, "IRD", 3) == 0) || (strncmp(romTid, "IRE", 3) == 0);
+	bool isSpecificTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
 
 	u32* heapPointer = NULL;
@@ -1259,7 +1259,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && !isPkmnBW2 && !isDSiWare && ndsHeader->unitCode == 0x02) {
+		if (consoleModel == 0 && !isSpecificTitle && !isDSiWare && ndsHeader->unitCode == 0x02) {
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062C; /* MOVNE R0, #0x2C00000 */
