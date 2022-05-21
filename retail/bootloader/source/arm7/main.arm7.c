@@ -128,6 +128,7 @@ bool expansionPakFound = false;
 
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
+u32 accessControl = 0;
 
 static void initMBK(void) {
 	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
@@ -438,6 +439,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	}
 
 	fileRead(&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
+	fileRead(&accessControl, file, srlAddr+0x1B4, sizeof(u32));
 
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
@@ -981,7 +983,7 @@ int arm7_main(void) {
 	buildFatTableCache(&romFile);
 	if (wramUsed) {
 		if (romFile.fatTableCached) {
-			bool startMem = (ndsHeader->arm9destination >= 0x02004000 && arm7mbk == 0x080037C0 && romFile.fatTableCacheSize <= 0x4000);
+			bool startMem = (ndsHeader->unitCode > 0 && ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
 			if (startMem) {
