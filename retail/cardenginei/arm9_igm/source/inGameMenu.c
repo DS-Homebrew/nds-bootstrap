@@ -26,9 +26,10 @@ typedef enum {
 	MENU_SCREENSHOT = 2,
 	MENU_MANUAL = 3,
 	MENU_RAM_DUMP = 4,
-	MENU_OPTIONS = 5,
-	MENU_RAM_VIEWER = 6,
-	MENU_QUIT = 7
+	MENU_LOAD_STATE = 5,
+	MENU_OPTIONS = 6,
+	MENU_RAM_VIEWER = 7,
+	MENU_QUIT = 8
 
 } MenuItem;
 
@@ -679,7 +680,7 @@ void inGameMenu(s8* mainScreen) {
 	// Let ARM7 know the menu loaded
 	sharedAddr[5] = 0x59444552; // 'REDY'
 
-	MenuItem menuItems[8];
+	MenuItem menuItems[9];
 	int menuItemCount = 0;
 	menuItems[menuItemCount++] = MENU_EXIT;
 #ifndef B4DS
@@ -689,6 +690,9 @@ void inGameMenu(s8* mainScreen) {
 		menuItems[menuItemCount++] = MENU_MANUAL;
 #endif
 	menuItems[menuItemCount++] = MENU_RAM_DUMP;
+#ifndef B4DS
+	menuItems[menuItemCount++] = MENU_LOAD_STATE;
+#endif
 	menuItems[menuItemCount++] = MENU_OPTIONS;
 	menuItems[menuItemCount++] = MENU_RAM_VIEWER;
 	menuItems[menuItemCount++] = MENU_QUIT;
@@ -758,6 +762,16 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[4] = 0x54495845; // EXIT
 					#endif
 					break;
+				#ifndef B4DS
+				case MENU_LOAD_STATE:
+					sharedAddr[4] = 0x5453444C; // LDST
+					while (sharedAddr[4] == 0x5453444C) {
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
+					}
+					sharedAddr[4] = 0x54495845; // EXIT
+					break;
+				#endif
 				case MENU_OPTIONS:
 					optionsMenu(mainScreen);
 					break;

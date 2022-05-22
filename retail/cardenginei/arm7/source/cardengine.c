@@ -619,6 +619,33 @@ void returnToLoader(bool wait) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 }
 
+void loadState(void) {
+	#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+	#endif
+		// Dump full RAM
+		fileRead((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000)-0x500, !sdRead, -1);
+	#ifndef TWLSDK
+	} else if (isSdk5(moduleParams)) {
+		// Dump RAM used in DS mode (SDK5)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileRead((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
+		fileRead((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0xA00, !sdRead, -1);
+		fileRead((char*)0x02FFFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
+	} else if (moduleParams->sdk_version >= 0x2008000) {
+		// Dump RAM used in DS mode (SDK2.1+)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileRead((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x1FA00, !sdRead, -1);
+		fileRead((char*)0x027FFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
+	} else {
+		// Dump RAM used in DS mode (SDK2.0)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
+		fileRead((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x3FA00, !sdRead, -1);
+		fileRead((char*)0x027FFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
+	}
+	#endif
+}
+
 void dumpRam(void) {
 	#ifdef TWLSDK
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
@@ -628,9 +655,12 @@ void dumpRam(void) {
 	sdRead = (valueBits & b_dsiSD);
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
+	#ifndef TWLSDK
 	if (valueBits & dsiMode) {
+	#endif
 		// Dump full RAM
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
+	#ifndef TWLSDK
 	} else if (isSdk5(moduleParams)) {
 		// Dump RAM used in DS mode (SDK5)
 		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
@@ -645,6 +675,7 @@ void dumpRam(void) {
 		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
 		fileWrite((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x40000, !sdRead, -1);
 	}
+	#endif
 	sharedAddr[3] = 0;
   	#ifdef TWLSDK
 	if (doBak) restoreSdBakData();

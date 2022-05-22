@@ -20,6 +20,7 @@ extern bool returnToMenu;
 extern struct IgmText *igmText;
 
 extern void reset(void);
+extern void loadState(void);
 extern void dumpRam(void);
 extern void returnToLoader(void);
 extern void prepareScreenshot(void);
@@ -85,6 +86,10 @@ void inGameMenu(void) {
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
+					exitMenu = true;
+					break;
+				case 0x5453444C: // LDST
+					loadState();
 					exitMenu = true;
 					break;
 				case 0x50455453: // STEP
