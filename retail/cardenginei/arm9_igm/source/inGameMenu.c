@@ -27,9 +27,10 @@ typedef enum {
 	MENU_MANUAL = 3,
 	MENU_RAM_DUMP = 4,
 	MENU_LOAD_STATE = 5,
-	MENU_OPTIONS = 6,
-	MENU_RAM_VIEWER = 7,
-	MENU_QUIT = 8
+	MENU_SAVE_STATE = 6,
+	MENU_OPTIONS = 7,
+	MENU_RAM_VIEWER = 8,
+	MENU_QUIT = 9
 
 } MenuItem;
 
@@ -628,6 +629,8 @@ void inGameMenu(s8* mainScreen) {
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
 
+	bool igmGraphicsUnloaded = false;
+
 	u32 dispcnt = REG_DISPCNT_SUB;
 	u16 bg0cnt = REG_BG0CNT_SUB;
 	u16 bg1cnt = REG_BG1CNT_SUB;
@@ -680,7 +683,7 @@ void inGameMenu(s8* mainScreen) {
 	// Let ARM7 know the menu loaded
 	sharedAddr[5] = 0x59444552; // 'REDY'
 
-	MenuItem menuItems[9];
+	MenuItem menuItems[10];
 	int menuItemCount = 0;
 	menuItems[menuItemCount++] = MENU_EXIT;
 #ifndef B4DS
@@ -692,6 +695,7 @@ void inGameMenu(s8* mainScreen) {
 	menuItems[menuItemCount++] = MENU_RAM_DUMP;
 #ifndef B4DS
 	menuItems[menuItemCount++] = MENU_LOAD_STATE;
+	menuItems[menuItemCount++] = MENU_SAVE_STATE;
 #endif
 	menuItems[menuItemCount++] = MENU_OPTIONS;
 	menuItems[menuItemCount++] = MENU_RAM_VIEWER;
@@ -763,14 +767,127 @@ void inGameMenu(s8* mainScreen) {
 					#endif
 					break;
 				#ifndef B4DS
-				case MENU_LOAD_STATE:
+				case MENU_LOAD_STATE: {
+					tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+					tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
+					tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
+
+					*(vu16*)0x0400106C = masterBright;
+
+					REG_DISPCNT_SUB = dispcnt;
+					REG_BG0CNT_SUB = bg0cnt;
+					REG_BG1CNT_SUB = bg1cnt;
+					REG_BG2CNT_SUB = bg2cnt;
+					REG_BG3CNT_SUB = bg3cnt;
+
+					VRAM_C_CR = vramCCr;
+					VRAM_H_CR = vramHCr;
+
+					REG_POWERCNT = powercnt;
+
+					igmGraphicsUnloaded = true;
+					bool registersLoaded = false;
+
 					sharedAddr[4] = 0x5453444C; // LDST
+
+					u32 vramPos = 0x06000000;
+
 					while (sharedAddr[4] == 0x5453444C) {
 						while (REG_VCOUNT != 191) swiDelay(100);
 						while (REG_VCOUNT == 191) swiDelay(100);
+
+						if (sharedAddr[0] == 0x44525256) { // VRRD
+							if (!registersLoaded) {
+								REG_DISPCNT = sharedAddr[8];
+								REG_BG0CNT = sharedAddr[9];
+								REG_BG1CNT = sharedAddr[10];
+								REG_BG2CNT = sharedAddr[11];
+								REG_BG3CNT = sharedAddr[12];
+								REG_DISPCNT_SUB = sharedAddr[13];
+								REG_BG0CNT_SUB = sharedAddr[14];
+								REG_BG1CNT_SUB = sharedAddr[15];
+								REG_BG2CNT_SUB = sharedAddr[16];
+								REG_BG3CNT_SUB = sharedAddr[17];
+								REG_POWERCNT = sharedAddr[18];
+								registersLoaded = true;
+							}
+							tonccpy((u16*)vramPos, bmpBuffer, 0x8000);
+							vramPos += 0x8000;
+							if (vramPos == 0x06080000) {
+								vramPos = 0x06200000;
+							} else if (vramPos == 0x06220000) {
+								vramPos = 0x06400000;
+							} else if (vramPos == 0x06440000) {
+								vramPos = 0x06600000;
+							}
+							sharedAddr[0] = 0x59444552; // REDY
+						}
+					}
+
+					for (int i = 8; i <= 18; i++) {
+						sharedAddr[i] = 0;
 					}
 					sharedAddr[4] = 0x54495845; // EXIT
-					break;
+				}	break;
+				case MENU_SAVE_STATE: {
+					tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+					tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
+					tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
+
+					*(vu16*)0x0400106C = masterBright;
+
+					REG_DISPCNT_SUB = dispcnt;
+					REG_BG0CNT_SUB = bg0cnt;
+					REG_BG1CNT_SUB = bg1cnt;
+					REG_BG2CNT_SUB = bg2cnt;
+					REG_BG3CNT_SUB = bg3cnt;
+
+					VRAM_C_CR = vramCCr;
+					VRAM_H_CR = vramHCr;
+
+					REG_POWERCNT = powercnt;
+
+					igmGraphicsUnloaded = true;
+
+					sharedAddr[8] = REG_DISPCNT;
+					sharedAddr[9] = REG_BG0CNT;
+					sharedAddr[10] = REG_BG1CNT;
+					sharedAddr[11] = REG_BG2CNT;
+					sharedAddr[12] = REG_BG3CNT;
+					sharedAddr[13] = REG_DISPCNT_SUB;
+					sharedAddr[14] = REG_BG0CNT_SUB;
+					sharedAddr[15] = REG_BG1CNT_SUB;
+					sharedAddr[16] = REG_BG2CNT_SUB;
+					sharedAddr[17] = REG_BG3CNT_SUB;
+					sharedAddr[18] = REG_POWERCNT;
+
+					sharedAddr[4] = 0x54535653; // SVST
+
+					u32 vramPos = 0x06000000;
+
+					while (sharedAddr[4] == 0x54535653) {
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
+
+						if (sharedAddr[0] == 0x50445256) { // VRDP
+							tonccpy(bmpBuffer, (u16*)vramPos, 0x8000);
+							vramPos += 0x8000;
+							if (vramPos == 0x06080000) {
+								vramPos = 0x06200000;
+							} else if (vramPos == 0x06220000) {
+								vramPos = 0x06400000;
+							} else if (vramPos == 0x06440000) {
+								vramPos = 0x06600000;
+							}
+							sharedAddr[0] = 0x59444552; // REDY
+						}
+					}
+
+					for (int i = 8; i <= 18; i++) {
+						sharedAddr[i] = 0;
+					}
+					sharedAddr[4] = 0x54495845; // EXIT
+				}	break;
 				#endif
 				case MENU_OPTIONS:
 					optionsMenu(mainScreen);
@@ -803,22 +920,24 @@ void inGameMenu(s8* mainScreen) {
 		#endif
 	}
 
-	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
-	tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
-	tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
+	if (!igmGraphicsUnloaded) {
+		tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+		tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
+		tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
 
-	*(vu16*)0x0400106C = masterBright;
+		*(vu16*)0x0400106C = masterBright;
 
-	REG_DISPCNT_SUB = dispcnt;
-	REG_BG0CNT_SUB = bg0cnt;
-	REG_BG1CNT_SUB = bg1cnt;
-	REG_BG2CNT_SUB = bg2cnt;
-	REG_BG3CNT_SUB = bg3cnt;
+		REG_DISPCNT_SUB = dispcnt;
+		REG_BG0CNT_SUB = bg0cnt;
+		REG_BG1CNT_SUB = bg1cnt;
+		REG_BG2CNT_SUB = bg2cnt;
+		REG_BG3CNT_SUB = bg3cnt;
 
-	VRAM_C_CR = vramCCr;
-	VRAM_H_CR = vramHCr;
+		VRAM_C_CR = vramCCr;
+		VRAM_H_CR = vramHCr;
 
-	REG_POWERCNT = powercnt;
+		REG_POWERCNT = powercnt;
+	}
 
 	if(*mainScreen == 1)
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;

@@ -17,7 +17,7 @@
 
 #Text is placed here
 igmText:
-.space 0x9F8
+.space 0xA0C
 .align 4
 
 sharedAddr:

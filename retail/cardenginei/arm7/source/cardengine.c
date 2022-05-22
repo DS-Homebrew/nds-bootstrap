@@ -619,33 +619,6 @@ void returnToLoader(bool wait) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 }
 
-void loadState(void) {
-	#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-	#endif
-		// Dump full RAM
-		fileRead((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000)-0x500, !sdRead, -1);
-	#ifndef TWLSDK
-	} else if (isSdk5(moduleParams)) {
-		// Dump RAM used in DS mode (SDK5)
-		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileRead((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
-		fileRead((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0xA00, !sdRead, -1);
-		fileRead((char*)0x02FFFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
-	} else if (moduleParams->sdk_version >= 0x2008000) {
-		// Dump RAM used in DS mode (SDK2.1+)
-		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileRead((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x1FA00, !sdRead, -1);
-		fileRead((char*)0x027FFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
-	} else {
-		// Dump RAM used in DS mode (SDK2.0)
-		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
-		fileRead((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x3FA00, !sdRead, -1);
-		fileRead((char*)0x027FFB00, ramDumpFile, 0x3FFB00, 0x500, !sdRead, -1);
-	}
-	#endif
-}
-
 void dumpRam(void) {
 	#ifdef TWLSDK
 	bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
@@ -680,6 +653,96 @@ void dumpRam(void) {
   	#ifdef TWLSDK
 	if (doBak) restoreSdBakData();
 	#endif
+}
+
+void loadState(void) {
+	#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+	#endif
+		// Read full RAM
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0xFFFA00, !sdRead, -1);
+		fileRead((char*)0x02FFFA2C, ramDumpFile, 0xFFFA2C, 0x5D4, !sdRead, -1);
+	#ifndef TWLSDK
+	} else if (isSdk5(moduleParams)) {
+		// Read RAM used in DS mode (SDK5)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileRead((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
+		fileRead((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0xA00, !sdRead, -1);
+		fileRead((char*)0x02FFFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	} else if (moduleParams->sdk_version >= 0x2008000) {
+		// Read RAM used in DS mode (SDK2.1+)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileRead((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x1FA00, !sdRead, -1);
+		fileRead((char*)0x027FFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	} else {
+		// Read RAM used in DS mode (SDK2.0)
+		fileRead((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
+		fileRead((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x3FA00, !sdRead, -1);
+		fileRead((char*)0x027FFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	}
+	#endif
+
+	u32 vramDumpPos = 0x400000;
+	#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+		vramDumpPos = 0x1000000;
+	}
+	#endif
+
+	for (u32 i = 0; i < 0x100000; i += 0x8000) {
+		sharedAddr[0] = 0x44525256; // 'VRRD'
+		while (sharedAddr[0] != 0x59444552) { // 'REDY'
+			while (REG_VCOUNT != 191) swiDelay(100);
+			while (REG_VCOUNT == 191) swiDelay(100);
+		}
+		fileRead((char*)INGAME_MENU_EXT_LOCATION, ramDumpFile, vramDumpPos, 0x8000, !sdRead, -1);
+		vramDumpPos += 0x8000;
+	}
+}
+
+void saveState(void) {
+	#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+	#endif
+		// Dump full RAM
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0xFFFA00, !sdRead, -1);
+		fileWrite((char*)0x02FFFA2C, ramDumpFile, 0xFFFA2C, 0x5D4, !sdRead, -1);
+	#ifndef TWLSDK
+	} else if (isSdk5(moduleParams)) {
+		// Dump RAM used in DS mode (SDK5)
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileWrite((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
+		fileWrite((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0xA00, !sdRead, -1);
+		fileWrite((char*)0x02FFFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	} else if (moduleParams->sdk_version >= 0x2008000) {
+		// Dump RAM used in DS mode (SDK2.1+)
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
+		fileWrite((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x1FA00, !sdRead, -1);
+		fileWrite((char*)0x027FFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	} else {
+		// Dump RAM used in DS mode (SDK2.0)
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
+		fileWrite((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x3FA00, !sdRead, -1);
+		fileWrite((char*)0x027FFA2C, ramDumpFile, 0x3FFA2C, 0x5D4, !sdRead, -1);
+	}
+	#endif
+
+	u32 vramDumpPos = 0x400000;
+	#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+		vramDumpPos = 0x1000000;
+	}
+	#endif
+
+	for (u32 i = 0; i < 0x100000; i += 0x8000) {
+		sharedAddr[0] = 0x50445256; // 'VRDP'
+		while (sharedAddr[0] != 0x59444552) { // 'REDY'
+			while (REG_VCOUNT != 191) swiDelay(100);
+			while (REG_VCOUNT == 191) swiDelay(100);
+		}
+		fileWrite((char*)INGAME_MENU_EXT_LOCATION, ramDumpFile, vramDumpPos, 0x8000, !sdRead, -1);
+		vramDumpPos += 0x8000;
+	}
 }
 
 void prepareScreenshot(void) {
@@ -729,7 +792,7 @@ void saveScreenshot(void) {
 }
 
 void readManual(int line) {
-	static int currentManualLine = 0;
+	/*static int currentManualLine = 0;
 	static int currentManualOffset = 0;
 	sdRead = (valueBits & b_dsiSD);
 	char buffer[32];
@@ -789,7 +852,7 @@ void readManual(int line) {
 				break;
 			}
 		}
-	}
+	}*/
 }
 
 static void log_arm9(void) {

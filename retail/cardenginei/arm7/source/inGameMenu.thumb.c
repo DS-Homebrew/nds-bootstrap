@@ -20,8 +20,9 @@ extern bool returnToMenu;
 extern struct IgmText *igmText;
 
 extern void reset(void);
-extern void loadState(void);
 extern void dumpRam(void);
+extern void loadState(void);
+extern void saveState(void);
 extern void returnToLoader(void);
 extern void prepareScreenshot(void);
 extern void saveScreenshot(void);
@@ -90,6 +91,10 @@ void inGameMenu(void) {
 					break;
 				case 0x5453444C: // LDST
 					loadState();
+					exitMenu = true;
+					break;
+				case 0x54535653: // SVST
+					saveState();
 					exitMenu = true;
 					break;
 				case 0x50455453: // STEP
