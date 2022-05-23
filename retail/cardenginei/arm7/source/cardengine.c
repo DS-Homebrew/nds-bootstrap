@@ -689,7 +689,7 @@ void loadState(void) {
 	}
 	#endif
 
-	for (u32 i = 0; i < 0x100000; i += 0x8000) {
+	for (u32 i = 0; i < 0x108000; i += 0x8000) {
 		sharedAddr[0] = 0x44525256; // 'VRRD'
 		while (sharedAddr[0] != 0x59444552) { // 'REDY'
 			while (REG_VCOUNT != 191) swiDelay(100);
@@ -734,7 +734,7 @@ void saveState(void) {
 	}
 	#endif
 
-	for (u32 i = 0; i < 0x100000; i += 0x8000) {
+	for (u32 i = 0; i < 0x108000; i += 0x8000) {
 		sharedAddr[0] = 0x50445256; // 'VRDP'
 		while (sharedAddr[0] != 0x59444552) { // 'REDY'
 			while (REG_VCOUNT != 191) swiDelay(100);

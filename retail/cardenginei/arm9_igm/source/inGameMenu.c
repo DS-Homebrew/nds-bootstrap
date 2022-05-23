@@ -819,6 +819,8 @@ void inGameMenu(s8* mainScreen) {
 								vramPos = 0x06400000;
 							} else if (vramPos == 0x06440000) {
 								vramPos = 0x06600000;
+							} else if (vramPos == 0x06620000) {
+								vramPos = 0x01FF8000; // ITCM
 							}
 							sharedAddr[0] = 0x59444552; // REDY
 						}
@@ -878,6 +880,8 @@ void inGameMenu(s8* mainScreen) {
 								vramPos = 0x06400000;
 							} else if (vramPos == 0x06440000) {
 								vramPos = 0x06600000;
+							} else if (vramPos == 0x06620000) {
+								vramPos = 0x01FF8000; // ITCM
 							}
 							sharedAddr[0] = 0x59444552; // REDY
 						}
