@@ -798,6 +798,7 @@ void inGameMenu(s8* mainScreen) {
 
 						if (sharedAddr[0] == 0x44525256) { // VRRD
 							if (!registersLoaded) {
+								//u32 temp = 0;
 								REG_DISPCNT = sharedAddr[8];
 								REG_BG0CNT = sharedAddr[9];
 								REG_BG1CNT = sharedAddr[10];
@@ -809,9 +810,28 @@ void inGameMenu(s8* mainScreen) {
 								REG_BG2CNT_SUB = sharedAddr[16];
 								REG_BG3CNT_SUB = sharedAddr[17];
 								REG_POWERCNT = sharedAddr[18];
+								REG_DISPCAPCNT = sharedAddr[19];
+								/*temp = sharedAddr[19];
+								toncset32(VRAM_CR, temp, 1);
+								temp = sharedAddr[20];
+								toncset32(VRAM_EFG_CR, temp, 1);
+								VRAM_H_CR = sharedAddr[21];
+								VRAM_I_CR = sharedAddr[22];*/
+								/*VRAM_A_CR = sharedAddr[19];
+								VRAM_B_CR = sharedAddr[20];
+								VRAM_C_CR = sharedAddr[21];
+								VRAM_D_CR = sharedAddr[22];
+								VRAM_E_CR = sharedAddr[23];
+								VRAM_F_CR = sharedAddr[24];
+								VRAM_G_CR = sharedAddr[25];
+								VRAM_H_CR = sharedAddr[26];
+								VRAM_I_CR = sharedAddr[27];*/
 								registersLoaded = true;
 							}
-							tonccpy((u16*)vramPos, bmpBuffer, 0x8000);
+							tonccpy((u16*)vramPos, bmpBuffer, (vramPos == 0x05000000) ? 0x800 : 0x8000);
+							if (vramPos == 0x05000000) {
+								tonccpy((u16*)0x07000000, bmpBuffer+(0x400/sizeof(u16)), 0x800);
+							}
 							vramPos += 0x8000;
 							if (vramPos == 0x06080000) {
 								vramPos = 0x06200000;
@@ -820,13 +840,15 @@ void inGameMenu(s8* mainScreen) {
 							} else if (vramPos == 0x06440000) {
 								vramPos = 0x06600000;
 							} else if (vramPos == 0x06620000) {
-								vramPos = 0x01FF8000; // ITCM
-							}
+								vramPos = 0x05000000;
+							} /*else if (vramPos == 0x06620000) {
+								vramPos = 0x01FF8000; // ITCM (Causes crash)
+							}*/
 							sharedAddr[0] = 0x59444552; // REDY
 						}
 					}
 
-					for (int i = 8; i <= 18; i++) {
+					for (int i = 8; i <= 27; i++) {
 						sharedAddr[i] = 0;
 					}
 					sharedAddr[4] = 0x54495845; // EXIT
@@ -862,6 +884,20 @@ void inGameMenu(s8* mainScreen) {
 					sharedAddr[16] = REG_BG2CNT_SUB;
 					sharedAddr[17] = REG_BG3CNT_SUB;
 					sharedAddr[18] = REG_POWERCNT;
+					sharedAddr[19] = REG_DISPCAPCNT;
+					/*sharedAddr[19] = VRAM_CR;
+					sharedAddr[20] = VRAM_EFG_CR;
+					sharedAddr[21] = VRAM_H_CR;
+					sharedAddr[22] = VRAM_I_CR;*/
+					/*sharedAddr[19] = VRAM_A_CR;
+					sharedAddr[20] = VRAM_B_CR;
+					sharedAddr[21] = VRAM_C_CR;
+					sharedAddr[22] = VRAM_D_CR;
+					sharedAddr[23] = VRAM_E_CR;
+					sharedAddr[24] = VRAM_F_CR;
+					sharedAddr[25] = VRAM_G_CR;
+					sharedAddr[26] = VRAM_H_CR;
+					sharedAddr[27] = VRAM_I_CR;*/
 
 					sharedAddr[4] = 0x54535653; // SVST
 
@@ -872,7 +908,11 @@ void inGameMenu(s8* mainScreen) {
 						while (REG_VCOUNT == 191) swiDelay(100);
 
 						if (sharedAddr[0] == 0x50445256) { // VRDP
-							tonccpy(bmpBuffer, (u16*)vramPos, 0x8000);
+							toncset(bmpBuffer, 0, 0x8000);
+							tonccpy(bmpBuffer, (u16*)vramPos, (vramPos == 0x05000000) ? 0x800 : 0x8000);
+							if (vramPos == 0x05000000) {
+								tonccpy(bmpBuffer+(0x400/sizeof(u16)), (u16*)0x07000000, 0x800);
+							}
 							vramPos += 0x8000;
 							if (vramPos == 0x06080000) {
 								vramPos = 0x06200000;
@@ -881,13 +921,15 @@ void inGameMenu(s8* mainScreen) {
 							} else if (vramPos == 0x06440000) {
 								vramPos = 0x06600000;
 							} else if (vramPos == 0x06620000) {
+								vramPos = 0x05000000;
+							} /*else if (vramPos == 0x06620000) {
 								vramPos = 0x01FF8000; // ITCM
-							}
+							}*/
 							sharedAddr[0] = 0x59444552; // REDY
 						}
 					}
 
-					for (int i = 8; i <= 18; i++) {
+					for (int i = 8; i <= 27; i++) {
 						sharedAddr[i] = 0;
 					}
 					sharedAddr[4] = 0x54495845; // EXIT
