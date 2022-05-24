@@ -87,7 +87,9 @@ typedef struct cardengineArm7 {
 		6: preciseVolumeControl
 		7: powerCodeOnVBlank
 		8: runCardEngineCheck
-		9: ipcEveryFrame
+		9: cardReadDma
+		10: hiyaCfwFound
+		11: slowSoftReset
 		31: scfgLocked
 	*/
     u32* languageAddr;

@@ -42,7 +42,7 @@
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define b_ipcEveryFrame BIT(9)
+#define b_cardReadDma BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
@@ -340,11 +340,14 @@ int hookNdsRetailArm7(
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
 		}
+		if (hiyaCfwFound) {
+			ce7->valueBits |= b_hiyaCfwFound;
+		}
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000 || (moduleParams->sdk_version >= 0x5040000 && !dsiModeConfirmed && !boostCpu)) {
 			ce7->valueBits |= b_slowSoftReset;
 		}
-		if (hiyaCfwFound) {
-			ce7->valueBits |= b_hiyaCfwFound;
+		if (cardReadDMA) {
+			ce7->valueBits |= b_cardReadDma;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
