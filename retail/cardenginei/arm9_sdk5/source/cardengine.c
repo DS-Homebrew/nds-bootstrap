@@ -823,6 +823,10 @@ void myIrqHandlerIPC(void) {
 			continueCardReadDmaArm9();
 		}
 			break;
+		case 0x4:
+			extern bool dmaOn;
+			dmaOn = !dmaOn;
+			break;
 #endif
 		case 0x6:
 			if(mainScreen == 1)

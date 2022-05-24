@@ -112,6 +112,7 @@ static bool powerLedChecked = false;
 static bool powerLedIsPurple = false;
 static bool swapScreens = false;
 static bool dmaSignal = false;
+static bool wifiIrq = false;
 //static bool saveInRam = false;
 
 #ifdef TWLSDK
@@ -1325,6 +1326,14 @@ void myIrqHandlerVBlank(void) {
 
 	if (REG_IE & IRQ_NETWORK) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
+	}
+
+	if (!(valueBits & ROMinRAM)) {
+		bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
+		if (wifiIrq != wifiIrqCheck) {
+			IPC_SendSync(0x4); // Turn off card read DMA if WiFi is used, and back on when not in use
+			wifiIrq = wifiIrqCheck;
+		}
 	}
 
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {

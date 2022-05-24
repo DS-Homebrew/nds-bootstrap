@@ -79,6 +79,7 @@ static u32 asyncSector = 0;
 //static int aQSize = 0;
 #endif
 
+bool dmaOn = true;
 bool dmaReadOnArm7 = false;
 bool dmaReadOnArm9 = false;
 
@@ -529,15 +530,28 @@ u32 cardReadDma() {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
-			// new dma method
-			cacheFlush();
-			cardSetDma();
-            return true;
-		} /*else {
-			dma=4;
-            clearIcache();
-		}*/
+        if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
+			#ifdef DLDI
+				// new dma method
+				cacheFlush();
+				cardSetDma();
+				return true;
+			#else
+			if (dmaOn) {
+				// new dma method
+				cacheFlush();
+				cardSetDma();
+				return true;
+			} else {
+				cardRead(NULL);
+				endCardReadDma();
+				return true;
+			} /*else {
+				dma=4;
+				clearIcache();
+			}*/
+			#endif
+		}
     } /*else {
         dma=4;
         clearIcache();
