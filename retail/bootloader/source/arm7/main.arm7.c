@@ -598,16 +598,10 @@ u8 getRumblePakType(void) {
 	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[0] == 0xFFFE || GBA_BUS[1] == 0xFFFF) {
 		return 0;
 	}
-	// Then, check for 0x96 to see if it's a GBA game
+	// Then, check for 0x96 to see if it's a GBA game or flashcart
 	if (GBA_HEADER.is96h == 0x96) {
-		//if it is a game, we check the game code
-		//to see if it is WarioWare: Twisted, or Drill Dozer
-		if (((GBA_HEADER.gamecode[0] == 'R') && (GBA_HEADER.gamecode[1] == 'Z') && (GBA_HEADER.gamecode[2] == 'W'))
-		 || ((GBA_HEADER.gamecode[0] == 'V') && (GBA_HEADER.gamecode[1] == '4') && (GBA_HEADER.gamecode[2] == '9')))
-		{
-			WARIOWARE_ENABLE = 8;
-			return 1;
-		}
+		WARIOWARE_ENABLE = 8;
+		return 1;
 	} else {
 		for (int i = 0; i < 4000; i++) { // Run 4000 times to make sure it works
 			for (int p = 0; p < 0x1000/2; p++) {
