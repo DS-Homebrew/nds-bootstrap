@@ -179,6 +179,13 @@ static void resetMemory_ARM7(void) {
 	}
 
 	REG_SOUNDCNT = 0;
+	REG_SNDCAP0CNT = 0;
+	REG_SNDCAP1CNT = 0;
+
+	REG_SNDCAP0DAD = 0;
+	REG_SNDCAP0LEN = 0;
+	REG_SNDCAP1DAD = 0;
+	REG_SNDCAP1LEN = 0;
 
 	// Clear out ARM7 DMA channels and timers
 	for (i = 0; i < 4; i++) {
