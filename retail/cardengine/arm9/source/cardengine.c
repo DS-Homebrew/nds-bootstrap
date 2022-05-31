@@ -306,8 +306,8 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
 
 			*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen);
+			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
+			(*inGameMenu)(&mainScreen, 0);
 
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file

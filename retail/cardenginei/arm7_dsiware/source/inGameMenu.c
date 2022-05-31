@@ -26,7 +26,7 @@ extern void prepareScreenshot(void);
 extern void saveScreenshot(void);
 extern void readManual(int line);
 
-volatile int timeTilBatteryLevelRefresh = 7;
+volatile int timeTillStatusRefresh = 7;
 
 void inGameMenu(void) {
 	returnToMenu = false;
@@ -52,10 +52,20 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
-			timeTilBatteryLevelRefresh++;
-			if (timeTilBatteryLevelRefresh >= 8) {
-				sharedAddr[6] = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY);
-				timeTilBatteryLevelRefresh = 0;
+			timeTillStatusRefresh++;
+			if (timeTillStatusRefresh >= 8) {
+				timeTillStatusRefresh = 0;
+
+				u8 brightness = i2cReadRegister(I2C_PM, 0x41);
+				u32 pmControl = readPowerManagement(PM_CONTROL_REG);
+				if(brightness && !(pmControl & 0xC)) { // Turn on backlights if SELECT+volume used
+					pmControl |= 0xC;
+					writePowerManagement(PM_CONTROL_REG, pmControl);
+				}
+
+				sharedAddr[6] = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY); // Battery
+				sharedAddr[6] |= (brightness + ((pmControl & 0xC) != 0)) << 8; // Brightness
+				sharedAddr[6] |= i2cReadRegister(I2C_PM, I2CREGPM_VOL) << 16; // Volume
 			}
 
 			while (REG_VCOUNT != 191) swiDelay(100);
@@ -67,7 +77,7 @@ void inGameMenu(void) {
 					break;
 				case 0x54455352: // RSET
 					exitMenu = true;
-					timeTilBatteryLevelRefresh = 7;
+					timeTillStatusRefresh = 7;
 					extern void restoreBakData(void);
 					restoreBakData();
 					reset();
@@ -107,6 +117,19 @@ void inGameMenu(void) {
 				case 0x574D4152: // RAMW
 					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
 					break;
+				case 0x4554494C: // LITE
+					if(sharedAddr[0] == 0) {
+						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) & ~0xC);
+					} else {
+						i2cWriteRegister(I2C_PM, 0x41, sharedAddr[0] - 1);
+						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) | 0xC);
+					}
+					timeTillStatusRefresh = 7;
+					break;
+				case 0x554C4F56: // VOLU
+					i2cWriteRegister(I2C_PM, I2CREGPM_VOL, sharedAddr[0]);
+					timeTillStatusRefresh = 7;
+					break;
 				default:
 					break;
 			}
@@ -118,7 +141,7 @@ void inGameMenu(void) {
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT
-	timeTilBatteryLevelRefresh = 7;
+	timeTillStatusRefresh = 7;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

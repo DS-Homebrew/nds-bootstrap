@@ -14,12 +14,6 @@
 void DC_InvalidateRange(const void *base, u32 size);
 void DC_FlushRange(const void *base, u32 size);
 
-#ifdef B4DS
-#define OPTIONS_MENU_ITEMS 1
-#else
-#define OPTIONS_MENU_ITEMS 3
-#endif
-
 typedef enum {
 	MENU_EXIT = 0,
 	MENU_RESET = 1,
@@ -31,6 +25,14 @@ typedef enum {
 	MENU_QUIT = 7
 
 } MenuItem;
+
+typedef enum {
+	OPTIONS_MAIN_SCREEN,
+	OPTIONS_BRIGHTNESS,
+	OPTIONS_VOLUME,
+	OPTIONS_CLOCK_SPEED,
+	OPTIONS_VRAM_MODE
+} OptionsItem;
 
 extern struct IgmText igmText;
 
@@ -114,7 +116,6 @@ static void printChar(int x, int y, unsigned char c, int palette) {
 	BG_MAP_RAM_SUB(15)[y * 0x20 + x] = c | palette << 12;
 }
 
-#ifndef B4DS
 static void printDec(int x, int y, u32 val, int digits, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
 	for(int i = digits - 1; i >= 0; i--) {
@@ -122,7 +123,6 @@ static void printDec(int x, int y, u32 val, int digits, int palette) {
 		val /= 10;
 	}
 }
-#endif
 
 static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	u16 *dst = BG_MAP_RAM_SUB(15) + y * 0x20 + x;
@@ -168,29 +168,13 @@ static void waitKeys(u16 keys) {
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
-	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
-	} while(!(KEYS & keys));
-}
-
-#ifndef B4DS
-static void waitKeysBattery(u16 keys) {
-	// Prevent key repeat for 10 frames
-	for(int i = 0; i < 10 && (KEYS & keys); i++) {
-		printBattery();
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
-	}
+	u32 status = sharedAddr[6]; // Battery, brightness, volume
 
 	do {
-		printBattery();
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
-	} while(!(KEYS & keys));
+	} while(!(KEYS & keys) && sharedAddr[6] == status);
 }
-#endif
-
 static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(15), 0, 0x300);
 }
@@ -371,61 +355,83 @@ static void drawMainMenu(MenuItem *menuItems, int menuItemCount) {
 	#endif
 }
 
-static void optionsMenu(s8 *mainScreen) {
+static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
+	OptionsItem optionsItems[8];
+	int optionsItemCount = 0;
+	optionsItems[optionsItemCount++] = OPTIONS_MAIN_SCREEN;
+	if(consoleModel < 2) // Not on 3DS
+		optionsItems[optionsItemCount++] = OPTIONS_BRIGHTNESS;
+#ifndef B4DS
+	optionsItems[optionsItemCount++] = OPTIONS_VOLUME;
+	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
+	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
+#endif
+
 	u8 cursorPosition = 0;
 	while(1) {
 		clearScreen();
 
-		// Print labels
-		for(int i = 0; i < OPTIONS_MENU_ITEMS; i++) {
-			if(igmText.rtl)
-				printRight(0x1D, i, igmText.options[i], 0);
-			else
-				print(2, i, igmText.options[i], 0);
+		// Print options
+		for(int i = 0; i < optionsItemCount; i++) {
+			const unsigned char *optionValue = NULL;
+			int optionPercent = 0;
+			bool isString = true;
+			switch(optionsItems[i]) {
+				case OPTIONS_MAIN_SCREEN:
+					optionValue = igmText.optionsValues[*mainScreen];
+					break;
+				case OPTIONS_BRIGHTNESS:
+					optionPercent = (u8)(sharedAddr[6] >> 8) * 100 / 5;
+					isString = false;
+					break;
+				case OPTIONS_VOLUME:
+					optionPercent = (u8)(sharedAddr[6] >> 16) * 100 / 31;
+					isString = false;
+					break;
+				case OPTIONS_CLOCK_SPEED:
+					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? scfgClkBak : REG_SCFG_CLK) & 1)];
+					break;
+				case OPTIONS_VRAM_MODE:
+					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
+					break;
+			}
+
+			int digits = optionPercent == 100 ? 3 : (optionPercent >= 10 ? 2 : 1);
+			if(igmText.rtl) {
+				printRight(0x1D, i, igmText.optionsLabels[optionsItems[i]], 0);
+				if(isString) {
+					print(0, i, optionValue, 0);
+				} else {
+					printDec(0, i, optionPercent, digits, 0);
+					printChar(0 + digits, i, '%', 0);
+				}
+			} else {
+				print(2, i, igmText.optionsLabels[optionsItems[i]], 0);
+				if(isString) {
+					printRight(0x1E, i, optionValue, 0);
+				} else {
+					printDec(0x1E - digits, i, optionPercent, digits, 0);
+					printChar(0x1E, i, '%', 0);
+				}
+			}
 		}
 		drawCursor(cursorPosition);
 
-#ifndef B4DS
-		if(igmText.rtl) {
-			// Main screen
-			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
-			// Clock speed
-			print(1, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
-			// VRAM mode
-			print(1, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
-		} else {
-			// Main screen
-			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
-			// Clock speed
-			printRight(0x1E, 1, igmText.options[6 + ((REG_SCFG_CLK==0 ? scfgClkBak : REG_SCFG_CLK) & 1)], 0);
-			// VRAM mode
-			printRight(0x1E, 2, igmText.options[8 + (((REG_SCFG_EXT==0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)], 0);
-		}
-#else
-		if(igmText.rtl) {
-			// Main screen
-			print(1, 0, igmText.options[3 + (*mainScreen)] , 0);
-		} else {
-			// Main screen
-			printRight(0x1E, 0, igmText.options[3 + (*mainScreen)] , 0);
-		}
-#endif
-
-		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B | KEY_SELECT);
 
 		if (KEYS & KEY_UP) {
 			if(cursorPosition > 0)
 				cursorPosition--;
 			else
-				cursorPosition = OPTIONS_MENU_ITEMS - 1;
+				cursorPosition = optionsItemCount - 1;
 		} else if (KEYS & KEY_DOWN) {
-			if(cursorPosition < (OPTIONS_MENU_ITEMS - 1))
+			if(cursorPosition < (optionsItemCount - 1))
 				cursorPosition++;
 			else
 				cursorPosition = 0;
 		} else if (KEYS & (KEY_LEFT | KEY_RIGHT)) {
-			switch(cursorPosition) {
-				case 0:
+			switch(optionsItems[cursorPosition]) {
+				case OPTIONS_MAIN_SCREEN:
 					(KEYS & KEY_LEFT) ? (*mainScreen)-- : (*mainScreen)++;
 					if(*mainScreen > 2)
 						*mainScreen = 0;
@@ -433,10 +439,42 @@ static void optionsMenu(s8 *mainScreen) {
 						*mainScreen = 2;
 					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
 					break;
-				case 1:
+				case OPTIONS_BRIGHTNESS:
+				{
+					u8 brightness = (u8)(sharedAddr[6] >> 8);
+					if(KEYS & KEY_LEFT && brightness > 0)
+						brightness--;
+					else if (KEYS & KEY_RIGHT && brightness < 5)
+						brightness++;
+
+					sharedAddr[0] = brightness;
+					sharedAddr[4] = 0x4554494C; // LITE
+					while(sharedAddr[4] == 0x4554494C) {
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
+					}
+					break;
+				}
+				case OPTIONS_VOLUME:
+				{
+					u8 volume = (u8)(sharedAddr[6] >> 16);
+					if(KEYS & KEY_LEFT && volume > 0)
+						volume--;
+					else if (KEYS & KEY_RIGHT && volume < 31)
+						volume++;
+
+					sharedAddr[0] = volume;
+					sharedAddr[4] = 0x554C4F56; // VOLU
+					while(sharedAddr[4] == 0x554C4F56) {
+						while (REG_VCOUNT != 191) swiDelay(100);
+						while (REG_VCOUNT == 191) swiDelay(100);
+					}
+					break;
+				}
+				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
 					break;
-				case 2:
+				case OPTIONS_VRAM_MODE:
 					REG_SCFG_EXT ^= BIT(13);
 					break;
 				default:
@@ -619,7 +657,7 @@ static void ramViewer(void) {
 	}
 }
 
-void inGameMenu(s8* mainScreen) {
+void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	#ifndef B4DS
 	int oldIME = enterCriticalSection();
 
@@ -708,12 +746,11 @@ void inGameMenu(s8* mainScreen) {
 	while (sharedAddr[4] == 0x554E454D) {
 		drawMainMenu(menuItems, menuItemCount);
 		drawCursor(cursorPosition);
+#ifndef B4DS
+		printBattery();
+#endif
 
-		#ifndef B4DS
-		waitKeysBattery(KEY_UP | KEY_DOWN | KEY_A | KEY_B | KEY_R);
-		#else
 		waitKeys(KEY_UP | KEY_DOWN | KEY_A | KEY_B);
-		#endif
 
 		if (KEYS & KEY_UP) {
 			if (cursorPosition > 0)
@@ -759,7 +796,7 @@ void inGameMenu(s8* mainScreen) {
 					#endif
 					break;
 				case MENU_OPTIONS:
-					optionsMenu(mainScreen);
+					optionsMenu(mainScreen, consoleModel);
 					break;
 				case MENU_RAM_VIEWER:
 					ramViewer();

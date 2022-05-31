@@ -17,6 +17,8 @@ extern bool returnToMenu;
 
 extern void rebootConsole(void);
 
+volatile int timeTillStatusRefresh = 7;
+
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
@@ -41,6 +43,16 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
+			timeTillStatusRefresh++;
+			if (timeTillStatusRefresh >= 8) {
+				u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
+				if((pmBacklight & 0xF0) == 0xF0) { // DS Lite
+					sharedAddr[6] = ((pmBacklight & 3) + ((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0)) << 8; // Brightness
+				} else { // DS Phat
+					sharedAddr[6] = ((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0) ? 5 : 0;
+				}
+				timeTillStatusRefresh = 0;
+			}
 
 			while (REG_VCOUNT != 191) swiDelay(100);
 			while (REG_VCOUNT == 191) swiDelay(100);
@@ -64,6 +76,17 @@ void inGameMenu(void) {
 					break;
 				case 0x574D4152: // RAMW
 					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					break;
+				case 0x4554494C: // LITE
+					if(sharedAddr[0] == 0) {
+						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) & ~0xC);
+					} else {
+						u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
+						if((pmBacklight & 0xF0) == 0xF0) // DS Lite
+							writePowerManagement(PM_BACKLIGHT_LEVEL, pmBacklight | (sharedAddr[0] - 1));
+						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) | 0xC);
+					}
+					timeTillStatusRefresh = 7;
 					break;
 				default:
 					break;
