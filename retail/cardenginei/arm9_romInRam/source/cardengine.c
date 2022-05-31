@@ -590,12 +590,12 @@ void myIrqHandlerIPC(void) {
 			if (!(ce9->valueBits & extendedMemory)) {
 				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 					*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-					(*inGameMenu)(&mainScreen);
+					volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+					(*inGameMenu)(&mainScreen, ce9->consoleModel);
 				} else {
 					*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-					(*inGameMenu)(&mainScreen);
+					volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+					(*inGameMenu)(&mainScreen, ce9->consoleModel);
 				}
 				if (sharedAddr[3] == 0x52534554) {
 					igmReset = true;
