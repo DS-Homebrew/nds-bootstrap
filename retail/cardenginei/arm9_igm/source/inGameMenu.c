@@ -14,6 +14,12 @@
 void DC_InvalidateRange(const void *base, u32 size);
 void DC_FlushRange(const void *base, u32 size);
 
+#ifndef B4DS
+	#define MAX_BRIGHTNESS 5
+#else
+	#define MAX_BRIGHTNESS 4
+#endif
+
 typedef enum {
 	MENU_EXIT = 0,
 	MENU_RESET = 1,
@@ -381,7 +387,7 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					optionValue = igmText.optionsValues[*mainScreen];
 					break;
 				case OPTIONS_BRIGHTNESS:
-					optionPercent = (u8)(sharedAddr[6] >> 8) * 100 / 5;
+					optionPercent = (u8)(sharedAddr[6] >> 8) * 100 / MAX_BRIGHTNESS;
 					isString = false;
 					break;
 				case OPTIONS_VOLUME:
@@ -444,7 +450,7 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					u8 brightness = (u8)(sharedAddr[6] >> 8);
 					if(KEYS & KEY_LEFT && brightness > 0)
 						brightness--;
-					else if (KEYS & KEY_RIGHT && brightness < 5)
+					else if (KEYS & KEY_RIGHT && brightness < MAX_BRIGHTNESS)
 						brightness++;
 
 					sharedAddr[0] = brightness;
