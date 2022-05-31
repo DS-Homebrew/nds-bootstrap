@@ -46,10 +46,10 @@ void inGameMenu(void) {
 			timeTillStatusRefresh++;
 			if (timeTillStatusRefresh >= 8) {
 				u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
-				if((pmBacklight & 0xF0) == 0xF0) { // DS Lite
+				if(pmBacklight & 0xF0) { // DS Lite
 					sharedAddr[6] = ((pmBacklight & 3) + ((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0)) << 8; // Brightness
 				} else { // DS Phat
-					sharedAddr[6] = ((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0) ? 5 : 0;
+					sharedAddr[6] = (((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0) ? 5 : 0) << 8;
 				}
 				timeTillStatusRefresh = 0;
 			}
@@ -82,8 +82,8 @@ void inGameMenu(void) {
 						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) & ~0xC);
 					} else {
 						u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
-						if((pmBacklight & 0xF0) == 0xF0) // DS Lite
-							writePowerManagement(PM_BACKLIGHT_LEVEL, pmBacklight | (sharedAddr[0] - 1));
+						if(pmBacklight & 0xF0) // DS Lite
+							writePowerManagement(PM_BACKLIGHT_LEVEL, (pmBacklight & ~3) | (sharedAddr[0] - 1));
 						writePowerManagement(PM_CONTROL_REG, readPowerManagement(PM_CONTROL_REG) | 0xC);
 					}
 					timeTillStatusRefresh = 7;
