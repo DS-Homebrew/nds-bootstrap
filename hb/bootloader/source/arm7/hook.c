@@ -25,8 +25,6 @@
 #include "tonccpy.h"
 #include "locations.h"
 
-extern vu32* myMemUncached(vu32*);
-
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -253,7 +251,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
 	toncset ((u32*)SDENGINE_BUFFER_LOCATION, 0, 0x4000);
 
-	sdEngineLocation[1] = (u32)myMemUncached(wordCommandAddr);
+	sdEngineLocation[1] = (u32)wordCommandAddr;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

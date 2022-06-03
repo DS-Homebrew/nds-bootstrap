@@ -22,7 +22,7 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define MAX_READ 53
+//#define MAX_READ 53
 #define BYTES_PER_READ 512
 
 #ifndef NULL
@@ -37,47 +37,50 @@
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
 #include <nds/ipc.h>
+//#include <nds/arm9/cache.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
 #include "tonccpy.h"
 #include "locations.h"
 
-extern vu32* myMemUncached(vu32*);
-
 extern char ioType[4];
-extern vu32 word_command;
-extern vu32 word_params;
-extern vu32 words_msg;
+extern u32 dataStartOffset;
+//extern vu32 word_command; // word_command_offset
+//extern vu32 word_params; // word_command_offset+4
+//extern u32* words_msg; // word_command_offset+8
+u32 word_command_offset = 0;
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
 extern vu32* tmp_buf_addr;
 extern vu8 allocated_space;
 
-void sendValue32(u32 value32) {
+bool dsiMode = false;
+
+static inline void sendValue32(u32 value32) {
 	//nocashMessage("sendValue32");
-	*((vu32*)myMemUncached(&word_params)) = value32;
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE04;
+	*(vu32*)(word_command_offset+4) = (vu32)value32;
+	*(vu32*)word_command_offset = (vu32)0x027FEE04;
 	IPC_SendSync(0xEE24);
 }
 
-void sendMsg(int size, u8* msg) {
+static inline void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
-	*((vu32*)myMemUncached(&word_params)) = size;
-	tonccpy((u8*)myMemUncached(&words_msg), msg, size);
-	*((vu32*)myMemUncached(&word_command)) = (vu32)0x027FEE05;
+	*(vu32*)(word_command_offset+4) = (vu32)size;
+	tonccpy((u8*)word_command_offset+8, msg, size);
+	*(vu32*)word_command_offset = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
 
-void waitValue32() {
+static inline void waitValue32() {
 	//nocashMessage("waitValue32");
     //dbg_hexa(&word_command);
     //dbg_hexa(myMemUncached(&word_command));
-	while(*((vu32*)myMemUncached(&word_command)) != (vu32)0x027FEE08);
+	while(*(vu32*)word_command_offset != (vu32)0x027FEE08);
 }
 
-u32 getValue32() {
+static inline u32 getValue32() {
 	//nocashMessage("getValue32");
-	return *((vu32*)myMemUncached(&word_params));
+	return *(u32*)(word_command_offset+4);
 }
 
 /*void goodOldCopy32(u32* src, u32* dst, int size) {
@@ -94,18 +97,10 @@ void extendedMemory(bool yes) {
 	}
 }
 
-//void __custom_mpu_setup();
-//void __custom_mpu_restore();
-
 //---------------------------------------------------------------------------------
 bool sd_Startup() {
 //---------------------------------------------------------------------------------
 	//nocashMessage("sdio_Startup");
-	//if (!isSDAcessible()) return false;
-
-	//REG_SCFG_EXT &= 0xC000;
-
-	//__custom_mpu_setup();
 
 	sendValue32(SDMMC_HAVE_SD);
 
@@ -121,8 +116,6 @@ bool sd_Startup() {
 
 	result = getValue32();
 
-	//__custom_mpu_restore();
-
 	return result == 0;
 }
 
@@ -130,12 +123,9 @@ bool sd_Startup() {
 bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
 	//nocashMessage("sd_ReadSectors");
-	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	int result = 0;
 	sec_t startsector, readsectors;
-
-	//__custom_mpu_setup();
 
 	int max_reads = ((1 << allocated_space) / 512) - 11;
 
@@ -144,7 +134,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads;
 
-		vu32* mybuffer = (vu32*)myMemUncached(tmp_buf_addr);
+		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
 
 		msg.type = SDMMC_SD_READ_SECTORS;
 		msg.sdParams.startsector = startsector;
@@ -160,21 +150,29 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		tonccpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 	}
 
-	//__custom_mpu_restore();
+	/*DC_FlushRange(buffer,numSectors * 512);
+
+	msg.type = SDMMC_SD_READ_SECTORS;
+	msg.sdParams.startsector = sector;
+	msg.sdParams.numsectors = numSectors;
+	msg.sdParams.buffer = buffer;
+
+	sendMsg(sizeof(msg), (u8*)&msg);
+
+	waitValue32();
+
+	result = getValue32();*/
 
 	return result == 0;
 }
 
 //---------------------------------------------------------------------------------
-bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
+bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
 	//nocashMessage("sd_ReadSectors");
-	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	int result = 0;
 	sec_t startsector, readsectors;
-
-	//__custom_mpu_setup();
 
 	int max_reads = ((1 << allocated_space) / 512) - 11;
 
@@ -183,7 +181,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads;
 
-		vu32* mybuffer = (vu32*)myMemUncached(tmp_buf_addr);
+		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
 
 		tonccpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
 
@@ -199,13 +197,23 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 		result = getValue32();
 	}
 
-	//__custom_mpu_restore();
+	/*DC_FlushRange(buffer,numSectors * 512);
+
+	msg.type = SDMMC_SD_WRITE_SECTORS;
+	msg.sdParams.startsector = sector;
+	msg.sdParams.numsectors = numSectors;
+	msg.sdParams.buffer = buffer;
+
+	sendMsg(sizeof(msg), (u8*)&msg);
+
+	waitValue32();
+
+	result = getValue32();*/
 
 	return result == 0;
 }
 
 bool isArm7 = false;
-bool dsiMode = false;
 bool ramDisk = false;
 
 
@@ -260,10 +268,11 @@ returns true if successful, otherwise returns false
 bool startup(void) {
 	//nocashMessage("startup");
 	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
-	if (REG_SCFG_EXT == 0x8307F100) {
-		dsiMode = *(u16*)((u32)RAM_DISK_LOCATION_DSIMODE+0x1FE) == 0xAA55;
-	}
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
+	if (REG_SCFG_EXT == 0x8307F100) {
+		dsiMode = *(vu32*)((u32)NDS_HEADER_16MB+0xC) == *(vu32*)((u32)NDS_HEADER_16MB+0x0A00000C);
+		//dsiMode = *(u16*)((u32)RAM_DISK_LOCATION_DSIMODE+0x1FE) == 0xAA55;
+	}
 
 	if (ramDisk) {
 		return true;
@@ -271,6 +280,8 @@ bool startup(void) {
 		sdmmc_init();
 		return SD_Init()==0;
 	} else {
+		word_command_offset = dataStartOffset+0x80;
+		word_command_offset += dsiMode ? 0x0A000000 : 0x00400000;
 		return sd_Startup();
 	}
 }
