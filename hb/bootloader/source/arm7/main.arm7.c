@@ -533,6 +533,13 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
+	bool isGbaR2 = false;
+	u32 bannerOffset = 0;
+	char gbaR2Text[0x20];
+	fileRead((char*)&bannerOffset, romFile, 0x48, 4, -1);
+	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20, -1);
+	isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
@@ -596,22 +603,24 @@ int arm7_main (void) {
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		if (!isGbaR2) {
+			hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 
-		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
-		// Find and inject bootloader
-		u32* addr = (u32*)ndsHeader->arm9destination;
-		for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-			if (addr[i]   == bootloaderSignature[0]
-			 && addr[i+1] == bootloaderSignature[1]
-			 && addr[i+2] == bootloaderSignature[2]
-			 && addr[i+3] == bootloaderSignature[3])
-			{
-				toncset(addr + i, 0, 0x9C98);
-				tonccpy(addr + i, (char*)0x06000000, 0x8000);
-				tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
-				break;
+			// Find and inject bootloader
+			u32* addr = (u32*)ndsHeader->arm9destination;
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				if (addr[i]   == bootloaderSignature[0]
+				 && addr[i+1] == bootloaderSignature[1]
+				 && addr[i+2] == bootloaderSignature[2]
+				 && addr[i+3] == bootloaderSignature[3])
+				{
+					toncset(addr + i, 0, 0x9C98);
+					tonccpy(addr + i, (char*)0x06000000, 0x8000);
+					tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
+					break;
+				}
 			}
 		}
 		toncset((char*)0x06000000, 0, 0x8000);
