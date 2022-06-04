@@ -23,7 +23,10 @@
 */
 
 //#define MAX_READ 53
+#define cacheBlockSize 0x8000
+#define cacheSlots 0x800000/cacheBlockSize
 #define BYTES_PER_READ 512
+#define cacheBlockSectors (cacheBlockSize/BYTES_PER_READ)
 
 #ifndef NULL
  #define NULL 0
@@ -37,7 +40,6 @@
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
 #include <nds/ipc.h>
-//#include <nds/arm9/cache.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
 #include "tonccpy.h"
@@ -49,6 +51,44 @@ extern u32 dataStartOffset;
 //extern vu32 word_params; // word_command_offset+4
 //extern u32* words_msg; // word_command_offset+8
 u32 word_command_offset = 0;
+
+// NOTE: The cache code isn't working properly for some reason
+/*u32 cacheDescriptor[cacheSlots] = {0xFFFFFFFF};
+int cacheCounter[cacheSlots];
+int accessCounter = 0;
+
+int allocateCacheSlot(void) {
+	int slot = 0;
+	u32 lowerCounter = accessCounter;
+	for (int i = 0; i < cacheSlots; i++) {
+		if (cacheCounter[i] <= lowerCounter) {
+			lowerCounter = cacheCounter[i];
+			slot = i;
+			if (!lowerCounter) {
+				break;
+			}
+		}
+	}
+	return slot;
+}
+
+int getSlotForSector(sec_t sector) {
+	for (int i = 0; i < cacheSlots; i++) {
+		if (cacheDescriptor[i] == sector) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+vu8* getCacheAddress(int slot) {
+	return (vu8*)(CACHE_ADRESS_START + slot*cacheBlockSize);
+}
+
+void updateDescriptor(int slot, sec_t sector) {
+	cacheDescriptor[slot] = sector;
+	cacheCounter[slot] = accessCounter;
+}*/
 
  // Use the dldi remaining space as temporary buffer : 28k usually available
 extern vu32* tmp_buf_addr;
@@ -150,18 +190,46 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		tonccpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 	}
 
-	/*DC_FlushRange(buffer,numSectors * 512);
+	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
 
-	msg.type = SDMMC_SD_READ_SECTORS;
-	msg.sdParams.startsector = sector;
-	msg.sdParams.numsectors = numSectors;
-	msg.sdParams.buffer = buffer;
+	accessCounter++;
 
-	sendMsg(sizeof(msg), (u8*)&msg);
+	while(numSectors > 0) {
+		int slot = getSlotForSector(sector);
+		vu8* cacheBuffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			slot = allocateCacheSlot();
 
-	waitValue32();
+			cacheBuffer = getCacheAddress(slot);
 
-	result = getValue32();*/
+			msg.type = SDMMC_SD_READ_SECTORS;
+			msg.sdParams.startsector = alignedSector;
+			msg.sdParams.numsectors = cacheBlockSectors;
+			msg.sdParams.buffer = (u32*)cacheBuffer;
+
+			sendMsg(sizeof(msg), (u8*)&msg);
+
+			waitValue32();
+
+			result = getValue32();
+		}
+		updateDescriptor(slot, alignedSector);	
+
+		sec_t len2 = numSectors;
+		if ((sector - alignedSector) + len2 > cacheBlockSectors) {
+			len2 = alignedSector - sector + cacheBlockSectors;
+		}
+
+		tonccpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
+		numSectors -= len2;
+		if (numSectors > 0) {
+			sector += len2;
+			buffer += len2*BYTES_PER_READ;
+			alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
+			accessCounter++;
+		}
+	}*/
 
 	return result == 0;
 }
@@ -197,18 +265,58 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		result = getValue32();
 	}
 
-	/*DC_FlushRange(buffer,numSectors * 512);
+	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
 
-	msg.type = SDMMC_SD_WRITE_SECTORS;
-	msg.sdParams.startsector = sector;
-	msg.sdParams.numsectors = numSectors;
-	msg.sdParams.buffer = buffer;
+	accessCounter++;
 
-	sendMsg(sizeof(msg), (u8*)&msg);
+	while(numSectors > 0) {
+		int slot = getSlotForSector(sector);
+		vu8* cacheBuffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			slot = allocateCacheSlot();
 
-	waitValue32();
+			cacheBuffer = getCacheAddress(slot);
 
-	result = getValue32();*/
+			msg.type = SDMMC_SD_READ_SECTORS;
+			msg.sdParams.startsector = alignedSector;
+			msg.sdParams.numsectors = cacheBlockSectors;
+			msg.sdParams.buffer = (u32*)cacheBuffer;
+
+			sendMsg(sizeof(msg), (u8*)&msg);
+
+			waitValue32();
+
+			result = getValue32();
+		}
+		updateDescriptor(slot, alignedSector);	
+
+		sec_t len2 = numSectors;
+		if ((sector - alignedSector) + len2 > cacheBlockSectors) {
+			len2 = alignedSector - sector + cacheBlockSectors;
+		}
+
+		tonccpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
+
+		msg.type = SDMMC_SD_WRITE_SECTORS;
+		msg.sdParams.startsector = alignedSector;
+		msg.sdParams.numsectors = len2;
+		msg.sdParams.buffer = (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ);
+
+		sendMsg(sizeof(msg), (u8*)&msg);
+
+		waitValue32();
+
+		result = getValue32();
+
+		numSectors -= len2;
+		if (numSectors > 0) {
+			sector += len2;
+			buffer += len2*BYTES_PER_READ;
+			alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
+			accessCounter++;
+		}
+	}*/
 
 	return result == 0;
 }
