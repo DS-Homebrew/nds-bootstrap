@@ -144,7 +144,7 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 	while (addr < end) {
 		if ((addr[0] == homebrewAccelSig2007[0]) &&
 			(addr[1] == homebrewAccelSig2007[1]) &&
-			(addr[2] == homebrewAccelSig2007[2]) &&
+			((addr[2] == homebrewAccelSig2007[2]) || (addr[2] == homebrewAccelSig2007_2[2])) &&
 			(addr[3] == homebrewAccelSig2007[3]))
 		{
 			break;
@@ -160,34 +160,6 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 	addr[0] = homebrewAccelSigPatched[0];
 	addr[1] = homebrewAccelSigPatched[1];
 
-	// The first entry in the table is for the Vblank handler, which is what we want
-	return addr;
-}
-
-static u32* hookAccelIPCHomebrew2007_2(u32* addr, size_t size) {
-	u32* end = addr + size/sizeof(u32);
-
-	// Find the start of the handler
-	while (addr < end) {
-		if ((addr[0] == homebrewAccelSig2007_2[0]) &&
-			(addr[1] == homebrewAccelSig2007_2[1]) &&
-			(addr[2] == homebrewAccelSig2007_2[2]) &&
-			(addr[3] == homebrewAccelSig2007_2[3]))
-		{
-			break;
-		}
-		addr++;
-	}
-
-	if (addr >= end) {
-		return NULL;
-	}
-
-	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
-
-	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
 
@@ -214,7 +186,6 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	addr[0] = homebrewAccelSigPatched[0];
 	addr[1] = homebrewAccelSigPatched[1];
 
-	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
 
@@ -232,10 +203,6 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	}
 
 	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-
-	if (!hookAccel) {
-		hookAccel = hookAccelIPCHomebrew2007_2((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-	}
 
 	if (!hookAccel) {
 		hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
