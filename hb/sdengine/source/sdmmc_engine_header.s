@@ -83,6 +83,21 @@ exit:
 
 .pool
 
+	.thumb
+vBlankIntrWaitHook:
+@	ldr	r3, =runSdMmcEngineCheck2
+@	bl	_blx_r3_stub_thumb
+@	swi 0x05
+@	bx  lr
+
+@---------------------------------------------------------------------------------
+_blx_r3_stub_thumb:
+@---------------------------------------------------------------------------------
+	bx	r3	
+
+.pool
+
+	.arm
 .global tryLockMutex
 .type	tryLockMutex STT_FUNC
 @ r0 : mutex adr

@@ -53,6 +53,8 @@ dldiOffset:
 	.word	_dldi_start - _start
 dsiSD:
 	.word	0
+dsiMode:
+	.word	0
 
 startUp:
 	mov	r0, #0x04000000
@@ -78,21 +80,9 @@ startUp:
 	sub	r1, r1, r0
 	bl	ClearMem
 
-@ Load ARM9 region into main RAM
-	ldr	r1, =__arm9_source_start
-	ldr	r2, =__arm9_start	
-	ldr	r3, =__arm9_source_end
-	sub	r3, r3, r1
-	bl	CopyMem
-
-@ Start ARM9 binary
-	ldr	r0, =0x02FFFE24	
-	ldr	r1, =_arm9_start
-	str	r1, [r0]
-
 	mov	r0, #0			@ int argc
 	mov	r1, #0			@ char *argv[]
-	ldr	r3, =arm7_main
+	ldr	r3, =main
 	bl	_blx_r3_stub		@ jump to user code
 
 	@ If the user ever returns, restart
@@ -111,7 +101,7 @@ _blx_r3_stub:
 ClearMem:
 @---------------------------------------------------------------------------------
 	mov	r2, #3			@ Round down to nearest word boundary
-	add	r1, r1, r2		@ Shouldnt be needed
+	add	r1, r1, r2		@ Shouldn't be needed
 	bics	r1, r1, r2		@ Clear 2 LSB (and set Z)
 	bxeq	lr			@ Quit if copy size is 0
 

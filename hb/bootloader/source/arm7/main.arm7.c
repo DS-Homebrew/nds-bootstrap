@@ -40,6 +40,7 @@ Helpful information:
 #include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
+#include <nds/ipc.h>
 #include <nds/timers.h>
 #define ARM9
 #undef ARM7
@@ -54,6 +55,7 @@ Helpful information:
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
+//#include "my_sdmmc.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
 #include "hook.h"
@@ -183,7 +185,7 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 static void resetMemory_ARM7 (void)
 {
-	int i;
+	int i, reg;
 	u8 settings1, settings2;
 	u32 settingsOffset = 0;
 
@@ -205,7 +207,13 @@ static void resetMemory_ARM7 (void)
 		DMA_DEST(i) = 0;
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
+		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
+
+	// Clear out FIFO
+	REG_IPC_SYNC = 0;
+	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
+	REG_IPC_FIFO_CR = 0;
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
@@ -590,7 +598,7 @@ int arm7_main (void) {
 
 		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 
-		/*u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
 		// Find and inject bootloader
 		u32* addr = (u32*)ndsHeader->arm9destination;
@@ -606,7 +614,7 @@ int arm7_main (void) {
 				break;
 			}
 		}
-		toncset((char*)0x06000000, 0, 0x8000);*/
+		toncset((char*)0x06000000, 0, 0x8000);
 	}
 
 	if (dsiMode) {
@@ -630,6 +638,11 @@ int arm7_main (void) {
 			while (arm9_stateFlag != ARM9_READY);
 		}
 	}
+
+	/*sdmmc_init(true);
+	*(vu16*)(SDMMC_BASE + REG_DATACTL32) &= 0xFFFDu;
+	*(vu16*)(SDMMC_BASE + REG_DATACTL) &= 0xFFDDu;
+	*(vu16*)(SDMMC_BASE + REG_SDBLKLEN32) = 0;*/
 
 	REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 

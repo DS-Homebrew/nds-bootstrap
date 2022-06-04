@@ -143,6 +143,20 @@ void runSdMmcEngineCheck (void) {
   	}
 }
 
+/*void runSdMmcEngineCheck2(void) {
+
+  	if (lockMutex(&cardEgnineCommandMutex)) {
+		if(*commandAddr == (vu32)0x027FEE04)
+		{
+			sdmmcCustomValueHandler(commandAddr[1]);
+		} else if(*commandAddr == (vu32)0x027FEE05)
+		{
+			sdmmcCustomMsgHandler(commandAddr[1]);
+		}
+  		unlockMutex(&cardEgnineCommandMutex);
+  	}
+}*/
+
 //---------------------------------------------------------------------------------
 static void SyncHandler(void) {
 //---------------------------------------------------------------------------------

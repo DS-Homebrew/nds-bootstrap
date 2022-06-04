@@ -23,6 +23,7 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include "dldi_patcher.h"
+#include "tonccpy.h"
 
 #define FIX_ALL	0x01
 #define FIX_GLUE	0x02
@@ -90,7 +91,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+data_t dldiMagicString[] = "\xED\xA5\x8D\xBF cHISHM";	// Normal DLDI file
 static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 
 #define DEVICE_TYPE_DLDI 0x49444C44
@@ -109,6 +110,15 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	addr_t addrIter;
 
 	size_t dldiFileSize = 0;
+
+	// Demangle DLDI string
+	dldiMagicString[5] -= 0x20;
+	dldiMagicString[6] += 0x20;
+	dldiMagicString[7] += 0x20;
+	dldiMagicString[8] += 0x20;
+	dldiMagicString[9] += 0x20;
+	dldiMagicString[10] += 0x20;
+	dldiMagicString[11] += 0x20;
 
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
@@ -168,7 +178,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
 	// Put the correct DLDI magic string back into the DLDI header
-	memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file
@@ -199,7 +209,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	if (pDH[DO_fixSections] & FIX_BSS) {
 		// Initialise the BSS to 0
-		memset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
+		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}
 
 	return true;

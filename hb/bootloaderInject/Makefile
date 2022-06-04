@@ -14,7 +14,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	loadInject
 BUILD		:=	build
-SOURCES		:=	source source/arm7 source/patches source/arm9 source/arm9/loading_screens ../common/source ../common/source_general
+SOURCES		:=	source ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include
 DATA		:=	../data
 SPECS		:=  specs
@@ -104,8 +104,15 @@ $(LOADBIN)	:	$(LOADELF)
 $(LOADELF)	:	$(OFILES)
 	@echo linking $(notdir $@)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
-	
-	
+
+arm9mpu_reset.o: mpu_reset.bin
+
+mpu_reset.bin: mpu_reset.elf
+	$(OBJCOPY) -O binary $< $@
+
+mpu_reset.elf: $(TOPDIR)/arm9code/mpu_reset.s
+	$(CC) $(ASFLAGS) -Ttext=0 -x assembler-with-cpp -nostartfiles -nostdlib $< -o $@
+
 -include $(DEPENDS)
 
 

@@ -104,6 +104,10 @@ static const u32 homebrewAccelSigPatched[2] = {
 	0x037C0020
 };
 
+/*static const u32 swi05Sig[1] = {
+	0x4770DF05   , // SWI 0X05
+};*/
+
 //static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
@@ -189,6 +193,50 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	return addr;
 }
 
+/*const u16* generateA7InstrThumb(int arg1, int arg2) {
+	static u16 instrs[2];
+
+	// 23 bit offset
+	u32 offset = (u32)(arg2 - arg1 - 4);
+	//dbg_printf("generateA7InstrThumb offset\n");
+	//dbg_hexa(offset);
+	
+	// 1st instruction contains the upper 11 bit of the offset
+	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
+
+	// 2nd instruction contains the lower 11 bit of the offset
+	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
+
+	return instrs;
+}
+
+static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
+	u32* end = addr + size/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if (addr[0] == swi05Sig[0])
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	u32 dstAddr = (u32)hookAccel+8;
+	const u16* branchCode = generateA7InstrThumb((int)addr, dstAddr);
+
+	// patch the program
+	tonccpy(addr, branchCode, 4);
+
+	tonccpy((u32*)dstAddr, (u32**)((u32)SDENGINE_BUFFER_LOCATION+4), 0x10);
+
+	return addr;
+}*/
+
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
@@ -213,6 +261,10 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	} else {
 		nocashMessage("ACCEL_IPC_OK");
 	}
+
+	/*if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
+		hookSwi05((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize, hookAccel, sdEngineLocation);
+	}*/
 
 	tonccpy (sdEngineLocation, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
 	tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);

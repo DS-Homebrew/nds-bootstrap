@@ -106,6 +106,10 @@ static const u32 homebrewAccelSigPatched[2] = {
 	0x037C0020
 };
 
+/*static const u32 swi05Sig[1] = {
+	0x4770DF05   , // SWI 0X05
+};*/
+
 //static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
