@@ -97,6 +97,7 @@ static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Diff
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 _io_dldi;
+extern u32 word_command;
 
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
@@ -127,6 +128,8 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		// does not have a DLDI section
 		return false;
 	}
+
+	toncset32((u32*)&word_command, 0, 6);
 
 	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);

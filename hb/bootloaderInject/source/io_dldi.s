@@ -25,6 +25,7 @@
 	.arm
 	.global _dldi_start
 	.global _io_dldi
+	.global word_command
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
 .equ FEATURE_MEDIUM_CANWRITE,		0x00000002
@@ -71,7 +72,17 @@ _io_dldi:
 	.word	_DLDI_writeSectors		@ 
 	.word	_DLDI_clearStatus		@ 
 	.word	_DLDI_shutdown			@ 
-	
+
+	word_command:
+	.word	0x00000000
+	word_params:
+	.word	0x00000000
+	words_msg:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
 @---------------------------------------------------------------------------------
 
 _DLDI_startup:
