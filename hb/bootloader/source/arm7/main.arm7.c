@@ -82,6 +82,10 @@ extern u32 cfgCluster;
 extern u32 cfgSize;
 extern u32 romFileType;
 extern u32 romIsCompressed;
+extern u32 consoleModel;
+extern u32 srParamsFileCluster;
+extern u32 srTid1;
+extern u32 srTid2;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -514,7 +518,19 @@ int arm7_main (void) {
 		return -1;
 	}
 
+	u32 standaloneFileCluster = CLUSTER_FREE;
+
+	u32 srParams = 0xFFFFFFFF;
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	fileRead((char*)&standaloneFileCluster, srParamsFile, 0, 4, -1);
+	fileWrite((char*)&srParams, srParamsFile, 0, 4, -1);
+
+	const bool ramDiskFound = (ramDiskCluster != 0 && ramDiskSize > 0);
+
 	aFile romFile = getFileFromCluster(storedFileCluster);
+	if (!ramDiskFound && (standaloneFileCluster != 0xFFFFFFFF)) {
+		romFile = getFileFromCluster(standaloneFileCluster);
+	}
 
 	const char* bootName = "BOOT.NDS";
 
@@ -527,41 +543,7 @@ int arm7_main (void) {
 		return -1;
 	}
 
-	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
-
-	// Load the NDS file
-	nocashMessage("Load the NDS file");
-	loadBinary_ARM7(romFile);
-
-	bool isGbaR2 = false;
-	u32 bannerOffset = 0;
-	char gbaR2Text[0x20];
-	fileRead((char*)&bannerOffset, romFile, 0x48, 4, -1);
-	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20, -1);
-	isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
-
-	// Patch with DLDI if desired
-	if (wantToPatchDLDI) {
-		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
-	}
-
-	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
-		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
-	}
-
-	if (dsiMode) {
-		dsiModeConfirmed = true;
-	} else {
-		NTR_BIOS();
-		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
-	}
-
-	// Pass command line arguments to loaded program
-	passArgs_ARM7();
-
-	if (ramDiskCluster != 0 && ramDiskSize > 0) {
+	if (ramDiskFound) {
 		void* ramDiskLocation = (void*)(dsiMode ? RAM_DISK_LOCATION_DSIMODE : RAM_DISK_LOCATION);
 		arm9_ramDiskCluster = ramDiskCluster;
 		if (ramDiskSize < (dsiMode ? 0x01001000 : 0x01C01000)) {
@@ -598,33 +580,71 @@ int arm7_main (void) {
 				//toncset((u32*)0x023A0000, 0, 0x40000);
 			}
 		}
+	}
+
+	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
+
+	bool isGbaR2 = false;
+	u32 bannerOffset = 0;
+	char gbaR2Text[0x20];
+	fileRead((char*)&bannerOffset, romFile, 0x48, 4, -1);
+	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20, -1);
+	isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+
+	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
+		NDSTouchscreenMode();
+		*(u16*)0x4000500 = 0x807F;
+	}
+
+	if (dsiMode) {
+		dsiModeConfirmed = true;
 	} else {
+		NTR_BIOS();
+		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+	}
+
+	// Load the NDS file
+	nocashMessage("Load the NDS file");
+	loadBinary_ARM7(romFile);
+
+	// Patch with DLDI if desired
+	if (wantToPatchDLDI) {
+		nocashMessage("wantToPatchDLDI");
+		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
+	}
+
+	// Pass command line arguments to loaded program
+	passArgs_ARM7();
+
+	if (!isGbaR2 && !ramDiskFound) {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		if (!isGbaR2) {
-			hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 
-			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
-			// Find and inject bootloader
-			u32* addr = (u32*)ndsHeader->arm9destination;
-			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-				if (addr[i]   == bootloaderSignature[0]
-				 && addr[i+1] == bootloaderSignature[1]
-				 && addr[i+2] == bootloaderSignature[2]
-				 && addr[i+3] == bootloaderSignature[3])
-				{
-					toncset(addr + i, 0, 0x9C98);
-					tonccpy(addr + i, (char*)0x06000000, 0x8000);
-					tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
-					break;
-				}
+		// Find and inject bootloader
+		u32* addr = (u32*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+			if (addr[i]   == bootloaderSignature[0]
+			 && addr[i+1] == bootloaderSignature[1]
+			 && addr[i+2] == bootloaderSignature[2]
+			 && addr[i+3] == bootloaderSignature[3])
+			{
+				toncset(addr + i, 0, 0x9C98);
+				toncset32((char*)0x06000024, consoleModel, 1);
+				toncset32((char*)0x06000028, srParamsFileCluster, 1);
+				toncset32((char*)0x0600002C, srTid1, 1);
+				toncset32((char*)0x06000030, srTid2, 1);
+				tonccpy(addr + i, (char*)0x06000000, 0x8000);
+				//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
+				break;
 			}
 		}
-		toncset((char*)0x06000000, 0, 0x8000);
 	}
+	toncset((char*)0x06000000, 0, 0x8000);
 
 	if (dsiMode) {
 		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory

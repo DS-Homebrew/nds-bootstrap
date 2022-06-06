@@ -60,6 +60,9 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "i2c.h"
+
+#include "sr_data_srllastran.h" // For rebooting the game
 
 void arm7clearRAM();
 
@@ -72,6 +75,44 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
+extern u32 consoleModel;
+extern u32 srParamsFileCluster;
+extern u32 srTid1;
+extern u32 srTid2;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+static const char *unlaunchAutoLoadID = "AutoLoadInfo";
+static const char *resetgameSrldrPath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
+
+static void unlaunchSetFilename(void) {
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
+	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
+	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
+													// Use colors 2000814h
+	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
+	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	int i2 = 0;
+	for (int i = 0; i < strlen(resetgameSrldrPath); i++) {
+		*(u8*)(0x02000838+i2) = resetgameSrldrPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+		i2 += 2;
+	}
+	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
+}
+
+static void readSrBackendId(void) {
+	// Use SR backend ID
+	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
+	*(u16*)(0x02000304) = 0x1801;
+	*(u32*)(0x02000308) = 0;
+	*(u32*)(0x0200030C) = 0;
+	*(u32*)(0x02000310) = srTid1;
+	*(u32*)(0x02000314) = srTid2;
+	*(u32*)(0x02000318) = /* srTid2 == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x0200031C) = 0;
+	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -300,6 +341,21 @@ int main (void) {
 	{
 		return -1;
 	}
+
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4, -1);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
+
+	if (srTid1 != 0) {
+		readSrBackendId();
+	} else if (consoleModel >= 2) {
+		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x20);
+	} else {
+		unlaunchSetFilename();
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
+
+	while (1);
 
 	// ARM9 clears its memory part 2
 	// copy ARM9 function to RAM, and make the ARM9 jump to it

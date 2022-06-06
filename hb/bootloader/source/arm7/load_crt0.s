@@ -38,6 +38,10 @@
 	.global cfgSize
 	.global romFileType
 	.global romIsCompressed
+	.global consoleModel
+	.global srParamsFileCluster
+	.global srTid1
+	.global srTid2
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -78,6 +82,14 @@ cfgSize:
 romFileType:
 	.word	0x00000000
 romIsCompressed:
+	.word	0x00000000
+consoleModel:
+	.word	0x00000000
+srParamsFileCluster:
+	.word	0x00000000
+srTid1:
+	.word	0x00000000
+srTid2:
 	.word	0x00000000
 
 startUp:

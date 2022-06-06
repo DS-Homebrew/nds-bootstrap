@@ -25,7 +25,7 @@
 #include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "sdmmcEngine.h"
-#include "i2c.h"
+//#include "i2c.h"
 
 //#include "sr_data_error.h"      // For showing an error screen
 //#include "sr_data_srloader.h"   // For rebooting into DSiMenu++

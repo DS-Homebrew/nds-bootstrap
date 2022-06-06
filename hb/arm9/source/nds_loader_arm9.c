@@ -82,6 +82,10 @@ dsiSD:
 #define CFG_SIZE_OFFSET 56
 #define ROM_FILE_TYPE_OFFSET 60
 #define ROM_IS_COMPRESSED_OFFSET 64
+#define CONSOLE_MODEL_OFFSET 68
+#define SOFTRESET_FILE_OFFSET 72
+#define SR_TID_1_OFFSET 76
+#define SR_TID_2_OFFSET 80
 
 
 typedef signed int addr_t;
@@ -284,7 +288,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2)
 {
 	char* argStart;
 	u16* argData;
@@ -360,6 +364,10 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_D, CFG_SIZE_OFFSET, cfgSize);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_FILE_TYPE_OFFSET, romToRamDisk);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
+	writeAddr ((data_t*) LCDC_BANK_D, CONSOLE_MODEL_OFFSET, consoleModel);
+	writeAddr ((data_t*) LCDC_BANK_D, SOFTRESET_FILE_OFFSET, srParamsCluster);
+	writeAddr ((data_t*) LCDC_BANK_D, SR_TID_1_OFFSET, srTid1);
+	writeAddr ((data_t*) LCDC_BANK_D, SR_TID_2_OFFSET, srTid2);
 
 		
 	if(dldiPatchNds) {
@@ -398,12 +406,14 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram) {
+int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, const char* srParamsFilename, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
 	struct stat st;
 	struct stat stRam;
 	struct stat stCfg;
+	struct stat stSr;
 	u32 clusterRam = 0;
 	u32 clusterCfg = 0;
+	u32 clusterSr = 0;
 	char filePath[PATH_MAX];
 	int pathLen;
 	const char* args[1];
@@ -462,6 +472,10 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 		clusterCfg = stCfg.st_ino;
 	}
 
+	if (stat(srParamsFilename, &stSr) >= 0) {
+		clusterSr = stSr.st_ino;
+	}
+
 	if (argc <= 0 || !argv) {
 		// Construct a command line if we weren't supplied with one
 		if (!getcwd (filePath, PATH_MAX)) {
@@ -479,7 +493,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram);
+	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
 }
 
 /*

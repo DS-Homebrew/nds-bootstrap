@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, u32 cfgSize, int language, int dsiMode, bool boostVram) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -160,7 +160,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -260,6 +260,9 @@ int main( int argc, char **argv) {
 			dbg_printf("VRAM boosted\n");
 		}
 
+		// Console model
+		int consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
+
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
 		for (int i = 0; i < 30; i++) { swiWaitForVBlank(); }
@@ -333,7 +336,24 @@ int main( int argc, char **argv) {
 			dbg_printf("RAM disk size: %x\n", ramDiskSize);
 		}
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, cfgSize, language, dsiMode, boostVram);
+		std::string srParamsFilePath = "fat:/_nds/nds-bootstrap/softResetParams.bin";
+	
+		if (getFileSize(srParamsFilePath.c_str()) < 0x10) {
+			u32 buffer = 0xFFFFFFFF;
+
+			FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "wb");
+			fwrite(&buffer, sizeof(u32), 1, srParamsFile);
+			fseek(srParamsFile, 0x10 - 1, SEEK_SET);
+			fputc('\0', srParamsFile);
+			fclose(srParamsFile);
+		}
+
+		u32 srBackendId[2] = {0};
+		FILE* srBackendBin = fopen("fat:/_nds/nds-bootstrap/srBackendId.bin", "rb");
+		fread(&srBackendId, sizeof(u32), 2, srBackendBin);
+		fclose(srBackendBin);
+
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, srBackendId[0], srBackendId[1]);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
