@@ -105,6 +105,17 @@ static const u32 homebrewAccelSigPatched[2] = {
 	0x037C0020
 };
 
+static const u32 swi00Sig[1] = {
+	0x4770DF00   , // SWI 0X05
+};
+
+static const u32 swi00Patched[3] = {
+	0x68004801   , // LDR     R0, =0x02FFFE34
+	               // LDR     R0, [R0]
+	0x00004700   , // BX      R0
+	0x02FFFE34
+};
+
 /*static const u32 swi05Sig[1] = {
 	0x4770DF05   , // SWI 0X05
 };*/
@@ -179,7 +190,7 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	return addr;
 }
 
-/*const u16* generateA7InstrThumb(int arg1, int arg2) {
+const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
 	// 23 bit offset
@@ -196,7 +207,35 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	return instrs;
 }
 
-static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
+static u32* hookSwi00(u32* hookAccel) {
+	u32* addr = hookAccel;
+	u32* end = addr + 0x200/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if (addr[0] == swi00Sig[0])
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	u32 dstAddr = (u32)hookAccel+8;
+	const u16* branchCode = generateA7InstrThumb((int)addr, dstAddr);
+
+	// patch the program
+	tonccpy(addr, branchCode, 4);
+
+	tonccpy((u32*)dstAddr, swi00Patched, 0xC);
+
+	return addr;
+}
+
+/*static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
 	u32* end = addr + size/sizeof(u32);
 
 	// Find the start of the handler
@@ -268,12 +307,16 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		nocashMessage("ACCEL_IPC_OK");
 	}
 
+	if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
+		hookSwi00(hookAccel);
+	}
+
 	/*if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
 		hookSwi05((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize, hookAccel, sdEngineLocation);
 	}*/
 
 	tonccpy (sdEngineLocation, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
-	tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
+	//tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
 	toncset ((u32*)SDENGINE_BUFFER_LOCATION, 0, 0x4000);
 
 	sdEngineLocation[1] = (u32)wordCommandAddr;
