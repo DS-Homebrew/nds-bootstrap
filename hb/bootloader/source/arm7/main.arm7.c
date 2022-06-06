@@ -82,10 +82,7 @@ extern u32 cfgCluster;
 extern u32 cfgSize;
 extern u32 romFileType;
 extern u32 romIsCompressed;
-extern u32 consoleModel;
 extern u32 srParamsFileCluster;
-extern u32 srTid1;
-extern u32 srTid2;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -634,10 +631,6 @@ int arm7_main (void) {
 			 && addr[i+3] == bootloaderSignature[3])
 			{
 				toncset(addr + i, 0, 0x9C98);
-				toncset32((char*)0x06000024, consoleModel, 1);
-				toncset32((char*)0x06000028, srParamsFileCluster, 1);
-				toncset32((char*)0x0600002C, srTid1, 1);
-				toncset32((char*)0x06000030, srTid2, 1);
 				tonccpy(addr + i, (char*)0x06000000, 0x8000);
 				//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 				break;

@@ -119,7 +119,7 @@ static void readSrBackendId(void) {
 
 #define FW_READ        0x03
 
-static void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
+/*static void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
   uint32 index;
 
   // Read command
@@ -150,7 +150,7 @@ static inline void copyLoop (u32* dest, const u32* src, u32 size) {
 	do {
 		*dest++ = *src++;
 	} while (size -= 4);
-}
+}*/
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
@@ -159,7 +159,7 @@ passArgs_ARM7
 Copies the command line arguments to the end of the ARM9 binary,
 then sets a flag in memory for the loaded NDS to use
 --------------------------------------------------------------------------*/
-static void passArgs_ARM7 (void) {
+/*static void passArgs_ARM7 (void) {
 	u32 ARM9_DST = *((u32*)(NDS_HEADER + 0x028));
 	u32 ARM9_LEN = *((u32*)(NDS_HEADER + 0x02C));
 	u32* argSrc;
@@ -176,7 +176,7 @@ static void passArgs_ARM7 (void) {
 	__system_argv->argvMagic = ARGV_MAGIC;
 	__system_argv->commandLine = (char*)argDst;
 	__system_argv->length = argSize;
-}
+}*/
 
 
 
@@ -188,7 +188,7 @@ Written by Darkain.
 Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
-static void resetMemory_ARM7 (void)
+/*static void resetMemory_ARM7 (void)
 {
 	int i, reg;
 	u8 settings1, settings2;
@@ -273,7 +273,7 @@ void loadBinary_ARM7 (aFile file)
 	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
 	ndsHeader[0x024>>2] = 0;
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEADER, 0x170);
-}
+}*/
 
 /*-------------------------------------------------------------------------
 startBinary_ARM7
@@ -282,7 +282,7 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-void startBinary_ARM7 (void) {
+/*void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
@@ -292,12 +292,12 @@ void startBinary_ARM7 (void) {
 	// Start ARM7
 	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
-}
+}*/
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Main function
 
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
@@ -320,12 +320,17 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 extern unsigned char dldiMagicString[12];
 
 void mpu_reset();
-void mpu_reset_end();
+void mpu_reset_end();*/
 
 int main (void) {
 	//nocashMessage("bootloader");
 
 	const char* bootName = "BOOT.NDS";
+
+	// ARM9 clears its memory part 2
+	// copy ARM9 function to RAM, and make the ARM9 jump to it
+	tonccpy((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
+	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 
 	// Init card
 	if(!FAT_InitFiles(true, 0))
@@ -356,7 +361,7 @@ int main (void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 
 	while (1);
-
+/*
 	// ARM9 clears its memory part 2
 	// copy ARM9 function to RAM, and make the ARM9 jump to it
 	copyLoop((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
@@ -413,7 +418,7 @@ int main (void) {
 			break;
 		}
 	}
-
+*/
 	//if (!dsiMode && ramDiskSize == 0) {
 	/*	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
 		bool recentLibnds =
@@ -433,7 +438,7 @@ int main (void) {
 	*(vu16*)(SDMMC_BASE + REG_DATACTL) &= 0xFFDDu;
 	*(vu16*)(SDMMC_BASE + REG_SDBLKLEN32) = 0;*/
 
-	startBinary_ARM7();
+	/*startBinary_ARM7();
 
-	return 0;
+	return 0;*/
 }

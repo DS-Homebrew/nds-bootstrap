@@ -82,10 +82,7 @@ dsiSD:
 #define CFG_SIZE_OFFSET 56
 #define ROM_FILE_TYPE_OFFSET 60
 #define ROM_IS_COMPRESSED_OFFSET 64
-#define CONSOLE_MODEL_OFFSET 68
-#define SOFTRESET_FILE_OFFSET 72
-#define SR_TID_1_OFFSET 76
-#define SR_TID_2_OFFSET 80
+#define SOFTRESET_FILE_OFFSET 68
 
 
 typedef signed int addr_t;
@@ -353,6 +350,11 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	}
 	*argData = argTempVal;
 	
+	writeAddr ((data_t*) LCDC_BANK_C, 0x24, consoleModel);
+	writeAddr ((data_t*) LCDC_BANK_C, 0x28, srParamsCluster);
+	writeAddr ((data_t*) LCDC_BANK_C, 0x2C, srTid1);
+	writeAddr ((data_t*) LCDC_BANK_C, 0x30, srTid2);
+
 	writeAddr ((data_t*) LCDC_BANK_D, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_D);
 	writeAddr ((data_t*) LCDC_BANK_D, ARG_SIZE_OFFSET, argSize);
 	writeAddr ((data_t*) LCDC_BANK_D, LANGUAGE_OFFSET, language);
@@ -364,10 +366,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_D, CFG_SIZE_OFFSET, cfgSize);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_FILE_TYPE_OFFSET, romToRamDisk);
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
-	writeAddr ((data_t*) LCDC_BANK_D, CONSOLE_MODEL_OFFSET, consoleModel);
 	writeAddr ((data_t*) LCDC_BANK_D, SOFTRESET_FILE_OFFSET, srParamsCluster);
-	writeAddr ((data_t*) LCDC_BANK_D, SR_TID_1_OFFSET, srTid1);
-	writeAddr ((data_t*) LCDC_BANK_D, SR_TID_2_OFFSET, srTid2);
 
 		
 	if(dldiPatchNds) {
