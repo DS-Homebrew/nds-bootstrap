@@ -58,9 +58,27 @@ Helpful information:
 //#include "my_sdmmc.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
+#include "patch.h"
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+
+u16 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched, some offsets removed
+										// the offset order changed, and/or the function signatures changed
+
+patchOffsetCacheContents patchOffsetCache;
+
+void rsetPatchCache(const tNDSHeader* ndsHeader)
+{
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 2
+	 || patchOffsetCache.headerCRC != ndsHeader->headerCRC16) {
+		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 2;	// 0 = Regular, 1 = B4DS, 2 = Homebrew
+		patchOffsetCache.headerCRC = ndsHeader->headerCRC16;
+	}
+}
 
 void arm7clearRAM();
 
@@ -82,6 +100,7 @@ extern u32 cfgCluster;
 extern u32 cfgSize;
 extern u32 romFileType;
 extern u32 romIsCompressed;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -604,10 +623,20 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
+	// File containing cached patch offsets
+	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
+	if (standaloneFileCluster == 0xFFFFFFFF) {
+		fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	}
+	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+
+	rsetPatchCache(ndsHeader);
+
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
+		patchOffsetCache.dldiChecked = true;
 	}
 
 	// Pass command line arguments to loaded program
@@ -615,29 +644,46 @@ int arm7_main (void) {
 
 	if (!isGbaR2 && !ramDiskFound) {
 		// Find the DLDI reserved space in the file
-		u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
+		u32 patchOffset = patchOffsetCache.dldiOffset;
+		if (!patchOffsetCache.dldiChecked) {
+			patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
+			if (patchOffset) {
+				patchOffsetCache.dldiOffset = patchOffset;
+			}
+			patchOffsetCache.dldiChecked = true;
+		}
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
 		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
 
-		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		if (!patchOffsetCache.bootloaderChecked) {
+			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
-		// Find and inject bootloader
-		u32* addr = (u32*)ndsHeader->arm9destination;
-		for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-			if (addr[i]   == bootloaderSignature[0]
-			 && addr[i+1] == bootloaderSignature[1]
-			 && addr[i+2] == bootloaderSignature[2]
-			 && addr[i+3] == bootloaderSignature[3])
-			{
-				toncset(addr + i, 0, 0x9C98);
-				tonccpy(addr + i, (char*)0x06000000, 0x8000);
-				//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
-				break;
+			// Find and inject bootloader
+			u32* addr = (u32*)ndsHeader->arm9destination;
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				if (addr[i]   == bootloaderSignature[0]
+				 && addr[i+1] == bootloaderSignature[1]
+				 && addr[i+2] == bootloaderSignature[2]
+				 && addr[i+3] == bootloaderSignature[3])
+				{
+					patchOffsetCache.bootloaderOffset = addr + i;
+					break;
+				}
 			}
+			patchOffsetCache.bootloaderChecked = true;
+		}
+		if (patchOffsetCache.bootloaderOffset) {
+			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
+			tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);
+			//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 		}
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
+
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion && (standaloneFileCluster == 0xFFFFFFFF)) {
+		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	}
 
 	if (dsiMode) {
 		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory

@@ -23,6 +23,7 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include "dldi_patcher.h"
+#include "patch.h"
 #include "tonccpy.h"
 
 #define FIX_ALL	0x01
@@ -120,11 +121,16 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	size_t dldiFileSize = 0;
 
 	// Find the DLDI reserved space in the file
-	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+	patchOffset = (addr_t)patchOffsetCache.dldiOffset;
+	if (!patchOffsetCache.dldiOffset) {
+		patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+	}
 
 	if (patchOffset < 0) {
 		// does not have a DLDI section
 		return false;
+	} else {
+		patchOffsetCache.dldiOffset = (u32)patchOffset;
 	}
 
 	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);

@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, string patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -160,7 +160,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath.c_str(), cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -203,6 +203,14 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
         start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
     return str;
+}
+
+bool extention(const std::string& filename, const char* ext) {
+	if(strcasecmp(filename.c_str() + filename.size() - strlen(ext), ext)) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 int main( int argc, char **argv) {
@@ -348,12 +356,34 @@ int main( int argc, char **argv) {
 			fclose(srParamsFile);
 		}
 
+		std::string patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/patchOffsetCache/"+filename;
+
+		const char *typeToReplace = ".nds";
+		if (extention(filename, ".dsi")) {
+			typeToReplace = ".dsi";
+		} else if (extention(filename, ".ids")) {
+			typeToReplace = ".ids";
+		} else if (extention(filename, ".srl")) {
+			typeToReplace = ".srl";
+		} else if (extention(filename, ".app")) {
+			typeToReplace = ".app";
+		}
+
+		patchOffsetCacheFilePath = ReplaceAll(patchOffsetCacheFilePath, typeToReplace, ".bin");
+		if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
+			char buffer[0x200] = {0};
+
+			FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath.c_str(), "wb");
+			fwrite(buffer, 1, sizeof(buffer), patchOffsetCacheFile);
+			fclose(patchOffsetCacheFile);
+		}
+
 		u32 srBackendId[2] = {0};
 		FILE* srBackendBin = fopen("fat:/_nds/nds-bootstrap/srBackendId.bin", "rb");
 		fread(&srBackendId, sizeof(u32), 2, srBackendBin);
 		fclose(srBackendBin);
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, srBackendId[0], srBackendId[1]);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, srBackendId[0], srBackendId[1]);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");

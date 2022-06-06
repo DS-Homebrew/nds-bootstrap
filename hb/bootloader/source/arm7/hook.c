@@ -20,6 +20,7 @@
 #include <nds/system.h>
 #include <nds/debug.h>
 
+#include "patch.h"
 #include "hook.h"
 #include "common.h"
 #include "tonccpy.h"
@@ -130,13 +131,6 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 		return NULL;
 	}
 
-	// patch the program
-	addr[0] = homebrewSigPatched[0];
-	addr[1] = homebrewSigPatched[1];
-	addr[2] = homebrewSigPatched[2];
-	addr[3] = homebrewSigPatched[3];
-	addr[4] = homebrewSigPatched[4];
-
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
 }
@@ -160,10 +154,6 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 		return NULL;
 	}
 
-	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
-
 	return addr;
 }
 
@@ -185,10 +175,6 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	if (addr >= end) {
 		return NULL;
 	}
-
-	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
 
 	return addr;
 }
@@ -238,27 +224,47 @@ static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocat
 }*/
 
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
-	u32* hookLocation = NULL;
-	u32* hookAccel = NULL;
+	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
+	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
 
 	nocashMessage("hookNds");
 
-	hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-
 	if (!hookLocation) {
-		nocashMessage("ERR_HOOK");
-		return ERR_HOOK;
+		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (hookLocation) {
+			patchOffsetCache.a7IrqHookOffset = hookLocation;
+		} else {
+			nocashMessage("ERR_HOOK");
+			return ERR_HOOK;
+		}
 	}
 
-	hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+	if (hookLocation) {
+		// patch the program
+		hookLocation[0] = homebrewSigPatched[0];
+		hookLocation[1] = homebrewSigPatched[1];
+		hookLocation[2] = homebrewSigPatched[2];
+		hookLocation[3] = homebrewSigPatched[3];
+		hookLocation[4] = homebrewSigPatched[4];
+	}
 
 	if (!hookAccel) {
-		hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (!hookAccel) {
+			hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		}
+		if (hookAccel) {
+			patchOffsetCache.a7IrqHookAccelOffset = hookAccel;
+		}
 	}
 
 	if (!hookAccel) {
 		nocashMessage("ACCEL_IPC_ERR");
 	} else {
+		// patch the program
+		hookAccel[0] = homebrewAccelSigPatched[0];
+		hookAccel[1] = homebrewAccelSigPatched[1];
+
 		nocashMessage("ACCEL_IPC_OK");
 	}
 

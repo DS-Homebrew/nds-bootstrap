@@ -38,6 +38,7 @@
 	.global cfgSize
 	.global romFileType
 	.global romIsCompressed
+	.global patchOffsetCacheFileCluster
 	.global srParamsFileCluster
 @---------------------------------------------------------------------------------
 	.align	4
@@ -79,6 +80,8 @@ cfgSize:
 romFileType:
 	.word	0x00000000
 romIsCompressed:
+	.word	0x00000000
+patchOffsetCacheFileCluster:
 	.word	0x00000000
 srParamsFileCluster:
 	.word	0x00000000
