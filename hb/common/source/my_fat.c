@@ -29,6 +29,8 @@
     project at chishm@hotmail.com
 ------------------------------------------------------------------*/
 
+#ifndef _NO_FAT
+
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "card.h"
@@ -1123,3 +1125,5 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;
 }
+
+#endif

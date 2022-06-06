@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _NO_FAT
+
 #include <string.h>
 #include <nds/debug.h>
 #include "my_fat.h"
@@ -47,3 +49,5 @@ u32 dbg_printf(const char* message) {
 u32 dbg_hexa(u32 n) {
 	return dbg_printf(tohex(n));
 }
+
+#endif

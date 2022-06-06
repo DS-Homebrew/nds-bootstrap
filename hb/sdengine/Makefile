@@ -34,7 +34,7 @@ COMMON	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-COMMON	+=	$(INCLUDE) -DARM7
+COMMON	+=	$(INCLUDE) -DARM7 -D_NO_FAT
 
 CFLAGS	:=	$(COMMON) -std=gnu99
 CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
