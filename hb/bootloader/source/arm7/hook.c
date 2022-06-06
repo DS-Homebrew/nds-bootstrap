@@ -207,7 +207,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
-static u32* hookSwi00(u32* hookAccel) {
+static u32* hookSwi0012(u32* hookAccel) {
 	u32* addr = hookAccel;
 	u32* end = addr + 0x200/sizeof(u32);
 
@@ -231,6 +231,17 @@ static u32* hookSwi00(u32* hookAccel) {
 	tonccpy(addr, branchCode, 4);
 
 	tonccpy((u32*)dstAddr, swi00Patched, 0xC);
+
+	if (!(REG_SCFG_ROM & BIT(9))) {
+		// Patch SWI 0x12 to 0x02 for DSi BIOS
+		u16* addrThumb = (u16*)addr;
+		for (u8 i = 0; i < 0x80/2; i++) {
+			if (addrThumb[i] == 0xDF12) {
+				addrThumb[i] = 0xDF02;
+				break;
+			}
+		}
+	}
 
 	return addr;
 }
@@ -308,7 +319,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	}
 
 	if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
-		hookSwi00(hookAccel);
+		hookSwi0012(hookAccel);
 	}
 
 	/*if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
