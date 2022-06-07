@@ -401,13 +401,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("sd:/_nds", 0777);
 		mkdir("sd:/_nds/nds-bootstrap", 0777);
 		mkdir("sd:/_nds/nds-bootstrap/patchOffsetCache", 0777);
-		mkdir("sd:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 	if (flashcardFound) {
 		mkdir("fat:/_nds", 0777);
 		mkdir("fat:/_nds/nds-bootstrap", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
-		mkdir("fat:/_nds/nds-bootstrap/fatTable", 0777);
 	}
 
 	pageFilePath = "sd:/_nds/pagefile.sys";

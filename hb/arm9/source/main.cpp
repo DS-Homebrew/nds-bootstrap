@@ -240,6 +240,10 @@ int main( int argc, char **argv) {
 
 		nitroFSInit(bootstrapPath.c_str());
 
+		mkdir("fat:/_nds", 0777);
+		mkdir("fat:/_nds/nds-bootstrap", 0777);
+		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+
 		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1").c_str(), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
 				iprintf("Please insert a cartridge...\n");
