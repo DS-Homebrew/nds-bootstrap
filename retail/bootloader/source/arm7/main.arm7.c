@@ -1011,6 +1011,9 @@ int arm7_main(void) {
 					savFile.fatTableCache = (u32*)fatTableAddr;
 				}
 			}
+			if (!startMem) {
+				fatTableAddr -= (fatTableAddr % 512); // Align end of heap to 512 bytes
+			}
 		} else {
 			lastClusterCacheUsed = (u32*)fatTableAddr;
 			clusterCache = fatTableAddr;
