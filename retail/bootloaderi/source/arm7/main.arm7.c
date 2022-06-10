@@ -1296,7 +1296,7 @@ int arm7_main(void) {
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 
-	if (!isDSiWare && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	if (!isDSiWare && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
