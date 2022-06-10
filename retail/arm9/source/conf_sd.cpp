@@ -934,7 +934,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 	}
-	if ((conf->gameOnFlashcard || !conf->isDSiWare) && (conf->extendedMemory || conf->dsiMode)) {
+	/*if ((conf->gameOnFlashcard || !conf->isDSiWare) && (conf->extendedMemory || conf->dsiMode)) {
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 		if (!found) {
 			consoleDemoInit();
@@ -950,7 +950,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (!found) {
 			consoleClear();
 		}
-	}
+	}*/
 
 	// Load ROMinRAM ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
@@ -1034,6 +1034,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+  }
+
 	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 	if (!found) {
 		consoleDemoInit();
@@ -1049,7 +1051,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!found) {
 		consoleClear();
 	}
-  }
 
 	// Load DS blowfish
 	cebin = fopen("nitro:/encr_data.bin", "rb");

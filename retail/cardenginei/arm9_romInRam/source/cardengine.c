@@ -56,6 +56,7 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
+bool ntrj = false;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static bool flagsSet = false;
@@ -438,6 +439,10 @@ void reset(u32 param, u32 tid2) {
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
+		if (!igmReset && ntrj) {
+			*(u32*)resetParam = 0;
+			*(u32*)(resetParam+8) = 0x44414F4C; // 'LOAD'
+		}
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
@@ -641,6 +646,8 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
+
+	ntrj = (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0);
 
 	hookIPC_SYNC();
 

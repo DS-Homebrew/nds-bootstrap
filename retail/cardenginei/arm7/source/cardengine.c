@@ -58,6 +58,7 @@
 #define cardReadDma BIT(9)
 #define hiyaCfwFound BIT(10)
 #define slowSoftReset BIT(11)
+#define isSdk5 BIT(12)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -309,7 +310,7 @@ static void initialize(void) {
 	}
 
 	#ifndef TWLSDK
-	if (isSdk5(moduleParams)) {
+	if (valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
@@ -321,10 +322,7 @@ static void initialize(void) {
 		personalData->language = language;
 	}
 
-	//if (isSdk5(moduleParams)) {
-	//	*(u16*)0x02fffc40 = 1;	// Change boot indicator to Slot-1 card
-	//}
-	romLocation = (char*)(((valueBits & dsiMode) || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	romLocation = (char*)(((valueBits & dsiMode) || (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (valueBits & extendedMemory) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
@@ -369,12 +367,17 @@ void restoreSdBakData(void) {
 
 void reset(void) {
 #ifndef TWLSDK
-	u32 resetParam = (isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	if ((valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory)) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
+		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
+			fileWrite(ndsHeader, pageFile, 0x2BFE00, 0x160, !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, ndsHeader->arm9binarySize, !sdRead, -1);
+			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
+		}
 		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
@@ -641,7 +644,7 @@ void dumpRam(void) {
 	if (valueBits & dsiMode) {
 		// Dump full RAM
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
-	} else if (isSdk5(moduleParams)) {
+	} else if (valueBits & isSdk5) {
 		// Dump RAM used in DS mode (SDK5)
 		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
 		fileWrite((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
@@ -1168,8 +1171,8 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
-	if (!funcsUnpatched && *(int*)(isSdk5(moduleParams) ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
-		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)(isSdk5(moduleParams) ? UNPATCHED_FUNCTION_LOCATION_SDK5 : UNPATCHED_FUNCTION_LOCATION);
+	if (!funcsUnpatched && *(int*)((valueBits & isSdk5) ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)((valueBits & isSdk5) ? UNPATCHED_FUNCTION_LOCATION_SDK5 : UNPATCHED_FUNCTION_LOCATION);
 
 		if (unpatchedFuncs->compressed_static_end) {
 			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;

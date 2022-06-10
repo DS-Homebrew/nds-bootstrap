@@ -580,12 +580,28 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	srlAddr = softResetParams[3];
-	fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
-	if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
-		// Invalid SRL
-		srlAddr = 0;
+	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
+	if (separateSrl) {
+		srlAddr = 0xFFFFFFFF;
+		aFile pageFile = getFileFromCluster(pageFileCluster);
+
+		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160, !sdRead, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
+	} else {
+		srlAddr = softResetParams[3];
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+		if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
+			// Invalid SRL
+			srlAddr = 0;
+			fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+		}
+
+		// Load binaries into memory
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
+		if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
+			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
+		}
 	}
 
 	char baseTid[5] = {0};
@@ -606,26 +622,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
-    /*if (
-		strncmp(romTid, "APDE", 4) == 0    // Pokemon Dash
-	) {
-		// read statically the 6D2C4 function data 
-        fileRead(0x0218A960, file, 0x000CE000, 0x1000, 0);
-        fileRead(0x020D6340, file, 0x000D2400, 0x200, 0);
-        fileRead(0x020D6140, file, 0x000CFA00, 0x200, 0);
-        fileRead(0x023B9F00, file, 0x000CFC00, 0x2800, 0);
-	}*/
-
 	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
         ;*/
-
-
-	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
-	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
-	}
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -1101,17 +1100,19 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
 		resetParamLoc[0] = softResetParams[0];
 		resetParamLoc[1] = softResetParams[1];
-		resetParamLoc[2] = softResetParams[2];
+		if (softResetParams[2] != 0x44414F4C) {
+			resetParamLoc[2] = softResetParams[2];
+		}
 		resetParamLoc[3] = softResetParams[3];
 	}
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
 
 	const char* romTid = getRomTid(ndsHeader);
-	if (!dsiModeConfirmed && 
+	if ((!dsiModeConfirmed && 
 		(strncmp(romTid, "KPP", 3) == 0 	// Pop Island
 	  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
-	)
+	) || (srlAddr > 0) || (softResetParams[2] == 0x44414F4C))
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 2;					// Boot Indicator (Cloneboot/Multiboot)
 	}

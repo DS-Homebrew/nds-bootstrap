@@ -252,7 +252,7 @@ eepromReadThumbStub:
 _blx_r3_stubthumb7:
 	bx	r4
 .pool
-	
+
 cardIdThumbStub:
 	ldr r0, cardIdDataT
 	bx      lr

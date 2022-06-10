@@ -45,7 +45,7 @@
 #define b_cardReadDma BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
-#define b_wideCheatUsed BIT(12)
+#define b_isSdk5 BIT(12)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -312,7 +312,6 @@ int hookNdsRetailArm7(
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
 		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
-		ce7->moduleParams             = moduleParams;
 		ce7->fileCluster              = fileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
 		ce7->ramDumpCluster           = ramDumpCluster;
@@ -348,6 +347,9 @@ int hookNdsRetailArm7(
 		}
 		if (cardReadDMA) {
 			ce7->valueBits |= b_cardReadDma;
+		}
+		if (isSdk5(moduleParams)) {
+			ce7->valueBits |= b_isSdk5;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
@@ -429,7 +431,6 @@ int hookNdsRetailArm7(
 			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, !sdRead, 0);
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
-			ce7->valueBits |= b_wideCheatUsed;
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, !sdRead, 0);
