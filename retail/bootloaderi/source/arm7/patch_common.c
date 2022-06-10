@@ -42,6 +42,11 @@ extern u8 dsiSD;
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
+	//const char* chnFontPath = "sdmc:/sys/CHNFontTable.dat";
+
+	/*if (ndsHeader->arm7binarySize == 0xF548) {
+		tonccpy((char*)0x02E929BC, chnFontPath, strlen(chnFontPath));
+	}*/
 
 	// Absolute BrickBuster (USA)
 	if (strcmp(romTid, "K6QE") == 0) {

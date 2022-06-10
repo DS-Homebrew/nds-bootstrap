@@ -138,6 +138,7 @@ bool overlaysInRam = false;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
+u32 baseRomSize = 0;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
@@ -549,7 +550,7 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }
 
 static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
-	return (ndsHeader->romSize+0x88) - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
+	return (baseRomSize+0x88) - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }
 
 /*static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
@@ -622,6 +623,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
+	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32), !sdRead, 0);
+
 	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
         ;*/
@@ -658,7 +661,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		u32 romSize = (ndsHeader->romSize-0x8000)+0x88;
+		u32 romSize = (baseRomSize-0x8000)+0x88;
 		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize : romSize) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01800000)
@@ -783,6 +786,10 @@ static void NTR_BIOS() {
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
+	if (memcmp(romTid, "NTRJ", 4) == 0) {
+		return;
+	}
+
 	// Load overlays into RAM
 	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x280000 : 0x200000) : 0x700000))) {
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
@@ -822,7 +829,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 	}
 
 	u16 romOffset = 0x8000;
-	u32 romSizeEdit = (ndsHeader->romSize-0x8000)+0x88;
+	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (romSizeEdit >= romSizeLimit) {
 		tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
@@ -855,7 +862,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 			toncset((char*)IMAGES_LOCATION, 0, 0x8000);
 			toncset((char*)IMAGES_LOCATION+0x8000, 0xFF, 0x8000);
 			u32 offsetEnd = (romSize > (romSizeLimit-0x400000)+0x8000) ? (romSizeLimit-0x400000)+0x8000 : romSize;
-			for (u32 offset = ndsHeader->romSize+0x88; offset < offsetEnd; offset += 0x8000) { // Load more data beyond ROM size in header (Some ROM hacks may need this)
+			for (u32 offset = baseRomSize+0x88; offset < offsetEnd; offset += 0x8000) { // Load more data beyond ROM size in header (Some ROM hacks may need this)
 				toncset((char*)IMAGES_LOCATION+0x10000, 0, 0x8000); // Clear leftover data
 				fileRead((char*)IMAGES_LOCATION+0x10000, *romFile, offset, 0x8000, !sdRead, 0);
 				if ((memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION, 0x8000) != 0) && (memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION+0x8000, 0x8000) != 0)) {
@@ -1655,7 +1662,7 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead(&clonebootFlag, *romFile, ndsHeader->romSize, sizeof(u32), !sdRead, -1);
+		fileRead(&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 
 		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);

@@ -169,7 +169,7 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if ((expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize < romSizeLimit) {
+	if (strncmp(romTid, "NTRJ", 4) != 0 && (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize < romSizeLimit) {
 		ce9->valueBits |= b_overlaysInRam;
 	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {

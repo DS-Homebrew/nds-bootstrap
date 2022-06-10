@@ -121,6 +121,7 @@ u32 fatTableAddr = 0;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
+u32 baseRomSize = 0;
 
 u16 s2FlashcardId = 0;
 
@@ -420,7 +421,7 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }
 
 /*static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
-	return ndsHeader->romSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
+	return baseRomSize - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }*/
 
 // SDK 5
@@ -448,6 +449,14 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	fileRead(&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
 	fileRead(&accessControl, file, srlAddr+0x1B4, sizeof(u32));
 
+	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+
+	// Load binaries into memory
+	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
+	if (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0)) {
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
+	}
+
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
 	if (
@@ -466,13 +475,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
-	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
-
-	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-	if (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0)) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
-	}
+	fileRead((char*)&baseRomSize, file, 0x80, 4);
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -520,7 +523,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (arm9iromOffset-0x8000)+ioverlaysSize : (ndsHeader->romSize-0x8000)+0x88) < romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (arm9iromOffset-0x8000)+ioverlaysSize : (baseRomSize-0x8000)+0x88) < romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -650,6 +653,10 @@ static void startBinary_ARM7(void) {
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
+	if (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0) {
+		return;
+	}
+
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
@@ -782,7 +789,8 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	const char* romTid = getRomTid(ndsHeader);
 	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
 	 || strncmp(romTid, "KPF", 3) == 0		// Pop Island: Paperfield
-	 || strncmp(romTid, "KGK", 3) == 0)	// Glory Days: Tactical Defense
+	 || strncmp(romTid, "KGK", 3) == 0		// Glory Days: Tactical Defense
+	 || (srlAddr > 0) || (softResetParams[2] == 0x44414F4C))
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
