@@ -468,7 +468,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	) {
 		// Fix Pokemon games needing header data.
 		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
-		*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
+		//*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
+		fileRead(ndsHeaderPokemon, file, 0, 0x160);
 
 		// Make the Pokemon game code ADAJ.
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
@@ -780,7 +781,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
 		resetParamLoc[0] = softResetParams[0];
 		resetParamLoc[1] = softResetParams[1];
-		resetParamLoc[2] = softResetParams[2];
+		if (softResetParams[2] != 0x44414F4C) {
+			resetParamLoc[2] = softResetParams[2];
+		}
 		resetParamLoc[3] = softResetParams[3];
 	}
 
@@ -794,6 +797,10 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
+
+	/*if (softResetParams[2] == 0x44414F4C) {
+		*((u16*)(isSdk5(moduleParams) ? 0x02fffcfa : 0x027ffcfa)) = 0x1041;	// NoCash: channel ch1+7+13 (Doesn't seem to work)
+	}*/
 }
 
 int arm7_main(void) {
