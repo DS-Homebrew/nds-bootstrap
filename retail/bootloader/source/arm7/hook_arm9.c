@@ -15,6 +15,7 @@
 #define b_overlaysInRam BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
+#define b_softResetMb BIT(13)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -143,6 +144,7 @@ int hookNdsRetailArm9(
 
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romSizeLimit;
+	extern bool softResetMb;
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -174,6 +176,9 @@ int hookNdsRetailArm9(
 	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {
 		ce9->valueBits |= b_cacheFlushFlag;
+	}
+	if (softResetMb) {
+		ce9->valueBits |= b_softResetMb;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;

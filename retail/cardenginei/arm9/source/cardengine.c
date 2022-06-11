@@ -49,6 +49,7 @@
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
 #define asyncCardRead BIT(12)
+#define softResetMb BIT(13)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -80,7 +81,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
-bool ntrj = false;
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
@@ -602,7 +602,7 @@ void reset(u32 param) {
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
-		if (!igmReset && ntrj) {
+		if (!igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)RESET_PARAM = 0;
 			*(u32*)(RESET_PARAM+8) = 0x44414F4C; // 'LOAD'
 		}
@@ -751,8 +751,6 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
-
-	ntrj = (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0);
 
 	hookIPC_SYNC();
 

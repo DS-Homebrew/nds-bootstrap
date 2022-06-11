@@ -24,6 +24,7 @@
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
 #define b_asyncCardRead BIT(12)
+#define b_softResetMb BIT(13)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -144,6 +145,7 @@ int hookNdsRetailArm9(
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	const char* romTid = getRomTid(ndsHeader);
+	extern bool softResetMb;
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -175,6 +177,9 @@ int hookNdsRetailArm9(
 	}
 	if (asyncCardRead) {
 		ce9->valueBits |= b_asyncCardRead;
+	}
+	if (softResetMb) {
+		ce9->valueBits |= b_softResetMb;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;

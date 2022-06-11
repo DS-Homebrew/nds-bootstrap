@@ -6,6 +6,8 @@
 
 //#define memset __builtin_memset
 
+bool softResetMb = false;
+
 //
 // Subroutine function signatures ARM9
 //
@@ -2591,6 +2593,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			if (resetOffset) {
 				dbg_printf("Reset found\n");
 				dbg_printf("\n");
+				softResetMb = true;
 				return resetOffset;
 			} else {
 				dbg_printf("Reset not found\n");

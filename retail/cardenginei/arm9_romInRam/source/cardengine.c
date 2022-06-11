@@ -47,6 +47,7 @@
 #define overlaysInRam BIT(6)
 #define a7HaltPatched BIT(9)
 #define slowSoftReset BIT(10)
+#define softResetMb BIT(13)
 
 //extern void user_exception(void);
 
@@ -56,7 +57,6 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
-bool ntrj = false;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 static bool flagsSet = false;
@@ -439,7 +439,7 @@ void reset(u32 param, u32 tid2) {
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
-		if (!igmReset && ntrj) {
+		if (!igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)resetParam = 0;
 			*(u32*)(resetParam+8) = 0x44414F4C; // 'LOAD'
 		}
@@ -646,8 +646,6 @@ u32 myIrqEnable(u32 irq) {
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
-
-	ntrj = (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0);
 
 	hookIPC_SYNC();
 
