@@ -438,24 +438,33 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	srlAddr = softResetParams[3];
-	fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
-	if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
-		// Invalid SRL
-		srlAddr = 0;
+	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
+	if (separateSrl) {
+		srlAddr = 0xFFFFFFFF;
+		aFile pageFile = getFileFromCluster(pageFileCluster);
+
+		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0x14000, dsiHeaderTemp->ndshdr.arm9binarySize);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize);
+	} else {
+		srlAddr = softResetParams[3];
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
+		if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
+			// Invalid SRL
+			srlAddr = 0;
+			fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
+		}
+		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+
+		// Load binaries into memory
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
+		if (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0)) {
+			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
+		}
 	}
 
-	fileRead(&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
-	fileRead(&accessControl, file, srlAddr+0x1B4, sizeof(u32));
-
-	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
-
-	// Load binaries into memory
-	fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-	if (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == 0)) {
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
-	}
+	fileRead((u32*)&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
+	fileRead((u32*)&accessControl, file, srlAddr+0x1B4, sizeof(u32));
 
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);

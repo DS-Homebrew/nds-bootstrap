@@ -13,6 +13,7 @@ extern u32 newArm7binarySize;
 static const u32 wramEndAddr[1]                = {0x0380FF00};
 static const u32 wramClearSignature1[2]        = {0xE92D4010, 0xE3A00008};
 static const u32 wramClearSignature3[3]        = {0xE92D4010, 0xE24DD008, 0xE3A00008};
+static const u32 wramClearSignature3Alt[1]     = {0xE1C507BA};
 static const u32 wramClearSignature4[1]        = {0xE1C407BA};
 static const u32 wramClearSignature5[2]        = {0xE92D4038, 0xE3A05008};
 static const u32 wramClearSignatureTwlEarly[3] = {0xE92D4070, 0xE1A06000, 0xE3560001};
@@ -208,6 +209,20 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 				dbg_printf("WRAM clear offset (SDK2) thumb found\n");
 			} else {
 				dbg_printf("WRAM clear offset (SDK2) thumb not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x800,
+				wramClearSignature3Alt, 1
+			);
+			if (offset) {
+				dbg_printf("WRAM clear offset (SDK3) alt found\n");
+				dbg_printf("\n");
+				return offset + 3;
+			} else {
+				dbg_printf("WRAM clear offset (SDK3) alt not found\n");
 			}
 		}
 

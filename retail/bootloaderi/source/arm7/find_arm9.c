@@ -2570,8 +2570,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
     u32 * resetOffset = NULL;
 
-	const char* romTid = getRomTid(ndsHeader);
-	if ((memcmp(romTid, "NTRJ", 4) == 0) && (moduleParams->sdk_version < 0x5000000)) {
+	if ((memcmp(getRomTid(ndsHeader), "NTRJ", 4) == 0) && (moduleParams->sdk_version < 0x5000000)) {
 		u32* resetConstOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			resetConstantMb, 1

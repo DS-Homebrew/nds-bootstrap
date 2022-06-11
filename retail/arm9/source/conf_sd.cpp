@@ -32,6 +32,7 @@
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
+#define ntrPageFileSize 0x400000
 #define twlPageFileSize 0x600000
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
@@ -1161,6 +1162,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+	if (!found) {
+		consoleDemoInit();
+		iprintf("Creating pagefile.sys\n");
+		iprintf("Please wait...\n");
+	}
+
+	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+	fseek(cebin, ntrPageFileSize - 1, SEEK_SET);
+	fputc('\0', cebin);
+	fclose(cebin);
+
+	if (!found) {
+		consoleClear();
+	}
+
 	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
 	if (cebin) {
@@ -1173,12 +1190,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		fclose(cebin);
 
-		if (access(pageFilePath.c_str(), F_OK) != 0) {
+		/*if (access(pageFilePath.c_str(), F_OK) != 0) {
 			cebin = fopen(pageFilePath.c_str(), "wb");
 			fseek(cebin, 0x14000 - 1, SEEK_SET);
 			fputc('\0', cebin);
 			fclose(cebin);
-		}
+		}*/
 		cebin = fopen(pageFilePath.c_str(), "r+");
 		fwrite((u8*)INGAME_MENU_LOCATION_B4DS, 1, 0xA000, cebin);
 		fclose(cebin);

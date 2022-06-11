@@ -62,6 +62,7 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 
 extern vu32* volatile cardStruct0;
 
+bool ntrj = false;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 arm9iromOffset = 0;
 static u32 arm9ibinarySize = 0;
@@ -485,8 +486,17 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 void reset(u32 param) {
 	setDeviceOwner();
-	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
-	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
+	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	if (ntrj) {
+		*(u32*)resetParams = 0;
+		*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
+		fileWrite(ndsHeader, pageFile, 0x2BFE00, 0x160);
+		fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, ndsHeader->arm9binarySize);
+		fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+	} else {
+		*(u32*)resetParams = param;
+	}
+	fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }
@@ -549,6 +559,8 @@ u32 myIrqEnable(u32 irq) {
 	}
 
 	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
+
+	ntrj = (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0);
 
 	hookIPC_SYNC();
 
