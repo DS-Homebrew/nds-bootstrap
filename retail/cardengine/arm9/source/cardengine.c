@@ -142,15 +142,14 @@ void reset(u32 param) {
 		enterCriticalSection();
 		if (isDSiWare) {
 			sharedAddr[0] = 0x57495344; // 'DSIW'
-			fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
 		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)resetParams = 0;
 			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
 			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, ndsHeader->arm9binarySize);
 			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
-			fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
 		}
+		fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
 		sharedAddr[3] = 0x52534554;
 		while (1);
 	}
