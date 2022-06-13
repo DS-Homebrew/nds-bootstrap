@@ -71,7 +71,7 @@ jobs:
           cp nds-bootstrap.7z ~/artifacts
           cp nds-bootstrap.zip ~/artifacts
       - name: Publish build to GH Actions
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ~/artifacts/*
           name: build
