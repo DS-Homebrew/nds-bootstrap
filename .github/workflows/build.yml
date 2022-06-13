@@ -26,7 +26,7 @@ jobs:
       commit_message: ${{ steps.vars.outputs.commit_message }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Install tools
         run: |
           sudo apt-get update
@@ -91,7 +91,7 @@ jobs:
       current_date: ${{ steps.commit.outputs.current_date }}
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: build
           path: build
