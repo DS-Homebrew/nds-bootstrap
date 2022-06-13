@@ -552,10 +552,11 @@ int arm7_main (void) {
 		romFile = getFileFromCluster(standaloneFileCluster);
 	}
 
-	const char* bootName = "BOOT.NDS";
+	//const char* bootName = "BOOT.NDS";
 
 	if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
-		romFile = getBootFileCluster(bootName, 0);
+		//romFile = getBootFileCluster(bootName, 0);
+		return -1;
 	}
 
 	if (romFile.firstCluster == CLUSTER_FREE) {

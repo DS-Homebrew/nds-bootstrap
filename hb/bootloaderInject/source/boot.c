@@ -326,7 +326,7 @@ int main (void) {
 	//nocashMessage("bootloader");
 
 	extern char _io_dldi;
-	const char* bootName = "BOOT.NDS";
+	//const char* bootName = "BOOT.NDS";
 
 	if(memcpy(_io_dldi, "RAMD", 4) == 0)
 	{
