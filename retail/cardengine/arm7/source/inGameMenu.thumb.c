@@ -16,6 +16,7 @@ extern bool ipcEveryFrame;
 extern bool returnToMenu;
 
 extern void rebootConsole(void);
+extern void reset(void);
 
 volatile int timeTillStatusRefresh = 7;
 
@@ -60,6 +61,11 @@ void inGameMenu(void) {
 			switch (sharedAddr[4]) {
 				case 0x54495845: // EXIT
 					exitMenu = true;
+					break;
+				case 0x54455352: // RSET
+					exitMenu = true;
+					timeTillStatusRefresh = 7;
+					reset();
 					break;
 				case 0x54495551: // QUIT
 					rebootConsole();

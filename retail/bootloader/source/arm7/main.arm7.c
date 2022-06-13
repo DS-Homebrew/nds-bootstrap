@@ -1146,6 +1146,14 @@ int arm7_main(void) {
 		}
 	}
 
+	extern u32 iUncompressedSize;
+	aFile pageFile = getFileFromCluster(pageFileCluster);
+
+	fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
+	fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
+	fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
+	fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
+
 	arm9_boostVram = boostVram;
 
 	if (esrbScreenPrepared) {

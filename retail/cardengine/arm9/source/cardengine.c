@@ -21,9 +21,12 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
+#include <nds/dma.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
+#include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
 #include "hex.h"
@@ -91,8 +94,10 @@ static inline void setDeviceOwner(void) {
 
 static bool initialized = false;
 static bool region0FixNeeded = false;
+static bool igmReset = false;
 static bool mpuSet = false;
 static bool mariosHolidayPrimaryFixApplied = false;
+static bool isDSiWare = false;
 
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
@@ -125,22 +130,51 @@ void setExceptionHandler2() {
 	*exceptionC = user_exception;
 }
 
-/*void reset(u32 param) {
+extern void region0Fix(); // Revert region 0 patch
+extern void sdk5MpuFix();
+extern void resetMpu();
+
+void reset(u32 param) {
 	setDeviceOwner();
-	*(u32*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM) = param;
-	fileWrite((char*)((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM), srParamsFile, 0, 0x10);
+	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	*(u32*)resetParams = param;
+	if (isDSiWare || param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+		enterCriticalSection();
+		if (isDSiWare) {
+			sharedAddr[0] = 0x57495344; // 'DSIW'
+			fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
+		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
+			*(u32*)resetParams = 0;
+			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
+			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, ndsHeader->arm9binarySize);
+			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
+		}
+		sharedAddr[3] = 0x52534554;
+		while (1);
+	}
 	sharedAddr[3] = 0x52534554;
 
-	EXCEPTION_VECTOR_SDK1 = 0;
+	//EXCEPTION_VECTOR_SDK1 = 0;
 
-	volatile u32 arm9_BLANK_RAM = 0;
+	//volatile u32 arm9_BLANK_RAM = 0;
  	register int i;
 
 	REG_IME = 0;
 	REG_IE = 0;
 	REG_IF = ~0;
 
-	toncset((u32*)0x01FF8000, 0, 0x8000);
+	//toncset((u32*)0x01FF8000, 0, 0x8000);
+
+	cacheFlush();
+	resetMpu();
+
+	if (igmReset) {
+		igmReset = false;
+	} else {
+		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
+	}
 
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
@@ -156,37 +190,47 @@ void setExceptionHandler2() {
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
-	VRAM_A_CR = 0x80;
-	VRAM_B_CR = 0x80;
-	VRAM_C_CR = 0x80;
-	VRAM_D_CR = 0x80;
-	VRAM_E_CR = 0x80;
-	VRAM_F_CR = 0x80;
-	VRAM_G_CR = 0x80;
-	VRAM_H_CR = 0x80;
-	VRAM_I_CR = 0x80;
-	BG_PALETTE[0] = 0xFFFF;
-	dmaFill((u16*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
-	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
+	mpuSet = false;
+	IPC_SYNC_hooked = false;
+	mariosHolidayPrimaryFixApplied = false;
 
-	REG_DISPSTAT = 0;
+	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
+	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
-	VRAM_A_CR = 0;
-	VRAM_B_CR = 0;
-	VRAM_C_CR = 0;
-	VRAM_D_CR = 0;
-	VRAM_E_CR = 0;
-	VRAM_F_CR = 0;
-	VRAM_G_CR = 0;
-	VRAM_H_CR = 0;
-	VRAM_I_CR = 0;
-	REG_POWERCNT = 0x820F;
+	/*if (isDSiWare) {
+		REG_DISPSTAT = 0;
+		REG_DISPCNT = 0;
+		REG_DISPCNT_SUB = 0;
 
-	mpuFullRam();
+		toncset((u16*)0x04000000, 0, 0x56);
+		toncset((u16*)0x04001000, 0, 0x56);
+
+		VRAM_A_CR = 0x80;
+		VRAM_B_CR = 0x80;
+		VRAM_C_CR = 0x80;
+		VRAM_D_CR = 0x80;
+		VRAM_E_CR = 0x80;
+		VRAM_F_CR = 0x80;
+		VRAM_G_CR = 0x80;
+		VRAM_H_CR = 0x80;
+		VRAM_I_CR = 0x80;
+
+		toncset16(BG_PALETTE, 0, 256); // Clear palettes
+		toncset16(BG_PALETTE_SUB, 0, 256);
+		toncset(VRAM, 0, 0xC0000); // Clear VRAM
+
+		VRAM_A_CR = 0;
+		VRAM_B_CR = 0;
+		VRAM_C_CR = 0;
+		VRAM_D_CR = 0;
+		VRAM_E_CR = 0;
+		VRAM_F_CR = 0;
+		VRAM_G_CR = 0;
+		VRAM_H_CR = 0;
+		VRAM_I_CR = 0;
+	}*/
+
+	/*mpuFullRam();
 
 	*(u32*)(0x02000000) = BIT(0) | BIT(1);
 	if (param == 0xFFFFFFFF) {
@@ -208,16 +252,24 @@ void setExceptionHandler2() {
 
 	if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
 		while (1);
-	}
+	}*/
+
+	u32 iUncompressedSize = 0;
+	u32 newArm7binarySize = 0;
+	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
+	fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
+	fileRead((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
+	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
+	sharedAddr[3] = 0;
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
 	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
 	arm9code();
-}*/
+}
 
 s8 mainScreen = 0;
 
@@ -313,7 +365,10 @@ void myIrqHandlerIPC(void) {
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
-			if (sharedAddr[3] == 0x444D4152) { // RAMD
+			if (sharedAddr[3] == 0x52534554) {
+				igmReset = true;
+				reset(0);
+			} else if (sharedAddr[3] == 0x444D4152) { // RAMD
 				#ifdef EXTMEM
 				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
 				fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
@@ -359,12 +414,18 @@ static void initialize(void) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		}
 
+		if (ndsHeader->unitCode > 0) {
+			u32 buffer = 0;
+			fileRead((char*)&buffer, romFile, 0x234, sizeof(u32));
+			isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
+		}
+
 		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
 			fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
 			fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
 			if (ndsHeader->unitCode == 3) {
-				fileRead(&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
-				fileRead(&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+				fileRead((char*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
+				fileRead((char*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
 
 				fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
 			}
@@ -418,9 +479,6 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     counter++;
 	return counter;
 }
-
-extern void region0Fix(); // Revert region 0 patch
-extern void sdk5MpuFix();
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
@@ -484,7 +542,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 
-void reset(u32 param) {
+/*void reset(u32 param) {
 	setDeviceOwner();
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	if (ce9->valueBits & softResetMb) {
@@ -499,7 +557,7 @@ void reset(u32 param) {
 	fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
 	sharedAddr[3] = 0x52534554;
 	while (1);
-}
+}*/
 
 void rumble(u32 arg) {
 	sharedAddr[0] = ce9->rumbleFrames[0];
@@ -528,37 +586,9 @@ u32 myIrqEnable(u32 irq) {
 		setExceptionHandler2();
 	}
 
-	if (unpatchedFuncs->compressed_static_end) {
-		*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
-	}
-
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
-		*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
-
-		if (unpatchedFuncs->mpuAccessOffset) {
-			if (unpatchedFuncs->mpuOldInstrAccess) {
-				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
-			}
-			if (unpatchedFuncs->mpuOldDataAccess) {
-				unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
-			}
-		}
 	}
-
-	if (unpatchedFuncs->mpuInitCacheOffset) {
-		*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
-	}
-
-	if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
-		*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
-	}
-
-	if (unpatchedFuncs->mpuDataOffset2) {
-		*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
-	}
-
-	toncset((char*)unpatchedFuncs, 0, sizeof(unpatchedFunctions));
 
 	hookIPC_SYNC();
 

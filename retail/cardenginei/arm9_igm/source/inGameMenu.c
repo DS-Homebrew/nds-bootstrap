@@ -726,8 +726,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	MenuItem menuItems[8];
 	int menuItemCount = 0;
 	menuItems[menuItemCount++] = MENU_EXIT;
-#ifndef B4DS
 	menuItems[menuItemCount++] = MENU_RESET;
+#ifndef B4DS
 	menuItems[menuItemCount++] = MENU_SCREENSHOT;
 	if(igmText.manualMaxLine > 0)
 		menuItems[menuItemCount++] = MENU_MANUAL;

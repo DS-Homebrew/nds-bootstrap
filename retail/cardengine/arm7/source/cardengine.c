@@ -16,13 +16,15 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string.h> // memcpy
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/fifomessages.h>
+#include <nds/dma.h>
 #include <nds/ipc.h>
-#include <nds/interrupts.h>
 #include <nds/system.h>
+#include <nds/interrupts.h>
 #include <nds/input.h>
+#include <nds/timers.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 #include <nds/memory.h> // tNDSHeader
@@ -30,6 +32,7 @@
 
 #include "locations.h"
 #include "module_params.h"
+#include "unpatched_funcs.h"
 #include "cardengine.h"
 #include "nds_header.h"
 #include "tonccpy.h"
@@ -56,6 +59,8 @@ extern u8 RumblePakType;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static bool initialized = false;
+static bool bootloaderCleared = false;
+static bool funcsUnpatched = false;
 
 //static int saveReadTimeOut = 0;
 
@@ -79,6 +84,7 @@ static int swapTimer = 0;
 static int languageTimer = 0;
 static bool halfVolume = false;
 bool returnToMenu = false;
+bool isSdk5Set = false;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -114,15 +120,20 @@ static void initialize(void) {
 		return;
 	}
 
-	ndsHeader = (tNDSHeader*)(isSdk5(moduleParams) ? NDS_HEADER_SDK5 : NDS_HEADER);
-	personalData = (PERSONAL_DATA*)(isSdk5(moduleParams) ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
+	isSdk5Set = isSdk5(moduleParams);
+
+	ndsHeader = (tNDSHeader*)(isSdk5Set ? NDS_HEADER_SDK5 : NDS_HEADER);
+	personalData = (PERSONAL_DATA*)(isSdk5Set ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
 
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language;
 	}
 
-	toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+	if (!bootloaderCleared) {
+		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		bootloaderCleared = true;
+	}
 
 	initialized = true;
 }
@@ -172,7 +183,12 @@ void rebootConsole(void) {
 	sharedAddr[3] = 0;
 }
 
-/*void reset(void) {
+void reset(void) {
+	u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
+	if (sharedAddr[0] == 0x57495344 || *(u32*)resetParam == 0xFFFFFFFF || *(u32*)(resetParam+0xC) > 0) {
+		rebootConsole();
+	}
+
 	register int i;
 	
 	REG_IME = 0;
@@ -185,6 +201,13 @@ void rebootConsole(void) {
 	}
 
 	REG_SOUNDCNT = 0;
+	REG_SNDCAP0CNT = 0;
+	REG_SNDCAP1CNT = 0;
+
+	REG_SNDCAP0DAD = 0;
+	REG_SNDCAP0LEN = 0;
+	REG_SNDCAP1DAD = 0;
+	REG_SNDCAP1LEN = 0;
 
 	// Clear out ARM7 DMA channels and timers
 	for (i = 0; i < 4; i++) {
@@ -206,6 +229,10 @@ void rebootConsole(void) {
 	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
+	initialized = false;
+	funcsUnpatched = false;
+	languageTimer = 0;
+
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
@@ -214,7 +241,7 @@ void rebootConsole(void) {
 	// Start ARM7
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
-}*/
+}
 
 
 //---------------------------------------------------------------------------------
@@ -239,6 +266,41 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
+	if (!funcsUnpatched && *(int*)(isSdk5Set ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+
+		if (unpatchedFuncs->compressed_static_end) {
+			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
+		}
+
+		if (unpatchedFuncs->mpuDataOffset) {
+			*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
+
+			if (unpatchedFuncs->mpuAccessOffset) {
+				if (unpatchedFuncs->mpuOldInstrAccess) {
+					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+				}
+				if (unpatchedFuncs->mpuOldDataAccess) {
+					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+				}
+			}
+		}
+
+		if (unpatchedFuncs->mpuInitCacheOffset) {
+			*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
+		}
+
+		if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
+			*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
+		}
+
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
+
+		funcsUnpatched = true;
+	}
+
 	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
 		inGameMenu();
 	}
@@ -258,7 +320,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		rebootConsole();
+		reset();
 	}
 
 	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {

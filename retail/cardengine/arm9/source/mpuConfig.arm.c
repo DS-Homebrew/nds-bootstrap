@@ -9,3 +9,6 @@ void sdk5MpuFix() {
 	asm("LDR R0,=#0x2000031\n\tmcr p15, 0, r0, C6,C1,0");
 }
 
+void resetMpu() {
+	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
+}
