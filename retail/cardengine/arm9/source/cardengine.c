@@ -137,10 +137,13 @@ extern void resetMpu();
 void reset(u32 param) {
 	setDeviceOwner();
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	u32 iUncompressedSize = 0;
+	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
+
 	*(u32*)resetParams = param;
-	if (isDSiWare || param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+	if (isDSiWare || iUncompressedSize > 0x280000 || param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
 		enterCriticalSection();
-		if (isDSiWare) {
+		if (isDSiWare || iUncompressedSize > 0x280000) {
 			sharedAddr[0] = 0x57495344; // 'DSIW'
 		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)resetParams = 0;
@@ -253,9 +256,7 @@ void reset(u32 param) {
 		while (1);
 	}*/
 
-	u32 iUncompressedSize = 0;
 	u32 newArm7binarySize = 0;
-	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
 	fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
 	fileRead((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
 	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
