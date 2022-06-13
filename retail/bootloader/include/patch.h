@@ -67,6 +67,7 @@ typedef struct patchOffsetCacheContents {
 	u32* a9CardIrqEnableOffset;
 	u32 a9CardIrqIsThumb;
 	u32* resetOffset;
+	u32 resetMb;
 	u32 resetChecked;
 	u32* nandTmpJumpFuncOffset;
 	u32 nandTmpJumpFuncChecked;

@@ -685,7 +685,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	u32* reset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
-		reset = findResetOffset(ndsHeader, moduleParams);
+		reset = findResetOffset(ndsHeader, moduleParams, (bool*)&patchOffsetCache.resetMb);
 		if (reset) patchOffsetCache.resetOffset = reset;
 		patchOffsetCache.resetChecked = true;
 	}

@@ -63,7 +63,7 @@ Helpful information:
 #include "common.h"
 #include "locations.h"
 
-u16 patchOffsetCacheFileVersion = 1;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 2;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -71,12 +71,10 @@ patchOffsetCacheContents patchOffsetCache;
 void rsetPatchCache(const tNDSHeader* ndsHeader)
 {
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 2
-	 || patchOffsetCache.headerCRC != ndsHeader->headerCRC16) {
+	 || patchOffsetCache.type != 2) {
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
 		patchOffsetCache.type = 2;	// 0 = Regular, 1 = B4DS, 2 = Homebrew
-		patchOffsetCache.headerCRC = ndsHeader->headerCRC16;
 	}
 }
 
@@ -539,7 +537,13 @@ int arm7_main (void) {
 	u32 srParams = 0xFFFFFFFF;
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&standaloneFileCluster, srParamsFile, 0, 4, -1);
-	fileWrite((char*)&srParams, srParamsFile, 0, 4, -1);
+	if (standaloneFileCluster != 0xFFFFFFFF) {
+		fileWrite((char*)&srParams, srParamsFile, 0, 4, -1);
+		srParams = 0;
+		fileWrite((char*)&srParams, srParamsFile, 4, 4, -1);
+		fileWrite((char*)&srParams, srParamsFile, 8, 4, -1);
+		fileWrite((char*)&srParams, srParamsFile, 0xC, 4, -1);
+	}
 
 	const bool ramDiskFound = (ramDiskCluster != 0 && ramDiskSize > 0);
 
@@ -625,9 +629,7 @@ int arm7_main (void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	if (standaloneFileCluster == 0xFFFFFFFF) {
-		fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
-	}
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	rsetPatchCache(ndsHeader);
@@ -681,7 +683,7 @@ int arm7_main (void) {
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion && (standaloneFileCluster == 0xFFFFFFFF)) {
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
 

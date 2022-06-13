@@ -1281,9 +1281,7 @@ int arm7_main(void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	if (srlAddr == 0) {
-		fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
-	}
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	nocashMessage("Loading the header...\n");
@@ -1742,7 +1740,7 @@ int arm7_main(void) {
 			consoleModel
 		);
 
-		if (srlAddr == 0 && (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged)) {
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
 

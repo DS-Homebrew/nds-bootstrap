@@ -6,8 +6,6 @@
 
 //#define memset __builtin_memset
 
-bool softResetMb = false;
-
 //
 // Subroutine function signatures ARM9
 //
@@ -1501,7 +1499,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	return randomPatchOffset;
 }
 
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	dbg_printf("findResetOffset\n");
     u32* resetSignature = resetSignature2;
 
@@ -1535,7 +1533,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			if (resetOffset) {
 				dbg_printf("Reset found\n");
 				dbg_printf("\n");
-				softResetMb = true;
+				*softResetMb = true;
 				return resetOffset;
 			} else {
 				dbg_printf("Reset not found\n");

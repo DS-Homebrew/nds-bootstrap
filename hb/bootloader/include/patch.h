@@ -6,7 +6,6 @@
 typedef struct patchOffsetCacheContents {
     u16 ver;
     u16 type;
-	u32 headerCRC;
 	u32 dldiOffset;
 	u32 dldiChecked;
 	u32* wordCommandOffset;

@@ -24,7 +24,7 @@
 
 u8 lz77ImageBuffer[0x20000];
 
-std::string patchOffsetCacheFilePath;
+char patchOffsetCacheFilePath[64];
 std::string wideCheatFilePath;
 std::string cheatFilePath;
 std::string ramDumpPath;
@@ -431,7 +431,7 @@ static int runNdsFile(configuration* conf) {
 		clusterApPatch = stApPatch.st_ino;
 	}
 
-	if (stat(patchOffsetCacheFilePath.c_str(), &stPatchOffsetCache) >= 0) {
+	if (stat(patchOffsetCacheFilePath, &stPatchOffsetCache) >= 0) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
 

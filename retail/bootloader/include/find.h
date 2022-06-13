@@ -64,7 +64,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 // ARM7

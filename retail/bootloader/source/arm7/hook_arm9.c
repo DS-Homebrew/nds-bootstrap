@@ -144,7 +144,6 @@ int hookNdsRetailArm9(
 
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romSizeLimit;
-	extern bool softResetMb;
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -177,7 +176,7 @@ int hookNdsRetailArm9(
 	if (strncmp(romTid, "CLJ", 3) == 0) {
 		ce9->valueBits |= b_cacheFlushFlag;
 	}
-	if (softResetMb) {
+	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
 	}
 	ce9->overlaysSize           = overlaysSize;

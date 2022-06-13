@@ -325,7 +325,13 @@ void mpu_reset_end();*/
 int main (void) {
 	//nocashMessage("bootloader");
 
+	extern char _io_dldi;
 	const char* bootName = "BOOT.NDS";
+
+	if(memcpy(_io_dldi, "RAMD", 4) == 0)
+	{
+		return -1;
+	}
 
 	// ARM9 clears its memory part 2
 	// copy ARM9 function to RAM, and make the ARM9 jump to it
@@ -340,15 +346,21 @@ int main (void) {
 	aFile file = getFileFromCluster(storedFileCluster);
 	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
-		file = getBootFileCluster(bootName, 0);
+		//file = getBootFileCluster(bootName, 0);
+		return -1;
 	}
 	if (file.firstCluster == CLUSTER_FREE)
 	{
 		return -1;
 	}
 
+	u8 tidCrc[6] = {0};
+	fileRead(tidCrc, file, 0xC, 4, -1);
+	fileRead(tidCrc+4, file, 0x15E, 2, -1);
+
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4, -1);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
+	fileWrite(tidCrc, srParamsFile, 4, 6, -1);
 
 	if (srTid1 != 0) {
 		readSrBackendId();

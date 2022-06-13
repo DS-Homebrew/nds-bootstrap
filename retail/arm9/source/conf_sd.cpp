@@ -56,7 +56,7 @@ static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srl
 
 extern const DISC_INTERFACE __my_io_dsisd;
 
-extern std::string patchOffsetCacheFilePath;
+extern char patchOffsetCacheFilePath[64];
 extern std::string wideCheatFilePath;
 extern std::string cheatFilePath;
 extern std::string ramDumpPath;
@@ -418,6 +418,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u8 unitCode = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
+	u16 headerCRC = 0;
 	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
 	u32 ndsArm9isrc = 0;
@@ -438,6 +439,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
 		fread(&fatAddr, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x15E, SEEK_SET);
+		fread(&headerCRC, sizeof(u16), 1, ndsFile);
 		fseek(ndsFile, 0x1A0, SEEK_SET);
 		fread(&a7mbk6, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1B4, SEEK_SET);
@@ -1321,15 +1324,42 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(srParamsFile);
 	}
 
-	patchOffsetCacheFilePath = "sd:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
-	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
-		patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/patchOffsetCache/"+romFilename;
+	u32 srlAddr = 0;
+	bool srlFromPageFile = false;
+
+	if (access(srParamsFilePath.c_str(), F_OK) == 0) {
+		u32 buffer = 0;
+		FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb");
+		fseek(srParamsFile, 8, SEEK_SET);
+		fread(&buffer, sizeof(u32), 1, srParamsFile);
+		//fseek(srParamsFile, 0xC, SEEK_SET);
+		fread(&srlAddr, sizeof(u32), 1, srParamsFile);
+		fclose(srParamsFile);
+		srlFromPageFile = (buffer == 0x44414F4C); // 'LOAD'
 	}
-	
-	if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
+
+	if (srlFromPageFile) {
+		FILE* pageFile = fopen(pageFilePath.c_str(), "rb");
+		fseek(pageFile, 0x2BFE0C, SEEK_SET);
+		fread(&romTid, 1, 4, pageFile);
+		fseek(pageFile, 0x2BFF5E, SEEK_SET);
+		fread(&headerCRC, sizeof(u16), 1, pageFile);
+		fclose(pageFile);
+	} else if (srlAddr > 0) {
+		FILE* ndsFile = fopen(conf->ndsPath, "rb");
+		fseek(ndsFile, srlAddr+0xC, SEEK_SET);
+		fread(&romTid, 1, 4, ndsFile);
+		fseek(ndsFile, srlAddr+0x15E, SEEK_SET);
+		fread(&headerCRC, sizeof(u16), 1, ndsFile);
+		fclose(ndsFile);
+	}
+
+	sprintf(patchOffsetCacheFilePath, "%s:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') ? "fat" : "sd", romTid, headerCRC);
+
+	if (access(patchOffsetCacheFilePath, F_OK) != 0) {
 		char buffer[0x200] = {0};
 
-		FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath.c_str(), "wb");
+		FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath, "wb");
 		fwrite(buffer, 1, sizeof(buffer), patchOffsetCacheFile);
 		fclose(patchOffsetCacheFile);
 	}

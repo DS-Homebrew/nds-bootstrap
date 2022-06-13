@@ -80,7 +80,7 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, string patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -160,7 +160,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath.c_str(), cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -360,24 +360,44 @@ int main( int argc, char **argv) {
 			fclose(srParamsFile);
 		}
 
-		std::string patchOffsetCacheFilePath = "fat:/_nds/nds-bootstrap/patchOffsetCache/"+filename;
+		bool tidCrcFromSrParams = false;
+		char romTid[5] = {0};
+		u16 headerCRC = 0;
 
-		const char *typeToReplace = ".nds";
-		if (extention(filename, ".dsi")) {
-			typeToReplace = ".dsi";
-		} else if (extention(filename, ".ids")) {
-			typeToReplace = ".ids";
-		} else if (extention(filename, ".srl")) {
-			typeToReplace = ".srl";
-		} else if (extention(filename, ".app")) {
-			typeToReplace = ".app";
+		if (access(srParamsFilePath.c_str(), F_OK) == 0) {
+			u32 buffer = 0;
+			FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb");
+			fread(&buffer, sizeof(u32), 1, srParamsFile);
+			tidCrcFromSrParams = (buffer != 0xFFFFFFFF);
+			if (tidCrcFromSrParams) {
+				fread(romTid, 1, 4, srParamsFile);
+				fread(&headerCRC, sizeof(u16), 1, srParamsFile);
+			}
+			fclose(srParamsFile);
 		}
 
-		patchOffsetCacheFilePath = ReplaceAll(patchOffsetCacheFilePath, typeToReplace, ".bin");
-		if (access(patchOffsetCacheFilePath.c_str(), F_OK) != 0) {
+		if (!tidCrcFromSrParams) {
+			FILE* ndsFile = fopen(ndsPath.c_str(), "rb");
+			fseek(ndsFile, 0xC, SEEK_SET);
+			fread(romTid, 1, 4, ndsFile);
+			fseek(ndsFile, 0x15E, SEEK_SET);
+			fread(&headerCRC, sizeof(u16), 1, ndsFile);
+			fclose(ndsFile);
+		}
+
+		if (romTid[0] == 0) {
+			// Fix blank TID
+			for (int i = 0; i < 4; i++) {
+				romTid[i] = '#';
+			}
+		}
+
+		char patchOffsetCacheFilePath[64];
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", romTid, headerCRC);
+		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
 			char buffer[0x200] = {0};
 
-			FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath.c_str(), "wb");
+			FILE* patchOffsetCacheFile = fopen(patchOffsetCacheFilePath, "wb");
 			fwrite(buffer, 1, sizeof(buffer), patchOffsetCacheFile);
 			fclose(patchOffsetCacheFile);
 		}
