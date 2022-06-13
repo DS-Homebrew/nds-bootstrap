@@ -368,6 +368,12 @@ u32 patchCardNdsArm7(
 
 	//patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 
+	const u32 cardId = getChipId(ndsHeader, moduleParams);
+	u32* cardIdPatch = (u32*)ce7->patches->arm7Functions->cardId;
+	u32* cardIdPatchThumb = (u32*)ce7->patches->arm7FunctionsThumb->cardId;
+	cardIdPatch[2] = cardId;
+	cardIdPatchThumb[1] = cardId;
+
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
 
