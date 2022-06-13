@@ -524,7 +524,7 @@ static void jumpToAddress(void) {
 static void ramViewer(void) {
 	clearScreen();
 
-	u8 *arm7RamBuffer = ((u8*)sharedAddr) - 0x94C;
+	u8 *arm7RamBuffer = ((u8*)sharedAddr) - 0x74C;
 	bool ramLoaded = false;
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
