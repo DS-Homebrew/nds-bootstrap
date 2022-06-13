@@ -268,7 +268,7 @@ u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
 
 	u32* swi12Offset = (u32*)findOffsetThumb(
-		(u16*)ndsHeader->arm9destination, 0x00000800,//ndsHeader->arm9binarySize,
+		(u16*)ndsHeader->arm9destination, 0x850,//ndsHeader->arm9binarySize,
 		swi12Signature, 2
 	);
 	if (swi12Offset) {
