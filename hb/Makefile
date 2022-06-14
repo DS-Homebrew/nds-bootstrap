@@ -169,6 +169,7 @@ dldi/dsisd.dldi:
 #---------------------------------------------------------------------------------		
 bootloader: $(DATA) sdengine
 	@$(MAKE) -C bootloader
+	@dlditool dldi/dsisd.dldi data/load.bin
 
 #---------------------------------------------------------------------------------		
 bootloaderInject: $(DATA) sdengine

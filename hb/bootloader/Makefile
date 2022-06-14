@@ -99,7 +99,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 $(LOADBIN)	:	$(LOADELF)
-	@dlditool ../../dldi/dsisd.dldi $@
+
 
 $(LOADELF)	:	$(OFILES)
 	@echo linking $(notdir $@)
