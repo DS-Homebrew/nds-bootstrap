@@ -92,8 +92,8 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+//static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+/*static const*/ data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 static const data_t ramdFriendlyNameString[] = "RAM disk\x00\x00\xA0\xE1\x00\x00\xA0\xE1";
 static const data_t ramdIoTypeString[] = "RAMD";
 
@@ -123,7 +123,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	// Find the DLDI reserved space in the file
 	patchOffset = (addr_t)patchOffsetCache.dldiOffset;
 	if (!patchOffsetCache.dldiOffset) {
-		patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+		patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
 	}
 
 	if (patchOffset < 0) {
@@ -186,7 +186,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	}
 
 	// Put the correct DLDI magic string back into the DLDI header
-	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	tonccpy (pAH, dldiMagicLoaderString, sizeof (dldiMagicLoaderString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file

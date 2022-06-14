@@ -153,15 +153,18 @@ $(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004
 #			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
-	dlditool dldi/dsisd.dldi $(CURDIR)/$(BIN)/$(TARGET).nds
 
 #---------------------------------------------------------------------------------
 arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootloaderInject bootstub dldi/dsisd.dldi
+arm9/$(TARGET).elf:	dldi/dsisd.dldi bootloader bootloaderInject bootstub
 	@$(MAKE) -C arm9
+
+#---------------------------------------------------------------------------------	
+dldi/dsisd.dldi:
+	@$(MAKE) -C dldi
 
 #---------------------------------------------------------------------------------		
 bootloader: $(DATA) sdengine
@@ -175,10 +178,6 @@ bootloaderInject: $(DATA) sdengine
 bootstub: $(DATA)
 	@$(MAKE) -C bootstub
 
-#---------------------------------------------------------------------------------	
-dldi/dsisd.dldi:
-	@$(MAKE) -C dldi
-	
 #---------------------------------------------------------------------------------	
 sdengine: data
 	@$(MAKE) -C sdengine

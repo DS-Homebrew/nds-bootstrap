@@ -134,7 +134,7 @@ static void writeAddr (data_t *mem, addr_t offset, addr_t value) {
 	((addr_t*)mem)[offset/sizeof(addr_t)] = value;
 }
 
-static void vramcpy (void* dst, const void* src, int len)
+/*static void vramcpy (void* dst, const void* src, int len)
 {
 	u16* dst16 = (u16*)dst;
 	u16* src16 = (u16*)src;
@@ -282,7 +282,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	}
 
 	return true;
-}
+}*/
 
 char imgTemplateBuffer[0xEA00];
 
@@ -371,14 +371,14 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_D, SOFTRESET_FILE_OFFSET, srParamsCluster);
 
 		
-	if(dldiPatchNds) {
+	/*if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
 		if (!dldiPatchLoader ((data_t*)LCDC_BANK_D, loaderSize, initDisc)) {
 			nocashMessage("return 3");
 			return 3;
 		}
-	}
+	}*/
 	
 	nocashMessage("irqDisable(IRQ_ALL);");
 
@@ -522,7 +522,7 @@ dldiOffset:
 dsiSD:
 	.word	0
 */
-bool installBootStub(bool havedsiSD) {
+/*bool installBootStub(bool havedsiSD) {
 #ifndef _NO_BOOTSTUB_
 	nocashMessage("installBootStub");
 	extern char *fake_heap_end;
@@ -551,5 +551,5 @@ bool installBootStub(bool havedsiSD) {
 	return true;
 #endif
 
-}
+}*/
 

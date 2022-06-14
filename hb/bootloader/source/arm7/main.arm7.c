@@ -510,7 +510,7 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	return -1;
 }
 
-static const unsigned char dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+extern unsigned char dldiMagicLoaderString[0xC];
 
 int arm7_main (void) {
 	nocashMessage("bootloader");
@@ -635,6 +635,8 @@ int arm7_main (void) {
 
 	rsetPatchCache(ndsHeader);
 
+	dldiMagicLoaderString[0]--;
+
 	// Patch with DLDI if desired
 	if (wantToPatchDLDI) {
 		nocashMessage("wantToPatchDLDI");
@@ -649,7 +651,7 @@ int arm7_main (void) {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = patchOffsetCache.dldiOffset;
 		if (!patchOffsetCache.dldiChecked) {
-			patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
+			patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicLoaderString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicLoaderString));
 			if (patchOffset) {
 				patchOffsetCache.dldiOffset = patchOffset;
 			}
