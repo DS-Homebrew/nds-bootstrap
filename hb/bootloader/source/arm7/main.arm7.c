@@ -68,6 +68,8 @@ u16 patchOffsetCacheFileVersion = 2;	// Change when new functions are being patc
 
 patchOffsetCacheContents patchOffsetCache;
 
+bool patchOffsetCacheChanged = false;
+
 void rsetPatchCache(const tNDSHeader* ndsHeader)
 {
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
@@ -85,7 +87,7 @@ void arm7clearRAM();
 extern unsigned long _start;
 extern unsigned long storedFileCluster;
 extern unsigned long initDisc;
-extern unsigned long wantToPatchDLDI;
+//extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
@@ -628,6 +630,13 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
+	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+	bool recentLibnds =
+		  (a9exe[0] == 0xE3A00301
+		&& a9exe[1] == 0xE5800208
+		&& a9exe[2] == 0xE3A00013
+		&& a9exe[3] == 0xE129F000);
+
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
@@ -638,16 +647,17 @@ int arm7_main (void) {
 	dldiMagicLoaderString[0]--;
 
 	// Patch with DLDI if desired
-	if (wantToPatchDLDI) {
+	if (!recentLibnds || (recentLibnds && !dsiModeConfirmed) || ramDiskFound) {
 		nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 		patchOffsetCache.dldiChecked = true;
+		patchOffsetCacheChanged = true;
 	}
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
-	if (!isGbaR2 && !ramDiskFound) {
+	if (!isGbaR2 && !ramDiskFound && (!recentLibnds || !dsiModeConfirmed)) {
 		// Find the DLDI reserved space in the file
 		u32 patchOffset = patchOffsetCache.dldiOffset;
 		if (!patchOffsetCache.dldiChecked) {
@@ -656,6 +666,7 @@ int arm7_main (void) {
 				patchOffsetCache.dldiOffset = patchOffset;
 			}
 			patchOffsetCache.dldiChecked = true;
+			patchOffsetCacheChanged = true;
 		}
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
@@ -677,6 +688,7 @@ int arm7_main (void) {
 				}
 			}
 			patchOffsetCache.bootloaderChecked = true;
+			patchOffsetCacheChanged = true;
 		}
 		if (patchOffsetCache.bootloaderOffset) {
 			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
@@ -686,7 +698,7 @@ int arm7_main (void) {
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion) {
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
 
@@ -699,17 +711,9 @@ int arm7_main (void) {
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
-	if (!dsiMode && ramDiskSize == 0) {
-		u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
-		bool recentLibnds =
-			  (a9exe[0] == 0xE3A00301
-			&& a9exe[1] == 0xE5800208
-			&& a9exe[2] == 0xE3A00013
-			&& a9exe[3] == 0xE129F000);
-		if (recentLibnds) {
-			arm9_stateFlag = ARM9_LOCKSCFG;
-			while (arm9_stateFlag != ARM9_READY);
-		}
+	if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
+		arm9_stateFlag = ARM9_LOCKSCFG;
+		while (arm9_stateFlag != ARM9_READY);
 	}
 
 	/*sdmmc_init(true);
