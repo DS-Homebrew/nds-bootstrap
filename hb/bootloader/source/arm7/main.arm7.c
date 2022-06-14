@@ -103,6 +103,8 @@ extern u32 romIsCompressed;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
 
+u8 TWL_HEAD[0x1000] = {0};
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
 
@@ -156,9 +158,29 @@ static void passArgs_ARM7 (void) {
 
 	if (!argStart || !argSize) return;
 
+	if ( ARM9_DST == 0 && ARM9_LEN == 0) {
+		ARM9_DST = *((u32*)(NDS_HEADER + 0x038));
+		ARM9_LEN = *((u32*)(NDS_HEADER + 0x03C));
+	}
+
 	argSrc = (u32*)(argStart + (int)&_start);
 
 	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned
+
+	if (ARM9_LEN > 0x380000) {
+		argDst = (u32*)0x02FFA000;
+	} else
+	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
+	{
+		u32 ARM9i_DST = *((u32*)(TWL_HEAD + 0x1C8));
+		u32 ARM9i_LEN = *((u32*)(TWL_HEAD + 0x1CC));
+		if (ARM9i_LEN)
+		{
+			u32* argDst2 = (u32*)((ARM9i_DST + ARM9i_LEN + 3) & ~3);		// Word aligned
+			if (argDst2 > argDst)
+				argDst = argDst2;
+		}
+	}
 
 	copyLoop(argDst, argSrc, argSize);
 
@@ -286,6 +308,11 @@ static void loadBinary_ARM7 (aFile file)
 	// read NDS header
 	fileRead((char*)NDS_HEADER, file, 0, 0x170, 0);
 	fileRead((char*)&dsiFlags, file, 0x1BF, 1, -1);
+
+	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
+	{
+		fileRead((char*)TWL_HEAD, file, 0, 0x1000, 0);
+	}
 
 	// Load binaries into memory
 	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
@@ -702,8 +729,9 @@ int arm7_main (void) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	}
 
-	if (dsiMode) {
+	if (dsiModeConfirmed) {
 		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory
+		tonccpy ((char*)0x02FFE000, (char*)TWL_HEAD, 0x1000);
 	}
 
 	arm9_boostVram = boostVram;
@@ -711,7 +739,7 @@ int arm7_main (void) {
 	while (arm9_stateFlag != ARM9_READY);
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
-	if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
+	if (!dsiModeConfirmed && ramDiskSize == 0 && recentLibnds) {
 		arm9_stateFlag = ARM9_LOCKSCFG;
 		while (arm9_stateFlag != ARM9_READY);
 	}
