@@ -309,14 +309,27 @@ static void loadBinary_ARM7 (aFile file)
 	fileRead((char*)NDS_HEADER, file, 0, 0x170, 0);
 	fileRead((char*)&dsiFlags, file, 0x1BF, 1, -1);
 
-	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
-	{
-		fileRead((char*)TWL_HEAD, file, 0, 0x1000, 0);
-	}
-
 	// Load binaries into memory
 	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
 	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
+
+	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
+	{
+		// Read full TWL header
+		fileRead((char*)TWL_HEAD, file, 0, 0x1000, 0);
+
+		u32 ARM9i_SRC = *(u32*)(TWL_HEAD+0x1C0);
+		char* ARM9i_DST = (char*)*(u32*)(TWL_HEAD+0x1C8);
+		u32 ARM9i_LEN = *(u32*)(TWL_HEAD+0x1CC);
+		u32 ARM7i_SRC = *(u32*)(TWL_HEAD+0x1D0);
+		char* ARM7i_DST = (char*)*(u32*)(TWL_HEAD+0x1D8);
+		u32 ARM7i_LEN = *(u32*)(TWL_HEAD+0x1DC);
+
+		if (ARM9i_LEN)
+			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 0);
+		if (ARM7i_LEN)
+			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 0);
+	}
 }
 
 static void NDSTouchscreenMode(void) {
@@ -489,8 +502,10 @@ static void NDSTouchscreenMode(void) {
 
 static void NTR_BIOS() {
 	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
-	nocashMessage("Switch to NTR mode BIOS");
 	REG_SCFG_ROM = 0x703;
+	if (REG_SCFG_ROM == 0x703) {
+		nocashMessage("Switched to NTR mode BIOS");
+	}
 }
 
 /*-------------------------------------------------------------------------
@@ -731,6 +746,9 @@ int arm7_main (void) {
 	if (dsiModeConfirmed) {
 		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory
 		tonccpy ((char*)0x02FFE000, (char*)TWL_HEAD, 0x1000);
+		if (recentLibnds) {
+			REG_MBK6=0x00403000;
+		}
 	}
 
 	arm9_boostVram = boostVram;
