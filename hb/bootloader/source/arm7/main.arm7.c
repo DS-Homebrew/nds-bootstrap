@@ -678,7 +678,6 @@ int arm7_main (void) {
 		nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 		patchOffsetCache.dldiChecked = true;
-		patchOffsetCacheChanged = true;
 	}
 
 	// Pass command line arguments to loaded program
