@@ -748,6 +748,8 @@ int arm7_main (void) {
 		tonccpy ((char*)0x02FFE000, (char*)TWL_HEAD, 0x1000);
 		if (recentLibnds) {
 			REG_MBK6=0x00403000;
+		} else {
+			tonccpy ((char*)NDS_HEADER_8MB, (char*)NDS_HEADER, 0x1000);
 		}
 	}
 
