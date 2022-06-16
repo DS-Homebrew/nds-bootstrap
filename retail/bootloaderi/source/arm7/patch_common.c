@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 79;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 80;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;

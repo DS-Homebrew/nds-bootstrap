@@ -1089,6 +1089,19 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		dbg_printf("irq enable not found\n");
 	}
 
+	if (!cardIrqEnableOffset && moduleParams->sdk_version < 0x4000000) {
+		// SDK 4
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize,
+            irqEnableStartSignature4, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable SDK 4 found\n");
+		} else {
+			dbg_printf("irq enable SDK 4 not found\n");
+		}
+	}
+
 	if (!cardIrqEnableOffset) {
 		// SDK 5
 		cardIrqEnableOffset = findOffset(
