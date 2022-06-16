@@ -647,8 +647,6 @@ int arm7_main (void) {
 		}
 	}
 
-	REG_GPIO_WIFI &= BIT(8);	// New Atheros/DSi-Wifi mode
-
 	bool isGbaR2 = false;
 	u32 bannerOffset = 0;
 	char gbaR2Text[0x20];
