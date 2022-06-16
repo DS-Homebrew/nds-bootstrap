@@ -1038,7 +1038,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		irqEnableStartSignature, 4
 	);
 	if (cardIrqEnableOffset) {
-		dbg_printf("irq enable found: ");
+		dbg_printf("irq enable found\n");
 	} else {
 		dbg_printf("irq enable not found\n");
 	}
@@ -1050,7 +1050,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
             irqEnableStartSignature4Alt, 4
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable alt found: \n");
+			dbg_printf("irq enable alt found\n");
 		} else {
 			dbg_printf("irq enable alt not found\n");
 		}
@@ -1063,15 +1063,10 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
             irqEnableStartSignatureThumb5, 5
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable thumb found: \n");
+			dbg_printf("irq enable thumb found\n");
 		} else {
 			dbg_printf("irq enable thumb not found\n");
 		}
-	}
-
-	if (cardIrqEnableOffset) {
-		dbg_hexa((u32)cardIrqEnableOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
