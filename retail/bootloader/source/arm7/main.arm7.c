@@ -121,7 +121,11 @@ u32 fatTableAddr = 0;
 
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
+u16 baseHeaderCRC = 0;
+u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
+u32 baseChipID = 0;
+bool pkmnHeader = false;
 
 u16 s2FlashcardId = 0;
 
@@ -477,15 +481,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	) {
 		// Fix Pokemon games needing header data.
 		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
-		//*ndsHeaderPokemon = dsiHeaderTemp->ndshdr;
-		fileRead(ndsHeaderPokemon, file, 0, 0x160);
-
-		// Make the Pokemon game code ADAJ.
-		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
-		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
+		fileRead((char*)ndsHeaderPokemon, file, 0, 0x160);
+		pkmnHeader = true;
 	}
 
-	fileRead((char*)&baseRomSize, file, 0x80, 4);
+	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16));
+	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16));
+	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32));
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -760,29 +762,35 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
-	u32 chipID = getChipId(ndsHeader, moduleParams);
     dbg_printf("chipID: ");
-    dbg_hexa(chipID);
+    dbg_hexa(baseChipID);
     dbg_printf("\n"); 
 
     // TODO
     // figure out what is 0x027ffc10, somehow related to cardId check
     //*((u32*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 1;
 
+	if (pkmnHeader) {
+		// Make the Pokemon game code ADAJ.
+		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
+		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
+		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
+	}
+
     // Set memory values expected by loaded NDS
     // from NitroHax, thanks to Chism
-	*((u32*)(isSdk5(moduleParams) ? 0x02fff800 : 0x027ff800)) = chipID;					// CurrentCardID
-	*((u32*)(isSdk5(moduleParams) ? 0x02fff804 : 0x027ff804)) = chipID;					// Command10CardID
-	*((u16*)(isSdk5(moduleParams) ? 0x02fff808 : 0x027ff808)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
-	*((u16*)(isSdk5(moduleParams) ? 0x02fff80a : 0x027ff80a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff800 : 0x027ff800)) = baseChipID;		// CurrentCardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fff804 : 0x027ff804)) = baseChipID;		// Command10CardID
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff808 : 0x027ff808)) = baseHeaderCRC;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fff80a : 0x027ff80a)) = baseSecureCRC;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fff850 : 0x027ff850)) = 0x5835;
 
 	// Copies of above
-	*((u32*)(isSdk5(moduleParams) ? 0x02fffc00 : 0x027ffc00)) = chipID;					// CurrentCardID
-	*((u32*)(isSdk5(moduleParams) ? 0x02fffc04 : 0x027ffc04)) = chipID;					// Command10CardID
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = ndsHeader->headerCRC16;	// Header Checksum, CRC-16 of [000h-15Dh]
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = ndsHeader->secureCRC16;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc00 : 0x027ffc00)) = baseChipID;		// CurrentCardID
+	*((u32*)(isSdk5(moduleParams) ? 0x02fffc04 : 0x027ffc04)) = baseChipID;		// Command10CardID
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc08 : 0x027ffc08)) = baseHeaderCRC;	// Header Checksum, CRC-16 of [000h-15Dh]
+	*((u16*)(isSdk5(moduleParams) ? 0x02fffc0a : 0x027ffc0a)) = baseSecureCRC;	// Secure Area Checksum, CRC-16 of [ [20h]..7FFFh]
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
@@ -912,6 +920,8 @@ int arm7_main(void) {
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
+	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
+
 	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
 		// Switch touch mode to NTR
 		*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
@@ -929,9 +939,9 @@ int arm7_main(void) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {
-		fileRead(&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
-		fileRead(&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
-		fileRead(&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
+		fileRead((u32*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
+		fileRead((u32*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+		fileRead((u32*)&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
 
 		// Calculate i-overlay pack size
 		for (u32 i = arm9iromOffset+arm9ibinarySize; i < arm7iromOffset; i++) {

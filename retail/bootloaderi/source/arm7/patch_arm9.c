@@ -410,9 +410,10 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 	if (cardIdStartOffset) {
         // Patch
+		extern u32 baseChipID;
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
-		cardIdPatch[usesThumb ? 1 : 2] = getChipId(ndsHeader, moduleParams);
+		cardIdPatch[usesThumb ? 1 : 2] = baseChipID;
 		tonccpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 		dbg_printf("cardId location : ");
 		dbg_hexa((u32)cardIdStartOffset);

@@ -1044,9 +1044,10 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Tropix! Your Island Getaway
     else if (strcmp(romTid, "CTXE") == 0) {
+		extern u32 baseChipID;
 		u32 cardIdFunc[2] = {0, 0};
 		tonccpy(cardIdFunc, ce9->thumbPatches->card_id_arm9, 0x4);
-		cardIdFunc[1] = getChipId(ndsHeader, moduleParams);
+		cardIdFunc[1] = baseChipID;
 
 		const u16* branchCode1 = generateA7InstrThumb(0x020BA666, 0x020BA670);
 

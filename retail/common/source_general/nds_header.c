@@ -53,7 +53,7 @@ const u32 getChipId(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 	//The Flag Bits in 3th byte can be
 	//0   Maybe Infrared flag? (in case ROM does contain on-chip infrared stuff)
-	if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
+	if (ndsHeader->gameCode[0] == 'I') {
 		cardid |= 0x01 << 16;
 	}
 
@@ -63,14 +63,14 @@ const u32 getChipId(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     u8 unit = 0;
     if (ndsHeader->unitCode==0x02) {
 		unit=0xC0;
-	} else if (strncmp(getRomTid(ndsHeader), "I", 1) == 0) {
+	} else if (ndsHeader->gameCode[0] == 'I') {
 		unit=0xE0;
 	} else if (moduleParams->sdk_version > 0x4000000) {
 		unit=0x80;
 	}
     cardid |= unit << 24;
 
-    if (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
+    //if (memcmp(ndsHeader->gameCode, "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
     return cardid;
 }
 #endif
