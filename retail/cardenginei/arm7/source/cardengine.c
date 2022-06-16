@@ -374,7 +374,7 @@ void reset(void) {
 		//driveInitialize();
 		sdRead = !(valueBits & gameOnFlashcard);
 		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
-			fileWrite(ndsHeader, pageFile, 0x2BFE00, 0x160, !sdRead, -1);
+			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160, !sdRead, -1);
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, ndsHeader->arm9binarySize, !sdRead, -1);
 			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
 		}
