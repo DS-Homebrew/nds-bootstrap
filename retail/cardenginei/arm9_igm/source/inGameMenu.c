@@ -140,6 +140,10 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 
 #ifndef B4DS
 static void printBattery(void) {
+	while ((u8)sharedAddr[6] == 0) { // Wait for battery level to be received
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
 	u8 batteryLevel = (u8)sharedAddr[6];
 	const char *bars = "\3\3";
 	if (batteryLevel & BIT(7)) {
