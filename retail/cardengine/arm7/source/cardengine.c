@@ -185,7 +185,7 @@ void rebootConsole(void) {
 
 void reset(void) {
 	u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (sharedAddr[0] == 0x57495344 || *(u32*)resetParam == 0xFFFFFFFF || *(u32*)(resetParam+0xC) > 0) {
+	if (sharedAddr[0] == 0x57495344 || *(u32*)resetParam == 0xFFFFFFFF) {
 		rebootConsole();
 	}
 
@@ -234,6 +234,10 @@ void reset(void) {
 	languageTimer = 0;
 
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
+		if (sharedAddr[1] == 0x48495344) {  // 'DSIH'
+			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+			sharedAddr[1] = 0;
+		}
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}

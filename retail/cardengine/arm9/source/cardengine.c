@@ -134,6 +134,8 @@ extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
 
+extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
+
 void reset(u32 param) {
 	setDeviceOwner();
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
@@ -153,8 +155,10 @@ void reset(u32 param) {
 			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
-		sharedAddr[3] = 0x52534554;
-		while (1);
+		if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
+			sharedAddr[3] = 0x52534554;
+			while (1);
+		}
 	}
 	sharedAddr[3] = 0x52534554;
 
@@ -199,7 +203,7 @@ void reset(u32 param) {
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
-	/*if (isDSiWare) {
+	if (!igmReset && *(u32*)(resetParams+0xC) > 0) {
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -230,36 +234,37 @@ void reset(u32 param) {
 		VRAM_G_CR = 0;
 		VRAM_H_CR = 0;
 		VRAM_I_CR = 0;
-	}*/
 
-	/*mpuFullRam();
+		sdk5MpuFix();
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
-	*(u32*)(0x02000000) = BIT(0) | BIT(1);
-	if (param == 0xFFFFFFFF) {
-		*(u32*)(0x02000000) |= BIT(2);
+		/* *(u32*)(0x02000000) = BIT(0) | BIT(1);
+		if (param == 0xFFFFFFFF) {
+			*(u32*)(0x02000000) |= BIT(2);
+		}*/
+		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
+		toncset((u32*)0x02000000, 0, 0x3DA000);
+		toncset((u32*)0x02FE0000, 0, 0x1F000);
+
+		WRAM_CR = 0; // Set shared ram to ARM9
+
+		aFile bootNds = getBootFileCluster("BOOT.NDS");
+		fileRead((char*)ndsHeader, bootNds, 0, 0x170);
+		fileRead((char*)ndsHeader->arm9destination, bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+		fileRead((char*)ndsHeader->arm7destination, bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+
+		WRAM_CR = 0x03; // Set shared ram to ARM7
+		sharedAddr[1] = 0x48495344; // 'DSIH'
+
+		if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
+			while (1);
+		}
+	} else {
+		u32 newArm7binarySize = 0;
+		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
+		fileRead((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
 	}
-	toncset((u32*)0x02000004, 0, 0x3D9000 - 4);
-	toncset((u32*)0x023E0000, 0, 0x1E000);
-
-	ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-
-	WRAM_CR = 0; // Set shared ram to ARM9
-
-	aFile bootNds = getBootFileCluster("BOOT.NDS");
-	fileRead((char*)ndsHeader, bootNds, 0, 0x170);
-	fileRead(ndsHeader->arm9destination, bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-	fileRead(ndsHeader->arm7destination, bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
-
-	WRAM_CR = 0x03; // Set shared ram to ARM7
-
-	if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
-		while (1);
-	}*/
-
-	u32 newArm7binarySize = 0;
-	fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
-	fileRead((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
-	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;
