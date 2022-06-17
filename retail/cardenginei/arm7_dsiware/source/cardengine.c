@@ -423,7 +423,7 @@ void returnToLoader(bool wait) {
 		//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
 
-	if (*(u32*)(ce7+0x8D00) != 0 || (valueBits & wideCheatUsed)) {
+	if (valueBits & wideCheatUsed) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}

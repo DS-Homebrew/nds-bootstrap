@@ -653,7 +653,7 @@ void returnToLoader(bool wait) {
 #endif
 	}
 #ifdef TWLSDK
-	if ((valueBits & b_dsiSD) && (*(u32*)(ce7+0xB900) != 0 || (valueBits & wideCheatUsed))) {
+	if ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed)) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
