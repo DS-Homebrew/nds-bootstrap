@@ -1544,7 +1544,7 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
+		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) /*|| (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))*/) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
@@ -1558,8 +1558,13 @@ int arm7_main(void) {
 		}
 
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			if ((u8)a9ScfgRom != 1 && cdcReadReg(CDC_SOUND, 0x22) != 0xF0) {
+			if (cdcReadReg(CDC_SOUND, 0x22) != 0xF0) {
 				*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
+			} else if (!(*(u8*)0x02FFE1BF & BIT(0))) {
+				*(u8*)0x02FFE1BF |= BIT(0);	// Set TWL touch mode
+				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+				DSiTouchscreenMode();
+				*(u16*)0x4000500 = 0x807F;
 			} else if (*(u8*)0x02FFE1BF & BIT(0)) {
 				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 				DSiTouchscreenMode();
@@ -1863,7 +1868,7 @@ int arm7_main(void) {
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	}
 
-	if (!dsiModeConfirmed || (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)) {
+	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
 	}
 

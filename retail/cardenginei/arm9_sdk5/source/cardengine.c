@@ -637,6 +637,20 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
     return true; 
 }
 
+#ifdef TWLSDK
+void initMBKARM9_dsiMode(void) {
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE194;
+	REG_MBK7 = *(u32*)0x02FFE198;
+	REG_MBK8 = *(u32*)0x02FFE19C;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
+}
+#endif
+
 extern void resetMpu();
 
 void reset(u32 param, u32 tid2) {
@@ -660,18 +674,18 @@ void reset(u32 param, u32 tid2) {
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
-	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
-		if (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {
-			if (ce9->consoleModel < 2) {
+	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+		if (param == 0xFFFFFFFF || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
+			/*if (ce9->consoleModel < 2) {
 				// Make screens white
 				SetBrightness(0, 31);
 				SetBrightness(1, 31);
 				waitFrames(5);	// Wait for DSi screens to stabilize
 			}
 			enterCriticalSection();
-			cacheFlush();
+			cacheFlush();*/
 			sharedAddr[3] = 0x54495845;
-			while (1);
+			//while (1);
 		} else {
 			sharedAddr[3] = 0x52534554;
 		}
@@ -730,7 +744,7 @@ void reset(u32 param, u32 tid2) {
 	IPC_SYNC_hooked = false;
 
 #ifdef TWLSDK
-	if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -772,6 +786,13 @@ void reset(u32 param, u32 tid2) {
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
+	}
+
+	if (ndsHeader->unitCode > 0 && sharedAddr[3] == 0x54495845) {
+		initMBKARM9_dsiMode();
+		REG_SCFG_EXT = 0x8307F100;
+		REG_SCFG_CLK = 0x87;
+		REG_SCFG_RST = 1;
 	}
 
 	#ifdef DLDI
@@ -828,6 +849,15 @@ void myIrqHandlerIPC(void) {
 			dmaOn = !dmaOn;
 			break;
 #endif
+		case 0x5:
+			igmReset = true;
+			sharedAddr[3] = 0x54495845;
+			if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
+				reset(0, 0);
+			} else {
+				reset(0xFFFFFFFF, 0);
+			}
+			break;
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -854,6 +884,16 @@ void myIrqHandlerIPC(void) {
 			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 #endif
 			(*inGameMenu)(&mainScreen, ce9->consoleModel);
+#ifdef TWLSDK
+			if (sharedAddr[3] == 0x54495845) {
+				igmReset = true;
+				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
+					reset(0, 0);
+				} else {
+					reset(0xFFFFFFFF, 0);
+				}
+			} else
+#endif
 			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
 #ifdef TWLSDK

@@ -440,6 +440,13 @@ void returnToLoader(bool wait) {
 	}
 
 	REG_SOUNDCNT = 0;
+	REG_SNDCAP0CNT = 0;
+	REG_SNDCAP1CNT = 0;
+
+	REG_SNDCAP0DAD = 0;
+	REG_SNDCAP0LEN = 0;
+	REG_SNDCAP1DAD = 0;
+	REG_SNDCAP1LEN = 0;
 
 	// Clear out ARM7 DMA channels and timers
 	for (i = 0; i < 4; i++) {
@@ -571,7 +578,7 @@ void readManual(int line) {
 		}
 	}
 
-	memset((u8*)INGAME_MENU_EXT_LOCATION, ' ', 32 * 24);
+	toncset((u8*)INGAME_MENU_EXT_LOCATION, ' ', 32 * 24);
 	((vu8*)INGAME_MENU_EXT_LOCATION)[32 * 24] = '\0';
 
 	// Read in 24 lines
@@ -590,7 +597,7 @@ void readManual(int line) {
 				if(buffer[i] == '\n')
 					tempManualOffset++;
 				fullLine = i == 32;
-				memcpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
+				tonccpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
 				break;
 			}
 		}
@@ -657,7 +664,7 @@ void myIrqHandlerVBlank(void) {
 	
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
-			IPC_SendSync(0x3);
+			IPC_SendSync(0x5);
 		}
 		returnTimer++;
 	} else {

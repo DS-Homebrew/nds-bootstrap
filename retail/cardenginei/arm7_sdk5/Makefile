@@ -24,15 +24,15 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	../arm7/source ../../common/source ../../common/source_general
-INCLUDES		:=	../arm7/include ../../common/include ../../common/include_fat
+SOURCES			:=	source_ext ../arm7/source ../../common/source ../../common/source_general
+INCLUDES		:=	include_ext ../arm7/include ../../common/include ../../common/include_fat
 DATA			:=	data
 
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork -march=armv4t
+ARCH	:=	-mthumb -mthumb-interwork -march=armv4t
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\

@@ -234,7 +234,7 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
-		case 0x3:
+		case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;
 			reset(0, 0);

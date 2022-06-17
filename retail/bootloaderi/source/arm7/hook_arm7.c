@@ -45,7 +45,8 @@
 #define b_cardReadDma BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
-#define b_isSdk5 BIT(12)
+#define b_wideCheatUsed BIT(12)
+#define b_isSdk5 BIT(13)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -431,6 +432,7 @@ int hookNdsRetailArm7(
 			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, !sdRead, 0);
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
+			ce7->valueBits |= b_wideCheatUsed;
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, !sdRead, 0);

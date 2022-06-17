@@ -90,7 +90,8 @@ typedef struct cardengineArm7 {
 		9: cardReadDma
 		10: hiyaCfwFound
 		11: slowSoftReset
-		12: isSdk5
+		12: wideCheatUsed
+		13: isSdk5
 		31: scfgLocked
 	*/
     u32* languageAddr;
