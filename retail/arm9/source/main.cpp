@@ -41,6 +41,7 @@ typedef struct {
 //bool logging = false;
 
 static bool debug = false;
+static bool sdFound = false;
 
 static inline const char* btoa(bool x) {
 	return x ? "true" : "false";
@@ -52,7 +53,7 @@ static int dbg_printf(const char* format, ...) { // static int...
 	}
 
 	static FILE* debugFile;
-	debugFile = fopen("sd:/NDSBTSRP.LOG", "a");
+	debugFile = fopen(sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG", "a");
 
 	va_list args;
 	va_start(args, format);
@@ -480,6 +481,7 @@ int main(int argc, char** argv) {
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
 
 	int status = loadFromSD(conf, argv[0]);
+	sdFound = (conf->sdFound && !conf->b4dsMode);
 
 	if (status == 0) {
 		status = runNdsFile(conf);
