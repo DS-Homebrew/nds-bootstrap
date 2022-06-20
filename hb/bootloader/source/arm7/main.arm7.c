@@ -62,6 +62,7 @@ Helpful information:
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
+#include "i2c.h"
 
 u16 patchOffsetCacheFileVersion = 2;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
@@ -501,6 +502,7 @@ static void NDSTouchscreenMode(void) {
 
 static void NTR_BIOS() {
 	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
+	REG_SCFG_CLK = 0x181;
 	REG_SCFG_ROM = 0x703;
 	if (REG_SCFG_ROM == 0x703) {
 		nocashMessage("Switched to NTR mode BIOS");
@@ -663,6 +665,9 @@ int arm7_main (void) {
 	} else {
 		NTR_BIOS();
 		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+
+		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 	}
 
 	// Load the NDS file

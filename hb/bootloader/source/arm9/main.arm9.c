@@ -126,6 +126,19 @@ void arm9_main(void) {
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
+	vu16 *mainregs = (vu16*)0x04000000;
+	vu16 *subregs = (vu16*)0x04001000;
+	
+	for (register int i=0; i<43; i++) {
+		mainregs[i] = 0;
+		subregs[i] = 0;
+	}
+	
+	u16 mode = 1 << 14;
+
+	*(vu16*)(0x0400006C + (0x1000 * 0)) = 0 + mode;
+	*(vu16*)(0x0400006C + (0x1000 * 1)) = 0 + mode;
+
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
 	//VRAM_C_CR = 0;
