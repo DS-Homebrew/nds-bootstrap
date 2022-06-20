@@ -169,10 +169,10 @@ dldi/dsisd.dldi:
 #---------------------------------------------------------------------------------		
 bootloader: $(DATA) sdengine
 	@$(MAKE) -C bootloader
-	@dlditool dldi/dsisd.dldi data/load.bin
+	@dlditool dldi/dsisd.dldi nitrofiles/load.bin
 
 #---------------------------------------------------------------------------------		
-bootloaderInject: $(DATA) sdengine
+bootloaderInject: $(DATA)
 	@$(MAKE) -C bootloaderInject
 
 #---------------------------------------------------------------------------------	
@@ -180,7 +180,8 @@ bootstub: $(DATA)
 	@$(MAKE) -C bootstub
 
 #---------------------------------------------------------------------------------	
-sdengine: data
+sdengine: $(DATA)
+	@mkdir -p bootloader/$(DATA)
 	@$(MAKE) -C sdengine
 
 #---------------------------------------------------------------------------------

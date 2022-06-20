@@ -16,7 +16,7 @@ TARGET		:=	load
 BUILD		:=	build
 SOURCES		:=	source source/arm7 source/patches source/arm9 source/arm9/loading_screens ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include
-DATA		:=	../data
+DATA		:=	data
 SPECS		:=  specs
  
 #---------------------------------------------------------------------------------
@@ -51,17 +51,17 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
 export TOPDIR	:=	$(CURDIR)
-export LOADBIN	:=	$(CURDIR)/../data/$(TARGET).bin
+export LOADBIN	:=	$(CURDIR)/../nitrofiles/$(TARGET).bin
 export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-#BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-BINFILES	:=	
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
 
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 

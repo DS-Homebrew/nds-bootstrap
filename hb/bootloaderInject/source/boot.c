@@ -328,7 +328,7 @@ int main (void) {
 	extern char _io_dldi;
 	//const char* bootName = "BOOT.NDS";
 
-	if(memcpy(_io_dldi, "RAMD", 4) == 0)
+	if(memcmp(_io_dldi, "RAMD", 4) == 0)
 	{
 		return -1;
 	}
@@ -355,12 +355,12 @@ int main (void) {
 	}
 
 	u8 tidCrc[6] = {0};
-	fileRead(tidCrc, file, 0xC, 4, -1);
-	fileRead(tidCrc+4, file, 0x15E, 2, -1);
+	fileRead((char*)tidCrc, file, 0xC, 4, -1);
+	fileRead((char*)tidCrc+4, file, 0x15E, 2, -1);
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4, -1);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
-	fileWrite(tidCrc, srParamsFile, 4, 6, -1);
+	fileWrite((char*)tidCrc, srParamsFile, 4, 6, -1);
 
 	if (srTid1 != 0) {
 		readSrBackendId();

@@ -32,9 +32,6 @@
 #include "tonccpy.h"
 #include "locations.h"
 
-#include "load_bin.h"
-#include "loadInject_bin.h"
-
 #ifndef _NO_BOOTSTUB_
 #include "bootstub_bin.h"
 #endif
@@ -284,6 +281,8 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }*/
 
+char load_bin[0x10000];
+char loadInject_bin[0x8000];
 char imgTemplateBuffer[0xEA00];
 
 int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 patchOffsetCacheCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2)
@@ -304,7 +303,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_LCD;
 	// Load the loader/patcher into the correct address
-	tonccpy (LCDC_BANK_C, loadInject_bin, loadInject_bin_size);
+	tonccpy (LCDC_BANK_C, loadInject_bin, 0x8000);
 	tonccpy (LCDC_BANK_D, loader, loaderSize);
 
 	// Set the parameters for the loader
@@ -457,9 +456,15 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 		}
 	}
 
-	ramDiskTemplate = fopen("nitro:/sdengine.bin", "rb");
+	ramDiskTemplate = fopen("nitro:/load.bin", "rb");
 	if (ramDiskTemplate) {
-		fread((void*)SDENGINE_BUFFER_LOCATION, 1, 0x4000, ramDiskTemplate);
+		fread((void*)load_bin, 1, 0x10000, ramDiskTemplate);
+		fclose(ramDiskTemplate);
+	}
+
+	ramDiskTemplate = fopen("nitro:/loadInject.bin", "rb");
+	if (ramDiskTemplate) {
+		fread((void*)loadInject_bin, 1, 0x8000, ramDiskTemplate);
 		fclose(ramDiskTemplate);
 	}
 
@@ -500,7 +505,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, load_bin_size, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
+	return runNds (load_bin, 0x10000, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
 }
 
 /*

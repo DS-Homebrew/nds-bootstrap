@@ -20,6 +20,7 @@
 #include <nds/system.h>
 #include <nds/debug.h>
 
+#include "sdengine_bin.h"
 #include "patch.h"
 #include "hook.h"
 #include "common.h"
@@ -326,9 +327,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		hookSwi05((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize, hookAccel, sdEngineLocation);
 	}*/
 
-	tonccpy (sdEngineLocation, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
-	//tonccpy ((u32*)SDENGINE_BUFFER_WRAM_LOCATION, (u32*)SDENGINE_BUFFER_LOCATION, 0x4000);
-	toncset ((u32*)SDENGINE_BUFFER_LOCATION, 0, 0x4000);
+	tonccpy (sdEngineLocation, sdengine_bin, sdengine_bin_size);
 
 	sdEngineLocation[1] = (u32)wordCommandAddr;
 
