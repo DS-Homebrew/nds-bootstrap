@@ -329,13 +329,13 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;
 				if (!ROMsupportsDsiMode(ndsHeader)) {
+					if (!arm9_boostVram) {
+						REG_SCFG_EXT &= ~BIT(13);
+					}
 					transferToArm9(15);
 				}
 			} else {
 				REG_SCFG_EXT = 0x8300C000;
-				if (arm9_boostVram) {
-					REG_SCFG_EXT |= BIT(13);	// Extended VRAM Access
-				}
                 REG_SCFG_EXT |= BIT(16);	// NDMA
 				*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = REG_SCFG_EXT;
 				*(u16*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 8) = REG_SCFG_CLK;
