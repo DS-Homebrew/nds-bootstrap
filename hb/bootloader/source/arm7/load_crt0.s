@@ -40,6 +40,7 @@
 	.global romIsCompressed
 	.global patchOffsetCacheFileCluster
 	.global srParamsFileCluster
+	.global ndsPreloaded
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -84,6 +85,8 @@ romIsCompressed:
 patchOffsetCacheFileCluster:
 	.word	0x00000000
 srParamsFileCluster:
+	.word	0x00000000
+ndsPreloaded:
 	.word	0x00000000
 
 startUp:

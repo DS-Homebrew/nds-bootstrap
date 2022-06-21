@@ -103,6 +103,7 @@ extern u32 romFileType;
 extern u32 romIsCompressed;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
+extern u32 ndsPreloaded;
 
 u8 TWL_HEAD[0x1000] = {0};
 
@@ -259,7 +260,11 @@ static void resetMemory_ARM7 (void)
 	REG_IPC_FIFO_CR = 0;
 
 	arm7clearRAM();								// clear exclusive IWRAM
-	toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
+	if (ndsPreloaded) {
+		toncset((u32*)0x02200000, 0, 0x180000);	// clear most of EWRAM (except pre-loaded ARM9 binary)
+	} else {
+		toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
+	}
 	toncset((u32*)0x02380000, 0, 0x70000);
 	toncset((u32*)0x023F1000, 0, 0xF000);
 	if (romIsCompressed) {
@@ -310,7 +315,16 @@ static void loadBinary_ARM7 (aFile file)
 	fileRead((char*)&dsiFlags, file, 0x1BF, 1, -1);
 
 	// Load binaries into memory
-	fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+	if (ndsPreloaded) {
+		if ((u32)ndsHeader->arm9destination < 0x02004000) {
+			fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize >= 0x4000 ? 0x4000 : ndsHeader->arm9binarySize, 0);
+		}
+		if ((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize >= 0x02200000) {
+			fileRead((char*)0x02200000, file, ndsHeader->arm9romOffset + 0x200000 + ((u32)ndsHeader->arm9destination - 0x02000000), ndsHeader->arm9binarySize-0x200000, 0);
+		}
+	} else {
+		fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+	}
 	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
 
 	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
