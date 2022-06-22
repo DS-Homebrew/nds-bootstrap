@@ -23,7 +23,7 @@
 #include "common.h"
 #include "tonccpy.h"
 
-u16 patchOffsetCacheFileVersion = 2;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 3;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;

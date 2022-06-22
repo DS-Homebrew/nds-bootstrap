@@ -106,8 +106,14 @@ static const u32 homebrewAccelSigPatched[2] = {
 	0x037C0020
 };
 
-static const u32 swi00Sig[1] = {
-	0x4770DF00   , // SWI 0X05
+static const u16 swi00Sig[2] = {
+	0xDF00   , // SWI 0X00
+	0x4770
+};
+
+static const u16 swi12Sig[2] = {
+	0xDF12   , // SWI 0X12
+	0x4770
 };
 
 static const u32 swi00Patched[3] = {
@@ -191,6 +197,44 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	return addr;
 }
 
+static u16* hookSwi00(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi00Sig[0] &&
+			(addr[1] == swi00Sig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u16* hookSwi12(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi12Sig[0] &&
+			(addr[1] == swi12Sig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
 const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
@@ -206,45 +250,6 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 
 	return instrs;
-}
-
-static u32* hookSwi0012(u32* hookAccel) {
-	u32* addr = hookAccel;
-	u32* end = addr + 0x200/sizeof(u32);
-
-	// Find the start of the handler
-	while (addr < end) {
-		if (addr[0] == swi00Sig[0])
-		{
-			break;
-		}
-		addr++;
-	}
-
-	if (addr >= end) {
-		return NULL;
-	}
-
-	u32 dstAddr = (u32)hookAccel+8;
-	const u16* branchCode = generateA7InstrThumb((int)addr, dstAddr);
-
-	// patch the program
-	tonccpy(addr, branchCode, 4);
-
-	tonccpy((u32*)dstAddr, swi00Patched, 0xC);
-
-	if (!(REG_SCFG_ROM & BIT(9))) {
-		// Patch SWI 0x12 to 0x02 for DSi BIOS
-		u16* addrThumb = (u16*)addr;
-		for (u8 i = 0; i < 0x80/2; i++) {
-			if (addrThumb[i] == 0xDF12) {
-				addrThumb[i] = 0xDF02;
-				break;
-			}
-		}
-	}
-
-	return addr;
 }
 
 /*static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
@@ -277,16 +282,44 @@ static u32* hookSwi0012(u32* hookAccel) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
+	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
+	u16* swi00Location = patchOffsetCache.swi00Offset;
 
 	nocashMessage("hookNds");
+
+	if (!patchOffsetCache.a9Swi12Checked) {
+		a9Swi12Location = hookSwi12((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi12Location) {
+			patchOffsetCache.a9Swi12Offset = a9Swi12Location;
+		}
+		patchOffsetCache.a9Swi12Checked = true;
+	}
+	if (a9Swi12Location && !(REG_SCFG_ROM & BIT(1))) {
+		// Patch SWI 0x12 to 0x02 for DSi BIOS
+		*a9Swi12Location = 0xDF02;
+	}
+
+	if (!patchOffsetCache.swi00Checked) {
+		swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (swi00Location) {
+			patchOffsetCache.swi00Offset = swi00Location;
+		}
+		patchOffsetCache.swi00Checked = true;
+	}
+	if (swi00Location && !(REG_SCFG_ROM & BIT(9))) {
+		// Patch SWI 0x12 to 0x02 for DSi BIOS
+		for (u8 i = 0; i < 0x80/2; i++) {
+			if (swi00Location[i] == 0xDF12) {
+				swi00Location[i] = 0xDF02;
+				break;
+			}
+		}
+	}
 
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		if (hookLocation) {
 			patchOffsetCache.a7IrqHookOffset = hookLocation;
-		} else {
-			nocashMessage("ERR_HOOK");
-			return ERR_HOOK;
 		}
 	}
 
@@ -297,6 +330,9 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		hookLocation[2] = homebrewSigPatched[2];
 		hookLocation[3] = homebrewSigPatched[3];
 		hookLocation[4] = homebrewSigPatched[4];
+	} else {
+		nocashMessage("ERR_HOOK");
+		return ERR_HOOK;
 	}
 
 	if (!hookAccel) {
@@ -319,8 +355,14 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		nocashMessage("ACCEL_IPC_OK");
 	}
 
-	if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
-		hookSwi0012(hookAccel);
+	if (swi00Location && hookAccel) {
+		u32 dstAddr = (u32)hookAccel+8;
+		const u16* branchCode = generateA7InstrThumb((int)swi00Location, dstAddr);
+
+		// patch the program
+		tonccpy(swi00Location, branchCode, 4);
+
+		tonccpy((u32*)dstAddr, swi00Patched, 0xC);
 	}
 
 	/*if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {

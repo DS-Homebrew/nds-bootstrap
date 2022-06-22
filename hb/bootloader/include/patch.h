@@ -12,8 +12,12 @@ typedef struct patchOffsetCacheContents {
 	u32* wordCommandOffset;
 	u32* bootloaderOffset;
 	u32 bootloaderChecked;
+	u16* a9Swi12Offset;
+	u32 a9Swi12Checked;
 	u32* a7IrqHookOffset;
 	u32* a7IrqHookAccelOffset;
+	u16* swi00Offset;
+	u32 swi00Checked;
 } patchOffsetCacheContents;
 
 extern u16 patchOffsetCacheFileVersion;
