@@ -316,6 +316,10 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		}
 	}
 
+	if (!sdEngineLocation) {
+		return ERR_NONE;
+	}
+
 	if (!hookLocation) {
 		hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		if (hookLocation) {

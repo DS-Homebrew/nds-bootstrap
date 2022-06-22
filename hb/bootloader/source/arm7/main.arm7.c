@@ -737,6 +737,8 @@ int arm7_main (void) {
 			tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);
 			//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 		}
+	} else if (!isGbaR2 && !recentLibnds) {
+		hookNds(ndsHeader, NULL, 0);
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 
