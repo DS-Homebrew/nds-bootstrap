@@ -64,23 +64,6 @@ Helpful information:
 #include "locations.h"
 #include "i2c.h"
 
-u16 patchOffsetCacheFileVersion = 2;	// Change when new functions are being patched, some offsets removed
-										// the offset order changed, and/or the function signatures changed
-
-patchOffsetCacheContents patchOffsetCache;
-
-bool patchOffsetCacheChanged = false;
-
-void rsetPatchCache(const tNDSHeader* ndsHeader)
-{
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 2) {
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 2;	// 0 = Regular, 1 = B4DS, 2 = Homebrew
-	}
-}
-
 void arm7clearRAM();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -713,6 +696,8 @@ int arm7_main (void) {
 
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
+
+	patchBinary(ndsHeader);
 
 	if (!isGbaR2 && !ramDiskFound && (!recentLibnds || !dsiModeConfirmed)) {
 		// Find the DLDI reserved space in the file

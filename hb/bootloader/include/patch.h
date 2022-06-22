@@ -2,6 +2,7 @@
 #define PATCH_H
 
 #include <nds/ndstypes.h>
+#include <nds/memory.h> // tNDSHeader
 
 typedef struct patchOffsetCacheContents {
     u16 ver;
@@ -17,5 +18,9 @@ typedef struct patchOffsetCacheContents {
 
 extern u16 patchOffsetCacheFileVersion;
 extern patchOffsetCacheContents patchOffsetCache;
+extern bool patchOffsetCacheChanged;
+extern void rsetPatchCache(const tNDSHeader* ndsHeader);
+
+extern void patchBinary(const tNDSHeader* ndsHeader);
 
 #endif // PATCH_H
