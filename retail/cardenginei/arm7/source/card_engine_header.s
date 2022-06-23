@@ -246,7 +246,9 @@ patches:
 .word	fifoHandler
 .word	ndma0Handler
 .word   card_pull
+.word   arm7FunctionsDirect
 .word   arm7Functions
+.word   arm7FunctionsThumb
 .word   swi02
 .word   swi24
 .word   swi25
@@ -255,7 +257,6 @@ patches:
 .word   j_twlGetPitchTable
 .word   j_twlGetPitchTableThumb
 .word   getPitchTableStub
-.word   arm7FunctionsThumb
 .pool
 @---------------------------------------------------------------------------------
 
@@ -504,6 +505,16 @@ thumb_blx_r3_stub2:
 card_pull:
 @---------------------------------------------------------------------------------
 	bx lr
+
+arm7FunctionsDirect:
+.word    eepromProtect
+.word    eepromPageErase
+.word    eepromPageVerify
+.word    eepromPageWrite
+.word    eepromPageProg
+.word    eepromRead
+.word    cardRead
+.word    cardId
 
 arm7Functions:
 .word    eepromProtectStub

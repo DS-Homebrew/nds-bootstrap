@@ -47,7 +47,9 @@ typedef struct cardengineArm7Patches {
     u32 fifoHandler;
     u32 ndma0Handler;
     u32 card_pull;
+    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
+    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
     u32* swi02;
     u32* swi24;
     u32* swi25;
@@ -56,7 +58,6 @@ typedef struct cardengineArm7Patches {
     u32* j_twlGetPitchTable;
     u32* j_twlGetPitchTableThumb;
     u32* getPitchTableStub;
-    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
 } __attribute__ ((__packed__)) cardengineArm7Patches;
 
 //
@@ -126,6 +127,7 @@ typedef struct cardengineArm7Patches {
     u32* thumb_card_irq_enable_arm7;
     u32 vblankHandler;
     u32* j_twlGetPitchTable;
+    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
 } __attribute__ ((__packed__)) cardengineArm7Patches;

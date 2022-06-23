@@ -88,6 +88,7 @@ patches:
 .word	thumb_card_irq_enable_arm7
 .word	vblankHandler
 .word   j_twlGetPitchTable
+.word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
 .pool
@@ -153,6 +154,16 @@ thumb_blx_r3_stub2:
 @---------------------------------------------------------------------------------
 
 	.arm
+arm7FunctionsDirect:
+.word    eepromProtect
+.word    eepromPageErase
+.word    eepromPageVerify
+.word    eepromPageWrite
+.word    eepromPageProg
+.word    eepromRead
+.word    cardRead
+.word    cardId
+
 arm7Functions:
 .word    eepromProtectStub
 .word    eepromPageEraseStub
