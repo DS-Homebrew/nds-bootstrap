@@ -18,7 +18,8 @@ static const u32 wramClearSignature4[1]        = {0xE1C407BA};
 static const u32 wramClearSignature5[2]        = {0xE92D4038, 0xE3A05008};
 static const u32 wramClearSignatureTwlEarly[3] = {0xE92D4070, 0xE1A06000, 0xE3560001};
 static const u32 wramClearSignatureTwl[3]      = {0xE92D40F8, 0xE1A07000, 0xE3570001};
-static const u32 wramClearSignatureTwlAlt[3]   = {0xE92D43FE, 0xE1A04000, 0xE59F61C8};
+static const u32 wramClearSignatureTwlAlt1[3]  = {0xE92D43FE, 0xE1A04000, 0xE59F61C8};
+static const u32 wramClearSignatureTwlAlt2[4]  = {0xE92D40F8, 0xE24DD008, 0xE1A04000, 0xE3540001};
 static const u16 wramClearSignature1Thumb[2]   = {0xB510, 0x2008};
 static const u16 wramClearSignature4Thumb[1]   = {0x80E0};
 static const u16 wramClearSignatureTwlThumb[3] = {0xB570, 0x1C05, 0x2D01};
@@ -145,12 +146,24 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 		if (!offset) {
 			offset = findOffset(
 				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignatureTwlAlt, 3
+				wramClearSignatureTwlAlt1, 3
 			);
 			if (offset) {
-				dbg_printf("WRAM clear alt offset found\n");
+				dbg_printf("WRAM clear alt 1 offset found\n");
 			} else {
-				dbg_printf("WRAM clear alt offset not found\n");
+				dbg_printf("WRAM clear alt 1 offset not found\n");
+			}
+		}
+
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm7destination, 0x1000,
+				wramClearSignatureTwlAlt2, 4
+			);
+			if (offset) {
+				dbg_printf("WRAM clear alt 2 offset found\n");
+			} else {
+				dbg_printf("WRAM clear alt 2 offset not found\n");
 			}
 		}
 

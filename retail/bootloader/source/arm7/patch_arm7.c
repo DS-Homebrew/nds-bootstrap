@@ -113,6 +113,9 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			} else {
 				if (ndsHeader->unitCode == 0) {
 					offset[*offset==0xE92D4038 ? 15 : (offset[1]==0xE24DD008 ? 18 : 17)] = 0xE3A02000;	// mov r2, #0
+				} else if (offset[1]==0xE24DD008) {
+					offset[10] = 0xE3A01000;	// mov r1, #0
+					offset[60] = 0xE3A01000;	// mov r1, #0
 				} else if (*offset==0xE92D43FE) {
 					offset[12] = 0xE3A01000;	// mov r1, #0
 					offset[61] = 0xE3A01000;	// mov r1, #0
