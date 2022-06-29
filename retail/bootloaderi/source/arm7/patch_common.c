@@ -1301,9 +1301,11 @@ void rsetA7Cache(void)
 
 void rsetPatchCache(bool dsiWare)
 {
+	extern u32 srlAddr;
+
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0) {
-		if (!dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
+		if (srlAddr == 0 && !dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));

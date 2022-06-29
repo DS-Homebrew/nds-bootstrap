@@ -4707,9 +4707,11 @@ void rsetA7Cache(void)
 
 void rsetPatchCache(void)
 {
+	extern u32 srlAddr;
+
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
-		if (!esrbScreenPrepared) pleaseWaitOutput();
+		if (srlAddr == 0 && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
