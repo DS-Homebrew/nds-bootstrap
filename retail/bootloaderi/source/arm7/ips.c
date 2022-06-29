@@ -20,7 +20,6 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
-	bool doLow = (strncmp(romTid, "BKW", 3) == 0);
 	bool armPatched = false;
 
 	int ipson = 5;
@@ -47,10 +46,13 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 				rombyte = (void*)ROM_LOCATION_EXT;
 			} else if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
 				rombyte = (void*)retail_OVARLAYS_ADRESS_START_TWLSDK;
+				if (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0) {
+					rombyte -= 0x200000;
+				}
 			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
 
-				if (doLow) {
+				if (strncmp(romTid, "BKW", 3) == 0) {
 					rombyte = (void*)CACHE_ADRESS_START_low;
 				}
 			}

@@ -792,14 +792,18 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 	if (memcmp(romTid, "NTRJ", 4) == 0) {
 		return;
 	}
+	bool powerProKun = (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0);
 
 	// Load overlays into RAM
-	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (dsiWramAccess ? 0x280000 : 0x200000) : 0x700000))) {
+	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (powerProKun ? (dsiWramAccess ? 0x480000 : 0x400000) : (dsiWramAccess ? 0x280000 : 0x200000)) : 0x700000))) {
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 		if (extendedMemoryConfirmed) {
 			overlaysLocation = (u32)ROM_LOCATION_EXT;
 		} else if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
 			overlaysLocation = (u32)retail_OVARLAYS_ADRESS_START_TWLSDK;
+			if (powerProKun) {
+				overlaysLocation -= 0x200000;
+			}
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 
