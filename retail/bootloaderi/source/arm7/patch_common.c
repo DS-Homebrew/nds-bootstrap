@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 80;	// Change when new functions are being patched, some offsets removed
+u16 patchOffsetCacheFileVersion = 81;	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 
 patchOffsetCacheContents patchOffsetCache;
@@ -1301,16 +1301,14 @@ void rsetA7Cache(void)
 
 void rsetPatchCache(bool dsiWare)
 {
-	extern u32 srlAddr;
-
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 0) {
-		if (srlAddr == 0 && !dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
+		if (!dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS
+		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS, 2 = HB
 		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
 		patchOffsetCache.ltdModuleParamsOffset = ltdModuleParamsOffset;
 		rsetA7CacheDone = true;
@@ -1329,7 +1327,6 @@ u32 patchCardNds(
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
-	rsetPatchCache(false);
 
 	bool sdk5 = isSdk5(moduleParams);
 	if (sdk5) {

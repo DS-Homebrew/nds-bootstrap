@@ -1105,6 +1105,40 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
 }
 
+void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
+	if (!ROMsupportsDsiMode) {
+		return;
+	}
+
+	u32* offset = patchOffsetCache.mpuInitEndTwl;
+	if (!patchOffsetCache.mpuInitEndTwl) {
+		offset = findMpuInitTwlEnd(patchOffsetCache.heapPointerOffset);
+		if (offset) {
+			patchOffsetCache.mpuInitEndTwl = offset;
+			patchOffsetCacheChanged = true;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	bool dsiEnhanced = (offset[-1] == 0x027FF000);
+
+	if (offset[0] == 0xE1A00100) {
+		offset[dsiEnhanced ? -3 : -2] = 0xE1A00000; // nop
+	} else {
+		u16* thumbOffset = (u16*)offset;
+		thumbOffset[dsiEnhanced ? -5 : -3] = 0x46C0; // nop
+		thumbOffset[dsiEnhanced ? -4 : -2] = 0x46C0; // nop
+	}
+
+	dbg_printf("Mpu init end TWL: ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+}
+
 /*static bool patchCartExist(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	// Slot-2 cart exist
 	u32* offset = patchOffsetCache.cartExistOffset;
@@ -1228,15 +1262,11 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	bool isSpecificTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
 
-	u32* heapPointer = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 0
-	 || (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
-	  && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)
-	  && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x048020BE : 0x023E0000))) {
+	u32* heapPointer = patchOffsetCache.heapPointerOffset;
+	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
+	 && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)
+	 && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x048020BE : 0x023E0000)) {
 		patchOffsetCache.heapPointerOffset = 0;
-	} else {
-		heapPointer = patchOffsetCache.heapPointerOffset;
 	}
 	if (!patchOffsetCache.heapPointerOffset) {
 		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
@@ -2163,6 +2193,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams);
+	patchMpuInitTwl(ndsHeader);
 
 	//patchDownloadplay(ndsHeader);
 

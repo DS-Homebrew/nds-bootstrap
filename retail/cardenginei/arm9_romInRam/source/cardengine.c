@@ -254,9 +254,9 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 
-void __attribute__((target("arm"))) openDebugRam() {
+/*void __attribute__((target("arm"))) openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
-}
+}*/
 
 // Revert region 0 patch
 void __attribute__((target("arm"))) region0Fix() {
@@ -271,9 +271,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (ce9->valueBits & isSdk5) {
-			if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-				openDebugRam();
-			} else {
+			if (ndsHeader->unitCode == 0 || !(ce9->valueBits & dsiMode)) {
 				sdk5MpuFix();
 			}
 		}

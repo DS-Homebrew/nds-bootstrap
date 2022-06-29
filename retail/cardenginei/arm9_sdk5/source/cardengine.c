@@ -527,7 +527,7 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 }
 
 #ifdef TWLSDK
-extern void openDebugRam();
+//extern void openDebugRam();
 #else
 // Revert region 0 patch
 extern void region0Fix();
@@ -547,9 +547,7 @@ bool isNotTcm(u32 address, u32 len) {
 void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		#ifdef TWLSDK
-		openDebugRam();
-		#else
+		#ifndef TWLSDK
 		mpuFix();
 		if (region0FixNeeded) {
 			region0Fix();

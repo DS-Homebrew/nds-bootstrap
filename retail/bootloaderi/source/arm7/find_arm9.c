@@ -173,6 +173,8 @@ static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
+static const u32 mpuInitRegion3TwlEndSignature[4]      = {0xE1A00100, 0xE280062F, 0xE2800AFF, 0xE5900DC4};
+static const u32 mpuInitRegion3TwlEndSignatureThumb[3] = {0x48010081, 0x47705808, 0x02FFFDC4};
 
 // Mpu cache init
 static const u32 mpuInitCache[1] = {0xE3A00042};
@@ -1854,6 +1856,35 @@ u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
 
 	dbg_printf("\n");
 	return mpuInitCacheOffset;
+}
+
+u32* findMpuInitTwlEnd(const u32* heapPointer2Offset) {
+	dbg_printf("findMpuInitTwlEnd:\n");
+
+	u32* offset = findOffsetBackwards(
+		heapPointer2Offset, 0x80,
+		mpuInitRegion3TwlEndSignature, 4
+	);
+	if (offset) {
+		dbg_printf("Mpu init TWL end found\n");
+	} else {
+		dbg_printf("Mpu init TWL end not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffsetBackwards(
+			heapPointer2Offset, 0x60,
+			mpuInitRegion3TwlEndSignatureThumb, 3
+		);
+		if (offset) {
+			dbg_printf("Mpu init TWL end thumb found\n");
+		} else {
+			dbg_printf("Mpu init TWL end thumb not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {

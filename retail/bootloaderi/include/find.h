@@ -74,6 +74,7 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
 u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
 u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader);
 u32* findMpuInitCacheOffset(const u32* mpuStartOffset);
+u32* findMpuInitTwlEnd(const u32* heapPointer2Offset);
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);

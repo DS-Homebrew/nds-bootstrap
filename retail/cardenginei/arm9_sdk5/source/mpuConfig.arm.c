@@ -1,9 +1,9 @@
 #include <nds/ndstypes.h>
 
 #ifdef TWLSDK
-void openDebugRam() {
+/*void openDebugRam() {
 	asm("LDR R0,=#0x8000035\n\tmcr p15, 0, r0, C6,C3,0");
-}
+}*/
 #else
 // Revert region 0 patch
 void region0Fix() {

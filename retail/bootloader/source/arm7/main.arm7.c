@@ -967,6 +967,9 @@ int arm7_main(void) {
 
 	nocashMessage("Trying to patch the card...\n");
 
+	extern void rsetPatchCache(void);
+	rsetPatchCache();
+
 	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6000);
 	toncset((u32*)0x023E0000, 0, 0x10000);

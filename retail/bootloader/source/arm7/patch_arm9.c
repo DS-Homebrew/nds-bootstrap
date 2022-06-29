@@ -672,13 +672,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 		return;
 	}
 
-	u32* heapPointer = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		patchOffsetCache.heapPointer2Offset = 0;
-	} else {
-		heapPointer = patchOffsetCache.heapPointer2Offset;
-	}
+	u32* heapPointer = patchOffsetCache.heapPointer2Offset;
 	if (!patchOffsetCache.heapPointer2Offset) {
 		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
 	}
