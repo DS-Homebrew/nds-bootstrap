@@ -379,6 +379,12 @@ void continueCardReadDmaArm7() {
 void cardSetDma(void) {
 	isDma = true;
 
+	if (!dmaOn) {
+		cardRead(NULL);
+		endCardReadDma();
+		return;
+	}
+
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
     disableIrqMask(IRQ_CARD);
@@ -531,26 +537,10 @@ u32 cardReadDma() {
 	) {
 		isDma = true;
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
-			#ifdef DLDI
-				// new dma method
-				cacheFlush();
-				cardSetDma();
-				return true;
-			#else
-			if (dmaOn) {
-				// new dma method
-				cacheFlush();
-				cardSetDma();
-				return true;
-			} else {
-				cardRead(NULL);
-				endCardReadDma();
-				return true;
-			} /*else {
-				dma=4;
-				clearIcache();
-			}*/
-			#endif
+			// new dma method
+			cacheFlush();
+			cardSetDma();
+			return true;
 		}
     } /*else {
         dma=4;
