@@ -347,6 +347,9 @@ void reset(void) {
 
 		restoreBakData();
 	}
+	toncset((char*)0x02FFFD80, 0, 0x80);
+	toncset((char*)0x02FFFF80, 0, 0x80);
+
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
 	for (i = 0; i < 4; i++) {

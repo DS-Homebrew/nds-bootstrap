@@ -481,6 +481,9 @@ void reset(void) {
 
 	if (doBak) restoreSdBakData();
 	#endif
+	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
+	toncset((char*)((valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
+
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
 	for (i = 0; i < 4; i++) {
