@@ -1100,8 +1100,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 }
 
 void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	if (!ROMsupportsDsiMode) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 		return;
 	}
 
@@ -1118,14 +1117,18 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 		return;
 	}
 
-	bool dsiEnhanced = (offset[-1] == 0x027FF000);
-
-	if (offset[0] == 0xE1A00100) {
-		offset[dsiEnhanced ? -3 : -2] = 0xE1A00000; // nop
+	if (offset[-2] == 0xE12FFF1C) {
+		offset[-3] = 0xE12FFF1E; // bx lr
 	} else {
-		u16* thumbOffset = (u16*)offset;
-		thumbOffset[dsiEnhanced ? -5 : -3] = 0x46C0; // nop
-		thumbOffset[dsiEnhanced ? -4 : -2] = 0x46C0; // nop
+		bool dsiEnhanced = (offset[-1] == 0x027FF000);
+
+		if (offset[0] == 0xE1A00100) {
+			offset[dsiEnhanced ? -3 : -2] = 0xE1A00000; // nop
+		} else {
+			u16* thumbOffset = (u16*)offset;
+			thumbOffset[dsiEnhanced ? -5 : -3] = 0x46C0; // nop
+			thumbOffset[dsiEnhanced ? -4 : -2] = 0x46C0; // nop
+		}
 	}
 
 	dbg_printf("Mpu init end TWL: ");
