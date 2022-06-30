@@ -165,14 +165,17 @@ static const u32 mpuInitRegion0Data[1]      = {0x4000033};
 static const u32 mpuInitRegion1Signature[1] = {0xEE060F11};
 static const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 4
 static const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
-static const u32 mpuInitRegion1Data5[1]     = {0x2000031}; // SDK 5
+//static const u32 mpuInitRegion1Data5[1]     = {0x2000031}; // SDK 5
 static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
 static const u32 mpuInitRegion2SignatureElab[2] = {0xEE060F12, 0xE59F00B4};
 static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK <= 2
 static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
-static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5
+//static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
+static const u32 mpuChangeRegion1Signature[3]         = {0xE3A00001, 0xE3A01402, 0xE3A0202A};
+static const u16 mpuChangeRegion1SignatureThumb[3]    = {0x2001, 0x0609, 0x222A};
+static const u16 mpuChangeRegion1SignatureThumbAlt[3] = {0x2001, 0x0621, 0x222A};
 static const u32 mpuInitRegion3TwlEndSignature[4]      = {0xE1A00100, 0xE280062F, 0xE2800AFF, 0xE5900DC4};
 static const u32 mpuInitRegion3TwlEndSignatureThumb[3] = {0x48010081, 0x47705808, 0x02FFFDC4};
 
@@ -1775,12 +1778,12 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 	if (moduleParams->sdk_version >= 0x2008000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	}
-	if (moduleParams->sdk_version > 0x5000000) {
+	/*if (moduleParams->sdk_version > 0x5000000) {
 		mpuInitRegion2Data = mpuInitRegion2Data5;
 	}
 	if (moduleParams->sdk_version > 0x5000000) {
 		mpuInitRegion1Data = mpuInitRegion1Data5;
-	}
+	}*/
 
 	const u32* mpuInitRegionData = mpuInitRegion1Data;
 	switch (patchMpuRegion) {
@@ -1836,6 +1839,47 @@ u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return mpuDataOffset;
+}
+
+u32* findMpuChange(const tNDSHeader* ndsHeader) {
+	dbg_printf("findMpuChange:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		mpuChangeRegion1Signature, 3
+	);
+	if (offset) {
+		dbg_printf("Mpu change found\n");
+	} else {
+		dbg_printf("Mpu change not found\n");
+	}
+
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuChangeRegion1SignatureThumb, 3
+		);
+		if (offset) {
+			dbg_printf("Mpu change thumb found\n");
+		} else {
+			dbg_printf("Mpu change thumb not found\n");
+		}
+	}
+
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuChangeRegion1SignatureThumbAlt, 3
+		);
+		if (offset) {
+			dbg_printf("Mpu change thumb alt found\n");
+		} else {
+			dbg_printf("Mpu change thumb alt not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findMpuInitTwlEnd(const u32* heapPointer2Offset) {

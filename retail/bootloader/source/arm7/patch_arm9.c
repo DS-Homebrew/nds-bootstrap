@@ -357,7 +357,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (ndsHeader->unitCode == 3 || !extendedMemory2 || patchMpuRegion == 2) {
+	if (!extendedMemory2 || patchMpuRegion == 2 || isSdk5(moduleParams)) {
 		return;
 	}
 
@@ -459,7 +459,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
-	if (!isSdk5(moduleParams)) {
+	//if (!isSdk5(moduleParams)) {
 		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
 		if (!patchOffsetCache.mpuDataOffsetAlt) {
 			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
@@ -477,7 +477,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			dbg_hexa((u32)mpuDataOffsetAlt);
 			dbg_printf("\n\n");
 		}
-	}
+	//}
 
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
@@ -569,6 +569,38 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuStartOffset2 = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset2 = mpuDataOffset;
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
+}
+
+void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 arm7mbk;
+	if (!extendedMemory2 || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
+		return;
+	}
+
+	u32* offset = patchOffsetCache.mpuDataOffset;
+	if (!patchOffsetCache.mpuDataOffset) {
+		offset = findMpuChange(ndsHeader);
+		if (offset) {
+			patchOffsetCache.mpuDataOffset = offset;
+			patchOffsetCacheChanged = true;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	if (offset[0] == 0xE3A00001) {
+		offset[3] = 0xE1A00000; // nop
+	} else {
+		u16* thumbOffset = (u16*)offset;
+		thumbOffset[3] = 0x46C0; // nop
+		thumbOffset[4] = 0x46C0; // nop
+	}
+
+	dbg_printf("Mpu change: ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
 }
 
 /*u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, u32 saveSize) {
@@ -1131,6 +1163,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);
+	patchMpuChange(ndsHeader, moduleParams);
 
 	//patchDownloadplay(ndsHeader);
 

@@ -1300,28 +1300,30 @@ void myIrqHandlerVBlank(void) {
 		if (unpatchedFuncs->ltd_compressed_static_end) {
 			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
 		}
-		#endif
+		#else
+		if (!(valueBits & isSdk5)) {
+			if (unpatchedFuncs->mpuDataOffset) {
+				*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
 
-		if (unpatchedFuncs->mpuDataOffset) {
-			*unpatchedFuncs->mpuDataOffset = unpatchedFuncs->mpuInitRegionOldData;
-
-			if (unpatchedFuncs->mpuAccessOffset) {
-				if (unpatchedFuncs->mpuOldInstrAccess) {
-					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
-				}
-				if (unpatchedFuncs->mpuOldDataAccess) {
-					unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+				if (unpatchedFuncs->mpuAccessOffset) {
+					if (unpatchedFuncs->mpuOldInstrAccess) {
+						unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset] = unpatchedFuncs->mpuOldInstrAccess;
+					}
+					if (unpatchedFuncs->mpuOldDataAccess) {
+						unpatchedFuncs->mpuDataOffset[unpatchedFuncs->mpuAccessOffset + 1] = unpatchedFuncs->mpuOldDataAccess;
+					}
 				}
 			}
-		}
 
-		if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
-			*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
-		}
+			if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
+				*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
+			}
 
-		if (unpatchedFuncs->mpuDataOffset2) {
-			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+			if (unpatchedFuncs->mpuDataOffset2) {
+				*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+			}
 		}
+		#endif
 
 		funcsUnpatched = true;
 	}

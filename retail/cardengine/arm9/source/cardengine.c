@@ -487,9 +487,6 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
-		if ((ce9->valueBits & isSdk5) && ndsHeader->unitCode > 0 && ndsHeader->unitCode < 3) {
-			sdk5MpuFix();
-		}
 		if (region0FixNeeded) {
 			region0Fix();
 		}

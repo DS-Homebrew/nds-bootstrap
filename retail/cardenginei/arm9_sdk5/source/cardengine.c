@@ -526,15 +526,6 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 	tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 }
 
-#ifdef TWLSDK
-//extern void openDebugRam();
-#else
-// Revert region 0 patch
-extern void region0Fix();
-
-extern void mpuFix();
-#endif
-
 bool isNotTcm(u32 address, u32 len) {
     u32 base = (getDtcmBase()>>12) << 12;
     return    // test data not in ITCM
@@ -547,12 +538,6 @@ bool isNotTcm(u32 address, u32 len) {
 void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
-		#ifndef TWLSDK
-		mpuFix();
-		if (region0FixNeeded) {
-			region0Fix();
-		}
-		#endif
 		if (!driveInitialized) {
 			FAT_InitFiles(false, 0);
 			driveInitialized = true;
