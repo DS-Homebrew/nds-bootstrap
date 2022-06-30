@@ -176,9 +176,6 @@ static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuInitRegion3TwlEndSignature[4]      = {0xE1A00100, 0xE280062F, 0xE2800AFF, 0xE5900DC4};
 static const u32 mpuInitRegion3TwlEndSignatureThumb[3] = {0x48010081, 0x47705808, 0x02FFFDC4};
 
-// Mpu cache init
-static const u32 mpuInitCache[1] = {0xE3A00042};
-
 //static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
 // GBA Cart info init
@@ -1839,23 +1836,6 @@ u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return mpuDataOffset;
-}
-
-u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
-	dbg_printf("findMpuInitCacheOffset:\n");
-
-	u32* mpuInitCacheOffset = findOffset(
-		mpuStartOffset, 0x100,
-		mpuInitCache, 1
-	);
-	if (mpuInitCacheOffset) {
-		dbg_printf("Mpu init cache found\n");
-	} else {
-		dbg_printf("Mpu init cache not found\n");
-	}
-
-	dbg_printf("\n");
-	return mpuInitCacheOffset;
 }
 
 u32* findMpuInitTwlEnd(const u32* heapPointer2Offset) {

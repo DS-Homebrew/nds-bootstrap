@@ -11,11 +11,9 @@ typedef struct unpatchedFunctions {
 	u32* mpuDataOffset;
 	u32* mpuDataOffsetAlt;
 	u32* mpuDataOffset2;
-	u32* mpuInitCacheOffset;
 	u32 mpuInitRegionOldData;
 	u32 mpuInitRegionOldDataAlt;
 	u32 mpuInitRegionOldData2;
-	u32 mpuInitCacheOld;
 	int mpuAccessOffset;
 	u32 mpuOldInstrAccess;
 	u32 mpuOldDataAccess;

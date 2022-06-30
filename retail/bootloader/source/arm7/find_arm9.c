@@ -107,9 +107,6 @@ static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 
-// Mpu cache init
-static const u32 mpuInitCache[1] = {0xE3A00042};
-
 // Init Heap
 static const u32 initHeapEndSignature1[2]              = {0x27FF000, 0x37F8000};
 static const u32 initHeapEndSignature5[2]              = {0x2FFF000, 0x37F8000};
@@ -1329,23 +1326,6 @@ u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return mpuDataOffset;
-}
-
-u32* findMpuInitCacheOffset(const u32* mpuStartOffset) {
-	dbg_printf("findMpuInitCacheOffset:\n");
-
-	u32* mpuInitCacheOffset = findOffset(
-		mpuStartOffset, 0x100,
-		mpuInitCache, 1
-	);
-	if (mpuInitCacheOffset) {
-		dbg_printf("Mpu init cache found\n");
-	} else {
-		dbg_printf("Mpu init cache not found\n");
-	}
-
-	dbg_printf("\n");
-	return mpuInitCacheOffset;
 }
 
 u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {

@@ -829,8 +829,6 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
-static bool mpuInitCachePatched = false;
-
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion) {
 	if (patchMpuRegion == 2
 	|| (ndsHeader->unitCode > 0 && dsiModeConfirmed)) return;
@@ -895,23 +893,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 
 		dbg_printf("Mpu data: ");
 		dbg_hexa((u32)mpuDataOffset);
-		dbg_printf("\n\n");
-	}
-
-	// Find the mpu cache init
-	u32* mpuInitCacheOffset = patchOffsetCache.mpuInitCacheOffset;
-	if (!patchOffsetCache.mpuInitCacheOffset) {
-		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
-	}
-	if (mpuInitCacheOffset) {
-		unpatchedFuncs->mpuInitCacheOffset = mpuInitCacheOffset;
-		unpatchedFuncs->mpuInitCacheOld = *mpuInitCacheOffset;
-		*mpuInitCacheOffset = 0xE3A00046;
-		mpuInitCachePatched = true;
-		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
-
-		dbg_printf("Mpu init cache: ");
-		dbg_hexa((u32)mpuInitCacheOffset);
 		dbg_printf("\n\n");
 	}
 
@@ -1045,23 +1026,6 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 
 		dbg_printf("Mpu data 2: ");
 		dbg_hexa((u32)mpuDataOffset);
-		dbg_printf("\n\n");
-	}
-
-	// Find the mpu cache init
-	u32* mpuInitCacheOffset = patchOffsetCache.mpuInitCacheOffset;
-	if (!mpuInitCachePatched) {
-		mpuInitCacheOffset = findMpuInitCacheOffset(mpuStartOffset);
-	}
-	if (mpuInitCacheOffset && !mpuInitCachePatched) {
-		unpatchedFuncs->mpuInitCacheOffset = mpuInitCacheOffset;
-		unpatchedFuncs->mpuInitCacheOld = *mpuInitCacheOffset;
-		*mpuInitCacheOffset = 0xE3A00046;
-		mpuInitCachePatched = true;
-		patchOffsetCache.mpuInitCacheOffset = mpuInitCacheOffset;
-
-		dbg_printf("Mpu init cache: ");
-		dbg_hexa((u32)mpuInitCacheOffset);
 		dbg_printf("\n\n");
 	}
 

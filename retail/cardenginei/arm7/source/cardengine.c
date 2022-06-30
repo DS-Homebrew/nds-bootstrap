@@ -1315,10 +1315,6 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 
-		if (unpatchedFuncs->mpuInitCacheOffset) {
-			*unpatchedFuncs->mpuInitCacheOffset = unpatchedFuncs->mpuInitCacheOld;
-		}
-
 		if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
 			*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 		}
