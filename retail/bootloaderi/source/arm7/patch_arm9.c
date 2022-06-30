@@ -1259,7 +1259,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const char* romTid = getRomTid(ndsHeader);
 
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	bool isSpecificTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
+	bool isSpecificTitle = (strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
 
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
