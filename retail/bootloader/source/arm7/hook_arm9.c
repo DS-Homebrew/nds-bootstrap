@@ -72,7 +72,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	}
     
     dbg_printf("handlerStartSig\n");
-    dbg_hexa(addr);
+    dbg_hexa((u32)addr);
     dbg_printf("\n");
 
 	// Find the end of the handler
@@ -94,7 +94,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     
     
     dbg_printf("handlerEndSig\n");
-    dbg_hexa(addr2);
+    dbg_hexa((u32)addr2);
     dbg_printf("\n");
 
 	// Now find the IRQ vector table
@@ -112,11 +112,11 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     dbg_hexa(returnAddr);
     dbg_printf("\n");
     
-	u32* actualReturnAddr = addr + 2;
-	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
+	//u32* actualReturnAddr = addr + 2;
+	//u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
 
 	// The first entry in the table is for the Vblank handler, which is what we want
-	return tableAddr;
+	return (u32*)tableAddr;
 	// 2     LCD V-Counter Match
 }
 

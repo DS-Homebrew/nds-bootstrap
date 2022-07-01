@@ -81,7 +81,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	}
     
     dbg_printf("handlerStartSig\n");
-    dbg_hexa(addr);
+    dbg_hexa((u32)addr);
     dbg_printf("\n");
 
 	// Find the end of the handler
@@ -101,7 +101,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     }
      
     dbg_printf("handlerEndSig\n");
-    dbg_hexa(addr2);
+    dbg_hexa((u32)addr2);
     dbg_printf("\n");
 
 	// Now find the IRQ vector table
@@ -119,11 +119,11 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     dbg_hexa(returnAddr);
     dbg_printf("\n");
     
-	u32* actualReturnAddr = addr + 2;
-	u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
+	//u32* actualReturnAddr = addr + 2;
+	//u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
 
 	// The first entry in the table is for the Vblank handler, which is what we want
-	return tableAddr;
+	return (u32*)tableAddr;
 	// 2     LCD V-Counter Match
 }
 
@@ -144,6 +144,7 @@ int hookNdsRetailArm9(
 
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
+	extern bool overlayPatch;
 	const char* romTid = getRomTid(ndsHeader);
 
 	ce9->fileCluster            = fileCluster;
@@ -193,7 +194,7 @@ int hookNdsRetailArm9(
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
 		bool powerProKun = (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0);
-		bool runOverlayCheck = true;
+		bool runOverlayCheck = overlayPatch;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (isSdk5(moduleParams)) {
 			if (consoleModel > 0) {
@@ -205,15 +206,15 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-				runOverlayCheck = (ndsHeader->unitCode == 0x02);
-				ce9->romLocation = (ndsHeader->unitCode == 0x02) ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;
-				if (ndsHeader->unitCode == 0x02 && powerProKun) {
+				runOverlayCheck = (ndsHeader->unitCode == 0x02 && overlayPatch);
+				ce9->romLocation = runOverlayCheck ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;
+				if (runOverlayCheck && powerProKun) {
 					ce9->romLocation -= 0x200000;
 				}
 				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
 			} else {
-				runOverlayCheck = !dsiModeConfirmed;
+				runOverlayCheck = (!dsiModeConfirmed && overlayPatch);
 				ce9->romLocation = CACHE_ADRESS_START;
 				ce9->cacheAddress = CACHE_ADRESS_START;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
@@ -225,7 +226,7 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else {
-				runOverlayCheck = (consoleModel > 0 || !dsiModeConfirmed);
+				runOverlayCheck = ((consoleModel > 0 || !dsiModeConfirmed) && overlayPatch);
 				ce9->romLocation = (consoleModel>0&&dsiMode ? dev_CACHE_ADRESS_START_SDK5 : CACHE_ADRESS_START);
 				ce9->cacheAddress = ce9->romLocation;
 				if (consoleModel > 0 /*&&!gbaRomFound*/) {

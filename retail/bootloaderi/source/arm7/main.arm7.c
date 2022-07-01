@@ -134,6 +134,7 @@ static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
 u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
+bool overlayPatch = false;
 bool overlaysInRam = false;
 
 static u32 softResetParams[4] = {0};
@@ -789,7 +790,7 @@ static void NTR_BIOS() {
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
-	if (memcmp(romTid, "NTRJ", 4) == 0) {
+	if (!overlayPatch) {
 		return;
 	}
 	bool powerProKun = (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0);
@@ -1600,6 +1601,19 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, savFile, sizeof(aFile));
 		}
 
+		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+			dbg_printf("AP-fix found\n");
+			fileRead((char*)IPS_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
+			if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
+				overlayPatch = ipsHasOverlayPatch(ndsHeader, (u8*)IPS_LOCATION);
+			}
+		}
+
+		if (strncmp(romTid, "ASM", 3) == 0) {
+			overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
+		}
+
 		extern void rsetPatchCache(bool dsiWare);
 		rsetPatchCache(false);
 
@@ -1784,20 +1798,12 @@ int arm7_main(void) {
 		}
 
 		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
-			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-			dbg_printf("AP-fix found\n");
-			if (esrbScreenPrepared) {
-				while (!esrbImageLoaded) {
-					while (REG_VCOUNT != 191);
-					while (REG_VCOUNT == 191);
-				}
-			}
-			fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
-			if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
 			}
+			toncset((u32*)IPS_LOCATION, 0, apPatchSize);	// Clear IPS patch
 		}
 
 		extern u32 iUncompressedSize;
@@ -1850,7 +1856,7 @@ int arm7_main(void) {
 		}
 	}
 
-	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
+	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images
 	clearScreen();
 
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press

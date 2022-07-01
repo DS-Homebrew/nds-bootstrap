@@ -1258,6 +1258,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
 	bool isSpecificTitle = (strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
+	extern bool overlayPatch;
 
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
 	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
@@ -1287,7 +1288,8 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && !isSpecificTitle && !isDSiWare && ndsHeader->unitCode == 0x02) {
+		if (consoleModel == 0 && !isSpecificTitle && !isDSiWare && ndsHeader->unitCode == 0x02 && overlayPatch) {
+			// DSi-Enhanced title with AP-patched overlays running on DSi consoles
 			if (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0) {
 				switch (*heapPointer) {
 					case 0x13A007BE:
@@ -1314,6 +1316,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 				}
 			}
 		} else if ((gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
+			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both with DSi WRAM not mapped to ARM9
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062E; /* MOVNE R0, #0x2E00000 */
@@ -1326,6 +1329,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		} else if (!gameOnFlashcard && isDSiWare && !dsiWramAccess) {
+			// DSiWare loaded from SD with DSi WRAM not mapped to ARM9
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BA; /* MOVNE R0, #0x2E80000 */
@@ -1338,6 +1342,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		} else if (gameOnFlashcard || !isDSiWare) {
+			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
@@ -1350,6 +1355,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		} else {
+			// DSiWare loaded from SD
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BD; /* MOVNE R0, #0x2F40000 */
