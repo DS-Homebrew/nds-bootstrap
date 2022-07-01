@@ -24,7 +24,7 @@ Anti-Piracy patches can be loaded via IPS files, but they are not included insid
 
 nds-bootstrap also supports many homebrew applications, including games like DScraft.
 
-B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked SCFG or DS Phat/lite) only supports some DS and DSiWare ROMs. You can increase compatibility by inserting a DS Memory Expansion Pak.
+B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked SCFG or DS Phat/Lite) only supports some DS and DSiWare ROMs. You can increase compatibility by inserting a DS Memory Expansion Pak.
 
 # Compiling
 
