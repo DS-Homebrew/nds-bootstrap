@@ -51,10 +51,6 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 				}
 			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
-
-				if (strncmp(romTid, "BKW", 3) == 0) {
-					rombyte = (void*)CACHE_ADRESS_START_low;
-				}
 			}
 			if (ROMinRAM) {
 				rombyte -= 0x8000;

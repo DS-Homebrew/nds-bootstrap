@@ -201,10 +201,6 @@ int hookNdsRetailArm9(
 				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheSlots = dev_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
-			} else if (strncmp(romTid, "BKW", 3) == 0) {
-				ce9->romLocation = CACHE_ADRESS_START_low;
-				ce9->cacheAddress = CACHE_ADRESS_START_low;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				runOverlayCheck = (ndsHeader->unitCode == 0x02 && overlayPatch);
 				ce9->romLocation = runOverlayCheck ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;
@@ -236,7 +232,7 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-		if (strncmp(romTid, "NTRJ", 4) != 0 && runOverlayCheck
+		if (runOverlayCheck
 		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (powerProKun ? (dsiWramAccess ? 0x480000 : 0x400000) : (dsiWramAccess ? 0x280000 : 0x200000)) : 0x700000))) {
 			extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {

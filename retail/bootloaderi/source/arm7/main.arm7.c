@@ -669,6 +669,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize : romSize) < 0x01000000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01800000)
+			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel==0 && romSize < 0x00700000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && romSize < 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
@@ -807,10 +808,6 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 			}
 		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)CACHE_ADRESS_START;
-
-			if (strncmp(romTid, "BKW", 3) == 0) {
-				overlaysLocation = (u32)CACHE_ADRESS_START_low;
-			}
 		}
 		fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
 
@@ -831,7 +828,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
 	// Load ROM into RAM
-	u32 romLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	u32 romLocation = (u32)(((consoleModel > 0 && isSdk5(moduleParams)) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
 		romLocation = (u32)ROM_LOCATION_EXT;
 	}
@@ -840,33 +837,25 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (romSizeEdit >= romSizeLimit) {
-		tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
-		romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
 		tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
 		savFile->fatTableCache = (u32*)((char*)ce7Location+0xFC00);
 
 		fileRead((char*)romLocation, *romFile, romOffset, romSizeLimit, !sdRead, 0);
 		fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimit, !sdRead, 0);
 
-		toncset((char*)IMAGES_LOCATION-0x40000, 0, 0x80000);
 		romFile->fatTableCached = false;
-		//savFile->fatTableCached = false;
 	} else {
 		if (extendedMemoryConfirmed) {
-			// Move FAT tables to avoid being overwritten by the ROM
-			tonccpy((char*)IMAGES_LOCATION-0x40000, romFile->fatTableCache, 0x80000);
-			romFile->fatTableCache = (u32*)((char*)IMAGES_LOCATION-0x40000);
+			// Move sav FAT table to avoid being overwritten by the ROM
 			tonccpy((char*)ce7Location+0xFC00, savFile->fatTableCache, 0x28000);
 			savFile->fatTableCache = (u32*)((char*)ce7Location+0xFC00);
+			romFile->fatTableCached = false;
 		}
 		fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, !sdRead, 0);
 		if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
 			*(u32*)((romLocation-romOffset)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
 		}
-		if (extendedMemoryConfirmed) {
-			toncset((char*)IMAGES_LOCATION-0x40000, 0, 0x80000);
-			romFile->fatTableCached = false;
-		} else {
+		if (!extendedMemoryConfirmed) {
 			toncset((char*)IMAGES_LOCATION, 0, 0x8000);
 			toncset((char*)IMAGES_LOCATION+0x8000, 0xFF, 0x8000);
 			u32 offsetEnd = (romSize > (romSizeLimit-0x400000)+0x8000) ? (romSizeLimit-0x400000)+0x8000 : romSize;
