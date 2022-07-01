@@ -1594,7 +1594,9 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, savFile, sizeof(aFile));
 		}
 
-		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+		bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
+
+		if (useApPatch) {
 			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 			dbg_printf("AP-fix found\n");
 			fileRead((char*)IPS_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
@@ -1790,7 +1792,7 @@ int arm7_main(void) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 
-		if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+		if (useApPatch) {
 			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
