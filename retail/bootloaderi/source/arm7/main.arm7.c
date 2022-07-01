@@ -666,8 +666,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		u32 romSize = (baseRomSize-0x8000)+0x88;
-		res = ((dsiModeConfirmed && consoleModel>0 && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize : romSize) < 0x01000000)
-			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01000000)
+		res = ((dsiModeConfirmed && consoleModel>0 && ROMsupportsDsiMode(ndsHeader) && ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize < 0x00F80000)
+			|| (isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && romSize < 0x01800000)
 			|| (!dsiModeConfirmed && isSdk5(moduleParams) && consoleModel==0 && romSize < 0x00700000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && romSize < 0x00800000));
@@ -1252,16 +1252,17 @@ int arm7_main(void) {
 			errorOutput();
 		}*/
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
-			/*if (consoleModel > 0) {
+			if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
-			} else {*/
-				tonccpy((char*)0x02F00000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0x800000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0x800000;
-			//}
-			tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
+				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
+			} else {
+				tonccpy((char*)0x02EE0000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
+				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7E0000;
+				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7E0000;
+				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
+			}
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
 		}
 	}
@@ -1585,7 +1586,10 @@ int arm7_main(void) {
 			ce7Location = CARDENGINEI_ARM7_SDK5_LOCATION;
 		}
 
-		if (isSdk5(moduleParams)) {
+		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
+			tonccpy((char*)ROM_FILE_LOCATION_TWLSDK, romFile, sizeof(aFile));
+			tonccpy((char*)SAV_FILE_LOCATION_TWLSDK, savFile, sizeof(aFile));
+		} else if (isSdk5(moduleParams)) {
 			tonccpy((char*)ROM_FILE_LOCATION_SDK5, romFile, sizeof(aFile));
 			tonccpy((char*)SAV_FILE_LOCATION_SDK5, savFile, sizeof(aFile));
 		}

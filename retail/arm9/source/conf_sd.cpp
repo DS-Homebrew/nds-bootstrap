@@ -978,7 +978,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
 				if (addr[i] >= INGAME_MENU_LOCATION && addr[i] < INGAME_MENU_LOCATION+0x4000) {
 					addr[i] -= INGAME_MENU_LOCATION;
-					addr[i] += INGAME_MENU_LOCATION_TWLSDK;
+					addr[i] += (conf->consoleModel > 0 ? INGAME_MENU_LOCATION_DSIWARE : INGAME_MENU_LOCATION_TWLSDK);
 				}
 			}
 		}

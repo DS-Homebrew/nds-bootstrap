@@ -200,7 +200,7 @@ int hookNdsRetailArm9(
 			if (consoleModel > 0) {
 				ce9->romLocation = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
-				ce9->cacheSlots = dev_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
+				ce9->cacheSlots = ((ndsHeader->unitCode > 0 && dsiModeConfirmed) ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_SDK5)/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				runOverlayCheck = (ndsHeader->unitCode == 0x02 && overlayPatch);
 				ce9->romLocation = runOverlayCheck ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;

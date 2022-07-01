@@ -120,18 +120,18 @@ static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
 
 #ifdef TWLSDK
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION_SDK5;
-static aFile* savFile = (aFile*)SAV_FILE_LOCATION_SDK5;
-static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_SDK5;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
+static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
+//static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_TWLSDK;
 #else
 #ifdef ALTERNATIVE
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_ALT;
-static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_ALT;
+//static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_ALT;
 #else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
-static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
+//static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 #endif
 static aFile ramDumpFile;
@@ -327,7 +327,7 @@ static void initialize(void) {
 	if (valueBits & extendedMemory) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
-		romLocation = (char*)(ROM_LOCATION_EXT);
+		romLocation = (char*)ROM_LOCATION_EXT;
 	}
 
 	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {

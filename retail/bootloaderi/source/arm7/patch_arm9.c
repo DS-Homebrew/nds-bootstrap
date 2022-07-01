@@ -1315,8 +1315,9 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 						break;
 				}
 			}
-		} else if ((gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
-			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both with DSi WRAM not mapped to ARM9
+		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
+			// DSi WRAM not mapped to ARM9
+			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062E; /* MOVNE R0, #0x2E00000 */
@@ -1328,8 +1329,9 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					*heapPointer = (u32)0x048020B8; /* MOVS R0, #0x2E00000 */
 					break;
 			}
-		} else if (!gameOnFlashcard && isDSiWare && !dsiWramAccess) {
-			// DSiWare loaded from SD with DSi WRAM not mapped to ARM9
+		} else if (!gameOnFlashcard && (consoleModel > 0 || isDSiWare) && !dsiWramAccess) {
+			// DSi WRAM not mapped to ARM9
+			// DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BA; /* MOVNE R0, #0x2E80000 */
@@ -1341,8 +1343,8 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
 					break;
 			}
-		} else if (gameOnFlashcard || !isDSiWare) {
-			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard
+		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) {
+			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
@@ -1355,7 +1357,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		} else {
-			// DSiWare loaded from SD
+			// DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A007BD; /* MOVNE R0, #0x2F40000 */
@@ -1385,10 +1387,20 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 		return;
 	}
 
+	extern u8 consoleModel;
+
 	u32* mbkWramBOffset = patchOffsetCache.mbkWramBOffset;
-	if (standAlone) { // DSiWare
+	if (consoleModel > 0 || standAlone) { // DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
 		if (!patchOffsetCache.mbkWramBOffset) {
-			mbkWramBOffset = findMbkWramBOffsetBoth(ndsHeader, moduleParams, (bool*)&patchOffsetCache.a9IsThumb);
+			if (standAlone) {
+				mbkWramBOffset = findMbkWramBOffsetBoth(ndsHeader, moduleParams, (bool*)&patchOffsetCache.a9IsThumb);
+			} else {
+				if (patchOffsetCache.a9IsThumb) {
+					mbkWramBOffset = (u32*)findMbkWramBOffsetThumb(ndsHeader, moduleParams);
+				} else {
+					mbkWramBOffset = findMbkWramBOffset(ndsHeader, moduleParams);
+				}
+			}
 			if (mbkWramBOffset) {
 				patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
 				patchOffsetCacheChanged = true;
@@ -1453,11 +1465,13 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			}
 		}
 	}
-	if (mbkWramBOffset) {
-		dbg_printf("mbkWramBCGet location : ");
-		dbg_hexa((u32)mbkWramBOffset);
-		dbg_printf("\n\n");
+	if (!mbkWramBOffset) {
+		return;
 	}
+
+	dbg_printf("mbkWramBCGet location : ");
+	dbg_hexa((u32)mbkWramBOffset);
+	dbg_printf("\n\n");
 }
 
 void patchFileIoFuncs(const tNDSHeader* ndsHeader) {
