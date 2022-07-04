@@ -24,8 +24,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	source ../../common/source ../../common/source_general
-INCLUDES		:=	include ../../common/include ../../common/include_fat
+SOURCES			:=	source source/patcher ../../common/source ../../common/source_general
+INCLUDES		:=	include include/patcher ../../common/include ../../common/include_fat
 DATA			:=	data
 
 

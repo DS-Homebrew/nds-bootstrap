@@ -845,7 +845,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->dsiWramAccess = true;
 	}
 	if (conf->dsiWramAccess) {
-		conf->valueBits2 |= BIT(5);
+		if (strncmp(romTid, "ADA", 3) == 0 // Diamond
+		 || strncmp(romTid, "APA", 3) == 0 // Pearl
+		 || strncmp(romTid, "CPU", 3) == 0 // Platinum
+		 || strncmp(romTid, "IPK", 3) == 0 // HG
+		 || strncmp(romTid, "IPG", 3) == 0 // SS
+		) {
+			conf->dsiWramAccess = false;
+		} else {
+			conf->valueBits2 |= BIT(5);
+		}
 	}
 	if (access("sd:/hiya.dsi", F_OK) == 0) {
 		conf->valueBits2 |= BIT(6);

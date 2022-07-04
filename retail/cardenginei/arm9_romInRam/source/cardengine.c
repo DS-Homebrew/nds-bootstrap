@@ -438,7 +438,7 @@ void reset(u32 param, u32 tid2) {
 			sysSetCardOwner(false);	// Give Slot-1 access to arm7
 			sharedAddr[3] = 0x52534554;
 		}
-	} else if ((ce9->valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0) {
+	} else if (ce9->valueBits & slowSoftReset) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
@@ -456,6 +456,13 @@ void reset(u32 param, u32 tid2) {
 	} else {
 		if (ce9->valueBits & dsiMode) {
 			sysSetCardOwner(false);	// Give Slot-1 access to arm7
+		}
+		if (*(u32*)(resetParam+0xC) > 0) {
+			sharedAddr[1] = ce9->valueBits;
+		}
+		if (!igmReset && (ce9->valueBits & softResetMb)) {
+			*(u32*)resetParam = 0;
+			*(u32*)(resetParam+8) = 0x44414F4C; // 'LOAD'
 		}
 		sharedAddr[3] = 0x52534554;
 	}
@@ -505,6 +512,14 @@ void reset(u32 param, u32 tid2) {
 
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
+
+	if (*(u32*)(resetParam+0xC) > 0) {
+		u32 newIrqTable = sharedAddr[2];
+		ce9->valueBits = sharedAddr[1];
+		ce9->irqTable = (u32*)newIrqTable;
+		ce9->cardStruct0 = sharedAddr[4];
+		sharedAddr[4] = 0;
+	}
 
 	if (returnToLoader || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
 		REG_DISPSTAT = 0;

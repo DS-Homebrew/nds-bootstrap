@@ -42,6 +42,16 @@
 #include "nds_header.h"
 #include "igm_text.h"
 
+#ifndef TWLSDK
+// Patcher
+#include "common.h"
+#include "decompress.h"
+#include "patch.h"
+#include "find.h"
+#include "hook.h"
+#endif
+
+// TWL soft-reset
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
 #include "sr_data_srllastran.h" // For rebooting the game
@@ -163,10 +173,11 @@ static u32 wordBak = 0;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 #else
-static const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 #endif
 static const char* romLocation = NULL;
+u32 currentSrlAddr = 0;
 
 void i2cIRQHandler(void);
 
@@ -187,7 +198,11 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
+			#ifdef TWLSDK
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xB800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			#else
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11800+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			#endif
 			i2 += 2;
 		}
 	}
@@ -219,9 +234,15 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
+	#ifdef TWLSDK
 	*(u32*)(0x02000310) = *(u32*)(ce7+0xB900);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0xB904);
 	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xB904) == 0x00030000 ? 0x13 : */ 0x17;
+	#else
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x11900);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x11904);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x11904) == 0x00030000 ? 0x13 : */ 0x17;
+	#endif
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -364,26 +385,36 @@ void restoreSdBakData(void) {
 	*(vu32*)0x400481C = sdStatBak;
 	*(vu32*)0x4004820 = sdMaskBak;
 }
+#else
+static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
+	//nocashMessage("Looking for moduleparams...\n");
+
+	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
+
+	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
+	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
+}
 #endif
 
 void reset(void) {
 #ifndef TWLSDK
 	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if ((valueBits & slowSoftReset) || *(u32*)(resetParam+0xC) > 0 || (valueBits & extendedMemory)) {
+	if ((valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5))) || (valueBits & extendedMemory)) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
-		sdRead = !(valueBits & gameOnFlashcard);
 		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
+			sdRead = (valueBits & b_dsiSD);
 			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160, !sdRead, -1);
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, ndsHeader->arm9binarySize, !sdRead, -1);
 			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
 		}
+		sdRead = !(valueBits & gameOnFlashcard);
 		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
-		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		} else {
 			// Use different SR backend ID
@@ -443,7 +474,60 @@ void reset(void) {
 	languageTimer = 0;
 
 	#ifndef TWLSDK
-	if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+	if (currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
+		currentSrlAddr = *(u32*)(resetParam+0xC);
+		if (*(u32*)(resetParam+8) == 0x44414F4C) {
+			tonccpy((char*)ndsHeader->arm7destination, (char*)0x022C0000, ndsHeader->arm7binarySize);
+		} else {
+			sdRead = !(valueBits & gameOnFlashcard);
+			fileRead((char*)ndsHeader, *romFile, currentSrlAddr, 0x160, !sdRead, 0);
+			fileRead((char*)ndsHeader->arm9destination, *romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, !sdRead, 0);
+			fileRead((char*)ndsHeader->arm7destination, *romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, !sdRead, 0);
+		}
+		sdRead = (valueBits & b_dsiSD);
+		*(u32*)(resetParam+8) = 0;
+
+		moduleParams = getModuleParams(ndsHeader);
+		/*dbg_printf("sdk_version: ");
+		dbg_hexa(moduleParams->sdk_version);
+		dbg_printf("\n");*/ 
+
+		ensureBinaryDecompressed(ndsHeader, moduleParams);
+
+		patchCardNdsArm9(
+			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
+			ndsHeader,
+			moduleParams,
+			1
+		);
+		patchCardNdsArm7(
+			(cardengineArm7*)ce7,
+			ndsHeader,
+			moduleParams
+		);
+
+		hookNdsRetailArm7(
+			(cardengineArm7*)ce7,
+			ndsHeader
+		);
+		hookNdsRetailArm9(ndsHeader);
+
+		extern u32 iUncompressedSize;
+
+		if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
+			fileWrite((char*)&ndsHeader->arm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, 0);
+		} else {
+			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
+			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
+			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
+			while (ndmaBusy(0) || ndmaBusy(1));
+		}
+
+		*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
+	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
 		//driveInitialize();
 		sdRead = (valueBits & b_dsiSD);
 
@@ -581,7 +665,11 @@ void forceGameReboot(void) {
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
 		if (valueBits & b_dsiSD) {
+			#ifdef TWLSDK
 			(*(u32*)(ce7+0xB900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			#else
+			(*(u32*)(ce7+0x11900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			#endif
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -595,8 +683,11 @@ void forceGameReboot(void) {
 	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
   	#ifdef TWLSDK
 	if (doBak) restoreSdBakData();
+	if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD))
+	#else
+	if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 	#endif
-	if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
+	{
 		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 	} else {
 		// Use different SR backend ID
@@ -631,9 +722,20 @@ void returnToLoader(bool wait) {
 	IPC_SendSync(0x8);
 #endif
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
+#ifdef TWLSDK
+		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD))
+#else
+		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
+#endif
+		{
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		} else if (*(char*)(ce7+0xB903) == 'H' || *(char*)(ce7+0xB903) == 'K') {
+		}
+#ifdef TWLSDK
+		else if (*(char*)(ce7+0xB903) == 'H' || *(char*)(ce7+0xB903) == 'K')
+#else
+		else if (*(char*)(ce7+0x11903) == 'H' || *(char*)(ce7+0x11903) == 'K')
+#endif
+		{
 			// Use different SR backend ID
 			readSrBackendId();
 		}
@@ -641,7 +743,12 @@ void returnToLoader(bool wait) {
 		waitFrames(1);
 #endif
 	} else {
-		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD)) {
+#ifdef TWLSDK
+		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD))
+#else
+		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
+#endif
+		{
 #ifndef TWLSDK
 			unlaunchSetFilename(true);
 #endif

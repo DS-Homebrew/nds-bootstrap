@@ -47,6 +47,7 @@
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
 #define b_isSdk5 BIT(13)
+#define b_asyncCardRead BIT(14)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -352,6 +353,9 @@ int hookNdsRetailArm7(
 		if (isSdk5(moduleParams)) {
 			ce7->valueBits |= b_isSdk5;
 		}
+		if (asyncCardRead) {
+			ce7->valueBits |= b_asyncCardRead;
+		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
 		}
@@ -362,6 +366,7 @@ int hookNdsRetailArm7(
 		ce7->consoleModel             = consoleModel;
 		ce7->romRead_LED              = romRead_LED;
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
+		ce7->scfgRomBak               = REG_SCFG_ROM;
 
 		*vblankHandler = ce7->patches->vblankHandler;
 		*ipcSyncHandler = ce7->patches->fifoHandler;

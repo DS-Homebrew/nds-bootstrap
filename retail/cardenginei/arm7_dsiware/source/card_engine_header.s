@@ -27,6 +27,7 @@
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
+.global scfgRomBak
 .global igmHotkey
 
 #define ICACHE_SIZE	0x2000
@@ -74,6 +75,8 @@ dmaRomRead_LED:
 	.byte	0
 irqTable_offset:
 	.word	irqTable
+scfgRomBak:
+	.hword	0
 igmHotkey:
 	.hword	0
 .align	4

@@ -594,7 +594,7 @@ void __attribute__((target("arm"))) resetMpu(void) {
 
 void reset(u32 param) {
 	*(u32*)RESET_PARAM = param;
-	if ((ce9->valueBits & slowSoftReset) || *(u32*)(RESET_PARAM+0xC) > 0) {
+	if (ce9->valueBits & slowSoftReset) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
@@ -610,6 +610,14 @@ void reset(u32 param) {
 		sharedAddr[3] = 0x52534554;
 		while (1);
 	} else {
+		if (*(u32*)(RESET_PARAM+0xC) > 0) {
+			sharedAddr[1] = ce9->valueBits;
+		}
+		if (!igmReset && (ce9->valueBits & softResetMb)) {
+			*(u32*)RESET_PARAM = 0;
+			*(u32*)(RESET_PARAM+8) = 0x44414F4C; // 'LOAD'
+		}
+
 		sharedAddr[3] = 0x52534554;
 	}
 
@@ -653,6 +661,14 @@ void reset(u32 param) {
 
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
+
+	if (*(u32*)(RESET_PARAM+0xC) > 0) {
+		u32 newIrqTable = sharedAddr[2];
+		ce9->valueBits = sharedAddr[1];
+		ce9->irqTable = (u32*)newIrqTable;
+		ce9->cardStruct0 = sharedAddr[4];
+		sharedAddr[4] = 0;
+	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;

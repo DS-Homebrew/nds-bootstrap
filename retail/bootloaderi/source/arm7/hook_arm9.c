@@ -259,8 +259,6 @@ int hookNdsRetailArm9(
 		}
 	}
 
-	extern u32 iUncompressedSize;
-
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
  	if (!tableAddr) {
 		tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);

@@ -24,8 +24,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	../arm7/source ../../common/source ../../common/source_general
-INCLUDES		:=	../arm7/include ../../common/include ../../common/include_fat
+SOURCES			:=	../arm7/source ../arm7/source/patcher ../../common/source ../../common/source_general
+INCLUDES		:=	../arm7/include ../arm7/include/patcher ../../common/include ../../common/include_fat
 DATA			:=	data
 
 
