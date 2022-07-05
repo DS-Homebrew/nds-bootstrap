@@ -30,10 +30,18 @@ static const u32 handlerStartSig[5] = {
 	0xe3510000		// cmp	r1, #0
 };
 
-// alt gsun
+// alt black sigil
 static const u32 handlerStartSigAlt[5] = {
 	0xe3a0c301, 	// mov  ip, #0x4000000
-	0xe5bc2208,		// 
+	0xe28cce21,		//
+	0xe51c1008,		//
+	0xe14f0000		//
+};
+
+// alt gsun
+static const u32 handlerStartSigAlt5[5] = {
+	0xe3a0c301, 	// mov  ip, #0x4000000
+	0xe5bc2208,		//
 	0xe1ec00d8,		//
 	0xe3520000		// cmp	r2, #0
 };
@@ -46,13 +54,22 @@ static const u32 handlerEndSig[4] = {
 	0xe12fff10		// bx   r0
 };
 
-// alt gsun
+// alt black sigil
 static const u32 handlerEndSigAlt[4] = {
+	0xe8bd5003, 	// 
+	0xe14c10b8,		// 
+	0xe169f000,		// 
+	0xe12fff1e		// 
+};
+
+// alt gsun
+static const u32 handlerEndSigAlt5[4] = {
 	0xe59f100C, 	// 
 	0xe5813000,		// 
 	0xe5813004,		// 
 	0xeaffffb8		// 
 };
+
 
 static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// Find the start of the handler
@@ -66,11 +83,17 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     		handlerStartSigAlt, 4
     	);
         if (!addr) {
+			addr = findOffset(
+				start, size,
+				handlerStartSigAlt5, 4
+			);
+        }
+        if (!addr) {
             dbg_printf("ERR_HOOK_9 : handlerStartSig\n");
     		return NULL;
         }
 	}
-    
+
     dbg_printf("handlerStartSig\n");
     dbg_hexa((u32)addr);
     dbg_printf("\n");
@@ -85,14 +108,20 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     		addr, MAX_HANDLER_LEN_ALT*sizeof(u32),
     		handlerEndSigAlt, 4
     	);
+        if (addr2) {
+			addr2 = addr2 + 1;
+		} else {
+			addr2 = findOffset(
+				addr, MAX_HANDLER_LEN_ALT*sizeof(u32),
+				handlerEndSigAlt5, 4
+			);
+        }
         if (!addr2) {
             dbg_printf("ERR_HOOK_9 : handlerEndSig\n");
     		return NULL;
         }
     }
-    
-    
-    
+
     dbg_printf("handlerEndSig\n");
     dbg_hexa((u32)addr2);
     dbg_printf("\n");
@@ -106,12 +135,12 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     dbg_printf("tableAddr\n");
     dbg_hexa(tableAddr);
     dbg_printf("\n");
-    
+
 	u32 returnAddr = addr[1];
     dbg_printf("returnAddr\n");
     dbg_hexa(returnAddr);
     dbg_printf("\n");
-    
+
 	//u32* actualReturnAddr = addr + 2;
 	//u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
 
