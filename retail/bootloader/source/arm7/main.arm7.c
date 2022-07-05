@@ -895,6 +895,7 @@ int arm7_main(void) {
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	nocashMessage("Loading the header...\n");
@@ -1138,7 +1139,8 @@ int arm7_main(void) {
 		errorOutput();
 	}*/
 
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 

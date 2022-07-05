@@ -104,7 +104,6 @@ static bool patchCardHashInit(const tNDSHeader* ndsHeader, const module_params_t
 		cardHashInitOffset = usesThumb ? (u32*)findCardHashInitOffsetThumb(ndsHeader, moduleParams) : findCardHashInitOffset(ndsHeader, moduleParams);
 		if (cardHashInitOffset) {
 			patchOffsetCache.cardHashInitOffset = cardHashInitOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 
@@ -141,7 +140,6 @@ static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
 		cardRomInitOffset = usesThumb ? (u32*)findCardRomInitOffsetThumb((u16*)cardReadEndOffset) : findCardRomInitOffset(cardReadEndOffset);
 		if (cardRomInitOffset) {
 			patchOffsetCache.cardRomInitOffset = cardRomInitOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 
@@ -284,7 +282,6 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 			cardReadStartOffset = findCardReadHashOffset();
 			if (cardReadStartOffset) {
 				patchOffsetCache.cardReadHashOffset = cardReadStartOffset;
-				patchOffsetCacheChanged = true;
 			} else {
 				return false;
 			}
@@ -441,7 +438,6 @@ void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool sea
 			patchOffsetCache.gbaSlotInitOffset = gbaSlotInitOffset;
 		}
 		patchOffsetCache.gbaSlotInitChecked = true;
-		patchOffsetCacheChanged = true;
 	} else if (searchAgainForThumb) {
 		usesThumb = patchOffsetCache.a9IsThumb;
 	}
@@ -517,7 +513,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 			patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
 		}
 		patchOffsetCache.cardReadDmaChecked = true;
-		patchOffsetCacheChanged = true;
 	}
 	if (!cardReadDmaStartOffset) {
 		return;
@@ -561,7 +556,6 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 			patchOffsetCache.dmaHandlerOffset = offsetDmaHandler;
 		}
 		patchOffsetCache.cardEndReadDmaChecked = true;
-		patchOffsetCacheChanged = true;
 	  }
     if(offset) {
       dbg_printf("\nNDMA CARD READ METHOD ACTIVE\n");
@@ -665,7 +659,6 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 			patchOffsetCache.cardSetDmaOffset = setDmaoffset;
 		}
 		patchOffsetCache.cardSetDmaChecked = true;
-		patchOffsetCacheChanged = true;
     }
     if(setDmaoffset) {
       dbg_printf("\nNDMA CARD SET METHOD ACTIVE\n");       
@@ -779,7 +772,6 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			patchOffsetCache.sleepFuncOffset = offset;
 		}
 		patchOffsetCache.sleepChecked = true;
-		patchOffsetCacheChanged = true;
 	}
 	if (offset) {
 		if (patchOffsetCache.sleepFuncIsThumb) {
@@ -837,7 +829,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
 		patchOffsetCache.mpuInitOffset = 0;
-		patchOffsetCacheChanged = true;
 	}
 
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
@@ -1086,7 +1077,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	if (offset[0] == 0xE3A00001) {
+	if (offset[0] == 0xE3A00001 || offset[0] == 0x03A0202C) {
 		offset[3] = 0xE1A00000; // nop
 	} else {
 		u16* thumbOffset = (u16*)offset;
@@ -1109,7 +1100,6 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 		offset = findMpuInitTwlEnd(patchOffsetCache.heapPointerOffset);
 		if (offset) {
 			patchOffsetCache.mpuInitEndTwl = offset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 
@@ -1143,7 +1133,6 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 		offset = findCartExistOffset(ndsHeader, usesThumb);
 		if (offset) {
 			patchOffsetCache.cartExistOffset = offset;
-			patchOffsetCacheChanged = true;
 		}
 		patchOffsetCache.cartExistOffsetChecked = true;
 	}
@@ -1229,7 +1218,6 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
         return 0;
     } else if (!patchOffsetCache.heapPointerOffset) {
 		patchOffsetCache.heapPointerOffset = heapPointer;
-		patchOffsetCacheChanged = true;
 	}
 
     u32* oldheapPointer = (u32*)*heapPointer;
@@ -1271,7 +1259,6 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	}
     if(heapPointer) {
 		patchOffsetCache.heapPointerOffset = heapPointer;
-		patchOffsetCacheChanged = true;
 	} else {
 		dbg_printf("Heap pointer not found\n");
 		return NULL;
@@ -1403,7 +1390,6 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			}
 			if (mbkWramBOffset) {
 				patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 		if (mbkWramBOffset) {
@@ -1438,7 +1424,6 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			}
 			if (mbkWramBOffset) {
 				patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 		if (mbkWramBOffset) {
@@ -1478,7 +1463,6 @@ void patchFileIoFuncs(const tNDSHeader* ndsHeader) {
 	u32* offset = patchOffsetCache.fileIoFuncOffset;
 	if (!patchOffsetCache.fileIoFuncChecked) {
 		offset = findFileIoFuncOffset(ndsHeader);
-		patchOffsetCacheChanged = true;
 		if (offset) {
 			patchOffsetCache.fileIoFuncOffset = offset;
 		}
@@ -1822,7 +1806,6 @@ static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* modu
 				patchOffsetCache.randomPatchOffset = randomPatchOffset;
 			}
 			patchOffsetCache.randomPatchChecked = true;
-			patchOffsetCacheChanged = true;
 		}
 		if (randomPatchOffset) {
 			// Patch
@@ -1940,7 +1923,6 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 			patchOffsetCache.randomPatch5SecondOffset = randomPatchOffset5Second;
 		}
 		patchOffsetCache.randomPatch5SecondChecked = true;
-		patchOffsetCacheChanged = true;
 	}
 	if (!randomPatchOffset5Second) {
 		return;

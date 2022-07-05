@@ -28,12 +28,13 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 82;	// Change when new functions are being patched, some offsets removed
-										// the offset order changed, and/or the function signatures changed
+u16 patchOffsetCacheFileVersion = 82;	// Change when new functions are being patched, some offsets removed,
+										// the offset order changed, and/or the function signatures changed (not added)
 
 patchOffsetCacheContents patchOffsetCache;
 
-bool patchOffsetCacheChanged = false;
+u16 patchOffsetCacheFilePrevCrc = 0;
+u16 patchOffsetCacheFileNewCrc = 0;
 
 extern bool logging;
 extern bool gbaRomFound;

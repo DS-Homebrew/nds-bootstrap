@@ -107,6 +107,7 @@ static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuChangeRegion1Signature[3]         = {0xE3A00001, 0xE3A01402, 0xE3A0202A};
+static const u32 mpuChangeRegion1SignatureAlt[3]      = {0x03A0202C, 0xE3A00001, 0xE3A01402};
 static const u16 mpuChangeRegion1SignatureThumb[3]    = {0x2001, 0x0609, 0x222A};
 static const u16 mpuChangeRegion1SignatureThumbAlt[3] = {0x2001, 0x0621, 0x222A};
 
@@ -1342,6 +1343,18 @@ u32* findMpuChange(const tNDSHeader* ndsHeader) {
 		dbg_printf("Mpu change found\n");
 	} else {
 		dbg_printf("Mpu change not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuChangeRegion1SignatureAlt, 3
+		);
+		if (offset) {
+			dbg_printf("Mpu change alt found\n");
+		} else {
+			dbg_printf("Mpu change alt not found\n");
+		}
 	}
 
 	if (!offset) {

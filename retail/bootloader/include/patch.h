@@ -108,7 +108,8 @@ typedef struct patchOffsetCacheContents {
 extern u16 patchOffsetCacheFileVersion;
 extern patchOffsetCacheContents patchOffsetCache;
 
-extern bool patchOffsetCacheChanged;
+extern u16 patchOffsetCacheFilePrevCrc;
+extern u16 patchOffsetCacheFileNewCrc;
 
 u32 generateA7Instr(int arg1, int arg2);
 u32* getOffsetFromBL(u32* blOffset);

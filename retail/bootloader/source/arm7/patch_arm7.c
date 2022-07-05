@@ -348,7 +348,6 @@ u32 patchCardNdsArm7(
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 		rsetA7Cache();
 		patchOffsetCache.a7BinSize = newArm7binarySize;
-		patchOffsetCacheChanged = true;
 	}
 
 	if (!patchWramClear(ndsHeader)) {

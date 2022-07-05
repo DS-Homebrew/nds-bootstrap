@@ -1285,6 +1285,7 @@ int arm7_main(void) {
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	nocashMessage("Loading the header...\n");
@@ -1404,7 +1405,6 @@ int arm7_main(void) {
 				extern void rsetA7Cache(void);
 				rsetA7Cache();
 				patchOffsetCache.a7BinSize = newArm7binarySize;
-				patchOffsetCacheChanged = true;
 			}
 
 			if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
@@ -1415,7 +1415,6 @@ int arm7_main(void) {
 			extern void rsetA7Cache(void);
 			rsetA7Cache();
 			patchOffsetCache.a7BinSize = newArm7binarySize;
-			patchOffsetCacheChanged = true;
 		}
 
 		extern void patchScfgExt(const tNDSHeader* ndsHeader);
@@ -1474,7 +1473,8 @@ int arm7_main(void) {
 
 		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
 
@@ -1779,7 +1779,8 @@ int arm7_main(void) {
 			consoleModel
 		);
 
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
 		}
 

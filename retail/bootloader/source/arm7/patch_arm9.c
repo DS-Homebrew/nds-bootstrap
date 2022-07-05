@@ -366,7 +366,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		patchOffsetCache.mpuStartOffset = 0;
 		patchOffsetCache.mpuDataOffset = 0;
 		patchOffsetCache.mpuInitOffset = 0;
-		patchOffsetCacheChanged = true;
 	}
 
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
@@ -582,7 +581,6 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		offset = findMpuChange(ndsHeader);
 		if (offset) {
 			patchOffsetCache.mpuDataOffset = offset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 
@@ -590,7 +588,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	if (offset[0] == 0xE3A00001) {
+	if (offset[0] == 0xE3A00001 || offset[0] == 0x03A0202C) {
 		offset[3] = 0xE1A00000; // nop
 	} else {
 		u16* thumbOffset = (u16*)offset;
@@ -626,7 +624,6 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
         return 0;
     } else if (!patchOffsetCache.heapPointerOffset) {
 		patchOffsetCache.heapPointerOffset = heapPointer;
-		patchOffsetCacheChanged = true;
 	}
 
     u32* oldheapPointer = (u32*)*heapPointer;
@@ -680,7 +677,6 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
         return;
     } else if (!patchOffsetCache.heapPointer2Offset) {
 		patchOffsetCache.heapPointer2Offset = heapPointer;
-		patchOffsetCacheChanged = true;
 	}
 
     dbg_printf("hi heap end: ");

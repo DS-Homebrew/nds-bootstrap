@@ -117,7 +117,6 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 		scfgExtOffset = a7_findScfgExtOffset(ndsHeader);
 		if (scfgExtOffset) {
 			patchOffsetCache.a7ScfgExtOffset = scfgExtOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
@@ -173,7 +172,6 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		a7iStartOffset = (u32)findA7iStartOffset();
 		if (a7iStartOffset) {
 			patchOffsetCache.a7iStartOffset = a7iStartOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}*/
 
@@ -220,28 +218,24 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 			swi24Offset = a7_findSwi24Offset();
 			if (swi24Offset) {
 				patchOffsetCache.a7Swi24Offset = swi24Offset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 		if (!patchOffsetCache.a7Swi25Offset) {
 			swi25Offset = a7_findSwi25Offset();
 			if (swi25Offset) {
 				patchOffsetCache.a7Swi25Offset = swi25Offset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 		if (!patchOffsetCache.a7Swi26Offset) {
 			swi26Offset = a7_findSwi26Offset();
 			if (swi26Offset) {
 				patchOffsetCache.a7Swi26Offset = swi26Offset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 		if (!patchOffsetCache.a7Swi27Offset) {
 			swi27Offset = a7_findSwi27Offset();
 			if (swi27Offset) {
 				patchOffsetCache.a7Swi27Offset = swi27Offset;
-				patchOffsetCacheChanged = true;
 			}
 		}
 
@@ -337,7 +331,6 @@ void patchPostBoot(const tNDSHeader* ndsHeader) {
 		postBootOffset = findPostBootOffset(ndsHeader);
 		if (postBootOffset) {
 			patchOffsetCache.postBootOffset = postBootOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 	if (postBootOffset) {
@@ -405,7 +398,6 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 		sdCardResetOffset = findSdCardResetOffset(ndsHeader, moduleParams);
 		if (sdCardResetOffset) {
 			patchOffsetCache.sdCardResetOffset = sdCardResetOffset;
-			patchOffsetCacheChanged = true;
 		}
 	}
 	if (sdCardResetOffset) {
@@ -441,7 +433,6 @@ u32 patchCardNdsArm7(
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 		rsetA7Cache();
 		patchOffsetCache.a7BinSize = newArm7binarySize;
-		patchOffsetCacheChanged = true;
 	}
 
 	patchPostBoot(ndsHeader);
