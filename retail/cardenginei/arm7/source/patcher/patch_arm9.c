@@ -577,37 +577,6 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	}
 }
 
-u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
-	if (moduleParams->sdk_version < 0x2008000) {
-		return NULL;
-	}
-
-	u32* heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
-    if(!heapPointer) {
-		//dbg_printf("Heap pointer not found\n");
-		return NULL;
-	}
-
-    /*dbg_printf("hi heap end: ");
-	dbg_hexa((u32)heapPointer);
-    dbg_printf("\n\n");
-
-    u32* oldheapPointer = (u32*)*heapPointer;
-
-    dbg_printf("old hi heap value: ");
-	dbg_hexa((u32)oldheapPointer);
-    dbg_printf("\n\n");*/
-
-	*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
-
-    /*dbg_printf("new hi heap value: ");
-	dbg_hexa((u32)*heapPointer);
-    dbg_printf("\n\n");
-    dbg_printf("Hi Heap Shrink Sucessfull\n\n");*/
-
-    return (u32*)*heapPointer;
-}
-
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	//const char* romTid = getRomTid(ndsHeader);
 

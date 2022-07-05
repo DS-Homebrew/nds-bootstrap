@@ -346,8 +346,6 @@ static void initialize(void) {
 
 	romLocation = (char*)(((valueBits & dsiMode) || (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (valueBits & extendedMemory) {
-		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
-		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_4MB-0x180);
 		romLocation = (char*)ROM_LOCATION_EXT;
 	}
 

@@ -40,7 +40,6 @@
 
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
-#define ROMinRAM BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)

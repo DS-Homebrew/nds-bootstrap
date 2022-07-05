@@ -40,7 +40,7 @@
 
 #define saveOnFlashcard BIT(0)
 #define extendedMemory BIT(1)
-#define ROMinRAM BIT(2)
+#define eSdk2 BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
@@ -169,25 +169,61 @@ void cardSetDma(u32 * params) {
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? params[4] : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
+	u32 lenExt = 0;
 
+	/*if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
+		dst -= 0x400000;	// Do not overwrite ROM
+	}*/
+
+	bool srcInWram = false;
+	u32 romEnd1st = ((ce9->valueBits & isSdk5) ? 0x0CFE0000 : ((ce9->valueBits & eSdk2) ? 0x0C7C0000 : 0x0C7E0000));
+	u32 romEnd2nd = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
-
-	// Copy via dma
 	if (ce9->valueBits & extendedMemory) {
-		int oldIME = enterCriticalSection();
-		REG_SCFG_EXT += 0xC000;
+		if (newSrc >= romEnd2nd) {
+			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+			newSrc = (u32)(newSrc-0x8000)+src;
+			srcInWram = true;
+		} else if (newSrc+len > romEnd2nd) {
+			u32 oldLen = len;
+			for (int i = 0; i < oldLen; i++) {
+				len--;
+				lenExt++;
+				if (newSrc+len == romEnd2nd) break;
+			}
+			srcInWram = true;
+		}
+		if (!srcInWram) {
+			if (newSrc >= romEnd1st) {
+				newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
+			} else if (newSrc+len > romEnd1st) {
+				u32 oldLen = len;
+				for (int i = 0; i < oldLen; i++) {
+					len--;
+					lenExt++;
+					if (newSrc+len == romEnd1st) break;
+				}
+			}
+		}
+	}
+
+	if (lenExt > 0) {
 		ndmaCopyWords(0, (u8*)newSrc, dst, len);
-		REG_SCFG_EXT -= 0xC000;
-		leaveCriticalSection(oldIME);
-		endCardReadDma();
+		if (srcInWram) {
+			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+		} else {
+			newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
+		}
+		newSrc = (u32)(newSrc-0x8000)+src+len;
+		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst+len, lenExt);
 	} else {
 		// Copy via dma
 		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
-		IPC_SendSync(0x3);
 	}
+	IPC_SendSync(0x3);
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -273,10 +309,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		if (region0FixNeeded) {
 			region0Fix();
 		}
-		if (ce9->valueBits & extendedMemory) {
-			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
-		}
-
 		flagsSet = true;
 	}
 	
@@ -289,53 +321,55 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	u32 lenExt = 0;
 
-	if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
+	/*if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
-	}
+	}*/
 
-	u32 romEnd1st = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
+	bool srcInWram = false;
+	u32 romEnd1st = ((ce9->valueBits & isSdk5) ? 0x0CFE0000 : ((ce9->valueBits & eSdk2) ? 0x0C7C0000 : 0x0C7E0000));
+	u32 romEnd2nd = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
-	if (newSrc >= romEnd1st) {
-		newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-		newSrc = (u32)(newSrc-0x8000)+src;
-	} else if (newSrc+len > romEnd1st) {
-		u32 oldLen = len;
-		for (int i = 0; i < oldLen; i++) {
-			len--;
-			lenExt++;
-			if (newSrc+len == romEnd1st) break;
+	if (ce9->valueBits & extendedMemory) {
+		if (newSrc >= romEnd2nd) {
+			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
+			newSrc = (u32)(newSrc-0x8000)+src;
+			srcInWram = true;
+		} else if (newSrc+len > romEnd2nd) {
+			u32 oldLen = len;
+			for (int i = 0; i < oldLen; i++) {
+				len--;
+				lenExt++;
+				if (newSrc+len == romEnd2nd) break;
+			}
+			srcInWram = true;
+		}
+		if (!srcInWram) {
+			if (newSrc >= romEnd1st) {
+				newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
+			} else if (newSrc+len > romEnd1st) {
+				u32 oldLen = len;
+				for (int i = 0; i < oldLen; i++) {
+					len--;
+					lenExt++;
+					if (newSrc+len == romEnd1st) break;
+				}
+			}
 		}
 	}
 
-	/*if (isDma && !(ce9->valueBits & extendedMemory)) {
-		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
-		while (ndmaBusy(0)) {
-			sleepMs(1);
-		}
-	} else {*/
-		int oldIME = 0;
-		if (ce9->valueBits & extendedMemory) {
-			// Open extra memory
-			oldIME = enterCriticalSection();
-			REG_SCFG_EXT += 0xC000;
-		}
-
-		tonccpy(dst, (u8*)newSrc, len);
-		if (lenExt > 0) {
+	tonccpy(dst, (u8*)newSrc, len);
+	if (lenExt > 0) {
+		if (srcInWram) {
 			newSrc = (u32)ROM_LOCATION_EXT_P2-(ce9->consoleModel==0 ? 0x00C00000 : 0x01C00000);
-			newSrc = (u32)(newSrc-0x8000)+src+len;
-			tonccpy(dst+len, (u8*)newSrc, lenExt);
+		} else {
+			newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
 		}
-
-		if (ce9->valueBits & extendedMemory) {
-			// Close extra memory
-			REG_SCFG_EXT -= 0xC000;
-			leaveCriticalSection(oldIME);
-		}
-	//}
+		newSrc = (u32)(newSrc-0x8000)+src+len;
+		tonccpy(dst+len, (u8*)newSrc, lenExt);
+	}
 
     isDma=false;
 }

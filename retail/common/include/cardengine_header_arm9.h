@@ -71,7 +71,7 @@ typedef struct cardengineArm9 {
 	/*
 		0: saveOnFlashcard
 		1: extendedMemory
-		2: ROMinRAM
+		2: eSdk2
 		3: dsiMode
 		4: enableExceptionHandler
 		5: isSdk5

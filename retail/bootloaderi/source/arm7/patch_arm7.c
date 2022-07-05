@@ -304,17 +304,27 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }
 
-/*static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000) {
+static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0) {
 		return;
 	}
 
-	u32* ramClearOffset = findRamClearOffset(ndsHeader);
-	
-	if (ramClearOffset) {
-		*(ramClearOffset + 1) = 0x02FFD000;
+	u32* ramClearOffset = patchOffsetCache.ramClearOffset;
+	if (!patchOffsetCache.ramClearOffset && !patchOffsetCache.ramClearChecked) {
+		ramClearOffset = findRamClearOffset(ndsHeader);
+		if (ramClearOffset) {
+			patchOffsetCache.ramClearOffset = ramClearOffset;
+		}
 	}
-}*/
+	if (ramClearOffset) {
+		*(ramClearOffset) = 0x02FFC000;
+		*(ramClearOffset + 1) = 0x02FFD000;
+		dbg_printf("RAM clear location : ");
+		dbg_hexa((u32)ramClearOffset);
+		dbg_printf("\n\n");
+	}
+	patchOffsetCache.ramClearChecked = true;
+}
 
 void patchPostBoot(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -441,7 +451,7 @@ u32 patchCardNdsArm7(
 
 	patchSleepMode(ndsHeader);
 
-	//patchRamClear(ndsHeader, moduleParams);
+	patchRamClear(ndsHeader, moduleParams);
 
 	// Touch fix for SM64DS (U) v1.0
 	if (newArm7binarySize == 0x24B64

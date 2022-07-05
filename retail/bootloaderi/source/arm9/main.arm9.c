@@ -339,21 +339,15 @@ void __attribute__((target("arm"))) arm9_main(void) {
                 REG_SCFG_EXT |= BIT(16);	// NDMA
 				*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = REG_SCFG_EXT;
 				*(u16*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 8) = REG_SCFG_CLK;
-				if (extendedMemoryConfirmed) {
-					if (moreMemory) {
-						for (int i = 0; i < 16; i++) {
-							transferToArm9(i);
-						}
-					} else {
-						transferToArm9(15);
+				if (extendedMemoryConfirmed && moreMemory) {
+					for (int i = 0; i < 16; i++) {
+						transferToArm9(i);
 					}
-					// Switch to 4MB mode
-					REG_SCFG_EXT -= 0xC000;
 				} else {
 					transferToArm9(15);
-					// lock SCFG
-					REG_SCFG_EXT &= ~(1UL << 31);
 				}
+				// lock SCFG
+				REG_SCFG_EXT &= ~(1UL << 31);
 			}
 			arm9_stateFlag = ARM9_READY;
 		}

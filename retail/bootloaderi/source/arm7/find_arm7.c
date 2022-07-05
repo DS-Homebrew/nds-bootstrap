@@ -82,7 +82,7 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-//static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
 
 // Post-boot code
 static const u32 postBootStartSignature[1]      = {0xE92D47F0};
@@ -983,7 +983,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	return sleepPatchOffset;
 }
 
-/*u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
+u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
@@ -1000,7 +1000,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return ramClearOffset;
-}*/
+}
 
 u32* findPostBootOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findPostBootOffset:\n");

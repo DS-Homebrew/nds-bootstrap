@@ -13,7 +13,7 @@
 
 #define b_saveOnFlashcard BIT(0)
 #define b_extendedMemory BIT(1)
-#define b_ROMinRAM BIT(2)
+#define b_eSdk2 BIT(2)
 #define b_dsiMode BIT(3)
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
@@ -185,9 +185,6 @@ int hookNdsRetailArm9(
 	if (extendedMemory) {
 		ce9->valueBits |= b_extendedMemory;
 	}
-	if (ROMinRAM) {
-		ce9->valueBits |= b_ROMinRAM;
-	}
 	if (dsiMode) {
 		ce9->valueBits |= b_dsiMode; // SDK 5
 	}
@@ -287,6 +284,8 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
+	} else if (moduleParams->sdk_version < 0x2008000) {
+		ce9->valueBits |= b_eSdk2;
 	}
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;

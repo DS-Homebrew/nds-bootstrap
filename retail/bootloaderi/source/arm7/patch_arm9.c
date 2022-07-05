@@ -69,7 +69,7 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2EFFFD0;
 				}
 			}
-		} else if (!dsiModeConfirmed && extendedMemoryConfirmed && !(REG_SCFG_ROM & BIT(1))) {
+		} /*else if (!dsiModeConfirmed && extendedMemoryConfirmed && !(REG_SCFG_ROM & BIT(1))) {
 			dsiModeCheckOffset[0] = 0xE3A00001;	// mov r0, #1
 			dsiModeCheckOffset[1] = 0xE12FFF1E;	// bx lr
 
@@ -83,7 +83,7 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 					dsiModeCheck2OffsetThumb[1] = 0x4770;	// bx lr
 				}
 			}
-		}
+		}*/
 	}
 
 	if (ROMisDsiEnhanced) {
@@ -948,7 +948,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+	if ((moduleParams->sdk_version < 0x2008000 && !extendedMemoryConfirmed) || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -994,10 +994,13 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 			//}
 		//}
 		} else {*/
-			//Original code made loading slow, so new code is used
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
+			if (extendedMemoryConfirmed) {
+				*mpuDataOffset = 0;
+			} else {
+				*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
+			}
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
@@ -1358,7 +1361,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		}
 	} else {
-		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION_ROMINRAM;
+		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM;
 	}
 
     dbg_printf("new hi heap value: ");
