@@ -211,7 +211,7 @@ int hookNdsRetailArm9(
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
 	if (extendedMemory) {
-		ce9->romLocation = ROM_LOCATION_EXT;
+		ce9->romLocation = (moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT;
 	} else if (consoleModel > 0) {
 		ce9->romLocation = ((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	} else {
