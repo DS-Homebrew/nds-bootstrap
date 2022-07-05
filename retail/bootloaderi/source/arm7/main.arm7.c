@@ -853,7 +853,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 			fileRead((char*)romLocation, *romFile, romOffset, romSizeLimitTilA7, !sdRead, 0);
 			fileRead((char*)romLocation+romSizeLimitTilA7+((moduleParams->sdk_version < 0x2008000) ? 0x40000 : 0x20000), *romFile, romOffset + romSizeLimitTilA7, romSizeEdit-romSizeLimitTilA7, !sdRead, 0);
 			if (romSizeEdit > romSizeLimit) {
-				fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimitTilA7-romSizeLimit, !sdRead, 0);
+				fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimit, !sdRead, 0);
 			}
 		}
 		if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
@@ -1643,7 +1643,7 @@ int arm7_main(void) {
 				} else if ((u32)ndsHeader->arm9destination == 0x02004000) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2;
 				} else if (extendedMemoryConfirmed && (moreMemory || !dsiWramAccess)) {
-					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION5_ROMINRAM;
+					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM;
 				} else if (dsiWramAccess) {
 					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				}
@@ -1714,7 +1714,7 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead(&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
+		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 
 		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
