@@ -515,10 +515,10 @@ void reset(void) {
 		extern u32 iUncompressedSize;
 
 		if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
-			fileWrite((char*)&ndsHeader->arm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
-			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, 0);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)&ndsHeader->arm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
 		} else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
