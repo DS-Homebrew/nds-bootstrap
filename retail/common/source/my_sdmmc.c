@@ -945,86 +945,69 @@ int SD_Init(void)
 	set_target(&handleSD);
 	swiDelay(0x1980); // ~75-76 clocks
 
-	sdmmc_send_command(&handleSD,0,0);
-	sdmmc_send_command(&handleSD,0x10408,0x1AA);
-	u32 temp = (handleSD.error & 0x1) << 0x1E;
+    // card reset
+    sdmmc_send_command(&handleSD,0,0);
 
-	u32 temp2 = 0;
+    // CMD8 0x1AA
+    sdmmc_send_command(&handleSD,0x10408,0x1AA);
+    u32 temp = (handleSD.error & 0x1) << 0x1E;
 
-	do
-	{
-		do
-		{
-			sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
-			sdmmc_send_command(&handleSD,0x10769,0x00FF8000 | temp);
-			temp2 = 1;
-		} while ( !(handleSD.error & 1) );
-	}
-	while((handleSD.ret[0] & 0x80000000) == 0);
+    u32 temp2 = 0;
+    do {
+        do {
+            // CMD55
+            sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
+            // ACMD41
+            sdmmc_send_command(&handleSD,0x10769,0x00FF8000 | temp);
+            temp2 = 1;
+        } while ( !(handleSD.error & 1) );
 
-	if(!((handleSD.ret[0] >> 30) & 1) || !temp)
-		temp2 = 0;
+    } while((handleSD.ret[0] & 0x80000000) == 0);
 
-	handleSD.isSDHC = temp2;
+    if(!((handleSD.ret[0] >> 30) & 1) || !temp)
+        temp2 = 0;
 
-	sdmmc_send_command(&handleSD,0x10602,0);
-	if((handleSD.error & 0x4)) return -1;
+    handleSD.isSDHC = temp2;
 
-	sdmmc_send_command(&handleSD,0x10403,0);
-	if((handleSD.error & 0x4)) return -2;
-	handleSD.initarg = handleSD.ret[0] >> 0x10;
+    sdmmc_send_command(&handleSD,0x10602,0);
+    if (handleSD.error & 0x4) return -1;
 
-	sdmmc_send_command(&handleSD,0x10609,handleSD.initarg << 0x10);
-	if((handleSD.error & 0x4)) return -3;
+    sdmmc_send_command(&handleSD,0x10403,0);
+    if (handleSD.error & 0x4) return -1;
+    handleSD.initarg = handleSD.ret[0] >> 0x10;
 
-	// Command Class 10 support
-	const bool cmd6Supported = ((u8*)handleSD.ret)[10] & 0x40;
-	handleSD.total_size = sdmmc_calc_size((u8*)&handleSD.ret[0],-1);
-	setckl(0x201); // 16.756991 MHz
+    sdmmc_send_command(&handleSD,0x10609,handleSD.initarg << 0x10);
+    if (handleSD.error & 0x4) return -1;
 
-	sdmmc_send_command(&handleSD,0x10507,handleSD.initarg << 0x10);
-	if((handleSD.error & 0x4)) return -4;
+    handleSD.total_size = sdmmc_calc_size((u8*)&handleSD.ret[0],-1);
+    handleSD.clk = 1;
+    setckl(1);
 
-	// CMD55
-	sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
-	if(handleSD.error & 0x4) return -5;
+    sdmmc_send_command(&handleSD,0x10507,handleSD.initarg << 0x10);
+    if (handleSD.error & 0x4) return -1;
 
-	// ACMD42 SET_CLR_CARD_DETECT
-	sdmmc_send_command(&handleSD,0x1076A,0x0);
-	if(handleSD.error & 0x4) return -6;
+    // CMD55
+    sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
+    if (handleSD.error & 0x4) return -1;
 
-	sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
-	if((handleSD.error & 0x4)) return -7;
+    // ACMD42
+    sdmmc_send_command(&handleSD,0x1076A,0x0);
+    if (handleSD.error & 0x4) return -1;
 
-	handleSD.SDOPT = 1;
-	sdmmc_send_command(&handleSD,0x10446,0x2);
-	if((handleSD.error & 0x4)) return -8;
-	sdmmc_mask16(REG_SDOPT, 0x8000, 0); // Switch to 4 bit mode.
+    // CMD55
+    sdmmc_send_command(&handleSD,0x10437,handleSD.initarg << 0x10);
+    if (handleSD.error & 0x4) return -7;
 
-	// TODO: CMD6 to switch to high speed mode.
-	if(cmd6Supported)
-	{
-		sdmmc_write16(REG_SDSTOP,0);
-		sdmmc_write16(REG_SDBLKLEN32,64);
-		sdmmc_write16(REG_SDBLKLEN,64);
-		handleSD.rData = NULL;
-		handleSD.size = 64;
-        handleSD.startOffset = 0;
-        handleSD.endOffset = 0;
-		sdmmc_send_command(&handleSD,0x31C06,0x80FFFFF1);
-		sdmmc_write16(REG_SDBLKLEN,512);
-		if(handleSD.error & 0x4) return -9;
+    handleSD.SDOPT = 1;
+    sdmmc_send_command(&handleSD,0x10446,0x2);
+    if (handleSD.error & 0x4) return -8;
 
-		handleSD.clk = 0x200; // 33.513982 MHz
-		setckl(0x200);
-	}
-	else handleSD.clk = 0x201; // 16.756991 MHz
+    sdmmc_send_command(&handleSD,0x1040D,handleSD.initarg << 0x10);
+    if (handleSD.error & 0x4) return -9;
 
-	sdmmc_send_command(&handleSD,0x1040D,handleSD.initarg << 0x10);
-	if((handleSD.error & 0x4)) return -9;
-
-	sdmmc_send_command(&handleSD,0x10410,0x200);
-	if((handleSD.error & 0x4)) return -10;
+    sdmmc_send_command(&handleSD,0x10410,0x200);
+    if (handleSD.error & 0x4) return -10;
+    handleSD.clk |= 0x200;
 
 	return 0;
 }
