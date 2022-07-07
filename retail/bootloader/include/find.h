@@ -36,6 +36,7 @@ u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_
 u32* findCardReadStartOffsetType0(const module_params_t* moduleParams, const u32* cardReadEndOffset);
 u32* findCardReadStartOffsetType1(const u32* cardReadEndOffset);
 u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* cardReadEndOffset); // SDK 5
+u32* findCardReadCheckOffsetMvDK4(u32 startOffset);
 u16* findCardReadStartOffsetThumb(const u16* cardReadEndOffset);
 u16* findCardReadStartOffsetThumb5Type0(const module_params_t* moduleParams, const u16* cardReadEndOffset); // SDK 5
 u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, const u16* cardReadEndOffset); // SDK 5

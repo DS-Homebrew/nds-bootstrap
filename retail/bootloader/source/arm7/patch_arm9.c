@@ -128,6 +128,22 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
+static bool patchCardReadMvDK4(u32 startOffset) {
+	u32* offset = findCardReadCheckOffsetMvDK4(startOffset);
+	if (!offset) {
+		return false;
+	}
+
+	//offset[2] = 0xE3A00001; // mov r0, #1
+	offset[3] = 0xE1A00000; // nop
+	offset[4] += 0xD0000000; // bne to b
+
+	dbg_printf("cardReadMvDK4 location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+	return true;
+}
+
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
 	u32* cardPullOutOffset = patchOffsetCache.cardPullOutOffset;
@@ -1143,6 +1159,16 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, startOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
+	}
+
+	if (strncmp(romTid, "V2G", 3) == 0) {
+		// try to patch card read a second time
+		dbg_printf("patch card read a second time\n");
+		dbg_printf("startOffset : 0x02030000\n\n");
+		if (!patchCardReadMvDK4(0x02030000)) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
 	patchCardReadPdash(ce9, ndsHeader);

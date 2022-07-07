@@ -299,19 +299,21 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	return true;
 }
 
-/*static bool patchCardReadMvDK4(cardengineArm9* ce9, u32 startOffset) {
-	u32* cardReadStartOffset = findCardReadStartOffsetMvDK4(startOffset);
-	if (!cardReadStartOffset) {
+static bool patchCardReadMvDK4(u32 startOffset) {
+	u32* offset = findCardReadCheckOffsetMvDK4(startOffset);
+	if (!offset) {
 		return false;
 	}
 
-	u32* cardReadPatch = ce9->patches->card_dma_arm9;
-	tonccpy(cardReadStartOffset, cardReadPatch, 0x60);
-    dbg_printf("cardReadDma location : ");
-    dbg_hexa(cardReadStartOffset);
-    dbg_printf("\n\n");
+	//offset[2] = 0xE3A00001; // mov r0, #1
+	offset[3] = 0xE1A00000; // nop
+	offset[4] += 0xD0000000; // bne to b
+
+	dbg_printf("cardReadMvDK4 location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
 	return true;
-}*/
+}
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
 	// Card pull out
@@ -536,6 +538,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -648,6 +651,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
@@ -2126,10 +2130,10 @@ static void operaRamPatch(void) {
 	//*(u32*)0x0238C950 = 0xC400000;
 }
 
-static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
+/*static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
-}
+}*/
 
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
 
@@ -2180,15 +2184,15 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-   /*if (strncmp(romTid, "V2G", 3) == 0) {
-        // try to patch card read DMA a second time
-        dbg_printf("patch card read a second time\n");
-        dbg_printf("startOffset : 0x02030000\n\n");
-	   	if (!patchCardReadMvDK4(ce9, 0x02030000)) {
-    		dbg_printf("ERR_LOAD_OTHR\n\n");
-    		return ERR_LOAD_OTHR;
-    	}
-	}*/
+	if (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) {
+		// try to patch card read a second time
+		dbg_printf("patch card read a second time\n");
+		dbg_printf("startOffset : 0x02030000\n\n");
+		if (!patchCardReadMvDK4(0x02030000)) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
+	}
 
 	patchCardReadPdash(ce9, ndsHeader);
 
@@ -2245,7 +2249,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
-	setFlushCache(ce9, patchMpuRegion, usesThumb);
+	//setFlushCache(ce9, patchMpuRegion, usesThumb);
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

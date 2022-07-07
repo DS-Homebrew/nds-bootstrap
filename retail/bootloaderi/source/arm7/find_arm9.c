@@ -48,7 +48,7 @@ static const u32 cardReadStartSignatureAlt[1]       = {0xE92D47F0};
 static const u32 cardReadStartSignatureAlt2[1]      = {0xE92D4070};
 static const u32 cardReadStartSignature5[1]         = {0xE92D4FF8};                                                     // SDK 5
 static const u32 cardReadStartSignature5Alt[4]      = {0xE92D4010};													// SDK 5.5
-static const u32 cardReadStartSignature5AltMvDK4[4] = {0xE92D4010, 0xE59F4050, 0xE3A0000C, 0xE5942024};
+static const u32 cardReadCheckSignatureMvDK4[3]     = {0xE5C02289, 0xE5C02288, 0xE5D0028A};
 static const u16 cardReadStartSignatureThumb[2]     = {0xB5F8, 0xB082};
 static const u16 cardReadStartSignatureThumbAlt[2]  = {0xB5F0, 0xB083};
 static const u16 cardReadStartSignatureThumb5[1]    = {0xB5F0};                                                         // SDK 5
@@ -765,19 +765,17 @@ u32* findCardReadStartOffset5(const module_params_t* moduleParams, const u32* ca
 	return cardReadStartOffset;
 }
 
-u32* findCardReadStartOffsetMvDK4(u32 startOffset) {
-	dbg_printf("findCardReadStartOffsetMvDK4:\n");
-
-	//if (readType != 1) {
+u32* findCardReadCheckOffsetMvDK4(u32 startOffset) {
+	dbg_printf("findCardReadCheckOffsetMvDK4:\n");
 
 	u32* cardReadStartOffset = findOffset(
 		(u32*)startOffset, 0x20000,
-		cardReadStartSignature5AltMvDK4, 4
+		cardReadCheckSignatureMvDK4, 3
 	);
 	if (cardReadStartOffset) {
-		dbg_printf("ARM9 Card read DMA start (MvDK4) found\n");
+		dbg_printf("ARM9 Card read check (MvDK4) found\n");
 	} else {
-		dbg_printf("ARM9 Card read DMA start (MvDK4) not found\n");
+		dbg_printf("ARM9 Card read check (MvDK4) not found\n");
 	}
 
 	dbg_printf("\n");
