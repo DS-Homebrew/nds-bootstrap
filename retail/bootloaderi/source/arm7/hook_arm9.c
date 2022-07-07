@@ -234,8 +234,13 @@ int hookNdsRetailArm9(
 				if (runOverlayCheck && powerProKun) {
 					ce9->romLocation -= 0x200000;
 				}
-				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
+				if (strncmp(romTid, "DD3", 3) == 0) {
+					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK+0x12000;
+					ce9->cacheSlots = (retail_CACHE_ADRESS_SIZE_TWLSDK-0x12000)/cacheBlockSize;
+				} else {
+					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
+					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
+				}
 			} else {
 				runOverlayCheck = (!dsiModeConfirmed && overlayPatch);
 				ce9->romLocation = CACHE_ADRESS_START;

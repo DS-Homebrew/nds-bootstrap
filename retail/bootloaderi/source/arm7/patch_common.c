@@ -41,6 +41,7 @@ extern bool gbaRomFound;
 extern u8 dsiSD;
 
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	extern u8 consoleModel;
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
 	//const char* chnFontPath = "sdmc:/sys/CHNFontTable.dat";
@@ -91,6 +92,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u16*)0x020051F4 = branchCode[0];
 		*(u16*)0x020051F6 = branchCode[1];
+	}
+
+	// Hidden Photo (Europe)
+	else if (strcmp(romTid, "DD3P") == 0 && consoleModel == 0) {
+		*(u32*)0x0201BC14 -= 0xD000; // Shift heap
 	}
 
 	else if (dsiSD) {

@@ -1305,6 +1305,20 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 						break;
 				}
 			}
+		} else if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && !isDSiWare && dsiWramAccess) {
+			// DSi: Hidden Photo (Europe) needs more heap space
+			u32 addr = (u32)heapPointer;
+
+			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2ED2000
+
+			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+			if (*(u32*)(addr+0x9C) != 0) {
+				for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+					*(u32*)(addr+0x40) += 1;
+				}
+			}
+
+			*(u32*)(addr+0x9C) = retail_CACHE_ADRESS_START_TWLSDK+0x12000;
 		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
