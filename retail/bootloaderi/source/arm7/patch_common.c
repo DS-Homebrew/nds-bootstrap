@@ -99,6 +99,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201BC14 -= 0xD000; // Shift heap
 	}
 
+	// Wimmelbild Creator (German)
+	else if (strcmp(romTid, "DD3D") == 0 && consoleModel == 0) {
+		*(u32*)0x0201B9E4 -= 0xD000; // Shift heap
+	}
+
 	else if (dsiSD) {
 		return;
 	}

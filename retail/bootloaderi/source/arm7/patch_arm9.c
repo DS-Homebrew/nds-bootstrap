@@ -1306,7 +1306,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 				}
 			}
 		} else if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && !isDSiWare && dsiWramAccess) {
-			// DSi: Hidden Photo (Europe) needs more heap space
+			// DSi: Hidden Photo (Europe/German) needs more heap space
 			u32 addr = (u32)heapPointer;
 
 			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2ED2000
