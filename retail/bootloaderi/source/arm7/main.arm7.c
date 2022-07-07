@@ -250,7 +250,8 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
-	memset_addrs_arm7(0x02F80000, 0x02FFE000);
+	memset_addrs_arm7(0x02F80000, 0x02FFD7BC); // Leave eMMC CID intact
+	memset_addrs_arm7(0x02FFD7CC, 0x02FFE000);
 	toncset((u32*)0x02FFF000, 0, 0xD60);		// clear part of EWRAM
 	toncset((u32*)0x02FFFE00, 0, 0x200);		// clear part of EWRAM: header
 	REG_IE = 0;
