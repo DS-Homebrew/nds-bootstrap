@@ -305,7 +305,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0) {
+	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0 || dsiModeConfirmed) {
 		return;
 	}
 
