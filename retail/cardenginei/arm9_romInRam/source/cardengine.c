@@ -181,8 +181,7 @@ void cardSetDma(u32 * params) {
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
-	}
-	if (ce9->valueBits & extendedMemory) {
+	} else if (ce9->valueBits & extendedMemory) {
 		if (newSrc >= romEnd2nd) {
 			newSrc -= romEnd2nd;
 			newSrc += ROM_LOCATION_EXT_P2;
@@ -332,8 +331,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
 	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
-	}
-	if (ce9->valueBits & extendedMemory) {
+	} else if (ce9->valueBits & extendedMemory) {
 		if (newSrc >= romEnd2nd) {
 			newSrc -= romEnd2nd;
 			newSrc += ROM_LOCATION_EXT_P2;
