@@ -718,50 +718,25 @@ void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	sharedAddr[4] = 0x57534352;
-#ifndef TWLSDK
-	IPC_SendSync(0x8);
-#endif
-	if (consoleModel >= 2) {
-#ifdef TWLSDK
-		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD))
-#else
-		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
-#endif
-		{
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		}
-#ifdef TWLSDK
-		else if (*(char*)(ce7+0xB903) == 'H' || *(char*)(ce7+0xB903) == 'K')
-#else
-		else if (*(char*)(ce7+0x11903) == 'H' || *(char*)(ce7+0x11903) == 'K')
-#endif
-		{
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-#ifndef TWLSDK
-		waitFrames(1);
-#endif
-	} else {
-#ifdef TWLSDK
-		if (*(u32*)(ce7+0xB900) == 0 && (valueBits & b_dsiSD))
-#else
-		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
-#endif
-		{
-			unlaunchSetFilename(true);
-		} else {
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-#ifdef TWLSDK
-		//waitFrames(wait ? 5 : 1);
-#else
-		waitFrames(5);							// Wait for DSi screens to stabilize
-#endif
-	}
 #ifdef TWLSDK
 	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+		if (consoleModel >= 2) {
+			if (*(u32*)(ce7+0xB900) == 0) {
+				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			} else if (*(char*)(ce7+0xB903) == 'H' || *(char*)(ce7+0xB903) == 'K') {
+				// Use different SR backend ID
+				readSrBackendId();
+			}
+			waitFrames(1);
+		} else {
+			if (*(u32*)(ce7+0xB900) == 0) {
+				unlaunchSetFilename(true);
+			} else {
+				// Use different SR backend ID
+				readSrBackendId();
+			}
+			waitFrames(5);							// Wait for DSi screens to stabilize
+		}
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
@@ -855,6 +830,29 @@ void returnToLoader(bool wait) {
 	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
 	arm7code();
 #else
+	IPC_SendSync(0x8);
+	if (consoleModel >= 2) {
+		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
+		{
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+		}
+		else if (*(char*)(ce7+0x11903) == 'H' || *(char*)(ce7+0x11903) == 'K')
+		{
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+		waitFrames(1);
+	} else {
+		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
+		{
+			unlaunchSetFilename(true);
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
+		}
+		waitFrames(5);							// Wait for DSi screens to stabilize
+	}
+
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 #endif
