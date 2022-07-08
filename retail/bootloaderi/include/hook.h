@@ -54,7 +54,8 @@ int hookNdsRetailArm7(
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
-	u8 dmaRomRead_LED
+	u8 dmaRomRead_LED,
+	bool twlTouch
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

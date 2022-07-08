@@ -70,6 +70,8 @@
 #define slowSoftReset BIT(11)
 #define wideCheatUsed BIT(12)
 #define isSdk5 BIT(13)
+//#define asyncCardRead BIT(14)
+#define twlTouch BIT(15)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -816,7 +818,7 @@ void returnToLoader(bool wait) {
 	sdRead = (valueBits & b_dsiSD);
 
 	aFile file = getBootFileCluster("BOOT.NDS", !sdRead);
-	if (file.firstCluster == CLUSTER_FREE) {
+	if (file.firstCluster == CLUSTER_FREE || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);

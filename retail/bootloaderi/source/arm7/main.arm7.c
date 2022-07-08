@@ -1341,10 +1341,13 @@ int arm7_main(void) {
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
 
 	if (!gameOnFlashcard && isDSiWare) {
-		if (*(u8*)0x02FFE1BF & BIT(0)) {
+		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
+
+		if (twlTouch && *(u8*)0x02FFE1BF & BIT(0)) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			DSiTouchscreenMode();
 		} else {
+			*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			if (macroMode) {
@@ -1466,7 +1469,8 @@ int arm7_main(void) {
 			0,
 			consoleModel,
 			romRead_LED,
-			dmaRomRead_LED
+			dmaRomRead_LED,
+			twlTouch
 		);
 		if (errorCode == ERR_NONE) {
 			nocashMessage("Card hook successful");
@@ -1549,7 +1553,9 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) /*|| (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))*/) {
+		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
+
+		if (!twlTouch || !dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
@@ -1563,14 +1569,14 @@ int arm7_main(void) {
 		}
 
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			if (cdcReadReg(CDC_SOUND, 0x22) != 0xF0) {
+			if (!twlTouch) {
 				*(u8*)0x02FFE1BF &= ~BIT(0);	// Set NTR touch mode (Disables camera)
-			} else if (!(*(u8*)0x02FFE1BF & BIT(0))) {
+			} else/* if (!(*(u8*)0x02FFE1BF & BIT(0))) {
 				*(u8*)0x02FFE1BF |= BIT(0);	// Set TWL touch mode
 				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 				DSiTouchscreenMode();
 				*(u16*)0x4000500 = 0x807F;
-			} else if (*(u8*)0x02FFE1BF & BIT(0)) {
+			} else*/ if (*(u8*)0x02FFE1BF & BIT(0)) {
 				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 				DSiTouchscreenMode();
 				*(u16*)0x4000500 = 0x807F;
@@ -1761,7 +1767,8 @@ int arm7_main(void) {
 			ROMinRAM,
 			consoleModel,
 			romRead_LED,
-			dmaRomRead_LED
+			dmaRomRead_LED,
+			twlTouch
 		);
 		if (errorCode == ERR_NONE) {
 			nocashMessage("Card hook successful");

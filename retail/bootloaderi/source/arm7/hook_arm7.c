@@ -48,6 +48,7 @@
 #define b_wideCheatUsed BIT(12)
 #define b_isSdk5 BIT(13)
 #define b_asyncCardRead BIT(14)
+#define b_twlTouch BIT(15)
 #define b_scfgLocked BIT(31)
 
 extern bool sdRead;
@@ -139,7 +140,8 @@ int hookNdsRetailArm7(
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
-	u8 dmaRomRead_LED
+	u8 dmaRomRead_LED,
+	bool twlTouch
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -355,6 +357,9 @@ int hookNdsRetailArm7(
 		}
 		if (asyncCardRead) {
 			ce7->valueBits |= b_asyncCardRead;
+		}
+		if (twlTouch) {
+			ce7->valueBits |= b_twlTouch;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
