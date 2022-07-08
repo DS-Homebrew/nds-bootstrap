@@ -95,3 +95,4 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - Swedish: [TM-47](https://crowdin.com/profile/-tm-)
 - Turkish: [Egehan.TWL](https://crowdin.com/profile/egehan.twl), [rewold20](https://crowdin.com/profile/rewold20), [TM-47](https://crowdin.com/profile/-tm-)
 - Ukrainian: [MichaelBest01](https://crowdin.com/profile/michaelbest01), [TM-47](https://crowdin.com/profile/-tm-)
+- Valencian: [tsolo](https://crowdin.com/profile/tsolo)
