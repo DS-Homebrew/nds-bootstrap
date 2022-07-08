@@ -120,10 +120,7 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
-		u32 scfgLoc = 0x2EFFFD0;
-		if (!gameOnFlashcard && isDSiWare) {
-			scfgLoc = 0x2F7FFD0;
-		}
+		u32 scfgLoc = 0x2F7FFD0;
 
 		*(u16*)(scfgLoc+0x00) = 0x0101;
 		//*(u16*)(scfgLoc+0x04) = 0x0187;
