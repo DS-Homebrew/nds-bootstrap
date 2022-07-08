@@ -419,7 +419,7 @@ void returnToLoader(bool wait) {
 		//waitFrames(1);
 	} else {
 		if (*(u32*)(ce7+0x8D00) == 0) {
-			//unlaunchSetFilename(true);
+			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
@@ -427,7 +427,7 @@ void returnToLoader(bool wait) {
 		//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 	}
 
-	if (valueBits & wideCheatUsed) {
+	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
@@ -481,7 +481,7 @@ void returnToLoader(bool wait) {
 	driveInitialize();
 
 	aFile file = getBootFileCluster("BOOT.NDS", 0);
-	if (file.firstCluster == CLUSTER_FREE || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
+	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);

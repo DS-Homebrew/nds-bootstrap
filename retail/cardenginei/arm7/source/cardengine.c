@@ -749,9 +749,7 @@ void returnToLoader(bool wait) {
 		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 #endif
 		{
-#ifndef TWLSDK
 			unlaunchSetFilename(true);
-#endif
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
@@ -763,7 +761,7 @@ void returnToLoader(bool wait) {
 #endif
 	}
 #ifdef TWLSDK
-	if ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed)) {
+	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
@@ -818,7 +816,7 @@ void returnToLoader(bool wait) {
 	sdRead = (valueBits & b_dsiSD);
 
 	aFile file = getBootFileCluster("BOOT.NDS", !sdRead);
-	if (file.firstCluster == CLUSTER_FREE || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
+	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
