@@ -32,8 +32,14 @@
 ### nds-bootstrap.ini
 
 
-<!-- To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini` or enable it in the Games and Apps settings page of TWiLight Menu++ settings. -->
-<!-- It will be `sd:/NDSBTSTRP.log`. You can upload it by dragging and dropping into the GitHub text box. -->
+<!--
+
+To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini`. It will be found at `sd:/NDSBTSTRP.log`.
+Upload it by dragging and dropping into the GitHub text box.
+
+Using TWiLight Menu++? Toggle it via the 'nds-bootstrap' page instead
+
+-->
 ### Logs
 
 
