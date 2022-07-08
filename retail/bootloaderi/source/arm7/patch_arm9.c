@@ -952,7 +952,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if ((moduleParams->sdk_version < 0x2008000 && !extendedMemoryConfirmed) || moduleParams->sdk_version > 0x5000000) {
+	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -1000,11 +1000,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		} else {*/
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			if (extendedMemoryConfirmed) {
-				*mpuDataOffset = 0;
-			} else {
-				*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
-			}
+			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
@@ -1244,13 +1240,13 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }*/
 
 u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
-	if (moduleParams->sdk_version < 0x2008000) {
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
+	if (!ROMsupportsDsiMode) {
 		return NULL;
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
 	bool isSpecificTitle = (strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
 	extern bool overlayPatch;
@@ -1281,7 +1277,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ROMsupportsDsiMode) {
+	//if (ROMsupportsDsiMode) {
 		if (consoleModel == 0 && !isSpecificTitle && !isDSiWare && ndsHeader->unitCode == 0x02 && overlayPatch) {
 			// DSi-Enhanced title with AP-patched overlays running on DSi consoles
 			if (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0) {
@@ -1378,9 +1374,9 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		}
-	} else {
+	/*} else {
 		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM;
-	}
+	}*/
 
     dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
