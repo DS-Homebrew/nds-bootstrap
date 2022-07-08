@@ -77,7 +77,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 #else
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
+static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 #endif
 #ifdef DLDI
 bool sdRead = false;
