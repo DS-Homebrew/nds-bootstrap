@@ -822,6 +822,8 @@ void returnToLoader(bool wait) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
 
+	toncset((u8*)0x02000800, 0, 0x400);		// Clear Unlaunch parameters
+
 	fileRead((char*)__DSiHeader, file, 0, sizeof(tDSiHeader), !sdRead, 0);
 	*ndsHeader = __DSiHeader->ndshdr;
 
