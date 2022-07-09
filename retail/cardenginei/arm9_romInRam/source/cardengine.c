@@ -59,6 +59,22 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
+u32 romMap[4][4] =
+{
+	{0x00008000, 0x003FE000, 0x0C3E2000, 0x0C7E0000},
+	{0x00406000, 0x00800000, 0x0C800000, 0x0D000000},
+	{0x00C06000, 0x00080000, 0x03700000, 0x03780000},
+	{0x00C06000, 0x00080000, 0x03700000, 0x03780000}
+};
+
+/*u32 romMapSdk5Ntr[4][4] =
+{
+	{0x00008000, 0x003FE000, 0x0C3E2000, 0x0C7E0000},
+	{0x00406000, 0x00800000, 0x0C7FF000, 0x0CFFF000},
+	{0x00C06000, 0x01000000, 0x0D000000, 0x0E000000},
+	{0x01C06000, 0x00080000, 0x03700000, 0x03780000}
+};*/
+
 static bool flagsSet = false;
 static bool flagsSetOnce = false;
 static bool region0FixNeeded = false;
@@ -169,57 +185,36 @@ void cardSetDma(u32 * params) {
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? params[4] : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
-	u32 lenExt = 0;
 
 	/*if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}*/
 
-	bool srcInWram = false;
-	u32 romEnd1st = ((ce9->valueBits & isSdk5) ? 0x0CFE0000 : ((ce9->valueBits & eSdk2) ? 0x0C7C0000 : 0x0C7E0000));
-	u32 romEnd2nd = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
-	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
-		newSrc -= *(u32*)0x02FFE1CC;
-	} else if (ce9->valueBits & extendedMemory) {
-		if (newSrc >= romEnd2nd) {
-			newSrc -= romEnd2nd;
-			newSrc += ROM_LOCATION_EXT_P2;
-			srcInWram = true;
-		} else if (newSrc+len > romEnd2nd) {
-			u32 oldLen = len;
-			for (int i = 0; i < oldLen; i++) {
-				len--;
-				lenExt++;
-				if (newSrc+len == romEnd2nd) break;
-			}
-			srcInWram = true;
-		}
-		if (!srcInWram) {
-			if (newSrc >= romEnd1st) {
-				newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
-			} else if (newSrc+len > romEnd1st) {
-				u32 oldLen = len;
-				for (int i = 0; i < oldLen; i++) {
-					len--;
-					lenExt++;
-					if (newSrc+len == romEnd1st) break;
+	if (ce9->valueBits & extendedMemory) {
+		for (int i = 0; i < 4; i++) {
+			if (src >= romMap[i][0] && src < romMap[i][0]+romMap[i][1]) {
+				u32 newSrc = (romMap[i][2]-romMap[i][0])+src;
+				if (newSrc+len > romMap[i][3]) {
+					u32 lenPart = 0;
+					u32 oldLen = len;
+					for (int i = 0; i < oldLen; i++) {
+						len--;
+						lenPart++;
+						if (newSrc+len == romMap[i][3]) break;
+					}
+					ndmaCopyWords(0, (u8*)newSrc, dst, len);
+					ndmaCopyWordsAsynch(0, (u8*)(romMap[i+1][2]), dst+len, lenPart);
+				} else {
+					ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
 				}
+				break;
 			}
 		}
-	}
-
-	if (lenExt > 0) {
-		ndmaCopyWords(0, (u8*)newSrc, dst, len);
-		newSrc += len;
-		if (srcInWram) {
-			newSrc -= romEnd2nd;
-			newSrc += ROM_LOCATION_EXT_P2;
-		} else {
-			newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
-		}
-		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst+len, lenExt);
 	} else {
+		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
+			newSrc -= *(u32*)0x02FFE1CC;
+		}
 		// Copy via dma
 		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
 	}
@@ -319,58 +314,38 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-	u32 lenExt = 0;
 
 	/*if ((ce9->valueBits & extendedMemory) && (u32)dst >= 0x02400000 && (u32)dst < 0x02700000) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}*/
 
-	bool srcInWram = false;
-	u32 romEnd1st = ((ce9->valueBits & isSdk5) ? 0x0CFE0000 : ((ce9->valueBits & eSdk2) ? 0x0C7C0000 : 0x0C7E0000));
-	u32 romEnd2nd = (ce9->consoleModel==0 ? 0x0D000000 : 0x0E000000);
-	u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
-		newSrc -= *(u32*)0x02FFE1CC;
-	} else if (ce9->valueBits & extendedMemory) {
-		if (newSrc >= romEnd2nd) {
-			newSrc -= romEnd2nd;
-			newSrc += ROM_LOCATION_EXT_P2;
-			srcInWram = true;
-		} else if (newSrc+len > romEnd2nd) {
-			u32 oldLen = len;
-			for (int i = 0; i < oldLen; i++) {
-				len--;
-				lenExt++;
-				if (newSrc+len == romEnd2nd) break;
-			}
-			srcInWram = true;
-		}
-		if (!srcInWram) {
-			if (newSrc >= romEnd1st) {
-				newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
-			} else if (newSrc+len > romEnd1st) {
-				u32 oldLen = len;
-				for (int i = 0; i < oldLen; i++) {
-					len--;
-					lenExt++;
-					if (newSrc+len == romEnd1st) break;
+	if (ce9->valueBits & extendedMemory) {
+		for (int i = 0; i < 4; i++) {
+			if (src >= romMap[i][0] && src < romMap[i][0]+romMap[i][1]) {
+				u32 newSrc = (romMap[i][2]-romMap[i][0])+src;
+				if (newSrc+len > romMap[i][3]) {
+					u32 lenPart = 0;
+					u32 oldLen = len;
+					for (int i = 0; i < oldLen; i++) {
+						len--;
+						lenPart++;
+						if (newSrc+len == romMap[i][3]) break;
+					}
+					tonccpy(dst, (u8*)newSrc, len);
+					tonccpy(dst+len, (u8*)(romMap[i+1][2]), lenPart);
+				} else {
+					tonccpy(dst, (u8*)newSrc, len);
 				}
+				break;
 			}
 		}
-	}
-
-	tonccpy(dst, (u8*)newSrc, len);
-	if (lenExt > 0) {
-		newSrc += len;
-		if (srcInWram) {
-			newSrc -= romEnd2nd;
-			newSrc += ROM_LOCATION_EXT_P2;
-		} else {
-			newSrc += (ce9->valueBits & eSdk2) ? 0x40000 : 0x20000;
+	} else {
+		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
+			newSrc -= *(u32*)0x02FFE1CC;
 		}
-		tonccpy(dst+len, (u8*)newSrc, lenExt);
+		tonccpy(dst, (u8*)newSrc, len);
 	}
-
     isDma=false;
 }
 
@@ -724,6 +699,31 @@ u32 myIrqEnable(u32 irq) {
 			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 			unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+		}
+		if (ce9->consoleModel > 0) {
+			romMap[1][1] = 0x01800000;
+			romMap[1][3] = 0x0E000000;
+		}
+		if (ce9->valueBits & isSdk5) {
+			if (ndsHeader->unitCode > 0) {
+				romMap[0][1] = 0x00BFE000;
+				romMap[0][3] = 0x0CFE0000;
+			} else {
+				romMap[1][2] = 0x0C7FF000;
+				romMap[1][3] = 0x0CFFF000;
+				romMap[2][2] = 0x0C800000;
+				romMap[2][3] = 0x0D000000;
+				if (ce9->consoleModel > 0) {
+					romMap[1][1] = 0x00800000;
+					romMap[2][1] = 0x01000000;
+					romMap[2][2] = 0x0D000000;
+					romMap[2][3] = 0x0E000000;
+					romMap[3][0] += 0x1000000;
+				}
+			}
+		} else if (ce9->valueBits & eSdk2) {
+			romMap[0][2] -= 0x20000;
+			romMap[0][3] -= 0x20000;
 		}
 		flagsSetOnce = true;
 	}

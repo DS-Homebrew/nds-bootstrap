@@ -834,9 +834,14 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 
 	u16 romOffset = 0x8000;
 	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
-	u32 romSizeLimit = (consoleModel==0 ? 0x00BFE000 : 0x01BFE000);
-	u32 romSizeLimitTilA7 = (isSdk5(moduleParams) ? 0x00BFE000 : 0x003FE000);
+	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (extendedMemoryConfirmed) {
+		romSizeLimit -= 0x2000;
+		u32 romSizeLimitTilA7 = ((isSdk5(moduleParams) && ndsHeader->unitCode > 0) ? 0x00BFE000 : 0x003FE000);
+		u32 romIncr = ((moduleParams->sdk_version < 0x2008000) ? 0x40000 : 0x20000);
+		if (isSdk5(moduleParams) && ndsHeader->unitCode == 0) {
+			romIncr -= 0x1000;
+		}
 		if (esrbScreenPrepared) {
 			while (!esrbImageLoaded) {
 				while (REG_VCOUNT != 191);
@@ -852,7 +857,12 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const modu
 			fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, !sdRead, 0);
 		} else {
 			fileRead((char*)romLocation, *romFile, romOffset, romSizeLimitTilA7, !sdRead, 0);
-			fileRead((char*)romLocation+romSizeLimitTilA7+((moduleParams->sdk_version < 0x2008000) ? 0x40000 : 0x20000), *romFile, romOffset + romSizeLimitTilA7, romSizeEdit-romSizeLimitTilA7, !sdRead, 0);
+			if (isSdk5(moduleParams) && ndsHeader->unitCode == 0 && consoleModel > 0) {
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, 0x800000, !sdRead, 0);
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr+0x801000, *romFile, romOffset + romSizeLimitTilA7 + 0x800000, romSizeEdit-romSizeLimitTilA7-0x800000, !sdRead, 0);
+			} else {
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, romSizeEdit-romSizeLimitTilA7, !sdRead, 0);
+			}
 			if (romSizeEdit > romSizeLimit) {
 				fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimit, !sdRead, 0);
 			}
