@@ -706,8 +706,24 @@ u32 myIrqEnable(u32 irq) {
 		}
 		if (ce9->valueBits & isSdk5) {
 			if (ndsHeader->unitCode > 0) {
-				romMap[0][1] = 0x00BFE000;
-				romMap[0][3] = 0x0CFE0000;
+				/*if (ce9->valueBits & dsiMode) {
+					romMap[0][1] = 0x00F80000;
+					romMap[0][2] = 0x0D000000;
+					romMap[0][3] = 0x0DF80000;
+				} else {*/
+					romMap[0][1] = 0x00BFE000;
+					romMap[0][3] = 0x0CFE0000;
+					romMap[1][0] = 0x00C06000;
+					if (ce9->consoleModel > 0) {
+						romMap[1][1] = 0x01000000;
+						romMap[1][2] = 0x0D000000;
+						romMap[2][0] += 0x1000000;
+					} else {
+						romMap[1][1] = 0x00080000;
+						romMap[1][2] = 0x03700000;
+						romMap[1][3] = 0x03780000;
+					}
+				//}
 			} else {
 				romMap[1][2] = 0x0C7FF000;
 				romMap[1][3] = 0x0CFFF000;
