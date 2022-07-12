@@ -1379,6 +1379,9 @@ int arm7_main(void) {
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
+		newArm7binarySize = ndsHeader->arm7binarySize;
+		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
+
 		if (REG_SCFG_EXT == 0) {
 			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 				// Replace incompatible ARM7 binary
