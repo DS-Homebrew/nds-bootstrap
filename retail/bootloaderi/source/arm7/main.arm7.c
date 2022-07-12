@@ -1350,6 +1350,8 @@ int arm7_main(void) {
 
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
 
+	const char* romTid = getRomTid(ndsHeader);
+
 	if (!gameOnFlashcard && isDSiWare) {
 		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
@@ -1367,9 +1369,53 @@ int arm7_main(void) {
 		}
 		*(u16*)0x4000500 = 0x807F;
 
-	  if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
+	 if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
+	  if (memcmp(romTid, "KYR", 3) == 0 // Rytmik Retrobits
+	   || memcmp(romTid, "KRQ", 3) == 0 // Rytmik Rock Edition
+	  ) {
+		// Skip loading in-game menu and cheat engine
+		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
+		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
+		if (REG_SCFG_EXT == 0) {
+			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+				// Replace incompatible ARM7 binary
+				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
+				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
+				*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+				*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
+				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
+			}
+
+			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+				extern void rsetA7Cache(void);
+				rsetA7Cache();
+				patchOffsetCache.a7BinSize = newArm7binarySize;
+			}
+
+			if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
+				extern void patchPostBoot(const tNDSHeader* ndsHeader);
+				patchPostBoot(ndsHeader);
+			}
+		} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+			extern void rsetA7Cache(void);
+			rsetA7Cache();
+			patchOffsetCache.a7BinSize = newArm7binarySize;
+		}
+
+		extern void patchScfgExt(const tNDSHeader* ndsHeader);
+		patchScfgExt(ndsHeader);
+
+		toncset((u32*)0x02680000, 0, 0x100000);
+		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
+
+		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+		}
+	  } else {
 		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
 		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
 
@@ -1526,8 +1572,8 @@ int arm7_main(void) {
 			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
 		}
 	  }
+	 }
 	} else {
-		const char* romTid = getRomTid(ndsHeader);
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C400000, 0xFF, 0xC0);
 			toncset((u8*)0x0C4000B2, 0, 3);
