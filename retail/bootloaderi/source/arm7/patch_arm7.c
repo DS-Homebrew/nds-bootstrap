@@ -110,7 +110,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 }*/
 
 void patchScfgExt(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0) return;
+	if (ndsHeader->unitCode == 0 || newArm7binarySize == 0x44C) return;
 
 	u32* scfgExtOffset = patchOffsetCache.a7ScfgExtOffset;
 	if (!patchOffsetCache.a7ScfgExtOffset) {

@@ -53,6 +53,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x02E929BC, chnFontPath, strlen(chnFontPath));
 	}*/
 
+	if (ndsHeader->arm7binarySize == 0x44C) {
+		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
+			*(u32*)0x023803BC -= 0x80000;
+		}
+		if (*(u32*)0x023803C0 >= 0x02F00000 && *(u32*)0x023803C0 < 0x02F80000) {
+			*(u32*)0x023803C0 -= 0x80000;
+		}
+		if (*(u32*)0x023803C4 >= 0x02F00000 && *(u32*)0x023803C4 < 0x02F80000) {
+			*(u32*)0x023803C4 -= 0x80000;
+		}
+	}
+
 	// Absolute BrickBuster (USA)
 	if (strcmp(romTid, "K6QE") == 0) {
 		if (dsiSD) { // Redirect otherPub to dataPub

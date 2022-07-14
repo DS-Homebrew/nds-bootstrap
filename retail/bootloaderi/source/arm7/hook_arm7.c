@@ -147,9 +147,9 @@ int hookNdsRetailArm7(
 
 	bool ce7NotFound = (ce7 == NULL);
 
-	if (newArm7binarySize < 0x1000) {
+	/*if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
-	}
+	}*/
 
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
 	if (!handlerLocation && !ce7NotFound) {
@@ -266,6 +266,9 @@ int hookNdsRetailArm7(
 				switch (newArm7ibinarySize) {
 					case 0x6AFD4:
 						hookLocation = (u32*)0x2EE7360;
+						break;
+					case 0x6B038:
+						hookLocation = (u32*)0x2EE7348;
 						break;
 					case 0x7250C:
 						hookLocation = (u32*)0x2EE5E10;

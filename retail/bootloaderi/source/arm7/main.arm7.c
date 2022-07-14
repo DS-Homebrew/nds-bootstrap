@@ -1271,6 +1271,7 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
+		if (dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = 0x02E80000;
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
 			if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
@@ -1369,7 +1370,7 @@ int arm7_main(void) {
 		}
 		*(u16*)0x4000500 = 0x807F;
 
-	 if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
+	 //if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
 	  if (memcmp(romTid, "KRV", 3) == 0 // Hip Hop King: Rytmik Edition
 	   || memcmp(romTid, "KYR", 3) == 0 // Rytmik Retrobits
@@ -1577,7 +1578,7 @@ int arm7_main(void) {
 			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
 		}
 	  }
-	 }
+	 //}
 	} else {
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C400000, 0xFF, 0xC0);

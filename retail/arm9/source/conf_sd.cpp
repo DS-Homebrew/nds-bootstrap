@@ -468,7 +468,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fseek(ndsFile, 0x1D0, SEEK_SET);
 		fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1D8, SEEK_SET);
-		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
+		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile); if (ndsArm7idst > 0x02E80000) ndsArm7idst = 0x02E80000;
 		fseek(ndsFile, 0x1DC, SEEK_SET);
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
@@ -591,6 +591,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
+		toncset32((u8*)target+0x1D8, ndsArm7idst, 1);
 
 		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
 			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
