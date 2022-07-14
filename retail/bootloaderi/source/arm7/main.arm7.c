@@ -1371,8 +1371,10 @@ int arm7_main(void) {
 
 	 if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
-	  if (memcmp(romTid, "KYR", 3) == 0 // Rytmik Retrobits
+	  if (memcmp(romTid, "KRV", 3) == 0 // Hip Hop King: Rytmik Edition
+	   || memcmp(romTid, "KYR", 3) == 0 // Rytmik Retrobits
 	   || memcmp(romTid, "KRQ", 3) == 0 // Rytmik Rock Edition
+	   || memcmp(romTid, "KYH", 3) == 0 // Rytmik World Music
 	  ) {
 		// Skip loading in-game menu and cheat engine
 		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
