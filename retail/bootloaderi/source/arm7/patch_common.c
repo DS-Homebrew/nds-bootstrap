@@ -111,7 +111,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "HNI", 3) == 0 && memoryPit) {
 		extern u32 iUncompressedSize;
 		// Find and replace pit.bin text string with tip.bin to avoid conflicting with Memory Pit
-		char* addr = (char*)ndsHeader->arm9destination;
+		char* addr = (char*)ndsHeader->arm9destination+0xC0000;
 		for (u32 i = 0; i < iUncompressedSize; i++) {
 			if (memcmp(addr+i, "pit.bin", 8) == 0)
 			{
