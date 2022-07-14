@@ -28,6 +28,9 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+extern u8 valueBits3;
+#define memoryPit (valueBits3 & BIT(1))
+
 u16 patchOffsetCacheFileVersion = 83;	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
@@ -102,6 +105,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Wimmelbild Creator (German)
 	else if (strcmp(romTid, "DD3D") == 0 && consoleModel == 0) {
 		*(u32*)0x0201B9E4 -= 0xD000; // Shift heap
+	}
+
+	// Nintendo DSi Camera
+	else if (strncmp(romTid, "HNI", 3) == 0 && memoryPit) {
+		extern u32 iUncompressedSize;
+		// Find and replace pit.bin text string with tip.bin to avoid conflicting with Memory Pit
+		char* addr = (char*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < iUncompressedSize; i++) {
+			if (memcmp(addr+i, "pit.bin", 8) == 0)
+			{
+				const char* textReplace = "tip.bin";
+				tonccpy(addr+i, textReplace, sizeof(textReplace));
+				break;
+			}
+		}
 	}
 
 	else if (dsiSD) {

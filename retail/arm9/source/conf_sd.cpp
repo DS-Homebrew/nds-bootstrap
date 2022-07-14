@@ -398,6 +398,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	/*if (conf->cardReadDMA == 2) {
 		conf->valueBits3 |= BIT(1);
 	}*/
+	if (conf->sdFound) {
+		FILE* pit = fopen("sd:/private/ds/app/484E494A/pit.bin", "rb");
+		fseek(pit, 0x18, SEEK_SET);
+		u32 word = 0;
+		fread(&word, sizeof(u32), 1, pit);
+		if (word == 0x022D0000 || word == 0x023213A0) {
+			// Memory Pit found
+			conf->valueBits3 |= BIT(1);
+		}
+	}
 
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
