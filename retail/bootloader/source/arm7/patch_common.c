@@ -200,6 +200,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
 	}
 
+	// 101 Pinball World (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KIIE") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02093EB0 = 0xE1A00000; // nop
+		*(u32*)0x02097220 = 0xE1A00000; // nop
+		*(u32*)0x0209B3E4 = 0xE1A00000; // nop
+		*(u32*)0x0209D190 = 0xE1A00000; // nop
+		*(u32*)0x0209D194 = 0xE1A00000; // nop
+		*(u32*)0x0209D1A0 = 0xE1A00000; // nop
+		*(u32*)0x0209D300 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0209D35C, heapEnd); // mov r0, #0x2700000
+		*(u32*)0x020A1D28 = 0xE1A00000; // nop
+		*(u32*)0x020B7B0C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7B30 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7B54 = 0xE3A00001; // mov r0, #1
+	}
+
+	// 101 Pinball World (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KIIP") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0208DC80 = 0xE1A00000; // nop
+		*(u32*)0x02090FF0 = 0xE1A00000; // nop
+		*(u32*)0x020951B4 = 0xE1A00000; // nop
+		*(u32*)0x02096F60 = 0xE1A00000; // nop
+		*(u32*)0x02096F64 = 0xE1A00000; // nop
+		*(u32*)0x02096F70 = 0xE1A00000; // nop
+		*(u32*)0x020970D0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0209712C, heapEnd); // mov r0, #0x2700000
+		*(u32*)0x0209BAF8 = 0xE1A00000; // nop
+		*(u32*)0x020B0888 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B08AC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B08D0 = 0xE3A00001; // mov r0, #1
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
