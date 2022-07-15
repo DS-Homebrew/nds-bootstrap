@@ -213,6 +213,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0209D1A0 = 0xE1A00000; // nop
 		*(u32*)0x0209D300 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0209D35C, heapEnd); // mov r0, #0x2700000
+		*(u32*)0x0209E8F0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020A1D28 = 0xE1A00000; // nop
 		*(u32*)0x020B7B0C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020B7B30 = 0xE3A00001; // mov r0, #1
@@ -232,6 +233,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02096F70 = 0xE1A00000; // nop
 		*(u32*)0x020970D0 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0209712C, heapEnd); // mov r0, #0x2700000
+		*(u32*)0x020986C0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0209BAF8 = 0xE1A00000; // nop
 		*(u32*)0x020B0888 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020B08AC = 0xE3A00001; // mov r0, #1
@@ -3792,6 +3794,59 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020360BC = 0x020AE580;
 		*(u32*)0x02037370 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0203A7C8 = 0xE1A00000; // nop
+	}
+
+	// Robot Rescue 2 (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KRRE") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200C0AC = 0xE1A00000; // nop
+		*(u32*)0x0200C0B4 = 0xE1A00000; // nop
+		*(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C3B0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02033384 = 0xE1A00000; // nop
+		*(u32*)0x02036678 = 0xE1A00000; // nop
+		*(u32*)0x0203A098 = 0xE1A00000; // nop
+		*(u32*)0x0203BE34 = 0xE1A00000; // nop
+		*(u32*)0x0203BE38 = 0xE1A00000; // nop
+		*(u32*)0x0203BE44 = 0xE1A00000; // nop
+		*(u32*)0x0203BFA4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0203C000, 0x02F00000); // mov r0, #0x2F00000 (mirrors to 0x2700000 on debug DS units)
+		*(u32*)0x0203C134 = 0x020BEAA0;
+		*(u32*)0x0203D3F8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02040850 = 0xE1A00000; // nop
+	}
+
+	// Robot Rescue 2 (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KRRP") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200C0AC = 0xE1A00000; // nop
+		*(u32*)0x0200C0B4 = 0xE1A00000; // nop
+		*(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C3B0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02010BE4 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02036A54 = 0xE1A00000; // nop
+		*(u32*)0x0203A474 = 0xE1A00000; // nop
+		*(u32*)0x0203C20C = 0xE1A00000; // nop
+		*(u32*)0x0203C210 = 0xE1A00000; // nop
+		*(u32*)0x0203C214 = 0xE1A00000; // nop
+		*(u32*)0x0203C380 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0203C3DC, 0x02F00000); // mov r0, #0x2F00000 (mirrors to 0x2700000 on debug DS units)
+		*(u32*)0x0203C510 = 0x020BF400;
+		*(u32*)0x0203D7D4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02040C2C = 0xE1A00000; // nop
 	}
 
 	// Rock-n-Roll Domo (USA)
