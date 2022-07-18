@@ -325,17 +325,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dr. Mario Express (USA)
-	else if (strcmp(romTid, "KD9E") == 0) {
+	// A Little Bit of... Dr. Mario (Europe, Australia)
+	else if (strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) {
 		*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		} else {
+			*(u32*)0x02044A9C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02058E58 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02058E5C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02073F44 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		}
+	}
+
+	// Chotto Dr. Mario (Japan)
+	else if (strcmp(romTid, "KD9J") == 0) {
+		*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202D644 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202DFF0 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		*(u32*)0x020584B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020584B8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205F6F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207356C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02073570 = 0xE12FFF1E; // bx lr
 	}
 
 	// GO Series: Earth Saver (USA)

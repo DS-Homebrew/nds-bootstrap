@@ -1747,7 +1747,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dr. Mario Express (USA)
-	else if (strcmp(romTid, "KD9E") == 0) {
+	// A Little Bit of... Dr. Mario (Europe, Australia)
+	else if (strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) {
 		*(u32*)0x020103C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02013A08 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019DF4 = 0xE3A00000; // mov r0, #0
@@ -1768,20 +1769,60 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0205990C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x0207401C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
-		*(u32*)0x020740FC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0207412C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0207415C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0207419C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020741D4 = 0xE3A00000; // mov r0, #0
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205990C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0207401C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		} else {
+			*(u32*)0x02044A9C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02058E58 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02058E5C = 0xE12FFF1E; // bx lr
+			*(u32*)0x020597FC = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206F320 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02073F0C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02073F44 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		}
+	}
+
+	// Chotto Dr. Mario (Japan)
+	else if (strcmp(romTid, "KD9J") == 0) {
+		*(u32*)0x020052B0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02010B08 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02013E58 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201A244 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201BB74 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201BB78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201C05C = 0xE1A00000; // nop
+		*(u32*)0x0201C060 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C078 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C1C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C1D8 = 0xE1A00000; // nop (Leave MPU region 1 untouched)
+		*(u32*)0x0201C25C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C28C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C360 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C390 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D358 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D6F8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202D644 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202DFB8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202DFF0 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		*(u32*)0x020584B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020584B8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205F6F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0207356C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02073570 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02073F10 = 0xE3A00000; // mov r0, #0
 	}
 
 	// Dragon's Lair (USA)
