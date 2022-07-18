@@ -3348,6 +3348,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4774 = 0xE3A00003; // mov r0, #3
 	}
 
+	// Odekake! Earth Seeker (Japan)
+	// Black screens after company logos
+	// Seemingly not possible to fix the cause? (Fails to read or write save)
+	/*else if (strcmp(romTid, "KA7J") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020107E8 = 0xE1A00000; // nop
+		*(u32*)0x02014350 = 0xE1A00000; // nop
+		*(u32*)0x02018864 = 0xE1A00000; // nop
+		*(u32*)0x0201A6B0 = 0xE1A00000; // nop
+		*(u32*)0x0201A6B4 = 0xE1A00000; // nop
+		*(u32*)0x0201A6C0 = 0xE1A00000; // nop
+		*(u32*)0x0201A820 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201A87C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201BD30 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201C4A4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201C4A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F500 = 0xE1A00000; // nop
+		*(u32*)0x02022DA4 = 0xE1A00000; // nop
+		*(u32*)0x0202B070 = 0xE1A00000; // nop
+		*(u32*)0x0202B078 = 0xE1A00000; // nop
+		*(u32*)0x0202B080 = 0xE1A00000; // nop
+		//*(u32*)0x02036694 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020366AC = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x020366C4 = 0xE3A00001; // mov r0, #1
+		//*(u32*)0x020366E4 = 0xE3A00001; // mov r0, #1
+		//*(u32*)0x02036708 = 0xE3A00001; // mov r0, #1
+		//*(u32*)0x02036738 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02036C94 = 0xE1A00000; // nop
+		*(u32*)0x0205D920 = 0xE1A00000; // nop
+	}*/
+
 	// Petit Computer (USA)
 	// Does not boot (black screens, seems to rely on code from DSi binaries)
 	/*else if (strcmp(romTid, "KNAE") == 0) {
