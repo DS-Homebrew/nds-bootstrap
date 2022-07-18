@@ -2798,6 +2798,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020331D8 = 0xE1A00000; // nop
 	}
 
+	// Magical Whip (USA)
+	else if (strcmp(romTid, "KWME") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200E5D4 = 0xE1A00000; // nop
+		*(u32*)0x02011A18 = 0xE1A00000; // nop
+		*(u32*)0x020155B0 = 0xE1A00000; // nop
+		*(u32*)0x02017344 = 0xE1A00000; // nop
+		*(u32*)0x02017348 = 0xE1A00000; // nop
+		*(u32*)0x02017354 = 0xE1A00000; // nop
+		*(u32*)0x020174B4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02017510, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02018758 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201BAFC = 0xE1A00000; // nop
+		*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02026E94 = 0xE1A00000; // nop
+		*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Magical Whip (Europe)
+	else if (strcmp(romTid, "KWMP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200E610 = 0xE1A00000; // nop
+		*(u32*)0x02011ADC = 0xE1A00000; // nop
+		*(u32*)0x02015688 = 0xE1A00000; // nop
+		*(u32*)0x02017424 = 0xE1A00000; // nop
+		*(u32*)0x02017428 = 0xE1A00000; // nop
+		*(u32*)0x02017434 = 0xE1A00000; // nop
+		*(u32*)0x02017594 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020175F0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02018838 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201BBDC = 0xE1A00000; // nop
+		*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02026F74 = 0xE1A00000; // nop
+		*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

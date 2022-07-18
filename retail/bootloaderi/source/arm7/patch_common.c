@@ -490,6 +490,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// Magical Whip (USA)
+	else if (strcmp(romTid, "KWME") == 0) {
+		*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Magical Whip (Europe)
+	else if (strcmp(romTid, "KWMP") == 0) {
+		*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
