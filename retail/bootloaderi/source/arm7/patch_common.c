@@ -324,6 +324,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Dr. Mario Express (USA)
+	else if (strcmp(romTid, "KD9E") == 0) {
+		*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02058504 = 0xE3A00001; // mov r0, #1 (NO$GBA: This fixes blank message appearing during a Game Over, but causes a soft-lock)
+		*(u32*)0x02058508 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+	}
+
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop
