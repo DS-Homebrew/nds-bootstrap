@@ -553,6 +553,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207F55C = 0xE12FFF1E; // bx lr
 	}
 
+	// Neko Reversi (Japan)
+	else if (strcmp(romTid, "KNVJ") == 0) {
+		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Nintendogs (China)
 	/*else if (strcmp(romTid, "KDOC") == 0) {
 		*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr

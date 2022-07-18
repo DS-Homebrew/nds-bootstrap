@@ -3156,6 +3156,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02036ED0 = 0xE1A00000; // nop
 	}
 
+	// Neko Reversi (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02010A04 = 0xE1A00000; // nop
+		*(u32*)0x020140A8 = 0xE1A00000; // nop
+		*(u32*)0x02017B64 = 0xE1A00000; // nop
+		*(u32*)0x02019900 = 0xE1A00000; // nop
+		*(u32*)0x02019904 = 0xE1A00000; // nop
+		*(u32*)0x02019910 = 0xE1A00000; // nop
+		*(u32*)0x02019A70 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019ACC, heapEnd); // mov r0, #0x2700000
+		*(u32*)0x0201AE44 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201E4B4 = 0xE1A00000; // nop
+		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
 	else if (strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) {
