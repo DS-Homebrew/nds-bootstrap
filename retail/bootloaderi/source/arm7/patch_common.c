@@ -328,9 +328,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KD9E") == 0) {
 		*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02058504 = 0xE3A00001; // mov r0, #1 (NO$GBA: This fixes blank message appearing during a Game Over, but causes a soft-lock)
-		*(u32*)0x02058508 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02058F68 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02058F6C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
