@@ -234,6 +234,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
 	}
 
+	// Candle Route (USA)
+	else if (strcmp(romTid, "K9YE") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x020AE76C;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Candle Route (Europe)
+	else if (strcmp(romTid, "K9YP") == 0) {
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x020AE810;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {
 		*(u32*)0x02005980 = 0xE12FFF1E; // bx lr

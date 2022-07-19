@@ -1264,6 +1264,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042B6C = 0xE12FFF1E; // bx lr
 	}
 
+	// Candle Route (USA)
+	// Candle Route (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K9YE") == 0 || strcmp(romTid, "K9YP") == 0) && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020175F4 = 0xE1A00000; // nop
+		*(u32*)0x0201ADD4 = 0xE1A00000; // nop
+		*(u32*)0x0201FE10 = 0xE1A00000; // nop
+		*(u32*)0x02021CA0 = 0xE1A00000; // nop
+		*(u32*)0x02021CA4 = 0xE1A00000; // nop
+		*(u32*)0x02021CB0 = 0xE1A00000; // nop
+		*(u32*)0x02021E10 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02021E6C, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02023108 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202661C = 0xE1A00000; // nop
+		*(u32*)0x0207DEB8 = 0xE1A00000; // nop
+		*(u32*)0x0207DEBC = 0xE1A00000; // nop
+		*(u32*)0x0207DEC0 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x020AE44C = 0xE1A00000; // nop
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x020AE76C;
+				offset[i] = 0xE1A00000; // nop
+			}
+		} else {
+			*(u32*)0x020AE4F0 = 0xE1A00000; // nop
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x020AE810;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+	}
+
 	// Castle Conqueror (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KCNE") == 0 && extendedMemory2) {
@@ -3205,7 +3243,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019904 = 0xE1A00000; // nop
 		*(u32*)0x02019910 = 0xE1A00000; // nop
 		*(u32*)0x02019A70 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02019ACC, heapEnd); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x02019ACC, 0x02700000); // mov r0, #0x2700000
 		*(u32*)0x0201AE44 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201E4B4 = 0xE1A00000; // nop
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
