@@ -957,7 +957,9 @@ int arm7_main(void) {
 		toncset((u8*)0x0C4000B2, 0, 3);
 		toncset((u8*)0x0C4000B5, 0x24, 3);
 		*(u16*)0x0C4000BE = 0x7FFF;
+		toncset((char*)0x0C4000C0, 0, 0xE);
 		*(u16*)0x0C4000CE = 0x7FFF;
+		toncset((char*)0x0C4000D0, 0, 0x130);
 	}
 
 	*(vu16*)0x08240000 = 1;
