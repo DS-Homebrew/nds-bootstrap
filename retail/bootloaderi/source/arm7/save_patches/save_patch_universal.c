@@ -35,7 +35,8 @@ static const u16 a7JumpTableSignatureUniversalThumb[3]          = {0x68D0, 0x691
 static const u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910, 0x68D1, 0x6952};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
-static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6820, 0x6900};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt3[2] = {0x6800, 0x6900};
 
 
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
@@ -176,6 +177,12 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 						a7JumpTableSignatureUniversalThumb_pt3_alt, 2
 					);
 				}
+				if (!EepromEraseJump) {
+					EepromEraseJump = (u32*)findOffsetThumb(
+						(u16*)EepromVerifyJump + 2, newArm7binarySize,
+						a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+					);
+				}
 			} else JumpTableFuncType++;
 		}
 		if (JumpTableFuncType == 1) {
@@ -194,7 +201,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			);
 			EepromEraseJump = (u32*)findOffsetThumb(
 				(u16*)EepromVerifyJump - 2, newArm7binarySize,
-				a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+				a7JumpTableSignatureUniversalThumb_pt3_alt3, 2
 			);
 		}
 	}
