@@ -232,6 +232,10 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
 			*((u16*)sleepPatchOffset + 3) = 0;
+
+			dbg_printf("Sleep location : ");
+			dbg_hexa((u32)sleepPatchOffset);
+			dbg_printf("\n\n");
 		}
 	}
 }

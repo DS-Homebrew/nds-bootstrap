@@ -901,14 +901,9 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 		sleepPatch, 2
 	);
 	if (sleepPatchOffset) {
-		dbg_printf("Sleep patch found: ");
+		dbg_printf("Sleep patch found\n");
 	} else {
 		dbg_printf("Sleep patch not found\n");
-	}
-
-	if (sleepPatchOffset) {
-		dbg_hexa((u32)sleepPatchOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
@@ -923,7 +918,7 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 		sleepPatchThumb, 2
 	);
 	if (sleepPatchOffset) {
-		dbg_printf("Thumb sleep patch thumb found: ");
+		dbg_printf("Thumb sleep patch thumb found\n");
 	} else {
 		dbg_printf("Thumb sleep patch thumb not found\n");
 	}
@@ -934,15 +929,10 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 			sleepPatchThumbAlt, 2
 		);
 		if (sleepPatchOffset) {
-			dbg_printf("Thumb sleep patch thumb alt found: ");
+			dbg_printf("Thumb sleep patch thumb alt found\n");
 		} else {
 			dbg_printf("Thumb sleep patch thumb alt not found\n");
 		}
-	}
-
-	if (sleepPatchOffset) {
-		dbg_hexa((u32)sleepPatchOffset);
-		dbg_printf("\n");
 	}
 
 	dbg_printf("\n");
