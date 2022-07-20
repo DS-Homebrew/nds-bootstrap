@@ -180,9 +180,6 @@ void __attribute__((target("arm"))) arm9_main(void) {
 
 	arm9_stateFlag = ARM9_MEMCLR;
 
-	*(vu32*)0x00803FFC = 0;  // IRQ_HANDLER ARM9 version
-	*(vu32*)0x00803FF8 = ~0; // VBLANK_INTR_WAIT_FLAGS ARM9 version
-
 	// Clear out ARM9 DMA channels
 	for (i = 0; i < 4; i++) {
 		DMA_CR(i) = 0;
