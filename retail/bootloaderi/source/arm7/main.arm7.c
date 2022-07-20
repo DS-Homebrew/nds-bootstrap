@@ -825,7 +825,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
 	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-0x8000), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
 }
 
-static void loadROMintoRAM(const tNDSHeader* ndsHeader, bool armBins, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
 	// Load ROM into RAM
 	u32 romLocation = (u32)(((consoleModel > 0 && isSdk5(moduleParams)) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
@@ -1864,7 +1864,7 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, (strncmp(romTid, "UBR", 3) != 0 && usesCloneboot), moduleParams, romFile, savFile);
+			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
