@@ -2118,12 +2118,6 @@ static void operaRamPatch(void) {
 		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
 		toncset((char*)0xC800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
 	}
-
-	// Opera RAM patch (ARM7)
-	*(u32*)0x0238C7BC = 0xC400000;
-	*(u32*)0x0238C7C0 = 0xC4000CE;
-
-	//*(u32*)0x0238C950 = 0xC400000;
 }
 
 /*static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {

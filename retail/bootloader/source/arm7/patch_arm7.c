@@ -319,6 +319,14 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	}
 }*/
 
+static void operaRamPatch(void) {
+	// Opera RAM patch (ARM7)
+	*(u32*)0x0238C7BC = 0xC400000;
+	*(u32*)0x0238C7C0 = 0xC4000CE;
+
+	//*(u32*)0x0238C950 = 0xC400000;
+}
+
 extern void rsetA7Cache(void);
 
 u32 patchCardNdsArm7(
@@ -361,7 +369,7 @@ u32 patchCardNdsArm7(
 
 	patchRamClear(ndsHeader, moduleParams);
 
-	//const char* romTid = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 
 	if (!patchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		dbg_printf("ERR_LOAD_OTHR");
@@ -404,6 +412,10 @@ u32 patchCardNdsArm7(
 		if (!saveResult) {
 			patchOffsetCache.savePatchType = 0;
 		}
+	}
+
+	if (strcmp(romTid, "UBRP") == 0) {
+		operaRamPatch();
 	}
 
 	fixForDSiBios(ce7, ndsHeader, moduleParams);

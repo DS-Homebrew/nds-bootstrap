@@ -417,6 +417,14 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 }
 
+static void operaRamPatch(void) {
+	// Opera RAM patch (ARM7)
+	*(u32*)0x0238C7BC = 0xC400000;
+	*(u32*)0x0238C7C0 = 0xC4000CE;
+
+	//*(u32*)0x0238C950 = 0xC400000;
+}
+
 extern void rsetA7Cache(void);
 
 u32 patchCardNdsArm7(
@@ -504,6 +512,10 @@ u32 patchCardNdsArm7(
 	}
 
 	//patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
+
+	if (strcmp(romTid, "UBRP") == 0) {
+		operaRamPatch();
+	}
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
