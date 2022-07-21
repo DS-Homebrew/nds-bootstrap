@@ -1169,6 +1169,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02063DEC = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Bugs'N'Balls (USA)
+	// Bugs'N'Balls (Europe)
+	else if (strncmp(romTid, "KKQ", 3) == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0201B334 = 0xE1A00000; // nop
+		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
+		*(u32*)0x02022F3C = 0xE1A00000; // nop
+		*(u32*)0x02024D6C = 0xE1A00000; // nop
+		*(u32*)0x02024D70 = 0xE1A00000; // nop
+		*(u32*)0x02024D7C = 0xE1A00000; // nop
+		*(u32*)0x02024EDC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02024F38, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0202637C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02029104 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02062F20 = 0xE1A00000; // nop
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02064B7C = 0xE1A00000; // nop
+		}
+	}
+
 	// Cake Ninja (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K2JE") == 0 && extendedMemory2) {
