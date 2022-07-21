@@ -515,6 +515,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203C5EC = 0xE1A00000; // nop
 	}
 
+	// Advanced Circuits (USA)
+	// Advanced Circuits (Europe, Australia)
+	else if (strncmp(romTid, "KAC", 3) == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02011298 = 0xE1A00000; // nop
+		*(u32*)0x02014738 = 0xE1A00000; // nop
+		*(u32*)0x02018468 = 0xE1A00000; // nop
+		*(u32*)0x0201A248 = 0xE1A00000; // nop
+		*(u32*)0x0201A24C = 0xE1A00000; // nop
+		*(u32*)0x0201A258 = 0xE1A00000; // nop
+		*(u32*)0x0201A3B8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201A414, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201B758 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201EBE8 = 0xE1A00000; // nop
+		*(u32*)0x0202CDA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202D490 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02053F30 = 0xE1A00000; // nop
+			*(u32*)0x02053F90 = 0xE1A00000; // nop
+			*(u32*)0x02054920 = 0xE12FFF1E; // bx lr
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			*(u32*)0x02053F58 = 0xE1A00000; // nop
+			*(u32*)0x02053FB8 = 0xE1A00000; // nop
+			*(u32*)0x020548C0 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Ah! Heaven (USA)
 	// Ah! Heaven (Europe)
 	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {

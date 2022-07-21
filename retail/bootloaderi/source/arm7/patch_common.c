@@ -154,6 +154,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
 	}
 
+	// Advanced Circuits (USA)
+	// Advanced Circuits (Europe, Australia)
+	else if (strncmp(romTid, "KAC", 3) == 0) {
+		*(u32*)0x0202CDA4 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02053F90 = 0xE1A00000; // nop
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			*(u32*)0x02053FB8 = 0xE1A00000; // nop
+		}
+	}
+
 	// Ah! Heaven (USA)
 	// Ah! Heaven (Europe)
 	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {
