@@ -3280,6 +3280,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02036ED0 = 0xE1A00000; // nop
 	}
 
+	// Music on: Playing Piano (USA)
+	// Sprite graphics and font missing
+	else if (strcmp(romTid, "KICE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200AFFC = 0xE1A00000; // nop
+		*(u32*)0x0200E08C = 0xE1A00000; // nop
+		*(u32*)0x0200E0DC = 0xE1A00000; // nop
+		*(u32*)0x0200E0FC = 0xE1A00000; // nop
+		*(u32*)0x0200E10C = 0xE1A00000; // nop
+		*(u32*)0x0200E138 = 0xE1A00000; // nop
+		*(u32*)0x0201D9F4 = 0xE1A00000; // nop
+		*(u32*)0x02020EC8 = 0xE1A00000; // nop
+		*(u32*)0x020219D8 = 0xE1A00000; // nop
+		*(u32*)0x02021A74 = 0xE1A00000; // nop
+		*(u32*)0x02021B28 = 0xE1A00000; // nop
+		*(u32*)0x02021BDC = 0xE1A00000; // nop
+		*(u32*)0x02021C7C = 0xE1A00000; // nop
+		*(u32*)0x02021CFC = 0xE1A00000; // nop
+		*(u32*)0x02021D78 = 0xE1A00000; // nop
+		*(u32*)0x02021DFC = 0xE1A00000; // nop
+		*(u32*)0x02021E9C = 0xE1A00000; // nop
+		*(u32*)0x02021F58 = 0xE1A00000; // nop
+		*(u32*)0x02022094 = 0xE1A00000; // nop
+		*(u32*)0x020220F8 = 0xE1A00000; // nop
+		*(u32*)0x020221C0 = 0xE1A00000; // nop
+		*(u32*)0x02022230 = 0xE1A00000; // nop
+		*(u32*)0x020222BC = 0xE1A00000; // nop
+		*(u32*)0x0202232C = 0xE1A00000; // nop
+		*(u32*)0x020223B4 = 0xE1A00000; // nop
+		*(u32*)0x02022424 = 0xE1A00000; // nop
+		*(u32*)0x02022538 = 0xE1A00000; // nop
+		*(u32*)0x020225A0 = 0xE1A00000; // nop
+		*(u32*)0x02022620 = 0xE1A00000; // nop
+		*(u32*)0x02022684 = 0xE1A00000; // nop
+		*(u32*)0x0202273C = 0xE1A00000; // nop
+		*(u32*)0x020227AC = 0xE1A00000; // nop
+		*(u32*)0x0202A754 = 0xE1A00000; // nop
+		*(u32*)0x02025F9C = 0xE1A00000; // nop
+		*(u32*)0x02025FA0 = 0xE1A00000; // nop
+		*(u32*)0x02025FAC = 0xE1A00000; // nop
+		*(u32*)0x0202610C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02026168, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02027574 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202A754 = 0xE1A00000; // nop
+	}
+
 	// Neko Reversi (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory2) {
