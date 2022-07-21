@@ -622,6 +622,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Paul's Shooting Adventure (USA)
+	else if (strcmp(romTid, "KPJE") == 0) {
+		*(u32*)0x0203A20C = 0xE12FFF1E; // bx lr
+	}
+
+	// Paul's Shooting Adventure 2 (USA)
+	else if (strcmp(romTid, "KUSE") == 0) {
+		*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
+	}
+
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0) {
 		*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr

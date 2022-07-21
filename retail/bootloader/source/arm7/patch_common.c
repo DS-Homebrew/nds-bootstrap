@@ -3512,6 +3512,45 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205D920 = 0xE1A00000; // nop
 	}*/
 
+	// Paul's Shooting Adventure (USA)
+	else if (strcmp(romTid, "KPJE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200FF94 = 0xE1A00000; // nop
+		*(u32*)0x0201362C = 0xE1A00000; // nop
+		*(u32*)0x02017F20 = 0xE1A00000; // nop
+		*(u32*)0x02019CB4 = 0xE1A00000; // nop
+		*(u32*)0x02019CB8 = 0xE1A00000; // nop
+		*(u32*)0x02019CC4 = 0xE1A00000; // nop
+		*(u32*)0x02019E24 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019E80, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201B104 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201E40C = 0xE1A00000; // nop
+		*(u32*)0x0203A20C = 0xE12FFF1E; // bx lr
+	}
+
+	// Paul's Shooting Adventure 2 (USA)
+	else if (strcmp(romTid, "KUSE") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02016008 = 0xE1A00000; // nop
+		*(u32*)0x02019E58 = 0xE1A00000; // nop
+		*(u32*)0x0201F9B0 = 0xE1A00000; // nop
+		*(u32*)0x02021874 = 0xE1A00000; // nop
+		*(u32*)0x02021878 = 0xE1A00000; // nop
+		*(u32*)0x02021884 = 0xE1A00000; // nop
+		*(u32*)0x020219E4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02021A40, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02022E98 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02022EB4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02022EB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022EC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02022EC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02026298 = 0xE1A00000; // nop
+		*(u32*)0x0202A968 = 0xE1A00000; // nop
+		*(u32*)0x0202A980 = 0xE1A00000; // nop
+		*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
+	}
+
 	// Petit Computer (USA)
 	// Does not boot (black screens, seems to rely on code from DSi binaries)
 	/*else if (strcmp(romTid, "KNAE") == 0) {
