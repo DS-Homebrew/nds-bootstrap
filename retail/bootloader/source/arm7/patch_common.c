@@ -2067,7 +2067,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// GO Series: Earth Saver (USA)
-	// Extra fixes required for it to boot on real hardware
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -2076,6 +2075,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005534 = 0xE1A00000; // nop
 		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02036398 = 0xE1A00000; // nop
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204BFE8 = 0xE1A00000; // nop
@@ -2084,6 +2084,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056228 = 0xE1A00000; // nop
 		*(u32*)0x0205622C = 0xE1A00000; // nop
 		*(u32*)0x02056238 = 0xE1A00000; // nop
+		*(u32*)0x02056398 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020563F4, heapEnd); // mov r0, #0x23C0000
 		*(u32*)0x02057678 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02057AAC = 0xE1A00000; // nop

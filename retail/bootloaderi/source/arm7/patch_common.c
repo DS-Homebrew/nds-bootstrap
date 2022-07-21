@@ -397,6 +397,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005534 = 0xE1A00000; // nop
 		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 
 		// Skip Manual screen
