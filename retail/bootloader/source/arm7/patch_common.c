@@ -3327,6 +3327,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202A754 = 0xE1A00000; // nop
 	}
 
+	// Need for Speed: Nitro-X (USA)
+	// Need for Speed: Nitro-X (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strncmp(romTid, "KNP", 3) == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		doubleNopT(0x0200511E);
+		doubleNopT(0x02005124);
+		*(u32*)0x0201BA24 = 0xE1A00000; // nop
+		*(u32*)0x0201F744 = 0xE1A00000; // nop
+		*(u32*)0x0202CD44 = 0xE1A00000; // nop
+		*(u32*)0x0202ECE0 = 0xE1A00000; // nop
+		*(u32*)0x0202ECE4 = 0xE1A00000; // nop
+		*(u32*)0x0202ECF0 = 0xE1A00000; // nop
+		*(u32*)0x0202EE50 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202EEAC, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02030430 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02033DD4 = 0xE1A00000; // nop
+		*(u16*)0x020EBFC4 = 0x4770; // bx lr
+		*(u16*)0x020EC0C0 = 0x4770; // bx lr
+	}
+
 	// Neko Reversi (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory2) {

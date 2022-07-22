@@ -595,6 +595,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207F55C = 0xE12FFF1E; // bx lr
 	}
 
+	// Need for Speed: Nitro-X (USA)
+	// Need for Speed: Nitro-X (Europe, Australia)
+	else if (strncmp(romTid, "KNP", 3) == 0) {
+		*(u16*)0x020EBFC4 = 0x4770; // bx lr
+		*(u16*)0x020EC0C0 = 0x4770; // bx lr
+	}
+
 	// Neko Reversi (Japan)
 	else if (strcmp(romTid, "KNVJ") == 0) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
