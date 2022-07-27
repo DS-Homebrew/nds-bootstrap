@@ -42,8 +42,11 @@
 #include "loading.h"
 
 extern void arm9_clearCache(void);
+extern void arm9code1(void);
+extern void arm9code5(void);
 
 tNDSHeader* ndsHeader = NULL;
+bool arm9_isSdk5 = false;
 bool arm9_boostVram = false;
 bool extendedMemory2 = false;
 bool dsDebugRam = false;
@@ -302,6 +305,5 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();
+	arm9_isSdk5 ? arm9code5() : arm9code1();
 }

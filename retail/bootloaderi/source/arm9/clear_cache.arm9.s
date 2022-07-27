@@ -41,5 +41,65 @@ BEGIN_ASM_FUNC arm9_clearCache
 	mcr p15, 0, r3, c7, c6, 0		@ Flush DCache
 	mcr p15, 0, r3, c7, c10, 4		@ empty write buffer
 
+	mcr p15, 0, r3, c3, c0, 0		@ disable write buffer       (def = 0)
+
+	mcr p15, 0, r3, c2, c0, 0		@ disable DTCM and protection unit
+
+	mcr p15, 0, r3, c6, c0, 0		@ disable protection unit 0  (def = 0)
+	mcr p15, 0, r3, c6, c1, 0		@ disable protection unit 1  (def = 0)
+	mcr p15, 0, r3, c6, c2, 0 		@ disable protection unit 2  (def = 0)
+	mcr p15, 0, r3, c6, c3, 0		@ disable protection unit 3  (def = 0)
+	mcr p15, 0, r3, c6, c4, 0		@ disable protection unit 4  (def = ?)
+	mcr p15, 0, r3, c6, c5, 0		@ disable protection unit 5  (def = ?)
+	mcr p15, 0, r3, c6, c6, 0		@ disable protection unit 6  (def = ?)
+	mcr p15, 0, r3, c6, c7, 0		@ disable protection unit 7  (def = ?)
+
+	mcr p15, 0, r3, c5, c0, 3		@ IAccess
+	mcr p15, 0, r3, c5, c0, 2		@ DAccess
+
+	mov r3, #0x00800000
+	add r3, r3, #0x00A
+	mcr p15, 0, r3, c9, c1, 0		@ DTCM base  (def = 0x0080000A) ???
+
+	mov r3, #0x0000000C
+	mcr p15, 0, r3, c9, c1, 1		@ ITCM base  (def = 0x0000000C) ???
+
 	bx lr
 
+BEGIN_ASM_FUNC arm9code1
+	ldr	r0, =0x027FFE24
+	ldr	r0, [r0]
+
+	mov r1, #0
+	mov r2, #0
+	mov r3, #0
+	mov r4, #0
+	mov r5, #0
+	mov r6, #0
+	mov r7, #0
+	mov r8, #0
+	mov r9, #0
+	mov r10, #0
+	mov r11, #0
+
+	bx	r0
+.pool
+
+BEGIN_ASM_FUNC arm9code5
+	ldr		r0, =0x02FFFE24
+	ldr		r0, [r0]
+
+	mov r1, #0
+	mov r2, #0
+	mov r3, #0
+	mov r4, #0
+	mov r5, #0
+	mov r6, #0
+	mov r7, #0
+	mov r8, #0
+	mov r9, #0
+	mov r10, #0
+	mov r11, #0
+
+	bx	r0
+.pool
