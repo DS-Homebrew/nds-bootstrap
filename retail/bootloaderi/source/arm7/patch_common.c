@@ -99,6 +99,42 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
 	}
 
+	// Cake Ninja (USA)
+	else if (strcmp(romTid, "K2JE") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x0203CE70 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Cake Ninja (Europe)
+	else if (strcmp(romTid, "K2JP") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x0203CF48 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Cake Ninja 2 (USA)
+	else if (strcmp(romTid, "K2NE") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x0205C3BC = 0xE3A00000; // mov r0, #0
+	}
+
+	// Cake Ninja 2 (Europe)
+	else if (strcmp(romTid, "K2NP") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x0205C418 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Cake Ninja: XMAS (USA)
+	else if (strcmp(romTid, "KYNE") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x020354A0 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Cake Ninja: XMAS (Europe)
+	else if (strcmp(romTid, "KYNP") == 0) {
+		// Fix weird MobiClip bug
+		*(u32*)0x0203552C = 0xE3A00000; // mov r0, #0
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		tonccpy((void*)0x023C0000, ce9->thumbPatches->reset_arm9, 0x18);
