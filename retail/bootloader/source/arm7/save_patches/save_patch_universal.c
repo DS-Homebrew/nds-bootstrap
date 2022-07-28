@@ -368,7 +368,7 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
     // inverted order
     EepromEraseJump = (u32*)findOffsetThumb(
     	(u16*)ndsHeader->arm7destination, newArm7binarySize,
-    		a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+    		a7JumpTableSignatureUniversalThumb_pt3_alt3, 2
 	);
 
     EepromVerifyJump = (u32*)findOffsetThumb(
