@@ -376,7 +376,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02069D54 = 0xE1A00000; // nop
 			*(u32*)0x02069D60 = 0xE1A00000; // nop
 			*(u32*)0x02069EC0 = 0xE1A00000; // nop
-			patchHiHeapDSiWare(0x02069E28, 0x02700000); // mov r0, #0x2700000
+			patchHiHeapDSiWare(0x02069F1C, 0x02700000); // mov r0, #0x2700000
 			*(u32*)0x0206DE34 = 0xE1A00000; // nop
 			*(u32*)0x02070668 = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
