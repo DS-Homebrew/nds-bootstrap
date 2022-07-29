@@ -523,7 +523,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			if (isDevConsole) {
 				romLocation = 0x0D000000;
 			}
-			romSizeLimit = isDevConsole ? 0x1000000 : 0x700000;
+			romSizeLimit = isDevConsole ? 0x1000000 : 0x7E0000;
 		} else {
 			romSizeLimit = isDevConsole ? 0x1800000 : 0x800000;
 		}
