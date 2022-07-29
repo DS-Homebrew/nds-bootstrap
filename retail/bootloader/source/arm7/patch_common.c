@@ -1265,13 +1265,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Cake Ninja: XMAS (USA)
-	// Locks up on Please Wait screen(?)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYNE") == 0 && extendedMemory2) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x02008406 = 0xE1A00000; // nop
 		*(u32*)0x0200846C = 0xE1A00000; // nop
+		*(u32*)0x02008604 = 0xE1A00000; // nop
 		*(u32*)0x02050348 = 0xE1A00000; // nop
 		*(u32*)0x02053B0C = 0xE1A00000; // nop
 		*(u32*)0x020597E8 = 0xE1A00000; // nop
@@ -1279,8 +1278,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B7F0 = 0xE1A00000; // nop
 		*(u32*)0x0205B7FC = 0xE1A00000; // nop
 		*(u32*)0x0205B95C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02062E7C, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0205B9B8, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0205CF60 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0205CF7C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205CF80 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205CF88 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205CF8C = 0xE12FFF1E; // bx lr
 		*(u32*)0x020604DC = 0xE1A00000; // nop
+	}
+
+	// Cake Ninja: XMAS (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KYNP") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200846C = 0xE1A00000; // nop
+		*(u32*)0x020086F4 = 0xE1A00000; // nop
+		*(u32*)0x020503D4 = 0xE1A00000; // nop
+		*(u32*)0x02053B98 = 0xE1A00000; // nop
+		*(u32*)0x02059874 = 0xE1A00000; // nop
+		*(u32*)0x0205B878 = 0xE1A00000; // nop
+		*(u32*)0x0205B87C = 0xE1A00000; // nop
+		*(u32*)0x0205B888 = 0xE1A00000; // nop
+		*(u32*)0x0205B9E8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0205BA44, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0205CFEC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0205D008 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205D00C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205D014 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205D018 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02060568 = 0xE1A00000; // nop
 	}
 
 	// Calculator (USA)
