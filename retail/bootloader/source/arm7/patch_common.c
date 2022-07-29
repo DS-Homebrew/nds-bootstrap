@@ -1245,9 +1245,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02067A78 = 0xE1A00000; // nop
 	}
 
+	// Cake Ninja 2 (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K2NE") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02008880 = 0xE1A00000; // nop
+		*(u32*)0x020089F4 = 0xE1A00000; // nop
+		*(u32*)0x020774AC = 0xE1A00000; // nop
+		*(u32*)0x0207AC70 = 0xE1A00000; // nop
+		*(u32*)0x0208084C = 0xE1A00000; // nop
+		*(u32*)0x02082850 = 0xE1A00000; // nop
+		*(u32*)0x02082854 = 0xE1A00000; // nop
+		*(u32*)0x02082860 = 0xE1A00000; // nop
+		*(u32*)0x020829C0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02082A1C, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02083FC4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02083FE0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02083FE4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02083FEC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02083FF0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02087540 = 0xE1A00000; // nop
+	}
+
 	// Cake Ninja 2 (Europe)
-	// Locks up on the game's logo
-	/*else if (strcmp(romTid, "K2NP") == 0 && extendedMemory2) {
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K2NP") == 0 && extendedMemory2) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02008880 = 0xE1A00000; // nop
@@ -1261,8 +1284,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02082A1C = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02082A78, 0x02700000); // mov r0, #0x2700000
 		*(u32*)0x02084020 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0208403C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02084040 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02084048 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0208404C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0208759C = 0xE1A00000; // nop
-	}*/
+	}
 
 	// Cake Ninja: XMAS (USA)
 	// Requires 8MB of RAM
