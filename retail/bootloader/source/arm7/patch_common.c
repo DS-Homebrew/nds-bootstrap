@@ -2751,8 +2751,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
-	// Some graphics are glitched/missing
-	// .wave sound files not loaded
 	// Requires 8MB of RAM
 	else if (strncmp(romTid, "KQ9", 3) == 0 && extendedMemory2) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
@@ -2764,7 +2762,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020185CC = 0xE1A00000; // nop
 		*(u32*)0x020185D8 = 0xE1A00000; // nop
 		*(u32*)0x02018738 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02018794, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x02018794, 0x027B0000); // mov r0, #0x27B0000
 		*(u32*)0x020188C8 -= 0x30000;
 		*(u32*)0x0201994C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02019968 = 0xE3A00001; // mov r0, #1
@@ -2774,21 +2772,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
-			*(u32*)0x0208CDC0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+			//*(u32*)0x0208CDC0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 			*(u32*)0x020A44F4 = 0xE1A00000; // nop
 			*(u32*)0x020A44F8 = 0xE1A00000; // nop
 			*(u32*)0x020A44FC = 0xE1A00000; // nop
 			*(u32*)0x020A467C = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x02082A78 = 0xE1A00000; // nop
-			*(u32*)0x0208CDE0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+			//*(u32*)0x0208CDE0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 			*(u32*)0x020A4514 = 0xE1A00000; // nop
 			*(u32*)0x020A4518 = 0xE1A00000; // nop
 			*(u32*)0x020A451C = 0xE1A00000; // nop
 			*(u32*)0x020A469C = 0xE1A00000; // nop
 		} else {
 			*(u32*)0x02082A14 = 0xE1A00000; // nop
-			*(u32*)0x0208CD7C = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+			//*(u32*)0x0208CD7C = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 			*(u32*)0x020A44B0 = 0xE1A00000; // nop
 			*(u32*)0x020A44B4 = 0xE1A00000; // nop
 			*(u32*)0x020A44B8 = 0xE1A00000; // nop

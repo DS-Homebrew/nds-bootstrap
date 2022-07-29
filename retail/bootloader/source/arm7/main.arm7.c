@@ -997,8 +997,14 @@ int arm7_main(void) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
-		fatTableAddr = 0x02700000;
-		fatTableSize = 0x80000;
+		if (strncmp(romTid, "KQ9", 3) == 0 // The Legend of Zelda: Four Swords: Anniversary Edition
+		) {
+			fatTableAddr = 0x02000000;
+			fatTableSize = 0x4000;
+		} else {
+			fatTableAddr = 0x02700000;
+			fatTableSize = 0x80000;
+		}
 	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
 		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1A000;
