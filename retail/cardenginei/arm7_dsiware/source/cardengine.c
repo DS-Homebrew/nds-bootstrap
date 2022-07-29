@@ -59,6 +59,8 @@ static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
 static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
+extern void ndsCodeStart(u32* addr);
+
 extern u32 saveCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
@@ -363,8 +365,7 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 void forceGameReboot(void) {
@@ -508,8 +509,7 @@ void returnToLoader(bool wait) {
 	}
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 void dumpRam(void) {

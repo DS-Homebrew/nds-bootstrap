@@ -78,8 +78,7 @@
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 extern void arm7clearRAM(void);
-extern void arm7code1(void);
-extern void arm7code5(void);
+extern void arm7code(u32* addr);
 
 extern bool moreMemory;
 
@@ -931,7 +930,7 @@ static void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	arm9_isSdk5 ? arm7code5() : arm7code1();
+	arm7code(ndsHeader->arm7executeAddress);
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

@@ -82,8 +82,7 @@ typedef unsigned char data_t;
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 extern void arm7clearRAM(void);
-extern void arm7code1(void);
-extern void arm7code5(void);
+extern void arm7code(u32* addr);
 
 //extern u32 _start;
 extern u32 storedFileCluster;
@@ -662,7 +661,7 @@ static void startBinary_ARM7(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	arm9_isSdk5 ? arm7code5() : arm7code1();
+	arm7code(ndsHeader->arm7executeAddress);
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
@@ -1179,7 +1178,6 @@ int arm7_main(void) {
 	fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
 
 	arm9_boostVram = boostVram;
-	arm9_isSdk5 = isSdk5(moduleParams);
 
 	if (esrbScreenPrepared) {
 		while (!esrbImageLoaded) {

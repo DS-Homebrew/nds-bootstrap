@@ -49,6 +49,8 @@ extern u32 ce7;
 
 //#define memcpy __builtin_memcpy
 
+extern void ndsCodeStart(u32* addr);
+
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 language;
@@ -243,8 +245,7 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 

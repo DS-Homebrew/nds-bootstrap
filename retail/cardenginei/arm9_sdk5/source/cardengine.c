@@ -68,6 +68,8 @@
 
 extern cardengineArm9* volatile ce9;
 
+extern void ndsCodeStart(u32* addr);
+
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
@@ -795,8 +797,7 @@ void reset(u32 param, u32 tid2) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = (VoidFn)ndsHeader->arm9executeAddress;
-	arm9code();
+	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
 //---------------------------------------------------------------------------------

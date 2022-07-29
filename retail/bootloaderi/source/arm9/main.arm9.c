@@ -45,8 +45,7 @@
 #define REG_MBK_CACHE_START	0x4004044
 
 extern void arm9_clearCache(void);
-extern void arm9code1(void);
-extern void arm9code5(void);
+extern void arm9code(u32* addr);
 
 tNDSHeader* ndsHeader = NULL;
 bool isGSDD = false;
@@ -356,5 +355,5 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	arm9_isSdk5 ? arm9code5() : arm9code1();
+	arm9code(ndsHeader->arm9executeAddress);
 }

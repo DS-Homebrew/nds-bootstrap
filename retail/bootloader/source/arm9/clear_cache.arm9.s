@@ -66,10 +66,7 @@ BEGIN_ASM_FUNC arm9_clearCache
 
 	bx lr
 
-BEGIN_ASM_FUNC arm9code1
-	ldr	r0, =0x027FFE24
-	ldr	r0, [r0]
-
+BEGIN_ASM_FUNC arm9code
 	mov r1, #0
 	mov r2, #0
 	mov r3, #0
@@ -83,23 +80,3 @@ BEGIN_ASM_FUNC arm9code1
 	mov r11, #0
 
 	bx	r0
-.pool
-
-BEGIN_ASM_FUNC arm9code5
-	ldr		r0, =0x02FFFE24
-	ldr		r0, [r0]
-
-	mov r1, #0
-	mov r2, #0
-	mov r3, #0
-	mov r4, #0
-	mov r5, #0
-	mov r6, #0
-	mov r7, #0
-	mov r8, #0
-	mov r9, #0
-	mov r10, #0
-	mov r11, #0
-
-	bx	r0
-.pool

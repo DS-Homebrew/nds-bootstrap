@@ -29,6 +29,7 @@
 .global dmaRomRead_LED
 .global scfgRomBak
 .global igmHotkey
+.global ndsCodeStart
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -117,6 +118,25 @@ exit:
 .pool
 
 card_engine_end:
+
+ndsCodeStart:
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	mov r1, #0
+	mov r2, #0
+	mov r3, #0
+	mov r4, #0
+	mov r5, #0
+	mov r6, #0
+	mov r7, #0
+	mov r8, #0
+	mov r9, #0
+	mov r10, #0
+	mov r11, #0
+
+	bx	r0
 
 patches:
 .word	0

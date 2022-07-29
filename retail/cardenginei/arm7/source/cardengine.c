@@ -82,6 +82,7 @@ static const char *unlaunchAutoLoadID = "AutoLoadInfo";
 static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
 static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
+extern void ndsCodeStart(u32* addr);
 extern int tryLockMutex(int* addr);
 extern int lockMutex(int* addr);
 extern int unlockMutex(int* addr);
@@ -580,8 +581,7 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
@@ -825,8 +825,7 @@ void returnToLoader(bool wait) {
 	}
 
 	// Start ARM7
-	VoidFn arm7code = (VoidFn)ndsHeader->arm7executeAddress;
-	arm7code();
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 #else
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
