@@ -1184,6 +1184,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(ndsFile);
 	fclose(donorNdsFile);
 
+	if (dsiFeatures() && (strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
+		easysave::ini config_file_b4ds("fat:/_nds/nds-bootstrap.ini");
+
+		// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
+		conf->donorTwl0Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
+
+		// SDK5.x (TWL) DSi-Enhanced Donor NDS path
+		conf->donorTwlPath = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
+	}
+
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
