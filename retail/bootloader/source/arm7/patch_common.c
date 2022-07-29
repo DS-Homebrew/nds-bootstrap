@@ -3321,6 +3321,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		doubleNopT(0x0200511E);
 		doubleNopT(0x02005124);
+		doubleNopT(0x02005272);
 		*(u32*)0x0201BA24 = 0xE1A00000; // nop
 		*(u32*)0x0201F744 = 0xE1A00000; // nop
 		*(u32*)0x0202CD44 = 0xE1A00000; // nop
