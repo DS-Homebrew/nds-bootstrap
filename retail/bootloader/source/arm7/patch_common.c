@@ -1215,7 +1215,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02062E20 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02062E7C, 0x02700000); // mov r0, #0x2700000
 		*(u32*)0x02064424 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02064440 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064444 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206444C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02064450 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020679A0 = 0xE1A00000; // nop
+	}
+
+	// Cake Ninja (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K2JP") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02008C4C = 0xE1A00000; // nop
+		*(u32*)0x02008ED4 = 0xE1A00000; // nop
+		*(u32*)0x02057A10 = 0xE1A00000; // nop
+		*(u32*)0x0205B1D4 = 0xE1A00000; // nop
+		*(u32*)0x02060D84 = 0xE1A00000; // nop
+		*(u32*)0x02062D88 = 0xE1A00000; // nop
+		*(u32*)0x02062D8C = 0xE1A00000; // nop
+		*(u32*)0x02062D90 = 0xE1A00000; // nop
+		*(u32*)0x02062EF8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02062F54, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x020644FC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02064518 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206451C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02064524 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02064528 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02067A78 = 0xE1A00000; // nop
 	}
 
 	// Cake Ninja 2 (Europe)
@@ -1321,7 +1348,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				u32* offset = (u32*)0x020AE76C;
 				offset[i] = 0xE1A00000; // nop
 			}
-		} else {
+		} else if (ndsHeader->gameCode[3] == 'P') {
 			*(u32*)0x020AE4F0 = 0xE1A00000; // nop
 
 			// Skip Manual screen
