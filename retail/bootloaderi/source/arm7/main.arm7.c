@@ -814,6 +814,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 		}
 
 		overlaysInRam = true;
+		dbg_printf("Overlays pre-loaded into RAM\n");
 	}
 }
 
@@ -893,7 +894,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 	overlaysInRam = true;
 
-	dbg_printf("ROM loaded into RAM\n");
+	dbg_printf("ROM pre-loaded into RAM\n");
 	if (extendedMemoryConfirmed) {
 		dbg_printf("Complete ");
 		if (romSizeEdit >= romSizeLimit) {
