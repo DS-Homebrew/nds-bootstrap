@@ -1022,7 +1022,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02077630 = 0xE1A00000; // nop
 		*(u32*)0x02077790 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020777EC, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02078A40 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02078A5C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02078A60 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02078A68 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02078A6C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207BE88 = 0xE1A00000; // nop
+		*(u32*)0x0207D764 = 0xE3A00003; // mov r0, #3
+	}
+
+	// BlayzBloo: Batoru x Batoru (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KBZJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0206B810 = 0xE1A00000; // nop
+		*(u32*)0x0206F30C = 0xE1A00000; // nop
+		*(u32*)0x020755EC = 0xE1A00000; // nop
+		*(u32*)0x020774F4 = 0xE1A00000; // nop
+		*(u32*)0x020774F8 = 0xE1A00000; // nop
+		*(u32*)0x02077504 = 0xE1A00000; // nop
+		*(u32*)0x02077664 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020776C0, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02078914 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02078930 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02078934 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207893C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02078940 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207BD4C = 0xE1A00000; // nop
+		*(u32*)0x0207D628 = 0xE3A00003; // mov r0, #3
 	}
 
 	// Bloons TD 4 (USA)
