@@ -1592,7 +1592,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201ECC8 = 0xE1A00000; // nop
 		*(u32*)0x0201ECD4 = 0xE1A00000; // nop
 		*(u32*)0x0201EE34 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201C080, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0201EE90, 0x02700000); // mov r0, #0x2700000
 		*(u32*)0x020201DC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0202368C = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
