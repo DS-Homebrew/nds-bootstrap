@@ -585,6 +585,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205AA94 = 0xE1A00000; // nop
 		*(u32*)0x0205ABF4 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0205AC50, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0205C1B4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0205FA64 = 0xE1A00000; // nop
 	}
 
@@ -937,6 +938,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B82C = 0xE1A00000; // nop
 		*(u32*)0x0205B98C = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0205B9E8, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0205CF4C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020607FC = 0xE1A00000; // nop
 	}
 
@@ -953,6 +955,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204E6D4 = 0xE1A00000; // nop
 		*(u32*)0x0204E834 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0204E890, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0204FDE4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02053548 = 0xE1A00000; // nop
 	}
 
