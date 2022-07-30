@@ -393,8 +393,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Absolute Baseball (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KE9E") == 0 && extendedMemory2) {
+	// Audio doesn't play on retail consoles
+	// Extra fixes required for it to work on real hardware
+	/*else if (strcmp(romTid, "KE9E") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02005088 = 0xE1A00000; // nop
@@ -405,12 +406,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019FE0 = 0xE1A00000; // nop
 		*(u32*)0x02019FEC = 0xE1A00000; // nop
 		*(u32*)0x0201A14C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201A1A8, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0201A1A8, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 		*(u32*)0x0201B42C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201E7D8 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0201D0FC = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201D124 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02038E5C = 0xE1A00000; // nop
+		}
 		*(u32*)0x0205FAD0 = 0xE1A00000; // nop
-		*(u32*)0x02072554 = 0xE3A00000; // mov r0, #0
-	}
+		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #0
+	}*/
 
 	// Absolute BrickBuster (USA)
 	// Crashes after starting a game mode
@@ -3191,7 +3197,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
-	// Audio doesn't play on retail consoles
+	// Music doesn't play on retail consoles
 	else if (strncmp(romTid, "KWY", 3) == 0) {
 		ce9->rumbleFrames[0] = 10;
 		ce9->rumbleFrames[1] = 30;
