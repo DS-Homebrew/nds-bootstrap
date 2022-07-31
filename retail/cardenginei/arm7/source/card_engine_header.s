@@ -202,22 +202,33 @@ loc_2384390:
                 ADDEQ           R0, R0, #1
                 BEQ             loc_2384390
                 STR             R2, [R12,#4]
-                LDR             R1, =extraIrqTable
+                LDR             R1, dsiIrqTable
                 LDR             R0, [R1,R0,LSL#2]
 
 loc_23843A8:
-                LDR             R2, =extraIrqTable0
+                LDR             R2, dsiIrqRet
                 STMIA           R2, {R4-R11,SP}
                 LDR             LR, irqRet
                 BX              R0
 @ End of function irqHandler
 
 @ ---------------------------------------------------------------------------
-.pool
 irqTable:
 	.word	0
 irqRet:
 	.word	0
+.global dsiIrqTable
+dsiIrqTable:
+	.word	extraIrqTable
+.global dsiIrqRet
+dsiIrqRet:
+	.word	extraIrqRet
+@.global extraIrqTable_offset
+@extraIrqTable_offset:
+@	.word	extraIrqTable
+@.global extraIrqRet_offset
+@extraIrqRet_offset:
+@	.word	extraIrqRet
 
 
 extraIrqTable:
@@ -227,7 +238,7 @@ extraIrqTable:
 	.word	extraIrq_ret		@ Unused (0)
 	.word	extraIrq_ret		@ GPIO33[0] unknown (related to "GPIO330" testpoint on mainboard?)
 	.word	extraIrq_ret		@ GPIO33[1] Headphone connect (HP#SP) (static state)
-	.word	i2cIRQHandler		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
+	.word	extraIrq_ret		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
 	.word	extraIrq_ret		@ GPIO33[3] sound enable output (ie. not a useful irq-input)
 	.word	extraIrq_ret		@ SD/MMC Controller   ;-Onboard eMMC and External SD Slot
 	.word	extraIrq_ret		@ SD Slot Data1 pin   ;-For SDIO hardware in External SD Slot
@@ -237,22 +248,22 @@ extraIrqTable:
 	.word	extraIrq_ret		@ I2C interrupt
 	.word	extraIrq_ret		@ Microphone Extended interrupt
 	.word	extraIrq_ret
-extraIrqTable0:
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
-	.word	extraIrq_ret
+extraIrqRet:
+	.word	extraIrq_ret		@ GPIO18[0]
+	.word	extraIrq_ret		@ GPIO18[1]
+	.word	extraIrq_ret		@ GPIO18[2]
+	.word	extraIrq_ret		@ Unused (0)
+	.word	extraIrq_ret		@ GPIO33[0] unknown (related to "GPIO330" testpoint on mainboard?)
+	.word	extraIrq_ret		@ GPIO33[1] Headphone connect (HP#SP) (static state)
+	.word	extraIrq_ret		@ GPIO33[2] Powerbutton interrupt (short pulse upon key-down)
+	.word	extraIrq_ret		@ GPIO33[3] sound enable output (ie. not a useful irq-input)
+	.word	extraIrq_ret		@ SD/MMC Controller   ;-Onboard eMMC and External SD Slot
+	.word	extraIrq_ret		@ SD Slot Data1 pin   ;-For SDIO hardware in External SD Slot
+	.word	extraIrq_ret		@ SDIO Controller     ;\Atheros Wifi Unit
+	.word	extraIrq_ret		@ SDIO Data1 pin      ;/
+	.word	extraIrq_ret		@ AES interrupt
+	.word	extraIrq_ret		@ I2C interrupt
+	.word	extraIrq_ret		@ Microphone Extended interrupt
 	.word	extraIrq_ret
 
 extraIrq_ret:

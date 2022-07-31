@@ -259,10 +259,7 @@ static inline void waitFrames(int count) {
 }
 
 static inline bool isSdEjected(void) {
-	if (*(vu32*)(0x400481C) & BIT(3)) {
-		return true;
-	}
-	return false;
+	return (*(vu32*)(0x400481C) & BIT(3));
 }
 
 static void driveInitialize(void) {
@@ -1253,12 +1250,6 @@ static void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-    if (IPC_GetSync() == 0x3) {
-		swiDelay(100);
-		IPC_SendSync(0x3);
-		return;
-	}
-
   	if (tryLockMutex(&cardEgnineCommandMutex)) {
         //if(!readOngoing)
         //{
@@ -1335,6 +1326,12 @@ void myIrqHandlerFIFO(void) {
 	#endif
 
 	calledViaIPC = true;
+
+    if (IPC_GetSync() == 0x3) {
+		swiDelay(100);
+		IPC_SendSync(0x3);
+		return;
+	}
 
 	runCardEngineCheck();
 }
@@ -1433,7 +1430,6 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
-	//*(vu32*)(0x027FFB30) = (vu32)isSdEjected();
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
@@ -1652,6 +1648,16 @@ u32 myIrqEnable(u32 irq) {
 	if (doBak) restoreSdBakData();
 	#endif
 
+	/*if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
+		extern u32* dsiIrqTable;
+		extern u32* dsiIrqRet;
+		extern u32* extraIrqTable_offset;
+		extern u32* extraIrqRet_offset;
+
+		dsiIrqTable[8] = extraIrqTable_offset[8];
+		dsiIrqRet[8] = extraIrqRet_offset[8];
+	}*/
+
 	/*const char* romTid = getRomTid(ndsHeader);
 
 	if ((strncmp(romTid, "UOR", 3) == 0)
@@ -1674,6 +1680,9 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	//if (!(valueBits & powerCodeOnVBlank)) {
 	//	REG_AUXIE |= IRQ_I2C;
+	//}
+	//if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {	
+	//	REG_AUXIE |= IRQ_SDMMC;
 	//}
 	leaveCriticalSection(oldIME);
 	ipcSyncHooked = true;

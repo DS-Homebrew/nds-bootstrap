@@ -32,6 +32,7 @@
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
+#include "tonccpy.h"
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
@@ -176,6 +177,12 @@ int hookNdsRetailArm7(
 		return ERR_HOOK;
 	}
 
+	/*bool handlerPatched = false;
+	if (!gameOnFlashcard && !ROMinRAM && handlerLocation && ce7->patches->fifoHandler) {
+		tonccpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+		handlerPatched = true;
+	}*/
+
 	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
 	if (!wordsLocation && !ce7NotFound) {
 		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
@@ -291,12 +298,16 @@ int hookNdsRetailArm7(
 		}
 	}
 
-	/* *(ce7->irqTable_offset) = wordsLocation[0];
-	if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
-		*(ce7->irqTable_offset + 1) = wordsLocation[1];
-	} else {
-		*(ce7->irqTable_offset + 1) = wordsLocation[3];
-	} */
+	/*if (handlerPatched) {
+		*(ce7->irqTable_offset) = wordsLocation[0];
+		if (wordsLocation[1] >= 0x037F0000 && wordsLocation[1] < 0x03800000) {
+			*(ce7->irqTable_offset + 1) = wordsLocation[1];
+		} else {
+			*(ce7->irqTable_offset + 1) = wordsLocation[3];
+			*(ce7->irqTable_offset + 2) = wordsLocation[1];
+			*(ce7->irqTable_offset + 3) = wordsLocation[2];
+		}
+	}*/
 
    	dbg_printf("hookLocation arm7: ");
 	dbg_hexa((u32)hookLocation);

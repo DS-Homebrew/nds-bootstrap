@@ -1954,7 +1954,16 @@ int arm7_main(void) {
 	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
-	}
+	} /*else if (!isDSiWare) {
+		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
+		if (!gameOnFlashcard) {
+			*(vu32*)0x4004820 = BIT(3);	// Set SD IRQ mask register
+			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
+			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
+		} else {
+			*(vu32*)0x4004820 = 0;	// Clear SD IRQ mask register
+		}
+	}*/
 
 	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
