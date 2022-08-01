@@ -96,6 +96,7 @@ bool sdRead = false;
 u32* cacheDescriptor = (u32*)0x02790000;
 u32* cacheCounter = (u32*)0x027A0000;
 u32 accessCounter = 0;
+u16 slotsAllocated = 0;
 #endif
 static bool flagsSet = false;
 static bool driveInitialized = false;
@@ -172,7 +173,7 @@ void sleepMs(int ms) {
 int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for (int i = 0; i < ce9->cacheSlots; i++) {
+	for (int i = 0; i < slotsAllocated; i++) {
 		if (cacheCounter[i] <= lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -185,7 +186,7 @@ int allocateCacheSlot(void) {
 }
 
 int getSlotForSector(u32 sector) {
-	for (int i = 0; i < ce9->cacheSlots; i++) {
+	for (int i = 0; i < slotsAllocated; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
 		}
@@ -316,6 +317,10 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 				}*/
 
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				slotsAllocated++;
+				if (slotsAllocated > ce9->cacheSlots) {
+					slotsAllocated = ce9->cacheSlots;
+				}
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
