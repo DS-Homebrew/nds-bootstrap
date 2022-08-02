@@ -106,6 +106,7 @@ extern u32 patchOffsetCacheFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
+extern u32 apFixOverlaysCluster;
 extern u32 pageFileCluster;
 extern u32 manualCluster;
 extern u8 patchMpuSize;
@@ -794,27 +795,29 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 	if (!overlayPatch) {
 		return;
 	}
-	bool powerProKun = (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0);
 
 	// Load overlays into RAM
-	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (powerProKun ? (dsiWramAccess ? 0x480000 : 0x400000) : (dsiWramAccess ? 0x280000 : 0x200000)) : 0x700000))) {
+	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
 		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-		if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
-			overlaysLocation = (u32)retail_OVARLAYS_ADRESS_START_TWLSDK;
-			if (powerProKun) {
-				overlaysLocation -= 0x200000;
-			}
-		} else if (consoleModel == 0 && isSdk5(moduleParams)) {
+		if (consoleModel == 0 && isSdk5(moduleParams)) {
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 		}
-		fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
+		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+			fileRead((char*)overlaysLocation, file, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, 0);
+		} else {
+			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
+		}
 
 		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
 			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
 		}
 
 		overlaysInRam = true;
-		dbg_printf("Overlays pre-loaded into RAM\n");
+		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+			// Do nothing
+		} else {
+			dbg_printf("Overlays pre-loaded into RAM\n");
+		}
 	}
 }
 
@@ -1869,12 +1872,18 @@ int arm7_main(void) {
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
 			}
-		} else if ((ndsHeader->unitCode == 0x02 && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
+		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 
 		if (useApPatch) {
 			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
+				if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && overlaysInRam) {
+					aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
+					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster);
+					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, -1);	// Write AP-fixed overlays to a file
+					toncset((char*)CACHE_ADRESS_START, 0, overlaysSize + (overlaysSize % 0x4000));
+				}
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");

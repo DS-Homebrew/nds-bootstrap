@@ -63,6 +63,7 @@ extern std::string cheatFilePath;
 extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
 extern std::string screenshotPath;
+extern std::string apFixOverlaysPath;
 extern std::string pageFilePath;
 
 extern u8 lz77ImageBuffer[0x20000];
@@ -1413,9 +1414,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 		}
 
-		if (conf->sdFound && access(ramDumpPath.c_str(), F_OK) != 0) {
+		if (access(ramDumpPath.c_str(), F_OK) != 0) {
 			consoleDemoInit();
-			iprintf("Creating RAM dump file.\n");
+			iprintf("Allocating space for\n");
+			iprintf("creating a RAM dump.\n");
 			iprintf("Please wait...\n");
 			/* printf("\n");
 			if (conf->consoleModel >= 2) {
@@ -1431,6 +1433,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
 				fputc('\0', ramDumpFile);
 				fclose(ramDumpFile);
+			}
+
+			consoleClear();
+		}
+
+		apFixOverlaysPath = "sd:/_nds/nds-bootstrap/apFixOverlays.bin";
+		if (conf->gameOnFlashcard) {
+			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
+		}
+
+		if (conf->consoleModel == 0 && unitCode > 0 && conf->dsiMode && !conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+			consoleDemoInit();
+			iprintf("Allocating space for\n");
+			iprintf("AP-fixed overlays.\n");
+			iprintf("Please wait...\n");
+
+			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
+			if (apFixOverlaysFile) {
+				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fputc('\0', apFixOverlaysFile);
+				fclose(apFixOverlaysFile);
 			}
 
 			consoleClear();

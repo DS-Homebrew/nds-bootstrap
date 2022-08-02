@@ -15,12 +15,15 @@
 #define SAV_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 32) //+ sizeof(aFile)
 #define SAV_FILE_LOCATION_MAINMEM (ROM_FILE_LOCATION_MAINMEM + 32) //+ sizeof(aFile)
 #define SAV_FILE_LOCATION_TWLSDK  (ROM_FILE_LOCATION_TWLSDK + 32) //+ sizeof(aFile)
-#define GBA_FILE_LOCATION         (ROM_FILE_LOCATION + 64) //+ sizeof(aFile)
+#define OVL_FILE_LOCATION         (ROM_FILE_LOCATION + 64) //+ sizeof(aFile)
+#define OVL_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 64) //+ sizeof(aFile)
+#define OVL_FILE_LOCATION_TWLSDK  (ROM_FILE_LOCATION_TWLSDK + 64) //+ sizeof(aFile)
+/* #define GBA_FILE_LOCATION         (ROM_FILE_LOCATION + 64) //+ sizeof(aFile)
 #define GBA_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 64) //+ sizeof(aFile)
 #define GBA_FILE_LOCATION_MAINMEM (ROM_FILE_LOCATION_MAINMEM + 64) //+ sizeof(aFile)
 #define GBA_SAV_FILE_LOCATION         (ROM_FILE_LOCATION + 96) //+ sizeof(aFile)
 #define GBA_SAV_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 96) //+ sizeof(aFile)
-#define GBA_SAV_FILE_LOCATION_MAINMEM (ROM_FILE_LOCATION_MAINMEM + 96) //+ sizeof(aFile)
+#define GBA_SAV_FILE_LOCATION_MAINMEM (ROM_FILE_LOCATION_MAINMEM + 96) //+ sizeof(aFile) */
 
 #define LOAD_CRT0_LOCATION      0x06840000 // LCDC_BANK_C
 #define LOAD_CRT0_LOCATION_B4DS 0x06860000 // LCDC_BANK_D
@@ -107,7 +110,6 @@
 #define CACHE_ADRESS_START                  0x0C800000
 #define CACHE_ADRESS_START_low              0x0C480000
 #define retail_CACHE_ADRESS_START_TWLSDK    0x02EC0000
-#define retail_OVARLAYS_ADRESS_START_TWLSDK 0x02C00000
 
 #define retail_CACHE_ADRESS_SIZE        0x800000
 #define retail_CACHE_ADRESS_SIZE_low    0x274000

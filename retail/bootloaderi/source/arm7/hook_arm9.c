@@ -220,7 +220,6 @@ int hookNdsRetailArm9(
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
-		bool powerProKun = (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0);
 		bool runOverlayCheck = overlayPatch;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (isSdk5(moduleParams)) {
@@ -229,11 +228,7 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = dev_CACHE_ADRESS_START_SDK5;
 				ce9->cacheSlots = ((ndsHeader->unitCode > 0 && dsiModeConfirmed) ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_SDK5)/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-				runOverlayCheck = (ndsHeader->unitCode == 0x02 && overlayPatch);
-				ce9->romLocation = runOverlayCheck ? retail_OVARLAYS_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK;
-				if (runOverlayCheck && powerProKun) {
-					ce9->romLocation -= 0x200000;
-				}
+				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
 				if (strncmp(romTid, "DD3", 3) == 0) {
 					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK+0x12000;
 					ce9->cacheSlots = (retail_CACHE_ADRESS_SIZE_TWLSDK-0x12000)/cacheBlockSize;
@@ -265,7 +260,7 @@ int hookNdsRetailArm9(
 			}
 		}
 		if (runOverlayCheck
-		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode == 0x02 && dsiModeConfirmed ? (powerProKun ? (dsiWramAccess ? 0x480000 : 0x400000) : (dsiWramAccess ? 0x280000 : 0x200000)) : 0x700000))) {
+		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
 			extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {
 				if (cacheBlockSize == 0) {

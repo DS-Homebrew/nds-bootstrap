@@ -49,6 +49,7 @@
 	.global ramDumpCluster
 	.global srParamsFileCluster
 	.global screenshotCluster
+	.global apFixOverlaysCluster
 	.global pageFileCluster
 	.global manualCluster
 	.global patchMpuSize
@@ -123,6 +124,8 @@ ramDumpCluster:
 srParamsFileCluster:
 	.word	0x00000000
 screenshotCluster:
+	.word	0x00000000
+apFixOverlaysCluster:
 	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000

@@ -49,6 +49,7 @@
 	.global ramDumpCluster
 	.global srParamsFileCluster
 	.global screenshotCluster
+	.global apFixOverlaysCluster
 	.global pageFileCluster
 	.global manualCluster
 	.global patchMpuSize
@@ -124,6 +125,8 @@ srParamsFileCluster:
 	.word	0x00000000
 screenshotCluster:
 	.word	0x00000000
+apFixOverlaysCluster:
+	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000
 manualCluster:
@@ -192,8 +195,6 @@ startUp:
 	ldr	r1, =_arm9_start
 	str	r1, [r0]
 
-	mov	r0, #0			@ int argc
-	mov	r1, #0			@ char *argv[]
 	ldr	r3, =arm7_main
 	bl	_blx_r3_stub		@ jump to user code
 
@@ -251,23 +252,6 @@ CIDLoop:
 	subs	r3, r3, #4
 	bne	CIDLoop
 	bx	lr
-
-.global fastCopy32
-.type	fastCopy32 STT_FUNC
-@ r0 : src, r1 : dst, r2 : len
-fastCopy32:
-	stmfd   sp!, {r3-r11,lr}
-	@ copy 512 bytes
-	mov     r10, r0
-	mov     r9, r1
-	mov     r8, r2
-loop_fastCopy32:
-	ldmia   r10!, {r0-r7}
-	stmia   r9!,  {r0-r7}
-	subs    r8, r8, #32  @ 4*8 bytes
-	bgt     loop_fastCopy32
-	ldmfd   sp!, {r3-r11,lr}
-	bx      lr
 
 @---------------------------------------------------------------------------------
 	.align

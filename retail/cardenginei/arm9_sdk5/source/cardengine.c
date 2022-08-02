@@ -78,6 +78,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 #endif
@@ -379,7 +380,11 @@ void getAsyncSector() {
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
+	#ifdef TWLSDK
+	fileRead((char*)dst, ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	#else
 	fileRead((char*)dst, *romFile, src, len, 0);
+	#endif
 #else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -424,7 +429,11 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
+				#ifdef TWLSDK
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				#else
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				#endif
 				slotsAllocated++;
 				if (slotsAllocated > ce9->cacheSlots) {
 					slotsAllocated = ce9->cacheSlots;
@@ -575,11 +584,19 @@ void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	// -------------------------------------
 	#endif
 
+	#ifdef TWLSDK
+	if ((ce9->valueBits & overlaysInRam) && ce9->consoleModel > 0 && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+		cardReadRAM(dst, src, len);
+	} else {
+		cardReadNormal(dst, src, len);
+	}
+	#else
 	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
+	#endif
     isDma=false;
 }
 

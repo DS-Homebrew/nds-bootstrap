@@ -30,6 +30,7 @@ std::string cheatFilePath;
 std::string ramDumpPath;
 std::string srParamsFilePath;
 std::string screenshotPath;
+std::string apFixOverlaysPath;
 std::string pageFilePath;
 
 typedef struct {
@@ -398,6 +399,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stRamDump;
 	struct stat stSrParams;
 	struct stat stScreenshot;
+	struct stat stApFixOverlays;
 	struct stat stPage;
 	struct stat stManual;
 	u32 clusterSav = 0;
@@ -411,6 +413,7 @@ static int runNdsFile(configuration* conf) {
 	u32 clusterRamDump = 0;
 	u32 clusterSrParams = 0;
 	u32 clusterScreenshot = 0;
+	u32 apFixOverlaysCluster = 0;
 	u32 clusterPageFile = 0;
 	u32 clusterManual = 0;
 
@@ -461,6 +464,10 @@ static int runNdsFile(configuration* conf) {
 			clusterScreenshot = stScreenshot.st_ino;
 		}
 
+		if (stat(apFixOverlaysPath.c_str(), &stApFixOverlays) >= 0) {
+			apFixOverlaysCluster = stApFixOverlays.st_ino;
+		}
+
 		if (stat(conf->manualPath, &stManual) >= 0) {
 			clusterManual = stManual.st_ino;
 		}
@@ -474,7 +481,7 @@ static int runNdsFile(configuration* conf) {
 		clusterPageFile = stPage.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, clusterPageFile, clusterManual, conf);
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, clusterPageFile, clusterManual, conf);
 }
 
 int main(int argc, char** argv) {

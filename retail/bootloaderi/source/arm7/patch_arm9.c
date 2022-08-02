@@ -1247,7 +1247,6 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	bool isSpecificTitle = (strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "IRE", 3) == 0); // Work around heap allocation issue
 	extern u8 consoleModel;
 	extern bool overlayPatch;
 
@@ -1278,34 +1277,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	//if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && !isSpecificTitle && !isDSiWare && ndsHeader->unitCode == 0x02 && overlayPatch) {
-			// DSi-Enhanced title with AP-patched overlays running on DSi consoles
-			if (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0) {
-				switch (*heapPointer) {
-					case 0x13A007BE:
-						*heapPointer = (u32)0x13A0062A; /* MOVNE R0, #0x2A00000 */
-						break;
-					case 0xE3A007BE:
-						*heapPointer = (u32)0xE3A0062A; /* MOV R0, #0x2A00000 */
-						break;
-					case 0x048020BE:
-						*heapPointer = (u32)0x048020A8; /* MOVS R0, #0x2A00000 */
-						break;
-				}
-			} else {
-				switch (*heapPointer) {
-					case 0x13A007BE:
-						*heapPointer = (u32)0x13A0062C; /* MOVNE R0, #0x2C00000 */
-						break;
-					case 0xE3A007BE:
-						*heapPointer = (u32)0xE3A0062C; /* MOV R0, #0x2C00000 */
-						break;
-					case 0x048020BE:
-						*heapPointer = (u32)0x048020B0; /* MOVS R0, #0x2C00000 */
-						break;
-				}
-			}
-		} else if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && !isDSiWare && dsiWramAccess) {
+		if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && !isDSiWare && dsiWramAccess) {
 			// DSi: Hidden Photo (Europe/German) needs more heap space
 			u32 addr = (u32)heapPointer;
 

@@ -44,16 +44,13 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			rombyte = (void*)(isSdk5 ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
-			} else if (consoleModel == 0 && ndsHeader->unitCode == 0x02 && dsiModeConfirmed) {
-				rombyte = (void*)retail_OVARLAYS_ADRESS_START_TWLSDK;
-				if (strncmp(romTid, "VPT", 3) == 0 || strncmp(romTid, "VPL", 3) == 0) {
-					rombyte -= 0x200000;
-				}
 			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
 			}
 			if (ROMinRAM) {
 				rombyte -= 0x8000;
+			} else if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/0x4000)*0x4000;
 			} else {
 				rombyte -= ndsHeader->arm9romOffset;
 				rombyte -= ndsHeader->arm9binarySize;
