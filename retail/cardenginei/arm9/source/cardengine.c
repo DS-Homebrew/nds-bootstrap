@@ -42,7 +42,7 @@
 #define extendedMemory BIT(1)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
-#define overlaysInRam BIT(6)
+#define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
@@ -526,7 +526,7 @@ void cardRead(u32* cacheStruct) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		cardReadRAM(cardStruct, cacheStruct, dst, src, len);
 	} else {
 		cardReadNormal(cardStruct, cacheStruct, dst, src, len);

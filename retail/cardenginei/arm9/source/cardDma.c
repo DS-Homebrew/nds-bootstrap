@@ -38,7 +38,6 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
-#define overlaysInRam BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)

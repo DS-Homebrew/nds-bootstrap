@@ -12,7 +12,7 @@
 #define b_dsDebugRam BIT(3)
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
-#define b_overlaysInRam BIT(6)
+#define b_overlaysCached BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
 #define b_softResetMb BIT(13)
@@ -199,8 +199,8 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (strncmp(romTid, "NTRJ", 4) != 0 && (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize < romSizeLimit) {
-		ce9->valueBits |= b_overlaysInRam;
+	if (strncmp(romTid, "NTRJ", 4) != 0 && (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
+		ce9->valueBits |= b_overlaysCached;
 	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {
 		ce9->valueBits |= b_cacheFlushFlag;

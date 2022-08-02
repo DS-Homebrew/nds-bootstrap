@@ -43,7 +43,7 @@
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
-#define overlaysInRam BIT(6)
+#define overlaysCached BIT(6)
 #define cacheDisabled BIT(9)
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
@@ -381,7 +381,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	#ifdef TWLSDK
-	fileRead((char*)dst, ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 	#else
 	fileRead((char*)dst, *romFile, src, len, 0);
 	#endif
@@ -430,7 +430,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				}*/
 
 				#ifdef TWLSDK
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
 				#else
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 				#endif
@@ -585,13 +585,13 @@ void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	#endif
 
 	#ifdef TWLSDK
-	if ((ce9->valueBits & overlaysInRam) && ce9->consoleModel > 0 && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & overlaysCached) && ce9->consoleModel > 0 && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
 	#else
-	if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);

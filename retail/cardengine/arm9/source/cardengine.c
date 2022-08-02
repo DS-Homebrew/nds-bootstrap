@@ -49,7 +49,7 @@
 #define dsDebugRam BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
-#define overlaysInRam BIT(6)
+#define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define softResetMb BIT(13)
@@ -523,7 +523,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			newSrc = (u32)(ce9->romLocation-0x8000-arm9ibinarySize)+src;
 		}
 		tonccpy(dst, (u8*)newSrc, len);
-	} else if ((ce9->valueBits & overlaysInRam) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	} else if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
 		tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 	} else {
 		cardReadNormal(dst, src, len);

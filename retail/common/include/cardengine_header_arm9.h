@@ -75,7 +75,7 @@ typedef struct cardengineArm9 {
 		3: dsiMode
 		4: enableExceptionHandler
 		5: isSdk5
-		6: overlaysInRam
+		6: overlaysCached
 		7: cacheFlushFlag
 		8: cardReadFix
 		9: cacheDisabled
@@ -160,7 +160,7 @@ typedef struct cardengineArm9 {
 		2: ROMinRAM
 		3: dsDebugRam
 		5: isSdk5
-		6: overlaysInRam
+		6: overlaysCached
 	*/
     u32 overlaysSize;
     u32 ioverlaysSize;

@@ -17,7 +17,7 @@
 #define b_dsiMode BIT(3)
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
-#define b_overlaysInRam BIT(6)
+#define b_overlaysCached BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
 #define b_cacheDisabled BIT(9)
@@ -271,7 +271,7 @@ int hookNdsRetailArm9(
 					ce9->cacheSlots--;
 				}
 			}
-			ce9->valueBits |= b_overlaysInRam;
+			ce9->valueBits |= b_overlaysCached;
 		}
 
 		if (strncmp(romTid, "CLJ", 3) == 0 || strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {

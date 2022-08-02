@@ -1878,13 +1878,14 @@ int arm7_main(void) {
 
 		if (useApPatch) {
 			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
+				dbg_printf("AP-fix applied\n");
 				if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && overlaysInRam) {
 					aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster);
 					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, -1);	// Write AP-fixed overlays to a file
 					toncset((char*)CACHE_ADRESS_START, 0, overlaysSize + (overlaysSize % 0x4000));
+					dbg_printf("Overlays cached to a file\n");
 				}
-				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
 			}
