@@ -265,10 +265,6 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	} else {
 		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		ce7->igmHotkey = igmText->hotkey;
-		if (*(u32*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION != 0) {
-			cardengineArm7* ce7sdk5 = (cardengineArm7*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION;
-			ce7sdk5->igmHotkey = igmText->hotkey;
-		}
 	}
 
 	char path[40];
@@ -886,29 +882,31 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (conf->gameOnFlashcard || !conf->isDSiWare) {
-	// Load ce7 binary
-	cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x8000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
-		if (REG_SCFG_EXT7 != 0) {
-			tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+	if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
+		// Load SDK5 ce7 binary
+		cebin = fopen("nitro:/cardenginei_arm7_sdk5.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x8000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
+			if (REG_SCFG_EXT7 != 0) {
+				tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+			}
+			tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 		}
-		tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
-	}
-	fclose(cebin);
-
-	// Load SDK5 ce7 binary
-	cebin = fopen("nitro:/cardenginei_arm7_sdk5.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, 0x8000, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION);
-		if (REG_SCFG_EXT7 != 0) {
-			tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+		fclose(cebin);
+	} else {
+		// Load ce7 binary
+		cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, 0x8000, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
+			if (REG_SCFG_EXT7 != 0) {
+				tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+			}
+			tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 		}
-		tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
+		fclose(cebin);
 	}
-	fclose(cebin);
 
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");

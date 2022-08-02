@@ -1694,7 +1694,7 @@ int arm7_main(void) {
 		extern void rsetPatchCache(bool dsiWare);
 		rsetPatchCache(false);
 
-		tonccpy((u32*)ce7Location, (u32*)(useSdk5ce7 ? CARDENGINEI_ARM7_SDK5_BUFFERED_LOCATION : CARDENGINEI_ARM7_BUFFERED_LOCATION), ce7Size);
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, ce7Size);
 		if (gameOnFlashcard || saveOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400)) {
 				dbg_printf("ce7 DLDI patch failed\n");
