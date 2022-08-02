@@ -1705,7 +1705,7 @@ int arm7_main(void) {
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 		if (isSdk5(moduleParams)) {
-			ce9Location = CARDENGINEI_ARM9_SDK5_LOCATION;
+			ce9Location = CARDENGINEI_ARM9_LOCATION;
 			if (ROMinRAM) {
 				ce9size = 0x2000;
 				if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
