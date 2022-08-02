@@ -143,7 +143,7 @@ static void waitFrames(int count) {
 #ifndef DLDI
 void sleepMs(int ms) {
 	if (!(ce9->valueBits & asyncCardRead) || REG_IME == 0 || REG_IF == 0) {
-		swiDelay(50);
+		swiDelay(100);
 		return;
 	}
 
@@ -154,7 +154,7 @@ void sleepMs(int ms) {
 		extern void callSleepThumb(int ms);
 		callSleepThumb(ms);
 	} else {
-		swiDelay(50);
+		swiDelay(100);
 	}
 }
 
