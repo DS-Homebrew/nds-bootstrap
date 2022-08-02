@@ -57,7 +57,6 @@ extern aFile* romFile;
 extern u32* cacheDescriptor;
 extern u32* cacheCounter;
 extern u32 accessCounter;
-extern u16 slotsAllocated;
 
 bool isDma = false;
 
@@ -254,10 +253,6 @@ void continueCardReadDmaArm9() {
         		buffer = getCacheAddress(slot);
 
 				//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-				slotsAllocated++;
-				if (slotsAllocated > ce9->cacheSlots) {
-					slotsAllocated = ce9->cacheSlots;
-				}
 
 				/*u32 len2 = (src - sector) + len;
 				u16 readLen = ce9->cacheBlockSize;
@@ -435,10 +430,6 @@ void cardSetDma (u32 * params) {
 			buffer = getCacheAddress(slot);
 
 			//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-			slotsAllocated++;
-			if (slotsAllocated > ce9->cacheSlots) {
-				slotsAllocated = ce9->cacheSlots;
-			}
 
 			/*u32 len2 = (src - sector) + len;
 			u16 readLen = ce9->cacheBlockSize;

@@ -95,7 +95,6 @@ u32* cacheDescriptor = (u32*)0x02790000;
 u32* cacheCounter = (u32*)0x027A0000;
 #endif
 u32 accessCounter = 0;
-u16 slotsAllocated = 0;
 
 #if ASYNCPF
 static u32 asyncSector = 0;
@@ -234,7 +233,7 @@ void enableIPC_SYNC(void) {
 int allocateCacheSlot(void) {
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for (int i = 0; i < slotsAllocated; i++) {
+	for (int i = 0; i < ce9->cacheSlots; i++) {
 		if (cacheCounter[i] <= lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -247,7 +246,7 @@ int allocateCacheSlot(void) {
 }
 
 int getSlotForSector(u32 sector) {
-	for (int i = 0; i < slotsAllocated; i++) {
+	for (int i = 0; i < ce9->cacheSlots; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
 		}
@@ -272,7 +271,6 @@ void resetSlots(void) {
 		cacheCounter[i] = 0;
 	}
 	accessCounter = 0;
-	slotsAllocated = 0;
 }
 #endif
 
@@ -434,10 +432,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				#else
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 				#endif
-				slotsAllocated++;
-				if (slotsAllocated > ce9->cacheSlots) {
-					slotsAllocated = ce9->cacheSlots;
-				}
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
