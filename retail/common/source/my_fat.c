@@ -246,11 +246,10 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #define CLUSTER_CACHE      0x2700000 // Main RAM
 #define CLUSTER_CACHE_SIZE 0x7FF80 // 512K
 
+u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 #ifndef B4DS
-static u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 u32 currentClusterCacheSize = 0;
 #else
-u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 u32 clusterCache = CLUSTER_CACHE;
 u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 #endif

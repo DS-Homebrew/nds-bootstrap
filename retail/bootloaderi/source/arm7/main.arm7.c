@@ -1273,17 +1273,20 @@ int arm7_main(void) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
 			errorOutput();
 		}*/
+		extern u32* lastClusterCacheUsed;
 		if (dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = 0x02E80000;
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
 			if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
+				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0xB880000;
 				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
 			} else {
 				tonccpy((char*)0x02EE0000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7E0000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7E0000;
+				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0x7E0000;
 				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			}
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
@@ -1882,8 +1885,11 @@ int arm7_main(void) {
 				if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && overlaysInRam) {
 					aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster);
+					buildFatTableCache(apFixOverlaysFile, !sdRead, 0);
+
 					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, -1);	// Write AP-fixed overlays to a file
 					toncset((char*)CACHE_ADRESS_START, 0, overlaysSize + (overlaysSize % 0x4000));
+
 					dbg_printf("Overlays cached to a file\n");
 				}
 			} else {
