@@ -778,16 +778,17 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchOffsetCache.sleepChecked = true;
 	}
 	if (offset) {
-		if (patchOffsetCache.sleepFuncIsThumb) {
-			ce9->thumbPatches->sleepRef = offset;
-		} else {
-			ce9->patches->sleepRef = offset;
-		}
-		dbg_printf("sleep location : ");
-		dbg_hexa((u32)offset);
-		dbg_printf("\n\n");
+		return false;
 	}
-	return offset ? true : false;
+	if (patchOffsetCache.sleepFuncIsThumb) {
+		ce9->thumbPatches->sleepRef = offset;
+	} else {
+		ce9->patches->sleepRef = offset;
+	}
+	dbg_printf("sleep location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+	return true;
 }
 
 bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -2175,9 +2176,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	} else {
+	getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
+	//if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+	//	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	//} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
@@ -2185,7 +2187,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
-	}
+	//}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams);
