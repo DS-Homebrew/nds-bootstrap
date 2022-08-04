@@ -190,7 +190,6 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	IPC_SendSync(0x4);
 	sleepMs(1);
 	while (sharedAddr[4] == commandWrite) {
-		IPC_SendSync(0x4);
 		swiDelay(100);
 	}
 	return sharedAddr[4] == 0;
