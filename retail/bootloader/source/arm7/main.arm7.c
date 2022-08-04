@@ -511,7 +511,13 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	bool isDevConsole = false;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
-		romSizeLimit = (s2FlashcardId == 0x5A45) ? 0xF80000 : 0x1F80000;
+		if (s2FlashcardId == 0x5A45) {
+			romSizeLimit = 0xF80000;
+		} else if (s2FlashcardId == 0x4353) {
+			romSizeLimit = 0x1F7FE00;
+		} else {
+			romSizeLimit = 0x1F80000;
+		}
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
@@ -987,8 +993,8 @@ int arm7_main(void) {
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
-		fatTableAddr = 0x09F80000;
-		fatTableSize = (s2FlashcardId==0x4353 ? 0x7FFFC : 0x80000);
+		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
+		fatTableSize = 0x80000;
 	} else if (s2FlashcardId == 0x5A45) {
 		fatTableAddr = 0x08F80000;
 		fatTableSize = 0x80000;
