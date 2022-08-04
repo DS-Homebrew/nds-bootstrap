@@ -2127,10 +2127,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
-	//if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-	//	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
-	//} else {
+	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	} else {
 		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
@@ -2138,7 +2137,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
-	//}
+	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams);

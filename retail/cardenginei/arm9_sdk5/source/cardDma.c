@@ -382,7 +382,7 @@ void cardSetDma (u32 * params) {
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];
 
-	if (!dmaOn) {
+	if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 		cardRead(0, dst, src, len);
 		endCardReadDma();
 		return;
