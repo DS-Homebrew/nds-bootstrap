@@ -1589,54 +1589,6 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *thumbSetDmaCardLocation = current_location;
 
-    u32* armReadNandLocation = findOffset((u32*)current_location, size, location_sig, 1);
-	if (!armReadNandLocation) {
-		return;
-	}
-    dbg_printf("armReadNandLocation ");
-	dbg_hexa((u32)armReadNandLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*armReadNandLocation);
-    dbg_printf("\n\n");
-
-    *armReadNandLocation = current_location;
-
-    u32* thumbReadNandLocation = findOffset((u32*)current_location, size, location_sig, 1);
-	if (!thumbReadNandLocation) {
-		return;
-	}
-    dbg_printf("thumbReadNandLocation ");
-	dbg_hexa((u32)thumbReadNandLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*thumbReadNandLocation);
-    dbg_printf("\n\n");
-
-    *thumbReadNandLocation = current_location;
-
-    u32* armWriteNandLocation = findOffset((u32*)current_location, size, location_sig, 1);
-	if (!armWriteNandLocation) {
-		return;
-	}
-    dbg_printf("armWriteNandLocation ");
-	dbg_hexa((u32)armWriteNandLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*armWriteNandLocation);
-    dbg_printf("\n\n");
-
-    *armWriteNandLocation = current_location;
-
-    u32* thumbWriteNandLocation = findOffset((u32*)current_location, size, location_sig, 1);
-	if (!thumbWriteNandLocation) {
-		return;
-	}
-    dbg_printf("thumbWriteNandLocation ");
-	dbg_hexa((u32)thumbWriteNandLocation);
-    dbg_printf(" : ");
-    dbg_hexa((u32)*thumbWriteNandLocation);
-    dbg_printf("\n\n");
-
-    *thumbWriteNandLocation = current_location;
-
     u32* armIrqEnableLocation = findOffset((u32*)current_location, size, location_sig, 1);
 	if (!armIrqEnableLocation) {
 		return;

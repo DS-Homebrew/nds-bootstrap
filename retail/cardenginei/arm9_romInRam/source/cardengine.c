@@ -361,39 +361,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 }*/
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-    // Send a command to the ARM7 to read the nand save
-	u32 commandNandRead = 0x025FFC01;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandRead;
-
-	waitForArm7();
-
-	sysSetCardOwner(true);	// Give Slot-1 access back to arm9
-	return true; 
+	return false;
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-	// Send a command to the ARM7 to write the nand save
-	u32 commandNandWrite = 0x025FFC02;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandWrite;
-
-	waitForArm7();
-
-	sysSetCardOwner(true);	// Give Slot-1 access back to arm9
-	return true; 
+	return false;
 }
 
 u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {

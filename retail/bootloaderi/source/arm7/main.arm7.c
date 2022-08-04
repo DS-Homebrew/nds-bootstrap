@@ -656,13 +656,14 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && consoleModel>0)
-	|| (strncmp(romTid, "UOR", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "AMC", 3) != 0
 	 && strncmp(romTid, "A8T", 3) != 0
 	 && strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
+	 && strncmp(romTid, "USK", 3) != 0
+	 && strncmp(romTid, "UXB", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {

@@ -228,7 +228,9 @@ extern void setExceptionHandler2();
 
 static inline void waitForArm7(void) {
 	IPC_SendSync(0x4);
-	while (sharedAddr[3] != (vu32)0);
+	while (sharedAddr[3] != (vu32)0) {
+		swiDelay(100);
+	}
 }
 
 #ifndef DLDI
@@ -541,44 +543,48 @@ void cardPullOut(void) {
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileRead(memory, *savFile, flash, len, -1);
-#endif
+	if (ce9->valueBits & saveOnFlashcard) {
+		fileRead(memory, *savFile, flash, len, 0);
 		return true;
+	} else {
+		// Send a command to the ARM7 to read the nand save
+		u32 commandNandRead = 0x025FFC01;
+
+		// Write the command
+		sharedAddr[0] = memory;
+		sharedAddr[1] = len;
+		sharedAddr[2] = flash;
+		sharedAddr[3] = commandNandRead;
+
+		waitForArm7();
 	}
-
-    // Send a command to the ARM7 to read the nand save
-	u32 commandNandRead = 0x025FFC01;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandRead;
-
-	waitForArm7();
+#else
+	fileRead(memory, *savFile, flash, len, 0);
+#endif
     return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileWrite(memory, *savFile, flash, len, -1);
-#endif
+	if (ce9->valueBits & saveOnFlashcard) {
+		fileWrite(memory, *savFile, flash, len, 0);
 		return true;
+	} else {
+		// Send a command to the ARM7 to write the nand save
+		u32 commandNandWrite = 0x025FFC02;
+
+		// Write the command
+		sharedAddr[0] = memory;
+		sharedAddr[1] = len;
+		sharedAddr[2] = flash;
+		sharedAddr[3] = commandNandWrite;
+
+		waitForArm7();
 	}
-
-	// Send a command to the ARM7 to write the nand save
-	u32 commandNandWrite = 0x025FFC02;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandWrite;
-
-	waitForArm7();
+#else
+	fileWrite(memory, *savFile, flash, len, 0);
+#endif
     return true; 
 }
 

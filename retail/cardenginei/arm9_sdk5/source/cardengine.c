@@ -287,14 +287,12 @@ extern void setExceptionHandler2();
 
 //#ifdef TWLSDK
 static void waitForArm7(bool ipc) {
-	if (!ipc) {
-		IPC_SendSync(0x4);
-	}
+	IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0) {
 		if (ipc) {
 			IPC_SendSync(0x4);
-			sleepMs(1);
 		}
+		swiDelay(100);
 	}
 }
 //#endif
@@ -593,46 +591,50 @@ void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef TWLSDK
-	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileRead(memory, *savFile, flash, len, -1);
-#endif
+	if (ce9->valueBits & saveOnFlashcard) {
+		fileRead(memory, *savFile, flash, len, 0);
 		return true;
+	} else {
+		// Send a command to the ARM7 to read the nand save
+		u32 commandNandRead = 0x025FFC01;
+
+		// Write the command
+		sharedAddr[0] = memory;
+		sharedAddr[1] = len;
+		sharedAddr[2] = flash;
+		sharedAddr[3] = commandNandRead;
+
+		waitForArm7(false);
 	}
-
-    // Send a command to the ARM7 to read the nand save
-	u32 commandNandRead = 0x025FFC01;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandRead;
-
-	waitForArm7(false);
+#else
+	fileRead(memory, *savFile, flash, len, 0);
+#endif
 #endif
     return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef TWLSDK
-	if (ce9->valueBits & saveOnFlashcard) {
 #ifdef DLDI
-		fileWrite(memory, *savFile, flash, len, -1);
-#endif
+	if (ce9->valueBits & saveOnFlashcard) {
+		fileWrite(memory, *savFile, flash, len, 0);
 		return true;
+	} else {
+		// Send a command to the ARM7 to write the nand save
+		u32 commandNandWrite = 0x025FFC02;
+
+		// Write the command
+		sharedAddr[0] = memory;
+		sharedAddr[1] = len;
+		sharedAddr[2] = flash;
+		sharedAddr[3] = commandNandWrite;
+
+		waitForArm7(false);
 	}
-
-	// Send a command to the ARM7 to write the nand save
-	u32 commandNandWrite = 0x025FFC02;
-
-	// Write the command
-	sharedAddr[0] = memory;
-	sharedAddr[1] = len;
-	sharedAddr[2] = flash;
-	sharedAddr[3] = commandNandWrite;
-
-	waitForArm7(false);
+#else
+	fileWrite(memory, *savFile, flash, len, 0);
+#endif
 #endif
     return true; 
 }

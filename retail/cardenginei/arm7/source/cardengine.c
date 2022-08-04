@@ -1235,12 +1235,12 @@ static inline void sdmmcHandler(void) {
 			//currentNdmaSlot = sharedAddr[3];
 			timeTillDmaLedOff = 0;
 			readOngoing = true;
-			break;
+			break;*/
 		case 0x53445752:
 			cardReadLED(true, true);
-			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], -1);
 			cardReadLED(false, true);
-			break;*/
+			break;
 	}
 }
 

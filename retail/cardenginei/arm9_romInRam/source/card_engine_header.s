@@ -323,92 +323,30 @@ cardReadRef15:
 @---------------------------------------------------------------------------------
 nand_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r3-r9,lr}
-
-	ldr		r6, cardReadRef8
-    ldr     r7, ce9location8
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_nand_read	
-    
-
-	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_read:
-	bx	r6	
-.pool
-ce9location8:
-.word   ce9
-cardReadRef8:
-.word   nandRead-ce9 
+    mov r0, #0
+	bx	lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 nand_write_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r3-r9,lr}
-
-	ldr		r6, cardReadRef9
-    ldr     r7, ce9location9
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_nand_write
-    
-
-	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_write:
-	bx	r6	
-.pool
-ce9location9:
-.word   ce9
-cardReadRef9:
-.word   nandWrite-ce9 
+    mov r0, #0
+	bx	lr
 @---------------------------------------------------------------------------------
 
 	.thumb    
 @---------------------------------------------------------------------------------
 thumb_nand_read_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, cardReadRef10
-    ldr     r7, ce9location10
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_thumb_nand_read	
-    
-
-	pop	{r1-r7, pc}
-_blx_r6_stub_thumb_nand_read:
-	bx	r6	
-.pool
-.align	4
-ce9location10:
-.word   ce9
-cardReadRef10:
-.word   nandRead-ce9 
+    mov r0, #0
+	bx	lr
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 thumb_nand_write_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, cardReadRef11
-    ldr     r7, ce9location11
-    add     r6, r6, r7
-
-	bl		_blx_r6_stub_thumb_nand_write
-    
-
-	pop	{r1-r7, pc}
-_blx_r6_stub_thumb_nand_write:
-	bx	r6	
-.pool
-.align	4
-ce9location11:
-.word   ce9
-cardReadRef11:
-.word   nandWrite-ce9 
+    mov r0, #0
+	bx	lr
 @---------------------------------------------------------------------------------
 
 	.arm
