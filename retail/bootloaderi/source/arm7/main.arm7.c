@@ -1274,6 +1274,7 @@ int arm7_main(void) {
 			errorOutput();
 		}*/
 		extern u32* lastClusterCacheUsed;
+		extern u32 clusterCache;
 		if (dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = 0x02E80000;
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
 			if (consoleModel > 0) {
@@ -1281,12 +1282,14 @@ int arm7_main(void) {
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
 				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0xB880000;
+				clusterCache += 0xB880000;
 				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
 			} else {
 				tonccpy((char*)0x02EE0000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7E0000;
 				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7E0000;
 				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0x7E0000;
+				clusterCache += 0x7E0000;
 				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			}
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);

@@ -247,10 +247,10 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 #define CLUSTER_CACHE_SIZE 0x80000 // 512K
 
 u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
+u32 clusterCache = CLUSTER_CACHE;
 #ifndef B4DS
 u32 currentClusterCacheSize = 0;
 #else
-u32 clusterCache = CLUSTER_CACHE;
 u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 #endif
 
@@ -1665,7 +1665,7 @@ void buildFatTableCache (aFile * file)
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
 #ifndef B4DS
-		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
+		&& (u32)lastClusterCacheUsed<clusterCache+CLUSTER_CACHE_SIZE)
 #else
 		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
 #endif

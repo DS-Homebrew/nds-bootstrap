@@ -1249,7 +1249,6 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const char* romTid = getRomTid(ndsHeader);
 
 	extern u8 consoleModel;
-	extern bool overlayPatch;
 
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
 	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
