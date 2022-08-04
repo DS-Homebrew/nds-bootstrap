@@ -1239,13 +1239,11 @@ int arm7_main(void) {
 
 	if (gameOnFlashcard || !isDSiWare) {
 		buildFatTableCache(romFile, !sdRead, 0);
-		tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, romFile, sizeof(aFile));
 
 		sdRead = (saveOnFlashcard ? false : dsiSD);
 
 		if (savFile->firstCluster != CLUSTER_FREE) {
 			buildFatTableCache(savFile, !sdRead, 0);
-			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
 		if (gameOnFlashcard) sdRead = false;
@@ -1680,6 +1678,9 @@ int arm7_main(void) {
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
 			tonccpy((char*)ROM_FILE_LOCATION_TWLSDK, romFile, sizeof(aFile));
 			tonccpy((char*)SAV_FILE_LOCATION_TWLSDK, savFile, sizeof(aFile));
+		} else {
+			tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, romFile, sizeof(aFile));
+			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
 		bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
