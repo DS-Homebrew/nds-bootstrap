@@ -777,7 +777,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 		patchOffsetCache.sleepChecked = true;
 	}
-	if (offset) {
+	if (!offset) {
 		return false;
 	}
 	if (patchOffsetCache.sleepFuncIsThumb) {
