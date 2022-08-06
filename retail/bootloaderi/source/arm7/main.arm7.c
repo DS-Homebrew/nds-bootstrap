@@ -1032,7 +1032,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		if (consoleModel == 0 && memcmp(ndsHeader->gameCode, "DD3", 3) == 0) {
 			// Relocate TWLCFG for Hidden Photo
 			*(u32*)0x02FFFDFC = 0x02FFD400;
-		} else {
+		} else if (*(u32*)0x02FFFDFC != 0x02FFD400) {
 			toncset((u32*)0x02FFD400, 0, 0x128);
 		}
 
