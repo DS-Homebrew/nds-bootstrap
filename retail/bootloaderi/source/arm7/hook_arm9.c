@@ -230,8 +230,8 @@ int hookNdsRetailArm9(
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
 				if (strncmp(romTid, "DD3", 3) == 0) {
-					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK+0x12000;
-					ce9->cacheSlots = (retail_CACHE_ADRESS_SIZE_TWLSDK-0x12000)/cacheBlockSize;
+					ce9->cacheAddress = 0x02000000;
+					ce9->cacheSlots = 0x4000/cacheBlockSize;
 				} else {
 					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
 					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;

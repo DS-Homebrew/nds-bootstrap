@@ -1281,7 +1281,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			// DSi: Hidden Photo (Europe/German) needs more heap space
 			u32 addr = (u32)heapPointer;
 
-			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2ED2000
+			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2ED6000
 
 			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
 			if (*(u32*)(addr+0x9C) != 0) {
@@ -1290,7 +1290,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 				}
 			}
 
-			*(u32*)(addr+0x9C) = retail_CACHE_ADRESS_START_TWLSDK+0x12000;
+			*(u32*)(addr+0x9C) = INGAME_MENU_LOCATION_TWLSDK;
 		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi

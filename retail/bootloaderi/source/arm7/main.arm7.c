@@ -267,6 +267,9 @@ static void resetMemory_ARM7(void) {
 	useTwlCfg = ((*(u8*)0x02000400 != 0) && (*(u8*)0x02000401 == 0) && (*(u8*)0x02000402 == 0) && (*(u8*)0x02000404 == 0) && (*(u8*)0x02000448 != 0));
 	twlCfgCountry = *(u8*)0x02000405;
 	twlCfgLang = *(u8*)0x02000406;
+	if (useTwlCfg) {
+		tonccpy((u8*)0x02FFD400, (u8*)0x02000400, 0x128); // Duplicate TWLCFG, in case it gets overwritten
+	}
 }
 
 void my_enableSlot1() {
@@ -971,9 +974,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
-		if (!useTwlCfg && ndsHeader->arm9destination >= 0x02000800) {
+		if (!useTwlCfg) {
 			// Reconstruct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
+			if (ndsHeader->arm9destination < 0x02000800) {
+				twlCfg = (u8*)0x02FFD400;
+			}
 			u8* personalData = (u8*)0x02FFFC80;
 			tonccpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
 			tonccpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
@@ -1003,20 +1009,29 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			dbg_printf("TWLCFG reconstructed\n");
 		}
 
-		if (ndsHeader->arm9destination >= 0x02000800) {
-			u8* twlCfg = (u8*)0x02000400;
-			u32 configFlags = useTwlCfg ? *(u32*)0x02000400 : 0x0100000F;
-			if (consoleModel < 2) {
-				if (wifiLedState == 0 || wifiLedState == 0x12) {
-					configFlags &= ~BIT(3); // Clear WiFi Enable flag
-				} else {
-					configFlags |= BIT(3);
-				}
+		u8* twlCfg = (u8*)0x02000400;
+		if (ndsHeader->arm9destination < 0x02000800) {
+			twlCfg = (u8*)0x02FFD400;
+			*(u32*)0x02FFFDFC = 0x02FFD400;
+		}
+		u32 configFlags = useTwlCfg ? (*(u32*)((u32)twlCfg)) : 0x0100000F;
+		if (consoleModel < 2) {
+			if (wifiLedState == 0 || wifiLedState == 0x12) {
+				configFlags &= ~BIT(3); // Clear WiFi Enable flag
+			} else {
+				configFlags |= BIT(3);
 			}
+		}
 
-			toncset32(twlCfg, configFlags, 1); // Config Flags
-			tonccpy(twlCfg+0x10, (u8*)0x02FFE20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
-			tonccpy(twlCfg+0x9C, (u8*)0x02FFE2F0, 1); // Parental Controls Years of Age Rating (00h..14h)
+		toncset32(twlCfg, configFlags, 1); // Config Flags
+		tonccpy(twlCfg+0x10, (u8*)0x02FFE20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
+		tonccpy(twlCfg+0x9C, (u8*)0x02FFE2F0, 1); // Parental Controls Years of Age Rating (00h..14h)
+
+		if (consoleModel == 0 && memcmp(ndsHeader->gameCode, "DD3", 3) == 0) {
+			// Relocate TWLCFG for Hidden Photo
+			*(u32*)0x02FFFDFC = 0x02FFD400;
+		} else {
+			toncset((u32*)0x02FFD400, 0, 0x128);
 		}
 
 		// Set region flag
@@ -1076,6 +1091,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			toncset((u32*)0x02FFFD60, 0, 0xA0);
 		}
 	} else {
+		toncset((u32*)0x02FFD400, 0, 0x128);
 		toncset((u32*)0x02FFFD60, 0, 0xA0);
 	}
 

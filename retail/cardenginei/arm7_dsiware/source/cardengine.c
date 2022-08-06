@@ -408,6 +408,12 @@ void returnToLoader(bool wait) {
 	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 	sharedAddr[4] = 0x57534352;
 	//IPC_SendSync(0x8);
+
+	u32 twlCfgLoc = *(u32*)0x02FFFDFC;
+	if (twlCfgLoc != 0x02000400) {
+		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
+	}
+
 	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0x8D00) == 0) {
