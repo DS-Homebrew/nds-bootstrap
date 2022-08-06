@@ -255,6 +255,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02F80000, 0x02FFD7BC); // Leave eMMC CID intact
 	memset_addrs_arm7(0x02FFD7CC, 0x02FFE000);
 	toncset((u32*)0x02FFF000, 0, 0xD60);		// clear part of EWRAM
+	toncset32((u32*)0x02FFFDFC, 0, 1);		// clear TWLCFG address
 	toncset((u32*)0x02FFFE00, 0, 0x200);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
@@ -780,6 +781,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
 		if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
 			*(u8*)0x02000406 = language;
+			*(u8*)0x02FFD406 = language;
 		}
 	}
 
