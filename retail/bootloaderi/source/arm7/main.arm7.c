@@ -73,6 +73,8 @@
 #include "value_bits.h"
 #include "loading_screen.h"
 
+#define cacheBlockSize 0x4000
+
 //#define memcpy __builtin_memcpy
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
@@ -804,7 +806,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 		}
 		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-			fileRead((char*)overlaysLocation, file, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, 0);
+			fileRead((char*)overlaysLocation, file, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize, overlaysSize + (overlaysSize % cacheBlockSize), !sdRead, 0);
 		} else {
 			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
 		}
@@ -1857,7 +1859,7 @@ int arm7_main(void) {
 			romFile->firstCluster,
 			savFile->firstCluster,
 			saveOnFlashcard,
-			0x4000,
+			cacheBlockSize,
 			extendedMemoryConfirmed,
 			ROMinRAM,
 			dsiModeConfirmed,

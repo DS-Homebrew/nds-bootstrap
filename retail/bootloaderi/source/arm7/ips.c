@@ -9,6 +9,8 @@
 #include "locations.h"
 #include "tonccpy.h"
 
+#define cacheBlockSize 0x4000
+
 extern u8 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
@@ -19,7 +21,6 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		return false;
 	}
 
-	const char* romTid = getRomTid(ndsHeader);
 	bool armPatched = false;
 
 	int ipson = 5;
@@ -50,7 +51,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			if (ROMinRAM) {
 				rombyte -= 0x8000;
 			} else if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/0x4000)*0x4000;
+				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			} else {
 				rombyte -= ndsHeader->arm9romOffset;
 				rombyte -= ndsHeader->arm9binarySize;
