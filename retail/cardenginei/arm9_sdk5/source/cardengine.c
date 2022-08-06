@@ -87,8 +87,13 @@ bool sdRead = false;
 #else
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
-int cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5];
+#ifdef TWLSDK
+u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
+int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
+#else
+u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_SDK5];
 int cacheCounter[dev_CACHE_SLOTS_16KB_SDK5];
+#endif
 int accessCounter = 0;
 
 #if ASYNCPF
@@ -377,8 +382,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	fileRead((char*)dst, *romFile, src, len, 0);
 	#endif
 #else
-	int sector = (src/ce9->cacheBlockSize);
-	u32 sectorLoc = sector*ce9->cacheBlockSize;
+	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
 
@@ -422,9 +426,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				}*/
 
 				#ifdef TWLSDK
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sectorLoc, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
 				#else
-				fileRead((char*)buffer, *romFile, sectorLoc, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 				#endif
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
@@ -468,8 +472,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 			//getSdatAddr(sector, (u32)buffer);
 
 			u32 len2 = len;
-			if ((src - sectorLoc) + len2 > ce9->cacheBlockSize) {
-				len2 = sectorLoc - src + ce9->cacheBlockSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
 			#ifdef DEBUG
@@ -479,7 +483,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 			sharedAddr[0] = dst;
 			sharedAddr[1] = len2;
-			sharedAddr[2] = buffer+src-sectorLoc;
+			sharedAddr[2] = buffer+src-sector;
 			sharedAddr[3] = commandRead;
 
 			waitForArm7();
@@ -488,22 +492,21 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
     		// Copy directly
 			/*if (isDma) {
-				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sectorLoc), dst, len2);
+				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 				while (ndmaBusy(0)) {
 					if (runSleep) {
 						sleepMs(1);
 					}
 				}
 			} else {*/
-				tonccpy(dst, (u8*)buffer+(src-sectorLoc), len2);
+				tonccpy(dst, (u8*)buffer+(src-sector), len2);
 			//}
 
 			len -= len2;
 			if (len > 0) {
 				src = src + len2;
 				dst = (u8*)(dst + len2);
-				sector = (src/ce9->cacheBlockSize);
-				sectorLoc = sector*ce9->cacheBlockSize;
+				sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 				accessCounter++;
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}

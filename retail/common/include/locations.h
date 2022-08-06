@@ -127,11 +127,14 @@
 #define dev_CACHE_ADRESS_SIZE_SDK5  0x1000000
 #define dev_CACHE_ADRESS_SIZE_TWLSDK 0xF80000
 
-#define dev_CACHE_SLOTS_8KB       0xC00
-#define dev_CACHE_SLOTS_16KB      0x600
-#define dev_CACHE_SLOTS_32KB      0x300
-#define dev_CACHE_SLOTS_8KB_SDK5  0x800
-#define dev_CACHE_SLOTS_16KB_SDK5 0x400
-#define dev_CACHE_SLOTS_32KB_SDK5 0x200
+#define dev_CACHE_SLOTS_8KB         0xC00
+#define dev_CACHE_SLOTS_16KB        0x600
+#define dev_CACHE_SLOTS_32KB        0x300
+#define dev_CACHE_SLOTS_8KB_SDK5    0x800
+#define dev_CACHE_SLOTS_8KB_TWLSDK  0x7C0
+#define dev_CACHE_SLOTS_16KB_SDK5   0x400
+#define dev_CACHE_SLOTS_16KB_TWLSDK 0x3E0
+#define dev_CACHE_SLOTS_32KB_SDK5   0x200
+#define dev_CACHE_SLOTS_32KB_TWLSDK 0x1F0
 
 #endif // LOCATIONS_H

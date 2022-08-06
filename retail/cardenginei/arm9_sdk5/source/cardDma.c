@@ -54,7 +54,7 @@ extern vu32* volatile sharedAddr;
 extern tNDSHeader* ndsHeader;
 extern aFile* romFile;
 
-extern int cacheDescriptor[];
+extern u32 cacheDescriptor[];
 extern int cacheCounter[];
 extern int accessCounter;
 
@@ -225,8 +225,7 @@ void continueCardReadDmaArm9() {
 		dst = (u8*)dmaParams[4];
 		len = dmaParams[5];
 
-		int sector = (src/ce9->cacheBlockSize);
-		u32 sectorLoc = sector*ce9->cacheBlockSize;
+		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 		#ifdef ASYNCPF
 		processAsyncCommand();
@@ -268,7 +267,7 @@ void continueCardReadDmaArm9() {
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = sectorLoc;
+				sharedAddr[2] = sector;
 				sharedAddr[3] = commandRead;
 
 				dmaReadOnArm7 = true;
@@ -308,8 +307,8 @@ void continueCardReadDmaArm9() {
         	updateDescriptor(slot, sector);	
 
         	u32 len2 = len;
-        	if ((src - sectorLoc) + len2 > ce9->cacheBlockSize) {
-        		len2 = sectorLoc - src + ce9->cacheBlockSize;
+        	if ((src - sector) + len2 > ce9->cacheBlockSize) {
+        		len2 = sector - src + ce9->cacheBlockSize;
         	}
 
         	/*if (len2 > 512) {
@@ -318,7 +317,7 @@ void continueCardReadDmaArm9() {
         	}*/
 
 			// Copy via dma
-			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sectorLoc), dst, len2);
+			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
 			currentLen = len2;
 			//currentSlot = slot;
@@ -348,12 +347,11 @@ void continueCardReadDmaArm7() {
 		/*if (ce9->valueBits & cacheDisabled) {
 			endCardReadDma();
 		} else {*/
-			int sector = (src/ce9->cacheBlockSize);
-			u32 sectorLoc = sector*ce9->cacheBlockSize;
+			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 			u32 len2 = len;
-			if ((src - sectorLoc) + len2 > ce9->cacheBlockSize) {
-				len2 = sectorLoc - src + ce9->cacheBlockSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
 			/*if (len2 > 512) {
@@ -365,7 +363,7 @@ void continueCardReadDmaArm7() {
 			vu8* buffer = getCacheAddress(getSlotForSector(sector));
 
 			// TODO Copy via dma
-			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sectorLoc), dst, len2);
+			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
 			currentLen = len2;
 
@@ -394,8 +392,7 @@ void cardSetDma (u32 * params) {
 	enableIPC_SYNC();
 
 	u32 commandRead=0x025FFB0A;
-	int sector = (src/ce9->cacheBlockSize);
-	u32 sectorLoc = sector*ce9->cacheBlockSize;
+	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
 
 	accessCounter++;  
@@ -447,7 +444,7 @@ void cardSetDma (u32 * params) {
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = sectorLoc;
+			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
 			dmaReadOnArm7 = true;
@@ -487,8 +484,8 @@ void cardSetDma (u32 * params) {
 		updateDescriptor(slot, sector);	
 
 		u32 len2 = len;
-		if ((src - sectorLoc) + len2 > ce9->cacheBlockSize) {
-			len2 = sectorLoc - src + ce9->cacheBlockSize;
+		if ((src - sector) + len2 > ce9->cacheBlockSize) {
+			len2 = sector - src + ce9->cacheBlockSize;
 		}
 
 		/*if (len2 > 512) {
@@ -497,7 +494,7 @@ void cardSetDma (u32 * params) {
 		}*/
 
 		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sectorLoc), dst, len2);
+		ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 		dmaReadOnArm9 = true;
 		currentLen = len2;
 		//currentSlot = slot;

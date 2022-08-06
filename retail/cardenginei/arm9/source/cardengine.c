@@ -93,7 +93,7 @@ bool sdRead = false;
 #else
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
-int cacheDescriptor[dev_CACHE_SLOTS_16KB];
+u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 int cacheCounter[dev_CACHE_SLOTS_16KB];
 int accessCounter = 0;
 #endif
@@ -274,8 +274,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, *romFile, src, len, 0);
 #else
-	int sector = (src/ce9->cacheBlockSize);
-	u32 sectorLoc = sector*ce9->cacheBlockSize;
+	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
 
@@ -318,7 +317,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				fileRead((char*)buffer, *romFile, sectorLoc, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -361,8 +360,8 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 			//getSdatAddr(sector, (u32)buffer);
 
 			u32 len2 = len;
-			if ((src - sectorLoc) + len2 > ce9->cacheBlockSize) {
-				len2 = sectorLoc - src + ce9->cacheBlockSize;
+			if ((src - sector) + len2 > ce9->cacheBlockSize) {
+				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
     		#ifdef DEBUG
@@ -372,7 +371,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
     
     		sharedAddr[0] = dst;
     		sharedAddr[1] = len2;
-    		sharedAddr[2] = buffer+src-sectorLoc;
+    		sharedAddr[2] = buffer+src-sector;
     		sharedAddr[3] = commandRead;
     
     		waitForArm7();
@@ -381,14 +380,14 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
     
     		// Copy directly
 			/*if (isDma) {
-				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sectorLoc), dst, len2);
+				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 				while (ndmaBusy(0)) {
 					if (runSleep) {
 						sleepMs(1);
 					}
 				}
 			} else {*/
-				tonccpy(dst, (u8*)buffer+(src-sectorLoc), len2);
+				tonccpy(dst, (u8*)buffer+(src-sector), len2);
 			//}
 
     		// Update cardi common
@@ -400,8 +399,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 			if (len > 0) {
 				src = cardStruct[0];
 				dst = (u8*)cardStruct[1];
-				sector = (src/ce9->cacheBlockSize);
-				sectorLoc = sector*ce9->cacheBlockSize;
+				sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 				accessCounter++;
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
