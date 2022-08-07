@@ -286,9 +286,9 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 	//	sleepMsEnabled = true;
 	//}
 
-	/*if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x02800000) {
+	if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x02800000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
-	} else {*/
+	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while(len > 0) {
@@ -404,7 +404,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
-	//}
+	}
 #endif
 
 	//sleepMsEnabled = false;

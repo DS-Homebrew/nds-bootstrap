@@ -199,6 +199,10 @@ int hookNdsRetailArm9(
 	) {
 		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
 	}*/
+	if (strncmp(romTid, "YV5", 3) == 0 // Dragon Quest V: Hand of the Heavenly Bride
+	) {
+		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
+	}
 	if (!(REG_SCFG_ROM & BIT(9))) {
 		ce9->valueBits |= b_dsiBios;
 	}

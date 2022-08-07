@@ -394,13 +394,13 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	/*if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x03000000) {
+	if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x03000000) {
 		#ifdef TWLSDK
 		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 		#else
 		fileRead((char*)dst, *romFile, src, len, 0);
 		#endif
-	} else {*/
+	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while(len > 0) {
@@ -515,7 +515,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
-	//}
+	}
 #endif
 
 	//sleepMsEnabled = false;
