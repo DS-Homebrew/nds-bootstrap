@@ -344,7 +344,7 @@ void continueCardReadDmaArm7() {
 		u8* dst = (u8*)dmaParams[4];
 		u32 len = dmaParams[5];
 
-		/*if (ce9->valueBits & cacheDisabled) {
+		/*if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x03000000) {
 			endCardReadDma();
 		} else {*/
 			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -401,7 +401,7 @@ void cardSetDma (u32 * params) {
 	processAsyncCommand();
 	#endif
 
-	/*if (ce9->valueBits & cacheDisabled) {
+	/*if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x03000000) {
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -409,8 +409,6 @@ void cardSetDma (u32 * params) {
 		sharedAddr[3] = commandRead;
 
 		dmaReadOnArm7 = true;
-
-		IPC_SendSync(0x4);
 	} else {*/
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
@@ -498,9 +496,9 @@ void cardSetDma (u32 * params) {
 		dmaReadOnArm9 = true;
 		currentLen = len2;
 		//currentSlot = slot;
-
-		IPC_SendSync(0x3);
 	//}
+
+	IPC_SendSync(0x3);
 }
 #else
 void cardSetDma (u32 * params) {

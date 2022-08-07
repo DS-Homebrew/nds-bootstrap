@@ -514,8 +514,6 @@ setIrqMask:
     MOV             R0, R1
     STRH            R2, [R3]
     BX              LR
-.pool
-
 
 .global enableIrqMask
 .type	enableIrqMask STT_FUNC
@@ -531,7 +529,6 @@ enableIrqMask:
     MOV             R0, R1
     STRH            R2, [R3]
     BX              LR
-.pool
 
 .global disableIrqMask
 .type	disableIrqMask STT_FUNC
@@ -547,8 +544,7 @@ disableIrqMask:
     LDRH            R1, [R7]
     STRH            R3, [R7]
     BX              LR
-.pool
-    
+
 .global resetRequestIrqMask
 .type	resetRequestIrqMask STT_FUNC
 resetRequestIrqMask:
@@ -562,6 +558,7 @@ resetRequestIrqMask:
     MOV             R0, R1
     STRH            R2, [R3]
     BX              LR
+.pool
 
 	.arm
 .global disableInterrupts
