@@ -286,7 +286,7 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x02800000) {
+	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x02800000) {
 		fileRead((char*)dst, *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache

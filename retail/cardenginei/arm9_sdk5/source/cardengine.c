@@ -394,7 +394,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) && src >= 0x02000000 && src < 0x03000000) {
+	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		#ifdef TWLSDK
 		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 		#else
