@@ -373,7 +373,50 @@ void getAsyncSector() {
       leaveCriticalSection(oldIME);*/
 //}
 
+#ifdef TWLSDK
+#ifndef DLDI
+// For testing with FS SDK functions
+/*static bool ctxInited = false;
+static const char* rompath = "";
+static const char* savepath = "";
+static const char* apFixOverlaysPath = "sdmc:/_nds/nds-bootstrap/apFixOverlays.bin";
+static u32 fsCtx[0x80/sizeof(u32)];*/
+
+// Face Training (EUR)
+/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x020F1320;
+volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x020F1470;
+volatile void (*FS_Close)(u32*) = (volatile void*)0x020F14F4;
+volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x020F15B8;
+volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x020F15E4;
+volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x020F1638;*/
+
+// Rabbids Go Home (USA)
+/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x0203C264;
+volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x0203C3FC;
+volatile void (*FS_Close)(u32*) = (volatile void*)0x0203C480;
+volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x0203C54C;
+volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x0203C578;
+volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
+#endif
+#endif
+
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
+/*#ifdef TWLSDK
+	#ifdef DLDI
+	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	#else
+	if (!ctxInited) {
+		(*FS_InitCtx)(fsCtx);
+		ctxInited = true;
+	}
+
+	(*FS_Open)(fsCtx, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? apFixOverlaysPath : rompath, 1);
+	(*FS_Seek)(fsCtx, src, 1);
+	(*FS_Read)(fsCtx, (u32)dst, len);
+	(*FS_Close)(fsCtx);
+	#endif
+#else*/
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	#ifdef TWLSDK
@@ -517,6 +560,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 #endif
+//#endif
 
 	//sleepMsEnabled = false;
 }
@@ -553,7 +597,9 @@ void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	//nocashMessage("\narm9 cardRead\n");
 	if (!flagsSet) {
 		if (!driveInitialized) {
+			//#ifndef TWLSDK
 			FAT_InitFiles(false, 0);
+			//#endif
 			driveInitialized = true;
 		}
 		if (ce9->valueBits & enableExceptionHandler) {
@@ -615,6 +661,15 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7(false);
 	}
 #else
+	/*if (!ctxInited) {
+		(*FS_InitCtx)(fsCtx);
+		ctxInited = true;
+	}
+
+	(*FS_Open)(fsCtx, savepath, 1);
+	(*FS_Seek)(fsCtx, flash, 1);
+	(*FS_Read)(fsCtx, memory, len);
+	(*FS_Close)(fsCtx);*/
 	fileRead(memory, *savFile, flash, len, 0);
 #endif
 #endif
@@ -640,6 +695,15 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7(false);
 	}
 #else
+	/*if (!ctxInited) {
+		(*FS_InitCtx)(fsCtx);
+		ctxInited = true;
+	}
+
+	(*FS_Open)(fsCtx, savepath, 1);
+	(*FS_Seek)(fsCtx, flash, 1);
+	(*FS_Write)(fsCtx, memory, len);
+	(*FS_Close)(fsCtx);*/
 	fileWrite(memory, *savFile, flash, len, 0);
 #endif
 #endif
