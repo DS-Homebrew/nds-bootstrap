@@ -115,6 +115,7 @@ u32 popFromAsyncQueueHead() {
 }
 #endif*/
 
+#ifdef ASYNCPF
 static void waitForArm7(bool ipc) {
 	extern void sleepMs(int ms);
 
@@ -129,7 +130,6 @@ static void waitForArm7(bool ipc) {
 	}
 }
 
-#ifdef ASYNCPF
 void triggerAsyncPrefetch(sector) {	
 	if(asyncSector == 0) {
 		int slot = getSlotForSector(sector);
