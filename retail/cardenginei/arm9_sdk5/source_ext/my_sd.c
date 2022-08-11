@@ -7,8 +7,6 @@
 
 extern bool isDma;
 extern void sleepMs(int ms);
-extern u32 disableInterrupts();
-extern void restoreInterrupts(u32 irq);
 
 /*! \fn DC_FlushAll()
 	\brief flush the entire data cache to memory.
@@ -86,11 +84,9 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[4] = commandRead;
 
 	IPC_SendSync(0x4);
-	u32 irq = disableInterrupts();
 	while (sharedAddr[4] == commandRead) {
 		sleepMs(1);
 	}
-	restoreInterrupts(irq);
 	return sharedAddr[4] == 0;
 }
 
@@ -116,12 +112,10 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
 
-	u32 irq = disableInterrupts();
 	while (sharedAddr[4] == commandRead) {
 		IPC_SendSync(0x4);
 		sleepMs(1);
 	}
-	restoreInterrupts(irq);
 	return sharedAddr[4] == 0;
 }
 
@@ -191,11 +185,9 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	sharedAddr[4] = commandWrite;
 
 	IPC_SendSync(0x4);
-	u32 irq = disableInterrupts();
 	while (sharedAddr[4] == commandWrite) {
 		sleepMs(1);
 	}
-	restoreInterrupts(irq);
 	return sharedAddr[4] == 0;
 }
 
