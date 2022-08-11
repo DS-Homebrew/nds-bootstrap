@@ -388,16 +388,17 @@ int hookNdsRetailArm7(
 		ce7->scfgRomBak               = REG_SCFG_ROM;
 
 		*vblankHandler = ce7->patches->vblankHandler;
+		if (ce7->patches->fifoHandler) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
-		if (ce7->patches->fifoHandler
-		&& ((strncmp(romTid, "UOR", 3) == 0)
+		if ((strncmp(romTid, "UOR", 3) == 0)
 		 || (strncmp(romTid, "UXB", 3) == 0)
 		 || (strncmp(romTid, "USK", 3) == 0)
-		|| (!gameOnFlashcard && !ROMinRAM))) {
+		|| (!gameOnFlashcard && !ROMinRAM)) {
 			//*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
 				ce7->valueBits |= b_runCardEngineCheck;
 			}
+		}
 		}
 
 		/*extern bool setDmaPatched;
