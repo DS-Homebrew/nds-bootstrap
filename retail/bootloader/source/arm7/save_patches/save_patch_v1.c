@@ -143,7 +143,7 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 	dbg_hexa((u32)cardId);
 	dbg_printf("\n");
 	u32 srcAddr = JumpTableFunc + 0xAC - vAddrOfRelocSrc + relocDestAtSharedMem;
-	u32 patchCardID = generateA7Instr(srcAddr, ce7->patches->arm7FunctionsDirect->cardId);
+	u32 patchCardID = generateA7Instr(srcAddr, ce7->patches->arm7Functions->cardId);
 	*cardId = patchCardID;
 
 	u32 anotherWramAddr = *(u32*)(JumpTableFunc + 0xD0);
