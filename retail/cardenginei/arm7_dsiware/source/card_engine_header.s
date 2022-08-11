@@ -148,15 +148,15 @@ patches:
 .word	0
 .word   0
 .word   arm7Functions
-.word   0
-.word   0
-.word   0
-.word   0
-.word   0
-.word   0
-.word   0
-.word   0
 .word   arm7FunctionsThumb
+.word   0
+.word   0
+.word   0
+.word   0
+.word   0
+.word   0
+.word   0
+.word   0
 .pool
 @---------------------------------------------------------------------------------
 
