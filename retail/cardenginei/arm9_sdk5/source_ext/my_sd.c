@@ -190,8 +190,8 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	sharedAddr[3] = 0;
 	sharedAddr[4] = commandWrite;
 
-	u32 irq = disableInterrupts();
 	IPC_SendSync(0x4);
+	u32 irq = disableInterrupts();
 	while (sharedAddr[4] == commandWrite) {
 		sleepMs(1);
 	}
