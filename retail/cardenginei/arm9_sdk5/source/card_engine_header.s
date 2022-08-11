@@ -436,7 +436,6 @@ _blx_r6_stub_callEndReadDmaThumb:
 	bx	r6
 .pool
 
-	.thumb
 .global setIrqMask
 .type	setIrqMask STT_FUNC
 setIrqMask:
@@ -469,17 +468,17 @@ enableIrqMask:
 .global disableIrqMask
 .type	disableIrqMask STT_FUNC
 disableIrqMask:
-    LDR             R7, =0x4000208
-    MOV             R2, #0
-    LDRH            R3, [R7]
-    MVN             R1, R0
-    STRH            R2, [R7]
-    LDR             R0, [R7,#8]
-    AND             R1, R0, R1
-    STR             R1, [R7,#8]
-    LDRH            R1, [R7]
-    STRH            R3, [R7]
-    BX              LR
+	LDR             R12, =0x4000208
+	MOV             R2, #0
+	LDRH            R3, [R12]
+	MVN             R1, R0
+	STRH            R2, [R12]
+	LDR             R0, [R12,#8]
+	AND             R1, R0, R1
+	STR             R1, [R12,#8]
+	LDRH            R1, [R12]
+	STRH            R3, [R12]
+	BX              LR
 
 .global resetRequestIrqMask
 .type	resetRequestIrqMask STT_FUNC
@@ -496,7 +495,6 @@ resetRequestIrqMask:
     BX              LR
 .pool
 
-	.arm
 .global disableInterrupts
 .type	disableInterrupts STT_FUNC
 disableInterrupts:
