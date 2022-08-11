@@ -345,9 +345,11 @@ static void initialize(void) {
 	}
 
 	romLocation = (char*)(((valueBits & dsiMode) || (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	#ifndef TWLSDK
 	if (valueBits & extendedMemory) {
 		romLocation = (char*)ROM_LOCATION_EXT;
 	}
+	#endif
 
 	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
