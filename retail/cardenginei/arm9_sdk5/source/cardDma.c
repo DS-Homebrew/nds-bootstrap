@@ -199,6 +199,7 @@ extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
 static u32 * dmaParams = NULL;
+#ifndef TWLSDK
 static int currentLen = 0;
 //static int currentSlot = 0;
 
@@ -371,10 +372,19 @@ void continueCardReadDmaArm7() {
 		}
 	}
 }
+#endif
 
 void cardSetDma (u32 * params) {
 	isDma = true;
 
+	#ifdef TWLSDK
+	u32 src = params[3];
+	u8* dst = (u8*)params[4];
+	u32 len = params[5];
+
+	cardRead(0, dst, src, len);
+	endCardReadDma();
+	#else
 	dmaParams = params;
 	u32 src = dmaParams[3];
 	u8* dst = (u8*)dmaParams[4];
@@ -501,6 +511,7 @@ void cardSetDma (u32 * params) {
 
 		IPC_SendSync(0x3);
 	}
+	#endif
 }
 #else
 void cardSetDma (u32 * params) {
@@ -528,7 +539,6 @@ u32 cardReadDma(u32 dma, u8* dst, u32 src, u32 len) {
 	) {
 		isDma = true;
 		if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
-			cacheFlush();
 			return true;
 		} /*else {
 			dma=4;

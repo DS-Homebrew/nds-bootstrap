@@ -910,6 +910,7 @@ void myIrqHandlerIPC(void) {
 
 	switch (IPC_GetSync()) {
 #ifndef DLDI
+#ifndef TWLSDK
 		case 0x3:
 		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
@@ -920,6 +921,7 @@ void myIrqHandlerIPC(void) {
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
 			break;
+#endif
 #endif
 		case 0x5:
 			igmReset = true;

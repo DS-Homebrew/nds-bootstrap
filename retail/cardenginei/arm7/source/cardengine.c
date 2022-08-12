@@ -1125,6 +1125,7 @@ static bool ongoingIsDma = false;
 //static int currentCmd=0, currentNdmaSlot=0;
 //static int timeTillDmaLedOff = 0;
 
+#ifndef TWLSDK
 static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
 	u32 dst = sharedAddr[0];
@@ -1195,6 +1196,7 @@ static bool resume_cardRead_arm9(void) {
         return false;    
     }
 }
+#endif
 
 static inline void sdmmcHandler(void) {
 	if (sdReadOngoing) {
@@ -1271,6 +1273,7 @@ static void runCardEngineCheck(void) {
 			if (!(valueBits & gameOnFlashcard)) {
 				sdmmcHandler();
 
+				#ifndef TWLSDK
 				if (/*sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A ||*/ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
 					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						/*u32 src = sharedAddr[2];
@@ -1290,6 +1293,7 @@ static void runCardEngineCheck(void) {
 					sharedAddr[3] = 0;
 					IPC_SendSync(0x3);
 				}*/
+				#endif
 			}
 
     		if (sharedAddr[3] == (vu32)0x026FF800) {
@@ -1568,6 +1572,7 @@ void myIrqHandlerVBlank(void) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
 	}
 
+	#ifndef TWLSDK
 	if (!(valueBits & ROMinRAM) && (valueBits & cardReadDma)) {
 		bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
 		if (wifiIrq != wifiIrqCheck) {
@@ -1586,6 +1591,7 @@ void myIrqHandlerVBlank(void) {
 			wifiIrqTimer = 0;
 		}
 	}
+	#endif
 
 	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
