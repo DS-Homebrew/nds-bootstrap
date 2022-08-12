@@ -806,10 +806,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 
 	// Load overlays into RAM
 	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
-		u32 overlaysLocation = (u32)((isSdk5(moduleParams) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-		if (consoleModel == 0 && isSdk5(moduleParams)) {
-			overlaysLocation = (u32)CACHE_ADRESS_START;
-		}
+		u32 overlaysLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;
@@ -844,7 +841,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
 	// Load ROM into RAM
-	u32 romLocation = (u32)(((consoleModel > 0 && isSdk5(moduleParams)) || dsiModeConfirmed) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	u32 romLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
 		romLocation = (u32)((moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT);
 	}
