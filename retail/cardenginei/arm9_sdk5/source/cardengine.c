@@ -422,13 +422,13 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	#ifdef TWLSDK
-	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 	#else
 	fileRead((char*)dst, *romFile, src, len, 0);
 	#endif
 #else
 	#ifdef TWLSDK
-	if (ce9->consoleModel == 0 && newOverlayOffset == 0) {
+	if (newOverlayOffset == 0) {
 		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	}
 	#endif
@@ -447,7 +447,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		#ifdef TWLSDK
-		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+		fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 		#else
 		fileRead((char*)dst, *romFile, src, len, 0);
 		#endif
@@ -481,7 +481,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				}*/
 
 				#ifdef TWLSDK
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
 				#else
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
 				#endif
