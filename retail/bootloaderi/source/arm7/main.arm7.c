@@ -664,9 +664,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	if ((strncmp(romTid, "UBR", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPP", 3) == 0 && consoleModel>0)
 	|| (strncmp(romTid, "KPF", 3) == 0 && consoleModel>0)
-	|| (strncmp(romTid, "AMC", 3) != 0
-	 && strncmp(romTid, "A8T", 3) != 0
-	 && strncmp(romTid, "UBR", 3) != 0
+	|| (strncmp(romTid, "UBR", 3) != 0
 	 && strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "USK", 3) != 0
 	 && strncmp(romTid, "UXB", 3) != 0
@@ -687,12 +685,12 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		moreMemory = (dsiWramAccess && romSize > (consoleModel==0 ? 0x00BFE000 : 0x01BFE000));
 	  }
 	}
-	if ((strncmp(romTid, "HND", 3) == 0)
+	/*if ((strncmp(romTid, "HND", 3) == 0)
 	|| (strncmp(romTid, "HNE", 3) == 0))
 	{
 		extendedMemoryConfirmed = true;
 		return extendedMemoryConfirmed;
-	}
+	}*/
 	return res;
 }
 
