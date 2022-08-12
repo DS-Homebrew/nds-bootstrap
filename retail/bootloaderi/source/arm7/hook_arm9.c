@@ -241,7 +241,6 @@ int hookNdsRetailArm9(
 					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
 				}
 			} else {
-				runOverlayCheck = (!dsiModeConfirmed && overlayPatch);
 				ce9->romLocation = CACHE_ADRESS_START;
 				ce9->cacheAddress = CACHE_ADRESS_START;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_SDK5/cacheBlockSize;
@@ -253,7 +252,6 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress = CACHE_ADRESS_START_low;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
 			} else {
-				runOverlayCheck = ((consoleModel > 0 || !dsiModeConfirmed) && overlayPatch);
 				ce9->romLocation = (consoleModel>0&&dsiMode ? dev_CACHE_ADRESS_START_SDK5 : CACHE_ADRESS_START);
 				ce9->cacheAddress = ce9->romLocation;
 				if (consoleModel > 0 /*&&!gbaRomFound*/) {
