@@ -811,7 +811,13 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 			overlaysLocation = (u32)CACHE_ADRESS_START;
 		}
 		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-			fileRead((char*)overlaysLocation, file, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize, overlaysSize + (overlaysSize % cacheBlockSize), !sdRead, 0);
+			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+			u32 newOverlaysSize = 0;
+			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+				newOverlaysSize += cacheBlockSize;
+			}
+
+			fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize, !sdRead, 0);
 		} else {
 			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
 		}
@@ -1911,8 +1917,14 @@ int arm7_main(void) {
 					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster);
 					buildFatTableCache(apFixOverlaysFile, !sdRead, 0);
 
-					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/0x4000)*0x4000, overlaysSize + (overlaysSize % 0x4000), !sdRead, -1);	// Write AP-fixed overlays to a file
-					toncset((char*)CACHE_ADRESS_START, 0, overlaysSize + (overlaysSize % 0x4000));
+					u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+					u32 newOverlaysSize = 0;
+					for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+						newOverlaysSize += cacheBlockSize;
+					}
+
+					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize, !sdRead, -1);	// Write AP-fixed overlays to a file
+					toncset((char*)CACHE_ADRESS_START, 0, newOverlaysSize);
 
 					dbg_printf("Overlays cached to a file\n");
 				}
