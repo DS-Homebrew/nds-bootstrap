@@ -1789,6 +1789,9 @@ int arm7_main(void) {
 			ce9size = 0x2000;
 			if (moreMemory || !dsiWramAccess) {
 				ce9Location = (moduleParams->sdk_version >= 0x2008000) ? CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM : CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM;
+				if ((u32)ndsHeader->arm9destination == 0x02004000 && moduleParams->sdk_version < 0x2008000) {
+					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION1;
+				}
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, ce9size);
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION_DSI_WRAM,ce9Location,ce9size);
 			} else {
