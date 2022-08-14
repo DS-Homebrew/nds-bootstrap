@@ -334,8 +334,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 				REG_SCFG_EXT = 0x8300C000;
                 REG_SCFG_EXT |= BIT(16);	// NDMA
 				if (!extendedMemoryConfirmed) {
-					*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = REG_SCFG_EXT;
-					*(u16*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 8) = REG_SCFG_CLK;
+					*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 8) = REG_SCFG_EXT;
+					*(u16*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0xC) = REG_SCFG_CLK;
 				}
 				if (extendedMemoryConfirmed && moreMemory) {
 					for (int i = 0; i < 16; i++) {

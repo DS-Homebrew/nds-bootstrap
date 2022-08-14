@@ -42,6 +42,7 @@ typedef enum {
 
 extern struct IgmText igmText;
 
+extern u32* waitSysCyclesLoc;
 extern u32 scfgExtBak;
 extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;
@@ -483,6 +484,14 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 				}
 				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
+					if (waitSysCyclesLoc) {
+						if (*(u16*)((u32)waitSysCyclesLoc+2) == 0xE92D) {
+							waitSysCyclesLoc[1] = (REG_SCFG_CLK & BIT(1)) ? 0xE1A00100 : 0xE1A00080;
+						} else {
+							u16* offsetThumb = (u16*)waitSysCyclesLoc;
+							offsetThumb[1] = (REG_SCFG_CLK & BIT(1)) ? 0x0080 : 0x0040;
+						}
+					}
 					break;
 				case OPTIONS_VRAM_MODE:
 					REG_SCFG_EXT ^= BIT(13);

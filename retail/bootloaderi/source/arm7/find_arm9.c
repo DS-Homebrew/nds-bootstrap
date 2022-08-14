@@ -199,6 +199,10 @@ static const u32 cartReadSignatureMid[4]        = {0xE3500011, 0x8A000009, 0xE35
 static const u16 cartReadSignatureStartThumb[1] = {0xB5F0};
 static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD304};
 
+// Wait system cycles (SDK 5)
+static const u32 waitSysCyclesSignature[3]      = {0xE92D4008, 0xE1A00080, 0xE3500010};
+static const u16 waitSysCyclesSignatureThumb[3] = {0xB508, 0x0040, 0x2810};
+
 // Threads management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
 static const u16 sleepSignatureThumb2[4]        = {0x4010, 0xE92D, 0xD030, 0xE24D}; // sdk2
@@ -2248,6 +2252,30 @@ u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb) {
 
 	dbg_printf("\n");
 	return startOffset;
+}
+
+u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findWaitSysCyclesOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		waitSysCyclesSignature, 3
+	);
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			waitSysCyclesSignatureThumb, 3
+		);
+	}
+
+	if (offset) {
+		dbg_printf("Wait system cycles found\n");
+	} else {
+		dbg_printf("Wait system cycles not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 /*u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

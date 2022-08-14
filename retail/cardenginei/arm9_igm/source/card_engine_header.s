@@ -4,6 +4,7 @@
 	.global _start
 	.global igmText
 	.global sharedAddr
+	.global waitSysCyclesLoc
 	.global scfgExtBak
 	.global scfgClkBak
 	.align	4
@@ -21,6 +22,8 @@ igmText:
 .align 4
 
 sharedAddr:
+.word 0
+waitSysCyclesLoc:
 .word 0
 scfgExtBak:
 .word 0

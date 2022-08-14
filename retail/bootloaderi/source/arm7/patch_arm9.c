@@ -11,6 +11,9 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
+#include "igm_text.h"
+#include "locations.h"
+
 extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u16 a9ScfgRom;
@@ -1202,6 +1205,37 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_printf("\n\n");
 }*/
 
+static void patchWaitSysCycles(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (!isSdk5(moduleParams) || ndsHeader->unitCode > 0) {
+		return;
+	}
+
+	u32* offset = patchOffsetCache.waitSysCyclesOffset;
+	if (!patchOffsetCache.waitSysCyclesOffset) {
+		offset = findWaitSysCyclesOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.waitSysCyclesOffset = offset;
+		}
+	}
+
+	if (boostCpu) {
+		if (offset[1] == 0xE1A00080) {
+			offset[1] = 0xE1A00100; // mov r0, r0, lsl#2
+		} else {
+			u16* offsetThumb = (u16*)offset;
+			offsetThumb[1] = 0x0080; // lsls r0, r0, #2
+		}
+
+		if (dsiModeConfirmed) {	
+			*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)offset;
+		}
+	}
+
+	dbg_printf("waitSysCycles location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+}
+
 /*u32* patchLoHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
 	u32* heapPointer = NULL;
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
@@ -2150,6 +2184,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);
+
+	patchWaitSysCycles(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();
