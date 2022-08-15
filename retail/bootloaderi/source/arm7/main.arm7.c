@@ -902,12 +902,12 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		toncset((char*)IMAGES_LOCATION, 0, 0x8000);
 		toncset((char*)IMAGES_LOCATION+0x8000, 0xFF, 0x8000);
 		u32 offsetEnd = (romSize > (romSizeLimit-0x400000)+0x8000) ? (romSizeLimit-0x400000)+0x8000 : romSize;
-		for (u32 offset = baseRomSize+0x88; offset < offsetEnd; offset += 0x8000) { // Load more data beyond ROM size in header (Some ROM hacks may need this)
+		for (u32 offset = baseRomSize+(usesCloneboot ? 0x88 : 0); offset < offsetEnd; offset += 0x8000) { // Load more data beyond ROM size in header (Some ROM hacks may need this)
 			toncset((char*)IMAGES_LOCATION+0x10000, 0, 0x8000); // Clear leftover data
 			fileRead((char*)IMAGES_LOCATION+0x10000, *romFile, offset, 0x8000, !sdRead, 0);
 			if ((memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION, 0x8000) != 0) && (memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION+0x8000, 0x8000) != 0)) {
 				// Data is found
-				tonccpy((char*)(romLocation-0x8000)+offset, (char*)IMAGES_LOCATION+0x10000, 0x8000);
+				tonccpy((char*)(romLocation-romOffset)+offset, (char*)IMAGES_LOCATION+0x10000, 0x8000);
 			} else {
 				// Padding detected
 				break;
