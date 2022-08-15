@@ -1209,10 +1209,6 @@ static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	u32* offset = patchOffsetCache.waitSysCyclesOffset;
 
 	if (isSdk5(moduleParams)) {
-		if (ndsHeader->unitCode > 0) {
-			return;
-		}
-
 		if (!patchOffsetCache.waitSysCyclesOffset) {
 			offset = findWaitSysCyclesOffset(ndsHeader);
 			if (offset) {
@@ -1220,12 +1216,29 @@ static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 		}
 
-		if (boostCpu) {
-			if (offset[1] == 0xE1A00080) {
+		if ((ndsHeader->unitCode == 0 && (boostCpu || dsiModeConfirmed)) || (ndsHeader->unitCode > 0 && boostCpu && !dsiModeConfirmed)) {
+			if (offset[0] == 0xE92D4008) {
 				offset[1] = 0xE1A00100; // mov r0, r0, lsl#2
+				if (ndsHeader->unitCode > 0) {
+					offset[2] = 0xE1A00000; // nop
+					offset[3] = 0xE1A00000; // nop
+					offset[4] = 0xE1A00000; // nop
+					offset[5] = 0xE1A00000; // nop
+					offset[6] = 0xE1A00000; // nop
+					offset[7] = 0xE1A00000; // nop
+				}
 			} else {
 				u16* offsetThumb = (u16*)offset;
 				offsetThumb[1] = 0x0080; // lsls r0, r0, #2
+				if (ndsHeader->unitCode > 0) {
+					offsetThumb[2] = 0x46C0; // nop
+					offsetThumb[3] = 0x46C0; // nop
+					offsetThumb[4] = 0x46C0; // nop
+					offsetThumb[5] = 0x46C0; // nop
+					offsetThumb[6] = 0x46C0; // nop
+					offsetThumb[7] = 0x46C0; // nop
+					offsetThumb[8] = 0x46C0; // nop
+				}
 			}
 
 			if (dsiModeConfirmed) {	
@@ -1246,7 +1259,7 @@ static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		}
 	}
 
-	if (boostCpu) {
+	if (boostCpu || dsiModeConfirmed) {
 		offset[0] = 0xE59F3000; // ldr r3, =waitSysCycles
 		offset[1] = 0xE12FFF13; // bx r3
 		offset[2] = (u32)ce9->patches->waitSysCycles;

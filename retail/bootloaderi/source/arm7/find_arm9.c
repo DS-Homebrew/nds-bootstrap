@@ -203,8 +203,10 @@ static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD30
 static const u32 waitCpuCyclesSignature[3] = {0xE2500004, 0x2AFFFFFD, 0xE12FFF1E};
 
 // Wait system cycles (SDK 5)
-static const u32 waitSysCyclesSignature[3]      = {0xE92D4008, 0xE1A00080, 0xE3500010};
-static const u16 waitSysCyclesSignatureThumb[3] = {0xB508, 0x0040, 0x2810};
+static const u32 waitSysCyclesSignature[3]         = {0xE92D4008, 0xE1A00080, 0xE3500010};
+static const u32 waitSysCyclesSignatureTwl[3]      = {0xE92D4008, 0xE59F1028, 0xE1D110B0};
+static const u16 waitSysCyclesSignatureThumb[3]    = {0xB508, 0x0040, 0x2810};
+static const u16 waitSysCyclesSignatureTwlThumb[3] = {0xB508, 0x4907, 0x2201};
 
 // Threads management  
 static const u32 sleepSignature2[4]        = {0xE92D4010, 0xE24DD030, 0xE1A04000, 0xE28D0004}; // sdk2
@@ -2278,14 +2280,21 @@ u32* findWaitCpuCyclesOffset(const tNDSHeader* ndsHeader) {
 u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findWaitSysCyclesOffset:\n");
 
+	const u32* waitSysCyclesSignatureFind = waitSysCyclesSignature;
+	const u16* waitSysCyclesSignatureThumbFind = waitSysCyclesSignatureThumb;
+	if (ndsHeader->unitCode > 0) {
+		waitSysCyclesSignatureFind = waitSysCyclesSignatureTwl;
+		waitSysCyclesSignatureThumbFind = waitSysCyclesSignatureTwlThumb;
+	}
+
 	u32* offset = findOffset(
 		(u32*)ndsHeader->arm9destination, iUncompressedSize,
-		waitSysCyclesSignature, 3
+		waitSysCyclesSignatureFind, 3
 	);
 	if (!offset) {
 		offset = (u32*)findOffsetThumb(
 			(u16*)ndsHeader->arm9destination, iUncompressedSize,
-			waitSysCyclesSignatureThumb, 3
+			waitSysCyclesSignatureThumbFind, 3
 		);
 	}
 
