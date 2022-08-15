@@ -199,6 +199,9 @@ static const u32 cartReadSignatureMid[4]        = {0xE3500011, 0x8A000009, 0xE35
 static const u16 cartReadSignatureStartThumb[1] = {0xB5F0};
 static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD304};
 
+// Wait CPU cycles (SDK 1-4)
+static const u32 waitCpuCyclesSignature[3] = {0xE2500004, 0x2AFFFFFD, 0xE12FFF1E};
+
 // Wait system cycles (SDK 5)
 static const u32 waitSysCyclesSignature[3]      = {0xE92D4008, 0xE1A00080, 0xE3500010};
 static const u16 waitSysCyclesSignatureThumb[3] = {0xB508, 0x0040, 0x2810};
@@ -2252,6 +2255,24 @@ u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb) {
 
 	dbg_printf("\n");
 	return startOffset;
+}
+
+u32* findWaitCpuCyclesOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findWaitCpuCyclesOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		waitCpuCyclesSignature, 3
+	);
+
+	if (offset) {
+		dbg_printf("Wait CPU cycles found\n");
+	} else {
+		dbg_printf("Wait CPU cycles not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader) {

@@ -18,7 +18,7 @@ typedef struct cardengineArm9Patches {
     u32* nand_read_arm9;
     u32* nand_write_arm9;
     u32* cardStructArm9;
-    u32* card_pull; // Unused
+    u32* waitSysCycles;
     u32* cart_read;
     u32* cacheFlushRef;
     u32* cardEndReadDmaRef;

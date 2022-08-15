@@ -73,7 +73,7 @@ patches:
 .word   nand_read_arm9
 .word   nand_write_arm9
 .word	cardStructArm9
-.word   card_pull
+.word   waitSysCycles
 .word	cart_read
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
@@ -241,9 +241,22 @@ card_pull_out_arm9:
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
-card_pull:
+waitCpuCycles:
 @---------------------------------------------------------------------------------
-	bx      lr
+	SUBS            R0, R0, #4
+	BCS             waitCpuCycles
+	BX              LR
+
+@---------------------------------------------------------------------------------
+waitSysCycles:
+@---------------------------------------------------------------------------------
+	STMFD           SP!, {R3,LR}
+	MOV             R0, R0,LSL#2
+	CMP             R0, #0x10
+	LDMLSFD         SP!, {R3,PC}
+	SUB             R0, R0, #0x10
+	BL              waitCpuCycles
+	LDMFD           SP!, {R3,PC}
 
 @---------------------------------------------------------------------------------
 cart_read:

@@ -85,6 +85,7 @@ u32* findFileIoFunc2Offset(const u32* fileIoFuncOffset);
 u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findCartExistOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb);
+u32* findWaitCpuCyclesOffset(const tNDSHeader* ndsHeader);
 u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader);
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);

@@ -1205,33 +1205,58 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_printf("\n\n");
 }*/
 
-static void patchWaitSysCycles(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (!isSdk5(moduleParams) || ndsHeader->unitCode > 0) {
+static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.waitSysCyclesOffset;
+
+	if (isSdk5(moduleParams)) {
+		if (ndsHeader->unitCode > 0) {
+			return;
+		}
+
+		if (!patchOffsetCache.waitSysCyclesOffset) {
+			offset = findWaitSysCyclesOffset(ndsHeader);
+			if (offset) {
+				patchOffsetCache.waitSysCyclesOffset = offset;
+			}
+		}
+
+		if (boostCpu) {
+			if (offset[1] == 0xE1A00080) {
+				offset[1] = 0xE1A00100; // mov r0, r0, lsl#2
+			} else {
+				u16* offsetThumb = (u16*)offset;
+				offsetThumb[1] = 0x0080; // lsls r0, r0, #2
+			}
+
+			if (dsiModeConfirmed) {	
+				*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)offset;
+			}
+		}
+
+		dbg_printf("waitSysCycles location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
 		return;
 	}
 
-	u32* offset = patchOffsetCache.waitSysCyclesOffset;
 	if (!patchOffsetCache.waitSysCyclesOffset) {
-		offset = findWaitSysCyclesOffset(ndsHeader);
+		offset = findWaitCpuCyclesOffset(ndsHeader);
 		if (offset) {
 			patchOffsetCache.waitSysCyclesOffset = offset;
 		}
 	}
 
 	if (boostCpu) {
-		if (offset[1] == 0xE1A00080) {
-			offset[1] = 0xE1A00100; // mov r0, r0, lsl#2
-		} else {
-			u16* offsetThumb = (u16*)offset;
-			offsetThumb[1] = 0x0080; // lsls r0, r0, #2
-		}
+		offset[0] = 0xE59FC000; // ldr r12, =waitSysCycles
+		offset[1] = 0xE12FFF1C; // bx r12
+		offset[2] = (u32)ce9->patches->waitSysCycles;
 
 		if (dsiModeConfirmed) {	
-			*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)offset;
+			*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)ce9->patches->waitSysCycles;
 		}
 	}
 
-	dbg_printf("waitSysCycles location : ");
+	dbg_printf("waitCpuCycles location : ");
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
@@ -1737,7 +1762,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
-    ce9->patches->card_pull = (u32*)((u32)ce9->patches->card_pull - default_location + current_location);
+    ce9->patches->waitSysCycles = (u32*)((u32)ce9->patches->waitSysCycles - default_location + current_location);
     ce9->patches->cart_read = (u32*)((u32)ce9->patches->cart_read - default_location + current_location);
     ce9->patches->cacheFlushRef = (u32*)((u32)ce9->patches->cacheFlushRef - default_location + current_location);
     ce9->patches->cardEndReadDmaRef = (u32*)((u32)ce9->patches->cardEndReadDmaRef - default_location + current_location);
@@ -2185,7 +2210,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);
 
-	patchWaitSysCycles(ndsHeader, moduleParams);
+	patchWaitSysCycles(ce9, ndsHeader, moduleParams);
+
+	if (strcmp(romTid, "ASME") == 0 && boostCpu) {
+		*(u32*)0x0205E520 = 0x332340*2;
+	}
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();
