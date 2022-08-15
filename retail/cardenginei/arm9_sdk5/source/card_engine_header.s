@@ -335,7 +335,6 @@ thumb_card_irq_enable:
 
 	bl	thumb_blx_r6_stub2
 	pop	{r1-r7, pc}
-	bx  lr
 thumb_blx_r6_stub2:
 	bx	r6
 .pool

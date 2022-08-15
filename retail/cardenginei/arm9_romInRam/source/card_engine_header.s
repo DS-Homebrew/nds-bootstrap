@@ -153,7 +153,6 @@ thumb_card_read_arm9:
 	pop	{r3-r7, pc}
 _blx_r6_stub_thumb_card_read:
 	bx	r6	
-.pool
 .align	4
 ce9location2:
 .word   ce9
@@ -187,7 +186,6 @@ card_dma_arm9:
 	ldmfd   sp!, {r3-r9,pc}
 _blx_r6_stub_card_read_dma:
 	bx	r6	
-.pool
 ce9location4:
 .word   ce9
 cardReadRef4:
@@ -209,7 +207,6 @@ card_set_dma_arm9:
 	ldmfd   sp!, {r1-r11,pc}
 _blx_r6_stub_card_set_dma:
 	bx	r6	
-.pool
 ce9location14:
 .word   ce9
 cardReadRef14:
@@ -233,7 +230,6 @@ card_pull_out_arm9:
 @	bx      lr
 @_blx_r6_stub_card_pull_out:
 @	bx	r6
-@.pool
 @ce9location5:
 @.word   ce9
 @cardPullOutRef:
@@ -272,7 +268,6 @@ cart_read:
 	ldmfd   sp!, {r4-r7,pc}
 _blx_r6_stub_slot2_read:
 	bx	r6
-.pool
 ce9locationS2R:
 .word   ce9
 cardReadRefS2R:
@@ -302,7 +297,6 @@ thumb_card_dma_arm9:
     pop	{r3-r7, pc}
 _blx_r6_stub_thumb_card_read_dma:
 	bx	r6	
-.pool
 .align	4
 ce9location7:
 .word   ce9
@@ -324,7 +318,6 @@ thumb_card_set_dma_arm9:
     pop	{r1-r7, pc}
 _blx_r6_stub_thumb_card_set_dma:
 	bx	r6	
-.pool
 .align	4
 ce9location15:
 .word   ce9
@@ -335,12 +328,6 @@ cardReadRef15:
 	.arm
 @---------------------------------------------------------------------------------
 nand_read_arm9:
-@---------------------------------------------------------------------------------
-    mov r0, #0
-	bx	lr
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
 nand_write_arm9:
 @---------------------------------------------------------------------------------
     mov r0, #0
@@ -350,12 +337,6 @@ nand_write_arm9:
 	.thumb    
 @---------------------------------------------------------------------------------
 thumb_nand_read_arm9:
-@---------------------------------------------------------------------------------
-    mov r0, #0
-	bx	lr
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
 thumb_nand_write_arm9:
 @---------------------------------------------------------------------------------
     mov r0, #0
@@ -379,7 +360,6 @@ card_irq_enable:
 	bx  lr
 _blx_r3_stub2:
 	bx	r3
-.pool
 ce9locationIrq:
 .word   ce9
 cardReadRefIrq:
@@ -398,11 +378,9 @@ thumb_card_irq_enable:
 
 	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
-	bx  lr
 thumb_blx_r3_stub2:
 	bx	r3
-.pool
-.align	4
+@.align	4
 ce9locationTIrq:
 .word   ce9
 cardReadRefTIrq:
@@ -422,7 +400,6 @@ thumb_reset_arm9:
 	pop	{r2-r7, pc}
 thumb_blx_r3_stub3:
 	bx	r3
-.pool
 .align	4
 ce9locationTReset:
 .word   ce9
@@ -446,7 +423,6 @@ pdash_read:
     bx      lr
 _blx_r6_stub_pdash:
 	bx	r6	
-.pool     
 ce9location12:
 .word   ce9
 cardReadRef12:
@@ -480,7 +456,6 @@ thumb_cart_read:
 	bx      r3
 _blx_r6_stub_thumb_slot2_read:
 	bx	r6	
-.pool
 .align	4
 ce9locationTS2R:
 .word   ce9
@@ -529,7 +504,6 @@ arm9exit:
 	pop  	{lr}
 	bx  lr
     
-.pool
 ce9location13:
 .word   ce9
 cardReadRef13V:
@@ -552,7 +526,6 @@ reset_arm9:
 	ldmfd   sp!, {r2-r11,pc}
 _blx_r6_stub_reset:
 	bx	r6	
-.pool
 ce9locationRes:
 .word   ce9
 cardReadRefRes:
