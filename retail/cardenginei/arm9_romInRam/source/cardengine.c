@@ -48,6 +48,7 @@
 #define a7HaltPatched BIT(9)
 #define slowSoftReset BIT(10)
 #define softResetMb BIT(13)
+#define cloneboot BIT(14)
 
 //extern void user_exception(void);
 
@@ -213,7 +214,7 @@ void cardSetDma(u32 * params) {
 			}
 		}
 	} else {
-		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+		u32 newSrc = (u32)(ce9->romLocation-romMap[0][0])+src;
 		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 			newSrc -= *(u32*)0x02FFE1CC;
 		}
@@ -254,8 +255,8 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
 		{
 			// new dma method
-			cacheFlush();
 			if (!(ce9->valueBits & isSdk5)) {
+				cacheFlush();
 				cardSetDma(NULL);
 			}
             return true;
@@ -342,7 +343,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 		}
 	} else {
-		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+		u32 newSrc = (u32)(ce9->romLocation-romMap[0][0])+src;
 		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
 			newSrc -= *(u32*)0x02FFE1CC;
 		}
@@ -714,6 +715,14 @@ u32 myIrqEnable(u32 irq) {
 			} else if (ce9->valueBits & eSdk2) {
 				romMap[0][2] -= 0x22000;
 				romMap[0][3] -= 0x22000;
+			}
+		}
+		if (!(ce9->valueBits & cloneboot)) {
+			for (int i = 0; i < 4; i++) {
+				for (int i2 = 0; i2 < 2; i2++) {
+					romMap[i][i2] -= 0x8000;
+					romMap[i][i2] += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+				}
 			}
 		}
 		flagsSetOnce = true;

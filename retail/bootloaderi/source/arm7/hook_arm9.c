@@ -25,6 +25,7 @@
 #define b_dsiBios BIT(11)
 #define b_asyncCardRead BIT(12)
 #define b_softResetMb BIT(13)
+#define b_cloneboot BIT(14)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -168,7 +169,8 @@ int hookNdsRetailArm9(
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK 5
 	u8 enableExceptionHandler,
-	u8 consoleModel
+	u8 consoleModel,
+	bool usesCloneboot
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
@@ -184,6 +186,9 @@ int hookNdsRetailArm9(
 	}
 	if (extendedMemory) {
 		ce9->valueBits |= b_extendedMemory;
+	}
+	if (moduleParams->sdk_version < 0x2008000) {
+		ce9->valueBits |= b_eSdk2;
 	}
 	if (dsiMode) {
 		ce9->valueBits |= b_dsiMode; // SDK 5
@@ -211,6 +216,9 @@ int hookNdsRetailArm9(
 	}
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
+	}
+	if (usesCloneboot) {
+		ce9->valueBits |= b_cloneboot;
 	}
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
@@ -286,8 +294,6 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
-	} else if (moduleParams->sdk_version < 0x2008000) {
-		ce9->valueBits |= b_eSdk2;
 	}
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;

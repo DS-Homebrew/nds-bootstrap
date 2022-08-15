@@ -653,7 +653,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
 	/*dbg_printf("Console model: ");
 	dbg_hexa(consoleModel);
 	dbg_printf("\nromTid: ");
@@ -672,6 +672,10 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		u32 romSize = (baseRomSize-0x8000)+0x88;
+		if (!usesCloneboot) {
+			romSize = (baseRomSize - ndsHeader->arm9binarySize);
+			romSize -= ndsHeader->arm9romOffset;
+		}
 		res = ((dsiModeConfirmed && consoleModel>0 && ROMsupportsDsiMode(ndsHeader) && ((u32)dsiHeader->arm9iromOffset-0x8000)+ioverlaysSize <= 0x00F80000)
 			|| (isSdk5(moduleParams) && consoleModel>0 && romSize <= 0x01000000)
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel>0 && romSize <= 0x01800000)
@@ -777,7 +781,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language; //*(u8*)((u32)ndsHeader - 0x11C) = language;
-		if (ROMsupportsDsiMode(ndsHeader) && ndsHeader->arm9destination >= 0x02000800) {
+		if (ROMsupportsDsiMode(ndsHeader) && (u32)ndsHeader->arm9destination >= 0x02000800) {
 			*(u8*)0x02000406 = language;
 			*(u8*)0x02FFD406 = language;
 		}
@@ -830,22 +834,28 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 	}
 }
 
-static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file) {
+static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file, const bool usesCloneboot) {
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-0x8000), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
+	u32 romOffset = usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
 }
 
-static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile) {
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
 	// Load ROM into RAM
 	u32 romLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
 		romLocation = (u32)((moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT);
 	}
 
-	u16 romOffset = 0x8000;
+	u32 romOffset = 0x8000;
 	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
+	if (!usesCloneboot) {
+		romOffset = ndsHeader->arm9romOffset + ndsHeader->arm9binarySize;
+		romSizeEdit = (baseRomSize - ndsHeader->arm9binarySize);
+		romSizeEdit -= ndsHeader->arm9romOffset;
+	}
 	u32 romSizeLimit = (consoleModel==0 ? 0x00C00000 : 0x01C00000);
 	if (extendedMemoryConfirmed) {
 		romSizeLimit -= 0x2000;
@@ -1678,8 +1688,15 @@ int arm7_main(void) {
 			NTR_BIOS();
 		}
 
+		u32 clonebootFlag = 0;
+		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
+		bool usesCloneboot = (clonebootFlag == 0x16361);
+		if (usesCloneboot) {
+			dbg_printf("Cloneboot detected\n");
+		}
+
 		// If possible, set to load ROM into RAM
-		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams);
+		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot);
 
 		nocashMessage("Trying to patch the card...\n");
 
@@ -1814,10 +1831,6 @@ int arm7_main(void) {
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
 
-		u32 clonebootFlag = 0;
-		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
-		bool usesCloneboot = (clonebootFlag == 0x16361);
-
 		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
@@ -1887,7 +1900,8 @@ int arm7_main(void) {
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(romTid),
-			consoleModel
+			consoleModel,
+			usesCloneboot
 		);
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
@@ -1901,16 +1915,16 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile);
+			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile, usesCloneboot);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile);
+				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile, usesCloneboot);
 			}
 		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
 				dbg_printf("AP-fix applied\n");
 				if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && overlaysInRam) {
 					aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;

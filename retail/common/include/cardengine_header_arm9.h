@@ -83,6 +83,7 @@ typedef struct cardengineArm9 {
 		11: dsiBios
 		12: asyncCardRead
 		13: softResetMb
+		14: cloneboot
 	*/
     u32 overlaysSize;
 	u32 consoleModel;

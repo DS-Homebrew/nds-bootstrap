@@ -16,7 +16,7 @@ extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
 extern bool overlaysInRam;
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool isSdk5, bool ROMinRAM) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
@@ -48,7 +48,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			} else if (consoleModel == 0 && isSdk5) {
 				rombyte = (void*)CACHE_ADRESS_START;
 			}
-			if (ROMinRAM) {
+			if (ROMinRAM && usesCloneboot) {
 				rombyte -= 0x8000;
 			} else if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
