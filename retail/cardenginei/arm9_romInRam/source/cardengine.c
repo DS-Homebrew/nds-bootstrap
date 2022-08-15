@@ -712,8 +712,8 @@ u32 myIrqEnable(u32 irq) {
 					}
 				}
 			} else if (ce9->valueBits & eSdk2) {
-				romMap[0][2] -= 0x20000;
-				romMap[0][3] -= 0x20000;
+				romMap[0][2] -= 0x22000;
+				romMap[0][3] -= 0x22000;
 			}
 		}
 		flagsSetOnce = true;

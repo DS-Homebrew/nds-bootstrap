@@ -850,7 +850,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	if (extendedMemoryConfirmed) {
 		romSizeLimit -= 0x2000;
 		u32 romSizeLimitTilA7 = ((isSdk5(moduleParams) && ndsHeader->unitCode > 0) ? 0x00BFE000 : 0x003FE000);
-		u32 romIncr = ((moduleParams->sdk_version < 0x2008000) ? 0x40000 : 0x20000);
+		u32 romIncr = ((moduleParams->sdk_version < 0x2008000) ? 0x42000 : 0x20000);
 		if (isSdk5(moduleParams) && ndsHeader->unitCode == 0) {
 			romIncr -= 0x1000;
 		}
@@ -1787,9 +1787,9 @@ int arm7_main(void) {
 			ce9size = 0x2000;
 			if (moreMemory || !dsiWramAccess) {
 				ce9Location = (moduleParams->sdk_version >= 0x2008000) ? CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM : CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM;
-				if ((u32)ndsHeader->arm9destination == 0x02004000 && moduleParams->sdk_version < 0x2008000) {
+				/*if ((u32)ndsHeader->arm9destination == 0x02004000 && moduleParams->sdk_version < 0x2008000) {
 					ce9Location = CARDENGINEI_ARM9_CACHED_LOCATION1;
-				}
+				}*/
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, ce9size);
 				relocate_ce9(CARDENGINEI_ARM9_LOCATION_DSI_WRAM,ce9Location,ce9size);
 			} else {
@@ -1805,7 +1805,9 @@ int arm7_main(void) {
 			}
 		}
 
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
+		if (!extendedMemoryConfirmed) {
+			toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
+		}
 
 		if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
