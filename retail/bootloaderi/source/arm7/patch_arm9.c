@@ -1247,8 +1247,8 @@ static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 
 	if (boostCpu) {
-		offset[0] = 0xE59FC000; // ldr r12, =waitSysCycles
-		offset[1] = 0xE12FFF1C; // bx r12
+		offset[0] = 0xE59F3000; // ldr r3, =waitSysCycles
+		offset[1] = 0xE12FFF13; // bx r3
 		offset[2] = (u32)ce9->patches->waitSysCycles;
 
 		if (dsiModeConfirmed) {	
