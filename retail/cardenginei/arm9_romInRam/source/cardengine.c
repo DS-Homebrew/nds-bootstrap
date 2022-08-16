@@ -368,7 +368,6 @@ void myIrqHandlerIPC(void) {
 			endCardReadDma();
 			break;
 		case 0x4:
-			extern bool dmaOn;
 			dmaOn = !dmaOn;
 			break;
 		case 0x5:
