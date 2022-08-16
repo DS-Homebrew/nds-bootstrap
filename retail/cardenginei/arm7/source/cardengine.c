@@ -1227,10 +1227,13 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = sharedAddr[4]==0x53444D41;
 			cardReadLED(true, ongoingIsDma);
-			//sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
-			//cardReadLED(false, ongoingIsDma);
-			/* sharedAddr[4] = */ my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
-			sdReadOngoing = true;
+			if (wifiIrq) {
+				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+				cardReadLED(false, ongoingIsDma);
+			} else {
+				/* sharedAddr[4] = */ my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2], sharedAddr[3]);
+				sdReadOngoing = true;
+			}
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
