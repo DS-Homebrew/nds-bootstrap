@@ -76,11 +76,11 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 #ifdef TWLSDK
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
-static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
-static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
+aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
+aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
+aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
-static aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
+aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 #endif
 #ifdef DLDI
 bool sdRead = false;
@@ -918,10 +918,11 @@ void myIrqHandlerIPC(void) {
 
 	switch (IPC_GetSync()) {
 #ifndef DLDI
-#ifndef TWLSDK
 		case 0x3:
-		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
+			#ifndef TWLSDK
 			continueCardReadDmaArm7();
+			#endif
 			continueCardReadDmaArm9();
 		}
 			break;
@@ -929,7 +930,6 @@ void myIrqHandlerIPC(void) {
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
 			break;
-#endif
 #endif
 		case 0x5:
 			igmReset = true;
