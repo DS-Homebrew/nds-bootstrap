@@ -1572,23 +1572,21 @@ void myIrqHandlerVBlank(void) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
 	}
 
-	if (!(valueBits & ROMinRAM) && (valueBits & cardReadDma)) {
-		bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
-		if (wifiIrq != wifiIrqCheck) {
-			// Turn off card read DMA if WiFi is used, and back on when not in use
-			if (wifiIrq) {
-				wifiIrqTimer++;
-				if (wifiIrqTimer == 30) {
-					IPC_SendSync(0x4);
-					wifiIrq = wifiIrqCheck;
-				}
-			} else {
+	bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
+	if (wifiIrq != wifiIrqCheck) {
+		// Turn off card read DMA if WiFi is used, and back on when not in use
+		if (wifiIrq) {
+			wifiIrqTimer++;
+			if (wifiIrqTimer == 30) {
 				IPC_SendSync(0x4);
 				wifiIrq = wifiIrqCheck;
 			}
 		} else {
-			wifiIrqTimer = 0;
+			IPC_SendSync(0x4);
+			wifiIrq = wifiIrqCheck;
 		}
+	} else {
+		wifiIrqTimer = 0;
 	}
 
 	if (valueBits & b_runCardEngineCheck) {
