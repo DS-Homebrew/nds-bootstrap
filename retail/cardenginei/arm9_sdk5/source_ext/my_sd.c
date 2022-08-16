@@ -6,6 +6,7 @@
 #include "my_sdmmc.h"
 
 extern bool isDma;
+extern bool dmaOn;
 extern void sleepMs(int ms);
 
 /*! \fn DC_FlushAll()
@@ -83,7 +84,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[3] = endOffset;
 	sharedAddr[4] = commandRead;
 
-	IPC_SendSync(0x4);
+	if (dmaOn) IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead) {
 		sleepMs(1);
 	}
@@ -113,7 +114,7 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[4] = commandRead;
 
 	while (sharedAddr[4] == commandRead) {
-		IPC_SendSync(0x4);
+		if (dmaOn) IPC_SendSync(0x4);
 		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;
@@ -184,7 +185,7 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	sharedAddr[3] = 0;
 	sharedAddr[4] = commandWrite;
 
-	IPC_SendSync(0x4);
+	if (dmaOn) IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandWrite) {
 		sleepMs(1);
 	}

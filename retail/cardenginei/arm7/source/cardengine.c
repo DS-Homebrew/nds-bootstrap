@@ -121,7 +121,7 @@ static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
 static bool calledViaIPC = false;
-static bool ipcSyncHooked = false;
+//static bool ipcSyncHooked = false;
 bool ipcEveryFrame = false;
 //static bool dmaLed = false;
 static bool powerLedChecked = false;
@@ -470,7 +470,7 @@ void reset(void) {
 
 	initialized = false;
 	funcsUnpatched = false;
-	ipcSyncHooked = false;
+	//ipcSyncHooked = false;
 	languageTimer = 0;
 
 	#ifndef TWLSDK
@@ -1572,30 +1572,29 @@ void myIrqHandlerVBlank(void) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
 	}
 
-	#ifndef TWLSDK
-	if (!(valueBits & ROMinRAM) && (valueBits & cardReadDma)) {
+	if (!(valueBits & ROMinRAM)) {
 		bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
 		if (wifiIrq != wifiIrqCheck) {
 			// Turn off card read DMA if WiFi is used, and back on when not in use
 			if (wifiIrq) {
 				wifiIrqTimer++;
-				if (wifiIrqTimer == 5) {
-					IPC_SendSync(0x4);
+				if (wifiIrqTimer == 30) {
+					#ifndef TWLSDK
+					if (valueBits & cardReadDma) IPC_SendSync(0x4);
+					#endif
 					wifiIrq = wifiIrqCheck;
 				}
 			} else {
-				IPC_SendSync(0x4);
+				#ifndef TWLSDK
+				if (valueBits & cardReadDma) IPC_SendSync(0x4);
+				#endif
 				wifiIrq = wifiIrqCheck;
 			}
 		} else {
 			wifiIrqTimer = 0;
 		}
 	}
-	#endif
 
-	if (ipcSyncHooked && !(REG_IE & IRQ_IPC_SYNC)) {
-		REG_IE |= IRQ_IPC_SYNC;
-	}
 	if (valueBits & b_runCardEngineCheck) {
 		calledViaIPC = false;
 		runCardEngineCheck();
@@ -1698,7 +1697,7 @@ u32 myIrqEnable(u32 irq) {
 	//	REG_AUXIE |= IRQ_SDMMC;
 	//}
 	leaveCriticalSection(oldIME);
-	ipcSyncHooked = true;
+	//ipcSyncHooked = true;
 	return irq_before;
 }
 
