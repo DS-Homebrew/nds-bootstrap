@@ -56,20 +56,20 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
-u32 romMap[4][4] =
-{
-	{0x00008000, 0x003FE000, 0x0C3E2000, 0x0C7E0000},
-	{0x00406000, 0x00800000, 0x0C800000, 0x0D000000},
-	{0x00C06000, 0x00080000, 0x03700000, 0x03780000},
-	{0x00C06000, 0x00080000, 0x03700000, 0x03780000}
+u32 romMap[4][3] =
+{	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+	{0x00008000, 0x0C3E2000, 0x0C7E0000},
+	{0x00406000, 0x0C800000, 0x0D000000},
+	{0x00C06000, 0x03700000, 0x03780000},
+	{0x00C06000, 0x03700000, 0x03780000}
 };
 
-/*u32 romMapSdk5Ntr[4][4] =
+/*u32 romMapSdk5Ntr[4][3] =
 {
-	{0x00008000, 0x003FE000, 0x0C3E2000, 0x0C7E0000},
-	{0x00406000, 0x00800000, 0x0C7FF000, 0x0CFFF000},
-	{0x00C06000, 0x01000000, 0x0D000000, 0x0E000000},
-	{0x01C06000, 0x00080000, 0x03700000, 0x03780000}
+	{0x00008000, 0x0C3E2000, 0x0C7E0000},
+	{0x00406000, 0x0C7FF000, 0x0CFFF000},
+	{0x00C06000, 0x0D000000, 0x0E000000},
+	{0x01C06000, 0x03700000, 0x03780000}
 };*/
 
 bool flagsSet = false;
@@ -154,18 +154,18 @@ void cardSetDma(u32 * params) {
 
 	if (ce9->valueBits & extendedMemory) {
 		for (int i = 0; i < 4; i++) {
-			if (src >= romMap[i][0] && src < romMap[i][0]+romMap[i][1]) {
-				u32 newSrc = (romMap[i][2]-romMap[i][0])+src;
-				if (newSrc+len > romMap[i][3]) {
+			if (src >= romMap[i][0] && (i == 3 || src < romMap[i+1][0])) {
+				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+				if (newSrc+len > romMap[i][2]) {
 					u32 lenPart = 0;
 					u32 oldLen = len;
 					for (int i = 0; i < oldLen; i++) {
 						len--;
 						lenPart++;
-						if (newSrc+len == romMap[i][3]) break;
+						if (newSrc+len == romMap[i][2]) break;
 					}
 					ndmaCopyWords(0, (u8*)newSrc, dst, len);
-					ndmaCopyWordsAsynch(0, (u8*)(romMap[i+1][2]), dst+len, lenPart);
+					ndmaCopyWordsAsynch(0, (u8*)(romMap[i+1][1]), dst+len, lenPart);
 				} else {
 					ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
 				}
@@ -283,18 +283,18 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	if (ce9->valueBits & extendedMemory) {
 		for (int i = 0; i < 4; i++) {
-			if (src >= romMap[i][0] && src < romMap[i][0]+romMap[i][1]) {
-				u32 newSrc = (romMap[i][2]-romMap[i][0])+src;
-				if (newSrc+len > romMap[i][3]) {
+			if (src >= romMap[i][0] && (i == 3 || src < romMap[i+1][0])) {
+				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+				if (newSrc+len > romMap[i][2]) {
 					u32 lenPart = 0;
 					u32 oldLen = len;
 					for (int i = 0; i < oldLen; i++) {
 						len--;
 						lenPart++;
-						if (newSrc+len == romMap[i][3]) break;
+						if (newSrc+len == romMap[i][2]) break;
 					}
 					tonccpy(dst, (u8*)newSrc, len);
-					tonccpy(dst+len, (u8*)(romMap[i+1][2]), lenPart);
+					tonccpy(dst+len, (u8*)(romMap[i+1][1]), lenPart);
 				} else {
 					tonccpy(dst, (u8*)newSrc, len);
 				}
@@ -460,53 +460,42 @@ u32 myIrqEnable(u32 irq) {
 		}
 		if (ce9->valueBits & extendedMemory) {
 			if (ce9->consoleModel > 0) {
-				romMap[1][1] = 0x01800000;
-				romMap[1][3] = 0x0E000000;
+				romMap[1][2] = 0x0E000000;
 			}
 			if (ce9->valueBits & isSdk5) {
 				if (ndsHeader->unitCode > 0) {
 					/*if (ce9->valueBits & dsiMode) {
-						romMap[0][1] = 0x00F80000;
-						romMap[0][2] = 0x0D000000;
-						romMap[0][3] = 0x0DF80000;
+						romMap[0][1] = 0x0D000000;
+						romMap[0][2] = 0x0DF80000;
 					} else {*/
-						romMap[0][1] = 0x00BFE000;
-						romMap[0][3] = 0x0CFE0000;
+						romMap[0][2] = 0x0CFE0000;
 						romMap[1][0] = 0x00C06000;
 						if (ce9->consoleModel > 0) {
-							romMap[1][1] = 0x01000000;
-							romMap[1][2] = 0x0D000000;
+							romMap[1][1] = 0x0D000000;
 							romMap[2][0] += 0x1000000;
 						} else {
-							romMap[1][1] = 0x00080000;
-							romMap[1][2] = 0x03700000;
-							romMap[1][3] = 0x03780000;
+							romMap[1][1] = 0x03700000;
+							romMap[1][2] = 0x03780000;
 						}
 					//}
 				} else {
-					romMap[1][2] = 0x0C7FF000;
-					romMap[1][3] = 0x0CFFF000;
-					romMap[2][2] = 0x0C800000;
-					romMap[2][3] = 0x0D000000;
+					romMap[1][2] = 0x0CFFF000;
+					romMap[2][2] = 0x0D000000;
 					if (ce9->consoleModel > 0) {
-						romMap[1][1] = 0x00800000;
-						romMap[2][1] = 0x01000000;
-						romMap[2][2] = 0x0D000000;
-						romMap[2][3] = 0x0E000000;
+						romMap[2][1] = 0x0D000000;
+						romMap[2][2] = 0x0E000000;
 						romMap[3][0] += 0x1000000;
 					}
 				}
 			} else if (ce9->valueBits & eSdk2) {
+				romMap[0][1] -= 0x22000;
 				romMap[0][2] -= 0x22000;
-				romMap[0][3] -= 0x22000;
 			}
 		}
 		if (!(ce9->valueBits & cloneboot)) {
 			for (int i = 0; i < 4; i++) {
-				for (int i2 = 0; i2 < 2; i2++) {
-					romMap[i][i2] -= 0x8000;
-					romMap[i][i2] += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-				}
+				romMap[i][0] -= 0x8000;
+				romMap[i][0] += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 			}
 		}
 		flagsSetOnce = true;
