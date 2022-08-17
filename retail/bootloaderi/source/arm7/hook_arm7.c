@@ -50,6 +50,7 @@
 #define b_isSdk5 BIT(13)
 #define b_asyncCardRead BIT(14)
 #define b_twlTouch BIT(15)
+#define b_cloneboot BIT(16)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -140,7 +141,8 @@ int hookNdsRetailArm7(
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
-	bool twlTouch
+	bool twlTouch,
+	bool usesCloneboot
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -372,6 +374,9 @@ int hookNdsRetailArm7(
 		}
 		if (twlTouch) {
 			ce7->valueBits |= b_twlTouch;
+		}
+		if (usesCloneboot) {
+			ce7->valueBits |= b_cloneboot;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

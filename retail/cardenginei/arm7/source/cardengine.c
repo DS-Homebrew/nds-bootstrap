@@ -72,6 +72,7 @@
 #define isSdk5 BIT(13)
 //#define asyncCardRead BIT(14)
 #define twlTouch BIT(15)
+#define cloneboot BIT(16)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -1935,6 +1936,9 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	
 	if (valueBits & ROMinRAM) {
 		u32 newSrc = (u32)(romLocation-0x8000)+src;
+		if (!(valueBits & cloneboot)) {
+			newSrc = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
+		}
 		#ifdef TWLSDK
 		if (src > *(u32*)0x02FFE1C0) {
 			newSrc -= *(u32*)0x02FFE1CC;

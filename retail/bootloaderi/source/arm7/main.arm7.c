@@ -1866,7 +1866,8 @@ int arm7_main(void) {
 			consoleModel,
 			romRead_LED,
 			dmaRomRead_LED,
-			twlTouch
+			twlTouch,
+			usesCloneboot
 		);
 		if (errorCode == ERR_NONE) {
 			nocashMessage("Card hook successful");

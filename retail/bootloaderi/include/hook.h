@@ -55,7 +55,8 @@ int hookNdsRetailArm7(
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
-	bool twlTouch
+	bool twlTouch,
+	bool usesCloneboot
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
