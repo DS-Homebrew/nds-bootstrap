@@ -56,6 +56,7 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
+int romMapLines = 3; // 4 for SDK5 NTR ROMs on 3DS
 u32 romMap[4][3] =
 {	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 	{0x00008000, 0x0C3E2000, 0x0C7E0000},
@@ -153,8 +154,8 @@ void cardSetDma(u32 * params) {
 	}*/
 
 	if (ce9->valueBits & extendedMemory) {
-		for (int i = 0; i < 4; i++) {
-			if (src >= romMap[i][0] && (i == 3 || src < romMap[i+1][0])) {
+		for (int i = 0; i < romMapLines; i++) {
+			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
 				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 				if (newSrc+len > romMap[i][2]) {
 					u32 lenPart = 0;
@@ -282,8 +283,8 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}*/
 
 	if (ce9->valueBits & extendedMemory) {
-		for (int i = 0; i < 4; i++) {
-			if (src >= romMap[i][0] && (i == 3 || src < romMap[i+1][0])) {
+		for (int i = 0; i < romMapLines; i++) {
+			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
 				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 				if (newSrc+len > romMap[i][2]) {
 					u32 lenPart = 0;
@@ -485,6 +486,7 @@ u32 myIrqEnable(u32 irq) {
 						romMap[2][1] = 0x0D000000;
 						romMap[2][2] = 0x0E000000;
 						romMap[3][0] += 0x1000000;
+						romMapLines = 4;
 					}
 				}
 			} else if (ce9->valueBits & eSdk2) {
