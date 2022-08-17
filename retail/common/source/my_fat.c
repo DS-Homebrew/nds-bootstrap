@@ -1271,13 +1271,15 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
               dbg_hexa(discSecPerClus[card2]);
               dbg_hexa(curSect/discSecPerClus[card2]);
 			  #else
-              
-              clusterIndex+= curSect/discSecPerClus[card2];
-              curSect = curSect % discSecPerClus[card2];
-              #endif
               dbg_hexa(discSecPerClus);
               dbg_hexa(curSect/discSecPerClus);
+              #endif
+              #endif
               
+			  #ifdef TWOCARD
+              clusterIndex+= curSect/discSecPerClus[card2];
+              curSect = curSect % discSecPerClus[card2];
+			  #else
               clusterIndex+= curSect/discSecPerClus;
               curSect = curSect % discSecPerClus;
               #endif
