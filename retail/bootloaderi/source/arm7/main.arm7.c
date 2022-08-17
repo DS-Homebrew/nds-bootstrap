@@ -1555,7 +1555,8 @@ int arm7_main(void) {
 			consoleModel,
 			romRead_LED,
 			dmaRomRead_LED,
-			twlTouch
+			twlTouch,
+			false
 		);
 		if (errorCode == ERR_NONE) {
 			nocashMessage("Card hook successful");
