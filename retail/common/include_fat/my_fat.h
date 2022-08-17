@@ -46,6 +46,9 @@ typedef	struct
 	bool fatTableCached;
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
+	#ifdef TWOCARD
+	bool card2;
+	#endif
 } aFile;
 
 typedef	struct
@@ -67,31 +70,28 @@ typedef	struct
 #ifdef TWOCARD
 bool FAT_InitFiles(bool initCard, bool card2, int ndmaSlot);
 aFile getBootFileCluster(const char* bootName, bool card2);
+aFile getFileFromCluster(u32 cluster, bool card2);
 #else
 bool FAT_InitFiles(bool initCard, int ndmaSlot);
 aFile getBootFileCluster(const char* bootName);
+aFile getFileFromCluster(u32 cluster);
 #endif
 #else
 bool FAT_InitFiles(bool initCard);
 aFile getBootFileCluster(const char* bootName);
-#endif
 aFile getFileFromCluster(u32 cluster);
+#endif
 #ifndef B4DS
-#ifdef TWOCARD
-u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, bool card2, int ndmaSlot);
-bool fileReadNonBLocking(char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot);
-bool resumeFileRead();
-u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, bool card2, int ndmaSlot);
-u32 FAT_ClustToSect(u32 cluster, bool card2);
-void buildFatTableCache (aFile * file, bool card2, int ndmaSlot);
-#else
 u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
 bool fileReadNonBLocking(char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot);
 bool resumeFileRead();
 u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+#ifdef TWOCARD
+u32 FAT_ClustToSect(u32 cluster, bool card2);
+#else
 u32 FAT_ClustToSect(u32 cluster);
-void buildFatTableCache (aFile * file, int ndmaSlot);
 #endif
+void buildFatTableCache (aFile * file, int ndmaSlot);
 #else
 u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length);
 u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length);

@@ -82,9 +82,7 @@ aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 #endif
-#ifdef DLDI
-bool sdRead = false;
-#else
+#ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
 #ifdef TWLSDK

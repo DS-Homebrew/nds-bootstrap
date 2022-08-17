@@ -128,8 +128,6 @@ u8 twlCfgCountry = 0;
 int twlCfgLang = 0;
 u8 wifiLedState = 0;
 
-bool sdRead = true;
-
 //bool gbaRomFound = false;
 
 static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
@@ -596,29 +594,29 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	if (separateSrl) {
 		srlAddr = 0xFFFFFFFF;
-		aFile pageFile = getFileFromCluster(pageFileCluster);
+		aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
 
-		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160, !sdRead, 0);
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
+		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 	} else {
 		srlAddr = softResetParams[3];
-		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), 0);
 		if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
 			// Invalid SRL
 			srlAddr = 0;
-			fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), !sdRead, 0);
+			fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp), 0);
 		}
 
 		// Load binaries into memory
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, !sdRead, 0);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
 		if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
-			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, !sdRead, 0);
+			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize, 0);
 		}
 	}
 
 	char baseTid[5] = {0};
-	fileRead((char*)&baseTid, file, 0xC, 4, !sdRead, 0);
+	fileRead((char*)&baseTid, file, 0xC, 4, 0);
 	if (
 		strncmp(baseTid, "ADA", 3) == 0    // Diamond
 		|| strncmp(baseTid, "APA", 3) == 0 // Pearl
@@ -628,13 +626,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	) {
 		// Fix Pokemon games needing header data.
 		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
-		fileRead((char*)ndsHeaderPokemon, file, 0, 0x160, !sdRead, 0);
+		fileRead((char*)ndsHeaderPokemon, file, 0, 0x160, 0);
 		pkmnHeader = true;
 	}
 
-	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16), !sdRead, 0);
-	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16), !sdRead, 0);
-	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32), !sdRead, 0);
+	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16), 0);
+	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16), 0);
+	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32), 0);
 
 	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
@@ -816,9 +814,9 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid,
 				newOverlaysSize += cacheBlockSize;
 			}
 
-			fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize, !sdRead, 0);
+			fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize, 0);
 		} else {
-			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, !sdRead, 0);
+			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize, 0);
 		}
 
 		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
@@ -839,7 +837,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile file, const 
 	if (ioverlaysSize>0x700000) return;
 
 	u32 romOffset = usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, !sdRead, 0);
+	fileRead((char*)ROM_SDK5_LOCATION+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize, 0);
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
@@ -876,17 +874,17 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		//savFile->fatTableCache = (u32*)((char*)ce7Location+0x11C00);
 
 		if (romSizeEdit <= romSizeLimitTilA7) {
-			fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, !sdRead, 0);
+			fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, 0);
 		} else {
-			fileRead((char*)romLocation, *romFile, romOffset, romSizeLimitTilA7, !sdRead, 0);
+			fileRead((char*)romLocation, *romFile, romOffset, romSizeLimitTilA7, 0);
 			if (isSdk5(moduleParams) && ndsHeader->unitCode == 0 && consoleModel > 0) {
-				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, 0x800000, !sdRead, 0);
-				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr+0x801000, *romFile, romOffset + romSizeLimitTilA7 + 0x800000, romSizeEdit-romSizeLimitTilA7-0x800000, !sdRead, 0);
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, 0x800000, 0);
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr+0x801000, *romFile, romOffset + romSizeLimitTilA7 + 0x800000, romSizeEdit-romSizeLimitTilA7-0x800000, 0);
 			} else {
-				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, romSizeEdit-romSizeLimitTilA7, !sdRead, 0);
+				fileRead((char*)romLocation+romSizeLimitTilA7+romIncr, *romFile, romOffset + romSizeLimitTilA7, romSizeEdit-romSizeLimitTilA7, 0);
 			}
 			if (romSizeEdit > romSizeLimit) {
-				fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimit, !sdRead, 0);
+				fileRead((char*)ROM_LOCATION_EXT_P2, *romFile, romOffset + romSizeLimit, romSizeEdit-romSizeLimit, 0);
 			}
 		}
 		if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
@@ -895,7 +893,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romFile->fatTableCached = false;
 		savFile->fatTableCached = false;
 	} else {
-		fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, !sdRead, 0);
+		fileRead((char*)romLocation, *romFile, romOffset, romSizeEdit, 0);
 		if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
 			*(u32*)((romLocation-romOffset)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
 		}
@@ -904,7 +902,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		u32 offsetEnd = (romSize > (romSizeLimit-0x400000)+0x8000) ? (romSizeLimit-0x400000)+0x8000 : romSize;
 		for (u32 offset = baseRomSize+(usesCloneboot ? 0x88 : 0); offset < offsetEnd; offset += 0x8000) { // Load more data beyond ROM size in header (Some ROM hacks may need this)
 			toncset((char*)IMAGES_LOCATION+0x10000, 0, 0x8000); // Clear leftover data
-			fileRead((char*)IMAGES_LOCATION+0x10000, *romFile, offset, 0x8000, !sdRead, 0);
+			fileRead((char*)IMAGES_LOCATION+0x10000, *romFile, offset, 0x8000, 0);
 			if ((memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION, 0x8000) != 0) && (memcmp((char*)IMAGES_LOCATION+0x10000, (char*)IMAGES_LOCATION+0x8000, 0x8000) != 0)) {
 				// Data is found
 				tonccpy((char*)(romLocation-romOffset)+offset, (char*)IMAGES_LOCATION+0x10000, 0x8000);
@@ -1211,49 +1209,41 @@ int arm7_main(void) {
 	}
 
 	if (gameOnFlashcard || saveOnFlashcard) {
-		sdRead = false;
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, true, 0)) {
 			nocashMessage("!FAT_InitFiles");
 			//errorOutput();
 			//return -1;
 		}
-		sdRead = dsiSD;
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", !sdRead));
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", !dsiSD));
 	}
-
-	if (gameOnFlashcard) sdRead = false;
 
 	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT == 0);
 
-	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10, !sdRead, -1);
+	aFile srParamsFile = getFileFromCluster(srParamsFileCluster, gameOnFlashcard);
+	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10, -1);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
 		clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0x4, 0x4, !sdRead, -1);
-		fileWrite((char*)&clearBuffer, srParamsFile, 0x8, 0x4, !sdRead, -1);
-		fileWrite((char*)&clearBuffer, srParamsFile, 0xC, 0x4, !sdRead, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0x4, 0x4, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0x8, 0x4, -1);
+		fileWrite((char*)&clearBuffer, srParamsFile, 0xC, 0x4, -1);
 	}
 
 	// ROM file
 	aFile* romFile = (aFile*)(dsiEnhancedMbk ? ROM_FILE_LOCATION_ALT : ROM_FILE_LOCATION);
-	*romFile = getFileFromCluster(storedFileCluster);
+	*romFile = getFileFromCluster(storedFileCluster, gameOnFlashcard);
 
-	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), !sdRead, -1);
-
-	sdRead = (saveOnFlashcard ? false : dsiSD);
+	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), -1);
 
 	// Sav file
 	aFile* savFile = (aFile*)(dsiEnhancedMbk ? SAV_FILE_LOCATION_ALT : SAV_FILE_LOCATION);
-	*savFile = getFileFromCluster(saveFileCluster);
-
-	sdRead = (gameOnFlashcard ? false : dsiSD);
+	*savFile = getFileFromCluster(saveFileCluster, saveOnFlashcard);
 
 	/*const char* bootName = "BOOT.NDS";
 
@@ -1269,15 +1259,11 @@ int arm7_main(void) {
 	}*/
 
 	if (gameOnFlashcard || !isDSiWare) {
-		buildFatTableCache(romFile, !sdRead, 0);
-
-		sdRead = (saveOnFlashcard ? false : dsiSD);
+		buildFatTableCache(romFile, 0);
 
 		if (savFile->firstCluster != CLUSTER_FREE) {
-			buildFatTableCache(savFile, !sdRead, 0);
+			buildFatTableCache(savFile, 0);
 		}
-
-		if (gameOnFlashcard) sdRead = false;
 	}
 
 	int errorCode;
@@ -1341,8 +1327,8 @@ int arm7_main(void) {
 	}*/
 
 	// File containing cached patch offsets
-	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster, gameOnFlashcard);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
@@ -1456,7 +1442,7 @@ int arm7_main(void) {
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
-			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 	  } else {
 		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
@@ -1588,7 +1574,7 @@ int arm7_main(void) {
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
-			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
 		extern u32 iUncompressedSize;
@@ -1603,16 +1589,16 @@ int arm7_main(void) {
 			*(u32*)0x0DFFE1CC = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
 			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
 		} else {
-			aFile pageFile = getFileFromCluster(pageFileCluster);
+			aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
 
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
-			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC), !sdRead, -1);
-			fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, -1);
-			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x5FFFF8, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), -1);
+			fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC), -1);
+			fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, -1);
+			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), pageFile, 0x5FFFF8, sizeof(u32), -1);
+			fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), -1);
 		}
 	  }
 	 //}
@@ -1638,10 +1624,10 @@ int arm7_main(void) {
 			tonccpy((char*)GBA_SAV_FILE_LOCATION_MAINMEM, gbaSavFile, sizeof(aFile));
 
 			if (gbaRomFound) {
-				fileRead((char*)0x027FFC30, *gbaFile, 0xBE, 2, !sdRead, -1);
-				fileRead((char*)0x027FFC32, *gbaFile, 0xB5, 3, !sdRead, -1);
-				fileRead((char*)0x027FFC36, *gbaFile, 0xB0, 2, !sdRead, -1);
-				fileRead((char*)0x027FFC38, *gbaFile, 0xAC, 4, !sdRead, -1);
+				fileRead((char*)0x027FFC30, *gbaFile, 0xBE, 2, -1);
+				fileRead((char*)0x027FFC32, *gbaFile, 0xB5, 3, -1);
+				fileRead((char*)0x027FFC36, *gbaFile, 0xB0, 2, -1);
+				fileRead((char*)0x027FFC38, *gbaFile, 0xAC, 4, -1);
 			}
 		}*/
 
@@ -1689,7 +1675,7 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), !sdRead, -1);
+		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 		if (usesCloneboot) {
 			dbg_printf("Cloneboot detected\n");
@@ -1724,9 +1710,9 @@ int arm7_main(void) {
 		bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
 
 		if (useApPatch) {
-			aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+			aFile apPatchFile = getFileFromCluster(apPatchFileCluster, gameOnFlashcard);
 			dbg_printf("AP-fix found\n");
-			fileRead((char*)IPS_LOCATION, apPatchFile, 0, apPatchSize, !sdRead, 0);
+			fileRead((char*)IPS_LOCATION, apPatchFile, 0, apPatchSize, 0);
 			if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
 				overlayPatch = ipsHasOverlayPatch(ndsHeader, (u8*)IPS_LOCATION);
 			}
@@ -1906,7 +1892,7 @@ int arm7_main(void) {
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
-			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), !sdRead, -1);
+			fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 		}
 
 		if (isSdk5(moduleParams)) {
@@ -1928,8 +1914,8 @@ int arm7_main(void) {
 				dbg_printf("AP-fix applied\n");
 				if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && overlaysInRam) {
 					aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
-					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster);
-					buildFatTableCache(apFixOverlaysFile, !sdRead, 0);
+					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
+					buildFatTableCache(apFixOverlaysFile, 0);
 
 					u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 					u32 newOverlaysSize = 0;
@@ -1937,7 +1923,7 @@ int arm7_main(void) {
 						newOverlaysSize += cacheBlockSize;
 					}
 
-					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize, !sdRead, -1);	// Write AP-fixed overlays to a file
+					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize, -1);	// Write AP-fixed overlays to a file
 					toncset((char*)CACHE_ADRESS_START, 0, newOverlaysSize);
 
 					dbg_printf("Overlays cached to a file\n");
@@ -1953,20 +1939,18 @@ int arm7_main(void) {
 			// Do nothing
 		} else if (extendedMemoryConfirmed || dsiModeConfirmed) {
 			extern u32 iUncompressedSizei;
-			aFile pageFile = getFileFromCluster(pageFileCluster);
+			aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
 
-			sdRead = dsiSD;
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
-			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, -1);
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), -1);
+			fileWrite((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), -1);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, -1);
-				fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, -1);
-				fileWrite((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), !sdRead, -1);
-				fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, -1);
+				fileWrite((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, -1);
+				fileWrite((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, -1);
+				fileWrite((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), -1);
+				fileWrite((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), -1);
 			}
-			sdRead = (gameOnFlashcard ? false : dsiSD);
 		} else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			tonccpy((char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, iUncompressedSize);
@@ -2010,11 +1994,10 @@ int arm7_main(void) {
     setMemoryAddress(ndsHeader, moduleParams);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
-		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
+		aFile ramDumpFile = getFileFromCluster(ramDumpCluster, !dsiSD);
 
-		sdRead = dsiSD;
-		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);		// Dump RAM
-		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, !sdRead, -1);	// Dump (decrypted?) arm9 binary
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
+		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
 	}
 
 	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !(REG_SCFG_ROM & BIT(9))) {

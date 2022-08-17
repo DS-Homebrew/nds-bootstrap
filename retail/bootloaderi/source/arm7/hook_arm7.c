@@ -52,8 +52,6 @@
 #define b_twlTouch BIT(15)
 #define b_scfgLocked BIT(31)
 
-extern bool sdRead;
-
 extern u32 newArm7binarySize;
 extern u32 newArm7ibinarySize;
 
@@ -443,24 +441,24 @@ int hookNdsRetailArm7(
 		cheatSizeLimit -= 0x10;
 	}
 
-	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster);
-	aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster, gameOnFlashcard);
+	aFile cheatFile = getFileFromCluster(cheatFileCluster, gameOnFlashcard);
+	aFile apPatchFile = getFileFromCluster(apPatchFileCluster, gameOnFlashcard);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, !sdRead, 0);
+			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");
 		}
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, !sdRead, 0);
+			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			ce7->valueBits |= b_wideCheatUsed;
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, !sdRead, 0);
+			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
 		}
 		if (!gameOnFlashcard && isDSiWare) {
 			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;

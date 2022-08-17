@@ -112,9 +112,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
-bool dsiSD = false;
-bool sdRead = true;
-
 static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
@@ -267,28 +264,22 @@ static void driveInitialize(void) {
 		return;
 	}
 
-	bool sdReadBak = sdRead;
-
 	if (valueBits & b_dsiSD) {
 		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 			sdmmc_init();
 			SD_Init();
 		}
-		dsiSD = true;
-		sdRead = true;				// Switch to SD
 		FAT_InitFiles(false, false, 0);
 	}
 	if (((valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) || (valueBits & saveOnFlashcard)) {
-		sdRead = false;			// Switch to flashcard
 		FAT_InitFiles(false, true, 0);
-		sdRead = true;				// Switch to SD
 	}
 
-	ramDumpFile = getFileFromCluster(ramDumpCluster);
-	srParamsFile = getFileFromCluster(srParamsCluster);
-	screenshotFile = getFileFromCluster(screenshotCluster);
-	pageFile = getFileFromCluster(pageFileCluster);
-	manualFile = getFileFromCluster(manualCluster);
+	ramDumpFile = getFileFromCluster(ramDumpCluster, !(valueBits & b_dsiSD));
+	srParamsFile = getFileFromCluster(srParamsCluster, !(valueBits & gameOnFlashcard));
+	screenshotFile = getFileFromCluster(screenshotCluster, !(valueBits & b_dsiSD));
+	pageFile = getFileFromCluster(pageFileCluster, !(valueBits & b_dsiSD));
+	manualFile = getFileFromCluster(manualCluster, !(valueBits & b_dsiSD));
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -307,7 +298,7 @@ static void driveInitialize(void) {
 	}*/
 
 	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
+	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0, !(valueBits & b_dsiSD));
 	enableDebug(myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
@@ -321,8 +312,6 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
-	sdRead = sdReadBak;
-
 	driveInited = true;
 }
 
@@ -404,13 +393,11 @@ void reset(void) {
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
 		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
-			sdRead = (valueBits & b_dsiSD);
-			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160, !sdRead, -1);
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, ndsHeader->arm9binarySize, !sdRead, -1);
-			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
+			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160, -1);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, ndsHeader->arm9binarySize, -1);
+			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize, -1);
 		}
-		sdRead = !(valueBits & gameOnFlashcard);
-		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, !sdRead, -1);
+		fileWrite((char*)resetParam, srParamsFile, 0, 0x10, -1);
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
@@ -479,12 +466,10 @@ void reset(void) {
 		if (*(u32*)(resetParam+8) == 0x44414F4C) {
 			tonccpy((char*)ndsHeader->arm7destination, (char*)0x022C0000, ndsHeader->arm7binarySize);
 		} else {
-			sdRead = !(valueBits & gameOnFlashcard);
-			fileRead((char*)ndsHeader, *romFile, currentSrlAddr, 0x160, !sdRead, 0);
-			fileRead((char*)ndsHeader->arm9destination, *romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, !sdRead, 0);
-			fileRead((char*)ndsHeader->arm7destination, *romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, !sdRead, 0);
+			fileRead((char*)ndsHeader, *romFile, currentSrlAddr, 0x160, 0);
+			fileRead((char*)ndsHeader->arm9destination, *romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+			fileRead((char*)ndsHeader->arm7destination, *romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
 		}
-		sdRead = (valueBits & b_dsiSD);
 		*(u32*)(resetParam+8) = 0;
 
 		moduleParams = getModuleParams(ndsHeader);
@@ -515,10 +500,10 @@ void reset(void) {
 		extern u32 iUncompressedSize;
 
 		if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, -1);
-			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, ndsHeader->arm7binarySize, !sdRead, -1);
-			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, -1);
-			fileWrite((char*)&ndsHeader->arm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, -1);
+			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, -1);
+			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, ndsHeader->arm7binarySize, -1);
+			fileWrite((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), -1);
+			fileWrite((char*)&ndsHeader->arm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), -1);
 		} else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
@@ -529,14 +514,13 @@ void reset(void) {
 		*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
 	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
 		//driveInitialize();
-		sdRead = (valueBits & b_dsiSD);
 
 		u32 iUncompressedSize = 0;
 		u32 newArm7binarySize = 0;
-		fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
-		fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
-		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
-		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
+		fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), 0);
+		fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), 0);
+		fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, 0);
+		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, 0);
 	} else {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 		ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
@@ -553,15 +537,14 @@ void reset(void) {
 	u32 newArm7binarySize = 0;
 	u32 newArm7ibinarySize = 0;
 
-	sdRead = (valueBits & b_dsiSD);
-	fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), !sdRead, 0);
-	fileRead((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), !sdRead, 0);
-	fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, !sdRead, 0);
-	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, !sdRead, 0);
-	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, !sdRead, 0);
-	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, !sdRead, 0);
+	fileRead((char*)&iUncompressedSize, pageFile, 0x5FFFF0, sizeof(u32), 0);
+	fileRead((char*)&newArm7binarySize, pageFile, 0x5FFFF4, sizeof(u32), 0);
+	fileRead((char*)&iUncompressedSizei, pageFile, 0x5FFFF8, sizeof(u32), 0);
+	fileRead((char*)&newArm7ibinarySize, pageFile, 0x5FFFFC, sizeof(u32), 0);
+	fileRead((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, 0);
+	fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, 0);
+	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, 0);
+	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, 0);
 
 	if (doBak) restoreSdBakData();
 	#endif
@@ -678,8 +661,7 @@ void forceGameReboot(void) {
 	if (doBak) bakSdData();
 	#endif
 	//driveInitialize();
-	sdRead = !(valueBits & gameOnFlashcard);
-	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, !sdRead, -1);
+	fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4, -1);
   	#ifdef TWLSDK
 	if (doBak) restoreSdBakData();
 	if (*(u32*)(ce7+0xF900) == 0 && (valueBits & b_dsiSD))
@@ -792,28 +774,27 @@ void returnToLoader(bool wait) {
 	*(vu32*)0x4004820 = 0;
 
 	//driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
 
-	aFile file = getBootFileCluster("BOOT.NDS", !sdRead);
+	aFile file = getBootFileCluster("BOOT.NDS", !(valueBits & b_dsiSD));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
 
-	fileRead((char*)__DSiHeader, file, 0, sizeof(tDSiHeader), !sdRead, 0);
+	fileRead((char*)__DSiHeader, file, 0, sizeof(tDSiHeader), 0);
 	*ndsHeader = __DSiHeader->ndshdr;
 
-	fileRead(__DSiHeader->ndshdr.arm9destination, file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize, !sdRead, 0);
-	fileRead(__DSiHeader->ndshdr.arm7destination, file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize, !sdRead, 0);
+	fileRead(__DSiHeader->ndshdr.arm9destination, file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize, 0);
+	fileRead(__DSiHeader->ndshdr.arm7destination, file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize, 0);
 	if (ndsHeader->unitCode > 0) {
-		fileRead(__DSiHeader->arm9idestination, file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, !sdRead, 0);
-		fileRead(__DSiHeader->arm7idestination, file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, !sdRead, 0);
+		fileRead(__DSiHeader->arm9idestination, file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, 0);
+		fileRead(__DSiHeader->arm7idestination, file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, 0);
 
 		initMBK_dsiMode();
 	}
 
-	if (!sdRead) {
+	if (!(valueBits & b_dsiSD)) {
 		dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 
@@ -865,25 +846,24 @@ void dumpRam(void) {
 	if (doBak) bakSdData();
 	#endif
 	//driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
 	if (valueBits & dsiMode) {
 		// Dump full RAM
-		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), !sdRead, -1);
+		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);
 	} else if (valueBits & isSdk5) {
 		// Dump RAM used in DS mode (SDK5)
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileWrite((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, !sdRead, -1);
-		fileWrite((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0x1000, !sdRead, -1);
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, -1);
+		fileWrite((char*)(ndsHeader->unitCode==2 ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x3E0000, 0x1F000, -1);
+		fileWrite((char*)0x02FFF000, ramDumpFile, 0x3FF000, 0x1000, -1);
 	} else if (moduleParams->sdk_version >= 0x2008000) {
 		// Dump RAM used in DS mode (SDK2.1+)
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, !sdRead, -1);
-		fileWrite((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x20000, !sdRead, -1);
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3E0000, -1);
+		fileWrite((char*)0x027E0000, ramDumpFile, 0x3E0000, 0x20000, -1);
 	} else {
 		// Dump RAM used in DS mode (SDK2.0)
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3C0000, !sdRead, -1);
-		fileWrite((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x40000, !sdRead, -1);
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x3C0000, -1);
+		fileWrite((char*)0x027C0000, ramDumpFile, 0x3C0000, 0x40000, -1);
 	}
 	sharedAddr[3] = 0;
   	#ifdef TWLSDK
@@ -899,8 +879,7 @@ void prepareScreenshot(void) {
 	if (doBak) bakSdData();
 #endif
 		//driveInitialize();
-		sdRead = (valueBits & b_dsiSD);
-		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
+		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, -1);
 #ifndef TWLSDK
 	}
 #else
@@ -916,20 +895,19 @@ void saveScreenshot(void) {
 	if (doBak) bakSdData();
 #endif
 	//driveInitialize();
-	sdRead = (valueBits & b_dsiSD);
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, !sdRead, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, -1);
 
 	// Skip until next blank slot
 	char magic;
 	do {
 		igmText->currentScreenshot++;
-		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, !sdRead, -1);
+		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, -1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
 #ifndef TWLSDK
 	if (valueBits & dsiMode) {
 #endif
-		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, !sdRead, -1);
+		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, -1);
 #ifndef TWLSDK
 	}
 #else
@@ -940,14 +918,13 @@ void saveScreenshot(void) {
 void readManual(int line) {
 	static int currentManualLine = 0;
 	static int currentManualOffset = 0;
-	sdRead = (valueBits & b_dsiSD);
 	char buffer[32];
 
 	// Seek for desired line
 	bool firstLoop = true;
 	while(currentManualLine != line) {
 		if(line > currentManualLine) {
-			fileRead(buffer, manualFile, currentManualOffset, 32, !sdRead, -1);
+			fileRead(buffer, manualFile, currentManualOffset, 32, -1);
 
 			for(int i = 0; i < 32; i++) {
 				if(buffer[i] == '\n') {
@@ -961,7 +938,7 @@ void readManual(int line) {
 			}
 		} else {
 			currentManualOffset -= 32;
-			fileRead(buffer, manualFile, currentManualOffset, 32, !sdRead, -1);
+			fileRead(buffer, manualFile, currentManualOffset, 32, -1);
 			int i = firstLoop ? 30 : 31;
 			firstLoop = false;
 			for(; i >= 0; i--) {
@@ -982,11 +959,11 @@ void readManual(int line) {
 	u32 tempManualOffset = currentManualOffset;
 	bool fullLine = false;
 	for(int line = 0; line < 24 && line < igmText->manualMaxLine; line++) {
-		fileRead(buffer, manualFile, tempManualOffset, 32, !sdRead, -1);
+		fileRead(buffer, manualFile, tempManualOffset, 32, -1);
 
 		// Fix for exactly 32 char lines
 		if(fullLine && buffer[0] == '\n')
-			fileRead(buffer, manualFile, ++tempManualOffset, 32, !sdRead, -1);
+			fileRead(buffer, manualFile, ++tempManualOffset, 32, -1);
 
 		for(int i = 0; i <= 32; i++) {
 			if(i == 32 || buffer[i] == '\n' || buffer[i] == '\0') {
@@ -1054,7 +1031,7 @@ static void nandRead(void) {
     if (tryLockMutex(&saveMutex)) {
 		//driveInitialize();
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileRead(memory, *savFile, flash, len, !sdRead, -1);
+		fileRead(memory, *savFile, flash, len, -1);
     	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
@@ -1086,7 +1063,7 @@ static void nandWrite(void) {
 		//driveInitialize();
 		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileWrite(memory, *savFile, flash, len, !sdRead, -1);
+		fileWrite(memory, *savFile, flash, len, -1);
     	cardReadLED(false, true);
   		unlockMutex(&saveMutex);
 	}
@@ -1300,28 +1277,24 @@ static void runCardEngineCheck(void) {
 			}
 
     		if (sharedAddr[3] == (vu32)0x026FF800) {
-				sdRead = (valueBits & b_dsiSD);
     			log_arm9();
     			sharedAddr[3] = 0;
                 //IPC_SendSync(0x8);
     		}
     
             if (sharedAddr[3] == (vu32)0x025FFC01) {
-				sdRead = !(valueBits & saveOnFlashcard);
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
     			nandRead();
     			sharedAddr[3] = 0;
     		}
 
             if (sharedAddr[3] == (vu32)0x025FFC02) {
-				sdRead = !(valueBits & saveOnFlashcard);
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
     			nandWrite();
     			sharedAddr[3] = 0;
     		}
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
-				sdRead = true;
                 dmaLed = false;
     			slot2Read();
     			sharedAddr[3] = 0;
@@ -1750,11 +1723,10 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		if (doBak) bakSdData();
 		#endif
 		//driveInitialize();
-		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
-			fileRead(dst, *savFile, src, len, !sdRead, -1);
+			fileRead(dst, *savFile, src, len, -1);
 		//}
 		#ifdef TWLSDK
 		if (doBak) restoreSdBakData();
@@ -1787,13 +1759,12 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		if (doBak) bakSdData();
 		#endif
 		//driveInitialize();
-		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		fileWrite(src, *savFile, dst, len, !sdRead, -1);
+		fileWrite(src, *savFile, dst, len, -1);
 		#ifdef TWLSDK
 		if (doBak) restoreSdBakData();
 		#endif
@@ -1825,13 +1796,12 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		if (doBak) bakSdData();
 		#endif
 		//driveInitialize();
-		sdRead = ((valueBits & saveOnFlashcard) ? false : true);
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		fileWrite(src, *savFile, dst, len, !sdRead, -1);
+		fileWrite(src, *savFile, dst, len, -1);
   		#ifdef TWLSDK
 		if (doBak) restoreSdBakData();
 		#endif
@@ -1974,13 +1944,12 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	} else {
 		while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
-		sdRead = ((valueBits & gameOnFlashcard) ? false : true);
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;
 		#ifdef DEBUG	
 		nocashMessage("fileRead romFile");
 		#endif	
-		fileRead(dst, *romFile, src, len, !sdRead, 0);
+		fileRead(dst, *romFile, src, len, 0);
 		//ndmaUsed = true;
 		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
 	}

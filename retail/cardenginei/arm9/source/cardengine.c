@@ -88,9 +88,7 @@ aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
-#ifdef DLDI
-bool sdRead = false;
-#else
+#ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];

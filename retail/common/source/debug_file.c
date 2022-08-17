@@ -35,26 +35,13 @@ u32 dbg_printf(const char* message) {
         return 0;
     }
 
-#ifndef B4DS
-	nocashMessage(message);
-#endif
-
-#ifndef _NO_SDMMC
-	extern bool sdRead;
-	extern bool dsiSD;
-	bool store_sdRead = sdRead;
-	sdRead = dsiSD;
-#endif
-
 	#ifndef B4DS
-	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), !sdRead, 0);
+	nocashMessage(message);
+
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 0);
 	#else
 	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message));
 	#endif
-
-#ifndef _NO_SDMMC
-	sdRead = store_sdRead;
-#endif
 
 	_currentPos += strlen(message);
 
