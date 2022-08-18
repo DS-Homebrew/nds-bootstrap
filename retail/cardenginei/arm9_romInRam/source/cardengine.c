@@ -154,23 +154,25 @@ void cardSetDma(u32 * params) {
 	}*/
 
 	if (ce9->valueBits & extendedMemory) {
+		u32 len2 = 0;
 		for (int i = 0; i < romMapLines; i++) {
 			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
 				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 				if (newSrc+len > romMap[i][2]) {
-					u32 lenPart = 0;
-					u32 oldLen = len;
-					for (int i = 0; i < oldLen; i++) {
+					while (1) {
 						len--;
-						lenPart++;
-						if (newSrc+len == romMap[i][2]) break;
+						len2++;
+						if (newSrc+len == romMap[i][2]) {
+							break;
+						}
 					}
-					ndmaCopyWords(0, (u8*)newSrc, dst, len);
-					ndmaCopyWordsAsynch(0, (u8*)(romMap[i+1][1]), dst+len, lenPart);
+					tonccpy(dst, (u8*)newSrc, len);
+					src += len;
+					dst += len;
 				} else {
-					ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
+					ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+					break;
 				}
-				break;
 			}
 		}
 	} else {
@@ -283,23 +285,25 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}*/
 
 	if (ce9->valueBits & extendedMemory) {
+		u32 len2 = 0;
 		for (int i = 0; i < romMapLines; i++) {
 			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
 				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 				if (newSrc+len > romMap[i][2]) {
-					u32 lenPart = 0;
-					u32 oldLen = len;
-					for (int i = 0; i < oldLen; i++) {
+					while (1) {
 						len--;
-						lenPart++;
-						if (newSrc+len == romMap[i][2]) break;
+						len2++;
+						if (newSrc+len == romMap[i][2]) {
+							break;
+						}
 					}
 					tonccpy(dst, (u8*)newSrc, len);
-					tonccpy(dst+len, (u8*)(romMap[i+1][1]), lenPart);
+					src += len;
+					dst += len;
 				} else {
-					tonccpy(dst, (u8*)newSrc, len);
+					tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+					break;
 				}
-				break;
 			}
 		}
 	} else {
