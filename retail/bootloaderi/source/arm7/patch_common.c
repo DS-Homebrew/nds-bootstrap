@@ -548,17 +548,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
-		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
+		//*(u32*)0x0200B0A0 = 0xE1A00000; // nop
+		*(u32*)0x0200B0E8 = generateA7Instr(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B100 = 0xE1A00000; // nop
+		*(u32*)0x0200B114 = generateA7Instr(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B124 = generateA7Instr(0x0200B124, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B12C = generateA7Instr(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B39C = generateA7Instr(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B5B4 = generateA7Instr(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B5BC = generateA7Instr(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0) {
-		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
+		//*(u32*)0x0200B3A8 = 0xE1A00000; // nop
+		*(u32*)0x0200B3F0 = generateA7Instr(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B408 = 0xE1A00000; // nop
+		*(u32*)0x0200B41C = generateA7Instr(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B42C = generateA7Instr(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B434 = generateA7Instr(0x0200B434, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B8BC = generateA7Instr(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B8C4 = generateA7Instr(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0) {
-		*(u32*)0x0200B184 = 0xE1A00000; // nop
+		//*(u32*)0x0200B184 = 0xE1A00000; // nop
+		*(u32*)0x0200B1D4 = generateA7Instr(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B1EC = 0xE1A00000; // nop
+		*(u32*)0x0200B1FC = generateA7Instr(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B210 = generateA7Instr(0x0200B210, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B218 = generateA7Instr(0x0200B218, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B488 = generateA7Instr(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B6AC = generateA7Instr(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Milky Way (USA)

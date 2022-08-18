@@ -1661,6 +1661,18 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
 
     *thumbSetDmaCardLocation = current_location;
 
+    u32* armDSiSaveLocation = findOffset((u32*)current_location, size, location_sig, 1);
+	if (!armDSiSaveLocation) {
+		return;
+	}
+    dbg_printf("armDSiSaveLocation ");
+	dbg_hexa((u32)armDSiSaveLocation);
+    dbg_printf(" : ");
+    dbg_hexa((u32)*armDSiSaveLocation);
+    dbg_printf("\n\n");
+
+    *armDSiSaveLocation = current_location;
+
     u32* armIrqEnableLocation = findOffset((u32*)current_location, size, location_sig, 1);
 	if (!armIrqEnableLocation) {
 		return;
@@ -1774,6 +1786,10 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->card_set_dma_arm9 = (u32*)((u32)ce9->patches->card_set_dma_arm9 - default_location + current_location);
     ce9->patches->nand_read_arm9 = (u32*)((u32)ce9->patches->nand_read_arm9 - default_location + current_location);
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
+    ce9->patches->dsiSaveOpen = (u32*)((u32)ce9->patches->dsiSaveOpen - default_location + current_location);
+    ce9->patches->dsiSaveClose = (u32*)((u32)ce9->patches->dsiSaveClose - default_location + current_location);
+    ce9->patches->dsiSaveRead = (u32*)((u32)ce9->patches->dsiSaveRead - default_location + current_location);
+    ce9->patches->dsiSaveWrite = (u32*)((u32)ce9->patches->dsiSaveWrite - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);
     ce9->patches->waitSysCycles = (u32*)((u32)ce9->patches->waitSysCycles - default_location + current_location);
     ce9->patches->cart_read = (u32*)((u32)ce9->patches->cart_read - default_location + current_location);

@@ -1009,7 +1009,7 @@ static void log_arm9(void) {
 	#endif
 }
 
-static void nandRead(void) {
+static bool nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1031,16 +1031,13 @@ static void nandRead(void) {
 	dbg_hexa(marker);
 	#endif
 
-    if (tryLockMutex(&saveMutex)) {
-		//driveInitialize();
-	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileRead(memory, *savFile, flash, len, -1);
-    	cardReadLED(false, true);
-  		unlockMutex(&saveMutex);
-	}
+	//driveInitialize();
+	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
+	return fileRead(memory, *savFile, flash, len, -1);
+	//cardReadLED(false, true);
 }
 
-static void nandWrite(void) {
+static bool nandWrite(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1062,14 +1059,11 @@ static void nandWrite(void) {
 	dbg_hexa(marker);
 	#endif
 
-  	if (tryLockMutex(&saveMutex)) {
-		//driveInitialize();
-		saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
-	    cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-		fileWrite(memory, *savFile, flash, len, -1);
-    	cardReadLED(false, true);
-  		unlockMutex(&saveMutex);
-	}
+	//driveInitialize();
+	saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
+	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
+	return fileWrite(memory, *savFile, flash, len, -1);
+	//cardReadLED(false, true);
 }
 
 /*static void slot2Read(void) {
@@ -1285,17 +1279,17 @@ static void runCardEngineCheck(void) {
                 //IPC_SendSync(0x8);
     		}
     
+			#ifdef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
-    			nandRead();
-    			sharedAddr[3] = 0;
+    			sharedAddr[3] = nandRead();
     		}
 
             if (sharedAddr[3] == (vu32)0x025FFC02) {
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
-    			nandWrite();
-    			sharedAddr[3] = 0;
+    			sharedAddr[3] = nandWrite();
     		}
+			#endif
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
                 dmaLed = false;

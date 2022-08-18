@@ -30,6 +30,7 @@
 #include "igm_text.h"
 #include "nds_header.h"
 #include "cardengine.h"
+#include "fat.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
@@ -55,6 +56,7 @@ static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCT
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 
 int romMapLines = 3; // 4 for SDK5 NTR ROMs on 3DS
 u32 romMap[4][3] =
@@ -101,12 +103,13 @@ extern void waitFrames(int count);
 		extern void callSleepThumb(int ms);
 		callSleepThumb(ms);
 	}
-}
-
-static void waitForArm7(void) {
-	IPC_SendSync(0x4);
-	while (sharedAddr[3] != (vu32)0);
 }*/
+
+static inline void runArm7Cmd(u32 cmd) {
+	sharedAddr[3] = cmd;
+	IPC_SendSync(0x4);
+	while (sharedAddr[3] == cmd);
+}
 
 extern bool IPC_SYNC_hooked;
 extern void hookIPC_SYNC(void);
@@ -321,7 +324,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		/*volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
         (*terminateForPullOutRef);
 		sharedAddr[3] = 0x5245424F;
-		waitForArm7();
+		runArm7Cmd();
 	}
 }*/
 
@@ -333,6 +336,60 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return false;
 }
 
+static u32 dsiSaveSeekPos = 0;
+static bool dsiSaveOpened = false;
+
+bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	dsiSaveOpened = true;
+	return true;
+}
+
+bool dsiSaveClose(void* ctx) {
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	//toncset(ctx, 0, 0x80);
+	dsiSaveOpened = false;
+	return true;
+}
+
+bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+
+	// Send a command to the ARM7 to read the save
+	u32 commandNandRead = 0x025FFC01;
+
+	// Write the command
+	sharedAddr[0] = (vu32)dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = dsiSaveSeekPos;
+	runArm7Cmd(commandNandRead);
+
+	dsiSaveSeekPos += len;
+	return dsiSaveOpened;
+}
+
+bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+
+	// Send a command to the ARM7 to write the save
+	u32 commandNandWrite = 0x025FFC02;
+
+	// Write the command
+	sharedAddr[0] = (vu32)src;
+	sharedAddr[1] = len;
+	sharedAddr[2] = dsiSaveSeekPos;
+	runArm7Cmd(commandNandWrite);
+
+	dsiSaveSeekPos += len;
+	return dsiSaveOpened;
+}
+
 u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	// Send a command to the ARM7 to read the GBA ROM
 	/*u32 commandRead = 0x025FBC01;
@@ -341,9 +398,7 @@ u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	sharedAddr[0] = (vu32)dst;
 	sharedAddr[1] = len;
 	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
-
-	waitForArm7();*/
+	runArm7Cmd(commandRead);*/
     return 0; 
 }
 

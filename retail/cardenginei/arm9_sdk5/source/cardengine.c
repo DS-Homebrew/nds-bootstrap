@@ -717,6 +717,75 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifdef TWLSDK
+#ifdef DLDI
+static u32 dsiSaveSeekPos = 0;
+#endif
+#endif
+
+bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
+#ifdef TWLSDK
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	return true;
+#else
+	return false;
+#endif
+#else
+	return false;
+#endif
+}
+
+bool dsiSaveClose(void* ctx) {
+#ifdef TWLSDK
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	//toncset(ctx, 0, 0x80);
+	return true;
+#else
+	return false;
+#endif
+#else
+	return false;
+#endif
+}
+
+bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+#ifdef TWLSDK
+#ifdef DLDI
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileRead(dst, *savFile, dsiSaveSeekPos, len, 0);
+	dsiSaveSeekPos += len;
+	return res;
+#else
+	return false;
+#endif
+#else
+	return false;
+#endif
+}
+
+bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+#ifdef TWLSDK
+#ifdef DLDI
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
+	dsiSaveSeekPos += len;
+	return res;
+#else
+	return false;
+#endif
+#else
+	return false;
+#endif
+}
+
+#ifdef TWLSDK
 void initMBKARM9_dsiMode(void) {
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;

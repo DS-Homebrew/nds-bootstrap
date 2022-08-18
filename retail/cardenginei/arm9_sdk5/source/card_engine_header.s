@@ -78,6 +78,10 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+.word   dsiSaveOpen_arm
+.word   dsiSaveClose_arm
+.word   dsiSaveRead_arm
+.word   dsiSaveWrite_arm
 .word	cardStructArm9
 .word   card_pull
 .word   0x0
@@ -305,6 +309,66 @@ nand_write_arm9:
 	ldmfd   sp!, {r3-r11,pc}
 _blx_r6_stub_nand_write:
 	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveOpen_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, =dsiSaveOpen
+
+	bl		_blx_r6_stub_dsiSaveOpen
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveOpen:
+	bx	r6
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveClose_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r9,lr}
+
+	ldr		r6, =dsiSaveClose
+
+	bl		_blx_r6_stub_dsiSaveClose
+
+	ldmfd   sp!, {r1-r9,pc}
+_blx_r6_stub_dsiSaveClose:
+	bx	r6
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveRead_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, =dsiSaveRead
+
+	bl		_blx_r6_stub_dsiSaveRead
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveRead:
+	bx	r6
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveWrite_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, =dsiSaveWrite
+
+	bl		_blx_r6_stub_dsiSaveWrite
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveWrite:
+	bx	r6
 .pool
 @---------------------------------------------------------------------------------
 

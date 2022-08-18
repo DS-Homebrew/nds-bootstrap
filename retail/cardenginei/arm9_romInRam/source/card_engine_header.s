@@ -72,6 +72,10 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+.word   dsiSaveOpen_arm
+.word   dsiSaveClose_arm
+.word   dsiSaveRead_arm
+.word   dsiSaveWrite_arm
 .word	cardStructArm9
 .word   waitSysCycles
 .word	cart_read
@@ -322,10 +326,84 @@ _blx_r6_stub_thumb_card_set_dma:
 ce9location15:
 .word   ce9
 cardReadRef15:
-.word   cardSetDma-ce9 
+.word   cardSetDma-ce9
 @---------------------------------------------------------------------------------
 
 	.arm
+@---------------------------------------------------------------------------------
+dsiSaveOpen_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, dsiSaveOpenRef
+    ldr     r7, ce9locationDSiSave
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_dsiSaveOpen
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveOpen:
+	bx	r6
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveClose_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r1-r9,lr}
+
+	ldr		r6, dsiSaveCloseRef
+    ldr     r7, ce9locationDSiSave
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_dsiSaveClose
+
+	ldmfd   sp!, {r1-r9,pc}
+_blx_r6_stub_dsiSaveClose:
+	bx	r6
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveRead_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, dsiSaveReadRef
+    ldr     r7, ce9locationDSiSave
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_dsiSaveRead
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveRead:
+	bx	r6
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveWrite_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r9,lr}
+
+	ldr		r6, dsiSaveWriteRef
+    ldr     r7, ce9locationDSiSave
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_dsiSaveWrite
+
+	ldmfd   sp!, {r3-r9,pc}
+_blx_r6_stub_dsiSaveWrite:
+	bx	r6
+ce9locationDSiSave:
+.word   ce9
+dsiSaveOpenRef:
+.word   dsiSaveOpen-ce9
+dsiSaveCloseRef:
+.word   dsiSaveClose-ce9
+dsiSaveReadRef:
+.word   dsiSaveRead-ce9
+dsiSaveWriteRef:
+.word   dsiSaveWrite-ce9
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 nand_read_arm9:
 nand_write_arm9:
