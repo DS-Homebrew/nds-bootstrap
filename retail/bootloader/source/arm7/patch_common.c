@@ -4358,7 +4358,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x02026F68 = generateA7Instr(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
 		*(u32*)0x02092050 = 0xE1A00000; // nop
-		*(u32*)0x02092078 = 0xE3A05001; // mov r5, #1
+		*(u32*)0x02092078 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0209291C = generateA7Instr(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02092934 = 0xE1A00000; // nop
 		*(u32*)0x02092944 = generateA7Instr(0x02092944, (u32)ce9->patches->dsiSaveOpen);
@@ -4413,7 +4413,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x020271E0 = generateA7Instr(0x020271E0, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
 		*(u32*)0x020922D4 = 0xE1A00000; // nop
-		*(u32*)0x020922FC = 0xE3A05001; // mov r5, #1
+		*(u32*)0x020922FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02092D4C = generateA7Instr(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02092D64 = 0xE1A00000; // nop
 		*(u32*)0x02092D74 = generateA7Instr(0x02092D74, (u32)ce9->patches->dsiSaveOpen);
