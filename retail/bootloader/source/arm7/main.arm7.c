@@ -383,13 +383,8 @@ static void NDSTouchscreenMode(void) {
 }
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
-	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
-	u32* moduleParamsOffset = malloc(0x100);
-
-	//memset(moduleParamsOffset, 0, sizeof(module_params_t));
-	memset(moduleParamsOffset, 0, 0x100);
-
-	module_params_t* moduleParams = (module_params_t*)(moduleParamsOffset - 7);
+	module_params_t* moduleParams = (module_params_t*)malloc(sizeof(module_params_t));
+	toncset(moduleParams, 0, sizeof(module_params_t));
 
 	moduleParams->compressed_static_end = 0; // Avoid decompressing
 	switch (donorSdkVer) {
@@ -468,8 +463,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		}
 	}
 
-	fileRead((u32*)&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
-	fileRead((u32*)&accessControl, file, srlAddr+0x1B4, sizeof(u32));
+	fileRead((char*)&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
+	fileRead((char*)&accessControl, file, srlAddr+0x1B4, sizeof(u32));
 
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
@@ -944,9 +939,9 @@ int arm7_main(void) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {
-		fileRead((u32*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
-		fileRead((u32*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
-		fileRead((u32*)&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
+		fileRead((char*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
+		fileRead((char*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+		fileRead((char*)&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
 
 		// Calculate i-overlay pack size
 		for (u32 i = arm9iromOffset+arm9ibinarySize; i < arm7iromOffset; i++) {
@@ -1032,7 +1027,7 @@ int arm7_main(void) {
 	buildFatTableCache(&romFile);
 	if (wramUsed) {
 		if (romFile.fatTableCached) {
-			bool startMem = (ndsHeader->unitCode > 0 && ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
+			bool startMem = (ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
 			if (startMem) {
@@ -1129,8 +1124,8 @@ int arm7_main(void) {
 		moduleParams,
 		romFile.firstCluster,
 		savFile.firstCluster,
-		romFile.fatTableCache,
-		savFile.fatTableCache,
+		(u32)romFile.fatTableCache,
+		(u32)savFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
 		pageFileCluster,

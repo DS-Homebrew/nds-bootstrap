@@ -517,13 +517,8 @@ static void DSiTouchscreenMode(void) {
 }
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
-	//u32* moduleParamsOffset = malloc(sizeof(module_params_t));
-	u32* moduleParamsOffset = malloc(0x100);
-
-	//toncset(moduleParamsOffset, 0, sizeof(module_params_t));
-	toncset(moduleParamsOffset, 0, 0x100);
-
-	module_params_t* moduleParams = (module_params_t*)(moduleParamsOffset - 7);
+	module_params_t* moduleParams = (module_params_t*)malloc(sizeof(module_params_t));
+	toncset(moduleParams, 0, sizeof(module_params_t));
 
 	moduleParams->compressed_static_end = 0; // Avoid decompressing
 	switch (donorSdkVer) {
@@ -988,7 +983,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		if (!useTwlCfg) {
 			// Reconstruct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
-			if (ndsHeader->arm9destination < 0x02000800) {
+			if ((u32)ndsHeader->arm9destination < 0x02000800) {
 				twlCfg = (u8*)0x02FFD400;
 			}
 			u8* personalData = (u8*)0x02FFFC80;
@@ -1021,7 +1016,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		u8* twlCfg = (u8*)0x02000400;
-		if (ndsHeader->arm9destination < 0x02000800) {
+		if ((u32)ndsHeader->arm9destination < 0x02000800) {
 			twlCfg = (u8*)0x02FFD400;
 			*(u32*)0x02FFFDFC = 0x02FFD400;
 		}
@@ -1239,7 +1234,7 @@ int arm7_main(void) {
 	aFile* romFile = (aFile*)(dsiEnhancedMbk ? ROM_FILE_LOCATION_ALT : ROM_FILE_LOCATION);
 	*romFile = getFileFromCluster(storedFileCluster, gameOnFlashcard);
 
-	fileRead(&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), -1);
+	fileRead((char*)&oldArm7mbk, *romFile, 0x1A0, sizeof(u32), -1);
 
 	// Sav file
 	aFile* savFile = (aFile*)(dsiEnhancedMbk ? SAV_FILE_LOCATION_ALT : SAV_FILE_LOCATION);
@@ -1290,20 +1285,20 @@ int arm7_main(void) {
 		}*/
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
-		if (dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = 0x02E80000;
+		if ((u32)dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = (u32*)0x02E80000;
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
 			if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0xB880000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0xB880000;
-				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0xB880000;
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0xB880000);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
 				clusterCache += 0xB880000;
 				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
 			} else {
 				tonccpy((char*)0x02EE0000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32)romFile->fatTableCache+0x7E0000;
-				savFile->fatTableCache = (u32)savFile->fatTableCache+0x7E0000;
-				lastClusterCacheUsed = (u32)lastClusterCacheUsed+0x7E0000;
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0x7E0000);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0x7E0000);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0x7E000);
 				clusterCache += 0x7E0000;
 				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			}
@@ -1676,7 +1671,7 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead((u32*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), -1);
+		fileRead((char*)&clonebootFlag, *romFile, baseRomSize, sizeof(u32), -1);
 		bool usesCloneboot = (clonebootFlag == 0x16361);
 		if (usesCloneboot) {
 			dbg_printf("Cloneboot detected\n");
@@ -2009,12 +2004,12 @@ int arm7_main(void) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		if (!gameOnFlashcard) {
 			*(vu32*)0x4004820 = BIT(3);	// Set SD IRQ mask register
-			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
-			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
 		} else {
 			*(vu32*)0x4004820 = 0;	// Clear SD IRQ mask register
 		}
 	}*/
+			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
+			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
 
 	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
