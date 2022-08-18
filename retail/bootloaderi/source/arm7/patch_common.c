@@ -550,7 +550,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KMGE") == 0) {
 		//*(u32*)0x0200B0A0 = 0xE1A00000; // nop
 		*(u32*)0x0200B0E8 = generateA7Instr(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B100 = 0xE1A00000; // nop
 		*(u32*)0x0200B114 = generateA7Instr(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B124 = generateA7Instr(0x0200B124, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B12C = generateA7Instr(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
@@ -563,7 +562,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KMGV") == 0) {
 		//*(u32*)0x0200B3A8 = 0xE1A00000; // nop
 		*(u32*)0x0200B3F0 = generateA7Instr(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B408 = 0xE1A00000; // nop
 		*(u32*)0x0200B41C = generateA7Instr(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B42C = generateA7Instr(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B434 = generateA7Instr(0x0200B434, (u32)ce9->patches->dsiSaveClose);
@@ -576,7 +574,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KMGJ") == 0) {
 		//*(u32*)0x0200B184 = 0xE1A00000; // nop
 		*(u32*)0x0200B1D4 = generateA7Instr(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B1EC = 0xE1A00000; // nop
 		*(u32*)0x0200B1FC = generateA7Instr(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B210 = generateA7Instr(0x0200B210, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B218 = generateA7Instr(0x0200B218, (u32)ce9->patches->dsiSaveClose);
@@ -589,7 +586,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
 	else if (strncmp(romTid, "KWY", 3) == 0) {
-		*(u32*)0x020054E4 = 0xE1A00000; // nop
+		//*(u32*)0x020054E4 = 0xE1A00000; // nop
+		*(u32*)0x02005534 = generateA7Instr(0x02005534, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200555C = generateA7Instr(0x0200555C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02005570 = generateA7Instr(0x02005570, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02005578 = generateA7Instr(0x02005578, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020057F4 = generateA7Instr(0x020057F4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02005A0C = generateA7Instr(0x02005A0C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02005A14 = generateA7Instr(0x02005A14, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mixed Messages (USA)
@@ -803,6 +807,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02010164 = 0x2001; // movs r0, #1
 		*(u16*)0x02010166 = 0x4770; // bx lr
 		*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+	}
+
+	// Shantae: Risky's Revenge (USA)
+	else if (strcmp(romTid, "KS3E") == 0) {
+		*(u32*)0x0209291C = generateA7Instr(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02092944 = generateA7Instr(0x02092944, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02092958 = generateA7Instr(0x02092958, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02092960 = generateA7Instr(0x02092960, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02092BDC = generateA7Instr(0x02092BDC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02092DF4 = generateA7Instr(0x02092DF4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02092DFC = generateA7Instr(0x02092DFC, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Shantae: Risky's Revenge (Europe)
+	else if (strcmp(romTid, "KS3P") == 0) {
+		*(u32*)0x02092D4C = generateA7Instr(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02092D74 = generateA7Instr(0x02092D74, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02092D88 = generateA7Instr(0x02092D88, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02092D90 = generateA7Instr(0x02092D90, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0209300C = generateA7Instr(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02093224 = generateA7Instr(0x02093224, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0209322C = generateA7Instr(0x0209322C, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Space Invaders Extreme Z (Japan)
