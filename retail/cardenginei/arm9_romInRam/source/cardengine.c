@@ -126,12 +126,13 @@ void endCardReadDma() {
 		IPC_SendSync(0x3);
 		return;
 	}
-    if(ce9->patches->cardEndReadDmaRef) {
-        volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
-        (*cardEndReadDmaRef)();
-    } else if(ce9->thumbPatches->cardEndReadDmaRef) {
-        callEndReadDmaThumb();
-    }    
+
+	if (ce9->patches->cardEndReadDmaRef) {
+		volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
+		(*cardEndReadDmaRef)();
+	} else if (ce9->thumbPatches->cardEndReadDmaRef) {
+		callEndReadDmaThumb();
+	}
 }
 
 void cardSetDma(u32 * params) {
@@ -147,8 +148,8 @@ void cardSetDma(u32 * params) {
 		return;
 	}
 
-    disableIrqMask(IRQ_CARD);
-    disableIrqMask(IRQ_CARD_LINE);
+	disableIrqMask(IRQ_CARD);
+	disableIrqMask(IRQ_CARD_LINE);
 
 	enableIPC_SYNC();
 
@@ -159,23 +160,21 @@ void cardSetDma(u32 * params) {
 	if (ce9->valueBits & extendedMemory) {
 		u32 len2 = 0;
 		for (int i = 0; i < romMapLines; i++) {
-			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
-				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
-				if (newSrc+len > romMap[i][2]) {
-					while (1) {
-						len--;
-						len2++;
-						if (newSrc+len == romMap[i][2]) {
-							break;
-						}
-					}
-					tonccpy(dst, (u8*)newSrc, len);
-					src += len;
-					dst += len;
-				} else {
-					ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
-					break;
-				}
+			if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
+				continue;
+
+			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+			if (newSrc+len > romMap[i][2]) {
+				do {
+					len--;
+					len2++;
+				} while (newSrc+len != romMap[i][2]);
+				tonccpy(dst, (u8*)newSrc, len);
+				src += len;
+				dst += len;
+			} else {
+				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+				break;
 			}
 		}
 	} else {
@@ -204,52 +203,51 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-    u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
+	u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
 
-    if(dma >= 0 
-        && dma <= 3 
-        //&& func != NULL
-        && len > 0
-        && !(((int)dst) & 3)
-        && isNotTcm(dst, len)
-        // check 512 bytes page alignement 
-        && !(((int)len) & 511)
-        && !(((int)src) & 511)
+	if (dma >= 0 
+         && dma <= 3 
+         //&& func != NULL
+         && len > 0
+         && !(((int)dst) & 3)
+         && isNotTcm(dst, len)
+         // check 512 bytes page alignement 
+         && !(((int)len) & 511)
+         && !(((int)src) & 511)
 	) {
 		isDma = true;
-        if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef)
-		{
+		if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
 			if (!(ce9->valueBits & isSdk5)) {
 				cacheFlush();
 				cardSetDma(NULL);
 			}
-            return true;
-		} /*else {
+			return true;
+		} /* else {
 			isDma = false;
-			dma=4;
-            clearIcache();
-		}*/
-    } /*else {
-        isDma = false;
-        dma=4;
-        clearIcache();
-    }*/
+			dma = 4;
+			clearIcache();
+		} */
+	} /* else {
+		isDma = false;
+		dma=4;
+		clearIcache();
+	} */
 
-    return false;
+	return false;
 }
 
 static int counter=0;
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
-    cardStruct[0] = src;
-    cardStruct[1] = (vu32)dst;
-    cardStruct[2] = len;
+	cardStruct[0] = src;
+	cardStruct[1] = (vu32)dst;
+	cardStruct[2] = len;
 
-    cardRead(cacheStruct, dst, src, len);
+	cardRead(cacheStruct, dst, src, len);
 
-    counter++;
+	counter++;
 	return counter;
 }
 
@@ -290,23 +288,21 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ce9->valueBits & extendedMemory) {
 		u32 len2 = 0;
 		for (int i = 0; i < romMapLines; i++) {
-			if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
-				u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
-				if (newSrc+len > romMap[i][2]) {
-					while (1) {
-						len--;
-						len2++;
-						if (newSrc+len == romMap[i][2]) {
-							break;
-						}
-					}
-					tonccpy(dst, (u8*)newSrc, len);
-					src += len;
-					dst += len;
-				} else {
-					tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
-					break;
-				}
+			if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
+				continue;
+
+			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+			if (newSrc+len > romMap[i][2]) {
+				do {
+					len--;
+					len2++;
+				} while (newSrc+len != romMap[i][2]);
+				tonccpy(dst, (u8*)newSrc, len);
+				src += len;
+				dst += len;
+			} else {
+				tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+				break;
 			}
 		}
 	} else {
@@ -316,7 +312,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		}
 		tonccpy(dst, (u8*)newSrc, len);
 	}
-    isDma=false;
+	isDma = false;
 }
 
 /*void cardPullOut(void) {
@@ -399,7 +395,7 @@ u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	sharedAddr[1] = len;
 	sharedAddr[2] = src;
 	runArm7Cmd(commandRead);*/
-    return 0; 
+	return 0;
 }
 
 extern void reset(u32 param, u32 tid2);
