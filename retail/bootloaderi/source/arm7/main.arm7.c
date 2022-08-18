@@ -554,11 +554,11 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
 }
 
-static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
+/*static inline u32 getRomSizeNoArmBins(const tNDSHeader* ndsHeader) {
 	return (baseRomSize+0x88) - ndsHeader->arm7romOffset - ndsHeader->arm7binarySize + overlaysSize;
 }
 
-/*static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
+static inline u32 getIRomSizeNoArmBins(const tDSiHeader* dsiHeader) {
 	return (u32)dsiHeader->arm9iromOffset - dsiHeader->ndshdr.arm7romOffset - dsiHeader->ndshdr.arm7binarySize + overlaysSize;
 }*/
 
@@ -1804,7 +1804,10 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!extendedMemoryConfirmed) {
+		if (extendedMemoryConfirmed) {
+			memset_addrs_arm7(CARDENGINEI_ARM7_BUFFERED_LOCATION, CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM);
+			memset_addrs_arm7(CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM+0x2000, CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION+0x7000);
+		} else {
 			toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x48000);
 		}
 
