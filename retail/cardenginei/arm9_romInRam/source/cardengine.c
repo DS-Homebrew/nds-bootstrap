@@ -62,7 +62,7 @@ u32 romMap[4][3] =
 	{0x00008000, 0x0C3E2000, 0x0C7E0000},
 	{0x00406000, 0x0C800000, 0x0D000000},
 	{0x00C06000, 0x03700000, 0x03780000},
-	{0x00C06000, 0x03700000, 0x03780000}
+	{0x01C06000, 0x03700000, 0x03780000}
 };
 
 /*u32 romMapSdk5Ntr[4][3] =
@@ -462,6 +462,7 @@ u32 myIrqEnable(u32 irq) {
 		if (ce9->valueBits & extendedMemory) {
 			if (ce9->consoleModel > 0) {
 				romMap[1][2] = 0x0E000000;
+				romMap[2][0] += 0x1000000;
 			}
 			if (ce9->valueBits & isSdk5) {
 				if (ndsHeader->unitCode > 0) {
@@ -485,7 +486,6 @@ u32 myIrqEnable(u32 irq) {
 					if (ce9->consoleModel > 0) {
 						romMap[2][1] = 0x0D000000;
 						romMap[2][2] = 0x0E000000;
-						romMap[3][0] += 0x1000000;
 						romMapLines = 4;
 					}
 				}
