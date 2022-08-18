@@ -676,7 +676,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			|| (!dsiModeConfirmed && !isSdk5(moduleParams) && consoleModel==0 && romSize <= 0x00800000));
 
 	  if (!res && extendedMemory && !dsiModeConfirmed) {
-	    u32 romSizeLimit = (consoleModel==0 ? (extendedMemory==2 ? 0x00C7E000 : 0x00BFE000) : (extendedMemory==2 ? 0x01C7E000 : 0x01BFE000));
+	    u32 romSizeLimit = (consoleModel==0 ? (extendedMemory==2 ? 0x00C76000 : 0x00BF6000) : (extendedMemory==2 ? 0x01C76000 : 0x01BF6000));
 		res = (romSize <= romSizeLimit);
 		extendedMemoryConfirmed = res;
 		moreMemory = (dsiWramAccess && romSize > (consoleModel==0 ? 0x00BFE000 : 0x01BFE000));
@@ -1804,7 +1804,7 @@ int arm7_main(void) {
 			}
 		}
 
-		if (extendedMemoryConfirmed) {
+		if (extendedMemoryConfirmed && (moreMemory || !dsiWramAccess)) {
 			memset_addrs_arm7(CARDENGINEI_ARM7_BUFFERED_LOCATION, CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM);
 			memset_addrs_arm7(CARDENGINEI_ARM9_CACHED_LOCATION1_ROMINRAM+0x2000, CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION+0x7000);
 		} else {

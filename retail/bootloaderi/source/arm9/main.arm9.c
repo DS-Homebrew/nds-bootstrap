@@ -338,8 +338,8 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					*(u16*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0xC) = REG_SCFG_CLK;
 				}
 				if (extendedMemoryConfirmed && moreMemory) {
-					for (int i = 0; i < 16; i++) {
-						transferToArm9(i);
+					for (int i = 0; i < 15; i++) {
+						transferToArm9(i+1);
 					}
 				} else {
 					transferToArm9(15);
