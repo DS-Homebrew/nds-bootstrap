@@ -408,7 +408,7 @@ static module_params_t* buildModuleParams(u32 donorSdkVer) {
 			break;
 	}
 
-	return moduleParams;
+	return (module_params_t*)(moduleParams - 7);
 }
 
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
