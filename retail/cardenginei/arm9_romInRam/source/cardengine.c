@@ -165,10 +165,10 @@ void cardSetDma(u32 * params) {
 
 			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 			if (newSrc+len > romMap[i][2]) {
-				while (newSrc+len != romMap[i][2]) {
+				do {
 					len--;
 					len2++;
-				}
+				} while (newSrc+len != romMap[i][2]);
 				tonccpy(dst, (u8*)newSrc, len);
 				src += len;
 				dst += len;
@@ -293,10 +293,10 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
 			if (newSrc+len > romMap[i][2]) {
-				while (newSrc+len != romMap[i][2]) {
+				do {
 					len--;
 					len2++;
-				}
+				} while (newSrc+len != romMap[i][2]);
 				tonccpy(dst, (u8*)newSrc, len);
 				src += len;
 				dst += len;
