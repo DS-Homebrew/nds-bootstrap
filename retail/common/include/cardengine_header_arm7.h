@@ -94,6 +94,7 @@ typedef struct cardengineArm7 {
 		13: isSdk5
 		14: asyncCardRead
 		15: twlTouch
+		16: cloneboot
 		31: scfgLocked
 	*/
     u32* languageAddr;

@@ -3127,7 +3127,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014BDC;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201A38C;
 
-		*(u32*)0x0200B0A0 = 0xE1A00000; // nop
+		*(u32*)0x0200B0E8 = generateA7Instr(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B100 = 0xE1A00000; // nop
+		*(u32*)0x0200B114 = generateA7Instr(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B124 = generateA7Instr(0x0200B124, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B12C = generateA7Instr(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B39C = generateA7Instr(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B5B4 = generateA7Instr(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B5BC = generateA7Instr(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02014BDC = generateA7Instr(0x02014BDC, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		*(u32*)0x0201A38C = generateA7Instr(0x0201A38C, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
@@ -3152,7 +3159,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201528C;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201AA44;
 
-		*(u32*)0x0200B3A8 = 0xE1A00000; // nop
+		*(u32*)0x0200B3F0 = generateA7Instr(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B408 = 0xE1A00000; // nop
+		*(u32*)0x0200B41C = generateA7Instr(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B42C = generateA7Instr(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B434 = generateA7Instr(0x0200B434, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B8BC = generateA7Instr(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B8C4 = generateA7Instr(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x0201528C = generateA7Instr(0x0201528C, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		*(u32*)0x0201AA44 = generateA7Instr(0x0201AA44, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D504 = 0xE1A00000; // nop
@@ -3179,7 +3193,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x0200B184 = 0xE1A00000; // nop
+		*(u32*)0x0200B1D4 = generateA7Instr(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B1EC = 0xE1A00000; // nop
+		*(u32*)0x0200B1FC = generateA7Instr(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B210 = generateA7Instr(0x0200B210, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0200B218 = generateA7Instr(0x0200B218, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B488 = generateA7Instr(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0200B6AC = generateA7Instr(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02014718 = generateA7Instr(0x02014718, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		*(u32*)0x02019C54 = generateA7Instr(0x02019C54, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204B538 = 0xE1A00000; // nop

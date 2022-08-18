@@ -307,7 +307,7 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)dst, savFile, src, len);
 
 			sharedAddr[3] = 0;
-			REG_EXMEMCNT  = exmemcnt;
+			REG_EXMEMCNT = exmemcnt;
 		} break;
 		case 0x53415657: {
 			u16 exmemcnt = REG_EXMEMCNT;
@@ -321,7 +321,7 @@ void myIrqHandlerIPC(void) {
 			fileWrite((char*)src, savFile, dst, len);
 
 			sharedAddr[3] = 0;
-			REG_EXMEMCNT  = exmemcnt;
+			REG_EXMEMCNT = exmemcnt;
 		} break;
 		case 0x524F4D52: {
 			u16 exmemcnt = REG_EXMEMCNT;
@@ -335,7 +335,7 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)dst, romFile, src, len);
 
 			sharedAddr[3] = 0;
-			REG_EXMEMCNT  = exmemcnt;
+			REG_EXMEMCNT = exmemcnt;
 		} break;
 	}
 
@@ -541,6 +541,45 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
 	fileWrite(memory, savFile, (u32)flash, len);
+	return true;
+}
+
+static u32 dsiSaveSeekPos = 0;
+
+bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
+	dsiSaveSeekPos = 0;
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+    return true; 
+}
+
+bool dsiSaveClose(void* ctx) {
+	dsiSaveSeekPos = 0;
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	//toncset(ctx, 0, 0x80);
+    return true; 
+}
+
+bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	setDeviceOwner();
+	fileRead(dst, savFile, dsiSaveSeekPos, len);
+	dsiSaveSeekPos += len;
+    return true; 
+}
+
+bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	setDeviceOwner();
+	fileWrite(src, savFile, dsiSaveSeekPos, len);
+	dsiSaveSeekPos += len;
 	return true;
 }
 
