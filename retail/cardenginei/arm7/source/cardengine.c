@@ -334,10 +334,12 @@ static void initialize(void) {
 		personalData->language = language;
 	}
 
-	romLocation = (char*)(((valueBits & dsiMode) || (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	romLocation = (char*)ROM_SDK5_LOCATION;
+	#else
+	romLocation = (char*)((consoleModel > 0 && (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (valueBits & extendedMemory) {
-		romLocation = (char*)ROM_LOCATION_EXT;
+		romLocation = (char*)((moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT);
 	}
 	#endif
 
