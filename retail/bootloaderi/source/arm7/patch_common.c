@@ -156,13 +156,76 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
-	// Saving not possible to implement?
 	else if (strncmp(romTid, "KKQ", 3) == 0 && saveOnFlashcard) {
+		u32* saveFuncOffsets[19] = {NULL};
+
 		if (ndsHeader->gameCode[3] == 'E') {
-			*(u32*)0x02062F20 = 0xE1A00000; // nop
+			saveFuncOffsets[0] = (u32*)0x0205B148;
+			*(u32*)0x0205B160 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x0205B174;
+			saveFuncOffsets[2] = (u32*)0x0205B18C;
+			saveFuncOffsets[3] = (u32*)0x0205B1A0;
+			saveFuncOffsets[4] = (u32*)0x0205B1B8;
+			saveFuncOffsets[5] = (u32*)0x0205B1CC;
+			saveFuncOffsets[6] = (u32*)0x0205B1DC;
+			saveFuncOffsets[7] = (u32*)0x0205B24C;
+			*(u32*)0x0205B264 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x0205B278;
+			saveFuncOffsets[9] = (u32*)0x0205B290;
+			saveFuncOffsets[10] = (u32*)0x0205B2A4;
+			saveFuncOffsets[11] = (u32*)0x0205B2BC;
+			saveFuncOffsets[12] = (u32*)0x0205B2D0;
+			saveFuncOffsets[13] = (u32*)0x0205B2E0;
+			*(u32*)0x0205B350 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
+			saveFuncOffsets[14] = (u32*)0x0205B384;
+			saveFuncOffsets[15] = (u32*)0x0205B3A4;
+			saveFuncOffsets[16] = (u32*)0x0205B3AC;
+			saveFuncOffsets[17] = (u32*)0x0205B40C;
+			saveFuncOffsets[18] = (u32*)0x0205B424;
 		} else if (ndsHeader->gameCode[3] == 'P') {
-			*(u32*)0x02064B7C = 0xE1A00000; // nop
+			saveFuncOffsets[0] = (u32*)0x0205C6F8;
+			*(u32*)0x0205C710 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x0205C724;
+			saveFuncOffsets[2] = (u32*)0x0205C73C;
+			saveFuncOffsets[3] = (u32*)0x0205C750;
+			saveFuncOffsets[4] = (u32*)0x0205C768;
+			saveFuncOffsets[5] = (u32*)0x0205C77C;
+			saveFuncOffsets[6] = (u32*)0x0205C78C;
+			saveFuncOffsets[7] = (u32*)0x0205C7FC;
+			*(u32*)0x0205C814 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x0205C828;
+			saveFuncOffsets[9] = (u32*)0x0205C840;
+			saveFuncOffsets[10] = (u32*)0x0205C854;
+			saveFuncOffsets[11] = (u32*)0x0205C86C;
+			saveFuncOffsets[12] = (u32*)0x0205C880;
+			saveFuncOffsets[13] = (u32*)0x0205C890;
+			*(u32*)0x0205C900 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
+			saveFuncOffsets[14] = (u32*)0x0205C934;
+			saveFuncOffsets[15] = (u32*)0x0205C954;
+			saveFuncOffsets[16] = (u32*)0x0205C95C;
+			saveFuncOffsets[17] = (u32*)0x0205C9BC;
+			saveFuncOffsets[18] = (u32*)0x0205C9D4; 
 		}
+
+		*saveFuncOffsets[0] = generateA7Instr((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[1] = generateA7Instr((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[2] = generateA7Instr((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
+		*saveFuncOffsets[3] = generateA7Instr((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[4] = generateA7Instr((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
+		*saveFuncOffsets[5] = generateA7Instr((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[6] = generateA7Instr((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[7] = generateA7Instr((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[8] = generateA7Instr((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[9] = generateA7Instr((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
+		*saveFuncOffsets[10] = generateA7Instr((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[11] = generateA7Instr((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
+		*saveFuncOffsets[12] = generateA7Instr((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[13] = generateA7Instr((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveWrite);
+		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Cake Ninja (USA)
@@ -427,74 +490,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KBCV") == 0) {
 		*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
 	}
-
-	// Bugs'N'Balls (USA)
-	// Bugs'N'Balls (Europe)
-	/*else if (strncmp(romTid, "KKQ", 3) == 0) {
-		u32* saveFuncOffsets[19] = {NULL};
-
-		if (ndsHeader->gameCode[3] == 'E') {
-			saveFuncOffsets[0] = (u32*)0x0205B148;
-			saveFuncOffsets[1] = (u32*)0x0205B174;
-			saveFuncOffsets[2] = (u32*)0x0205B18C;
-			saveFuncOffsets[3] = (u32*)0x0205B1A0;
-			saveFuncOffsets[4] = (u32*)0x0205B1B8;
-			saveFuncOffsets[5] = (u32*)0x0205B1CC;
-			saveFuncOffsets[6] = (u32*)0x0205B1DC;
-			saveFuncOffsets[7] = (u32*)0x0205B24C;
-			saveFuncOffsets[8] = (u32*)0x0205B278;
-			saveFuncOffsets[9] = (u32*)0x0205B290;
-			saveFuncOffsets[10] = (u32*)0x0205B2A4;
-			saveFuncOffsets[11] = (u32*)0x0205B2BC;
-			saveFuncOffsets[12] = (u32*)0x0205B2D0;
-			saveFuncOffsets[13] = (u32*)0x0205B2E0;
-			saveFuncOffsets[14] = (u32*)0x0205B384;
-			saveFuncOffsets[15] = (u32*)0x0205B3A4;
-			saveFuncOffsets[16] = (u32*)0x0205B3AC;
-			saveFuncOffsets[17] = (u32*)0x0205B40C;
-			saveFuncOffsets[18] = (u32*)0x0205B424;
-		} else if (ndsHeader->gameCode[3] == 'P') {
-			saveFuncOffsets[0] = (u32*)0x0205C6F8;
-			saveFuncOffsets[1] = (u32*)0x0205C724;
-			saveFuncOffsets[2] = (u32*)0x0205C73C;
-			saveFuncOffsets[3] = (u32*)0x0205C750;
-			saveFuncOffsets[4] = (u32*)0x0205C768;
-			saveFuncOffsets[5] = (u32*)0x0205C77C;
-			saveFuncOffsets[6] = (u32*)0x0205C78C;
-			saveFuncOffsets[7] = (u32*)0x0205C7FC;
-			saveFuncOffsets[8] = (u32*)0x0205C828;
-			saveFuncOffsets[9] = (u32*)0x0205C840;
-			saveFuncOffsets[10] = (u32*)0x0205C854;
-			saveFuncOffsets[11] = (u32*)0x0205C86C;
-			saveFuncOffsets[12] = (u32*)0x0205C880;
-			saveFuncOffsets[13] = (u32*)0x0205C890;
-			saveFuncOffsets[14] = (u32*)0x0205C934;
-			saveFuncOffsets[15] = (u32*)0x0205C954;
-			saveFuncOffsets[16] = (u32*)0x0205C95C;
-			saveFuncOffsets[17] = (u32*)0x0205C9BC;
-			saveFuncOffsets[18] = (u32*)0x0205C9D4;
-		}
-
-		*saveFuncOffsets[0] = generateA7Instr((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[1] = generateA7Instr((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[2] = generateA7Instr((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
-		*saveFuncOffsets[3] = generateA7Instr((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[4] = generateA7Instr((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
-		*saveFuncOffsets[5] = generateA7Instr((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[6] = generateA7Instr((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[7] = generateA7Instr((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[8] = generateA7Instr((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[9] = generateA7Instr((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
-		*saveFuncOffsets[10] = generateA7Instr((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[11] = generateA7Instr((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
-		*saveFuncOffsets[12] = generateA7Instr((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[13] = generateA7Instr((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveWrite);
-		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveClose);
-	}*/
 
 	// Candle Route (USA)
 	else if (strcmp(romTid, "K9YE") == 0) {
