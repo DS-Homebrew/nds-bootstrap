@@ -1788,6 +1788,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->patches->nand_write_arm9 = (u32*)((u32)ce9->patches->nand_write_arm9 - default_location + current_location);
     ce9->patches->dsiSaveOpen = (u32*)((u32)ce9->patches->dsiSaveOpen - default_location + current_location);
     ce9->patches->dsiSaveClose = (u32*)((u32)ce9->patches->dsiSaveClose - default_location + current_location);
+    ce9->patches->dsiSaveSeek = (u32*)((u32)ce9->patches->dsiSaveSeek - default_location + current_location);
     ce9->patches->dsiSaveRead = (u32*)((u32)ce9->patches->dsiSaveRead - default_location + current_location);
     ce9->patches->dsiSaveWrite = (u32*)((u32)ce9->patches->dsiSaveWrite - default_location + current_location);
     ce9->patches->cardStructArm9 = (u32*)((u32)ce9->patches->cardStructArm9 - default_location + current_location);

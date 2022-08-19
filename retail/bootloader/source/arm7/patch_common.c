@@ -973,7 +973,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020104A0 = 0xE1A00000; // nop
 		*(u32*)0x02010508 = 0xE1A00000; // nop
 		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x0201D770 = generateA7Instr(0x0201D770, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201D780 = generateA7Instr(0x0201D780, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0201F944 = generateA7Instr(0x0201F944, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201F964 = generateA7Instr(0x0201F964, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020267D4 = generateA7Instr(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02026814 = generateA7Instr(0x02026814, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0202684C = generateA7Instr(0x0202684C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020268B8 = generateA7Instr(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020268D4 = generateA7Instr(0x020268D4, (u32)ce9->patches->dsiSaveRead); */
 		*(u32*)0x0203F500 = 0xE1A00000; // nop
+		//*(u32*)0x02041338 = generateA7Instr(0x02041338, (u32)ce9->patches->dsiSaveWrite);
+		//*(u32*)0x0204134C = generateA7Instr(0x0204134C, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02042F10 = 0xE1A00000; // nop
 		*(u32*)0x02049420 = 0xE1A00000; // nop
 		*(u32*)0x0204B27C = 0xE1A00000; // nop
@@ -1215,7 +1226,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
+	// Saving not possible to implement?
 	else if (strncmp(romTid, "KKQ", 3) == 0) {
+		//u32* saveFuncOffsets[19] = {NULL};
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0201B334 = 0xE1A00000; // nop
@@ -1229,10 +1243,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202637C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02029104 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
+			/* *(u32*)0x0205AEB0 = 0xE1A00000; // nop
+			*(u32*)0x0205AED8 = 0xE1A00000; // nop
+			*(u32*)0x0205AEE0 = 0xE1A00000; // nop
+			*(u32*)0x0205AFFC = 0xE1A00000; // nop
+			*(u32*)0x0205B000 = 0xE1A00000; // nop
+			*(u32*)0x0205B004 = 0xE1A00000; // nop
+			*(u32*)0x0205B008 = 0xE1A00000; // nop */
+			/* saveFuncOffsets[0] = (u32*)0x0205B148;
+			saveFuncOffsets[1] = (u32*)0x0205B174;
+			saveFuncOffsets[2] = (u32*)0x0205B18C;
+			saveFuncOffsets[3] = (u32*)0x0205B1A0;
+			saveFuncOffsets[4] = (u32*)0x0205B1B8;
+			saveFuncOffsets[5] = (u32*)0x0205B1CC;
+			saveFuncOffsets[6] = (u32*)0x0205B1DC;
+			saveFuncOffsets[7] = (u32*)0x0205B24C;
+			saveFuncOffsets[8] = (u32*)0x0205B278;
+			saveFuncOffsets[9] = (u32*)0x0205B290;
+			saveFuncOffsets[10] = (u32*)0x0205B2A4;
+			saveFuncOffsets[11] = (u32*)0x0205B2BC;
+			saveFuncOffsets[12] = (u32*)0x0205B2D0;
+			saveFuncOffsets[13] = (u32*)0x0205B2E0;
+			saveFuncOffsets[14] = (u32*)0x0205B384;
+			saveFuncOffsets[15] = (u32*)0x0205B3A4;
+			saveFuncOffsets[16] = (u32*)0x0205B3AC;
+			saveFuncOffsets[17] = (u32*)0x0205B40C;
+			saveFuncOffsets[18] = (u32*)0x0205B424; */
 			*(u32*)0x02062F20 = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
+			/* saveFuncOffsets[0] = (u32*)0x0205C6F8;
+			saveFuncOffsets[1] = (u32*)0x0205C724;
+			saveFuncOffsets[2] = (u32*)0x0205C73C;
+			saveFuncOffsets[3] = (u32*)0x0205C750;
+			saveFuncOffsets[4] = (u32*)0x0205C768;
+			saveFuncOffsets[5] = (u32*)0x0205C77C;
+			saveFuncOffsets[6] = (u32*)0x0205C78C;
+			saveFuncOffsets[7] = (u32*)0x0205C7FC;
+			saveFuncOffsets[8] = (u32*)0x0205C828;
+			saveFuncOffsets[9] = (u32*)0x0205C840;
+			saveFuncOffsets[10] = (u32*)0x0205C854;
+			saveFuncOffsets[11] = (u32*)0x0205C86C;
+			saveFuncOffsets[12] = (u32*)0x0205C880;
+			saveFuncOffsets[13] = (u32*)0x0205C890;
+			saveFuncOffsets[14] = (u32*)0x0205C934;
+			saveFuncOffsets[15] = (u32*)0x0205C954;
+			saveFuncOffsets[16] = (u32*)0x0205C95C;
+			saveFuncOffsets[17] = (u32*)0x0205C9BC;
+			saveFuncOffsets[18] = (u32*)0x0205C9D4; */
 			*(u32*)0x02064B7C = 0xE1A00000; // nop
 		}
+
+		/* *saveFuncOffsets[0] = generateA7Instr((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[1] = generateA7Instr((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[2] = generateA7Instr((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
+		*saveFuncOffsets[3] = generateA7Instr((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[4] = generateA7Instr((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
+		*saveFuncOffsets[5] = generateA7Instr((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[6] = generateA7Instr((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[7] = generateA7Instr((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[8] = generateA7Instr((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[9] = generateA7Instr((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
+		*saveFuncOffsets[10] = generateA7Instr((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[11] = generateA7Instr((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
+		*saveFuncOffsets[12] = generateA7Instr((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[13] = generateA7Instr((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveWrite);
+		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveClose); */
 	}
 
 	// Cake Ninja (USA)
