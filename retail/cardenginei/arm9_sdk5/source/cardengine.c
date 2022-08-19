@@ -755,6 +755,22 @@ bool dsiSaveClose(void* ctx) {
 #endif
 }
 
+bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
+#ifdef TWLSDK
+#ifdef DLDI
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	dsiSaveSeekPos = pos;
+	return true;
+#else
+	return false;
+#endif
+#else
+	return false;
+#endif
+}
+
 bool dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef TWLSDK
 #ifdef DLDI

@@ -551,7 +551,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-    return true; 
+	return true;
 }
 
 bool dsiSaveClose(void* ctx) {
@@ -560,27 +560,29 @@ bool dsiSaveClose(void* ctx) {
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
-    return true; 
+	return true;
+}
+
+bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	dsiSaveSeekPos = pos;
+	return true;
 }
 
 bool dsiSaveRead(void* ctx, void* dst, u32 len) {
-	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
-		return false;
-	}
 	setDeviceOwner();
-	fileRead(dst, savFile, dsiSaveSeekPos, len);
+	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
 	dsiSaveSeekPos += len;
-    return true; 
+	return res;
 }
 
 bool dsiSaveWrite(void* ctx, void* src, u32 len) {
-	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
-		return false;
-	}
 	setDeviceOwner();
-	fileWrite(src, savFile, dsiSaveSeekPos, len);
+	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
 	dsiSaveSeekPos += len;
-	return true;
+	return res;
 }
 
 

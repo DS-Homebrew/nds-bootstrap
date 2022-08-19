@@ -333,14 +333,12 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 static u32 dsiSaveSeekPos = 0;
-static bool dsiSaveOpened = false;
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	dsiSaveOpened = true;
 	return true;
 }
 
@@ -350,7 +348,14 @@ bool dsiSaveClose(void* ctx) {
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
-	dsiSaveOpened = false;
+	return true;
+}
+
+bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	dsiSaveSeekPos = pos;
 	return true;
 }
 
@@ -367,7 +372,7 @@ bool dsiSaveRead(void* ctx, void* dst, u32 len) {
 	runArm7Cmd(commandNandRead);
 
 	dsiSaveSeekPos += len;
-	return dsiSaveOpened;
+	return sharedAddr[3];
 }
 
 bool dsiSaveWrite(void* ctx, void* src, u32 len) {
@@ -383,7 +388,7 @@ bool dsiSaveWrite(void* ctx, void* src, u32 len) {
 	runArm7Cmd(commandNandWrite);
 
 	dsiSaveSeekPos += len;
-	return dsiSaveOpened;
+	return sharedAddr[3];
 }
 
 u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
