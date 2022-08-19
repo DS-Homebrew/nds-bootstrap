@@ -93,7 +93,7 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile 
 	@cp $(LOADBIN) $(LOADBIN_CMP)
-	@$(LZSS) -ewf $(LOADBIN_CMP)
+	@$(LZSS) -ewn $(LOADBIN_CMP)
 
 #---------------------------------------------------------------------------------
 clean:
