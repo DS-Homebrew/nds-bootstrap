@@ -108,8 +108,8 @@ build/
 #!.vscode/launch.json
 #!.vscode/extensions.json
 hb/bootloader/data/sdengine.bin
-hb/nitrofiles/boot.bin
-hb/nitrofiles/bootInject.bin
+hb/nitrofiles/load.bin
+hb/nitrofiles/loadInject.bin
 hb/nitrofiles/sdengine.bin
 retail/nitrofiles/cardengine_arm7*.bin
 retail/nitrofiles/cardengine_arm9*.bin
