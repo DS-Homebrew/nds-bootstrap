@@ -113,6 +113,124 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 extern bool extention(const std::string& filename, const char* ext);
 
+static bool sdFound = false;
+
+char copyBuf[0x200];
+
+int fcopy(const char *sourcePath, const char *destinationPath)
+{
+	FILE* sourceFile = fopen(sourcePath, "rb");
+	off_t fsize = 0;
+	if (sourceFile) {
+		fseek(sourceFile, 0, SEEK_END);
+		fsize = ftell(sourceFile);			// Get source file's size
+		fseek(sourceFile, 0, SEEK_SET);
+	} else {
+		fclose(sourceFile);
+		return 1;
+	}
+
+	FILE* destinationFile = fopen(destinationPath, "wb");
+	if (!destinationFile) {
+		fclose(sourceFile);
+		fclose(destinationFile);
+		return 1;
+	}
+
+	off_t offset = 0;
+	int numr;
+	while (1)
+	{
+		// Copy file to destination path
+		numr = fread(copyBuf, 1, 0x200, sourceFile);
+		fwrite(copyBuf, 1, numr, destinationFile);
+		offset += 0x200;
+
+		if (offset > fsize) {
+			fclose(sourceFile);
+			fclose(destinationFile);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+std::string setApFix(configuration* conf) {
+	sdFound = (conf->sdFound && !conf->b4dsMode);
+	if (!sdFound) {
+		remove("fat:/_nds/nds-bootstrap/apFix.ips");
+		remove("fat:/_nds/nds-bootstrap/apFixCheat.bin");
+	}
+
+	char gameTid[5];
+	u16 headerCRC;
+	FILE* romFile = fopen(conf->ndsPath, "rb");
+	fseek(romFile, 0xC, SEEK_SET);
+	fread(gameTid, 1, 4, romFile);
+	fseek(romFile, 0x15E, SEEK_SET);
+	fread(&headerCRC, 1, sizeof(u16), romFile);
+	fclose(romFile);
+	gameTid[4] = '\0';
+	bool ipsFound = false;
+	bool cheatVer = true;
+	char ipsPath[256];
+
+	// search the main drive first to see if there are manual overrides
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/cht/%s.bin", sdFound ? "sd" : "fat", conf->ndsPath);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+	}
+
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/cht/%s-%X.bin", sdFound ? "sd" : "fat", gameTid, headerCRC);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+	}
+
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/%s.ips", sdFound ? "sd" : "fat", conf->ndsPath);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+		if (ipsFound) {
+			cheatVer = false;
+		}
+	}
+
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/%s-%X.ips", sdFound ? "sd" : "fat", gameTid, headerCRC);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+		if (ipsFound) {
+			cheatVer = false;
+		}
+	}
+
+	// not found, so read from NitroFS
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "nitro:/apfix/cht/%s-%X.bin", gameTid, headerCRC);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+	}
+
+	if (!ipsFound) {
+		snprintf(ipsPath, sizeof(ipsPath), "nitro:/apfix/%s-%X.ips", gameTid, headerCRC);
+		ipsFound = (access(ipsPath, F_OK) == 0);
+		if (ipsFound) {
+			cheatVer = false;
+		}
+	}
+
+	if (ipsFound) {
+		if (!sdFound) {
+			mkdir("fat:/_nds", 0777);
+			mkdir("fat:/_nds/nds-bootstrap", 0777);
+			fcopy(ipsPath, cheatVer ? "fat:/_nds/nds-bootstrap/apFixCheat.bin" : "fat:/_nds/nds-bootstrap/apFix.ips");
+			return cheatVer ? "fat:/_nds/nds-bootstrap/apFixCheat.bin" : "fat:/_nds/nds-bootstrap/apFix.ips";
+		}
+		// we have to copy anyway since ipsPath could be nitroFS
+		fcopy(ipsPath, cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips");
+		return cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips";
+	}
+	return "";
+}
+
 static void load_conf(configuration* conf, const char* fn) {
 	easysave::ini config_file(fn);
 
@@ -156,7 +274,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->gbaSavPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_SAV_PATH").c_str());
 
 	// AP-patch path
-	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
+	conf->apPatchPath = strdup(setApFix(conf).c_str());
 
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);

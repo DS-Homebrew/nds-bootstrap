@@ -147,7 +147,7 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
-	dbg_printf("apPatchPath: %s\n", conf->apPatchPath);
+	dbg_printf("apPatchPath: \"%s\"\n", conf->apPatchPath);
 	if (dsiFeatures()) {
 		dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 		dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
