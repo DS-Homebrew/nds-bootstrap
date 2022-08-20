@@ -176,9 +176,19 @@ std::string setApFix(configuration* conf) {
 	bool cheatVer = true;
 	char ipsPath[256];
 
+	// get the ROM file name, needed for overriding AP fixes that way
+	char filename[96]; // 256-160, as 256 is ipsPath size and apfix path must contain at most 160 chars
+	for(u32 i = 0; i < (strlen(conf->ndsPath) - 1); i++) {
+		// this path always starts with sd:/ or fat:/, so just assume path always has a / in it
+		if(conf->ndsPath[i] == '/') {
+			strncpy(filename, conf->ndsPath+i+1, strlen(conf->ndsPath)-i);
+			filename[strlen(conf->ndsPath)-i] = '\0';
+		}
+	}
+
 	// search the main drive first to see if there are manual overrides
 	if (!ipsFound) {
-		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/cht/%s.bin", sdFound ? "sd" : "fat", conf->ndsPath);
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/cht/%s.bin", sdFound ? "sd" : "fat", filename);
 		ipsFound = (access(ipsPath, F_OK) == 0);
 	}
 
@@ -188,7 +198,7 @@ std::string setApFix(configuration* conf) {
 	}
 
 	if (!ipsFound) {
-		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/%s.ips", sdFound ? "sd" : "fat", conf->ndsPath);
+		snprintf(ipsPath, sizeof(ipsPath), "%s:/_nds/nds-bootstrap/apfix/%s.ips", sdFound ? "sd" : "fat", filename);
 		ipsFound = (access(ipsPath, F_OK) == 0);
 		if (ipsFound) {
 			cheatVer = false;
