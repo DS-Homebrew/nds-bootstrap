@@ -72,6 +72,7 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+.word   dsiSaveCreate_arm
 .word   dsiSaveOpen_arm
 .word   dsiSaveClose_arm
 .word   dsiSaveSeek_arm
@@ -332,6 +333,22 @@ cardReadRef15:
 
 	.arm
 @---------------------------------------------------------------------------------
+dsiSaveCreate_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r7,lr}
+
+	ldr		r6, dsiSaveCreateRef
+    ldr     r7, ce9locationDSiSave
+    add     r6, r6, r7
+
+	bl		_blx_r6_stub_dsiSaveCreate
+
+	ldmfd   sp!, {r3-r7,pc}
+_blx_r6_stub_dsiSaveCreate:
+	bx	r6
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 dsiSaveOpen_arm:
 @---------------------------------------------------------------------------------
     stmfd   sp!, {r3-r9,lr}
@@ -411,6 +428,8 @@ _blx_r6_stub_dsiSaveWrite:
 	bx	r6
 ce9locationDSiSave:
 .word   ce9
+dsiSaveCreateRef:
+.word   dsiSaveCreate-ce9
 dsiSaveOpenRef:
 .word   dsiSaveOpen-ce9
 dsiSaveCloseRef:

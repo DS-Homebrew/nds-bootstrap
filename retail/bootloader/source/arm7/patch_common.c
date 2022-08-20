@@ -272,10 +272,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020320C4 = generateA7Instr(0x020320C4, (u32)ce9->patches->dsiSaveSeek);
 		*(u32*)0x020320D4 = generateA7Instr(0x020320D4, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x020320DC = generateA7Instr(0x020320DC, (u32)ce9->patches->dsiSaveClose);
-		//*(u32*)0x02032154 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
-		//*(u32*)0x02032180 = generateA7Instr(0x02032180, (u32)ce9->patches->dsiSaveOpen);
-		//*(u32*)0x020321BC = generateA7Instr(0x020321BC, (u32)ce9->patches->dsiSaveWrite);
-		//*(u32*)0x020321CC = generateA7Instr(0x020321CC, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02032154 = generateA7Instr(0x02032154, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02032180 = generateA7Instr(0x02032180, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x020321BC = generateA7Instr(0x020321BC, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020321CC = generateA7Instr(0x020321CC, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x0204F5B0 = 0xE1A00000; // nop
 		*(u32*)0x02053278 = 0xE1A00000; // nop
 		*(u32*)0x0205B090 = 0xE1A00000; // nop
@@ -318,10 +318,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020311A4 = generateA7Instr(0x020311A4, (u32)ce9->patches->dsiSaveSeek);
 		*(u32*)0x020311B4 = generateA7Instr(0x020311B4, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x020311BC = generateA7Instr(0x020311BC, (u32)ce9->patches->dsiSaveClose);
-		//*(u32*)0x02031234 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
-		//*(u32*)0x02031260 = generateA7Instr(0x02031260, (u32)ce9->patches->dsiSaveOpen);
-		//*(u32*)0x0203129C = generateA7Instr(0x0203129C, (u32)ce9->patches->dsiSaveWrite);
-		//*(u32*)0x020312AC = generateA7Instr(0x020312AC, (u32)ce9->patches->dsiSaveClose); 
+		*(u32*)0x02031234 = generateA7Instr(0x02031234, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02031260 = generateA7Instr(0x02031260, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0203129C = generateA7Instr(0x0203129C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020312AC = generateA7Instr(0x020312AC, (u32)ce9->patches->dsiSaveClose); 
 		*(u32*)0x0205FCF4 = 0xE1A00000; // nop
 		*(u32*)0x0206488C = 0xE1A00000; // nop
 		*(u32*)0x0206B1C0 = 0xE1A00000; // nop
@@ -345,6 +345,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x02010F2C = 0xE1A00000; // nop
 		*(u32*)0x02010F60 = 0xE1A00000; // nop
+		*(u32*)0x02012E48 = generateA7Instr(0x02012E48, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x02012E5C = 0xE1A00000; // nop
 		*(u32*)0x02012E68 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02012EF8 = 0xE1A00000; // nop
@@ -362,10 +363,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020310A8 = generateA7Instr(0x020310A8, (u32)ce9->patches->dsiSaveSeek);
 		*(u32*)0x020310B8 = generateA7Instr(0x020310B8, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x020310C0 = generateA7Instr(0x020310C0, (u32)ce9->patches->dsiSaveClose);
-		//*(u32*)0x020311C8 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
-		//*(u32*)0x02031164 = generateA7Instr(0x02031164, (u32)ce9->patches->dsiSaveOpen);
-		//*(u32*)0x020311A0 = generateA7Instr(0x020311A0, (u32)ce9->patches->dsiSaveWrite);
-		//*(u32*)0x020311B0 = generateA7Instr(0x020311B0, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020311C8 = generateA7Instr(0x020311C8, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02031164 = generateA7Instr(0x02031164, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x020311A0 = generateA7Instr(0x020311A0, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020311B0 = generateA7Instr(0x020311B0, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02063618 = 0xE1A00000; // nop
 		*(u32*)0x02069F60 = 0xE1A00000; // nop
 		*(u32*)0x0206BDF0 = 0xE1A00000; // nop
@@ -395,7 +396,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200515C = 0xE1A00000; // nop
 		*(u32*)0x02010CE8 = 0xE1A00000; // nop
 		*(u32*)0x02010D1C = 0xE1A00000; // nop
+		*(u32*)0x02012BD4 = generateA7Instr(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02012BE8 = 0xE1A00000; // nop
+		*(u32*)0x02012BF4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012C84 = 0xE1A00000; // nop
+		*(u32*)0x02012C88 = 0xE1A00000; // nop
+		*(u32*)0x02012C8C = 0xE1A00000; // nop
+		*(u32*)0x02012CB4 = 0xE1A00000; // nop
+		*(u32*)0x02012CC0 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02031820 = generateA7Instr(0x02031820, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02031838 = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x02031848 = generateA7Instr(0x02031848, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x02031858 = generateA7Instr(0x02031858, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02031860 = generateA7Instr(0x02031860, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020318D0 = generateA7Instr(0x020318D0, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020318E8 = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x020318FC = generateA7Instr(0x020318FC, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0203190C = generateA7Instr(0x0203190C, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02031914 = generateA7Instr(0x02031914, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x0203198C = generateA7Instr(0x0203198C, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x020319B8 = generateA7Instr(0x020319B8, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020319F4 = generateA7Instr(0x020319F4, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02031A04 = generateA7Instr(0x02031A04, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x02061478 = 0xE1A00000; // nop
 			*(u32*)0x02067D7C = 0xE1A00000; // nop
 			*(u32*)0x02069C0C = 0xE1A00000; // nop
@@ -406,6 +429,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206DCD8 = 0xE1A00000; // nop
 			*(u32*)0x0207050C = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02031870 = generateA7Instr(0x02031870, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02031888 = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x02031898 = generateA7Instr(0x02031898, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x020318A8 = generateA7Instr(0x020318A8, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020318B0 = generateA7Instr(0x020318B0, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02031920 = generateA7Instr(0x02031920, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02031938 = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x0203194C = generateA7Instr(0x0203196C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0203195C = generateA7Instr(0x0203195C, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02031964 = generateA7Instr(0x02031964, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020319DC = generateA7Instr(0x020319DC, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02031A08 = generateA7Instr(0x02031A08, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02031A44 = generateA7Instr(0x02031A44, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02031A54 = generateA7Instr(0x02031A54, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x020614C8 = 0xE1A00000; // nop
 			*(u32*)0x02067DCC = 0xE1A00000; // nop
 			*(u32*)0x02069C5C = 0xE1A00000; // nop
@@ -438,7 +475,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200515C = 0xE1A00000; // nop
 		*(u32*)0x02010CE4 = 0xE1A00000; // nop
 		*(u32*)0x02010D18 = 0xE1A00000; // nop
+		*(u32*)0x02011918 = generateA7Instr(0x02011918, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0201192C = 0xE1A00000; // nop
+		*(u32*)0x02011938 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020119CC = 0xE1A00000; // nop
+		*(u32*)0x020119D0 = 0xE1A00000; // nop
+		*(u32*)0x020119D4 = 0xE1A00000; // nop
+		*(u32*)0x020119FC = 0xE1A00000; // nop
+		*(u32*)0x02011A08 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x020302D4 = generateA7Instr(0x020302D4, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020302EC = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x020302FC = generateA7Instr(0x020302FC, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0203030C = generateA7Instr(0x0203030C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02030314 = generateA7Instr(0x02030314, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02030384 = generateA7Instr(0x02030384, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x0203039C = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x020303B0 = generateA7Instr(0x020303B0, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x020303C0 = generateA7Instr(0x020303C0, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x020303C8 = generateA7Instr(0x020303C8, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02030440 = generateA7Instr(0x02030440, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x0203046C = generateA7Instr(0x0203046C, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020304A8 = generateA7Instr(0x020304A8, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020304B8 = generateA7Instr(0x020304B8, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x02061590 = 0xE1A00000; // nop
 			*(u32*)0x02067EC0 = 0xE1A00000; // nop
 			*(u32*)0x02069D50 = 0xE1A00000; // nop
@@ -449,6 +508,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206DE34 = 0xE1A00000; // nop
 			*(u32*)0x02070668 = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02030324 = generateA7Instr(0x02030324, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x0203033C = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x0203034C = generateA7Instr(0x0203034C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0203035C = generateA7Instr(0x0203035C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02030364 = generateA7Instr(0x02030364, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020303D4 = generateA7Instr(0x020303D4, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020303EC = 0xE1A00000; // nop (dsiSaveGetLength)
+			*(u32*)0x02030400 = generateA7Instr(0x02030400, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x02030410 = generateA7Instr(0x02030410, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02030418 = generateA7Instr(0x02030418, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02030490 = generateA7Instr(0x02030490, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x020304BC = generateA7Instr(0x020304BC, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020304F8 = generateA7Instr(0x020304F8, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02030508 = generateA7Instr(0x02030508, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x020615E0 = 0xE1A00000; // nop
 			*(u32*)0x02067F10 = 0xE1A00000; // nop
 			*(u32*)0x02069DA0 = 0xE1A00000; // nop
@@ -613,9 +686,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x020182F0, heapEnd); // mov r0, #0x23C0000
 		*(u32*)0x02019538 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201C150 = 0xE1A00000; // nop
+		/* *(u32*)0x0201E3C0 = generateA7Instr(0x0201E3C0, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0201E41C = 0xE1A00000; // nop
+		*(u32*)0x0201E428 = generateA7Instr(0x0201E428, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0201E438 = generateA7Instr(0x0201E438, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201E468 = generateA7Instr(0x0201E468, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201E540 = generateA7Instr(0x0201E540, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0201E560 = generateA7Instr(0x0201E560, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201E578 = generateA7Instr(0x0201E578, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0201E588 = generateA7Instr(0x0201E588, (u32)ce9->patches->dsiSaveSeek); */
 		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x02029CFC = generateA7Instr(0x02029CFC, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02029DB8 = generateA7Instr(0x02029DB8, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02029DCC = generateA7Instr(0x02029DCC, (u32)ce9->patches->dsiSaveClose); */
 	}
 
 	// AiRace: Tunnel (USA)
@@ -781,26 +866,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02061984 = 0xE1A00000; // nop
 	}*/
 
-	// Army Defender (USA)
-	// Army Defender (Europe)
-	else if (strncmp(romTid, "KAY", 3) == 0) {
-		*(u32*)0x020051BC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020051C0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02005204 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02005208 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020426BC = 0xE1A00000; // nop
-		*(u32*)0x02045CC4 = 0xE1A00000; // nop
-		*(u32*)0x0204B010 = 0xE1A00000; // nop
-		*(u32*)0x0204CECC = 0xE1A00000; // nop
-		*(u32*)0x0204CED0 = 0xE1A00000; // nop
-		*(u32*)0x0204CEDC = 0xE1A00000; // nop
-		*(u32*)0x0204D020 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0204D07C, heapEnd); // mov r0, #0x23C0000
-		*(u32*)0x0204E3E0 = 0xE1A00000; // nop
-		*(u32*)0x0204E3E8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
-		*(u32*)0x02051AB8 = 0xE1A00000; // nop
-	}
-
 	// Art Style: AQUIA (USA)
 	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAE") == 0) {
@@ -909,6 +974,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
 		*(u32*)0x0200DC9C = 0xE1A00000; // nop
+		/* *(u32*)0x02059E0C = 0xE1A00000; // nop
+		*(u32*)0x02059E14 = 0xE1A00000; // nop
+		*(u32*)0x02059E20 = generateA7Instr(0x02059E20, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02059E3C = generateA7Instr(0x02059E3C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02059E90 = generateA7Instr(0x02059E90, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02059EB0 = 0xE1A00000; // nop
+		*(u32*)0x02059EB8 = 0xE1A00000; // nop
+		*(u32*)0x02059F2C = generateA7Instr(0x02059F2C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02059F9C = generateA7Instr(0x02059F9C, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02059FA8 = generateA7Instr(0x02059FA8, (u32)ce9->patches->dsiSaveClose); */
 		*(u32*)0x02068414 = 0xE1A00000; // nop
 		*(u32*)0x0206CA14 = 0xE1A00000; // nop
 		*(u32*)0x02078504 = 0xE1A00000; // nop
@@ -969,6 +1044,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207BC74 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0207BC78 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207F478 = 0xE1A00000; // nop
+	}
+
+	// Army Defender (USA)
+	// Army Defender (Europe)
+	else if (strncmp(romTid, "KAY", 3) == 0) {
+		*(u32*)0x0200523C = 0xE1A00000; // nop
+		*(u32*)0x02020A28 = generateA7Instr(0x02020A28, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02020A38 = generateA7Instr(0x02020A38, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02020A8C = generateA7Instr(0x02020A8C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02020A94 = generateA7Instr(0x02020A94, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02020ADC = generateA7Instr(0x02020ADC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02020B08 = 0xE1A00000; // nop (dsiSaveGetLength)
+		*(u32*)0x02020B18 = generateA7Instr(0x02020B18, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02020B20 = generateA7Instr(0x02020B20, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020426BC = 0xE1A00000; // nop
+		*(u32*)0x02045CC4 = 0xE1A00000; // nop
+		*(u32*)0x0204B010 = 0xE1A00000; // nop
+		*(u32*)0x0204CECC = 0xE1A00000; // nop
+		*(u32*)0x0204CED0 = 0xE1A00000; // nop
+		*(u32*)0x0204CEDC = 0xE1A00000; // nop
+		*(u32*)0x0204D020 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204D07C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0204E3E0 = 0xE1A00000; // nop
+		*(u32*)0x0204E3E8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x02051AB8 = 0xE1A00000; // nop
 	}
 
 	// Asphalt 4: Elite Racing (USA)
@@ -1296,7 +1396,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
 	else if (strncmp(romTid, "KKQ", 3) == 0) {
-		u32* saveFuncOffsets[19] = {NULL};
+		u32* saveFuncOffsets[20] = {NULL};
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -1345,12 +1445,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[11] = (u32*)0x0205B2BC;
 			saveFuncOffsets[12] = (u32*)0x0205B2D0;
 			saveFuncOffsets[13] = (u32*)0x0205B2E0;
-			*(u32*)0x0205B350 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
-			saveFuncOffsets[14] = (u32*)0x0205B384;
-			saveFuncOffsets[15] = (u32*)0x0205B3A4;
-			saveFuncOffsets[16] = (u32*)0x0205B3AC;
-			saveFuncOffsets[17] = (u32*)0x0205B40C;
-			saveFuncOffsets[18] = (u32*)0x0205B424;
+			saveFuncOffsets[14] = (u32*)0x0205B350;
+			saveFuncOffsets[15] = (u32*)0x0205B384;
+			saveFuncOffsets[16] = (u32*)0x0205B3A4;
+			saveFuncOffsets[17] = (u32*)0x0205B3AC;
+			saveFuncOffsets[18] = (u32*)0x0205B40C;
+			saveFuncOffsets[19] = (u32*)0x0205B424;
 		} else if (ndsHeader->gameCode[3] == 'P') {
 			*(u32*)0x0205B920 = 0xE1A00000;
 			*(u32*)0x0205B960 = 0xE1A00000;
@@ -1389,12 +1489,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[11] = (u32*)0x0205C86C;
 			saveFuncOffsets[12] = (u32*)0x0205C880;
 			saveFuncOffsets[13] = (u32*)0x0205C890;
-			*(u32*)0x0205C900 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
-			saveFuncOffsets[14] = (u32*)0x0205C934;
-			saveFuncOffsets[15] = (u32*)0x0205C954;
-			saveFuncOffsets[16] = (u32*)0x0205C95C;
-			saveFuncOffsets[17] = (u32*)0x0205C9BC;
-			saveFuncOffsets[18] = (u32*)0x0205C9D4; 
+			saveFuncOffsets[14] = (u32*)0x0205C900;
+			saveFuncOffsets[15] = (u32*)0x0205C934;
+			saveFuncOffsets[16] = (u32*)0x0205C954;
+			saveFuncOffsets[17] = (u32*)0x0205C95C;
+			saveFuncOffsets[18] = (u32*)0x0205C9BC;
+			saveFuncOffsets[19] = (u32*)0x0205C9D4; 
 		}
 
 		*saveFuncOffsets[0] = generateA7Instr((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
@@ -1411,11 +1511,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*saveFuncOffsets[11] = generateA7Instr((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
 		*saveFuncOffsets[12] = generateA7Instr((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
 		*saveFuncOffsets[13] = generateA7Instr((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveWrite);
-		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveCreate);
+		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveWrite);
+		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveClose);
+		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveOpen);
+		*saveFuncOffsets[19] = generateA7Instr((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Cake Ninja (USA)
@@ -1800,7 +1901,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KCVE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0200526C = 0xE1A00000; // nop
-		*(u32*)0x02005994 = 0xE3A00001; // mov r0, #1 (dsiSaveCreate)
+		*(u32*)0x02005994 = generateA7Instr(0x02005994, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020059D0 = generateA7Instr(0x020059D0, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02005A28 = generateA7Instr(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x02005A40 = generateA7Instr(0x02005A40, (u32)ce9->patches->dsiSaveClose);
@@ -3331,11 +3432,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014BDC;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201A38C;
 
+		*(u32*)0x0200B048 = generateA7Instr(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0200B080 = 0xE1A00000; // nop
+		*(u32*)0x0200B090 = generateA7Instr(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B0E8 = generateA7Instr(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B100 = 0xE1A00000; // nop
 		*(u32*)0x0200B114 = generateA7Instr(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B124 = generateA7Instr(0x0200B124, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B12C = generateA7Instr(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B388 = generateA7Instr(0x0200B388, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B39C = generateA7Instr(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B5B4 = generateA7Instr(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x0200B5BC = generateA7Instr(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
@@ -3363,11 +3468,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201528C;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201AA44;
 
+		*(u32*)0x0200B350 = generateA7Instr(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0200B388 = 0xE1A00000; // nop
+		*(u32*)0x0200B398 = generateA7Instr(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B3F0 = generateA7Instr(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B408 = 0xE1A00000; // nop
 		*(u32*)0x0200B41C = generateA7Instr(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B42C = generateA7Instr(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B434 = generateA7Instr(0x0200B434, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B690 = generateA7Instr(0x0200B690, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B8BC = generateA7Instr(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x0200B8C4 = generateA7Instr(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
@@ -3397,11 +3506,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200B134 = generateA7Instr(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0200B168 = 0xE1A00000; // nop
+		*(u32*)0x0200B174 = generateA7Instr(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B1D4 = generateA7Instr(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B1EC = 0xE1A00000; // nop
 		*(u32*)0x0200B1FC = generateA7Instr(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B210 = generateA7Instr(0x0200B210, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x0200B218 = generateA7Instr(0x0200B218, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200B478 = generateA7Instr(0x0200B478, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B488 = generateA7Instr(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x0200B6AC = generateA7Instr(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
@@ -3432,7 +3545,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
+		*(u32*)0x0200547C = generateA7Instr(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
+		*(u32*)0x020054BC = generateA7Instr(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020054C8 = 0xE1A00000; // nop
 		*(u32*)0x020054CC = 0xE1A00000; // nop
 		*(u32*)0x020054D0 = 0xE1A00000; // nop
@@ -3444,6 +3559,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005570 = generateA7Instr(0x02005570, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x02005578 = generateA7Instr(0x02005578, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x020057C0 = 0xE1A00000; // nop
+		*(u32*)0x020057E4 = generateA7Instr(0x020057E4, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020057F4 = generateA7Instr(0x020057F4, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02005A0C = generateA7Instr(0x02005A0C, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x02005A14 = generateA7Instr(0x02005A14, (u32)ce9->patches->dsiSaveClose);
@@ -4561,7 +4677,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x02026F68 = generateA7Instr(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		*(u32*)0x0209201C = generateA7Instr(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x02092050 = 0xE1A00000; // nop
+		*(u32*)0x0209205C = generateA7Instr(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x02092078 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0209291C = generateA7Instr(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02092934 = 0xE1A00000; // nop
@@ -4569,6 +4687,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02092958 = generateA7Instr(0x02092958, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x02092960 = generateA7Instr(0x02092960, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02092BA8 = 0xE1A00000; // nop
+		*(u32*)0x02092BCC = generateA7Instr(0x02092BCC, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x02092BDC = generateA7Instr(0x02092BDC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02092DF4 = generateA7Instr(0x02092DF4, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x02092DFC = generateA7Instr(0x02092DFC, (u32)ce9->patches->dsiSaveClose);
@@ -4616,7 +4735,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		*(u32*)0x020271E0 = generateA7Instr(0x020271E0, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		*(u32*)0x020922A0 = generateA7Instr(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020922D4 = 0xE1A00000; // nop
+		*(u32*)0x020922E0 = generateA7Instr(0x020922E0, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020922FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02092D4C = generateA7Instr(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02092D64 = 0xE1A00000; // nop
@@ -4624,6 +4745,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02092D88 = generateA7Instr(0x02092D88, (u32)ce9->patches->dsiSaveRead);
 		*(u32*)0x02092D90 = generateA7Instr(0x02092D90, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02092FD8 = 0xE1A00000; // nop
+		*(u32*)0x02092FFC = generateA7Instr(0x02092FFC, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0209300C = generateA7Instr(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02093224 = generateA7Instr(0x02093224, (u32)ce9->patches->dsiSaveWrite);
 		*(u32*)0x0209322C = generateA7Instr(0x0209322C, (u32)ce9->patches->dsiSaveClose);

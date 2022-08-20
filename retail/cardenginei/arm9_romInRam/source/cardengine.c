@@ -332,14 +332,56 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return false;
 }
 
+static bool dsiSaveEmpty = true;
+static bool dsiSaveInited = false;
 static u32 dsiSaveSeekPos = 0;
+
+static bool dsiSaveInit(void) {
+	if (dsiSaveInited) {
+		return true;
+	}
+	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+
+	// Send a command to the ARM7 to read the save
+	u32 commandNandRead = 0x025FFC01;
+
+	// Write the command
+	sharedAddr[0] = 0x02FFF600;
+	sharedAddr[1] = 512;
+	sharedAddr[2] = 0;
+	runArm7Cmd(commandNandRead);
+
+	for (int i = 0; i < 512; i++) {
+		if (*(char*)(0x02FFF600+i) != 0) {
+			toncset((char*)0x02FFF600, 0, 512);
+			dsiSaveEmpty = false;
+			dsiSaveInited = true;
+			return true;
+		}
+	}
+	dsiSaveInited = true;
+	return false;
+}
+
+bool dsiSaveCreate(const char* path, u32 permit) {
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	if (!dsiSaveInited) {
+		dsiSaveInit();
+	}
+	bool bak = dsiSaveEmpty;
+	dsiSaveEmpty = false;
+	return bak;
+}
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	return true;
+	return dsiSaveInit();
 }
 
 bool dsiSaveClose(void* ctx) {

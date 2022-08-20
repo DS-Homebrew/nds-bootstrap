@@ -114,6 +114,7 @@ patches:
 .word	card_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+.word   dsiSaveCreate_arm
 .word   dsiSaveOpen_arm
 .word   dsiSaveClose_arm
 .word   dsiSaveSeek_arm
@@ -259,6 +260,21 @@ nand_write_arm9:
 	ldmfd   sp!, {r3-r9,pc}
 _blx_r6_stub_nand_write:
 	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveCreate_arm:
+@---------------------------------------------------------------------------------
+    stmfd   sp!, {r3-r7,lr}
+
+	ldr		r6, =dsiSaveCreate
+
+	bl		_blx_r6_stub_dsiSaveCreate
+
+	ldmfd   sp!, {r3-r7,pc}
+_blx_r6_stub_dsiSaveCreate:
+	bx	r6
 .pool
 @---------------------------------------------------------------------------------
 

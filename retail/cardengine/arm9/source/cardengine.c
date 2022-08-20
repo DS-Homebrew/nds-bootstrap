@@ -544,14 +544,47 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	return true;
 }
 
+static bool dsiSaveEmpty = true;
+static bool dsiSaveInited = false;
 static u32 dsiSaveSeekPos = 0;
+
+static bool dsiSaveInit(void) {
+	if (dsiSaveInited) {
+		return true;
+	}
+	setDeviceOwner();
+	fileRead((char*)0x02FFF600, savFile, 0, 512);
+	for (int i = 0; i < 512; i++) {
+		if (*(char*)(0x02FFF600+i) != 0) {
+			toncset((char*)0x02FFF600, 0, 512);
+			dsiSaveEmpty = false;
+			dsiSaveInited = true;
+			return true;
+		}
+	}
+	dsiSaveInited = true;
+	return false;
+}
+
+bool dsiSaveCreate(const char* path, u32 permit) {
+	dsiSaveSeekPos = 0;
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	if (!dsiSaveInited) {
+		dsiSaveInit();
+	}
+	bool bak = dsiSaveEmpty;
+	dsiSaveEmpty = false;
+	return bak;
+}
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	return true;
+	return dsiSaveInit();
 }
 
 bool dsiSaveClose(void* ctx) {
