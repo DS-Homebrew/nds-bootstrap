@@ -147,6 +147,7 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
+	dbg_printf("apPatchPath: %s\n", conf->apPatchPath);
 	if (dsiFeatures()) {
 		dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
 		dbg_printf("boostVram: %s\n", btoa(conf->boostVram));
@@ -186,6 +187,7 @@ static inline void debugConf(configuration* conf) {
 	//dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);
 	dbg_printf("dmaRomRead_LED: %lX\n", conf->dmaRomRead_LED);
+	dbg_printf("apPatchPath: \"%s\"\n", conf->apPatchPath);
 	dbg_printf("asyncCardRead: %s\n", btoa(conf->asyncCardRead));
 	dbg_printf("cardReadDMA: %i\n", conf->cardReadDMA);
 	dbg_printf("boostCpu: %s\n", btoa(conf->boostCpu));
