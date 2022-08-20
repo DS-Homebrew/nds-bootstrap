@@ -224,9 +224,11 @@ std::string setApFix(configuration* conf) {
 			fcopy(ipsPath, cheatVer ? "fat:/_nds/nds-bootstrap/apFixCheat.bin" : "fat:/_nds/nds-bootstrap/apFix.ips");
 			return cheatVer ? "fat:/_nds/nds-bootstrap/apFixCheat.bin" : "fat:/_nds/nds-bootstrap/apFix.ips";
 		}
-		// we have to copy anyway since ipsPath could be nitroFS
-		fcopy(ipsPath, cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips");
-		return cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips";
+		if(memcmp(ipsPath, "nitro:/", 7) == 0) {
+			// nitroFS doesn't exist at bootloader stage and later. Copy it to the drive.
+			fcopy(ipsPath, cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips");
+			return cheatVer ? "sd:/_nds/nds-bootstrap/apFixCheat.bin" : "sd:/_nds/nds-bootstrap/apFix.ips";
+		} else return ipsPath;
 	}
 	return "";
 }
