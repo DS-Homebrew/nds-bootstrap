@@ -1832,6 +1832,55 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020208D0 -= 0x30000;
 		*(u32*)0x02021A68 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02024730 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02065CA0 = generateA7Instr(0x02065CA0, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02065CB4 = generateA7Instr(0x02065CB4, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02065CC4 = generateA7Instr(0x02065CC4, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02065CE4 = 0xE1A00000; // nop
+			*(u32*)0x02065CF0 = generateA7Instr(0x02065CF0, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02065D00 = generateA7Instr(0x02065D00, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02066208 = generateA7Instr(0x02066208, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0206621C = generateA7Instr(0x0206621C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0206622C = generateA7Instr(0x0206622C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0206623C = generateA7Instr(0x0206623C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0206624C = generateA7Instr(0x0206624C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0206625C = generateA7Instr(0x0206625C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020662C0 = generateA7Instr(0x020662C0, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x020662D4 = generateA7Instr(0x020662D4, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020662DC = generateA7Instr(0x020662DC, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02066330 = generateA7Instr(0x02066330, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02066648 = generateA7Instr(0x02066648, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x02066658 = generateA7Instr(0x02066658, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02066684 = generateA7Instr(0x02066684, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02066BE4 = generateA7Instr(0x02066BE4, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02066BF8 = generateA7Instr(0x02066BF8, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x02066C08 = generateA7Instr(0x02066C08, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02066C10 = generateA7Instr(0x02066C10, (u32)ce9->patches->dsiSaveClose);
+		} else if (ndsHeader->gameCode[3] == 'J') {
+			*(u32*)0x02026FA8 = generateA7Instr(0x02026FA8, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02026FC0 = generateA7Instr(0x02026FC0, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02026FD0 = generateA7Instr(0x02026FD0, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02026FF0 = 0xE1A00000; // nop
+			*(u32*)0x02026FFC = generateA7Instr(0x02026FFC, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x0202700C = generateA7Instr(0x0202700C, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02027518 = generateA7Instr(0x02027518, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0202752C = generateA7Instr(0x0202752C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0202753C = generateA7Instr(0x0202753C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0202754C = generateA7Instr(0x0202754C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0202755C = generateA7Instr(0x0202755C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x0202756C = generateA7Instr(0x0202756C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020275E0 = generateA7Instr(0x020275E0, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x020275F4 = generateA7Instr(0x020275F4, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x020275FC = generateA7Instr(0x020275FC, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02027654 = generateA7Instr(0x02027654, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020276C4 = generateA7Instr(0x020276C4, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x020276D4 = generateA7Instr(0x020276D4, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02027704 = generateA7Instr(0x02027704, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02027D28 = generateA7Instr(0x02027D28, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02027D3C = generateA7Instr(0x02027D3C, (u32)ce9->patches->dsiSaveSeek);
+			*(u32*)0x02027D4C = generateA7Instr(0x02027D4C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02027D54 = generateA7Instr(0x02027D54, (u32)ce9->patches->dsiSaveClose);
+		}
 	}
 
 	// Castle Conqueror: Heroes (Europe, Australia)
@@ -1849,6 +1898,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020207FC = 0x022C9BA0;
 		*(u32*)0x02021994 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0202465C = 0xE1A00000; // nop
+		*(u32*)0x02066110 = generateA7Instr(0x02066110, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066128 = generateA7Instr(0x02066128, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02066138 = generateA7Instr(0x02066138, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066158 = 0xE1A00000; // nop
+		*(u32*)0x02066164 = generateA7Instr(0x02066164, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02066174 = generateA7Instr(0x02066174, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066680 = generateA7Instr(0x02066680, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066694 = generateA7Instr(0x02066694, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020666A4 = generateA7Instr(0x020666A4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020666B4 = generateA7Instr(0x020666B4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020666C4 = generateA7Instr(0x020666C4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020666D4 = generateA7Instr(0x020666D4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066748 = generateA7Instr(0x02066748, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206675C = generateA7Instr(0x0206675C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066764 = generateA7Instr(0x02066764, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020667BC = generateA7Instr(0x020667BC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0206682C = generateA7Instr(0x0206682C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206683C = generateA7Instr(0x0206683C, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0206686C = generateA7Instr(0x0206686C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02066E90 = generateA7Instr(0x02066E90, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066EA4 = generateA7Instr(0x02066EA4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066EB4 = generateA7Instr(0x02066EB4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066EBC = generateA7Instr(0x02066EBC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Castle Conqueror: Heroes 2 (USA)
@@ -1966,7 +2038,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x020142BC, heapEnd); // mov r0, #0x23C0000
 		*(u32*)0x02015504 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201829C = 0xE1A00000; // nop
-		*(u32*)0x0201B9E4 = 0xE1A00000; // nop
+		*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0201BBA4 = generateA7Instr(0x0201BBA4, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0201BBB4 = generateA7Instr(0x0201BBB4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201BBD0 = generateA7Instr(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201BBE0 = generateA7Instr(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0201BBE8 = generateA7Instr(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x0201BD0C = 0xE3A02001; // mov r2, #1
+		*(u32*)0x0201BD10 = generateA7Instr(0x0201BD10, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201BD28 = generateA7Instr(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201BD38 = generateA7Instr(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0201BD40 = generateA7Instr(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0201BD60 = 0xE1A00000; // nop
 
 		// Skip Manual screen
 		for (int i = 0; i < 4; i++) {
@@ -1990,7 +2073,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201D460 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020201F8 = 0xE1A00000; // nop
 		*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
-		*(u32*)0x020459F0 = 0xE1A00000; // nop
+		*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02045BAC = generateA7Instr(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02045BBC = generateA7Instr(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02045BD8 = generateA7Instr(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02045BE8 = generateA7Instr(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02045BF0 = generateA7Instr(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x02045D14 = 0xE3A02001; // mov r2, #1
+		*(u32*)0x02045D1C = generateA7Instr(0x02045D1C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02045D34 = generateA7Instr(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02045D44 = generateA7Instr(0x02045D44, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02045D4C = generateA7Instr(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02045D6C = 0xE1A00000; // nop
 	}
 
 	// Color Commando (USA)
@@ -2034,6 +2128,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02039B1C = 0xE1A00000; // nop
 	}
 
+	// Crash-Course Domo (USA)
+	else if (strcmp(romTid, "KDCE") == 0) {
+		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
+		*(u16*)0x0200DF3A = 0x4770; // bx lr
+		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u16*)0x02015418 = 0x46C0; // nop
+		doubleNopT(0x02023C72);
+		doubleNopT(0x02025EC2);
+		doubleNopT(0x02028B44);
+		doubleNopT(0x0202A0FE);
+		doubleNopT(0x0202A102);
+		doubleNopT(0x0202A10E);
+		doubleNopT(0x0202A1F2);
+		patchHiHeapDSiWareThumb(0x0202A230, 0x208F, 0x0480); // movs r0, #0x23C0000
+		doubleNopT(0x0202B2B6);
+		*(u16*)0x0202B2BA = 0x46C0; // nop
+		*(u16*)0x0202B2BC = 0x46C0; // nop
+		doubleNopT(0x0202B2BE);
+		doubleNopT(0x0202D372);
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	// Stage music doesn't play on retail consoles
@@ -2055,27 +2170,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else if (ndsHeader->gameCode[3] == 'P') {
 			*(u32*)0x02093AA4 = 0xE12FFF1E; // bx lr
 		}
-	}
-
-	// Crash-Course Domo (USA)
-	else if (strcmp(romTid, "KDCE") == 0) {
-		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
-		*(u16*)0x0200DF3A = 0x4770; // bx lr
-		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
-		*(u16*)0x02015418 = 0x46C0; // nop
-		doubleNopT(0x02023C72);
-		doubleNopT(0x02025EC2);
-		doubleNopT(0x02028B44);
-		doubleNopT(0x0202A0FE);
-		doubleNopT(0x0202A102);
-		doubleNopT(0x0202A10E);
-		doubleNopT(0x0202A1F2);
-		patchHiHeapDSiWareThumb(0x0202A230, 0x208F, 0x0480); // movs r0, #0x23C0000
-		doubleNopT(0x0202B2B6);
-		*(u16*)0x0202B2BA = 0x46C0; // nop
-		*(u16*)0x0202B2BC = 0x46C0; // nop
-		doubleNopT(0x0202B2BE);
-		doubleNopT(0x0202D372);
 	}
 
 	// Dark Void Zero (USA)

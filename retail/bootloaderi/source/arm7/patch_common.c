@@ -328,6 +328,84 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008918 = 0xE12FFF1E; // bx lr (NO$GBA fix)
 	}*/
 
+	// Castle Conqueror: Heroes (USA)
+	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
+		*(u32*)0x02065CA0 = generateA7Instr(0x02065CA0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02065CB4 = generateA7Instr(0x02065CB4, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02065CC4 = generateA7Instr(0x02065CC4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02065CF0 = generateA7Instr(0x02065CF0, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02065D00 = generateA7Instr(0x02065D00, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066208 = generateA7Instr(0x02066208, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206621C = generateA7Instr(0x0206621C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0206622C = generateA7Instr(0x0206622C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206623C = generateA7Instr(0x0206623C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0206624C = generateA7Instr(0x0206624C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206625C = generateA7Instr(0x0206625C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020662C0 = generateA7Instr(0x020662C0, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020662D4 = generateA7Instr(0x020662D4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020662DC = generateA7Instr(0x020662DC, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02066330 = generateA7Instr(0x02066330, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066648 = generateA7Instr(0x02066648, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066658 = generateA7Instr(0x02066658, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02066684 = generateA7Instr(0x02066684, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02066BE4 = generateA7Instr(0x02066BE4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066BF8 = generateA7Instr(0x02066BF8, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066C08 = generateA7Instr(0x02066C08, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066C10 = generateA7Instr(0x02066C10, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Castle Conqueror: Heroes (Europe, Australia)
+	else if (strcmp(romTid, "KC5V") == 0 && saveOnFlashcard) {
+		*(u32*)0x02066110 = generateA7Instr(0x02066110, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066128 = generateA7Instr(0x02066128, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02066138 = generateA7Instr(0x02066138, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066164 = generateA7Instr(0x02066164, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02066174 = generateA7Instr(0x02066174, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066680 = generateA7Instr(0x02066680, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066694 = generateA7Instr(0x02066694, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020666A4 = generateA7Instr(0x020666A4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020666B4 = generateA7Instr(0x020666B4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020666C4 = generateA7Instr(0x020666C4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020666D4 = generateA7Instr(0x020666D4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066748 = generateA7Instr(0x02066748, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206675C = generateA7Instr(0x0206675C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066764 = generateA7Instr(0x02066764, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020667BC = generateA7Instr(0x020667BC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0206682C = generateA7Instr(0x0206682C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0206683C = generateA7Instr(0x0206683C, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0206686C = generateA7Instr(0x0206686C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02066E90 = generateA7Instr(0x02066E90, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02066EA4 = generateA7Instr(0x02066EA4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02066EB4 = generateA7Instr(0x02066EB4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02066EBC = generateA7Instr(0x02066EBC, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Castle Conqueror: Heroes (Japan)
+	else if (strcmp(romTid, "KC5J") == 0 && saveOnFlashcard) {
+		*(u32*)0x02026FA8 = generateA7Instr(0x02026FA8, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02026FC0 = generateA7Instr(0x02026FC0, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02026FD0 = generateA7Instr(0x02026FD0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02026FFC = generateA7Instr(0x02026FFC, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0202700C = generateA7Instr(0x0202700C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02027518 = generateA7Instr(0x02027518, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0202752C = generateA7Instr(0x0202752C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0202753C = generateA7Instr(0x0202753C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0202754C = generateA7Instr(0x0202754C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0202755C = generateA7Instr(0x0202755C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0202756C = generateA7Instr(0x0202756C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020275E0 = generateA7Instr(0x020275E0, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020275F4 = generateA7Instr(0x020275F4, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020275FC = generateA7Instr(0x020275FC, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02027654 = generateA7Instr(0x02027654, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x020276C4 = generateA7Instr(0x020276C4, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x020276D4 = generateA7Instr(0x020276D4, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02027704 = generateA7Instr(0x02027704, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02027D28 = generateA7Instr(0x02027D28, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02027D3C = generateA7Instr(0x02027D3C, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02027D4C = generateA7Instr(0x02027D4C, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02027D54 = generateA7Instr(0x02027D54, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
@@ -356,6 +434,48 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!dsiSD) {
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
 		}
+	}
+
+	// Chuck E. Cheese's Alien Defense Force (USA)
+	else if (strcmp(romTid, "KUQE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201BBA4 = generateA7Instr(0x0201BBA4, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x0201BBB4 = generateA7Instr(0x0201BBB4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201BBD0 = generateA7Instr(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201BBE0 = generateA7Instr(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0201BBE8 = generateA7Instr(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x0201BD0C = 0xE3A02001; // mov r2, #1
+		*(u32*)0x0201BD10 = generateA7Instr(0x0201BD10, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0201BD28 = generateA7Instr(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x0201BD38 = generateA7Instr(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x0201BD40 = generateA7Instr(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
+
+		if (!dsiSD) {
+			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 4; i++) {
+				u32* offset = (u32*)0x0202D43C;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+	}
+
+	// Chuck E. Cheese's Arcade Room (USA)
+	else if (strcmp(romTid, "KUCE") == 0 && saveOnFlashcard) {
+		if (!dsiSD) {
+			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
+			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02045BAC = generateA7Instr(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02045BBC = generateA7Instr(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02045BD8 = generateA7Instr(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02045BE8 = generateA7Instr(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x02045BF0 = generateA7Instr(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x02045D14 = 0xE3A02001; // mov r2, #1
+		*(u32*)0x02045D1C = generateA7Instr(0x02045D1C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02045D34 = generateA7Instr(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
+		*(u32*)0x02045D44 = generateA7Instr(0x02045D44, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02045D4C = generateA7Instr(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// DS WiFi Settings
@@ -611,20 +731,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32* offset = (u32*)0x020AE810;
 			offset[i] = 0xE1A00000; // nop
 		}
-	}
-
-	// Chuck E. Cheese's Alien Defense Force (USA)
-	else if (strcmp(romTid, "KUQE") == 0) {
-		// Skip Manual screen
-		for (int i = 0; i < 4; i++) {
-			u32* offset = (u32*)0x0202D43C;
-			offset[i] = 0xE1A00000; // nop
-		}
-	}
-
-	// Chuck E. Cheese's Arcade Room (USA)
-	else if (strcmp(romTid, "KUCE") == 0) {
-		*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
 	// Crash-Course Domo (USA)
