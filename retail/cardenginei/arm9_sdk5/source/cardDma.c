@@ -38,6 +38,7 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
+#define ROMinRAM BIT(1)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
@@ -53,20 +54,27 @@ extern vu32* volatile sharedAddr;
 
 extern tNDSHeader* ndsHeader;
 extern aFile* romFile;
+extern u32 romStart;
 
 extern u32 cacheDescriptor[];
 extern int cacheCounter[];
 extern int accessCounter;
 
 bool isDma = false;
+bool dmaOn = true;
 
 void endCardReadDma() {
-    if(ce9->patches->cardEndReadDmaRef) {
-        volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
-        (*cardEndReadDmaRef)();
-    } else if(ce9->thumbPatches->cardEndReadDmaRef) {
-        callEndReadDmaThumb();
-    }    
+	if ((ce9->valueBits & ROMinRAM) && dmaOn && ndmaBusy(0)) {
+		IPC_SendSync(0x3);
+		return;
+	}
+
+	if (ce9->patches->cardEndReadDmaRef) {
+		volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
+		(*cardEndReadDmaRef)();
+	} else if (ce9->thumbPatches->cardEndReadDmaRef) {
+		callEndReadDmaThumb();
+	}
 }
 
 #ifndef DLDI
@@ -78,7 +86,6 @@ static u32 asyncSector = 0;
 //static int aQSize = 0;
 #endif
 
-bool dmaOn = true;
 #ifndef TWLSDK
 bool dmaReadOnArm7 = false;
 #endif
@@ -398,6 +405,13 @@ void cardSetDma (u32 * params) {
     disableIrqMask(IRQ_CARD_LINE);
 
 	enableIPC_SYNC();
+
+	if (ce9->valueBits & ROMinRAM) {
+		// Copy via dma
+		ndmaCopyWordsAsynch(0, (u8*)(ce9->romLocation-romStart)+src, dst, len);
+		IPC_SendSync(0x3);
+		return;
+	}
 
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;

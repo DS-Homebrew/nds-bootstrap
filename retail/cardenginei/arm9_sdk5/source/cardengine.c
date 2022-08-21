@@ -39,7 +39,7 @@
 #include "unpatched_funcs.h"
 
 #define saveOnFlashcard BIT(0)
-#define extendedMemory BIT(1)
+#define ROMinRAM BIT(1)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
@@ -48,6 +48,7 @@
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
 #define asyncCardRead BIT(12)
+#define cloneboot BIT(14)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -82,6 +83,7 @@ aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 #endif
+u32 romStart = 0x8000;
 #ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
@@ -112,6 +114,7 @@ static bool igmReset = false;
 
 extern bool isDma;
 
+extern void endCardReadDma();
 extern void continueCardReadDmaArm7();
 extern void continueCardReadDmaArm9();
 
@@ -579,7 +582,7 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = (ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
+	sharedAddr[2] = (ce9->romLocation-romStart)+src;
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
@@ -587,7 +590,7 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 	#endif
 
 	// Copy directly
-	tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
+	tonccpy(dst, (u8*)(ce9->romLocation-romStart)+src, len);
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -633,13 +636,13 @@ void cardRead(u32 dma, u8* dst, u32 src, u32 len) {
 	#endif
 
 	#ifdef TWLSDK
-	if ((ce9->valueBits & overlaysCached) && ce9->consoleModel > 0 && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if (ce9->consoleModel > 0 && ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset))) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
 	#else
-	if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
@@ -1047,20 +1050,26 @@ void myIrqHandlerIPC(void) {
 	#endif	
 
 	switch (IPC_GetSync()) {
-#ifndef DLDI
 		case 0x3:
-		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
+#ifdef DLDI
+		if (ce9->valueBits & ROMinRAM) {
+			endCardReadDma();
+		}
+#else
+		if (ce9->valueBits & ROMinRAM) {
+			endCardReadDma();
+		} else if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			#ifndef TWLSDK
 			continueCardReadDmaArm7();
 			#endif
 			continueCardReadDmaArm9();
 		}
+#endif
 			break;
 		case 0x4:
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
 			break;
-#endif
 		case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;
@@ -1143,6 +1152,7 @@ void myIrqHandlerIPC(void) {
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
+	static bool flagsSetOnce = false;
 
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
@@ -1150,6 +1160,14 @@ u32 myIrqEnable(u32 irq) {
 
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();
+	}
+
+	if (!flagsSetOnce) {
+		if (!(ce9->valueBits & ROMinRAM) || !(ce9->valueBits & cloneboot)) {
+			romStart -= 0x8000;
+			romStart += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+		flagsSetOnce = true;
 	}
 
 	#ifndef TWLSDK

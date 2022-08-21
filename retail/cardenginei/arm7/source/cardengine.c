@@ -1279,7 +1279,6 @@ static void runCardEngineCheck(void) {
                 //IPC_SendSync(0x8);
     		}
     
-			#ifdef TWLSDK
             if (sharedAddr[3] == (vu32)0x025FFC01) {
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
     			sharedAddr[3] = nandRead();
@@ -1289,7 +1288,6 @@ static void runCardEngineCheck(void) {
                 //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
     			sharedAddr[3] = nandWrite();
     		}
-			#endif
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
                 dmaLed = false;
@@ -1562,10 +1560,10 @@ void myIrqHandlerVBlank(void) {
 		wifiIrqTimer = 0;
 	}
 
-	if (valueBits & b_runCardEngineCheck) {
+	//if (valueBits & b_runCardEngineCheck) {
 		calledViaIPC = false;
 		runCardEngineCheck();
-	}
+	//}
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {

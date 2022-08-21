@@ -39,7 +39,7 @@
 #include "unpatched_funcs.h"
 
 #define saveOnFlashcard BIT(0)
-#define extendedMemory BIT(1)
+#define ROMinRAM BIT(1)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define overlaysCached BIT(6)
@@ -50,6 +50,7 @@
 #define dsiBios BIT(11)
 #define asyncCardRead BIT(12)
 #define softResetMb BIT(13)
+#define cloneboot BIT(14)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -88,6 +89,7 @@ aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
+u32 romStart = 0x8000;
 #ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
@@ -102,6 +104,7 @@ static bool igmReset = false;
 
 extern bool isDma;
 
+extern void endCardReadDma();
 extern void continueCardReadDmaArm7();
 extern void continueCardReadDmaArm9();
 
@@ -413,35 +416,22 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 }
 
 static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
-	while (len > 0) {
-		#ifdef DEBUG
-		// Send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
+	#ifdef DEBUG
+	// Send a log command for debug purpose
+	// -------------------------------------
+	commandRead = 0x026ff800;
 
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
-		sharedAddr[3] = commandRead;
+	sharedAddr[0] = dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (ce9->romLocation-romStart)+src;
+	sharedAddr[3] = commandRead;
 
-		waitForArm7();
-		// -------------------------------------
-		#endif
+	waitForArm7();
+	// -------------------------------------
+	#endif
 
-		// Copy directly
-		tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
-
-		// Update cardi common
-		cardStruct[0] = src + len;
-		cardStruct[1] = (vu32)(dst + len);	
-		cardStruct[2] = len - len;
-
-		len = cardStruct[2];
-		if (len > 0) {
-			src = cardStruct[0];
-			dst = (u8*)cardStruct[1];
-		}
-	}
+	// Copy directly
+	tonccpy(dst, (u8*)(ce9->romLocation-romStart)+src, len);
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -481,7 +471,9 @@ void cardRead(u32* cacheStruct) {
 		if (region0FixNeeded) {
 			region0Fix();
 		}
-		debugRamMpuFix();
+		if (!(ce9->valueBits & ROMinRAM)) {
+			debugRamMpuFix();
+		}
 		if (!driveInitialized) {
 			FAT_InitFiles(false, 0);
 			driveInitialized = true;
@@ -521,7 +513,7 @@ void cardRead(u32* cacheStruct) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
+	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
 		cardReadRAM(cardStruct, cacheStruct, dst, src, len);
 	} else {
 		cardReadNormal(cardStruct, cacheStruct, dst, src, len);
@@ -623,7 +615,6 @@ void reset(u32 param) {
 			*(u32*)RESET_PARAM = 0;
 			*(u32*)(RESET_PARAM+8) = 0x44414F4C; // 'LOAD'
 		}
-
 		sharedAddr[3] = 0x52534554;
 	}
 
@@ -705,18 +696,24 @@ void myIrqHandlerIPC(void) {
 	#endif
 
 	switch (IPC_GetSync()) {
-#ifndef DLDI
 		case 0x3:
-		if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+#ifdef DLDI
+		if (ce9->valueBits & ROMinRAM) {
+			endCardReadDma();
+		}
+#else
+		if (ce9->valueBits & ROMinRAM) {
+			endCardReadDma();
+		} else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
+#endif
 			break;
 		case 0x4:
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
 			break;
-#endif
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -760,6 +757,7 @@ void myIrqHandlerIPC(void) {
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
+	static bool flagsSetOnce = false;
 
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
@@ -767,6 +765,14 @@ u32 myIrqEnable(u32 irq) {
 
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();
+	}
+
+	if (!flagsSetOnce) {
+		if (!(ce9->valueBits & ROMinRAM) || !(ce9->valueBits & cloneboot)) {
+			romStart -= 0x8000;
+			romStart += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+		flagsSetOnce = true;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {

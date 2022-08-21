@@ -35,12 +35,10 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 
-#define extendedMemory BIT(1)
 #define eSdk2 BIT(2)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
-#define overlaysInRam BIT(6)
 #define slowSoftReset BIT(10)
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
@@ -157,33 +155,24 @@ void cardSetDma(u32 * params) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}*/
 
-	if (ce9->valueBits & extendedMemory) {
-		u32 len2 = 0;
-		for (int i = 0; i < romMapLines; i++) {
-			if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
-				continue;
+	u32 len2 = 0;
+	for (int i = 0; i < romMapLines; i++) {
+		if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
+			continue;
 
-			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
-			if (newSrc+len > romMap[i][2]) {
-				do {
-					len--;
-					len2++;
-				} while (newSrc+len != romMap[i][2]);
-				tonccpy(dst, (u8*)newSrc, len);
-				src += len;
-				dst += len;
-			} else {
-				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
-				break;
-			}
+		u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+		if (newSrc+len > romMap[i][2]) {
+			do {
+				len--;
+				len2++;
+			} while (newSrc+len != romMap[i][2]);
+			tonccpy(dst, (u8*)newSrc, len);
+			src += len;
+			dst += len;
+		} else {
+			ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+			break;
 		}
-	} else {
-		u32 newSrc = (u32)(ce9->romLocation-romMap[0][0])+src;
-		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
-			newSrc -= *(u32*)0x02FFE1CC;
-		}
-		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
 	}
 	IPC_SendSync(0x3);
 }
@@ -285,32 +274,24 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		dst -= 0x400000;	// Do not overwrite ROM
 	}*/
 
-	if (ce9->valueBits & extendedMemory) {
-		u32 len2 = 0;
-		for (int i = 0; i < romMapLines; i++) {
-			if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
-				continue;
+	u32 len2 = 0;
+	for (int i = 0; i < romMapLines; i++) {
+		if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
+			continue;
 
-			u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
-			if (newSrc+len > romMap[i][2]) {
-				do {
-					len--;
-					len2++;
-				} while (newSrc+len != romMap[i][2]);
-				tonccpy(dst, (u8*)newSrc, len);
-				src += len;
-				dst += len;
-			} else {
-				tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
-				break;
-			}
+		u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+		if (newSrc+len > romMap[i][2]) {
+			do {
+				len--;
+				len2++;
+			} while (newSrc+len != romMap[i][2]);
+			tonccpy(dst, (u8*)newSrc, len);
+			src += len;
+			dst += len;
+		} else {
+			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+			break;
 		}
-	} else {
-		u32 newSrc = (u32)(ce9->romLocation-romMap[0][0])+src;
-		if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode) && src > *(u32*)0x02FFE1C0) {
-			newSrc -= *(u32*)0x02FFE1CC;
-		}
-		tonccpy(dst, (u8*)newSrc, len);
 	}
 	isDma = false;
 }
@@ -324,121 +305,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 }*/
 
-bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	return false;
-}
-
-bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	return false;
-}
-
-static bool dsiSaveEmpty = true;
-static bool dsiSaveInited = false;
-static s32 dsiSaveSeekPos = 0;
-
-static bool dsiSaveInit(void) {
-	if (dsiSaveInited) {
-		return true;
-	}
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-	// Send a command to the ARM7 to read the save
-	u32 commandNandRead = 0x025FFC01;
-
-	// Write the command
-	sharedAddr[0] = 0x02FFF600;
-	sharedAddr[1] = 512;
-	sharedAddr[2] = 0;
-	runArm7Cmd(commandNandRead);
-
-	for (int i = 0; i < 512; i++) {
-		if (*(char*)(0x02FFF600+i) != 0) {
-			toncset((char*)0x02FFF600, 0, 512);
-			dsiSaveEmpty = false;
-			dsiSaveInited = true;
-			return true;
-		}
-	}
-	dsiSaveInited = true;
-	return false;
-}
-
-bool dsiSaveCreate(const char* path, u32 permit) {
-	dsiSaveSeekPos = 0;
-	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
-		return false;
-	}
-	if (!dsiSaveInited) {
-		dsiSaveInit();
-	}
-	bool bak = dsiSaveEmpty;
-	dsiSaveEmpty = false;
-	return bak;
-}
-
-bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
-	dsiSaveSeekPos = 0;
-	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
-		return false;
-	}
-	return dsiSaveInit();
-}
-
-bool dsiSaveClose(void* ctx) {
-	dsiSaveSeekPos = 0;
-	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
-		return false;
-	}
-	//toncset(ctx, 0, 0x80);
-	return true;
-}
-
-bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
-	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
-		return false;
-	}
-	dsiSaveSeekPos = pos;
-	return true;
-}
-
-s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-	// Send a command to the ARM7 to read the save
-	u32 commandNandRead = 0x025FFC01;
-
-	// Write the command
-	sharedAddr[0] = (vu32)dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = dsiSaveSeekPos;
-	runArm7Cmd(commandNandRead);
-
-	if (sharedAddr[3]) {
-		dsiSaveSeekPos += len;
-		return len;
-	}
-	return -1;
-}
-
-s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-	// Send a command to the ARM7 to write the save
-	u32 commandNandWrite = 0x025FFC02;
-
-	// Write the command
-	sharedAddr[0] = (vu32)src;
-	sharedAddr[1] = len;
-	sharedAddr[2] = dsiSaveSeekPos;
-	runArm7Cmd(commandNandWrite);
-
-	if (sharedAddr[3]) {
-		dsiSaveSeekPos += len;
-		return len;
-	}
-	return -1;
-}
-
 u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	// Send a command to the ARM7 to read the GBA ROM
 	/*u32 commandRead = 0x025FBC01;
@@ -451,7 +317,7 @@ u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	return 0;
 }
 
-extern void reset(u32 param, u32 tid2);
+extern void reset(u32 param);
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
@@ -479,15 +345,15 @@ void myIrqHandlerIPC(void) {
 		case 0x4:
 			dmaOn = !dmaOn;
 			break;
-		case 0x5:
+		/*case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;
 			if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
 				reset(0, 0);
 			} else {
-				reset(0xFFFFFFFF, 0);
+				reset(0xFFFFFFFF);
 			}
-			break;
+			break;*/
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -505,7 +371,7 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-		case 0x9: {
+		/*case 0x9: {
 			if (!(ce9->valueBits & extendedMemory)) {
 				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 					if (ce9->consoleModel > 0) {
@@ -537,9 +403,9 @@ void myIrqHandlerIPC(void) {
 						reset(0, 0);
 					}
 				}
-			}
+			
 		}
-			break;
+			break;}*/
 	}
 
 	if (sharedAddr[4] == 0x57534352) {
@@ -567,40 +433,38 @@ u32 myIrqEnable(u32 irq) {
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 			unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
 		}
-		if (ce9->valueBits & extendedMemory) {
-			if (ce9->consoleModel > 0) {
-				romMap[1][2] = 0x0E000000;
-				romMap[2][0] += 0x1000000;
-			}
-			if (ce9->valueBits & isSdk5) {
-				if (ndsHeader->unitCode > 0) {
-					/*if (ce9->valueBits & dsiMode) {
-						romMap[0][1] = 0x0D000000;
-						romMap[0][2] = 0x0DF80000;
-					} else {*/
-						romMap[0][2] = 0x0CFE0000;
-						romMap[1][0] = 0x00C06000;
-						if (ce9->consoleModel > 0) {
-							romMap[1][1] = 0x0D000000;
-							romMap[2][0] += 0x1000000;
-						} else {
-							romMap[1][1] = 0x03700000;
-							romMap[1][2] = 0x03780000;
-						}
-					//}
-				} else {
-					romMap[1][2] = 0x0CFFF000;
-					romMap[2][2] = 0x0D000000;
+		if (ce9->consoleModel > 0) {
+			romMap[1][2] = 0x0E000000;
+			romMap[2][0] += 0x1000000;
+		}
+		if (ce9->valueBits & isSdk5) {
+			if (ndsHeader->unitCode > 0) {
+				/*if (ce9->valueBits & dsiMode) {
+					romMap[0][1] = 0x0D000000;
+					romMap[0][2] = 0x0DF80000;
+				} else {*/
+					romMap[0][2] = 0x0CFE0000;
+					romMap[1][0] = 0x00C06000;
 					if (ce9->consoleModel > 0) {
-						romMap[2][1] = 0x0D000000;
-						romMap[2][2] = 0x0E000000;
-						romMapLines = 4;
+						romMap[1][1] = 0x0D000000;
+						romMap[2][0] += 0x1000000;
+					} else {
+						romMap[1][1] = 0x03700000;
+						romMap[1][2] = 0x03780000;
 					}
+				//}
+			} else {
+				romMap[1][2] = 0x0CFFF000;
+				romMap[2][2] = 0x0D000000;
+				if (ce9->consoleModel > 0) {
+					romMap[2][1] = 0x0D000000;
+					romMap[2][2] = 0x0E000000;
+					romMapLines = 4;
 				}
-			} else if (ce9->valueBits & eSdk2) {
-				romMap[0][1] -= 0x22000;
-				romMap[0][2] -= 0x22000;
 			}
+		} else if (ce9->valueBits & eSdk2) {
+			romMap[0][1] -= 0x22000;
+			romMap[0][2] -= 0x22000;
 		}
 		if (!(ce9->valueBits & cloneboot)) {
 			for (int i = 0; i < 4; i++) {

@@ -121,46 +121,14 @@ void enableIPC_SYNC(void) {
       leaveCriticalSection(oldIME);*/
 //}
 
-void initMBKARM9_dsiMode(void) {
-	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
-	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
-	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
-	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
-	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
-	REG_MBK6 = *(u32*)0x02FFE194;
-	REG_MBK7 = *(u32*)0x02FFE198;
-	REG_MBK8 = *(u32*)0x02FFE19C;
-	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
-
 void __attribute__((target("arm"))) resetMpu(void) {
 	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
 }
 
-void reset(u32 param, u32 tid2) {
+void reset(u32 param) {
 	u32 resetParam = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (ndsHeader->unitCode == 0 || (*(u32*)0x02FFE234 != 0x00030004 && *(u32*)0x02FFE234 != 0x00030005)) {
-		*(u32*)resetParam = param;
-	}
-	bool returnToLoader = (param == 0xFFFFFFFF && ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode));
-	if (returnToLoader || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
-		if (returnToLoader || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
-			/*if (ce9->consoleModel < 2) {
-				// Make screens white
-				SetBrightness(0, 31);
-				SetBrightness(1, 31);
-				waitFrames(5);	// Wait for DSi screens to stabilize
-			}
-			enterCriticalSection();
-			cacheFlush();*/
-			sysSetCardOwner(false);	// Give Slot-1 access to arm7
-			sharedAddr[3] = 0x54495845;
-			//while (1);
-		} else {
-			sysSetCardOwner(false);	// Give Slot-1 access to arm7
-			sharedAddr[3] = 0x52534554;
-		}
-	} else if (ce9->valueBits & slowSoftReset) {
+	*(u32*)resetParam = param;
+	if (ce9->valueBits & slowSoftReset) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
 			SetBrightness(0, 31);
@@ -176,9 +144,6 @@ void reset(u32 param, u32 tid2) {
 		sharedAddr[3] = 0x52534554;
 		while (1);
 	} else {
-		if (ce9->valueBits & dsiMode) {
-			sysSetCardOwner(false);	// Give Slot-1 access to arm7
-		}
 		if (*(u32*)(resetParam+0xC) > 0) {
 			sharedAddr[1] = ce9->valueBits;
 		}
@@ -200,18 +165,8 @@ void reset(u32 param, u32 tid2) {
 
 	if (igmReset) {
 		igmReset = false;
-
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
-			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
-			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
-		}
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
-
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
-			*(u32*)0x02FFC230 = 0;
-			*(u32*)0x02FFC234 = 0;
-		}
 	}
 
 	// Clear out ARM9 DMA channels
@@ -232,6 +187,11 @@ void reset(u32 param, u32 tid2) {
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
+	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
 
@@ -241,55 +201,6 @@ void reset(u32 param, u32 tid2) {
 		ce9->irqTable = (u32*)newIrqTable;
 		ce9->cardStruct0 = sharedAddr[4];
 		sharedAddr[4] = 0;
-	}
-
-	if (returnToLoader || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
-		REG_DISPSTAT = 0;
-		REG_DISPCNT = 0;
-		REG_DISPCNT_SUB = 0;
-
-		toncset((u16*)0x04000000, 0, 0x56);
-		toncset((u16*)0x04001000, 0, 0x56);
-
-		VRAM_A_CR = 0x80;
-		VRAM_B_CR = 0x80;
-		VRAM_C_CR = 0x80;
-		VRAM_D_CR = 0x80;
-		VRAM_E_CR = 0x80;
-		VRAM_F_CR = 0x80;
-		VRAM_G_CR = 0x80;
-		VRAM_H_CR = 0x80;
-		VRAM_I_CR = 0x80;
-
-		toncset16(BG_PALETTE, 0, 256); // Clear palettes
-		toncset16(BG_PALETTE_SUB, 0, 256);
-		toncset(VRAM, 0, 0xC0000); // Clear VRAM
-
-		VRAM_A_CR = 0;
-		VRAM_B_CR = 0;
-		VRAM_C_CR = 0;
-		VRAM_D_CR = 0;
-		VRAM_E_CR = 0;
-		VRAM_F_CR = 0;
-		VRAM_G_CR = 0;
-		VRAM_H_CR = 0;
-		VRAM_I_CR = 0;
-	}
-
-	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
-
-	if (returnToLoader && ndsHeader->unitCode > 0 && sharedAddr[3] == 0x54495845) {
-		initMBKARM9_dsiMode();
-		REG_SCFG_EXT = 0x8307F100;
-		REG_SCFG_CLK = 0x87;
-		REG_SCFG_RST = 1;
-	}
-
-	if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-		sysSetCardOwner(true);	// Give Slot-1 access back to arm9
 	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'

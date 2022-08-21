@@ -12,7 +12,7 @@
 #include "value_bits.h"
 
 #define b_saveOnFlashcard BIT(0)
-#define b_extendedMemory BIT(1)
+#define b_ROMinRAM BIT(1)
 #define b_eSdk2 BIT(2)
 #define b_dsiMode BIT(3)
 #define b_enableExceptionHandler BIT(4)
@@ -184,8 +184,8 @@ int hookNdsRetailArm9(
 	if (saveOnFlashcard) {
 		ce9->valueBits |= b_saveOnFlashcard;
 	}
-	if (extendedMemory) {
-		ce9->valueBits |= b_extendedMemory;
+	if (ROMinRAM) {
+		ce9->valueBits |= b_ROMinRAM;
 	}
 	if (moduleParams->sdk_version < 0x2008000) {
 		ce9->valueBits |= b_eSdk2;
