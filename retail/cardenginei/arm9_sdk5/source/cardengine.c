@@ -720,7 +720,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
-static u32 dsiSaveSeekPos = 0;
+static s32 dsiSaveSeekPos = 0;
 
 static bool dsiSaveInit(void) {
 	if (dsiSaveInited) {
@@ -817,8 +817,11 @@ bool dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef DLDI
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileRead(dst, *savFile, dsiSaveSeekPos, len, 0);
-	dsiSaveSeekPos += len;
-	return res;
+	if (res) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 #else
 	return false;
 #endif
@@ -827,13 +830,16 @@ bool dsiSaveRead(void* ctx, void* dst, u32 len) {
 #endif
 }
 
-bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifdef TWLSDK
 #ifdef DLDI
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
-	dsiSaveSeekPos += len;
-	return res;
+	if (res) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 #else
 	return false;
 #endif

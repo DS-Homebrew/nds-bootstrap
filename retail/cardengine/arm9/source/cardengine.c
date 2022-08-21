@@ -546,7 +546,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
-static u32 dsiSaveSeekPos = 0;
+static s32 dsiSaveSeekPos = 0;
 
 static bool dsiSaveInit(void) {
 	if (dsiSaveInited) {
@@ -604,18 +604,24 @@ bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
 	return true;
 }
 
-bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	setDeviceOwner();
 	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
-	dsiSaveSeekPos += len;
-	return res;
+	if (res) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 }
 
-bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	setDeviceOwner();
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
-	dsiSaveSeekPos += len;
-	return res;
+	if (res) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 }
 
 

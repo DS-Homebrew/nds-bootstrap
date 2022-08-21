@@ -1289,22 +1289,61 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B8BC = 0xE3A00003; // mov r0, #3
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0204351C = 0xE1A00000; // nop
-			*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
-			*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
-			*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
+			//*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02043950 = generateA7Instr(0x02043950, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020439D0 = generateA7Instr(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02043A5C = generateA7Instr(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02043A70 = generateA7Instr(0x02043A70, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02043AE8 = generateA7Instr(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020437B4 = 0xE1A00000; // nop
+			*(u32*)0x020437D0 = 0xE1A00000; // nop
+			*(u32*)0x020437D8 = 0xE1A00000; // nop
+			*(u32*)0x020437F0 = 0xE1A00000; // nop
+			*(u32*)0x02043814 = 0xE1A00000; // nop
+			*(u32*)0x02046394 = generateA7Instr(0x02046394, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02046428 = generateA7Instr(0x02046428, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x0204649C = generateA7Instr(0x0204649C, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x0208FC20 = 0xE3A00001; // mov r0, #1
 			*(u32*)0x02098818 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0209881C = 0xE12FFF1E; // bx lr
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x020435E8 = 0xE1A00000; // nop
-			*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
-			*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
+			//*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			//*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
+			//*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
+			*(u32*)0x02043A1C = generateA7Instr(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02043A9C = generateA7Instr(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02043B28 = generateA7Instr(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x02043B3C = generateA7Instr(0x02043B28, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02043BB4 = generateA7Instr(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02043880 = 0xE1A00000; // nop
+			*(u32*)0x0204389C = 0xE1A00000; // nop
+			*(u32*)0x020438A4 = 0xE1A00000; // nop
+			*(u32*)0x020438BC = 0xE1A00000; // nop
+			*(u32*)0x020438E0 = 0xE1A00000; // nop
+			*(u32*)0x02046460 = generateA7Instr(0x02046460, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020464F4 = generateA7Instr(0x020464F4, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x02046568 = generateA7Instr(0x02046568, (u32)ce9->patches->dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'J') {
 			*(u32*)0x02043248 = 0xE1A00000; // nop
-			*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
-			*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
+			//*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
+			//*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
+			//*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
+			*(u32*)0x020434E0 = 0xE1A00000; // nop
+			*(u32*)0x020434FC = 0xE1A00000; // nop
+			*(u32*)0x02043504 = 0xE1A00000; // nop
+			*(u32*)0x0204351C = 0xE1A00000; // nop
+			*(u32*)0x02043540 = 0xE1A00000; // nop
+			*(u32*)0x0204367C = generateA7Instr(0x0204367C, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x020436FC = generateA7Instr(0x020436FC, (u32)ce9->patches->dsiSaveCreate);
+			*(u32*)0x02043788 = generateA7Instr(0x02043788, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0204379C = generateA7Instr(0x0204379C, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x02043814 = generateA7Instr(0x02043814, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020460C0 = generateA7Instr(0x020460C0, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x02046154 = generateA7Instr(0x02046154, (u32)ce9->patches->dsiSaveRead);
+			*(u32*)0x020461C8 = generateA7Instr(0x020461C8, (u32)ce9->patches->dsiSaveClose);
 		}
 	}
 

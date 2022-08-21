@@ -334,7 +334,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
-static u32 dsiSaveSeekPos = 0;
+static s32 dsiSaveSeekPos = 0;
 
 static bool dsiSaveInit(void) {
 	if (dsiSaveInited) {
@@ -401,7 +401,7 @@ bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
 	return true;
 }
 
-bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 
 	// Send a command to the ARM7 to read the save
@@ -413,11 +413,14 @@ bool dsiSaveRead(void* ctx, void* dst, u32 len) {
 	sharedAddr[2] = dsiSaveSeekPos;
 	runArm7Cmd(commandNandRead);
 
-	dsiSaveSeekPos += len;
-	return sharedAddr[3];
+	if (sharedAddr[3]) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 }
 
-bool dsiSaveWrite(void* ctx, void* src, u32 len) {
+s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 
 	// Send a command to the ARM7 to write the save
@@ -429,8 +432,11 @@ bool dsiSaveWrite(void* ctx, void* src, u32 len) {
 	sharedAddr[2] = dsiSaveSeekPos;
 	runArm7Cmd(commandNandWrite);
 
-	dsiSaveSeekPos += len;
-	return sharedAddr[3];
+	if (sharedAddr[3]) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+	return -1;
 }
 
 u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
