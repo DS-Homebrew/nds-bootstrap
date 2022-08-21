@@ -475,7 +475,8 @@ u32 patchCardNdsArm7(
 	toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 
 	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
-		return 0;
+		dbg_printf("ERR_LOAD_OTHR");
+		return ERR_LOAD_OTHER;
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
