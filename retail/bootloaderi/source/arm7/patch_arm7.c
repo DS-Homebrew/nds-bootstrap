@@ -476,7 +476,7 @@ u32 patchCardNdsArm7(
 
 	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		dbg_printf("ERR_LOAD_OTHR");
-		return ERR_LOAD_OTHER;
+		return ERR_LOAD_OTHR;
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
