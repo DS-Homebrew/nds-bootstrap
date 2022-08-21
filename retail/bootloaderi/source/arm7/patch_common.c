@@ -68,133 +68,133 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0 && saveOnFlashcard) {
-		*(u32*)0x02031FE8 = generateA7Instr(0x02031FE8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02031FE8, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02032000 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02032010 = generateA7Instr(0x02032010, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02032020 = generateA7Instr(0x02032020, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02032028 = generateA7Instr(0x02032028, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02032098 = generateA7Instr(0x02032098, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02032010, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02032020, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02032028, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02032098, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x020320B0 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020320C4 = generateA7Instr(0x020320C4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020320D4 = generateA7Instr(0x020320D4, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x020320DC = generateA7Instr(0x020320DC, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02032154 = generateA7Instr(0x02032154, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02032180 = generateA7Instr(0x02032180, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020321BC = generateA7Instr(0x020321BC, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020321CC = generateA7Instr(0x020321CC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020320C4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020320D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020320DC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02032154, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02032180, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020321BC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020321CC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// 99Bullets (Europe)
 	else if (strcmp(romTid, "K99P") == 0 && saveOnFlashcard) {
-		*(u32*)0x020310C8 = generateA7Instr(0x020310C8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020310C8, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x020310E0 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020310F0 = generateA7Instr(0x020310F0, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02031100 = generateA7Instr(0x02031100, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02031108 = generateA7Instr(0x02031108, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02031178 = generateA7Instr(0x02031178, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020310F0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02031100, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02031108, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02031178, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02031090 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020311A4 = generateA7Instr(0x020311A4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020311B4 = generateA7Instr(0x020311B4, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x020311BC = generateA7Instr(0x020311BC, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02031234 = generateA7Instr(0x02031234, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02031260 = generateA7Instr(0x02031260, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0203129C = generateA7Instr(0x0203129C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020312AC = generateA7Instr(0x020312AC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020311A4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020311B4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020311BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02031234, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02031260, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203129C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020312AC, (u32)ce9->patches->dsiSaveClose); 
 	}
 
 	// 99Bullets (Japan)
 	else if (strcmp(romTid, "K99J") == 0 && saveOnFlashcard) {
-		*(u32*)0x02012E48 = generateA7Instr(0x02012E48, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02030FCC = generateA7Instr(0x02030FCC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02012E48, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02030FCC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02030FE4 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02030FF4 = generateA7Instr(0x02030FF4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02031004 = generateA7Instr(0x02031004, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0203100C = generateA7Instr(0x0203100C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x0203107C = generateA7Instr(0x0203107C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02030FF4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02031004, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0203100C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203107C, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02031094 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020310A8 = generateA7Instr(0x020310A8, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020310B8 = generateA7Instr(0x020310B8, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x020310C0 = generateA7Instr(0x020310C0, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020311C8 = generateA7Instr(0x020311C8, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02031164 = generateA7Instr(0x02031164, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020311A0 = generateA7Instr(0x020311A0, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020311B0 = generateA7Instr(0x020311B0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020310A8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020310B8, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020310C0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020311C8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02031164, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020311A0, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020311B0, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// 99Moves (USA)
 	else if (strcmp(romTid, "K9WE") == 0 && saveOnFlashcard) {
-		*(u32*)0x02012BD4 = generateA7Instr(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02031820 = generateA7Instr(0x02031820, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02031820, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02031838 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02031848 = generateA7Instr(0x02031848, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02031858 = generateA7Instr(0x02031858, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02031860 = generateA7Instr(0x02031860, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020318D0 = generateA7Instr(0x020318D0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02031848, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02031858, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02031860, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020318D0, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x020318E8 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020318FC = generateA7Instr(0x020318FC, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0203190C = generateA7Instr(0x0203190C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02031914 = generateA7Instr(0x02031914, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x0203198C = generateA7Instr(0x0203198C, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020319B8 = generateA7Instr(0x020319B8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020319F4 = generateA7Instr(0x020319F4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02031A04 = generateA7Instr(0x02031A04, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020318FC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0203190C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02031914, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203198C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020319B8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020319F4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02031A04, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// 99Moves (Europe)
 	else if (strcmp(romTid, "K9WP") == 0 && saveOnFlashcard) {
-		*(u32*)0x02012BD4 = generateA7Instr(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02031870 = generateA7Instr(0x02031870, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02031870, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02031888 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02031898 = generateA7Instr(0x02031898, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020318A8 = generateA7Instr(0x020318A8, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020318B0 = generateA7Instr(0x020318B0, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02031920 = generateA7Instr(0x02031920, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02031898, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020318A8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020318B0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02031920, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02031938 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x0203194C = generateA7Instr(0x0203196C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0203195C = generateA7Instr(0x0203195C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02031964 = generateA7Instr(0x02031964, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020319DC = generateA7Instr(0x020319DC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02031A08 = generateA7Instr(0x02031A08, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02031A44 = generateA7Instr(0x02031A44, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02031A54 = generateA7Instr(0x02031A54, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203196C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0203195C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02031964, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020319DC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02031A08, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02031A44, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02031A54, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// 99Seconds (USA)
 	else if (strcmp(romTid, "KXTE") == 0 && saveOnFlashcard) {
-		*(u32*)0x02011918 = generateA7Instr(0x02011918, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020302D4 = generateA7Instr(0x020302D4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02011918, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020302D4, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x020302EC = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020302FC = generateA7Instr(0x020302FC, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0203030C = generateA7Instr(0x0203030C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02030314 = generateA7Instr(0x02030314, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02030384 = generateA7Instr(0x02030384, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020302FC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0203030C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02030314, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02030384, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0203039C = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x020303B0 = generateA7Instr(0x020303B0, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020303C0 = generateA7Instr(0x020303C0, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x020303C8 = generateA7Instr(0x020303C8, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02030440 = generateA7Instr(0x02030440, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0203046C = generateA7Instr(0x0203046C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020304A8 = generateA7Instr(0x020304A8, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020304B8 = generateA7Instr(0x020304B8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020303B0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020303C0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020303C8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02030440, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203046C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020304A8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020304B8, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// 99Seconds (Europe)
 	else if (strcmp(romTid, "KXTP") == 0 && saveOnFlashcard) {
-		*(u32*)0x02011918 = generateA7Instr(0x02011918, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02030324 = generateA7Instr(0x02030324, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02011918, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02030324, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0203033C = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x0203034C = generateA7Instr(0x0203034C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0203035C = generateA7Instr(0x0203035C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02030364 = generateA7Instr(0x02030364, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020303D4 = generateA7Instr(0x020303D4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203034C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0203035C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02030364, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020303D4, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x020303EC = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02030400 = generateA7Instr(0x02030400, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02030410 = generateA7Instr(0x02030410, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02030418 = generateA7Instr(0x02030418, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02030490 = generateA7Instr(0x02030490, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020304BC = generateA7Instr(0x020304BC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020304F8 = generateA7Instr(0x020304F8, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02030508 = generateA7Instr(0x02030508, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02030400, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02030410, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02030418, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02030490, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020304BC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020304F8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02030508, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Absolute BrickBuster (USA)
@@ -238,56 +238,56 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020051C0 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005204 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02005208 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02020A28 = generateA7Instr(0x02020A28, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02020A38 = generateA7Instr(0x02020A38, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02020A8C = generateA7Instr(0x02020A8C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02020A94 = generateA7Instr(0x02020A94, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02020ADC = generateA7Instr(0x02020ADC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02020A28, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02020A38, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02020A8C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02020A94, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02020ADC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02020B08 = 0xE1A00000; // nop (dsiSaveGetLength)
-		*(u32*)0x02020B18 = generateA7Instr(0x02020B18, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02020B20 = generateA7Instr(0x02020B20, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02020B18, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02020B20, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02043950 = generateA7Instr(0x02043950, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020439D0 = generateA7Instr(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02043A5C = generateA7Instr(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02043A70 = generateA7Instr(0x02043A70, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02043AE8 = generateA7Instr(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02046394 = generateA7Instr(0x02046394, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02046428 = generateA7Instr(0x02046428, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0204649C = generateA7Instr(0x0204649C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043950, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02043A70, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02046394, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02046428, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0204649C, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Bomberman Blitz (Europe, Australia)
 	else if (strcmp(romTid, "KBBV") == 0 && saveOnFlashcard) {
 		//*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02043A1C = generateA7Instr(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02043A9C = generateA7Instr(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02043B28 = generateA7Instr(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02043B3C = generateA7Instr(0x02043B28, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02043BB4 = generateA7Instr(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02046460 = generateA7Instr(0x02046460, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020464F4 = generateA7Instr(0x020464F4, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02046568 = generateA7Instr(0x02046568, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02043B28, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02046460, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020464F4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02046568, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Itsudemo Bomberman (Japan)
 	else if (strcmp(romTid, "KBBJ") == 0 && saveOnFlashcard) {
 		//*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
-		*(u32*)0x0204367C = generateA7Instr(0x0204367C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020436FC = generateA7Instr(0x020436FC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02043788 = generateA7Instr(0x02043788, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0204379C = generateA7Instr(0x0204379C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02043814 = generateA7Instr(0x02043814, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020460C0 = generateA7Instr(0x020460C0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02046154 = generateA7Instr(0x02046154, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x020461C8 = generateA7Instr(0x020461C8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204367C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020436FC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02043788, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0204379C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043814, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020460C0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02046154, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020461C8, (u32)ce9->patches->dsiSaveClose);
 	}
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
@@ -342,26 +342,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[19] = (u32*)0x0205C9D4; 
 		}
 
-		*saveFuncOffsets[0] = generateA7Instr((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[1] = generateA7Instr((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[2] = generateA7Instr((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
-		*saveFuncOffsets[3] = generateA7Instr((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[4] = generateA7Instr((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
-		*saveFuncOffsets[5] = generateA7Instr((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[6] = generateA7Instr((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[7] = generateA7Instr((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[8] = generateA7Instr((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[9] = generateA7Instr((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
-		*saveFuncOffsets[10] = generateA7Instr((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[11] = generateA7Instr((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
-		*saveFuncOffsets[12] = generateA7Instr((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[13] = generateA7Instr((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[14] = generateA7Instr((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveCreate);
-		*saveFuncOffsets[15] = generateA7Instr((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[16] = generateA7Instr((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveWrite);
-		*saveFuncOffsets[17] = generateA7Instr((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveClose);
-		*saveFuncOffsets[18] = generateA7Instr((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveOpen);
-		*saveFuncOffsets[19] = generateA7Instr((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
+		setBL((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveCreate);
+		setBL((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Cake Ninja (USA)
@@ -371,80 +371,80 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Castle Conqueror: Heroes (USA)
 	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
-		*(u32*)0x02065CA0 = generateA7Instr(0x02065CA0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02065CB4 = generateA7Instr(0x02065CB4, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02065CC4 = generateA7Instr(0x02065CC4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02065CF0 = generateA7Instr(0x02065CF0, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02065D00 = generateA7Instr(0x02065D00, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066208 = generateA7Instr(0x02066208, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0206621C = generateA7Instr(0x0206621C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0206622C = generateA7Instr(0x0206622C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0206623C = generateA7Instr(0x0206623C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0206624C = generateA7Instr(0x0206624C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0206625C = generateA7Instr(0x0206625C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020662C0 = generateA7Instr(0x020662C0, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020662D4 = generateA7Instr(0x020662D4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020662DC = generateA7Instr(0x020662DC, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02066330 = generateA7Instr(0x02066330, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066648 = generateA7Instr(0x02066648, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02066658 = generateA7Instr(0x02066658, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02066684 = generateA7Instr(0x02066684, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02066BE4 = generateA7Instr(0x02066BE4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066BF8 = generateA7Instr(0x02066BF8, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02066C08 = generateA7Instr(0x02066C08, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02066C10 = generateA7Instr(0x02066C10, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02065CA0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02065CB4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02065CC4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02065CF0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02065D00, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066208, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0206621C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0206622C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0206623C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0206624C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0206625C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020662C0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020662D4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020662DC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02066330, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066648, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02066658, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02066684, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02066BE4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066BF8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02066C08, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02066C10, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Castle Conqueror: Heroes (Europe, Australia)
 	else if (strcmp(romTid, "KC5V") == 0 && saveOnFlashcard) {
-		*(u32*)0x02066110 = generateA7Instr(0x02066110, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066128 = generateA7Instr(0x02066128, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02066138 = generateA7Instr(0x02066138, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066164 = generateA7Instr(0x02066164, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02066174 = generateA7Instr(0x02066174, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066680 = generateA7Instr(0x02066680, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02066694 = generateA7Instr(0x02066694, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020666A4 = generateA7Instr(0x020666A4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020666B4 = generateA7Instr(0x020666B4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020666C4 = generateA7Instr(0x020666C4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020666D4 = generateA7Instr(0x020666D4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02066748 = generateA7Instr(0x02066748, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0206675C = generateA7Instr(0x0206675C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02066764 = generateA7Instr(0x02066764, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020667BC = generateA7Instr(0x020667BC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0206682C = generateA7Instr(0x0206682C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0206683C = generateA7Instr(0x0206683C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0206686C = generateA7Instr(0x0206686C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02066E90 = generateA7Instr(0x02066E90, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02066EA4 = generateA7Instr(0x02066EA4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02066EB4 = generateA7Instr(0x02066EB4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02066EBC = generateA7Instr(0x02066EBC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02066110, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066128, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02066138, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066164, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02066174, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066680, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02066694, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020666A4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020666B4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020666C4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020666D4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02066748, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0206675C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02066764, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020667BC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0206682C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0206683C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0206686C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02066E90, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02066EA4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02066EB4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02066EBC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Castle Conqueror: Heroes (Japan)
 	else if (strcmp(romTid, "KC5J") == 0 && saveOnFlashcard) {
-		*(u32*)0x02026FA8 = generateA7Instr(0x02026FA8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02026FC0 = generateA7Instr(0x02026FC0, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02026FD0 = generateA7Instr(0x02026FD0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02026FFC = generateA7Instr(0x02026FFC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0202700C = generateA7Instr(0x0202700C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02027518 = generateA7Instr(0x02027518, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0202752C = generateA7Instr(0x0202752C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0202753C = generateA7Instr(0x0202753C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0202754C = generateA7Instr(0x0202754C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0202755C = generateA7Instr(0x0202755C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0202756C = generateA7Instr(0x0202756C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020275E0 = generateA7Instr(0x020275E0, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020275F4 = generateA7Instr(0x020275F4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020275FC = generateA7Instr(0x020275FC, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02027654 = generateA7Instr(0x02027654, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020276C4 = generateA7Instr(0x020276C4, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020276D4 = generateA7Instr(0x020276D4, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02027704 = generateA7Instr(0x02027704, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02027D28 = generateA7Instr(0x02027D28, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02027D3C = generateA7Instr(0x02027D3C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02027D4C = generateA7Instr(0x02027D4C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02027D54 = generateA7Instr(0x02027D54, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02026FA8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02026FC0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02026FD0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02026FFC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0202700C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02027518, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202752C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202753C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202754C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202755C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202756C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020275E0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020275F4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020275FC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02027654, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020276C4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020276D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02027704, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02027D28, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02027D3C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02027D4C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02027D54, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Cave Story (USA)
@@ -452,26 +452,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02005994 = generateA7Instr(0x02005994, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020059D0 = generateA7Instr(0x020059D0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005A28 = generateA7Instr(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02005A40 = generateA7Instr(0x02005A40, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02005ADC = generateA7Instr(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005A28 = generateA7Instr(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02005AB0 = generateA7Instr(0x02005AB0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005ADC = generateA7Instr(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005994, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020059D0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02005A40, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02005AB0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02005AF8 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
-		*(u32*)0x02005B0C = generateA7Instr(0x02005B0C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02005B2C = generateA7Instr(0x02005B2C, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02005B3C = generateA7Instr(0x02005B3C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02005B44 = generateA7Instr(0x02005B44, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02005BAC = generateA7Instr(0x02005BAC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005BD8 = generateA7Instr(0x02005BD8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005B0C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005B2C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02005B3C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02005B44, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005BAC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005BD8, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x02005BF4 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
-		*(u32*)0x02005C08 = generateA7Instr(0x02005C08, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02005C28 = generateA7Instr(0x02005C28, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02005C38 = generateA7Instr(0x02005C38, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02005C40 = generateA7Instr(0x02005C40, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005C08, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005C28, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02005C38, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02005C40, (u32)ce9->patches->dsiSaveClose);
 		if (!dsiSD) {
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -479,16 +479,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0 && saveOnFlashcard) {
-		*(u32*)0x0201BBA4 = generateA7Instr(0x0201BBA4, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0201BBB4 = generateA7Instr(0x0201BBB4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0201BBD0 = generateA7Instr(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201BBE0 = generateA7Instr(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0201BBE8 = generateA7Instr(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201BBA4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201BBB4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
 		//*(u32*)0x0201BD0C = 0xE3A02001; // mov r2, #1
-		*(u32*)0x0201BD10 = generateA7Instr(0x0201BD10, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0201BD28 = generateA7Instr(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201BD38 = generateA7Instr(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0201BD40 = generateA7Instr(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201BD10, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
 
 		if (!dsiSD) {
 			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -507,16 +507,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		*(u32*)0x02045BAC = generateA7Instr(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02045BBC = generateA7Instr(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02045BD8 = generateA7Instr(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02045BE8 = generateA7Instr(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02045BF0 = generateA7Instr(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
 		//*(u32*)0x02045D14 = 0xE3A02001; // mov r2, #1
-		*(u32*)0x02045D1C = generateA7Instr(0x02045D1C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02045D34 = generateA7Instr(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x02045D44 = generateA7Instr(0x02045D44, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02045D4C = generateA7Instr(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02045D1C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// DS WiFi Settings
@@ -541,64 +541,64 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0 && saveOnFlashcard) {
-		*(u32*)0x0200B048 = generateA7Instr(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B090 = generateA7Instr(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B0A0 = 0xE1A00000; // nop
-		*(u32*)0x0200B0E8 = generateA7Instr(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B114 = generateA7Instr(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B124 = generateA7Instr(0x0200B124, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0200B12C = generateA7Instr(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x0200B388 = generateA7Instr(0x0200B388, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B39C = generateA7Instr(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B5B4 = generateA7Instr(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0200B5BC = generateA7Instr(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B124, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B388, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0 && saveOnFlashcard) {
-		*(u32*)0x0200B350 = generateA7Instr(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B398 = generateA7Instr(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B3A8 = 0xE1A00000; // nop
-		*(u32*)0x0200B3F0 = generateA7Instr(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B41C = generateA7Instr(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B42C = generateA7Instr(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0200B434 = generateA7Instr(0x0200B434, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x0200B690 = generateA7Instr(0x0200B690, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B8BC = generateA7Instr(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0200B8C4 = generateA7Instr(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200B434, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B690, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0 && saveOnFlashcard) {
-		*(u32*)0x0200B134 = generateA7Instr(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B174 = generateA7Instr(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B184 = 0xE1A00000; // nop
-		*(u32*)0x0200B1D4 = generateA7Instr(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B1FC = generateA7Instr(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B210 = generateA7Instr(0x0200B210, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0200B218 = generateA7Instr(0x0200B218, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x0200B478 = generateA7Instr(0x0200B478, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0200B488 = generateA7Instr(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200B6A4 = generateA7Instr(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0200B6AC = generateA7Instr(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B210, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200B218, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B478, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
 	else if (strncmp(romTid, "KWY", 3) == 0 && saveOnFlashcard) {
-		*(u32*)0x0200547C = generateA7Instr(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020054BC = generateA7Instr(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x020054E4 = 0xE1A00000; // nop
-		*(u32*)0x02005534 = generateA7Instr(0x02005534, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0200555C = generateA7Instr(0x0200555C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005570 = generateA7Instr(0x02005570, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02005578 = generateA7Instr(0x02005578, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020057E4 = generateA7Instr(0x020057E4, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020057F4 = generateA7Instr(0x020057F4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02005A0C = generateA7Instr(0x02005A0C, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02005A14 = generateA7Instr(0x02005A14, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005534, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200555C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005570, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02005578, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020057E4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020057F4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02005A0C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02005A14, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Nintendo DSi Camera
@@ -618,30 +618,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0 && saveOnFlashcard) {
-		*(u32*)0x0209201C = generateA7Instr(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0209205C = generateA7Instr(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0209291C = generateA7Instr(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02092944 = generateA7Instr(0x02092944, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02092958 = generateA7Instr(0x02092958, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02092960 = generateA7Instr(0x02092960, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02092BCC = generateA7Instr(0x02092BCC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02092BDC = generateA7Instr(0x02092BDC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02092DF4 = generateA7Instr(0x02092DF4, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x02092DFC = generateA7Instr(0x02092DFC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02092944, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02092958, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02092960, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02092BCC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02092BDC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02092DF4, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02092DFC, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Shantae: Risky's Revenge (Europe)
 	else if (strcmp(romTid, "KS3P") == 0 && saveOnFlashcard) {
-		*(u32*)0x020922A0 = generateA7Instr(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x020922E0 = generateA7Instr(0x020922E0, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02092D4C = generateA7Instr(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02092D74 = generateA7Instr(0x02092D74, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02092D88 = generateA7Instr(0x02092D88, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02092D90 = generateA7Instr(0x02092D90, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02092FFC = generateA7Instr(0x02092FFC, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0209300C = generateA7Instr(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02093224 = generateA7Instr(0x02093224, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0209322C = generateA7Instr(0x0209322C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020922E0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02092D74, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02092D88, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02092D90, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02092FFC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02093224, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0209322C, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	else if (dsiSD) {
