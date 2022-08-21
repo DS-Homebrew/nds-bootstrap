@@ -686,21 +686,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x020182F0, heapEnd); // mov r0, #0x23C0000
 		*(u32*)0x02019538 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201C150 = 0xE1A00000; // nop
-		/* *(u32*)0x0201E3C0 = generateA7Instr(0x0201E3C0, (u32)ce9->patches->dsiSaveCreate);
+		/* setBL(0x0201E3C0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201E3E8, (u32)ce9->patches->dsiSaveOpen);
 		*(u32*)0x0201E41C = 0xE1A00000; // nop
-		*(u32*)0x0201E428 = generateA7Instr(0x0201E428, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x0201E438 = generateA7Instr(0x0201E438, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0201E468 = generateA7Instr(0x0201E468, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0201E540 = generateA7Instr(0x0201E540, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x0201E560 = generateA7Instr(0x0201E560, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201E578 = generateA7Instr(0x0201E578, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0201E588 = generateA7Instr(0x0201E588, (u32)ce9->patches->dsiSaveSeek); */
+		setBL(0x0201E428, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201E438, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201E468, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201E540, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201E560, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0201E578, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201E588, (u32)ce9->patches->dsiSaveSeek); */
 		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
-		/* *(u32*)0x02029CFC = generateA7Instr(0x02029CFC, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02029DB8 = generateA7Instr(0x02029DB8, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02029DCC = generateA7Instr(0x02029DCC, (u32)ce9->patches->dsiSaveClose); */
+		/* setBL(0x02029CFC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02029DB8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02029DCC, (u32)ce9->patches->dsiSaveClose); */
 	}
 
 	// AiRace: Tunnel (USA)
