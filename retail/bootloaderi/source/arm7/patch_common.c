@@ -472,9 +472,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005C28, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02005C38, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x02005C40, (u32)ce9->patches->dsiSaveClose);
-		if (!dsiSD) {
+		//if (!dsiSD) {
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
-		}
+		//}
 	}
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
@@ -490,7 +490,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
 
-		if (!dsiSD) {
+		//if (!dsiSD) {
 			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
@@ -498,15 +498,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				u32* offset = (u32*)0x0202D43C;
 				offset[i] = 0xE1A00000; // nop
 			}
-		}
+		//}
 	}
 
 	// Chuck E. Cheese's Arcade Room (USA)
 	else if (strcmp(romTid, "KUCE") == 0 && saveOnFlashcard) {
-		if (!dsiSD) {
+		//if (!dsiSD) {
 			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
+		//}
 		setBL(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);

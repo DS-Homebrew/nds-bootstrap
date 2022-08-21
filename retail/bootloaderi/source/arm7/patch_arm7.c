@@ -527,9 +527,9 @@ u32 patchCardNdsArm7(
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 
-	if (!gameOnFlashcard) {
+	//if (!gameOnFlashcard) {
 		patchSdCardReset(ndsHeader, moduleParams);
-	}
+	//}
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
