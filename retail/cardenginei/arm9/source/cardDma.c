@@ -54,7 +54,6 @@ extern vu32* volatile sharedAddr;
 
 extern tNDSHeader* ndsHeader;
 extern aFile* romFile;
-extern u32 romStart;
 
 extern u32 cacheDescriptor[];
 extern int cacheCounter[];
@@ -405,7 +404,7 @@ void cardSetDma(void) {
 
 	if (ce9->valueBits & ROMinRAM) {
 		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)(ce9->romLocation-romStart)+src, dst, len);
+		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation+src, dst, len);
 		IPC_SendSync(0x3);
 		return;
 	}

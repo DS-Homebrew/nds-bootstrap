@@ -295,6 +295,7 @@ int hookNdsRetailArm9(
 			ce9->valueBits |= b_slowSoftReset;
 		}
 	}
+	ce9->romLocation -= (ROMinRAM && usesCloneboot) ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
  	if (!tableAddr) {

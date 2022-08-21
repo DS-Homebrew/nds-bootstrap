@@ -89,7 +89,6 @@ aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
-u32 romStart = 0x8000;
 #ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
@@ -423,7 +422,7 @@ static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* 
 
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = (ce9->romLocation-romStart)+src;
+	sharedAddr[2] = ce9->romLocation+src;
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
@@ -431,7 +430,7 @@ static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* 
 	#endif
 
 	// Copy directly
-	tonccpy(dst, (u8*)(ce9->romLocation-romStart)+src, len);
+	tonccpy(dst, (u8*)ce9->romLocation+src, len);
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -757,7 +756,6 @@ void myIrqHandlerIPC(void) {
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
-	static bool flagsSetOnce = false;
 
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
@@ -765,14 +763,6 @@ u32 myIrqEnable(u32 irq) {
 
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();
-	}
-
-	if (!flagsSetOnce) {
-		if (!(ce9->valueBits & ROMinRAM) || !(ce9->valueBits & cloneboot)) {
-			romStart -= 0x8000;
-			romStart += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-		}
-		flagsSetOnce = true;
 	}
 
 	if (unpatchedFuncs->mpuDataOffset) {

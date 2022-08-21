@@ -119,6 +119,57 @@ extern void enableIPC_SYNC(void);
 //	asm("MOV R0,#0\n\tmcr p15, 0, r0, C6,C2,0");
 //}
 
+void setupRomMap(void) {
+	if (flagsSetOnce) {
+		return;
+	}
+	if (ce9->valueBits & isSdk5) {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+	}
+	if (ce9->consoleModel > 0) {
+		romMap[1][2] = 0x0E000000;
+		romMap[2][0] += 0x1000000;
+	}
+	if (ce9->valueBits & isSdk5) {
+		if (ndsHeader->unitCode > 0) {
+			/*if (ce9->valueBits & dsiMode) {
+			romMap[0][1] = 0x0D000000;
+			romMap[0][2] = 0x0DF80000;
+			} else {*/
+				romMap[0][2] = 0x0CFE0000;
+				romMap[1][0] = 0x00C06000;
+				if (ce9->consoleModel > 0) {
+					romMap[1][1] = 0x0D000000;
+					romMap[2][0] += 0x1000000;
+				} else {
+					romMap[1][1] = 0x03700000;
+					romMap[1][2] = 0x03780000;
+				}
+			//}
+		} else {
+			romMap[1][2] = 0x0CFFF000;
+			romMap[2][2] = 0x0D000000;
+			if (ce9->consoleModel > 0) {
+				romMap[2][1] = 0x0D000000;
+				romMap[2][2] = 0x0E000000;
+				romMapLines = 4;
+			}
+		}
+	} else if (ce9->valueBits & eSdk2) {
+		romMap[0][1] -= 0x22000;
+		romMap[0][2] -= 0x22000;
+	}
+	if (!(ce9->valueBits & cloneboot)) {
+		for (int i = 0; i < 4; i++) {
+			romMap[i][0] -= 0x8000;
+			romMap[i][0] += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+	}
+	flagsSetOnce = true;
+}
+
 void endCardReadDma() {
 	if (dmaOn && ndmaBusy(0)) {
 		IPC_SendSync(0x3);
@@ -134,6 +185,8 @@ void endCardReadDma() {
 }
 
 void cardSetDma(u32 * params) {
+	setupRomMap();
+
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
@@ -262,6 +315,8 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		flagsSet = true;
 	}
 	
+	setupRomMap();
+
 	enableIPC_SYNC();
 
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
@@ -427,53 +482,7 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	if (!flagsSetOnce) {
-		if (ce9->valueBits & isSdk5) {
-			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-			unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
-		}
-		if (ce9->consoleModel > 0) {
-			romMap[1][2] = 0x0E000000;
-			romMap[2][0] += 0x1000000;
-		}
-		if (ce9->valueBits & isSdk5) {
-			if (ndsHeader->unitCode > 0) {
-				/*if (ce9->valueBits & dsiMode) {
-					romMap[0][1] = 0x0D000000;
-					romMap[0][2] = 0x0DF80000;
-				} else {*/
-					romMap[0][2] = 0x0CFE0000;
-					romMap[1][0] = 0x00C06000;
-					if (ce9->consoleModel > 0) {
-						romMap[1][1] = 0x0D000000;
-						romMap[2][0] += 0x1000000;
-					} else {
-						romMap[1][1] = 0x03700000;
-						romMap[1][2] = 0x03780000;
-					}
-				//}
-			} else {
-				romMap[1][2] = 0x0CFFF000;
-				romMap[2][2] = 0x0D000000;
-				if (ce9->consoleModel > 0) {
-					romMap[2][1] = 0x0D000000;
-					romMap[2][2] = 0x0E000000;
-					romMapLines = 4;
-				}
-			}
-		} else if (ce9->valueBits & eSdk2) {
-			romMap[0][1] -= 0x22000;
-			romMap[0][2] -= 0x22000;
-		}
-		if (!(ce9->valueBits & cloneboot)) {
-			for (int i = 0; i < 4; i++) {
-				romMap[i][0] -= 0x8000;
-				romMap[i][0] += (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-			}
-		}
-		flagsSetOnce = true;
-	}
+	setupRomMap();
 
 	if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
