@@ -815,7 +815,7 @@ bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
 #endif
 }
 
-bool dsiSaveRead(void* ctx, void* dst, u32 len) {
+s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef TWLSDK
 #ifdef DLDI
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
