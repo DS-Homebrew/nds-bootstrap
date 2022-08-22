@@ -596,7 +596,7 @@ bool dsiSaveClose(void* ctx) {
 	return true;
 }
 
-bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
+bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return false;
 	}
