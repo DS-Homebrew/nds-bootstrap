@@ -289,6 +289,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02046154, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x020461C8, (u32)ce9->patches->dsiSaveClose);
 	}
+
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
 	else if (strncmp(romTid, "KKQ", 3) == 0 && saveOnFlashcard) {
@@ -517,6 +518,81 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// CuteWitch! runner (USA)
+	// CuteWitch! runner (Europe)
+	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {
+		u32* saveFuncOffsets[20] = {NULL};
+
+		if (ndsHeader->gameCode[3] == 'E') {
+			saveFuncOffsets[0] = (u32*)0x02062EA4;
+			*(u32*)0x02062EBC = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x02062ED0;
+			saveFuncOffsets[2] = (u32*)0x02062EE8;
+			saveFuncOffsets[3] = (u32*)0x02062EFC;
+			saveFuncOffsets[4] = (u32*)0x02062F14;
+			saveFuncOffsets[5] = (u32*)0x02062F28;
+			saveFuncOffsets[6] = (u32*)0x02062F38;
+			saveFuncOffsets[7] = (u32*)0x02062FA8;
+			*(u32*)0x02062FC0 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x02062FD4;
+			saveFuncOffsets[9] = (u32*)0x02062FEC;
+			saveFuncOffsets[10] = (u32*)0x02063000;
+			saveFuncOffsets[11] = (u32*)0x02063018;
+			saveFuncOffsets[12] = (u32*)0x0206302C;
+			saveFuncOffsets[13] = (u32*)0x0206303C;
+			saveFuncOffsets[14] = (u32*)0x020630AC;
+			saveFuncOffsets[15] = (u32*)0x020630E0;
+			saveFuncOffsets[16] = (u32*)0x02063100;
+			saveFuncOffsets[17] = (u32*)0x02063108;
+			saveFuncOffsets[18] = (u32*)0x02063168;
+			saveFuncOffsets[19] = (u32*)0x02063180;
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			saveFuncOffsets[0] = (u32*)0x020948E0;
+			*(u32*)0x020948F8 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x0209490C;
+			saveFuncOffsets[2] = (u32*)0x02094924;
+			saveFuncOffsets[3] = (u32*)0x02094938;
+			saveFuncOffsets[4] = (u32*)0x02094950;
+			saveFuncOffsets[5] = (u32*)0x02094964;
+			saveFuncOffsets[6] = (u32*)0x02094974;
+			saveFuncOffsets[7] = (u32*)0x020949E4;
+			*(u32*)0x020949FC = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x02094A10;
+			saveFuncOffsets[9] = (u32*)0x02094A28;
+			saveFuncOffsets[10] = (u32*)0x02094A3C;
+			saveFuncOffsets[11] = (u32*)0x02094A54;
+			saveFuncOffsets[12] = (u32*)0x02094A68;
+			saveFuncOffsets[13] = (u32*)0x02094A78;
+			saveFuncOffsets[14] = (u32*)0x02094AE8;
+			saveFuncOffsets[15] = (u32*)0x02094B1C;
+			saveFuncOffsets[16] = (u32*)0x02094B3C;
+			saveFuncOffsets[17] = (u32*)0x02094B44;
+			saveFuncOffsets[18] = (u32*)0x02094BA4;
+			saveFuncOffsets[19] = (u32*)0x02094BBC;
+		}
+
+		setBL((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
+		setBL((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveCreate);
+		setBL((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// DS WiFi Settings

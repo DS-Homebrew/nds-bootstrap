@@ -1143,18 +1143,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020104A0 = 0xE1A00000; // nop
 		*(u32*)0x02010508 = 0xE1A00000; // nop
 		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		/* *(u32*)0x0201D770 = generateA7Instr(0x0201D770, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201D780 = generateA7Instr(0x0201D780, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0201F944 = generateA7Instr(0x0201F944, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201F964 = generateA7Instr(0x0201F964, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020267D4 = generateA7Instr(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02026814 = generateA7Instr(0x02026814, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0202684C = generateA7Instr(0x0202684C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020268B8 = generateA7Instr(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020268D4 = generateA7Instr(0x020268D4, (u32)ce9->patches->dsiSaveRead); */
+		/* getBL(0x0201D770, (u32)ce9->patches->dsiSaveSeek);
+		getBL(0x0201D780, (u32)ce9->patches->dsiSaveWrite);
+		getBL(0x0201D874, (u32)ce9->patches->dsiSaveClose);
+		getBL(0x0201F944, (u32)ce9->patches->dsiSaveSeek);
+		getBL(0x0201F964, (u32)ce9->patches->dsiSaveWrite); */
+		/* getBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
+		getBL(0x020267E4, (u32)ce9->patches->dsiSaveCreate);
+		getBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
+		getBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
+		getBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
+		getBL(0x020268D4, (u32)ce9->patches->dsiSaveRead); */
 		*(u32*)0x0203F500 = 0xE1A00000; // nop
-		//*(u32*)0x02041338 = generateA7Instr(0x02041338, (u32)ce9->patches->dsiSaveWrite);
-		//*(u32*)0x0204134C = generateA7Instr(0x0204134C, (u32)ce9->patches->dsiSaveClose);
+		//getBL(0x02041338, (u32)ce9->patches->dsiSaveWrite);
+		//getBL(0x0204134C, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02042F10 = 0xE1A00000; // nop
 		*(u32*)0x02049420 = 0xE1A00000; // nop
 		*(u32*)0x0204B27C = 0xE1A00000; // nop
@@ -1264,7 +1266,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Bomberman Blitz (USA)
 	// Bomberman Blitz (Europe, Australia)
 	// Itsudemo Bomberman (Japan)
-	// Controls must be reset in the Options menu to play the game properly
 	else if (strncmp(romTid, "KBB", 3) == 0) {
 		*(u32*)0x02008988 = 0xE1A00000; // nop
 		*(u32*)0x0200C280 = 0xE1A00000; // nop
@@ -2193,6 +2194,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// CuteWitch! runner (Europe)
 	// Stage music doesn't play on retail consoles
 	else if (strncmp(romTid, "K32", 3) == 0) {
+		u32* saveFuncOffsets[20] = {NULL};
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0201B8CC = 0xE1A00000; // nop
@@ -2206,10 +2209,120 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026978 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02029700 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
-			*(u32*)0x02062068 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020620D8 = 0xE1A00000; // nop
+			*(u32*)0x02062118 = 0xE1A00000; // nop
+			*(u32*)0x020621FC = 0xE1A00000; // nop
+			*(u32*)0x02062204 = 0xE1A00000; // nop
+			*(u32*)0x02062318 = 0xE1A00000; // nop
+			*(u32*)0x02062394 = 0xE1A00000; // nop
+			*(u32*)0x0206239C = 0xE1A00000; // nop
+			*(u32*)0x02062428 = 0xE1A00000; // nop
+			*(u32*)0x0206249C = 0xE1A00000; // nop
+			*(u32*)0x020624A4 = 0xE1A00000; // nop
+			*(u32*)0x02062530 = 0xE1A00000; // nop
+			*(u32*)0x02062638 = 0xE1A00000; // nop
+			*(u32*)0x0206263C = 0xE1A00000; // nop
+			*(u32*)0x02062640 = 0xE1A00000; // nop
+			*(u32*)0x020626F4 = 0xE1A00000; // nop
+			*(u32*)0x020626FC = 0xE1A00000; // nop
+			*(u32*)0x02062928 = 0xE1A00000; // nop
+			*(u32*)0x02062A40 = 0xE1A00000; // nop
+			*(u32*)0x02062A48 = 0xE1A00000; // nop
+			*(u32*)0x02062C0C = 0xE1A00000; // nop
+			*(u32*)0x02062C34 = 0xE1A00000; // nop
+			*(u32*)0x02062C38 = 0xE1A00000; // nop
+			*(u32*)0x02062C3C = 0xE1A00000; // nop
+			saveFuncOffsets[0] = (u32*)0x02062EA4;
+			*(u32*)0x02062EBC = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x02062ED0;
+			saveFuncOffsets[2] = (u32*)0x02062EE8;
+			saveFuncOffsets[3] = (u32*)0x02062EFC;
+			saveFuncOffsets[4] = (u32*)0x02062F14;
+			saveFuncOffsets[5] = (u32*)0x02062F28;
+			saveFuncOffsets[6] = (u32*)0x02062F38;
+			saveFuncOffsets[7] = (u32*)0x02062FA8;
+			*(u32*)0x02062FC0 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x02062FD4;
+			saveFuncOffsets[9] = (u32*)0x02062FEC;
+			saveFuncOffsets[10] = (u32*)0x02063000;
+			saveFuncOffsets[11] = (u32*)0x02063018;
+			saveFuncOffsets[12] = (u32*)0x0206302C;
+			saveFuncOffsets[13] = (u32*)0x0206303C;
+			saveFuncOffsets[14] = (u32*)0x020630AC;
+			saveFuncOffsets[15] = (u32*)0x020630E0;
+			saveFuncOffsets[16] = (u32*)0x02063100;
+			saveFuncOffsets[17] = (u32*)0x02063108;
+			saveFuncOffsets[18] = (u32*)0x02063168;
+			saveFuncOffsets[19] = (u32*)0x02063180;
 		} else if (ndsHeader->gameCode[3] == 'P') {
-			*(u32*)0x02093AA4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02093B14 = 0xE1A00000; // nop
+			*(u32*)0x02093B54 = 0xE1A00000; // nop
+			*(u32*)0x02093C38 = 0xE1A00000; // nop
+			*(u32*)0x02093C40 = 0xE1A00000; // nop
+			*(u32*)0x02093D54 = 0xE1A00000; // nop
+			*(u32*)0x02093DD0 = 0xE1A00000; // nop
+			*(u32*)0x02093DD8 = 0xE1A00000; // nop
+			*(u32*)0x02093E64 = 0xE1A00000; // nop
+			*(u32*)0x02093ED8 = 0xE1A00000; // nop
+			*(u32*)0x02093EE0 = 0xE1A00000; // nop
+			*(u32*)0x02093F6C = 0xE1A00000; // nop
+			*(u32*)0x02094074 = 0xE1A00000; // nop
+			*(u32*)0x02094078 = 0xE1A00000; // nop
+			*(u32*)0x0209407C = 0xE1A00000; // nop
+			*(u32*)0x02094130 = 0xE1A00000; // nop
+			*(u32*)0x02094138 = 0xE1A00000; // nop
+			*(u32*)0x02094364 = 0xE1A00000; // nop
+			*(u32*)0x0209447C = 0xE1A00000; // nop
+			*(u32*)0x02094480 = 0xE1A00000; // nop
+			*(u32*)0x02094484 = 0xE1A00000; // nop
+			*(u32*)0x02094648 = 0xE1A00000; // nop
+			*(u32*)0x02094670 = 0xE1A00000; // nop
+			*(u32*)0x02094674 = 0xE1A00000; // nop
+			*(u32*)0x02094678 = 0xE1A00000; // nop
+			saveFuncOffsets[0] = (u32*)0x020948E0;
+			*(u32*)0x020948F8 = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[1] = (u32*)0x0209490C;
+			saveFuncOffsets[2] = (u32*)0x02094924;
+			saveFuncOffsets[3] = (u32*)0x02094938;
+			saveFuncOffsets[4] = (u32*)0x02094950;
+			saveFuncOffsets[5] = (u32*)0x02094964;
+			saveFuncOffsets[6] = (u32*)0x02094974;
+			saveFuncOffsets[7] = (u32*)0x020949E4;
+			*(u32*)0x020949FC = 0xE1A00000; // nop (dsiSaveGetLength)
+			saveFuncOffsets[8] = (u32*)0x02094A10;
+			saveFuncOffsets[9] = (u32*)0x02094A28;
+			saveFuncOffsets[10] = (u32*)0x02094A3C;
+			saveFuncOffsets[11] = (u32*)0x02094A54;
+			saveFuncOffsets[12] = (u32*)0x02094A68;
+			saveFuncOffsets[13] = (u32*)0x02094A78;
+			saveFuncOffsets[14] = (u32*)0x02094AE8;
+			saveFuncOffsets[15] = (u32*)0x02094B1C;
+			saveFuncOffsets[16] = (u32*)0x02094B3C;
+			saveFuncOffsets[17] = (u32*)0x02094B44;
+			saveFuncOffsets[18] = (u32*)0x02094BA4;
+			saveFuncOffsets[19] = (u32*)0x02094BBC;
 		}
+
+		setBL((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveRead);
+		setBL((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveCreate);
+		setBL((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Dark Void Zero (USA)
