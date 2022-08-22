@@ -1136,6 +1136,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Aura-Aura Climber (USA)
+	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0200515C = 0xE1A00000; // nop
@@ -1143,20 +1144,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020104A0 = 0xE1A00000; // nop
 		*(u32*)0x02010508 = 0xE1A00000; // nop
 		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		/* getBL(0x0201D770, (u32)ce9->patches->dsiSaveSeek);
-		getBL(0x0201D780, (u32)ce9->patches->dsiSaveWrite);
-		getBL(0x0201D874, (u32)ce9->patches->dsiSaveClose);
-		getBL(0x0201F944, (u32)ce9->patches->dsiSaveSeek);
-		getBL(0x0201F964, (u32)ce9->patches->dsiSaveWrite); */
-		/* getBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
-		getBL(0x020267E4, (u32)ce9->patches->dsiSaveCreate);
-		getBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
-		getBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
-		getBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
-		getBL(0x020268D4, (u32)ce9->patches->dsiSaveRead); */
+		/* *(u32*)0x02026788 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020267E8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0202683C = 0xE3A00000; // mov r0, #0 (dsiSaveFlush)
+		setBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02026870, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0202687C = 0xE3A00B0B; // mov r0, #0x2C00 (dsiSaveGetLength)
+		*(u32*)0x02026880 = 0xE3A02B0B; // mov r2, #0x2C00
+		*(u32*)0x02026884 = 0xE3A01000; // mov r1, #0
+		//*(u32*)0x02026888 = 0xE3A03000; // mov r3, #0
+		setBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020268D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026BDC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026C00, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026CC0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026CDC, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026F6C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026F84, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020271E4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020271FC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202723C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02027258, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020273AC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020273C4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020275A4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020275BC, (u32)ce9->patches->dsiSaveWrite); */
 		*(u32*)0x0203F500 = 0xE1A00000; // nop
-		//getBL(0x02041338, (u32)ce9->patches->dsiSaveWrite);
-		//getBL(0x0204134C, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02042F10 = 0xE1A00000; // nop
 		*(u32*)0x02049420 = 0xE1A00000; // nop
 		*(u32*)0x0204B27C = 0xE1A00000; // nop
@@ -2325,6 +2340,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
 	}
 
+	// Dairojo! Samurai Defenders (USA)
+	else if (strcmp(romTid, "KF3E") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
+		*(u32*)0x02011580 = 0xE1A00000; // nop
+		*(u32*)0x0201BCD4 = 0xE1A00000; // nop
+		*(u32*)0x0201DB50 = 0xE1A00000; // nop
+		*(u32*)0x0201DB54 = 0xE1A00000; // nop
+		*(u32*)0x0201DB60 = 0xE1A00000; // nop
+		*(u32*)0x0201DCC0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201DD1C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201EFDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201EFE0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EFE8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EFEC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022418 = 0xE1A00000; // nop
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
@@ -2351,25 +2385,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020891BC = 0xE1A00000; // nop
 		*(u32*)0x0208AE4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0208B008 = 0xE12FFF1E; // bx lr
-	}
-
-	// Dairojo! Samurai Defenders (USA)
-	else if (strcmp(romTid, "KF3E") == 0) {
-		*(u32*)0x02004838 = 0xE1A00000; // nop
-		*(u32*)0x0200499C = 0xE1A00000; // nop
-		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
-		*(u32*)0x02011580 = 0xE1A00000; // nop
-		*(u32*)0x0201BCD4 = 0xE1A00000; // nop
-		*(u32*)0x0201DB50 = 0xE1A00000; // nop
-		*(u32*)0x0201DB54 = 0xE1A00000; // nop
-		*(u32*)0x0201DB60 = 0xE1A00000; // nop
-		*(u32*)0x0201DCC0 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201DD1C, heapEnd); // mov r0, #0x23C0000
-		*(u32*)0x0201EFDC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0201EFE0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0201EFE8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201EFEC = 0xE12FFF1E; // bx lr
-		*(u32*)0x02022418 = 0xE1A00000; // nop
 	}
 
 	// GO Series: Defense Wars (USA)

@@ -248,6 +248,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02020B20, (u32)ce9->patches->dsiSaveClose);
 	}
 
+	// Aura-Aura Climber (USA)
+	// Save code too advanced to patch, preventing support
+	else if (strcmp(romTid, "KSRE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x02026788 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020267E8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0202683C = 0xE3A00000; // mov r0, #0 (dsiSaveFlush)
+		setBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02026870, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x0202687C = 0xE3A00B0B; // mov r0, #0x2C00 (dsiSaveGetLength)
+		*(u32*)0x02026880 = 0xE3A02B0B; // mov r2, #0x2C00
+		*(u32*)0x02026884 = 0xE3A01000; // mov r1, #0
+		//*(u32*)0x02026888 = 0xE3A03000; // mov r3, #0
+		setBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020268D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026BDC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026C00, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026CC0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026CDC, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02026F6C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02026F84, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020271E4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020271FC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202723C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02027258, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020273AC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020273C4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020275A4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020275BC, (u32)ce9->patches->dsiSaveWrite); */
+	}
+
+	// Aura-Aura Climber (Europe, Australia)
+	else if (strcmp(romTid, "KSRV") == 0 && saveOnFlashcard) {
+		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
@@ -782,26 +820,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Asphalt 4: Elite Racing (Europe, Australia)
 	else if (strcmp(romTid, "KA4V") == 0) {
 		*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
-	}
-
-	// Aura-Aura Climber (USA)
-	else if (strcmp(romTid, "KSRE") == 0) {
-		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
-		/* *(u32*)0x0201D770 = generateA7Instr(0x0201D770, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201D780 = generateA7Instr(0x0201D780, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0201F944 = generateA7Instr(0x0201F944, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x0201F964 = generateA7Instr(0x0201F964, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x020267D4 = generateA7Instr(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02026814 = generateA7Instr(0x02026814, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0202684C = generateA7Instr(0x0202684C, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x020268B8 = generateA7Instr(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
-		*(u32*)0x020268D4 = generateA7Instr(0x020268D4, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02041338 = generateA7Instr(0x02041338, (u32)ce9->patches->dsiSaveWrite); */
-	}
-
-	// Aura-Aura Climber (Europe, Australia)
-	else if (strcmp(romTid, "KSRV") == 0) {
-		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
 	}
 
 	// Brain Challenge (USA)
