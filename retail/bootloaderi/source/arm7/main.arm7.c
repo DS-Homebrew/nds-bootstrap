@@ -1807,6 +1807,7 @@ int arm7_main(void) {
 			|| strncmp(romTid, "AMU", 3) == 0 // Big Mutha Truckers
 			|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
+			|| strncmp(romTid, "AUR", 3) == 0 // Urusei Yatsura: Endless Summer
 			) ? 0 : 1,
 			usesCloneboot,
 			ROMinRAM,
