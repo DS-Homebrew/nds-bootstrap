@@ -728,8 +728,12 @@ static bool dsiSaveInit(void) {
 	if (dsiSaveInited) {
 		return true;
 	}
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	fileRead((char*)0x02FFF600, *savFile, 0, 512, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
 	for (int i = 0; i < 512; i++) {
 		if (*(char*)(0x02FFF600+i) != 0) {
 			toncset((char*)0x02FFF600, 0, 512);
@@ -798,7 +802,7 @@ bool dsiSaveClose(void* ctx) {
 #endif
 }
 
-bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
+bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #ifdef TWLSDK
 #ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
@@ -817,8 +821,12 @@ bool dsiSaveSeek(void* ctx, u32 pos, u32 mode) {
 s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef TWLSDK
 #ifdef DLDI
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileRead(dst, *savFile, dsiSaveSeekPos, len, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
 	if (res) {
 		dsiSaveSeekPos += len;
 		return len;
@@ -835,8 +843,12 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifdef TWLSDK
 #ifdef DLDI
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
 	if (res) {
 		dsiSaveSeekPos += len;
 		return len;
