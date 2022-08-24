@@ -546,6 +546,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
+static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
 
 static void dsiSaveInit(void) {
@@ -617,6 +618,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 		dsiSaveEmpty = false;
 	}
 
+	dsiSavePerms = mode;
 	return !dsiSaveEmpty;
 }
 
@@ -638,6 +640,10 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 }
 
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
+	if (dsiSavePerms == 2) {
+		return -1; // Return if only write perms are set
+	}
+
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	setDeviceOwner();
@@ -652,6 +658,10 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 }
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
+	if (dsiSavePerms == 1) {
+		return -1; // Return if only read perms are set
+	}
+
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	setDeviceOwner();

@@ -722,6 +722,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
+static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
 
 static void dsiSaveInit(void) {
@@ -805,6 +806,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 		dsiSaveEmpty = false;
 	}
 
+	dsiSavePerms = mode;
 	return !dsiSaveEmpty;
 #else
 	return false;
@@ -838,6 +840,10 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 
 s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef DLDI
+	if (dsiSavePerms == 2) {
+		return -1; // Return if only write perms are set
+	}
+
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
@@ -854,6 +860,10 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifdef DLDI
+	if (dsiSavePerms == 1) {
+		return -1; // Return if only read perms are set
+	}
+
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
