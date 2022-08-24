@@ -548,9 +548,9 @@ static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
 static s32 dsiSaveSeekPos = 0;
 
-static bool dsiSaveInit(void) {
+static void dsiSaveInit(void) {
 	if (dsiSaveInited) {
-		return true;
+		return;
 	}
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
@@ -563,11 +563,10 @@ static bool dsiSaveInit(void) {
 			toncset((char*)0x02FFF600, 0, 512);
 			dsiSaveEmpty = false;
 			dsiSaveInited = true;
-			return true;
+			return;
 		}
 	}
 	dsiSaveInited = true;
-	return false;
 }
 
 bool dsiSaveCreate(const char* path, u32 permit) {
@@ -575,12 +574,36 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	if (!dsiSaveInited) {
-		dsiSaveInit();
+
+	dsiSaveInit();
+	if ((dsiSaveEmpty && permit == 1) || (!dsiSaveEmpty && permit == 2)) {
+		return false;
 	}
-	bool bak = dsiSaveEmpty;
-	dsiSaveEmpty = false;
-	return bak;
+
+	return true;
+}
+
+bool dsiSaveDelete(const char* path) {
+	dsiSaveSeekPos = 0;
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	if (!dsiSaveEmpty) {
+		toncset((char*)0x02FFF600, 0, 512);
+
+		int oldIME = enterCriticalSection();
+		u16 exmemcnt = REG_EXMEMCNT;
+		setDeviceOwner();
+		fileWrite((char*)0x02FFF600, savFile, 0, 512);
+		REG_EXMEMCNT = exmemcnt;
+		leaveCriticalSection(oldIME);
+
+		dsiSaveEmpty = true;
+		return true;
+	}
+
+	return false;
 }
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
@@ -588,7 +611,13 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	return dsiSaveInit();
+
+	dsiSaveInit();
+	if (mode == 2 || mode == 3) {
+		dsiSaveEmpty = false;
+	}
+
+	return !dsiSaveEmpty;
 }
 
 bool dsiSaveClose(void* ctx) {

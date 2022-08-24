@@ -724,9 +724,9 @@ static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
 static s32 dsiSaveSeekPos = 0;
 
-static bool dsiSaveInit(void) {
+static void dsiSaveInit(void) {
 	if (dsiSaveInited) {
-		return true;
+		return;
 	}
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
@@ -739,54 +739,79 @@ static bool dsiSaveInit(void) {
 			toncset((char*)0x02FFF600, 0, 512);
 			dsiSaveEmpty = false;
 			dsiSaveInited = true;
-			return true;
+			return;
 		}
 	}
 	dsiSaveInited = true;
-	return false;
 }
-#endif
 #endif
 
 bool dsiSaveCreate(const char* path, u32 permit) {
-#ifdef TWLSDK
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	if (!dsiSaveInited) {
-		dsiSaveInit();
+
+	dsiSaveInit();
+	if ((dsiSaveEmpty && permit == 1) || (!dsiSaveEmpty && permit == 2)) {
+		return false;
 	}
-	bool bak = dsiSaveEmpty;
-	dsiSaveEmpty = false;
-	return bak;
+
+	return true;
 #else
 	return false;
 #endif
+}
+
+bool dsiSaveDelete(const char* path) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	dsiSaveInit();
+
+	if (!dsiSaveEmpty) {
+		toncset((char*)0x02FFF600, 0, 512);
+
+		int oldIME = enterCriticalSection();
+		u16 exmemcnt = REG_EXMEMCNT;
+		sysSetCardOwner(true);	// Give Slot-1 access to arm9
+		fileWrite((char*)0x02FFF600, *savFile, 0, 512, 0);
+		REG_EXMEMCNT = exmemcnt;
+		leaveCriticalSection(oldIME);
+
+		dsiSaveEmpty = true;
+		return true;
+	}
+
+	return false;
 #else
 	return false;
 #endif
 }
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
-#ifdef TWLSDK
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return false;
 	}
-	return dsiSaveInit();
-#else
-	return false;
-#endif
+
+	dsiSaveInit();
+	if (mode == 2 || mode == 3) {
+		dsiSaveEmpty = false;
+	}
+
+	return !dsiSaveEmpty;
 #else
 	return false;
 #endif
 }
 
 bool dsiSaveClose(void* ctx) {
-#ifdef TWLSDK
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
@@ -797,13 +822,9 @@ bool dsiSaveClose(void* ctx) {
 #else
 	return false;
 #endif
-#else
-	return false;
-#endif
 }
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
-#ifdef TWLSDK
 #ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return false;
@@ -813,13 +834,9 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #else
 	return false;
 #endif
-#else
-	return false;
-#endif
 }
 
 s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
-#ifdef TWLSDK
 #ifdef DLDI
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
@@ -831,17 +848,11 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 		dsiSaveSeekPos += len;
 		return len;
 	}
+#endif
 	return -1;
-#else
-	return false;
-#endif
-#else
-	return false;
-#endif
 }
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
-#ifdef TWLSDK
 #ifdef DLDI
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
@@ -853,16 +864,10 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		dsiSaveSeekPos += len;
 		return len;
 	}
+#endif
 	return -1;
-#else
-	return false;
-#endif
-#else
-	return false;
-#endif
 }
 
-#ifdef TWLSDK
 void initMBKARM9_dsiMode(void) {
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;

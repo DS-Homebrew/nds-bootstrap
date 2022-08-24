@@ -115,6 +115,7 @@ patches:
 .word   nand_read_arm9
 .word   nand_write_arm9
 .word   dsiSaveCreate_arm
+.word   dsiSaveDelete_arm
 .word   dsiSaveOpen_arm
 .word   dsiSaveClose_arm
 .word   dsiSaveSeek_arm
@@ -267,6 +268,14 @@ _blx_r6_stub_nand_write:
 dsiSaveCreate_arm:
 @---------------------------------------------------------------------------------
 	ldr	r12, =dsiSaveCreate
+	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveDelete_arm:
+@---------------------------------------------------------------------------------
+	ldr	r12, =dsiSaveDelete
 	bx	r12
 .pool
 @---------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ typedef struct cardengineArm9Patches {
     u32* nand_read_arm9;
     u32* nand_write_arm9;
     u32* dsiSaveCreate;
+    u32* dsiSaveDelete;
     u32* dsiSaveOpen;
     u32* dsiSaveClose;
     u32* dsiSaveSeek;
@@ -113,6 +114,7 @@ typedef struct cardengineArm9Patches {
     u32* nand_read_arm9;
     u32* nand_write_arm9;
     u32* dsiSaveCreate;
+    u32* dsiSaveDelete;
     u32* dsiSaveOpen;
     u32* dsiSaveClose;
     u32* dsiSaveSeek;
