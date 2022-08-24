@@ -20,6 +20,7 @@ typedef struct cardengineArm9Patches {
     u32* dsiSaveCreate;
     u32* dsiSaveDelete;
     u32* dsiSaveOpen;
+    u32* dsiSaveOpenR;
     u32* dsiSaveClose;
     u32* dsiSaveSeek;
     u32* dsiSaveRead;
@@ -116,6 +117,7 @@ typedef struct cardengineArm9Patches {
     u32* dsiSaveCreate;
     u32* dsiSaveDelete;
     u32* dsiSaveOpen;
+    u32* dsiSaveOpenR;
     u32* dsiSaveClose;
     u32* dsiSaveSeek;
     u32* dsiSaveRead;

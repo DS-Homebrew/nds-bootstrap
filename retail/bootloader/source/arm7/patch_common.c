@@ -2172,8 +2172,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
-		//*(u32*)0x0201BD0C = 0xE3A02001; // mov r2, #1
-		setBL(0x0201BD10, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201BD10, (u32)ce9->patches->dsiSaveOpenR);
 		setBL(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
@@ -2207,8 +2206,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
-		//*(u32*)0x02045D14 = 0xE3A02001; // mov r2, #1
-		setBL(0x02045D1C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02045D1C, (u32)ce9->patches->dsiSaveOpenR);
 		setBL(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
@@ -2665,7 +2663,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020594F8, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02059674, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x02059684, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020597FC, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020597FC, (u32)ce9->patches->dsiSaveOpenR);
 			setBL(0x020598A0, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x02059920 = 0xE1A00000; // nop
 			*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
@@ -2682,7 +2680,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020593E8, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02059564, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x02059574, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020596EC, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020596EC, (u32)ce9->patches->dsiSaveOpenR);
 			setBL(0x02059790, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x02059810 = 0xE1A00000; // nop
 			*(u32*)0x0206F320 = 0xE3A00000; // mov r0, #0
@@ -2729,7 +2727,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02073AFC, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x02073C78, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02073C88, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02073E00, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02073E00, (u32)ce9->patches->dsiSaveOpenR);
 		setBL(0x02073EA4, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02073F24 = 0xE1A00000; // nop
 	}

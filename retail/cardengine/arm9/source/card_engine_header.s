@@ -120,6 +120,7 @@ patches:
 .word   dsiSaveClose_arm
 .word   dsiSaveSeek_arm
 .word   dsiSaveRead_arm
+.word   dsiSaveReadR_arm
 .word   dsiSaveWrite_arm
 .word	cardStructArm9
 .word   card_pull
@@ -308,6 +309,15 @@ dsiSaveSeek_arm:
 dsiSaveRead_arm:
 @---------------------------------------------------------------------------------
 	ldr	r12, =dsiSaveRead
+	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveReadR_arm:
+@---------------------------------------------------------------------------------
+	ldr	r12, =dsiSaveRead
+	mov r2, #1
 	bx	r12
 .pool
 @---------------------------------------------------------------------------------
